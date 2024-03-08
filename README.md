@@ -1,2 +1,3 @@
 # rsvim
-Reinvention Vim with Rust+WASM
+
+Reinvention Vim with Rust+Javascript/Typescript.
