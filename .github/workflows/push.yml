@@ -11,15 +11,6 @@ env:
   RUSTFLAGS: "-Dwarnings"
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 jobs:
-  commit:
-    name: Commits
-    if: ${{ github.ref != 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: amannn/action-semantic-pull-request@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -36,7 +27,10 @@ jobs:
         run: cargo clippy --all-targets --all-features
   unit_test:
     name: Unit Test
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Install Rust
         run: |
