@@ -1,11 +1,8 @@
-name: Pull Request
+name: Push
 on:
-  pull_request:
+  push:
     branches:
       - main
-concurrency:
-  group: ${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: ${{ !contains(github.ref, 'main') }}
 permissions:
   contents: write
   pull-requests: write
