@@ -22,6 +22,6 @@ mod tests {
   #[test]
   fn test_example() {
     let actual = example();
-    assert_eq!(actual.is_ok(), true);
+    assert!(actual.is_ok());
   }
 }
