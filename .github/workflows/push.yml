@@ -11,15 +11,6 @@ env:
   RUSTFLAGS: "-Dwarnings"
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 jobs:
-  commit:
-    name: Commits
-    if: ${{ github.ref != 'refs/heads/main' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: amannn/action-semantic-pull-request@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   lint:
     name: Lint
     runs-on: ubuntu-latest
