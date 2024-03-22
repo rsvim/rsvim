@@ -18,6 +18,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Rustfmt
         run: cargo fmt
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: ${{ github.ref != 'refs/heads/main' }}
+        with:
+          commit_message: "chore(pr): auto-format"
+          push_options: "--force"
       - name: Clippy
         run: cargo clippy --all-targets --all-features
   unit_test:
