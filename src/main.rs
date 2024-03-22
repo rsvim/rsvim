@@ -1,3 +1,2 @@
-fn main() {
-  println!("Hello Rsvim!");
+fn main() { println!("Hello Rsvim!");
 }
