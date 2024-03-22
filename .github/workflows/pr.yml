@@ -5,7 +5,7 @@ on:
       - main
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: ${{ !contains(github.ref, 'main') }}
+  cancel-in-progress: true
 permissions:
   contents: write
   pull-requests: write
