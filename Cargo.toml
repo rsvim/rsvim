@@ -9,7 +9,6 @@ readme = "README.md"
 homepage = "https://github.com/rsvim/rsvim"
 documentation = "https://docs.rs/rsvim"
 license = "GPL-3.0"
-license-file = "LICENSE"
 keywords = ["vim", "neovim", "text-editor"]
 categories = ["text-editor"]
 
