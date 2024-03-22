@@ -1,3 +1,5 @@
+use rsvim;
+
 fn main() {
-  println!("Hello Rsvim!");
+  rsvim::example();
 }

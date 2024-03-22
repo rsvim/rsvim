@@ -12,6 +12,7 @@ permissions:
 env:
   RUST_CHANNEL: "stable"
   RUSTFLAGS: "-Dwarnings"
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 jobs:
   commit:
     name: Commits
@@ -26,12 +27,12 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - name: Install Rust
         run: |
           rustup update --no-self-update ${{ env.RUST_CHANNEL }}
           rustup component add --toolchain ${{ env.RUST_CHANNEL }} rustfmt rust-src rust-analyzer clippy cargo
           rustup default ${{ env.RUST_CHANNEL }}
+      - uses: actions/checkout@v4
       - name: Rustfmt
         run: cargo fmt
       - uses: stefanzweifel/git-auto-commit-action@v5
@@ -41,3 +42,22 @@ jobs:
           push_options: "--force"
       - name: Clippy
         run: cargo clippy --all-targets --all-features
+  unit_test:
+    name: Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Rust
+        run: |
+          rustup update --no-self-update ${{ env.RUST_CHANNEL }}
+          rustup component add --toolchain ${{ env.RUST_CHANNEL }} rustfmt rust-src rust-analyzer clippy cargo
+          rustup default ${{ env.RUST_CHANNEL }}
+      - uses: actions/checkout@v4
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - name: Run Unit Tests
+        run: |
+          cargo llvm-cov clean --workspace
+          cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+      - uses: codecov/codecov-action@v4
+        with:
+          files: lcov.info
+          fail_ci_if_error: true
