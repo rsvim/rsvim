@@ -11,6 +11,7 @@ documentation = "https://docs.rs/rsvim"
 license = "GPL-3.0"
 license-file = "LICENSE"
 keywords = ["vim", "neovim", "text-editor"]
+categories = ["text-editor"]
 
 [dependencies]
 crossterm = "0.27"
