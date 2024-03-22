@@ -27,11 +27,6 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Install Rust
-        run: |
-          rustup update --no-self-update ${{ env.RUST_CHANNEL }}
-          rustup component add --toolchain ${{ env.RUST_CHANNEL }} rustfmt rust-src rust-analyzer clippy cargo
-          rustup default ${{ env.RUST_CHANNEL }}
       - uses: actions/checkout@v4
       - name: Rustfmt
         run: cargo fmt

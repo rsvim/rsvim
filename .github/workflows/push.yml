@@ -25,11 +25,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install Rust
-        run: |
-          rustup update --no-self-update ${{ env.RUST_CHANNEL }}
-          rustup component add --toolchain ${{ env.RUST_CHANNEL }} rustfmt rust-src rust-analyzer clippy cargo
-          rustup default ${{ env.RUST_CHANNEL }}
       - name: Rustfmt
         run: cargo fmt
       - uses: stefanzweifel/git-auto-commit-action@v5
