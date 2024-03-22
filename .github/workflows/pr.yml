@@ -33,8 +33,11 @@ jobs:
           rustup component add --toolchain stable rustfmt rust-src rust-analyzer clippy cargo
           rustup default stable
       - name: Rustfmt
-        run: |
-          cargo fmt
+        run: cargo fmt
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        if: ${{ github.ref != 'refs/heads/main' }}
+        with:
+          commit_message: "chore(pr): auto-format"
+          push_options: "--force"
       - name: Clippy
-        run: |
-          cargo clippy
+        run: cargo clippy --all-targets --all-features
