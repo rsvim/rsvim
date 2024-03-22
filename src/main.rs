@@ -1,5 +1,3 @@
-use rsvim;
-
 fn main() {
-  rsvim::example();
+  let _ = rsvim::example();
 }

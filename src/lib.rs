@@ -1,5 +1,18 @@
-pub fn example() {
-  println!("Hello Rsvim!");
+use std::io::stdout;
+
+use crossterm::{
+  style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor},
+  ExecutableCommand,
+};
+
+pub fn example() -> std::io::Result<()> {
+  stdout()
+    .execute(SetForegroundColor(Color::Yellow))?
+    .execute(SetBackgroundColor(Color::DarkGrey))?
+    .execute(Print("Hello Rsvim!"))?
+    .execute(ResetColor)?;
+
+  Ok(())
 }
 
 #[cfg(test)]
@@ -8,7 +21,7 @@ mod tests {
 
   #[test]
   fn test_example() {
-    example();
-    assert_eq!(1, 1);
+    let actual = example();
+    assert_eq!(actual.unwrap(), ());
   }
 }
