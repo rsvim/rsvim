@@ -1,16 +1,26 @@
-use std::io::stdout;
+use crossterm::{cursor, execute, terminal};
+use std::io::{stdout, Write};
 
-use crossterm::{
-  style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor},
-  ExecutableCommand,
-};
+use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 
 pub fn example() -> std::io::Result<()> {
-  stdout()
-    .execute(SetForegroundColor(Color::Yellow))?
-    .execute(SetBackgroundColor(Color::DarkGrey))?
-    .execute(Print("Hello Rsvim!"))?
-    .execute(ResetColor)?;
+  if !terminal::is_raw_mode_enabled()? {
+    terminal::enable_raw_mode()?;
+  }
+  let (cols, rows) = terminal::size()?;
+
+  execute!(
+    stdout(),
+    terminal::Clear(terminal::ClearType::All),
+    cursor::SetCursorStyle::BlinkingBar,
+    cursor::Show,
+    SetForegroundColor(Color::Yellow),
+    SetBackgroundColor(Color::DarkGrey),
+    Print(format!(
+      "Hello Rsvim! This is a {cols} rows, {rows} columns terminal!"
+    )),
+    ResetColor
+  )?;
 
   Ok(())
 }
