@@ -1,5 +1,5 @@
 use crossterm::{cursor, execute, terminal};
-use std::io::{stdout, Write};
+use std::io::stdout;
 
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 
