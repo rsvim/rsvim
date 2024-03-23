@@ -32,6 +32,7 @@ mod tests {
   #[test]
   fn test_example() {
     let actual = example();
+    println!("actual:{:?}", actual);
     assert!(actual.is_ok());
   }
 }
