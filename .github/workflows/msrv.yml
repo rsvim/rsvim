@@ -1,4 +1,4 @@
-name: Cargo Msrv
+name: MSRV
 on:
   pull_request:
     branches:
