@@ -12,6 +12,7 @@ permissions:
 env:
   RUST_CHANNEL: "stable"
   RUSTFLAGS: "-Dwarnings"
+  RUST_BACKTRACE: "1"
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 jobs:
   lint:
