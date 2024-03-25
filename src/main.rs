@@ -24,10 +24,11 @@ pub fn hello() -> std::io::Result<()> {
   )?;
 
   let mut i = 1;
+  let timeout = 3;
   loop {
     thread::sleep(time::Duration::from_secs(1));
     i += 1;
-    if i > 5 {
+    if i > timeout {
       break;
     }
   }
