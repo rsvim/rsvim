@@ -23,6 +23,10 @@ pub fn hello() -> std::io::Result<()> {
     terminal::LeaveAlternateScreen
   )?;
 
+  if terminal::is_raw_mode_enabled()? {
+    terminal::disable_raw_mode()?;
+  }
+
   Ok(())
 }
 
