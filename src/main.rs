@@ -43,5 +43,6 @@ pub fn hello() -> std::io::Result<()> {
 }
 
 fn main() {
+  let aaccess = 1;
   let _ = hello();
 }
