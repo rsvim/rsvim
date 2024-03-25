@@ -10,6 +10,7 @@ pub fn hello() -> std::io::Result<()> {
 
   execute!(
     stdout(),
+    terminal::EnterAlternateScreen,
     terminal::Clear(terminal::ClearType::All),
     cursor::SetCursorStyle::BlinkingBar,
     cursor::Show,
@@ -18,7 +19,8 @@ pub fn hello() -> std::io::Result<()> {
     Print(format!(
       "Hello Rsvim! This is a {cols} rows, {rows} columns terminal!"
     )),
-    ResetColor
+    ResetColor,
+    terminal::LeaveAlternateScreen
   )?;
 
   Ok(())
