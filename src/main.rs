@@ -1,6 +1,7 @@
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::{cursor, execute, terminal};
 use std::io::stdout;
+use std::{thread, time};
 
 pub fn hello() -> std::io::Result<()> {
   if !terminal::is_raw_mode_enabled()? {
@@ -10,6 +11,7 @@ pub fn hello() -> std::io::Result<()> {
 
   execute!(
     stdout(),
+    terminal::EnterAlternateScreen,
     terminal::Clear(terminal::ClearType::All),
     cursor::SetCursorStyle::BlinkingBar,
     cursor::Show,
@@ -18,8 +20,24 @@ pub fn hello() -> std::io::Result<()> {
     Print(format!(
       "Hello Rsvim! This is a {cols} rows, {rows} columns terminal!"
     )),
-    ResetColor
+    ResetColor,
   )?;
+
+  let mut i = 1;
+  let timeout = 3;
+  loop {
+    thread::sleep(time::Duration::from_secs(1));
+    i += 1;
+    if i > timeout {
+      break;
+    }
+  }
+
+  execute!(stdout(), terminal::LeaveAlternateScreen)?;
+
+  if terminal::is_raw_mode_enabled()? {
+    terminal::disable_raw_mode()?;
+  }
 
   Ok(())
 }
