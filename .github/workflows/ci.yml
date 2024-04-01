@@ -24,11 +24,15 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - uses: actions/checkout@v4
+      - uses: crate-ci/typos@master
       - uses: EmbarkStudios/cargo-deny-action@v1
       - name: Rustfmt
         run: cargo fmt --check
       - name: Clippy
         run: cargo clippy --all-targets --all-features
+      - uses: taiki-e/install-action@cargo-hack
+      - name: MSRV
+        run: cargo hack check --rust-version --workspace --all-targets --ignore-private
   unit_test:
     name: Unit Test
     strategy:
