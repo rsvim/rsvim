@@ -15,8 +15,14 @@ env:
   RUST_BACKTRACE: "full"
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 jobs:
-  lint:
-    name: Lint
+  typos:
+    name: Typos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: crate-ci/typos@master
+  deny:
+    name: Deny
     runs-on: ubuntu-latest
     steps:
       - uses: dtolnay/rust-toolchain@stable
@@ -24,13 +30,38 @@ jobs:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
       - uses: actions/checkout@v4
-      - uses: crate-ci/typos@master
       - uses: EmbarkStudios/cargo-deny-action@v1
+  rustfmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@v4
       - name: Rustfmt
         run: cargo fmt --check
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@v4
       - name: Clippy
         run: cargo clippy --all-targets --all-features
-      - uses: taiki-e/install-action@cargo-hack
+  msrv:
+    name: MSRV
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@v4
       - name: MSRV
         run: cargo hack check --rust-version --workspace --all-targets --ignore-private
   unit_test:
