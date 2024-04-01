@@ -47,7 +47,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: actions/checkout@v4
       - name: MSRV
-        run: cargo hack check --rust-version --workspace --all-targets --ignore-private
+        run: |
+          cargo install cargo-msrv
+          echo "cargo msrv list"
+          cargo msrv verify
+          echo "cargo msrv verify"
+          cargo msrv verify
   unit_test:
     name: Unit Test
     strategy:
