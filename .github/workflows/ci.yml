@@ -50,7 +50,7 @@ jobs:
         run: |
           cargo install cargo-msrv
           echo "cargo msrv list"
-          cargo msrv verify
+          cargo msrv list
           echo "cargo msrv verify"
           cargo msrv verify
   unit_test:
