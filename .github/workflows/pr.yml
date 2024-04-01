@@ -19,6 +19,10 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
       - uses: actions/checkout@v4
       - name: Rustfmt
         run: cargo fmt
@@ -36,11 +40,10 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Install Rust
-        run: |
-          rustup update --no-self-update ${{ env.RUST_CHANNEL }}
-          rustup component add --toolchain ${{ env.RUST_CHANNEL }} rustfmt rust-src rust-analyzer clippy cargo
-          rustup default ${{ env.RUST_CHANNEL }}
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
       - uses: actions/checkout@v4
       - uses: taiki-e/install-action@cargo-llvm-cov
       - name: Run Unit Tests
