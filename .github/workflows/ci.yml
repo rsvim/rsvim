@@ -1,14 +1,14 @@
-name: Pull Request
+name: CI
 on:
   pull_request:
+    branches:
+      - main
+  push:
     branches:
       - main
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
-permissions:
-  contents: write
-  pull-requests: write
 env:
   RUST_CHANNEL: "stable"
   RUSTFLAGS: "-Dwarnings"
@@ -42,7 +42,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: actions/checkout@v4
       - uses: taiki-e/install-action@cargo-llvm-cov
-      - name: Run Unit Tests
+      - name: Run Tests
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info

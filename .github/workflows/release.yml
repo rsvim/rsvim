@@ -1,0 +1,27 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+  pull-requests: write
+env:
+  RUST_CHANNEL: "stable"
+  RUSTFLAGS: "-Dwarnings"
+  RUST_BACKTRACE: "full"
+  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        id: release
+      - uses: actions/checkout@v4
+      - run: |
+          echo "release_created:${{ steps.release.outputs.release_created }}"
+          echo "tag_name:${{ steps.release.outputs.tag_name }}"
+          echo "major:${{ steps.release.outputs.major }}"
+          echo "minor:${{ steps.release.outputs.minor }}"
+          echo "patch:${{ steps.release.outputs.patch }}"
