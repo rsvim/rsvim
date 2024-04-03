@@ -11,14 +11,14 @@ pub struct Cli {
     long = "cmd",
     help = "Execute <CMD> before loading any config"
   )]
-  cmd_before_config: Option<Vec<String>>,
+  cmd_before: Option<Vec<String>>,
 
   #[clap(
     value_name = "CMD",
     short = 'c',
     help = "Execute <CMD> after loading config and first file"
   )]
-  cmd_after_config: Option<Vec<String>>,
+  cmd_after: Option<Vec<String>>,
 
   #[arg(short = 'd', long, help = "Run in diff mode")]
   diff: bool,
@@ -36,96 +36,84 @@ mod tests {
 
   #[test]
   fn test_cli() {
-    let actual = Cli::parse_from(vec![] as Vec<String>);
-    println!("actual-1: {:?}", actual);
-    assert_eq!(actual.debug, false);
-    assert_eq!(actual.headless, false);
-    assert_eq!(actual.cmd_before_config, None);
-    assert_eq!(actual.cmd_after_config, None);
-    assert_eq!(actual.file, vec![] as Vec<String>);
-    let actual = Cli::parse_from(vec!["--version", "--headless"]);
-    println!("actual-3: {:?}", actual);
-    assert_eq!(actual.debug, false);
-    assert_eq!(actual.cmd_before_config, None);
-    assert_eq!(actual.cmd_after_config, None);
-    assert_eq!(actual.file, vec![] as Vec<String>);
-    let actual = Cli::parse_from(vec!["README.md"]);
-    println!("actual-4: {:?}", actual);
-    assert_eq!(actual.debug, false);
-    assert_eq!(actual.cmd_before_config, None);
-    assert_eq!(actual.cmd_after_config, None);
-    assert_eq!(actual.file, vec!["README.md".to_string()]);
-    let actual = Cli::parse_from(vec!["--debug", "README.md"]);
-    println!("actual-5: {:?}", actual);
-    assert_eq!(actual.debug, true);
-    assert_eq!(actual.cmd_before_config, None);
-    assert_eq!(actual.cmd_after_config, None);
-    assert_eq!(actual.file, vec!["README.md".to_string()]);
-    let actual = Cli::parse_from(vec!["README.md", "LICENSE"]);
-    println!("actual-6: {:?}", actual);
-    assert_eq!(actual.debug, false);
-    assert_eq!(actual.cmd_before_config, None);
-    assert_eq!(actual.cmd_after_config, None);
-    assert_eq!(
-      actual.file,
-      vec!["README.md".to_string(), "LICENSE".to_string()]
-    );
-    let actual = Cli::parse_from(vec!["README.md", "LICENSE", "--debug"]);
-    println!("actual-7: {:?}", actual);
-    assert_eq!(actual.debug, true);
-    assert_eq!(actual.cmd_before_config, None);
-    assert_eq!(actual.cmd_after_config, None);
-    assert_eq!(
-      actual.file,
-      vec!["README.md".to_string(), "LICENSE".to_string()]
-    );
-    let actual = Cli::parse_from(vec!["README.md", "LICENSE", "--cmd", "echo 1"]);
-    println!("actual-8: {:?}", actual);
-    assert_eq!(actual.debug, false);
-    assert_eq!(actual.cmd_before_config, Some(vec!["echo 1".to_string()]));
-    assert_eq!(actual.cmd_after_config, None);
-    assert_eq!(
-      actual.file,
-      vec!["README.md".to_string(), "LICENSE".to_string()]
-    );
-    let actual = Cli::parse_from(vec![
-      "README.md",
-      "LICENSE",
-      "--cmd",
-      "echo 1",
-      "--cmd",
-      "quit",
-    ]);
-    println!("actual-9: {:?}", actual);
-    assert_eq!(actual.debug, false);
-    assert_eq!(
-      actual.cmd_before_config,
-      Some(vec!["echo 1".to_string(), "quit".to_string()])
-    );
-    assert_eq!(actual.cmd_after_config, None);
-    assert_eq!(
-      actual.file,
-      vec!["README.md".to_string(), "LICENSE".to_string()]
-    );
-    let actual = Cli::parse_from(vec![
-      "README.md",
-      "LICENSE",
-      "-c",
-      "echo 1",
-      "--cmd",
-      "quit",
-    ]);
-    println!("actual-10: {:?}", actual);
-    assert_eq!(actual.debug, false);
-    assert_eq!(actual.cmd_before_config, Some(vec!["quit".to_string()]));
-    assert_eq!(actual.cmd_after_config, Some(vec!["echo 1".to_string()]));
-    assert_eq!(
-      actual.file,
-      vec!["README.md".to_string(), "LICENSE".to_string()]
-    );
-    let actual = Cli::parse_from(vec!["--headless", "LICENSE"]);
-    println!("actual-11: {:?}", actual);
-    assert_eq!(actual.headless, true);
-    assert_eq!(actual.file, vec!["LICENSE".to_string()]);
+    let input = vec![
+      vec![],
+      vec![
+        "--version".to_string(),
+        "--headless".to_string(),
+        "--debug".to_string(),
+        "-d".to_string(),
+      ],
+      vec!["README.md".to_string()],
+      vec![
+        "README.md".to_string(),
+        "LICENSE".to_string(),
+        "--headless".to_string(),
+        "-d".to_string(),
+      ],
+      vec![
+        "README.md".to_string(),
+        "LICENSE".to_string(),
+        "--cmd".to_string(),
+        "echo 1".to_string(),
+        "-c".to_string(),
+        "quit".to_string(),
+      ],
+    ] as Vec<Vec<String>>;
+    let expect = vec![
+      Cli {
+        file: vec![],
+        cmd_before: None,
+        cmd_after: None,
+        diff: false,
+        headless: false,
+        debug: false,
+      },
+      Cli {
+        file: vec![],
+        cmd_before: None,
+        cmd_after: None,
+        diff: true,
+        headless: true,
+        debug: true,
+      },
+      Cli {
+        file: vec!["README.md".to_string()],
+        cmd_before: None,
+        cmd_after: None,
+        diff: false,
+        headless: false,
+        debug: false,
+      },
+      Cli {
+        file: vec!["README.md".to_string(), "LICENSE".to_string()],
+        cmd_before: None,
+        cmd_after: None,
+        diff: true,
+        headless: true,
+        debug: false,
+      },
+      Cli {
+        file: vec!["README.md".to_string(), "LICENSE".to_string()],
+        cmd_before: Some(vec!["echo 1".to_string()]),
+        cmd_after: Some(vec!["quit".to_string()]),
+        diff: false,
+        headless: false,
+        debug: false,
+      },
+    ];
+
+    assert_eq!(input.len(), expect.len());
+    let n = input.len();
+    for i in 0..n {
+      let actual = Cli::parse_from(&input[i]);
+      println!("actual-{i}: {:?}", actual);
+      assert_eq!(actual.cmd_before, expect[i].cmd_before);
+      assert_eq!(actual.cmd_after, expect[i].cmd_after);
+      assert_eq!(actual.file, expect[i].file);
+      assert_eq!(actual.diff, expect[i].diff);
+      assert_eq!(actual.headless, expect[i].headless);
+      assert_eq!(actual.debug, expect[i].debug);
+    }
   }
 }
