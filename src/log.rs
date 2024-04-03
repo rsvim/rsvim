@@ -1,5 +1,4 @@
 use crate::cli::Cli;
-use chrono::prelude::Local;
 use std::io;
 use tracing::{self, Level};
 use tracing_appender;
@@ -7,7 +6,6 @@ use tracing_subscriber::{self, EnvFilter};
 
 pub fn init(cli: &Cli) {
   if cli.debug() {
-    let now = Local::now();
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
       .with_file(true)
       .with_line_number(true)
@@ -17,13 +15,7 @@ pub fn init(cli: &Cli) {
       .with_ansi(false)
       .with_env_filter(EnvFilter::from_default_env())
       .with_max_level(Level::TRACE)
-      .with_writer(tracing_appender::rolling::never(
-        ".",
-        format!(
-          "rsvim-{}.log",
-          now.format("%Y-%m-%d-%H-%M-%S-%3f").to_string()
-        ),
-      ))
+      .with_writer(tracing_appender::rolling::never(".", "rsvim.log"))
       .finish();
     tracing::subscriber::set_global_default(subscriber).expect("Failed to initialize tracing log");
   } else {
