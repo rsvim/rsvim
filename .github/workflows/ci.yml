@@ -59,7 +59,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: MSRV
         run: |
-          cargo install msrv
+          cargo install cargo-msrv
           echo "cargo msrv list"
           cargo msrv list
           echo "cargo msrv show"
