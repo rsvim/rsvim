@@ -2,6 +2,7 @@ use clap::Parser;
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::{cursor, execute, terminal};
 use rsvim::cli::Cli;
+use rsvim::log;
 use std::io::stdout;
 use std::{thread, time};
 use tracing::{self, debug, info};
@@ -58,16 +59,7 @@ pub fn hello() -> std::io::Result<()> {
 
 fn main() {
   let cli = Cli::parse();
-  let file_appender = tracing_appender::rolling::daily("", "rsvim.log");
-  let (non_blocking_appender, _guard) = tracing_appender::non_blocking(file_appender);
-  let subscriber = tracing_subscriber::FmtSubscriber::builder()
-    .with_file(true)
-    .with_line_number(true)
-    .with_thread_ids(true)
-    .with_thread_names(true)
-    .with_level(true)
-    .with_writer(non_blocking_appender)
-    .finish();
+  log::init();
   info!("cli: {:?}", cli);
   // let _ = hello();
 }

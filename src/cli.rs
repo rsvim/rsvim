@@ -26,6 +26,9 @@ pub struct Cli {
   #[arg(long, help = "Run in headless mode, without a user interface")]
   headless: bool,
 
+  #[arg(long, help = "Run in verbose mode")]
+  verbose: bool,
+
   #[arg(long, help = "Run in debug mode")]
   debug: bool,
 }
@@ -67,6 +70,7 @@ mod tests {
         cmd_after: None,
         diff: false,
         headless: false,
+        verbose: false,
         debug: false,
       },
       Cli {
@@ -75,6 +79,7 @@ mod tests {
         cmd_after: None,
         diff: true,
         headless: true,
+        verbose: false,
         debug: true,
       },
       Cli {
@@ -83,6 +88,7 @@ mod tests {
         cmd_after: None,
         diff: false,
         headless: false,
+        verbose: false,
         debug: false,
       },
       Cli {
@@ -91,6 +97,7 @@ mod tests {
         cmd_after: None,
         diff: true,
         headless: true,
+        verbose: false,
         debug: false,
       },
       Cli {
@@ -99,6 +106,7 @@ mod tests {
         cmd_after: Some(vec!["quit".to_string()]),
         diff: false,
         headless: false,
+        verbose: false,
         debug: false,
       },
     ];
