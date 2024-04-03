@@ -5,9 +5,7 @@ use rsvim::cli::Cli;
 use rsvim::log;
 use std::io::stdout;
 use std::{thread, time};
-use tracing::{self, debug, Level};
-use tracing_appender;
-use tracing_subscriber;
+use tracing::{self, debug};
 
 pub fn hello() -> std::io::Result<()> {
   if !terminal::is_raw_mode_enabled()? {
@@ -60,6 +58,6 @@ pub fn hello() -> std::io::Result<()> {
 fn main() {
   let cli = Cli::parse();
   log::init(&cli);
-  info!("cli: {:?}", cli);
+  debug!("cli: {:?}", cli);
   // let _ = hello();
 }
