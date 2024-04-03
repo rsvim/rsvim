@@ -8,4 +8,4 @@
 <a href="https://app.codacy.com/gh/rsvim/rsvim/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img alt="codacy" src="https://img.shields.io/codacy/grade/1c6a3d21352c4f8bb84ff6c7e3ef0399/main" /></a>
 </p>
 
-Vim Reinvention with Rust+Typescript.
+The VIM editor reinvented in Rust+Typescript.
