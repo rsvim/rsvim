@@ -38,7 +38,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: cargo-bins/cargo-binstall@main
       - uses: actions/checkout@v4
-      - name: Rustfmt
+      - name: Taplo
         run: |
           cargo binstall --no-confirm taplo-cli
           taplo fmt --check Cargo.toml
