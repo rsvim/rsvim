@@ -83,8 +83,8 @@ pub fn init(cli: &Cli) {
   }
   if use_console_appender {
     let console_appender = ConsoleAppender {
-      stdout: io::stdout,
-      stderr: io::stderr,
+      stdout: io::stdout(),
+      stderr: io::stderr(),
     };
     subscriber = subscriber.with_writer(console_appender);
   }
