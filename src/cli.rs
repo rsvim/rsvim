@@ -33,6 +33,42 @@ pub struct Cli {
   debug: bool,
 }
 
+impl Cli {
+  pub fn file(&self) -> Vec<&str> {
+    self.file.iter().map(|f| &**f).collect()
+  }
+
+  pub fn cmd_before(&self) -> Option<Vec<&str>> {
+    match &self.cmd_before {
+      Some(cmd) => Some(cmd.iter().map(|c| &**c).collect()),
+      None => None,
+    }
+  }
+
+  pub fn cmd_after(&self) -> Option<Vec<&str>> {
+    match &self.cmd_after {
+      Some(cmd) => Some(cmd.iter().map(|c| &**c).collect()),
+      None => None,
+    }
+  }
+
+  pub fn diff(&self) -> bool {
+    self.diff
+  }
+
+  pub fn headless(&self) -> bool {
+    self.headless
+  }
+
+  pub fn verbose(&self) -> bool {
+    self.verbose
+  }
+
+  pub fn debug(&self) -> bool {
+    self.debug
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

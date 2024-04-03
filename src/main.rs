@@ -5,7 +5,7 @@ use rsvim::cli::Cli;
 use rsvim::log;
 use std::io::stdout;
 use std::{thread, time};
-use tracing::{self, debug, info};
+use tracing::{self, debug, Level};
 use tracing_appender;
 use tracing_subscriber;
 
@@ -59,7 +59,14 @@ pub fn hello() -> std::io::Result<()> {
 
 fn main() {
   let cli = Cli::parse();
-  log::init();
+  let mut log_level = Level::WARN;
+  let mut file_appender = false;
+  if cli.verbose() {
+    log_level = Level::INFO;
+  } else if cli.debug() {
+    log_level = Level::DEBUG;
+  }
+  log::init(log_level);
   info!("cli: {:?}", cli);
   // let _ = hello();
 }
