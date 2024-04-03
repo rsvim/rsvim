@@ -108,9 +108,10 @@ mod tests {
     for i in 0..n {
       let actual = Cli::parse_from(&input[i]);
       println!("actual-{i}: {:?}", actual);
+      println!("expect-{i}: {:?}", expect[i]);
+      assert_eq!(actual.file, expect[i].file);
       assert_eq!(actual.cmd_before, expect[i].cmd_before);
       assert_eq!(actual.cmd_after, expect[i].cmd_after);
-      assert_eq!(actual.file, expect[i].file);
       assert_eq!(actual.diff, expect[i].diff);
       assert_eq!(actual.headless, expect[i].headless);
       assert_eq!(actual.debug, expect[i].debug);
