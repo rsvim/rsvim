@@ -6,7 +6,7 @@ pub struct Cli {
   #[arg(help = "Edit file(s)")]
   file: Vec<String>,
 
-  #[arg(short, long)]
+  #[arg(short, long, help = "Run in debug mode")]
   debug: bool,
 
   #[arg(long, help = "Run in headless mode, without a user interface")]
