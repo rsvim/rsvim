@@ -3,6 +3,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about=None)]
 pub struct Cli {
+  #[arg(help = "Edit file(s)")]
   file: Vec<String>,
 
   #[arg(short, long)]
