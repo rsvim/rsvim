@@ -13,11 +13,18 @@ pub struct Cli {
   headless: bool,
 
   #[clap(
-    short = 'c',
-    long,
-    help = "Run rsvim scripts in batch mode, without an editor instance or a user interface"
+    value_name = "CMD",
+    long = "cmd",
+    help = "Execute <CMD> before any config"
   )]
-  cmd: Option<Vec<String>>,
+  cmd_before_config: Option<Vec<String>>,
+
+  #[clap(
+    value_name = "CMD",
+    short = 'c',
+    help = "Execute <CMD> after config and first file"
+  )]
+  cmd_after_config: Option<Vec<String>>,
 }
 
 #[cfg(test)]
@@ -29,32 +36,38 @@ mod tests {
     let actual = Cli::parse_from(vec![] as Vec<String>);
     println!("actual-1: {:?}", actual);
     assert_eq!(actual.debug, false);
-    assert_eq!(actual.cmd, None);
+    assert_eq!(actual.cmd_before_config, None);
+    assert_eq!(actual.cmd_after_config, None);
     assert_eq!(actual.file, vec![] as Vec<String>);
     let actual = Cli::parse_from(vec!["--debug"]);
     println!("actual-2: {:?}", actual);
     assert_eq!(actual.debug, true);
-    assert_eq!(actual.cmd, None);
+    assert_eq!(actual.cmd_before_config, None);
+    assert_eq!(actual.cmd_after_config, None);
     assert_eq!(actual.file, vec![] as Vec<String>);
     let actual = Cli::parse_from(vec!["--version"]);
     println!("actual-3: {:?}", actual);
     assert_eq!(actual.debug, false);
-    assert_eq!(actual.cmd, None);
+    assert_eq!(actual.cmd_before_config, None);
+    assert_eq!(actual.cmd_after_config, None);
     assert_eq!(actual.file, vec![] as Vec<String>);
     let actual = Cli::parse_from(vec!["README.md"]);
     println!("actual-4: {:?}", actual);
     assert_eq!(actual.debug, true);
-    assert_eq!(actual.cmd, None);
+    assert_eq!(actual.cmd_before_config, None);
+    assert_eq!(actual.cmd_after_config, None);
     assert_eq!(actual.file, vec!["README.md".to_string()]);
     let actual = Cli::parse_from(vec!["--debug", "README.md"]);
     println!("actual-5: {:?}", actual);
     assert_eq!(actual.debug, true);
-    assert_eq!(actual.cmd, None);
+    assert_eq!(actual.cmd_before_config, None);
+    assert_eq!(actual.cmd_after_config, None);
     assert_eq!(actual.file, vec!["README.md".to_string()]);
     let actual = Cli::parse_from(vec!["README.md", "LICENSE"]);
     println!("actual-6: {:?}", actual);
     assert_eq!(actual.debug, false);
-    assert_eq!(actual.cmd, None);
+    assert_eq!(actual.cmd_before_config, None);
+    assert_eq!(actual.cmd_after_config, None);
     assert_eq!(
       actual.file,
       vec!["README.md".to_string(), "LICENSE".to_string()]
@@ -62,7 +75,8 @@ mod tests {
     let actual = Cli::parse_from(vec!["README.md", "LICENSE", "--debug"]);
     println!("actual-7: {:?}", actual);
     assert_eq!(actual.debug, true);
-    assert_eq!(actual.cmd, None);
+    assert_eq!(actual.cmd_before_config, None);
+    assert_eq!(actual.cmd_after_config, None);
     assert_eq!(
       actual.file,
       vec!["README.md".to_string(), "LICENSE".to_string()]
@@ -70,7 +84,8 @@ mod tests {
     let actual = Cli::parse_from(vec!["README.md", "LICENSE", "--cmd", "echo 1"]);
     println!("actual-8: {:?}", actual);
     assert_eq!(actual.debug, false);
-    assert_eq!(actual.cmd, Some(vec!["echo 1".to_string()]));
+    assert_eq!(actual.cmd_before_config, Some(vec!["echo 1".to_string()]));
+    assert_eq!(actual.cmd_after_config, None);
     assert_eq!(
       actual.file,
       vec!["README.md".to_string(), "LICENSE".to_string()]
@@ -86,12 +101,33 @@ mod tests {
     println!("actual-9: {:?}", actual);
     assert_eq!(actual.debug, false);
     assert_eq!(
-      actual.cmd,
+      actual.cmd_before_config,
       Some(vec!["echo 1".to_string(), "quit".to_string()])
     );
+    assert_eq!(actual.cmd_after_config, None);
     assert_eq!(
       actual.file,
       vec!["README.md".to_string(), "LICENSE".to_string()]
     );
+    let actual = Cli::parse_from(vec![
+      "README.md",
+      "LICENSE",
+      "-c",
+      "echo 1",
+      "--cmd",
+      "quit",
+    ]);
+    println!("actual-10: {:?}", actual);
+    assert_eq!(actual.debug, false);
+    assert_eq!(actual.cmd_before_config, Some(vec!["quit".to_string()]));
+    assert_eq!(actual.cmd_after_config, Some(vec!["echo 1".to_string()]));
+    assert_eq!(
+      actual.file,
+      vec!["README.md".to_string(), "LICENSE".to_string()]
+    );
+    let actual = Cli::parse_from(vec!["--headless", "LICENSE"]);
+    println!("actual-11: {:?}", actual);
+    assert_eq!(actual.headless, true);
+    assert_eq!(actual.file, vec!["LICENSE".to_string()]);
   }
 }
