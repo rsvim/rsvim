@@ -15,53 +15,30 @@ env:
   RUST_BACKTRACE: "full"
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 jobs:
-  typos:
-    name: Typos
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: cargo-bins/cargo-binstall@main
       - uses: actions/checkout@v4
       - uses: crate-ci/typos@master
-  rustfmt:
-    name: Rustfmt
-    runs-on: ubuntu-latest
-    steps:
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: actions/checkout@v4
       - name: Rustfmt
         run: cargo fmt --check
-  taplo:
-    name: Taplo
-    runs-on: ubuntu-latest
-    steps:
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: actions/checkout@v4
       - name: Taplo
         run: |
-          cargo install taplo-cli
+          cargo binstall --force --no-confirm taplo-cli
+          echo "taplo --version"
+          taplo --version
           taplo fmt --check Cargo.toml
-  clippy:
-    name: Clippy
-    runs-on: ubuntu-latest
-    steps:
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: actions/checkout@v4
       - name: Clippy
         run: cargo clippy --all-targets --all-features
-  msrv:
-    name: MSRV
-    runs-on: ubuntu-latest
-    steps:
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: actions/checkout@v4
       - name: MSRV
         run: |
-          cargo install cargo-msrv
-          echo "cargo msrv list"
-          cargo msrv list
+          cargo binstall --force --no-confirm cargo-msrv
+          echo "cargo msrv --version"
+          cargo msrv --version
           echo "cargo msrv show"
           cargo msrv show
           echo "cargo msrv verify"
