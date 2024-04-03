@@ -4,6 +4,8 @@ use crossterm::{cursor, execute, terminal};
 use rsvim::cli::Cli;
 use std::io::stdout;
 use std::{thread, time};
+use tracing::{self, debug, info};
+use tracing_appender;
 use tracing_subscriber;
 
 pub fn hello() -> std::io::Result<()> {
@@ -56,8 +58,11 @@ pub fn hello() -> std::io::Result<()> {
 
 fn main() {
   let cli = Cli::parse();
-
-  let subscriber = tracing_subscriber::FmtSubscriber::new();
-  println!("cli: {:?}", cli);
+  let file_appender = tracing_appender::rolling::daily("", "rsvim.log");
+  let (non_blocking_appender, _guard) = tracing_appender::non_blocking(file_appender);
+  let subscriber = tracing_subscriber::FmtSubscriber::builder()
+    .with_writer(non_blocking_appender)
+    .finish();
+  info!("cli: {:?}", cli);
   // let _ = hello();
 }
