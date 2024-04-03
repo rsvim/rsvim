@@ -59,14 +59,7 @@ pub fn hello() -> std::io::Result<()> {
 
 fn main() {
   let cli = Cli::parse();
-  let mut log_level = Level::WARN;
-  let mut file_appender = false;
-  if cli.verbose() {
-    log_level = Level::INFO;
-  } else if cli.debug() {
-    log_level = Level::DEBUG;
-  }
-  log::init(log_level);
+  log::init(&cli);
   info!("cli: {:?}", cli);
   // let _ = hello();
 }
