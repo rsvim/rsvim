@@ -76,21 +76,24 @@ mod tests {
   #[test]
   fn test_cli() {
     let input = vec![
-      vec![],
+      vec!["rsvim".to_string()],
       vec![
+        "rsvim".to_string(),
         "--version".to_string(),
         "--headless".to_string(),
         "--debug".to_string(),
         "-d".to_string(),
       ],
-      vec!["README.md".to_string()],
+      vec!["rsvim".to_string(), "README.md".to_string()],
       vec![
+        "rsvim".to_string(),
         "README.md".to_string(),
         "LICENSE".to_string(),
         "--headless".to_string(),
         "-d".to_string(),
       ],
       vec![
+        "rsvim".to_string(),
         "README.md".to_string(),
         "LICENSE".to_string(),
         "--cmd".to_string(),
@@ -153,7 +156,7 @@ mod tests {
       let actual = Cli::parse_from(&input[i]);
       println!("actual-{i}: {:?}", actual);
       println!("expect-{i}: {:?}", expect[i]);
-      // assert_eq!(actual.file, vec![] as Vec<String>);
+      assert_eq!(actual.file, expect[i].file);
       assert_eq!(actual.cmd_before, expect[i].cmd_before);
       assert_eq!(actual.cmd_after, expect[i].cmd_after);
       assert_eq!(actual.diff, expect[i].diff);
