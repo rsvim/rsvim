@@ -2,7 +2,7 @@ use crate::cli::Cli;
 use std::io;
 use tracing::{self, debug, Level};
 use tracing_appender;
-use tracing_subscriber;
+use tracing_subscriber::{self, fmt, EnvFilter};
 
 pub fn init(cli: &Cli) {
   let mut log_level = Level::WARN;
@@ -17,21 +17,20 @@ pub fn init(cli: &Cli) {
     use_console_appender = true;
   }
 
-  let mut subscriber = tracing_subscriber::FmtSubscriber::builder()
+  let subscriber = tracing_subscriber::FmtSubscriber::builder()
     .with_file(true)
     .with_line_number(true)
     .with_thread_ids(true)
     .with_thread_names(true)
     .with_level(true)
     .with_ansi(false)
+    .with_env_filter(EnvFilter::from_default_env())
     .with_max_level(log_level);
-
   if use_file_appender {
-    let file_appender = tracing_appender::rolling::never(".", "rsvim.log");
-    subscriber = subscriber.with_writer(file_appender);
+    subscriber.with_writer(tracing_appender::rolling::never(".", "rsvim.log"));
   }
   if use_console_appender {
-    subscriber = subscriber.with_writer(io::stderr);
+    subscriber.with_writer(io::stderr);
   }
   let subscriber = subscriber.finish();
   tracing::subscriber::set_global_default(subscriber).expect("Failed to initialize tracing log");
