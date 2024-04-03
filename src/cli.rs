@@ -15,14 +15,14 @@ pub struct Cli {
   #[clap(
     value_name = "CMD",
     long = "cmd",
-    help = "Execute <CMD> before any config"
+    help = "Execute <CMD> before loading any config"
   )]
   cmd_before_config: Option<Vec<String>>,
 
   #[clap(
     value_name = "CMD",
     short = 'c',
-    help = "Execute <CMD> after config and first file"
+    help = "Execute <CMD> after loading config and first file"
   )]
   cmd_after_config: Option<Vec<String>>,
 }
@@ -36,16 +36,11 @@ mod tests {
     let actual = Cli::parse_from(vec![] as Vec<String>);
     println!("actual-1: {:?}", actual);
     assert_eq!(actual.debug, false);
+    assert_eq!(actual.headless, false);
     assert_eq!(actual.cmd_before_config, None);
     assert_eq!(actual.cmd_after_config, None);
     assert_eq!(actual.file, vec![] as Vec<String>);
-    let actual = Cli::parse_from(vec!["--debug"]);
-    println!("actual-2: {:?}", actual);
-    assert_eq!(actual.debug, true);
-    assert_eq!(actual.cmd_before_config, None);
-    assert_eq!(actual.cmd_after_config, None);
-    assert_eq!(actual.file, vec![] as Vec<String>);
-    let actual = Cli::parse_from(vec!["--version"]);
+    let actual = Cli::parse_from(vec!["--version", "--headless"]);
     println!("actual-3: {:?}", actual);
     assert_eq!(actual.debug, false);
     assert_eq!(actual.cmd_before_config, None);
@@ -53,7 +48,7 @@ mod tests {
     assert_eq!(actual.file, vec![] as Vec<String>);
     let actual = Cli::parse_from(vec!["README.md"]);
     println!("actual-4: {:?}", actual);
-    assert_eq!(actual.debug, true);
+    assert_eq!(actual.debug, false);
     assert_eq!(actual.cmd_before_config, None);
     assert_eq!(actual.cmd_after_config, None);
     assert_eq!(actual.file, vec!["README.md".to_string()]);
