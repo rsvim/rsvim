@@ -56,13 +56,10 @@ jobs:
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: cargo-bins/cargo-binstall@main
       - uses: actions/checkout@v4
       - name: MSRV
         run: |
-          cargo binstall --version 0.15.1 --no-confirm cargo-msrv
-          echo "cargo --list"
-          cargo --list
+          cargo install cargo-msrv
           echo "cargo msrv list"
           cargo msrv list
           echo "cargo msrv show"
