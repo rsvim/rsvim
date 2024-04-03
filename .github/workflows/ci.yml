@@ -41,7 +41,7 @@ jobs:
       - name: Taplo
         run: |
           cargo binstall --force --no-confirm taplo-cli
-          echo 'taplo --version'
+          echo "taplo --version"
           taplo --version
           taplo fmt --check Cargo.toml
   clippy:
@@ -66,6 +66,8 @@ jobs:
           cargo binstall --force --no-confirm cargo-msrv
           echo "cargo msrv --version"
           cargo msrv --version
+          echo "cargo msrv show"
+          cargo msrv show
           echo "cargo msrv verify"
           cargo msrv verify
   unit_test:
