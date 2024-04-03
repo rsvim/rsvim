@@ -6,15 +6,6 @@ pub struct Cli {
   #[arg(help = "Edit file(s)")]
   file: Vec<String>,
 
-  #[arg(long, help = "Run in debug mode")]
-  debug: bool,
-
-  #[arg(long, help = "Run in headless mode, without a user interface")]
-  headless: bool,
-
-  #[arg(short = 'd', long, help = "Run in diff mode")]
-  diff: bool,
-
   #[clap(
     value_name = "CMD",
     long = "cmd",
@@ -28,6 +19,15 @@ pub struct Cli {
     help = "Execute <CMD> after loading config and first file"
   )]
   cmd_after_config: Option<Vec<String>>,
+
+  #[arg(short = 'd', long, help = "Run in diff mode")]
+  diff: bool,
+
+  #[arg(long, help = "Run in headless mode, without a user interface")]
+  headless: bool,
+
+  #[arg(long, help = "Run in debug mode")]
+  debug: bool,
 }
 
 #[cfg(test)]
