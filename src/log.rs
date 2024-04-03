@@ -1,11 +1,11 @@
-use crate::cli::Cli;
+use crate::cli::CliOpts;
 use std::io;
 use tracing::{self, Level};
 use tracing_appender;
 use tracing_subscriber::{self, EnvFilter};
 
-pub fn init(cli: &Cli) {
-  if cli.debug() {
+pub fn init(cli_opts: &CliOpts) {
+  if cli_opts.debug() {
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
       .with_file(true)
       .with_line_number(true)
@@ -20,7 +20,7 @@ pub fn init(cli: &Cli) {
       .finish();
     tracing::subscriber::set_global_default(subscriber).expect("Failed to initialize tracing log");
   } else {
-    let log_level = match cli.verbose() {
+    let log_level = match cli_opts.verbose() {
       true => Level::INFO,
       _ => Level::ERROR,
     };
