@@ -16,7 +16,6 @@ pub fn init(cli: &Cli) {
       .with_env_filter(EnvFilter::from_default_env())
       .with_max_level(Level::TRACE)
       .with_writer(tracing_appender::rolling::never(".", "rsvim.log"))
-      .with_test_writer()
       .finish();
     tracing::subscriber::set_global_default(subscriber).expect("Failed to initialize tracing log");
   } else {
