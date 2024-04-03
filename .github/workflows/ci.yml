@@ -61,6 +61,8 @@ jobs:
       - name: MSRV
         run: |
           cargo binstall --version 0.15.1 --no-confirm cargo-msrv
+          echo "cargo --list"
+          cargo --list
           echo "cargo msrv list"
           cargo msrv list
           echo "cargo msrv show"
