@@ -59,5 +59,5 @@ fn main() {
   let cli = Cli::parse();
   log::init(&cli);
   debug!("cli: {:?}", cli);
-  // let _ = hello();
+  let _ = hello();
 }
