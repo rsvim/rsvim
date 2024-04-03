@@ -39,17 +39,17 @@ impl Cli {
   }
 
   pub fn cmd_before(&self) -> Option<Vec<&str>> {
-    match &self.cmd_before {
-      Some(cmd) => Some(cmd.iter().map(|c| &**c).collect()),
-      None => None,
-    }
+    self
+      .cmd_before
+      .as_ref()
+      .map(|cb| cb.iter().map(|c| &**c).collect())
   }
 
   pub fn cmd_after(&self) -> Option<Vec<&str>> {
-    match &self.cmd_after {
-      Some(cmd) => Some(cmd.iter().map(|c| &**c).collect()),
-      None => None,
-    }
+    self
+      .cmd_after
+      .as_ref()
+      .map(|ca| ca.iter().map(|c| &**c).collect())
   }
 
   pub fn diff(&self) -> bool {
