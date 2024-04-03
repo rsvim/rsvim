@@ -1,5 +1,7 @@
+use clap::Parser;
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::{cursor, execute, terminal};
+use rsvim::cli::Cli;
 use std::io::stdout;
 use std::{thread, time};
 
@@ -52,5 +54,7 @@ pub fn hello() -> std::io::Result<()> {
 }
 
 fn main() {
-  let _ = hello();
+  let cli = Cli::parse();
+  println!("cli: {:?}", cli);
+  // let _ = hello();
 }
