@@ -12,7 +12,11 @@ pub struct Cli {
   #[arg(long, help = "Run in headless mode, without a user interface")]
   headless: bool,
 
-  #[clap(short = 'c', long)]
+  #[clap(
+    short = 'c',
+    long,
+    help = "Run rsvim scripts in batch mode, without an editor instance or a user interface"
+  )]
   cmd: Option<Vec<String>>,
 }
 
