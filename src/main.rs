@@ -32,7 +32,7 @@ pub fn hello() -> std::io::Result<()> {
     let msg = format!("Here's column:{}, row:{}!", corner.0, corner.1);
     let (mut c, r) = corner;
     if c > 0 {
-      c = c - (msg.len() as u16);
+      c -= msg.len() as u16;
     }
     execute!(
       stdout(),
