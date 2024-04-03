@@ -56,25 +56,19 @@ impl<'a> MakeWriter<'a> for ConsoleAppender {
 }
 
 pub fn init(cli: &Cli) {
+  let mut log_level = Level::WARN;
   let mut use_file_appender = false;
   let mut use_console_appender = true;
   if cli.debug() {
+    log_level = Level::DEBUG;
     use_file_appender = true;
     use_console_appender = true;
   } else if cli.verbose() {
+    log_level = Level::INFO;
     use_console_appender = true;
   }
 
-  let file_appender = match use_file_appender {
-    true => Some(tracing_appender::rolling::never(".", "rsvim.log")),
-    _ => None,
-  };
-  let console_appender = match use_console_appender {
-    true => Some(ConsoleAppender),
-    _ => None,
-  };
-
-  let subscriber = tracing_subscriber::FmtSubscriber::builder()
+  let mut subscriber = tracing_subscriber::FmtSubscriber::builder()
     .with_file(true)
     .with_line_number(true)
     .with_thread_ids(true)
@@ -82,6 +76,19 @@ pub fn init(cli: &Cli) {
     .with_level(true)
     .with_ansi(false)
     .with_max_level(log_level);
+
+  if use_file_appender {
+    let file_appender = tracing_appender::rolling::never(".", "rsvim.log");
+    subscriber = subscriber.with_writer(file_appender);
+  }
+  if use_console_appender {
+    let console_appender = ConsoleAppender {
+      stdout: io::stdout,
+      stderr: io::stderr,
+    };
+    subscriber = subscriber.with_writer(console_appender);
+  }
+  let subscriber = subscriber.finish();
   tracing::subscriber::set_global_default(subscriber).expect("Failed to initialize tracing log");
   debug!("Initialize tracing log");
 }
