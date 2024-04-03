@@ -62,12 +62,12 @@ jobs:
       - name: MSRV
         run: |
           cargo binstall --no-confirm cargo-msrv
-          echo "cargo msrv list"
-          cargo msrv list
-          echo "cargo msrv show"
-          cargo msrv show
-          echo "cargo msrv verify"
-          cargo msrv verify
+          echo "cargo-msrv list"
+          cargo-msrv list
+          echo "cargo-msrv show"
+          cargo-msrv show
+          echo "cargo-msrv verify"
+          cargo-msrv verify
   unit_test:
     name: Unit Test
     strategy:
