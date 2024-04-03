@@ -1,12 +1,12 @@
-use crate::cli::CliOpts;
-use chrono::prelude::{DateTime, Local};
+use crate::cli::Cli;
+use chrono::prelude::Local;
 use std::io;
 use tracing::{self, Level};
 use tracing_appender;
 use tracing_subscriber::{self, EnvFilter};
 
-pub fn init(cli_opts: &CliOpts) {
-  if cli_opts.debug() {
+pub fn init(cli: &Cli) {
+  if cli.debug() {
     let now = Local::now();
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
       .with_file(true)
@@ -27,7 +27,7 @@ pub fn init(cli_opts: &CliOpts) {
       .finish();
     tracing::subscriber::set_global_default(subscriber).expect("Failed to initialize tracing log");
   } else {
-    let log_level = match cli_opts.verbose() {
+    let log_level = match cli.verbose() {
       true => Level::INFO,
       _ => Level::ERROR,
     };
