@@ -12,6 +12,9 @@ pub struct Cli {
   #[arg(long, help = "Run in headless mode, without a user interface")]
   headless: bool,
 
+  #[arg(short = 'd', long, help = "Run in diff mode")]
+  diff: bool,
+
   #[clap(
     value_name = "CMD",
     long = "cmd",
