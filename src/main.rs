@@ -4,6 +4,7 @@ use crossterm::{cursor, execute, terminal};
 use rsvim::cli::Cli;
 use std::io::stdout;
 use std::{thread, time};
+use tracing_subscriber;
 
 pub fn hello() -> std::io::Result<()> {
   if !terminal::is_raw_mode_enabled()? {
@@ -55,6 +56,8 @@ pub fn hello() -> std::io::Result<()> {
 
 fn main() {
   let cli = Cli::parse();
+
+  let subscriber = tracing_subscriber::FmtSubscriber::new();
   println!("cli: {:?}", cli);
   // let _ = hello();
 }
