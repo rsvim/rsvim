@@ -36,11 +36,10 @@ jobs:
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: cargo-bins/cargo-binstall@main
       - uses: actions/checkout@v4
       - name: Taplo
         run: |
-          cargo binstall --no-confirm taplo-cli
+          cargo install taplo-cli
           taplo fmt --check Cargo.toml
   clippy:
     name: Clippy
@@ -57,17 +56,16 @@ jobs:
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: cargo-bins/cargo-binstall@main
       - uses: actions/checkout@v4
       - name: MSRV
         run: |
-          cargo binstall --no-confirm cargo-msrv
-          echo "cargo-msrv list"
-          cargo-msrv list
-          echo "cargo-msrv show"
-          cargo-msrv show
-          echo "cargo-msrv verify"
-          cargo-msrv verify
+          cargo install msrv
+          echo "cargo msrv list"
+          cargo msrv list
+          echo "cargo msrv show"
+          cargo msrv show
+          echo "cargo msrv verify"
+          cargo msrv verify
   unit_test:
     name: Unit Test
     strategy:
