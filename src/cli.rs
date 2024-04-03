@@ -9,6 +9,9 @@ pub struct Cli {
   #[arg(short, long)]
   debug: bool,
 
+  #[arg(long, help = "Run in headless mode, without a user interface")]
+  headless: bool,
+
   #[clap(short = 'c', long)]
   cmd: Option<Vec<String>>,
 }
