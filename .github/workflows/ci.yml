@@ -36,10 +36,11 @@ jobs:
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - uses: cargo-bins/cargo-binstall@main
       - uses: actions/checkout@v4
       - name: Taplo
         run: |
-          cargo install taplo-cli
+          cargo binstall --force --no-confirm taplo-cli
           taplo fmt --check Cargo.toml
   clippy:
     name: Clippy
