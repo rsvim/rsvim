@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 use clap::Parser;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
