@@ -10,7 +10,6 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 env:
-  RUST_CHANNEL: "stable"
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
   CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
