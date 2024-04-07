@@ -10,10 +10,8 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 env:
-  RUST_CHANNEL: "stable"
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
-  CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 jobs:
   lint:
     name: Lint
@@ -62,6 +60,8 @@ jobs:
           cargo llvm-cov clean --workspace
           cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: lcov.info
           fail_ci_if_error: true
