@@ -46,6 +46,7 @@ async fn input_loop() -> std::io::Result<()> {
             match maybe_event {
                 Some(Ok(event)) => {
                     println!("Event::{:?}\r", event);
+                    debug!("Event::{:?}", event);
 
                     if event == Event::Key(KeyCode::Char('c').into()) {
                         println!("Curosr position: {:?}\r", cursor::position());
