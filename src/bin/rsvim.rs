@@ -10,7 +10,7 @@ use std::io::stdout;
 use std::{thread, time};
 use tracing::{self, debug};
 
-pub fn hello() -> std::io::Result<()> {
+async fn input_loop() -> std::io::Result<()> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
 
@@ -62,9 +62,10 @@ pub fn hello() -> std::io::Result<()> {
   Ok(())
 }
 
-fn main() {
+#[tokio::main]
+async fn main() -> std::io::Result<()> {
   let cli = Cli::parse();
   log::init(&cli);
   debug!("cli: {:?}", cli);
-  let _ = hello();
+  input_loop().await
 }
