@@ -1,12 +1,16 @@
 use clap::Parser;
 use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
+  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
+  EventStream, KeyCode,
 };
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::{cursor, execute, terminal};
+use futures::{future::FutureExt, select, StreamExt};
+use futures_timer::Delay;
 use rsvim::cli::Cli;
 use rsvim::log;
 use std::io::stdout;
+use std::time::Duration;
 use std::{thread, time};
 use tracing::{self, debug};
 
@@ -31,22 +35,31 @@ async fn input_loop() -> std::io::Result<()> {
     ResetColor,
   )?;
 
-  let corners: Vec<(u16, u16)> = vec![(0, 0), (cols, 0), (0, rows), (cols, rows)];
-  for corner in corners {
-    let msg = format!("Here's column:{}, row:{}!", corner.0, corner.1);
-    let (mut c, r) = corner;
-    if c > 0 {
-      c -= msg.len() as u16;
+  let mut reader = EventStream::new();
+  loop {
+    let mut delay = Delay::new(Duration::from_millis(1_000)).fuse();
+    let mut event = reader.next().fuse();
+
+    select! {
+        _ = delay => { println!(".\r"); },
+        maybe_event = event => {
+            match maybe_event {
+                Some(Ok(event)) => {
+                    println!("Event::{:?}\r", event);
+
+                    if event == Event::Key(KeyCode::Char('c').into()) {
+                        println!("Curosr position: {:?}\r", cursor::position());
+                    }
+
+                    if event == Event::Key(KeyCode::Esc.into()) {
+                        break;
+                    }
+                }
+                Some(Err(e)) => println!("Error: {:?}\r", e),
+                None => break,
+            }
+        }
     }
-    execute!(
-      stdout(),
-      cursor::MoveTo(c, r),
-      SetForegroundColor(Color::Yellow),
-      SetBackgroundColor(Color::DarkGrey),
-      Print(msg),
-      ResetColor,
-    )?;
-    thread::sleep(time::Duration::from_secs(1));
   }
 
   execute!(stdout(), terminal::LeaveAlternateScreen)?;
