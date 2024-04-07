@@ -1,4 +1,7 @@
 use clap::Parser;
+use crossterm::event::{
+  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
+};
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::{cursor, execute, terminal};
 use rsvim::cli::Cli;
@@ -8,10 +11,11 @@ use std::{thread, time};
 use tracing::{self, debug};
 
 pub fn hello() -> std::io::Result<()> {
-  if !terminal::is_raw_mode_enabled()? {
-    terminal::enable_raw_mode()?;
-  }
+  terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
+
+  execute!(stdout(), EnableMouseCapture)?;
+  execute!(stdout(), EnableFocusChange)?;
 
   let msg = format!("Hello Rsvim! This is a {rows} row, {cols} column terminal!");
   execute!(
@@ -46,6 +50,9 @@ pub fn hello() -> std::io::Result<()> {
   }
 
   execute!(stdout(), terminal::LeaveAlternateScreen)?;
+
+  execute!(stdout(), DisableMouseCapture)?;
+  execute!(stdout(), DisableFocusChange)?;
 
   if terminal::is_raw_mode_enabled()? {
     terminal::disable_raw_mode()?;
