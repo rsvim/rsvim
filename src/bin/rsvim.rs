@@ -44,22 +44,22 @@ async fn input_loop() -> std::io::Result<()> {
       _ = delay => { println!(".\r"); },
       maybe_event = event => {
         match maybe_event {
-                Some(Ok(event)) => {
-                    println!("Event::{:?}\r", event);
-                    debug!("Event::{:?}", event);
+          Some(Ok(event)) => {
+            println!("Event::{:?}\r", event);
+            debug!("Event::{:?}", event);
 
-                    if event == Event::Key(KeyCode::Char('c').into()) {
-                        println!("Curosr position: {:?}\r", cursor::position());
-                    }
-
-                    if event == Event::Key(KeyCode::Esc.into()) {
-                        break;
-                    }
-                }
-                Some(Err(e)) => println!("Error: {:?}\r", e),
-                None => break,
+            if event == Event::Key(KeyCode::Char('c').into()) {
+              println!("Curosr position: {:?}\r", cursor::position());
             }
+
+            if event == Event::Key(KeyCode::Esc.into()) {
+              break;
+            }
+          }
+          Some(Err(e)) => println!("Error: {:?}\r", e),
+          None => break,
         }
+      }
     }
   }
 
