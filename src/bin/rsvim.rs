@@ -41,9 +41,9 @@ async fn input_loop() -> std::io::Result<()> {
     let mut event = reader.next().fuse();
 
     select! {
-        _ = delay => { println!(".\r"); },
-        maybe_event = event => {
-            match maybe_event {
+      _ = delay => { println!(".\r"); },
+      maybe_event = event => {
+        match maybe_event {
                 Some(Ok(event)) => {
                     println!("Event::{:?}\r", event);
                     debug!("Event::{:?}", event);
