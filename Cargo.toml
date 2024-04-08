@@ -27,6 +27,7 @@ time = { version = "0.3.34", features = [
   "parsing",
   "serde",
   "serde-human-readable",
+  "rand",
 ] }
 tzdb = "0.6.1"
 tz-rs = "0.6.14"
