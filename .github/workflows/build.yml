@@ -259,4 +259,4 @@ jobs:
       - name: Upload Assets To Github Release
         uses: softprops/action-gh-release@v2
         with:
-          files: "artifacts/*"
+          files: "artifacts/rsvim*"
