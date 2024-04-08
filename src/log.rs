@@ -57,15 +57,6 @@ impl<'a> MakeWriter<'a> for ConsoleMakeWriter {
   }
 }
 
-impl ConsoleMakeWriter {
-  pub fn new() -> Self {
-    ConsoleMakeWriter {
-      stdout: io::stdout(),
-      stderr: io::stderr(),
-    }
-  }
-}
-
 pub fn init(cli: &Cli) {
   if cli.debug() {
     let now = tzdb::now::local().unwrap();
@@ -108,7 +99,10 @@ pub fn init(cli: &Cli) {
       .with_level(true)
       .with_env_filter(EnvFilter::from_default_env())
       .with_max_level(log_level)
-      .with_writer(ConsoleMakeWriter::new())
+      .with_writer(ConsoleMakeWriter {
+        stdout: io::stdout(),
+        stderr: io::stderr(),
+      })
       .pretty()
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
