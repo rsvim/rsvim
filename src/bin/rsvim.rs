@@ -14,7 +14,7 @@ use rsvim::log;
 use std::io::stdout;
 use std::time::Duration;
 use std::{thread, time};
-use tracing::{self, debug};
+use tracing::{debug, error};
 
 async fn input_loop() -> std::io::Result<()> {
   terminal::enable_raw_mode()?;
