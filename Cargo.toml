@@ -24,14 +24,13 @@ futures = "0.3"
 futures-timer = "3.0.3"
 time = { version = "0.3.34", features = [
   "std",
-  "local-offset",
   "macros",
   "parsing",
   "serde",
   "serde-human-readable",
   "rand",
 ] }
-tzdb = "0.6.1"
+tzdb = { version = "0.6.1", features = ["local"] }
 tz-rs = "0.6.14"
 rand = "0.8.5"
 

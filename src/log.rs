@@ -1,13 +1,24 @@
 use crate::cli::Cli;
 use std::io;
-use time::{format_description, OffsetDateTime};
+use time::{format_description, Date, Month, OffsetDateTime, Time, UtcOffset};
 use tracing::{self, Level};
 use tracing_appender;
 use tracing_subscriber::{self, EnvFilter};
+use tzdb;
 
 pub fn init(cli: &Cli) {
   if cli.debug() {
-    let now = OffsetDateTime::now_local().unwrap();
+    let now = tzdb::now::local().unwrap();
+    let now = OffsetDateTime::new_in_offset(
+      Date::from_calendar_date(
+        now.year(),
+        Month::try_from(now.month()).unwrap(),
+        now.month_day(),
+      )
+      .unwrap(),
+      Time::from_hms_nano(now.hour(), now.minute(), now.second(), now.nanoseconds()).unwrap(),
+      UtcOffset::from_whole_seconds(now.local_time_type().ut_offset()).unwrap(),
+    );
     let fmt = format_description::parse(
       "rsvim-[year][month][day]-[hour][minute][second]-[subsecond digits:3].log",
     )
