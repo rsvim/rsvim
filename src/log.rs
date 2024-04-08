@@ -8,12 +8,12 @@ use tracing_subscriber::fmt::writer::MakeWriter;
 use tracing_subscriber::{self, EnvFilter};
 use tzdb;
 
-pub struct ConsoleMakeWriter {
+struct ConsoleMakeWriter {
   stdout: Stdout,
   stderr: Stderr,
 }
 
-pub enum ConsoleLock<'a> {
+enum ConsoleLock<'a> {
   Stdout(StdoutLock<'a>),
   Stderr(StderrLock<'a>),
 }
@@ -57,6 +57,55 @@ impl<'a> MakeWriter<'a> for ConsoleMakeWriter {
   }
 }
 
+struct DebugConsoleMakeWriter {
+  stdout: Stdout,
+  stderr: Stderr,
+}
+
+enum DebugConsoleLock<'a> {
+  Stdout(StdoutLock<'a>),
+  Stderr(StderrLock<'a>),
+}
+
+impl<'a> io::Write for DebugConsoleLock<'a> {
+  fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+    match self {
+      DebugConsoleLock::Stdout(_) => Ok(0),
+      DebugConsoleLock::Stderr(lock) => lock.write(buf),
+    }
+  }
+
+  fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
+    match self {
+      DebugConsoleLock::Stdout(_) => Ok(()),
+      DebugConsoleLock::Stderr(lock) => lock.write_all(buf),
+    }
+  }
+
+  fn flush(&mut self) -> io::Result<()> {
+    match self {
+      DebugConsoleLock::Stdout(_) => Ok(()),
+      DebugConsoleLock::Stderr(lock) => lock.flush(),
+    }
+  }
+}
+
+impl<'a> MakeWriter<'a> for DebugConsoleMakeWriter {
+  type Writer = DebugConsoleLock<'a>;
+
+  fn make_writer(&'a self) -> Self::Writer {
+    DebugConsoleLock::Stdout(self.stdout.lock())
+  }
+
+  fn make_writer_for(&'a self, meta: &tracing_core::Metadata<'_>) -> Self::Writer {
+    if meta.level() <= &tracing_core::Level::WARN {
+      DebugConsoleLock::Stderr(self.stderr.lock())
+    } else {
+      DebugConsoleLock::Stdout(self.stdout.lock())
+    }
+  }
+}
+
 pub fn init(cli: &Cli) {
   if cli.debug() {
     let now = tzdb::now::local().unwrap();
@@ -85,6 +134,10 @@ pub fn init(cli: &Cli) {
       .with_env_filter(EnvFilter::from_default_env())
       .with_max_level(Level::TRACE)
       .with_writer(tracing_appender::rolling::never(".", log_name))
+      .with_writer(DebugConsoleMakeWriter {
+        stdout: io::stdout(),
+        stderr: io::stderr(),
+      })
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
   } else {

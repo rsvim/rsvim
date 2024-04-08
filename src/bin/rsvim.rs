@@ -83,5 +83,6 @@ async fn main() -> std::io::Result<()> {
   let cli = Cli::parse();
   log::init(&cli);
   debug!("cli: {:?}", cli);
+  error!("cli: {:?}", cli);
   input_loop().await
 }
