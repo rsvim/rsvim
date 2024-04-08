@@ -690,6 +690,7 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-appender",
+ "tracing-core",
  "tracing-subscriber",
  "tz-rs",
  "tzdb",
