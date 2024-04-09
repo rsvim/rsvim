@@ -9,7 +9,7 @@ repository = "https://github.com/rsvim/rsvim"
 readme = "README.md"
 homepage = "https://github.com/rsvim/rsvim"
 documentation = "https://docs.rs/rsvim"
-license = "Vim or Apache-2.0"
+license = "Vim OR Apache-2.0"
 keywords = ["vim", "neovim", "text-editor"]
 categories = ["text-editor"]
 
