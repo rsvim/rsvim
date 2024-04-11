@@ -37,3 +37,7 @@ rand = "0.8.5"
 
 [profile.release]
 lto = "thin"
+
+[profile.nightly]
+inherits = "release"
+debug = true
