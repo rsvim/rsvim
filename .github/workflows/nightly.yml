@@ -1,10 +1,10 @@
-name: Build
+name: Nightly
 permissions:
   contents: write
 on:
-  push:
-    tags:
-      - "*"
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: false
@@ -20,9 +20,29 @@ defaults:
   run:
     shell: bash
 jobs:
+  prepare-release:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          tag_name: nightly
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+      - uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          prerelease: true
+          makeLatest: true
+          name: "Nightly Build"
+          body: "Build profile: release + debugging info"
+          removeArtifacts: true
+          tag: nightly
+          commit: main
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    needs: prepare-release
     strategy:
       matrix:
         include:
@@ -31,7 +51,7 @@ jobs:
           - target: aarch64-unknown-linux-musl
             os: ubuntu-22.04
           - target: aarch64-apple-darwin
-            os: macos-14
+            os: macos-12
           - target: aarch64-pc-windows-msvc
             os: windows-2022
           - target: x86_64-unknown-linux-gnu
@@ -66,7 +86,7 @@ jobs:
           include: README.md,LICENSE-APACHE.txt,LICENSE-VIM.txt
           checksum: sha256
           bin-leading-dir: bin
-          profile: release
+          profile: nightly
       - name: After Upload
         run: |
           echo "ls -lah --color=always"
