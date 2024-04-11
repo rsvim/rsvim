@@ -1,11 +1,14 @@
 name: Release
+permissions:
+  contents: write
+  pull-requests: write
 on:
   push:
     branches:
       - main
-permissions:
-  contents: write
-  pull-requests: write
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: false
 env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"

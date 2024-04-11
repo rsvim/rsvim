@@ -23,3 +23,7 @@ clap = { version = "4.5.4", features = ["derive", "unicode"] }
 
 [profile.release]
 lto = "thin"
+
+[profile.nightly]
+inherits = "release"
+debug = true
