@@ -6,13 +6,5 @@
   "bump-patch-for-minor-pre-major": true,
   "packages": {
     ".": {}
-  },
-  "changelog-sections": [
-    { "type": "break", "section": "Break Changes" },
-    { "type": "revert", "section": "Reverts" },
-    { "type": "feat", "section": "Features" },
-    { "type": "feature", "section": "Features" },
-    { "type": "fix", "section": "Bug Fixes" },
-    { "type": "perf", "section": "Performance Improvements" }
-  ]
+  }
 }
