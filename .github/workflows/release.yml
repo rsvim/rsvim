@@ -24,26 +24,68 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: cargo-bins/cargo-binstall@main
       - uses: actions/checkout@v4
-      - name: Cargo check
-        run: cargo check --workspace
-      - name: Cargo publish --dry-run
-        run: cargo publish --dry-run
-      - uses: google-github-actions/release-please-action@v4
-        id: release
         with:
-          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
-      - run: |
-          echo "release_created:${{ steps.release.outputs.release_created }}"
-          echo "tag_name:${{ steps.release.outputs.tag_name }}"
-          echo "major:${{ steps.release.outputs.major }}"
-          echo "minor:${{ steps.release.outputs.minor }}"
-          echo "patch:${{ steps.release.outputs.patch }}"
-      - name: Cargo publish
-        if: ${{ steps.release.outputs.release_created }}
+          fetch-depth: 0
+      - uses: orhun/git-cliff-action@v3
+        with:
+          config: cliff.toml
+          args: -l --verbose
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: cargo publish
+          OUTPUT: UPDATES.md
+      - uses: ncipollo/release-action@v1
+        with:
+          draft: true
+          bodyFile: UPDATES.md
+  upload-assets:
+    name: ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    needs: release
+    strategy:
+      matrix:
+        include:
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-22.04
+          - target: aarch64-unknown-linux-musl
+            os: ubuntu-22.04
+          - target: aarch64-apple-darwin
+            os: macos-14
+          - target: aarch64-pc-windows-msvc
+            os: windows-2022
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-22.04
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-22.04
+          - target: x86_64-apple-darwin
+            os: macos-12
+          - target: x86_64-pc-windows-msvc
+            os: windows-2022
+          - target: x86_64-unknown-freebsd
+            os: ubuntu-22.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/setup-cross-toolchain-action@v1
+        with:
+          target: ${{ matrix.target }}
+        if: startsWith(matrix.os, 'ubuntu')
+      - uses: taiki-e/install-action@cross
+        if: contains(matrix.target, '-musl')
+      - run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
+        if: endsWith(matrix.target, 'windows-msvc')
+      - uses: taiki-e/upload-rust-binary-action@v1
+        with:
+          bin: rsvim
+          target: ${{ matrix.target }}
+          tar: all
+          zip: windows
+          token: ${{ secrets.GITHUB_TOKEN }}
+          include: README.md,LICENSE-APACHE.txt,LICENSE-VIM.txt
+          checksum: sha256
+          bin-leading-dir: bin
+          profile: release
+      - name: After Upload
+        run: |
+          echo "ls -lah --color=always"
+          ls -lah --color=always
