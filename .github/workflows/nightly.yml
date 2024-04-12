@@ -1,4 +1,4 @@
-name: Nightly
+name: Nightly Build
 permissions:
   contents: write
 on:
@@ -20,29 +20,38 @@ defaults:
   run:
     shell: bash
 jobs:
-  prepare-release:
-    name: Prepare Release
+  prepare:
+    name: Release Nighty
     runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - uses: dev-drprasad/delete-tag-and-release@v1.1
         with:
           tag_name: nightly
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: orhun/git-cliff-action@v3
+        with:
+          config: cliff.toml
+          args: -u --verbose
+        env:
+          OUTPUT: UPDATES.md
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           prerelease: true
           makeLatest: true
           name: "Nightly Build"
-          body: "Build profile: release + debugging info"
+          bodyFile: UPDATES.md
           removeArtifacts: true
           tag: nightly
           commit: main
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
-    needs: prepare-release
+    needs: prepare
     strategy:
       matrix:
         include:
