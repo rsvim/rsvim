@@ -57,7 +57,7 @@ commit_parsers = [
   { message = "^feat", group = "<!-- 0 -->Features" },
   { message = "^fix", group = "<!-- 1 -->Bug Fixes" },
   { message = "^perf", group = "<!-- 2 -->Performance Improvements" },
-  { body = "^security", group = "<!-- 10 -->Security" },
+  { message = "^security", group = "<!-- 10 -->Security" },
 ]
 # protect breaking changes from being skipped due to matching a skipping commit_parser
 protect_breaking_commits = false
