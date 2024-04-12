@@ -1,4 +1,4 @@
-name: Build
+name: Cargo Release
 permissions:
   contents: write
 on:
@@ -20,9 +20,27 @@ defaults:
   run:
     shell: bash
 jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: orhun/git-cliff-action@v3
+        with:
+          config: cliff.toml
+          args: -l --verbose
+        env:
+          OUTPUT: UPDATES.md
+      - uses: ncipollo/release-action@v1
+        with:
+          draft: true
+          bodyFile: UPDATES.md
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    needs: release
     strategy:
       matrix:
         include:
