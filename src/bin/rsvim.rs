@@ -40,10 +40,9 @@ async fn input_loop() -> std::io::Result<()> {
 
   let mut reader = EventStream::new();
   loop {
-    let mut event = reader.next().fuse();
-
+    let next_event = reader.next().fuse();
     tokio::select! {
-      maybe_event = event => {
+      maybe_event = next_event => {
         match maybe_event {
           Some(Ok(event)) => {
             println!("Event::{:?}\r", event);
