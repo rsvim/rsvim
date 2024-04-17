@@ -1,0 +1,5 @@
+root = true
+charset = utf-8
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2

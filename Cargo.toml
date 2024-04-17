@@ -14,12 +14,25 @@ keywords = ["vim", "neovim", "text-editor"]
 categories = ["text-editor"]
 
 [dependencies]
-crossterm = { version = "0.27", features = ["event-stream"] }
+crossterm = { version = "0.27", features = ["event-stream", "serde"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
+tracing-core = "0.1.32"
 tokio = { version = "1", features = ["full"] }
 clap = { version = "4.5.4", features = ["derive", "unicode"] }
+futures = "0.3"
+time = { version = "0.3.34", features = [
+  "std",
+  "macros",
+  "parsing",
+  "serde",
+  "serde-human-readable",
+  "rand",
+] }
+tzdb = { version = "0.6.1", features = ["local"] }
+tz-rs = "0.6.14"
+rand = "0.8.5"
 
 [profile.release]
 lto = "thin"
