@@ -1,0 +1,15 @@
+style = "conventional"
+allowed_types = [
+  "fix",
+  "feat",
+  "chore",
+  "docs",
+  "style",
+  "refactor",
+  "perf",
+  "test",
+  "ci",
+  "build",
+  "poc",
+]
+subject_capitalized = false
