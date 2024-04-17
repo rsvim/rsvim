@@ -40,25 +40,22 @@ async fn input_loop() -> std::io::Result<()> {
 
   let mut reader = EventStream::new();
   loop {
-    let next_event = reader.next().fuse();
     tokio::select! {
-      maybe_event = next_event => {
-        match maybe_event {
-          Some(Ok(event)) => {
-            println!("Event::{:?}\r", event);
-            debug!("Event::{:?}", event);
+      event_result = reader.next() => match event_result {
+        Some(Ok(event)) => {
+          println!("Event::{:?}\r", event);
+          debug!("Event::{:?}", event);
 
-            if event == Event::Key(KeyCode::Char('c').into()) {
-              println!("Curosr position: {:?}\r", cursor::position());
-            }
-
-            if event == Event::Key(KeyCode::Esc.into()) {
-              break;
-            }
+          if event == Event::Key(KeyCode::Char('c').into()) {
+            println!("Curosr position: {:?}\r", cursor::position());
           }
-          Some(Err(e)) => println!("Error: {:?}\r", e),
-          None => break,
+
+          if event == Event::Key(KeyCode::Esc.into()) {
+            break;
+          }
         }
+        Some(Err(e)) => println!("Error: {:?}\r", e),
+        None => break,
       }
     }
   }
