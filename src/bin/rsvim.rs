@@ -14,6 +14,7 @@ use rsvim::log;
 use std::io::stdout;
 use std::time::Duration;
 use std::{thread, time};
+use tokio;
 use tracing::{debug, error};
 
 async fn input_loop() -> std::io::Result<()> {
@@ -39,11 +40,9 @@ async fn input_loop() -> std::io::Result<()> {
 
   let mut reader = EventStream::new();
   loop {
-    let mut delay = Delay::new(Duration::from_millis(1_000)).fuse();
     let mut event = reader.next().fuse();
 
-    select! {
-      _ = delay => { println!(".\r"); },
+    tokio::select! {
       maybe_event = event => {
         match maybe_event {
           Some(Ok(event)) => {
@@ -83,6 +82,5 @@ async fn main() -> std::io::Result<()> {
   let cli = Cli::parse();
   log::init(&cli);
   debug!("cli: {:?}", cli);
-  error!("cli: {:?}", cli);
   input_loop().await
 }
