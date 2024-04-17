@@ -27,12 +27,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: orhun/git-cliff-action@v3
-        with:
-          config: cliff.toml
-          args: -l --verbose
-        env:
-          OUTPUT: UPDATES.md
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Create Changelog
+        run: |
+          cargo install git-cliff --all-features
+          git-cliff -l --verbose -o UPDATES.md
       - uses: ncipollo/release-action@v1
         with:
           draft: true
