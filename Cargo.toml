@@ -22,7 +22,6 @@ tracing-core = "0.1.32"
 tokio = { version = "1", features = ["full"] }
 clap = { version = "4.5.4", features = ["derive", "unicode"] }
 futures = "0.3"
-futures-timer = "3.0.3"
 time = { version = "0.3.34", features = [
   "std",
   "macros",

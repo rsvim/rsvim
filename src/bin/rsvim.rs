@@ -7,8 +7,7 @@ use crossterm::event::{
 };
 use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
 use crossterm::{cursor, execute, terminal};
-use futures::{future::FutureExt, select, StreamExt};
-use futures_timer::Delay;
+use futures::StreamExt;
 use rsvim::cli::Cli;
 use rsvim::log;
 use std::io::stdout;
