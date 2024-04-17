@@ -12,3 +12,4 @@ allowed_types = [
   "build",
   "poc",
 ]
+subject_capitalized = false
