@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::cli::Cli;
 use std::io::{self, Stderr, StderrLock, Stdout, StdoutLock};
 use time::{format_description, Date, Month, OffsetDateTime, Time, UtcOffset};
