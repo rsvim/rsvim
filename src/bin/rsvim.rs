@@ -1,19 +1,9 @@
-#![allow(unused_imports)]
-
 use clap::Parser;
-use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
-  EventStream, KeyCode,
-};
-use crossterm::style::{Color, Print, ResetColor, SetBackgroundColor, SetForegroundColor};
-use crossterm::{cursor, execute, terminal};
+use crossterm::cursor;
+use crossterm::event::{Event, EventStream, KeyCode};
 use futures::StreamExt;
-use heed::{self, Database, EnvOpenOptions};
 use rsvim::{cli, dvc, log};
-use std::io::stdout;
-use std::time::Duration;
-use std::{fs, path, thread, time};
-use tracing::{debug, error};
+use tracing::debug;
 
 async fn input_loop() -> std::io::Result<()> {
   let mut reader = EventStream::new();
@@ -47,7 +37,11 @@ async fn main() -> std::io::Result<()> {
   log::init(&cli);
   debug!("cli: {:?}", cli);
 
-  dvc::init().await?;
+  let dvc_state = dvc::init().await?;
+  debug!(
+    "dvc_state cols: {}, rows: {}",
+    dvc_state.cols, dvc_state.rows
+  );
   input_loop().await?;
   dvc::shutdown().await
 }

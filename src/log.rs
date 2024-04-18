@@ -1,14 +1,14 @@
-#![allow(dead_code)]
+pub mod console_writer;
 
-use crate::cli::Cli;
+use crate::cli;
 use time::{format_description, Date, Month, OffsetDateTime, Time, UtcOffset};
-use tracing::{self, Level};
+use tracing;
 use tracing_appender;
 use tracing_subscriber::{self, EnvFilter};
 use tzdb;
 
-pub fn init(cli: &Cli) {
-  if cli.debug() {
+pub fn init(c: &cli::Cli) {
+  if c.debug() {
     let now = tzdb::now::local().unwrap();
     let now = OffsetDateTime::new_in_offset(
       Date::from_calendar_date(
@@ -33,16 +33,16 @@ pub fn init(cli: &Cli) {
       .with_level(true)
       .with_ansi(false)
       .with_env_filter(EnvFilter::from_default_env())
-      .with_max_level(Level::TRACE)
+      .with_max_level(tracing::Level::TRACE)
       .with_writer(tracing_appender::rolling::never(".", log_name))
-      .with_writer(std::io::stderr)
+      .with_writer(console_writer::ConsoleMakeWriter::new())
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
   } else {
-    let log_level = if cli.verbose() {
-      Level::INFO
+    let log_level = if c.verbose() {
+      tracing::Level::INFO
     } else {
-      Level::ERROR
+      tracing::Level::ERROR
     };
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
       .with_file(true)
@@ -50,7 +50,7 @@ pub fn init(cli: &Cli) {
       .with_level(true)
       .with_env_filter(EnvFilter::from_default_env())
       .with_max_level(log_level)
-      .with_writer(std::io::stderr)
+      .with_writer(console_writer::ConsoleMakeWriter::new())
       .pretty()
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();

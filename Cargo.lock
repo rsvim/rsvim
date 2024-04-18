@@ -852,6 +852,7 @@ dependencies = [
  "crossterm",
  "futures",
  "heed",
+ "lazy_static",
  "rand",
  "time",
  "tokio",

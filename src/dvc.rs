@@ -1,12 +1,16 @@
+pub mod state;
+
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{cursor, execute, terminal};
+use state::State;
 use std::io::stdout;
 
-pub async fn init() -> std::io::Result<()> {
+pub async fn init() -> std::io::Result<State> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
+  let stat = State::new(cols, rows);
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
@@ -20,7 +24,7 @@ pub async fn init() -> std::io::Result<()> {
     cursor::MoveTo(0, 0),
   )?;
 
-  Ok(())
+  Ok(stat)
 }
 
 pub async fn shutdown() -> std::io::Result<()> {
