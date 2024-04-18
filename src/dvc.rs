@@ -6,11 +6,13 @@ use crossterm::event::{
 use crossterm::{cursor, execute, terminal};
 use state::State;
 use std::io::stdout;
+use tracing::debug;
 
 pub async fn init() -> std::io::Result<State> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
   let stat = State::new(cols, rows);
+  debug!("dvc stat: {:?}", stat);
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
