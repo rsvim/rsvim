@@ -4,6 +4,7 @@ use crate::cli;
 use time::{format_description, Date, Month, OffsetDateTime, Time, UtcOffset};
 use tracing;
 use tracing_appender;
+use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::{self, EnvFilter};
 use tzdb;
 
@@ -35,8 +36,11 @@ pub fn init(c: &cli::Cli) {
       .with_env_filter(EnvFilter::from_default_env())
       .with_max_level(tracing::Level::TRACE)
       .with_writer(tracing_appender::rolling::never(".", log_name))
-      .with_writer(console_make_writer::ConsoleMakeWriter::new())
-      .finish();
+      .finish()
+      .with(
+        tracing_subscriber::fmt::Layer::default()
+          .with_writer(console_make_writer::ConsoleMakeWriter::new()),
+      );
     tracing::subscriber::set_global_default(subscriber).unwrap();
   } else {
     let log_level = if c.verbose() {
