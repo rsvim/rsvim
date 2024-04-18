@@ -1,4 +1,4 @@
-pub mod console_writer;
+pub mod console_make_writer;
 
 use crate::cli;
 use time::{format_description, Date, Month, OffsetDateTime, Time, UtcOffset};
@@ -35,7 +35,7 @@ pub fn init(c: &cli::Cli) {
       .with_env_filter(EnvFilter::from_default_env())
       .with_max_level(tracing::Level::TRACE)
       .with_writer(tracing_appender::rolling::never(".", log_name))
-      .with_writer(console_writer::ConsoleMakeWriter::new())
+      .with_writer(console_make_writer::ConsoleMakeWriter::new())
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
   } else {
@@ -50,7 +50,7 @@ pub fn init(c: &cli::Cli) {
       .with_level(true)
       .with_env_filter(EnvFilter::from_default_env())
       .with_max_level(log_level)
-      .with_writer(console_writer::ConsoleMakeWriter::new())
+      .with_writer(console_make_writer::ConsoleMakeWriter::new())
       .pretty()
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
