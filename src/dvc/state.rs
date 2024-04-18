@@ -9,3 +9,15 @@ impl State {
     State { cols, rows }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_new() {
+    let stat = State::new(1, 2);
+    assert_eq!(stat.cols, 1);
+    assert_eq!(stat.rows, 2);
+  }
+}

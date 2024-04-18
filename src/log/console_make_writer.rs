@@ -58,8 +58,8 @@ impl ConsoleMakeWriter {
   }
 }
 
-impl ConsoleMakeWriter {
-  pub fn default() -> Self {
+impl Default for ConsoleMakeWriter {
+  fn default() -> Self {
     Self::new()
   }
 }
