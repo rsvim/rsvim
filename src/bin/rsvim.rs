@@ -16,10 +16,7 @@ use std::time::Duration;
 use std::{fs, path, thread, time};
 use tracing::{debug, error};
 
-async fn input_loop(
-  db: &Database<heed::types::Str, heed::types::OwnedType<i32>>,
-  env: &heed::Env,
-) -> std::io::Result<()> {
+async fn input_loop() -> std::io::Result<()> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
 
@@ -47,9 +44,6 @@ async fn input_loop(
         Some(Ok(event)) => {
           println!("Event::{:?}\r", event);
           debug!("Event::{:?}", event);
-          let mut wtxn = env.write_txn().unwrap();
-          db.put(&mut wtxn, "1", &1).unwrap();
-              wtxn.commit().unwrap();
 
           if event == Event::Key(KeyCode::Char('c').into()) {
             println!("Curosr position: {:?}\r", cursor::position());
@@ -83,11 +77,5 @@ async fn main() -> std::io::Result<()> {
   let cli = Cli::parse();
   log::init(&cli);
   debug!("cli: {:?}", cli);
-  fs::create_dir_all(path::Path::new("lmdb").join("lmdb.mdb")).unwrap();
-  let env = EnvOpenOptions::new()
-    .open(path::Path::new("lmdb").join("lmdb.mdb"))
-    .unwrap();
-  let db: Database<heed::types::Str, heed::types::OwnedType<i32>> =
-    env.create_database(None).unwrap();
-  input_loop(&db, &env).await
+  input_loop().await
 }
