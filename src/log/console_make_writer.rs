@@ -51,9 +51,15 @@ impl<'a> MakeWriter<'a> for ConsoleMakeWriter {
 }
 
 impl ConsoleMakeWriter {
-  pub fn new() -> ConsoleMakeWriter {
+  pub fn new() -> Self {
     ConsoleMakeWriter {
       stderr: std::io::stderr(),
     }
+  }
+}
+
+impl ConsoleMakeWriter {
+  pub fn default() -> Self {
+    Self::new()
   }
 }
