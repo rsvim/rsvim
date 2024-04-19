@@ -35,11 +35,11 @@ pub fn init(c: &cli::Cli) {
       .with_ansi(false)
       .with_env_filter(EnvFilter::from_default_env())
       .with_max_level(tracing::Level::TRACE)
-      .with_writer(tracing_appender::rolling::never(".", log_name))
+      .with_writer(console_make_writer::ConsoleMakeWriter::new())
       .finish()
       .with(
         tracing_subscriber::fmt::Layer::default()
-          .with_writer(console_make_writer::ConsoleMakeWriter::new()),
+          .with_writer(tracing_appender::rolling::never(".", log_name)),
       );
     tracing::subscriber::set_global_default(subscriber).unwrap();
   } else {

@@ -37,11 +37,7 @@ async fn main() -> std::io::Result<()> {
   log::init(&cli);
   debug!("cli: {:?}", cli);
 
-  let dvc_state = dvc::init().await?;
-  debug!(
-    "dvc_state cols: {}, rows: {}",
-    dvc_state.cols, dvc_state.rows
-  );
+  dvc::init().await?;
   input_loop().await?;
   dvc::shutdown().await
 }

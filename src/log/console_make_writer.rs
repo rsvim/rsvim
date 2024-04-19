@@ -42,7 +42,7 @@ impl<'a> MakeWriter<'a> for ConsoleMakeWriter {
   }
 
   fn make_writer_for(&'a self, meta: &tracing_core::Metadata<'_>) -> Self::Writer {
-    if meta.level() <= &tracing_core::Level::WARN {
+    if meta.level() <= &tracing_core::Level::ERROR {
       ConsoleLock::Stderr(self.stderr.lock())
     } else {
       ConsoleLock::Stdout
@@ -61,5 +61,28 @@ impl ConsoleMakeWriter {
 impl Default for ConsoleMakeWriter {
   fn default() -> Self {
     Self::new()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_new() {
+    let console = ConsoleMakeWriter::new();
+    match console.make_writer() {
+      ConsoleLock::Stdout => assert!(true),
+      _ => assert!(false),
+    };
+  }
+
+  #[test]
+  fn test_default() {
+    let console = ConsoleMakeWriter::new();
+    match console.make_writer() {
+      ConsoleLock::Stdout => assert!(true),
+      _ => assert!(false),
+    };
   }
 }
