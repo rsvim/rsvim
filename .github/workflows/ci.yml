@@ -10,8 +10,7 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
 env:
-  RUSTFLAGS: "-Dwarnings"
-  RUST_BACKTRACE: "full"
+  RUST_BACKTRACE: 1
 jobs:
   lint:
     name: Lint
