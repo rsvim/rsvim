@@ -6,6 +6,7 @@ pub struct ConsoleMakeWriter {
   stderr: Stderr,
 }
 
+#[derive(Debug)]
 pub enum ConsoleLock<'a> {
   Stdout,
   Stderr(StderrLock<'a>),
@@ -69,20 +70,20 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_new() {
+  fn should_return_stdout_for_new_make_writer() {
     let console = ConsoleMakeWriter::new();
     match console.make_writer() {
-      ConsoleLock::Stdout => assert!(true),
-      _ => assert!(false),
+      ConsoleLock::Stdout => {}
+      ConsoleLock::Stderr(_) => panic!("make_writer should return ConsoleLock::Stdout"),
     };
   }
 
   #[test]
-  fn test_default() {
-    let console = ConsoleMakeWriter::new();
+  fn should_return_stdout_for_default_make_writer() {
+    let console: ConsoleMakeWriter = Default::default();
     match console.make_writer() {
-      ConsoleLock::Stdout => assert!(true),
-      _ => assert!(false),
+      ConsoleLock::Stdout => {}
+      ConsoleLock::Stderr(_) => panic!("make_writer should return ConsoleLock::Stdout"),
     };
   }
 }
