@@ -5,20 +5,20 @@ pub struct Pos<T> {
 }
 
 impl<T> Pos<T> {
-  fn new(x: T, y: T) -> Self {
+  pub fn new(x: T, y: T) -> Self {
     Pos { x, y }
   }
 
-  fn swap(self) -> Self {
+  pub fn swap(self) -> Self {
     Pos::new(self.y, self.x)
   }
 }
 
 // Relative position.
-type RelPos = Pos<isize>;
+pub type RelPos = Pos<isize>;
 
 // Absolute position.
-type AbsPos = Pos<usize>;
+pub type AbsPos = Pos<usize>;
 
 #[cfg(test)]
 mod tests {
