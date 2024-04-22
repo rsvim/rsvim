@@ -15,10 +15,10 @@ impl<T> Pos<T> {
 }
 
 // Relative position.
-pub type RelPos = Pos<isize>;
+pub type RelPos = Pos<i32>;
 
 // Absolute position.
-pub type AbsPos = Pos<usize>;
+pub type AbsPos = Pos<u32>;
 
 #[cfg(test)]
 mod tests {
