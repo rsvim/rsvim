@@ -33,6 +33,8 @@ time = { version = "0.3.34", features = [
 tzdb = { version = "0.6.1", features = ["local"] }
 tz-rs = "0.6.14"
 rand = "0.8.5"
+heed = "0.20.0-alpha.9"
+lazy_static = "1.4.0"
 
 [profile.release]
 lto = "thin"
