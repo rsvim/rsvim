@@ -1,3 +1,5 @@
+pub mod pos;
+
 #[cfg(test)]
 mod tests {
   #[test]
