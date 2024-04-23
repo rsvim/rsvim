@@ -1,5 +1,5 @@
-pub mod pos;
 pub mod tree;
+pub mod vec;
 
 #[cfg(test)]
 mod tests {
