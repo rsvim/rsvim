@@ -1,5 +1,5 @@
 pub mod device;
-pub mod vec;
+pub mod rect;
 pub mod view;
 
 #[cfg(test)]
