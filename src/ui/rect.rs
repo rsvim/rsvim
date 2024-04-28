@@ -1,7 +1,7 @@
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Pos<T> {
-  pub x: T, // col
-  pub y: T, // row
+  pub x: T,
+  pub y: T,
 }
 
 impl<T> Pos<T> {
@@ -13,11 +13,13 @@ impl<T> Pos<T> {
     Pos::new(self.y, self.x)
   }
 
+  // x-axis on the coordinate is row number on terminal
   pub fn row(self) -> T {
     self.x
   }
 
-  pub fn col(self) -> T {
+  // y-axis on the coordinate is column number on terminal
+  pub fn column(self) -> T {
     self.y
   }
 }
@@ -62,9 +64,9 @@ mod tests {
   }
 
   #[test]
-  fn should_equal_row_col_on_relpos_y_x() {
+  fn should_equal_row_column_on_relpos_x_y() {
     let p1 = RelPos::new(5, 10);
-    assert_eq!(p1.col(), 10);
+    assert_eq!(p1.column(), 10);
     assert_eq!(p1.row(), 5);
   }
 
@@ -82,9 +84,9 @@ mod tests {
   }
 
   #[test]
-  fn should_equal_row_col_on_abspos_y_x() {
+  fn should_equal_row_column_on_abspos_x_y() {
     let p1 = AbsPos::new(5, 10);
-    assert_eq!(p1.col(), 10);
+    assert_eq!(p1.column(), 10);
     assert_eq!(p1.row(), 5);
   }
 
