@@ -3,15 +3,14 @@ use std::collections::LinkedList;
 use std::rc::Rc;
 
 use crate::ui::device::Device;
-use crate::ui::vec::pos::{AbsPos, RelPos};
-use crate::ui::vec::vec2d::AbsVec2d;
+use crate::ui::rect::{AbsPos, RelPos, Size};
 
 pub trait View {
   fn draw(&self, dvc: &Device);
 
   fn offset(&self) -> RelPos;
 
-  fn size(&self) -> AbsVec2d;
+  fn size(&self) -> Size;
 
   fn abs_offset(&self) -> AbsPos;
 

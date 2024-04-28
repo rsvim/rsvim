@@ -22,17 +22,17 @@ pub type AbsPos = Pos<u32>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Size {
-  pub x: u32,
-  pub y: u32,
+  pub height: u32,
+  pub width: u32,
 }
 
 impl Size {
-  pub fn new(x: u32, y: u32) -> Self {
-    Size { x, y }
+  pub fn new(height: u32, width: u32) -> Self {
+    Size { height, width }
   }
 
   pub fn swap(self) -> Self {
-    Size::new(self.y, self.x)
+    Size::new(self.width, self.height)
   }
 }
 
@@ -67,15 +67,16 @@ mod tests {
   }
 
   #[test]
-  fn should_all_zero_on_relvec2d_default() {
-    let p1: RelVec2d = Default::default();
-    let p2 = RelVec2d::new(0, 0);
+  fn should_all_zero_on_size_default() {
+    let p1: Size = Default::default();
+    let p2 = Size::new(0, 0);
     assert_eq!(p1, p2);
   }
 
   #[test]
-  fn should_reverse_after_relvec2d_swap() {
-    let p1 = RelVec2d::new(1, 2);
-    assert_eq!(p1.swap(), RelVec2d::new(2, 1));
+  fn should_reverse_on_size_swap() {
+    let p2 = Size::new(100, 50);
+    let p1 = p2.swap();
+    assert_eq!(p1, Size::new(50, 100));
   }
 }

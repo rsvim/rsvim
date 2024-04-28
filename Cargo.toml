@@ -36,6 +36,9 @@ rand = "0.8.5"
 heed = "0.20.0"
 lazy_static = "1.4.0"
 
+[dev-dependencies]
+mockall = "0.12.1"
+
 [profile.release]
 lto = "thin"
 
