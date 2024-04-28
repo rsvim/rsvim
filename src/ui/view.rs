@@ -9,11 +9,11 @@ use crate::ui::vec::vec2d::AbsVec2d;
 pub trait View {
   fn draw(&self, dvc: &Device);
 
-  fn offset(&self) -> AbsPos;
+  fn offset(&self) -> RelPos;
 
   fn size(&self) -> AbsVec2d;
 
-  fn relative_offset(&self) -> RelPos;
+  fn abs_offset(&self) -> AbsPos;
 
   fn parent(&self) -> Option<Rc<RefCell<dyn View>>>;
 

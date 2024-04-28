@@ -2,7 +2,7 @@ use clap::Parser;
 use crossterm::cursor;
 use crossterm::event::{Event, EventStream, KeyCode};
 use futures::StreamExt;
-use rsvim::{cli, dvc, log};
+use rsvim::{cli, log, ui};
 use tracing::debug;
 
 async fn input_loop() -> std::io::Result<()> {
@@ -37,7 +37,7 @@ async fn main() -> std::io::Result<()> {
   log::init(&cli);
   debug!("cli: {:?}", cli);
 
-  dvc::init().await?;
+  ui::device::init().await?;
   input_loop().await?;
-  dvc::shutdown().await
+  ui::device::shutdown().await
 }
