@@ -20,7 +20,6 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: cargo-bins/cargo-binstall@main
-      - uses: mozilla-actions/sccache-action@v0.0.3
       - uses: actions/checkout@v4
       - uses: crate-ci/typos@master
       - name: Rustfmt
@@ -54,7 +53,6 @@ jobs:
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - uses: mozilla-actions/sccache-action@v0.0.3
       - uses: actions/checkout@v4
       - uses: taiki-e/install-action@cargo-llvm-cov
       - name: Run Tests
