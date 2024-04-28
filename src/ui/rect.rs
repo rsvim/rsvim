@@ -1,7 +1,7 @@
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Pos<T> {
-  pub x: T,
-  pub y: T,
+  pub x: T, // row
+  pub y: T, // col
 }
 
 impl<T> Pos<T> {
