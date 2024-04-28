@@ -13,22 +13,14 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
-  sccache:
-    name: Sccache
-    runs-on: ubuntu-latest
-    steps:
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: cargo-bins/cargo-binstall@main
-      - run: cargo binstall --force --no-confirm sccache
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    needs: sccache
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: cargo-bins/cargo-binstall@main
+      - uses: mozilla-actions/sccache-action@v0.0.3
       - uses: actions/checkout@v4
       - uses: crate-ci/typos@master
       - name: Rustfmt
@@ -55,7 +47,6 @@ jobs:
           cargo msrv verify
   unit_test:
     name: Unit Test
-    needs: sccache
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
@@ -63,6 +54,7 @@ jobs:
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.3
       - uses: actions/checkout@v4
       - uses: taiki-e/install-action@cargo-llvm-cov
       - name: Run Tests
