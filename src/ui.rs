@@ -1,5 +1,6 @@
-pub mod tree;
+pub mod device;
 pub mod vec;
+pub mod view;
 
 #[cfg(test)]
 mod tests {

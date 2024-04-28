@@ -1,18 +1,15 @@
-pub mod state;
-
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{cursor, execute, terminal};
-use state::State;
 use std::io::stdout;
-use tracing::debug;
+// use tracing::debug;
 
-pub async fn init() -> std::io::Result<State> {
+pub async fn init() -> std::io::Result<Device> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
-  let stat = State::new(cols, rows);
-  debug!("dvc stat: {:?}", stat);
+  let device = Device::new(rows as u32, cols as u32);
+  // debug!("dvc stat: {:?}", stat);
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
@@ -26,7 +23,7 @@ pub async fn init() -> std::io::Result<State> {
     cursor::MoveTo(0, 0),
   )?;
 
-  Ok(stat)
+  Ok(device)
 }
 
 pub async fn shutdown() -> std::io::Result<()> {
@@ -42,4 +39,15 @@ pub async fn shutdown() -> std::io::Result<()> {
   }
 
   Ok(())
+}
+
+pub struct Device {
+  height: u32,
+  width: u32,
+}
+
+impl Device {
+  fn new(height: u32, width: u32) -> Self {
+    Device { width, height }
+  }
 }
