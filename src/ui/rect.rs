@@ -1,7 +1,7 @@
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Pos<T> {
-  pub x: T, // row
-  pub y: T, // col
+  pub x: T, // col
+  pub y: T, // row
 }
 
 impl<T> Pos<T> {
@@ -11,6 +11,14 @@ impl<T> Pos<T> {
 
   pub fn swap(self) -> Self {
     Pos::new(self.y, self.x)
+  }
+
+  pub fn row(self) -> T {
+    self.x
+  }
+
+  pub fn col(self) -> T {
+    self.y
   }
 }
 
@@ -54,6 +62,13 @@ mod tests {
   }
 
   #[test]
+  fn should_equal_row_col_on_relpos_y_x() {
+    let p1 = RelPos::new(5, 10);
+    assert_eq!(p1.col(), 10);
+    assert_eq!(p1.row(), 5);
+  }
+
+  #[test]
   fn should_all_zero_on_abspos_default() {
     let p1: AbsPos = Default::default();
     let p2 = AbsPos::new(0, 0);
@@ -64,6 +79,13 @@ mod tests {
   fn should_reverse_after_abspos_swap() {
     let p1 = AbsPos::new(1, 2);
     assert_eq!(p1.swap(), AbsPos::new(2, 1));
+  }
+
+  #[test]
+  fn should_equal_row_col_on_abspos_y_x() {
+    let p1 = AbsPos::new(5, 10);
+    assert_eq!(p1.col(), 10);
+    assert_eq!(p1.row(), 5);
   }
 
   #[test]
