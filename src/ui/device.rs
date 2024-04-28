@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
@@ -9,7 +11,6 @@ pub async fn init() -> std::io::Result<Device> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
   let device = Device::new(rows as u32, cols as u32);
-  // debug!("dvc stat: {:?}", stat);
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
@@ -48,6 +49,18 @@ pub struct Device {
 
 impl Device {
   fn new(height: u32, width: u32) -> Self {
-    Device { width, height }
+    Device { height, width }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn should_equal_on_device_new() {
+    let d1 = Device::new(1, 2);
+    assert_eq!(d1.height, 1);
+    assert_eq!(d1.width, 2);
   }
 }
