@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 use crate::ui::device::Device;
 use crate::ui::layout::LayoutRc;
@@ -13,9 +13,10 @@ pub trait View {
 
   fn abs_offset(&self) -> AbsPos;
 
-  fn parent(&self) -> Option<ViewRc>;
+  fn parent(&self) -> Option<ViewWk>;
 
   fn layout(&self) -> LayoutRc;
 }
 
 pub type ViewRc = Rc<dyn View>;
+pub type ViewWk = Weak<dyn View>;
