@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 use crate::ui::device::Device;
@@ -18,5 +19,5 @@ pub trait View {
   fn layout(&self) -> LayoutRc;
 }
 
-pub type ViewRc = Rc<dyn View>;
-pub type ViewWk = Weak<dyn View>;
+pub type ViewRc = Rc<RefCell<dyn View>>;
+pub type ViewWk = Weak<RefCel<dyn View>>;

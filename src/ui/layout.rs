@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::collections::LinkedList;
 use std::rc::Rc;
 
@@ -7,7 +8,7 @@ pub trait Layout {
   fn children(&self) -> LinkedList<ViewRc>;
 }
 
-pub type LayoutRc = Rc<dyn Layout>;
+pub type LayoutRc = Rc<RefCell<dyn Layout>>;
 
 pub struct HorizontalLayout {}
 
