@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::ui::device::Device;
-use crate::ui::layout::Layout;
+use crate::ui::layout::LayoutRc;
 use crate::ui::rect::{AbsPos, RelPos, Size};
 
 pub trait View {
@@ -14,7 +14,9 @@ pub trait View {
 
   fn abs_offset(&self) -> AbsPos;
 
-  fn parent(&self) -> Option<Rc<RefCell<dyn View>>>;
+  fn parent(&self) -> Option<ViewRc>;
 
-  fn layout(&self) -> Rc<RefCell<dyn Layout>>;
+  fn layout(&self) -> LayoutRc;
 }
+
+pub type ViewRc = Rc<RefCell<dyn View>>;
