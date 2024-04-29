@@ -3,6 +3,7 @@ use std::collections::LinkedList;
 use std::rc::Rc;
 
 use crate::ui::device::Device;
+use crate::ui::layout::Layout;
 use crate::ui::rect::{AbsPos, RelPos, Size};
 
 pub trait View {
@@ -17,4 +18,6 @@ pub trait View {
   fn parent(&self) -> Option<Rc<RefCell<dyn View>>>;
 
   fn children(&self) -> LinkedList<Rc<RefCell<dyn View>>>;
+
+  fn layout(&self) -> Rc<RefCell<dyn Layout>>;
 }
