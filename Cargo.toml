@@ -40,6 +40,12 @@ lazy_static = "1.4.0"
 [dev-dependencies]
 mockall = "0.12.1"
 
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
 [profile.release]
 lto = "thin"
 strip = "debuginfo"
