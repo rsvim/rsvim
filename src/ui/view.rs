@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::ui::device::Device;
-use crate::ui::layout::LayoutRc;
+use crate::ui::layout::LayoutPtr;
 use crate::ui::rect::{AbsPos, RelPos, Size};
 
 pub trait View {
@@ -16,7 +16,7 @@ pub trait View {
 
   fn parent(&self) -> Option<ViewPtr>;
 
-  fn layout(&self) -> LayoutRc;
+  fn layout(&self) -> LayoutPtr;
 }
 
 pub type ViewPtr = Rc<RefCell<dyn View>>;
