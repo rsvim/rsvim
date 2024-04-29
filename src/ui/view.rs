@@ -20,4 +20,4 @@ pub trait View {
 }
 
 pub type ViewRc = Rc<RefCell<dyn View>>;
-pub type ViewWk = Weak<RefCel<dyn View>>;
+pub type ViewWk = Weak<RefCell<dyn View>>;
