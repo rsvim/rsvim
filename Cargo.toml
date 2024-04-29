@@ -42,6 +42,7 @@ mockall = "0.12.1"
 
 [profile.release]
 lto = "thin"
+strip = "debuginfo"
 
 [profile.nightly]
 inherits = "release"
