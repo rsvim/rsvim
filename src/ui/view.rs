@@ -21,6 +21,7 @@ pub trait View {
   // if contains more children views, all these views are managed by layout
   fn layout(&self) -> Option<LayoutRc>;
 
+  // actually draw the terminal screen
   fn draw(&self, dvc: &Device);
 }
 
