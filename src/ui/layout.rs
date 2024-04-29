@@ -2,13 +2,13 @@ use std::cell::RefCell;
 use std::collections::LinkedList;
 use std::rc::Rc;
 
-use crate::ui::view::{View, ViewRc};
+use crate::ui::view::{View, ViewPtr};
 
 pub trait Layout {
-  fn children(&self) -> LinkedList<ViewRc>;
+  fn children(&self) -> LinkedList<ViewPtr>;
 }
 
-pub type LayoutRc = Rc<RefCell<dyn Layout>>;
+pub type LayoutPtr = Rc<RefCell<dyn Layout>>;
 
 pub struct HorizontalLayout {}
 

@@ -14,9 +14,9 @@ pub trait View {
 
   fn abs_offset(&self) -> AbsPos;
 
-  fn parent(&self) -> Option<ViewRc>;
+  fn parent(&self) -> Option<ViewPtr>;
 
   fn layout(&self) -> LayoutRc;
 }
 
-pub type ViewRc = Rc<RefCell<dyn View>>;
+pub type ViewPtr = Rc<RefCell<dyn View>>;
