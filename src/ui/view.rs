@@ -16,7 +16,7 @@ pub trait View {
 
   fn parent(&self) -> Option<ViewWk>;
 
-  fn layout(&self) -> LayoutRc;
+  fn layout(&self) -> Option<LayoutRc>;
 }
 
 pub type ViewRc = Rc<RefCell<dyn View>>;
