@@ -1,5 +1,4 @@
 use std::cell::RefCell;
-use std::collections::LinkedList;
 use std::rc::Rc;
 
 use crate::ui::device::Device;
@@ -16,8 +15,6 @@ pub trait View {
   fn abs_offset(&self) -> AbsPos;
 
   fn parent(&self) -> Option<Rc<RefCell<dyn View>>>;
-
-  fn children(&self) -> LinkedList<Rc<RefCell<dyn View>>>;
 
   fn layout(&self) -> Rc<RefCell<dyn Layout>>;
 }
