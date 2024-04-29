@@ -1,8 +1,7 @@
-use std::cell::RefCell;
 use std::rc::Rc;
 
 use crate::ui::device::Device;
-use crate::ui::layout::LayoutPtr;
+use crate::ui::layout::LayoutRc;
 use crate::ui::rect::{AbsPos, RelPos, Size};
 
 pub trait View {
@@ -14,9 +13,9 @@ pub trait View {
 
   fn abs_offset(&self) -> AbsPos;
 
-  fn parent(&self) -> Option<ViewPtr>;
+  fn parent(&self) -> Option<ViewRc>;
 
-  fn layout(&self) -> LayoutPtr;
+  fn layout(&self) -> LayoutRc;
 }
 
-pub type ViewPtr = Rc<RefCell<dyn View>>;
+pub type ViewRc = Rc<dyn View>;

@@ -1,19 +1,18 @@
-use std::cell::RefCell;
 use std::collections::LinkedList;
 use std::rc::Rc;
 
-use crate::ui::view::{View, ViewPtr};
+use crate::ui::view::ViewRc;
 
 pub trait Layout {
-  fn children(&self) -> LinkedList<ViewPtr>;
+  fn children(&self) -> LinkedList<ViewRc>;
 }
 
-pub type LayoutPtr = Rc<RefCell<dyn Layout>>;
+pub type LayoutRc = Rc<dyn Layout>;
 
 pub struct HorizontalLayout {}
 
 impl Layout for HorizontalLayout {
-  fn children(&self) -> LinkedList<Rc<RefCell<dyn View>>> {
+  fn children(&self) -> LinkedList<ViewRc> {
     LinkedList::new()
   }
 }
@@ -21,7 +20,7 @@ impl Layout for HorizontalLayout {
 pub struct VerticalLayout {}
 
 impl Layout for VerticalLayout {
-  fn children(&self) -> LinkedList<Rc<RefCell<dyn View>>> {
+  fn children(&self) -> LinkedList<ViewRc> {
     LinkedList::new()
   }
 }
