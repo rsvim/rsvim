@@ -40,6 +40,7 @@ async fn main() -> std::io::Result<()> {
   debug!("cli: {:?}", cli);
 
   let dir = tempfile::tempdir().unwrap();
+  debug!("tempdir:{:?}", dir);
   let env = unsafe { EnvOpenOptions::new().open(dir.path()).unwrap() };
   let mut wtxn = env.write_txn().unwrap();
   let db: Database<heed_types::Str, heed_types::U32<byteorder::NativeEndian>> =
