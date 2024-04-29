@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::collections::LinkedList;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 use crate::ui::view::ViewRc;
 
@@ -9,6 +9,7 @@ pub trait Layout {
 }
 
 pub type LayoutRc = Rc<RefCell<dyn Layout>>;
+pub type LayoutWk = Weak<RefCell<dyn Layout>>;
 
 pub struct HorizontalLayout {}
 
