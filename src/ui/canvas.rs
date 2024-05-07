@@ -6,12 +6,12 @@ use crossterm::event::{
 use crossterm::{cursor, execute, terminal};
 use std::io::stdout;
 // use tracing::debug;
-use crate::ui::rect::{AbsPos, Size};
+use crate::ui::rect::{Pos, Size};
 
 pub async fn init() -> std::io::Result<Canvas> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
-  let cvs = Canvas::new(Size::new(rows as u32, cols as u32), AbsPos::new(0, 0));
+  let cvs = Canvas::new(Size::new(rows as u32, cols as u32), Pos::new(0, 0));
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
@@ -45,11 +45,11 @@ pub async fn shutdown() -> std::io::Result<()> {
 
 pub struct Canvas {
   size: Size,
-  pos: AbsPos,
+  pos: Pos,
 }
 
 impl Canvas {
-  fn new(size: Size, pos: AbsPos) -> Self {
+  fn new(size: Size, pos: Pos) -> Self {
     Canvas { size, pos }
   }
 
@@ -76,7 +76,7 @@ mod tests {
 
   #[test]
   fn should_equal_on_canvas_new() {
-    let c1 = Canvas::new(Size::new(1, 2), AbsPos::new(0, 0));
+    let c1 = Canvas::new(Size::new(1, 2), Pos::new(0, 0));
     assert_eq!(c1.height(), 1);
     assert_eq!(c1.width(), 2);
     assert_eq!(c1.x(), 0);
