@@ -51,6 +51,14 @@ impl Canvas {
   fn new(height: u32, width: u32) -> Self {
     Canvas { height, width }
   }
+
+  fn height(&self) -> u32 {
+    self.height
+  }
+
+  fn width(&self) -> u32 {
+    self.width
+  }
 }
 
 #[cfg(test)]
