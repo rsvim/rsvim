@@ -1,16 +1,16 @@
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Pos<T> {
+pub struct Position<T> {
   pub x: T, // row
   pub y: T, // column
 }
 
-impl<T> Pos<T> {
+impl<T> Position<T> {
   pub fn new(x: T, y: T) -> Self {
-    Pos { x, y }
+    Position { x, y }
   }
 
   pub fn swap(self) -> Self {
-    Pos::new(self.y, self.x)
+    Position::new(self.y, self.x)
   }
 
   // x-axis on the coordinate is row number on terminal
@@ -24,11 +24,11 @@ impl<T> Pos<T> {
   }
 }
 
-// Relative position.
-pub type RelPos = Pos<i32>;
+// relative position.
+pub type RelPos = Position<i32>;
 
-// Absolute position.
-pub type AbsPos = Pos<u32>;
+// absolute position.
+pub type Pos = Position<u32>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Size {
@@ -74,20 +74,20 @@ mod tests {
 
   #[test]
   fn should_all_zero_on_abspos_default() {
-    let p1: AbsPos = Default::default();
-    let p2 = AbsPos::new(0, 0);
+    let p1: Pos = Default::default();
+    let p2 = Pos::new(0, 0);
     assert_eq!(p1, p2);
   }
 
   #[test]
   fn should_reverse_after_abspos_swap() {
-    let p1 = AbsPos::new(1, 2);
-    assert_eq!(p1.swap(), AbsPos::new(2, 1));
+    let p1 = Pos::new(1, 2);
+    assert_eq!(p1.swap(), Pos::new(2, 1));
   }
 
   #[test]
   fn should_equal_row_column_on_abspos_x_y() {
-    let p1 = AbsPos::new(5, 10);
+    let p1 = Pos::new(5, 10);
     assert_eq!(p1.column(), 10);
     assert_eq!(p1.row(), 5);
   }
