@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
@@ -7,6 +5,8 @@ use crossterm::{cursor, execute, terminal};
 use std::io::stdout;
 // use tracing::debug;
 use crate::ui::rect::{AbsPos, Size};
+
+pub mod screen;
 
 pub async fn init() -> std::io::Result<Canvas> {
   terminal::enable_raw_mode()?;
@@ -46,6 +46,16 @@ pub async fn shutdown() -> std::io::Result<()> {
 pub struct Canvas {
   size: Size,
   pos: AbsPos,
+}
+
+pub trait Canvas {
+  fn height(&self) -> u32;
+
+  fn width(&self) -> u32;
+
+  fn x(&self) -> u32;
+
+  fn y(&self) -> u32;
 }
 
 impl Canvas {
