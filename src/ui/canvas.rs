@@ -11,13 +11,7 @@ use crate::ui::rect::{AbsPos, Size};
 pub async fn init() -> std::io::Result<Canvas> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
-  let cvs = Canvas::new(
-    Size {
-      height: rows as u32,
-      width: cols as u32,
-    },
-    AbsPos { x: 0, y: 0 },
-  );
+  let cvs = Canvas::new(Size::new(rows as u32, cols as u32), AbsPos::new(0, 0));
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
