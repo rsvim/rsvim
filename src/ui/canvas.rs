@@ -10,7 +10,7 @@ use std::io::stdout;
 pub async fn init() -> std::io::Result<Canvas> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
-  let cvs = Canvas::new(rows as u32, cols as u32);
+  let cvs = Canvas::new(rows, cols);
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
@@ -43,20 +43,20 @@ pub async fn shutdown() -> std::io::Result<()> {
 }
 
 pub struct Canvas {
-  height: u32,
-  width: u32,
+  height: u16,
+  width: u16,
 }
 
 impl Canvas {
-  fn new(height: u32, width: u32) -> Self {
+  fn new(height: u16, width: u16) -> Self {
     Canvas { height, width }
   }
 
-  fn height(&self) -> u32 {
+  fn height(&self) -> u16 {
     self.height
   }
 
-  fn width(&self) -> u32 {
+  fn width(&self) -> u16 {
     self.width
   }
 }
