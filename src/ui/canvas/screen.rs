@@ -3,8 +3,8 @@ use crate::ui::rect::{AbsPos, Size};
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
-use crossterm::{cursor, execute, queue, terminal};
-use std::io::{stdout, Result as IoResult};
+use crossterm::{cursor, queue, terminal};
+use std::io::Result as IoResult;
 
 struct Screen {
   size: Size,
