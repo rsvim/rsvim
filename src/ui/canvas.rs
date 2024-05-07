@@ -10,7 +10,7 @@ use std::io::stdout;
 pub async fn init() -> std::io::Result<Canvas> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
-  let device = Canvas::new(rows as u32, cols as u32);
+  let cvs = Canvas::new(rows as u32, cols as u32);
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
@@ -24,7 +24,7 @@ pub async fn init() -> std::io::Result<Canvas> {
     cursor::MoveTo(0, 0),
   )?;
 
-  Ok(device)
+  Ok(cvs)
 }
 
 pub async fn shutdown() -> std::io::Result<()> {
@@ -58,9 +58,9 @@ mod tests {
   use super::*;
 
   #[test]
-  fn should_equal_on_device_new() {
-    let d1 = Canvas::new(1, 2);
-    assert_eq!(d1.height, 1);
-    assert_eq!(d1.width, 2);
+  fn should_equal_on_canvas_new() {
+    let c1 = Canvas::new(1, 2);
+    assert_eq!(c1.height, 1);
+    assert_eq!(c1.width, 2);
   }
 }
