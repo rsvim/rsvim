@@ -22,7 +22,7 @@ pub trait View {
   fn layout(&self) -> Option<LayoutRc>;
 
   // actually draw the terminal screen
-  fn draw(&self, dvc: &Device);
+  fn draw(&self, canvas: &dyn Canvas);
 }
 
 pub type ViewRc = Rc<RefCell<dyn View>>;
