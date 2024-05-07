@@ -36,17 +36,15 @@ pub struct Size {
   pub height: u32,
   // width
   pub width: u32,
-  // absolute position of top-left corner
-  pub pos: AbsPos,
 }
 
 impl Size {
-  pub fn new(height: u32, width: u32, pos: AbsPos) -> Self {
-    Size { height, width, pos }
+  pub fn new(height: u32, width: u32) -> Self {
+    Size { height, width }
   }
 
   pub fn swap(self) -> Self {
-    Size::new(self.width, self.height, self.pos)
+    Size::new(self.width, self.height)
   }
 }
 

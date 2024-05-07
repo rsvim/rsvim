@@ -6,11 +6,18 @@ use crossterm::event::{
 use crossterm::{cursor, execute, terminal};
 use std::io::stdout;
 // use tracing::debug;
+use crate::ui::rect::{AbsPos, Size};
 
 pub async fn init() -> std::io::Result<Canvas> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
-  let cvs = Canvas::new(rows, cols);
+  let cvs = Canvas::new(
+    Size {
+      height: rows as u32,
+      width: cols as u32,
+    },
+    AbsPos { x: 0, y: 0 },
+  );
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
@@ -43,40 +50,29 @@ pub async fn shutdown() -> std::io::Result<()> {
 }
 
 pub struct Canvas {
-  // canvas height
-  height: u16,
-  // canvas width
-  width: u16,
-  // x coordinate of top-left corner
-  x: u16,
-  // y coordinate of top-left corner
-  y: u16,
+  size: Size,
+  pos: AbsPos,
 }
 
 impl Canvas {
-  fn new(height: u16, width: u16, x: u16, y: u16) -> Self {
-    Canvas {
-      height,
-      width,
-      x,
-      y,
-    }
+  fn new(size: Size, pos: AbsPos) -> Self {
+    Canvas { size, pos }
   }
 
-  fn height(&self) -> u16 {
-    self.height
+  fn height(&self) -> u32 {
+    self.size.height
   }
 
-  fn width(&self) -> u16 {
-    self.width
+  fn width(&self) -> u32 {
+    self.size.width
   }
 
-  fn x(&self) -> u16 {
-    self.x
+  fn x(&self) -> u32 {
+    self.pos.x
   }
 
-  fn y(&self) -> u16 {
-    self.y
+  fn y(&self) -> u32 {
+    self.pos.y
   }
 }
 
@@ -86,10 +82,10 @@ mod tests {
 
   #[test]
   fn should_equal_on_canvas_new() {
-    let c1 = Canvas::new(1, 2);
-    assert_eq!(c1.height, 1);
-    assert_eq!(c1.width, 2);
+    let c1 = Canvas::new(Size::new(1, 2), AbsPos::new(0, 0));
     assert_eq!(c1.height(), 1);
     assert_eq!(c1.width(), 2);
+    assert_eq!(c1.x(), 0);
+    assert_eq!(c1.y(), 0);
   }
 }
