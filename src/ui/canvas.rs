@@ -6,60 +6,60 @@ use std::io::{Result as IoResult, Write};
 // use tracing::debug;
 use crate::ui::rect::Size;
 
+pub async fn init() -> std::io::Result<Canvas> {
+  terminal::enable_raw_mode()?;
+  let (cols, rows) = terminal::size()?;
+  let cvs = Canvas {
+    size: Size::new(rows as usize, cols as usize),
+  };
+
+  let mut out = std::io::stdout();
+
+  queue!(out, EnableMouseCapture)?;
+  queue!(out, EnableFocusChange)?;
+
+  queue!(
+    out,
+    terminal::EnterAlternateScreen,
+    terminal::Clear(terminal::ClearType::All),
+    cursor::SetCursorStyle::BlinkingBlock,
+    cursor::Show,
+    cursor::MoveTo(0, 0),
+  )?;
+
+  out.flush()?;
+
+  Ok(cvs)
+}
+
+pub async fn shutdown() -> IoResult<()> {
+  let mut out = std::io::stdout();
+  queue!(
+    out,
+    DisableMouseCapture,
+    DisableFocusChange,
+    terminal::LeaveAlternateScreen,
+  )?;
+
+  out.flush()?;
+
+  if terminal::is_raw_mode_enabled()? {
+    terminal::disable_raw_mode()?;
+  }
+
+  Ok(())
+}
+
 pub struct Canvas {
   size: Size,
 }
 
 impl Canvas {
-  async fn new() -> std::io::Result<Canvas> {
-    terminal::enable_raw_mode()?;
-    let (cols, rows) = terminal::size()?;
-    let cvs = Canvas {
-      size: Size::new(rows as usize, cols as usize),
-    };
-
-    let mut out = std::io::stdout();
-
-    queue!(out, EnableMouseCapture)?;
-    queue!(out, EnableFocusChange)?;
-
-    queue!(
-      out,
-      terminal::EnterAlternateScreen,
-      terminal::Clear(terminal::ClearType::All),
-      cursor::SetCursorStyle::BlinkingBlock,
-      cursor::Show,
-      cursor::MoveTo(0, 0),
-    )?;
-
-    out.flush()?;
-
-    Ok(cvs)
-  }
-
-  async fn shutdown(&mut self) -> IoResult<()> {
-    let mut out = std::io::stdout();
-    queue!(
-      out,
-      DisableMouseCapture,
-      DisableFocusChange,
-      terminal::LeaveAlternateScreen,
-    )?;
-
-    out.flush()?;
-
-    if terminal::is_raw_mode_enabled()? {
-      terminal::disable_raw_mode()?;
-    }
-
-    Ok(())
-  }
-
-  fn height(&self) -> usize {
+  pub fn height(&self) -> usize {
     self.size.height
   }
 
-  fn width(&self) -> usize {
+  pub fn width(&self) -> usize {
     self.size.width
   }
 }
