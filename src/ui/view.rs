@@ -1,7 +1,7 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-use crate::ui::device::Device;
+use crate::ui::canvas::Canvas;
 use crate::ui::layout::LayoutRc;
 use crate::ui::rect::{AbsPos, RelPos, Size};
 
