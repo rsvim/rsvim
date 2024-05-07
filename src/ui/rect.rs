@@ -25,21 +25,21 @@ impl<T> Position<T> {
 }
 
 // relative position.
-pub type Pos = Position<i32>;
+pub type Pos = Position<isize>;
 
 // absolute position.
-pub type AbsPos = Position<u32>;
+pub type AbsPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Size {
   // height
-  pub height: u32,
+  pub height: usize,
   // width
-  pub width: u32,
+  pub width: usize,
 }
 
 impl Size {
-  pub fn new(height: u32, width: u32) -> Self {
+  pub fn new(height: usize, width: usize) -> Self {
     Size { height, width }
   }
 

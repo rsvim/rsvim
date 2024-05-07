@@ -1,82 +1,66 @@
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
-use crossterm::{cursor, execute, terminal};
-use std::io::stdout;
+use crossterm::{cursor, queue, terminal};
+use std::io::{Result as IoResult, Write};
 // use tracing::debug;
-use crate::ui::rect::{AbsPos, Size};
-
-pub mod screen;
-
-pub async fn init() -> std::io::Result<Canvas> {
-  terminal::enable_raw_mode()?;
-  let (cols, rows) = terminal::size()?;
-  let cvs = Canvas::new(Size::new(rows as u32, cols as u32), AbsPos::new(0, 0));
-
-  execute!(std::io::stdout(), EnableMouseCapture)?;
-  execute!(std::io::stdout(), EnableFocusChange)?;
-
-  execute!(
-    stdout(),
-    terminal::EnterAlternateScreen,
-    terminal::Clear(terminal::ClearType::All),
-    cursor::SetCursorStyle::BlinkingBlock,
-    cursor::Show,
-    cursor::MoveTo(0, 0),
-  )?;
-
-  Ok(cvs)
-}
-
-pub async fn shutdown() -> std::io::Result<()> {
-  execute!(
-    stdout(),
-    DisableMouseCapture,
-    DisableFocusChange,
-    terminal::LeaveAlternateScreen,
-  )?;
-
-  if terminal::is_raw_mode_enabled()? {
-    terminal::disable_raw_mode()?;
-  }
-
-  Ok(())
-}
+use crate::ui::rect::Size;
 
 pub struct Canvas {
   size: Size,
-  pos: AbsPos,
-}
-
-pub trait Canvas {
-  fn height(&self) -> u32;
-
-  fn width(&self) -> u32;
-
-  fn x(&self) -> u32;
-
-  fn y(&self) -> u32;
 }
 
 impl Canvas {
-  fn new(size: Size, pos: AbsPos) -> Self {
-    Canvas { size, pos }
+  async fn new() -> std::io::Result<Canvas> {
+    terminal::enable_raw_mode()?;
+    let (cols, rows) = terminal::size()?;
+    let cvs = Canvas {
+      size: Size::new(rows as usize, cols as usize),
+    };
+
+    let mut out = std::io::stdout();
+
+    queue!(out, EnableMouseCapture)?;
+    queue!(out, EnableFocusChange)?;
+
+    queue!(
+      out,
+      terminal::EnterAlternateScreen,
+      terminal::Clear(terminal::ClearType::All),
+      cursor::SetCursorStyle::BlinkingBlock,
+      cursor::Show,
+      cursor::MoveTo(0, 0),
+    )?;
+
+    out.flush()?;
+
+    Ok(cvs)
   }
 
-  fn height(&self) -> u32 {
+  async fn shutdown(&mut self) -> IoResult<()> {
+    let mut out = std::io::stdout();
+    queue!(
+      out,
+      DisableMouseCapture,
+      DisableFocusChange,
+      terminal::LeaveAlternateScreen,
+    )?;
+
+    out.flush()?;
+
+    if terminal::is_raw_mode_enabled()? {
+      terminal::disable_raw_mode()?;
+    }
+
+    Ok(())
+  }
+
+  fn height(&self) -> usize {
     self.size.height
   }
 
-  fn width(&self) -> u32 {
+  fn width(&self) -> usize {
     self.size.width
-  }
-
-  fn x(&self) -> u32 {
-    self.pos.x
-  }
-
-  fn y(&self) -> u32 {
-    self.pos.y
   }
 }
 
@@ -86,10 +70,10 @@ mod tests {
 
   #[test]
   fn should_equal_on_canvas_new() {
-    let c1 = Canvas::new(Size::new(1, 2), AbsPos::new(0, 0));
+    let c1 = Canvas {
+      size: Size::new(1, 2),
+    };
     assert_eq!(c1.height(), 1);
     assert_eq!(c1.width(), 2);
-    assert_eq!(c1.x(), 0);
-    assert_eq!(c1.y(), 0);
   }
 }
