@@ -70,5 +70,7 @@ mod tests {
     let c1 = Canvas::new(1, 2);
     assert_eq!(c1.height, 1);
     assert_eq!(c1.width, 2);
+    assert_eq!(c1.height(), 1);
+    assert_eq!(c1.width(), 2);
   }
 }
