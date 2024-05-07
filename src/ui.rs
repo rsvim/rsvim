@@ -1,5 +1,4 @@
-#[cfg(test)]
-mod tests {
-  #[test]
-  fn test_ui() {}
-}
+pub mod canvas;
+pub mod layout;
+pub mod rect;
+pub mod view;

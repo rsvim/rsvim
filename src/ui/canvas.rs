@@ -1,18 +1,16 @@
-pub mod state;
+#![allow(dead_code)]
 
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{cursor, execute, terminal};
-use state::State;
 use std::io::stdout;
-use tracing::debug;
+// use tracing::debug;
 
-pub async fn init() -> std::io::Result<State> {
+pub async fn init() -> std::io::Result<Canvas> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
-  let stat = State::new(cols, rows);
-  debug!("dvc stat: {:?}", stat);
+  let cvs = Canvas::new(rows as u32, cols as u32);
 
   execute!(std::io::stdout(), EnableMouseCapture)?;
   execute!(std::io::stdout(), EnableFocusChange)?;
@@ -26,7 +24,7 @@ pub async fn init() -> std::io::Result<State> {
     cursor::MoveTo(0, 0),
   )?;
 
-  Ok(stat)
+  Ok(cvs)
 }
 
 pub async fn shutdown() -> std::io::Result<()> {
@@ -42,4 +40,37 @@ pub async fn shutdown() -> std::io::Result<()> {
   }
 
   Ok(())
+}
+
+pub struct Canvas {
+  height: u32,
+  width: u32,
+}
+
+impl Canvas {
+  fn new(height: u32, width: u32) -> Self {
+    Canvas { height, width }
+  }
+
+  fn height(&self) -> u32 {
+    self.height
+  }
+
+  fn width(&self) -> u32 {
+    self.width
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn should_equal_on_canvas_new() {
+    let c1 = Canvas::new(1, 2);
+    assert_eq!(c1.height, 1);
+    assert_eq!(c1.width, 2);
+    assert_eq!(c1.height(), 1);
+    assert_eq!(c1.width(), 2);
+  }
 }

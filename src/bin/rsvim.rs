@@ -2,7 +2,9 @@ use clap::Parser;
 use crossterm::cursor;
 use crossterm::event::{Event, EventStream, KeyCode};
 use futures::StreamExt;
-use rsvim::{cli, dvc, log};
+use heed::types as heed_types;
+use heed::{byteorder, Database, EnvOpenOptions};
+use rsvim::{cli, log, ui};
 use tracing::debug;
 
 async fn input_loop() -> std::io::Result<()> {
@@ -37,7 +39,16 @@ async fn main() -> std::io::Result<()> {
   log::init(&cli);
   debug!("cli: {:?}", cli);
 
-  dvc::init().await?;
+  let dir = tempfile::tempdir().unwrap();
+  debug!("tempdir:{:?}", dir);
+  let env = unsafe { EnvOpenOptions::new().open(dir.path()).unwrap() };
+  let mut wtxn = env.write_txn().unwrap();
+  let db: Database<heed_types::Str, heed_types::U32<byteorder::NativeEndian>> =
+    env.create_database(&mut wtxn, None).unwrap();
+  db.put(&mut wtxn, "seven", &7).unwrap();
+  wtxn.commit().unwrap();
+
+  ui::canvas::init().await?;
   input_loop().await?;
-  dvc::shutdown().await
+  ui::canvas::shutdown().await
 }
