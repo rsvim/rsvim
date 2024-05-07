@@ -32,17 +32,28 @@ pub type AbsPos = Pos<u32>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Size {
+  // height
   pub height: u32,
+  // width
   pub width: u32,
+  // x coordinate of top-left corner
+  pub x: u32,
+  // y coordinate of top-left corner
+  pub y: u32,
 }
 
 impl Size {
-  pub fn new(height: u32, width: u32) -> Self {
-    Size { height, width }
+  pub fn new(height: u32, width: u32, x: u32, y: u32) -> Self {
+    Size {
+      height,
+      width,
+      x,
+      y,
+    }
   }
 
   pub fn swap(self) -> Self {
-    Size::new(self.width, self.height)
+    Size::new(self.width, self.height, self.x, self.y)
   }
 }
 

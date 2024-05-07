@@ -70,6 +70,14 @@ impl Canvas {
   fn width(&self) -> u16 {
     self.width
   }
+
+  fn x(&self) -> u16 {
+    self.x
+  }
+
+  fn y(&self) -> u16 {
+    self.y
+  }
 }
 
 #[cfg(test)]
