@@ -43,13 +43,24 @@ pub async fn shutdown() -> std::io::Result<()> {
 }
 
 pub struct Canvas {
+  // canvas height
   height: u16,
+  // canvas width
   width: u16,
+  // x coordinate of top-left corner
+  x: u16,
+  // y coordinate of top-left corner
+  y: u16,
 }
 
 impl Canvas {
-  fn new(height: u16, width: u16) -> Self {
-    Canvas { height, width }
+  fn new(height: u16, width: u16, x: u16, y: u16) -> Self {
+    Canvas {
+      height,
+      width,
+      x,
+      y,
+    }
   }
 
   fn height(&self) -> u16 {
