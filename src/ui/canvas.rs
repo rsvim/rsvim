@@ -6,6 +6,7 @@ use std::io::{Result as IoResult, Write};
 // use tracing::debug;
 use crate::ui::rect::Size;
 
+pub mod buffer;
 pub mod cell;
 
 pub async fn init() -> std::io::Result<Canvas> {
