@@ -13,8 +13,11 @@ pub mod cell;
 pub async fn init() -> std::io::Result<Canvas> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
+  let size = Size::new(rows as usize, cols as usize);
   let cvs = Canvas {
-    size: Size::new(rows as usize, cols as usize),
+    size,
+    prev_buf: Buffer::new(size),
+    buf: Buffer::new(size),
   };
 
   let mut out = std::io::stdout();
@@ -76,8 +79,11 @@ mod tests {
 
   #[test]
   fn should_equal_on_canvas_new() {
+    let sz = Size::new(1, 2);
     let c1 = Canvas {
-      size: Size::new(1, 2),
+      size: sz,
+      prev_buf: Buffer::new(sz),
+      buf: Buffer::new(sz),
     };
     assert_eq!(c1.height(), 1);
     assert_eq!(c1.width(), 2);

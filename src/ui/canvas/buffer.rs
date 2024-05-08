@@ -6,4 +6,11 @@ pub struct Buffer {
   cells: Vec<Cell>,
 }
 
-impl Buffer {}
+impl Buffer {
+  pub fn new(size: Size) -> Self {
+    Buffer {
+      size,
+      cells: vec![],
+    }
+  }
+}
