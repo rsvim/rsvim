@@ -4,6 +4,7 @@ use crossterm::event::{
 use crossterm::{cursor, queue, terminal};
 use std::io::{Result as IoResult, Write};
 // use tracing::debug;
+use crate::ui::canvas::buffer::Buffer;
 use crate::ui::rect::Size;
 
 pub mod buffer;
@@ -55,6 +56,8 @@ pub async fn shutdown() -> IoResult<()> {
 
 pub struct Canvas {
   size: Size,
+  prev_buf: Buffer,
+  buf: Buffer,
 }
 
 impl Canvas {
