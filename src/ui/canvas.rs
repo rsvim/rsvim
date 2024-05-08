@@ -6,6 +6,8 @@ use std::io::{Result as IoResult, Write};
 // use tracing::debug;
 use crate::ui::rect::Size;
 
+pub mod cell;
+
 pub async fn init() -> std::io::Result<Canvas> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
