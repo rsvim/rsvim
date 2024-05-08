@@ -1,11 +1,11 @@
+use crate::ui::canvas::buffer::Buffer;
+use crate::ui::rect::Size;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{cursor, queue, terminal};
 use std::io::{Result as IoResult, Write};
 // use tracing::debug;
-use crate::ui::canvas::buffer::Buffer;
-use crate::ui::rect::Size;
 
 pub mod buffer;
 pub mod cell;
