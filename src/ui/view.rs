@@ -3,14 +3,14 @@ use std::rc::{Rc, Weak};
 
 use crate::ui::canvas::Canvas;
 use crate::ui::layout::LayoutRc;
-use crate::ui::rect::{AbsPos, Pos, Size};
+use crate::ui::rect::{IPos, Size, UPos};
 
 pub trait View {
   // (relative) offset based on parent view
-  fn offset(&self) -> Pos;
+  fn offset(&self) -> IPos;
 
   // absolute offset based on terminal screen
-  fn abs_offset(&self) -> AbsPos;
+  fn abs_offset(&self) -> UPos;
 
   // height/width
   fn size(&self) -> Size;
