@@ -2,11 +2,20 @@ use compact_str::CompactString;
 use crossterm::style::{Attributes, Color};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
+/// Single character/grapheme rendering unit, it accepts ansi/unicode/emoji/nerd font symbol.
+///
+/// * `symbol`: The character/grapheme.
+/// * `fg`: Foreground color.
+/// * `bg`: Background color.
+/// * `attrs`: Attributes: underline, bold, italic, etc.
+/// * `dirty`: Whether it's been modified, other UI components will modify a cell and make it
+/// dirty, and it revert to clean after been flushed to terminal screen.
 pub struct Cell {
-  symbol: CompactString,
-  fg: Color,
-  bg: Color,
-  attrs: Attributes,
+  pub symbol: CompactString,
+  pub fg: Color,
+  pub bg: Color,
+  pub attrs: Attributes,
+  pub dirty: bool,
 }
 
 impl Cell {
