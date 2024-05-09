@@ -1,5 +1,5 @@
 use compact_str::CompactString;
-use crossterm::style::{Attribute, Attributes, Color};
+use crossterm::style::{Attributes, Color};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cell {
@@ -25,9 +25,17 @@ impl Cell {
     self
   }
 
+  pub fn fg(&self) -> Color {
+    self.fg
+  }
+
   pub fn set_fg(&mut self, color: Color) -> &mut Self {
     self.fg = color;
     self
+  }
+
+  pub fn bg(&self) -> Color {
+    self.bg
   }
 
   pub fn set_bg(&mut self, color: Color) -> &mut Self {
@@ -35,14 +43,8 @@ impl Cell {
     self
   }
 
-  pub fn set_attr(&mut self, attr: Attribute) -> &mut Self {
-    self.attrs.set(attr);
-    self
-  }
-
-  pub fn unset_attr(&mut self, attr: Attribute) -> &mut Self {
-    self.attrs.unset(attr);
-    self
+  pub fn attrs(&self) -> Attributes {
+    self.attrs
   }
 
   pub fn set_attrs(&mut self, attrs: Attributes) -> &mut Self {
