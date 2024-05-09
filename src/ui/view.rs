@@ -5,23 +5,30 @@ use crate::ui::canvas::Canvas;
 use crate::ui::layout::LayoutRc;
 use crate::ui::rect::{IPos, Size, UPos};
 
+/// View
 pub trait View {
-  // (relative) offset based on parent view
+  /// (Relative) x-y offset vased on parent view
   fn offset(&self) -> IPos;
 
-  // absolute offset based on terminal screen
+  /// Absoluate x/y offset based on terminal screen
   fn abs_offset(&self) -> UPos;
 
-  // height/width
+  /// Rectangle height/width
   fn size(&self) -> Size;
 
-  // parent view, root view doesn't have parent
+  /// Control arrange content layout when multiple views conflict on each other.
+  fn zindex(&self) -> usize;
+
+  /// Parent view of this view.
+  /// Note: Root view doesn't have a parent view.
   fn parent(&self) -> Option<ViewWk>;
 
-  // if contains more children views, all these views are managed by layout
+  /// Manage children views layout inside this view when there exists.
   fn layout(&self) -> Option<LayoutRc>;
 
-  // actually draw the terminal screen
+  /// Draw the view to canvas buffer.
+  ///
+  /// * `canvas`: Canvas buffer
   fn draw(&self, canvas: &Canvas);
 }
 
