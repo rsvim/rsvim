@@ -36,6 +36,10 @@ impl Size {
   pub fn new(height: usize, width: usize) -> Self {
     Size { height, width }
   }
+
+  pub fn area(&self) -> usize {
+    self.height * self.width
+  }
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
