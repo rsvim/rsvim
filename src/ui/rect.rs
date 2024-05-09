@@ -95,4 +95,14 @@ mod tests {
     assert_eq!(sz.width, 10);
     assert_eq!(sz.area(), 5 * 10);
   }
+
+  #[test]
+  fn should_equal_on_rect_area() {
+    let r = Rect::new(UPos::new(1, 2), Size::new(3, 4));
+    assert_eq!(r.x(), 1);
+    assert_eq!(r.y(), 2);
+    assert_eq!(r.height(), 3);
+    assert_eq!(r.width(), 4);
+    assert_eq!(r.area(), 3 * 4);
+  }
 }
