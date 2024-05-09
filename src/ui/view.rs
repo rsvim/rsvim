@@ -1,9 +1,9 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-use crate::ui::canvas::Canvas;
 use crate::ui::layout::LayoutRc;
 use crate::ui::rect::{IPos, Size, UPos};
+use crate::ui::screen::Screen;
 
 /// View
 pub trait View {
@@ -28,8 +28,8 @@ pub trait View {
 
   /// Draw the view to canvas buffer.
   ///
-  /// * `canvas`: Canvas buffer
-  fn draw(&self, canvas: &Canvas);
+  /// * `screen`: crate::ui::screen::Screen
+  fn draw(&self, screen: &Screen);
 }
 
 pub type ViewRc = Rc<RefCell<dyn View>>;
