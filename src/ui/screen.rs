@@ -73,6 +73,18 @@ impl Screen {
   pub fn size(&self) -> Size {
     self.buf.size()
   }
+
+  pub fn prev_height(&self) -> usize {
+    self.prev_buf.height()
+  }
+
+  pub fn prev_width(&self) -> usize {
+    self.prev_buf.width()
+  }
+
+  pub fn prev_size(&self) -> Size {
+    self.prev_buf.size()
+  }
 }
 
 #[cfg(test)]
@@ -88,5 +100,7 @@ mod tests {
     };
     assert_eq!(c1.height(), 1);
     assert_eq!(c1.width(), 2);
+    assert_eq!(c1.prev_height(), 1);
+    assert_eq!(c1.prev_width(), 2);
   }
 }
