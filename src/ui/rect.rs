@@ -79,37 +79,20 @@ mod tests {
   use super::*;
 
   #[test]
-  fn should_all_zero_on_relpos_default() {
-    let p1: IPos = Default::default();
-    let p2 = IPos::new(0, 0);
-    assert_eq!(p1, p2);
+  fn should_all_zero_on_pos_default() {
+    let p1: IPos = IPos::default();
+    assert_eq!(p1.x, 0);
+    assert_eq!(p1.y, 0);
+    let p2: UPos = UPos::default();
+    assert_eq!(p2.x, 0);
+    assert_eq!(p2.y, 0);
   }
 
   #[test]
-  fn should_equal_row_column_on_relpos_x_y() {
-    let p1 = IPos::new(5, 10);
-    assert_eq!(p1.x, 5);
-    assert_eq!(p1.y, 10);
-  }
-
-  #[test]
-  fn should_all_zero_on_abspos_default() {
-    let p1: UPos = Default::default();
-    let p2 = UPos::new(0, 0);
-    assert_eq!(p1, p2);
-  }
-
-  #[test]
-  fn should_equal_row_column_on_abspos_x_y() {
-    let p1 = UPos::new(5, 10);
-    assert_eq!(p1.x, 5);
-    assert_eq!(p1.y, 10);
-  }
-
-  #[test]
-  fn should_all_zero_on_size_default() {
-    let p1: Size = Default::default();
-    let p2 = Size::new(0, 0);
-    assert_eq!(p1, p2);
+  fn should_equal_on_size_area() {
+    let sz = Size::new(5, 10);
+    assert_eq!(sz.height, 5);
+    assert_eq!(sz.width, 10);
+    assert_eq!(sz.area(), 5 * 10);
   }
 }
