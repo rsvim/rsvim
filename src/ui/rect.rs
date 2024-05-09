@@ -68,6 +68,10 @@ impl Rect {
   pub fn width(&self) -> usize {
     self.size.width
   }
+
+  pub fn area(&self) -> usize {
+    self.size.area()
+  }
 }
 
 #[cfg(test)]
