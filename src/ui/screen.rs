@@ -83,7 +83,6 @@ mod tests {
   fn should_equal_on_canvas_new() {
     let sz = Size::new(1, 2);
     let c1 = Screen {
-      size: sz,
       prev_buf: Buffer::new(sz),
       buf: Buffer::new(sz),
     };
