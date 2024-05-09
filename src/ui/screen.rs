@@ -92,7 +92,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn should_equal_on_canvas_new() {
+  fn should_equal_on_screen_new() {
     let sz = Size::new(1, 2);
     let c1 = Screen {
       prev_buf: Buffer::new(sz),

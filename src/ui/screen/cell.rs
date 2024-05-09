@@ -1,12 +1,12 @@
 use compact_str::CompactString;
-use crossterm::style::{Attribute, Color};
+use crossterm::style::{Attribute, Attributes, Color};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct Cell {
   symbol: CompactString,
   fg: Color,
   bg: Color,
-  attr: Attribute,
+  attrs: Attributes,
 }
 
 impl Cell {
@@ -19,7 +19,7 @@ impl Cell {
     self
   }
 
-  pub fn set_char(&mut self, ch: char) -> &mut Self {
+  pub fn set_char_symbol(&mut self, ch: char) -> &mut Self {
     let mut buf = [0; 4];
     self.symbol = CompactString::new(ch.encode_utf8(&mut buf));
     self
@@ -32,6 +32,21 @@ impl Cell {
 
   pub fn set_bg(&mut self, color: Color) -> &mut Self {
     self.bg = color;
+    self
+  }
+
+  pub fn set_attr(&mut self, attr: Attribute) -> &mut Self {
+    self.attrs.set(attr);
+    self
+  }
+
+  pub fn unset_attr(&mut self, attr: Attribute) -> &mut Self {
+    self.attrs.unset(attr);
+    self
+  }
+
+  pub fn set_attrs(&mut self, attrs: Attributes) -> &mut Self {
+    self.attrs = attrs;
     self
   }
 }
