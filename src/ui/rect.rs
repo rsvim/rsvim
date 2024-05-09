@@ -17,6 +17,10 @@ pub type IPos = Position<isize>;
 pub type UPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+/// Rectangle size: height/width.
+///
+/// * `height`: Rows number.
+/// * `width`: Columns number.
 pub struct Size {
   // height
   pub height: usize,
