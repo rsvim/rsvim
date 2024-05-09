@@ -69,6 +69,7 @@ impl Default for Cell {
       fg: Color::Reset,
       bg: Color::Reset,
       attrs: Attributes::default(),
+      dirty: true,
     }
   }
 }
