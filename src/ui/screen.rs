@@ -1,5 +1,5 @@
-use crate::ui::canvas::buffer::Buffer;
 use crate::ui::rect::Size;
+use crate::ui::screen::buffer::Buffer;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
@@ -10,11 +10,11 @@ use std::io::{Result as IoResult, Write};
 pub mod buffer;
 pub mod cell;
 
-pub async fn init() -> std::io::Result<Canvas> {
+pub async fn init() -> std::io::Result<Screen> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
   let size = Size::new(rows as usize, cols as usize);
-  let cvs = Canvas {
+  let cvs = Screen {
     size,
     prev_buf: Buffer::new(size),
     buf: Buffer::new(size),
@@ -57,13 +57,13 @@ pub async fn shutdown() -> IoResult<()> {
   Ok(())
 }
 
-pub struct Canvas {
+pub struct Screen {
   size: Size,
   prev_buf: Buffer,
   buf: Buffer,
 }
 
-impl Canvas {
+impl Screen {
   pub fn height(&self) -> usize {
     self.size.height
   }
@@ -80,7 +80,7 @@ mod tests {
   #[test]
   fn should_equal_on_canvas_new() {
     let sz = Size::new(1, 2);
-    let c1 = Canvas {
+    let c1 = Screen {
       size: sz,
       prev_buf: Buffer::new(sz),
       buf: Buffer::new(sz),

@@ -1,5 +1,5 @@
-use crate::ui::canvas::cell::Cell;
 use crate::ui::rect::Size;
+use crate::ui::screen::cell::Cell;
 
 pub struct Buffer {
   size: Size,
