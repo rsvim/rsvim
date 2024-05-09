@@ -48,7 +48,7 @@ async fn main() -> std::io::Result<()> {
   db.put(&mut wtxn, "seven", &7).unwrap();
   wtxn.commit().unwrap();
 
-  ui::canvas::init().await?;
+  ui::screen::init().await?;
   input_loop().await?;
-  ui::canvas::shutdown().await
+  ui::screen::shutdown().await
 }
