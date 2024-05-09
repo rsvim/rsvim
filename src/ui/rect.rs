@@ -1,4 +1,8 @@
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+/// Axis system on terminal screen: x/y.
+///
+/// * `x`: Column number.
+/// * `y`: Row number.
 pub struct Position<T> {
   pub x: T, // row
   pub y: T, // column
@@ -16,11 +20,11 @@ pub type IPos = Position<isize>;
 // absolute position.
 pub type UPos = Position<usize>;
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Rectangle size: height/width.
 ///
-/// * `height`: Rows number.
-/// * `width`: Columns number.
+/// * `height`: Rows count.
+/// * `width`: Columns count.
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Size {
   // height
   pub height: usize,
