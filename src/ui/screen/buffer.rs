@@ -34,13 +34,8 @@ mod tests {
   #[test]
   fn should_equal_on_buffer_new() {
     let sz = Size::new(1, 2);
-    let c1 = Screen {
-      prev_buf: Buffer::new(sz),
-      buf: Buffer::new(sz),
-    };
-    assert_eq!(c1.height(), 1);
-    assert_eq!(c1.width(), 2);
-    assert_eq!(c1.prev_height(), 1);
-    assert_eq!(c1.prev_width(), 2);
+    let b = Buffer::new(sz);
+    assert_eq!(b.height(), 1);
+    assert_eq!(b.width(), 2);
   }
 }

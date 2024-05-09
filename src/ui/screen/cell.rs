@@ -52,3 +52,28 @@ impl Cell {
     self
   }
 }
+
+impl Default for Cell {
+  fn default() -> Self {
+    Cell {
+      symbol: CompactString::new_inline(" "),
+      fg: Color::Reset,
+      bg: Color::Reset,
+      attrs: Attributes::default(),
+    }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn should_equal_on_cell_default() {
+    let c = Cell::default();
+    assert_eq!(c.symbol(), " ");
+    assert_eq!(c.fg(), Color::Reset);
+    assert_eq!(c.bg(), Color::Reset);
+    assert_eq!(c.attrs(), Attributes::default());
+  }
+}
