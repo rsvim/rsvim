@@ -15,7 +15,6 @@ pub async fn init() -> std::io::Result<Screen> {
   let (cols, rows) = terminal::size()?;
   let size = Size::new(rows as usize, cols as usize);
   let cvs = Screen {
-    size,
     prev_buf: Buffer::new(size),
     buf: Buffer::new(size),
   };
@@ -58,18 +57,21 @@ pub async fn shutdown() -> IoResult<()> {
 }
 
 pub struct Screen {
-  size: Size,
   prev_buf: Buffer,
   buf: Buffer,
 }
 
 impl Screen {
   pub fn height(&self) -> usize {
-    self.size.height
+    self.buf.height()
   }
 
   pub fn width(&self) -> usize {
-    self.size.width
+    self.buf.width()
+  }
+
+  pub fn size(&self) -> Size {
+    self.buf.size()
   }
 }
 

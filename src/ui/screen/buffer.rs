@@ -13,4 +13,16 @@ impl Buffer {
       cells: vec![],
     }
   }
+
+  pub fn size(&self) -> Size {
+    self.size
+  }
+
+  pub fn height(&self) -> usize {
+    self.size.height
+  }
+
+  pub fn width(&self) -> usize {
+    self.size.width
+  }
 }
