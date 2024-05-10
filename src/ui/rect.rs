@@ -20,11 +20,11 @@ pub type IPos = Position<isize>;
 // absolute position.
 pub type UPos = Position<usize>;
 
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Rectangle size: height/width.
 ///
 /// * `height`: Rows count.
 /// * `width`: Columns count.
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Size {
   // height
   pub height: usize,
