@@ -1,6 +1,10 @@
 use crate::ui::rect::Size;
 use crate::ui::screen::cell::Cell;
 
+/// Screen buffer.
+///
+/// * `size`: Buffer size.
+/// * `cells`: Buffer cells.
 pub struct Buffer {
   size: Size,
   cells: Vec<Cell>,

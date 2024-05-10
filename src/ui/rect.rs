@@ -1,5 +1,8 @@
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Axis system on terminal screen: x/y.
+///
+/// * `x`: Also known as column number.
+/// * `y`: Also known as row number.
 pub struct Position<T> {
   /// Column number.
   pub x: T,
@@ -20,11 +23,12 @@ pub type IPos = Position<isize>;
 pub type UPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-/// Rectangle size: height/width.
+/// Rectangle size.
+///
+/// * `height`: Also known as rows count.
+/// * `width`: Also known as columns count.
 pub struct Size {
-  /// Rows count.
   pub height: usize,
-  /// Columns count.
   pub width: usize,
 }
 
@@ -39,7 +43,10 @@ impl Size {
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-/// Rectangle, include position and size.
+/// Rectangle.
+///
+/// * `pos`: Rectangle position.
+/// * `size`: Rectangle size.
 pub struct Rect {
   pub pos: UPos,
   pub size: Size,
