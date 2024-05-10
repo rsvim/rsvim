@@ -1,11 +1,10 @@
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Axis system on terminal screen: x/y.
-///
-/// * `x`: Column number.
-/// * `y`: Row number.
 pub struct Position<T> {
-  pub x: T, // row
-  pub y: T, // column
+  /// Column number.
+  pub x: T,
+  /// Row number.
+  pub y: T,
 }
 
 impl<T> Position<T> {
@@ -14,21 +13,18 @@ impl<T> Position<T> {
   }
 }
 
-// relative position.
+// Relative position.
 pub type IPos = Position<isize>;
 
-// absolute position.
+// Absolute position.
 pub type UPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Rectangle size: height/width.
-///
-/// * `height`: Rows count.
-/// * `width`: Columns count.
 pub struct Size {
-  // height
+  /// Rows count.
   pub height: usize,
-  // width
+  /// Columns count.
   pub width: usize,
 }
 
@@ -43,6 +39,7 @@ impl Size {
 }
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+/// Rectangle, include position and size.
 pub struct Rect {
   pub pos: UPos,
   pub size: Size,
