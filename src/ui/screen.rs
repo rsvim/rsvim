@@ -65,10 +65,6 @@ impl Screen {
   pub fn size(&self) -> Size {
     self.buf.size
   }
-
-  pub fn prev_size(&self) -> Size {
-    self.prev_buf.size
-  }
 }
 
 #[cfg(test)]
