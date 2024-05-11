@@ -2,8 +2,8 @@ use crate::ui::rect::Size;
 use crate::ui::screen::cell::Cell;
 
 /// Buffer for rendering UI components, they will first write symbols/grapheme/characters to
-/// this buffer, then flushed to terminal screen. Terminal screen will save the buffer after flush,
-/// and use it to diff with next buffer, find out the difference and reduce the bytes flushed to
+/// this buffer, then flushed to terminal screen. Terminal screen will save the buffer been flushed,
+/// and use it to diff with next new buffer, find out the difference and reduce the bytes flushed to
 /// backend terminal device, i.e. the crossterm library.
 ///
 /// * `size`: Buffer size.
