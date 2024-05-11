@@ -20,14 +20,6 @@ impl Buffer {
       cells: vec![],
     }
   }
-
-  pub fn height(&self) -> usize {
-    self.size.height
-  }
-
-  pub fn width(&self) -> usize {
-    self.size.width
-  }
 }
 
 #[cfg(test)]
@@ -38,7 +30,8 @@ mod tests {
   fn should_equal_on_buffer_new() {
     let sz = Size::new(1, 2);
     let b = Buffer::new(sz);
-    assert_eq!(b.height(), 1);
-    assert_eq!(b.width(), 2);
+    assert_eq!(b.size.height, 1);
+    assert_eq!(b.size.width, 2);
+    assert_eq!(b.size.area(), 2);
   }
 }

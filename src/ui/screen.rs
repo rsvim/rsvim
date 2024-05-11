@@ -62,28 +62,12 @@ pub struct Screen {
 }
 
 impl Screen {
-  pub fn height(&self) -> usize {
-    self.buf.height()
-  }
-
-  pub fn width(&self) -> usize {
-    self.buf.width()
-  }
-
   pub fn size(&self) -> Size {
-    self.buf.size()
-  }
-
-  pub fn prev_height(&self) -> usize {
-    self.prev_buf.height()
-  }
-
-  pub fn prev_width(&self) -> usize {
-    self.prev_buf.width()
+    self.buf.size
   }
 
   pub fn prev_size(&self) -> Size {
-    self.prev_buf.size()
+    self.prev_buf.size
   }
 }
 
@@ -98,9 +82,9 @@ mod tests {
       prev_buf: Buffer::new(sz),
       buf: Buffer::new(sz),
     };
-    assert_eq!(c1.height(), 1);
-    assert_eq!(c1.width(), 2);
-    assert_eq!(c1.prev_height(), 1);
-    assert_eq!(c1.prev_width(), 2);
+    assert_eq!(c1.size().height, 1);
+    assert_eq!(c1.size().width, 2);
+    assert_eq!(c1.prev_size().height, 1);
+    assert_eq!(c1.prev_size().width, 2);
   }
 }
