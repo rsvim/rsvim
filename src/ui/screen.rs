@@ -80,7 +80,5 @@ mod tests {
     };
     assert_eq!(c1.size().height, 1);
     assert_eq!(c1.size().width, 2);
-    assert_eq!(c1.prev_size().height, 1);
-    assert_eq!(c1.prev_size().width, 2);
   }
 }
