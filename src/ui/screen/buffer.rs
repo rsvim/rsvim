@@ -9,8 +9,8 @@ use crate::ui::screen::cell::Cell;
 /// * `size`: Buffer size.
 /// * `cells`: Buffer cells.
 pub struct Buffer {
-  size: Size,
-  cells: Vec<Cell>,
+  pub size: Size,
+  pub cells: Vec<Cell>,
 }
 
 impl Buffer {
@@ -19,10 +19,6 @@ impl Buffer {
       size,
       cells: vec![],
     }
-  }
-
-  pub fn size(&self) -> Size {
-    self.size
   }
 
   pub fn height(&self) -> usize {
