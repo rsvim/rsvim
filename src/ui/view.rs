@@ -10,7 +10,7 @@ pub trait View {
   /// (Relative) x-y offset vased on parent view
   fn offset(&self) -> IPos;
 
-  /// Absoluate x/y offset based on terminal screen
+  /// Absolute x/y offset based on terminal screen
   fn abs_offset(&self) -> UPos;
 
   /// Rectangle height/width
