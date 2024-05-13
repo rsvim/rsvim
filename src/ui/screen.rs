@@ -57,8 +57,8 @@ pub async fn shutdown() -> IoResult<()> {
 }
 
 pub struct Screen {
-  prev_buf: Buffer,
   buf: Buffer,
+  prev_buf: Buffer,
 }
 
 impl Screen {
