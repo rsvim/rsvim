@@ -65,6 +65,9 @@ impl Screen {
   pub fn size(&self) -> Size {
     self.buf.size
   }
+  pub fn flush(&mut self) {
+    self.prev_buf = self.buf.clone();
+  }
 }
 
 #[cfg(test)]
@@ -80,5 +83,7 @@ mod tests {
     };
     assert_eq!(c1.size().height, 1);
     assert_eq!(c1.size().width, 2);
+    assert_eq!(c1.prev_buf.size.height, 1);
+    assert_eq!(c1.prev_buf.size.width, 2);
   }
 }

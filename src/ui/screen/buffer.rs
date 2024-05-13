@@ -1,6 +1,7 @@
 use crate::ui::rect::Size;
 use crate::ui::screen::cell::Cell;
 
+#[derive(Debug, Clone)]
 /// Buffer for rendering UI components, they will first write symbols/grapheme/characters to this
 /// buffer, then flushed to terminal screen. Terminal screen will save the buffer been flushed, and
 /// use it to diff with next new buffer, find out difference and only flush those changed/dirty
