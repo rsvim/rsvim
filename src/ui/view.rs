@@ -5,9 +5,11 @@ use crate::ui::layout::LayoutRc;
 use crate::ui::rect::{IPos, Size, UPos};
 use crate::ui::screen::Screen;
 
+pub mod window;
+
 /// View
 pub trait View {
-  /// (Relative) x-y offset vased on parent view
+  /// (Relative) x/y offset vased on parent view
   fn offset(&self) -> IPos;
 
   /// Absolute x/y offset based on terminal screen
