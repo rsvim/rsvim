@@ -1,28 +1,35 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-use crate::ui::canvas::Canvas;
 use crate::ui::layout::LayoutRc;
-use crate::ui::rect::{AbsPos, RelPos, Size};
+use crate::ui::rect::{IPos, Size, UPos};
+use crate::ui::screen::Screen;
 
+/// View
 pub trait View {
-  // relative offset based on parent view
-  fn offset(&self) -> RelPos;
+  /// (Relative) x-y offset vased on parent view
+  fn offset(&self) -> IPos;
 
-  // absolute offset based on terminal screen
-  fn abs_offset(&self) -> AbsPos;
+  /// Absolute x/y offset based on terminal screen
+  fn abs_offset(&self) -> UPos;
 
-  // height/width
+  /// Rectangle height/width
   fn size(&self) -> Size;
 
-  // parent view, root view doesn't have parent
+  /// Control arrange content layout when multiple views conflict on each other.
+  fn zindex(&self) -> usize;
+
+  /// Parent view of this view.
+  /// Note: Root view doesn't have a parent view.
   fn parent(&self) -> Option<ViewWk>;
 
-  // if contains more children views, all these views are managed by layout
+  /// Manage children views layout inside this view when there exists.
   fn layout(&self) -> Option<LayoutRc>;
 
-  // actually draw the terminal screen
-  fn draw(&self, canvas: &Canvas);
+  /// Draw the view to canvas buffer.
+  ///
+  /// * `screen`: crate::ui::screen::Screen
+  fn draw(&self, screen: &Screen);
 }
 
 pub type ViewRc = Rc<RefCell<dyn View>>;

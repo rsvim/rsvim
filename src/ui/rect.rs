@@ -1,48 +1,80 @@
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Pos<T> {
-  pub x: T, // row
-  pub y: T, // column
+/// Axis system on terminal screen: x/y.
+///
+/// * `x`: Also known as column number.
+/// * `y`: Also known as row number.
+pub struct Position<T> {
+  /// Column number.
+  pub x: T,
+  /// Row number.
+  pub y: T,
 }
 
-impl<T> Pos<T> {
+impl<T> Position<T> {
   pub fn new(x: T, y: T) -> Self {
-    Pos { x, y }
-  }
-
-  pub fn swap(self) -> Self {
-    Pos::new(self.y, self.x)
-  }
-
-  // x-axis on the coordinate is row number on terminal
-  pub fn row(self) -> T {
-    self.x
-  }
-
-  // y-axis on the coordinate is column number on terminal
-  pub fn column(self) -> T {
-    self.y
+    Position { x, y }
   }
 }
 
 // Relative position.
-pub type RelPos = Pos<i32>;
+pub type IPos = Position<isize>;
 
 // Absolute position.
-pub type AbsPos = Pos<u32>;
+pub type UPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+/// Rectangle size.
+///
+/// * `height`: Also known as rows count.
+/// * `width`: Also known as columns count.
 pub struct Size {
-  pub height: u32,
-  pub width: u32,
+  pub height: usize,
+  pub width: usize,
 }
 
 impl Size {
-  pub fn new(height: u32, width: u32) -> Self {
+  pub fn new(height: usize, width: usize) -> Self {
     Size { height, width }
   }
 
-  pub fn swap(self) -> Self {
-    Size::new(self.width, self.height)
+  pub fn area(&self) -> usize {
+    self.height * self.width
+  }
+}
+
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+/// Rectangle.
+///
+/// * `pos`: Rectangle position.
+/// * `size`: Rectangle size.
+pub struct Rect {
+  pub pos: UPos,
+  pub size: Size,
+}
+
+impl Rect {
+  pub fn new(pos: UPos, size: Size) -> Self {
+    Rect { pos, size }
+  }
+
+  pub fn x(&self) -> usize {
+    self.pos.x
+  }
+
+  pub fn y(&self) -> usize {
+    self.pos.y
+  }
+
+  pub fn height(&self) -> usize {
+    self.size.height
+  }
+
+  pub fn width(&self) -> usize {
+    self.size.width
+  }
+
+  pub fn area(&self) -> usize {
+    self.size.area()
   }
 }
 
@@ -51,56 +83,30 @@ mod tests {
   use super::*;
 
   #[test]
-  fn should_all_zero_on_relpos_default() {
-    let p1: RelPos = Default::default();
-    let p2 = RelPos::new(0, 0);
-    assert_eq!(p1, p2);
+  fn should_all_zero_on_pos_default() {
+    let p1: IPos = IPos::default();
+    assert_eq!(p1.x, 0);
+    assert_eq!(p1.y, 0);
+    let p2: UPos = UPos::default();
+    assert_eq!(p2.x, 0);
+    assert_eq!(p2.y, 0);
   }
 
   #[test]
-  fn should_reverse_after_relpos_swap() {
-    let p1 = RelPos::new(1, 2);
-    assert_eq!(p1.swap(), RelPos::new(2, 1));
+  fn should_equal_on_size_area() {
+    let sz = Size::new(5, 10);
+    assert_eq!(sz.height, 5);
+    assert_eq!(sz.width, 10);
+    assert_eq!(sz.area(), 5 * 10);
   }
 
   #[test]
-  fn should_equal_row_column_on_relpos_x_y() {
-    let p1 = RelPos::new(5, 10);
-    assert_eq!(p1.column(), 10);
-    assert_eq!(p1.row(), 5);
-  }
-
-  #[test]
-  fn should_all_zero_on_abspos_default() {
-    let p1: AbsPos = Default::default();
-    let p2 = AbsPos::new(0, 0);
-    assert_eq!(p1, p2);
-  }
-
-  #[test]
-  fn should_reverse_after_abspos_swap() {
-    let p1 = AbsPos::new(1, 2);
-    assert_eq!(p1.swap(), AbsPos::new(2, 1));
-  }
-
-  #[test]
-  fn should_equal_row_column_on_abspos_x_y() {
-    let p1 = AbsPos::new(5, 10);
-    assert_eq!(p1.column(), 10);
-    assert_eq!(p1.row(), 5);
-  }
-
-  #[test]
-  fn should_all_zero_on_size_default() {
-    let p1: Size = Default::default();
-    let p2 = Size::new(0, 0);
-    assert_eq!(p1, p2);
-  }
-
-  #[test]
-  fn should_reverse_on_size_swap() {
-    let p2 = Size::new(100, 50);
-    let p1 = p2.swap();
-    assert_eq!(p1, Size::new(50, 100));
+  fn should_equal_on_rect_area() {
+    let r = Rect::new(UPos::new(1, 2), Size::new(3, 4));
+    assert_eq!(r.x(), 1);
+    assert_eq!(r.y(), 2);
+    assert_eq!(r.height(), 3);
+    assert_eq!(r.width(), 4);
+    assert_eq!(r.area(), 3 * 4);
   }
 }
