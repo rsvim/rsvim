@@ -4,9 +4,7 @@
 /// * `x`: Also known as column number.
 /// * `y`: Also known as row number.
 pub struct Position<T> {
-  /// Column number.
   pub x: T,
-  /// Row number.
   pub y: T,
 }
 
