@@ -39,7 +39,7 @@ impl View for RootWindow {
 }
 
 impl RootWindow {
-  fn new(&screen: Screen) -> Self {
+  fn new(screen: &Screen) -> Self {
     RootWindow {
       size: screen.size(),
     }
