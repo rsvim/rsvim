@@ -1,4 +1,4 @@
-//! Basic trait for UI component.
+//! High-level abstraction for all UI components.
 
 use std::cell::RefCell;
 use std::collections::LinkedList;
