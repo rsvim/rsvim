@@ -4,8 +4,10 @@ use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about=None)]
+/// Command line options.
 pub struct Cli {
   #[arg(help = "Edit file(s)")]
+  /// Input files.
   file: Vec<String>,
 
   #[clap(
@@ -13,6 +15,7 @@ pub struct Cli {
     long = "cmd",
     help = "Execute <CMD> before loading any config"
   )]
+  /// Commands should be execute before loading any config.
   cmd_before: Option<Vec<String>>,
 
   #[clap(
@@ -20,18 +23,23 @@ pub struct Cli {
     short = 'c',
     help = "Execute <CMD> after loading config and first file"
   )]
+  /// Commands should be execute after loading any config and first line.
   cmd_after: Option<Vec<String>>,
 
   #[arg(short = 'd', long, help = "Run in diff mode")]
+  /// Run in diff mode.
   diff: bool,
 
   #[arg(long, help = "Run in headless mode, without a user interface")]
+  /// Run in headless mode.
   headless: bool,
 
   #[arg(long, help = "Run in verbose mode")]
+  /// Run in verbose mode.
   verbose: bool,
 
   #[arg(long, help = "Run in debug mode")]
+  /// Run in debug mode.
   debug: bool,
 }
 
