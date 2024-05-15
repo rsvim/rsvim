@@ -2,8 +2,8 @@ use clap::Parser;
 use crossterm::cursor;
 use crossterm::event::{Event, EventStream, KeyCode};
 use futures::StreamExt;
-use heed::types as heed_types;
-use heed::{byteorder, Database, EnvOpenOptions};
+// use heed::types as heed_types;
+// use heed::{byteorder, Database, EnvOpenOptions};
 use rsvim::{cli, log, ui};
 use tracing::debug;
 
