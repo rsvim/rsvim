@@ -1,4 +1,4 @@
-//! Backend terminal as the canvas for UI rendering.
+//! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use crate::ui::rect::Size;
 use crate::ui::term::buffer::Buffer;
