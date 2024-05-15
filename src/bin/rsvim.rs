@@ -39,14 +39,14 @@ async fn main() -> std::io::Result<()> {
   log::init(&cli);
   debug!("cli: {:?}", cli);
 
-  let dir = tempfile::tempdir().unwrap();
-  debug!("tempdir:{:?}", dir);
-  let env = unsafe { EnvOpenOptions::new().open(dir.path()).unwrap() };
-  let mut wtxn = env.write_txn().unwrap();
-  let db: Database<heed_types::Str, heed_types::U32<byteorder::NativeEndian>> =
-    env.create_database(&mut wtxn, None).unwrap();
-  db.put(&mut wtxn, "seven", &7).unwrap();
-  wtxn.commit().unwrap();
+  // let dir = tempfile::tempdir().unwrap();
+  // debug!("tempdir:{:?}", dir);
+  // let env = unsafe { EnvOpenOptions::new().open(dir.path()).unwrap() };
+  // let mut wtxn = env.write_txn().unwrap();
+  // let db: Database<heed_types::Str, heed_types::U32<byteorder::NativeEndian>> =
+  //   env.create_database(&mut wtxn, None).unwrap();
+  // db.put(&mut wtxn, "seven", &7).unwrap();
+  // wtxn.commit().unwrap();
 
   ui::term::init().await?;
   input_loop().await?;
