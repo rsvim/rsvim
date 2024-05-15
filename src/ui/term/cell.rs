@@ -13,6 +13,7 @@ use crossterm::style::{Attributes, Color};
 /// * `dirty`: Whether it's been modified, other UI components will modify a cell and make it
 /// dirty, and it revert to clean after been flushed to terminal.
 pub struct Cell {
+  /// The character/grapheme.
   pub symbol: CompactString,
   pub fg: Color,
   pub bg: Color,
@@ -21,46 +22,47 @@ pub struct Cell {
 }
 
 impl Cell {
-  /// symbol getter
+  /// Symbol getter.
   pub fn symbol(&self) -> &str {
     self.symbol.as_str()
   }
 
-  /// symbol setter
+  /// Symbol setter.
   pub fn set_symbol(&mut self, symbol: &str) -> &mut Self {
     self.symbol = CompactString::new(symbol);
     self
   }
 
-  /// symbol setter (by char)
+  /// Symbol setter (by char).
   pub fn set_char(&mut self, ch: char) -> &mut Self {
     let mut buf = [0; 4];
     self.symbol = CompactString::new(ch.encode_utf8(&mut buf));
     self
   }
 
-  /// fg getter
+  /// Fg getter.
   pub fn fg(&self) -> Color {
     self.fg
   }
 
-  /// fg setter
+  /// Fg setter.
   pub fn set_fg(&mut self, color: Color) -> &mut Self {
     self.fg = color;
     self
   }
 
-  /// bg getter
+  /// Bg getter.
   pub fn bg(&self) -> Color {
     self.bg
   }
 
-  /// bg setter
+  /// Bg setter.
   pub fn set_bg(&mut self, color: Color) -> &mut Self {
     self.bg = color;
     self
   }
 
+  /// Bg setter.
   pub fn attrs(&self) -> Attributes {
     self.attrs
   }
