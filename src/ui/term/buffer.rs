@@ -3,9 +3,9 @@ use crate::ui::term::cell::Cell;
 
 #[derive(Debug, Clone)]
 /// Buffer for rendering UI components, they will first write symbols/grapheme/characters to this
-/// buffer, then flushed to terminal screen. Terminal screen will save the buffer been flushed, and
-/// use it to diff with next new buffer, find out difference and only flush those changed/dirty
-/// parts to backend device.
+/// buffer, then flushed to terminal. Terminal will save the buffer been flushed, and use it to
+/// diff with next new buffer, find out difference and only flush those changed/dirty parts to
+/// backend device.
 ///
 /// * `size`: Buffer size.
 /// * `cells`: Buffer cells.
