@@ -31,7 +31,7 @@ pub struct Cli {
   diff: bool,
 
   #[arg(long, help = "Run in headless mode, without a user interface")]
-  /// Run in headless mode.
+  /// Run in headless mode, without TUI.
   headless: bool,
 
   #[arg(long, help = "Run in verbose mode")]
