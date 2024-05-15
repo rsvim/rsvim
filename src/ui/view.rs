@@ -11,13 +11,13 @@ pub mod root;
 
 /// View
 pub trait View {
-  /// (Relative) x/y offset vased on parent view
+  /// (Relative) x/y offset based on parent view.
   fn offset(&self) -> IPos;
 
-  /// Absolute x/y offset based on terminal
+  /// Absolute x/y offset based on terminal.
   fn abs_offset(&self) -> UPos;
 
-  /// Rectangle height/width
+  /// Rectangle height/width.
   fn size(&self) -> Size;
 
   /// Control arrange content layout when multiple views conflict on each other.
