@@ -4,7 +4,7 @@ use crate::ui::view::{View, ViewWk};
 use std::collections::LinkedList;
 
 pub struct RootView {
-  size: Size,
+  pub size: Size,
 }
 
 impl View for RootView {
@@ -32,12 +32,16 @@ impl View for RootView {
     todo!();
   }
 
-  fn draw(&self, terminal: &Terminal) {
+  fn draw(&self, _terminal: &Terminal) {
     todo!();
   }
 }
 
 impl RootView {
+  #[allow(dead_code)]
+  /// Create new root view.
+  ///
+  /// * `terminal`: terminal.
   fn new(terminal: &Terminal) -> Self {
     RootView {
       size: terminal.size(),

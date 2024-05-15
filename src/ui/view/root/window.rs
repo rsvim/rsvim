@@ -36,12 +36,13 @@ impl View for RootWindow {
     todo!();
   }
 
-  fn draw(&self, terminal: &Terminal) {
+  fn draw(&self, _terminal: &Terminal) {
     todo!();
   }
 }
 
 impl RootWindow {
+  #[allow(dead_code)]
   fn new(
     offset: IPos,
     abs_offset: UPos,

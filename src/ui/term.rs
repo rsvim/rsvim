@@ -73,6 +73,10 @@ impl Terminal {
   pub fn flush(&mut self) {
     self.prev_buf = self.buf.clone();
   }
+
+  pub fn new(buf: Buffer, prev_buf: Buffer) -> Self {
+    Terminal { buf, prev_buf }
+  }
 }
 
 #[cfg(test)]
@@ -82,10 +86,7 @@ mod tests {
   #[test]
   fn should_equal_on_terminal_new() {
     let sz = Size::new(1, 2);
-    let c1 = Terminal {
-      prev_buf: Buffer::new(sz),
-      buf: Buffer::new(sz),
-    };
+    let c1 = Terminal::new(Buffer::new(sz), Buffer::new(sz));
     assert_eq!(c1.size().height, 1);
     assert_eq!(c1.size().width, 2);
     assert_eq!(c1.prev_size().height, 1);
