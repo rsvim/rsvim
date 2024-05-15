@@ -24,11 +24,10 @@ pub type UPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Rectangle size.
-///
-/// * `height`: Also known as rows count.
-/// * `width`: Also known as columns count.
 pub struct Size {
+  /// Also known as rows count.
   pub height: usize,
+  /// Also known as columns count.
   pub width: usize,
 }
 
