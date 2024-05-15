@@ -53,6 +53,7 @@ pub struct Rect {
 }
 
 impl Rect {
+  /// Make new rect from position and size.
   pub fn new(pos: UPos, size: Size) -> Self {
     Rect { pos, size }
   }
