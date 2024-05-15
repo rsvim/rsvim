@@ -1,4 +1,3 @@
-pub mod layout;
 pub mod rect;
-pub mod screen;
+pub mod term;
 pub mod view;

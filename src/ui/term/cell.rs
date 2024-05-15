@@ -9,7 +9,7 @@ use crossterm::style::{Attributes, Color};
 /// * `bg`: Background color.
 /// * `attrs`: Attributes: underline, bold, italic, etc.
 /// * `dirty`: Whether it's been modified, other UI components will modify a cell and make it
-/// dirty, and it revert to clean after been flushed to terminal screen.
+/// dirty, and it revert to clean after been flushed to terminal.
 pub struct Cell {
   pub symbol: CompactString,
   pub fg: Color,

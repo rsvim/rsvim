@@ -1,35 +1,43 @@
 use std::cell::RefCell;
+use std::collections::LinkedList;
 use std::rc::{Rc, Weak};
 
-use crate::ui::layout::LayoutRc;
 use crate::ui::rect::{IPos, Size, UPos};
-use crate::ui::screen::Screen;
+use crate::ui::term::Terminal;
+
+pub mod root;
 
 /// View
 pub trait View {
-  /// (Relative) x-y offset vased on parent view
+  /// (Relative) x/y offset vased on parent view
   fn offset(&self) -> IPos;
 
-  /// Absolute x/y offset based on terminal screen
+  /// Absolute x/y offset based on terminal
   fn abs_offset(&self) -> UPos;
 
   /// Rectangle height/width
   fn size(&self) -> Size;
 
   /// Control arrange content layout when multiple views conflict on each other.
+  /// View that contains a higher zindex will cover the lower one.
   fn zindex(&self) -> usize;
 
   /// Parent view of this view.
+  ///
   /// Note: Root view doesn't have a parent view.
   fn parent(&self) -> Option<ViewWk>;
 
-  /// Manage children views layout inside this view when there exists.
-  fn layout(&self) -> Option<LayoutRc>;
+  /// Children views of this view.
+  ///
+  /// Note: View has the **ownership** of all its children, thus recursively **owns** all its nested
+  /// grandchildren and so on, which means:
+  /// 1. The (grand)children will be destroyed once their parent is been destroyed.
+  /// 2. The (grand)children still can be placed outside of their parent, i.e. the size or position
+  ///    can be outside the scope of their parent.
+  fn children(&self) -> LinkedList<ViewWk>;
 
   /// Draw the view to canvas buffer.
-  ///
-  /// * `screen`: crate::ui::screen::Screen
-  fn draw(&self, screen: &Screen);
+  fn draw(&self, terminal: &Terminal);
 }
 
 pub type ViewRc = Rc<RefCell<dyn View>>;
