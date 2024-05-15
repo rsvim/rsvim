@@ -1,3 +1,5 @@
+//! Basic trait for UI component.
+
 use std::cell::RefCell;
 use std::collections::LinkedList;
 use std::rc::{Rc, Weak};

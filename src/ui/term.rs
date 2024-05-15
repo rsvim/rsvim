@@ -1,3 +1,5 @@
+//! Terminal.
+
 use crate::ui::rect::Size;
 use crate::ui::term::buffer::Buffer;
 use crossterm::event::{
