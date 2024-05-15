@@ -80,7 +80,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn should_equal_on_screen_new() {
+  fn should_equal_on_terminal_new() {
     let sz = Size::new(1, 2);
     let c1 = Terminal {
       prev_buf: Buffer::new(sz),

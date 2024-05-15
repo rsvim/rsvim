@@ -12,7 +12,7 @@ pub trait View {
   /// (Relative) x/y offset vased on parent view
   fn offset(&self) -> IPos;
 
-  /// Absolute x/y offset based on terminal screen
+  /// Absolute x/y offset based on terminal
   fn abs_offset(&self) -> UPos;
 
   /// Rectangle height/width
@@ -26,9 +26,7 @@ pub trait View {
   fn parent(&self) -> Option<ViewWk>;
 
   /// Draw the view to canvas buffer.
-  ///
-  /// * `screen`: crate::ui::screen::Screen
-  fn draw(&self, screen: &Terminal);
+  fn draw(&self, terminal: &Terminal);
 }
 
 pub type ViewRc = Rc<RefCell<dyn View>>;
