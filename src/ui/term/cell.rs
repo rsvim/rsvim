@@ -38,33 +38,34 @@ impl Cell {
     self
   }
 
-  /// Fg getter.
+  /// Foreground color getter.
   pub fn fg(&self) -> Color {
     self.fg
   }
 
-  /// Fg setter.
+  /// Foreground color setter.
   pub fn set_fg(&mut self, color: Color) -> &mut Self {
     self.fg = color;
     self
   }
 
-  /// Bg getter.
+  /// Background color getter.
   pub fn bg(&self) -> Color {
     self.bg
   }
 
-  /// Bg setter.
+  /// Background color setter.
   pub fn set_bg(&mut self, color: Color) -> &mut Self {
     self.bg = color;
     self
   }
 
-  /// Bg setter.
+  /// Attributes setter.
   pub fn attrs(&self) -> Attributes {
     self.attrs
   }
 
+  /// Attributes setter.
   pub fn set_attrs(&mut self, attrs: Attributes) -> &mut Self {
     self.attrs = attrs;
     self
