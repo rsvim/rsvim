@@ -1,6 +1,7 @@
 use crate::ui::rect::{IPos, Size, UPos};
 use crate::ui::term::Terminal;
 use crate::ui::view::{View, ViewWk};
+use std::collections::LinkedList;
 
 pub struct RootView {
   size: Size,
@@ -25,6 +26,10 @@ impl View for RootView {
 
   fn parent(&self) -> Option<ViewWk> {
     None
+  }
+
+  fn children(&self) -> LinkedList<ViewWk> {
+    todo!();
   }
 
   fn draw(&self, terminal: &Terminal) {
