@@ -1,4 +1,3 @@
-use crate::ui::layout::LayoutRc;
 use crate::ui::rect::{IPos, Size, UPos};
 use crate::ui::screen::Screen;
 use crate::ui::view::{View, ViewWk};
@@ -29,12 +28,8 @@ impl View for RootWindow {
     None
   }
 
-  fn layout(&self) -> Option<LayoutRc> {
-    None
-  }
-
   fn draw(&self, screen: &Screen) {
-    debug!("draw");
+    todo!();
   }
 }
 

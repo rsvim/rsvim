@@ -4,7 +4,7 @@ use std::rc::{Rc, Weak};
 use crate::ui::rect::{IPos, Size, UPos};
 use crate::ui::screen::Screen;
 
-pub mod root_window;
+pub mod root_view;
 pub mod window;
 
 /// View
