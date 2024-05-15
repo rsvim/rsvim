@@ -73,6 +73,7 @@ impl Cell {
 }
 
 impl Default for Cell {
+  /// Make default cell with a whitespace and no color, empty attributes.
   fn default() -> Self {
     Cell {
       symbol: CompactString::new_inline(" "),
