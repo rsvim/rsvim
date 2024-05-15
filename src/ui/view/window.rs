@@ -1,6 +1,7 @@
 use crate::ui::rect::{IPos, Size, UPos};
 use crate::ui::term::Terminal;
 use crate::ui::view::{View, ViewWk};
+use std::collections::LinkedList;
 
 pub struct Window {
   offset: IPos,
@@ -29,6 +30,10 @@ impl View for Window {
 
   fn parent(&self) -> Option<ViewWk> {
     self.parent.clone()
+  }
+
+  fn children(&self) -> LinkedList<ViewWk> {
+    todo!();
   }
 
   fn draw(&self, terminal: &Terminal) {
