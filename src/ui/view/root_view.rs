@@ -1,5 +1,5 @@
 use crate::ui::rect::{IPos, Size, UPos};
-use crate::ui::screen::Screen;
+use crate::ui::term::Terminal;
 use crate::ui::view::{View, ViewWk};
 
 pub struct RootView {
@@ -27,15 +27,15 @@ impl View for RootView {
     None
   }
 
-  fn draw(&self, screen: &Screen) {
+  fn draw(&self, terminal: &Terminal) {
     todo!();
   }
 }
 
 impl RootView {
-  fn new(screen: &Screen) -> Self {
+  fn new(terminal: &Terminal) -> Self {
     RootView {
-      size: screen.size(),
+      size: terminal.size(),
     }
   }
 }

@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
 use crate::ui::rect::{IPos, Size, UPos};
-use crate::ui::screen::Screen;
+use crate::ui::term::Terminal;
 
 pub mod root_view;
 pub mod window;
@@ -28,7 +28,7 @@ pub trait View {
   /// Draw the view to canvas buffer.
   ///
   /// * `screen`: crate::ui::screen::Screen
-  fn draw(&self, screen: &Screen);
+  fn draw(&self, screen: &Terminal);
 }
 
 pub type ViewRc = Rc<RefCell<dyn View>>;

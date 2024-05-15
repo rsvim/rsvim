@@ -1,5 +1,5 @@
 use crate::ui::rect::Size;
-use crate::ui::screen::buffer::Buffer;
+use crate::ui::term::buffer::Buffer;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
@@ -10,11 +10,11 @@ use std::io::{Result as IoResult, Write};
 pub mod buffer;
 pub mod cell;
 
-pub async fn init() -> std::io::Result<Screen> {
+pub async fn init() -> std::io::Result<Terminal> {
   terminal::enable_raw_mode()?;
   let (cols, rows) = terminal::size()?;
   let size = Size::new(rows as usize, cols as usize);
-  let cvs = Screen {
+  let cvs = Terminal {
     prev_buf: Buffer::new(size),
     buf: Buffer::new(size),
   };
@@ -56,12 +56,12 @@ pub async fn shutdown() -> IoResult<()> {
   Ok(())
 }
 
-pub struct Screen {
+pub struct Terminal {
   buf: Buffer,
   prev_buf: Buffer,
 }
 
-impl Screen {
+impl Terminal {
   pub fn size(&self) -> Size {
     self.buf.size
   }
@@ -82,7 +82,7 @@ mod tests {
   #[test]
   fn should_equal_on_screen_new() {
     let sz = Size::new(1, 2);
-    let c1 = Screen {
+    let c1 = Terminal {
       prev_buf: Buffer::new(sz),
       buf: Buffer::new(sz),
     };

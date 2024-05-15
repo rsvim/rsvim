@@ -1,5 +1,5 @@
 use crate::ui::rect::Size;
-use crate::ui::screen::cell::Cell;
+use crate::ui::term::cell::Cell;
 
 #[derive(Debug, Clone)]
 /// Buffer for rendering UI components, they will first write symbols/grapheme/characters to this

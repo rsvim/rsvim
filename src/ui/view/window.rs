@@ -1,5 +1,5 @@
 use crate::ui::rect::{IPos, Size, UPos};
-use crate::ui::screen::Screen;
+use crate::ui::term::Terminal;
 use crate::ui::view::{View, ViewWk};
 
 pub struct Window {
@@ -31,7 +31,7 @@ impl View for Window {
     self.parent.clone()
   }
 
-  fn draw(&self, screen: &Screen) {
+  fn draw(&self, terminal: &Terminal) {
     todo!();
   }
 }
