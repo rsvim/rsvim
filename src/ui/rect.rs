@@ -37,7 +37,7 @@ impl Size {
     Size { height, width }
   }
 
-  /// Size area, i.e. height * width.
+  /// The area of this size, i.e. height * width.
   pub fn area(&self) -> usize {
     self.height * self.width
   }
