@@ -1,3 +1,5 @@
+//! The VIM editor reinvented in Rust+Typescript.
+
 use clap::Parser;
 use crossterm::cursor;
 use crossterm::event::{Event, EventStream, KeyCode};
