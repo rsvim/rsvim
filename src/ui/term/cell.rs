@@ -70,6 +70,11 @@ impl Cell {
     self.attrs = attrs;
     self
   }
+
+  /// Whether this cell is dirty.
+  pub fn dirty(&self) -> bool {
+    self.dirty
+  }
 }
 
 impl Default for Cell {
