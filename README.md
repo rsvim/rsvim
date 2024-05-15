@@ -1,4 +1,4 @@
-# Rsvim
+# RSVIM
 
 <p>
 <a href="https://crates.io/crates/rsvim"><img alt="push.yml" src="https://img.shields.io/crates/v/rsvim" /></a>
