@@ -1,4 +1,4 @@
-//! User input & UI components.
+//! User input & interface components.
 
 pub mod rect;
 pub mod term;
