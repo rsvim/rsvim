@@ -45,11 +45,10 @@ impl Size {
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Rectangle.
-///
-/// * `pos`: Rectangle position.
-/// * `size`: Rectangle size.
 pub struct Rect {
+  /// Rectangle position.
   pub pos: UPos,
+  /// Rectangle size.
   pub size: Size,
 }
 
