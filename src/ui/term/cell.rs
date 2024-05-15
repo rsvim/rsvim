@@ -14,7 +14,7 @@ pub struct Cell {
   pub bg: Color,
   /// Attributes: underline, bold, italic, etc.
   pub attrs: Attributes,
-  /// Indicates whether this cell is been modified, other UI components will modify a cell and make
+  /// Indicate whether this cell is been modified, other UI components will modify a cell and make
   /// it dirty, and it revert to clean after been flushed to terminal.
   pub dirty: bool,
 }
@@ -71,7 +71,7 @@ impl Cell {
     self
   }
 
-  /// Whether this cell is dirty.
+  /// Indicate whether this cell is dirty.
   pub fn dirty(&self) -> bool {
     self.dirty
   }
