@@ -11,7 +11,10 @@ pub mod buffer;
 pub mod cell;
 
 pub async fn init() -> std::io::Result<Terminal> {
-  terminal::enable_raw_mode()?;
+  if !terminal::is_raw_mode_enabled()? {
+    terminal::enable_raw_mode()?;
+  }
+
   let (cols, rows) = terminal::size()?;
   let size = Size::new(rows as usize, cols as usize);
   let cvs = Terminal {
@@ -30,7 +33,6 @@ pub async fn init() -> std::io::Result<Terminal> {
     terminal::Clear(terminal::ClearType::All),
     cursor::SetCursorStyle::BlinkingBlock,
     cursor::Show,
-    cursor::MoveTo(0, 0),
   )?;
 
   out.flush()?;
