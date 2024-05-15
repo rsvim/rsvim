@@ -1,3 +1,5 @@
+//! Rectangle position and size.
+
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Axis system on terminal.
 ///
