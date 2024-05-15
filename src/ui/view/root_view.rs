@@ -1,7 +1,6 @@
 use crate::ui::rect::{IPos, Size, UPos};
 use crate::ui::screen::Screen;
 use crate::ui::view::{View, ViewWk};
-use tracing::debug;
 
 pub struct RootWindow {
   size: Size,
