@@ -1,3 +1,5 @@
+//! Basic unit for single character/grapheme rendering.
+
 use compact_str::CompactString;
 use crossterm::style::{Attributes, Color};
 
