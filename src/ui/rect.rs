@@ -10,15 +10,16 @@ pub struct Position<T> {
 }
 
 impl<T> Position<T> {
+  /// Create a position.
   pub fn new(x: T, y: T) -> Self {
     Position { x, y }
   }
 }
 
-/// Relative position.
+/// Relative position, the x/y could be negative.
 pub type IPos = Position<isize>;
 
-/// Absolute position.
+/// Absolute position, the x/y are always non-negative.
 pub type UPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
