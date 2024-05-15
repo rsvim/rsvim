@@ -16,10 +16,10 @@ impl<T> Position<T> {
   }
 }
 
-/// Relative position, the x/y could be negative.
+/// Relative position, the coordinates could be negative.
 pub type IPos = Position<isize>;
 
-/// Absolute position, the x/y are always non-negative.
+/// Absolute position, the coordinates are always non-negative.
 pub type UPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
