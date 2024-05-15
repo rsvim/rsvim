@@ -40,3 +40,21 @@ impl View for Window {
     todo!();
   }
 }
+
+impl Window {
+  fn new(
+    offset: IPos,
+    abs_offset: UPos,
+    size: Size,
+    zindex: usize,
+    parent: Option<ViewWk>,
+  ) -> Self {
+    Window {
+      offset,
+      abs_offset,
+      size,
+      zindex,
+      parent,
+    }
+  }
+}
