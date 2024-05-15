@@ -28,7 +28,7 @@ impl Cell {
     self
   }
 
-  pub fn set_char_symbol(&mut self, ch: char) -> &mut Self {
+  pub fn set_char(&mut self, ch: char) -> &mut Self {
     let mut buf = [0; 4];
     self.symbol = CompactString::new(ch.encode_utf8(&mut buf));
     self
