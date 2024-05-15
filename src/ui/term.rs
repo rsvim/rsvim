@@ -76,7 +76,7 @@ impl Terminal {
     self.prev_buf = self.buf.clone();
   }
 
-  pub fn new(buf: Buffer, prev_buf: Buffer) -> Self {
+  pub fn new(size: Size) -> Self {
     Terminal { buf, prev_buf }
   }
 }

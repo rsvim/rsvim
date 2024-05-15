@@ -18,7 +18,7 @@ impl Buffer {
   pub fn new(size: Size) -> Self {
     Buffer {
       size,
-      cells: vec![],
+      cells: vec![Cell::default(); size.area()],
     }
   }
 }
@@ -34,5 +34,9 @@ mod tests {
     assert_eq!(b.size.height, 1);
     assert_eq!(b.size.width, 2);
     assert_eq!(b.size.area(), 2);
+    assert_eq!(b.cells.len(), b.size.area());
+    for c in b.cells.into_iter() {
+      assert_eq!(c, Cell::default());
+    }
   }
 }

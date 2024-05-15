@@ -19,34 +19,41 @@ pub struct Cell {
 }
 
 impl Cell {
+  /// symbol getter
   pub fn symbol(&self) -> &str {
     self.symbol.as_str()
   }
 
+  /// symbol setter
   pub fn set_symbol(&mut self, symbol: &str) -> &mut Self {
     self.symbol = CompactString::new(symbol);
     self
   }
 
+  /// symbol setter (by char)
   pub fn set_char(&mut self, ch: char) -> &mut Self {
     let mut buf = [0; 4];
     self.symbol = CompactString::new(ch.encode_utf8(&mut buf));
     self
   }
 
+  /// fg getter
   pub fn fg(&self) -> Color {
     self.fg
   }
 
+  /// fg setter
   pub fn set_fg(&mut self, color: Color) -> &mut Self {
     self.fg = color;
     self
   }
 
+  /// bg getter
   pub fn bg(&self) -> Color {
     self.bg
   }
 
+  /// bg setter
   pub fn set_bg(&mut self, color: Color) -> &mut Self {
     self.bg = color;
     self
