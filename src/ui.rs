@@ -1,4 +1,4 @@
-//! UI: keyboard, mouse & TUI rendering.
+//! User input & UI components.
 
 pub mod rect;
 pub mod term;
