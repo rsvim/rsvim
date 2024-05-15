@@ -38,7 +38,7 @@ pub trait View {
   ///    can be outside the scope of their parent.
   fn children(&self) -> LinkedList<ViewWk>;
 
-  /// Draw the view to canvas buffer.
+  /// Draw the view to terminal.
   fn draw(&self, terminal: &Terminal);
 }
 
