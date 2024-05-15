@@ -1,4 +1,4 @@
-//! The VIM editor reinvented in Rust+Typescript.
+//! The [VIM](https://www.vim.org/) editor reinvented in Rust+Typescript.
 
 use clap::Parser;
 use crossterm::cursor;
