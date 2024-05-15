@@ -1,7 +1,6 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
-use crate::ui::layout::LayoutRc;
 use crate::ui::rect::{IPos, Size, UPos};
 use crate::ui::screen::Screen;
 
@@ -25,9 +24,6 @@ pub trait View {
   /// Parent view of this view.
   /// Note: Root view doesn't have a parent view.
   fn parent(&self) -> Option<ViewWk>;
-
-  /// Manage children views layout inside this view when there exists.
-  fn layout(&self) -> Option<LayoutRc>;
 
   /// Draw the view to canvas buffer.
   ///
