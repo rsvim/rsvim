@@ -5,8 +5,7 @@ use std::rc::{Rc, Weak};
 use crate::ui::rect::{IPos, Size, UPos};
 use crate::ui::term::Terminal;
 
-pub mod root_view;
-pub mod window;
+pub mod root;
 
 /// View
 pub trait View {

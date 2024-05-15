@@ -3,7 +3,7 @@ use crate::ui::term::Terminal;
 use crate::ui::view::{View, ViewWk};
 use std::collections::LinkedList;
 
-pub struct Window {
+pub struct RootWindow {
   offset: IPos,
   abs_offset: UPos,
   size: Size,
@@ -11,7 +11,7 @@ pub struct Window {
   parent: Option<ViewWk>,
 }
 
-impl View for Window {
+impl View for RootWindow {
   fn offset(&self) -> IPos {
     self.offset
   }
@@ -41,7 +41,7 @@ impl View for Window {
   }
 }
 
-impl Window {
+impl RootWindow {
   fn new(
     offset: IPos,
     abs_offset: UPos,
@@ -49,7 +49,7 @@ impl Window {
     zindex: usize,
     parent: Option<ViewWk>,
   ) -> Self {
-    Window {
+    RootWindow {
       offset,
       abs_offset,
       size,
