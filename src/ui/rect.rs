@@ -16,10 +16,10 @@ impl<T> Position<T> {
   }
 }
 
-// Relative position.
+/// Relative position.
 pub type IPos = Position<isize>;
 
-// Absolute position.
+/// Absolute position.
 pub type UPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
@@ -37,6 +37,7 @@ impl Size {
     Size { height, width }
   }
 
+  /// Size area, i.e. height * width.
   pub fn area(&self) -> usize {
     self.height * self.width
   }
@@ -57,22 +58,27 @@ impl Rect {
     Rect { pos, size }
   }
 
+  /// Same as `self.pos.x`.
   pub fn x(&self) -> usize {
     self.pos.x
   }
 
+  /// Same as `self.pos.y`.
   pub fn y(&self) -> usize {
     self.pos.y
   }
 
+  /// Same as `self.size.height`.
   pub fn height(&self) -> usize {
     self.size.height
   }
 
+  /// Same as `self.size.width`.
   pub fn width(&self) -> usize {
     self.size.width
   }
 
+  /// Same as `self.size.area()`.
   pub fn area(&self) -> usize {
     self.size.area()
   }
