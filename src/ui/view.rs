@@ -42,5 +42,7 @@ pub trait View {
   fn draw(&self, terminal: &Terminal);
 }
 
+/// The `Rc/RefCell` smart pointer for a view.
 pub type ViewRc = Rc<RefCell<dyn View>>;
+/// The `Weak/RefCell` smart pointer for a view.
 pub type ViewWk = Weak<RefCell<dyn View>>;
