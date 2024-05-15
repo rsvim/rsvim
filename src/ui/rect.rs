@@ -2,11 +2,10 @@
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Axis system on terminal.
-///
-/// * `x`: Also known as column number.
-/// * `y`: Also known as row number.
 pub struct Position<T> {
+  /// Also known as column number.
   pub x: T,
+  /// Also known as row number.
   pub y: T,
 }
 
