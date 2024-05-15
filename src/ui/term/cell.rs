@@ -5,19 +5,17 @@ use crossterm::style::{Attributes, Color};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// Single character/grapheme rendering unit, it accepts ansi/unicode/emoji/nerd font symbol.
-///
-/// * `symbol`: The character/grapheme.
-/// * `fg`: Foreground color.
-/// * `bg`: Background color.
-/// * `attrs`: Attributes: underline, bold, italic, etc.
-/// * `dirty`: Whether it's been modified, other UI components will modify a cell and make it
-/// dirty, and it revert to clean after been flushed to terminal.
 pub struct Cell {
   /// The character/grapheme.
   pub symbol: CompactString,
+  /// Foreground color.
   pub fg: Color,
+  /// Background color.
   pub bg: Color,
+  /// Attributes: underline, bold, italic, etc.
   pub attrs: Attributes,
+  /// Indicates whether this cell is been modified, other UI components will modify a cell and make
+  /// it dirty, and it revert to clean after been flushed to terminal.
   pub dirty: bool,
 }
 
