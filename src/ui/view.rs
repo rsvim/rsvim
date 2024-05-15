@@ -19,6 +19,7 @@ pub trait View {
   fn size(&self) -> Size;
 
   /// Control arrange content layout when multiple views conflict on each other.
+  /// View that contains a higher zindex will cover the lower one.
   fn zindex(&self) -> usize;
 
   /// Parent view of this view.
