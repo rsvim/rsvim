@@ -2,11 +2,11 @@ use crate::ui::rect::{IPos, Size, UPos};
 use crate::ui::screen::Screen;
 use crate::ui::view::{View, ViewWk};
 
-pub struct RootWindow {
+pub struct RootView {
   size: Size,
 }
 
-impl View for RootWindow {
+impl View for RootView {
   fn offset(&self) -> IPos {
     IPos::new(0, 0)
   }
@@ -32,9 +32,9 @@ impl View for RootWindow {
   }
 }
 
-impl RootWindow {
+impl RootView {
   fn new(screen: &Screen) -> Self {
-    RootWindow {
+    RootView {
       size: screen.size(),
     }
   }
