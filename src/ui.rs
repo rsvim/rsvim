@@ -1,5 +1,5 @@
-//! User input & interface components.
+//! User inputs & interfaces.
 
+pub mod frame;
 pub mod geo;
 pub mod term;
-pub mod view;
