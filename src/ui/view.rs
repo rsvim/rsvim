@@ -1,11 +1,11 @@
 //! UI components.
 
+use crate::ui::geo::pos::{IPos, UPos};
+use crate::ui::geo::size::Size;
+use crate::ui::term::Terminal;
 use std::cell::RefCell;
 use std::collections::LinkedList;
 use std::rc::{Rc, Weak};
-
-use crate::ui::rect::{IPos, Size, UPos};
-use crate::ui::term::Terminal;
 
 pub mod root;
 

@@ -20,3 +20,16 @@ impl Size {
     self.height * self.width
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn should_equal_on_size_area() {
+    let sz = Size::new(5, 10);
+    assert_eq!(sz.height, 5);
+    assert_eq!(sz.width, 10);
+    assert_eq!(sz.area(), 5 * 10);
+  }
+}

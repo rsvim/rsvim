@@ -1,6 +1,6 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
-use crate::ui::rect::Size;
+use crate::ui::geo::size::Size;
 use crate::ui::term::buffer::Buffer;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,

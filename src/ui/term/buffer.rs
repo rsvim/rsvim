@@ -1,4 +1,5 @@
-use crate::ui::rect::{Rect, Size, UPos};
+use crate::ui::geo::pos::UPos;
+use crate::ui::geo::size::Size;
 use crate::ui::term::cell::Cell;
 
 #[derive(Debug, Clone)]

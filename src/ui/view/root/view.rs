@@ -1,4 +1,5 @@
-use crate::ui::rect::{IPos, Size, UPos};
+use crate::ui::geo::pos::{IPos, UPos};
+use crate::ui::geo::size::Size;
 use crate::ui::term::Terminal;
 use crate::ui::view::{View, ViewWk};
 use std::collections::LinkedList;
