@@ -1,4 +1,4 @@
-//! Base trait for all UI components.
+//! UI components.
 
 use std::cell::RefCell;
 use std::collections::LinkedList;
@@ -9,12 +9,12 @@ use crate::ui::term::Terminal;
 
 pub mod root;
 
-/// View
+/// A [`View`] is a basic trait for all UI components.
 pub trait View {
-  /// (Relative) x/y offset based on parent view.
+  /// (Relative) offset based on parent [view](crate::ui::view::View).
   fn offset(&self) -> IPos;
 
-  /// Absolute x/y offset based on terminal.
+  /// Absolute offset based on [terminal](crate::ui::term::Terminal).
   fn abs_offset(&self) -> UPos;
 
   /// Rectangle height/width.

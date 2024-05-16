@@ -60,6 +60,7 @@ pub async fn shutdown() -> IoResult<()> {
   Ok(())
 }
 
+/// Backend terminal
 pub struct Terminal {
   buf: Buffer,
   prev_buf: Buffer,

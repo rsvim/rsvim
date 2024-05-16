@@ -1,7 +1,7 @@
 //! Rectangle position and size.
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-/// Axis system on terminal.
+/// Axis system on [terminal](crate::ui::term::Terminal).
 pub struct Position<T> {
   /// Also known as column number.
   pub x: T,
@@ -10,16 +10,18 @@ pub struct Position<T> {
 }
 
 impl<T> Position<T> {
-  /// Create a position.
+  /// Create new [position](crate::ui::rect::Position).
   pub fn new(x: T, y: T) -> Self {
     Position { x, y }
   }
 }
 
-/// Relative position, the coordinates could be negative.
+/// Relative [position](crate::ui::rect::Position), the coordinates
+/// ([x](crate::ui::rect::IPos::x)/[y](crate::ui::rect::IPos::y)) could be negative.
 pub type IPos = Position<isize>;
 
-/// Absolute position, the coordinates are always non-negative.
+/// Absolute [position](crate::ui::rect::Position), the coordinates
+/// ([x](crate::ui::rect::UPos::x)/[y](crate::ui::rect::UPos::y)) are always non-negative.
 pub type UPos = Position<usize>;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
@@ -32,12 +34,12 @@ pub struct Size {
 }
 
 impl Size {
-  /// Make new size from height and width.
+  /// Make new [size](crate::ui::rect::Size) from [height](crate::ui::rect::Size::height) and [width](crate::ui::rect::Size::width).
   pub fn new(height: usize, width: usize) -> Self {
     Size { height, width }
   }
 
-  /// The area of this size, i.e. height * width.
+  /// The area of the [size](crate::ui::rect::Size), i.e. [height](crate::ui::rect::Size::height) * [width](crate::ui::rect::Size::width).
   pub fn area(&self) -> usize {
     self.height * self.width
   }
@@ -46,9 +48,9 @@ impl Size {
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Rectangle.
 pub struct Rect {
-  /// Rectangle position.
+  /// Rectangle [position](crate::ui::rect::UPos).
   pub pos: UPos,
-  /// Rectangle size.
+  /// Rectangle [size](crate::ui::rect::Size).
   pub size: Size,
 }
 
