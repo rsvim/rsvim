@@ -15,6 +15,7 @@ pub struct Buffer {
 }
 
 impl Buffer {
+  /// Make new buffer with size.
   pub fn new(size: Size) -> Self {
     Buffer {
       size,
@@ -22,6 +23,7 @@ impl Buffer {
     }
   }
 
+  /// Get single cell on position.
   pub fn get_cell(&self, pos: UPos) -> &Cell {
     &self.cells[pos.x * pos.y]
   }
