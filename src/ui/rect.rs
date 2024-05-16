@@ -55,32 +55,33 @@ pub struct Rect {
 }
 
 impl Rect {
-  /// Make new rect from position and size.
+  /// Make new [rect](crate::ui::rect::Rect) from [position](crate::ui::rect::UPos) and
+  /// [size](crate::ui::rect::Size).
   pub fn new(pos: UPos, size: Size) -> Self {
     Rect { pos, size }
   }
 
-  /// Same as `self.pos.x`.
+  /// Same as [self.pos.x](crate::ui::rect::UPos::x).
   pub fn x(&self) -> usize {
     self.pos.x
   }
 
-  /// Same as `self.pos.y`.
+  /// Same as [self.pos.y](crate::ui::rect::UPos::y).
   pub fn y(&self) -> usize {
     self.pos.y
   }
 
-  /// Same as `self.size.height`.
+  /// Same as [self.size.height](crate::ui::rect::Size::height).
   pub fn height(&self) -> usize {
     self.size.height
   }
 
-  /// Same as `self.size.width`.
+  /// Same as [self.size.width](crate::ui::rect::Size::width).
   pub fn width(&self) -> usize {
     self.size.width
   }
 
-  /// Same as `self.size.area()`.
+  /// Same as [self.size.area()](crate::ui::rect::Size::area()).
   pub fn area(&self) -> usize {
     self.size.area()
   }
