@@ -79,7 +79,10 @@ impl Terminal {
   }
 
   pub fn new(size: Size) -> Self {
-    Terminal { buf, prev_buf }
+    Terminal {
+      buf: Buffer::new(size),
+      prev_buf: Buffer::new(size),
+    }
   }
 }
 
@@ -90,7 +93,7 @@ mod tests {
   #[test]
   fn should_equal_on_terminal_new() {
     let sz = Size::new(1, 2);
-    let c1 = Terminal::new(Buffer::new(sz), Buffer::new(sz));
+    let c1 = Terminal::new(sz);
     assert_eq!(c1.size().height, 1);
     assert_eq!(c1.size().width, 2);
     assert_eq!(c1.prev_size().height, 1);
