@@ -21,8 +21,11 @@ pub trait Widget {
   /// Frame size.
   fn size(&self) -> Size;
 
-  /// Control arrange content layout when multiple views conflict on each other.
-  /// A frame that has a higher zindex will cover/override the lower one.
+  /// Control arrange content layout when multiple children conflict on each other.
+  /// A widget that has a higher zindex will cover/override the lower one.
+  ///
+  /// Note: zindex only works for the children has the same parent, a child widget will always
+  /// cover/override its parent.
   fn zindex(&self) -> usize;
 
   /// Parent frame of this one.
