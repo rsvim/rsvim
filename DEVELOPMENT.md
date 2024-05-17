@@ -11,7 +11,7 @@ Please setup your development environment with:
    - For macOS, please use [Xcode Clang](https://developer.apple.com/xcode/).
    - For Windows, please use [Visual Studio with C++/C# Components](https://visualstudio.microsoft.com/).
 2. Latest stable [Rust](https://www.rust-lang.org/) compiler, or at least 1.74.0.
-3. Cargo commands (for rust):
+3. Rust project:
 
    - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter.
    - [cargo clippy](https://github.com/rust-lang/rust-clippy): Linter.
