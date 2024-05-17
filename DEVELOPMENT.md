@@ -19,7 +19,7 @@ Please setup your development environment with:
    - [browser-sync](https://browsersync.io/): Cargo docs reload, setup with below steps:
 
      > 1. Install with `npm install -g browser-sync`.
-     > 2. Start local service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
+     > 2. Start service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
      > 3. Open browser with `https://localhost:3000/rsvim`.
 
 4. Misc:
