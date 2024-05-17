@@ -14,10 +14,10 @@ Please setup your development environment with:
 3. Rust project:
 
    - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter.
-   - [cargo clippy](https://github.com/rust-lang/rust-clippy): Linter.
+   - [rust-clippy](https://github.com/rust-lang/rust-clippy): Linter.
    - [bacon](https://github.com/Canop/bacon): Background linter, setup with:
 
-     > 1. Start service with `bacon clippy`.
+     > 1. Start service with `bacon clippy-all`.
 
    - [cargo-watch](https://github.com/watchexec/cargo-watch): Rust docs.
    - [browser-sync](https://browsersync.io/): Rust docs reload, setup with:
