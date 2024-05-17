@@ -15,8 +15,12 @@ Please setup your development environment with:
 
    - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter.
    - [cargo clippy](https://github.com/rust-lang/rust-clippy): Linter.
+   - [bacon](https://github.com/Canop/bacon): Background linter, setup with:
+
+     > 1. Start service with `bacon clippy`.
+
    - [cargo-watch](https://github.com/watchexec/cargo-watch): Rust docs.
-   - [browser-sync](https://browsersync.io/): Rust docs reload, setup with below steps:
+   - [browser-sync](https://browsersync.io/): Rust docs reload, setup with:
 
      > 1. Install with `npm install -g browser-sync`.
      > 2. Start service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
