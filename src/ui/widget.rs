@@ -11,8 +11,9 @@ pub mod root;
 
 /// Widget is the base trait of all UI components, it provide a common layer for receiving user
 /// inputs, keyboard/mouse events, and rendering itself on terminal.
+/// It is more of a logical data rather than a visible UI component.
 pub trait Widget {
-  /// (Relative) offset based on parent frame.
+  /// (Relative) offset based on parent widget.
   fn offset(&self) -> IPos;
 
   /// Absolute offset based on whole [terminal](crate::ui::term::Terminal).
