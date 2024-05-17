@@ -12,6 +12,33 @@ use std::io::{Result, Write};
 pub mod buffer;
 pub mod cell;
 
+pub async fn init() -> Result<Terminal> {
+  if !terminal::is_raw_mode_enabled()? {
+    terminal::enable_raw_mode()?;
+  }
+
+  let (cols, rows) = terminal::size()?;
+  let size = Size::new(rows as usize, cols as usize);
+  let t = Terminal::new(size);
+
+  let mut out = std::io::stdout();
+
+  queue!(out, EnableMouseCapture)?;
+  queue!(out, EnableFocusChange)?;
+
+  queue!(
+    out,
+    terminal::EnterAlternateScreen,
+    terminal::Clear(terminal::ClearType::All),
+    cursor::SetCursorStyle::BlinkingBlock,
+    cursor::Show,
+  )?;
+
+  out.flush()?;
+
+  Ok(t)
+}
+
 pub async fn shutdown() -> Result<()> {
   let mut out = std::io::stdout();
   queue!(
@@ -49,56 +76,7 @@ impl Terminal {
     self.prev_buf = self.buf.clone();
   }
 
-  pub async fn new() -> Result<Self> {
-    if !terminal::is_raw_mode_enabled()? {
-      terminal::enable_raw_mode()?;
-    }
-
-    let (cols, rows) = terminal::size()?;
-    let size = Size::new(rows as usize, cols as usize);
-    let t = Terminal {
-      prev_buf: Buffer::new(size),
-      buf: Buffer::new(size),
-    };
-
-    let mut out = std::io::stdout();
-
-    queue!(out, EnableMouseCapture)?;
-    queue!(out, EnableFocusChange)?;
-
-    queue!(
-      out,
-      terminal::EnterAlternateScreen,
-      terminal::Clear(terminal::ClearType::All),
-      cursor::SetCursorStyle::BlinkingBlock,
-      cursor::Show,
-    )?;
-
-    out.flush()?;
-
-    Ok(t)
-  }
-
-  pub async fn shutdown(&self) -> Result<()> {
-    let mut out = std::io::stdout();
-    queue!(
-      out,
-      DisableMouseCapture,
-      DisableFocusChange,
-      terminal::LeaveAlternateScreen,
-    )?;
-
-    out.flush()?;
-
-    if terminal::is_raw_mode_enabled()? {
-      terminal::disable_raw_mode()?;
-    }
-
-    Ok(())
-  }
-
-  #[cfg(test)]
-  pub fn mock_new(size: Size) -> Self {
+  pub fn new(size: Size) -> Self {
     Terminal {
       prev_buf: Buffer::new(size),
       buf: Buffer::new(size),
@@ -113,7 +91,7 @@ mod tests {
   #[test]
   fn should_equal_on_terminal_new() {
     let sz = Size::new(1, 2);
-    let c1 = Terminal::mock_new(sz);
+    let c1 = Terminal::new(sz);
     assert_eq!(c1.size(), c1.prev_size());
   }
 }
