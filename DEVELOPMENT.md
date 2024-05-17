@@ -20,7 +20,7 @@ Please setup your development environment with:
 
      > 1. Install with `npm install -g browser-sync`.
      > 2. Start local service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
-     > 3. Open cargo docs in browser with `https://localhost:3000/rsvim`.
+     > 3. Open browser with `https://localhost:3000/rsvim`.
 
 4. Misc:
    - [markdownlint](https://github.com/DavidAnson/markdownlint): Markdown docs.
