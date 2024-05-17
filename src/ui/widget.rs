@@ -10,7 +10,7 @@ use std::rc::{Rc, Weak};
 pub mod root;
 
 /// A frame is a basic container for all UI components, it specifies the basics of a UI component: position, size.
-pub trait Frame {
+pub trait Widget {
   /// (Relative) offset based on parent frame.
   fn offset(&self) -> IPos;
 
@@ -43,6 +43,6 @@ pub trait Frame {
 }
 
 /// The `Rc/RefCell` smart pointer for a [frame](Frame).
-pub type FrameRc = Rc<RefCell<dyn Frame>>;
+pub type FrameRc = Rc<RefCell<dyn Widget>>;
 /// The `Weak/RefCell` smart pointer for a [frame](Frame).
-pub type FrameWk = Weak<RefCell<dyn Frame>>;
+pub type FrameWk = Weak<RefCell<dyn Widget>>;
