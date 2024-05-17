@@ -6,7 +6,8 @@ use crossterm::event::{Event, EventStream, KeyCode};
 use futures::StreamExt;
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
-use rsvim::{cli, log, ui};
+use rsvim::ui::term::Terminal;
+use rsvim::{cli, log};
 use tracing::debug;
 
 async fn input_loop() -> std::io::Result<()> {
@@ -50,7 +51,7 @@ async fn main() -> std::io::Result<()> {
   // db.put(&mut wtxn, "seven", &7).unwrap();
   // wtxn.commit().unwrap();
 
-  ui::term::init().await?;
+  let t = Terminal::new().await?;
   input_loop().await?;
-  ui::term::shutdown().await
+  t.shutdown().await
 }
