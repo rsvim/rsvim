@@ -1,7 +1,7 @@
-use crate::ui::frame::{Frame, FrameWk};
 use crate::ui::geo::pos::{IPos, UPos};
 use crate::ui::geo::size::Size;
 use crate::ui::term::Terminal;
+use crate::ui::widget::{Widget, WidgetWk};
 use std::collections::LinkedList;
 
 pub struct RootWindow {
@@ -9,10 +9,10 @@ pub struct RootWindow {
   abs_offset: UPos,
   size: Size,
   zindex: usize,
-  parent: Option<FrameWk>,
+  parent: Option<WidgetWk>,
 }
 
-impl Frame for RootWindow {
+impl Widget for RootWindow {
   fn offset(&self) -> IPos {
     self.offset
   }
@@ -29,11 +29,11 @@ impl Frame for RootWindow {
     self.zindex
   }
 
-  fn parent(&self) -> Option<FrameWk> {
+  fn parent(&self) -> Option<WidgetWk> {
     self.parent.clone()
   }
 
-  fn children(&self) -> LinkedList<FrameWk> {
+  fn children(&self) -> LinkedList<WidgetWk> {
     todo!();
   }
 
@@ -49,7 +49,7 @@ impl RootWindow {
     abs_offset: UPos,
     size: Size,
     zindex: usize,
-    parent: Option<FrameWk>,
+    parent: Option<WidgetWk>,
   ) -> Self {
     RootWindow {
       offset,

@@ -1,14 +1,14 @@
-use crate::ui::frame::{Frame, FrameWk};
 use crate::ui::geo::pos::{IPos, UPos};
 use crate::ui::geo::size::Size;
 use crate::ui::term::Terminal;
+use crate::ui::widget::{Widget, WidgetWk};
 use std::collections::LinkedList;
 
-pub struct RootFrame {
+pub struct RootWidget {
   pub size: Size,
 }
 
-impl Frame for RootFrame {
+impl Widget for RootWidget {
   fn offset(&self) -> IPos {
     IPos::new(0, 0)
   }
@@ -25,11 +25,11 @@ impl Frame for RootFrame {
     0
   }
 
-  fn parent(&self) -> Option<FrameWk> {
+  fn parent(&self) -> Option<WidgetWk> {
     None
   }
 
-  fn children(&self) -> LinkedList<FrameWk> {
+  fn children(&self) -> LinkedList<WidgetWk> {
     todo!();
   }
 
@@ -38,13 +38,13 @@ impl Frame for RootFrame {
   }
 }
 
-impl RootFrame {
+impl RootWidget {
   #[allow(dead_code)]
   /// Create new root view.
   ///
   /// * `terminal`: terminal.
   fn new(terminal: &Terminal) -> Self {
-    RootFrame {
+    RootWidget {
       size: terminal.size(),
     }
   }
