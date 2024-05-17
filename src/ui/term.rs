@@ -110,8 +110,8 @@ impl Terminal {
 mod tests {
   use super::*;
 
-  #[tokio::test]
-  async fn should_equal_on_terminal_new() {
+  #[test]
+  fn should_equal_on_terminal_new() {
     let sz = Size::new(1, 2);
     let c1 = Terminal::mock_new(sz);
     assert_eq!(c1.size(), c1.prev_size());
