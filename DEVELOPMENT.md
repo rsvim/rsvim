@@ -15,8 +15,8 @@ Please setup your development environment with:
 
    - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter.
    - [cargo clippy](https://github.com/rust-lang/rust-clippy): Linter.
-   - [cargo-watch](https://github.com/watchexec/cargo-watch): Cargo docs.
-   - [browser-sync](https://browsersync.io/): Cargo docs reload, setup with below steps:
+   - [cargo-watch](https://github.com/watchexec/cargo-watch): Rust docs.
+   - [browser-sync](https://browsersync.io/): Rust docs reload, setup with below steps:
 
      > 1. Install with `npm install -g browser-sync`.
      > 2. Start service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
