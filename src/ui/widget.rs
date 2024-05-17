@@ -1,4 +1,4 @@
-//! UI components: [frame](Frame), window, floatwindow, tabline, statusline, numbercolumn, etc.
+//! Basic atom of all UI components.
 
 use crate::ui::geo::pos::{IPos, UPos};
 use crate::ui::geo::size::Size;
@@ -9,7 +9,8 @@ use std::rc::{Rc, Weak};
 
 pub mod root;
 
-/// A frame is a basic container for all UI components, it specifies the basics of a UI component: position, size.
+/// Widget is the base trait of all UI components, it provide a common layer for receiving user
+/// inputs, keyboard/mouse events, and rendering itself on terminal.
 pub trait Widget {
   /// (Relative) offset based on parent frame.
   fn offset(&self) -> IPos;
