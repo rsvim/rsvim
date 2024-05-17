@@ -19,7 +19,7 @@ pub trait Widget {
   /// Absolute offset based on whole [terminal](crate::ui::term::Terminal).
   fn abs_offset(&self) -> UPos;
 
-  /// Frame size.
+  /// Widget size.
   fn size(&self) -> Size;
 
   /// Control arrange content layout when multiple children conflict on each other.
@@ -29,14 +29,14 @@ pub trait Widget {
   /// cover/override its parent.
   fn zindex(&self) -> usize;
 
-  /// Parent frame of this one.
+  /// Parent widget of this one.
   ///
-  /// Note: Root frame doesn't have a parent.
+  /// Note: Root widget doesn't have a parent.
   fn parent(&self) -> Option<WidgetWk>;
 
-  /// Children frames of this one.
+  /// Children widgets of this one.
   ///
-  /// Note: View **owns** all its children, thus recursively **owns** all its nested
+  /// Note: A widget **owns** all its children, thus recursively **owns** all its nested
   /// grandchildren and so on, which means:
   /// 1. The (grand)children will be destroyed once their parent is been destroyed.
   /// 2. The (grand)children can only be *logically* placed outside of their parent, but the outside
@@ -44,7 +44,7 @@ pub trait Widget {
   /// 3. Some attributes are by default inherited from their parent, if not explicitly set.
   fn children(&self) -> LinkedList<WidgetWk>;
 
-  /// Draw the view to terminal.
+  /// Draw the widget to terminal.
   fn draw(&self, terminal: &Terminal);
 }
 

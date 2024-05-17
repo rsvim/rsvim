@@ -40,7 +40,7 @@ impl Widget for RootWidget {
 
 impl RootWidget {
   #[allow(dead_code)]
-  /// Create new root view.
+  /// Create new root widget.
   ///
   /// * `terminal`: terminal.
   fn new(terminal: &Terminal) -> Self {
