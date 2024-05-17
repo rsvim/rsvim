@@ -28,7 +28,7 @@ pub trait Widget {
   /// Parent frame of this one.
   ///
   /// Note: Root frame doesn't have a parent.
-  fn parent(&self) -> Option<FrameWk>;
+  fn parent(&self) -> Option<WidgetWk>;
 
   /// Children frames of this one.
   ///
@@ -37,13 +37,14 @@ pub trait Widget {
   /// 1. The (grand)children will be destroyed once their parent is been destroyed.
   /// 2. The (grand)children can only be *logically* placed outside of their parent, but the outside
   ///    parts will be invisible, only those parts inside their parent's rectangle are visible.
-  fn children(&self) -> LinkedList<FrameWk>;
+  /// 3. Some attributes are by default inherited from their parent, if not explicitly set.
+  fn children(&self) -> LinkedList<WidgetWk>;
 
   /// Draw the view to terminal.
   fn draw(&self, terminal: &Terminal);
 }
 
-/// The `Rc/RefCell` smart pointer for a [frame](Frame).
-pub type FrameRc = Rc<RefCell<dyn Widget>>;
-/// The `Weak/RefCell` smart pointer for a [frame](Frame).
-pub type FrameWk = Weak<RefCell<dyn Widget>>;
+/// The `Rc/RefCell` smart pointer for a [widget](Widget).
+pub type WidgetRc = Rc<RefCell<dyn Widget>>;
+/// The `Weak/RefCell` smart pointer for a [widget](Widget).
+pub type WidgetWk = Weak<RefCell<dyn Widget>>;
