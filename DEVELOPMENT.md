@@ -15,7 +15,7 @@ Please setup your development environment with:
 
    - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter.
    - [rust-clippy](https://github.com/rust-lang/rust-clippy): Linter.
-   - [bacon](https://github.com/Canop/bacon): Background linter, setup with:
+   - [bacon](https://github.com/Canop/bacon): Background checker, setup with:
 
      > 1. Start service with `bacon clippy-all`.
 
