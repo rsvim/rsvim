@@ -41,12 +41,12 @@ impl Terminal {
       println!("Curosr position: {:?}\r", cursor::position());
     }
 
-    // quit event loop
+    // quit loop
     if event == Event::Key(KeyCode::Esc.into()) {
       return false;
     }
 
-    // continue event loop
+    // continue loop
     true
   }
 
