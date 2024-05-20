@@ -8,13 +8,12 @@ use crossterm::event::{
 use crossterm::event::{Event, EventStream, KeyCode};
 use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
-use std::io::{Result, Write};
 use tracing::debug;
 
 pub mod buffer;
 pub mod cell;
 
-pub async fn init() -> Result<Terminal> {
+pub async fn init() -> std::io::Result<Terminal> {
   if !terminal::is_raw_mode_enabled()? {
     terminal::enable_raw_mode()?;
   }
@@ -41,7 +40,7 @@ pub async fn init() -> Result<Terminal> {
   Ok(t)
 }
 
-pub async fn shutdown() -> Result<()> {
+pub async fn shutdown() -> std::io::Result<()> {
   let mut out = std::io::stdout();
   queue!(
     out,
@@ -81,7 +80,7 @@ impl Terminal {
     self.prev_buf.size
   }
 
-  pub async fn run(&mut self) -> Result<()> {
+  pub async fn run(&mut self) -> std::io::Result<()> {
     let mut reader = EventStream::new();
     loop {
       tokio::select! {
@@ -120,6 +119,8 @@ impl Terminal {
     // continue event loop
     return true;
   }
+
+  pub async fn init(&mut self) {}
 
   pub fn flush(&mut self) {
     self.prev_buf = self.buf.clone();
