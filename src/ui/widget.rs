@@ -18,6 +18,7 @@ pub trait Widget {
   fn offset(&self) -> IPos;
 
   /// Absolute offset based on whole [terminal](crate::ui::term::Terminal).
+  /// Note: The anchor is always north-west.
   fn abs_offset(&self) -> UPos;
 
   /// Widget size.
