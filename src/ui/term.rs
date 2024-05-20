@@ -8,13 +8,13 @@ use crossterm::event::{
 use crossterm::event::{Event, EventStream, KeyCode};
 use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
-use std::io::{Result, Write};
+use std::io::{Error as IoError, Result as IoResult, Write};
 use tracing::debug;
 
 pub mod buffer;
 pub mod cell;
 
-pub async fn init() -> Result<Terminal> {
+pub async fn init() -> IoResult<Terminal> {
   if !terminal::is_raw_mode_enabled()? {
     terminal::enable_raw_mode()?;
   }
@@ -41,7 +41,7 @@ pub async fn init() -> Result<Terminal> {
   Ok(t)
 }
 
-pub async fn shutdown() -> Result<()> {
+pub async fn shutdown() -> IoResult<()> {
   let mut out = std::io::stdout();
   queue!(
     out,
@@ -59,24 +59,16 @@ pub async fn shutdown() -> Result<()> {
   Ok(())
 }
 
-pub async fn run(_term: &mut Terminal) -> Result<()> {
+pub async fn run(t: &mut Terminal) -> IoResult<()> {
   let mut reader = EventStream::new();
   loop {
     tokio::select! {
       maybe_event = reader.next() => match maybe_event {
-        Some(Ok(event)) => {
-          println!("Event::{:?}\r", event);
-          debug!("Event::{:?}", event);
-
-          if event == Event::Key(KeyCode::Char('c').into()) {
-            println!("Curosr position: {:?}\r", cursor::position());
+        Some(event) => {
+          if !t.accept(event) {
+              break;
           }
-
-          if event == Event::Key(KeyCode::Esc.into()) {
-            break;
-          }
-        }
-        Some(Err(e)) => println!("Error: {:?}\r", e),
+        },
         None => break,
       }
     }
@@ -104,6 +96,27 @@ impl Terminal {
 
   pub fn prev_size(&self) -> Size {
     self.prev_buf.size
+  }
+
+  /// Accept a terminal (keyboard/mouse) event.
+  /// Returns `true` if continue event loop, `false` if quit.
+  pub fn accept(&mut self, polled_event: Result<Event, IoError>) -> bool {
+    match polled_event {
+      Ok(event) => {
+        println!("Event::{:?}\r", event);
+        debug!("Event::{:?}", event);
+
+        if event == Event::Key(KeyCode::Char('c').into()) {
+          println!("Curosr position: {:?}\r", cursor::position());
+        }
+
+        if event == Event::Key(KeyCode::Esc.into()) {
+          return false;
+        }
+      }
+      Err(e) => println!("Error: {:?}\r", e),
+    }
+    return true;
   }
 
   pub fn flush(&mut self) {
