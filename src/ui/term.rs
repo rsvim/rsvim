@@ -63,9 +63,9 @@ pub async fn run(t: &mut Terminal) -> IoResult<()> {
   let mut reader = EventStream::new();
   loop {
     tokio::select! {
-      maybe_event = reader.next() => match maybe_event {
-        Some(event) => {
-          if !t.accept(event) {
+      polled_next = reader.next() => match polled_next {
+        Some(maybe_event) => {
+          if !t.accept(maybe_event) {
               break;
           }
         },
@@ -100,8 +100,8 @@ impl Terminal {
 
   /// Accept a terminal (keyboard/mouse) event.
   /// Returns `true` if continue event loop, `false` if quit.
-  pub fn accept(&mut self, polled_event: Result<Event, IoError>) -> bool {
-    match polled_event {
+  pub fn accept(&mut self, maybe_event: Result<Event, IoError>) -> bool {
+    match maybe_event {
       Ok(event) => {
         println!("Event::{:?}\r", event);
         debug!("Event::{:?}", event);
