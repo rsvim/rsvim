@@ -21,36 +21,43 @@ impl Buffer {
     }
   }
 
-  /// Get single cell on position.
+  /// Get the cell.
   pub fn get_cell(&self, pos: UPos) -> &Cell {
     &self.cells[pos.x * pos.y]
   }
 
+  /// Get the mutable cell.
   pub fn mut_get_cell(&mut self, pos: UPos) -> &mut Cell {
     &mut self.cells[pos.x * pos.y]
   }
 
+  /// Set the cell.
   pub fn set_cell(&mut self, pos: UPos, cell: Cell) -> &mut Self {
     self.cells[pos.x * pos.y] = cell;
     self
   }
 
-  pub fn get_cells(&self, pos: UPos, count: usize) -> &[Cell] {
+  /// Get n continuously cells, start from position.
+  pub fn get_cells(&self, pos: UPos, n: usize) -> &[Cell] {
     let start_at = pos.x * pos.y;
-    let end_at = start_at + count;
+    let end_at = start_at + n;
     &self.cells[start_at..end_at]
   }
 
-  pub fn mut_get_cells(&mut self, pos: UPos, count: usize) -> &mut [Cell] {
+  /// Get n continuously mutable cells, start from position.
+  pub fn mut_get_cells(&mut self, pos: UPos, n: usize) -> &mut [Cell] {
     let start_at = pos.x * pos.y;
-    let end_at = start_at + count;
+    let end_at = start_at + n;
     &mut self.cells[start_at..end_at]
   }
 
-  pub fn set_cells(&mut self, pos: UPos, cells: Vec<Cell>) -> Vec<Cell> {
+  /// Set n continuously cells, start from position.
+  /// Returns n old cells.
+  pub fn set_cells(&mut self, pos: UPos, cells: Vec<Cell>) -> &mut Self {
     let start_at = pos.x * pos.y;
     let end_at = start_at + cells.len();
-    self.cells.splice(start_at..end_at, cells).collect()
+    self.cells.splice(start_at..end_at, cells);
+    self
   }
 }
 
