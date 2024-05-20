@@ -2,62 +2,12 @@
 
 use crate::ui::geo::size::Size;
 use crate::ui::term::buffer::Buffer;
-use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
-};
-use crossterm::event::{Event, EventStream, KeyCode};
-use crossterm::{cursor, queue, terminal};
-use futures::StreamExt;
-use std::io::Write;
+use crossterm::cursor;
+use crossterm::event::{Event, KeyCode};
 use tracing::debug;
 
 pub mod buffer;
 pub mod cell;
-
-pub async fn init() -> std::io::Result<Terminal> {
-  if !terminal::is_raw_mode_enabled()? {
-    terminal::enable_raw_mode()?;
-  }
-
-  let (cols, rows) = terminal::size()?;
-  let size = Size::new(rows as usize, cols as usize);
-  let mut out = std::io::stdout();
-
-  queue!(out, EnableMouseCapture)?;
-  queue!(out, EnableFocusChange)?;
-
-  queue!(
-    out,
-    terminal::EnterAlternateScreen,
-    terminal::Clear(terminal::ClearType::All),
-    cursor::SetCursorStyle::BlinkingBlock,
-    cursor::MoveTo(0, 0),
-    cursor::Show,
-  )?;
-
-  out.flush()?;
-
-  let t = Terminal::new(size);
-  Ok(t)
-}
-
-pub async fn shutdown() -> std::io::Result<()> {
-  let mut out = std::io::stdout();
-  queue!(
-    out,
-    DisableMouseCapture,
-    DisableFocusChange,
-    terminal::LeaveAlternateScreen,
-  )?;
-
-  out.flush()?;
-
-  if terminal::is_raw_mode_enabled()? {
-    terminal::disable_raw_mode()?;
-  }
-
-  Ok(())
-}
 
 /// Backend terminal
 pub struct Terminal {
@@ -81,27 +31,6 @@ impl Terminal {
     self.prev_buf.size
   }
 
-  pub async fn run(&mut self) -> std::io::Result<()> {
-    let mut reader = EventStream::new();
-    loop {
-      tokio::select! {
-        polled_event = reader.next() => match polled_event {
-          Some(Ok(event)) => {
-            if !self.accept(event).await {
-                break;
-            }
-          },
-          Some(Err(e)) => {
-            println!("Error: {:?}\r", e);
-            break;
-          },
-          None => break,
-        }
-      }
-    }
-    Ok(())
-  }
-
   /// Accept a terminal (keyboard/mouse) event.
   /// Returns `true` if continue event loop, `false` if quit.
   pub async fn accept(&mut self, event: Event) -> bool {
@@ -118,7 +47,7 @@ impl Terminal {
     }
 
     // continue event loop
-    return true;
+    true
   }
 
   pub fn flush(&mut self) {
