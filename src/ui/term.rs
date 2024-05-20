@@ -31,6 +31,7 @@ pub async fn init() -> Result<Terminal> {
     terminal::EnterAlternateScreen,
     terminal::Clear(terminal::ClearType::All),
     cursor::SetCursorStyle::BlinkingBlock,
+    cursor::MoveTo(0, 0),
     cursor::Show,
   )?;
 
