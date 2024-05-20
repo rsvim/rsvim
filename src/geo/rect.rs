@@ -1,7 +1,7 @@
 //! Rectangle: position + size.
 
-use crate::ui::geo::pos::UPos;
-use crate::ui::geo::size::Size;
+use crate::geo::pos::UPos;
+use crate::geo::size::Size;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Rectangle.

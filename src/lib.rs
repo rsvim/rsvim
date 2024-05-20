@@ -2,5 +2,6 @@
 //! Rust+Typescript.
 
 pub mod cli;
+pub mod geo;
 pub mod log;
 pub mod ui;

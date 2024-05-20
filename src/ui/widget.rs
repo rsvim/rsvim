@@ -1,7 +1,7 @@
 //! Basic atom of all UI components.
 
-use crate::ui::geo::pos::{IPos, UPos};
-use crate::ui::geo::size::Size;
+use crate::geo::pos::{IPos, UPos};
+use crate::geo::size::Size;
 use crate::ui::term::Terminal;
 use std::cell::RefCell;
 use std::collections::LinkedList;
