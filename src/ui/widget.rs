@@ -14,6 +14,7 @@ pub mod root;
 /// It is more of a logical container rather than a visible entity.
 pub trait Widget {
   /// (Relative) offset based on parent widget.
+  /// Note: The anchor is always north-west.
   fn offset(&self) -> IPos;
 
   /// Absolute offset based on whole [terminal](crate::ui::term::Terminal).
