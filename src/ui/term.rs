@@ -87,7 +87,7 @@ impl Terminal {
       tokio::select! {
         polled_event = reader.next() => match polled_event {
           Some(Ok(event)) => {
-            if !self.accept(event) {
+            if !self.accept(event).await {
                 break;
             }
           },
@@ -104,7 +104,7 @@ impl Terminal {
 
   /// Accept a terminal (keyboard/mouse) event.
   /// Returns `true` if continue event loop, `false` if quit.
-  pub fn accept(&mut self, event: Event) -> bool {
+  pub async fn accept(&mut self, event: Event) -> bool {
     println!("Event::{:?}\r", event);
     debug!("Event::{:?}", event);
 
