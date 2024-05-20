@@ -114,7 +114,10 @@ impl Terminal {
           return false;
         }
       }
-      Err(e) => println!("Error: {:?}\r", e),
+      Err(e) => {
+        println!("Error: {:?}\r", e);
+        return false;
+      }
     }
     return true;
   }
