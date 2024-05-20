@@ -8,6 +8,7 @@ use crossterm::event::{
 use crossterm::event::{Event, EventStream, KeyCode};
 use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
+use std::io::Write;
 use tracing::debug;
 
 pub mod buffer;
@@ -119,8 +120,6 @@ impl Terminal {
     // continue event loop
     return true;
   }
-
-  pub async fn init(&mut self) {}
 
   pub fn flush(&mut self) {
     self.prev_buf = self.buf.clone();
