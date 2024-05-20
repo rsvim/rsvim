@@ -22,6 +22,6 @@ async fn main() -> std::io::Result<()> {
   // wtxn.commit().unwrap();
 
   let mut t = ui::term::init().await?;
-  ui::term::run(&mut t).await?;
+  t.run().await?;
   ui::term::shutdown().await
 }

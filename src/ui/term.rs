@@ -8,13 +8,13 @@ use crossterm::event::{
 use crossterm::event::{Event, EventStream, KeyCode};
 use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
-use std::io::{Error as IoError, Result as IoResult, Write};
+use std::io::{Result, Write};
 use tracing::debug;
 
 pub mod buffer;
 pub mod cell;
 
-pub async fn init() -> IoResult<Terminal> {
+pub async fn init() -> Result<Terminal> {
   if !terminal::is_raw_mode_enabled()? {
     terminal::enable_raw_mode()?;
   }
@@ -41,7 +41,7 @@ pub async fn init() -> IoResult<Terminal> {
   Ok(t)
 }
 
-pub async fn shutdown() -> IoResult<()> {
+pub async fn shutdown() -> Result<()> {
   let mut out = std::io::stdout();
   queue!(
     out,
@@ -56,23 +56,6 @@ pub async fn shutdown() -> IoResult<()> {
     terminal::disable_raw_mode()?;
   }
 
-  Ok(())
-}
-
-pub async fn run(t: &mut Terminal) -> IoResult<()> {
-  let mut reader = EventStream::new();
-  loop {
-    tokio::select! {
-      polled_next = reader.next() => match polled_next {
-        Some(maybe_event) => {
-          if !t.accept(maybe_event) {
-              break;
-          }
-        },
-        None => break,
-      }
-    }
-  }
   Ok(())
 }
 
@@ -98,27 +81,43 @@ impl Terminal {
     self.prev_buf.size
   }
 
-  /// Accept a terminal (keyboard/mouse) event.
-  /// Returns `true` if continue event loop, `false` if quit.
-  pub fn accept(&mut self, maybe_event: Result<Event, IoError>) -> bool {
-    match maybe_event {
-      Ok(event) => {
-        println!("Event::{:?}\r", event);
-        debug!("Event::{:?}", event);
-
-        if event == Event::Key(KeyCode::Char('c').into()) {
-          println!("Curosr position: {:?}\r", cursor::position());
+  pub async fn run(&mut self) -> Result<()> {
+    let mut reader = EventStream::new();
+    loop {
+      tokio::select! {
+        polled_next = reader.next() => match polled_next {
+          Some(Ok(event)) => {
+            if !self.accept(event) {
+                break;
+            }
+          },
+          Some(Err(e)) => {
+            println!("Error: {:?}\r", e);
+            break;
+          },
+          None => break,
         }
-
-        if event == Event::Key(KeyCode::Esc.into()) {
-          return false;
-        }
-      }
-      Err(e) => {
-        println!("Error: {:?}\r", e);
-        return false;
       }
     }
+    Ok(())
+  }
+
+  /// Accept a terminal (keyboard/mouse) event.
+  /// Returns `true` if continue event loop, `false` if quit.
+  pub fn accept(&mut self, event: Event) -> bool {
+    println!("Event::{:?}\r", event);
+    debug!("Event::{:?}", event);
+
+    if event == Event::Key(KeyCode::Char('c').into()) {
+      println!("Curosr position: {:?}\r", cursor::position());
+    }
+
+    // quit event loop
+    if event == Event::Key(KeyCode::Esc.into()) {
+      return false;
+    }
+
+    // continue event loop
     return true;
   }
 
