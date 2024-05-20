@@ -37,10 +37,7 @@ pub async fn init() -> Result<Terminal> {
 
   out.flush()?;
 
-  let t = Terminal {
-    prev_buf: Buffer::new(size),
-    buf: Buffer::new(size),
-  };
+  let t = Terminal::new(size);
   Ok(t)
 }
 
