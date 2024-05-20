@@ -3,13 +3,10 @@ use crate::geo::size::Size;
 use crate::ui::term::cell::Cell;
 
 #[derive(Debug, Clone)]
-/// Buffer for rendering UI components, they will first write symbols/grapheme/characters to this
-/// buffer, then flushed to terminal. Terminal will save the buffer been flushed, and use it to
-/// diff with next new buffer, find out difference and only flush those changed/dirty parts to
+/// Rendering buffer, all UI components will first write symbols/grapheme/characters to a buffer,
+/// then flushed to terminal. Terminal will save the previous buffer after flushed, and use it to
+/// diff with next buffer, to find out difference and only flush those changed/dirty parts to
 /// backend device.
-///
-/// * `size`: Buffer size.
-/// * `cells`: Buffer cells.
 pub struct Buffer {
   pub size: Size,
   pub cells: Vec<Cell>,
