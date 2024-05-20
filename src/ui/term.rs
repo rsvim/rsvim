@@ -85,7 +85,7 @@ impl Terminal {
     let mut reader = EventStream::new();
     loop {
       tokio::select! {
-        polled_next = reader.next() => match polled_next {
+        polled_event = reader.next() => match polled_event {
           Some(Ok(event)) => {
             if !self.accept(event) {
                 break;
