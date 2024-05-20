@@ -13,7 +13,7 @@ pub struct Buffer {
 }
 
 impl Buffer {
-  /// Make new buffer with size.
+  /// Make new buffer with [size](crate::geo::size::Size).
   pub fn new(size: Size) -> Self {
     Buffer {
       size,
