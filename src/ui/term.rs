@@ -2,7 +2,6 @@
 
 use crate::ui::geo::size::Size;
 use crate::ui::term::buffer::Buffer;
-use crossterm::cursor;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
@@ -14,52 +13,6 @@ use tracing::debug;
 
 pub mod buffer;
 pub mod cell;
-
-// pub async fn init() -> Result<Terminal> {
-//   if !terminal::is_raw_mode_enabled()? {
-//     terminal::enable_raw_mode()?;
-//   }
-//
-//   let (cols, rows) = terminal::size()?;
-//   let size = Size::new(rows as usize, cols as usize);
-//   let t = Terminal::new(size);
-//
-//   let mut out = std::io::stdout();
-//
-//   queue!(out, EnableMouseCapture)?;
-//   queue!(out, EnableFocusChange)?;
-//
-//   queue!(
-//     out,
-//     terminal::EnterAlternateScreen,
-//     terminal::Clear(terminal::ClearType::All),
-//     cursor::SetCursorStyle::BlinkingBlock,
-//     cursor::MoveTo(0, 0),
-//     cursor::Show,
-//   )?;
-//
-//   out.flush()?;
-//
-//   Ok(t)
-// }
-
-// pub async fn shutdown() -> Result<()> {
-//   let mut out = std::io::stdout();
-//   queue!(
-//     out,
-//     DisableMouseCapture,
-//     DisableFocusChange,
-//     terminal::LeaveAlternateScreen,
-//   )?;
-//
-//   out.flush()?;
-//
-//   if terminal::is_raw_mode_enabled()? {
-//     terminal::disable_raw_mode()?;
-//   }
-//
-//   Ok(())
-// }
 
 /// Backend terminal
 pub struct Terminal {
@@ -75,11 +28,6 @@ impl Terminal {
 
     let (cols, rows) = terminal::size()?;
     let size = Size::new(rows as usize, cols as usize);
-    let t = Terminal {
-      prev_buf: Buffer::new(size),
-      buf: Buffer::new(size),
-    };
-
     let mut out = std::io::stdout();
 
     queue!(out, EnableMouseCapture)?;
@@ -96,11 +44,15 @@ impl Terminal {
 
     out.flush()?;
 
+    let t = Terminal {
+      prev_buf: Buffer::new(size),
+      buf: Buffer::new(size),
+    };
     Ok(t)
   }
 
   pub async fn shutdown(&self) -> Result<()> {
-    let mut out = std::io::stdout();
+    let mut out = self.out();
     queue!(
       out,
       DisableMouseCapture,
@@ -121,7 +73,7 @@ impl Terminal {
     let mut reader = EventStream::new();
     loop {
       tokio::select! {
-        event_result = reader.next() => match event_result {
+        maybe_event = reader.next() => match maybe_event {
           Some(Ok(event)) => {
             println!("Event::{:?}\r", event);
             debug!("Event::{:?}", event);
@@ -152,6 +104,14 @@ impl Terminal {
 
   pub fn flush(&mut self) {
     self.prev_buf = self.buf.clone();
+  }
+
+  pub fn out(&self) -> std::io::Stdout {
+    std::io::stdout()
+  }
+
+  pub fn err(&self) -> std::io::Stderr {
+    std::io::stderr()
   }
 
   #[cfg(test)]
