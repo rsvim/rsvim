@@ -9,7 +9,7 @@ use std::rc::{Rc, Weak};
 
 pub mod root;
 
-/// Widget is the base trait of all UI components, it provide a common layer for receiving user
+/// Widget is the base trait for all UI components, it provide a common layer for receiving user
 /// inputs, keyboard/mouse events, and rendering itself on terminal.
 /// It is more of a logical container rather than a visible entity.
 pub trait Widget {
