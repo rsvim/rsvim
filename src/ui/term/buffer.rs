@@ -1,6 +1,6 @@
 use crate::geo::pos::UPos;
 use crate::geo::size::Size;
-use crate::ui::frame::cell::Cell;
+use crate::ui::term::cell::Cell;
 
 #[derive(Debug, Clone)]
 /// Buffer for rendering UI components, they will first write symbols/grapheme/characters to this

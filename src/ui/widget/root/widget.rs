@@ -1,6 +1,6 @@
 use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
-use crate::ui::frame::Terminal;
+use crate::ui::term::Terminal;
 use crate::ui::widget::{Widget, WidgetWk};
 use std::collections::LinkedList;
 
@@ -43,7 +43,7 @@ impl RootWidget {
   /// Create new root widget.
   ///
   /// * `terminal`: terminal.
-  fn new(terminal: &Termnal) -> Self {
+  fn new(terminal: &Terminal) -> Self {
     RootWidget {
       size: terminal.size(),
     }

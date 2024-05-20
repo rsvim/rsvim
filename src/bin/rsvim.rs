@@ -1,16 +1,16 @@
 //! The VIM editor reinvented in Rust+Typescript.
 
 use clap::Parser;
-use rsvim::{cli, log, ui};
+use rsvim::{cli, log};
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
-use crate::ui::geo::size::Size;
-use crate::ui::term::Terminal;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, EventStream,
 };
 use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
+use rsvim::geo::size::Size;
+use rsvim::ui::term::Terminal;
 use std::io::Write;
 use tracing::debug;
 
