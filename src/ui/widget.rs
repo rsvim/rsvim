@@ -10,8 +10,23 @@ use std::rc::{Rc, Weak};
 pub mod root;
 
 /// Widget is the base trait for all UI components, it provide a common layer for receiving user
-/// inputs, keyboard/mouse events, and rendering itself on terminal.
-/// It is more of a logical container rather than a visible entity.
+/// inputs, keyboard/mouse events, and rendering itself on terminal. It is more of a logical
+/// container rather than a visible entity.
+/// All widgets are maintained in a tree data structure, i.e. the whole terminal is a root widget,
+/// everything inside it is it's children widgets, and more grand-children widgets are nested
+/// deeper inside these children of the root, and can recurse infinitely downwards.
+/// The widget guarantee these rules:
+/// 1. Children (include nested grand-children) will be destroyed when their parent is been
+///    destroyed.
+/// 2. Children (include nested grand-children) can only be **logically** placed outside of their
+///    parent, while the outside parts will be invisible, i.e. only the parts inside their parent
+///    geometric shape are visible.
+/// 2. Each widget can bind an event handler, to handle the user events happening inside it & update
+///    the content.
+/// 3. The parent widget will be responsible for dispatching user events to the corresponding
+///    child widget, based on whether user event is happening within the range of the widget
+///    geometric shape.
+/// 4. Children's attributes are by default inherited from their parent, if not explicitly set.
 pub trait Widget {
   /// (Relative) offset based on parent widget.
   /// Note: The anchor is always north-west.
