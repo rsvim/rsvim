@@ -9,7 +9,7 @@ use crossterm::event::{
 };
 use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
-use rsvim::eventloop::EventLoop;
+use rsvim::evloop::EventLoop;
 use rsvim::ui::term::Terminal;
 use std::io::Write;
 use tracing::debug;

@@ -2,7 +2,7 @@
 //! Rust+Typescript.
 
 pub mod cli;
-pub mod eventloop;
+pub mod evloop;
 pub mod geo;
 pub mod log;
 pub mod ui;
