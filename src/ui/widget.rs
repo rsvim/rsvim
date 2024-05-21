@@ -21,12 +21,13 @@ pub mod root;
 /// 2. Children (include nested grand-children) can only be **logically** placed outside of their
 ///    parent, while the outside parts will be invisible, i.e. only the parts inside their parent
 ///    geometric shape are visible.
-/// 2. Each widget can bind an event handler, to handle the user events happening inside it & update
+/// 3. Each widget can bind an event handler, to handle the user events happening inside it & update
 ///    the content.
-/// 3. The parent widget will be responsible for dispatching user events to the corresponding
+/// 4. The parent widget will be responsible for dispatching user events to the corresponding
 ///    child widget, based on whether user event is happening within the range of the widget
 ///    geometric shape.
-/// 4. Children's attributes are by default inherited from their parent, if not explicitly set.
+/// 5. Children's attributes are by default inherited from their parent, if not explicitly set.
+/// 6. Root widget doesn't have a parent.
 pub trait Widget {
   /// (Relative) offset based on parent widget.
   /// Note: The anchor is always north-west.
@@ -46,22 +47,10 @@ pub trait Widget {
   /// cover/override its parent.
   fn zindex(&self) -> usize;
 
-  /// Parent widget of this one.
-  ///
-  /// Note: Root widget doesn't have a parent.
+  /// Parent widget.
   fn parent(&self) -> Option<WidgetWk>;
 
-  /// Children widgets of this one.
-  ///
-  /// Note: A widget **owns** all its children, thus recursively **owns** all its nested
-  /// grandchildren and so on, which means:
-  /// 1. The (grand)children will be destroyed once their parent is been destroyed.
-  /// 2. The (grand)children can only be *logically* placed outside of their parent, but the outside
-  ///    parts will be invisible, only those parts inside their parent's rectangle are visible.
-  /// 3. Children's attributes are by default inherited from their parent, if not explicitly set.
-  /// 4. Each widget can bind a event handler to handle user inputs & update its content, the
-  ///    parent widget will be responsible for dispatching the events to the corresponding widget,
-  ///    based on whether the event is happening within the range of the widget geometric shape.
+  /// Children widgets.
   fn children(&self) -> LinkedList<WidgetWk>;
 
   /// Draw the widget to terminal.
