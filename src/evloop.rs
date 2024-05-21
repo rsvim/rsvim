@@ -1,3 +1,5 @@
+//! Main event loop for TUI application.
+
 #![allow(unused_imports, dead_code)]
 use crate::geo::size::Size;
 use crate::ui::term::Terminal;
