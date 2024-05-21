@@ -1,35 +1,79 @@
+//! The VIM editor reinvented in Rust+Typescript.
+
 use clap::Parser;
-use crossterm::cursor;
-use crossterm::event::{Event, EventStream, KeyCode};
+use rsvim::{cli, log};
+// use heed::types as heed_types;
+// use heed::{byteorder, Database, EnvOpenOptions};
+use crossterm::event::{
+  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, EventStream,
+};
+use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
-use heed::types as heed_types;
-use heed::{byteorder, Database, EnvOpenOptions};
-use rsvim::{cli, log, ui};
+use rsvim::eventloop::EventLoop;
+use rsvim::ui::term::Terminal;
+use std::io::Write;
 use tracing::debug;
 
-async fn input_loop() -> std::io::Result<()> {
+pub async fn init() -> std::io::Result<()> {
+  if !terminal::is_raw_mode_enabled()? {
+    terminal::enable_raw_mode()?;
+  }
+
+  let mut out = std::io::stdout();
+
+  queue!(out, EnableMouseCapture)?;
+  queue!(out, EnableFocusChange)?;
+
+  queue!(
+    out,
+    terminal::EnterAlternateScreen,
+    terminal::Clear(terminal::ClearType::All),
+    cursor::SetCursorStyle::BlinkingBlock,
+    cursor::MoveTo(0, 0),
+    cursor::Show,
+  )?;
+
+  out.flush()?;
+
+  Ok(())
+}
+
+pub async fn shutdown() -> std::io::Result<()> {
+  let mut out = std::io::stdout();
+  queue!(
+    out,
+    DisableMouseCapture,
+    DisableFocusChange,
+    terminal::LeaveAlternateScreen,
+  )?;
+
+  out.flush()?;
+
+  if terminal::is_raw_mode_enabled()? {
+    terminal::disable_raw_mode()?;
+  }
+
+  Ok(())
+}
+
+pub async fn run(t: &mut Terminal) -> std::io::Result<()> {
   let mut reader = EventStream::new();
   loop {
     tokio::select! {
-      event_result = reader.next() => match event_result {
+      polled_event = reader.next() => match polled_event {
         Some(Ok(event)) => {
-          println!("Event::{:?}\r", event);
-          debug!("Event::{:?}", event);
-
-          if event == Event::Key(KeyCode::Char('c').into()) {
-            println!("Curosr position: {:?}\r", cursor::position());
+          if !t.accept(event).await {
+              break;
           }
-
-          if event == Event::Key(KeyCode::Esc.into()) {
-            break;
-          }
-        }
-        Some(Err(e)) => println!("Error: {:?}\r", e),
+        },
+        Some(Err(e)) => {
+          println!("Error: {:?}\r", e);
+          break;
+        },
         None => break,
       }
     }
   }
-
   Ok(())
 }
 
@@ -39,16 +83,17 @@ async fn main() -> std::io::Result<()> {
   log::init(&cli);
   debug!("cli: {:?}", cli);
 
-  let dir = tempfile::tempdir().unwrap();
-  debug!("tempdir:{:?}", dir);
-  let env = unsafe { EnvOpenOptions::new().open(dir.path()).unwrap() };
-  let mut wtxn = env.write_txn().unwrap();
-  let db: Database<heed_types::Str, heed_types::U32<byteorder::NativeEndian>> =
-    env.create_database(&mut wtxn, None).unwrap();
-  db.put(&mut wtxn, "seven", &7).unwrap();
-  wtxn.commit().unwrap();
+  // let dir = tempfile::tempdir().unwrap();
+  // debug!("tempdir:{:?}", dir);
+  // let env = unsafe { EnvOpenOptions::new().open(dir.path()).unwrap() };
+  // let mut wtxn = env.write_txn().unwrap();
+  // let db: Database<heed_types::Str, heed_types::U32<byteorder::NativeEndian>> =
+  //   env.create_database(&mut wtxn, None).unwrap();
+  // db.put(&mut wtxn, "seven", &7).unwrap();
+  // wtxn.commit().unwrap();
 
-  ui::term::init().await?;
-  input_loop().await?;
-  ui::term::shutdown().await
+  init().await?;
+  let mut ev = EventLoop::new()?;
+  ev.run().await?;
+  shutdown().await
 }

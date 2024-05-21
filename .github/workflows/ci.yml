@@ -8,7 +8,7 @@ on:
       - main
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref == 'refs/heads/main' }}
 env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
@@ -60,8 +60,8 @@ jobs:
           cargo llvm-cov clean --workspace
           cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v4
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
-          files: lcov.info
           fail_ci_if_error: true
+          files: lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: true

@@ -1,3 +1,4 @@
-pub mod rect;
+//! User interfaces, inputs & events.
+
 pub mod term;
-pub mod view;
+pub mod widget;

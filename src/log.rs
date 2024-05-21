@@ -1,3 +1,5 @@
+//! Logging.
+
 use crate::cli;
 use time::{format_description, Date, Month, OffsetDateTime, Time, UtcOffset};
 use tracing;

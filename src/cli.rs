@@ -1,7 +1,10 @@
+//! Command line options.
+
 use clap::Parser;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about=None)]
+/// Command line options.
 pub struct Cli {
   #[arg(help = "Edit file(s)")]
   file: Vec<String>,
@@ -34,10 +37,12 @@ pub struct Cli {
 }
 
 impl Cli {
+  /// Input files.
   pub fn file(&self) -> Vec<&str> {
     self.file.iter().map(|f| &**f).collect()
   }
 
+  /// Commands should be execute before loading any config.
   pub fn cmd_before(&self) -> Option<Vec<&str>> {
     self
       .cmd_before
@@ -45,6 +50,7 @@ impl Cli {
       .map(|cb| cb.iter().map(|c| &**c).collect())
   }
 
+  /// Commands should be execute after loading any config and first line.
   pub fn cmd_after(&self) -> Option<Vec<&str>> {
     self
       .cmd_after
@@ -52,18 +58,22 @@ impl Cli {
       .map(|ca| ca.iter().map(|c| &**c).collect())
   }
 
+  /// Run in diff mode.
   pub fn diff(&self) -> bool {
     self.diff
   }
 
+  /// Run in headless mode, without TUI.
   pub fn headless(&self) -> bool {
     self.headless
   }
 
+  /// Run in verbose mode.
   pub fn verbose(&self) -> bool {
     self.verbose
   }
 
+  /// Run in debug mode.
   pub fn debug(&self) -> bool {
     self.debug
   }
