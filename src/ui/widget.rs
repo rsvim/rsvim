@@ -47,7 +47,7 @@ pub trait Widget {
   fn children(&self) -> LinkedList<WidgetWk>;
 
   /// Draw the widget to terminal.
-  fn draw(&self, terminal: &Terminal);
+  fn draw(&self, t: &Terminal);
 }
 
 /// The `Rc/RefCell` smart pointer for a [widget](Widget).

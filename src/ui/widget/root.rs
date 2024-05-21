@@ -2,4 +2,3 @@
 //! headless mode.
 
 pub mod widget;
-pub mod window;

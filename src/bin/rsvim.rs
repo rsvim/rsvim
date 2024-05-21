@@ -9,18 +9,16 @@ use crossterm::event::{
 };
 use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
-use rsvim::geo::size::Size;
+use rsvim::eventloop::EventLoop;
 use rsvim::ui::term::Terminal;
 use std::io::Write;
 use tracing::debug;
 
-pub async fn init() -> std::io::Result<Terminal> {
+pub async fn init() -> std::io::Result<()> {
   if !terminal::is_raw_mode_enabled()? {
     terminal::enable_raw_mode()?;
   }
 
-  let (cols, rows) = terminal::size()?;
-  let size = Size::new(rows as usize, cols as usize);
   let mut out = std::io::stdout();
 
   queue!(out, EnableMouseCapture)?;
@@ -37,8 +35,7 @@ pub async fn init() -> std::io::Result<Terminal> {
 
   out.flush()?;
 
-  let t = Terminal::new(size);
-  Ok(t)
+  Ok(())
 }
 
 pub async fn shutdown() -> std::io::Result<()> {
@@ -95,7 +92,8 @@ async fn main() -> std::io::Result<()> {
   // db.put(&mut wtxn, "seven", &7).unwrap();
   // wtxn.commit().unwrap();
 
-  let mut t = init().await?;
-  run(&mut t).await?;
+  init().await?;
+  let mut ev = EventLoop::new()?;
+  ev.run().await?;
   shutdown().await
 }
