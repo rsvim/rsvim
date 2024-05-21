@@ -43,7 +43,10 @@ pub trait Widget {
   /// 1. The (grand)children will be destroyed once their parent is been destroyed.
   /// 2. The (grand)children can only be *logically* placed outside of their parent, but the outside
   ///    parts will be invisible, only those parts inside their parent's rectangle are visible.
-  /// 3. Some attributes are by default inherited from their parent, if not explicitly set.
+  /// 3. Children's attributes are by default inherited from their parent, if not explicitly set.
+  /// 4. Each widget can bind a event handler to handle user inputs & update its content, the
+  ///    parent widget will be responsible for dispatching the events to the corresponding widget,
+  ///    based on whether the event is happening within the range of the widget geometric shape.
   fn children(&self) -> LinkedList<WidgetWk>;
 
   /// Draw the widget to terminal.
