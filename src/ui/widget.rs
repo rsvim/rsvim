@@ -56,9 +56,6 @@ pub trait Widget {
   /// Children widgets.
   fn children(&self) -> LinkedList<WidgetWk>;
 
-  /// Sibling widgets.
-  fn siblings(&self) -> LinkedList<WidgetWk>;
-
   /// Draw the widget to terminal.
   fn draw(&self, t: &Terminal);
 }
