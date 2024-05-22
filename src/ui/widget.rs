@@ -26,6 +26,9 @@ pub mod root;
 ///    shape.
 /// 4. Children's attributes are by default inherited from their parent, if not explicitly set.
 pub trait Widget {
+  /// Remove from parent and delete itself.
+  fn delete(&self);
+
   /// Unique ID of a widget instance.
   fn id(&self) -> usize;
 
@@ -51,8 +54,17 @@ pub trait Widget {
   /// Note: root widget doesn't have a parent.
   fn parent(&self) -> Option<WidgetWk>;
 
+  /// Change parent widget.
+  fn set_parent(&mut self, parent: Option<WidgetWk>);
+
   /// Children widgets.
   fn children(&self) -> LinkedList<WidgetWk>;
+
+  /// Children widgets.
+  fn find_children(&self, id: usize) -> Option<WidgetWk>;
+
+  /// Children widgets.
+  fn find_direct_children(&self, id: usize) -> Option<WidgetWk>;
 
   /// Draw the widget to terminal.
   fn draw(&self, t: &Terminal);
