@@ -10,9 +10,9 @@ use std::rc::{Rc, Weak};
 pub mod root;
 
 /// Widget is the base trait for all UI components, it provide a common layer for receiving user
-/// inputs, keyboard/mouse events, and rendering itself on terminal. It is more of a logical
-/// container rather than a visible entity.
-/// All widgets are maintained in a tree data structure, i.e. the whole terminal is a root widget,
+/// events (keyboard/mouse), and rendering itself on terminal. It is more of a logical container
+/// rather than a visible entity.
+/// All widgets are maintained in a tree structure, i.e. the whole terminal is a root widget,
 /// everything inside it is it's children widgets, and more grand-children widgets are nested
 /// deeper inside these children of the root, and can recurse infinitely downwards.
 /// The widget guarantee these rules:
