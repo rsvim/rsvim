@@ -27,7 +27,6 @@ pub mod root;
 ///    child widget, based on whether user event is happening within the range of the widget
 ///    geometric shape.
 /// 5. Children's attributes are by default inherited from their parent, if not explicitly set.
-/// 6. Root widget doesn't have a parent.
 pub trait Widget {
   /// (Relative) offset based on parent widget.
   /// Note: The anchor is always north-west.
@@ -48,6 +47,7 @@ pub trait Widget {
   fn zindex(&self) -> usize;
 
   /// Parent widget.
+  /// Note: root widget doesn't have a parent.
   fn parent(&self) -> Option<WidgetWk>;
 
   /// Children widgets.
