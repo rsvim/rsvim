@@ -28,6 +28,9 @@ pub mod root;
 ///    geometric shape.
 /// 5. Children's attributes are by default inherited from their parent, if not explicitly set.
 pub trait Widget {
+  /// Unique ID of a widget instance.
+  fn id(&self) -> usize;
+
   /// (Relative) offset based on parent widget.
   /// Note: The anchor is always north-west.
   fn offset(&self) -> IPos;
@@ -52,6 +55,9 @@ pub trait Widget {
 
   /// Children widgets.
   fn children(&self) -> LinkedList<WidgetWk>;
+
+  /// Sibling widgets.
+  fn siblings(&self) -> LinkedList<WidgetWk>;
 
   /// Draw the widget to terminal.
   fn draw(&self, t: &Terminal);
