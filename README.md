@@ -18,3 +18,4 @@ The goal of RSVIM is to following the philosophy of the VIM editor, but reinvent
 - To be more timely updates, splits executable binary distribution and plug-in upgrade.
 - To be a text processing tool, allows batch processing text contents.
 - To be a background editing service, allows multiple clients to remotely access to work together.
+- To be modern and popular, leveraging community works for: theme, documentation, development, etc.
