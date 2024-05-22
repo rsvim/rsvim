@@ -15,7 +15,7 @@ pub mod root;
 /// All widgets are maintained in a tree structure, i.e. the whole terminal is a root widget,
 /// everything inside it is it's children widgets, and more grand-children widgets are nested
 /// deeper inside these children of the root, and can recurse infinitely downwards.
-/// The widget guarantee these rules:
+/// The widget guarantee these parts:
 /// 1. Children (include nested grand-children) will be destroyed when their parent is been
 ///    destroyed.
 /// 2. Children (include nested grand-children) can only be **logically** placed outside of their
