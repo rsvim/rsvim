@@ -13,20 +13,18 @@ pub mod root;
 /// events (keyboard/mouse), and rendering itself on terminal. It is more of a logical container
 /// rather than a visible entity.
 /// All widgets are maintained in a tree structure, i.e. the whole terminal is a root widget,
-/// everything inside it is it's children widgets, and more grand-children widgets are nested
-/// deeper inside these children of the root, and can recurse infinitely downwards.
+/// everything inside it is children widgets, and nested recurse infinitely downwards.
 /// The widget guarantee these parts:
-/// 1. Children (include nested grand-children) will be destroyed when their parent is been
-///    destroyed.
-/// 2. Children (include nested grand-children) can only be **logically** placed outside of their
-///    parent, while the outside parts will be invisible, i.e. only the parts inside their parent
-///    geometric shape are visible.
-/// 3. Each widget can bind an event handler, to handle the user events happening inside it & update
+/// 1. Children will be destroyed when their parent is, and are also displayed inside their parent's
+///    coordinate system, clipped by boundaries.
+/// 2. Children always cover their parent's display, for children who cover each other, higher
+///    [zindex](Widget::zindex()) will cover others.
+/// 2. Each widget can bind event handlers to handle the user events happening inside it & update
 ///    the content.
-/// 4. The parent widget will be responsible for dispatching user events to the corresponding
-///    child widget, based on whether user event is happening within the range of the widget
-///    geometric shape.
-/// 5. Children's attributes are by default inherited from their parent, if not explicitly set.
+/// 3. The parent widget will be responsible for dispatching user events to the corresponding child
+///    widget, based on whether user event is happening within the range of the widget geometric
+///    shape.
+/// 4. Children's attributes are by default inherited from their parent, if not explicitly set.
 pub trait Widget {
   /// Unique ID of a widget instance.
   fn id(&self) -> usize;
