@@ -11,7 +11,9 @@
 <a href="https://app.codacy.com/gh/rsvim/rsvim/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img alt="codacy" src="https://img.shields.io/codacy/grade/1c6a3d21352c4f8bb84ff6c7e3ef0399/main" /></a>
 </p>
 
-The goal of RSVIM is to following the philosophy of the VIM editor, but improves/reinvents these components:
+The goal of RSVIM is to following the philosophy of the VIM editor, but improves/reinvents below components:
 
-- A powerfull TUI engine, providing complete functions similar to GUI framework like [Qt](https://www.qt.io/) or [Tk](https://tkdocs.com/), not only support for windows, but also includes popups, dialogs, mouse events, etc.
-- A programmable editor that runs like a VM, providing a consistent scripting language runtime environment, with built-in support for async and plugin package manager.
+- A powerfull TUI engine, provides complete functions similar to GUI framework like [Qt](https://www.qt.io/) or [Tk](https://tkdocs.com/), not only support for windows, but also includes popups, dialogs, mouse events, etc.
+- A programmable editor that runs like a VM, provides a consistent scripting language runtime environment, with built-in support for async and plugin package manager.
+- A background editing service, allows multiple clients to connect remotely and work together.
+- Better documentations/testings/benchmarks, leverages existing community work.
