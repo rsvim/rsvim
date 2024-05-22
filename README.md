@@ -15,5 +15,5 @@ The goal of RSVIM is to following the philosophy of the VIM editor, but reinvent
 
 - A powerfull TUI engine similar to GUI frameworks such as [Qt](https://www.qt.io/) and [Tk](https://tkdocs.com/).
 - A programmable editor as a VM, provides a consistent scripting language runtime environment, with built-in support for async and modern plugin package manager.
-- A background editing service, allows multiple clients to connect remotely and work together.
+- A headless text processing tool and a background service, allows scripting to process text contents, and remote access from multiple clients to work together.
 - To be modern and popular, leveraging community works for: script, theme, documentation, testing, development, etc.
