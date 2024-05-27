@@ -26,11 +26,17 @@ pub mod root;
 ///    shape.
 /// 4. Children's attributes are by default inherited from their parent, if not explicitly set.
 pub trait Widget {
-  /// Remove from parent and delete itself.
-  fn delete(&self);
-
   /// Unique ID of a widget instance.
   fn id(&self) -> usize;
+
+  /// Delete the widget itself (later), and remove it from parent.
+  /// Note: The widget usually cannot be just deleted right now, right here, due to some life cycle
+  /// management issue. For logic level, user should never use it once it's deleted, for system
+  /// level, the memory will be released after all references on the smart pointer are removed.
+  fn delete(&self);
+
+  /// Create new widget
+  fn new(parent: Option<WidgetWk>);
 
   /// (Relative) offset based on parent widget.
   /// Note: The anchor is always north-west.
