@@ -26,8 +26,7 @@ pub mod root;
 ///    shape.
 /// 4. Children's attributes are by default inherited from their parent, if not explicitly set.
 pub trait Widget {
-  // {
-  // Life Cycle
+  // { Life cycle
 
   /// Delete the widget itself (later), and remove it from parent.
   /// Note: The widget usually cannot be just deleted right now, right here, due to some life cycle
@@ -38,10 +37,9 @@ pub trait Widget {
   /// Create new widget based on the parent, with all default settings.
   fn new(parent: Option<WidgetWk>);
 
-  // }
+  // } Life cycle
 
-  // {
-  // Life Cycle
+  // { Common attributes
 
   /// Unique ID of a widget instance.
   fn id(&self) -> usize;
@@ -64,6 +62,10 @@ pub trait Widget {
   /// cover/override its parent.
   fn zindex(&self) -> usize;
 
+  // } Common attributes
+
+  // { Parent-child relationship
+
   /// Parent widget.
   /// Note: root widget doesn't have a parent.
   fn parent(&self) -> Option<WidgetWk>;
@@ -80,8 +82,14 @@ pub trait Widget {
   /// Children widgets.
   fn find_direct_children(&self, id: usize) -> Option<WidgetWk>;
 
+  // } Parent-child relationship
+
+  // { Flush to terminal
+
   /// Draw the widget to terminal.
   fn draw(&self, t: &Terminal);
+
+  // } Flush to terminal
 }
 
 /// The `Rc/RefCell` smart pointer for a [widget](Widget).
