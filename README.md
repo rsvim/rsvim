@@ -11,7 +11,7 @@
 <a href="https://app.codacy.com/gh/rsvim/rsvim/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img alt="codacy" src="https://img.shields.io/codacy/grade/1c6a3d21352c4f8bb84ff6c7e3ef0399/main" /></a>
 </p>
 
-The goal of RSVIM is to following the philosophy of the VIM editor, but also to be:
+The goal of RSVIM is to follow the philosophy of the VIM editor, but also to be:
 
 - A powerfull TUI engine similar to GUI frameworks such as [Qt](https://www.qt.io/), provides widgets, event handlers, MVC, etc.
 - A programmable editor, provides a consistent scripting runtime environment, with built-in support for type system, async, modern plugin package manager, etc.
