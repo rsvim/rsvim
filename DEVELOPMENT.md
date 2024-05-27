@@ -33,8 +33,10 @@ To write markdown docs, please setup with:
 To release new version, please setup with:
 
 - [git-cliff](https://github.com/orhun/git-cliff): Generate changelog from [conventional commits](https://www.conventionalcommits.org/).
-- [cargo-release](https://github.com/crate-ci/cargo-release): Release a new version, run below commands:
 
   > 1. Install `git-cliff` with `cargo install git-cliff --all-features`(it will enable github integration feature).
-  > 2. Dry run with `cargo release patch|minor|major`.
-  > 3. Run with `cargo release patch|minor|major --execute`.
+
+- [cargo-release](https://github.com/crate-ci/cargo-release): Release a new version, run below commands:
+
+  > 1. Dry run with `cargo release patch|minor|major`.
+  > 2. Run with `cargo release patch|minor|major --execute`.
