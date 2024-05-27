@@ -59,7 +59,9 @@ pub trait Widget {
   /// A widget that has a higher zindex will cover/override the lower one.
   ///
   /// Note: zindex only works for the children has the same parent, a child widget will always
-  /// cover/override its parent.
+  /// cover/override its parent. To change the visibility priority between children and parent, you
+  /// need to directly set another parent for the children, or even switch the relationship between
+  /// children and parent, i.e. make child the parent, make parent the child.
   fn zindex(&self) -> usize;
 
   // } Common attributes
@@ -76,10 +78,10 @@ pub trait Widget {
   /// Children widgets.
   fn children(&self) -> LinkedList<WidgetWk>;
 
-  /// Children widgets.
+  /// Find children widgets by ID, include nested grand children.
   fn find_children(&self, id: usize) -> Option<WidgetWk>;
 
-  /// Children widgets.
+  /// Find direct children widgets by ID, without nested grand children.
   fn find_direct_children(&self, id: usize) -> Option<WidgetWk>;
 
   // } Parent-child relationship
