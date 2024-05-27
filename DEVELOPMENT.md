@@ -6,26 +6,35 @@
 
 Please setup your development environment with:
 
-1. Latest stable C++ toolchain:
-   - For Linux, please use builtin [GNU GCC](https://gcc.gnu.org/).
-   - For macOS, please use [Xcode Clang](https://developer.apple.com/xcode/).
-   - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
-2. Latest stable [Rust](https://www.rust-lang.org/) compiler, or at least 1.74.0.
-3. Rust project:
+- Latest stable C++ toolchain:
+  - For Linux, please use builtin [GNU GCC](https://gcc.gnu.org/).
+  - For macOS, please use [Xcode Clang](https://developer.apple.com/xcode/).
+  - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
+- Latest stable [Rust](https://www.rust-lang.org/) compiler, or at least 1.74.0.
 
-   - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter.
-   - [rust-clippy](https://github.com/rust-lang/rust-clippy): Linter.
-   - [bacon](https://github.com/Canop/bacon): Background checker, setup with:
+## Documentation
 
-     > 1. Start service with `bacon clippy-all`.
+To write rust docs, please setup with:
 
-   - [cargo-watch](https://github.com/watchexec/cargo-watch): Rust docs.
-   - [browser-sync](https://browsersync.io/): Rust docs reload, setup with:
+- [cargo-watch](https://github.com/watchexec/cargo-watch): Watch project file changes.
+- [browser-sync](https://browsersync.io/): Reload generated docs and sync to browser, setup with:
 
-     > 1. Install with `npm install -g browser-sync`.
-     > 2. Start service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
-     > 3. Open browser with `http://localhost:3000/rsvim`.
+  > 1.  Install with `npm install -g browser-sync`.
+  > 2.  Start service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
+  > 3.  Open browser with `http://localhost:3000/rsvim`.
 
-4. Markdown docs:
-   - [markdownlint](https://github.com/DavidAnson/markdownlint): Linter.
-   - [prettier](https://prettier.io/): Code formatter.
+To write markdown docs, please setup with:
+
+- [markdownlint](https://github.com/DavidAnson/markdownlint): Markdown linter.
+- [prettier](https://prettier.io/): Markdown formatter.
+
+## Release
+
+To release new version, please setup with:
+
+- [git-cliff](https://github.com/orhun/git-cliff): Generate changelog from [conventional commits](https://www.conventionalcommits.org/).
+- [cargo-release](https://github.com/crate-ci/cargo-release): Release a new version, run below commands:
+
+  > 1. Install `git-cliff` with `cargo install git-cliff --all-features`(it will enable github integration feature).
+  > 2. (First) dry run with `cargo release patch|minor|major`.
+  > 3. (Real) run with `cargo release patch|minor|major --execute`.

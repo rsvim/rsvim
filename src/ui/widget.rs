@@ -26,8 +26,8 @@ pub mod root;
 ///    shape.
 /// 4. Children's attributes are by default inherited from their parent, if not explicitly set.
 pub trait Widget {
-  /// Unique ID of a widget instance.
-  fn id(&self) -> usize;
+  // {
+  // Life Cycle
 
   /// Delete the widget itself (later), and remove it from parent.
   /// Note: The widget usually cannot be just deleted right now, right here, due to some life cycle
@@ -35,8 +35,16 @@ pub trait Widget {
   /// level, the memory will be released after all references on the smart pointer are removed.
   fn delete(&self);
 
-  /// Create new widget
+  /// Create new widget based on the parent, with all default settings.
   fn new(parent: Option<WidgetWk>);
+
+  // }
+
+  // {
+  // Life Cycle
+
+  /// Unique ID of a widget instance.
+  fn id(&self) -> usize;
 
   /// (Relative) offset based on parent widget.
   /// Note: The anchor is always north-west.
