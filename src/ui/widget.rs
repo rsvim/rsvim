@@ -15,6 +15,13 @@ pub mod root;
 /// rather than a visible entity.
 /// All widgets are maintained in a tree structure, i.e. the whole terminal is a root widget,
 /// everything inside it is children widgets, and nested recurse infinitely downwards.
+///
+/// Here we have several terms:
+/// * Parent: the direct upper side node in the tree structure.
+/// * Child: the direct down side node in the tree structure.
+/// * Ancestor: the indirect upper side node in the tree structure, i.e. parent of parent.
+/// * Offspring: the indirect down side node in the tree structure, i.e. child of child.
+///
 /// The widget guarantee these parts:
 /// 1. Children will be destroyed when their parent is, and are also displayed inside their parent's
 ///    coordinate system, clipped by boundaries.
