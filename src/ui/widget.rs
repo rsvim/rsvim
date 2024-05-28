@@ -71,19 +71,8 @@ pub trait Widget {
   /// Set z-index value.
   fn set_zindex(&mut self, value: usize);
 
-  /// Whether the widget is enabled. When a widget is disabled, user event will no longer been
-  /// received or processed, just like it's been deleted.
-  fn enabled(&self) -> bool;
-
-  /// Enable a widget.
-  fn enable(&mut self);
-
-  /// Disable a widget.
-  fn disable(&mut self);
-
-  /// Whether the widget is visible. When a widget is invisible, user event will still be
-  /// received and processed, and all logic will keep running, but it will not be rendered to
-  /// terminal.
+  /// Whether the widget is visible. When a widget is invisible, user event will no longer been
+  /// received or processed, not be rendered to terminal, just like it's been deleted.
   fn visible(&self) -> bool;
 
   /// Make the widget visible.
