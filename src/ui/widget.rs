@@ -75,11 +75,20 @@ pub trait Widget {
   /// received or processed, not be rendered to terminal, just like it's been deleted.
   fn visible(&self) -> bool;
 
-  /// Make the widget visible.
-  fn show(&mut self);
+  /// Set the widget visible/invisible.
+  ///
+  fn set_visible(&mut self, value: bool);
 
-  /// Make the widget invisible.
-  fn hide(&mut self);
+  /// Whether the widget is enabled. When a widget is disabled, user event will no longer been
+  /// received or processed, but it's still visible.
+  fn enabled(&self) -> bool;
+
+  /// Set the widget enabled/disabled.
+  /// Disable a widget also disables all its children, include nested grand-children. It's not
+  /// possible to enable a child while its parent is disabled.
+  /// Enable a widget also enables all its children, include nested grand-children, unless they
+  /// have been explicitly disabled.
+  fn set_enabled(&mut self, value: bool);
 
   // } Common attributes
 
@@ -117,6 +126,9 @@ pub trait Widget {
   /// explicitly call the parent's `event` method.
   /// When the child returns `false`, the event is been ignored, thus the parent will then try to
   /// find the next child to handle it.
+  /// When a child is invisible, the event is been ignored, thus next child or the parent will
+  /// handle it.
+  /// When a child is disabled, the event is been ignored, but
   fn event(&mut self, event: Event) -> bool;
 
   // } Event
