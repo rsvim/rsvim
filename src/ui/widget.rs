@@ -72,7 +72,7 @@ pub trait Widget {
   fn set_zindex(&mut self, value: usize);
 
   /// Whether the widget is enabled. When a widget is disabled, user event will no longer been
-  /// processed, just like it's been deleted.
+  /// received or processed, just like it's been deleted.
   fn enabled(&self) -> bool;
 
   /// Enable a widget.
@@ -82,7 +82,8 @@ pub trait Widget {
   fn disable(&mut self);
 
   /// Whether the widget is visible. When a widget is invisible, user event will still be
-  /// processing, and all logic will keep running, but it will not be rendered to terminal.
+  /// received and processed, and all logic will keep running, but it will not be rendered to
+  /// terminal.
   fn visible(&self) -> bool;
 
   /// Make the widget visible.
@@ -115,8 +116,18 @@ pub trait Widget {
 
   // { Event
 
-  /// Process user event, return `true` if processed, `false` if skipped.
-  /// Note:
+  /// Process a user keyboard/mouse event.
+  /// Parent widget will first try to dispatch the event to its children based on their geometric
+  /// shape, i.e. if an event happens inside one of its child, the parent will first dispatch the
+  /// event to that child.
+  /// If there're multiple children can handle an event, the one who has a higher z-index value
+  /// wins. If there's no children can handle the event, the parent will then try to handle it by
+  /// itself.
+  /// When the child returns `true`, the event is been handled, and the parent doesn't need to
+  /// handle it. Note: if the child want its parent to also handle the event (again), it has to
+  /// explicitly call the parent's `event` method.
+  /// When the child returns `false`, the event is been ignored, thus the parent will then try to
+  /// handle it.
   fn event(&mut self, event: Event) -> bool;
 
   // } Event
