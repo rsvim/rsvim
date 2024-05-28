@@ -22,7 +22,7 @@ pub mod root;
 /// * Ancestor: the indirect upper side node in the tree structure, i.e. parent of parent.
 /// * Offspring: the indirect down side node in the tree structure, i.e. child of child.
 ///
-/// The widget guarantee these parts:
+/// The widget tree structure guarantee:
 /// 1. Children will be destroyed when their parent is, and are also displayed inside their parent's
 ///    coordinate system, clipped by boundaries.
 /// 2. Children always cover their parent's display, for children who cover each other, higher
