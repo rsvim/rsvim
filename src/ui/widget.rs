@@ -29,8 +29,8 @@ pub trait Widget {
   // { Life cycle
 
   /// Delete the widget itself (later), and remove it from parent.
-  /// Note: The widget usually cannot be just deleted right now, right here, due to some life cycle
-  /// management issue. For logic level, user should never use it once it's deleted, for system
+  /// Note: The widget cannot be just deleted right now, right here, due to some life cycle
+  /// management issue. For logic level, user should never use it after been deleted, for system
   /// level, the memory will be released after all references on the smart pointer are removed.
   fn delete(&self);
 
@@ -45,8 +45,11 @@ pub trait Widget {
   fn id(&self) -> usize;
 
   /// (Relative) offset based on parent widget.
-  /// Note: The anchor is always north-west.
+  /// Note: The anchor is always NW (North-West).
   fn offset(&self) -> IPos;
+
+  /// Set (relative) offset.
+  fn set_offset(&mut self, value: IPos);
 
   /// Absolute offset based on whole [terminal](crate::ui::term::Terminal).
   /// Note: The anchor is always north-west.
@@ -55,14 +58,17 @@ pub trait Widget {
   /// Widget size.
   fn size(&self) -> Size;
 
-  /// Control arrange content layout when multiple children conflict on each other.
-  /// A widget that has a higher zindex will cover/override the lower one.
-  ///
-  /// Note: zindex only works for the children has the same parent, a child widget will always
-  /// cover/override its parent. To change the visibility priority between children and parent, you
-  /// need to directly set another parent for the children, or even switch the relationship between
-  /// children and parent, i.e. make child the parent, make parent the child.
+  /// Control arrange content stack when multiple children conflict on each other.
+  /// A widget that has a higher Z-index will be put to the top of the parent's widget's stack,
+  /// which has higher priority to be displayed.
+  /// Note: Z-index only works for the children stack under the same parent, a child widget will
+  /// always cover/override its parent. To change the visibility priority between children and
+  /// parent, you need to directly set another parent for the children, or even switch the
+  /// relationship between children and parent, i.e. make child the parent, make parent the child.
   fn zindex(&self) -> usize;
+
+  /// Set Z-index value.
+  fn set_zindex(&mut self, value: usize);
 
   // } Common attributes
 
