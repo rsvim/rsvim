@@ -127,7 +127,7 @@ pub trait Widget {
   /// handle it. Note: if the child want its parent to also handle the event (again), it has to
   /// explicitly call the parent's `event` method.
   /// When the child returns `false`, the event is been ignored, thus the parent will then try to
-  /// handle it.
+  /// find the next child to handle it.
   fn event(&mut self, event: Event) -> bool;
 
   // } Event
