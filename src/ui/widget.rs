@@ -3,6 +3,7 @@
 use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
 use crate::ui::term::Terminal;
+use crossterm::event::{Event, EventStream, KeyCode};
 use std::cell::RefCell;
 use std::collections::LinkedList;
 use std::rc::{Rc, Weak};
@@ -18,7 +19,7 @@ pub mod root;
 /// 1. Children will be destroyed when their parent is, and are also displayed inside their parent's
 ///    coordinate system, clipped by boundaries.
 /// 2. Children always cover their parent's display, for children who cover each other, higher
-///    [zindex](Widget::zindex()) will cover others.
+///    [z-index](Widget::zindex()) will cover others.
 /// 2. Each widget can bind event handlers to handle the user events happening inside it & update
 ///    the content.
 /// 3. The parent widget will be responsible for dispatching user events to the corresponding child
@@ -41,34 +42,54 @@ pub trait Widget {
 
   // { Common attributes
 
-  /// Unique ID of a widget instance.
+  /// Get unique ID of a widget instance.
   fn id(&self) -> usize;
 
-  /// (Relative) offset based on parent widget.
+  /// Get (relative) offset based on parent widget.
   /// Note: The anchor is always NW (North-West).
   fn offset(&self) -> IPos;
 
   /// Set (relative) offset.
   fn set_offset(&mut self, value: IPos);
 
-  /// Absolute offset based on whole [terminal](crate::ui::term::Terminal).
+  /// Get absolute offset based on whole [terminal](crate::ui::term::Terminal).
   /// Note: The anchor is always north-west.
   fn abs_offset(&self) -> UPos;
 
-  /// Widget size.
+  /// Get size.
   fn size(&self) -> Size;
 
   /// Control arrange content stack when multiple children conflict on each other.
-  /// A widget that has a higher Z-index will be put to the top of the parent's widget's stack,
+  /// A widget that has a higher z-index will be put to the top of the parent's widget's stack,
   /// which has higher priority to be displayed.
-  /// Note: Z-index only works for the children stack under the same parent, a child widget will
+  /// Note: z-index only works for the children stack under the same parent, a child widget will
   /// always cover/override its parent. To change the visibility priority between children and
   /// parent, you need to directly set another parent for the children, or even switch the
   /// relationship between children and parent, i.e. make child the parent, make parent the child.
   fn zindex(&self) -> usize;
 
-  /// Set Z-index value.
+  /// Set z-index value.
   fn set_zindex(&mut self, value: usize);
+
+  /// Whether the widget is enabled. When a widget is disabled, user event will no longer been
+  /// processed, just like it's been deleted.
+  fn enabled(&self) -> bool;
+
+  /// Enable a widget.
+  fn enable(&mut self);
+
+  /// Disable a widget.
+  fn disable(&mut self);
+
+  /// Whether the widget is visible. When a widget is invisible, user event will still be
+  /// processing, and all logic will keep running, but it will not be rendered to terminal.
+  fn visible(&self) -> bool;
+
+  /// Make the widget visible.
+  fn show(&mut self);
+
+  /// Make the widget invisible.
+  fn hide(&mut self);
 
   // } Common attributes
 
@@ -91,6 +112,14 @@ pub trait Widget {
   fn find_direct_children(&self, id: usize) -> Option<WidgetWk>;
 
   // } Parent-child relationship
+
+  // { Event
+
+  /// Process user event, return `true` if processed, `false` if skipped.
+  /// Note:
+  fn event(&mut self, event: Event) -> bool;
+
+  // } Event
 
   // { Flush to terminal
 
