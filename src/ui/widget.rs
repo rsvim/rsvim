@@ -137,7 +137,7 @@ pub trait Widget {
 
   // { Event
 
-  /// Process a user keyboard/mouse event.
+  /// Receive a user keyboard/mouse event.
   ///
   /// Parent will first try to dispatch the event to the corresponding child based on the geometric
   /// shape, i.e. if an event happens inside one of its children, parent will dispatch the event to
@@ -155,18 +155,17 @@ pub trait Widget {
   /// children can handle it.
   fn event(&mut self, event: Event) -> bool;
 
-  // } Event
+  /// Bind a callback function to process user events.
+  fn bind(&mut self, callback: ) -> bool;
 
-  // { Draw
+  // } Event
 
   /// Draw the widget to terminal.
   fn draw(&self, t: &Terminal);
-
-  // } Draw
 }
 
-/// The `<Rc<RefCell<...>>` smart pointer for a [widget](Widget).
+/// Smart pointer for a [widget](Widget).
 pub type WidgetRc = Rc<RefCell<dyn Widget>>;
 
-/// The `<Weak<RefCell<...>>` smart pointer for a [widget](Widget).
+/// Smart pointer for a [widget](Widget).
 pub type WidgetWk = Weak<RefCell<dyn Widget>>;
