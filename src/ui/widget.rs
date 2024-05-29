@@ -118,21 +118,21 @@ pub trait Widget {
 
   // { Parent-child relationship
 
-  /// Get parent widget.
+  /// Get parent.
   ///
   /// Root widget doesn't have a parent.
   fn parent(&self) -> Option<WidgetWk>;
 
-  /// Change parent widget.
+  /// Set/change parent.
   fn set_parent(&mut self, parent: Option<WidgetWk>);
 
-  /// Children widgets.
+  /// Get children.
   fn children(&self) -> LinkedList<WidgetWk>;
 
-  /// Find children widgets by ID, include nested grand children.
+  /// Find child and offspring widget by ID.
   fn find_children(&self, id: usize) -> Option<WidgetWk>;
 
-  /// Find direct children widgets by ID, without nested grand children.
+  /// Find direct child widget by ID, without offsprings.
   fn find_direct_children(&self, id: usize) -> Option<WidgetWk>;
 
   // } Parent-child relationship
