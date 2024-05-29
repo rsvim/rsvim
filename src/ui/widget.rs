@@ -118,7 +118,7 @@ pub trait Widget {
 
   // { Parent-child relationship
 
-  /// Parent widget.
+  /// Get parent widget.
   ///
   /// Root widget doesn't have a parent.
   fn parent(&self) -> Option<WidgetWk>;
