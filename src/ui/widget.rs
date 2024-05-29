@@ -86,17 +86,17 @@ pub trait Widget {
 
   /// Whether the widget is visible.
   ///
-  /// When a widget is invisible, user event will no longer been received or processed, and not
-  /// rendered to terminal, just like it's been deleted.
+  /// When invisible, user event will no longer been received or processed, and not rendered to
+  /// terminal, just like it's deleted.
   fn visible(&self) -> bool;
 
-  /// Set the widget visible/invisible.
+  /// Make the widget visible/invisible.
   ///
-  /// Make a widget invisible also implicitly invisibles all its children and offsprings, unless
-  /// they have been explicitly been visibled.
+  /// Make a widget invisible also implicitly invisibles all children and offsprings. Children or
+  /// offsprings cannot be visible when parent is invisible.
   ///
-  /// Make a widget visible also implicitly visibles all its children and offsprings, unless they
-  /// have been explicitly been invisibled.
+  /// Make a widget visible also implicitly visibles all children and offsprings, unless they have
+  /// been explicitly made invisible.
   fn set_visible(&mut self, value: bool);
 
   /// Whether the widget is enabled. When a widget is disabled, user event will no longer been
