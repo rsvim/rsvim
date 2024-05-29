@@ -165,7 +165,8 @@ pub trait Widget {
   // } Draw
 }
 
-/// The `Rc/RefCell` smart pointer for a [widget](Widget).
+/// The `<Rc<RefCell<...>>` smart pointer for a [widget](Widget).
 pub type WidgetRc = Rc<RefCell<dyn Widget>>;
-/// The `Weak/RefCell` smart pointer for a [widget](Widget).
+
+/// The `<Weak<RefCell<...>>` smart pointer for a [widget](Widget).
 pub type WidgetWk = Weak<RefCell<dyn Widget>>;
