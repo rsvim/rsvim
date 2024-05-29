@@ -92,22 +92,26 @@ pub trait Widget {
 
   /// Make the widget visible/invisible.
   ///
-  /// Make a widget invisible also implicitly invisibles all children and offsprings. Children or
-  /// offsprings cannot be visible when parent is invisible.
+  /// Hide a widget also implicitly hides all children and offsprings. Children or offsprings
+  /// cannot be visible when parent is invisible.
   ///
-  /// Make a widget visible also implicitly visibles all children and offsprings, unless they have
-  /// been explicitly made invisible.
+  /// Show a widget also implicitly shows all children and offsprings, unless they have been
+  /// explicitly made invisible.
   fn set_visible(&mut self, value: bool);
 
-  /// Whether the widget is enabled. When a widget is disabled, user event will no longer been
-  /// received or processed, but it's still visible.
+  /// Whether the widget is enabled.
+  ///
+  /// When disabled, user event will no longer been received or processed, but still visible, just
+  /// like it's locked.
   fn enabled(&self) -> bool;
 
-  /// Set the widget enabled/disabled.
-  /// Disable a widget also disables all its children, include nested grand-children. It's not
-  /// possible to enable a child while its parent is disabled.
-  /// Enable a widget also enables all its children, include nested grand-children, unless they
-  /// have been explicitly disabled.
+  /// Make the widget enabled/disabled.
+  ///
+  /// Disable a widget also implicitly disables all children and offsprings. Children or offsprings
+  /// cannot be enabled when parent is disabled.
+  ///
+  /// Enable a widget also implicitly enables all children and offsprings, unless they have been
+  /// explicitly disabled.
   fn set_enabled(&mut self, value: bool);
 
   // } Common attributes
