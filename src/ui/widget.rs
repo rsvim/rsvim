@@ -28,8 +28,8 @@ pub mod root;
 ///
 /// 1. Children will be destroyed when their parent is, and are also displayed inside their
 ///    parent's coordinate system, clipped by boundaries. Children are always on top of the canvas
-///    layer over their parent. For those who overlap each other, higher [z-index](Widget::zindex())
-///    wins.
+///    layer over their parent. For those who overlap each other, the one with higher
+///    [z-index](Widget::zindex()) has higher priority to display.
 /// 2. Parent will dispatch user events to corresponding child if an event happens within the range
 ///    of the parent widget geometric shape. Each widget can bind handlers to process & update the
 ///    data.
@@ -70,10 +70,8 @@ pub trait Widget {
   /// Get size.
   fn size(&self) -> Size;
 
-  /// Control arrange content stack when multiple children conflict on each other.
-  ///
-  /// A widget that has a higher z-index will be put to the top of the parent's widget's stack,
-  /// which has higher priority to be displayed.
+  /// Control arrange content stack when multiple children overlap on each other, a widget with
+  /// higher z-index has higher priority to be displayed.
   ///
   /// Z-index only works for the children stack under the same parent, a child widget will
   /// always cover/override its parent. To change the visibility priority between children and
@@ -116,7 +114,7 @@ pub trait Widget {
 
   // } Common attributes
 
-  // { Parent-child relationship
+  // { Relationship
 
   /// Get parent.
   ///
@@ -135,40 +133,36 @@ pub trait Widget {
   /// Find direct child widget by ID, without offsprings.
   fn find_direct_children(&self, id: usize) -> Option<WidgetWk>;
 
-  // } Parent-child relationship
+  // } Relationship
 
   // { Event
 
   /// Process a user keyboard/mouse event.
   ///
-  /// Parent widget will first try to dispatch the event to its children based on their geometric
-  /// shape, i.e. if an event happens inside one of its child, the parent will first dispatch the
-  /// event to that child.
+  /// Parent will first try to dispatch the event to the corresponding child based on the geometric
+  /// shape, i.e. if an event happens inside one of its children, parent will dispatch the event to
+  /// that child.
   ///
-  /// If there're multiple children can handle an event, the one who has a higher z-index value
-  /// wins. If there's no children can handle the event, the parent will then try to handle it by
-  /// itself.
+  /// If there're multiple children overlap on an event, the one with higher z-index value has
+  /// higher priority to receive and process the event.
   ///
-  /// When the child returns `true`, the event is been handled, and the parent doesn't need to
-  /// handle it. If the child want its parent to also handle the event (again), it has to
-  /// explicitly call the parent's `event` method.
+  /// Child returns `true` indicates the event is been handled, and the parent or other overlapped
+  /// chidlren doesn't need to handle it. If the child also wants its parent to handle the event
+  /// (again), it has to explicitly call its parent's [`event()`](Widget::event()) method.
   ///
-  /// When the child returns `false`, the event is been ignored, thus the parent will then try to
-  /// find the next child to handle it.
-  ///
-  /// When a child is invisible, the event is been ignored, thus next child or the parent will
-  /// handle it.
-  /// When a child is disabled, the event is been ignored, but
+  /// Child returns `false` indicates the event is been ignored, and the parent will then try to
+  /// find the next child if there's overlapped to handle it, or handles the event by itself if no
+  /// children can handle it.
   fn event(&mut self, event: Event) -> bool;
 
   // } Event
 
-  // { Flush to terminal
+  // { Draw
 
   /// Draw the widget to terminal.
   fn draw(&self, t: &Terminal);
 
-  // } Flush to terminal
+  // } Draw
 }
 
 /// The `Rc/RefCell` smart pointer for a [widget](Widget).
