@@ -3,10 +3,10 @@
 use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
 use crate::ui::term::Terminal;
-use crossterm::event::{Event, EventStream, KeyCode};
 use std::cell::RefCell;
 use std::collections::LinkedList;
 use std::rc::{Rc, Weak};
+use std::sync::{Arc, Mutex, RwLock};
 
 pub mod root;
 
@@ -19,10 +19,11 @@ pub mod root;
 ///
 /// Here we have several terms:
 ///
-/// * Parent: the direct upper side node in the tree structure.
-/// * Child: the direct down side node in the tree structure.
-/// * Ancestor: the indirect upper side node in the tree structure, i.e. parent of parent.
-/// * Offspring: the indirect down side node in the tree structure, i.e. child of child.
+/// * Parent: the parent widget.
+/// * Child: the child widget.
+/// * Ancestor: either the parent, or the parent of some ancestor of the widget.
+/// * Descendant: either the child, or the child of some descendant of the widget.
+/// * Sibling: nodes with the same parent.
 ///
 /// The widget tree structure guarantee:
 ///
@@ -45,7 +46,7 @@ pub trait Widget {
   fn delete(&self);
 
   /// Create new widget based on the parent, with all default settings.
-  fn new(parent: Option<WidgetWk>);
+  fn new(parent: Option<WidgetWk>) -> dyn Widget;
 
   // } Life cycle
 
@@ -60,7 +61,7 @@ pub trait Widget {
   fn offset(&self) -> IPos;
 
   /// Set (relative) offset.
-  fn set_offset(&mut self, value: IPos);
+  fn set_offset(&mut self, value: IPos) -> &mut Self;
 
   /// Get absolute offset based on whole [terminal](crate::ui::term::Terminal).
   ///
@@ -69,6 +70,9 @@ pub trait Widget {
 
   /// Get size.
   fn size(&self) -> Size;
+
+  /// Set size.
+  fn set_size(&mut self, value: Size) -> &mut Self;
 
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.
@@ -80,7 +84,7 @@ pub trait Widget {
   fn zindex(&self) -> usize;
 
   /// Set z-index value.
-  fn set_zindex(&mut self, value: usize);
+  fn set_zindex(&mut self, value: usize) -> &mut Self;
 
   /// Whether the widget is visible.
   ///
@@ -95,7 +99,7 @@ pub trait Widget {
   ///
   /// Show a widget also implicitly shows all children and offsprings, unless they have been
   /// explicitly made invisible.
-  fn set_visible(&mut self, value: bool);
+  fn set_visible(&mut self, value: bool) -> &mut Self;
 
   /// Whether the widget is enabled.
   ///
@@ -110,7 +114,7 @@ pub trait Widget {
   ///
   /// Enable a widget also implicitly enables all children and offsprings, unless they have been
   /// explicitly disabled.
-  fn set_enabled(&mut self, value: bool);
+  fn set_enabled(&mut self, value: bool) -> &mut Self;
 
   // } Common attributes
 
@@ -122,7 +126,7 @@ pub trait Widget {
   fn parent(&self) -> Option<WidgetWk>;
 
   /// Set/change parent.
-  fn set_parent(&mut self, parent: Option<WidgetWk>);
+  fn set_parent(&mut self, parent: Option<WidgetWk>) -> &mut Self;
 
   /// Get children.
   fn children(&self) -> LinkedList<WidgetWk>;
@@ -139,8 +143,14 @@ pub trait Widget {
   fn draw(&self, t: &Terminal);
 }
 
-/// Smart pointer for a [widget](Widget).
+/// Reference pointer for a [widget](Widget).
 pub type WidgetRc = Rc<RefCell<dyn Widget>>;
 
-/// Smart pointer for a [widget](Widget).
+/// Weak pointer for a [widget](Widget).
 pub type WidgetWk = Weak<RefCell<dyn Widget>>;
+
+/// Read/write (shared) pointer for a [widget](Widget).
+pub type WidgetRw = Arc<RwLock<dyn Widget>>;
+
+/// Exclusive pointer for a [widget](Widget).
+pub type WidgetEx = Arc<Mutex<dyn Widget>>;
