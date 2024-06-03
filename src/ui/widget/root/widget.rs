@@ -9,6 +9,14 @@ pub struct RootWidget {
 }
 
 impl Widget for RootWidget {
+  fn delete(&self) {
+    unimplemented!();
+  }
+
+  fn new(_: Option<WidgetWk>) {
+    unimplemented!();
+  }
+
   fn offset(&self) -> IPos {
     IPos::new(0, 0)
   }
