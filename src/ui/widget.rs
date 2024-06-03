@@ -25,7 +25,7 @@ pub mod root;
 /// * Descendant: either the child, or the child of some descendant of the node.
 /// * Sibling: nodes with the same parent.
 ///
-/// The widget tree structure guarantee:
+/// The widget tree structure guarantees:
 ///
 /// 1. Children will be destroyed when their parent is, and are also displayed inside their
 ///    parent's coordinate system, clipped by boundaries. Children are always on top of the canvas
