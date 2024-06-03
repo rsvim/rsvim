@@ -135,31 +135,6 @@ pub trait Widget {
 
   // } Relationship
 
-  // { Event
-
-  /// Receive a user keyboard/mouse event.
-  ///
-  /// Parent will first try to dispatch the event to the corresponding child based on the geometric
-  /// shape, i.e. if an event happens inside one of its children, parent will dispatch the event to
-  /// that child.
-  ///
-  /// If there're multiple children overlap on an event, the one with higher z-index value has
-  /// higher priority to receive and process the event.
-  ///
-  /// Child returns `true` indicates the event is been handled, and the parent or other overlapped
-  /// chidlren doesn't need to handle it. If the child also wants its parent to handle the event
-  /// (again), it has to explicitly call its parent's [`event()`](Widget::event()) method.
-  ///
-  /// Child returns `false` indicates the event is been ignored, and the parent will then try to
-  /// find the next child if there's overlapped to handle it, or handles the event by itself if no
-  /// children can handle it.
-  fn event(&mut self, event: Event) -> bool;
-
-  /// Bind a callback function to process user events.
-  fn bind(&mut self, callback: ) -> bool;
-
-  // } Event
-
   /// Draw the widget to terminal.
   fn draw(&self, t: &Terminal);
 }
