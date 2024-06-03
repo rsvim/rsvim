@@ -19,10 +19,10 @@ pub mod root;
 ///
 /// Here we have several terms:
 ///
-/// * Parent: the parent widget.
-/// * Child: the child widget.
-/// * Ancestor: either the parent, or the parent of some ancestor of the widget.
-/// * Descendant: either the child, or the child of some descendant of the widget.
+/// * Parent: the parent widget node.
+/// * Child: the child widget node.
+/// * Ancestor: either the parent, or the parent of some ancestor of the node.
+/// * Descendant: either the child, or the child of some descendant of the node.
 /// * Sibling: nodes with the same parent.
 ///
 /// The widget tree structure guarantee:
