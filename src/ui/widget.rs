@@ -15,7 +15,7 @@ pub mod root;
 /// rather than a visible entity.
 ///
 /// All widgets are maintained in a tree structure, i.e. the whole terminal is a root widget,
-/// everything inside it is children widgets, and nested recurse infinitely downwards.
+/// everything inside is its children widgets, and can nested recurse infinitely downwards.
 ///
 /// Here we have several terms:
 ///
