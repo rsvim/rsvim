@@ -1,8 +1,6 @@
-use std::sync::OnceLock;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 pub fn next() -> usize {
-  static GLOBAL: OnceLock<usize> = OnceLock::new();
-  let result: &usize = GLOBAL.get_or_init(|| 0usize);
-  GLOBAL.set(result + 1);
-  *result
+  static GLOBAL: AtomicUsize = AtomicUsize::new(0usize);
+  GLOBAL.fetch_add(0, Ordering::SeqCst)
 }
