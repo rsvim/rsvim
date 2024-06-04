@@ -40,7 +40,7 @@ pub mod root;
 ///    the one with higher [z-index](Widget::zindex()) has higher priority to display and receive
 ///    events.
 pub trait Widget {
-  // { Common attributes
+  // { Attributes
 
   /// Get unique ID of a widget instance.
   fn id(&self) -> usize;
@@ -106,7 +106,7 @@ pub trait Widget {
   /// explicitly disabled.
   fn set_enabled(&mut self, value: bool);
 
-  // } Common attributes
+  // } Attributes
 
   // { Relationship
 
@@ -129,8 +129,12 @@ pub trait Widget {
 
   // } Relationship
 
+  // { Contents
+
   /// Draw the widget to terminal.
   fn draw(&self, t: &Terminal);
+
+  // } Contents
 }
 
 /// Reference pointer for a [widget](Widget).
