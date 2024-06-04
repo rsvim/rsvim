@@ -71,11 +71,11 @@ impl Widget for RootWidget {
     todo!();
   }
 
-  fn find_children(&self, id: usize) -> Option<WidgetRw> {
+  fn find_children(&self, _id: usize) -> Option<WidgetRw> {
     None
   }
 
-  fn find_direct_children(&self, id: usize) -> Option<WidgetRw> {
+  fn find_direct_children(&self, _id: usize) -> Option<WidgetRw> {
     None
   }
 
