@@ -51,7 +51,7 @@ pub trait Widget {
   fn offset(&self) -> IPos;
 
   /// Set (relative) offset.
-  fn set_offset(&mut self, value: IPos) -> &mut Self;
+  fn set_offset(&mut self, value: IPos);
 
   /// Get absolute offset based on whole [terminal](crate::ui::term::Terminal).
   ///
@@ -62,7 +62,7 @@ pub trait Widget {
   fn size(&self) -> Size;
 
   /// Set size.
-  fn set_size(&mut self, value: Size) -> &mut Self;
+  fn set_size(&mut self, value: Size);
 
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.
@@ -74,7 +74,7 @@ pub trait Widget {
   fn zindex(&self) -> usize;
 
   /// Set z-index value.
-  fn set_zindex(&mut self, value: usize) -> &mut Self;
+  fn set_zindex(&mut self, value: usize);
 
   /// Whether the widget is visible.
   ///
@@ -89,7 +89,7 @@ pub trait Widget {
   ///
   /// Show a widget also implicitly shows all children and offsprings, unless they have been
   /// explicitly made invisible.
-  fn set_visible(&mut self, value: bool) -> &mut Self;
+  fn set_visible(&mut self, value: bool);
 
   /// Whether the widget is enabled.
   ///
@@ -104,7 +104,7 @@ pub trait Widget {
   ///
   /// Enable a widget also implicitly enables all children and offsprings, unless they have been
   /// explicitly disabled.
-  fn set_enabled(&mut self, value: bool) -> &mut Self;
+  fn set_enabled(&mut self, value: bool);
 
   // } Common attributes
 
@@ -113,19 +113,19 @@ pub trait Widget {
   /// Get parent.
   ///
   /// Root widget doesn't have a parent.
-  fn parent(&self) -> Option<WidgetWk>;
+  fn parent(&self) -> Option<WidgetRw>;
 
   /// Set/change parent.
-  fn set_parent(&mut self, parent: Option<WidgetWk>) -> &mut Self;
+  fn set_parent(&mut self, parent: Option<WidgetRw>);
 
   /// Get children.
-  fn children(&self) -> LinkedList<WidgetWk>;
+  fn children(&self) -> LinkedList<WidgetRw>;
 
   /// Find child and offspring widget by ID.
-  fn find_children(&self, id: usize) -> Option<WidgetWk>;
+  fn find_children(&self, id: usize) -> Option<WidgetRw>;
 
   /// Find direct child widget by ID, without offsprings.
-  fn find_direct_children(&self, id: usize) -> Option<WidgetWk>;
+  fn find_direct_children(&self, id: usize) -> Option<WidgetRw>;
 
   // } Relationship
 

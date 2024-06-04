@@ -2,26 +2,17 @@ use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
 use crate::id;
 use crate::ui::term::Terminal;
-use crate::ui::widget::{Widget, WidgetWk};
+use crate::ui::widget::{Widget, WidgetRw};
 use std::collections::LinkedList;
 
 pub struct RootWidget {
   id: usize,
-  offset: IPos,
   size: Size,
   visible: bool,
   enabled: bool,
 }
 
 impl Widget for RootWidget {
-  fn delete(&self) {
-    unimplemented!();
-  }
-
-  fn new(_: Option<WidgetWk>) -> dyn Widget {
-    unimplemented!();
-  }
-
   fn id(&self) -> usize {
     self.id
   }
@@ -30,9 +21,8 @@ impl Widget for RootWidget {
     IPos::new(0, 0)
   }
 
-  fn set_offset(&mut self, value: IPos) -> &mut Self {
-    self.offset = value;
-    self
+  fn set_offset(&mut self, _: IPos) {
+    unimplemented!();
   }
 
   fn abs_offset(&self) -> UPos {
@@ -43,54 +33,49 @@ impl Widget for RootWidget {
     self.size
   }
 
-  fn set_size(&mut self, value: Size) -> &mut Self {
+  fn set_size(&mut self, value: Size) {
     self.size = value;
-    self
   }
 
   fn zindex(&self) -> usize {
     0
   }
 
-  fn set_zindex(&mut self, _: usize) -> &mut Self {
-    self
-  }
+  fn set_zindex(&mut self, _: usize) {}
 
   fn visible(&self) -> bool {
     self.visible
   }
 
-  fn set_visible(&mut self, value: bool) -> &mut Self {
+  fn set_visible(&mut self, value: bool) {
     self.visible = value;
-    self
   }
 
   fn enabled(&self) -> bool {
     self.enabled
   }
 
-  fn set_enabled(&mut self, value: bool) -> &mut Self {
+  fn set_enabled(&mut self, value: bool) {
     self.enabled = value;
-    self
   }
 
-  fn parent(&self) -> Option<WidgetWk> {
+  fn parent(&self) -> Option<WidgetRw> {
     None
   }
 
-  fn set_parent(&mut self, _: Option<WidgetWk>) -> &mut Self {
-    self
+  fn set_parent(&mut self, _: Option<WidgetRw>) {
+    unimplemented!();
   }
 
-  fn children(&self) -> LinkedList<WidgetWk> {
+  fn children(&self) -> LinkedList<WidgetRw> {
     todo!();
   }
 
-  fn find_children(&self, id: usize) -> Option<WidgetWk> {
+  fn find_children(&self, id: usize) -> Option<WidgetRw> {
     None
   }
 
-  fn find_direct_children(&self, id: usize) -> Option<WidgetWk> {
+  fn find_direct_children(&self, id: usize) -> Option<WidgetRw> {
     None
   }
 
@@ -103,7 +88,6 @@ impl RootWidget {
   pub fn new(size: Size) -> Self {
     RootWidget {
       id: id::next(),
-      offset: IPos::new(0, 0),
       size,
       visible: true,
       enabled: true,
