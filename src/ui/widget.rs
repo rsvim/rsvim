@@ -137,14 +137,26 @@ pub trait Widget {
   // } Contents
 }
 
-/// Reference pointer for a [widget](Widget).
+/// Rc/RefCell
 pub type WidgetRc = Rc<RefCell<dyn Widget>>;
 
-/// Weak pointer for a [widget](Widget).
+/// Weak/RefCell
 pub type WidgetWk = Weak<RefCell<dyn Widget>>;
 
-/// Read/write (shared) pointer for a [widget](Widget).
+/// Arc/RwLock
 pub type WidgetRw = Arc<RwLock<dyn Widget>>;
 
-/// Exclusive pointer for a [widget](Widget).
+/// Arc/Mutex
 pub type WidgetMt = Arc<Mutex<dyn Widget>>;
+
+/// Rc/RefCell + LinkedList<Rc/RefCell>
+pub type ChildWidgetsRc = Rc<RefCell<LinkedList<WidgetRc>>>;
+
+/// Weak/RefCell + LinkedList<Rc/RefCell>
+pub type ChildWidgetsWk = Weak<RefCell<LinkedList<WidgetRc>>>;
+
+/// Arc/RwLock + LinkedList<Arc/RwLock>
+pub type ChildWidgetsRw = Arc<RwLock<LinkedList<WidgetRw>>>;
+
+/// Arc/Mutex + LinkedList<Arc/RwLock>
+pub type ChildWidgetsMt = Arc<Mutex<LinkedList<WidgetRw>>>;
