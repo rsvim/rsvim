@@ -7,6 +7,8 @@ use std::collections::LinkedList;
 
 pub struct RootWidget {
   id: usize,
+  offset: IPos,
+  abs_offset: UPos,
   size: Size,
   visible: bool,
   enabled: bool,
@@ -16,6 +18,8 @@ impl RootWidget {
   pub fn new(size: Size) -> Self {
     RootWidget {
       id: id::next(),
+      offset: IPos::new(0, 0),
+      abs_offset: UPos::new(0, 0),
       size,
       visible: true,
       enabled: true,
@@ -29,15 +33,13 @@ impl Widget for RootWidget {
   }
 
   fn offset(&self) -> IPos {
-    IPos::new(0, 0)
+    self.offset
   }
 
-  fn set_offset(&mut self, _: IPos) {
-    unimplemented!();
-  }
+  fn set_offset(&mut self, _: IPos) {}
 
   fn abs_offset(&self) -> UPos {
-    UPos::new(0, 0)
+    self.abs_offset
   }
 
   fn size(&self) -> Size {
