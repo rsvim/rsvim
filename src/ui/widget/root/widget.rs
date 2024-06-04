@@ -12,6 +12,17 @@ pub struct RootWidget {
   enabled: bool,
 }
 
+impl RootWidget {
+  pub fn new(size: Size) -> Self {
+    RootWidget {
+      id: id::next(),
+      size,
+      visible: true,
+      enabled: true,
+    }
+  }
+}
+
 impl Widget for RootWidget {
   fn id(&self) -> usize {
     self.id
@@ -81,16 +92,5 @@ impl Widget for RootWidget {
 
   fn draw(&self, _terminal: &Terminal) {
     todo!();
-  }
-}
-
-impl RootWidget {
-  pub fn new(size: Size) -> Self {
-    RootWidget {
-      id: id::next(),
-      size,
-      visible: true,
-      enabled: true,
-    }
   }
 }

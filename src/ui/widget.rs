@@ -143,4 +143,4 @@ pub type WidgetWk = Weak<RefCell<dyn Widget>>;
 pub type WidgetRw = Arc<RwLock<dyn Widget>>;
 
 /// Exclusive pointer for a [widget](Widget).
-pub type WidgetEx = Arc<Mutex<dyn Widget>>;
+pub type WidgetMt = Arc<Mutex<dyn Widget>>;
