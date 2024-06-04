@@ -119,7 +119,7 @@ pub trait Widget {
   fn set_parent(&mut self, parent: Option<WidgetRw>);
 
   /// Get children.
-  fn children(&self) -> LinkedList<WidgetRw>;
+  fn children(&self) -> ChildWidgetsRw;
 
   /// Find child and offspring widget by ID.
   fn find_children(&self, id: usize) -> Option<WidgetRw>;

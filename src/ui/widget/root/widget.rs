@@ -2,8 +2,9 @@ use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
 use crate::id;
 use crate::ui::term::Terminal;
-use crate::ui::widget::{Widget, WidgetRw};
+use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use std::collections::LinkedList;
+use std::sync::{Arc, Mutex, RwLock};
 
 pub struct RootWidget {
   id: usize,
@@ -12,6 +13,7 @@ pub struct RootWidget {
   size: Size,
   visible: bool,
   enabled: bool,
+  children: ChildWidgetsRw,
 }
 
 impl RootWidget {
@@ -23,6 +25,7 @@ impl RootWidget {
       size,
       visible: true,
       enabled: true,
+      children: Arc::new(RwLock::new(LinkedList::new())),
     }
   }
 }
@@ -80,8 +83,8 @@ impl Widget for RootWidget {
     unimplemented!();
   }
 
-  fn children(&self) -> LinkedList<WidgetRw> {
-    todo!();
+  fn children(&self) -> ChildWidgetsRw {
+    self.children.clone()
   }
 
   fn find_children(&self, _id: usize) -> Option<WidgetRw> {
