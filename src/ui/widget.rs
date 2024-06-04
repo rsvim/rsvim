@@ -119,7 +119,7 @@ pub trait Widget {
   fn set_parent(&mut self, parent: Option<WidgetRw>);
 
   /// Get children.
-  fn children(&self) -> ChildWidgetsMt;
+  fn children(&self) -> ChildWidgetsRw;
 
   /// Find child and offspring widget by ID.
   fn find_children(&self, id: usize) -> Option<WidgetRw>;
@@ -144,10 +144,10 @@ pub type WidgetRc = Rc<RefCell<dyn Widget>>;
 pub type WidgetWk = Weak<RefCell<dyn Widget>>;
 
 /// Arc/RwLock
-pub type WidgetRw = Arc<RwLock<dyn Widget>>;
+pub type WidgetRw = RwLock<Arc<dyn Widget>>;
 
 /// Arc/Mutex
-pub type WidgetMt = Arc<Mutex<dyn Widget>>;
+pub type WidgetMt = Mutex<Arc<dyn Widget>>;
 
 /// Rc/RefCell + LinkedList<Rc/RefCell>
 pub type ChildWidgetsRc = Rc<RefCell<LinkedList<WidgetRc>>>;
@@ -156,7 +156,7 @@ pub type ChildWidgetsRc = Rc<RefCell<LinkedList<WidgetRc>>>;
 pub type ChildWidgetsWk = Weak<RefCell<LinkedList<WidgetRc>>>;
 
 /// Arc/RwLock + LinkedList<Arc/RwLock>
-pub type ChildWidgetsRw = Arc<RwLock<LinkedList<WidgetRw>>>;
+pub type ChildWidgetsRw = RwLock<Arc<LinkedList<WidgetRw>>>;
 
 /// Arc/Mutex + LinkedList<Arc/RwLock>
-pub type ChildWidgetsMt = Arc<Mutex<LinkedList<WidgetRw>>>;
+pub type ChildWidgetsMt = Mutex<Arc<LinkedList<WidgetRw>>>;

@@ -25,7 +25,7 @@ impl RootWidget {
       size,
       visible: true,
       enabled: true,
-      children: Arc::new(RwLock::new(LinkedList::new())),
+      children: RwLock::new(Arc::new(LinkedList::new())),
     }
   }
 }
@@ -84,7 +84,7 @@ impl Widget for RootWidget {
   }
 
   fn children(&self) -> ChildWidgetsRw {
-    self.children.clone()
+    self.children.read().unwrap().clone().into()
   }
 
   fn find_children(&self, _id: usize) -> Option<WidgetRw> {
