@@ -32,8 +32,7 @@ pub mod root;
 ///    * Children are displayed inside their parent's geometric shape, clipped by boundaries.
 ///    * The [visible](Widget::visible()) and [enabled](Widget::enabled()) attributes are
 ///      implicitly controlled by parent, unless they're explicitly been set.
-/// 2. Children have higher priority to display and process user keyboard/mouse events than their
-///    parent.
+/// 2. Children have higher priority to display and process input events than their parent.
 ///    * Parent will first try to dispatch user events to the corresponding child if the event
 ///    happens within the range of the child's geometric shape. If the child doesn't process the
 ///    event, then parent will try to process it.
