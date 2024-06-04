@@ -27,29 +27,20 @@ pub mod root;
 ///
 /// The widget tree structure guarantees:
 ///
-/// 1. Children will be destroyed when their parent is, and are also displayed inside their
-///    parent's coordinate system, clipped by boundaries. Children are always on top of the canvas
-///    layer over their parent. For those who overlap each other, the one with higher
-///    [z-index](Widget::zindex()) has higher priority to display.
-/// 2. Parent will dispatch user events to corresponding child if an event happens within the range
-///    of the parent widget geometric shape. Each widget can bind handlers to process & update the
-///    data.
-/// 3. Children's attributes are by default inherited from their parent, if not explicitly set.
+/// 1. Parent owns its children.
+///    * Children will be destroyed when their parent is.
+///    * Children are displayed inside their parent's geometric shape, clipped by boundaries.
+///    * The [visible](Widget::visible()) and [enabled](Widget::enabled()) attributes are
+///      implicitly controlled by parent, unless they're explicitly been set.
+/// 2. Children have higher priority to display and process user keyboard/mouse events than their
+///    parent.
+///    * Parent will first try to dispatch user events to the corresponding child if the event
+///    happens within the range of the child's geometric shape. If the child doesn't process the
+///    event, then parent will try to process it.
+///    * Children are always displayed on top of their parent. For children that shade each other,
+///    the one with higher [z-index](Widget::zindex()) has higher priority to display and receive
+///    events.
 pub trait Widget {
-  // { Life cycle
-
-  /// Delete the widget itself (later), and remove it from parent.
-  ///
-  /// The widget cannot be just deleted right now, right here, due to life cycle management. For
-  /// logic level, user cannot use it after deleted, for system level, the memory will be released
-  /// after all references are removed.
-  fn delete(&self);
-
-  /// Create new widget based on the parent, with all default settings.
-  fn new(parent: Option<WidgetWk>) -> dyn Widget;
-
-  // } Life cycle
-
   // { Common attributes
 
   /// Get unique ID of a widget instance.
