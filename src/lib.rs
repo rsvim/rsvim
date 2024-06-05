@@ -7,3 +7,4 @@ pub mod geo;
 pub mod log;
 pub mod ui;
 pub mod uuid;
+pub mod vim;

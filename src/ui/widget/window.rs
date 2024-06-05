@@ -15,3 +15,17 @@ pub struct Window {
   enabled: bool,
   content: ChildWidgetsRw,
 }
+
+impl Window {
+  pub fn new(size: Size) -> Self {
+    Window {
+      id: uuid::next(),
+      offset: IPos::new(0, 0),
+      abs_offset: UPos::new(0, 0),
+      size,
+      visible: true,
+      enabled: true,
+      children: Arc::new(RwLock::new(vec![])),
+    }
+  }
+}

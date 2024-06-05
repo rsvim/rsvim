@@ -1,0 +1,3 @@
+//! Vim.
+
+pub mod buffer;
