@@ -138,26 +138,18 @@ pub trait Widget {
   // } Contents
 }
 
-/// Rc/RefCell
 pub type WidgetRc = Rc<RefCell<dyn Widget>>;
 
-/// Weak/RefCell
 pub type WidgetWk = Weak<RefCell<dyn Widget>>;
 
-/// Arc/RwLock
 pub type WidgetRw = Arc<RwLock<dyn Widget>>;
 
-/// Arc/Mutex
 pub type WidgetMt = Arc<Mutex<dyn Widget>>;
 
-/// Rc/RefCell + Vec<Rc/RefCell>
 pub type ChildWidgetsRc = Rc<RefCell<Vec<WidgetRc>>>;
 
-/// Weak/RefCell + Vec<Rc/RefCell>
 pub type ChildWidgetsWk = Weak<RefCell<Vec<WidgetRc>>>;
 
-/// Arc/RwLock + Vec<Arc/RwLock>
 pub type ChildWidgetsRw = Arc<RwLock<Vec<WidgetRw>>>;
 
-/// Arc/Mutex + Vec<Arc/RwLock>
 pub type ChildWidgetsMt = Arc<Mutex<Vec<WidgetRw>>>;
