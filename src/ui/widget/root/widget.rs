@@ -3,8 +3,7 @@ use crate::geo::size::Size;
 use crate::id;
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
-use std::collections::LinkedList;
-use std::sync::{Arc, Mutex, RwLock};
+use std::sync::{Arc, RwLock};
 
 pub struct RootWidget {
   id: usize,
@@ -25,7 +24,7 @@ impl RootWidget {
       size,
       visible: true,
       enabled: true,
-      children: RwLock::new(Arc::new(LinkedList::new())),
+      children: RwLock::new(Arc::new(vec![])),
     }
   }
 }

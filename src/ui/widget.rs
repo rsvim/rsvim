@@ -4,9 +4,9 @@ use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
 use crate::ui::term::Terminal;
 use std::cell::RefCell;
-use std::collections::LinkedList;
 use std::rc::{Rc, Weak};
 use std::sync::{Arc, Mutex, RwLock};
+use std::vec::Vec;
 
 pub mod root;
 pub mod window;
@@ -150,14 +150,14 @@ pub type WidgetRw = RwLock<Arc<dyn Widget>>;
 /// Arc/Mutex
 pub type WidgetMt = Mutex<Arc<dyn Widget>>;
 
-/// Rc/RefCell + LinkedList<Rc/RefCell>
-pub type ChildWidgetsRc = Rc<RefCell<LinkedList<WidgetRc>>>;
+/// Rc/RefCell + Vec<Rc/RefCell>
+pub type ChildWidgetsRc = Rc<RefCell<Vec<WidgetRc>>>;
 
-/// Weak/RefCell + LinkedList<Rc/RefCell>
-pub type ChildWidgetsWk = Weak<RefCell<LinkedList<WidgetRc>>>;
+/// Weak/RefCell + Vec<Rc/RefCell>
+pub type ChildWidgetsWk = Weak<RefCell<Vec<WidgetRc>>>;
 
-/// Arc/RwLock + LinkedList<Arc/RwLock>
-pub type ChildWidgetsRw = RwLock<Arc<LinkedList<WidgetRw>>>;
+/// Arc/RwLock + Vec<Arc/RwLock>
+pub type ChildWidgetsRw = RwLock<Arc<Vec<WidgetRw>>>;
 
-/// Arc/Mutex + LinkedList<Arc/RwLock>
-pub type ChildWidgetsMt = Mutex<Arc<LinkedList<WidgetRw>>>;
+/// Arc/Mutex + Vec<Arc/RwLock>
+pub type ChildWidgetsMt = Mutex<Arc<Vec<WidgetRw>>>;
