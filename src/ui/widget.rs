@@ -145,10 +145,10 @@ pub type WidgetRc = Rc<RefCell<dyn Widget>>;
 pub type WidgetWk = Weak<RefCell<dyn Widget>>;
 
 /// Arc/RwLock
-pub type WidgetRw = RwLock<Arc<dyn Widget>>;
+pub type WidgetRw = Arc<RwLock<dyn Widget>>;
 
 /// Arc/Mutex
-pub type WidgetMt = Mutex<Arc<dyn Widget>>;
+pub type WidgetMt = Arc<Mutex<dyn Widget>>;
 
 /// Rc/RefCell + Vec<Rc/RefCell>
 pub type ChildWidgetsRc = Rc<RefCell<Vec<WidgetRc>>>;
@@ -157,7 +157,7 @@ pub type ChildWidgetsRc = Rc<RefCell<Vec<WidgetRc>>>;
 pub type ChildWidgetsWk = Weak<RefCell<Vec<WidgetRc>>>;
 
 /// Arc/RwLock + Vec<Arc/RwLock>
-pub type ChildWidgetsRw = RwLock<Arc<Vec<WidgetRw>>>;
+pub type ChildWidgetsRw = Arc<RwLock<Vec<WidgetRw>>>;
 
 /// Arc/Mutex + Vec<Arc/RwLock>
-pub type ChildWidgetsMt = Mutex<Arc<Vec<WidgetRw>>>;
+pub type ChildWidgetsMt = Arc<Mutex<Vec<WidgetRw>>>;

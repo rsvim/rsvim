@@ -1,8 +1,8 @@
 use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
-use crate::id;
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
+use crate::uuid;
 use std::sync::{Arc, RwLock};
 
 pub struct RootWidget {
@@ -18,13 +18,13 @@ pub struct RootWidget {
 impl RootWidget {
   pub fn new(size: Size) -> Self {
     RootWidget {
-      id: id::next(),
+      id: uuid::next(),
       offset: IPos::new(0, 0),
       abs_offset: UPos::new(0, 0),
       size,
       visible: true,
       enabled: true,
-      children: RwLock::new(Arc::new(vec![])),
+      children: Arc::new(RwLock::new(vec![])),
     }
   }
 }
@@ -83,7 +83,7 @@ impl Widget for RootWidget {
   }
 
   fn children(&self) -> ChildWidgetsRw {
-    self.children.read().unwrap().clone().into()
+    self.children.clone()
   }
 
   fn find_children(&self, _id: usize) -> Option<WidgetRw> {
