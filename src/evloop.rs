@@ -3,7 +3,7 @@
 #![allow(unused_imports, dead_code)]
 use crate::geo::size::Size;
 use crate::ui::term::Terminal;
-use crate::ui::widget::root::widget::RootWidget;
+use crate::ui::widget::root::RootWidget;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode,

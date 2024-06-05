@@ -40,7 +40,9 @@ impl Widget for RootWidget {
     self.offset
   }
 
-  fn set_offset(&mut self, _: IPos) {}
+  fn set_offset(&mut self, _offset: IPos) {
+    unimplemented!();
+  }
 
   fn abs_offset(&self) -> UPos {
     self.abs_offset
@@ -58,7 +60,7 @@ impl Widget for RootWidget {
     0
   }
 
-  fn set_zindex(&mut self, _: usize) {}
+  fn set_zindex(&mut self, _zindex: usize) {}
 
   fn visible(&self) -> bool {
     self.visible
@@ -80,7 +82,7 @@ impl Widget for RootWidget {
     None
   }
 
-  fn set_parent(&mut self, _: Option<WidgetRw>) {
+  fn set_parent(&mut self, _parent: Option<WidgetRw>) {
     unimplemented!();
   }
 
