@@ -9,6 +9,7 @@ use std::rc::{Rc, Weak};
 use std::sync::{Arc, Mutex, RwLock};
 
 pub mod root;
+pub mod window;
 
 /// Widget is the base trait for all UI components, it provide a common layer for receiving user
 /// events (keyboard/mouse), and rendering itself on terminal. It is more of a logical container
