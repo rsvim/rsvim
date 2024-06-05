@@ -36,9 +36,9 @@ pub mod root;
 ///    * Parent will first try to dispatch user events to the corresponding child if the event
 ///    happens within the range of the child's geometric shape. If the child doesn't process the
 ///    event, then parent will try to process it.
-///    * Children are always displayed on top of their parent. For children that shade each other,
-///    the one with higher [z-index](Widget::zindex()) has higher priority to display and receive
-///    events.
+///    * Children are always displayed on top of their parent.
+///    * For children that shade each other, the one with higher [z-index](Widget::zindex()) has
+///      higher priority to display and receive events.
 pub trait Widget {
   // { Attributes
 
