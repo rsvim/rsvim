@@ -1,10 +1,6 @@
 use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
-use crate::ui::term::Terminal;
-use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
-use std::sync::{Arc, Mutex, RwLock};
-use std::vec::Vec;
 
 pub struct Window {
   id: usize,
@@ -13,7 +9,6 @@ pub struct Window {
   size: Size,
   visible: bool,
   enabled: bool,
-  content: ChildWidgetsRw,
 }
 
 impl Window {
@@ -25,7 +20,6 @@ impl Window {
       size,
       visible: true,
       enabled: true,
-      children: Arc::new(RwLock::new(vec![])),
     }
   }
 }
