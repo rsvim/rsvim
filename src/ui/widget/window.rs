@@ -82,12 +82,9 @@ impl Widget for Window {
     Some(self.parent.clone())
   }
 
-  fn set_parent(&mut self, value: Option<WidgetRw>) {
-    match value {
-      Some(p) => {
-        self.parent = p;
-      }
-      _ => {}
+  fn set_parent(&mut self, parent: Option<WidgetRw>) {
+    if let Some(p) = parent {
+      self.parent = p;
     }
   }
 
