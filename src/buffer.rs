@@ -1,3 +1,3 @@
-//! Vim Buffer.
+//! The VIM buffer.
 
 pub struct Buffer {}
