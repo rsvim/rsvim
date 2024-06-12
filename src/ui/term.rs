@@ -1,7 +1,7 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use crate::geo::size::Size;
-use crate::ui::buf::Buf;
+use crate::ui::frame::Buf;
 use crossterm::cursor;
 use crossterm::event::{Event, KeyCode};
 use tracing::debug;
