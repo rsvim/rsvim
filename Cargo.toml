@@ -38,6 +38,7 @@ tempfile = "3"
 lazy_static = "1.4.0"
 bytes = { version = "1", features = ["serde"] }
 compact_str = { version = "0.7.1", features = ["serde", "bytes"] }
+ropey = "1.6.1"
 
 [dev-dependencies]
 mockall = "0.12.1"
