@@ -1,35 +1,14 @@
 //! The VIM buffer.
 
 use ropey::Rope;
-use std::io::{Read, Result as IoResult, Write};
 
 pub struct Buffer {
-  rope: Rope,
+  pub rope: Rope,
 }
 
 impl Buffer {
-  fn from_str(text: &str) -> Self {
-    Buffer {
-      rope: Rope::from_str(text),
-    }
-  }
-
-  fn from_reader<T>(reader: T) -> IoResult<Self>
-  where
-    T: Read,
-  {
-    let res = Rope::from_reader(reader);
-    match res {
-      Ok(rope) => Ok(Buffer { rope }),
-      Err(e) => Err(e),
-    }
-  }
-
-  fn write_to<T>(&self, writer: T) -> IoResult<()>
-  where
-    T: Write,
-  {
-    self.rope.write_to(writer)
+  fn new(rope: Rope) -> Self {
+    Buffer { rope }
   }
 }
 
@@ -41,8 +20,14 @@ mod tests {
 
   #[test]
   fn should_be_equal_on_read_and_write() {
-    let buf1 = Buffer::from_str("Hello");
+    let rop1 = Rope::from_str("Hello");
+    let buf1 = Buffer::new(rop1);
     let tmp1 = tempfile().unwrap();
-    buf1.write_to(tmp1).unwrap();
+    buf1.rope.write_to(tmp1).unwrap();
+
+    let rop2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
+    let buf2 = Buffer::new(rop2);
+    let tmp2 = tempfile().unwrap();
+    buf2.rope.write_to(tmp2).unwrap();
   }
 }
