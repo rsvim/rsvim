@@ -10,7 +10,7 @@ use crossterm::event::{
 };
 use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
-use std::io::Write;
+use std::io::{Result as IoResult, Write};
 use tracing::debug;
 
 pub struct EventLoop {
@@ -19,7 +19,7 @@ pub struct EventLoop {
 }
 
 impl EventLoop {
-  pub fn new() -> std::io::Result<Self> {
+  pub fn new() -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
     let size = Size::new(rows as usize, cols as usize);
     let screen = Terminal::new(size);
@@ -27,7 +27,7 @@ impl EventLoop {
     Ok(EventLoop { screen, root })
   }
 
-  pub async fn run(&mut self) -> std::io::Result<()> {
+  pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
     loop {
       tokio::select! {

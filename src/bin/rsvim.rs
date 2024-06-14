@@ -11,10 +11,10 @@ use crossterm::{cursor, queue, terminal};
 use futures::StreamExt;
 use rsvim::evloop::EventLoop;
 use rsvim::ui::term::Terminal;
-use std::io::Write;
+use std::io::{Result as IoResult, Write};
 use tracing::debug;
 
-pub async fn init() -> std::io::Result<()> {
+pub async fn init() -> IoResult<()> {
   if !terminal::is_raw_mode_enabled()? {
     terminal::enable_raw_mode()?;
   }
@@ -38,7 +38,7 @@ pub async fn init() -> std::io::Result<()> {
   Ok(())
 }
 
-pub async fn shutdown() -> std::io::Result<()> {
+pub async fn shutdown() -> IoResult<()> {
   let mut out = std::io::stdout();
   queue!(
     out,
@@ -56,7 +56,7 @@ pub async fn shutdown() -> std::io::Result<()> {
   Ok(())
 }
 
-pub async fn run(t: &mut Terminal) -> std::io::Result<()> {
+pub async fn run(t: &mut Terminal) -> IoResult<()> {
   let mut reader = EventStream::new();
   loop {
     tokio::select! {
@@ -78,7 +78,7 @@ pub async fn run(t: &mut Terminal) -> std::io::Result<()> {
 }
 
 #[tokio::main]
-async fn main() -> std::io::Result<()> {
+async fn main() -> IoResult<()> {
   let cli = cli::Cli::parse();
   log::init(&cli);
   debug!("cli: {:?}", cli);
