@@ -155,7 +155,11 @@ pub struct Frame<'a> {
   pub buf: &'a Buf,
 }
 
-impl<'a> Frame<'a> {}
+impl<'a> Frame<'a> {
+  fn new(buf: &'a Buf) -> Self {
+    Frame { buf }
+  }
+}
 
 #[cfg(test)]
 mod tests {
