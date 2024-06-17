@@ -18,27 +18,27 @@ impl Rect {
     Rect { pos, size }
   }
 
-  /// Same as [self.pos.x](UPos::x).
+  /// Same as `self.pos.x`.
   pub fn x(&self) -> usize {
     self.pos.x
   }
 
-  /// Same as [self.pos.y](UPos::y).
+  /// Same as `self.pos.y`.
   pub fn y(&self) -> usize {
     self.pos.y
   }
 
-  /// Same as [self.size.height](Size::height).
+  /// Same as `self.size.height`.
   pub fn height(&self) -> usize {
     self.size.height
   }
 
-  /// Same as [self.size.width](Size::width).
+  /// Same as `self.size.width`.
   pub fn width(&self) -> usize {
     self.size.width
   }
 
-  /// Same as [self.size.area()](Size::area()).
+  /// Same as `self.size.area()`.
   pub fn area(&self) -> usize {
     self.size.area()
   }
