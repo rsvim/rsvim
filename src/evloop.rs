@@ -15,7 +15,7 @@ use tracing::debug;
 
 pub struct EventLoop {
   screen: Terminal,
-  root: RootWidget,
+  root_widget: RootWidget,
 }
 
 impl EventLoop {
@@ -23,8 +23,11 @@ impl EventLoop {
     let (cols, rows) = terminal::size()?;
     let size = Size::new(rows as usize, cols as usize);
     let screen = Terminal::new(size);
-    let root = RootWidget::new(size);
-    Ok(EventLoop { screen, root })
+    let root_widget = RootWidget::new(size);
+    Ok(EventLoop {
+      screen,
+      root_widget,
+    })
   }
 
   pub async fn run(&mut self) -> IoResult<()> {
