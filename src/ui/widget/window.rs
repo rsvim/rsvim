@@ -1,3 +1,5 @@
+//! The Vim window.
+
 use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
 use crate::ui::term::Terminal;

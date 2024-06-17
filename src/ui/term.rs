@@ -1,22 +1,22 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use crate::geo::size::Size;
-use crate::ui::frame::Buf;
+use crate::ui::frame::Frame;
 use crossterm::cursor;
 use crossterm::event::{Event, KeyCode};
 use tracing::debug;
 
 /// Backend terminal
 pub struct Terminal {
-  buf: Buf,
-  prev_buf: Buf,
+  buf: Frame,
+  prev_buf: Frame,
 }
 
 impl Terminal {
   pub fn new(size: Size) -> Self {
     Terminal {
-      prev_buf: Buf::new(size),
-      buf: Buf::new(size),
+      prev_buf: Frame::new(size),
+      buf: Frame::new(size),
     }
   }
 

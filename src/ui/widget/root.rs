@@ -1,5 +1,6 @@
-//! Root widget as a root UI container for all other widgets.
-//! It always exists along with RSVIM, as long as it runs in non-headless and interactive (non-batch-processing) mode.
+//! Root widget is the root UI container for all other widgets.
+//! It always exists along with RSVIM, as long as it runs in non-headless and interactive
+//! (non-batch-processing) mode.
 
 use crate::geo::pos::{IPos, UPos};
 use crate::geo::size::Size;
