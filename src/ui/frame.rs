@@ -125,7 +125,7 @@ pub struct Cursor {
 }
 
 struct CursorStyleFormatter {
-  pub style: SetCursorStyle,
+  style: SetCursorStyle,
 }
 
 impl From<SetCursorStyle> for CursorStyleFormatter {
