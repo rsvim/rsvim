@@ -1,7 +1,7 @@
 //! Coordinates system: x/y, also known as row/column.
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-/// Coordinates system on [terminal](crate::ui::term::Terminal).
+/// Position on a coordinates system of a terminal.
 pub struct Pos<T> {
   /// Also known as the column number.
   pub x: T,

@@ -97,15 +97,15 @@ impl Default for Cell {
 /// then flushed to terminal. Terminal will save the previous buffer after flushed, and use it to
 /// diff with next buffer, to find out difference and only flush those changed/dirty parts to
 /// backend device.
-pub struct Buf {
+pub struct Frame {
   pub size: Size,
   pub cells: Vec<Cell>,
 }
 
-impl Buf {
+impl Frame {
   /// Make new buffer with [size](crate::geo::size::Size).
   pub fn new(size: Size) -> Self {
-    Buf {
+    Frame {
       size,
       cells: vec![Cell::default(); size.area()],
     }
@@ -151,16 +151,6 @@ impl Buf {
   }
 }
 
-pub struct Frame<'a> {
-  pub buf: &'a Buf,
-}
-
-impl<'a> Frame<'a> {
-  fn new(buf: &'a Buf) -> Self {
-    Frame { buf }
-  }
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -177,7 +167,7 @@ mod tests {
   #[test]
   fn should_equal_on_buffer_new() {
     let sz = Size::new(1, 2);
-    let b = Buf::new(sz);
+    let b = Frame::new(sz);
     assert_eq!(b.size.height, 1);
     assert_eq!(b.size.width, 2);
     assert_eq!(b.size.area(), 2);
@@ -185,6 +175,5 @@ mod tests {
     for c in b.cells.iter() {
       assert_eq!(c.symbol(), Cell::default().symbol());
     }
-    let f = Frame::new(&b);
   }
 }
