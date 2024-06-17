@@ -4,6 +4,7 @@ use crate::geo::pos::UPos;
 use crate::geo::size::Size;
 use compact_str::CompactString;
 use crossterm::style::{Attributes, Color};
+use std::vec::Splice;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// Single character/grapheme rendering unit, it accepts ansi/unicode/emoji/nerd font symbol.
@@ -22,54 +23,59 @@ pub struct Cell {
 }
 
 impl Cell {
-  /// Symbol getter.
+  /// Get symbol.
   pub fn symbol(&self) -> &str {
     self.symbol.as_str()
   }
 
-  /// Symbol setter.
+  /// Set symbol.
   pub fn set_symbol(&mut self, symbol: &str) -> &mut Self {
     self.symbol = CompactString::new(symbol);
+    self.dirty = true;
     self
   }
 
-  /// Symbol setter (by char).
+  /// Set symbol by char.
   pub fn set_char(&mut self, ch: char) -> &mut Self {
     let mut buf = [0; 4];
     self.symbol = CompactString::new(ch.encode_utf8(&mut buf));
+    self.dirty = true;
     self
   }
 
-  /// Foreground color getter.
+  /// Get foreground color.
   pub fn fg(&self) -> Color {
     self.fg
   }
 
-  /// Foreground color setter.
+  /// Set foreground color.
   pub fn set_fg(&mut self, color: Color) -> &mut Self {
     self.fg = color;
+    self.dirty = true;
     self
   }
 
-  /// Background color getter.
+  /// Get background color.
   pub fn bg(&self) -> Color {
     self.bg
   }
 
-  /// Background color setter.
+  /// Set background color.
   pub fn set_bg(&mut self, color: Color) -> &mut Self {
     self.bg = color;
+    self.dirty = true;
     self
   }
 
-  /// Attributes setter.
+  /// Get attributes.
   pub fn attrs(&self) -> Attributes {
     self.attrs
   }
 
-  /// Attributes setter.
+  /// Set attributes.
   pub fn set_attrs(&mut self, attrs: Attributes) -> &mut Self {
     self.attrs = attrs;
+    self.dirty = true;
     self
   }
 
@@ -93,17 +99,15 @@ impl Default for Cell {
 }
 
 #[derive(Debug, Clone)]
-/// Rendering buffer, all UI components will first write symbols/grapheme/characters to a buffer,
-/// then flushed to terminal. Terminal will save the previous buffer after flushed, and use it to
-/// diff with next buffer, to find out difference and only flush those changed/dirty parts to
-/// backend device.
+/// Rendering buffer & cursor for the whole terminal.
+/// All UI components will dump their text contents to a frame first, then flush to terminal.
 pub struct Frame {
   pub size: Size,
   pub cells: Vec<Cell>,
 }
 
 impl Frame {
-  /// Make new buffer with [size](crate::geo::size::Size).
+  /// Make new frame with size.
   pub fn new(size: Size) -> Self {
     Frame {
       size,
@@ -111,17 +115,17 @@ impl Frame {
     }
   }
 
-  /// Get the cell.
+  /// Get a cell on specific position.
   pub fn get_cell(&self, pos: UPos) -> &Cell {
     &self.cells[pos.x * pos.y]
   }
 
-  /// Get the mutable cell.
+  /// Get a mutable cell on specific position.
   pub fn mut_get_cell(&mut self, pos: UPos) -> &mut Cell {
     &mut self.cells[pos.x * pos.y]
   }
 
-  /// Set the cell.
+  /// Set a cell on specific position.
   pub fn set_cell(&mut self, pos: UPos, cell: Cell) -> &mut Self {
     self.cells[pos.x * pos.y] = cell;
     self
@@ -141,13 +145,16 @@ impl Frame {
     &mut self.cells[start_at..end_at]
   }
 
-  /// Set n continuously cells, start from position.
+  /// Set continuously cells, start from position.
   /// Returns n old cells.
-  pub fn set_cells(&mut self, pos: UPos, cells: Vec<Cell>) -> &mut Self {
+  pub fn set_cells(
+    &mut self,
+    pos: UPos,
+    cells: Vec<Cell>,
+  ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter> {
     let start_at = pos.x * pos.y;
     let end_at = start_at + cells.len();
-    self.cells.splice(start_at..end_at, cells);
-    self
+    self.cells.splice(start_at..end_at, cells)
   }
 }
 
