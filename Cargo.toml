@@ -20,7 +20,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
 tracing-core = "0.1.32"
 tokio = { version = "1", features = ["full"] }
-clap = { version = "4.5.4", features = ["derive", "unicode"] }
+clap = { version = "4.5.7", features = ["derive", "unicode"] }
 futures = "0.3"
 time = { version = "0.3.36", features = [
   "std",
@@ -33,7 +33,7 @@ time = { version = "0.3.36", features = [
 tzdb = { version = "0.6.1", features = ["local"] }
 tz-rs = "0.6.14"
 rand = "0.8.5"
-heed = "0.20.1"
+heed = "0.20.2"
 tempfile = "3"
 lazy_static = "1.4.0"
 bytes = { version = "1", features = ["serde"] }
