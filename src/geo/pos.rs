@@ -1,4 +1,4 @@
-//! Coordinates system: x/y, also known as row/column.
+//! Coordinates system: X/Y, also known as row/column.
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Position on a coordinates system of a terminal.
