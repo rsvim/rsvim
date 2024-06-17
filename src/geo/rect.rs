@@ -6,9 +6,9 @@ use crate::geo::size::Size;
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
 /// Rectangle.
 pub struct Rect {
-  /// Rectangle [position](UPos).
+  /// Rectangle top-left corner's position.
   pub pos: UPos,
-  /// Rectangle [size](Size).
+  /// Rectangle's size.
   pub size: Size,
 }
 
