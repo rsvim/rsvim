@@ -7,6 +7,7 @@ use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
 use std::sync::{Arc, RwLock};
 
+/// The Vim window.
 pub struct Window {
   id: usize,
   offset: IPos,

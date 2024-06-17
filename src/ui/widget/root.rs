@@ -9,6 +9,7 @@ use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
 use std::sync::{Arc, RwLock};
 
+/// Root widget.
 pub struct RootWidget {
   id: usize,
   offset: IPos,

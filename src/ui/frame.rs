@@ -1,4 +1,4 @@
-//! Rendering cell and buffer.
+//! Terminal rendering frame.
 
 use crate::geo::pos::UPos;
 use crate::geo::size::Size;
@@ -16,8 +16,8 @@ pub struct Cell {
   pub bg: Color,
   /// Attributes: underline, bold, italic, etc.
   pub attrs: Attributes,
-  /// Indicate whether this cell is been modified, other UI components will modify a cell and make
-  /// it dirty, and it revert to clean after been flushed to terminal.
+  /// Indicates whether this cell is been modified, other UI components will modify a cell and make
+  /// it dirty, and it comes back to clean after been flushed to terminal.
   pub dirty: bool,
 }
 
