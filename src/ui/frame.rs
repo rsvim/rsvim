@@ -182,8 +182,9 @@ mod tests {
     assert_eq!(b.size.width, 2);
     assert_eq!(b.size.area(), 2);
     assert_eq!(b.cells.len(), b.size.area());
-    for c in b.cells.into_iter() {
-      assert_eq!(c, Cell::default());
+    for c in b.cells.iter() {
+      assert_eq!(c.symbol(), Cell::default().symbol());
     }
+    let f = Frame::new(&b);
   }
 }
