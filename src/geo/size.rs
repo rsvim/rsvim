@@ -1,6 +1,6 @@
 //! Rectangle size: height/width, also known as rows/columns.
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// Rectangle size.
 pub struct Size {
   /// Also known as rows.

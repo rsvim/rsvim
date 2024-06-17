@@ -3,8 +3,10 @@
 use crate::geo::pos::UPos;
 use crate::geo::size::Size;
 use compact_str::CompactString;
+use crossterm::cursor::SetCursorStyle;
 use crossterm::style::{Attributes, Color};
 use std::vec::Splice;
+use std::{cmp, fmt, hash};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// Single character/grapheme rendering unit, it accepts ansi/unicode/emoji/nerd font symbol.
@@ -98,12 +100,80 @@ impl Default for Cell {
   }
 }
 
+#[derive(Copy, Clone)]
+pub struct Cursor {
+  pub pos: UPos,
+  pub blinking: bool,
+  pub hidden: bool,
+  pub saved_pos: Option<UPos>,
+  pub style: SetCursorStyle,
+}
+
+struct CursorStyleFormatter {
+  pub style: SetCursorStyle,
+}
+
+impl From<SetCursorStyle> for CursorStyleFormatter {
+  fn from(style: SetCursorStyle) -> Self {
+    CursorStyleFormatter { style }
+  }
+}
+
+impl fmt::Debug for CursorStyleFormatter {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+    write!(f, "{}", self.style)
+  }
+}
+
+impl Cursor {}
+
+impl fmt::Debug for Cursor {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+    let style_formatter = CursorStyleFormatter::from(self.style);
+    f.debug_struct("Cursor")
+      .field("pos", &self.pos)
+      .field("blinking", &self.blinking)
+      .field("hidden", &self.hidden)
+      .field("saved_pos", &self.saved_pos)
+      .field("style", &style_formatter)
+      .finish()
+  }
+}
+
+impl cmp::PartialEq for Cursor {
+  /// Whether equals to other.
+  fn eq(&self, other: &Self) -> bool {
+    self.pos == other.pos
+  }
+}
+
+impl cmp::Eq for Cursor {}
+
+impl cmp::PartialOrd for Cursor {
+  fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
+    self.pos.partial_cmp(&other.pos)
+  }
+}
+
+impl cmp::Ord for Cursor {
+  fn cmp(&self, other: &Self) -> cmp::Ordering {
+    self.pos.cmp(&other.pos)
+  }
+}
+
+impl hash::Hash for Cursor {
+  fn hash<H: hash::Hasher>(&self, state: &mut H) {
+    self.pos.hash(state);
+  }
+}
+
 #[derive(Debug, Clone)]
 /// Rendering buffer & cursor for the whole terminal.
 /// All UI components will dump their text contents to a frame first, then flush to terminal.
 pub struct Frame {
   pub size: Size,
   pub cells: Vec<Cell>,
+  pub cursor: Cursor,
 }
 
 impl Frame {

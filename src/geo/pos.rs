@@ -1,18 +1,18 @@
 //! Coordinates system: X/Y, also known as row/column.
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// Position on a coordinates system of a terminal.
 pub struct Pos<T> {
-  /// Also known as the column number.
-  pub x: T,
   /// Also known as the row number.
   pub y: T,
+  /// Also known as the column number.
+  pub x: T,
 }
 
 impl<T> Pos<T> {
   /// Create new position from x and y.
   pub fn new(x: T, y: T) -> Self {
-    Pos { x, y }
+    Pos { y, x }
   }
 }
 

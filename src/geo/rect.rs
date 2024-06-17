@@ -3,7 +3,7 @@
 use crate::geo::pos::UPos;
 use crate::geo::size::Size;
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 /// Rectangle.
 pub struct Rect {
   /// Rectangle top-left corner's position.
