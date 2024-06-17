@@ -10,7 +10,7 @@ pub struct Pos<T> {
 }
 
 impl<T> Pos<T> {
-  /// Create new [position](Pos) from [x](Pos::x) and [y](Pos::y).
+  /// Create new position from x and y.
   pub fn new(x: T, y: T) -> Self {
     Pos { x, y }
   }
