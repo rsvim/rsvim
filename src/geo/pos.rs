@@ -16,10 +16,10 @@ impl<T> Pos<T> {
   }
 }
 
-/// Relative position, the coordinates ([x](IPos::x)/[y](IPos::y)) could be negative.
+/// Relative position, the X/Y-axis value could be negative.
 pub type IPos = Pos<isize>;
 
-/// Absolute position, the coordinates ([x](UPos::x)/[y](UPos::y)) are always non-negative.
+/// Absolute position, the X/Y-axis value are always non-negative.
 pub type UPos = Pos<usize>;
 
 #[cfg(test)]
