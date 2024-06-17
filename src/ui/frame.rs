@@ -100,13 +100,28 @@ impl Default for Cell {
   }
 }
 
+impl Cell {
+  fn new(symbol: CompactString, fg: Color, bg: Color, attrs: Attributes) -> Self {
+    Cell {
+      symbol,
+      fg,
+      bg,
+      attrs,
+      dirty: true,
+    }
+  }
+}
+
 #[derive(Copy, Clone)]
+/// Terminal cursor.
+/// Note: This is the real cursor of the terminal device, not a virtual one in multiple cursors.
 pub struct Cursor {
   pub pos: UPos,
   pub blinking: bool,
   pub hidden: bool,
   pub saved_pos: Option<UPos>,
   pub style: SetCursorStyle,
+  pub dirty: bool,
 }
 
 struct CursorStyleFormatter {
@@ -125,7 +140,31 @@ impl fmt::Debug for CursorStyleFormatter {
   }
 }
 
-impl Cursor {}
+impl Cursor {
+  fn new(pos: UPos, blinking: bool, hidden: bool, style: SetCursorStyle) -> Self {
+    Cursor {
+      pos,
+      blinking,
+      hidden,
+      saved_pos: None,
+      style,
+      dirty: true,
+    }
+  }
+}
+
+impl Default for Cursor {
+  fn default() -> Self {
+    Cursor {
+      pos: UPos::new(0, 0),
+      blinking: false,
+      hidden: false,
+      saved_pos: None,
+      style: SetCursorStyle::DefaultUserShape,
+      dirty: true,
+    }
+  }
+}
 
 impl fmt::Debug for Cursor {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
@@ -178,10 +217,11 @@ pub struct Frame {
 
 impl Frame {
   /// Make new frame with size.
-  pub fn new(size: Size) -> Self {
+  pub fn new(size: Size, cursor: Cursor) -> Self {
     Frame {
       size,
       cells: vec![Cell::default(); size.area()],
+      cursor,
     }
   }
 
@@ -244,7 +284,7 @@ mod tests {
   #[test]
   fn should_equal_on_buffer_new() {
     let sz = Size::new(1, 2);
-    let b = Frame::new(sz);
+    let b = Frame::new(sz, Cursor::default());
     assert_eq!(b.size.height, 1);
     assert_eq!(b.size.width, 2);
     assert_eq!(b.size.area(), 2);
