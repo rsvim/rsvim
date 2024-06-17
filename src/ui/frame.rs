@@ -151,6 +151,12 @@ impl Buf {
   }
 }
 
+pub struct Frame<'a> {
+  pub buf: &'a Buf,
+}
+
+impl<'a> Frame<'a> {}
+
 #[cfg(test)]
 mod tests {
   use super::*;
