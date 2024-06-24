@@ -1,31 +1,39 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use crate::geo::size::Size;
-use crate::ui::frame::Frame;
-use crossterm::cursor;
+use crate::ui::frame::{Cursive, Frame};
+use crossterm::cursor as termcur;
 use crossterm::event::{Event, KeyCode};
 use tracing::debug;
 
 /// Backend terminal
 pub struct Terminal {
-  buf: Frame,
-  prev_buf: Frame,
+  frame: Frame,
+  prev_frame: Frame,
 }
 
 impl Terminal {
-  pub fn new(size: Size) -> Self {
+  pub fn new(size: Size, cursor: Cursive) -> Self {
     Terminal {
-      prev_buf: Frame::new(size),
-      buf: Frame::new(size),
+      prev_frame: Frame::new(size, cursor),
+      frame: Frame::new(size, cursor),
     }
   }
 
   pub fn size(&self) -> Size {
-    self.buf.size
+    self.frame.size
   }
 
   pub fn prev_size(&self) -> Size {
-    self.prev_buf.size
+    self.prev_frame.size
+  }
+
+  pub fn cursive(&self) -> Cursive {
+    self.frame.cursive
+  }
+
+  pub fn prev_cursive(&self) -> Cursive {
+    self.prev_frame.cursive
   }
 
   /// Accept a terminal (keyboard/mouse) event.
@@ -35,7 +43,7 @@ impl Terminal {
     debug!("Event::{:?}", event);
 
     if event == Event::Key(KeyCode::Char('c').into()) {
-      println!("Curosr position: {:?}\r", cursor::position());
+      println!("Curosr position: {:?}\r", termcur::position());
     }
 
     // quit loop
@@ -48,7 +56,7 @@ impl Terminal {
   }
 
   pub fn flush(&mut self) {
-    self.prev_buf = self.buf.clone();
+    self.prev_frame = self.frame.clone();
   }
 }
 
@@ -59,7 +67,9 @@ mod tests {
   #[test]
   fn should_equal_on_terminal_new() {
     let sz = Size::new(1, 2);
-    let c1 = Terminal::new(sz);
-    assert_eq!(c1.size(), c1.prev_size());
+    let cs = Cursive::default();
+    let t = Terminal::new(sz, cs);
+    assert_eq!(t.size(), t.prev_size());
+    assert_eq!(t.cursive(), t.prev_cursive());
   }
 }

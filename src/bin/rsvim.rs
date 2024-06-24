@@ -5,12 +5,11 @@ use rsvim::{cli, log};
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
 use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, EventStream,
+  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
-use crossterm::{cursor, queue, terminal};
+use crossterm::{execute, terminal};
 use futures::StreamExt;
 use rsvim::evloop::EventLoop;
-use rsvim::ui::term::Terminal;
 use std::io::{Result as IoResult, Write};
 use tracing::debug;
 
@@ -20,60 +19,30 @@ pub async fn init() -> IoResult<()> {
   }
 
   let mut out = std::io::stdout();
-
-  queue!(out, EnableMouseCapture)?;
-  queue!(out, EnableFocusChange)?;
-
-  queue!(
+  execute!(
     out,
     terminal::EnterAlternateScreen,
     terminal::Clear(terminal::ClearType::All),
-    cursor::SetCursorStyle::BlinkingBlock,
-    cursor::MoveTo(0, 0),
-    cursor::Show,
+    EnableMouseCapture,
+    EnableFocusChange,
   )?;
-
-  out.flush()?;
 
   Ok(())
 }
 
 pub async fn shutdown() -> IoResult<()> {
   let mut out = std::io::stdout();
-  queue!(
+  execute!(
     out,
     DisableMouseCapture,
     DisableFocusChange,
     terminal::LeaveAlternateScreen,
   )?;
 
-  out.flush()?;
-
   if terminal::is_raw_mode_enabled()? {
     terminal::disable_raw_mode()?;
   }
 
-  Ok(())
-}
-
-pub async fn run(t: &mut Terminal) -> IoResult<()> {
-  let mut reader = EventStream::new();
-  loop {
-    tokio::select! {
-      polled_event = reader.next() => match polled_event {
-        Some(Ok(event)) => {
-          if !t.accept(event).await {
-              break;
-          }
-        },
-        Some(Err(e)) => {
-          println!("Error: {:?}\r", e);
-          break;
-        },
-        None => break,
-      }
-    }
-  }
   Ok(())
 }
 

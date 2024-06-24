@@ -21,6 +21,7 @@ pub type IPos = Pos<isize>;
 
 /// Absolute position, the X/Y-axis value are always non-negative.
 pub type UPos = Pos<usize>;
+pub type U16Pos = Pos<u16>;
 
 #[cfg(test)]
 mod tests {
