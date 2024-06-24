@@ -1,1 +1,0 @@
-//! Children widgets layout management.
