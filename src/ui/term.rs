@@ -1,7 +1,7 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use crate::geo::size::Size;
-use crate::ui::frame::{Cursive, Frame};
+use crate::ui::frame::{Cursor, Frame};
 use crossterm::cursor as termcur;
 use crossterm::event::{Event, KeyCode};
 use tracing::debug;
@@ -13,7 +13,7 @@ pub struct Terminal {
 }
 
 impl Terminal {
-  pub fn new(size: Size, cursor: Cursive) -> Self {
+  pub fn new(size: Size, cursor: Cursor) -> Self {
     Terminal {
       prev_frame: Frame::new(size, cursor),
       frame: Frame::new(size, cursor),
@@ -28,12 +28,12 @@ impl Terminal {
     self.prev_frame.size
   }
 
-  pub fn cursive(&self) -> Cursive {
-    self.frame.cursive
+  pub fn cursor(&self) -> Cursor {
+    self.frame.cursor
   }
 
-  pub fn prev_cursive(&self) -> Cursive {
-    self.prev_frame.cursive
+  pub fn prev_cursor(&self) -> Cursor {
+    self.prev_frame.cursor
   }
 
   /// Accept a terminal (keyboard/mouse) event.
@@ -67,9 +67,9 @@ mod tests {
   #[test]
   fn should_equal_on_terminal_new() {
     let sz = Size::new(1, 2);
-    let cs = Cursive::default();
+    let cs = Cursor::default();
     let t = Terminal::new(sz, cs);
     assert_eq!(t.size(), t.prev_size());
-    assert_eq!(t.cursive(), t.prev_cursive());
+    assert_eq!(t.cursor(), t.prev_cursor());
   }
 }

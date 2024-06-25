@@ -3,14 +3,14 @@
 #![allow(unused_imports, dead_code)]
 use crate::geo::pos::UPos;
 use crate::geo::size::Size;
-use crate::ui::frame::Cursive;
+use crate::ui::frame::Cursor;
 use crate::ui::term::Terminal;
 use crate::ui::widget::root::RootWidget;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode,
 };
-use crossterm::{cursor as termcur, queue, terminal};
+use crossterm::{cursor as termcursor, queue, terminal};
 use futures::StreamExt;
 use std::io::{Result as IoResult, Write};
 use tracing::debug;
@@ -24,8 +24,8 @@ impl EventLoop {
   pub async fn new() -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
     let size = Size::new(rows as usize, cols as usize);
-    let cursive = Cursive::default();
-    let screen = Terminal::new(size, cursive);
+    let cursor = Cursor::default();
+    let screen = Terminal::new(size, cursor);
     let root_widget = RootWidget::new(size);
     Ok(EventLoop {
       screen,
@@ -47,16 +47,16 @@ impl EventLoop {
       EnableFocusChange
     )?;
 
-    let cursive = self.screen.cursive();
+    let cursive = self.screen.cursor();
     if cursive.blinking {
-      queue!(out, termcur::EnableBlinking)?;
+      queue!(out, termcursor::EnableBlinking)?;
     } else {
-      queue!(out, termcur::DisableBlinking)?;
+      queue!(out, termcursor::DisableBlinking)?;
     }
     if cursive.hidden {
-      queue!(out, termcur::Hide)?;
+      queue!(out, termcursor::Hide)?;
     } else {
-      queue!(out, termcur::Show)?;
+      queue!(out, termcursor::Show)?;
     }
 
     queue!(out, cursive.style)?;
@@ -91,7 +91,7 @@ impl EventLoop {
     debug!("Event::{:?}", event);
 
     if event == Event::Key(KeyCode::Char('c').into()) {
-      println!("Curosr position: {:?}\r", termcur::position());
+      println!("Curosr position: {:?}\r", termcursor::position());
     }
 
     // quit loop

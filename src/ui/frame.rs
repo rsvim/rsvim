@@ -212,16 +212,16 @@ impl hash::Hash for Cursor {
 pub struct Frame {
   pub size: Size,
   pub cells: Vec<Cell>,
-  pub cursive: Cursor,
+  pub cursor: Cursor,
 }
 
 impl Frame {
   /// Make new frame.
-  pub fn new(size: Size, cursive: Cursor) -> Self {
+  pub fn new(size: Size, cursor: Cursor) -> Self {
     Frame {
       size,
       cells: vec![Cell::default(); size.area()],
-      cursive,
+      cursor,
     }
   }
 
