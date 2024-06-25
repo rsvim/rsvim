@@ -8,9 +8,8 @@ use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{execute, terminal};
-use futures::StreamExt;
 use rsvim::evloop::EventLoop;
-use std::io::{Result as IoResult, Write};
+use std::io::Result as IoResult;
 use tracing::debug;
 
 pub async fn init() -> IoResult<()> {
