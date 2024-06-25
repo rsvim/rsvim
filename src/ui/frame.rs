@@ -190,7 +190,7 @@ impl cmp::Eq for Cursor {}
 
 impl cmp::PartialOrd for Cursor {
   fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
-    self.pos.partial_cmp(&other.pos)
+    Some(self.cmp(other))
   }
 }
 

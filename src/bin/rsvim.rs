@@ -62,7 +62,7 @@ async fn main() -> IoResult<()> {
   // wtxn.commit().unwrap();
 
   init().await?;
-  let mut ev = EventLoop::new()?;
+  let mut ev = EventLoop::new().await?;
   ev.run().await?;
   shutdown().await
 }
