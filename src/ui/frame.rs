@@ -266,6 +266,14 @@ impl Frame {
     let end_at = start_at + cells.len();
     self.cells.splice(start_at..end_at, cells)
   }
+
+  pub fn get_cursor(&self) -> &Cursor {
+    &self.cursor
+  }
+
+  pub fn set_cursor(&mut self, cursor: Cursor) {
+    self.cursor = cursor;
+  }
 }
 
 #[cfg(test)]

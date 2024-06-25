@@ -1,7 +1,7 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use crate::geo::size::Size;
-use crate::ui::frame::{Cursor, Frame};
+use crate::ui::frame::{Cell, Cursor, Frame};
 use crossterm::cursor as termcursor;
 use crossterm::event::{Event, KeyCode};
 use tracing::debug;
@@ -20,20 +20,16 @@ impl Terminal {
     }
   }
 
-  pub fn size(&self) -> Size {
-    self.frame.size
+  pub fn frame(&self) -> &Frame {
+    &self.frame
   }
 
-  pub fn prev_size(&self) -> Size {
-    self.prev_frame.size
+  pub fn frame_mut(&mut self) -> &mut Frame {
+    &mut self.frame
   }
 
-  pub fn cursor(&self) -> Cursor {
-    self.frame.cursor
-  }
-
-  pub fn prev_cursor(&self) -> Cursor {
-    self.prev_frame.cursor
+  pub fn prev_frame(&self) -> &Frame {
+    &self.prev_frame
   }
 
   /// Accept a terminal (keyboard/mouse) event.
@@ -69,7 +65,7 @@ mod tests {
     let sz = Size::new(1, 2);
     let cs = Cursor::default();
     let t = Terminal::new(sz, cs);
-    assert_eq!(t.size(), t.prev_size());
-    assert_eq!(t.cursor(), t.prev_cursor());
+    assert_eq!(t.frame().size, t.prev_frame().size);
+    assert_eq!(t.frame().cursor, t.prev_frame().cursor);
   }
 }
