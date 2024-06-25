@@ -124,17 +124,17 @@ pub struct Cursive {
   pub dirty: bool,
 }
 
-struct CursorStyleFormatter {
+struct CursiveStyleFormatter {
   style: SetCursorStyle,
 }
 
-impl From<SetCursorStyle> for CursorStyleFormatter {
+impl From<SetCursorStyle> for CursiveStyleFormatter {
   fn from(style: SetCursorStyle) -> Self {
-    CursorStyleFormatter { style }
+    CursiveStyleFormatter { style }
   }
 }
 
-impl fmt::Debug for CursorStyleFormatter {
+impl fmt::Debug for CursiveStyleFormatter {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
     write!(f, "{}", self.style)
   }
@@ -168,7 +168,7 @@ impl Default for Cursive {
 
 impl fmt::Debug for Cursive {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    let style_formatter = CursorStyleFormatter::from(self.style);
+    let style_formatter = CursiveStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
       .field("pos", &self.pos)
       .field("blinking", &self.blinking)
