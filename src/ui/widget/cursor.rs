@@ -1,5 +1,4 @@
-//! Cursor widget.
-//! Note: To avoid naming confliction with `crossterm::cursor`, here name it `cursive`.
+//! The Cursor widget.
 
 use crate::geo::pos::U16Pos;
 use crate::geo::size::Size;
