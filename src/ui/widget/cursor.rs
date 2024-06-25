@@ -121,7 +121,5 @@ impl Widget for Cursor {
     None
   }
 
-  fn draw(&self, terminal: &Terminal) {
-    todo!();
-  }
+  fn draw(&self, terminal: &Terminal) {}
 }
