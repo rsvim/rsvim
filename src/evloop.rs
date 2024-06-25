@@ -47,19 +47,19 @@ impl EventLoop {
       EnableFocusChange
     )?;
 
-    let cursive = self.screen.cursor();
-    if cursive.blinking {
+    let cursor = self.screen.frame().cursor;
+    if cursor.blinking {
       queue!(out, termcursor::EnableBlinking)?;
     } else {
       queue!(out, termcursor::DisableBlinking)?;
     }
-    if cursive.hidden {
+    if cursor.hidden {
       queue!(out, termcursor::Hide)?;
     } else {
       queue!(out, termcursor::Show)?;
     }
 
-    queue!(out, cursive.style)?;
+    queue!(out, cursor.style)?;
     out.flush()?;
 
     Ok(())
