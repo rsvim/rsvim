@@ -115,7 +115,7 @@ impl Cell {
 #[derive(Copy, Clone)]
 /// Terminal cursor.
 /// Note: This is the real terminal cursor of the device, not a virtual one in multiple cursors.
-pub struct Cursive {
+pub struct Cursor {
   pub pos: U16Pos,
   pub blinking: bool,
   pub hidden: bool,
@@ -124,25 +124,25 @@ pub struct Cursive {
   pub dirty: bool,
 }
 
-struct CursiveStyleFormatter {
+struct CursorStyleFormatter {
   style: SetCursorStyle,
 }
 
-impl From<SetCursorStyle> for CursiveStyleFormatter {
+impl From<SetCursorStyle> for CursorStyleFormatter {
   fn from(style: SetCursorStyle) -> Self {
-    CursiveStyleFormatter { style }
+    CursorStyleFormatter { style }
   }
 }
 
-impl fmt::Debug for CursiveStyleFormatter {
+impl fmt::Debug for CursorStyleFormatter {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
     write!(f, "{}", self.style)
   }
 }
 
-impl Cursive {
+impl Cursor {
   pub fn new(pos: U16Pos, blinking: bool, hidden: bool, style: SetCursorStyle) -> Self {
-    Cursive {
+    Cursor {
       pos,
       blinking,
       hidden,
@@ -153,9 +153,9 @@ impl Cursive {
   }
 }
 
-impl Default for Cursive {
+impl Default for Cursor {
   fn default() -> Self {
-    Cursive {
+    Cursor {
       pos: U16Pos::new(0, 0),
       blinking: false,
       hidden: false,
@@ -166,9 +166,9 @@ impl Default for Cursive {
   }
 }
 
-impl fmt::Debug for Cursive {
+impl fmt::Debug for Cursor {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    let style_formatter = CursiveStyleFormatter::from(self.style);
+    let style_formatter = CursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
       .field("pos", &self.pos)
       .field("blinking", &self.blinking)
@@ -179,28 +179,28 @@ impl fmt::Debug for Cursive {
   }
 }
 
-impl cmp::PartialEq for Cursive {
+impl cmp::PartialEq for Cursor {
   /// Whether equals to other.
   fn eq(&self, other: &Self) -> bool {
     self.pos == other.pos
   }
 }
 
-impl cmp::Eq for Cursive {}
+impl cmp::Eq for Cursor {}
 
-impl cmp::PartialOrd for Cursive {
+impl cmp::PartialOrd for Cursor {
   fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
     self.pos.partial_cmp(&other.pos)
   }
 }
 
-impl cmp::Ord for Cursive {
+impl cmp::Ord for Cursor {
   fn cmp(&self, other: &Self) -> cmp::Ordering {
     self.pos.cmp(&other.pos)
   }
 }
 
-impl hash::Hash for Cursive {
+impl hash::Hash for Cursor {
   fn hash<H: hash::Hasher>(&self, state: &mut H) {
     self.pos.hash(state);
   }
@@ -212,12 +212,12 @@ impl hash::Hash for Cursive {
 pub struct Frame {
   pub size: Size,
   pub cells: Vec<Cell>,
-  pub cursive: Cursive,
+  pub cursive: Cursor,
 }
 
 impl Frame {
   /// Make new frame.
-  pub fn new(size: Size, cursive: Cursive) -> Self {
+  pub fn new(size: Size, cursive: Cursor) -> Self {
     Frame {
       size,
       cells: vec![Cell::default(); size.area()],
@@ -284,7 +284,7 @@ mod tests {
   #[test]
   fn should_equal_on_buffer_new() {
     let sz = Size::new(1, 2);
-    let b = Frame::new(sz, Cursive::default());
+    let b = Frame::new(sz, Cursor::default());
     assert_eq!(b.size.height, 1);
     assert_eq!(b.size.width, 2);
     assert_eq!(b.size.area(), 2);
