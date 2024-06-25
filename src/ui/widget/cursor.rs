@@ -1,4 +1,4 @@
-//! The Cursor widget.
+//! Cursor widget.
 
 use crate::geo::pos::U16Pos;
 use crate::geo::size::Size;
