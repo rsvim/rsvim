@@ -8,6 +8,7 @@ use std::rc::{Rc, Weak};
 use std::sync::{Arc, Mutex, RwLock};
 use std::vec::Vec;
 
+pub mod cursive;
 pub mod root;
 pub mod window;
 
