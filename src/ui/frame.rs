@@ -114,7 +114,7 @@ impl Cell {
 
 #[derive(Copy, Clone)]
 /// Terminal cursor.
-/// Note: This is the real cursor of the terminal device, not a virtual one in multiple cursors.
+/// Note: This is the real terminal cursor of the device, not a virtual one in multiple cursors.
 pub struct Cursive {
   pub pos: U16Pos,
   pub blinking: bool,
