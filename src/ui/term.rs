@@ -2,7 +2,7 @@
 
 use crate::geo::size::Size;
 use crate::ui::frame::{Cursor, Frame};
-use crossterm::cursor as termcur;
+use crossterm::cursor as termcursor;
 use crossterm::event::{Event, KeyCode};
 use tracing::debug;
 
@@ -43,7 +43,7 @@ impl Terminal {
     debug!("Event::{:?}", event);
 
     if event == Event::Key(KeyCode::Char('c').into()) {
-      println!("Curosr position: {:?}\r", termcur::position());
+      println!("Curosr position: {:?}\r", termcursor::position());
     }
 
     // quit loop
