@@ -5,6 +5,7 @@ use crate::geo::size::Size;
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
+use crossterm::cursor::SetCursorStyle;
 use std::sync::{Arc, RwLock};
 
 pub struct Cursor {
@@ -15,10 +16,23 @@ pub struct Cursor {
   size: Size,
   visible: bool,
   enabled: bool,
+
+  blinking: bool,
+  hidden: bool,
+  saved_offset: Option<IPos>, // saved_pos
+  style: SetCursorStyle,
 }
 
 impl Cursor {
-  pub fn new(parent: WidgetRw, offset: IPos, size: Size) -> Self {
+  pub fn new(
+    parent: WidgetRw,
+    offset: IPos,
+    size: Size,
+    blinking: bool,
+    hidden: bool,
+    saved_offset: Option<IPos>,
+    style: SetCursorStyle,
+  ) -> Self {
     Cursor {
       parent,
       id: uuid::next(),
@@ -27,6 +41,11 @@ impl Cursor {
       size,
       visible: true,
       enabled: true,
+
+      blinking,
+      hidden,
+      saved_offset,
+      style,
     }
   }
 }
