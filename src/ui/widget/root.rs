@@ -2,8 +2,7 @@
 //! It always exists along with RSVIM, as long as it runs in non-headless and interactive
 //! (non-batch-processing) mode.
 
-use crate::geo::pos::{IPos, UPos};
-use crate::geo::size::Size;
+use crate::geo::{IPos, UPos, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
@@ -14,19 +13,19 @@ pub struct RootWidget {
   id: usize,
   offset: IPos,
   abs_offset: UPos,
-  size: Size,
+  rect: URect,
   visible: bool,
   enabled: bool,
   children: ChildWidgetsRw,
 }
 
 impl RootWidget {
-  pub fn new(size: Size) -> Self {
+  pub fn new(rect: URect) -> Self {
     RootWidget {
       id: uuid::next(),
       offset: IPos::new(0, 0),
       abs_offset: UPos::new(0, 0),
-      size,
+      rect,
       visible: true,
       enabled: true,
       children: Arc::new(RwLock::new(vec![])),
