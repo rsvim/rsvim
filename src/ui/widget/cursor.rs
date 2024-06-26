@@ -118,13 +118,12 @@ impl Widget for Cursor {
     let abs_rect_min = self.abs_rect().min();
     let pos: U16Pos = coord! {x: abs_rect_min.x as u16, y: abs_rect_min.y as u16};
 
-    terminal
-      .frame_mut()
-      .set_cursor(crate::ui::frame::Cursor::new(
-        pos,
-        self.blinking,
-        self.hidden,
-        self.style,
-      ));
+    let frame = terminal.frame_mut();
+    frame.set_cursor(crate::ui::frame::Cursor::new(
+      pos,
+      self.blinking,
+      self.hidden,
+      self.style,
+    ));
   }
 }
