@@ -1,7 +1,6 @@
 //! Terminal rendering frame.
 
-use crate::geo::pos::{U16Pos, UPos};
-use crate::geo::size::Size;
+use crate::geo::{U16Pos, U16Rect, UPos};
 use compact_str::CompactString;
 use crossterm::cursor::SetCursorStyle;
 use crossterm::style::{Attributes, Color};
@@ -210,17 +209,17 @@ impl hash::Hash for Cursor {
 /// Rendering buffer & cursor for the whole terminal.
 /// All UI components will dump their text contents to a frame first, then flush to terminal.
 pub struct Frame {
-  pub size: Size,
+  pub rect: U16Rect,
   pub cells: Vec<Cell>,
   pub cursor: Cursor,
 }
 
 impl Frame {
   /// Make new frame.
-  pub fn new(size: Size, cursor: Cursor) -> Self {
+  pub fn new(rect: U16Rect, cursor: Cursor) -> Self {
     Frame {
-      size,
-      cells: vec![Cell::default(); size.area()],
+      rect,
+      cells: vec![Cell::default(); (rect.height() * rect.width()).into()],
       cursor,
     }
   }

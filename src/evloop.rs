@@ -1,8 +1,7 @@
 //! Main event loop for TUI application.
 
 #![allow(unused_imports, dead_code)]
-use crate::geo::pos::UPos;
-use crate::geo::size::Size;
+use crate::geo::Size;
 use crate::ui::frame::Cursor;
 use crate::ui::term::Terminal;
 use crate::ui::widget::root::RootWidget;

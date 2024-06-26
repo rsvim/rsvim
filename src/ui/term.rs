@@ -1,9 +1,10 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
-use crate::geo::size::Size;
-use crate::ui::frame::{Cell, Cursor, Frame};
+use crate::geo::U16Rect;
+use crate::ui::frame::{Cursor, Frame};
 use crossterm::cursor as termcursor;
 use crossterm::event::{Event, KeyCode};
+use geo::coord;
 use tracing::debug;
 
 /// Backend terminal
@@ -13,10 +14,10 @@ pub struct Terminal {
 }
 
 impl Terminal {
-  pub fn new(size: Size, cursor: Cursor) -> Self {
+  pub fn new(rect: U16Rect, cursor: Cursor) -> Self {
     Terminal {
-      prev_frame: Frame::new(size, cursor),
-      frame: Frame::new(size, cursor),
+      prev_frame: Frame::new(rect, cursor),
+      frame: Frame::new(rect, cursor),
     }
   }
 
@@ -62,10 +63,10 @@ mod tests {
 
   #[test]
   fn should_equal_on_terminal_new() {
-    let sz = Size::new(1, 2);
-    let cs = Cursor::default();
-    let t = Terminal::new(sz, cs);
-    assert_eq!(t.frame().size, t.prev_frame().size);
+    let r = U16Rect::new(coord! {x:1,y:2}, coord! { x: 3, y: 4 });
+    let c = Cursor::default();
+    let t = Terminal::new(r, c);
+    assert_eq!(t.frame().rect, t.prev_frame().rect);
     assert_eq!(t.frame().cursor, t.prev_frame().cursor);
   }
 }
