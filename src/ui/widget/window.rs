@@ -1,41 +1,38 @@
-//! Root widget is the root UI container for all other widgets.
-//! It always exists along with RSVIM, as long as it runs in non-headless and interactive
-//! (non-batch-processing) mode.
+//! The Vim window.
 
-use crate::geo::{IRect, URect, USize};
+use crate::geo::{IRect, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
 use geo::coord;
 use std::sync::{Arc, RwLock};
 
-/// Root widget.
-pub struct RootWidget {
+/// The Vim window.
+pub struct Window {
+  parent: WidgetRw,
   id: usize,
   rect: IRect,
   abs_rect: URect,
+  zindex: usize,
   visible: bool,
   enabled: bool,
-  children: ChildWidgetsRw,
 }
 
-impl RootWidget {
-  pub fn new(size: USize) -> Self {
-    RootWidget {
+impl Window {
+  pub fn new(rect: IRect, parent: WidgetRw) -> Self {
+    Window {
       id: uuid::next(),
-      rect: IRect::new(
-        coord! {x:0, y:0},
-        coord! {x:size.width as isize, y:size.height as isize},
-      ),
-      abs_rect: URect::new(coord! {x:0, y:0}, coord! {x:size.width , y:size.height }),
+      rect,
+      abs_rect: URect::new(coord! {x:0,y:0}, coord! {x:0,y:0}),
+      zindex: uuid::next(),
       visible: true,
       enabled: true,
-      children: Arc::new(RwLock::new(vec![])),
+      parent: parent.clone(),
     }
   }
 }
 
-impl Widget for RootWidget {
+impl Widget for Window {
   fn id(&self) -> usize {
     self.id
   }
@@ -44,25 +41,25 @@ impl Widget for RootWidget {
     self.rect
   }
 
-  /// Not allow to modify the position & size.
-  fn set_rect(&mut self, _rect: IRect) {
-    unimplemented!();
+  fn set_rect(&mut self, rect: IRect) {
+    self.rect = rect;
   }
 
   fn abs_rect(&self) -> URect {
     self.abs_rect
   }
 
-  /// Not allow to modify the position & size.
-  fn set_abs_rect(&mut self, _rect: URect) {
-    unimplemented!();
+  fn set_abs_rect(&mut self, rect: URect) {
+    self.abs_rect = rect;
   }
 
   fn zindex(&self) -> usize {
-    0
+    self.zindex
   }
 
-  fn set_zindex(&mut self, _zindex: usize) {}
+  fn set_zindex(&mut self, value: usize) {
+    self.zindex = value;
+  }
 
   fn visible(&self) -> bool {
     self.visible
@@ -81,15 +78,17 @@ impl Widget for RootWidget {
   }
 
   fn parent(&self) -> Option<WidgetRw> {
-    None
+    Some(self.parent.clone())
   }
 
-  fn set_parent(&mut self, _parent: Option<WidgetRw>) {
-    unimplemented!();
+  fn set_parent(&mut self, parent: Option<WidgetRw>) {
+    if let Some(p) = parent {
+      self.parent = p;
+    }
   }
 
   fn children(&self) -> ChildWidgetsRw {
-    self.children.clone()
+    Arc::new(RwLock::new(vec![]))
   }
 
   fn find_children(&self, _id: usize) -> Option<WidgetRw> {
