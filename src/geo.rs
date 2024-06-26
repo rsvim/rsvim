@@ -22,7 +22,7 @@ pub struct Size<T> {
 }
 
 impl<T> Size<T> {
-  fn new(height: T, width: T) -> Self {
+  pub fn new(height: T, width: T) -> Self {
     Size { height, width }
   }
 }

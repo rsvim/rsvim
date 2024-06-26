@@ -1,6 +1,6 @@
 //! Cursor widget.
 
-use crate::geo::{IPos, IRect, UPos, URect};
+use crate::geo::{IPos, IRect, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;

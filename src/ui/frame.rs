@@ -1,9 +1,10 @@
 //! Terminal rendering frame.
 
-use crate::geo::{U16Pos, U16Rect, U16Size, UPos};
+use crate::geo::{U16Pos, U16Size, UPos};
 use compact_str::CompactString;
 use crossterm::cursor::SetCursorStyle;
 use crossterm::style::{Attributes, Color};
+use geo::coord;
 use std::vec::Splice;
 use std::{cmp, fmt, hash};
 
@@ -155,7 +156,7 @@ impl Cursor {
 impl Default for Cursor {
   fn default() -> Self {
     Cursor {
-      pos: U16Pos::new(0, 0),
+      pos: coord! {x:0_u16, y:0_u16},
       blinking: false,
       hidden: false,
       saved_pos: None,
@@ -186,18 +187,6 @@ impl cmp::PartialEq for Cursor {
 }
 
 impl cmp::Eq for Cursor {}
-
-impl cmp::PartialOrd for Cursor {
-  fn partial_cmp(&self, other: &Self) -> Option<cmp::Ordering> {
-    Some(self.cmp(other))
-  }
-}
-
-impl cmp::Ord for Cursor {
-  fn cmp(&self, other: &Self) -> cmp::Ordering {
-    self.pos.cmp(&other.pos)
-  }
-}
 
 impl hash::Hash for Cursor {
   fn hash<H: hash::Hasher>(&self, state: &mut H) {
@@ -290,12 +279,14 @@ mod tests {
 
   #[test]
   fn should_equal_on_buffer_new() {
-    let sz = Size::new(1, 2);
+    let sz = U16Size::new(1, 2);
     let b = Frame::new(sz, Cursor::default());
     assert_eq!(b.size.height, 1);
     assert_eq!(b.size.width, 2);
-    assert_eq!(b.size.area(), 2);
-    assert_eq!(b.cells.len(), b.size.area());
+    assert_eq!(
+      b.cells.len(),
+      b.size.height as usize * b.size.width as usize
+    );
     for c in b.cells.iter() {
       assert_eq!(c.symbol(), Cell::default().symbol());
     }

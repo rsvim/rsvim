@@ -1,6 +1,6 @@
 //! The Vim window.
 
-use crate::geo::{IPos, IRect, UPos, URect};
+use crate::geo::{IRect, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
