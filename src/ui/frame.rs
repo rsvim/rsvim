@@ -1,5 +1,7 @@
 //! Terminal rendering frame.
 
+#![allow(dead_code)]
+
 use crate::geo::{U16Pos, U16Size, UPos};
 use compact_str::CompactString;
 use crossterm::style::{Attributes, Color};
