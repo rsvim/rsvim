@@ -2,7 +2,7 @@
 //! It always exists along with RSVIM, as long as it runs in non-headless and interactive
 //! (non-batch-processing) mode.
 
-use crate::geo::{IPos, IRect, UPos, URect};
+use crate::geo::{IRect, URect, USize};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
@@ -20,14 +20,14 @@ pub struct RootWidget {
 }
 
 impl RootWidget {
-  pub fn new(height: usize, width: usize) -> Self {
+  pub fn new(size: USize) -> Self {
     RootWidget {
       id: uuid::next(),
       rect: IRect::new(
         coord! {x:0, y:0},
-        coord! {x:width as isize, y:height as isize},
+        coord! {x:size.width as isize, y:size.height as isize},
       ),
-      abs_rect: URect::new(coord! {x:0, y:0}, coord! {x:width , y:height }),
+      abs_rect: URect::new(coord! {x:0, y:0}, coord! {x:size.width , y:size.height }),
       visible: true,
       enabled: true,
       children: Arc::new(RwLock::new(vec![])),
@@ -40,24 +40,22 @@ impl Widget for RootWidget {
     self.id
   }
 
-  fn offset(&self) -> IPos {
-    self.offset
+  fn rect(&self) -> IRect {
+    self.rect
   }
 
-  fn set_offset(&mut self, _offset: IPos) {
+  /// Not allow to modify the position & size.
+  fn set_rect(&mut self, _rect: IRect) {
     unimplemented!();
   }
 
-  fn abs_offset(&self) -> UPos {
-    self.abs_offset
+  fn abs_rect(&self) -> URect {
+    self.abs_rect
   }
 
-  fn size(&self) -> Size {
-    self.size
-  }
-
-  fn set_size(&mut self, value: Size) {
-    self.size = value;
+  /// Not allow to modify the position & size.
+  fn set_abs_rect(&mut self, _rect: URect) {
+    unimplemented!();
   }
 
   fn zindex(&self) -> usize {

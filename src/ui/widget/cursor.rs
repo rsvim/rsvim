@@ -1,19 +1,18 @@
 //! Cursor widget.
 
-use crate::geo::pos::{IPos, UPos};
-use crate::geo::size::Size;
+use crate::geo::{IPos, IRect, UPos, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
 use crossterm::cursor::SetCursorStyle;
+use geo::coord;
 use std::sync::{Arc, RwLock};
 
 pub struct Cursor {
   parent: WidgetRw,
   id: usize,
-  offset: IPos,
-  abs_offset: UPos,
-  size: Size,
+  rect: IRect,
+  abs_rect: URect,
   visible: bool,
   enabled: bool,
 
@@ -26,8 +25,7 @@ pub struct Cursor {
 impl Cursor {
   pub fn new(
     parent: WidgetRw,
-    offset: IPos,
-    size: Size,
+    rect: IRect,
     blinking: bool,
     hidden: bool,
     saved_offset: Option<IPos>,
@@ -36,9 +34,8 @@ impl Cursor {
     Cursor {
       parent,
       id: uuid::next(),
-      offset,
-      abs_offset: UPos::default(),
-      size,
+      rect,
+      abs_rect: URect::new(coord! {x:0,y:0}, coord! {x:0,y:0}),
       visible: true,
       enabled: true,
 
@@ -55,24 +52,20 @@ impl Widget for Cursor {
     self.id
   }
 
-  fn offset(&self) -> IPos {
-    self.offset
+  fn rect(&self) -> IRect {
+    self.rect
   }
 
-  fn set_offset(&mut self, value: IPos) {
-    self.offset = value;
+  fn set_rect(&mut self, rect: IRect) {
+    self.rect = rect;
   }
 
-  fn abs_offset(&self) -> UPos {
-    self.abs_offset
+  fn abs_rect(&self) -> URect {
+    self.abs_rect
   }
 
-  fn size(&self) -> Size {
-    self.size
-  }
-
-  fn set_size(&mut self, value: Size) {
-    self.size = value;
+  fn set_abs_rect(&mut self, rect: URect) {
+    self.abs_rect = rect;
   }
 
   fn zindex(&self) -> usize {

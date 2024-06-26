@@ -1,31 +1,29 @@
 //! The Vim window.
 
-use crate::geo::pos::{IPos, UPos};
-use crate::geo::size::Size;
+use crate::geo::{IPos, IRect, UPos, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
+use geo::coord;
 use std::sync::{Arc, RwLock};
 
 /// The Vim window.
 pub struct Window {
+  parent: WidgetRw,
   id: usize,
-  offset: IPos,
-  abs_offset: UPos,
-  size: Size,
+  rect: IRect,
+  abs_rect: URect,
   zindex: usize,
   visible: bool,
   enabled: bool,
-  parent: WidgetRw,
 }
 
 impl Window {
-  pub fn new(size: Size, parent: WidgetRw) -> Self {
+  pub fn new(rect: IRect, parent: WidgetRw) -> Self {
     Window {
       id: uuid::next(),
-      offset: IPos::new(0, 0),
-      abs_offset: UPos::new(0, 0),
-      size,
+      rect,
+      abs_rect: URect::new(coord! {x:0,y:0}, coord! {x:0,y:0}),
       zindex: uuid::next(),
       visible: true,
       enabled: true,
@@ -39,22 +37,20 @@ impl Widget for Window {
     self.id
   }
 
-  fn offset(&self) -> IPos {
-    self.offset
+  fn rect(&self) -> IRect {
+    self.rect
   }
 
-  fn set_offset(&mut self, _: IPos) {}
-
-  fn abs_offset(&self) -> UPos {
-    self.abs_offset
+  fn set_rect(&mut self, rect: IRect) {
+    self.rect = rect;
   }
 
-  fn size(&self) -> Size {
-    self.size
+  fn abs_rect(&self) -> URect {
+    self.abs_rect
   }
 
-  fn set_size(&mut self, value: Size) {
-    self.size = value;
+  fn set_abs_rect(&mut self, rect: URect) {
+    self.abs_rect = rect;
   }
 
   fn zindex(&self) -> usize {

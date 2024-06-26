@@ -1,6 +1,6 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
-use crate::geo::U16Rect;
+use crate::geo::{U16Rect, U16Size};
 use crate::ui::frame::{Cursor, Frame};
 use crossterm::cursor as termcursor;
 use crossterm::event::{Event, KeyCode};
@@ -14,7 +14,7 @@ pub struct Terminal {
 }
 
 impl Terminal {
-  pub fn new(cursor: Cursor, height: u16, width: u16) -> Self {
+  pub fn new(size: U16Size, cursor: Cursor) -> Self {
     Terminal {
       prev_frame: Frame::new(cursor, height, width),
       frame: Frame::new(cursor, height, width),
