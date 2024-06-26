@@ -1,5 +1,7 @@
 //! The VIM buffer.
 
+#![allow(dead_code)]
+
 use ropey::Rope;
 
 pub struct Buffer {
