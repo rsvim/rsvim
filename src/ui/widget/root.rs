@@ -100,7 +100,7 @@ impl Widget for RootWidget {
     None
   }
 
-  fn draw(&self, _terminal: &Terminal) {
+  fn draw(&self, _terminal: &mut Terminal) {
     todo!();
   }
 }

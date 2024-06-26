@@ -1,10 +1,10 @@
 //! Cursor widget.
 
-use crate::geo::{IPos, IRect, URect};
+use crate::geo::{IPos, IRect, U16Pos, URect};
+use crate::ui::frame::CursorStyle;
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
-use crossterm::cursor::SetCursorStyle;
 use geo::coord;
 use std::sync::{Arc, RwLock};
 
@@ -19,7 +19,7 @@ pub struct Cursor {
   blinking: bool,
   hidden: bool,
   saved_offset: Option<IPos>, // saved_pos
-  style: SetCursorStyle,
+  style: CursorStyle,
 }
 
 impl Cursor {
@@ -29,7 +29,7 @@ impl Cursor {
     blinking: bool,
     hidden: bool,
     saved_offset: Option<IPos>,
-    style: SetCursorStyle,
+    style: CursorStyle,
   ) -> Self {
     Cursor {
       parent,
@@ -114,5 +114,17 @@ impl Widget for Cursor {
     None
   }
 
-  fn draw(&self, terminal: &Terminal) {}
+  fn draw(&self, terminal: &mut Terminal) {
+    let abs_rect_min = self.abs_rect().min();
+    let pos: U16Pos = coord! {x: abs_rect_min.x as u16, y: abs_rect_min.y as u16};
+
+    terminal
+      .frame_mut()
+      .set_cursor(crate::ui::frame::Cursor::new(
+        pos,
+        self.blinking,
+        self.hidden,
+        self.style,
+      ));
+  }
 }

@@ -99,7 +99,7 @@ impl Widget for Window {
     None
   }
 
-  fn draw(&self, _terminal: &Terminal) {
+  fn draw(&self, _terminal: &mut Terminal) {
     todo!();
   }
 }

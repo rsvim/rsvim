@@ -127,7 +127,7 @@ pub trait Widget {
   // { Contents
 
   /// Draw the widget to terminal.
-  fn draw(&self, t: &Terminal);
+  fn draw(&self, t: &mut Terminal);
 
   // } Contents
 }

@@ -2,7 +2,6 @@
 
 use crate::geo::{U16Pos, U16Size, UPos};
 use compact_str::CompactString;
-use crossterm::cursor::SetCursorStyle;
 use crossterm::style::{Attributes, Color};
 use geo::coord;
 use std::vec::Splice;
@@ -112,6 +111,8 @@ impl Cell {
   }
 }
 
+pub type CursorStyle = crossterm::cursor::SetCursorStyle;
+
 #[derive(Copy, Clone)]
 /// Terminal cursor.
 /// Note: This is the real terminal cursor of the device, not a virtual one in multiple cursors.
@@ -120,16 +121,16 @@ pub struct Cursor {
   pub blinking: bool,
   pub hidden: bool,
   pub saved_pos: Option<UPos>,
-  pub style: SetCursorStyle,
+  pub style: CursorStyle,
   pub dirty: bool,
 }
 
 struct CursorStyleFormatter {
-  style: SetCursorStyle,
+  style: CursorStyle,
 }
 
-impl From<SetCursorStyle> for CursorStyleFormatter {
-  fn from(style: SetCursorStyle) -> Self {
+impl From<CursorStyle> for CursorStyleFormatter {
+  fn from(style: CursorStyle) -> Self {
     CursorStyleFormatter { style }
   }
 }
@@ -141,7 +142,7 @@ impl fmt::Debug for CursorStyleFormatter {
 }
 
 impl Cursor {
-  pub fn new(pos: U16Pos, blinking: bool, hidden: bool, style: SetCursorStyle) -> Self {
+  pub fn new(pos: U16Pos, blinking: bool, hidden: bool, style: CursorStyle) -> Self {
     Cursor {
       pos,
       blinking,
@@ -160,7 +161,7 @@ impl Default for Cursor {
       blinking: false,
       hidden: false,
       saved_pos: None,
-      style: SetCursorStyle::DefaultUserShape,
+      style: CursorStyle::DefaultUserShape,
       dirty: true,
     }
   }
