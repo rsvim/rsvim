@@ -120,7 +120,6 @@ pub struct Cursor {
   pub pos: U16Pos,
   pub blinking: bool,
   pub hidden: bool,
-  pub saved_pos: Option<UPos>,
   pub style: CursorStyle,
   pub dirty: bool,
 }
@@ -147,7 +146,6 @@ impl Cursor {
       pos,
       blinking,
       hidden,
-      saved_pos: None,
       style,
       dirty: true,
     }
@@ -160,7 +158,6 @@ impl Default for Cursor {
       pos: coord! {x:0_u16, y:0_u16},
       blinking: false,
       hidden: false,
-      saved_pos: None,
       style: CursorStyle::DefaultUserShape,
       dirty: true,
     }
@@ -174,7 +171,6 @@ impl fmt::Debug for Cursor {
       .field("pos", &self.pos)
       .field("blinking", &self.blinking)
       .field("hidden", &self.hidden)
-      .field("saved_pos", &self.saved_pos)
       .field("style", &style_formatter)
       .finish()
   }

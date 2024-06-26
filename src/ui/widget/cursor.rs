@@ -1,6 +1,6 @@
 //! Cursor widget.
 
-use crate::geo::{IPos, IRect, U16Pos, URect};
+use crate::geo::{IRect, U16Pos, URect};
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
@@ -18,7 +18,6 @@ pub struct Cursor {
 
   blinking: bool,
   hidden: bool,
-  saved_offset: Option<IPos>, // saved_pos
   style: CursorStyle,
 }
 
@@ -28,7 +27,6 @@ impl Cursor {
     rect: IRect,
     blinking: bool,
     hidden: bool,
-    saved_offset: Option<IPos>,
     style: CursorStyle,
   ) -> Self {
     Cursor {
@@ -41,7 +39,6 @@ impl Cursor {
 
       blinking,
       hidden,
-      saved_offset,
       style,
     }
   }
