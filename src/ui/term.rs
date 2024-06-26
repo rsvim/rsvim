@@ -65,7 +65,7 @@ mod tests {
     let s = U16Size::new(3, 4);
     let c = Cursor::default();
     let t = Terminal::new(s, c);
-    assert_eq!(t.frame().rect, t.prev_frame().rect);
+    assert_eq!(t.frame().size, t.prev_frame().size);
     assert_eq!(t.frame().cursor, t.prev_frame().cursor);
   }
 }
