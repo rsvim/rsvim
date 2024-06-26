@@ -14,10 +14,10 @@ pub struct Terminal {
 }
 
 impl Terminal {
-  pub fn new(rect: U16Rect, cursor: Cursor) -> Self {
+  pub fn new(cursor: Cursor, height: u16, width: u16) -> Self {
     Terminal {
-      prev_frame: Frame::new(rect, cursor),
-      frame: Frame::new(rect, cursor),
+      prev_frame: Frame::new(cursor, height, width),
+      frame: Frame::new(cursor, height, width),
     }
   }
 

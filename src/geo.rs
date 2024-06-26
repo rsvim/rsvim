@@ -13,6 +13,25 @@ pub type U16Pos = Coord<u16>;
 
 // Positions }
 
+// Sizes {
+
+#[derive(Debug, Default, PartialEq, Eq, Hash, Clone, Copy)]
+pub struct Size<T> {
+  pub height: T,
+  pub width: T,
+}
+
+impl<T> Size<T> {
+  fn new(height: T, width: T) -> Self {
+    Size { height, width }
+  }
+}
+
+pub type USize = Size<usize>;
+pub type U16Size = Size<u16>;
+
+// Sizes }
+
 // Rectangles {
 
 pub type IRect = Rect<isize>;

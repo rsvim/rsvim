@@ -27,7 +27,7 @@ impl EventLoop {
     let rect = U16Rect::new(coord! {x: 0, y:0}, coord! {x:cols, y:rows});
     let cursor = Cursor::default();
     let screen = Terminal::new(rect, cursor);
-    let root_widget = RootWidget::new(size);
+    let root_widget = RootWidget::new(rows as usize, cols as usize);
     Ok(EventLoop {
       screen,
       root_widget,

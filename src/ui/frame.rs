@@ -209,17 +209,19 @@ impl hash::Hash for Cursor {
 /// Rendering buffer & cursor for the whole terminal.
 /// All UI components will dump their text contents to a frame first, then flush to terminal.
 pub struct Frame {
-  pub rect: U16Rect,
+  pub height: u16,
+  pub width: u16,
   pub cells: Vec<Cell>,
   pub cursor: Cursor,
 }
 
 impl Frame {
   /// Make new frame.
-  pub fn new(rect: U16Rect, cursor: Cursor) -> Self {
+  pub fn new(cursor: Cursor, height: u16, width: u16) -> Self {
     Frame {
-      rect,
-      cells: vec![Cell::default(); (rect.height() * rect.width()).into()],
+      height,
+      width,
+      cells: vec![Cell::default(); (height * width).into()],
       cursor,
     }
   }

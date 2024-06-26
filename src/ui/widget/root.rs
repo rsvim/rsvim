@@ -2,30 +2,32 @@
 //! It always exists along with RSVIM, as long as it runs in non-headless and interactive
 //! (non-batch-processing) mode.
 
-use crate::geo::{IPos, UPos, URect};
+use crate::geo::{IPos, IRect, UPos, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
 use crate::uuid;
+use geo::coord;
 use std::sync::{Arc, RwLock};
 
 /// Root widget.
 pub struct RootWidget {
   id: usize,
-  offset: IPos,
-  abs_offset: UPos,
-  rect: URect,
+  rect: IRect,
+  abs_rect: URect,
   visible: bool,
   enabled: bool,
   children: ChildWidgetsRw,
 }
 
 impl RootWidget {
-  pub fn new(rect: URect) -> Self {
+  pub fn new(height: usize, width: usize) -> Self {
     RootWidget {
       id: uuid::next(),
-      offset: IPos::new(0, 0),
-      abs_offset: UPos::new(0, 0),
-      rect,
+      rect: IRect::new(
+        coord! {x:0, y:0},
+        coord! {x:width as isize, y:height as isize},
+      ),
+      abs_rect: URect::new(coord! {x:0, y:0}, coord! {x:width , y:height }),
       visible: true,
       enabled: true,
       children: Arc::new(RwLock::new(vec![])),

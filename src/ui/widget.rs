@@ -1,7 +1,6 @@
 //! Basic atom of all UI components.
 
-use crate::geo::pos::{IPos, UPos};
-use crate::geo::size::Size;
+use crate::geo::{IRect, URect};
 use crate::ui::term::Terminal;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
@@ -47,24 +46,18 @@ pub trait Widget {
   /// Get unique ID of a widget instance.
   fn id(&self) -> usize;
 
-  /// Get (relative) offset based on parent widget.
-  ///
-  /// The anchor is always NW (North-West).
-  fn offset(&self) -> IPos;
+  /// Get (relative) rect based on parent widget.
+  /// The rect indicates widget position and its size.
+  fn rect(&self) -> IRect;
 
-  /// Set (relative) offset.
-  fn set_offset(&mut self, value: IPos);
+  /// Set (relative) rect.
+  fn set_rect(&mut self, rect: IRect);
 
-  /// Get absolute offset based on whole [terminal](crate::ui::term::Terminal).
-  ///
-  /// The anchor is always NW (North-West).
-  fn abs_offset(&self) -> UPos;
+  /// Get absolute rect based on whole terminal.
+  fn abs_rect(&self) -> URect;
 
-  /// Get size.
-  fn size(&self) -> Size;
-
-  /// Set size.
-  fn set_size(&mut self, value: Size);
+  /// Set absolute rect.
+  fn set_abs_rect(&mut self, rect: URect);
 
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.
