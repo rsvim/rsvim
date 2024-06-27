@@ -20,16 +20,17 @@ body = """
 {% else %}\
     ## unreleased
 {% endif %}\
+{% macro makecommitid(commit_id) -%}[{{ commit_id | truncate(length=8, end="") }}]($REPO/commit/{{ commit_id }}){% endmacro -%}
 {% if previous %}\
     {% if previous.commit_id %}
-        [{{ previous.commit_id | truncate(length=8, end="") }}]($REPO/commit/{{ previous.commit_id }})...\
-            {% if commit_id %}[{{ commit_id | truncate(length=8, end="") }}]($REPO/commit/{{ commit_id }}){% endif %}
+        {{ self::makecommitid(commit_id=previous.commit_id) }}...\
+            {% if commit_id %}{{ self::makecommitid(commit_id=commit_id) }}{% endif %}
     {% endif %}\
 {% endif %}\
 {% macro makecommit(commit) -%}
 - {% if commit.scope %}*({{commit.scope}})* {% endif -%}\
   {% if commit.breaking %} [**breaking**]{% endif -%}\
-  {{ commit.message | upper_first | trim }} ([{{ commit.id | truncate(length=8, end="") }}]($REPO/commit/{{ commit.id }}))\
+  {{ commit.message | upper_first | trim }} ({{ self::makecommitid(commit_id=commit.id) }})\
   {% if commit.github.username %} by @{{ commit.github.username }}{%- endif -%}\
   {% if commit.github.pr_number %} ([#{{ commit.github.pr_number }}]($REPO/pull/{{ commit.github.pr_number }})){%- endif %}\
 {% if commit.body %}
@@ -57,7 +58,7 @@ body = """
 trim = true
 # postprocessors
 postprocessors = [
-  { pattern = '\$REPO', replace = "https://github.com/rsvim/rsvim" }, # replace repository URL
+  { pattern = '\$REPO', replace = "https://github.com/rsvim/rsvim" }, # repository URL
 ]
 
 [git]

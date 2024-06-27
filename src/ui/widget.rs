@@ -62,10 +62,14 @@ pub trait Widget {
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.
   ///
-  /// Z-index only works for the children stack under the same parent, a child widget will
-  /// always cover/override its parent. To change the visibility priority between children and
-  /// parent, you need to directly set another parent for the children, or even switch the
-  /// relationship between children and parent, i.e. make child the parent, make parent the child.
+  /// Note:
+  /// 1. The z-index only works for the children stack under the same parent, a child widget will
+  ///    always cover/override its parent. To change the visibility priority between children and
+  ///    parent, you need to directly set another parent for the children, or even swap the
+  ///    children and the parent.
+  /// 2. For two children with different z-index, say A with 100, B with 10. When B has a child C
+  ///    with z-index 1000, even 1000 > 100 > 10, A still covers C because it's a child of B.
+  ///
   fn zindex(&self) -> usize;
 
   /// Set z-index value.

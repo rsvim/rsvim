@@ -35,18 +35,7 @@ impl EventLoop {
   }
 
   pub async fn init(&self) -> IoResult<()> {
-    if !terminal::is_raw_mode_enabled()? {
-      terminal::enable_raw_mode()?;
-    }
-
     let mut out = std::io::stdout();
-    queue!(
-      out,
-      terminal::EnterAlternateScreen,
-      terminal::Clear(terminal::ClearType::All),
-      EnableMouseCapture,
-      EnableFocusChange
-    )?;
 
     let cursor = self.screen.frame().cursor;
     if cursor.blinking {
@@ -102,23 +91,5 @@ impl EventLoop {
 
     // continue loop
     true
-  }
-
-  pub async fn shutdown(&self) -> IoResult<()> {
-    let mut out = std::io::stdout();
-    queue!(
-      out,
-      DisableMouseCapture,
-      DisableFocusChange,
-      terminal::LeaveAlternateScreen,
-    )?;
-
-    out.flush()?;
-
-    if terminal::is_raw_mode_enabled()? {
-      terminal::disable_raw_mode()?;
-    }
-
-    Ok(())
   }
 }
