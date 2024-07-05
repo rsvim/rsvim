@@ -5,7 +5,6 @@ use crate::ui::term::Terminal;
 use crate::ui::widget::{ChildWidgetsArc, Widget, WidgetArc};
 use crate::uuid;
 use geo::coord;
-use std::sync::{Arc, RwLock};
 
 /// The Vim window.
 pub struct Window {
