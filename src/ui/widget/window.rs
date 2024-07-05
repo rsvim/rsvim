@@ -2,14 +2,14 @@
 
 use crate::geo::{IRect, URect};
 use crate::ui::term::Terminal;
-use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
+use crate::ui::widget::{ChildWidgetsArc, Widget, WidgetArc};
 use crate::uuid;
 use geo::coord;
 use std::sync::{Arc, RwLock};
 
 /// The Vim window.
 pub struct Window {
-  parent: WidgetRw,
+  parent: WidgetArc,
   id: usize,
   rect: IRect,
   abs_rect: URect,
@@ -19,7 +19,7 @@ pub struct Window {
 }
 
 impl Window {
-  pub fn new(rect: IRect, parent: WidgetRw) -> Self {
+  pub fn new(rect: IRect, parent: WidgetArc) -> Self {
     Window {
       id: uuid::next(),
       rect,
@@ -77,25 +77,25 @@ impl Widget for Window {
     self.enabled = value;
   }
 
-  fn parent(&self) -> Option<WidgetRw> {
+  fn parent(&self) -> Option<WidgetArc> {
     Some(self.parent.clone())
   }
 
-  fn set_parent(&mut self, parent: Option<WidgetRw>) {
+  fn set_parent(&mut self, parent: Option<WidgetArc>) {
     if let Some(p) = parent {
       self.parent = p;
     }
   }
 
-  fn children(&self) -> ChildWidgetsRw {
-    Arc::new(RwLock::new(vec![]))
-  }
-
-  fn find_children(&self, _id: usize) -> Option<WidgetRw> {
+  fn children(&self) -> Option<ChildWidgetsArc> {
     None
   }
 
-  fn find_direct_children(&self, _id: usize) -> Option<WidgetRw> {
+  fn find_children(&self, _id: usize) -> Option<WidgetArc> {
+    None
+  }
+
+  fn find_direct_children(&self, _id: usize) -> Option<WidgetArc> {
     None
   }
 

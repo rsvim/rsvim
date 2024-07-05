@@ -3,8 +3,8 @@
 use crate::geo::{IRect, URect};
 use crate::ui::term::Terminal;
 use std::cell::RefCell;
-use std::rc::{Rc, Weak};
-use std::sync::{Arc, Mutex, RwLock};
+use std::rc::Rc;
+use std::sync::{Arc, RwLock};
 use std::vec::Vec;
 
 pub mod cursor;
@@ -112,19 +112,19 @@ pub trait Widget {
   /// Get parent.
   ///
   /// Root widget doesn't have a parent.
-  fn parent(&self) -> Option<WidgetRw>;
+  fn parent(&self) -> Option<WidgetArc>;
 
   /// Set/change parent.
-  fn set_parent(&mut self, parent: Option<WidgetRw>);
+  fn set_parent(&mut self, parent: Option<WidgetArc>);
 
   /// Get children.
-  fn children(&self) -> ChildWidgetsRw;
+  fn children(&self) -> Option<ChildWidgetsArc>;
 
   /// Find child and offspring widget by ID.
-  fn find_children(&self, id: usize) -> Option<WidgetRw>;
+  fn find_children(&self, id: usize) -> Option<WidgetArc>;
 
   /// Find direct child widget by ID, without offsprings.
-  fn find_direct_children(&self, id: usize) -> Option<WidgetRw>;
+  fn find_direct_children(&self, id: usize) -> Option<WidgetArc>;
 
   // } Relationship
 
@@ -138,16 +138,8 @@ pub trait Widget {
 
 pub type WidgetRc = Rc<RefCell<dyn Widget>>;
 
-pub type WidgetWk = Weak<RefCell<dyn Widget>>;
-
-pub type WidgetRw = Arc<RwLock<dyn Widget>>;
-
-pub type WidgetMt = Arc<Mutex<dyn Widget>>;
+pub type WidgetArc = Arc<RwLock<dyn Widget>>;
 
 pub type ChildWidgetsRc = Rc<RefCell<Vec<WidgetRc>>>;
 
-pub type ChildWidgetsWk = Weak<RefCell<Vec<WidgetRc>>>;
-
-pub type ChildWidgetsRw = Arc<RwLock<Vec<WidgetRw>>>;
-
-pub type ChildWidgetsMt = Arc<Mutex<Vec<WidgetRw>>>;
+pub type ChildWidgetsArc = Arc<RwLock<Vec<WidgetArc>>>;

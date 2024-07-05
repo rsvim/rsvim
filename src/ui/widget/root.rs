@@ -4,7 +4,7 @@
 
 use crate::geo::{IRect, URect, USize};
 use crate::ui::term::Terminal;
-use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
+use crate::ui::widget::{ChildWidgetsArc, Widget, WidgetArc};
 use crate::uuid;
 use geo::coord;
 use std::sync::{Arc, RwLock};
@@ -16,7 +16,7 @@ pub struct RootWidget {
   abs_rect: URect,
   visible: bool,
   enabled: bool,
-  children: ChildWidgetsRw,
+  children: ChildWidgetsArc,
 }
 
 impl RootWidget {
@@ -80,23 +80,23 @@ impl Widget for RootWidget {
     self.enabled = value;
   }
 
-  fn parent(&self) -> Option<WidgetRw> {
+  fn parent(&self) -> Option<WidgetArc> {
     None
   }
 
-  fn set_parent(&mut self, _parent: Option<WidgetRw>) {
+  fn set_parent(&mut self, _parent: Option<WidgetArc>) {
     unimplemented!();
   }
 
-  fn children(&self) -> ChildWidgetsRw {
-    self.children.clone()
+  fn children(&self) -> Option<ChildWidgetsArc> {
+    Some(self.children.clone())
   }
 
-  fn find_children(&self, _id: usize) -> Option<WidgetRw> {
+  fn find_children(&self, _id: usize) -> Option<WidgetArc> {
     None
   }
 
-  fn find_direct_children(&self, _id: usize) -> Option<WidgetRw> {
+  fn find_direct_children(&self, _id: usize) -> Option<WidgetArc> {
     None
   }
 

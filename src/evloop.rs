@@ -1,7 +1,7 @@
 //! Main event loop for TUI application.
 
 #![allow(unused_imports, dead_code)]
-use crate::geo::{U16Rect, U16Size, USize};
+use crate::geo::{U16Size, USize};
 use crate::ui::frame::Cursor;
 use crate::ui::term::Terminal;
 use crate::ui::widget::root::RootWidget;
@@ -25,8 +25,7 @@ impl EventLoop {
   pub async fn new() -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
     let size = U16Size::new(cols, rows);
-    let cursor = Cursor::default();
-    let screen = Terminal::new(size, cursor);
+    let screen = Terminal::new(size, Cursor::default());
     let root_widget = RootWidget::new(USize::new(size.height as usize, size.width as usize));
     Ok(EventLoop {
       screen,

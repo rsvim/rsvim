@@ -3,13 +3,12 @@
 use crate::geo::{IRect, U16Pos, URect};
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::Terminal;
-use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
+use crate::ui::widget::{ChildWidgetsArc, Widget, WidgetArc};
 use crate::uuid;
 use geo::coord;
-use std::sync::{Arc, RwLock};
 
 pub struct Cursor {
-  parent: WidgetRw,
+  parent: WidgetArc,
   id: usize,
   rect: IRect,
   abs_rect: URect,
@@ -23,7 +22,7 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(
-    parent: WidgetRw,
+    parent: WidgetArc,
     rect: IRect,
     blinking: bool,
     hidden: bool,
@@ -87,11 +86,11 @@ impl Widget for Cursor {
     self.enabled = value;
   }
 
-  fn parent(&self) -> Option<WidgetRw> {
+  fn parent(&self) -> Option<WidgetArc> {
     Some(self.parent.clone())
   }
 
-  fn set_parent(&mut self, parent: Option<WidgetRw>) {
+  fn set_parent(&mut self, parent: Option<WidgetArc>) {
     assert!(parent.is_some());
     match parent {
       Some(p) => self.parent = p,
@@ -99,15 +98,15 @@ impl Widget for Cursor {
     }
   }
 
-  fn children(&self) -> ChildWidgetsRw {
-    Arc::new(RwLock::new(vec![]))
-  }
-
-  fn find_children(&self, _id: usize) -> Option<WidgetRw> {
+  fn children(&self) -> Option<ChildWidgetsArc> {
     None
   }
 
-  fn find_direct_children(&self, _id: usize) -> Option<WidgetRw> {
+  fn find_children(&self, _id: usize) -> Option<WidgetArc> {
+    None
+  }
+
+  fn find_direct_children(&self, _id: usize) -> Option<WidgetArc> {
     None
   }
 
