@@ -99,15 +99,19 @@ impl Widget for Cursor {
   }
 
   fn children(&self) -> Option<ChildWidgetsArc> {
-    None
+    unimplemented!();
+  }
+
+  fn set_children(&mut self, _children: Option<ChildWidgetsArc>) {
+    unimplemented!();
   }
 
   fn find_children(&self, _id: usize) -> Option<WidgetArc> {
-    None
+    unimplemented!();
   }
 
   fn find_direct_children(&self, _id: usize) -> Option<WidgetArc> {
-    None
+    unimplemented!();
   }
 
   fn draw(&self, terminal: &mut Terminal) {

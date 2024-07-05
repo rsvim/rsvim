@@ -120,6 +120,9 @@ pub trait Widget {
   /// Get children.
   fn children(&self) -> Option<ChildWidgetsArc>;
 
+  /// Set children.
+  fn set_children(&mut self, children: Option<ChildWidgetsArc>);
+
   /// Find child and offspring widget by ID.
   fn find_children(&self, id: usize) -> Option<WidgetArc>;
 
