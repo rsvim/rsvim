@@ -40,6 +40,8 @@ pub mod window;
 ///    * Children are always displayed on top of their parent.
 ///    * For children that shade each other, the one with higher [z-index](Widget::zindex()) has
 ///      higher priority to display and receive events.
+/// 3. Children (relative) positions are based on the parent widget's top-left corner. Their
+///      absolute positions are based on the terminal's top-left corner.
 pub trait Widget {
   // { Attributes
 
@@ -150,25 +152,25 @@ pub type WidgetsArc = Arc<RwLock<Vec<WidgetArc>>>;
 /// Define Widget Rc/Arc converters.
 #[macro_export]
 macro_rules! define_widget_converters {
-    () => {
-      pub fn to_widget_rc(w: Self) -> WidgetRc {
-        Rc::new(RefCell::new(w)) as WidgetRc
-      }
+  () => {
+    pub fn to_widget_rc(w: Self) -> WidgetRc {
+      Rc::new(RefCell::new(w)) as WidgetRc
+    }
 
-      pub fn to_widget_arc(w: Self) -> WidgetArc {
-        Arc::new(RwLock::new(w)) as WidgetArc
-      }
+    pub fn to_widget_arc(w: Self) -> WidgetArc {
+      Arc::new(RwLock::new(w)) as WidgetArc
+    }
 
-      pub fn to_children_widgets_rc(w: Vec<Rc<RefCell<Self>>>) -> WidgetsRc {
-        let dynamical_w: Vec<Rc<RefCell<dyn Widget>>> =
-          w.iter().map(|w| w.clone() as WidgetRc).collect();
-        Rc::new(RefCell::new(dynamical_w)) as WidgetsRc
-      }
+    pub fn to_children_widgets_rc(w: Vec<Rc<RefCell<Self>>>) -> WidgetsRc {
+      let dynamical_w: Vec<Rc<RefCell<dyn Widget>>> =
+        w.iter().map(|w| w.clone() as WidgetRc).collect();
+      Rc::new(RefCell::new(dynamical_w)) as WidgetsRc
+    }
 
-      pub fn to_children_widgets_arc(w: Vec<Arc<RwLock<Self>>>) -> WidgetsArc {
-        let dynamical_w: Vec<Arc<RwLock<dyn Widget>>> =
-          w.iter().map(|w| w.clone() as WidgetArc).collect();
-        Arc::new(RwLock::new(dynamical_w)) as WidgetsArc
-      }
-    };
+    pub fn to_children_widgets_arc(w: Vec<Arc<RwLock<Self>>>) -> WidgetsArc {
+      let dynamical_w: Vec<Arc<RwLock<dyn Widget>>> =
+        w.iter().map(|w| w.clone() as WidgetArc).collect();
+      Arc::new(RwLock::new(dynamical_w)) as WidgetsArc
+    }
+  };
 }

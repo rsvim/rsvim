@@ -1,12 +1,13 @@
 //! Cursor widget.
 
+use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 use std::vec::Vec;
 
 use crate::define_widget_converters;
-use crate::geo::{IRect, U16Pos, URect};
+use crate::geo::{IPos, IRect, U16Pos, UPos, URect};
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::Terminal;
 use crate::ui::widget::{Widget, WidgetArc, WidgetRc, WidgetsArc, WidgetsRc};
@@ -16,8 +17,8 @@ use geo::coord;
 pub struct Cursor {
   parent: WidgetArc,
   id: usize,
-  rect: IRect,
-  abs_rect: URect,
+  pos: IPos,
+  abs_pos: UPos,
   visible: bool,
   enabled: bool,
 
@@ -29,16 +30,19 @@ pub struct Cursor {
 impl Cursor {
   pub fn new(
     parent: WidgetArc,
-    rect: IRect,
+    pos: IPos,
     blinking: bool,
     hidden: bool,
     style: CursorStyle,
   ) -> Self {
+
+      let parent_abs_pos = parent.clone().borrow().abs_rect()
+      let abs_pos: UPos = coord!{x: pos.x + };
     Cursor {
       parent,
       id: uuid::next(),
-      rect,
-      abs_rect: URect::new(coord! {x:0,y:0}, coord! {x:0,y:0}),
+      pos,
+      abs_pos: coord! {x:0_usize ,y:0_usize},
       visible: true,
       enabled: true,
 
