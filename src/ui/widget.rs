@@ -46,7 +46,7 @@ pub trait Widget {
   /// Get unique ID of a widget instance.
   fn id(&self) -> usize;
 
-  /// Get (relative) rect based on parent widget.
+  /// Get (relative) rect based on parent widget top-left corner.
   /// The rect indicates widget position and its size.
   fn rect(&self) -> IRect;
 
@@ -118,10 +118,10 @@ pub trait Widget {
   fn set_parent(&mut self, parent: Option<WidgetArc>);
 
   /// Get children.
-  fn children(&self) -> Option<ChildWidgetsArc>;
+  fn children(&self) -> Option<WidgetsArc>;
 
   /// Set children.
-  fn set_children(&mut self, children: Option<ChildWidgetsArc>);
+  fn set_children(&mut self, children: Option<WidgetsArc>);
 
   /// Find child and offspring widget by ID.
   fn find_children(&self, id: usize) -> Option<WidgetArc>;
@@ -143,6 +143,32 @@ pub type WidgetRc = Rc<RefCell<dyn Widget>>;
 
 pub type WidgetArc = Arc<RwLock<dyn Widget>>;
 
-pub type ChildWidgetsRc = Rc<RefCell<Vec<WidgetRc>>>;
+pub type WidgetsRc = Rc<RefCell<Vec<WidgetRc>>>;
 
-pub type ChildWidgetsArc = Arc<RwLock<Vec<WidgetArc>>>;
+pub type WidgetsArc = Arc<RwLock<Vec<WidgetArc>>>;
+
+/// Define Widget Rc/Arc converters.
+#[macro_export]
+macro_rules! define_widget_converters {
+    () => {
+      pub fn to_widget_rc(w: Self) -> WidgetRc {
+        Rc::new(RefCell::new(w)) as WidgetRc
+      }
+
+      pub fn to_widget_arc(w: Self) -> WidgetArc {
+        Arc::new(RwLock::new(w)) as WidgetArc
+      }
+
+      pub fn to_children_widgets_rc(w: Vec<Rc<RefCell<Self>>>) -> WidgetsRc {
+        let dynamical_w: Vec<Rc<RefCell<dyn Widget>>> =
+          w.iter().map(|w| w.clone() as WidgetRc).collect();
+        Rc::new(RefCell::new(dynamical_w)) as WidgetsRc
+      }
+
+      pub fn to_children_widgets_arc(w: Vec<Arc<RwLock<Self>>>) -> WidgetsArc {
+        let dynamical_w: Vec<Arc<RwLock<dyn Widget>>> =
+          w.iter().map(|w| w.clone() as WidgetArc).collect();
+        Arc::new(RwLock::new(dynamical_w)) as WidgetsArc
+      }
+    };
+}

@@ -2,7 +2,7 @@
 
 use crate::geo::{IRect, URect};
 use crate::ui::term::Terminal;
-use crate::ui::widget::{ChildWidgetsArc, Widget, WidgetArc};
+use crate::ui::widget::{Widget, WidgetArc, WidgetsArc};
 use crate::uuid;
 use geo::coord;
 
@@ -86,11 +86,11 @@ impl Widget for Window {
     }
   }
 
-  fn children(&self) -> Option<ChildWidgetsArc> {
+  fn children(&self) -> Option<WidgetsArc> {
     unimplemented!();
   }
 
-  fn set_children(&mut self, _children: Option<ChildWidgetsArc>) {
+  fn set_children(&mut self, _children: Option<WidgetsArc>) {
     unimplemented!();
   }
 

@@ -2,9 +2,10 @@
 
 #![allow(unused_imports, dead_code)]
 use crate::geo::{U16Size, USize};
-use crate::ui::frame::Cursor;
 use crate::ui::term::Terminal;
+use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
+use crate::ui::widget::window::Window;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode,
@@ -14,6 +15,7 @@ use futures::StreamExt;
 use geo::coord;
 use heed::types::U16;
 use std::io::{Result as IoResult, Write};
+use std::sync::{Arc, RwLock};
 use tracing::debug;
 
 pub struct EventLoop {
@@ -25,8 +27,10 @@ impl EventLoop {
   pub async fn new() -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
     let size = U16Size::new(cols, rows);
-    let screen = Terminal::new(size, Cursor::default());
+    let screen = Terminal::new(size, Default::default());
     let root_widget = RootWidget::new(USize::new(size.height as usize, size.width as usize));
+
+    let cursor_widget = Cursor::new(RootWidget::to_widget_arc(root_widget), );
     Ok(EventLoop {
       screen,
       root_widget,

@@ -2,12 +2,17 @@
 //! It always exists along with RSVIM, as long as it runs in non-headless and interactive
 //! (non-batch-processing) mode.
 
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::sync::{Arc, RwLock};
+use std::vec::Vec;
+
+use crate::define_widget_converters;
 use crate::geo::{IRect, URect, USize};
 use crate::ui::term::Terminal;
-use crate::ui::widget::{ChildWidgetsArc, Widget, WidgetArc};
+use crate::ui::widget::{Widget, WidgetArc, WidgetRc, WidgetsArc, WidgetsRc};
 use crate::uuid;
 use geo::coord;
-use std::sync::{Arc, RwLock};
 
 /// Root widget.
 pub struct RootWidget {
@@ -16,7 +21,7 @@ pub struct RootWidget {
   abs_rect: URect,
   visible: bool,
   enabled: bool,
-  children: ChildWidgetsArc,
+  children: WidgetsArc,
 }
 
 impl RootWidget {
@@ -33,6 +38,8 @@ impl RootWidget {
       children: Arc::new(RwLock::new(vec![])),
     }
   }
+
+  define_widget_converters!();
 }
 
 impl Widget for RootWidget {
@@ -88,11 +95,11 @@ impl Widget for RootWidget {
     unimplemented!();
   }
 
-  fn children(&self) -> Option<ChildWidgetsArc> {
+  fn children(&self) -> Option<WidgetsArc> {
     Some(self.children.clone())
   }
 
-  fn set_children(&mut self, _children: Option<ChildWidgetsArc>) {
+  fn set_children(&mut self, _children: Option<WidgetsArc>) {
     unimplemented!();
   }
 

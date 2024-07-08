@@ -1,9 +1,15 @@
 //! Cursor widget.
 
+use std::cell::RefCell;
+use std::rc::Rc;
+use std::sync::{Arc, RwLock};
+use std::vec::Vec;
+
+use crate::define_widget_converters;
 use crate::geo::{IRect, U16Pos, URect};
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::Terminal;
-use crate::ui::widget::{ChildWidgetsArc, Widget, WidgetArc};
+use crate::ui::widget::{Widget, WidgetArc, WidgetRc, WidgetsArc, WidgetsRc};
 use crate::uuid;
 use geo::coord;
 
@@ -41,6 +47,8 @@ impl Cursor {
       style,
     }
   }
+
+  define_widget_converters!();
 }
 
 impl Widget for Cursor {
@@ -98,11 +106,11 @@ impl Widget for Cursor {
     }
   }
 
-  fn children(&self) -> Option<ChildWidgetsArc> {
+  fn children(&self) -> Option<WidgetsArc> {
     unimplemented!();
   }
 
-  fn set_children(&mut self, _children: Option<ChildWidgetsArc>) {
+  fn set_children(&mut self, _children: Option<WidgetsArc>) {
     unimplemented!();
   }
 
