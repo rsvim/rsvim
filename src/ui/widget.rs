@@ -30,7 +30,13 @@ pub mod window;
 ///
 /// 1. Parent owns its children.
 ///    * Children will be destroyed when their parent is.
-///    * Children are displayed inside their parent's geometric shape, clipped by boundaries.
+///    * Coordinates system are by default relative. i.e. children's relative positions are based
+///      on their parent's top-left corner, absolute positions are based on the terminal's top-left
+///      corner.
+///    * Children are displayed inside their parent's geometric shape, clipped by boundaries. The
+///      size system are by default logically infinite. i.e. children's logic shape can be
+///      logically infinite on the canvas of imagination, actual shape are been truncated by their
+///      parent's shape.
 ///    * The [visible](Widget::visible()) and [enabled](Widget::enabled()) attributes are
 ///      implicitly controlled by parent, unless they're explicitly been set.
 /// 2. Children have higher priority to display and process input events than their parent.
@@ -40,8 +46,6 @@ pub mod window;
 ///    * Children are always displayed on top of their parent.
 ///    * For children that shade each other, the one with higher [z-index](Widget::zindex()) has
 ///      higher priority to display and receive events.
-/// 3. Children (relative) positions are based on the parent widget's top-left corner. Their
-///      absolute positions are based on the terminal's top-left corner.
 pub trait Widget {
   // { Attributes
 
