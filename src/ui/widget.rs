@@ -53,7 +53,7 @@ pub trait Widget {
   /// Set (relative) rect.
   fn set_rect(&mut self, rect: IRect);
 
-  /// Get absolute rect based on whole terminal.
+  /// Get absolute rect based on whole terminal top-left corner.
   fn abs_rect(&self) -> URect;
 
   /// Set absolute rect.
