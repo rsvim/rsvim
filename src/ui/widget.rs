@@ -235,16 +235,24 @@ pub trait Widget {
   }
 
   /// Calculate actual size, based on (logic) size and parent's actual size.
+  /// Note: If the actual size is outside of the parent, it will be automatically truncated inside
+  /// of the parent's shape.
+  /// For example:
+  /// 1. If current widget's logic size is (10, 10), relative position is (0, 0), parent's actual
+  ///    size is (8, 8). Then the current widget's actual size is (8, 8).
+  /// 2. If current widget's logic size is (10, 10), relative position is (4, 4), parent's actual
+  ///    size is (8, 8). Then the current widget's actual size is (4, 4).
   fn to_actual_size(&self) -> USize {
     let r1 = self.rect();
     match self.parent() {
       Some(parent) => {
         let s1 = parent.read().unwrap().actual_size();
-        let top_left = r1.min();
-        let bottom_right: Coord<isize> = coord! {x: min(top_left.x as isize + r1.height() as isize, s1.height as isize), y: min(top_left.y as isize + r1.width() as isize, s1.width as isize)};
+        let top_left: Coord<isize> = coord! {x: max(r1.min().x, 0), y: max(r1.min().y, 0)};
+        let bot_right: Coord<isize> =
+          coord! {x: min(r1.max().x, s1.width as isize), y: max(r1.max().y, s1.height as isize)};
         USize::new(
-          (bottom_right.y - top_left.y) as usize,
-          (bottom_right.x - top_left.y) as usize,
+          (bot_right.y - top_left.y) as usize,
+          (bot_right.x - top_left.y) as usize,
         )
       }
       _ => unreachable!("No parent to calculate actual size"),
