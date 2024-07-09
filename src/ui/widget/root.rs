@@ -7,7 +7,7 @@ use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 use std::vec::Vec;
 
-use crate::define_widget_converters;
+use crate::define_widget_helpers;
 use crate::geo::{IRect, URect, USize};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{Widget, WidgetArc, WidgetRc, WidgetsArc, WidgetsRc};
@@ -39,7 +39,7 @@ impl RootWidget {
     }
   }
 
-  define_widget_converters!();
+  define_widget_helpers!();
 }
 
 impl Widget for RootWidget {
@@ -56,12 +56,12 @@ impl Widget for RootWidget {
     unimplemented!();
   }
 
-  fn abs_rect(&self) -> URect {
+  fn absolute_rect(&self) -> URect {
     self.abs_rect
   }
 
   /// Not allow to modify the position & size.
-  fn set_abs_rect(&mut self, _rect: URect) {
+  fn set_absolute_rect(&mut self, _rect: URect) {
     unimplemented!();
   }
 

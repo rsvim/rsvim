@@ -44,11 +44,11 @@ impl Widget for Window {
     self.rect = rect;
   }
 
-  fn abs_rect(&self) -> URect {
+  fn absolute_rect(&self) -> URect {
     self.abs_rect
   }
 
-  fn set_abs_rect(&mut self, rect: URect) {
+  fn set_absolute_rect(&mut self, rect: URect) {
     self.abs_rect = rect;
   }
 

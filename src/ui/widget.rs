@@ -1,15 +1,25 @@
 //! Basic atom of all UI components.
 
-use crate::geo::{IRect, URect};
+use crate::geo::{IPos, IRect, UPos, URect, USize};
 use crate::ui::term::Terminal;
+use geo::{point, coord, Rect, Coord};
+use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 use std::vec::Vec;
+use std::cmp::{min, max};
 
 pub mod cursor;
 pub mod root;
 pub mod window;
+
+/// Concrete struct type that implements a Widget trait.
+pub enum WidgetType {
+  RootWidgetType,
+  CursorType,
+  WindowType,
+}
 
 /// Widget is the base trait for all UI components, it provide a common layer for receiving user
 /// events (keyboard/mouse), and rendering itself on terminal. It is more of a logical container
@@ -52,18 +62,59 @@ pub trait Widget {
   /// Get unique ID of a widget instance.
   fn id(&self) -> usize;
 
-  /// Get (relative) rect based on parent widget top-left corner.
-  /// The rect indicates widget position and its size.
+  fn typeid(&self) -> WidgetType;
+
+  /// Get (relative) position.
+  fn pos(&self) -> IPos;
+
+  /// Set (relative) position.
+  fn set_pos(&mut self, pos: IPos);
+
+  /// Get absolute position.
+  fn absolute_pos(&self) -> UPos;
+
+  /// Set absolute position.
+  fn set_absolute_pos(&mut self, pos: UPos);
+
+  /// Get (logic) size.
+  fn size(&self) -> USize;
+
+  /// Set (logic) size.
+  fn set_size(&mut self, size: USize);
+
+  /// Get actual size.
+  fn actual_size(&self) -> USize;
+
+  /// Set actual size.
+  /// If the actual size is out of parent's shape, it will be automatically truncated.
+  fn set_actual_size(&mut self, size: USize);
+
+  /// Get (relative) rect.
+  /// It indicates both positions and (logic) size.
   fn rect(&self) -> IRect;
 
   /// Set (relative) rect.
   fn set_rect(&mut self, rect: IRect);
 
-  /// Get absolute rect based on whole terminal top-left corner.
-  fn abs_rect(&self) -> URect;
+  /// Get absolute rect.
+  fn absolute_rect(&self) -> URect;
 
   /// Set absolute rect.
-  fn set_abs_rect(&mut self, rect: URect);
+  fn set_absolute_rect(&mut self, rect: URect);
+
+  /// Get (relative) rect with actual size.
+  fn actual_rect(&self) -> IRect;
+
+  /// Set (relative) rect with actual size.
+  /// If the actual size is out of parent's shape, it will be automatically truncated.
+  fn set_actual_rect(&mut self, rect: IRect);
+
+  /// Get absolute rect with actual size.
+  fn actual_absolute_rect(&self) -> URect;
+
+  /// Set absolute rect with actual size.
+  /// If the actual size is out of parent's shape, it will be automatically truncated.
+  fn set_actual_absolute_rect(&mut self, rect: URect);
 
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.
@@ -143,38 +194,93 @@ pub trait Widget {
   fn draw(&self, t: &mut Terminal);
 
   // } Contents
+
+  // Helpers {
+
+  /// Children and parent's relative/absolute position, logic/actual size calculation.
+
+  /// Calculate absolute position, based on (relative) position and parent's absolute position.
+  fn to_absolute_pos(&self) -> UPos {
+    let p1 = point!(x: self.pos().x() as usize, y: self.pos().y() as usize);
+    match self.parent() {
+      Some(parent) => p1 + parent.read().unwrap().absolute_pos(),
+      _ => unreachable!("No parent to calculate absolute position"),
+    }
+  }
+
+  /// Calculate (relative) position, based on absolute position and parent's absolute position.
+  fn to_pos(&self) -> IPos {
+    let p1 = point!(x: self.absolute_pos().x() as isize, y: self.absolute_pos().y() as isize);
+    match self.parent() {
+      Some(parent) => {
+        let p2 = parent.read().unwrap().absolute_pos();
+        let p3 = point!(x: p2.x() as isize, y: p2.y() as isize);
+        p1 - p3
+      }
+      _ => unreachable!("No parent to calculate (relative) position"),
+    }
+  }
+
+  /// Calculate actual size, based on (logic) size and parent's actual size.
+  fn to_actual_size(&self) -> USize {
+    let r1 = self.rect();
+    match self.parent() {
+        Some(parent) => {
+            let s1 = parent.read().unwrap().actual_size();
+            let top_left = r1.min();
+            let bottom_right : Coord<isize> = coord!{x: min(top_left.x as isize + r1.height() as isize, s1.height as isize), y: min(top_left.y as isize + r1.width() as isize, s1.width as isize)};
+            USize::new((bottom_right.y - top_left.y) as usize, (bottom_right.x - top_left.y) as usize)
+        },
+      _ => unreachable!("No parent to calculate actual size"),
+    }
+  }
+
+  /// Calculate (relative) rect with actual size, based on (logic) size and parent's actual size.
+  fn to_actual_rect(&self) -> URect {}
+
+  /// Calculate absolute rect with actual size, based on (logic) size and parent's actual size.
+  fn to_actual_absolute_rect(&self) -> URect {}
+
+  // Helpers }
 }
 
 pub type WidgetRc = Rc<RefCell<dyn Widget>>;
 
 pub type WidgetArc = Arc<RwLock<dyn Widget>>;
 
-pub type WidgetsRc = Rc<RefCell<Vec<WidgetRc>>>;
+pub type WidgetsRc = Vec<WidgetRc>;
 
-pub type WidgetsArc = Arc<RwLock<Vec<WidgetArc>>>;
+pub type WidgetsArc = Vec<WidgetArc>;
 
 /// Define Widget Rc/Arc converters.
 #[macro_export]
-macro_rules! define_widget_converters {
+macro_rules! define_widget_helpers {
   () => {
-    pub fn to_widget_rc(w: Self) -> WidgetRc {
+    /// Define Widget Rc/Arc pointer converters.
+    pub fn downcast_rc(w: WidgetRc) -> Rc<RefCell<Self>> {
+      let as_any = |&w1| -> &dyn Any { w1 };
+      let casted = as_any(w).downcast_ref::<Rc<RefCell<Self>>>();
+      match casted {
+        Some(result) => result,
+        None => panic!("Failed to downcast WidgetRc to Rc<RefCell<Self>>"),
+      }
+    }
+
+    pub fn downcast_arc(w: WidgetArc) -> Arc<RwLock<Self>> {
+      let as_any = |&w1| -> &dyn Any { w1 };
+      let casted = as_any(w).downcast_ref::<Rc<RefCell<Self>>>();
+      match casted {
+        Some(result) => result,
+        None => panic!("Failed to downcast WidgetArc to Arc<RwLock<Self>>"),
+      }
+    }
+
+    pub fn upcast_rc(w: Self) -> WidgetRc {
       Rc::new(RefCell::new(w)) as WidgetRc
     }
 
-    pub fn to_widget_arc(w: Self) -> WidgetArc {
+    pub fn upcast_arc(w: Self) -> WidgetArc {
       Arc::new(RwLock::new(w)) as WidgetArc
-    }
-
-    pub fn to_children_widgets_rc(w: Vec<Rc<RefCell<Self>>>) -> WidgetsRc {
-      let dynamical_w: Vec<Rc<RefCell<dyn Widget>>> =
-        w.iter().map(|w| w.clone() as WidgetRc).collect();
-      Rc::new(RefCell::new(dynamical_w)) as WidgetsRc
-    }
-
-    pub fn to_children_widgets_arc(w: Vec<Arc<RwLock<Self>>>) -> WidgetsArc {
-      let dynamical_w: Vec<Arc<RwLock<dyn Widget>>> =
-        w.iter().map(|w| w.clone() as WidgetArc).collect();
-      Arc::new(RwLock::new(dynamical_w)) as WidgetsArc
     }
   };
 }

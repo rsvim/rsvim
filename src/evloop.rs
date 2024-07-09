@@ -1,7 +1,7 @@
 //! Main event loop for TUI application.
 
 #![allow(unused_imports, dead_code)]
-use crate::geo::{U16Size, USize, IRect, URect};
+use crate::geo::{IRect, U16Size, URect, USize};
 use crate::ui::term::Terminal;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
@@ -12,7 +12,7 @@ use crossterm::event::{
 };
 use crossterm::{cursor as termcursor, queue, terminal};
 use futures::StreamExt;
-use geo::coord;
+use geo::point;
 use heed::types::U16;
 use std::io::{Result as IoResult, Write};
 use std::sync::{Arc, RwLock};
@@ -30,11 +30,8 @@ impl EventLoop {
     let screen = Terminal::new(size, Default::default());
     let root_widget = RootWidget::new(USize::new(size.height as usize, size.width as usize));
 
-    let cursor_rect = IRect::new(
-        coord! {x:0, y:0},
-        coord! {x:1 , y:1 },
-      ),
-    let cursor_widget = Cursor::new(RootWidget::to_widget_arc(root_widget), );
+    let cursor_rect = IRect::new(point! (x:0, y:0), point! (x:1 , y:1));
+    let cursor_widget = Cursor::new(RootWidget::to_widget_arc(root_widget), cursor_rect);
     Ok(EventLoop {
       screen,
       root_widget,

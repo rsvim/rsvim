@@ -5,7 +5,7 @@
 use crate::geo::{U16Pos, U16Size, UPos};
 use compact_str::CompactString;
 use crossterm::style::{Attributes, Color};
-use geo::coord;
+use geo::point;
 use std::vec::Splice;
 use std::{cmp, fmt, hash};
 
@@ -157,7 +157,7 @@ impl Cursor {
 impl Default for Cursor {
   fn default() -> Self {
     Cursor {
-      pos: coord! {x:0_u16, y:0_u16},
+      pos: point! {x:0_u16, y:0_u16},
       blinking: false,
       hidden: false,
       style: CursorStyle::DefaultUserShape,

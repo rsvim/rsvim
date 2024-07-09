@@ -1,15 +1,14 @@
 //! Coordinates on the 2-dimensional Cartesian plain.
 //! Relative coordinates use signed integers, absolute coordinates use unsigned integers.
 
-use geo::geometry::Coord;
-use geo::geometry::Rect;
+use geo::{Point, Rect};
 
 // Positions {
 
-pub type IPos = Coord<isize>;
+pub type IPos = Point<isize>;
 
-pub type UPos = Coord<usize>;
-pub type U16Pos = Coord<u16>;
+pub type UPos = Point<usize>;
+pub type U16Pos = Point<u16>;
 
 // Positions }
 
