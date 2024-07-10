@@ -35,6 +35,12 @@ impl<T> Size<T> {
   pub fn new(height: T, width: T) -> Self {
     Size { height, width }
   }
+  pub fn height(&self) -> T {
+    self.height
+  }
+  pub fn width(&self) -> T {
+    self.width
+  }
 }
 
 impl<T> From<Rect<T>> for Size<T>

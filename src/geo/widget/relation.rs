@@ -19,7 +19,7 @@
 //! `absolute_actual_rect`, when it presents a relative position and a logic size, it's simply
 //! called a `rect`.
 
-use crate::geo::{IPos, IRect, ISize, Size, U16Rect, U16Size, UPos, URect, USize};
+use crate::geo::{IPos, IRect, ISize, Size, U16Size, UPos, URect, USize};
 use crate::{as_geo_point, as_geo_size};
 use geo::point;
 use std::cmp::{max, min};
@@ -109,15 +109,15 @@ mod tests {
         U16Size::new(5_u16, 5_u16),
       ),
       (
-        point!(x: 7, y:2),
+        point!(x: 7, y:1),
         point!(x: 3_usize, y: 6_usize),
-        U16Size::new(4_u16, 4_u16),
+        U16Size::new(8_u16, 8_u16),
       ),
     ];
     let expects: Vec<UPos> = vec![
       point!(x: 0_usize, y: 0_usize),
       point!(x: 5_usize, y: 5_usize),
-      point!(x: 5_usize, y: 5_usize),
+      point!(x: 8_usize, y: 7_usize),
     ];
     for (i, t) in inputs.iter().enumerate() {
       let actual = make_absolute_pos(t.0, t.1, t.2);
@@ -128,10 +128,56 @@ mod tests {
 
   #[test]
   fn should_make_relative_positions() {
-    let inputs: Vec<(UPos, UPos)> = vec![(point!(x: -1, y:-1), point!(x: 0_usize, y: 0_usize))];
-    let expects: Vec<UPos> = vec![point!(x: 0_usize, y: 0_usize)];
+    let inputs: Vec<(UPos, UPos)> = vec![
+      (
+        point!(x: 1_usize, y:1_usize),
+        point!(x: 0_usize, y: 0_usize),
+      ),
+      (
+        point!(x: 1_usize, y:1_usize),
+        point!(x: 5_usize, y: 6_usize),
+      ),
+    ];
+    let expects: Vec<IPos> = vec![point!(x: 1_isize, y: 1_isize), point!(x: -4, y: -5)];
     for (i, t) in inputs.iter().enumerate() {
-      let actual = make_pos(t.0, t.1, t.2);
+      let actual = make_pos(t.0, t.1);
+      let expect = expects[i];
+      assert_eq!(actual, expect);
+    }
+  }
+
+  #[test]
+  fn should_make_actual_sizes() {
+    let inputs: Vec<(IRect, USize)> = vec![(IRect::new((0, 0), (3, 5)), USize::new(4, 4))];
+    let expects: Vec<USize> = vec![USize::new(3, 4)];
+    for (i, t) in inputs.iter().enumerate() {
+      let actual = make_actual_size(t.0, t.1);
+      let expect = expects[i];
+      assert_eq!(actual, expect);
+    }
+  }
+
+  #[test]
+  fn should_make_actual_rects() {
+    let inputs: Vec<(IRect, USize)> = vec![(IRect::new((0, 0), (3, 5)), USize::new(4, 4))];
+    let expects: Vec<IRect> = vec![IRect::new((0, 0), (3, 4))];
+    for (i, t) in inputs.iter().enumerate() {
+      let actual = make_actual_rect(t.0, t.1);
+      let expect = expects[i];
+      assert_eq!(actual, expect);
+    }
+  }
+
+  #[test]
+  fn should_make_actual_absolute_rects() {
+    let inputs: Vec<(IRect, URect, U16Size)> = vec![(
+      IRect::new((0, 0), (3, 5)),
+      URect::new((0, 0), (4, 4)),
+      U16Size::new(10, 10),
+    )];
+    let expects: Vec<URect> = vec![URect::new((0, 0), (3, 4))];
+    for (i, t) in inputs.iter().enumerate() {
+      let actual = make_actual_absolute_rect(t.0, t.1, t.2);
       let expect = expects[i];
       assert_eq!(actual, expect);
     }

@@ -1,6 +1,7 @@
 //! Basic atom of all UI components.
 
-use crate::geo::{IPos, IRect, U16Rect, UPos, URect};
+use crate::as_geo_rect;
+use crate::geo::{IPos, IRect, UPos, URect, USize};
 use crate::ui::term::Terminal;
 use geo::{coord, point, Coord, Rect};
 use std::any::Any;
@@ -44,9 +45,8 @@ pub enum WidgetType {
 ///      on their parent's top-left corner, absolute positions are based on the terminal's top-left
 ///      corner.
 ///    * Children are displayed inside their parent's geometric shape, clipped by boundaries. The
-///      size system are by default logically infinite. i.e. children's logic shape can be
-///      logically infinite on the canvas of imagination, while the actual (i.e. visible) shape is
-///      been truncated by parent's shape.
+///      size system are by default logically infinite on parent's canvas of imagination, while the
+///      actual (visible) shape is been truncated by parent's shape.
 ///    * The [visible](Widget::visible()) and [enabled](Widget::enabled()) attributes are
 ///      implicitly controlled by parent, unless they're explicitly been set.
 /// 2. Children have higher priority to display and process input events than their parent.
@@ -64,11 +64,46 @@ pub trait Widget {
 
   fn typeid(&self) -> WidgetType;
 
-  /// Get rect, with relative position and logic size.
+  /// Get rect, relative position and logical
   fn rect(&self) -> IRect;
 
-  /// Set rect, with relative position and logic size.
+  /// Set rect.
   fn set_rect(&mut self, rect: IRect);
+
+  // Position and Size {
+
+  /// Get relative position.
+  fn pos(&self) -> IPos {
+    point!(x: self.rect().min().x, y: self.rect().min().y)
+  }
+
+  /// Set relative position.
+  fn set_pos(&mut self, pos: IPos) {
+    let r = self.rect();
+    self.set_rect(IRect::new(
+      pos,
+      point!(x: pos.x() + r.width(), y: pos.y() + r.height()),
+    ));
+  }
+
+  /// Get logical size.
+  fn size(&self) -> USize {
+    let r = self.rect();
+    let r2 = as_geo_rect!(r, usize);
+    USize::from(r2)
+  }
+
+  /// Set logical size.
+  fn set_size(&mut self, sz: USize) {
+    let r = self.rect();
+    let bottom_left = r.min();
+    self.set_rect(IRect::new(
+      bottom_left.into(),
+      point!(x: bottom_left.x + sz.width() as isize, y: bottom_left.y + sz.height() as isize),
+    ));
+  }
+
+  // Position and Size }
 
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.
@@ -151,7 +186,7 @@ pub trait Widget {
 
   // Helpers {
 
-  /// Children and parent's relative/absolute position, logic/actual size calculation.
+  /// Children and parent's relative/absolute position, logical/actual size calculation.
 
   /// Calculate absolute position from relative position ([`self.pos()`](Widget::pos())) and
   /// parent's absolute position ([`self.parent().absolute_pos()`](Widget::absolute_pos())).
@@ -193,16 +228,16 @@ pub trait Widget {
     }
   }
 
-  /// Calculate actual size from logic size ([`self.size()`](Widget::size())) and parent's actual
+  /// Calculate actual size from logical size ([`self.size()`](Widget::size())) and parent's actual
   /// size ([`self.parent().actual_size()`](Widget::actual_size())).
   ///
   /// Note: If the actual size is outside of the parent, it will be automatically truncated inside
   /// of the parent's shape.
   ///
   /// For example:
-  /// 1. If current widget's logic size is (10, 10), relative position is (0, 0), parent's actual
+  /// 1. If current widget's logical size is (10, 10), relative position is (0, 0), parent's actual
   ///    size is (8, 8). Then the current widget's actual size is (8, 8).
-  /// 2. If current widget's logic size is (10, 10), relative position is (4, 4), parent's actual
+  /// 2. If current widget's logical size is (10, 10), relative position is (4, 4), parent's actual
   ///    size is (8, 8). Then the current widget's actual size is (4, 4).
   fn to_actual_size(&self) -> USize {
     let r1 = self.rect();
@@ -221,7 +256,7 @@ pub trait Widget {
     }
   }
 
-  /// Calculate relative rect with actual size, from logic size ([`self.size()`](Widget::size()))
+  /// Calculate relative rect with actual size, from logical size ([`self.size()`](Widget::size()))
   /// and parent's actual size ([`self.parent().actual_size()`](Widget::actual_size())).
   ///
   /// Note: This method works exactly same with [to_actual_size](Widget::to_actual_size()), except
@@ -235,7 +270,7 @@ pub trait Widget {
     )
   }
 
-  /// Calculate absolute rect with actual size, from logic size ([`self.size()`](Widget::size()))
+  /// Calculate absolute rect with actual size, from logical size ([`self.size()`](Widget::size()))
   /// and parent's actual size ([`self.parent().actual_size()`](Widget::actual_size())).
   ///
   /// Note: This method works exactly same with [to_absolute_pos](Widget::to_absolute_pos()) and
