@@ -1,6 +1,7 @@
 //! Basic atom of all UI components.
 
 use crate::as_geo_rect;
+use crate::geo::widget::relation;
 use crate::geo::{IPos, IRect, UPos, URect, USize};
 use crate::ui::term::Terminal;
 use geo::{coord, point, Coord, Rect};
@@ -183,106 +184,6 @@ pub trait Widget {
   fn draw(&self, t: &mut Terminal);
 
   // } Contents
-
-  // Helpers {
-
-  /// Children and parent's relative/absolute position, logical/actual size calculation.
-
-  /// Calculate absolute position from relative position ([`self.pos()`](Widget::pos())) and
-  /// parent's absolute position ([`self.parent().absolute_pos()`](Widget::absolute_pos())).
-  ///
-  /// Note: If the absolute position is outside of the terminal, it will be automatically bounded
-  /// inside of the terminal's shape.
-  ///
-  /// For example:
-  /// 1. If current widget's relative position is (-1, -1), parent's absolute position is (0, 0).
-  ///    Then the current widget's absolute position is (0, 0).
-  /// 2. If current widget's relative position is (10, 10), parent's actual size is (5, 5),
-  ///    terminal's actual size is (5, 5). Then the current widget's absolution position is (5, 5).
-  fn to_absolute_pos(&self, terminal_size: U16Size) -> UPos {
-    let p1 = self.pos();
-    match self.parent() {
-      Some(parent) => {
-        let p2 = parent.read().unwrap().absolute_pos();
-        let p3: IPos = p1 + point!(x: p2.x() as isize, y: p2.y() as isize);
-        let x = min(max(p3.x(), 0), terminal_size.width as isize) as usize;
-        let y = min(max(p3.y(), 0), terminal_size.height as isize) as usize;
-        point!(x: x, y: y) as UPos
-      }
-      _ => unreachable!("No parent to calculate absolute position"),
-    }
-  }
-
-  /// Calculate relative position from absolute position
-  /// ([`self.absolute_pos()`](Widget::absolute_pos())) and parent's absolute position
-  /// ([`self.parent().absolute_pos()`](Widget::absolute_pos())).
-  fn to_pos(&self) -> IPos {
-    let p1 = self.absolute_pos();
-    match self.parent() {
-      Some(parent) => {
-        let p2 = parent.read().unwrap().absolute_pos();
-        point!(x: p1.x() as isize, y: p1.y() as isize)
-          - point!(x: p2.x() as isize, y: p2.y() as isize)
-      }
-      _ => unreachable!("No parent to calculate (relative) position"),
-    }
-  }
-
-  /// Calculate actual size from logical size ([`self.size()`](Widget::size())) and parent's actual
-  /// size ([`self.parent().actual_size()`](Widget::actual_size())).
-  ///
-  /// Note: If the actual size is outside of the parent, it will be automatically truncated inside
-  /// of the parent's shape.
-  ///
-  /// For example:
-  /// 1. If current widget's logical size is (10, 10), relative position is (0, 0), parent's actual
-  ///    size is (8, 8). Then the current widget's actual size is (8, 8).
-  /// 2. If current widget's logical size is (10, 10), relative position is (4, 4), parent's actual
-  ///    size is (8, 8). Then the current widget's actual size is (4, 4).
-  fn to_actual_size(&self) -> USize {
-    let r1 = self.rect();
-    match self.parent() {
-      Some(parent) => {
-        let s1 = parent.read().unwrap().actual_size();
-        let top_left: Coord<isize> = coord! {x: max(r1.min().x, 0), y: max(r1.min().y, 0)};
-        let bot_right: Coord<isize> =
-          coord! {x: min(r1.max().x, s1.width as isize), y: max(r1.max().y, s1.height as isize)};
-        USize::new(
-          (bot_right.y - top_left.y) as usize,
-          (bot_right.x - top_left.y) as usize,
-        )
-      }
-      _ => unreachable!("No parent to calculate actual size"),
-    }
-  }
-
-  /// Calculate relative rect with actual size, from logical size ([`self.size()`](Widget::size()))
-  /// and parent's actual size ([`self.parent().actual_size()`](Widget::actual_size())).
-  ///
-  /// Note: This method works exactly same with [to_actual_size](Widget::to_actual_size()), except
-  /// it returns a `IRect` instead of a `USize`.
-  fn to_actual_rect(&self) -> IRect {
-    let p1 = self.pos();
-    let s1 = self.to_actual_size();
-    IRect::new(
-      p1,
-      point!(x: p1.x() + s1.width as isize, y: p1.y() + s1.height as isize),
-    )
-  }
-
-  /// Calculate absolute rect with actual size, from logical size ([`self.size()`](Widget::size()))
-  /// and parent's actual size ([`self.parent().actual_size()`](Widget::actual_size())).
-  ///
-  /// Note: This method works exactly same with [to_absolute_pos](Widget::to_absolute_pos()) and
-  /// [to_actual_size](Widget::to_actual_size()), except it returns a `URect` instead of a `UPos`
-  /// or a `USize`.
-  fn to_actual_absolute_rect(&self, terminal_size: U16Size) -> URect {
-    let p1 = self.to_absolute_pos(terminal_size);
-    let s1 = self.to_actual_size();
-    URect::new(p1, point!(x: p1.x() + s1.width, y: p1.y() + s1.height))
-  }
-
-  // Helpers }
 }
 
 pub type WidgetRc = Rc<RefCell<dyn Widget>>;
