@@ -104,6 +104,7 @@ pub trait Widget {
   }
 
   /// Calculate absolute position, based on relative position and parent's absolute position.
+  /// If there's no parent widget, the relative position is absolute itself.
   fn get_absolute_pos(&self, terminal_size: U16Size) -> UPos {
     match self.parent() {
       Some(parent) => {

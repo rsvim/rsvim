@@ -28,7 +28,7 @@ use std::cmp::{max, min};
 ///
 /// Note:
 /// 1. If the widget doesn't have a parent, i.e. it's the root widget, then the relative position
-///    is absolute position itself.
+///    is already absolute itself.
 /// 2. If the absolute position is outside of the terminal, it will be automatically bounded inside
 ///    of the terminal's shape.
 ///
