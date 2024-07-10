@@ -2,12 +2,10 @@
 
 use crate::as_geo_rect;
 use crate::geo::widget::relation;
-use crate::geo::{IPos, IRect, UPos, URect, USize};
+use crate::geo::{IPos, IRect, U16Size, UPos, USize};
 use crate::ui::term::Terminal;
-use geo::{coord, point, Coord, Rect};
-use std::any::Any;
+use geo::{point, Rect};
 use std::cell::RefCell;
-use std::cmp::{max, min};
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 use std::vec::Vec;
@@ -72,7 +70,7 @@ pub trait Widget {
   /// Set rect.
   fn set_rect(&mut self, rect: IRect);
 
-  // Position and Size {
+  // Position/Size/Rect Helpers {
 
   /// Get relative position.
   fn pos(&self) -> IPos {
@@ -105,7 +103,18 @@ pub trait Widget {
     ));
   }
 
-  // Position and Size }
+  /// Calculate absolute position, based on relative position and parent's absolute position.
+  fn get_absolute_pos(&self, terminal_size: U16Size) -> UPos {
+    match self.parent() {
+      Some(parent) => {
+        let parent_absolute_pos = parent.read().unwrap().get_absolute_pos(terminal_size);
+        relation::make_absolute_pos(self.pos(), Some(parent_absolute_pos), terminal_size)
+      }
+      None => relation::make_absolute_pos(self.pos(), None, terminal_size),
+    }
+  }
+
+  // Position/Size/Rect Helpers }
 
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.

@@ -67,10 +67,12 @@ impl Widget for Cursor {
   }
 
   fn zindex(&self) -> usize {
-    0
+    std::usize::MAX
   }
 
-  fn set_zindex(&mut self, _zindex: usize) {}
+  fn set_zindex(&mut self, _zindex: usize) {
+    unimplemented!()
+  }
 
   fn visible(&self) -> bool {
     self.visible
@@ -93,27 +95,26 @@ impl Widget for Cursor {
   }
 
   fn set_parent(&mut self, parent: Option<WidgetArc>) {
-    assert!(parent.is_some());
     match parent {
       Some(p) => self.parent = p,
-      _ => unreachable!(),
+      _ => unreachable!("Parent is None"),
     }
   }
 
   fn children(&self) -> Option<WidgetsArc> {
-    unimplemented!();
+    unreachable!("Cursor doesn't have children widgets")
   }
 
   fn set_children(&mut self, _children: Option<WidgetsArc>) {
-    unimplemented!();
+    unreachable!("Cursor cannot set children widgets")
   }
 
   fn find_children(&self, _id: usize) -> Option<WidgetArc> {
-    unimplemented!();
+    unreachable!("Cursor doesn't have children widgets")
   }
 
   fn find_direct_children(&self, _id: usize) -> Option<WidgetArc> {
-    unimplemented!();
+    unreachable!("Cursor doesn't have direct children widgets")
   }
 
   fn draw(&self, terminal: &mut Terminal) {
