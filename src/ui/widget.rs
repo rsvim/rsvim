@@ -1,8 +1,7 @@
 //! Basic atom of all UI components.
 
 use crate::as_geo_rect;
-use crate::geo::widget::relation;
-use crate::geo::{IPos, IRect, U16Size, UPos, USize};
+use crate::geo::{conversion, IPos, IRect, U16Size, UPos, USize};
 use crate::ui::term::Terminal;
 use geo::{point, Rect};
 use std::cell::RefCell;
@@ -109,9 +108,9 @@ pub trait Widget {
     match self.parent() {
       Some(parent) => {
         let parent_absolute_pos = parent.read().unwrap().get_absolute_pos(terminal_size);
-        relation::make_absolute_pos(self.pos(), Some(parent_absolute_pos), terminal_size)
+        conversion::to_absolute_pos(self.pos(), Some(parent_absolute_pos), terminal_size)
       }
-      None => relation::make_absolute_pos(self.pos(), None, terminal_size),
+      None => conversion::to_absolute_pos(self.pos(), None, terminal_size),
     }
   }
 

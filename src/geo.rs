@@ -1,9 +1,9 @@
-//! Coordinates on the 2-dimensional Cartesian plain.
+//! Coordinate system on the 2-dimensional Cartesian plain.
 //! Relative coordinates use signed integers, absolute coordinates use unsigned integers.
 
 use geo::{Point, Rect};
 
-pub mod widget;
+pub mod conversion;
 
 // Positions {
 
