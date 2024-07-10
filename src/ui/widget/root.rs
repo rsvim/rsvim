@@ -8,7 +8,7 @@ use std::sync::{Arc, RwLock};
 use std::vec::Vec;
 
 use crate::define_widget_helpers;
-use crate::geo::{IRect, URect, USize};
+use crate::geo::{IRect, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{Widget, WidgetArc, WidgetRc, WidgetsArc, WidgetsRc};
 use crate::uuid;
@@ -25,14 +25,14 @@ pub struct RootWidget {
 }
 
 impl RootWidget {
-  pub fn new(size: USize) -> Self {
+  pub fn new(rect: URect) -> Self {
     RootWidget {
       id: uuid::next(),
       rect: IRect::new(
         coord! {x:0, y:0},
-        coord! {x:size.width as isize, y:size.height as isize},
+        coord! {x:rect.width as isize, y:rect.height as isize},
       ),
-      abs_rect: URect::new(coord! {x:0, y:0}, coord! {x:size.width , y:size.height }),
+      abs_rect: URect::new(coord! {x:0, y:0}, coord! {x:rect.width , y:rect.height }),
       visible: true,
       enabled: true,
       children: Arc::new(RwLock::new(vec![])),

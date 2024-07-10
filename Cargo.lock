@@ -1119,6 +1119,7 @@ dependencies = [
  "heed",
  "lazy_static",
  "mockall",
+ "num-traits",
  "rand",
  "ropey",
  "tempfile",

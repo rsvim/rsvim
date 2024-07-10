@@ -4,9 +4,7 @@ use crate::geo::{IPos, IRect, U16Size, UPos, URect, USize};
 use geo::{coord, point, Coord};
 use std::cmp::{max, min};
 
-/// Calculate absolute position from relative position
-/// ([`Widget::pos()`](crate::ui::widget::Widget::pos())) and parent's absolute position
-/// ([`Widget::absolute_pos()`](crate::ui::widget::Widget::absolute_pos())).
+/// Calculate absolute position from relative position and parent's absolute position.
 ///
 /// Note: If the absolute position is outside of the terminal, it will be automatically bounded
 /// inside of the terminal's shape.
@@ -16,7 +14,7 @@ use std::cmp::{max, min};
 ///    Then the current widget's absolute position is (0, 0).
 /// 2. If current widget's relative position is (10, 10), parent's actual size is (5, 5),
 ///    terminal's actual size is (5, 5). Then the current widget's absolution position is (5, 5).
-fn make_absolute_pos(pos: IPos, parent_absolute_pos: UPos, terminal_size: U16Size) -> UPos {
+fn make_absolute_pos(rect: IRect, parent_absolute_rect: URect, terminal_size: U16Size) -> URect {
   let p3: IPos =
     pos + point!(x: parent_absolute_pos.x() as isize, y: parent_absolute_pos.y() as isize);
   let x = min(max(p3.x(), 0), terminal_size.width as isize) as usize;
@@ -79,4 +77,31 @@ fn make_actual_absolute_rect(rect: IRect, parent_absolute_pos: UPos, parent_actu
   let p1 = make_absolute_pos(pos, parent_absolute_pos, terminal_size);
   let s1 = make_actual_size(rect, parent_actual_size);
   URect::new(p1, point!(x: p1.x() + s1.width, y: p1.y() + s1.height))
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn should_be_bounded_inside_of_terminal() {
+      let inputs : Vec<(IPos, UPos, U16Size)> = vec![
+          (point!(x: -1, y:-1), point!(x: 0_usize, y: 0_usize), ),
+      ];
+  }
+
+  #[test]
+  fn should_equal_on_buffer_new() {
+    let sz = U16Size::new(1, 2);
+    let b = Frame::new(sz, Cursor::default());
+    assert_eq!(b.size.height, 1);
+    assert_eq!(b.size.width, 2);
+    assert_eq!(
+      b.cells.len(),
+      b.size.height as usize * b.size.width as usize
+    );
+    for c in b.cells.iter() {
+      assert_eq!(c.symbol(), Cell::default().symbol());
+    }
+  }
 }
