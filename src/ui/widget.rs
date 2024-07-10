@@ -16,11 +16,12 @@ pub mod cursor;
 pub mod root;
 pub mod window;
 
-/// Concrete struct type that implements a Widget trait.
-pub enum WidgetType {
-  RootWidgetType,
-  CursorType,
-  WindowType,
+/// Concrete struct kind (since `type` is a rust keyword that we need to avoid) that implements a
+/// Widget trait.
+pub enum WidgetKind {
+  RootWidgetKind,
+  CursorKind,
+  WindowKind,
 }
 
 /// Widget is the base trait for all UI components, it provide a common layer for receiving user
@@ -63,7 +64,7 @@ pub trait Widget {
   /// Get unique ID of a widget instance.
   fn id(&self) -> usize;
 
-  fn typeid(&self) -> WidgetType;
+  fn kind(&self) -> WidgetKind;
 
   /// Get rect, relative position and logical
   fn rect(&self) -> IRect;
