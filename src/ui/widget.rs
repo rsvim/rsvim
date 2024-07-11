@@ -1,13 +1,12 @@
 //! Basic atom of all UI components.
 
-use crate::geom::{conversion, IPos, IRect, Size, U16Size, UPos, URect, USize};
-use crate::ui::term::Terminal;
-use crate::{as_geo_rect, as_geo_size};
-use geo::{point, Rect};
+use crate::as_geo_rect;
+use crate::geom::{IPos, IRect, UPos, URect, USize};
+use crate::ui::term::{Terminal, TerminalArc};
+use geo::{self, point, Rect};
 use std::any::Any;
-use std::cell::RefCell;
 use std::rc::Rc;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 use std::vec::Vec;
 
 pub mod cursor;
@@ -56,13 +55,15 @@ pub enum WidgetKind {
 ///    * Children are always displayed on top of their parent.
 ///    * For children that shade each other, the one with higher [z-index](Widget::zindex()) has
 ///      higher priority to display and receive events.
-pub trait Widget {
+pub trait Widget: Any + Sized {
   // { Attributes
 
   /// Get unique ID of a widget instance.
   fn id(&self) -> usize;
 
   fn kind(&self) -> WidgetKind;
+
+  fn terminal(&self) -> TerminalArc;
 
   /// Get rect, relative position and logical
   fn rect(&self) -> IRect;
@@ -104,75 +105,38 @@ pub trait Widget {
   }
 
   /// Get absolute position.
-  fn get_absolute_pos(&self) -> UPos;
-
-  /// Convert relative position to absolute.
-  fn to_absolute_pos(&self, terminal_size: U16Size) -> UPos {
-    match self.parent() {
-      Some(parent) => {
-        let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
-        conversion::to_absolute_pos(self.pos(), Some(parent_absolute_pos), terminal_size)
-      }
-      None => conversion::to_absolute_pos(self.pos(), None, terminal_size),
-    }
+  ///
+  /// For absolute position and actual size, we use a copy-on-write policy.
+  /// i.e. we calculate and cache them every time after the relative position or logical size
+  /// changed, then we can simply get the cache on our needs.
+  /// This helps avoid duplicated calculations.
+  fn absolute_pos(&self) -> UPos {
+    self.absolute_rect().min().into()
   }
 
   /// Get actual size.
-  fn get_actual_size(&self) -> USize;
-
-  /// Convert logical size to actual.
-  fn to_actual_size(&self, terminal_size: U16Size) -> USize {
-    match self.parent() {
-      Some(parent) => {
-        let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
-        conversion::to_actual_size(self.rect(), parent_actual_size)
-      }
-      None => {
-        let ts = as_geo_size!(terminal_size, usize);
-        conversion::to_actual_size(self.rect(), ts)
-      }
-    }
+  fn actual_size(&self) -> USize {
+    let r = as_geo_rect!(self.actual_rect, usize);
+    USize::from(r)
   }
+
+  /// Get absolute rect. i.e. absolute position and logical size.
+  fn absolute_rect(&self) -> URect;
+
+  /// Set/cache absolute rect.
+  fn _set_absolute_rect(&mut self, rect: URect);
 
   /// Get actual rect. i.e. relative position and actual size.
-  fn get_actual_rect(&self) -> IRect;
+  fn actual_rect(&self) -> IRect;
 
-  /// Convert rect to actual rect.
-  fn to_actual_rect(&self, terminal_size: U16Size) -> IRect {
-    match self.parent() {
-      Some(parent) => {
-        let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
-        conversion::to_actual_rect(self.rect(), parent_actual_size)
-      }
-      None => {
-        let ts = as_geo_size!(terminal_size, usize);
-        conversion::to_actual_rect(self.rect(), ts)
-      }
-    }
-  }
+  /// Set/cache actual rect.
+  fn _set_actual_rect(&mut self, rect: IRect);
 
   /// Get actual absolute rect. i.e. absolute position and actual size.
-  fn get_actual_absolute_rect(&self) -> URect;
+  fn actual_absolute_rect(&self) -> URect;
 
-  /// Convert rect to actual absolute rect.
-  fn to_actual_absolute_rect(&self, terminal_size: U16Size) -> URect {
-    match self.parent() {
-      Some(parent) => {
-        let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
-        let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
-        conversion::to_actual_absolute_rect(
-          self.rect(),
-          Some(parent_absolute_pos),
-          parent_actual_size,
-          terminal_size,
-        )
-      }
-      None => {
-        let ts = as_geo_size!(terminal_size, usize);
-        conversion::to_actual_absolute_rect(self.rect(), None, ts, terminal_size)
-      }
-    }
-  }
+  /// Set/cache actual absolute rect.
+  fn _set_actual_absolute_rect(&mut self, rect: URect);
 
   // Position/Size/Rect Helpers }
 
@@ -256,9 +220,11 @@ pub trait Widget {
   // } Contents
 }
 
-pub type WidgetRc = Rc<RefCell<dyn Widget>>;
+/// Rc<RefCell<dyn Widget>>
+pub type WidgetRc = Rc<dyn Any>;
 
-pub type WidgetArc = Arc<RwLock<dyn Widget>>;
+/// Arc<RwLock<dyn Widget>>
+pub type WidgetArc = Arc<dyn Any + Send + Sync>;
 
 pub type WidgetsRc = Vec<WidgetRc>;
 
@@ -269,22 +235,12 @@ pub type WidgetsArc = Vec<WidgetArc>;
 macro_rules! define_widget_helpers {
   () => {
     /// Define Widget Rc/Arc pointer converters.
-    pub fn downcast_rc(w: WidgetRc) -> Rc<RefCell<Self>> {
-      let as_any = |&w1| -> &dyn Any { w1 };
-      let casted = as_any(&w.clone().borrow()).downcast_ref::<Rc<RefCell<Self>>>();
-      match casted {
-        Some(result) => result,
-        None => panic!("Failed to downcast WidgetRc to Rc<RefCell<Self>>"),
-      }
+    pub fn downcast_rc(w: WidgetRc) -> Result<Rc<RefCell<Self>>, WidgetRc> {
+      w.downcast::<RefCell<Self>>()
     }
 
-    pub fn downcast_arc(w: WidgetArc) -> Arc<RwLock<Self>> {
-      let as_any = |&w1| -> &dyn Any { w1 };
-      let casted = as_any(w).downcast_ref::<Rc<RefCell<Self>>>();
-      match casted {
-        Some(result) => result,
-        None => panic!("Failed to downcast WidgetArc to Arc<RwLock<Self>>"),
-      }
+    pub fn downcast_arc(w: WidgetArc) -> Result<Arc<RwLock<Self>>, WidgetArc> {
+      w.downcast::<RwLock<Self>>()
     }
 
     pub fn upcast_rc(w: Rc<RefCell<Self>>) -> WidgetRc {
@@ -301,6 +257,96 @@ macro_rules! define_widget_helpers {
 
     pub fn to_arc(w: Self) -> WidgetArc {
       Arc::new(RwLock::new(w)) as WidgetArc
+    }
+
+    /// Convert relative position to absolute.
+    fn to_absolute_pos(&self) -> UPos {
+      self.terminal().read().unwrap()
+      match self.parent() {
+        Some(parent_arc) => match Self::downcast_arc(parent_arc) {
+          Ok(parent) => {
+            let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
+            geom::conversion::to_absolute_pos(self.pos(), Some(parent_absolute_pos), terminal_size)
+          }
+          _ => unreachable!("Failed to convert parent to concrete type"),
+        },
+        None => geom::conversion::to_absolute_pos(self.pos(), None, terminal_size),
+      }
+    }
+
+    /// Convert logical size to actual.
+    fn to_actual_size(&self, terminal_size: U16Size) -> USize {
+      match self.parent() {
+        Some(parent_arc) => match Self::downcast_arc(parent_arc) {
+          Ok(parent) => {
+            let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
+            geom::conversion::to_actual_size(self.rect(), parent_actual_size)
+          }
+          _ => unreachable!("Failed to convert parent to concrete type"),
+        },
+        None => {
+          let ts = as_geo_size!(terminal_size, usize);
+          geom::conversion::to_actual_size(self.rect(), ts)
+        }
+      }
+    }
+
+    /// Convert rect to actual rect.
+    fn to_actual_rect(&self, terminal_size: U16Size) -> IRect {
+      match self.parent() {
+        Some(parent_are) => match Self::downcast_arc(parent_arc) {
+          Ok(parent) => {
+            let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
+            geom::conversion::to_actual_rect(self.rect(), parent_actual_size)
+          }
+          _ => unreachable!("Failed to convert parent to concrete type"),
+        },
+        None => {
+          let ts = as_geo_size!(terminal_size, usize);
+          geom::conversion::to_actual_rect(self.rect(), ts)
+        }
+      }
+    }
+
+    /// Convert rect to absolute rect.
+    fn to_absolute_rect(&self, terminal_size: U16Size) -> URect {
+      match self.parent() {
+        Some(parent_arc) => match Self::downcast_arc(parent_arc) {
+          Ok(parent) => {
+            let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
+            geom::conversion::to_absolute_rect(
+              self.rect(),
+              Some(parent_absolute_pos),
+              terminal_size,
+            )
+          }
+          _ => unreachable!("Failed to convert parent to concrete type"),
+        },
+        None => geom::conversion::to_absolute_rect(self.rect(), None, terminal_size),
+      }
+    }
+
+    /// Convert rect to actual absolute rect.
+    fn to_actual_absolute_rect(&self, terminal_size: U16Size) -> URect {
+      match self.parent() {
+        Some(parent_arc) => match Self::downcast_arc(parent_arc) {
+          Ok(parent) => {
+            let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
+            let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
+            geom::conversion::to_actual_absolute_rect(
+              self.rect(),
+              Some(parent_absolute_pos),
+              parent_actual_size,
+              terminal_size,
+            )
+          }
+          _ => unreachable!("Failed to convert parent to concrete type"),
+        },
+        None => {
+          let ts = as_geo_size!(terminal_size, usize);
+          geom::conversion::to_actual_absolute_rect(self.rect(), None, ts, terminal_size)
+        }
+      }
     }
   };
 }

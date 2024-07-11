@@ -81,6 +81,19 @@ pub fn to_actual_rect(rect: IRect, parent_actual_size: USize) -> IRect {
   IRect::new(bottom_left.into(), top_right)
 }
 
+/// Same with [to_absolute_pos](to_absolute_pos()), but a rect version.
+/// The only difference is it returns `URect` instead of `UPos`.
+pub fn to_absolute_rect(
+  rect: IRect,
+  parent_absolute_pos: Option<UPos>,
+  terminal_size: U16Size,
+) -> URect {
+  let bottom_left = rect.min();
+  let p = to_absolute_pos(bottom_left.into(), parent_absolute_pos, terminal_size);
+  let top_right = point!(x: p.x() + rect.width() as usize, y: p.y() + rect.height() as usize);
+  URect::new(p, top_right)
+}
+
 /// Convert relative/logical rect to absolute/actual rect.
 ///
 /// Note:

@@ -1,7 +1,9 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
+use std::sync::{Arc, RwLock};
+
 use crate::geom::U16Size;
-use crate::ui::frame::{Cursor, Frame};
+use crate::ui::frame::{Cell, Cursor, Frame};
 use crossterm::cursor as termcursor;
 use crossterm::event::{Event, KeyCode};
 use tracing::debug;
@@ -20,6 +22,8 @@ impl Terminal {
     }
   }
 
+  // Current frame {
+
   pub fn frame(&self) -> &Frame {
     &self.frame
   }
@@ -28,9 +32,51 @@ impl Terminal {
     &mut self.frame
   }
 
+  pub fn size(&self) -> U16Size {
+    self.frame.size
+  }
+
+  pub fn set_size(&mut self, size: U16Size) {
+    self.frame.size = size;
+  }
+
+  pub fn cells(&self) -> &Vec<Cell> {
+    &self.frame.cells
+  }
+
+  pub fn cells_mut(&mut self) -> &mut Vec<Cell> {
+    &mut self.frame.cells
+  }
+
+  pub fn cursor(&self) -> &Cursor {
+    &self.frame.cursor
+  }
+
+  pub fn cursor_mut(&mut self) -> &mut Cursor {
+    &mut self.frame.cursor
+  }
+
+  // Current frame }
+
+  // Previous frame {
+
   pub fn prev_frame(&self) -> &Frame {
     &self.prev_frame
   }
+
+  pub fn prev_size(&self) -> U16Size {
+    self.prev_frame.size
+  }
+
+  pub fn prev_cells(&self) -> &Vec<Cell> {
+    &self.prev_frame.cells
+  }
+
+  pub fn prev_cursor(&self) -> &Cursor {
+    &self.prev_frame.cursor
+  }
+
+  // Previous frame }
 
   /// Accept a terminal (keyboard/mouse) event.
   /// Returns `true` if continue event loop, `false` if quit.
@@ -55,6 +101,8 @@ impl Terminal {
     self.prev_frame = self.frame.clone();
   }
 }
+
+pub type TerminalArc = Arc<RwLock<Terminal>>;
 
 #[cfg(test)]
 mod tests {

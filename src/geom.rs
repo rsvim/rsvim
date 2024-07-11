@@ -1,6 +1,7 @@
 //! Geometric space and coordinate system on the 2-dimensional Cartesian plain.
 
 use geo::{Point, Rect};
+use std::marker::Copy;
 
 pub mod conversion;
 
@@ -25,7 +26,7 @@ pub type U16Rect = Rect<u16>;
 // Size {
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
-pub struct Size<T> {
+pub struct Size<T: Copy> {
   pub height: T,
   pub width: T,
 }
@@ -57,7 +58,7 @@ pub type U16Size = Size<u16>;
 
 // Size }
 
-/// Convert `geo::Point<T1>` to another type `geo::Point<T2>`.
+/// Convert `geom::Point<T1>` to another type `geom::Point<T2>`.
 #[macro_export]
 macro_rules! as_geo_point {
   ($point_var:ident,$type_name:ty) => {
@@ -69,18 +70,18 @@ macro_rules! as_geo_point {
 #[macro_export]
 macro_rules! as_geo_rect {
   ($rect_var:ident,$type_name:ty) => {
-    Rect::new(point!(x: $rect_var.min().x as $type_name, y: $rect_var.min().y as $type_name), point!(x: $rect_var.max().x as $type_name, y: $rect_var.max().y as $type_name)) as Rect<$type_name>
+    geo::Rect::new(point!(x: $rect_var.min().x as $type_name, y: $rect_var.min().y as $type_name), point!(x: $rect_var.max().x as $type_name, y: $rect_var.max().y as $type_name)) as geo::Rect<$type_name>
   };
 }
 
-/// Convert `geo::Rect<T1>` to another type `geo::Rect<T2>`.
+/// Convert `geom::Size<T1>` to another type `geom::Size<T2>`.
 #[macro_export]
 macro_rules! as_geo_size {
   ($size_var:ident,$type_name:ty) => {
-    Size::new(
+    crate::geom::Size::new(
       $size_var.height as $type_name,
       $size_var.width as $type_name,
-    ) as Size<$type_name>
+    ) as crate::geom::Size<$type_name>
   };
 }
 

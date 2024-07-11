@@ -1,17 +1,16 @@
 //! Cursor widget.
 
-use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 use std::vec::Vec;
 
-use crate::define_widget_helpers;
 use crate::geom::{IPos, IRect, U16Pos, UPos, URect};
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::Terminal;
 use crate::ui::widget::{Widget, WidgetArc, WidgetKind, WidgetRc, WidgetsArc, WidgetsRc};
 use crate::uuid;
+use crate::{as_geo_rect, as_geo_size, define_widget_helpers};
 use geo::point;
 
 pub struct Cursor {
