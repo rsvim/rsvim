@@ -1,8 +1,8 @@
 //! Basic atom of all UI components.
 
-use crate::as_geo_rect;
-use crate::geo::{conversion, IPos, IRect, U16Size, UPos, USize};
+use crate::geom::{conversion, IPos, IRect, Size, U16Size, UPos, URect, USize};
 use crate::ui::term::Terminal;
+use crate::{as_geo_rect, as_geo_size};
 use geo::{point, Rect};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -102,15 +102,74 @@ pub trait Widget {
     ));
   }
 
-  /// Calculate absolute position, based on relative position and parent's absolute position.
-  /// If there's no parent widget, the relative position itself is already absolute.
-  fn get_absolute_pos(&self, terminal_size: U16Size) -> UPos {
+  /// Get absolute position.
+  fn get_absolute_pos(&self) -> UPos;
+
+  /// Convert relative position to absolute.
+  fn to_absolute_pos(&self, terminal_size: U16Size) -> UPos {
     match self.parent() {
       Some(parent) => {
-        let parent_absolute_pos = parent.read().unwrap().get_absolute_pos(terminal_size);
+        let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
         conversion::to_absolute_pos(self.pos(), Some(parent_absolute_pos), terminal_size)
       }
       None => conversion::to_absolute_pos(self.pos(), None, terminal_size),
+    }
+  }
+
+  /// Get actual size.
+  fn get_actual_size(&self) -> USize;
+
+  /// Convert logical size to actual.
+  fn to_actual_size(&self, terminal_size: U16Size) -> USize {
+    match self.parent() {
+      Some(parent) => {
+        let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
+        conversion::to_actual_size(self.rect(), parent_actual_size)
+      }
+      None => {
+        let ts = as_geo_size!(terminal_size, usize);
+        conversion::to_actual_size(self.rect(), ts)
+      }
+    }
+  }
+
+  /// Get actual rect. i.e. relative position and actual size.
+  fn get_actual_rect(&self) -> IRect;
+
+  /// Convert rect to actual rect.
+  fn to_actual_rect(&self, terminal_size: U16Size) -> IRect {
+    match self.parent() {
+      Some(parent) => {
+        let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
+        conversion::to_actual_rect(self.rect(), parent_actual_size)
+      }
+      None => {
+        let ts = as_geo_size!(terminal_size, usize);
+        conversion::to_actual_rect(self.rect(), ts)
+      }
+    }
+  }
+
+  /// Get actual absolute rect. i.e. absolute position and actual size.
+  fn get_actual_absolute_rect(&self) -> URect;
+
+  /// Convert rect to actual absolute rect.
+  fn to_actual_absolute_rect(&self, terminal_size: U16Size) -> URect {
+    match self.parent() {
+      Some(parent) => {
+        let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
+        let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
+        conversion::to_actual_absolute_rect(
+          self.rect(),
+          Some(parent_absolute_pos),
+          parent_actual_size,
+          terminal_size,
+        )
+      }
+      None => {
+        let ts = as_geo_size!(terminal_size, usize);
+        conversion::to_actual_absolute_rect(self.rect(), None, ts, terminal_size)
+      }
     }
   }
 

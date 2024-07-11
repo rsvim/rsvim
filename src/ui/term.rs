@@ -1,6 +1,6 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
-use crate::geo::U16Size;
+use crate::geom::U16Size;
 use crate::ui::frame::{Cursor, Frame};
 use crossterm::cursor as termcursor;
 use crossterm::event::{Event, KeyCode};

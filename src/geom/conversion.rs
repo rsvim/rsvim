@@ -75,10 +75,10 @@ pub fn to_actual_size(rect: IRect, parent_actual_size: USize) -> USize {
 /// Same with [to_actual_size](to_actual_size()), but a rect version.
 /// The only difference is it returns `IRect` instead of `USize`.
 pub fn to_actual_rect(rect: IRect, parent_actual_size: USize) -> IRect {
-  let top_left = rect.min();
+  let bottom_left = rect.min();
   let s = to_actual_size(rect, parent_actual_size);
-  let bottom_right = point!(x: top_left.x + s.width as isize, y: top_left.y + s.height as isize);
-  IRect::new(top_left.into(), bottom_right)
+  let top_right = point!(x: bottom_left.x + s.width as isize, y: bottom_left.y + s.height as isize);
+  IRect::new(bottom_left.into(), top_right)
 }
 
 /// Convert relative/logical rect to absolute/actual rect.

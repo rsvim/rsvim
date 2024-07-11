@@ -8,7 +8,7 @@ use std::sync::{Arc, RwLock};
 use std::vec::Vec;
 
 use crate::define_widget_helpers;
-use crate::geo::{IRect, URect};
+use crate::geom::{IRect, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{Widget, WidgetArc, WidgetRc, WidgetsArc, WidgetsRc};
 use crate::uuid;

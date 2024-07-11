@@ -7,7 +7,7 @@ use std::sync::{Arc, RwLock};
 use std::vec::Vec;
 
 use crate::define_widget_helpers;
-use crate::geo::{IPos, IRect, U16Pos, UPos, URect};
+use crate::geom::{IPos, IRect, U16Pos, UPos, URect};
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::Terminal;
 use crate::ui::widget::{Widget, WidgetArc, WidgetKind, WidgetRc, WidgetsArc, WidgetsRc};
