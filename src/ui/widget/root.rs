@@ -5,37 +5,46 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
-use std::vec::Vec;
 
-use crate::define_widget_helpers;
-use crate::geom::{IRect, URect};
+use crate::geom::{IRect, U16Size, URect};
 use crate::ui::term::Terminal;
-use crate::ui::widget::{Widget, WidgetArc, WidgetRc, WidgetsArc, WidgetsRc};
+use crate::ui::widget::{Widget, WidgetArc, WidgetKind, WidgetRc, WidgetsArc, WidgetsRc};
 use crate::uuid;
-use geo::coord;
+use crate::{as_geo_rect, define_widget_helpers};
+use geo::{point, Rect};
+use std::any::Any;
 
 /// Root widget.
 pub struct RootWidget {
   id: usize,
   rect: IRect,
-  abs_rect: URect,
+
+  absolute_rect: IRect,        // Cached absolute rect
+  actual_absolute_rect: URect, // Cached actual, absolute rect
+
   visible: bool,
   enabled: bool,
   children: WidgetsArc,
 }
 
 impl RootWidget {
-  pub fn new(rect: URect) -> Self {
+  pub fn new(terminal_size: U16Size) -> Self {
+    let rect = IRect::new(
+      (0, 0),
+      (
+        terminal_size.width() as isize,
+        terminal_size.height() as isize,
+      ),
+    );
+    let urect = as_geo_rect!(rect, usize);
     RootWidget {
       id: uuid::next(),
-      rect: IRect::new(
-        coord! {x:0, y:0},
-        coord! {x:rect.width as isize, y:rect.height as isize},
-      ),
-      abs_rect: URect::new(coord! {x:0, y:0}, coord! {x:rect.width , y:rect.height }),
+      rect,
+      absolute_rect: rect,
+      actual_absolute_rect: urect,
       visible: true,
       enabled: true,
-      children: Arc::new(RwLock::new(vec![])),
+      children: vec![],
     }
   }
 
@@ -47,17 +56,21 @@ impl Widget for RootWidget {
     self.id
   }
 
+  fn kind(&self) -> WidgetKind {
+    WidgetKind::RootWidgetKind
+  }
+
   fn rect(&self) -> IRect {
     self.rect
   }
 
   /// Not allow to modify the position & size.
-  fn set_rect(&mut self, _rect: IRect) {
-    unimplemented!();
+  fn set_rect(&mut self, rect: IRect) {
+    self.rect = rect;
   }
 
   fn absolute_rect(&self) -> URect {
-    self.abs_rect
+    self.absolute_rect
   }
 
   /// Not allow to modify the position & size.

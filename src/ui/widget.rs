@@ -4,6 +4,7 @@ use crate::geom::{conversion, IPos, IRect, Size, U16Size, UPos, URect, USize};
 use crate::ui::term::Terminal;
 use crate::{as_geo_rect, as_geo_size};
 use geo::{point, Rect};
+use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
@@ -270,7 +271,7 @@ macro_rules! define_widget_helpers {
     /// Define Widget Rc/Arc pointer converters.
     pub fn downcast_rc(w: WidgetRc) -> Rc<RefCell<Self>> {
       let as_any = |&w1| -> &dyn Any { w1 };
-      let casted = as_any(w).downcast_ref::<Rc<RefCell<Self>>>();
+      let casted = as_any(&w.clone().borrow()).downcast_ref::<Rc<RefCell<Self>>>();
       match casted {
         Some(result) => result,
         None => panic!("Failed to downcast WidgetRc to Rc<RefCell<Self>>"),
@@ -286,11 +287,19 @@ macro_rules! define_widget_helpers {
       }
     }
 
-    pub fn upcast_rc(w: Self) -> WidgetRc {
+    pub fn upcast_rc(w: Rc<RefCell<Self>>) -> WidgetRc {
+      w as WidgetRc
+    }
+
+    pub fn upcast_arc(w: Arc<RwLock<Self>>) -> WidgetArc {
+      w as WidgetArc
+    }
+
+    pub fn to_rc(w: Self) -> WidgetRc {
       Rc::new(RefCell::new(w)) as WidgetRc
     }
 
-    pub fn upcast_arc(w: Self) -> WidgetArc {
+    pub fn to_arc(w: Self) -> WidgetArc {
       Arc::new(RwLock::new(w)) as WidgetArc
     }
   };
