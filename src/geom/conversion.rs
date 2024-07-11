@@ -27,7 +27,7 @@
 //! 3. A widget's actual size will be automatically truncated inside of it's parent's shape, or by
 //!    the terminal's shape if it's the root widget already.
 
-use crate::geo::{IPos, IRect, ISize, Size, U16Size, UPos, URect, USize};
+use crate::geom::{IPos, IRect, ISize, Size, U16Size, UPos, URect, USize};
 use crate::{as_geo_point, as_geo_size};
 use geo::point;
 use std::cmp::{max, min};

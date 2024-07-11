@@ -2,7 +2,7 @@
 
 #![allow(dead_code)]
 
-use crate::geo::{U16Pos, U16Size, UPos};
+use crate::geom::{U16Pos, U16Size, UPos};
 use compact_str::CompactString;
 use crossterm::style::{Attributes, Color};
 use geo::point;

@@ -1,5 +1,4 @@
-//! Coordinate system on the 2-dimensional Cartesian plain.
-//! Relative coordinates use signed integers, absolute coordinates use unsigned integers.
+//! Geometric space and coordinate system on the 2-dimensional Cartesian plain.
 
 use geo::{Point, Rect};
 
