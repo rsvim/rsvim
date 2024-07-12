@@ -1,7 +1,7 @@
 //! Basic atom of all UI components.
 
-use crate::as_geo_rect;
-use crate::geom::{IPos, IRect, UPos, URect, USize};
+use crate::cart::{IPos, IRect, UPos, URect, USize};
+use crate::geo_rect_as;
 use crate::ui::term::{Terminal, TerminalArc};
 use geo::{self, point, Rect};
 use std::any::Any;
@@ -90,7 +90,7 @@ pub trait Widget: Any + Sized {
   /// Get logical size.
   fn size(&self) -> USize {
     let r = self.rect();
-    let r2 = as_geo_rect!(r, usize);
+    let r2 = geo_rect_as!(r, usize);
     USize::from(r2)
   }
 
@@ -116,7 +116,7 @@ pub trait Widget: Any + Sized {
 
   /// Get actual size.
   fn actual_size(&self) -> USize {
-    let r = as_geo_rect!(self.actual_rect, usize);
+    let r = geo_rect_as!(self.actual_rect, usize);
     USize::from(r)
   }
 
@@ -266,11 +266,11 @@ macro_rules! define_widget_helpers {
         Some(parent_arc) => match Self::downcast_arc(parent_arc) {
           Ok(parent) => {
             let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
-            geom::conversion::to_absolute_pos(self.pos(), Some(parent_absolute_pos), terminal_size)
+            cart::conversion::to_absolute_pos(self.pos(), Some(parent_absolute_pos), terminal_size)
           }
           _ => unreachable!("Failed to convert parent to concrete type"),
         },
-        None => geom::conversion::to_absolute_pos(self.pos(), None, terminal_size),
+        None => cart::conversion::to_absolute_pos(self.pos(), None, terminal_size),
       }
     }
 
@@ -280,13 +280,13 @@ macro_rules! define_widget_helpers {
         Some(parent_arc) => match Self::downcast_arc(parent_arc) {
           Ok(parent) => {
             let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
-            geom::conversion::to_actual_size(self.rect(), parent_actual_size)
+            cart::conversion::to_actual_size(self.rect(), parent_actual_size)
           }
           _ => unreachable!("Failed to convert parent to concrete type"),
         },
         None => {
-          let ts = as_geo_size!(terminal_size, usize);
-          geom::conversion::to_actual_size(self.rect(), ts)
+          let ts = geo_size_as!(terminal_size, usize);
+          cart::conversion::to_actual_size(self.rect(), ts)
         }
       }
     }
@@ -297,13 +297,13 @@ macro_rules! define_widget_helpers {
         Some(parent_are) => match Self::downcast_arc(parent_arc) {
           Ok(parent) => {
             let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
-            geom::conversion::to_actual_rect(self.rect(), parent_actual_size)
+            cart::conversion::to_actual_rect(self.rect(), parent_actual_size)
           }
           _ => unreachable!("Failed to convert parent to concrete type"),
         },
         None => {
-          let ts = as_geo_size!(terminal_size, usize);
-          geom::conversion::to_actual_rect(self.rect(), ts)
+          let ts = geo_size_as!(terminal_size, usize);
+          cart::conversion::to_actual_rect(self.rect(), ts)
         }
       }
     }
@@ -314,7 +314,7 @@ macro_rules! define_widget_helpers {
         Some(parent_arc) => match Self::downcast_arc(parent_arc) {
           Ok(parent) => {
             let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
-            geom::conversion::to_absolute_rect(
+            cart::conversion::to_absolute_rect(
               self.rect(),
               Some(parent_absolute_pos),
               terminal_size,
@@ -322,7 +322,7 @@ macro_rules! define_widget_helpers {
           }
           _ => unreachable!("Failed to convert parent to concrete type"),
         },
-        None => geom::conversion::to_absolute_rect(self.rect(), None, terminal_size),
+        None => cart::conversion::to_absolute_rect(self.rect(), None, terminal_size),
       }
     }
 
@@ -333,7 +333,7 @@ macro_rules! define_widget_helpers {
           Ok(parent) => {
             let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
             let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
-            geom::conversion::to_actual_absolute_rect(
+            cart::conversion::to_actual_absolute_rect(
               self.rect(),
               Some(parent_absolute_pos),
               parent_actual_size,
@@ -343,8 +343,8 @@ macro_rules! define_widget_helpers {
           _ => unreachable!("Failed to convert parent to concrete type"),
         },
         None => {
-          let ts = as_geo_size!(terminal_size, usize);
-          geom::conversion::to_actual_absolute_rect(self.rect(), None, ts, terminal_size)
+          let ts = geo_size_as!(terminal_size, usize);
+          cart::conversion::to_actual_absolute_rect(self.rect(), None, ts, terminal_size)
         }
       }
     }

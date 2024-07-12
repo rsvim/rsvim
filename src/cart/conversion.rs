@@ -27,8 +27,8 @@
 //! 3. A widget's actual size will be automatically truncated inside of it's parent's shape, or by
 //!    the terminal's shape if it's the root widget already.
 
-use crate::geom::{IPos, IRect, ISize, Size, U16Size, UPos, URect, USize};
-use crate::{as_geo_point, as_geo_size};
+use crate::cart::{IPos, IRect, ISize, Size, U16Size, UPos, URect, USize};
+use crate::{geo_point_as, geo_size_as};
 use geo::point;
 use std::cmp::{max, min};
 
@@ -45,7 +45,7 @@ pub fn to_absolute_pos(
   terminal_size: U16Size,
 ) -> UPos {
   let p = match parent_absolute_pos {
-    Some(pap) => pos + as_geo_point!(pap, isize),
+    Some(pap) => pos + geo_point_as!(pap, isize),
     None => pos,
   };
   let x = min(max(p.x(), 0), terminal_size.width as isize);
@@ -69,7 +69,7 @@ pub fn to_actual_size(rect: IRect, parent_actual_size: USize) -> USize {
     top_right.y() - bottom_left.y(),
     top_right.x() - bottom_left.y(),
   );
-  as_geo_size!(s, usize)
+  geo_size_as!(s, usize)
 }
 
 /// Same with [to_actual_size](to_actual_size()), but a rect version.

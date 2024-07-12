@@ -7,11 +7,11 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 
-use crate::geom::{self, IRect, Size, U16Size, UPos, URect, USize};
+use crate::cart::{self, IRect, Size, U16Size, UPos, URect, USize};
 use crate::ui::term::Terminal;
 use crate::ui::widget::{Widget, WidgetArc, WidgetKind, WidgetRc, WidgetsArc};
 use crate::uuid;
-use crate::{as_geo_rect, as_geo_size, define_widget_helpers};
+use crate::{define_widget_helpers, geo_rect_as, geo_size_as};
 use geo::{point, Rect};
 
 /// Root widget.
@@ -40,7 +40,7 @@ impl RootWidget {
         terminal_size.height() as isize,
       ),
     );
-    let urect = as_geo_rect!(rect, usize);
+    let urect = geo_rect_as!(rect, usize);
     RootWidget {
       id: uuid::next(),
       terminal,

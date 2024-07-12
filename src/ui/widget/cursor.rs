@@ -5,12 +5,12 @@ use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 use std::vec::Vec;
 
-use crate::geom::{IPos, IRect, U16Pos, UPos, URect};
+use crate::cart::{IPos, IRect, U16Pos, UPos, URect};
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::Terminal;
 use crate::ui::widget::{Widget, WidgetArc, WidgetKind, WidgetRc, WidgetsArc, WidgetsRc};
 use crate::uuid;
-use crate::{as_geo_rect, as_geo_size, define_widget_helpers};
+use crate::{define_widget_helpers, geo_rect_as, geo_size_as};
 use geo::point;
 
 pub struct Cursor {

@@ -1,7 +1,7 @@
 //! Main event loop for TUI application.
 
 #![allow(unused_imports, dead_code)]
-use crate::geom::{IRect, U16Rect, URect};
+use crate::cart::{IRect, U16Rect, URect};
 use crate::ui::term::Terminal;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
