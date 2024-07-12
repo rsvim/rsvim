@@ -60,6 +60,8 @@ pub trait Widget: Any {
   /// Get unique ID of a widget instance.
   fn id(&self) -> NodeId;
 
+  fn parent_id(&self) -> Option<NodeId>;
+
   fn tree(&self) -> Weak<Tree>;
 
   fn terminal(&self) -> Weak<Terminal>;
@@ -197,11 +199,18 @@ pub struct WidgetBase {
   tree: Weak<Tree>,
   terminal: Weak<Terminal>,
   parent_id: Option<NodeId>,
+
   rect: IRect,
+
+  // Cached rect
   absolute_rect: URect,
   actual_rect: IRect,
   actual_absolute_rect: URect,
+
   zindex: usize,
+
+  visible: bool,
+  enabled: bool,
 }
 
 impl WidgetBase {
@@ -224,6 +233,8 @@ impl WidgetBase {
       actual_rect,
       actual_absolute_rect,
       zindex,
+      visible: true,
+      enabled: true,
     }
   }
 
@@ -333,5 +344,21 @@ impl WidgetBase {
 
   pub fn set_zindex(&mut self, value: usize) {
     self.zindex = value;
+  }
+
+  pub fn visible(&self) -> bool {
+    self.visible
+  }
+
+  fn set_visible(&mut self, value: bool) {
+    self.visible = value;
+  }
+
+  fn enabled(&self) -> bool {
+    self.enabled
+  }
+
+  fn set_enabled(&mut self, value: bool) {
+    self.enabled = value;
   }
 }
