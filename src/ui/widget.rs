@@ -3,8 +3,8 @@
 use crate::cart::{IPos, IRect, UPos, URect, USize};
 use crate::geo_rect_as;
 use crate::ui::term::{Terminal, TerminalArc};
-use geo::{self, point, Rect};
-use std::any::Any;
+use crate::ui::tree::NodeId;
+use geo::{self, point};
 use std::rc::Rc;
 use std::sync::Arc;
 use std::vec::Vec;
@@ -12,14 +12,6 @@ use std::vec::Vec;
 pub mod cursor;
 pub mod root;
 pub mod window;
-
-/// Concrete struct kind (since `type` is a rust keyword that we need to avoid) that implements a
-/// Widget trait.
-pub enum WidgetKind {
-  RootWidgetKind,
-  CursorKind,
-  WindowKind,
-}
 
 /// Widget is the base trait for all UI components, it provide a common layer for receiving user
 /// events (keyboard/mouse), and rendering itself on terminal. It is more of a logical container
@@ -55,23 +47,30 @@ pub enum WidgetKind {
 ///    * Children are always displayed on top of their parent.
 ///    * For children that shade each other, the one with higher [z-index](Widget::zindex()) has
 ///      higher priority to display and receive events.
-pub trait Widget: Any + Sized {
+///
+/// A widget is always a rectangle, its position and size is stored by a `rect`, based on its
+/// parent's shape. While rendering to the terminal device, we will need to calculate its absolute
+/// position and actual size.
+/// To avoid too many duplicated calculations, we use the copy-on-write policy: we will calculate
+/// the absolute position and actual size on each time when a widget's position and size is
+/// changed, and also cache the results. Thus when we simply get the cached results when we need
+/// them.
+/// It's also based on a fact: widget's shape is often read, rarely modified.
+pub trait Widget {
   // { Attributes
 
   /// Get unique ID of a widget instance.
-  fn id(&self) -> usize;
-
-  fn kind(&self) -> WidgetKind;
+  fn id(&self) -> NodeId;
 
   fn terminal(&self) -> TerminalArc;
+
+  // Coordinates system: position/size/rect {
 
   /// Get rect, relative position and logical
   fn rect(&self) -> IRect;
 
   /// Set rect.
   fn set_rect(&mut self, rect: IRect);
-
-  // Position/Size/Rect Helpers {
 
   /// Get relative position.
   fn pos(&self) -> IPos {
@@ -138,7 +137,7 @@ pub trait Widget: Any + Sized {
   /// Set/cache actual absolute rect.
   fn _set_actual_absolute_rect(&mut self, rect: URect);
 
-  // Position/Size/Rect Helpers }
+  // Coordinates system: position/size/rect }
 
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.
