@@ -1,4 +1,4 @@
-//! The coordinate system conversions between children widgets and their parent widget.
+//! Cartesian coordinate system conversions between children widgets and their parent widget.
 //!
 //! A widget's shape is always a rectangle (`rect`), and it's position is the top-left corner of
 //! the rectangle.

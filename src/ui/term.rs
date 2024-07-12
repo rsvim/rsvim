@@ -1,5 +1,6 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
+use std::rc::Weak;
 use std::sync::{Arc, RwLock};
 
 use crate::cart::U16Size;
@@ -101,8 +102,6 @@ impl Terminal {
     self.prev_frame = self.frame.clone();
   }
 }
-
-pub type TerminalArc = Arc<RwLock<Terminal>>;
 
 #[cfg(test)]
 mod tests {

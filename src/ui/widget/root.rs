@@ -4,20 +4,23 @@
 
 use std::any::Any;
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::intrinsics::unreachable;
+use std::rc::{Rc, Weak};
 use std::sync::{Arc, RwLock};
 
 use crate::cart::{self, IRect, Size, U16Size, UPos, URect, USize};
 use crate::ui::term::Terminal;
+use crate::ui::tree::{NodeId, Tree};
 use crate::ui::widget::{Widget, WidgetArc, WidgetKind, WidgetRc, WidgetsArc};
 use crate::uuid;
-use crate::{define_widget_helpers, geo_rect_as, geo_size_as};
+use crate::{geo_rect_as, geo_size_as};
 use geo::{point, Rect};
 
 /// Root widget.
 pub struct RootWidget {
-  id: usize,
-  terminal: TerminalArc,
+  id: NodeId,
+  tree: Weak<Tree>,
+  terminal: Weak<Terminal>,
 
   rect: IRect,
 
@@ -27,46 +30,46 @@ pub struct RootWidget {
 
   visible: bool,
   enabled: bool,
-  children: WidgetsArc,
 }
 
 impl RootWidget {
-  pub fn new(terminal: TerminalArc) -> Self {
-    let terminal_size = terminal.frame().size;
-    let rect = IRect::new(
-      (0, 0),
-      (
-        terminal_size.width() as isize,
-        terminal_size.height() as isize,
-      ),
-    );
-    let urect = geo_rect_as!(rect, usize);
-    RootWidget {
-      id: uuid::next(),
-      terminal,
-      rect,
-      absolute_rect: urect,
-      actual_rect: rect,
-      actual_absolute_rect: urect,
-      visible: true,
-      enabled: true,
-      children: vec![],
+  pub fn new(tree: Weak<Tree>, terminal: Weak<Terminal>) -> Self {
+    if let Some(t) = terminal.upgrade() {
+      let terminal_size = t.size();
+      let rect = IRect::new(
+        (0, 0),
+        (
+          terminal_size.width() as isize,
+          terminal_size.height() as isize,
+        ),
+      );
+      let urect = geo_rect_as!(rect, usize);
+      return RootWidget {
+        id: uuid::next(),
+        tree,
+        terminal,
+        rect,
+        absolute_rect: urect,
+        actual_rect: rect,
+        actual_absolute_rect: urect,
+        visible: true,
+        enabled: true,
+      };
     }
+    unreachable!("Terminal is None");
   }
-
-  define_widget_helpers!();
 }
 
 impl Widget for RootWidget {
-  fn id(&self) -> usize {
+  fn id(&self) -> NodeId {
     self.id
   }
 
-  fn kind(&self) -> WidgetKind {
-    WidgetKind::RootWidgetKind
+  fn tree(&self) -> Weak<Tree> {
+    self.tree
   }
 
-  fn terminal(&self) -> TerminalArc {
+  fn terminal(&self) -> Weak<Terminal> {
     self.terminal
   }
 
@@ -79,26 +82,6 @@ impl Widget for RootWidget {
     let absolute_rect = self.to_absolute_rect();
     self._set_absolute_rect();
   }
-
-  fn absolute_rect(&self) -> IRect {
-    self.absolute_rect
-  }
-
-  fn set_absolute_rect(&mut self, rect: URect) {
-    self.absolute_rect = rect;
-  }
-
-  /// Get actual rect. i.e. relative position and actual size.
-  fn actual_rect(&self) -> IRect;
-
-  /// Set/cache actual rect.
-  fn set_actual_rect(&mut self, rect: IRect);
-
-  /// Get actual absolute rect. i.e. absolute position and actual size.
-  fn actual_absolute_rect(&self) -> URect;
-
-  /// Set/cache actual absolute rect.
-  fn set_actual_absolute_rect(&mut self, rect: URect);
 
   fn zindex(&self) -> usize {
     0
@@ -122,31 +105,7 @@ impl Widget for RootWidget {
     self.enabled = value;
   }
 
-  fn parent(&self) -> Option<WidgetArc> {
-    None
-  }
-
-  fn set_parent(&mut self, _parent: Option<WidgetArc>) {
-    unimplemented!();
-  }
-
-  fn children(&self) -> Option<WidgetsArc> {
-    Some(self.children.clone())
-  }
-
-  fn set_children(&mut self, _children: Option<WidgetsArc>) {
-    unimplemented!();
-  }
-
-  fn find_children(&self, _id: usize) -> Option<WidgetArc> {
-    unimplemented!();
-  }
-
-  fn find_direct_children(&self, _id: usize) -> Option<WidgetArc> {
-    unimplemented!();
-  }
-
-  fn draw(&self, _terminal: &mut Terminal) {
+  fn draw(&self) {
     todo!();
   }
 }
