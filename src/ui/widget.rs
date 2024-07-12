@@ -48,14 +48,13 @@ pub mod window;
 ///    * For children that shade each other, the one with higher [z-index](Widget::zindex()) has
 ///      higher priority to display and receive events.
 ///
-/// A widget is always a rectangle, its position and size is stored by a `rect`, based on its
-/// parent's shape. While rendering to the terminal device, we will need to calculate its absolute
-/// position and actual size.
-/// To avoid too many duplicated calculations, we use the copy-on-write policy: we will calculate
-/// the absolute position and actual size on each time when a widget's position and size is
-/// changed, and also cache the results. Thus when we simply get the cached results when we need
-/// them.
-/// It's also based on a fact: widget's shape is often read, rarely modified.
+/// A widget's shape is always a rectangle, its position and size is stored by a `rect`, based on
+/// its parent's shape. While rendering to the terminal device, we will need to calculate its
+/// absolute position and actual size.
+/// Based on the fact that widget's shape is often read, rarely modified, we use the copy-on-write
+/// policy to avoid too many duplicated calculations. A widget calculates its absolute position and
+/// actual size once it's relative position or logical size is been changed, and also caches the
+/// result. Thus we simply get the cached results when need.
 pub trait Widget {
   // { Attributes
 
@@ -66,7 +65,7 @@ pub trait Widget {
 
   // Coordinates system: position/size/rect {
 
-  /// Get rect, relative position and logical
+  /// Get rect (relative position and logical size).
   fn rect(&self) -> IRect;
 
   /// Set rect.
@@ -104,34 +103,29 @@ pub trait Widget {
   }
 
   /// Get absolute position.
-  ///
-  /// For absolute position and actual size, we use a copy-on-write policy.
-  /// i.e. we calculate and cache them every time after the relative position or logical size
-  /// changed, then we can simply get the cache on our needs.
-  /// This helps avoid duplicated calculations.
   fn absolute_pos(&self) -> UPos {
     self.absolute_rect().min().into()
   }
 
   /// Get actual size.
   fn actual_size(&self) -> USize {
-    let r = geo_rect_as!(self.actual_rect, usize);
-    USize::from(r)
+    let r = self.actual_rect();
+    USize::from(geo_rect_as!(r, usize))
   }
 
-  /// Get absolute rect. i.e. absolute position and logical size.
+  /// Get absolute rect (absolute position and logical size).
   fn absolute_rect(&self) -> URect;
 
   /// Set/cache absolute rect.
   fn _set_absolute_rect(&mut self, rect: URect);
 
-  /// Get actual rect. i.e. relative position and actual size.
+  /// Get actual rect (relative position and actual size).
   fn actual_rect(&self) -> IRect;
 
   /// Set/cache actual rect.
   fn _set_actual_rect(&mut self, rect: IRect);
 
-  /// Get actual absolute rect. i.e. absolute position and actual size.
+  /// Get actual absolute rect (absolute position and actual size).
   fn actual_absolute_rect(&self) -> URect;
 
   /// Set/cache actual absolute rect.
@@ -187,30 +181,6 @@ pub trait Widget {
 
   // } Attributes
 
-  // { Relationship
-
-  /// Get parent.
-  ///
-  /// Root widget doesn't have a parent.
-  fn parent(&self) -> Option<WidgetArc>;
-
-  /// Set/change parent.
-  fn set_parent(&mut self, parent: Option<WidgetArc>);
-
-  /// Get children.
-  fn children(&self) -> Option<WidgetsArc>;
-
-  /// Set children.
-  fn set_children(&mut self, children: Option<WidgetsArc>);
-
-  /// Find child and offspring widget by ID.
-  fn find_children(&self, id: usize) -> Option<WidgetArc>;
-
-  /// Find direct child widget by ID, without offsprings.
-  fn find_direct_children(&self, id: usize) -> Option<WidgetArc>;
-
-  // } Relationship
-
   // { Contents
 
   /// Draw the widget to terminal.
@@ -228,124 +198,3 @@ pub type WidgetArc = Arc<dyn Any + Send + Sync>;
 pub type WidgetsRc = Vec<WidgetRc>;
 
 pub type WidgetsArc = Vec<WidgetArc>;
-
-/// Define Widget Rc/Arc converters.
-#[macro_export]
-macro_rules! define_widget_helpers {
-  () => {
-    /// Define Widget Rc/Arc pointer converters.
-    pub fn downcast_rc(w: WidgetRc) -> Result<Rc<RefCell<Self>>, WidgetRc> {
-      w.downcast::<RefCell<Self>>()
-    }
-
-    pub fn downcast_arc(w: WidgetArc) -> Result<Arc<RwLock<Self>>, WidgetArc> {
-      w.downcast::<RwLock<Self>>()
-    }
-
-    pub fn upcast_rc(w: Rc<RefCell<Self>>) -> WidgetRc {
-      w as WidgetRc
-    }
-
-    pub fn upcast_arc(w: Arc<RwLock<Self>>) -> WidgetArc {
-      w as WidgetArc
-    }
-
-    pub fn to_rc(w: Self) -> WidgetRc {
-      Rc::new(RefCell::new(w)) as WidgetRc
-    }
-
-    pub fn to_arc(w: Self) -> WidgetArc {
-      Arc::new(RwLock::new(w)) as WidgetArc
-    }
-
-    /// Convert relative position to absolute.
-    fn to_absolute_pos(&self) -> UPos {
-      self.terminal().read().unwrap()
-      match self.parent() {
-        Some(parent_arc) => match Self::downcast_arc(parent_arc) {
-          Ok(parent) => {
-            let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
-            cart::conversion::to_absolute_pos(self.pos(), Some(parent_absolute_pos), terminal_size)
-          }
-          _ => unreachable!("Failed to convert parent to concrete type"),
-        },
-        None => cart::conversion::to_absolute_pos(self.pos(), None, terminal_size),
-      }
-    }
-
-    /// Convert logical size to actual.
-    fn to_actual_size(&self, terminal_size: U16Size) -> USize {
-      match self.parent() {
-        Some(parent_arc) => match Self::downcast_arc(parent_arc) {
-          Ok(parent) => {
-            let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
-            cart::conversion::to_actual_size(self.rect(), parent_actual_size)
-          }
-          _ => unreachable!("Failed to convert parent to concrete type"),
-        },
-        None => {
-          let ts = geo_size_as!(terminal_size, usize);
-          cart::conversion::to_actual_size(self.rect(), ts)
-        }
-      }
-    }
-
-    /// Convert rect to actual rect.
-    fn to_actual_rect(&self, terminal_size: U16Size) -> IRect {
-      match self.parent() {
-        Some(parent_are) => match Self::downcast_arc(parent_arc) {
-          Ok(parent) => {
-            let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
-            cart::conversion::to_actual_rect(self.rect(), parent_actual_size)
-          }
-          _ => unreachable!("Failed to convert parent to concrete type"),
-        },
-        None => {
-          let ts = geo_size_as!(terminal_size, usize);
-          cart::conversion::to_actual_rect(self.rect(), ts)
-        }
-      }
-    }
-
-    /// Convert rect to absolute rect.
-    fn to_absolute_rect(&self, terminal_size: U16Size) -> URect {
-      match self.parent() {
-        Some(parent_arc) => match Self::downcast_arc(parent_arc) {
-          Ok(parent) => {
-            let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
-            cart::conversion::to_absolute_rect(
-              self.rect(),
-              Some(parent_absolute_pos),
-              terminal_size,
-            )
-          }
-          _ => unreachable!("Failed to convert parent to concrete type"),
-        },
-        None => cart::conversion::to_absolute_rect(self.rect(), None, terminal_size),
-      }
-    }
-
-    /// Convert rect to actual absolute rect.
-    fn to_actual_absolute_rect(&self, terminal_size: U16Size) -> URect {
-      match self.parent() {
-        Some(parent_arc) => match Self::downcast_arc(parent_arc) {
-          Ok(parent) => {
-            let parent_absolute_pos = parent.read().unwrap().to_absolute_pos(terminal_size);
-            let parent_actual_size = parent.read().unwrap().to_actual_size(terminal_size);
-            cart::conversion::to_actual_absolute_rect(
-              self.rect(),
-              Some(parent_absolute_pos),
-              parent_actual_size,
-              terminal_size,
-            )
-          }
-          _ => unreachable!("Failed to convert parent to concrete type"),
-        },
-        None => {
-          let ts = geo_size_as!(terminal_size, usize);
-          cart::conversion::to_actual_absolute_rect(self.rect(), None, ts, terminal_size)
-        }
-      }
-    }
-  };
-}

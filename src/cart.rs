@@ -67,6 +67,12 @@ macro_rules! geo_point_as {
 }
 
 /// Convert the generic type `T` inside `geo::Rect<T>` to another type `U`.
+///
+/// It requires:
+///
+/// ```rust
+/// use geo::{self, point};
+/// ```
 #[macro_export]
 macro_rules! geo_rect_as {
   ($rect_var:ident,$type_name:ty) => {
