@@ -56,14 +56,12 @@ pub mod window;
 /// actual size once it's relative position or logical size is been changed, and also caches the
 /// result. Thus we simply get the cached results when need.
 pub trait Widget {
-  // { Attributes
-
   /// Get unique ID of a widget instance.
   fn id(&self) -> NodeId;
 
   fn terminal(&self) -> TerminalArc;
 
-  // Coordinates system: position/size/rect {
+  // Coordinates System {
 
   /// Get rect (relative position and logical size).
   fn rect(&self) -> IRect;
@@ -131,7 +129,7 @@ pub trait Widget {
   /// Set/cache actual absolute rect.
   fn _set_actual_absolute_rect(&mut self, rect: URect);
 
-  // Coordinates system: position/size/rect }
+  // Coordinates System }
 
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.
@@ -148,6 +146,8 @@ pub trait Widget {
 
   /// Set z-index value.
   fn set_zindex(&mut self, value: usize);
+
+  // Attributes {
 
   /// Whether the widget is visible.
   ///
@@ -179,14 +179,14 @@ pub trait Widget {
   /// explicitly disabled.
   fn set_enabled(&mut self, value: bool);
 
-  // } Attributes
+  // Attributes }
 
-  // { Contents
+  // Render {
 
   /// Draw the widget to terminal.
-  fn draw(&self, t: &mut Terminal);
+  fn draw(&self);
 
-  // } Contents
+  // Render }
 }
 
 /// Rc<RefCell<dyn Widget>>
