@@ -1,8 +1,9 @@
 //! Main event loop for TUI application.
 
 #![allow(unused_imports, dead_code)]
-use crate::cart::{IRect, U16Rect, URect};
+use crate::cart::{IRect, U16Rect, U16Size, URect};
 use crate::ui::term::Terminal;
+use crate::ui::tree::{NodeId, Tree};
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
 use crate::ui::widget::window::Window;
@@ -18,17 +19,19 @@ use std::io::{Result as IoResult, Write};
 use std::sync::{Arc, RwLock};
 use tracing::debug;
 
-pub struct EventLoop {
+pub struct EventLoop<'a> {
   screen: Terminal,
-  root_widget: RootWidget,
+  tree: Tree,
+  root_widget: RootWidget<'a>,
 }
 
-impl EventLoop {
+impl<'a> EventLoop<'a> {
   pub async fn new() -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
-    let size = U16Rect::new((0_u16, 0_u16), (cols, rows));
+    let size = U16Size::new(cols, rows);
     let screen = Terminal::new(size, Default::default());
-    let root_widget = RootWidget::new(USize::new(size.height as usize, size.width as usize));
+    let tree = Tree::new();
+    let root_widget = RootWidget::new(&mut tree, &mut screen);
 
     let cursor_rect = IRect::new(point! (x:0, y:0), point! (x:1 , y:1));
     let cursor_widget = Cursor::new(RootWidget::to_widget_arc(root_widget), cursor_rect);

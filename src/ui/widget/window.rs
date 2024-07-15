@@ -2,107 +2,90 @@
 
 use crate::cart::{self, IRect, U16Size, URect, USize};
 use crate::ui::term::Terminal;
-use crate::ui::widget::{Widget, WidgetArc, WidgetKind, WidgetRc, WidgetsArc};
-use crate::uuid;
-use geo::coord;
+use crate::ui::tree::{NodeId, Tree};
+use crate::ui::widget::{Widget, WidgetBase};
 
 /// The Vim window.
-pub struct Window {
-  parent: WidgetArc,
-  id: usize,
-  rect: IRect,
-  abs_rect: URect,
-  zindex: usize,
-  visible: bool,
-  enabled: bool,
+pub struct Window<'a> {
+  base: WidgetBase<'a>,
 }
 
-impl Window {
-  pub fn new(rect: IRect, parent: WidgetArc) -> Self {
-    Window {
-      id: uuid::next(),
-      rect,
-      abs_rect: URect::new(coord! {x:0,y:0}, coord! {x:0,y:0}),
-      zindex: uuid::next(),
-      visible: true,
-      enabled: true,
-      parent: parent.clone(),
-    }
+impl<'a> Window<'a> {
+  pub fn new(
+    parent_id: NodeId,
+    tree: &'a mut Tree,
+    terminal: &'a mut Terminal,
+    rect: IRect,
+    zindex: usize,
+  ) -> Self {
+    let zindex = std::usize::MAX;
+    let base = WidgetBase::new(tree, terminal, Some(parent_id), rect, zindex);
+    Window { base }
   }
 }
 
-impl Widget for Window {
-  fn id(&self) -> usize {
-    self.id
+impl<'a> Widget<_> for Window<'a> {
+  fn id(&self) -> NodeId {
+    self.base.id()
+  }
+
+  fn parent_id(&self) -> Option<NodeId> {
+    self.base.parent_id()
+  }
+
+  fn tree(&mut self) -> &mut Tree {
+    self.base.tree()
+  }
+
+  fn terminal(&mut self) -> &mut Terminal {
+    self.base.terminal()
   }
 
   fn rect(&self) -> IRect {
-    self.rect
+    self.base.rect()
   }
 
   fn set_rect(&mut self, rect: IRect) {
-    self.rect = rect;
+    self.base.set_rect(rect);
   }
 
   fn absolute_rect(&self) -> URect {
-    self.abs_rect
+    self.base.absolute_rect()
   }
 
-  fn set_absolute_rect(&mut self, rect: URect) {
-    self.abs_rect = rect;
+  fn actual_rect(&self) -> IRect {
+    self.base.actual_rect()
+  }
+
+  fn actual_absolute_rect(&self) -> URect {
+    self.base.actual_absolute_rect()
   }
 
   fn zindex(&self) -> usize {
-    self.zindex
+    self.base.zindex()
   }
 
-  fn set_zindex(&mut self, value: usize) {
-    self.zindex = value;
+  fn set_zindex(&mut self, zindex: usize) {
+    self.base.set_zindex(zindex);
   }
 
   fn visible(&self) -> bool {
-    self.visible
+    self.base.visible()
   }
 
   fn set_visible(&mut self, value: bool) {
-    self.visible = value;
+    self.base.set_visible(value);
   }
 
   fn enabled(&self) -> bool {
-    self.enabled
+    self.base.enabled()
   }
 
   fn set_enabled(&mut self, value: bool) {
-    self.enabled = value;
+    self.base.set_enabled(value);
   }
 
-  fn parent(&self) -> Option<WidgetArc> {
-    Some(self.parent.clone())
-  }
-
-  fn set_parent(&mut self, parent: Option<WidgetArc>) {
-    if let Some(p) = parent {
-      self.parent = p;
-    }
-  }
-
-  fn children(&self) -> Option<WidgetsArc> {
-    unimplemented!();
-  }
-
-  fn set_children(&mut self, _children: Option<WidgetsArc>) {
-    unimplemented!();
-  }
-
-  fn find_children(&self, _id: usize) -> Option<WidgetArc> {
-    unimplemented!();
-  }
-
-  fn find_direct_children(&self, _id: usize) -> Option<WidgetArc> {
-    unimplemented!();
-  }
-
-  fn draw(&self, _terminal: &mut Terminal) {
+  fn draw(&mut self) {
     todo!();
   }
 }

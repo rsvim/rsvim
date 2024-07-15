@@ -31,7 +31,10 @@ pub struct Size<T: Copy> {
   pub width: T,
 }
 
-impl<T> Size<T> {
+impl<T> Size<T>
+where
+  T: Copy + PartialOrd + std::fmt::Debug + num_traits::Num + num_traits::NumCast,
+{
   pub fn new(height: T, width: T) -> Self {
     Size { height, width }
   }
@@ -84,10 +87,10 @@ macro_rules! geo_rect_as {
 #[macro_export]
 macro_rules! geo_size_as {
   ($size_var:ident,$type_name:ty) => {
-    cart::Size::new(
+    Size::new(
       $size_var.height as $type_name,
       $size_var.width as $type_name,
-    ) as cart::Size<$type_name>
+    ) as Size<$type_name>
   };
 }
 

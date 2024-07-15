@@ -1,9 +1,8 @@
 //! Basic atom of all UI components.
 
 use std::any::Any;
-use std::rc::Weak;
 
-use crate::cart::{self, conversion, IPos, IRect, UPos, URect, USize};
+use crate::cart::{conversion, IPos, IRect, Size, UPos, URect, USize};
 use crate::ui::term::Terminal;
 use crate::ui::tree::{NodeId, Tree};
 use crate::uuid;
@@ -62,9 +61,9 @@ pub trait Widget: Any {
 
   fn parent_id(&self) -> Option<NodeId>;
 
-  fn tree(&self) -> Weak<Tree>;
+  fn tree(&mut self) -> &mut Tree;
 
-  fn terminal(&self) -> Weak<Terminal>;
+  fn terminal(&mut self) -> &mut Terminal;
 
   // Coordinates System {
 
@@ -119,20 +118,11 @@ pub trait Widget: Any {
   /// Get absolute rect (absolute position and logical size).
   fn absolute_rect(&self) -> URect;
 
-  /// Set/cache absolute rect.
-  fn _set_absolute_rect(&mut self, rect: URect);
-
   /// Get actual rect (relative position and actual size).
   fn actual_rect(&self) -> IRect;
 
-  /// Set/cache actual rect.
-  fn _set_actual_rect(&mut self, rect: IRect);
-
   /// Get actual absolute rect (absolute position and actual size).
   fn actual_absolute_rect(&self) -> URect;
-
-  /// Set/cache actual absolute rect.
-  fn _set_actual_absolute_rect(&mut self, rect: URect);
 
   // Coordinates System }
 
@@ -189,15 +179,15 @@ pub trait Widget: Any {
   // Render {
 
   /// Draw the widget to terminal.
-  fn draw(&self);
+  fn draw(&mut self);
 
   // Render }
 }
 
-pub struct WidgetBase {
+pub struct WidgetBase<'a> {
   id: NodeId,
-  tree: Weak<Tree>,
-  terminal: Weak<Terminal>,
+  tree: &'a mut Tree,
+  terminal: &'a mut Terminal,
   parent_id: Option<NodeId>,
 
   rect: IRect,
@@ -213,18 +203,24 @@ pub struct WidgetBase {
   enabled: bool,
 }
 
-impl WidgetBase {
+impl<'a> WidgetBase<'a> {
   pub fn new(
-    tree: Weak<Tree>,
-    terminal: Weak<Terminal>,
+    tree: &'a mut Tree,
+    terminal: &'a mut Terminal,
     parent_id: Option<NodeId>,
     rect: IRect,
     zindex: usize,
   ) -> Self {
+    let next_id = uuid::next();
+    match parent_id {
+      Some(pid) => {}
+      None => {}
+    }
+
     let (absolute_rect, actual_rect, actual_absolute_rect) =
-      WidgetBase::to_actual_absolute(rect, tree.clone(), terminal.clone(), parent_id);
+      WidgetBase::to_actual_absolute(rect, tree, terminal, parent_id);
     WidgetBase {
-      id: uuid::next(),
+      id: next_id,
       tree,
       terminal,
       parent_id,
@@ -241,44 +237,38 @@ impl WidgetBase {
   // Calculate (absolute_rect, actual_rect, actual_absolute_rect)
   fn to_actual_absolute(
     rect: IRect,
-    tree: Weak<Tree>,
-    terminal: Weak<Terminal>,
+    tree: &'a mut Tree,
+    terminal: &'a mut Terminal,
     parent_id: Option<NodeId>,
   ) -> (URect, IRect, URect) {
-    if let Some(tree2) = tree.upgrade() {
-      if let Some(terminal2) = terminal.upgrade() {
-        let terminal_size = terminal2.size();
-        match parent_id {
-          Some(parent_id2) => match tree2.get_node(parent_id2) {
-            Some(parent) => {
-              let parent_absolute_pos = parent.absolute_pos();
-              let parent_actual_size = parent.actual_size();
-              let absolute_rect =
-                conversion::to_absolute_rect(rect, Some(parent_absolute_pos), terminal_size);
-              let actual_rect = conversion::to_actual_rect(rect, parent_actual_size);
-              let actual_absolute_rect = conversion::to_actual_absolute_rect(
-                rect,
-                Some(parent_absolute_pos),
-                parent_actual_size,
-                terminal_size,
-              );
-              return (absolute_rect, actual_rect, actual_absolute_rect);
-            }
-            None => unreachable!("Parent not found"),
-          },
-          None => {
-            let parent_actual_size = geo_size_as!(terminal_size, usize);
-            let absolute_rect = conversion::to_absolute_rect(rect, None, terminal_size);
-            let actual_rect = conversion::to_actual_rect(rect, parent_actual_size);
-            let actual_absolute_rect =
-              conversion::to_actual_absolute_rect(rect, None, parent_actual_size, terminal_size);
-            return (absolute_rect, actual_rect, actual_absolute_rect);
-          }
+    let terminal_size = terminal.size();
+    match parent_id {
+      Some(parent_id2) => match tree.get_node(parent_id2) {
+        Some(parent) => {
+          let parent_absolute_pos = parent.read().unwrap().absolute_pos();
+          let parent_actual_size = parent.read().unwrap().actual_size();
+          let absolute_rect =
+            conversion::to_absolute_rect(rect, Some(parent_absolute_pos), terminal_size);
+          let actual_rect = conversion::to_actual_rect(rect, parent_actual_size);
+          let actual_absolute_rect = conversion::to_actual_absolute_rect(
+            rect,
+            Some(parent_absolute_pos),
+            parent_actual_size,
+            terminal_size,
+          );
+          return (absolute_rect, actual_rect, actual_absolute_rect);
         }
+        None => unreachable!("Parent not found"),
+      },
+      None => {
+        let parent_actual_size = geo_size_as!(terminal_size, usize);
+        let absolute_rect = conversion::to_absolute_rect(rect, None, terminal_size);
+        let actual_rect = conversion::to_actual_rect(rect, parent_actual_size);
+        let actual_absolute_rect =
+          conversion::to_actual_absolute_rect(rect, None, parent_actual_size, terminal_size);
+        return (absolute_rect, actual_rect, actual_absolute_rect);
       }
-      unreachable!("Terminal is None");
     }
-    unreachable!("Tree is None");
   }
 
   pub fn id(&self) -> NodeId {
@@ -289,12 +279,12 @@ impl WidgetBase {
     self.parent_id
   }
 
-  pub fn tree(&self) -> Weak<Tree> {
-    self.tree.clone()
+  pub fn tree(&mut self) -> &mut Tree {
+    self.tree
   }
 
-  pub fn terminal(&self) -> Weak<Terminal> {
-    self.terminal.clone()
+  pub fn terminal(&mut self) -> &mut Terminal {
+    self.terminal
   }
 
   pub fn rect(&self) -> IRect {
@@ -303,39 +293,23 @@ impl WidgetBase {
 
   pub fn set_rect(&mut self, rect: IRect) {
     self.rect = rect;
-    let (absolute_rect, actual_rect, actual_absolute_rect) = WidgetBase::to_actual_absolute(
-      rect,
-      self.tree.clone(),
-      self.terminal.clone(),
-      self.parent_id,
-    );
-    self._set_absolute_rect(absolute_rect);
-    self._set_actual_rect(actual_rect);
-    self._set_actual_absolute_rect(actual_absolute_rect);
+    let (absolute_rect, actual_rect, actual_absolute_rect) =
+      WidgetBase::to_actual_absolute(rect, self.tree, self.terminal, self.parent_id);
+    self.absolute_rect = absolute_rect;
+    self.actual_rect = actual_rect;
+    self.actual_absolute_rect = actual_absolute_rect;
   }
 
   pub fn absolute_rect(&self) -> URect {
     self.absolute_rect
   }
 
-  pub fn _set_absolute_rect(&mut self, rect: URect) {
-    self.absolute_rect = rect;
-  }
-
   pub fn actual_rect(&self) -> IRect {
     self.actual_rect
   }
 
-  pub fn _set_actual_rect(&mut self, rect: IRect) {
-    self.actual_rect = rect;
-  }
-
   pub fn actual_absolute_rect(&self) -> URect {
     self.actual_absolute_rect
-  }
-
-  pub fn _set_actual_absolute_rect(&mut self, rect: URect) {
-    self.actual_absolute_rect = rect;
   }
 
   pub fn zindex(&self) -> usize {
