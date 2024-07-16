@@ -1,30 +1,92 @@
 //! Widget Tree that manages all the widget components.
 
-use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::hash::Hash;
-use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 
+use crate::cart::{self, IPos, IRect, Size, U16Size, UPos, URect, USize};
+use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::root::RootWidget;
+use crate::ui::widget::window::Window;
 use crate::ui::widget::Widget;
 
 pub type NodeId = usize;
 
-pub enum Node {}
+pub enum Node {
+  RootWidgetNode(RootWidget),
+  CursorNode(Cursor),
+  WindowNode(Window),
+}
+
+pub type NodePtr = Arc<RwLock<Node>>;
+
+pub fn make_node_ptr(n: Node) -> Arc<RwLock<Node>> {
+  Arc::new(RwLock::new(n))
+}
 
 impl PartialOrd for Node {
   fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-    None
+    self.id().partial_cmp(&other.id())
   }
 }
 
 impl PartialEq for Node {
   fn eq(&self, other: &Self) -> bool {
-    false
+    self.id().eq(&other.id())
   }
 }
 
-impl Widget for Node {}
+macro_rules! define_widget_node_getter {
+  ($getter_name:ident,$return_type_name:ty) => {
+    fn $getter_name(&self) -> $return_type_name {
+      match self {
+        Self::RootWidgetNode(node) => node.$getter_name(),
+        Self::CursorNode(node) => node.$getter_name(),
+        Self::WindowNode(node) => node.$getter_name(),
+        _ => unreachable!("Unknown Widget Node"),
+      }
+    }
+  };
+}
+
+macro_rules! define_widget_node_setter {
+  ($setter_name:ident,$value_type_name:ty) => {
+    fn $setter_name(&mut self, value: $value_type_name) {
+      match self {
+        Self::RootWidgetNode(node) => node.$setter_name(value),
+        Self::CursorNode(node) => node.$setter_name(value),
+        Self::WindowNode(node) => node.$setter_name(value),
+        _ => unreachable!("Unknown Widget Node"),
+      }
+    }
+  };
+}
+
+impl Widget for Node {
+  define_widget_node_getter!(id, NodeId);
+
+  define_widget_node_getter!(rect, IRect);
+  define_widget_node_setter!(set_rect, IRect);
+  define_widget_node_getter!(pos, IPos);
+  define_widget_node_setter!(set_pos, IPos);
+  define_widget_node_getter!(size, USize);
+  define_widget_node_setter!(set_size, USize);
+  define_widget_node_getter!(zindex, usize);
+  define_widget_node_setter!(set_zindex, usize);
+  define_widget_node_getter!(visible, bool);
+  define_widget_node_setter!(set_visible, bool);
+  define_widget_node_getter!(enabled, bool);
+  define_widget_node_setter!(set_enabled, bool);
+
+  fn draw(&mut self) {
+    match self {
+      Self::RootWidgetNode(node) => node.draw(),
+      Self::CursorNode(node) => node.draw(),
+      Self::WindowNode(node) => node.draw(),
+      _ => unreachable!("Unknown Widget Node"),
+    }
+  }
+}
 
 #[derive(Hash, Copy, Clone, PartialEq, Eq, Default)]
 pub struct Edge {
@@ -76,8 +138,6 @@ pub struct Tree {
   parent_ids: BTreeMap<NodeId, NodeId>,
 }
 
-type NodePtr = Arc<RwLock<Node>>;
-
 impl Tree {
   pub fn new() -> Tree {
     Tree {
@@ -97,6 +157,13 @@ impl Tree {
       Some(node) => Some(node.clone()),
       None => None,
     }
+  }
+
+  /// Get the root node ID.
+  ///
+  /// Returns the root node ID if exists, returns `None` if not.
+  pub fn get_root_node(&self) -> Option<NodeId> {
+    self.root_id
   }
 
   /// Insert root node with its ID.
@@ -163,18 +230,11 @@ impl Tree {
     }
   }
 
+  /// Get edge by the `from` node ID and the `to` node ID.
+  ///
+  /// Returns the edge if exists, returns `None` if not.
   pub fn get_edge(&self, from: NodeId, to: NodeId) -> Option<&Edge> {
     self.edges.get(&Edge { from, to })
-  }
-
-  pub fn get_root(&self) -> Option<NodeId> {
-    self.root_id
-  }
-
-  pub fn set_root(&mut self, root_id: Option<NodeId>) -> Option<NodeId> {
-    let old_root = self.root_id;
-    self.root_id = root_id;
-    old_root
   }
 
   pub fn get_children(&self, parent_id: NodeId) -> Option<&HashSet<NodeId>> {

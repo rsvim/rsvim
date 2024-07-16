@@ -1,6 +1,5 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
-use std::rc::Weak;
 use std::sync::{Arc, RwLock};
 
 use crate::cart::U16Size;
@@ -13,6 +12,12 @@ use tracing::debug;
 pub struct Terminal {
   frame: Frame,
   prev_frame: Frame,
+}
+
+pub type TerminalPtr = Arc<RwLock<Terminal>>;
+
+pub fn make_terminal_ptr(t: Terminal) -> Arc<RwLock<Terminal>> {
+  Arc::new(RwLock::new(t))
 }
 
 impl Terminal {

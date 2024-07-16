@@ -3,10 +3,11 @@
 #![allow(unused_imports, dead_code)]
 use crate::cart::{IRect, U16Rect, U16Size, URect};
 use crate::ui::term::Terminal;
-use crate::ui::tree::{NodeId, Tree};
+use crate::ui::tree::{make_node_ptr, NodeId, Tree};
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
 use crate::ui::widget::window::Window;
+use crate::ui::widget::Widget;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode,
@@ -30,8 +31,9 @@ impl<'a> EventLoop<'a> {
     let (cols, rows) = terminal::size()?;
     let size = U16Size::new(cols, rows);
     let screen = Terminal::new(size, Default::default());
-    let tree = Tree::new();
+    let mut tree = Tree::new();
     let root_widget = RootWidget::new(&mut tree, &mut screen);
+    tree.insert_root_node(root_widget.id(), make_node_ptr(root_widget));
 
     let cursor_rect = IRect::new(point! (x:0, y:0), point! (x:1 , y:1));
     let cursor_widget = Cursor::new(RootWidget::to_widget_arc(root_widget), cursor_rect);

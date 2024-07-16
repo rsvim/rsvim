@@ -1,6 +1,7 @@
 //! Basic atom of all UI components.
 
 use std::any::Any;
+use std::sync::{Arc, RwLock};
 
 use crate::cart::{conversion, IPos, IRect, Size, UPos, URect, USize};
 use crate::ui::term::Terminal;
@@ -59,12 +60,6 @@ pub trait Widget: Any {
   /// Get unique ID of a widget instance.
   fn id(&self) -> NodeId;
 
-  fn parent_id(&self) -> Option<NodeId>;
-
-  fn tree(&mut self) -> &mut Tree;
-
-  fn terminal(&mut self) -> &mut Terminal;
-
   // Coordinates System {
 
   /// Get rect (relative position and logical size).
@@ -103,26 +98,6 @@ pub trait Widget: Any {
       point!(x: bottom_left.x + sz.width() as isize, y: bottom_left.y + sz.height() as isize),
     ));
   }
-
-  /// Get absolute position.
-  fn absolute_pos(&self) -> UPos {
-    self.absolute_rect().min().into()
-  }
-
-  /// Get actual size.
-  fn actual_size(&self) -> USize {
-    let r = self.actual_rect();
-    USize::from(geo_rect_as!(r, usize))
-  }
-
-  /// Get absolute rect (absolute position and logical size).
-  fn absolute_rect(&self) -> URect;
-
-  /// Get actual rect (relative position and actual size).
-  fn actual_rect(&self) -> IRect;
-
-  /// Get actual absolute rect (absolute position and actual size).
-  fn actual_absolute_rect(&self) -> URect;
 
   // Coordinates System }
 
@@ -184,90 +159,24 @@ pub trait Widget: Any {
   // Render }
 }
 
-pub struct WidgetBase<'a> {
+pub struct WidgetBase {
   id: NodeId,
-  tree: &'a mut Tree,
-  terminal: &'a mut Terminal,
-  parent_id: Option<NodeId>,
-
+  terminal: Arc<RwLock<Terminal>>,
   rect: IRect,
-
-  // Cached rect
-  absolute_rect: URect,
-  actual_rect: IRect,
-  actual_absolute_rect: URect,
-
   zindex: usize,
-
   visible: bool,
   enabled: bool,
 }
 
-impl<'a> WidgetBase<'a> {
-  pub fn new(
-    tree: &'a mut Tree,
-    terminal: &'a mut Terminal,
-    parent_id: Option<NodeId>,
-    rect: IRect,
-    zindex: usize,
-  ) -> Self {
-    let next_id = uuid::next();
-    match parent_id {
-      Some(pid) => {}
-      None => {}
-    }
-
-    let (absolute_rect, actual_rect, actual_absolute_rect) =
-      WidgetBase::to_actual_absolute(rect, tree, terminal, parent_id);
+impl WidgetBase {
+  pub fn new(terminal: Arc<RwLock<Terminal>>, rect: IRect, zindex: usize) -> Self {
     WidgetBase {
-      id: next_id,
-      tree,
+      id: uuid::next(),
       terminal,
-      parent_id,
       rect,
-      absolute_rect,
-      actual_rect,
-      actual_absolute_rect,
       zindex,
       visible: true,
       enabled: true,
-    }
-  }
-
-  // Calculate (absolute_rect, actual_rect, actual_absolute_rect)
-  fn to_actual_absolute(
-    rect: IRect,
-    tree: &'a mut Tree,
-    terminal: &'a mut Terminal,
-    parent_id: Option<NodeId>,
-  ) -> (URect, IRect, URect) {
-    let terminal_size = terminal.size();
-    match parent_id {
-      Some(parent_id2) => match tree.get_node(parent_id2) {
-        Some(parent) => {
-          let parent_absolute_pos = parent.read().unwrap().absolute_pos();
-          let parent_actual_size = parent.read().unwrap().actual_size();
-          let absolute_rect =
-            conversion::to_absolute_rect(rect, Some(parent_absolute_pos), terminal_size);
-          let actual_rect = conversion::to_actual_rect(rect, parent_actual_size);
-          let actual_absolute_rect = conversion::to_actual_absolute_rect(
-            rect,
-            Some(parent_absolute_pos),
-            parent_actual_size,
-            terminal_size,
-          );
-          return (absolute_rect, actual_rect, actual_absolute_rect);
-        }
-        None => unreachable!("Parent not found"),
-      },
-      None => {
-        let parent_actual_size = geo_size_as!(terminal_size, usize);
-        let absolute_rect = conversion::to_absolute_rect(rect, None, terminal_size);
-        let actual_rect = conversion::to_actual_rect(rect, parent_actual_size);
-        let actual_absolute_rect =
-          conversion::to_actual_absolute_rect(rect, None, parent_actual_size, terminal_size);
-        return (absolute_rect, actual_rect, actual_absolute_rect);
-      }
     }
   }
 
@@ -275,16 +184,8 @@ impl<'a> WidgetBase<'a> {
     self.id
   }
 
-  pub fn parent_id(&self) -> Option<NodeId> {
-    self.parent_id
-  }
-
-  pub fn tree(&mut self) -> &mut Tree {
-    self.tree
-  }
-
-  pub fn terminal(&mut self) -> &mut Terminal {
-    self.terminal
+  pub fn terminal(&self) -> Arc<RwLock<Terminal>> {
+    self.terminal.clone()
   }
 
   pub fn rect(&self) -> IRect {
@@ -293,23 +194,6 @@ impl<'a> WidgetBase<'a> {
 
   pub fn set_rect(&mut self, rect: IRect) {
     self.rect = rect;
-    let (absolute_rect, actual_rect, actual_absolute_rect) =
-      WidgetBase::to_actual_absolute(rect, self.tree, self.terminal, self.parent_id);
-    self.absolute_rect = absolute_rect;
-    self.actual_rect = actual_rect;
-    self.actual_absolute_rect = actual_absolute_rect;
-  }
-
-  pub fn absolute_rect(&self) -> URect {
-    self.absolute_rect
-  }
-
-  pub fn actual_rect(&self) -> IRect {
-    self.actual_rect
-  }
-
-  pub fn actual_absolute_rect(&self) -> URect {
-    self.actual_absolute_rect
   }
 
   pub fn zindex(&self) -> usize {
