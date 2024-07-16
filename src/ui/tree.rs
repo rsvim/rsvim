@@ -177,7 +177,7 @@ impl Tree {
     old_root
   }
 
-  pub fn get_children(&self, parent_id: NodeId) -> Option<&Vec<NodeId>> {
+  pub fn get_children(&self, parent_id: NodeId) -> Option<&HashSet<NodeId>> {
     self.children_ids.get(&parent_id)
   }
 
