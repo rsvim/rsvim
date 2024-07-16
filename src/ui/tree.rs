@@ -2,6 +2,7 @@
 
 use std::cell::RefCell;
 use std::collections::{BTreeMap, BTreeSet, HashSet};
+use std::hash::Hash;
 use std::rc::Rc;
 use std::sync::{Arc, RwLock};
 
@@ -31,20 +32,29 @@ pub struct Edge {
   to: NodeId,
 }
 
-impl PartialOrd for Edge {
-  fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+impl Edge {
+  pub fn hash_str(&self) -> String {
     let width = std::cmp::max(
       std::mem::size_of_val(&self.from),
       std::mem::size_of_val(&self.to),
     );
-    let h1 = format!("{:0<width$}{:0<width$}", self.from, self.to, width = width);
-    let h2 = format!(
-      "{:0<width$}{:0<width$}",
-      other.from,
-      other.to,
-      width = width
-    );
-    return h1.partial_cmp(&h2);
+    format!("{:0<width$}{:0<width$}", self.from, self.to, width = width)
+  }
+}
+
+impl PartialOrd for Edge {
+  fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    let h1 = self.hash_str();
+    let h2 = other.hash_str();
+    h1.partial_cmp(&h2)
+  }
+}
+
+impl Ord for Edge {
+  fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    let h1 = self.hash_str();
+    let h2 = other.hash_str();
+    h1.cmp(&h2)
   }
 }
 
