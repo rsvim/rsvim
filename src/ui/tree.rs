@@ -31,12 +31,29 @@ pub struct Edge {
   to: NodeId,
 }
 
+impl PartialOrd for Edge {
+  fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    let width = std::cmp::max(
+      std::mem::size_of_val(&self.from),
+      std::mem::size_of_val(&self.to),
+    );
+    let h1 = format!("{:0<width$}{:0<width$}", self.from, self.to, width = width);
+    let h2 = format!(
+      "{:0<width$}{:0<width$}",
+      other.from,
+      other.to,
+      width = width
+    );
+    return h1.partial_cmp(&h2);
+  }
+}
+
 pub struct Tree {
   // A collection of all nodes, maps from node ID to node struct.
   nodes: BTreeMap<NodeId, NodePtr>,
 
   // A collection of all edges.
-  edges: HashSet<Edge>,
+  edges: BTreeSet<Edge>,
 
   // Root node ID.
   root_id: Option<NodeId>,
@@ -55,7 +72,7 @@ impl Tree {
   pub fn new() -> Tree {
     Tree {
       nodes: BTreeMap::new(),
-      edges: HashSet::new(),
+      edges: BTreeSet::new(),
       root_id: None,
       children_ids: BTreeMap::new(),
       parent_ids: BTreeMap::new(),
@@ -101,6 +118,10 @@ impl Tree {
       }
     }
     self.parent_ids.insert(id, parent_id);
+    self.edges.insert(Edge {
+      from: parent_id,
+      to: id,
+    });
     self.nodes.insert(id, node.clone())
   }
 
