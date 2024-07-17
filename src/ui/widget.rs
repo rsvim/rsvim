@@ -3,11 +3,11 @@
 use std::any::Any;
 use std::sync::{Arc, RwLock};
 
-use crate::cart::{conversion, IPos, IRect, Size, UPos, URect, USize};
+use crate::cart::{IPos, IRect, USize};
+use crate::geo_rect_as;
 use crate::ui::term::Terminal;
-use crate::ui::tree::{NodeId, Tree};
+use crate::ui::tree::NodeId;
 use crate::uuid;
-use crate::{geo_rect_as, geo_size_as};
 use geo::{self, point};
 
 pub mod cursor;
@@ -161,7 +161,6 @@ pub trait Widget: Any {
 
 pub struct WidgetBase {
   id: NodeId,
-  terminal: Arc<RwLock<Terminal>>,
   rect: IRect,
   zindex: usize,
   visible: bool,
@@ -169,10 +168,9 @@ pub struct WidgetBase {
 }
 
 impl WidgetBase {
-  pub fn new(terminal: Arc<RwLock<Terminal>>, rect: IRect, zindex: usize) -> Self {
+  pub fn new(rect: IRect, zindex: usize) -> Self {
     WidgetBase {
       id: uuid::next(),
-      terminal,
       rect,
       zindex,
       visible: true,
@@ -182,10 +180,6 @@ impl WidgetBase {
 
   pub fn id(&self) -> NodeId {
     self.id
-  }
-
-  pub fn terminal(&self) -> Arc<RwLock<Terminal>> {
-    self.terminal.clone()
   }
 
   pub fn rect(&self) -> IRect {
