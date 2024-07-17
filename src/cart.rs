@@ -1,4 +1,39 @@
 //! Cartesian coordinate system on the 2-dimensional plane.
+//!
+//! For terminal based coordinate system, it's not working like the 2-dimensional coordinate system
+//! in mathematics. In mathematics, the 2-dimensional coordinates look like:
+//!
+//! The 2-dimensional coordinate system in mathematics usually look like:
+//!
+//!                  y:
+//!                  |
+//!                (0,1)
+//!                  |
+//! x: ----(-1,0)--(0,0)--(1,0)-----
+//!                  |
+//!                (0,-1)
+//!                  |
+//!
+//! But in a terminal based coordinate system, it's not working like that.
+//!
+//! We usually say the line in the top is the first line, the line in the bottom is the last line,
+//! the column in the left side is the first column, the column in the right side is the last
+//! column.
+//!
+//! Thus we need to flip the coordinate system upside down:
+//!
+//!                  y:
+//!                  |
+//!                (0,-1)
+//!                  |
+//! x: ----(-1,0)--(0,0)--(1,0)-----
+//!                  |
+//!                (0,1)
+//!                  |
+//!
+//! Note: The X-axis remains the same, the Y-axis is upside down. And the top-left of the terminal
+//! is `(0,0)` position, the bottom-right of the terminal is `(width, height)` position, where the
+//! `width` is the width of the terminal, `height` is the height of the terminal.
 
 use geo::{Point, Rect};
 use std::marker::Copy;
