@@ -1,11 +1,9 @@
 //! Basic atom of all UI components.
 
 use std::any::Any;
-use std::sync::{Arc, RwLock};
 
 use crate::cart::{IPos, IRect, USize};
 use crate::geo_rect_as;
-use crate::ui::term::Terminal;
 use crate::ui::tree::NodeId;
 use crate::uuid;
 use geo::{self, point};
@@ -213,4 +211,45 @@ impl WidgetBase {
   fn set_enabled(&mut self, value: bool) {
     self.enabled = value;
   }
+}
+
+#[macro_export]
+macro_rules! define_widget_base_helpers {
+  () => {
+    fn id(&self) -> NodeId {
+      self.base.id()
+    }
+
+    fn rect(&self) -> IRect {
+      self.base.rect()
+    }
+
+    fn set_rect(&mut self, rect: IRect) {
+      self.base.set_rect(rect);
+    }
+
+    fn zindex(&self) -> usize {
+      self.base.zindex()
+    }
+
+    fn set_zindex(&mut self, zindex: usize) {
+      self.base.set_zindex(zindex);
+    }
+
+    fn visible(&self) -> bool {
+      self.base.visible()
+    }
+
+    fn set_visible(&mut self, value: bool) {
+      self.base.set_visible(value);
+    }
+
+    fn enabled(&self) -> bool {
+      self.base.enabled()
+    }
+
+    fn set_enabled(&mut self, value: bool) {
+      self.base.set_enabled(value);
+    }
+  };
 }
