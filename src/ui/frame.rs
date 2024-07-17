@@ -214,30 +214,30 @@ impl Frame {
 
   /// Get a cell on specific position.
   pub fn get_cell(&self, pos: UPos) -> &Cell {
-    &self.cells[pos.x * pos.y]
+    &self.cells[pos.x() * pos.y()]
   }
 
   /// Get a mutable cell on specific position.
   pub fn mut_get_cell(&mut self, pos: UPos) -> &mut Cell {
-    &mut self.cells[pos.x * pos.y]
+    &mut self.cells[pos.x() * pos.y()]
   }
 
   /// Set a cell on specific position.
   pub fn set_cell(&mut self, pos: UPos, cell: Cell) -> &mut Self {
-    self.cells[pos.x * pos.y] = cell;
+    self.cells[pos.x() * pos.y()] = cell;
     self
   }
 
   /// Get n continuously cells, start from position.
   pub fn get_cells(&self, pos: UPos, n: usize) -> &[Cell] {
-    let start_at = pos.x * pos.y;
+    let start_at = pos.x() * pos.y();
     let end_at = start_at + n;
     &self.cells[start_at..end_at]
   }
 
   /// Get n continuously mutable cells, start from position.
   pub fn mut_get_cells(&mut self, pos: UPos, n: usize) -> &mut [Cell] {
-    let start_at = pos.x * pos.y;
+    let start_at = pos.x() * pos.y();
     let end_at = start_at + n;
     &mut self.cells[start_at..end_at]
   }
@@ -249,7 +249,7 @@ impl Frame {
     pos: UPos,
     cells: Vec<Cell>,
   ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter> {
-    let start_at = pos.x * pos.y;
+    let start_at = pos.x() * pos.y();
     let end_at = start_at + cells.len();
     self.cells.splice(start_at..end_at, cells)
   }
