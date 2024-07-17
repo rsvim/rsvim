@@ -4,7 +4,7 @@ use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::hash::Hash;
 use std::sync::{Arc, RwLock};
 
-use crate::cart::{self, IPos, IRect, Size, U16Size, UPos, URect, USize};
+use crate::cart::{IPos, IRect, USize};
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
 use crate::ui::widget::window::Window;
@@ -43,7 +43,6 @@ macro_rules! define_widget_node_getter {
         Self::RootWidgetNode(node) => node.$getter_name(),
         Self::CursorNode(node) => node.$getter_name(),
         Self::WindowNode(node) => node.$getter_name(),
-        _ => unreachable!("Unknown Widget Node"),
       }
     }
   };
@@ -56,7 +55,6 @@ macro_rules! define_widget_node_setter {
         Self::RootWidgetNode(node) => node.$setter_name(value),
         Self::CursorNode(node) => node.$setter_name(value),
         Self::WindowNode(node) => node.$setter_name(value),
-        _ => unreachable!("Unknown Widget Node"),
       }
     }
   };
@@ -83,7 +81,6 @@ impl Widget for Node {
       Self::RootWidgetNode(node) => node.draw(),
       Self::CursorNode(node) => node.draw(),
       Self::WindowNode(node) => node.draw(),
-      _ => unreachable!("Unknown Widget Node"),
     }
   }
 }
