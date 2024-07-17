@@ -1,4 +1,4 @@
-//! Window widget.
+//! The VIM Window.
 
 use crate::cart::IRect;
 use crate::define_widget_base_helpers;
