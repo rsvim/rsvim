@@ -37,9 +37,9 @@ pub struct Tree {
   // Thus when drawing the nodes to the terminal, we only need to get the cached results, instead
   // of real-time calculation (which involves too much duplicated calculation).
   //
-  // This is based on the fact that on a widget's actual shape, we read more while modify less. And
-  // mostly we only modify the leaf node widget, because it's on the top of a widget tree, which
-  // gets the attention of user's eyes.
+  // This is based on the fact that for a widget's actual shape, we read more while modify less.
+  // And mostly we only modify the leaf node widget, because it's on the top of a widget tree,
+  // which gets the attention of user's eyes.
   //
   // Note: A widget is always a rectangle.
   actual_shapes: HashMap<NodeId, URect>,
