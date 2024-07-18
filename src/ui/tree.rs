@@ -22,6 +22,7 @@ pub struct Tree {
   root_id: Option<NodeId>,
 
   // Maps "parent ID" => its "children IDs".
+  //
   // Note: A parent can have multiple children.
   children_ids: BTreeMap<NodeId, HashSet<NodeId>>,
 
