@@ -1,4 +1,4 @@
-//! Widget Tree that manages all the widget components.
+//! Widget tree that manages all the widget components.
 
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::hash::Hash;
@@ -9,6 +9,9 @@ use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::Widget;
+
+pub mod edge;
+pub mod node;
 
 pub type NodeId = usize;
 
@@ -117,6 +120,8 @@ impl Ord for Edge {
   }
 }
 
+/// Widget tree.
+/// A widget tree contains only 1 root node, each node can have 0 or multiple nodes.
 pub struct Tree {
   // A collection of all nodes, maps from node ID to node struct.
   nodes: BTreeMap<NodeId, NodePtr>,
