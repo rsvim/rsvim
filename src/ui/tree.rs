@@ -1,124 +1,12 @@
 //! Widget tree that manages all the widget components.
 
 use std::collections::{BTreeMap, BTreeSet, HashSet};
-use std::hash::Hash;
-use std::sync::{Arc, RwLock};
 
-use crate::cart::{IPos, IRect, USize};
-use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::root::RootWidget;
-use crate::ui::widget::window::Window;
-use crate::ui::widget::Widget;
+use crate::ui::tree::edge::Edge;
+use crate::ui::tree::node::{NodeId, NodePtr};
 
 pub mod edge;
 pub mod node;
-
-pub type NodeId = usize;
-
-pub enum Node {
-  RootWidgetNode(RootWidget),
-  CursorNode(Cursor),
-  WindowNode(Window),
-}
-
-pub type NodePtr = Arc<RwLock<Node>>;
-
-pub fn make_node_ptr(n: Node) -> Arc<RwLock<Node>> {
-  Arc::new(RwLock::new(n))
-}
-
-impl PartialOrd for Node {
-  fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-    self.id().partial_cmp(&other.id())
-  }
-}
-
-impl PartialEq for Node {
-  fn eq(&self, other: &Self) -> bool {
-    self.id().eq(&other.id())
-  }
-}
-
-macro_rules! define_widget_node_getter {
-  ($getter_name:ident,$return_type_name:ty) => {
-    fn $getter_name(&self) -> $return_type_name {
-      match self {
-        Self::RootWidgetNode(node) => node.$getter_name(),
-        Self::CursorNode(node) => node.$getter_name(),
-        Self::WindowNode(node) => node.$getter_name(),
-      }
-    }
-  };
-}
-
-macro_rules! define_widget_node_setter {
-  ($setter_name:ident,$value_type_name:ty) => {
-    fn $setter_name(&mut self, value: $value_type_name) {
-      match self {
-        Self::RootWidgetNode(node) => node.$setter_name(value),
-        Self::CursorNode(node) => node.$setter_name(value),
-        Self::WindowNode(node) => node.$setter_name(value),
-      }
-    }
-  };
-}
-
-impl Widget for Node {
-  define_widget_node_getter!(id, NodeId);
-
-  define_widget_node_getter!(rect, IRect);
-  define_widget_node_setter!(set_rect, IRect);
-  define_widget_node_getter!(pos, IPos);
-  define_widget_node_setter!(set_pos, IPos);
-  define_widget_node_getter!(size, USize);
-  define_widget_node_setter!(set_size, USize);
-  define_widget_node_getter!(zindex, usize);
-  define_widget_node_setter!(set_zindex, usize);
-  define_widget_node_getter!(visible, bool);
-  define_widget_node_setter!(set_visible, bool);
-  define_widget_node_getter!(enabled, bool);
-  define_widget_node_setter!(set_enabled, bool);
-
-  fn draw(&mut self) {
-    match self {
-      Self::RootWidgetNode(node) => node.draw(),
-      Self::CursorNode(node) => node.draw(),
-      Self::WindowNode(node) => node.draw(),
-    }
-  }
-}
-
-#[derive(Hash, Copy, Clone, PartialEq, Eq, Default)]
-pub struct Edge {
-  from: NodeId,
-  to: NodeId,
-}
-
-impl Edge {
-  pub fn hash_str(&self) -> String {
-    let width = std::cmp::max(
-      std::mem::size_of_val(&self.from),
-      std::mem::size_of_val(&self.to),
-    );
-    format!("{:0<width$}{:0<width$}", self.from, self.to, width = width)
-  }
-}
-
-impl PartialOrd for Edge {
-  fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-    let h1 = self.hash_str();
-    let h2 = other.hash_str();
-    h1.partial_cmp(&h2)
-  }
-}
-
-impl Ord for Edge {
-  fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-    let h1 = self.hash_str();
-    let h2 = other.hash_str();
-    h1.cmp(&h2)
-  }
-}
 
 /// Widget tree.
 /// A widget tree contains only 1 root node, each node can have 0 or multiple nodes.

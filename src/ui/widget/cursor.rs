@@ -2,7 +2,7 @@
 
 use crate::cart::{IPos, IRect, U16Pos, USize};
 use crate::ui::frame::CursorStyle;
-use crate::ui::tree::NodeId;
+use crate::ui::tree::node::NodeId;
 use crate::ui::widget::{Widget, WidgetBase};
 use geo::point;
 

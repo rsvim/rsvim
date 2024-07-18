@@ -4,7 +4,7 @@ use std::any::Any;
 
 use crate::cart::{IPos, IRect, USize};
 use crate::geo_rect_as;
-use crate::ui::tree::NodeId;
+use crate::ui::tree::node::NodeId;
 use crate::uuid;
 use geo::{self, point};
 

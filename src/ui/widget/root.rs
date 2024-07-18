@@ -4,7 +4,7 @@
 
 use crate::cart::{IRect, U16Size};
 use crate::define_widget_base_helpers;
-use crate::ui::tree::NodeId;
+use crate::ui::tree::node::NodeId;
 use crate::ui::widget::{Widget, WidgetBase};
 
 /// Root widget.

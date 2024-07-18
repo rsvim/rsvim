@@ -4,7 +4,7 @@ use compact_str::CompactString;
 
 use crate::cart::IRect;
 use crate::define_widget_base_helpers;
-use crate::ui::tree::NodeId;
+use crate::ui::tree::node::NodeId;
 use crate::ui::widget::{Widget, WidgetBase};
 
 /// The VIM window.

@@ -3,7 +3,8 @@
 #![allow(unused_imports, dead_code)]
 use crate::cart::{IRect, U16Rect, U16Size, URect};
 use crate::ui::term::Terminal;
-use crate::ui::tree::{make_node_ptr, Node, NodeId, Tree};
+use crate::ui::tree::node::{make_node_ptr, Node, NodeId};
+use crate::ui::tree::Tree;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
 use crate::ui::widget::window::Window;

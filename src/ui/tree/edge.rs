@@ -1,5 +1,7 @@
 //! Widget edge that connects two nodes in the tree.
 
+use crate::ui::tree::node::NodeId;
+
 /// Widget edge that connects two nodes in the tree.
 #[derive(Hash, Copy, Clone, PartialEq, Eq, Default)]
 pub struct Edge {

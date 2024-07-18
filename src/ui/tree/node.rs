@@ -1,5 +1,13 @@
 //! Widget node in the tree.
 
+use std::sync::{Arc, RwLock};
+
+use crate::cart::{IPos, IRect, USize};
+use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::root::RootWidget;
+use crate::ui::widget::window::Window;
+use crate::ui::widget::Widget;
+
 pub type NodeId = usize;
 
 /// Widget node in the tree.
