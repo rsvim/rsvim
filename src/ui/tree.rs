@@ -38,8 +38,8 @@ pub struct Tree {
   // of real-time calculation (which involves too much duplicated calculation).
   //
   // This is based on the fact that for a widget's actual shape, we read more while modify less.
-  // And mostly we only modify the leaf node widget, because it's on the top of a widget tree,
-  // which gets the attention of user's eyes.
+  // And mostly the user will only modify the leaf node widget, because it's on the top of a widget
+  // tree, which gets the attention of user's eyes.
   //
   // Note: A widget is always a rectangle.
   actual_shapes: HashMap<NodeId, URect>,
