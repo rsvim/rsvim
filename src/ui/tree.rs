@@ -32,10 +32,14 @@ pub struct Tree {
   // Maps node "ID" => its "actual shape", i.e. actual position and size on a terminal.
   //
   // Every time after a node's shape changes, i.e. its position moves or its shape resizes,
-  // the tree will calculate the updated its actual shape, and cache the results.
+  // the tree will calculate the updated its actual shape (and all its children's actual shapes),
+  // and cache all the results.
   // Thus when drawing the nodes to the terminal, we only need to get the cached results, instead
   // of real-time calculation (which involves too much duplicated calculation).
-  // This is based on the fact that on a widget's actual shape, we read more while modify less.
+  //
+  // This is based on the fact that on a widget's actual shape, we read more while modify less. And
+  // mostly we only modify the leaf node widget, because it's on the top of a widget tree, which
+  // gets the attention of user's eyes.
   //
   // Note: A widget is always a rectangle.
   actual_shapes: HashMap<NodeId, URect>,
@@ -49,6 +53,7 @@ impl Tree {
       root_id: None,
       children_ids: BTreeMap::new(),
       parent_ids: BTreeMap::new(),
+      actual_shapes: HashMap::new(),
     }
   }
 
