@@ -1,5 +1,9 @@
 //! Basic atom of all UI components.
 
+pub mod cursor;
+pub mod root;
+pub mod window;
+
 use std::any::Any;
 
 use crate::cart::{IPos, IRect, USize};
@@ -7,10 +11,6 @@ use crate::geo_rect_as;
 use crate::ui::tree::node::NodeId;
 use crate::uuid;
 use geo::{self, point};
-
-pub mod cursor;
-pub mod root;
-pub mod window;
 
 /// Widget is the base trait for all UI components, it provide a common layer for receiving user
 /// events (keyboard/mouse), and rendering itself on terminal. It is more of a logical container
