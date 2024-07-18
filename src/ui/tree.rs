@@ -29,13 +29,14 @@ pub struct Tree {
   parent_ids: BTreeMap<NodeId, NodeId>,
 
   // Maps node "ID" => its "actual shape", i.e. actual position and size on a terminal.
-  // Note: A node is always a rectangle.
   //
-  // Every time after change a node's shape, i.e. move its position or resize its size,
-  // the tree will calculate the updated actual shape on a terminal, and cache the results.
-  // Thus when drawing the nodes, we only need to get the cached results, instead of real-time
-  // calculations (which involves too much duplicated calculations).
-  // This is based on the fact that we read more the actual shape, while modify less the data.
+  // Every time after a node's shape changes, i.e. its position moves or its shape resizes,
+  // the tree will calculate the updated its actual shape, and cache the results.
+  // Thus when drawing the nodes to the terminal, we only need to get the cached results, instead
+  // of real-time calculation (which involves too much duplicated calculation).
+  // This is based on the fact that on a widget's actual shape, we read more while modify less.
+  //
+  // Note: A widget is always a rectangle.
   actual_shapes: HashMap<NodeId, URect>,
 }
 
