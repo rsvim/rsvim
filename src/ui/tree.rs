@@ -28,7 +28,7 @@ pub struct Tree {
   // Maps "child ID" => its "parent ID".
   parent_ids: BTreeMap<NodeId, NodeId>,
 
-  // Maps node "ID" => its "actual position and size" on a terminal.
+  // Maps node "ID" => its "actual shape", i.e. actual position and size on a terminal.
   // Note: A node is always a rectangle.
   actual_rects: HashMap<NodeId, URect>,
 }
