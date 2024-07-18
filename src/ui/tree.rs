@@ -1,7 +1,8 @@
 //! Widget tree that manages all the widget components.
 
-use std::collections::{BTreeMap, BTreeSet, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
+use crate::cart::URect;
 use crate::ui::tree::edge::Edge;
 use crate::ui::tree::node::{NodeId, NodePtr};
 
@@ -26,6 +27,10 @@ pub struct Tree {
 
   // Maps "child ID" => its "parent ID".
   parent_ids: BTreeMap<NodeId, NodeId>,
+
+  // Maps node "ID" => its "actual position and size" on a terminal.
+  // Note: A node is always a rectangle.
+  actual_rects: HashMap<NodeId, URect>,
 }
 
 impl Tree {
