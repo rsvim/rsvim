@@ -30,7 +30,7 @@ pub struct Tree {
 
   // Maps node "ID" => its "actual shape", i.e. actual position and size on a terminal.
   // Note: A node is always a rectangle.
-  actual_rects: HashMap<NodeId, URect>,
+  actual_shapes: HashMap<NodeId, URect>,
 }
 
 impl Tree {
