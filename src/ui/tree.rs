@@ -5,9 +5,9 @@ use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use geo::point;
 
 use crate::cart::{IPos, IRect, ISize, Size, URect, USize};
-use crate::geo_size_as;
 use crate::ui::tree::edge::Edge;
 use crate::ui::tree::node::{NodeId, NodePtr};
+use crate::{geo_rect_as, geo_size_as};
 
 pub mod edge;
 pub mod node;
@@ -159,24 +159,36 @@ impl Tree {
     self.root_id
   }
 
-  /// Insert root node with its ID.
+  /// Insert root node, with ID, size.
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
   ///
   /// # Panics
   ///
   /// Panics if there's already a root node.
-  pub fn insert_root_node(&mut self, id: NodeId, node: NodePtr) -> Option<NodePtr> {
+  pub fn insert_root_node(&mut self, id: NodeId, node: NodePtr, size: USize) -> Option<NodePtr> {
     assert!(self.root_id.is_none());
     self.root_id = Some(id);
-    self.nodes.insert(id, node.clone())
+    let result = self.nodes.insert(id, node.clone());
+    let shape = IRect::new(
+      point!(x:0, y:0),
+      point!(x: size.width() as isize, y: size.height() as isize),
+    );
+    self.shapes.insert(id, shape);
+    result
   }
 
-  /// Insert node with both its and its parent's ID.
+  /// Insert node, with ID, parent's ID, shape.
   /// This operation also binds the connection between the inserted node and its parent.
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
-  pub fn insert_node(&mut self, id: NodeId, node: NodePtr, parent_id: NodeId) -> Option<NodePtr> {
+  pub fn insert_node(
+    &mut self,
+    id: NodeId,
+    node: NodePtr,
+    parent_id: NodeId,
+    shape: IRect,
+  ) -> Option<NodePtr> {
     match self.children_ids.get_mut(&parent_id) {
       Some(children) => {
         children.insert(id);
@@ -189,6 +201,7 @@ impl Tree {
     }
     self.parent_ids.insert(id, parent_id);
     self.edges.insert(Edge::new(parent_id, id));
+    self.shapes.insert(id, shape);
     self.nodes.insert(id, node.clone())
   }
 
@@ -202,12 +215,16 @@ impl Tree {
     match self.nodes.remove(&id) {
       Some(node) => {
         if self.parent_ids.contains_key(&id) {
+          // It's a non-root node.
           assert!(self.root_id != Some(id));
           let parent_id = self.parent_ids.remove(&id).unwrap();
           assert!(self.children_ids.contains_key(&parent_id));
-          let removed = self.children_ids.get_mut(&parent_id).unwrap().remove(&id);
-          assert!(removed);
+          let child_removed = self.children_ids.get_mut(&parent_id).unwrap().remove(&id);
+          assert!(child_removed);
+          let edge_removed = self.edges.remove(&Edge::new(parent_id, id));
+          assert!(edge_removed);
         } else {
+          // It's a root node.
           assert!(self.root_id == Some(id));
           self.root_id = None;
         }
