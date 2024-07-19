@@ -6,7 +6,7 @@ use geo::point;
 
 use crate::cart::{IPos, IRect, ISize, Size, URect, USize};
 use crate::ui::tree::edge::Edge;
-use crate::ui::tree::node::{NodeId, NodePtr};
+use crate::ui::tree::node::{NodeAttribute, NodeId, NodePtr};
 use crate::{geo_rect_as, geo_size_as};
 
 pub mod edge;
@@ -101,34 +101,8 @@ pub struct Tree {
   // Maps "child ID" => its "parent ID".
   parent_ids: BTreeMap<NodeId, NodeId>,
 
-  // Maps node "ID" => its "relative and logical shape", i.e. relative position and logical shape
-  // on its parent widget (when doesn't have a parent, the terminal is its parent).
-  //
-  // The coordinate system by default uses relative and logical shape, this is mostly for the
-  // convenience of calculation.
-  shapes: HashMap<NodeId, IRect>,
-
-  // Maps node "ID" => its "absolute and actual shape", i.e. actual position and size on a terminal.
-  actual_shapes: HashMap<NodeId, URect>,
-
-  // Maps node "ID" => its "zindex".
-  //
-  /// The "z-index" arranges the display priority of the content stack when multiple children overlap
-  /// on each other, a widget with higher z-index has higher priority to be displayed.
-  ///
-  /// Note: The z-index only works for the children under the same parent. For a child widget, it
-  /// always covers/overrides its parent display. To change the visibility priority between
-  /// children and parent, you need to change the relationship between them.
-  /// For example, now we have two children under the same parent: A and B. A has 100 z-index, B
-  /// has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
-  /// still covers C, because it's a sibling of B.
-  zindexes: HashMap<NodeId, usize>,
-
-  // Maps node "ID" => its "visible".
-  visibles: HashMap<NodeId, bool>,
-
-  // Maps node "ID" => its "visible".
-  enables: HashMap<NodeId, bool>,
+  // Maps node "ID" => its attributes.
+  attributes: HashMap<NodeId, NodeAttribute>,
 }
 
 impl Tree {
@@ -139,11 +113,7 @@ impl Tree {
       root_id: None,
       children_ids: BTreeMap::new(),
       parent_ids: BTreeMap::new(),
-      shapes: HashMap::new(),
-      actual_shapes: HashMap::new(),
-      zindexes: HashMap::new(),
-      visibles: HashMap::new(),
-      enables: HashMap::new(),
+      attributes: HashMap::new(),
     }
   }
 
