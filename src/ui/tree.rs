@@ -45,30 +45,45 @@ pub mod node;
 ///    * For children that shade each other, the one with higher z-index has higher priority to
 ///      display and process the input events.
 ///
-/// The widget shape ensures:
+/// A widget also has several attributes:
 ///
-/// 1. A shape can be relative/logical or absolute/actual.
+/// 1. Widget shape, i.e. position and size.
+///
+///    1. A shape can be relative/logical or absolute/actual.
 ///
 ///    A widget shape is always a rectangle, the position is by default relative to its parent, and
 ///    the size is by default logically infinite. While rendering to the terminal device, we need
 ///    to calculate its absolute position and actual size.
 ///
-/// 2. Calculate absolute/actual shape with "copy-on-write" policy.
+///    2. Calculate absolute/actual shape with "copy-on-write" policy.
 ///
 ///    Based on the fact that a widget's shape is often read and rarely modified, we use a
 ///    "copy-on-write" policy to avoid too many duplicated calculations. i.e. we always calculates
 ///    a widget's absolute position and actual size right after it's shape is been changed, and
 ///    also caches the result. Thus we simply get the cached results when need.
 ///
-/// The widget has some attributes:
+/// 2. Widget z-index.
 ///
-/// 1. A widget can be visible or invisible.
+///    The z-index arranges the display priority of the content stack when multiple children
+///    overlap on each other, a widget with higher z-index has higher priority to be displayed.
+///
+///    The z-index only works for the children under the same parent. For a child widget, it always
+///    covers/overrides its parent display.
+///    To change the visibility priority between children and parent, you need to change the
+///    relationship between them.
+///    For example, now we have two children under the same parent: A and B. A has 100 z-index, B
+///    has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
+///    still covers C, because it's a sibling of B.
+///
+/// 3. Widget visible and enabled.
+///
+///    1. A widget can be visible or invisible.
 ///
 ///    When it's visible, it handles user's input events, processes them and updates the UI
 ///    contents. When it's invisible, it's just like not existed, so it doesn't handle or process
 ///    any input events, the UI hides.
 ///
-/// 2. A widget can be enabled or disabled.
+///    2. A widget can be enabled or disabled.
 ///
 ///    When it's enabled, it handles input events, processes them and updates the UI contents. When
 ///    it's disabled, it's just like been fronzen, so it doesn't handle or process any input
@@ -97,8 +112,6 @@ pub struct Tree {
   //
   // The coordinate system by default uses relative and logical shape, this is mostly for the
   // convenience of calculation.
-  //
-  // Note: A widget is always a rectangle.
   shapes: HashMap<NodeId, IRect>,
 
   // Maps node "ID" => its "absolute and actual shape", i.e. actual position and size on a terminal.
