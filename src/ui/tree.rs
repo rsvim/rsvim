@@ -36,12 +36,11 @@ pub mod node;
 ///    * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
 ///      parent, unless they're explicitly been set.
 /// 2. Children have higher priority than their parent to display and process input events.
-///    * Parent will first try to dispatch input events to the corresponding child if the event
-///      occurs within the child. If the child doesn't process the event, then parent will try to
-///      process it, or fallback to the parent of the parent.
-///    * Children are always displayed on top of their parent.
-///    * For children that shade each other, the one with higher [z-index](Widget::zindex()) has
-///      higher priority to display and receive events.
+///    * Children are always displayed on top of their parent, and has higher priority to process
+///      a user's input event when the event occurs within the shape of the child. The event will
+///      fallback to their parent if the child doesn't process it.
+///    * For children that shade each other, the one with higher z-index has higher priority to
+///      display and process the input events.
 ///
 /// A widget's shape is always a rectangle, its position and size is stored by a `rect`, based on
 /// its parent's shape. While rendering to the terminal device, we will need to calculate its
