@@ -58,47 +58,6 @@ pub trait Widget: Any {
   /// Get unique ID of a widget instance.
   fn id(&self) -> NodeId;
 
-  // Coordinates System {
-
-  /// Get rect (relative position and logical size).
-  fn rect(&self) -> IRect;
-
-  /// Set rect.
-  fn set_rect(&mut self, rect: IRect);
-
-  /// Get relative position.
-  fn pos(&self) -> IPos {
-    point!(x: self.rect().min().x, y: self.rect().min().y)
-  }
-
-  /// Set relative position.
-  fn set_pos(&mut self, pos: IPos) {
-    let r = self.rect();
-    self.set_rect(IRect::new(
-      pos,
-      point!(x: pos.x() + r.width(), y: pos.y() + r.height()),
-    ));
-  }
-
-  /// Get logical size.
-  fn size(&self) -> USize {
-    let r = self.rect();
-    let r2 = geo_rect_as!(r, usize);
-    USize::from(r2)
-  }
-
-  /// Set logical size.
-  fn set_size(&mut self, sz: USize) {
-    let r = self.rect();
-    let bottom_left = r.min();
-    self.set_rect(IRect::new(
-      bottom_left.into(),
-      point!(x: bottom_left.x + sz.width() as isize, y: bottom_left.y + sz.height() as isize),
-    ));
-  }
-
-  // Coordinates System }
-
   /// Control arrange content stack when multiple children overlap on each other, a widget with
   /// higher z-index has higher priority to be displayed.
   ///

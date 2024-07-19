@@ -5,11 +5,15 @@ use crate::ui::tree::node::NodeId;
 /// Widget edge that connects two nodes in the tree.
 #[derive(Hash, Copy, Clone, PartialEq, Eq, Default)]
 pub struct Edge {
-  from: NodeId,
-  to: NodeId,
+  pub from: NodeId,
+  pub to: NodeId,
 }
 
 impl Edge {
+  pub fn new(from: NodeId, to: NodeId) -> Self {
+    Edge { from, to }
+  }
+
   pub fn hash_str(&self) -> String {
     let width = std::cmp::max(
       std::mem::size_of_val(&self.from),
