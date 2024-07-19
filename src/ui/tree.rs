@@ -135,6 +135,8 @@ impl Tree {
       shapes: HashMap::new(),
       actual_shapes: HashMap::new(),
       zindexes: HashMap::new(),
+      visibles: HashMap::new(),
+      enables: HashMap::new(),
     }
   }
 
@@ -318,4 +320,32 @@ impl Tree {
   }
 
   // Shape }
+
+  // Attributes {
+
+  pub fn get_visible(&self, id: NodeId) -> Option<&bool> {
+    self.visibles.get(&id)
+  }
+
+  pub fn get_visible_mut(&mut self, id: NodeId) -> Option<&mut bool> {
+    self.visibles.get_mut(&id)
+  }
+
+  pub fn set_visible(&mut self, id: NodeId, visible: bool) -> Option<bool> {
+    self.visibles.insert(id, visible)
+  }
+
+  pub fn get_enabled(&self, id: NodeId) -> Option<&bool> {
+    self.enables.get(&id)
+  }
+
+  pub fn get_enabled_mut(&mut self, id: NodeId) -> Option<&mut bool> {
+    self.enables.get_mut(&id)
+  }
+
+  pub fn set_enabled(&mut self, id: NodeId, enabled: bool) -> Option<bool> {
+    self.enables.insert(id, enabled)
+  }
+
+  // Attributes }
 }
