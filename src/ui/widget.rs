@@ -71,17 +71,6 @@ pub trait Widget: Any {
   ///
   fn zindex(&self) -> usize;
 
-  /// Set z-index value.
-  fn set_zindex(&mut self, value: usize);
-
-  // Attributes {
-
-  /// Whether the widget is visible.
-  ///
-  /// When invisible, user event will no longer been received or processed, and not rendered to
-  /// terminal, just like it's deleted.
-  fn visible(&self) -> bool;
-
   /// Make the widget visible/invisible.
   ///
   /// Hide a widget also implicitly hides all children and offsprings. Children or offsprings
