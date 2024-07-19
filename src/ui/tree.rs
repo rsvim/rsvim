@@ -28,6 +28,7 @@ pub mod node;
 /// The widget tree ensures:
 ///
 /// 1. Parent owns all its children.
+///
 ///    * Children will be destroyed when their parent is.
 ///    * Coordinate system are relative to their parent's top-left corner, while the absolute
 ///      coordinates are based on the terminal's top-left corner.
@@ -35,20 +36,44 @@ pub mod node;
 ///      the size of each node can be logically infinite on the imaginary canvas.
 ///    * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
 ///      parent, unless they're explicitly been set.
+///
 /// 2. Children have higher priority than their parent to display and process input events.
+///
 ///    * Children are always displayed on top of their parent, and has higher priority to process
 ///      a user's input event when the event occurs within the shape of the child. The event will
 ///      fallback to their parent if the child doesn't process it.
 ///    * For children that shade each other, the one with higher z-index has higher priority to
 ///      display and process the input events.
 ///
-/// A widget's shape is always a rectangle, its position and size is stored by a `rect`, based on
-/// its parent's shape. While rendering to the terminal device, we will need to calculate its
-/// absolute position and actual size.
-/// Based on the fact that widget's shape is often read, rarely modified, we use the copy-on-write
-/// policy to avoid too many duplicated calculations. A widget calculates its absolute position and
-/// actual size once it's relative position or logical size is been changed, and also caches the
-/// result. Thus we simply get the cached results when need.
+/// The widget shape ensures:
+///
+/// 1. A shape can be relative/logical or absolute/actual.
+///
+///    A widget shape is always a rectangle, the position is by default relative to its parent, and
+///    the size is by default logically infinite. While rendering to the terminal device, we need
+///    to calculate its absolute position and actual size.
+///
+/// 2. Calculate absolute/actual shape with "copy-on-write" policy.
+///
+///    Based on the fact that a widget's shape is often read and rarely modified, we use a
+///    "copy-on-write" policy to avoid too many duplicated calculations. i.e. we always calculates
+///    a widget's absolute position and actual size right after it's shape is been changed, and
+///    also caches the result. Thus we simply get the cached results when need.
+///
+/// The widget has some attributes:
+///
+/// 1. A widget can be visible or invisible.
+///
+///    When it's visible, it handles user's input events, processes them and updates the UI
+///    contents. When it's invisible, it's just like not existed, so it doesn't handle or process
+///    any input events, the UI hides.
+///
+/// 2. A widget can be enabled or disabled.
+///
+///    When it's enabled, it handles input events, processes them and updates the UI contents. When
+///    it's disabled, it's just like been fronzen, so it doesn't handle or process any input
+///    events, the UI keeps still and never changes.
+///
 pub struct Tree {
   // A collection of all nodes, maps from node ID to node struct.
   nodes: BTreeMap<NodeId, NodePtr>,
@@ -77,18 +102,6 @@ pub struct Tree {
   shapes: HashMap<NodeId, IRect>,
 
   // Maps node "ID" => its "absolute and actual shape", i.e. actual position and size on a terminal.
-  //
-  // Every time after a node's shape changes, i.e. its position moves or its shape resizes,
-  // the tree will calculate the updated its actual shape (and all its children's actual shapes),
-  // and cache all the results.
-  // Thus when drawing the nodes to the terminal, we only need to get the cached results, instead
-  // of real-time calculation (which involves too much duplicated calculation).
-  //
-  // This is based on the fact that for a widget's actual shape, we read more while modify less.
-  // And mostly the user will only modify the leaf node widget, because it's on the top of a widget
-  // tree, which gets the attention of user's eyes.
-  //
-  // Note: A widget is always a rectangle.
   actual_shapes: HashMap<NodeId, URect>,
 
   // Maps node "ID" => its "zindex".
@@ -103,6 +116,12 @@ pub struct Tree {
   /// has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
   /// still covers C, because it's a sibling of B.
   zindexes: HashMap<NodeId, usize>,
+
+  // Maps node "ID" => its "visible".
+  visibles: HashMap<NodeId, bool>,
+
+  // Maps node "ID" => its "visible".
+  enables: HashMap<NodeId, bool>,
 }
 
 impl Tree {
