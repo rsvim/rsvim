@@ -47,22 +47,20 @@ pub mod node;
 ///
 /// A widget also has several attributes:
 ///
-/// 1. Widget shape, i.e. position and size.
+/// 1. Shape, i.e. position and size.
 ///
-///    * A shape can be relative/logical or absolute/actual.
+///    A shape can be relative/logical or absolute/actual, and always rectangle. The position is by
+///    default relative to its parent, and the size is by default logically infinite. While
+///    rendering to the terminal device, we need to calculate its absolute position and actual
+///    size.
 ///
-///    A widget shape is always a rectangle, the position is by default relative to its parent, and
-///    the size is by default logically infinite. While rendering to the terminal device, we need
-///    to calculate its absolute position and actual size.
+///    The absolute/actual shape is calculated with a "copy-on-write" policy. Based on the fact
+///    that a widget's shape is often read and rarely modified, thus the "copy-on-write" policy to
+///    avoid too many duplicated calculations. i.e. we always calculates a widget's absolute
+///    position and actual size right after it's shape is been changed, and also caches the result.
+///    Thus we simply get the cached results when need.
 ///
-///    * Calculate absolute/actual shape with "copy-on-write" policy.
-///
-///    Based on the fact that a widget's shape is often read and rarely modified, we use a
-///    "copy-on-write" policy to avoid too many duplicated calculations. i.e. we always calculates
-///    a widget's absolute position and actual size right after it's shape is been changed, and
-///    also caches the result. Thus we simply get the cached results when need.
-///
-/// 2. Widget z-index.
+/// 2. z-index.
 ///
 ///    The z-index arranges the display priority of the content stack when multiple children
 ///    overlap on each other, a widget with higher z-index has higher priority to be displayed.
@@ -75,19 +73,15 @@ pub mod node;
 ///    has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
 ///    still covers C, because it's a sibling of B.
 ///
-/// 3. Widget visible and enabled.
+/// 3. Visible and enabled.
 ///
-///    * A widget can be visible or invisible.
+///    A widget can be visible or invisible. When it's visible, it handles user's input events,
+///    processes them and updates the UI contents. When it's invisible, it's just like not existed,
+///    so it doesn't handle or process any input events, the UI hides.
 ///
-///    When it's visible, it handles user's input events, processes them and updates the UI
-///    contents. When it's invisible, it's just like not existed, so it doesn't handle or process
-///    any input events, the UI hides.
-///
-///    * A widget can be enabled or disabled.
-///
-///    When it's enabled, it handles input events, processes them and updates the UI contents. When
-///    it's disabled, it's just like been fronzen, so it doesn't handle or process any input
-///    events, the UI keeps still and never changes.
+///    A widget can be enabled or disabled. When it's enabled, it handles input events, processes
+///    them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
+///    doesn't handle or process any input events, the UI keeps still and never changes.
 ///
 pub struct Tree {
   // A collection of all nodes, maps from node ID to node struct.
