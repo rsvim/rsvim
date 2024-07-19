@@ -49,13 +49,13 @@ pub mod node;
 ///
 /// 1. Widget shape, i.e. position and size.
 ///
-///    1. A shape can be relative/logical or absolute/actual.
+///    * A shape can be relative/logical or absolute/actual.
 ///
 ///    A widget shape is always a rectangle, the position is by default relative to its parent, and
 ///    the size is by default logically infinite. While rendering to the terminal device, we need
 ///    to calculate its absolute position and actual size.
 ///
-///    2. Calculate absolute/actual shape with "copy-on-write" policy.
+///    * Calculate absolute/actual shape with "copy-on-write" policy.
 ///
 ///    Based on the fact that a widget's shape is often read and rarely modified, we use a
 ///    "copy-on-write" policy to avoid too many duplicated calculations. i.e. we always calculates
@@ -77,13 +77,13 @@ pub mod node;
 ///
 /// 3. Widget visible and enabled.
 ///
-///    1. A widget can be visible or invisible.
+///    * A widget can be visible or invisible.
 ///
 ///    When it's visible, it handles user's input events, processes them and updates the UI
 ///    contents. When it's invisible, it's just like not existed, so it doesn't handle or process
 ///    any input events, the UI hides.
 ///
-///    2. A widget can be enabled or disabled.
+///    * A widget can be enabled or disabled.
 ///
 ///    When it's enabled, it handles input events, processes them and updates the UI contents. When
 ///    it's disabled, it's just like been fronzen, so it doesn't handle or process any input
