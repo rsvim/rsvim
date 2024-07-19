@@ -62,19 +62,6 @@ macro_rules! define_widget_node_setter {
 impl Widget for Node {
   define_widget_node_getter!(id, NodeId);
 
-  define_widget_node_getter!(rect, IRect);
-  define_widget_node_setter!(set_rect, IRect);
-  define_widget_node_getter!(pos, IPos);
-  define_widget_node_setter!(set_pos, IPos);
-  define_widget_node_getter!(size, USize);
-  define_widget_node_setter!(set_size, USize);
-  define_widget_node_getter!(zindex, usize);
-  define_widget_node_setter!(set_zindex, usize);
-  define_widget_node_getter!(visible, bool);
-  define_widget_node_setter!(set_visible, bool);
-  define_widget_node_getter!(enabled, bool);
-  define_widget_node_setter!(set_enabled, bool);
-
   fn draw(&mut self) {
     match self {
       Self::RootWidgetNode(node) => node.draw(),

@@ -12,8 +12,44 @@ use crate::ui::tree::node::{NodeId, NodePtr};
 pub mod edge;
 pub mod node;
 
-/// Widget tree.
-/// A widget tree contains only 1 root node, each node can have 0 or multiple nodes.
+/// The widget tree.
+///
+/// A widget tree contains only 1 root node, each node can have 0 or multiple nodes. It manages all
+/// UI components and rendering on the terminal, i.e. the whole terminal is the root widget node,
+/// everything inside is the children nodes, and can recursively go down.
+///
+/// Here we have several terms:
+/// * Parent: The parent node.
+/// * Child: The child node.
+/// * Ancestor: Either the parent, or the parent of some ancestor of the node.
+/// * Descendant: Either the child, or the child of some descendant of the node.
+/// * Sibling: Other children nodes under the same parent.
+///
+/// The widget tree ensures:
+///
+/// 1. Parent owns all its children.
+///    * Children will be destroyed when their parent is.
+///    * Coordinate system are relative to their parent's top-left corner, while the absolute
+///      coordinates are based on the terminal's top-left corner.
+///    * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
+///      the size of each node can be logically infinite on the imaginary canvas.
+///    * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
+///      parent, unless they're explicitly been set.
+/// 2. Children have higher priority than their parent to display and process input events.
+///    * Parent will first try to dispatch input events to the corresponding child if the event
+///      occurs within the child. If the child doesn't process the event, then parent will try to
+///      process it, or fallback to the parent of the parent.
+///    * Children are always displayed on top of their parent.
+///    * For children that shade each other, the one with higher [z-index](Widget::zindex()) has
+///      higher priority to display and receive events.
+///
+/// A widget's shape is always a rectangle, its position and size is stored by a `rect`, based on
+/// its parent's shape. While rendering to the terminal device, we will need to calculate its
+/// absolute position and actual size.
+/// Based on the fact that widget's shape is often read, rarely modified, we use the copy-on-write
+/// policy to avoid too many duplicated calculations. A widget calculates its absolute position and
+/// actual size once it's relative position or logical size is been changed, and also caches the
+/// result. Thus we simply get the cached results when need.
 pub struct Tree {
   // A collection of all nodes, maps from node ID to node struct.
   nodes: BTreeMap<NodeId, NodePtr>,
@@ -61,14 +97,12 @@ pub struct Tree {
   /// The "z-index" arranges the display priority of the content stack when multiple children overlap
   /// on each other, a widget with higher z-index has higher priority to be displayed.
   ///
-  /// Note:
-  /// The z-index only works for the children under the same parent. For a child widget, it always
-  /// covers/overrides its parent display. To change the visibility priority between children and
-  /// parent, you need to change the relationship between them.
+  /// Note: The z-index only works for the children under the same parent. For a child widget, it
+  /// always covers/overrides its parent display. To change the visibility priority between
+  /// children and parent, you need to change the relationship between them.
   /// For example, now we have two children under the same parent: A and B. A has 100 z-index, B
   /// has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
   /// still covers C, because it's a sibling of B.
-  ///
   zindexes: HashMap<NodeId, usize>,
 }
 
