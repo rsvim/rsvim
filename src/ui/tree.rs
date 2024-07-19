@@ -60,7 +60,7 @@ pub mod node;
 ///    position and actual size right after it's shape is been changed, and also caches the result.
 ///    Thus we simply get the cached results when need.
 ///
-/// 2. z-index.
+/// 2. Z-index.
 ///
 ///    The z-index arranges the display priority of the content stack when multiple children
 ///    overlap on each other, a widget with higher z-index has higher priority to be displayed.
