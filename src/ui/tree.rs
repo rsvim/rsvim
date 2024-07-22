@@ -1,15 +1,15 @@
 //! Widget tree that manages all the widget components.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::sync::{Arc, RwLock, Weak};
 
-use crossterm::terminal;
 use geo::point;
 
-use crate::cart::{conversion, IPos, IRect, ISize, Size, URect, USize};
+use crate::cart::{conversion, IRect, URect, USize};
+use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::edge::Edge;
 use crate::ui::tree::node::{NodeAttribute, NodeId, NodePtr};
-use crate::{geo_rect_as, geo_size_as};
 
 pub mod edge;
 pub mod node;
@@ -108,6 +108,13 @@ pub struct Tree {
 
   // Maps "child ID" => its "parent ID".
   parent_ids: BTreeMap<NodeId, NodeId>,
+}
+
+pub type TreePtr = Arc<RwLock<Tree>>;
+pub type TreeWk = Weak<RwLock<Tree>>;
+
+pub fn make_tree_ptr(t: Tree) -> Arc<RwLock<Tree>> {
+  Arc::new(RwLock::new(t))
 }
 
 impl Tree {
@@ -262,16 +269,20 @@ impl Tree {
 
   // Attribute {
 
-  pub fn get_attribute(&self, id: NodeId) -> Option<&NodeAttribute> {
-    self.attributes.get(&id)
+  pub fn get_shape(&self, id: NodeId) -> Option<&IRect> {
+    match self.attributes.get(&id) {
+      Some(attr) => Some(&attr.shape),
+      None => None,
+    }
   }
 
-  pub fn get_attribute_mut(&mut self, id: NodeId) -> Option<&mut NodeAttribute> {
-    self.attributes.get_mut(&id)
-  }
-
-  pub fn set_attribute(&mut self, id: NodeId, attribute: NodeAttribute) -> Option<NodeAttribute> {
-    self.attributes.insert(id, attribute)
+  pub fn set_shape(&mut self, id: NodeId, shape: IRect) -> Option<IRect> {
+    match self.attributes.get_mut(&id) {
+      Some(attr) => {
+        attr.shape = shape;
+      }
+      None => None,
+    }
   }
 
   // Attribute }

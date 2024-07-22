@@ -2,9 +2,9 @@
 
 #![allow(unused_imports, dead_code)]
 use crate::cart::{IRect, U16Rect, U16Size, URect};
-use crate::ui::term::Terminal;
+use crate::ui::term::{make_terminal_ptr, Terminal, TerminalPtr};
 use crate::ui::tree::node::{make_node_ptr, Node, NodeId};
-use crate::ui::tree::Tree;
+use crate::ui::tree::{make_tree_ptr, Tree, TreePtr};
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
 use crate::ui::widget::window::Window;
@@ -23,8 +23,8 @@ use std::sync::{Arc, RwLock};
 use tracing::debug;
 
 pub struct EventLoop {
-  screen: Terminal,
-  tree: Tree,
+  screen: TerminalPtr,
+  tree: TreePtr,
 }
 
 impl EventLoop {
@@ -32,11 +32,13 @@ impl EventLoop {
     let (cols, rows) = terminal::size()?;
     let size = U16Size::new(cols, rows);
     let screen = Terminal::new(size, Default::default());
-    let mut tree = Tree::new();
+    let screen = make_terminal_ptr(screen);
+    let tree = Tree::new(Arc::downgrade(&screen));
+    let tree = make_tree_ptr(tree);
 
     let root_widget = RootWidget::new(size);
     let root_widget_node = make_node_ptr(Node::RootWidgetNode(root_widget));
-    tree.insert_root_node(
+    tree.read().unwrap().insert_root_node(
       root_widget_node.read().unwrap().id(),
       root_widget_node.clone(),
     );
@@ -45,7 +47,7 @@ impl EventLoop {
       0,
     );
     let window_node = make_node_ptr(Node::WindowNode(window));
-    tree.insert_node(
+    tree.read().unwrap().insert_node(
       window_node.read().unwrap().id(),
       window_node.clone(),
       root_widget_node.read().unwrap().id(),
@@ -58,7 +60,7 @@ impl EventLoop {
       SetCursorStyle::DefaultUserShape,
     );
     let cursor_node = make_node_ptr(Node::CursorNode(cursor));
-    tree.insert_node(
+    tree.read().unwrap().insert_node(
       cursor_node.read().unwrap().id(),
       cursor_node.clone(),
       window_node.read().unwrap().id(),

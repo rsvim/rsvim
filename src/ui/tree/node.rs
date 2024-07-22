@@ -1,6 +1,6 @@
 //! Widget node in the tree.
 
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, RwLock, Weak};
 
 use crate::cart::{IRect, URect};
 use crate::ui::widget::cursor::Cursor;
@@ -18,6 +18,7 @@ pub enum Node {
 }
 
 pub type NodePtr = Arc<RwLock<Node>>;
+pub type NodeWk = Weak<RwLock<Node>>;
 
 pub fn make_node_ptr(n: Node) -> Arc<RwLock<Node>> {
   Arc::new(RwLock::new(n))
