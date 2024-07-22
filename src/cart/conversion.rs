@@ -51,16 +51,29 @@ pub fn to_actual_shape(rect: IRect, parent_actual_shape: URect) -> URect {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use std::cmp::max;
 
   #[test]
-  fn should_make_actual_shapes() {
-    let inputs: Vec<(IRect, URect)> =
-      vec![(IRect::new((0, 0), (3, 5)), URect::new((0, 0), (10, 10)))];
-    let expects: Vec<URect> = vec![URect::new((0, 0), (3, 5))];
-    for (i, t) in inputs.iter().enumerate() {
-      let actual = to_actual_shape(t.0, t.1);
-      let expect = expects[i];
-      assert_eq!(actual, expect);
+  fn convert_to_actual_shapes() {
+    let inputs: Vec<IRect> = vec![
+      IRect::new((0, 0), (3, 5)),
+      IRect::new((0, 0), (1, 5)),
+      IRect::new((0, 0), (3, 7)),
+      IRect::new((0, 0), (0, 0)),
+      IRect::new((0, 0), (5, 4)),
+    ];
+    for t in inputs.iter() {
+      for p in 0..10 {
+        for q in 0..10 {
+          let input_actual_parent_shape = URect::new((0, 0), (p as usize, q as usize));
+          let expect = URect::new(
+            (0, 0),
+            (max(t.max().x, p) as usize, max(t.max().y, q) as usize),
+          );
+          let actual = to_actual_shape(*t, input_actual_parent_shape);
+          assert_eq!(actual, expect);
+        }
+      }
     }
   }
 }
