@@ -207,33 +207,32 @@ impl Tree {
   /// Remove node by its ID.
   ///
   /// Returns the removed node if it exists, returns `None` if not.
+  /// Returns `None` if the node is root node.
   ///
   /// This operation also removes the connection between the node and its parent (if any).
   /// This operation doesn't removes the connection between the node and its children (if any).
   pub fn remove_node(&mut self, id: NodeId) -> Option<NodePtr> {
-    match self.nodes.remove(&id) {
-      Some(node) => {
-        if self.parent_ids.contains_key(&id) {
-          // It's a non-root node.
-          assert!(self.root_id != Some(id));
-          let parent_id = self.parent_ids.remove(&id).unwrap();
-          assert!(self.children_ids.contains_key(&parent_id));
-          let child_removed = self.children_ids.get_mut(&parent_id).unwrap().remove(&id);
-          assert!(child_removed);
-          let edge_removed = self.edges.remove(&Edge::new(parent_id, id));
-          assert!(edge_removed);
-        } else {
-          // It's a root node.
-          assert!(self.root_id == Some(id));
-          self.root_id = None;
-        }
-        Some(node)
-      }
-      None => {
-        assert!(!self.parent_ids.contains_key(&id) && self.root_id != Some(id));
-        None
-      }
+    if self.root_id == Some(id) {
+      return None;
     }
+    if !self.parent_ids.contains_key(&id) {
+      return None;
+    }
+
+    let parent_id = self.parent_ids.remove(&id).unwrap();
+    assert!(self.children_ids.contains_key(&parent_id));
+
+    let child_removed = self.children_ids.get_mut(&parent_id).unwrap().remove(&id);
+    assert!(child_removed);
+
+    let attribute_removed = self.attributes.remove(&id);
+    assert!(attribute_removed.is_some());
+
+    let edge_removed = self.edges.remove(&Edge::new(parent_id, id));
+    assert!(edge_removed);
+
+    assert!(self.nodes.contains_key(&id));
+    self.nodes.remove(&id)
   }
 
   // Node }
@@ -261,107 +260,19 @@ impl Tree {
 
   // Parent-Children Relationship }
 
-  // Shape {
+  // Attribute {
 
-  pub fn get_shape(&self, id: NodeId) -> Option<&IRect> {
-    self.shapes.get(&id)
+  pub fn get_attribute(&self, id: NodeId) -> Option<&NodeAttribute> {
+    self.attributes.get(&id)
   }
 
-  pub fn get_shape_mut(&mut self, id: NodeId) -> Option<&mut IRect> {
-    self.shapes.get_mut(&id)
+  pub fn get_attribute_mut(&mut self, id: NodeId) -> Option<&mut NodeAttribute> {
+    self.attributes.get_mut(&id)
   }
 
-  pub fn set_shape(&mut self, id: NodeId, shape: IRect) -> Option<IRect> {
-    self.shapes.insert(id, shape)
+  pub fn set_attribute(&mut self, id: NodeId, attribute: NodeAttribute) -> Option<NodeAttribute> {
+    self.attributes.insert(id, attribute)
   }
 
-  pub fn get_pos(&self, id: NodeId) -> Option<IPos> {
-    match self.get_shape(id) {
-      Some(shape) => Some(point!(x: shape.min().x, y: shape.min().y)),
-      None => None,
-    }
-  }
-
-  pub fn set_pos(&mut self, id: NodeId, pos: IPos) -> Option<IPos> {
-    match self.get_shape_mut(id) {
-      Some(shape) => {
-        let old_pos = point!(x:shape.min().x, y:shape.min().y);
-        *shape = IRect::new(
-          pos,
-          point!(x:pos.x() + shape.width(), y: pos.y() + shape.height() ),
-        );
-        Some(old_pos)
-      }
-      None => None,
-    }
-  }
-
-  pub fn get_size(&self, id: NodeId) -> Option<USize> {
-    match self.get_shape(id) {
-      Some(shape) => {
-        let isz = ISize::from(*shape);
-        let usz = geo_size_as!(isz, usize);
-        Some(usz)
-      }
-      None => None,
-    }
-  }
-
-  pub fn set_size(&mut self, id: NodeId, sz: USize) -> Option<USize> {
-    match self.get_shape_mut(id) {
-      Some(shape) => {
-        let old_isz = ISize::from(*shape);
-        let old_usz = geo_size_as!(old_isz, usize);
-        let pos = point!(x: shape.min().x, y: shape.min().y);
-        *shape = IRect::new(
-          pos,
-          pos + point!(x: sz.width() as isize, y: sz.height() as isize),
-        );
-        Some(old_usz)
-      }
-      None => None,
-    }
-  }
-
-  pub fn get_zindex(&self, id: NodeId) -> Option<&usize> {
-    self.zindexes.get(&id)
-  }
-
-  pub fn get_zindex_mut(&mut self, id: NodeId) -> Option<&mut usize> {
-    self.zindexes.get_mut(&id)
-  }
-
-  pub fn set_zindex(&mut self, id: NodeId, zindex: usize) -> Option<usize> {
-    self.zindexes.insert(id, zindex)
-  }
-
-  // Shape }
-
-  // Attributes {
-
-  pub fn get_visible(&self, id: NodeId) -> Option<&bool> {
-    self.visibles.get(&id)
-  }
-
-  pub fn get_visible_mut(&mut self, id: NodeId) -> Option<&mut bool> {
-    self.visibles.get_mut(&id)
-  }
-
-  pub fn set_visible(&mut self, id: NodeId, visible: bool) -> Option<bool> {
-    self.visibles.insert(id, visible)
-  }
-
-  pub fn get_enabled(&self, id: NodeId) -> Option<&bool> {
-    self.enables.get(&id)
-  }
-
-  pub fn get_enabled_mut(&mut self, id: NodeId) -> Option<&mut bool> {
-    self.enables.get_mut(&id)
-  }
-
-  pub fn set_enabled(&mut self, id: NodeId, enabled: bool) -> Option<bool> {
-    self.enables.insert(id, enabled)
-  }
-
-  // Attributes }
+  // Attribute }
 }
