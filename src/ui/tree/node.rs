@@ -55,8 +55,6 @@ impl Widget for Node {
 
 #[derive(Copy, Clone)]
 pub struct NodeAttribute {
-  pub id: NodeId,
-
   /// Relative and logical shape of a widget node.
   pub shape: IRect,
 
@@ -70,7 +68,6 @@ pub struct NodeAttribute {
 
 impl NodeAttribute {
   pub fn new(
-    id: NodeId,
     shape: IRect,
     actual_shape: URect,
     zindex: usize,
@@ -78,7 +75,6 @@ impl NodeAttribute {
     enabled: bool,
   ) -> Self {
     NodeAttribute {
-      id,
       shape,
       actual_shape,
       zindex,
@@ -87,9 +83,8 @@ impl NodeAttribute {
     }
   }
 
-  fn default(id: NodeId, shape: IRect, actual_shape: URect) -> Self {
+  pub fn default(shape: IRect, actual_shape: URect) -> Self {
     NodeAttribute {
-      id,
       shape,
       actual_shape,
       zindex: 0_usize,

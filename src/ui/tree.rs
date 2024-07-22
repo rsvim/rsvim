@@ -90,6 +90,9 @@ pub struct Tree {
   // A collection of all edges.
   edges: BTreeSet<Edge>,
 
+  // Maps node "ID" => its attributes.
+  attributes: HashMap<NodeId, NodeAttribute>,
+
   // Root node ID.
   root_id: Option<NodeId>,
 
@@ -100,9 +103,6 @@ pub struct Tree {
 
   // Maps "child ID" => its "parent ID".
   parent_ids: BTreeMap<NodeId, NodeId>,
-
-  // Maps node "ID" => its attributes.
-  attributes: HashMap<NodeId, NodeAttribute>,
 }
 
 impl Tree {
@@ -147,11 +147,11 @@ impl Tree {
     assert!(self.root_id.is_none());
     self.root_id = Some(id);
     let result = self.nodes.insert(id, node.clone());
-    let shape = IRect::new(
-      point!(x:0, y:0),
-      point!(x: size.width() as isize, y: size.height() as isize),
-    );
-    self.shapes.insert(id, shape);
+    let actual_shape = URect::new(point!(x:0,y:0), point!(x:size.width(), y:size.height()));
+    let shape = geo_rect_as!(actual_shape, isize);
+    self
+      .attributes
+      .insert(id, NodeAttribute::default(shape, actual_shape));
     result
   }
 
@@ -178,7 +178,9 @@ impl Tree {
     }
     self.parent_ids.insert(id, parent_id);
     self.edges.insert(Edge::new(parent_id, id));
-    self.shapes.insert(id, shape);
+    self
+      .attributes
+      .insert(id, NodeAttribute::default(shape, actual_shape));
     self.nodes.insert(id, node.clone())
   }
 
