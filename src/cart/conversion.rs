@@ -51,19 +51,14 @@ pub fn to_actual_shape(rect: IRect, parent_actual_shape: URect) -> URect {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use geo::point;
 
   #[test]
   fn should_make_actual_shapes() {
-    let inputs: Vec<(IRect, Option<UPos>, USize, U16Size)> = vec![(
-      IRect::new((0, 0), (3, 5)),
-      Some(point!(x: 0_usize, y: 0_usize)),
-      USize::new(7, 8),
-      U16Size::new(10, 10),
-    )];
-    let expects: Vec<URect> = vec![URect::new((0, 0), (3, 4))];
+    let inputs: Vec<(IRect, URect)> =
+      vec![(IRect::new((0, 0), (3, 5)), URect::new((0, 0), (10, 10)))];
+    let expects: Vec<URect> = vec![URect::new((0, 0), (3, 5))];
     for (i, t) in inputs.iter().enumerate() {
-      let actual = to_actual_shape(t.0, t.1, t.2, t.3);
+      let actual = to_actual_shape(t.0, t.1);
       let expect = expects[i];
       assert_eq!(actual, expect);
     }
