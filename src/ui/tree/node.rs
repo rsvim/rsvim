@@ -2,7 +2,7 @@
 
 use std::sync::{Arc, RwLock, Weak};
 
-use crate::cart::{IRect, URect};
+use crate::cart::{IRect, U16Rect};
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
 use crate::ui::widget::window::Window;
@@ -60,7 +60,7 @@ pub struct NodeAttribute {
   pub shape: IRect,
 
   /// Absolute and actual shape of a widget node.
-  pub actual_shape: URect,
+  pub actual_shape: U16Rect,
 
   pub zindex: usize,
   pub visible: bool,
@@ -70,7 +70,7 @@ pub struct NodeAttribute {
 impl NodeAttribute {
   pub fn new(
     shape: IRect,
-    actual_shape: URect,
+    actual_shape: U16Rect,
     zindex: usize,
     visible: bool,
     enabled: bool,
@@ -84,7 +84,7 @@ impl NodeAttribute {
     }
   }
 
-  pub fn default(shape: IRect, actual_shape: URect) -> Self {
+  pub fn default(shape: IRect, actual_shape: U16Rect) -> Self {
     NodeAttribute {
       shape,
       actual_shape,

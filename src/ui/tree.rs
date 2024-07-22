@@ -1,11 +1,12 @@
 //! Widget tree that manages all the widget components.
 
+use std::collections::VecDeque;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::{Arc, RwLock, Weak};
 
 use geo::point;
 
-use crate::cart::{conversion, IRect, URect, USize};
+use crate::cart::{conversion, IRect, U16Rect, URect, USize};
 use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::edge::Edge;
@@ -279,8 +280,46 @@ impl Tree {
   pub fn set_shape(&mut self, id: NodeId, shape: IRect) -> Option<IRect> {
     match self.attributes.get_mut(&id) {
       Some(attr) => {
+        let old_shape = attr.shape;
         attr.shape = shape;
+        Some(old_shape)
       }
+      None => None,
+    }
+  }
+
+  fn calculate_actual_shape(&mut self, start_id: NodeId) {
+    let mut que: VecDeque<NodeId> = VecDeque::new();
+    que.push_back(start_id);
+
+    while !que.is_empty() {
+      match que.pop_front() {
+        Some(id) => match self.parent_ids.get(&id) {
+          Some(parent_id) => {
+            let shape = self.get_shape(id).unwrap();
+            let parent_actual_shape = self.get_actual_shape(*parent_id).unwrap();
+            let actual_shape = conversion::to_actual_shape(*shape, *parent_actual_shape);
+            self.set_shape(id, actual_shape);
+          }
+          None => {
+            let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
+          }
+        },
+        None => unreachable!("Failed to pop id from front"),
+      }
+    }
+  }
+
+  pub fn get_actual_shape(&self, id: NodeId) -> Option<&U16Rect> {
+    match self.attributes.get(&id) {
+      Some(attr) => Some(&attr.actual_shape),
+      None => None,
+    }
+  }
+
+  fn update_actual_shape(&self, id: NodeId) -> Option<&U16Rect> {
+    match self.attributes.get(&id) {
+      Some(attr) => Some(&attr.actual_shape),
       None => None,
     }
   }

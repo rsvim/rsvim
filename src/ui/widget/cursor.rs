@@ -1,13 +1,14 @@
 //! Cursor widget.
 
-use crate::cart::{IPos, IRect, U16Pos, USize};
+use crate::cart::{IPos, IRect, U16Pos};
 use crate::ui::frame::CursorStyle;
 use crate::ui::tree::node::NodeId;
-use crate::ui::widget::{Widget, WidgetBase};
+use crate::ui::widget::Widget;
+use crate::uuid;
 use geo::point;
 
 pub struct Cursor {
-  base: WidgetBase,
+  id: NodeId,
   blinking: bool,
   hidden: bool,
   style: CursorStyle,
@@ -15,11 +16,8 @@ pub struct Cursor {
 
 impl Cursor {
   pub fn new(pos: IPos, blinking: bool, hidden: bool, style: CursorStyle) -> Self {
-    let rect = IRect::new(pos, pos + point!(x:1, y:1));
-    let zindex = std::usize::MAX;
-    let base = WidgetBase::new(rect, zindex);
     Cursor {
-      base,
+      id: uuid::next(),
       blinking,
       hidden,
       style,
@@ -29,7 +27,7 @@ impl Cursor {
 
 impl Widget for Cursor {
   fn id(&self) -> NodeId {
-    self.base.id()
+    self.id
   }
 
   fn draw(&mut self) {
