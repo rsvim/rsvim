@@ -2,9 +2,11 @@
 
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
+use crossterm::terminal;
 use geo::point;
 
-use crate::cart::{IPos, IRect, ISize, Size, URect, USize};
+use crate::cart::{conversion, IPos, IRect, ISize, Size, URect, USize};
+use crate::ui::term::TerminalWk;
 use crate::ui::tree::edge::Edge;
 use crate::ui::tree::node::{NodeAttribute, NodeId, NodePtr};
 use crate::{geo_rect_as, geo_size_as};
@@ -84,6 +86,9 @@ pub mod node;
 ///    doesn't handle or process any input events, the UI keeps still and never changes.
 ///
 pub struct Tree {
+  // Terminal reference.
+  terminal: TerminalWk,
+
   // A collection of all nodes, maps from node ID to node struct.
   nodes: BTreeMap<NodeId, NodePtr>,
 
@@ -106,8 +111,9 @@ pub struct Tree {
 }
 
 impl Tree {
-  pub fn new() -> Tree {
+  pub fn new(terminal: TerminalWk) -> Tree {
     Tree {
+      terminal: terminal.clone(),
       nodes: BTreeMap::new(),
       edges: BTreeSet::new(),
       root_id: None,
@@ -178,6 +184,20 @@ impl Tree {
     }
     self.parent_ids.insert(id, parent_id);
     self.edges.insert(Edge::new(parent_id, id));
+    let actual_shape = match self.attributes.get(&parent_id) {
+      Some(parent_attribute) => conversion::to_actual_shape(shape, parent_attribute.actual_shape),
+      None => {
+        let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
+        let terminal_actual_shape = URect::new(
+          (0, 0),
+          (
+            terminal_size.width() as usize,
+            terminal_size.height() as usize,
+          ),
+        );
+        conversion::to_actual_shape(shape, terminal_actual_shape)
+      }
+    };
     self
       .attributes
       .insert(id, NodeAttribute::default(shape, actual_shape));
