@@ -542,8 +542,11 @@ mod tests {
     ];
     for c in children_ids.iter() {
       let actual = tree.get_children(c.0);
-      assert!(actual.is_some());
-      assert!(*actual.unwrap() == c.1);
+      if c.1.is_empty() {
+        assert!(actual.is_none());
+      } else {
+        assert!(*actual.unwrap() == c.1);
+      }
     }
     let parent_ids: Vec<(NodeId, NodeId)> = vec![
       (node_ids[1], node_ids[0]),
@@ -555,5 +558,7 @@ mod tests {
       assert!(actual.is_some());
       assert!(*actual.unwrap() == p.1);
     }
+    let window_ids: BTreeSet<NodeId> = [node_ids[1], node_ids[2]].iter().cloned().collect();
+    assert!(window_ids == *tree.get_window_ids());
   }
 }
