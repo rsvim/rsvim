@@ -25,6 +25,17 @@ impl Cursor {
   }
 }
 
+impl Default for Cursor {
+  fn default() -> Self {
+    Cursor {
+      id: uuid::next(),
+      blinking: true,
+      hidden: false,
+      style: CursorStyle::DefaultUserShape,
+    }
+  }
+}
+
 impl Widget for Cursor {
   fn id(&self) -> NodeId {
     self.id

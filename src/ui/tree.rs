@@ -9,9 +9,11 @@ use geo::point;
 use crate::cart::{conversion, IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
 use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
-use crate::ui::tree::edge::Edge;
-use crate::ui::tree::node::{Node, NodeAttribute, NodeId, NodePtr};
 use crate::ui::widget::Widget;
+
+// Re-export
+pub use crate::ui::tree::edge::Edge;
+pub use crate::ui::tree::node::{make_node_ptr, Node, NodeAttribute, NodeId, NodePtr};
 
 pub mod edge;
 pub mod node;
@@ -436,14 +438,17 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
+  use std::any::Any;
+
   use super::*;
   use crate::cart::{conversion, IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
-  use crate::ui::frame::cursor::Cursor;
+  use crate::ui::frame;
   use crate::ui::term::{make_terminal_ptr, Terminal};
+  use crate::ui::widget::{Cursor, RootWidget, Widget, Window};
 
   #[test]
   fn tree_new() {
-    let terminal = Terminal::new(U16Size::new(10, 10), Cursor::default());
+    let terminal = Terminal::new(U16Size::new(10, 10), frame::cursor::Cursor::default());
     let terminal = make_terminal_ptr(terminal);
 
     let tree = Tree::new(Arc::downgrade(&terminal));
@@ -454,5 +459,49 @@ mod tests {
     assert!(tree.get_root_id().is_none());
     assert!(tree.get_window_ids().is_empty());
     assert!(tree.get_attributes().is_empty());
+  }
+
+  #[test]
+  fn tree_insert() {
+    let terminal = Terminal::new(U16Size::new(10, 10), frame::cursor::Cursor::default());
+    let terminal = make_terminal_ptr(terminal);
+
+    let mut tree = Tree::new(Arc::downgrade(&terminal));
+
+    let n1 = RootWidget::new();
+    let n1 = make_node_ptr(Node::RootWidgetNode(n1));
+
+    let n2 = Window::default();
+    let n2 = make_node_ptr(Node::WindowNode(n2));
+
+    let n3 = Window::default();
+    let n3 = make_node_ptr(Node::WindowNode(n3));
+
+    let n4 = Cursor::default();
+    let n4 = make_node_ptr(Node::CursorNode(n4));
+
+    tree.insert_root_node(
+      n1.read().unwrap().id(),
+      n1.clone(),
+      terminal.read().unwrap().size(),
+    );
+    tree.insert_node(
+      n2.read().unwrap().id(),
+      n2.clone(),
+      n1.read().unwrap().id(),
+      IRect::new((0, 0), (10, 10)),
+    );
+    tree.insert_node(
+      n3.read().unwrap().id(),
+      n3.clone(),
+      n1.read().unwrap().id(),
+      IRect::new((0, 0), (10, 10)),
+    );
+    tree.insert_node(
+      n4.read().unwrap().id(),
+      n4.clone(),
+      n2.read().unwrap().id(),
+      IRect::new((0, 0), (1, 1)),
+    );
   }
 }

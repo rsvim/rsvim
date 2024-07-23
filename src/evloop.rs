@@ -2,6 +2,7 @@
 
 #![allow(unused_imports, dead_code)]
 use crate::cart::{IRect, U16Rect, U16Size, URect};
+use crate::ui::frame::CursorStyle;
 use crate::ui::term::{make_terminal_ptr, Terminal, TerminalPtr};
 use crate::ui::tree::node::{make_node_ptr, Node, NodeId};
 use crate::ui::tree::{make_tree_ptr, Tree, TreePtr};
@@ -9,7 +10,6 @@ use crate::ui::widget::Cursor;
 use crate::ui::widget::RootWidget;
 use crate::ui::widget::Widget;
 use crate::ui::widget::Window;
-use crossterm::cursor::SetCursorStyle;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode,
@@ -33,12 +33,11 @@ impl EventLoop {
     let size = U16Size::new(cols, rows);
     let screen = Terminal::new(size, Default::default());
     let screen = make_terminal_ptr(screen);
-    let tree = Tree::new(Arc::downgrade(&screen));
-    let tree = make_tree_ptr(tree);
+    let mut tree = Tree::new(Arc::downgrade(&screen));
 
     let root_widget = RootWidget::default();
     let root_widget_node = make_node_ptr(Node::RootWidgetNode(root_widget));
-    tree.write().unwrap().insert_root_node(
+    tree.insert_root_node(
       root_widget_node.read().unwrap().id(),
       root_widget_node.clone(),
       size,
@@ -46,24 +45,27 @@ impl EventLoop {
     let window = Window::default();
     let window_node = make_node_ptr(Node::WindowNode(window));
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
-    tree.write().unwrap().insert_node(
+    tree.insert_node(
       window_node.read().unwrap().id(),
       window_node.clone(),
       root_widget_node.read().unwrap().id(),
       window_shape,
     );
 
-    let cursor = Cursor::new(true, false, SetCursorStyle::DefaultUserShape);
+    let cursor = Cursor::default();
     let cursor_node = make_node_ptr(Node::CursorNode(cursor));
     let cursor_shape = IRect::new((0, 0), (1, 1));
-    tree.write().unwrap().insert_node(
+    tree.insert_node(
       cursor_node.read().unwrap().id(),
       cursor_node.clone(),
       window_node.read().unwrap().id(),
       cursor_shape,
     );
 
-    Ok(EventLoop { screen, tree })
+    Ok(EventLoop {
+      screen,
+      tree: make_tree_ptr(tree),
+    })
   }
 
   pub async fn init(&self) -> IoResult<()> {
