@@ -438,8 +438,6 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  use std::any::Any;
-
   use super::*;
   use crate::cart::{conversion, IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
   use crate::ui::frame;
@@ -512,5 +510,26 @@ mod tests {
     assert!(tree.get_root_id().unwrap() == n1.read().unwrap().id());
     assert!(tree.get_window_ids().len() == 2);
     assert!(tree.get_attributes().len() == 4);
+
+    let node_ids: Vec<NodeId> = [n1, n2, n3, n4]
+      .iter()
+      .map(|node| node.read().unwrap().id())
+      .collect();
+    for i in node_ids.iter() {
+      let actual = tree.get_node(*i);
+      assert!(actual.is_some());
+      assert!(actual.unwrap().read().unwrap().id() == *i);
+    }
+    let edges: Vec<Edge> = vec![
+      Edge::new(node_ids[0], node_ids[1]),
+      Edge::new(node_ids[0], node_ids[2]),
+      Edge::new(node_ids[1], node_ids[3]),
+    ];
+    for e in edges.iter() {
+      let actual = tree.get_edge(e.from, e.to);
+      assert!(actual.is_some());
+      assert!(actual.unwrap().from == e.from);
+      assert!(actual.unwrap().to == e.to);
+    }
   }
 }
