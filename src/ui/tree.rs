@@ -110,10 +110,10 @@ pub struct Tree {
   // Maps "parent ID" => its "children IDs".
   //
   // Note: A parent can have multiple children.
-  children_ids: BTreeMap<NodeId, HashSet<NodeId>>,
+  children_ids: HashMap<NodeId, HashSet<NodeId>>,
 
   // Maps "child ID" => its "parent ID".
-  parent_ids: BTreeMap<NodeId, NodeId>,
+  parent_ids: HashMap<NodeId, NodeId>,
 }
 
 pub type TreePtr = Arc<RwLock<Tree>>;
@@ -131,13 +131,17 @@ impl Tree {
       edges: BTreeSet::new(),
       root_id: None,
       window_ids: BTreeSet::new(),
-      children_ids: BTreeMap::new(),
-      parent_ids: BTreeMap::new(),
+      children_ids: HashMap::new(),
+      parent_ids: HashMap::new(),
       attributes: HashMap::new(),
     }
   }
 
   // Node {
+
+  pub fn get_nodes(&self) -> &BTreeMap<NodeId, NodePtr> {
+    &self.nodes
+  }
 
   /// Get node by its ID.
   ///
@@ -149,7 +153,7 @@ impl Tree {
   /// Get the root node ID.
   ///
   /// Returns the root node ID if exists, returns `None` if not.
-  pub fn get_root_node(&self) -> Option<NodeId> {
+  pub fn get_root_id(&self) -> Option<NodeId> {
     self.root_id
   }
 
@@ -266,6 +270,10 @@ impl Tree {
 
   // Edge {
 
+  pub fn get_edges(&self) -> &BTreeSet<Edge> {
+    &self.edges
+  }
+
   /// Get edge by the `from` node ID and the `to` node ID.
   ///
   /// Returns the edge if exists, returns `None` if not.
@@ -276,6 +284,14 @@ impl Tree {
   // Edge }
 
   // Parent-Children Relationship {
+
+  pub fn get_children_ids(&self) -> &HashMap<NodeId, HashSet<NodeId>> {
+    &self.children_ids
+  }
+
+  pub fn get_parent_ids(&self) -> &HashMap<NodeId, NodeId> {
+    &self.parent_ids
+  }
 
   pub fn get_children(&self, parent_id: NodeId) -> Option<&HashSet<NodeId>> {
     self.children_ids.get(&parent_id)
@@ -289,13 +305,17 @@ impl Tree {
 
   // Window Nodes {
 
-  pub fn get_windows(&self) -> &BTreeSet<NodeId> {
+  pub fn get_window_ids(&self) -> &BTreeSet<NodeId> {
     &self.window_ids
   }
 
   // Window Nodes }
 
   // Attribute {
+
+  pub fn get_attributes(&self) -> &HashMap<NodeId, NodeAttribute> {
+    &self.attributes
+  }
 
   pub fn get_shape(&self, id: NodeId) -> Option<&IRect> {
     match self.attributes.get(&id) {
@@ -412,4 +432,27 @@ impl Tree {
   }
 
   // Attribute }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::cart::{conversion, IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
+  use crate::ui::frame::cursor::Cursor;
+  use crate::ui::term::{make_terminal_ptr, Terminal};
+
+  #[test]
+  fn tree_new() {
+    let terminal = Terminal::new(U16Size::new(10, 10), Cursor::default());
+    let terminal = make_terminal_ptr(terminal);
+
+    let tree = Tree::new(Arc::downgrade(&terminal));
+    assert!(tree.get_nodes().is_empty());
+    assert!(tree.get_edges().is_empty());
+    assert!(tree.get_children_ids().is_empty());
+    assert!(tree.get_parent_ids().is_empty());
+    assert!(tree.get_root_id().is_none());
+    assert!(tree.get_window_ids().is_empty());
+    assert!(tree.get_attributes().is_empty());
+  }
 }
