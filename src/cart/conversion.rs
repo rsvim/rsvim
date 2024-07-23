@@ -69,10 +69,10 @@ mod tests {
           let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
           let expect = U16Rect::new((0, 0), (min(t.max().x, p) as u16, min(t.max().y, q) as u16));
           let actual = to_actual_shape(*t, input_actual_parent_shape);
-          println!(
-            "cart::conversion::tests::convert_to_actual_shapes expect:{:?}, actual:{:?}",
-            expect, actual
-          );
+          // println!(
+          //   "cart::conversion::tests::convert_to_actual_shapes expect:{:?}, actual:{:?}",
+          //   expect, actual
+          // );
           assert_eq!(actual, expect);
         }
       }

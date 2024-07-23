@@ -9,7 +9,7 @@ use crate::ui::widget::Widget;
 use crate::uuid;
 
 /// The VIM window.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Window {
   id: NodeId,
   lines: Vec<CompactString>,

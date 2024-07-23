@@ -10,7 +10,7 @@ use std::vec::Splice;
 
 // Re-export
 pub use crate::ui::frame::cell::Cell;
-pub use crate::ui::frame::cursor::{Cursor, CursorStyle};
+pub use crate::ui::frame::cursor::{Cursor, CursorStyle, CursorStyleFormatter};
 
 #[derive(Debug, Clone)]
 /// Rendering buffer & cursor for the whole terminal.

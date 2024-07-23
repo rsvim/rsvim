@@ -503,5 +503,14 @@ mod tests {
       n2.read().unwrap().id(),
       IRect::new((0, 0), (1, 1)),
     );
+
+    println!("ui::tree::tree_insert get_nodes:{:?}", tree.get_nodes());
+    assert!(tree.get_nodes().len() == 4);
+    assert!(tree.get_edges().len() == 3);
+    assert!(tree.get_children_ids().len() == 2);
+    assert!(tree.get_parent_ids().is_empty());
+    assert!(tree.get_root_id().is_none());
+    assert!(tree.get_window_ids().is_empty());
+    assert!(tree.get_attributes().is_empty());
   }
 }
