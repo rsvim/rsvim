@@ -504,7 +504,7 @@ mod tests {
       IRect::new((0, 0), (1, 1)),
     );
 
-    println!("ui::tree::tree_insert get_nodes:{:?}", tree.get_nodes());
+    // println!("ui::tree::tree_insert get_nodes:{:?}", tree.get_nodes());
     assert!(tree.get_nodes().len() == 4);
     assert!(tree.get_edges().len() == 3);
     assert!(tree.get_children_ids().len() == 2);
