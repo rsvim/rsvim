@@ -52,7 +52,7 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
 mod tests {
   use super::*;
   use crate::cart::{IRect, U16Rect};
-  use std::cmp::max;
+  use std::cmp::min;
 
   #[test]
   fn convert_to_actual_shapes() {
@@ -67,8 +67,12 @@ mod tests {
       for p in 0..10 {
         for q in 0..10 {
           let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
-          let expect = U16Rect::new((0, 0), (max(t.max().x, p) as u16, max(t.max().y, q) as u16));
+          let expect = U16Rect::new((0, 0), (min(t.max().x, p) as u16, min(t.max().y, q) as u16));
           let actual = to_actual_shape(*t, input_actual_parent_shape);
+          println!(
+            "cart::conversion::tests::convert_to_actual_shapes expect:{:?}, actual:{:?}",
+            expect, actual
+          );
           assert_eq!(actual, expect);
         }
       }
