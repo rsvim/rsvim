@@ -49,7 +49,7 @@ pub mod node;
 ///    * For children that shade each other, the one with higher z-index has higher priority to
 ///      display and process the input events.
 ///
-/// A widget also has several attributes:
+/// A widget has several attributes:
 ///
 /// 1. Shape, i.e. position and size.
 ///
