@@ -85,6 +85,7 @@ impl Frame {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crossterm::style::{Attributes, Color};
 
   #[test]
   fn should_equal_on_cell_default() {

@@ -2,7 +2,8 @@
 
 use compact_str::CompactString;
 
-use crate::cart::IRect;
+use crate::cart::U16Rect;
+use crate::ui::term::TerminalWk;
 use crate::ui::tree::node::NodeId;
 use crate::ui::widget::Widget;
 use crate::uuid;
@@ -50,4 +51,6 @@ impl Widget for Window {
   fn id(&self) -> NodeId {
     self.id
   }
+
+  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {}
 }
