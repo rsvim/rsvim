@@ -394,6 +394,7 @@ impl Tree {
     self.attributes.get(&id).map(|attr| attr.shape.min().into())
   }
 
+  /// Set the position of a node.
   pub fn set_pos(&mut self, id: NodeId, pos: IPos) -> Option<IPos> {
     match self.attributes.get_mut(&id) {
       Some(attr) => {
@@ -409,10 +410,12 @@ impl Tree {
     }
   }
 
+  /// Get the size of a node.
   pub fn get_size(&self, id: NodeId) -> Option<ISize> {
     self.attributes.get(&id).map(|attr| ISize::from(attr.shape))
   }
 
+  /// Set the size of a node.
   pub fn set_size(&mut self, id: NodeId, size: ISize) -> Option<ISize> {
     match self.attributes.get_mut(&id) {
       Some(attr) => {
@@ -429,6 +432,7 @@ impl Tree {
     }
   }
 
+  /// Get the actual shape of a node.
   pub fn get_actual_shape(&self, id: NodeId) -> Option<&U16Rect> {
     match self.attributes.get(&id) {
       Some(attr) => Some(&attr.actual_shape),
@@ -436,6 +440,7 @@ impl Tree {
     }
   }
 
+  /// Get the actual position of a node.
   pub fn get_actual_pos(&self, id: NodeId) -> Option<U16Pos> {
     self
       .attributes
@@ -443,6 +448,7 @@ impl Tree {
       .map(|attr| attr.actual_shape.min().into())
   }
 
+  /// Get the actual size of a node.
   pub fn get_actual_size(&self, id: NodeId) -> Option<U16Size> {
     self
       .attributes
@@ -454,6 +460,7 @@ impl Tree {
 
   // Draw {
 
+  /// Draw the widget tree to terminal device.
   pub fn draw(&mut self) {}
 
   // Draw }
