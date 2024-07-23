@@ -5,10 +5,10 @@ use crate::cart::{IRect, U16Rect, U16Size, URect};
 use crate::ui::term::{make_terminal_ptr, Terminal, TerminalPtr};
 use crate::ui::tree::node::{make_node_ptr, Node, NodeId};
 use crate::ui::tree::{make_tree_ptr, Tree, TreePtr};
-use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::root::RootWidget;
-use crate::ui::widget::window::Window;
+use crate::ui::widget::Cursor;
+use crate::ui::widget::RootWidget;
 use crate::ui::widget::Widget;
+use crate::ui::widget::Window;
 use crossterm::cursor::SetCursorStyle;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
