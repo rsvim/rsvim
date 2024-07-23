@@ -67,10 +67,7 @@ mod tests {
       for p in 0..10 {
         for q in 0..10 {
           let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
-          let expect = URect::new(
-            (0, 0),
-            (max(t.max().x, p) as usize, max(t.max().y, q) as usize),
-          );
+          let expect = U16Rect::new((0, 0), (max(t.max().x, p) as u16, max(t.max().y, q) as u16));
           let actual = to_actual_shape(*t, input_actual_parent_shape);
           assert_eq!(actual, expect);
         }
