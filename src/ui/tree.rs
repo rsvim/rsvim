@@ -137,10 +137,7 @@ impl Tree {
   ///
   /// Returns the node if exists, returns `None` if not.
   pub fn get_node(&self, id: NodeId) -> Option<NodePtr> {
-    match self.nodes.get(&id) {
-      Some(node) => Some(node.clone()),
-      None => None,
-    }
+    self.nodes.get(&id).cloned()
   }
 
   /// Get the root node ID.
@@ -294,39 +291,31 @@ impl Tree {
     let mut que: VecDeque<NodeId> = VecDeque::new();
     que.push_back(start_id);
 
-    loop {
-      match que.pop_front() {
-        Some(id) => {
-          let shape = self.attributes.get(&id).unwrap().shape;
-          let actual_shape = match self.parent_ids.get_mut(&id) {
-            Some(parent_id) => {
-              let parent_actual_shape = self.attributes.get(&parent_id).unwrap().actual_shape;
-              conversion::to_actual_shape(shape, parent_actual_shape)
-            }
-            None => {
-              let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
-              let terminal_actual_shape: U16Rect =
-                U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-              conversion::to_actual_shape(shape, terminal_actual_shape)
-            }
-          };
-          self.attributes.get_mut(&id).unwrap().actual_shape = actual_shape;
+    while let Some(id) = que.pop_front() {
+      let shape = self.attributes.get(&id).unwrap().shape;
+      let actual_shape = match self.parent_ids.get_mut(&id) {
+        Some(parent_id) => {
+          let parent_actual_shape = self.attributes.get(&parent_id).unwrap().actual_shape;
+          conversion::to_actual_shape(shape, parent_actual_shape)
+        }
+        None => {
+          let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
+          let terminal_actual_shape: U16Rect =
+            U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
+          conversion::to_actual_shape(shape, terminal_actual_shape)
+        }
+      };
+      self.attributes.get_mut(&id).unwrap().actual_shape = actual_shape;
 
-          // Add all children of `id` to the queue.
-          match self.children_ids.get(&id) {
-            Some(children_ids) => {
-              for child_id in children_ids.iter() {
-                que.push_back(*child_id);
-              }
-            }
-            None => {
-              // Do nothing
-            }
+      // Add all children of `id` to the queue.
+      match self.children_ids.get(&id) {
+        Some(children_ids) => {
+          for child_id in children_ids.iter() {
+            que.push_back(*child_id);
           }
         }
         None => {
-          // No more nodes.
-          break;
+          // Do nothing
         }
       }
     }
