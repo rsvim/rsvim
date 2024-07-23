@@ -561,4 +561,48 @@ mod tests {
     let window_ids: BTreeSet<NodeId> = [node_ids[1], node_ids[2]].iter().cloned().collect();
     assert!(window_ids == *tree.get_window_ids());
   }
+
+  #[test]
+  fn tree_shape() {
+    let terminal = Terminal::new(U16Size::new(10, 10), frame::cursor::Cursor::default());
+    let terminal = make_terminal_ptr(terminal);
+
+    let mut tree = Tree::new(Arc::downgrade(&terminal));
+
+    let n1 = RootWidget::new();
+    let n1 = make_node_ptr(Node::RootWidgetNode(n1));
+
+    let n2 = Window::default();
+    let n2 = make_node_ptr(Node::WindowNode(n2));
+
+    let n3 = Window::default();
+    let n3 = make_node_ptr(Node::WindowNode(n3));
+
+    let n4 = Cursor::default();
+    let n4 = make_node_ptr(Node::CursorNode(n4));
+
+    tree.insert_root_node(
+      n1.read().unwrap().id(),
+      n1.clone(),
+      terminal.read().unwrap().size(),
+    );
+    tree.insert_node(
+      n2.read().unwrap().id(),
+      n2.clone(),
+      n1.read().unwrap().id(),
+      IRect::new((0, 0), (10, 10)),
+    );
+    tree.insert_node(
+      n3.read().unwrap().id(),
+      n3.clone(),
+      n1.read().unwrap().id(),
+      IRect::new((0, 0), (10, 10)),
+    );
+    tree.insert_node(
+      n4.read().unwrap().id(),
+      n4.clone(),
+      n2.read().unwrap().id(),
+      IRect::new((0, 0), (1, 1)),
+    );
+  }
 }
