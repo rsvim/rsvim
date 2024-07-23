@@ -1,0 +1,6 @@
+{
+  // Line length
+  "MD013": false,
+  // Fenced code blocks should have a language specified
+  "MD040": false,
+}
