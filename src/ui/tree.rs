@@ -531,5 +531,29 @@ mod tests {
       assert!(actual.unwrap().from == e.from);
       assert!(actual.unwrap().to == e.to);
     }
+    let children_ids: Vec<(NodeId, HashSet<NodeId>)> = vec![
+      (
+        node_ids[0],
+        [node_ids[1], node_ids[2]].iter().cloned().collect(),
+      ),
+      (node_ids[1], [node_ids[3]].iter().cloned().collect()),
+      (node_ids[2], [].iter().cloned().collect()),
+      (node_ids[3], [].iter().cloned().collect()),
+    ];
+    for c in children_ids.iter() {
+      let actual = tree.get_children(c.0);
+      assert!(actual.is_some());
+      assert!(*actual.unwrap() == c.1);
+    }
+    let parent_ids: Vec<(NodeId, NodeId)> = vec![
+      (node_ids[1], node_ids[0]),
+      (node_ids[2], node_ids[0]),
+      (node_ids[3], node_ids[1]),
+    ];
+    for p in parent_ids.iter() {
+      let actual = tree.get_parent(p.0);
+      assert!(actual.is_some());
+      assert!(*actual.unwrap() == p.1);
+    }
   }
 }
