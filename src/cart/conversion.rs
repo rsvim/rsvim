@@ -51,6 +51,7 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
 #[cfg(test)]
 mod tests {
   use super::*;
+  use crate::cart::{IRect, U16Rect, URect};
   use std::cmp::max;
 
   #[test]
