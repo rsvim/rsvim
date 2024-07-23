@@ -17,6 +17,12 @@ impl RootWidget {
   }
 }
 
+impl Default for RootWidget {
+  fn default() -> Self {
+    RootWidget { id: uuid::next() }
+  }
+}
+
 impl Widget for RootWidget {
   fn id(&self) -> NodeId {
     self.id

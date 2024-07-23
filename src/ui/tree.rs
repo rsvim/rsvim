@@ -295,7 +295,7 @@ impl Tree {
       let shape = self.attributes.get(&id).unwrap().shape;
       let actual_shape = match self.parent_ids.get_mut(&id) {
         Some(parent_id) => {
-          let parent_actual_shape = self.attributes.get(&parent_id).unwrap().actual_shape;
+          let parent_actual_shape = self.attributes.get(parent_id).unwrap().actual_shape;
           conversion::to_actual_shape(shape, parent_actual_shape)
         }
         None => {

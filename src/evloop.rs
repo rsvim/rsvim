@@ -36,7 +36,7 @@ impl EventLoop {
     let tree = Tree::new(Arc::downgrade(&screen));
     let tree = make_tree_ptr(tree);
 
-    let root_widget = RootWidget::new();
+    let root_widget = RootWidget::default();
     let root_widget_node = make_node_ptr(Node::RootWidgetNode(root_widget));
     tree.write().unwrap().insert_root_node(
       root_widget_node.read().unwrap().id(),
