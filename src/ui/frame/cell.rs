@@ -88,7 +88,7 @@ impl Default for Cell {
   /// Make cell with a whitespace and no color, empty attributes.
   fn default() -> Self {
     Cell {
-      symbol: CompactString::new_inline(" "),
+      symbol: CompactString::const_new(" "),
       fg: Color::Reset,
       bg: Color::Reset,
       attrs: Attributes::default(),
