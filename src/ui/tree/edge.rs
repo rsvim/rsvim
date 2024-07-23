@@ -25,9 +25,7 @@ impl Edge {
 
 impl PartialOrd for Edge {
   fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-    let h1 = self.hash_str();
-    let h2 = other.hash_str();
-    h1.partial_cmp(&h2)
+    Some(self.cmp(other))
   }
 }
 

@@ -36,34 +36,31 @@ impl EventLoop {
     let tree = Tree::new(Arc::downgrade(&screen));
     let tree = make_tree_ptr(tree);
 
-    let root_widget = RootWidget::new(size);
+    let root_widget = RootWidget::new();
     let root_widget_node = make_node_ptr(Node::RootWidgetNode(root_widget));
-    tree.read().unwrap().insert_root_node(
+    tree.write().unwrap().insert_root_node(
       root_widget_node.read().unwrap().id(),
       root_widget_node.clone(),
+      size,
     );
-    let window = Window::new(
-      IRect::new((0, 0), (size.width() as isize, size.height() as isize)),
-      0,
-    );
+    let window = Window::default();
     let window_node = make_node_ptr(Node::WindowNode(window));
-    tree.read().unwrap().insert_node(
+    let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
+    tree.write().unwrap().insert_node(
       window_node.read().unwrap().id(),
       window_node.clone(),
       root_widget_node.read().unwrap().id(),
+      window_shape,
     );
 
-    let cursor = Cursor::new(
-      point!(x:0,y:0),
-      true,
-      false,
-      SetCursorStyle::DefaultUserShape,
-    );
+    let cursor = Cursor::new(true, false, SetCursorStyle::DefaultUserShape);
     let cursor_node = make_node_ptr(Node::CursorNode(cursor));
-    tree.read().unwrap().insert_node(
+    let cursor_shape = IRect::new((0, 0), (1, 1));
+    tree.write().unwrap().insert_node(
       cursor_node.read().unwrap().id(),
       cursor_node.clone(),
       window_node.read().unwrap().id(),
+      cursor_shape,
     );
 
     Ok(EventLoop { screen, tree })
@@ -72,7 +69,7 @@ impl EventLoop {
   pub async fn init(&self) -> IoResult<()> {
     let mut out = std::io::stdout();
 
-    let cursor = self.screen.frame().cursor;
+    let cursor = self.screen.read().unwrap().frame().cursor;
     if cursor.blinking {
       queue!(out, termcursor::EnableBlinking)?;
     } else {

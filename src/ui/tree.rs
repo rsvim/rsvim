@@ -6,7 +6,7 @@ use std::sync::{Arc, RwLock, Weak};
 
 use geo::point;
 
-use crate::cart::{conversion, IRect, U16Rect, URect, USize};
+use crate::cart::{conversion, IRect, U16Rect, U16Size};
 use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::edge::Edge;
@@ -157,11 +157,16 @@ impl Tree {
   /// # Panics
   ///
   /// Panics if there's already a root node.
-  pub fn insert_root_node(&mut self, id: NodeId, node: NodePtr, size: USize) -> Option<NodePtr> {
+  pub fn insert_root_node(
+    &mut self,
+    id: NodeId,
+    node: NodePtr,
+    terminal_size: U16Size,
+  ) -> Option<NodePtr> {
     assert!(self.root_id.is_none());
     self.root_id = Some(id);
     let result = self.nodes.insert(id, node.clone());
-    let actual_shape = URect::new(point!(x:0,y:0), point!(x:size.width(), y:size.height()));
+    let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let shape = geo_rect_as!(actual_shape, isize);
     self
       .attributes

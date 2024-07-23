@@ -3,6 +3,7 @@
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::cart::{IRect, U16Rect};
+use crate::ui::term::TerminalWk;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootWidget;
 use crate::ui::widget::window::Window;
@@ -45,11 +46,11 @@ impl Widget for Node {
     }
   }
 
-  fn draw(&mut self) {
+  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {
     match self {
-      Self::RootWidgetNode(node) => node.draw(),
-      Self::CursorNode(node) => node.draw(),
-      Self::WindowNode(node) => node.draw(),
+      Self::RootWidgetNode(node) => node.draw(actual_shape, terminal.clone()),
+      Self::CursorNode(node) => node.draw(actual_shape, terminal.clone()),
+      Self::WindowNode(node) => node.draw(actual_shape, terminal.clone()),
     }
   }
 }

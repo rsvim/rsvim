@@ -9,16 +9,17 @@ use crate::ui::widget::Widget;
 use crate::uuid;
 
 /// The VIM window.
+#[derive(Clone)]
 pub struct Window {
   id: NodeId,
   lines: Vec<CompactString>,
 }
 
 impl Window {
-  pub fn new() -> Self {
+  pub fn new(lines: Vec<CompactString>) -> Self {
     Window {
       id: uuid::next(),
-      lines: vec![],
+      lines,
     }
   }
 
@@ -47,10 +48,19 @@ impl Window {
   }
 }
 
+impl Default for Window {
+  fn default() -> Self {
+    Window {
+      id: uuid::next(),
+      lines: vec![],
+    }
+  }
+}
+
 impl Widget for Window {
   fn id(&self) -> NodeId {
     self.id
   }
 
-  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {}
+  fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {}
 }
