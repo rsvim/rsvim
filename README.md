@@ -1,8 +1,6 @@
-<h1>
-  <p align="center">
-    <img alt="logo.svg" src="https://raw.githubusercontent.com/rsvim/assets/main/logo/RSVIM-logo-helsinki-square-v2.svg" />
-  </p>
-</h1>
+<p align="center">
+  <img alt="logo.svg" src="https://raw.githubusercontent.com/rsvim/assets/main/logo/RSVIM-logo-helsinki-square-v2.svg" />
+</p>
 
 > The VIM editor reinvented in Rust+Typescript.
 
