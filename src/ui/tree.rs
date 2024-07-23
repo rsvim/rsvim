@@ -10,11 +10,8 @@ use crate::cart::{conversion, IRect, U16Rect, U16Size};
 use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::edge::Edge;
-use crate::ui::tree::node::{NodeAttribute, NodeId, NodePtr};
-
-use self::node::Node;
-
-use super::widget::Widget;
+use crate::ui::tree::node::{Node, NodeAttribute, NodeId, NodePtr};
+use crate::ui::widget::Widget;
 
 pub mod edge;
 pub mod node;
