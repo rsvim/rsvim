@@ -37,7 +37,7 @@ heed = "0.20.2"
 tempfile = "3"
 lazy_static = "1.5.0"
 bytes = { version = "1", features = ["serde"] }
-compact_str = { version = "0.7.1", features = ["serde", "bytes"] }
+compact_str = { version = "0.8.0", features = ["serde", "bytes"] }
 ropey = "1.6.1"
 geo = "0.28.0"
 num-traits = "0.2.19"
