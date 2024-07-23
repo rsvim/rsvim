@@ -1,0 +1,5 @@
+[default]
+extend-ignore-words-re = [
+  # Valid words
+  "visibles",
+]

@@ -1,105 +1,66 @@
-//! The Vim window.
+//! The VIM Window.
 
-use crate::geo::{IRect, URect};
-use crate::ui::term::Terminal;
-use crate::ui::widget::{ChildWidgetsRw, Widget, WidgetRw};
+use compact_str::CompactString;
+
+use crate::cart::U16Rect;
+use crate::ui::term::TerminalWk;
+use crate::ui::tree::node::NodeId;
+use crate::ui::widget::Widget;
 use crate::uuid;
-use geo::coord;
-use std::sync::{Arc, RwLock};
 
-/// The Vim window.
+/// The VIM window.
+#[derive(Clone)]
 pub struct Window {
-  parent: WidgetRw,
-  id: usize,
-  rect: IRect,
-  abs_rect: URect,
-  zindex: usize,
-  visible: bool,
-  enabled: bool,
+  id: NodeId,
+  lines: Vec<CompactString>,
 }
 
 impl Window {
-  pub fn new(rect: IRect, parent: WidgetRw) -> Self {
+  pub fn new(lines: Vec<CompactString>) -> Self {
     Window {
       id: uuid::next(),
-      rect,
-      abs_rect: URect::new(coord! {x:0,y:0}, coord! {x:0,y:0}),
-      zindex: uuid::next(),
-      visible: true,
-      enabled: true,
-      parent: parent.clone(),
+      lines,
+    }
+  }
+
+  pub fn lines(&self) -> &Vec<CompactString> {
+    &self.lines
+  }
+
+  pub fn lines_mut(&mut self) -> &mut Vec<CompactString> {
+    &mut self.lines
+  }
+
+  pub fn set_lines(&mut self, lines: Vec<CompactString>) {
+    self.lines = lines;
+  }
+
+  pub fn line(&self, index: usize) -> &CompactString {
+    &self.lines[index]
+  }
+
+  pub fn line_mut(&mut self, index: usize) -> &mut CompactString {
+    &mut self.lines[index]
+  }
+
+  pub fn set_line(&mut self, index: usize, line: CompactString) {
+    self.lines[index] = line;
+  }
+}
+
+impl Default for Window {
+  fn default() -> Self {
+    Window {
+      id: uuid::next(),
+      lines: vec![],
     }
   }
 }
 
 impl Widget for Window {
-  fn id(&self) -> usize {
+  fn id(&self) -> NodeId {
     self.id
   }
 
-  fn rect(&self) -> IRect {
-    self.rect
-  }
-
-  fn set_rect(&mut self, rect: IRect) {
-    self.rect = rect;
-  }
-
-  fn abs_rect(&self) -> URect {
-    self.abs_rect
-  }
-
-  fn set_abs_rect(&mut self, rect: URect) {
-    self.abs_rect = rect;
-  }
-
-  fn zindex(&self) -> usize {
-    self.zindex
-  }
-
-  fn set_zindex(&mut self, value: usize) {
-    self.zindex = value;
-  }
-
-  fn visible(&self) -> bool {
-    self.visible
-  }
-
-  fn set_visible(&mut self, value: bool) {
-    self.visible = value;
-  }
-
-  fn enabled(&self) -> bool {
-    self.enabled
-  }
-
-  fn set_enabled(&mut self, value: bool) {
-    self.enabled = value;
-  }
-
-  fn parent(&self) -> Option<WidgetRw> {
-    Some(self.parent.clone())
-  }
-
-  fn set_parent(&mut self, parent: Option<WidgetRw>) {
-    if let Some(p) = parent {
-      self.parent = p;
-    }
-  }
-
-  fn children(&self) -> ChildWidgetsRw {
-    Arc::new(RwLock::new(vec![]))
-  }
-
-  fn find_children(&self, _id: usize) -> Option<WidgetRw> {
-    None
-  }
-
-  fn find_direct_children(&self, _id: usize) -> Option<WidgetRw> {
-    None
-  }
-
-  fn draw(&self, _terminal: &mut Terminal) {
-    todo!();
-  }
+  fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {}
 }

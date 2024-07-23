@@ -1,7 +1,9 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
-use crate::geo::U16Size;
-use crate::ui::frame::{Cursor, Frame};
+use std::sync::{Arc, RwLock, Weak};
+
+use crate::cart::U16Size;
+use crate::ui::frame::{Cell, Cursor, Frame};
 use crossterm::cursor as termcursor;
 use crossterm::event::{Event, KeyCode};
 use tracing::debug;
@@ -12,6 +14,13 @@ pub struct Terminal {
   prev_frame: Frame,
 }
 
+pub type TerminalPtr = Arc<RwLock<Terminal>>;
+pub type TerminalWk = Weak<RwLock<Terminal>>;
+
+pub fn make_terminal_ptr(t: Terminal) -> Arc<RwLock<Terminal>> {
+  Arc::new(RwLock::new(t))
+}
+
 impl Terminal {
   pub fn new(size: U16Size, cursor: Cursor) -> Self {
     Terminal {
@@ -19,6 +28,8 @@ impl Terminal {
       frame: Frame::new(size, cursor),
     }
   }
+
+  // Current frame {
 
   pub fn frame(&self) -> &Frame {
     &self.frame
@@ -28,9 +39,51 @@ impl Terminal {
     &mut self.frame
   }
 
+  pub fn size(&self) -> U16Size {
+    self.frame.size
+  }
+
+  pub fn set_size(&mut self, size: U16Size) {
+    self.frame.size = size;
+  }
+
+  pub fn cells(&self) -> &Vec<Cell> {
+    &self.frame.cells
+  }
+
+  pub fn cells_mut(&mut self) -> &mut Vec<Cell> {
+    &mut self.frame.cells
+  }
+
+  pub fn cursor(&self) -> &Cursor {
+    &self.frame.cursor
+  }
+
+  pub fn cursor_mut(&mut self) -> &mut Cursor {
+    &mut self.frame.cursor
+  }
+
+  // Current frame }
+
+  // Previous frame {
+
   pub fn prev_frame(&self) -> &Frame {
     &self.prev_frame
   }
+
+  pub fn prev_size(&self) -> U16Size {
+    self.prev_frame.size
+  }
+
+  pub fn prev_cells(&self) -> &Vec<Cell> {
+    &self.prev_frame.cells
+  }
+
+  pub fn prev_cursor(&self) -> &Cursor {
+    &self.prev_frame.cursor
+  }
+
+  // Previous frame }
 
   /// Accept a terminal (keyboard/mouse) event.
   /// Returns `true` if continue event loop, `false` if quit.

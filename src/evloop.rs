@@ -1,54 +1,75 @@
 //! Main event loop for TUI application.
 
 #![allow(unused_imports, dead_code)]
-use crate::geo::{U16Rect, U16Size, USize};
-use crate::ui::frame::Cursor;
-use crate::ui::term::Terminal;
-use crate::ui::widget::root::RootWidget;
+use crate::cart::{IRect, U16Rect, U16Size, URect};
+use crate::ui::term::{make_terminal_ptr, Terminal, TerminalPtr};
+use crate::ui::tree::node::{make_node_ptr, Node, NodeId};
+use crate::ui::tree::{make_tree_ptr, Tree, TreePtr};
+use crate::ui::widget::Cursor;
+use crate::ui::widget::RootWidget;
+use crate::ui::widget::Widget;
+use crate::ui::widget::Window;
+use crossterm::cursor::SetCursorStyle;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode,
 };
 use crossterm::{cursor as termcursor, queue, terminal};
 use futures::StreamExt;
-use geo::coord;
+use geo::point;
 use heed::types::U16;
 use std::io::{Result as IoResult, Write};
+use std::sync::{Arc, RwLock};
 use tracing::debug;
 
 pub struct EventLoop {
-  screen: Terminal,
-  root_widget: RootWidget,
+  screen: TerminalPtr,
+  tree: TreePtr,
 }
 
 impl EventLoop {
   pub async fn new() -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
     let size = U16Size::new(cols, rows);
-    let cursor = Cursor::default();
-    let screen = Terminal::new(size, cursor);
-    let root_widget = RootWidget::new(USize::new(size.height as usize, size.width as usize));
-    Ok(EventLoop {
-      screen,
-      root_widget,
-    })
+    let screen = Terminal::new(size, Default::default());
+    let screen = make_terminal_ptr(screen);
+    let tree = Tree::new(Arc::downgrade(&screen));
+    let tree = make_tree_ptr(tree);
+
+    let root_widget = RootWidget::default();
+    let root_widget_node = make_node_ptr(Node::RootWidgetNode(root_widget));
+    tree.write().unwrap().insert_root_node(
+      root_widget_node.read().unwrap().id(),
+      root_widget_node.clone(),
+      size,
+    );
+    let window = Window::default();
+    let window_node = make_node_ptr(Node::WindowNode(window));
+    let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
+    tree.write().unwrap().insert_node(
+      window_node.read().unwrap().id(),
+      window_node.clone(),
+      root_widget_node.read().unwrap().id(),
+      window_shape,
+    );
+
+    let cursor = Cursor::new(true, false, SetCursorStyle::DefaultUserShape);
+    let cursor_node = make_node_ptr(Node::CursorNode(cursor));
+    let cursor_shape = IRect::new((0, 0), (1, 1));
+    tree.write().unwrap().insert_node(
+      cursor_node.read().unwrap().id(),
+      cursor_node.clone(),
+      window_node.read().unwrap().id(),
+      cursor_shape,
+    );
+
+    Ok(EventLoop { screen, tree })
   }
 
   pub async fn init(&self) -> IoResult<()> {
-    if !terminal::is_raw_mode_enabled()? {
-      terminal::enable_raw_mode()?;
-    }
-
     let mut out = std::io::stdout();
-    queue!(
-      out,
-      terminal::EnterAlternateScreen,
-      terminal::Clear(terminal::ClearType::All),
-      EnableMouseCapture,
-      EnableFocusChange
-    )?;
 
-    let cursor = self.screen.frame().cursor;
+    let cursor = self.screen.read().unwrap().frame().cursor;
     if cursor.blinking {
       queue!(out, termcursor::EnableBlinking)?;
     } else {
@@ -102,23 +123,5 @@ impl EventLoop {
 
     // continue loop
     true
-  }
-
-  pub async fn shutdown(&self) -> IoResult<()> {
-    let mut out = std::io::stdout();
-    queue!(
-      out,
-      DisableMouseCapture,
-      DisableFocusChange,
-      terminal::LeaveAlternateScreen,
-    )?;
-
-    out.flush()?;
-
-    if terminal::is_raw_mode_enabled()? {
-      terminal::disable_raw_mode()?;
-    }
-
-    Ok(())
   }
 }

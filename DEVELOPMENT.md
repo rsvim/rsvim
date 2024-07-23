@@ -1,5 +1,3 @@
-<!-- markdownlint-disable MD013 -->
-
 # Development
 
 ## Environment
@@ -19,9 +17,9 @@ To write rust docs, please setup with:
 - [cargo-watch](https://github.com/watchexec/cargo-watch): Watch project file changes.
 - [browser-sync](https://browsersync.io/): Reload generated docs and sync to browser, setup with:
 
-  > 1.  Install with `npm install -g browser-sync`.
-  > 2.  Start service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
-  > 3.  Open browser with `http://localhost:3000/rsvim`.
+  > 1. Install with `npm install -g browser-sync`.
+  > 2. Start service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
+  > 3. Open browser with `http://localhost:3000/rsvim`.
 
 To write markdown docs, please setup with:
 
