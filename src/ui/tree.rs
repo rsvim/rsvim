@@ -4,7 +4,6 @@ use std::collections::VecDeque;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::{Arc, RwLock, Weak};
 
-use futures::io::Window;
 use geo::point;
 
 use crate::cart::{conversion, IRect, U16Rect, U16Size};
