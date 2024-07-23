@@ -2,33 +2,25 @@
 //! It always exists along with RSVIM, as long as it runs in non-headless and interactive
 //! (non-batch-processing) mode.
 
-use crate::cart::{IRect, U16Size};
-use crate::define_widget_base_helpers;
 use crate::ui::tree::node::NodeId;
-use crate::ui::widget::{Widget, WidgetBase};
+use crate::ui::widget::Widget;
+use crate::uuid;
 
 /// Root widget.
 pub struct RootWidget {
-  base: WidgetBase,
+  id: NodeId,
 }
 
 impl RootWidget {
-  pub fn new(terminal_size: U16Size) -> Self {
-    let rect = IRect::new(
-      (0, 0),
-      (
-        terminal_size.width() as isize,
-        terminal_size.height() as isize,
-      ),
-    );
-    let zindex = 0;
-    let base = WidgetBase::new(rect, zindex);
-    RootWidget { base }
+  pub fn new() -> Self {
+    RootWidget { id: uuid::next() }
   }
 }
 
 impl Widget for RootWidget {
-  define_widget_base_helpers!();
+  fn id(&self) -> NodeId {
+    self.id
+  }
 
   fn draw(&mut self) {
     todo!();

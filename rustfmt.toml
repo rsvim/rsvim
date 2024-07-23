@@ -2,3 +2,4 @@ edition = "2021"
 tab_spaces = 2
 newline_style = "Unix"
 reorder_imports = true
+reorder_impl_items = true
