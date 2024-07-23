@@ -37,7 +37,7 @@ impl Frame {
   }
 
   /// Get a mutable cell on specific position.
-  pub fn mut_get_cell(&mut self, pos: UPos) -> &mut Cell {
+  pub fn get_cell_mut(&mut self, pos: UPos) -> &mut Cell {
     &mut self.cells[pos.x() * pos.y()]
   }
 
@@ -55,7 +55,7 @@ impl Frame {
   }
 
   /// Get n continuously mutable cells, start from position.
-  pub fn mut_get_cells(&mut self, pos: UPos, n: usize) -> &mut [Cell] {
+  pub fn get_cells_mut(&mut self, pos: UPos, n: usize) -> &mut [Cell] {
     let start_at = pos.x() * pos.y();
     let end_at = start_at + n;
     &mut self.cells[start_at..end_at]

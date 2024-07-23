@@ -4,6 +4,11 @@ pub mod cursor;
 pub mod root;
 pub mod window;
 
+// Re-export
+pub use crate::ui::widget::cursor::Cursor;
+pub use crate::ui::widget::root::RootWidget;
+pub use crate::ui::widget::window::Window;
+
 use std::any::Any;
 
 use crate::cart::U16Rect;
@@ -16,7 +21,7 @@ pub trait Widget: Any {
   fn id(&self) -> NodeId;
 
   /// Draw the widget to terminal, on the specific shape.
-  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {
+  fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {
     // Do nothing.
   }
 }
