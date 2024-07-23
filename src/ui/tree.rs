@@ -277,6 +277,8 @@ impl Tree {
       Some(attr) => {
         let old_shape = attr.shape;
         attr.shape = shape;
+        // Update the actual shape of `id`, and all its descendant nodes.
+        self.calculate_actual_shape(id);
         Some(old_shape)
       }
       None => None,
