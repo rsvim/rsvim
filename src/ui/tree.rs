@@ -6,7 +6,7 @@ use std::sync::{Arc, RwLock, Weak};
 
 use geo::point;
 
-use crate::cart::{conversion, IPos, IRect, ISize, U16Rect, U16Size};
+use crate::cart::{conversion, IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
 use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::edge::Edge;
@@ -390,6 +390,20 @@ impl Tree {
       Some(attr) => Some(&attr.actual_shape),
       None => None,
     }
+  }
+
+  pub fn get_actual_pos(&self, id: NodeId) -> Option<U16Pos> {
+    self
+      .attributes
+      .get(&id)
+      .map(|attr| attr.actual_shape.min().into())
+  }
+
+  pub fn get_actual_size(&self, id: NodeId) -> Option<U16Size> {
+    self
+      .attributes
+      .get(&id)
+      .map(|attr| U16Size::from(attr.actual_shape))
   }
 
   // Attribute }
