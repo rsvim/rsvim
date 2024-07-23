@@ -4,6 +4,7 @@ use std::collections::VecDeque;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::{Arc, RwLock, Weak};
 
+use futures::io::Window;
 use geo::point;
 
 use crate::cart::{conversion, IRect, U16Rect, U16Size};
@@ -11,6 +12,10 @@ use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::edge::Edge;
 use crate::ui::tree::node::{NodeAttribute, NodeId, NodePtr};
+
+use self::node::Node;
+
+use super::widget::Widget;
 
 pub mod edge;
 pub mod node;
@@ -102,6 +107,9 @@ pub struct Tree {
   // Root node ID.
   root_id: Option<NodeId>,
 
+  // A collection of all VIM window widget nodes.
+  window_ids: BTreeSet<NodeId>,
+
   // Maps "parent ID" => its "children IDs".
   //
   // Note: A parent can have multiple children.
@@ -125,6 +133,7 @@ impl Tree {
       nodes: BTreeMap::new(),
       edges: BTreeSet::new(),
       root_id: None,
+      window_ids: BTreeSet::new(),
       children_ids: BTreeMap::new(),
       parent_ids: BTreeMap::new(),
       attributes: HashMap::new(),
@@ -206,6 +215,12 @@ impl Tree {
     self
       .attributes
       .insert(id, NodeAttribute::default(shape, actual_shape));
+
+    // If `node` is a window widget, add it into the `window_ids` collection.
+    if let Node::WindowNode(window_node) = &*node.read().unwrap() {
+      self.window_ids.insert(window_node.id());
+    }
+
     self.nodes.insert(id, node.clone())
   }
 
