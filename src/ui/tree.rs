@@ -272,13 +272,6 @@ impl Tree {
     }
   }
 
-  pub fn get_shape_mut(&mut self, id: NodeId) -> Option<&mut IRect> {
-    match self.attributes.get_mut(&id) {
-      Some(attr) => Some(&mut attr.shape),
-      None => None,
-    }
-  }
-
   pub fn set_shape(&mut self, id: NodeId, shape: IRect) -> Option<IRect> {
     match self.attributes.get_mut(&id) {
       Some(attr) => {
@@ -335,13 +328,6 @@ impl Tree {
   pub fn get_actual_shape(&self, id: NodeId) -> Option<&U16Rect> {
     match self.attributes.get(&id) {
       Some(attr) => Some(&attr.actual_shape),
-      None => None,
-    }
-  }
-
-  pub fn get_actual_shape_mut(&mut self, id: NodeId) -> Option<&mut U16Rect> {
-    match self.attributes.get_mut(&id) {
-      Some(attr) => Some(&mut attr.actual_shape),
       None => None,
     }
   }
