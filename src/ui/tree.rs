@@ -350,13 +350,11 @@ impl Tree {
     match self.attributes.get_mut(&id) {
       Some(attr) => {
         let old_shape = attr.shape;
-        let shape = IRect::new(
+        let new_shape = IRect::new(
           pos,
           point!(x: pos.x() + old_shape.width(), y: pos.y() + old_shape.height()),
         );
-        attr.shape = shape;
-        // Update the actual shape of `id`, and all its descendant nodes.
-        self.calculate_actual_shape(id);
+        self.set_shape(id, new_shape);
         Some(old_shape.min().into())
       }
       None => None,
@@ -372,13 +370,11 @@ impl Tree {
       Some(attr) => {
         let old_shape = attr.shape;
         let old_pos: IPos = old_shape.min().into();
-        let shape = IRect::new(
+        let new_shape = IRect::new(
           old_pos,
           point!(x: old_pos.x() + size.width(), y: old_pos.y() + size.height()),
         );
-        attr.shape = shape;
-        // Update the actual shape of `id`, and all its descendant nodes.
-        self.calculate_actual_shape(id);
+        self.set_shape(id, new_shape);
         Some(ISize::from(old_shape))
       }
       None => None,
