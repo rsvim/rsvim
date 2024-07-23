@@ -16,5 +16,7 @@ pub trait Widget: Any {
   fn id(&self) -> NodeId;
 
   /// Draw the widget to terminal, on the specific shape.
-  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk);
+  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {
+    // Do nothing.
+  }
 }

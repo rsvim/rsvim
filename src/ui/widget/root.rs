@@ -21,8 +21,4 @@ impl Widget for RootWidget {
   fn id(&self) -> NodeId {
     self.id
   }
-
-  fn draw(&mut self) {
-    todo!();
-  }
 }

@@ -3,21 +3,20 @@
 use compact_str::CompactString;
 
 use crate::cart::IRect;
-use crate::define_widget_base_helpers;
 use crate::ui::tree::node::NodeId;
-use crate::ui::widget::{Widget, WidgetBase};
+use crate::ui::widget::Widget;
+use crate::uuid;
 
 /// The VIM window.
 pub struct Window {
-  base: WidgetBase,
+  id: NodeId,
   lines: Vec<CompactString>,
 }
 
 impl Window {
-  pub fn new(rect: IRect, zindex: usize) -> Self {
-    let base = WidgetBase::new(rect, zindex);
+  pub fn new() -> Self {
     Window {
-      base,
+      id: uuid::next(),
       lines: vec![],
     }
   }
@@ -45,23 +44,9 @@ impl Window {
   pub fn set_line(&mut self, index: usize, line: CompactString) {
     self.lines[index] = line;
   }
-
-  pub fn push_line(&mut self, line: CompactString) {
-    self.lines.push(line);
-  }
-
-  pub fn insert_line(&mut self, index: usize, line: CompactString) {
-    self.lines.insert(index, line);
-  }
-
-  pub fn remove_line(&mut self, index: usize) -> CompactString {
-    self.lines.remove(index)
-  }
 }
 
 impl Widget for Window {
-  define_widget_base_helpers!();
-
   fn draw(&mut self) {
     todo!();
   }
