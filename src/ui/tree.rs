@@ -141,6 +141,7 @@ impl Tree {
 
   // Node {
 
+  /// Get the collection of all nodes.
   pub fn get_nodes(&self) -> &BTreeMap<NodeId, NodePtr> {
     &self.nodes
   }
@@ -272,6 +273,7 @@ impl Tree {
 
   // Edge {
 
+  /// Get the collection of all edges.
   pub fn get_edges(&self) -> &BTreeSet<Edge> {
     &self.edges
   }
@@ -287,18 +289,22 @@ impl Tree {
 
   // Parent-Children Relationship {
 
+  /// Get the collection of all "parent" => "children" IDs mapping.
   pub fn get_children_ids(&self) -> &HashMap<NodeId, HashSet<NodeId>> {
     &self.children_ids
   }
 
+  /// Get the collection of all "child" => "parent" ID mapping.
   pub fn get_parent_ids(&self) -> &HashMap<NodeId, NodeId> {
     &self.parent_ids
   }
 
+  /// Get the children IDs by the `parent` ID.
   pub fn get_children(&self, parent_id: NodeId) -> Option<&HashSet<NodeId>> {
     self.children_ids.get(&parent_id)
   }
 
+  /// Get the parent ID by the `child` ID.
   pub fn get_parent(&self, child_id: NodeId) -> Option<&NodeId> {
     self.parent_ids.get(&child_id)
   }
@@ -307,6 +313,7 @@ impl Tree {
 
   // Window Nodes {
 
+  /// Get the collection of all window widget nodes.
   pub fn get_window_ids(&self) -> &BTreeSet<NodeId> {
     &self.window_ids
   }
@@ -315,10 +322,12 @@ impl Tree {
 
   // Attribute {
 
+  /// Get the collection of all node attributes.
   pub fn get_attributes(&self) -> &HashMap<NodeId, NodeAttribute> {
     &self.attributes
   }
 
+  /// Get shape of a node.
   pub fn get_shape(&self, id: NodeId) -> Option<&IRect> {
     match self.attributes.get(&id) {
       Some(attr) => Some(&attr.shape),
@@ -326,20 +335,27 @@ impl Tree {
     }
   }
 
+  /// Set shape of a node.
+  ///
+  /// Note: This triggers the calculation of its actual shape, and all its descendants actual
+  /// shapes.
   pub fn set_shape(&mut self, id: NodeId, shape: IRect) -> Option<IRect> {
     match self.attributes.get_mut(&id) {
       Some(attr) => {
         let old_shape = attr.shape;
         attr.shape = shape;
         // Update the actual shape of `id`, and all its descendant nodes.
-        self.calculate_actual_shape(id);
+        self.update_actual_shape(id);
         Some(old_shape)
       }
       None => None,
     }
   }
 
-  fn calculate_actual_shape(&mut self, start_id: NodeId) {
+  /// Internal implementation of [`set_shape`](Tree::set_shape()).
+  ///
+  /// It updates the node's (`start_id`) actual shape, and all the descendants actual shapes.
+  fn update_actual_shape(&mut self, start_id: NodeId) {
     let mut que: VecDeque<NodeId> = VecDeque::new();
     que.push_back(start_id);
 
@@ -373,6 +389,7 @@ impl Tree {
     }
   }
 
+  /// Get the position of a node.
   pub fn get_pos(&self, id: NodeId) -> Option<IPos> {
     self.attributes.get(&id).map(|attr| attr.shape.min().into())
   }
@@ -434,6 +451,12 @@ impl Tree {
   }
 
   // Attribute }
+
+  // Draw {
+
+  pub fn draw(&mut self) {}
+
+  // Draw }
 }
 
 #[cfg(test)]
@@ -563,7 +586,7 @@ mod tests {
   }
 
   #[test]
-  fn tree_shape() {
+  fn tree_shape1() {
     let terminal = Terminal::new(U16Size::new(10, 10), frame::cursor::Cursor::default());
     let terminal = make_terminal_ptr(terminal);
 
