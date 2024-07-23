@@ -73,6 +73,7 @@ pub mod node;
 ///    covers/overrides its parent display.
 ///    To change the visibility priority between children and parent, you need to change the
 ///    relationship between them.
+///
 ///    For example, now we have two children under the same parent: A and B. A has 100 z-index, B
 ///    has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
 ///    still covers C, because it's a sibling of B.
