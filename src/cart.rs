@@ -5,14 +5,16 @@
 //!
 //! The 2-dimensional coordinate system in mathematics usually look like:
 //!
-//!                  y:
+//! ```text
+//!                  y
 //!                  |
 //!                (0,1)
 //!                  |
-//! x: ----(-1,0)--(0,0)--(1,0)-----
+//!  x ----(-1,0)--(0,0)--(1,0)-----
 //!                  |
 //!                (0,-1)
 //!                  |
+//! ```
 //!
 //! But in a terminal based coordinate system, it's not working like that.
 //!
@@ -22,16 +24,18 @@
 //!
 //! Thus we need to flip the coordinate system upside down:
 //!
-//!                  y:
+//! ```text
+//!                  y
 //!                  |
 //!                (0,-1)
 //!                  |
-//! x: ----(-1,0)--(0,0)--(1,0)-----------(width,0)
+//!  x ----(-1,0)--(0,0)--(1,0)-----------(width,0)
 //!                  |                         |
 //!                (0,1)     terminal     (width,1)
 //!                  |                         |
 //!                  |                         |
 //!                (0,height)-------------(width,height)
+//! ```
 //!
 //! Note: The X-axis remains the same, the Y-axis is upside down.
 //!
