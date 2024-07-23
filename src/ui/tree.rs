@@ -234,6 +234,9 @@ impl Tree {
     if !self.parent_ids.contains_key(&id) {
       return None;
     }
+    if !self.nodes.contains_key(&id) {
+      return None;
+    }
 
     let parent_id = self.parent_ids.remove(&id).unwrap();
     assert!(self.children_ids.contains_key(&parent_id));
@@ -247,8 +250,15 @@ impl Tree {
     let edge_removed = self.edges.remove(&Edge::new(parent_id, id));
     assert!(edge_removed);
 
-    assert!(self.nodes.contains_key(&id));
-    self.nodes.remove(&id)
+    let removed_node = self.nodes.remove(&id).unwrap();
+
+    let removed_window = self.window_ids.remove(&id);
+    match &*removed_node.read().unwrap() {
+      Node::WindowNode(_) => assert!(removed_window),
+      _ => assert!(!removed_window),
+    }
+
+    Some(removed_node)
   }
 
   // Node }
