@@ -47,7 +47,7 @@ impl Window {
 }
 
 impl Widget for Window {
-  fn draw(&mut self) {
-    todo!();
+  fn id(&self) -> NodeId {
+    self.id
   }
 }
