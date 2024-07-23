@@ -299,7 +299,7 @@ impl Tree {
             let shape = self.get_shape(id).unwrap();
             let parent_actual_shape = self.get_actual_shape(*parent_id).unwrap();
             let actual_shape = conversion::to_actual_shape(*shape, *parent_actual_shape);
-            self.set_shape(id, actual_shape);
+            self.update_actual_shape(id, actual_shape);
           }
           None => {
             let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
@@ -317,9 +317,13 @@ impl Tree {
     }
   }
 
-  fn update_actual_shape(&self, id: NodeId) -> Option<&U16Rect> {
-    match self.attributes.get(&id) {
-      Some(attr) => Some(&attr.actual_shape),
+  fn update_actual_shape(&mut self, id: NodeId, actual_shape: U16Rect) -> Option<U16Rect> {
+    match self.attributes.get_mut(&id) {
+      Some(attr) => {
+        let old_actual_shape = attr.actual_shape;
+        attr.actual_shape = actual_shape;
+        Some(old_actual_shape)
+      }
       None => None,
     }
   }
