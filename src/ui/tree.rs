@@ -2,6 +2,7 @@
 
 use std::collections::VecDeque;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::os::unix::process::parent_id;
 use std::sync::{Arc, RwLock, Weak};
 
 use geo::point;
@@ -196,13 +197,8 @@ impl Tree {
       Some(parent_attribute) => conversion::to_actual_shape(shape, parent_attribute.actual_shape),
       None => {
         let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
-        let terminal_actual_shape = URect::new(
-          (0, 0),
-          (
-            terminal_size.width() as usize,
-            terminal_size.height() as usize,
-          ),
-        );
+        let terminal_actual_shape =
+          U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
         conversion::to_actual_shape(shape, terminal_actual_shape)
       }
     };
@@ -277,6 +273,13 @@ impl Tree {
     }
   }
 
+  pub fn get_shape_mut(&mut self, id: NodeId) -> Option<&mut IRect> {
+    match self.attributes.get_mut(&id) {
+      Some(attr) => Some(&mut attr.shape),
+      None => None,
+    }
+  }
+
   pub fn set_shape(&mut self, id: NodeId, shape: IRect) -> Option<IRect> {
     match self.attributes.get_mut(&id) {
       Some(attr) => {
@@ -292,20 +295,37 @@ impl Tree {
     let mut que: VecDeque<NodeId> = VecDeque::new();
     que.push_back(start_id);
 
-    while !que.is_empty() {
+    loop {
       match que.pop_front() {
-        Some(id) => match self.parent_ids.get(&id) {
-          Some(parent_id) => {
-            let shape = self.get_shape(id).unwrap();
-            let parent_actual_shape = self.get_actual_shape(*parent_id).unwrap();
-            let actual_shape = conversion::to_actual_shape(*shape, *parent_actual_shape);
-            self.update_actual_shape(id, actual_shape);
+        Some(id) => {
+          let maybe_parent_id = self.parent_ids.get_mut(&id);
+          match maybe_parent_id {
+            Some(parent_id) => {
+              let shape = self.attributes.get(&id).unwrap().shape;
+              let parent_actual_shape = self.attributes.get(&parent_id).unwrap().actual_shape;
+              let actual_shape = conversion::to_actual_shape(shape, parent_actual_shape);
+              self.attributes.get_mut(&id).unwrap().actual_shape = actual_shape;
+
+              match self.children_ids.get(&parent_id) {
+                Some(children_ids) => {
+                  for child_id in children_ids.iter() {
+                    que.push_back(*child_id);
+                  }
+                }
+                None => {
+                  // Do nothing
+                }
+              }
+            }
+            None => {
+              let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
+            }
           }
-          None => {
-            let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
-          }
-        },
-        None => unreachable!("Failed to pop id from front"),
+        }
+        None => {
+          // No more nodes.
+          break;
+        }
       }
     }
   }
@@ -317,13 +337,9 @@ impl Tree {
     }
   }
 
-  fn update_actual_shape(&mut self, id: NodeId, actual_shape: U16Rect) -> Option<U16Rect> {
+  pub fn get_actual_shape_mut(&mut self, id: NodeId) -> Option<&mut U16Rect> {
     match self.attributes.get_mut(&id) {
-      Some(attr) => {
-        let old_actual_shape = attr.actual_shape;
-        attr.actual_shape = actual_shape;
-        Some(old_actual_shape)
-      }
+      Some(attr) => Some(&mut attr.actual_shape),
       None => None,
     }
   }
