@@ -508,9 +508,9 @@ mod tests {
     assert!(tree.get_nodes().len() == 4);
     assert!(tree.get_edges().len() == 3);
     assert!(tree.get_children_ids().len() == 2);
-    assert!(tree.get_parent_ids().is_empty());
-    assert!(tree.get_root_id().is_none());
-    assert!(tree.get_window_ids().is_empty());
-    assert!(tree.get_attributes().is_empty());
+    assert!(tree.get_parent_ids().len() == 3);
+    assert!(tree.get_root_id().unwrap() == n1.read().unwrap().id());
+    assert!(tree.get_window_ids().len() == 2);
+    assert!(tree.get_attributes().len() == 4);
   }
 }
