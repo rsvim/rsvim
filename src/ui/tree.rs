@@ -6,7 +6,7 @@ use std::sync::{Arc, RwLock, Weak};
 
 use geo::point;
 
-use crate::cart::{conversion, IRect, U16Rect, U16Size};
+use crate::cart::{conversion, IPos, IRect, ISize, U16Rect, U16Size};
 use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::edge::Edge;
@@ -339,6 +339,49 @@ impl Tree {
           // Do nothing
         }
       }
+    }
+  }
+
+  pub fn get_pos(&self, id: NodeId) -> Option<IPos> {
+    self.attributes.get(&id).map(|attr| attr.shape.min().into())
+  }
+
+  pub fn set_pos(&mut self, id: NodeId, pos: IPos) -> Option<IPos> {
+    match self.attributes.get_mut(&id) {
+      Some(attr) => {
+        let old_shape = attr.shape;
+        let shape = IRect::new(
+          pos,
+          point!(x: pos.x() + old_shape.width(), y: pos.y() + old_shape.height()),
+        );
+        attr.shape = shape;
+        // Update the actual shape of `id`, and all its descendant nodes.
+        self.calculate_actual_shape(id);
+        Some(old_shape.min().into())
+      }
+      None => None,
+    }
+  }
+
+  pub fn get_size(&self, id: NodeId) -> Option<ISize> {
+    self.attributes.get(&id).map(|attr| ISize::from(attr.shape))
+  }
+
+  pub fn set_size(&mut self, id: NodeId, size: ISize) -> Option<ISize> {
+    match self.attributes.get_mut(&id) {
+      Some(attr) => {
+        let old_shape = attr.shape;
+        let old_pos: IPos = old_shape.min().into();
+        let shape = IRect::new(
+          old_pos,
+          point!(x: old_pos.x() + size.width(), y: old_pos.y() + size.height()),
+        );
+        attr.shape = shape;
+        // Update the actual shape of `id`, and all its descendant nodes.
+        self.calculate_actual_shape(id);
+        Some(ISize::from(old_shape))
+      }
+      None => None,
     }
   }
 
