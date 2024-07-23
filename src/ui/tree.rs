@@ -286,6 +286,14 @@ impl Tree {
 
   // Parent-Children Relationship }
 
+  // Window Nodes {
+
+  pub fn get_windows(&self) -> &BTreeSet<NodeId> {
+    &self.window_ids
+  }
+
+  // Window Nodes }
+
   // Attribute {
 
   pub fn get_shape(&self, id: NodeId) -> Option<&IRect> {
