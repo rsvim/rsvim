@@ -1,20 +1,12 @@
 //! Logging.
 
-use crate::cli;
 use time::{format_description, Date, Month, OffsetDateTime, Time, UtcOffset};
 use tracing;
 use tracing_appender;
 use tracing_subscriber;
 use tzdb;
 
-pub fn init(c: &cli::Cli) {
-  let log_level = if c.debug() {
-    tracing::Level::TRACE
-  } else if c.verbose() {
-    tracing::Level::INFO
-  } else {
-    tracing::Level::ERROR
-  };
+pub fn init() {
   let now = tzdb::now::local().unwrap();
   let now = OffsetDateTime::new_in_offset(
     Date::from_calendar_date(
@@ -39,7 +31,6 @@ pub fn init(c: &cli::Cli) {
     .with_level(true)
     .with_ansi(false)
     .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-    .with_max_level(log_level)
     .with_writer(tracing_appender::rolling::never(".", log_name))
     .finish();
   tracing::subscriber::set_global_default(subscriber).unwrap();
