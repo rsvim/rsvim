@@ -49,7 +49,7 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
   let actual_top_left_pos: U16Pos =
     point!(x: actual_top_left_x as u16, y: actual_top_left_y as u16);
   debug!(
-    "pos:{:?}, actual_pos:{:?}",
+    "actual_top_left_ipos:{:?}, actual_top_left_pos:{:?}",
     actual_top_left_ipos, actual_top_left_pos
   );
 
@@ -70,7 +70,7 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
     (actual_bottom_right_pos.y() as isize) - (actual_top_left_pos.y() as isize),
   );
   debug!(
-    "actual_isize:{:?}, actual_pos:{:?}",
+    "actual_isize:{:?}, actual_top_left_pos:{:?}",
     actual_isize, actual_top_left_pos
   );
   let actual_shape = U16Rect::new(
