@@ -476,13 +476,12 @@ mod tests {
   use super::*;
   use crate::cart::{IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size};
   use crate::geo_size_as;
-  use crate::ui::frame;
   use crate::ui::term::{make_terminal_ptr, Terminal};
   use crate::ui::widget::{Cursor, RootWidget, Widget, Window};
 
   #[test]
   fn tree_new() {
-    let terminal = Terminal::new(U16Size::new(10, 10), frame::cursor::Cursor::default());
+    let terminal = Terminal::new(U16Size::new(10, 10));
     let terminal = make_terminal_ptr(terminal);
 
     let tree = Tree::new(Arc::downgrade(&terminal));
@@ -497,7 +496,7 @@ mod tests {
 
   #[test]
   fn tree_insert() {
-    let terminal = Terminal::new(U16Size::new(10, 10), frame::cursor::Cursor::default());
+    let terminal = Terminal::new(U16Size::new(10, 10));
     let terminal = make_terminal_ptr(terminal);
 
     let mut tree = Tree::new(Arc::downgrade(&terminal));
@@ -600,7 +599,183 @@ mod tests {
 
   #[test]
   fn tree_shape1() {
-    let terminal = Terminal::new(U16Size::new(10, 10), frame::cursor::Cursor::default());
+    let terminal = Terminal::new(U16Size::new(10, 10));
+    let terminal_size = terminal.size();
+    let terminal = make_terminal_ptr(terminal);
+
+    let mut tree = Tree::new(Arc::downgrade(&terminal));
+
+    let n1 = RootWidget::new();
+    let n1_id = n1.id();
+    let n1 = make_node_ptr(Node::RootWidgetNode(n1));
+
+    let n2 = Window::default();
+    let n2_id = n2.id();
+    let n2 = make_node_ptr(Node::WindowNode(n2));
+
+    let n3 = Window::default();
+    let n3_id = n3.id();
+    let n3 = make_node_ptr(Node::WindowNode(n3));
+
+    let n4 = Cursor::default();
+    let n4_id = n4.id();
+    let n4 = make_node_ptr(Node::CursorNode(n4));
+
+    tree.insert_root_node(n1.read().unwrap().id(), n1.clone(), terminal_size);
+    let shape1 = tree.get_shape(n1_id);
+    let pos1 = tree.get_pos(n1_id);
+    let size1 = tree.get_size(n1_id);
+    let actual_shape1 = tree.get_actual_shape(n1_id);
+    let actual_pos1 = tree.get_actual_pos(n1_id);
+    let actual_size1 = tree.get_actual_size(n1_id);
+    assert!(
+      *shape1.unwrap()
+        == IRect::new(
+          (0, 0),
+          (
+            terminal_size.width() as isize,
+            terminal_size.height() as isize
+          )
+        )
+    );
+    assert!(pos1.unwrap() == point!(x:0, y:0));
+    assert!(
+      size1.unwrap()
+        == ISize::new(
+          terminal_size.width() as isize,
+          terminal_size.height() as isize
+        )
+    );
+    assert!(
+      *actual_shape1.unwrap()
+        == U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()))
+    );
+    assert!(actual_pos1.unwrap() == U16Pos::new(0_u16, 0_u16));
+    assert!(actual_size1.unwrap() == terminal_size);
+
+    tree.insert_node(
+      n2.read().unwrap().id(),
+      n2.clone(),
+      n1.read().unwrap().id(),
+      IRect::new((0, 0), (3, 5)),
+    );
+    let shape2 = tree.get_shape(n2_id);
+    let pos2 = tree.get_pos(n2_id);
+    let size2 = tree.get_size(n2_id);
+    let actual_shape2 = tree.get_actual_shape(n2_id);
+    let actual_pos2 = tree.get_actual_pos(n2_id);
+    let actual_size2 = tree.get_actual_size(n2_id);
+    assert!(*shape2.unwrap() == IRect::new((0, 0), (3, 5)));
+    assert!(pos2.unwrap() == point!(x:0, y:0));
+    assert!(size2.unwrap() == ISize::new(3, 5));
+    assert!(*actual_shape2.unwrap() == U16Rect::new((0, 0), (3_u16, 5_u16)));
+    assert!(actual_pos2.unwrap() == U16Pos::new(0_u16, 0_u16));
+    assert!(actual_size2.unwrap() == U16Size::new(3_u16, 5_u16));
+
+    tree.insert_node(
+      n3.read().unwrap().id(),
+      n3.clone(),
+      n1.read().unwrap().id(),
+      IRect::new((3, 5), (9, 10)),
+    );
+    let shape3 = tree.get_shape(n3_id);
+    let pos3 = tree.get_pos(n3_id);
+    let size3 = tree.get_size(n3_id);
+    let actual_shape3 = tree.get_actual_shape(n3_id);
+    let actual_pos3 = tree.get_actual_pos(n3_id);
+    let actual_size3 = tree.get_actual_size(n3_id);
+    assert!(*shape3.unwrap() == IRect::new((3, 5), (9, 10)));
+    assert!(pos3.unwrap() == point!(x:3, y:5));
+    assert!(size3.unwrap() == ISize::new(6, 5));
+    assert!(*actual_shape3.unwrap() == U16Rect::new((3, 5), (9_u16, 10_u16)));
+    assert!(actual_pos3.unwrap() == U16Pos::new(3_u16, 5_u16));
+    assert!(actual_size3.unwrap() == U16Size::new(6_u16, 5_u16));
+
+    tree.insert_node(
+      n4.read().unwrap().id(),
+      n4.clone(),
+      n2.read().unwrap().id(),
+      IRect::new((0, 0), (1, 1)),
+    );
+    let shape4 = tree.get_shape(n4_id);
+    let pos4 = tree.get_pos(n4_id);
+    let size4 = tree.get_size(n4_id);
+    let actual_shape4 = tree.get_actual_shape(n4_id);
+    let actual_pos4 = tree.get_actual_pos(n4_id);
+    let actual_size4 = tree.get_actual_size(n4_id);
+    assert!(*shape4.unwrap() == IRect::new((0, 0), (1, 1)));
+    assert!(pos4.unwrap() == point!(x:0, y:0));
+    assert!(size4.unwrap() == ISize::new(1, 1));
+    assert!(*actual_shape4.unwrap() == U16Rect::new((0, 0), (1_u16, 1_u16)));
+    assert!(actual_pos4.unwrap() == U16Pos::new(0_u16, 0_u16));
+    assert!(actual_size4.unwrap() == U16Size::new(1_u16, 1_u16));
+
+    let expects: Vec<(IRect, IPos, ISize, U16Rect, U16Pos, U16Size)> = vec![
+      (
+        IRect::new(
+          (0, 0),
+          (
+            terminal_size.width() as isize,
+            terminal_size.height() as isize,
+          ),
+        ),
+        point!(x:0, y:0),
+        geo_size_as!(terminal_size, isize),
+        U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height())),
+        point!(x: 0_u16, y: 0_u16),
+        terminal_size,
+      ),
+      (
+        IRect::new((0, 0), (3, 5)),
+        point!(x:0, y:0),
+        ISize::new(3, 5),
+        U16Rect::new((0, 0), (3_u16, 5_u16)),
+        point!(x: 0_u16, y: 0_u16),
+        U16Size::new(3_u16, 5_u16),
+      ),
+      (
+        IRect::new((3, 5), (9, 10)),
+        point!(x:3, y:5),
+        ISize::new(6, 5),
+        U16Rect::new((3, 5), (9_u16, 10_u16)),
+        point!(x: 3_u16, y: 5_u16),
+        U16Size::new(6_u16, 5_u16),
+      ),
+      (
+        IRect::new((0, 0), (1, 1)),
+        point!(x:0, y:0),
+        ISize::new(1, 1),
+        U16Rect::new((0, 0), (1_u16, 1_u16)),
+        point!(x: 0_u16, y: 0_u16),
+        U16Size::new(1_u16, 1_u16),
+      ),
+    ];
+
+    let node_ids = [n1_id, n2_id, n3_id, n4_id];
+    for (i, id) in node_ids.iter().enumerate() {
+      let shape = tree.get_shape(*id);
+      let pos = tree.get_pos(*id);
+      let size = tree.get_size(*id);
+      let actual_shape = tree.get_actual_shape(*id);
+      let actual_pos = tree.get_actual_pos(*id);
+      let actual_size = tree.get_actual_size(*id);
+      let expect = expects[i];
+      assert!(*shape.unwrap() == expect.0);
+      assert!(pos.unwrap() == expect.1);
+      assert!(size.unwrap() == expect.2);
+      assert!(*actual_shape.unwrap() == expect.3);
+      assert!(actual_pos.unwrap() == expect.4);
+      // println!(
+      //   "ui::tree::tree_shape1 i:{:?}, actual_size:{:?}, expect:{:?}",
+      //   i, actual_size, expect
+      // );
+      assert!(actual_size.unwrap() == expect.5);
+    }
+  }
+
+  #[test]
+  fn tree_shape2() {
+    let terminal = Terminal::new(U16Size::new(50, 50));
     let terminal_size = terminal.size();
     let terminal = make_terminal_ptr(terminal);
 

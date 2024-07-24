@@ -30,8 +30,8 @@ pub struct EventLoop {
 impl EventLoop {
   pub async fn new() -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
-    let size = U16Size::new(cols, rows);
-    let screen = Terminal::new(size, Default::default());
+    let screen_size = U16Size::new(cols, rows);
+    let screen = Terminal::new(screen_size);
     let screen = make_terminal_ptr(screen);
     let mut tree = Tree::new(Arc::downgrade(&screen));
 
@@ -40,11 +40,14 @@ impl EventLoop {
     tree.insert_root_node(
       root_widget_node.read().unwrap().id(),
       root_widget_node.clone(),
-      size,
+      screen_size,
     );
     let window = Window::default();
     let window_node = make_node_ptr(Node::WindowNode(window));
-    let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
+    let window_shape = IRect::new(
+      (0, 0),
+      (screen_size.width() as isize, screen_size.height() as isize),
+    );
     tree.insert_node(
       window_node.read().unwrap().id(),
       window_node.clone(),
