@@ -474,13 +474,11 @@ impl Tree {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::cart::{
-    conversion, IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size, UPos, URect, USize,
-  };
+  use crate::cart::{IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size};
+  use crate::geo_size_as;
   use crate::ui::frame;
   use crate::ui::term::{make_terminal_ptr, Terminal};
   use crate::ui::widget::{Cursor, RootWidget, Widget, Window};
-  use crate::{geo_rect_as, geo_size_as};
 
   #[test]
   fn tree_new() {
@@ -690,9 +688,9 @@ mod tests {
     assert!(*shape3.unwrap() == IRect::new((3, 5), (9, 10)));
     assert!(pos3.unwrap() == point!(x:3, y:5));
     assert!(size3.unwrap() == ISize::new(6, 5));
-    assert!(*actual_shape3.unwrap() == U16Rect::new((0, 0), (3_u16, 5_u16)));
-    assert!(actual_pos3.unwrap() == U16Pos::new(0_u16, 0_u16));
-    assert!(actual_size3.unwrap() == U16Size::new(3_u16, 5_u16));
+    assert!(*actual_shape3.unwrap() == U16Rect::new((3, 5), (9_u16, 10_u16)));
+    assert!(actual_pos3.unwrap() == U16Pos::new(3_u16, 5_u16));
+    assert!(actual_size3.unwrap() == U16Size::new(6_u16, 5_u16));
 
     tree.insert_node(
       n4.read().unwrap().id(),
@@ -700,6 +698,18 @@ mod tests {
       n2.read().unwrap().id(),
       IRect::new((0, 0), (1, 1)),
     );
+    let shape4 = tree.get_shape(n4_id);
+    let pos4 = tree.get_pos(n4_id);
+    let size4 = tree.get_size(n4_id);
+    let actual_shape4 = tree.get_actual_shape(n4_id);
+    let actual_pos4 = tree.get_actual_pos(n4_id);
+    let actual_size4 = tree.get_actual_size(n4_id);
+    assert!(*shape4.unwrap() == IRect::new((0, 0), (1, 1)));
+    assert!(pos4.unwrap() == point!(x:0, y:0));
+    assert!(size4.unwrap() == ISize::new(1, 1));
+    assert!(*actual_shape4.unwrap() == U16Rect::new((0, 0), (1_u16, 1_u16)));
+    assert!(actual_pos4.unwrap() == U16Pos::new(0_u16, 0_u16));
+    assert!(actual_size4.unwrap() == U16Size::new(1_u16, 1_u16));
 
     let expects: Vec<(IRect, IPos, ISize, U16Rect, U16Pos, U16Size)> = vec![
       (
@@ -722,7 +732,7 @@ mod tests {
         ISize::new(3, 5),
         U16Rect::new((0, 0), (3_u16, 5_u16)),
         point!(x: 0_u16, y: 0_u16),
-        U16Size::new(3_u16, 6_u16),
+        U16Size::new(3_u16, 5_u16),
       ),
       (
         IRect::new((3, 5), (9, 10)),
@@ -756,10 +766,10 @@ mod tests {
       assert!(size.unwrap() == expect.2);
       assert!(*actual_shape.unwrap() == expect.3);
       assert!(actual_pos.unwrap() == expect.4);
-      println!(
-        "ui::tree::tree_shape1 i:{:?}, actual_size:{:?}, expect:{:?}",
-        i, actual_size, expect
-      );
+      // println!(
+      //   "ui::tree::tree_shape1 i:{:?}, actual_size:{:?}, expect:{:?}",
+      //   i, actual_size, expect
+      // );
       assert!(actual_size.unwrap() == expect.5);
     }
   }
