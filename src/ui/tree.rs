@@ -478,6 +478,7 @@ mod tests {
   use crate::geo_size_as;
   use crate::ui::term::{make_terminal_ptr, Terminal};
   use crate::ui::widget::{Cursor, RootWidget, Widget, Window};
+  use tracing::info;
 
   #[test]
   fn tree_new() {
@@ -824,6 +825,10 @@ mod tests {
       U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height())),
       U16Pos::new(0_u16, 0_u16),
       terminal_size,
+    );
+    info!(
+      "expect-1:{:?}, shape/pos/size-1:{:?}/{:?}/{:?}, actual shape/pos/size-1:{:?}/{:?}/{:?}",
+      expect1, shape1, pos1, size1, actual_shape1, actual_pos1, actual_size1,
     );
     assert!(*shape1.unwrap() == expect1.0);
     assert!(pos1.unwrap() == expect1.1);
