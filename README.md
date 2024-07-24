@@ -2,7 +2,9 @@
   <img alt="logo.svg" src="https://raw.githubusercontent.com/rsvim/assets/main/logo/RSVIM-logo-helsinki-square-v2.svg" />
 </p>
 
-> The VIM editor reinvented in Rust+Typescript.
+<p align="center">
+The VIM editor reinvented in Rust+Typescript.
+</p>
 
 <p>
   <a href="https://crates.io/crates/rsvim"><img alt="push.yml" src="https://img.shields.io/crates/v/rsvim" /></a>
