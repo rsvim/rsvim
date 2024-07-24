@@ -874,45 +874,35 @@ mod tests {
         == U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()))
     );
     assert!(actual_pos2.unwrap() == U16Pos::new(0_u16, 0_u16));
-    assert!(actual_size2.unwrap() == U16Size::new(3_u16, 5_u16));
+    assert!(actual_size2.unwrap() == terminal_size);
 
-    tree.insert_node(
-      n3.read().unwrap().id(),
-      n3.clone(),
-      n1.read().unwrap().id(),
-      IRect::new((3, 5), (9, 10)),
-    );
+    tree.insert_node(nid3, n3.clone(), nid2, IRect::new((-2, -3), (4, 2)));
     let shape3 = tree.get_shape(nid3);
     let pos3 = tree.get_pos(nid3);
     let size3 = tree.get_size(nid3);
     let actual_shape3 = tree.get_actual_shape(nid3);
     let actual_pos3 = tree.get_actual_pos(nid3);
     let actual_size3 = tree.get_actual_size(nid3);
-    assert!(*shape3.unwrap() == IRect::new((3, 5), (9, 10)));
-    assert!(pos3.unwrap() == point!(x:3, y:5));
+    assert!(*shape3.unwrap() == IRect::new((-2, -3), (4, 2)));
+    assert!(pos3.unwrap() == point!(x:-2, y:-3));
     assert!(size3.unwrap() == ISize::new(6, 5));
-    assert!(*actual_shape3.unwrap() == U16Rect::new((3, 5), (9_u16, 10_u16)));
-    assert!(actual_pos3.unwrap() == U16Pos::new(3_u16, 5_u16));
-    assert!(actual_size3.unwrap() == U16Size::new(6_u16, 5_u16));
+    assert!(*actual_shape3.unwrap() == U16Rect::new((0, 0), (4_u16, 2_u16)));
+    assert!(actual_pos3.unwrap() == U16Pos::new(0_u16, 0_u16));
+    assert!(actual_size3.unwrap() == U16Size::new(4_u16, 2_u16));
 
-    tree.insert_node(
-      n4.read().unwrap().id(),
-      n4.clone(),
-      n2.read().unwrap().id(),
-      IRect::new((0, 0), (1, 1)),
-    );
+    tree.insert_node(nid4, n4.clone(), nid2, IRect::new((5, 10), (15, 18)));
     let shape4 = tree.get_shape(nid4);
     let pos4 = tree.get_pos(nid4);
     let size4 = tree.get_size(nid4);
     let actual_shape4 = tree.get_actual_shape(nid4);
     let actual_pos4 = tree.get_actual_pos(nid4);
     let actual_size4 = tree.get_actual_size(nid4);
-    assert!(*shape4.unwrap() == IRect::new((0, 0), (1, 1)));
-    assert!(pos4.unwrap() == point!(x:0, y:0));
-    assert!(size4.unwrap() == ISize::new(1, 1));
-    assert!(*actual_shape4.unwrap() == U16Rect::new((0, 0), (1_u16, 1_u16)));
-    assert!(actual_pos4.unwrap() == U16Pos::new(0_u16, 0_u16));
-    assert!(actual_size4.unwrap() == U16Size::new(1_u16, 1_u16));
+    assert!(*shape4.unwrap() == IRect::new((5, 10), (15, 18)));
+    assert!(pos4.unwrap() == point!(x:5, y:10));
+    assert!(size4.unwrap() == ISize::new(10, 8));
+    assert!(*actual_shape4.unwrap() == U16Rect::new((5, 10), (15_u16, 18_u16)));
+    assert!(actual_pos4.unwrap() == U16Pos::new(5_u16, 10_u16));
+    assert!(actual_size4.unwrap() == U16Size::new(10_u16, 8_u16));
 
     let expects: Vec<(IRect, IPos, ISize, U16Rect, U16Pos, U16Size)> = vec![
       (
