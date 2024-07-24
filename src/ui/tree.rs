@@ -478,7 +478,6 @@ mod tests {
   use crate::geo_size_as;
   use crate::ui::term::{make_terminal_ptr, Terminal};
   use crate::ui::widget::{Cursor, RootWidget, Widget, Window};
-  use tracing::info;
 
   #[test]
   fn tree_new() {
@@ -826,7 +825,7 @@ mod tests {
       U16Pos::new(0_u16, 0_u16),
       terminal_size,
     );
-    info!(
+    println!(
       "expect-1:{:?}, shape/pos/size-1:{:?}/{:?}/{:?}, actual shape/pos/size-1:{:?}/{:?}/{:?}",
       expect1, shape1, pos1, size1, actual_shape1, actual_pos1, actual_size1,
     );
@@ -872,6 +871,10 @@ mod tests {
       U16Pos::new(0_u16, 0_u16),
       terminal_size,
     );
+    println!(
+      "expect-2:{:?}, shape/pos/size-2:{:?}/{:?}/{:?}, actual shape/pos/size-2:{:?}/{:?}/{:?}",
+      expect2, shape2, pos2, size2, actual_shape2, actual_pos2, actual_size2,
+    );
 
     assert!(*shape2.unwrap() == expect2.0);
     assert!(pos2.unwrap() == expect2.1);
@@ -895,6 +898,10 @@ mod tests {
       U16Pos::new(0_u16, 0_u16),
       U16Size::new(4_u16, 2_u16),
     );
+    println!(
+      "expect-3:{:?}, shape/pos/size-3:{:?}/{:?}/{:?}, actual shape/pos/size-3:{:?}/{:?}/{:?}",
+      expect3, shape3, pos3, size3, actual_shape3, actual_pos3, actual_size3,
+    );
     assert!(*shape3.unwrap() == expect3.0);
     assert!(pos3.unwrap() == expect3.1);
     assert!(size3.unwrap() == expect3.2);
@@ -916,6 +923,10 @@ mod tests {
       U16Rect::new((5, 10), (15_u16, 18_u16)),
       U16Pos::new(5_u16, 10_u16),
       U16Size::new(10_u16, 8_u16),
+    );
+    println!(
+      "expect-4:{:?}, shape/pos/size-4:{:?}/{:?}/{:?}, actual shape/pos/size-4:{:?}/{:?}/{:?}",
+      expect4, shape4, pos4, size4, actual_shape4, actual_pos4, actual_size4,
     );
     assert!(*shape4.unwrap() == expect4.0);
     assert!(pos4.unwrap() == expect4.1);
@@ -939,6 +950,10 @@ mod tests {
       U16Pos::new(12_u16, 13_u16),
       U16Size::new(1_u16, 1_u16),
     );
+    println!(
+      "expect-5:{:?}, shape/pos/size-5:{:?}/{:?}/{:?}, actual shape/pos/size-5:{:?}/{:?}/{:?}",
+      expect5, shape5, pos5, size5, actual_shape5, actual_pos5, actual_size5,
+    );
     assert!(*shape5.unwrap() == expect5.0);
     assert!(pos5.unwrap() == expect5.1);
     assert!(size5.unwrap() == expect5.2);
@@ -958,15 +973,15 @@ mod tests {
       let actual_pos = tree.get_actual_pos(*id);
       let actual_size = tree.get_actual_size(*id);
       let expect = expects[i];
+      println!(
+        "i-{}, node-{} expect:{:?}, shape/pos/size:{:?}/{:?}/{:?}, actual shape/pos/size:{:?}/{:?}/{:?}",
+        i, *id, expect, shape, pos, size, actual_shape, actual_pos, actual_size,
+      );
       assert!(*shape.unwrap() == expect.0);
       assert!(pos.unwrap() == expect.1);
       assert!(size.unwrap() == expect.2);
       assert!(*actual_shape.unwrap() == expect.3);
       assert!(actual_pos.unwrap() == expect.4);
-      // println!(
-      //   "ui::tree::tree_shape1 i:{:?}, actual_size:{:?}, expect:{:?}",
-      //   i, actual_size, expect
-      // );
       assert!(actual_size.unwrap() == expect.5);
     }
   }
