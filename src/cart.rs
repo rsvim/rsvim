@@ -72,22 +72,22 @@ pub type U16Rect = Rect<u16>;
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Size<T: Copy> {
-  pub height: T,
   pub width: T,
+  pub height: T,
 }
 
 impl<T> Size<T>
 where
   T: Copy + PartialOrd + std::fmt::Debug + num_traits::Num + num_traits::NumCast,
 {
-  pub fn new(height: T, width: T) -> Self {
-    Size { height, width }
-  }
-  pub fn height(&self) -> T {
-    self.height
+  pub fn new(width: T, height: T) -> Self {
+    Size { width, height }
   }
   pub fn width(&self) -> T {
     self.width
+  }
+  pub fn height(&self) -> T {
+    self.height
   }
 }
 
@@ -96,7 +96,7 @@ where
   T: Copy + PartialOrd + std::fmt::Debug + num_traits::Num + num_traits::NumCast,
 {
   fn from(rect: Rect<T>) -> Size<T> {
-    Size::new(rect.height() as T, rect.width() as T)
+    Size::new(rect.width() as T, rect.height() as T)
   }
 }
 
@@ -205,21 +205,21 @@ mod tests {
     let actual1 = geo_size_as!(s1, u8);
     let actual1_w = actual1.width();
     let actual1_h = actual1.height();
-    assert_eq!(mem::size_of_val(&actual1_h), mem::size_of_val(&1_u8));
-    assert_eq!(mem::size_of_val(&actual1_w), mem::size_of_val(&2_u8));
+    assert_eq!(mem::size_of_val(&actual1_w), mem::size_of_val(&1_u8));
+    assert_eq!(mem::size_of_val(&actual1_h), mem::size_of_val(&2_u8));
 
     let s2: U16Size = U16Size::new(15_u16, 25_u16);
     let actual2 = geo_size_as!(s2, i32);
     let actual2_w = actual2.width();
     let actual2_h = actual2.height();
-    assert_eq!(mem::size_of_val(&actual2_h), mem::size_of_val(&15_i32));
-    assert_eq!(mem::size_of_val(&actual2_w), mem::size_of_val(&25_i32));
+    assert_eq!(mem::size_of_val(&actual2_w), mem::size_of_val(&15_i32));
+    assert_eq!(mem::size_of_val(&actual2_h), mem::size_of_val(&25_i32));
 
     let s3: Size<u32> = Size::new(78_u32, 88_u32);
     let actual3 = geo_size_as!(s3, i16);
     let actual3_h = actual3.height();
     let actual3_w = actual3.width();
-    assert_eq!(mem::size_of_val(&actual3_h), mem::size_of_val(&78_i16));
-    assert_eq!(mem::size_of_val(&actual3_w), mem::size_of_val(&88_i16));
+    assert_eq!(mem::size_of_val(&actual3_w), mem::size_of_val(&78_i16));
+    assert_eq!(mem::size_of_val(&actual3_h), mem::size_of_val(&88_i16));
   }
 }

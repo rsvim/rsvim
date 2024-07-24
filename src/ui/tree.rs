@@ -655,18 +655,28 @@ mod tests {
         terminal_size,
       ),
       (
-        IRect::new(
-          (0, 0),
-          (
-            terminal_size.width() as isize,
-            terminal_size.height() as isize,
-          ),
-        ),
+        IRect::new((0, 0), (3, 5)),
         point!(x:0, y:0),
-        geo_size_as!(terminal_size, isize),
-        U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height())),
+        ISize::new(3, 5),
+        U16Rect::new((0, 0), (3_u16, 5_u16)),
         point!(x: 0_u16, y: 0_u16),
-        terminal_size,
+        U16Size::new(3_u16, 6_u16),
+      ),
+      (
+        IRect::new((3, 5), (9, 10)),
+        point!(x:3, y:5),
+        ISize::new(6, 5),
+        U16Rect::new((3, 5), (9_u16, 10_u16)),
+        point!(x: 3_u16, y: 5_u16),
+        U16Size::new(6_u16, 5_u16),
+      ),
+      (
+        IRect::new((0, 0), (1, 1)),
+        point!(x:0, y:0),
+        ISize::new(1, 1),
+        U16Rect::new((0, 0), (1_u16, 1_u16)),
+        point!(x: 0_u16, y: 0_u16),
+        U16Size::new(1_u16, 1_u16),
       ),
     ];
 
@@ -684,6 +694,10 @@ mod tests {
       assert!(size.unwrap() == expect.2);
       assert!(*actual_shape.unwrap() == expect.3);
       assert!(actual_pos.unwrap() == expect.4);
+      println!(
+        "ui::tree::tree_shape1 i:{:?}, actual_size:{:?}, expect:{:?}",
+        i, actual_size, expect
+      );
       assert!(actual_size.unwrap() == expect.5);
     }
   }

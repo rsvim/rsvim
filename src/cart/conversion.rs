@@ -39,8 +39,8 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
   let bottom_right_bounded_y = min(bottom_right_pos.y(), parent_actual_shape.height() as isize);
   let bottom_right_actual_pos: IPos = point!(x: bottom_right_bounded_x, y: bottom_right_bounded_y);
   let actual_isize = ISize::new(
-    bottom_right_actual_pos.y() - actual_pos.y() as isize,
     bottom_right_actual_pos.x() - actual_pos.x() as isize,
+    bottom_right_actual_pos.y() - actual_pos.y() as isize,
   );
   U16Rect::new(
     actual_pos,
