@@ -1,8 +1,5 @@
 //! Testing logging.
 
-use tracing;
-use tracing_subscriber;
-
 #[cfg(test)]
 pub fn init() {
   let subscriber = tracing_subscriber::FmtSubscriber::builder()
