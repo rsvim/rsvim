@@ -9,6 +9,7 @@ pub fn init() {
     .with_thread_names(true)
     .with_level(true)
     .with_ansi(true)
+    .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
     .with_max_level(tracing::Level::TRACE)
     .with_writer(std::io::stderr)
     .finish();
