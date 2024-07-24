@@ -821,31 +821,16 @@ mod tests {
         terminal_size.width() as isize,
         terminal_size.height() as isize,
       ),
+      U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height())),
+      U16Pos::new(0_u16, 0_u16),
+      terminal_size,
     );
-    assert!(
-      *shape1.unwrap()
-        == IRect::new(
-          (0, 0),
-          (
-            terminal_size.width() as isize,
-            terminal_size.height() as isize
-          )
-        )
-    );
-    assert!(pos1.unwrap() == point!(x:0, y:0));
-    assert!(
-      size1.unwrap()
-        == ISize::new(
-          terminal_size.width() as isize,
-          terminal_size.height() as isize
-        )
-    );
-    assert!(
-      *actual_shape1.unwrap()
-        == U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()))
-    );
-    assert!(actual_pos1.unwrap() == U16Pos::new(0_u16, 0_u16));
-    assert!(actual_size1.unwrap() == terminal_size);
+    assert!(*shape1.unwrap() == expect1.0);
+    assert!(pos1.unwrap() == expect1.1);
+    assert!(size1.unwrap() == expect1.2);
+    assert!(*actual_shape1.unwrap() == expect1.3);
+    assert!(actual_pos1.unwrap() == expect1.4);
+    assert!(actual_size1.unwrap() == expect1.5);
 
     tree.insert_node(
       nid2,
