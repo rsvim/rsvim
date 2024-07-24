@@ -775,35 +775,39 @@ mod tests {
 
   #[test]
   fn tree_shape2() {
-    let terminal = Terminal::new(U16Size::new(50, 50));
-    let terminal_size = terminal.size();
+    let terminal_size = U16Size::new(50, 50);
+    let terminal = Terminal::new(terminal_size);
     let terminal = make_terminal_ptr(terminal);
 
     let mut tree = Tree::new(Arc::downgrade(&terminal));
 
     let n1 = RootWidget::new();
-    let n1_id = n1.id();
+    let nid1 = n1.id();
     let n1 = make_node_ptr(Node::RootWidgetNode(n1));
 
     let n2 = Window::default();
-    let n2_id = n2.id();
+    let nid2 = n2.id();
     let n2 = make_node_ptr(Node::WindowNode(n2));
 
     let n3 = Window::default();
-    let n3_id = n3.id();
+    let nid3 = n3.id();
     let n3 = make_node_ptr(Node::WindowNode(n3));
 
-    let n4 = Cursor::default();
-    let n4_id = n4.id();
-    let n4 = make_node_ptr(Node::CursorNode(n4));
+    let n4 = Window::default();
+    let nid4 = n4.id();
+    let n4 = make_node_ptr(Node::WindowNode(n4));
 
-    tree.insert_root_node(n1.read().unwrap().id(), n1.clone(), terminal_size);
-    let shape1 = tree.get_shape(n1_id);
-    let pos1 = tree.get_pos(n1_id);
-    let size1 = tree.get_size(n1_id);
-    let actual_shape1 = tree.get_actual_shape(n1_id);
-    let actual_pos1 = tree.get_actual_pos(n1_id);
-    let actual_size1 = tree.get_actual_size(n1_id);
+    let n5 = Cursor::default();
+    let nid5 = n5.id();
+    let n5 = make_node_ptr(Node::CursorNode(n5));
+
+    tree.insert_root_node(nid1, n1.clone(), terminal_size);
+    let shape1 = tree.get_shape(nid1);
+    let pos1 = tree.get_pos(nid1);
+    let size1 = tree.get_size(nid1);
+    let actual_shape1 = tree.get_actual_shape(nid1);
+    let actual_pos1 = tree.get_actual_pos(nid1);
+    let actual_size1 = tree.get_actual_size(nid1);
     assert!(
       *shape1.unwrap()
         == IRect::new(
@@ -830,21 +834,45 @@ mod tests {
     assert!(actual_size1.unwrap() == terminal_size);
 
     tree.insert_node(
-      n2.read().unwrap().id(),
+      nid2,
       n2.clone(),
-      n1.read().unwrap().id(),
-      IRect::new((0, 0), (3, 5)),
+      nid1,
+      IRect::new(
+        (0, 0),
+        (
+          terminal_size.width() as isize,
+          terminal_size.height() as isize,
+        ),
+      ),
     );
-    let shape2 = tree.get_shape(n2_id);
-    let pos2 = tree.get_pos(n2_id);
-    let size2 = tree.get_size(n2_id);
-    let actual_shape2 = tree.get_actual_shape(n2_id);
-    let actual_pos2 = tree.get_actual_pos(n2_id);
-    let actual_size2 = tree.get_actual_size(n2_id);
-    assert!(*shape2.unwrap() == IRect::new((0, 0), (3, 5)));
+    let shape2 = tree.get_shape(nid2);
+    let pos2 = tree.get_pos(nid2);
+    let size2 = tree.get_size(nid2);
+    let actual_shape2 = tree.get_actual_shape(nid2);
+    let actual_pos2 = tree.get_actual_pos(nid2);
+    let actual_size2 = tree.get_actual_size(nid2);
+    assert!(
+      *shape2.unwrap()
+        == IRect::new(
+          (0, 0),
+          (
+            terminal_size.width() as isize,
+            terminal_size.height() as isize
+          )
+        )
+    );
     assert!(pos2.unwrap() == point!(x:0, y:0));
-    assert!(size2.unwrap() == ISize::new(3, 5));
-    assert!(*actual_shape2.unwrap() == U16Rect::new((0, 0), (3_u16, 5_u16)));
+    assert!(
+      size2.unwrap()
+        == ISize::new(
+          terminal_size.width() as isize,
+          terminal_size.height() as isize
+        )
+    );
+    assert!(
+      *actual_shape2.unwrap()
+        == U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()))
+    );
     assert!(actual_pos2.unwrap() == U16Pos::new(0_u16, 0_u16));
     assert!(actual_size2.unwrap() == U16Size::new(3_u16, 5_u16));
 
@@ -854,12 +882,12 @@ mod tests {
       n1.read().unwrap().id(),
       IRect::new((3, 5), (9, 10)),
     );
-    let shape3 = tree.get_shape(n3_id);
-    let pos3 = tree.get_pos(n3_id);
-    let size3 = tree.get_size(n3_id);
-    let actual_shape3 = tree.get_actual_shape(n3_id);
-    let actual_pos3 = tree.get_actual_pos(n3_id);
-    let actual_size3 = tree.get_actual_size(n3_id);
+    let shape3 = tree.get_shape(nid3);
+    let pos3 = tree.get_pos(nid3);
+    let size3 = tree.get_size(nid3);
+    let actual_shape3 = tree.get_actual_shape(nid3);
+    let actual_pos3 = tree.get_actual_pos(nid3);
+    let actual_size3 = tree.get_actual_size(nid3);
     assert!(*shape3.unwrap() == IRect::new((3, 5), (9, 10)));
     assert!(pos3.unwrap() == point!(x:3, y:5));
     assert!(size3.unwrap() == ISize::new(6, 5));
@@ -873,12 +901,12 @@ mod tests {
       n2.read().unwrap().id(),
       IRect::new((0, 0), (1, 1)),
     );
-    let shape4 = tree.get_shape(n4_id);
-    let pos4 = tree.get_pos(n4_id);
-    let size4 = tree.get_size(n4_id);
-    let actual_shape4 = tree.get_actual_shape(n4_id);
-    let actual_pos4 = tree.get_actual_pos(n4_id);
-    let actual_size4 = tree.get_actual_size(n4_id);
+    let shape4 = tree.get_shape(nid4);
+    let pos4 = tree.get_pos(nid4);
+    let size4 = tree.get_size(nid4);
+    let actual_shape4 = tree.get_actual_shape(nid4);
+    let actual_pos4 = tree.get_actual_pos(nid4);
+    let actual_size4 = tree.get_actual_size(nid4);
     assert!(*shape4.unwrap() == IRect::new((0, 0), (1, 1)));
     assert!(pos4.unwrap() == point!(x:0, y:0));
     assert!(size4.unwrap() == ISize::new(1, 1));
@@ -927,7 +955,7 @@ mod tests {
       ),
     ];
 
-    let node_ids = [n1_id, n2_id, n3_id, n4_id];
+    let node_ids = [nid1, nid2, nid3, nid4];
     for (i, id) in node_ids.iter().enumerate() {
       let shape = tree.get_shape(*id);
       let pos = tree.get_pos(*id);
