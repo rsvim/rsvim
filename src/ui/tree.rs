@@ -469,10 +469,13 @@ impl Tree {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::cart::{conversion, IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
+  use crate::cart::{
+    conversion, IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size, UPos, URect, USize,
+  };
   use crate::ui::frame;
   use crate::ui::term::{make_terminal_ptr, Terminal};
   use crate::ui::widget::{Cursor, RootWidget, Widget, Window};
+  use crate::{geo_rect_as, geo_size_as};
 
   #[test]
   fn tree_new() {
@@ -595,38 +598,39 @@ mod tests {
   #[test]
   fn tree_shape1() {
     let terminal = Terminal::new(U16Size::new(10, 10), frame::cursor::Cursor::default());
+    let terminal_size = terminal.size();
     let terminal = make_terminal_ptr(terminal);
 
     let mut tree = Tree::new(Arc::downgrade(&terminal));
 
     let n1 = RootWidget::new();
+    let n1_id = n1.id();
     let n1 = make_node_ptr(Node::RootWidgetNode(n1));
 
     let n2 = Window::default();
+    let n2_id = n2.id();
     let n2 = make_node_ptr(Node::WindowNode(n2));
 
     let n3 = Window::default();
+    let n3_id = n3.id();
     let n3 = make_node_ptr(Node::WindowNode(n3));
 
     let n4 = Cursor::default();
+    let n4_id = n4.id();
     let n4 = make_node_ptr(Node::CursorNode(n4));
 
-    tree.insert_root_node(
-      n1.read().unwrap().id(),
-      n1.clone(),
-      terminal.read().unwrap().size(),
-    );
+    tree.insert_root_node(n1.read().unwrap().id(), n1.clone(), terminal_size);
     tree.insert_node(
       n2.read().unwrap().id(),
       n2.clone(),
       n1.read().unwrap().id(),
-      IRect::new((0, 0), (10, 10)),
+      IRect::new((0, 0), (3, 5)),
     );
     tree.insert_node(
       n3.read().unwrap().id(),
       n3.clone(),
       n1.read().unwrap().id(),
-      IRect::new((0, 0), (10, 10)),
+      IRect::new((3, 5), (9, 10)),
     );
     tree.insert_node(
       n4.read().unwrap().id(),
@@ -634,5 +638,53 @@ mod tests {
       n2.read().unwrap().id(),
       IRect::new((0, 0), (1, 1)),
     );
+
+    let expects: Vec<(IRect, IPos, ISize, U16Rect, U16Pos, U16Size)> = vec![
+      (
+        IRect::new(
+          (0, 0),
+          (
+            terminal_size.width() as isize,
+            terminal_size.height() as isize,
+          ),
+        ),
+        point!(x:0, y:0),
+        geo_size_as!(terminal_size, isize),
+        U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height())),
+        point!(x: 0_u16, y: 0_u16),
+        terminal_size,
+      ),
+      (
+        IRect::new(
+          (0, 0),
+          (
+            terminal_size.width() as isize,
+            terminal_size.height() as isize,
+          ),
+        ),
+        point!(x:0, y:0),
+        geo_size_as!(terminal_size, isize),
+        U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height())),
+        point!(x: 0_u16, y: 0_u16),
+        terminal_size,
+      ),
+    ];
+
+    let node_ids = vec![n1_id, n2_id, n3_id, n4_id];
+    for (i, id) in node_ids.iter().enumerate() {
+      let shape = tree.get_shape(*id);
+      let pos = tree.get_pos(*id);
+      let size = tree.get_size(*id);
+      let actual_shape = tree.get_actual_shape(*id);
+      let actual_pos = tree.get_actual_pos(*id);
+      let actual_size = tree.get_actual_size(*id);
+      let expect = expects[i];
+      assert!(*shape.unwrap() == expect.0);
+      assert!(pos.unwrap() == expect.1);
+      assert!(size.unwrap() == expect.2);
+      assert!(*actual_shape.unwrap() == expect.3);
+      assert!(actual_pos.unwrap() == expect.4);
+      assert!(actual_size.unwrap() == expect.5);
+    }
   }
 }
