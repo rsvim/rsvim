@@ -60,6 +60,11 @@ pub mod node;
 ///    rendering to the terminal device, we need to calculate its absolute position and actual
 ///    size.
 ///
+///    The shape boundary uses top-left open, bottom-right closed interval. For example the
+///    terminal shape is `((0,0), (10,10))`, the top-left position `(0,0)` is inclusive, i.e.
+///    inside the shape, the bottom-right position `(10,10)` is exclusive, i.e. outside the shape.
+///    The width and height of the shape is both `10`.
+///
 ///    The absolute/actual shape is calculated with a "copy-on-write" policy. Based on the fact
 ///    that a widget's shape is often read and rarely modified, thus the "copy-on-write" policy to
 ///    avoid too many duplicated calculations. i.e. we always calculates a widget's absolute
@@ -648,6 +653,8 @@ mod tests {
       *actual_shape1.unwrap()
         == U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()))
     );
+    assert!(actual_pos1.unwrap() == U16Pos::new(0_u16, 0_u16));
+    assert!(actual_size1.unwrap() == terminal_size);
 
     tree.insert_node(
       n2.read().unwrap().id(),
@@ -655,12 +662,38 @@ mod tests {
       n1.read().unwrap().id(),
       IRect::new((0, 0), (3, 5)),
     );
+    let shape2 = tree.get_shape(n2_id);
+    let pos2 = tree.get_pos(n2_id);
+    let size2 = tree.get_size(n2_id);
+    let actual_shape2 = tree.get_actual_shape(n2_id);
+    let actual_pos2 = tree.get_actual_pos(n2_id);
+    let actual_size2 = tree.get_actual_size(n2_id);
+    assert!(*shape2.unwrap() == IRect::new((0, 0), (3, 5)));
+    assert!(pos2.unwrap() == point!(x:0, y:0));
+    assert!(size2.unwrap() == ISize::new(3, 5));
+    assert!(*actual_shape2.unwrap() == U16Rect::new((0, 0), (3_u16, 5_u16)));
+    assert!(actual_pos2.unwrap() == U16Pos::new(0_u16, 0_u16));
+    assert!(actual_size2.unwrap() == U16Size::new(3_u16, 5_u16));
+
     tree.insert_node(
       n3.read().unwrap().id(),
       n3.clone(),
       n1.read().unwrap().id(),
       IRect::new((3, 5), (9, 10)),
     );
+    let shape3 = tree.get_shape(n3_id);
+    let pos3 = tree.get_pos(n3_id);
+    let size3 = tree.get_size(n3_id);
+    let actual_shape3 = tree.get_actual_shape(n3_id);
+    let actual_pos3 = tree.get_actual_pos(n3_id);
+    let actual_size3 = tree.get_actual_size(n3_id);
+    assert!(*shape3.unwrap() == IRect::new((3, 5), (9, 10)));
+    assert!(pos3.unwrap() == point!(x:3, y:5));
+    assert!(size3.unwrap() == ISize::new(6, 5));
+    assert!(*actual_shape3.unwrap() == U16Rect::new((0, 0), (3_u16, 5_u16)));
+    assert!(actual_pos3.unwrap() == U16Pos::new(0_u16, 0_u16));
+    assert!(actual_size3.unwrap() == U16Size::new(3_u16, 5_u16));
+
     tree.insert_node(
       n4.read().unwrap().id(),
       n4.clone(),
