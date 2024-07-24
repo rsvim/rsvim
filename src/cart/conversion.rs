@@ -34,23 +34,48 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
   );
   let parent_actual_pos: U16Pos = parent_actual_shape.min().into();
   let parent_actual_ipos: IPos = geo_point_as!(parent_actual_pos, isize);
-  let pos: IPos = <IPos>::from(shape.min()) + parent_actual_ipos;
-  let bounded_x = min(max(pos.x(), 0), parent_actual_shape.width() as isize);
-  let bounded_y = min(max(pos.y(), 0), parent_actual_shape.height() as isize);
-  let actual_pos: U16Pos = point!(x: bounded_x as u16, y: bounded_y as u16);
-  debug!("pos:{:?}, actual_pos:{:?}", pos, actual_pos);
-
+  let top_left_pos: IPos = shape.min().into();
   let bottom_right_pos: IPos = shape.max().into();
-  let bottom_right_bounded_x = min(bottom_right_pos.x(), parent_actual_shape.width() as isize);
-  let bottom_right_bounded_y = min(bottom_right_pos.y(), parent_actual_shape.height() as isize);
-  let bottom_right_actual_pos: IPos = point!(x: bottom_right_bounded_x, y: bottom_right_bounded_y);
+
+  let actual_top_left_ipos: IPos = top_left_pos + parent_actual_ipos;
+  let actual_top_left_x = min(
+    max(actual_top_left_ipos.x(), 0),
+    parent_actual_shape.width() as isize,
+  );
+  let actual_top_left_y = min(
+    max(actual_top_left_ipos.y(), 0),
+    parent_actual_shape.height() as isize,
+  );
+  let actual_top_left_pos: U16Pos =
+    point!(x: actual_top_left_x as u16, y: actual_top_left_y as u16);
+  debug!(
+    "pos:{:?}, actual_pos:{:?}",
+    actual_top_left_ipos, actual_top_left_pos
+  );
+
+  let actual_bottom_right_ipos: IPos = bottom_right_pos + parent_actual_ipos;
+  let actual_bottom_right_x = min(
+    max(actual_bottom_right_ipos.x(), 0),
+    parent_actual_shape.width() as isize,
+  );
+  let actual_bottom_right_y = min(
+    max(actual_bottom_right_ipos.y(), 0),
+    parent_actual_shape.height() as isize,
+  );
+  let actual_bottom_right_pos: U16Pos =
+    point!(x: actual_bottom_right_x as u16, y: actual_bottom_right_y as u16);
+
   let actual_isize = ISize::new(
-    bottom_right_actual_pos.x() - actual_pos.x() as isize,
-    bottom_right_actual_pos.y() - actual_pos.y() as isize,
+    (actual_bottom_right_pos.x() as isize) - (actual_top_left_pos.x() as isize),
+    (actual_bottom_right_pos.y() as isize) - (actual_top_left_pos.y() as isize),
+  );
+  debug!(
+    "actual_isize:{:?}, actual_pos:{:?}",
+    actual_isize, actual_top_left_pos
   );
   let actual_shape = U16Rect::new(
-    actual_pos,
-    point!(x: actual_pos.x() + actual_isize.width() as u16, y: actual_pos.y() + actual_isize.height() as u16),
+    actual_top_left_pos,
+    point!(x: actual_top_left_pos.x() + actual_isize.width() as u16, y: actual_top_left_pos.y() + actual_isize.height() as u16),
   );
   debug!(
     "actual_isize:{:?}, actual_shape:{:?}",
