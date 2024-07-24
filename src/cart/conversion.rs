@@ -28,12 +28,17 @@ use crate::geo_point_as;
 /// Convert relative/logical shape to actual shape.
 /// Note: If the widget doesn't have a parent, use the terminal shape as its parent's shape.
 pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
+  debug!(
+    "shape:{:?}, parent_actual_shape:{:?}",
+    shape, parent_actual_shape
+  );
   let parent_actual_pos: U16Pos = parent_actual_shape.min().into();
   let parent_actual_ipos: IPos = geo_point_as!(parent_actual_pos, isize);
   let pos: IPos = <IPos>::from(shape.min()) + parent_actual_ipos;
   let bounded_x = min(max(pos.x(), 0), parent_actual_shape.width() as isize);
   let bounded_y = min(max(pos.y(), 0), parent_actual_shape.height() as isize);
   let actual_pos: U16Pos = point!(x: bounded_x as u16, y: bounded_y as u16);
+  debug!("pos:{:?}, actual_pos:{:?}", pos, actual_pos);
 
   let bottom_right_pos: IPos = shape.max().into();
   let bottom_right_bounded_x = min(bottom_right_pos.x(), parent_actual_shape.width() as isize);
@@ -43,10 +48,16 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
     bottom_right_actual_pos.x() - actual_pos.x() as isize,
     bottom_right_actual_pos.y() - actual_pos.y() as isize,
   );
-  U16Rect::new(
+  let actual_shape = U16Rect::new(
     actual_pos,
     point!(x: actual_pos.x() + actual_isize.width() as u16, y: actual_pos.y() + actual_isize.height() as u16),
-  )
+  );
+  debug!(
+    "actual_isize:{:?}, actual_shape:{:?}",
+    actual_isize, actual_shape
+  );
+
+  actual_shape
 }
 
 #[cfg(test)]
