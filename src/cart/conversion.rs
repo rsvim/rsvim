@@ -20,6 +20,7 @@
 
 use geo::point;
 use std::cmp::{max, min};
+use tracing::debug;
 
 use crate::cart::{IPos, IRect, ISize, U16Pos, U16Rect};
 use crate::geo_point_as;

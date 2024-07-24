@@ -1,10 +1,10 @@
 //! Widget tree that manages all the widget components.
 
+use geo::point;
 use std::collections::VecDeque;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::{Arc, RwLock, Weak};
-
-use geo::point;
+use tracing::debug;
 
 use crate::cart::{conversion, IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
 use crate::geo_rect_as;
@@ -213,14 +213,25 @@ impl Tree {
     self.parent_ids.insert(id, parent_id);
     self.edges.insert(Edge::new(parent_id, id));
     let actual_shape = match self.attributes.get(&parent_id) {
-      Some(parent_attribute) => conversion::to_actual_shape(shape, parent_attribute.actual_shape),
+      Some(parent_attribute) => {
+        debug!(
+          "Calculate actual shape with parent actual shape:{:?}, shape:{:?}",
+          parent_attribute.actual_shape, shape
+        );
+        conversion::to_actual_shape(shape, parent_attribute.actual_shape)
+      }
       None => {
         let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
         let terminal_actual_shape =
           U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
+        debug!(
+          "Calculate actual shape with terminal actual shape:{:?}, shape:{:?}",
+          terminal_actual_shape, shape
+        );
         conversion::to_actual_shape(shape, terminal_actual_shape)
       }
     };
+    debug!("Calculated actual shape:{:?}", actual_shape);
     self
       .attributes
       .insert(id, NodeAttribute::default(shape, actual_shape));
