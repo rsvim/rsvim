@@ -808,6 +808,20 @@ mod tests {
     let actual_shape1 = tree.get_actual_shape(nid1);
     let actual_pos1 = tree.get_actual_pos(nid1);
     let actual_size1 = tree.get_actual_size(nid1);
+    let expect1: (IRect, IPos, ISize, U16Rect, U16Pos, U16Size) = (
+      IRect::new(
+        (0, 0),
+        (
+          terminal_size.width() as isize,
+          terminal_size.height() as isize,
+        ),
+      ),
+      point!(x:0,y:0),
+      ISize::new(
+        terminal_size.width() as isize,
+        terminal_size.height() as isize,
+      ),
+    );
     assert!(
       *shape1.unwrap()
         == IRect::new(
@@ -903,6 +917,20 @@ mod tests {
     assert!(*actual_shape4.unwrap() == U16Rect::new((5, 10), (15_u16, 18_u16)));
     assert!(actual_pos4.unwrap() == U16Pos::new(5_u16, 10_u16));
     assert!(actual_size4.unwrap() == U16Size::new(10_u16, 8_u16));
+
+    tree.insert_node(nid5, n5.clone(), nid4, IRect::new((7, 3), (8, 4)));
+    let shape5 = tree.get_shape(nid5);
+    let pos5 = tree.get_pos(nid5);
+    let size5 = tree.get_size(nid5);
+    let actual_shape5 = tree.get_actual_shape(nid5);
+    let actual_pos5 = tree.get_actual_pos(nid5);
+    let actual_size5 = tree.get_actual_size(nid5);
+    assert!(*shape5.unwrap() == IRect::new((7, 3), (8, 4)));
+    assert!(pos5.unwrap() == point!(x:7, y:3));
+    assert!(size5.unwrap() == ISize::new(1, 1));
+    assert!(*actual_shape5.unwrap() == U16Rect::new((12, 13), (13_u16, 14_u16)));
+    assert!(actual_pos5.unwrap() == U16Pos::new(12_u16, 13_u16));
+    assert!(actual_size5.unwrap() == U16Size::new(1_u16, 1_u16));
 
     let expects: Vec<(IRect, IPos, ISize, U16Rect, U16Pos, U16Size)> = vec![
       (
