@@ -620,6 +620,35 @@ mod tests {
     let n4 = make_node_ptr(Node::CursorNode(n4));
 
     tree.insert_root_node(n1.read().unwrap().id(), n1.clone(), terminal_size);
+    let shape1 = tree.get_shape(n1_id);
+    let pos1 = tree.get_pos(n1_id);
+    let size1 = tree.get_size(n1_id);
+    let actual_shape1 = tree.get_actual_shape(n1_id);
+    let actual_pos1 = tree.get_actual_pos(n1_id);
+    let actual_size1 = tree.get_actual_size(n1_id);
+    assert!(
+      *shape1.unwrap()
+        == IRect::new(
+          (0, 0),
+          (
+            terminal_size.width() as isize,
+            terminal_size.height() as isize
+          )
+        )
+    );
+    assert!(pos1.unwrap() == point!(x:0, y:0));
+    assert!(
+      size1.unwrap()
+        == ISize::new(
+          terminal_size.width() as isize,
+          terminal_size.height() as isize
+        )
+    );
+    assert!(
+      *actual_shape1.unwrap()
+        == U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()))
+    );
+
     tree.insert_node(
       n2.read().unwrap().id(),
       n2.clone(),
@@ -680,7 +709,7 @@ mod tests {
       ),
     ];
 
-    let node_ids = vec![n1_id, n2_id, n3_id, n4_id];
+    let node_ids = [n1_id, n2_id, n3_id, n4_id];
     for (i, id) in node_ids.iter().enumerate() {
       let shape = tree.get_shape(*id);
       let pos = tree.get_pos(*id);
