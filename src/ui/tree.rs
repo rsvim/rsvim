@@ -234,6 +234,7 @@ impl Tree {
       && self.children_ids.is_empty()
       && self.parent_ids.is_empty()
       && self.attributes.is_empty()
+      && self.window_ids.is_empty()
   }
 
   // Node {
@@ -253,7 +254,7 @@ impl Tree {
   /// Get the root node ID.
   ///
   /// Returns the root node ID if exists, returns `None` if not.
-  pub fn get_root_id(&self) -> Option<NodeId> {
+  pub fn get_root_node_id(&self) -> Option<NodeId> {
     self.root_id
   }
 
@@ -337,9 +338,14 @@ impl Tree {
     if self.is_empty() {
       return None;
     }
+    let edge = Edge::new(parent_id, id);
     // Fails if node already exists, or parent node not exists.
-    let node_existed =
-      self.root_id == Some(id) || self.nodes.contains_key(&id) || self.parent_ids.contains_key(&id);
+    let node_existed = self.root_id == Some(id)
+      || self.nodes.contains_key(&id)
+      || self.attributes.contains_key(&id)
+      || self.window_ids.contains(&id)
+      || self.parent_ids.contains_key(&id)
+      || self.edges.contains(&edge);
     let parent_not_existed = !self.children_ids.contains_key(&parent_id);
     if node_existed || parent_not_existed {
       return None;
@@ -347,7 +353,7 @@ impl Tree {
 
     self.children_ids.get_mut(&parent_id).unwrap().insert(id);
     self.parent_ids.insert(id, parent_id);
-    self.edges.insert(Edge::new(parent_id, id));
+    self.edges.insert(edge);
     let actual_shape = match self.attributes.get(&parent_id) {
       Some(parent_attribute) => {
         debug!(
@@ -755,7 +761,7 @@ mod tests {
     assert!(tree.get_edges().is_empty());
     assert!(tree.get_children_ids().is_empty());
     assert!(tree.get_parent_ids().is_empty());
-    assert!(tree.get_root_id().is_none());
+    assert!(tree.get_root_node_id().is_none());
     assert!(tree.get_window_ids().is_empty());
     assert!(tree.get_attributes().is_empty());
   }
@@ -815,7 +821,7 @@ mod tests {
     assert!(tree.get_edges().len() == 3);
     assert!(tree.get_children_ids().len() == 2);
     assert!(tree.get_parent_ids().len() == 3);
-    assert!(tree.get_root_id().unwrap() == n1.read().unwrap().id());
+    assert!(tree.get_root_node_id().unwrap() == n1.read().unwrap().id());
     assert!(tree.get_window_ids().len() == 2);
     assert!(tree.get_attributes().len() == 4);
 
