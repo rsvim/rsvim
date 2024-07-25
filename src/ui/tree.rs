@@ -1157,4 +1157,166 @@ mod tests {
       assert!(actual_size.unwrap() == expect.5);
     }
   }
+
+  #[test]
+  fn tree_remove() {
+    INIT.call_once(|| {
+      test_log_init();
+    });
+
+    let terminal_size = U16Size::new(50, 50);
+    let terminal = Terminal::new(terminal_size);
+    let terminal = make_terminal_ptr(terminal);
+
+    let mut tree = Tree::new(Arc::downgrade(&terminal));
+
+    let n1 = RootWidget::new();
+    let nid1 = n1.id();
+    let n1 = make_node_ptr(Node::RootWidgetNode(n1));
+
+    let n2 = Window::default();
+    let nid2 = n2.id();
+    let n2 = make_node_ptr(Node::WindowNode(n2));
+
+    let n3 = Window::default();
+    let nid3 = n3.id();
+    let n3 = make_node_ptr(Node::WindowNode(n3));
+
+    let n4 = Window::default();
+    let nid4 = n4.id();
+    let n4 = make_node_ptr(Node::WindowNode(n4));
+
+    let n5 = Cursor::default();
+    let nid5 = n5.id();
+    let n5 = make_node_ptr(Node::CursorNode(n5));
+
+    tree.insert_root_node(nid1, n1.clone(), terminal_size);
+    let shape1 = tree.get_shape(nid1);
+    let pos1 = tree.get_pos(nid1);
+    let size1 = tree.get_size(nid1);
+    let actual_shape1 = tree.get_actual_shape(nid1);
+    let actual_pos1 = tree.get_actual_pos(nid1);
+    let actual_size1 = tree.get_actual_size(nid1);
+    let expect1: (IRect, IPos, ISize, U16Rect, U16Pos, U16Size) = (
+      IRect::new(
+        (0, 0),
+        (
+          terminal_size.width() as isize,
+          terminal_size.height() as isize,
+        ),
+      ),
+      point!(x:0,y:0),
+      ISize::new(
+        terminal_size.width() as isize,
+        terminal_size.height() as isize,
+      ),
+      U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height())),
+      U16Pos::new(0_u16, 0_u16),
+      terminal_size,
+    );
+    info!(
+      "expect-1:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
+      expect1, shape1, pos1, size1, actual_shape1, actual_pos1, actual_size1,
+    );
+
+    tree.insert_node(
+      nid2,
+      n2.clone(),
+      nid1,
+      IRect::new(
+        (0, 0),
+        (
+          terminal_size.width() as isize,
+          terminal_size.height() as isize,
+        ),
+      ),
+    );
+    let shape2 = tree.get_shape(nid2);
+    let pos2 = tree.get_pos(nid2);
+    let size2 = tree.get_size(nid2);
+    let actual_shape2 = tree.get_actual_shape(nid2);
+    let actual_pos2 = tree.get_actual_pos(nid2);
+    let actual_size2 = tree.get_actual_size(nid2);
+    let expect2: (IRect, IPos, ISize, U16Rect, U16Pos, U16Size) = (
+      IRect::new(
+        (0, 0),
+        (
+          terminal_size.width() as isize,
+          terminal_size.height() as isize,
+        ),
+      ),
+      point!(x:0, y:0),
+      ISize::new(
+        terminal_size.width() as isize,
+        terminal_size.height() as isize,
+      ),
+      U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height())),
+      U16Pos::new(0_u16, 0_u16),
+      terminal_size,
+    );
+    info!(
+      "expect-2:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
+      expect2, shape2, pos2, size2, actual_shape2, actual_pos2, actual_size2,
+    );
+
+    tree.insert_node(nid3, n3.clone(), nid2, IRect::new((-2, -3), (4, 2)));
+    let shape3 = tree.get_shape(nid3);
+    let pos3 = tree.get_pos(nid3);
+    let size3 = tree.get_size(nid3);
+    let actual_shape3 = tree.get_actual_shape(nid3);
+    let actual_pos3 = tree.get_actual_pos(nid3);
+    let actual_size3 = tree.get_actual_size(nid3);
+    let expect3: (IRect, IPos, ISize, U16Rect, U16Pos, U16Size) = (
+      IRect::new((-2, -3), (4, 2)),
+      point!(x:-2, y:-3),
+      ISize::new(6, 5),
+      U16Rect::new((0, 0), (4_u16, 2_u16)),
+      U16Pos::new(0_u16, 0_u16),
+      U16Size::new(4_u16, 2_u16),
+    );
+    info!(
+      "expect-3:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
+      expect3, shape3, pos3, size3, actual_shape3, actual_pos3, actual_size3,
+    );
+
+    tree.insert_node(nid4, n4.clone(), nid2, IRect::new((5, 10), (15, 18)));
+    let shape4 = tree.get_shape(nid4);
+    let pos4 = tree.get_pos(nid4);
+    let size4 = tree.get_size(nid4);
+    let actual_shape4 = tree.get_actual_shape(nid4);
+    let actual_pos4 = tree.get_actual_pos(nid4);
+    let actual_size4 = tree.get_actual_size(nid4);
+    let expect4: (IRect, IPos, ISize, U16Rect, U16Pos, U16Size) = (
+      IRect::new((5, 10), (15, 18)),
+      point!(x:5, y:10),
+      ISize::new(10, 8),
+      U16Rect::new((5, 10), (15_u16, 18_u16)),
+      U16Pos::new(5_u16, 10_u16),
+      U16Size::new(10_u16, 8_u16),
+    );
+    info!(
+      "expect-4:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
+      expect4, shape4, pos4, size4, actual_shape4, actual_pos4, actual_size4,
+    );
+
+    tree.insert_node(nid5, n5.clone(), nid4, IRect::new((7, 3), (8, 4)));
+    let shape5 = tree.get_shape(nid5);
+    let pos5 = tree.get_pos(nid5);
+    let size5 = tree.get_size(nid5);
+    let actual_shape5 = tree.get_actual_shape(nid5);
+    let actual_pos5 = tree.get_actual_pos(nid5);
+    let actual_size5 = tree.get_actual_size(nid5);
+    let expect5: (IRect, IPos, ISize, U16Rect, U16Pos, U16Size) = (
+      IRect::new((7, 3), (8, 4)),
+      point!(x:7, y:3),
+      ISize::new(1, 1),
+      U16Rect::new((12, 13), (13_u16, 14_u16)),
+      U16Pos::new(12_u16, 13_u16),
+      U16Size::new(1_u16, 1_u16),
+    );
+    info!(
+      "expect-5:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
+      expect5, shape5, pos5, size5, actual_shape5, actual_pos5, actual_size5,
+    );
+  }
 }
