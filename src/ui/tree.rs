@@ -4,7 +4,6 @@ use geo::point;
 use std::cmp::{max, min};
 use std::collections::VecDeque;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
-use std::intrinsics::unreachable;
 use std::sync::{Arc, RwLock, Weak};
 use tracing::debug;
 
