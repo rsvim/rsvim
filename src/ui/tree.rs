@@ -255,6 +255,10 @@ impl Tree {
   ///
   /// Note: When the node is the first inserted node (root node), it doesn't need to provide the
   /// `parent_id`, and the `shape` should be the terminal's actual shape.
+  ///
+  /// # Panics
+  ///
+  /// Panics if there's already a root node when inserting a root node without the `parent_id`.
   pub fn insert_node(
     &mut self,
     id: NodeId,
@@ -307,6 +311,9 @@ impl Tree {
     parent_id: NodeId,
     shape: IRect,
   ) -> Option<NodePtr> {
+    assert!(self.root_id.is_some());
+    assert!(self.root_id.unwrap() != id);
+
     match self.children_ids.get_mut(&parent_id) {
       Some(children) => {
         children.insert(id);
@@ -359,6 +366,59 @@ impl Tree {
   /// When removing a node, this operation also removes the connection between the node and its
   /// parent (if any).
   pub fn remove_node(&mut self, id: NodeId) -> Option<NodePtr> {
+    if self.root_id == Some(id) {
+      return None;
+    }
+    if !self.parent_ids.contains_key(&id) {
+      return None;
+    }
+    if !self.nodes.contains_key(&id) {
+      return None;
+    }
+
+    let parent_id = self.parent_ids.remove(&id).unwrap();
+    assert!(self.children_ids.contains_key(&parent_id));
+
+    let child_removed = self.children_ids.get_mut(&parent_id).unwrap().remove(&id);
+    assert!(child_removed);
+
+    let attribute_removed = self.attributes.remove(&id);
+    assert!(attribute_removed.is_some());
+
+    let edge_removed = self.edges.remove(&Edge::new(parent_id, id));
+    assert!(edge_removed);
+
+    let removed_node = self.nodes.remove(&id).unwrap();
+
+    let removed_window = self.window_ids.remove(&id);
+    match &*removed_node.read().unwrap() {
+      Node::WindowNode(_) => assert!(removed_window),
+      _ => assert!(!removed_window),
+    }
+
+    Some(removed_node)
+  }
+
+  /// Removes an ancestor (non-leaf) node by its ID.
+  ///
+  /// This operation removes the node itself, and all its descendant nodes in the sub-tree (the
+  /// node plays the role of the root node in this sub-tree).
+  ///
+  /// Returns the removed sub-tree if success.
+  /// Returns `None` if failed.
+  pub fn remove_ancestor_node(&mut self, id: NodeId) -> Option<TreePtr> {}
+
+  /// Remove the leaf node by its ID.
+  ///
+  /// Returns the removed node if it exists, returns `None` if not.
+  /// Returns `None` if the node is root node.
+  ///
+  /// This operation also removes the connection between the leaf node and its parent.
+  ///
+  /// # Panics
+  ///
+  /// Panics if it's not a leaf node.
+  pub fn remove_leaf_node(&mut self, id: NodeId) -> Option<NodePtr> {
     if self.root_id == Some(id) {
       return None;
     }
