@@ -279,7 +279,7 @@ impl Tree {
   /// # Panics
   ///
   /// Panics if there's already a root node.
-  fn insert_root_node(
+  pub fn insert_root_node(
     &mut self,
     id: NodeId,
     node: NodePtr,
@@ -296,11 +296,11 @@ impl Tree {
     result
   }
 
-  /// Insert non-root node (descendant node), with ID, parent's ID, shape.
+  /// Insert non-root (descendant) node, with ID, parent's ID, shape.
   /// This operation also binds the connection between the inserted node and its parent.
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
-  fn insert_descendant_node(
+  pub fn insert_descendant_node(
     &mut self,
     id: NodeId,
     node: NodePtr,
