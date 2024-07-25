@@ -1,6 +1,7 @@
 //! Widget node in the tree.
 
-use std::sync::{Arc, RwLock, Weak};
+use std::cell::RefCell;
+use std::rc::{Rc, Weak};
 
 use crate::cart::{IRect, U16Rect};
 use crate::ui::term::TerminalWk;
@@ -19,11 +20,11 @@ pub enum Node {
   WindowNode(Window),
 }
 
-pub type NodePtr = Arc<RwLock<Node>>;
-pub type NodeWk = Weak<RwLock<Node>>;
+pub type NodePtr = Rc<RefCell<Node>>;
+pub type NodeWk = Weak<RefCell<Node>>;
 
-pub fn make_node_ptr(n: Node) -> Arc<RwLock<Node>> {
-  Arc::new(RwLock::new(n))
+pub fn make_node_ptr(n: Node) -> NodePtr {
+  Rc::new(RefCell::new(n))
 }
 
 impl PartialOrd for Node {

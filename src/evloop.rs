@@ -18,6 +18,7 @@ use crossterm::{cursor as termcursor, queue, terminal};
 use futures::StreamExt;
 use geo::point;
 use heed::types::U16;
+use std::borrow::Borrow;
 use std::io::{Result as IoResult, Write};
 use std::sync::{Arc, RwLock};
 use tracing::debug;
@@ -36,34 +37,24 @@ impl EventLoop {
     let mut tree = Tree::new(Arc::downgrade(&screen));
 
     let root_widget = RootWidget::default();
+    let root_widget_id = root_widget.id();
     let root_widget_node = make_node_ptr(Node::RootWidgetNode(root_widget));
-    tree.insert_root_node(
-      root_widget_node.read().unwrap().id(),
-      root_widget_node.clone(),
-      screen_size,
-    );
+    tree.insert_root_node(root_widget_id, root_widget_node.clone(), screen_size);
+
     let window = Window::default();
+    let window_id = window.id();
     let window_node = make_node_ptr(Node::WindowNode(window));
     let window_shape = IRect::new(
       (0, 0),
       (screen_size.width() as isize, screen_size.height() as isize),
     );
-    tree.insert_node(
-      window_node.read().unwrap().id(),
-      window_node.clone(),
-      root_widget_node.read().unwrap().id(),
-      window_shape,
-    );
+    tree.insert_node(window_id, window_node.clone(), root_widget_id, window_shape);
 
     let cursor = Cursor::default();
+    let cursor_id = cursor.id();
     let cursor_node = make_node_ptr(Node::CursorNode(cursor));
     let cursor_shape = IRect::new((0, 0), (1, 1));
-    tree.insert_node(
-      cursor_node.read().unwrap().id(),
-      cursor_node.clone(),
-      window_node.read().unwrap().id(),
-      cursor_shape,
-    );
+    tree.insert_node(cursor_id, cursor_node.clone(), window_id, cursor_shape);
 
     Ok(EventLoop {
       screen,
