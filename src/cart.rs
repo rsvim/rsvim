@@ -48,8 +48,6 @@
 use geo::{Point, Rect};
 use std::marker::Copy;
 
-pub mod conversion;
-
 // Positions {
 
 pub type IPos = Point<isize>;
