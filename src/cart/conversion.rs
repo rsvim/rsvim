@@ -101,7 +101,32 @@ mod tests {
   use std::cmp::min;
 
   #[test]
-  fn convert_to_actual_shapes() {
+  fn convert_actual_shapes() {
+    let inputs: Vec<IRect> = vec![
+      IRect::new((0, 0), (3, 5)),
+      IRect::new((0, 0), (1, 5)),
+      IRect::new((0, 0), (3, 7)),
+      IRect::new((0, 0), (0, 0)),
+      IRect::new((0, 0), (5, 4)),
+    ];
+    for t in inputs.iter() {
+      for p in 0..10 {
+        for q in 0..10 {
+          let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
+          let expect = U16Rect::new((0, 0), (min(t.max().x, p) as u16, min(t.max().y, q) as u16));
+          let actual = to_actual_shape(*t, input_actual_parent_shape);
+          // println!(
+          //   "cart::conversion::tests::convert_to_actual_shapes expect:{:?}, actual:{:?}",
+          //   expect, actual
+          // );
+          assert_eq!(actual, expect);
+        }
+      }
+    }
+  }
+
+  #[test]
+  fn convert_actual_shapes_with_negatives() {
     let inputs: Vec<IRect> = vec![
       IRect::new((0, 0), (3, 5)),
       IRect::new((0, 0), (1, 5)),
