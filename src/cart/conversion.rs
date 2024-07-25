@@ -32,19 +32,22 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
     "shape:{:?}, parent_actual_shape:{:?}",
     shape, parent_actual_shape
   );
-  let parent_actual_pos: U16Pos = parent_actual_shape.min().into();
-  let parent_actual_ipos: IPos = geo_point_as!(parent_actual_pos, isize);
+  let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
+  let parent_actual_top_left_ipos: IPos = geo_point_as!(parent_actual_top_left_pos, isize);
+  let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
+  let parent_actual_bottom_right_ipos: IPos = geo_point_as!(parent_actual_bottom_right_pos, isize);
+
   let top_left_pos: IPos = shape.min().into();
   let bottom_right_pos: IPos = shape.max().into();
 
-  let actual_top_left_ipos: IPos = top_left_pos + parent_actual_ipos;
+  let actual_top_left_ipos: IPos = top_left_pos + parent_actual_top_left_ipos;
   let actual_top_left_x = min(
-    max(actual_top_left_ipos.x(), 0),
-    parent_actual_shape.width() as isize,
+    max(actual_top_left_ipos.x(), parent_actual_top_left_ipos.x()),
+    parent_actual_bottom_right_ipos.x(),
   );
   let actual_top_left_y = min(
-    max(actual_top_left_ipos.y(), 0),
-    parent_actual_shape.height() as isize,
+    max(actual_top_left_ipos.y(), parent_actual_top_left_ipos.y()),
+    parent_actual_bottom_right_ipos.y(),
   );
   let actual_top_left_pos: U16Pos =
     point!(x: actual_top_left_x as u16, y: actual_top_left_y as u16);
@@ -53,14 +56,20 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
     actual_top_left_ipos, actual_top_left_pos
   );
 
-  let actual_bottom_right_ipos: IPos = bottom_right_pos + parent_actual_ipos;
+  let actual_bottom_right_ipos: IPos = bottom_right_pos + parent_actual_top_left_ipos;
   let actual_bottom_right_x = min(
-    max(actual_bottom_right_ipos.x(), 0),
-    parent_actual_shape.width() as isize,
+    max(
+      actual_bottom_right_ipos.x(),
+      parent_actual_top_left_ipos.x(),
+    ),
+    parent_actual_bottom_right_ipos.x(),
   );
   let actual_bottom_right_y = min(
-    max(actual_bottom_right_ipos.y(), 0),
-    parent_actual_shape.height() as isize,
+    max(
+      actual_bottom_right_ipos.y(),
+      parent_actual_top_left_ipos.y(),
+    ),
+    parent_actual_bottom_right_ipos.y(),
   );
   let actual_bottom_right_pos: U16Pos =
     point!(x: actual_bottom_right_x as u16, y: actual_bottom_right_y as u16);

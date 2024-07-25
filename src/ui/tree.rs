@@ -931,7 +931,7 @@ mod tests {
       U16Size::new(4_u16, 2_u16),
     );
     info!(
-      "expect-3:{:?}, shape/pos/size-3:{:?}/{:?}/{:?}, actual shape/pos/size-3:{:?}/{:?}/{:?}",
+      "expect-3:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
       expect3, shape3, pos3, size3, actual_shape3, actual_pos3, actual_size3,
     );
     assert!(*shape3.unwrap() == expect3.0);
@@ -957,7 +957,7 @@ mod tests {
       U16Size::new(10_u16, 8_u16),
     );
     info!(
-      "expect-4:{:?}, shape/pos/size-4:{:?}/{:?}/{:?}, actual shape/pos/size-4:{:?}/{:?}/{:?}",
+      "expect-4:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
       expect4, shape4, pos4, size4, actual_shape4, actual_pos4, actual_size4,
     );
     assert!(*shape4.unwrap() == expect4.0);
@@ -983,7 +983,7 @@ mod tests {
       U16Size::new(1_u16, 1_u16),
     );
     info!(
-      "expect-5:{:?}, shape/pos/size-5:{:?}/{:?}/{:?}, actual shape/pos/size-5:{:?}/{:?}/{:?}",
+      "expect-5:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
       expect5, shape5, pos5, size5, actual_shape5, actual_pos5, actual_size5,
     );
     assert!(*shape5.unwrap() == expect5.0);
