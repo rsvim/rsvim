@@ -858,7 +858,7 @@ mod tests {
       terminal_size,
     );
     info!(
-      "expect-1:{:?}, shape/pos/size-1:{:?}/{:?}/{:?}, actual shape/pos/size-1:{:?}/{:?}/{:?}",
+      "expect-1:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
       expect1, shape1, pos1, size1, actual_shape1, actual_pos1, actual_size1,
     );
     assert!(*shape1.unwrap() == expect1.0);
@@ -904,7 +904,7 @@ mod tests {
       terminal_size,
     );
     info!(
-      "expect-2:{:?}, shape/pos/size-2:{:?}/{:?}/{:?}, actual shape/pos/size-2:{:?}/{:?}/{:?}",
+      "expect-2:{:?}, shape:{:?}, pos:{:?}, size:{:?}, actual shape:{:?}, actual pos:{:?}, actual size:{:?}",
       expect2, shape2, pos2, size2, actual_shape2, actual_pos2, actual_size2,
     );
 
