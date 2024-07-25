@@ -227,6 +227,15 @@ impl Tree {
     }
   }
 
+  pub fn is_empty(&self) -> bool {
+    self.root_id.is_none()
+      && self.nodes.is_empty()
+      && self.edges.is_empty()
+      && self.children_ids.is_empty()
+      && self.parent_ids.is_empty()
+      && self.attributes.is_empty()
+  }
+
   // Node {
 
   /// Get the collection of all nodes.
@@ -285,23 +294,17 @@ impl Tree {
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
   ///
-  /// # Panics
-  ///
-  /// Panics if:
-  /// 1. The root node already exists.
-  /// 2. There's already other nodes.
+  /// Fails if the tree is not empty.
   pub fn insert_root_node(
     &mut self,
     id: NodeId,
     node: NodePtr,
     terminal_size: U16Size,
   ) -> Option<NodePtr> {
-    // root id must not exists.
-    assert!(self.root_id.is_none());
-    // parent ids collection is empty
-    assert!(self.children_ids.is_empty());
-    // children ids collection is empty
-    assert!(self.parent_ids.is_empty());
+    // Fails if the tree is not empty.
+    if !self.is_empty() {
+      return None;
+    }
 
     self.root_id = Some(id);
     self.children_ids.insert(id, HashSet::new());
@@ -319,10 +322,8 @@ impl Tree {
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
   ///
-  /// # Panics
-  ///
-  /// Panics if:
-  /// 1. The root node not exists.
+  /// Fails if:
+  /// 1. The tree is empty.
   /// 2. The `parent_id` not exists.
   /// 3. The `id` already exists.
   pub fn insert_descendant_node(
@@ -332,13 +333,17 @@ impl Tree {
     parent_id: NodeId,
     shape: IRect,
   ) -> Option<NodePtr> {
-    // root node must exists, and it's not the `id`.
-    assert!(self.root_id.is_some());
-    assert!(self.root_id.unwrap() != id);
-    // `parent_id` must already exists.
-    assert!(self.children_ids.contains_key(&parent_id));
-    // `id` must not exists.
-    assert!(!self.parent_ids.contains_key(&id));
+    // Fails if tree is empty.
+    if self.is_empty() {
+      return None;
+    }
+    // Fails if node already exists, or parent node not exists.
+    let node_existed =
+      self.root_id == Some(id) || self.nodes.contains_key(&id) || self.parent_ids.contains_key(&id);
+    let parent_not_existed = !self.children_ids.contains_key(&parent_id);
+    if node_existed || parent_not_existed {
+      return None;
+    }
 
     self.children_ids.get_mut(&parent_id).unwrap().insert(id);
     self.parent_ids.insert(id, parent_id);
