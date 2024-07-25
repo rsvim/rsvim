@@ -249,7 +249,7 @@ impl Tree {
   }
 
   /// Insert node, with ID, parent's ID, shape.
-  /// This operation also binds the connection between the inserted node and its parent.
+  /// This operation also binds the connection between the inserted node and its parent (if any).
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
   ///
@@ -851,7 +851,7 @@ mod tests {
     tree.insert_node(
       n2.read().unwrap().id(),
       n2.clone(),
-      n1.read().unwrap().id(),
+      Some(n1.read().unwrap().id()),
       IRect::new((0, 0), (3, 5)),
     );
     let shape2 = tree.get_shape(n2_id);
@@ -870,7 +870,7 @@ mod tests {
     tree.insert_node(
       n3.read().unwrap().id(),
       n3.clone(),
-      n1.read().unwrap().id(),
+      Some(n1.read().unwrap().id()),
       IRect::new((3, 5), (9, 10)),
     );
     let shape3 = tree.get_shape(n3_id);
@@ -889,7 +889,7 @@ mod tests {
     tree.insert_node(
       n4.read().unwrap().id(),
       n4.clone(),
-      n2.read().unwrap().id(),
+      Some(n2.read().unwrap().id()),
       IRect::new((0, 0), (1, 1)),
     );
     let shape4 = tree.get_shape(n4_id);
@@ -1038,7 +1038,7 @@ mod tests {
     tree.insert_node(
       nid2,
       n2.clone(),
-      nid1,
+      Some(nid1),
       IRect::new(
         (0, 0),
         (
@@ -1082,7 +1082,7 @@ mod tests {
     assert!(actual_pos2.unwrap() == expect2.4);
     assert!(actual_size2.unwrap() == expect2.5);
 
-    tree.insert_node(nid3, n3.clone(), nid2, IRect::new((-2, -3), (4, 2)));
+    tree.insert_node(nid3, n3.clone(), Some(nid2), IRect::new((-2, -3), (4, 2)));
     let shape3 = tree.get_shape(nid3);
     let pos3 = tree.get_pos(nid3);
     let size3 = tree.get_size(nid3);
@@ -1108,7 +1108,7 @@ mod tests {
     assert!(actual_pos3.unwrap() == expect3.4);
     assert!(actual_size3.unwrap() == expect3.5);
 
-    tree.insert_node(nid4, n4.clone(), nid2, IRect::new((5, 10), (15, 18)));
+    tree.insert_node(nid4, n4.clone(), Some(nid2), IRect::new((5, 10), (15, 18)));
     let shape4 = tree.get_shape(nid4);
     let pos4 = tree.get_pos(nid4);
     let size4 = tree.get_size(nid4);
@@ -1134,7 +1134,7 @@ mod tests {
     assert!(actual_pos4.unwrap() == expect4.4);
     assert!(actual_size4.unwrap() == expect4.5);
 
-    tree.insert_node(nid5, n5.clone(), nid4, IRect::new((7, 3), (8, 4)));
+    tree.insert_node(nid5, n5.clone(), Some(nid4), IRect::new((7, 3), (8, 4)));
     let shape5 = tree.get_shape(nid5);
     let pos5 = tree.get_pos(nid5);
     let size5 = tree.get_size(nid5);
@@ -1249,7 +1249,7 @@ mod tests {
     tree.insert_node(
       nid2,
       n2.clone(),
-      nid1,
+      Some(nid1),
       IRect::new(
         (0, 0),
         (
@@ -1286,7 +1286,7 @@ mod tests {
       expect2, shape2, pos2, size2, actual_shape2, actual_pos2, actual_size2,
     );
 
-    tree.insert_node(nid3, n3.clone(), nid2, IRect::new((-2, -3), (4, 2)));
+    tree.insert_node(nid3, n3.clone(), Some(nid2), IRect::new((-2, -3), (4, 2)));
     let shape3 = tree.get_shape(nid3);
     let pos3 = tree.get_pos(nid3);
     let size3 = tree.get_size(nid3);
@@ -1306,7 +1306,7 @@ mod tests {
       expect3, shape3, pos3, size3, actual_shape3, actual_pos3, actual_size3,
     );
 
-    tree.insert_node(nid4, n4.clone(), nid2, IRect::new((5, 10), (15, 18)));
+    tree.insert_node(nid4, n4.clone(), Some(nid2), IRect::new((5, 10), (15, 18)));
     let shape4 = tree.get_shape(nid4);
     let pos4 = tree.get_pos(nid4);
     let size4 = tree.get_size(nid4);
@@ -1326,7 +1326,7 @@ mod tests {
       expect4, shape4, pos4, size4, actual_shape4, actual_pos4, actual_size4,
     );
 
-    tree.insert_node(nid5, n5.clone(), nid4, IRect::new((7, 3), (8, 4)));
+    tree.insert_node(nid5, n5.clone(), Some(nid4), IRect::new((7, 3), (8, 4)));
     let shape5 = tree.get_shape(nid5);
     let pos5 = tree.get_pos(nid5);
     let size5 = tree.get_size(nid5);
