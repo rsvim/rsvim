@@ -4,6 +4,7 @@ use geo::point;
 use std::cmp::{max, min};
 use std::collections::VecDeque;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::intrinsics::unreachable;
 use std::sync::{Arc, RwLock, Weak};
 use tracing::debug;
 
@@ -253,12 +254,17 @@ impl Tree {
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
   ///
-  /// Note: When the node is the first inserted node (root node), it doesn't need to provide the
-  /// `parent_id`, and the `shape` should be the terminal's actual shape.
+  /// Note:
+  /// 1. When the node is the first inserted node (root node), it doesn't need to provide the
+  ///    `parent_id` , and the `shape` should be the terminal's actual shape.
+  /// 2. This method is a wrapper on [`insert_root_node`](Tree::insert_root_node()) and
+  ///    [`insert_descendant_node`](Tree::insert_descendant_node()).
   ///
   /// # Panics
   ///
-  /// Panics if there's already a root node when inserting a root node without the `parent_id`.
+  /// Panics if [`insert_root_node`](Tree::insert_root_node()) (inserted as root node) or
+  /// [`insert_descendant_node`](Tree::insert_descendant_node()) (inserted as non-root node)
+  /// panics.
   pub fn insert_node(
     &mut self,
     id: NodeId,
@@ -282,15 +288,24 @@ impl Tree {
   ///
   /// # Panics
   ///
-  /// Panics if there's already a root node.
+  /// Panics if:
+  /// 1. The root node already exists.
+  /// 2. There's already other nodes.
   pub fn insert_root_node(
     &mut self,
     id: NodeId,
     node: NodePtr,
     terminal_size: U16Size,
   ) -> Option<NodePtr> {
+    // root id must not exists.
     assert!(self.root_id.is_none());
+    // parent ids collection is empty
+    assert!(self.children_ids.is_empty());
+    // children ids collection is empty
+    assert!(self.parent_ids.is_empty());
+
     self.root_id = Some(id);
+    self.children_ids.insert(id, HashSet::new());
     let result = self.nodes.insert(id, node.clone());
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let shape = geo_rect_as!(actual_shape, isize);
@@ -307,7 +322,10 @@ impl Tree {
   ///
   /// # Panics
   ///
-  /// Panics if there's no root node.
+  /// Panics if:
+  /// 1. The root node not exists.
+  /// 2. The `parent_id` not exists.
+  /// 3. The `id` already exists.
   pub fn insert_descendant_node(
     &mut self,
     id: NodeId,
@@ -315,19 +333,15 @@ impl Tree {
     parent_id: NodeId,
     shape: IRect,
   ) -> Option<NodePtr> {
+    // root node must exists, and it's not the `id`.
     assert!(self.root_id.is_some());
     assert!(self.root_id.unwrap() != id);
+    // `parent_id` must already exists.
+    assert!(self.children_ids.contains_key(&parent_id));
+    // `id` must not exists.
+    assert!(!self.parent_ids.contains_key(&id));
 
-    match self.children_ids.get_mut(&parent_id) {
-      Some(children) => {
-        children.insert(id);
-      }
-      None => {
-        let mut init_ids = HashSet::new();
-        init_ids.insert(id);
-        self.children_ids.insert(parent_id, init_ids);
-      }
-    }
+    self.children_ids.get_mut(&parent_id).unwrap().insert(id);
     self.parent_ids.insert(id, parent_id);
     self.edges.insert(Edge::new(parent_id, id));
     let actual_shape = match self.attributes.get(&parent_id) {
