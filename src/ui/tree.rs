@@ -248,6 +248,30 @@ impl Tree {
     self.root_id
   }
 
+  /// Insert node, with ID, parent's ID, shape.
+  /// This operation also binds the connection between the inserted node and its parent.
+  ///
+  /// Returns the inserted node if succeeded, returns `None` if failed.
+  ///
+  /// Note: When the node is the first inserted node (root node), it doesn't need to provide the
+  /// `parent_id`, and the `shape` should be the terminal's actual shape.
+  pub fn insert_node(
+    &mut self,
+    id: NodeId,
+    node: NodePtr,
+    parent_id: Option<NodeId>,
+    shape: IRect,
+  ) -> Option<NodePtr> {
+    match parent_id {
+      Some(pid) => self.insert_descendant_node(id, node, pid, shape),
+      None => {
+        let u16shape = geo_rect_as!(shape, u16);
+        let terminal_size = U16Size::from(u16shape);
+        self.insert_root_node(id, node, terminal_size)
+      }
+    }
+  }
+
   /// Insert root node, with ID, size.
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
@@ -255,7 +279,7 @@ impl Tree {
   /// # Panics
   ///
   /// Panics if there's already a root node.
-  pub fn insert_root_node(
+  fn insert_root_node(
     &mut self,
     id: NodeId,
     node: NodePtr,
@@ -272,11 +296,11 @@ impl Tree {
     result
   }
 
-  /// Insert node, with ID, parent's ID, shape.
+  /// Insert non-root node (descendant node), with ID, parent's ID, shape.
   /// This operation also binds the connection between the inserted node and its parent.
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
-  pub fn insert_node(
+  fn insert_descendant_node(
     &mut self,
     id: NodeId,
     node: NodePtr,
@@ -332,8 +356,8 @@ impl Tree {
   /// Returns the removed node if it exists, returns `None` if not.
   /// Returns `None` if the node is root node.
   ///
-  /// This operation also removes the connection between the node and its parent (if any).
-  /// This operation doesn't removes the connection between the node and its children (if any).
+  /// When removing a node, this operation also removes the connection between the node and its
+  /// parent (if any).
   pub fn remove_node(&mut self, id: NodeId) -> Option<NodePtr> {
     if self.root_id == Some(id) {
       return None;
@@ -660,7 +684,9 @@ mod tests {
       test_log_init();
     });
 
-    let terminal = Terminal::new(U16Size::new(10, 10));
+    let terminal_size = U16Size::new(10, 10);
+    let terminal_isize = geo_size_as!(terminal_size, isize);
+    let terminal = Terminal::new(terminal_size);
     let terminal = make_terminal_ptr(terminal);
 
     let mut tree = Tree::new(Arc::downgrade(&terminal));
@@ -677,27 +703,28 @@ mod tests {
     let n4 = Cursor::default();
     let n4 = make_node_ptr(Node::CursorNode(n4));
 
-    tree.insert_root_node(
+    tree.insert_node(
       n1.read().unwrap().id(),
       n1.clone(),
-      terminal.read().unwrap().size(),
+      None,
+      IRect::new((0, 0), (terminal_isize.width(), terminal_isize.height())),
     );
     tree.insert_node(
       n2.read().unwrap().id(),
       n2.clone(),
-      n1.read().unwrap().id(),
+      Some(n1.read().unwrap().id()),
       IRect::new((0, 0), (10, 10)),
     );
     tree.insert_node(
       n3.read().unwrap().id(),
       n3.clone(),
-      n1.read().unwrap().id(),
+      Some(n1.read().unwrap().id()),
       IRect::new((0, 0), (10, 10)),
     );
     tree.insert_node(
       n4.read().unwrap().id(),
       n4.clone(),
-      n2.read().unwrap().id(),
+      Some(n2.read().unwrap().id()),
       IRect::new((0, 0), (1, 1)),
     );
 

@@ -1,7 +1,8 @@
 //! Main event loop for TUI application.
 
 #![allow(unused_imports, dead_code)]
-use crate::cart::{IRect, U16Rect, U16Size, URect};
+use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
+use crate::geo_size_as;
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::{make_terminal_ptr, Terminal, TerminalPtr};
 use crate::ui::tree::node::{make_node_ptr, Node, NodeId};
@@ -39,7 +40,15 @@ impl EventLoop {
     let root_widget = RootWidget::default();
     let root_widget_id = root_widget.id();
     let root_widget_node = make_node_ptr(Node::RootWidgetNode(root_widget));
-    tree.insert_root_node(root_widget_id, root_widget_node.clone(), screen_size);
+    tree.insert_node(
+      root_widget_id,
+      root_widget_node.clone(),
+      None,
+      IRect::new(
+        (0, 0),
+        (screen_size.width() as isize, screen_size.height() as isize),
+      ),
+    );
 
     let window = Window::default();
     let window_id = window.id();
@@ -48,13 +57,23 @@ impl EventLoop {
       (0, 0),
       (screen_size.width() as isize, screen_size.height() as isize),
     );
-    tree.insert_node(window_id, window_node.clone(), root_widget_id, window_shape);
+    tree.insert_node(
+      window_id,
+      window_node.clone(),
+      Some(root_widget_id),
+      window_shape,
+    );
 
     let cursor = Cursor::default();
     let cursor_id = cursor.id();
     let cursor_node = make_node_ptr(Node::CursorNode(cursor));
     let cursor_shape = IRect::new((0, 0), (1, 1));
-    tree.insert_node(cursor_id, cursor_node.clone(), window_id, cursor_shape);
+    tree.insert_node(
+      cursor_id,
+      cursor_node.clone(),
+      Some(window_id),
+      cursor_shape,
+    );
 
     Ok(EventLoop {
       screen,
