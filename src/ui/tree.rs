@@ -1017,7 +1017,4 @@ mod tests {
       assert!(actual_size.unwrap() == expect.5);
     }
   }
-
-  #[test]
-  fn tree_update_shape() {}
 }
