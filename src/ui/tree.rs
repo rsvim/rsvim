@@ -258,6 +258,16 @@ impl Tree {
     self.root_id
   }
 
+  /// Detect whether contains node by its ID.
+  pub fn contains_node(&self, id: NodeId) -> bool {
+    self.root_id == Some(id)
+      || self.nodes.contains_key(&id)
+      || self.attributes.contains_key(&id)
+      || self.window_ids.contains(&id)
+      || self.parent_ids.contains_key(&id)
+      || self.children_ids.contains_key(&id)
+  }
+
   /// Insert node, with ID, parent's ID, shape.
   /// This operation also binds the connection between the inserted node and its parent (if any).
   ///
@@ -338,16 +348,9 @@ impl Tree {
     if self.is_empty() {
       return None;
     }
-    let edge = Edge::new(parent_id, id);
     // Fails if node already exists, or parent node not exists.
-    let node_existed = self.root_id == Some(id)
-      || self.nodes.contains_key(&id)
-      || self.attributes.contains_key(&id)
-      || self.window_ids.contains(&id)
-      || self.parent_ids.contains_key(&id)
-      || self.edges.contains(&edge);
-    let parent_not_existed = !self.children_ids.contains_key(&parent_id);
-    if node_existed || parent_not_existed {
+    let edge = Edge::new(parent_id, id);
+    if self.contains_node(id) || !self.contains_node(parent_id) || self.edges.contains(&edge) {
       return None;
     }
 
