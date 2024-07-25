@@ -304,6 +304,10 @@ impl Tree {
   /// This operation also binds the connection between the inserted node and its parent.
   ///
   /// Returns the inserted node if succeeded, returns `None` if failed.
+  ///
+  /// # Panics
+  ///
+  /// Panics if there's no root node.
   pub fn insert_descendant_node(
     &mut self,
     id: NodeId,
