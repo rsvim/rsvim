@@ -319,13 +319,14 @@ impl Tree {
 
     self.root_id = Some(id);
     self.children_ids.insert(id, HashSet::new());
-    let result = self.nodes.insert(id, node.clone());
+
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let shape = geo_rect_as!(actual_shape, isize);
     self
       .attributes
       .insert(id, NodeAttribute::default(shape, actual_shape));
-    result
+
+    self.nodes.insert(id, node.clone())
   }
 
   /// Insert non-root (descendant) node, with ID, parent's ID, shape.
@@ -357,25 +358,9 @@ impl Tree {
     self.children_ids.get_mut(&parent_id).unwrap().insert(id);
     self.parent_ids.insert(id, parent_id);
     self.edges.insert(edge);
-    let actual_shape = match self.attributes.get(&parent_id) {
-      Some(parent_attribute) => {
-        debug!(
-          "Calculate actual shape with parent actual shape:{:?}, shape:{:?}",
-          parent_attribute.actual_shape, shape
-        );
-        convert_to_actual_shape(shape, parent_attribute.actual_shape)
-      }
-      None => {
-        let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
-        let terminal_actual_shape =
-          U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-        debug!(
-          "Calculate actual shape with terminal actual shape:{:?}, shape:{:?}",
-          terminal_actual_shape, shape
-        );
-        convert_to_actual_shape(shape, terminal_actual_shape)
-      }
-    };
+
+    let parent_actual_shape = self.attributes.get(&parent_id).unwrap().actual_shape;
+    let actual_shape = convert_to_actual_shape(shape, parent_actual_shape);
     debug!("Calculated actual shape:{:?}", actual_shape);
     self
       .attributes
