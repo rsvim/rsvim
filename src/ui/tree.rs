@@ -1,4 +1,4 @@
-//! Widget tree that manages all the widget components.
+//! The widget tree that manages all the widget components.
 
 use geo::point;
 use std::cmp::{max, min};
