@@ -98,7 +98,12 @@ pub fn to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
 mod tests {
   use super::*;
   use crate::cart::{IRect, U16Rect};
+  use crate::test::log::init as test_log_init;
   use std::cmp::min;
+  use std::sync::Once;
+  use tracing::info;
+
+  static INIT: Once = Once::new();
 
   #[test]
   fn convert_actual_shapes() {
@@ -127,26 +132,32 @@ mod tests {
 
   #[test]
   fn convert_actual_shapes_with_negatives() {
-    let inputs: Vec<IRect> = vec![
-      IRect::new((0, 0), (3, 5)),
-      IRect::new((0, 0), (1, 5)),
-      IRect::new((0, 0), (3, 7)),
-      IRect::new((0, 0), (0, 0)),
-      IRect::new((0, 0), (5, 4)),
+    INIT.call_once(|| {
+      test_log_init();
+    });
+
+    let inputs: Vec<(IRect, U16Rect)> = vec![
+      (IRect::new((0, 0), (3, 5)), U16Rect::new((0, 0), (7, 8))),
+      (IRect::new((-3, 1), (1, 5)), U16Rect::new((3, 2), (9, 8))),
+      (IRect::new((3, 9), (6, 10)), U16Rect::new((1, 1), (2, 2))),
+      (IRect::new((0, 0), (0, 0)), U16Rect::new((0, 0), (0, 0))),
+      (IRect::new((5, 3), (6, 4)), U16Rect::new((0, 0), (5, 3))),
     ];
-    for t in inputs.iter() {
-      for p in 0..10 {
-        for q in 0..10 {
-          let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
-          let expect = U16Rect::new((0, 0), (min(t.max().x, p) as u16, min(t.max().y, q) as u16));
-          let actual = to_actual_shape(*t, input_actual_parent_shape);
-          // println!(
-          //   "cart::conversion::tests::convert_to_actual_shapes expect:{:?}, actual:{:?}",
-          //   expect, actual
-          // );
-          assert_eq!(actual, expect);
-        }
-      }
+    let expects: Vec<U16Rect> = vec![
+      U16Rect::new((0, 0), (3, 5)),
+      U16Rect::new((3, 3), (4, 7)),
+      U16Rect::new((2, 2), (2, 2)),
+      U16Rect::new((0, 0), (0, 0)),
+      U16Rect::new((5, 3), (5, 3)),
+    ];
+    for (i, p) in inputs.iter().enumerate() {
+      let actual = to_actual_shape(p.0, p.1);
+      let expect = expects[i];
+      info!(
+        "i-{:?}, input:{:?}, actual:{:?}, expect:{:?}",
+        i, p, actual, expect
+      );
+      assert_eq!(actual, expect);
     }
   }
 }
