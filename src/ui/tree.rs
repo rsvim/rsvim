@@ -109,6 +109,15 @@ pub struct Tree {
   // Terminal reference.
   terminal: TerminalWk,
 
+  // The root node is a dummy node, and is always created along with the tree.
+  // All the other node related collections don't contain the root node.
+  //
+  // Root node id.
+  root_node_id: NodeId,
+
+  // Root node.
+  root_node: NodePtr,
+
   // A collection of all nodes, maps from node ID to node struct.
   nodes: BTreeMap<NodeId, NodePtr>,
 
@@ -118,15 +127,10 @@ pub struct Tree {
   // Maps node "ID" => its attributes.
   attributes: HashMap<NodeId, NodeAttribute>,
 
-  // Root node ID.
-  root_id: Option<NodeId>,
-
   // A collection of all VIM window widget nodes.
   window_ids: BTreeSet<NodeId>,
 
   // Maps "parent ID" => its "children IDs".
-  //
-  // Note: A parent can have multiple children.
   children_ids: HashMap<NodeId, HashSet<NodeId>>,
 
   // Maps "child ID" => its "parent ID".
@@ -214,6 +218,9 @@ fn convert_to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rec
 }
 
 impl Tree {
+  /// Make a widget tree.
+  ///
+  /// Note: The root node is created along with the tree.
   pub fn new(terminal: TerminalWk) -> Tree {
     Tree {
       terminal: terminal.clone(),
@@ -425,28 +432,29 @@ impl Tree {
   pub fn remove_ancestor_node(&mut self, id: NodeId) -> Option<TreePtr> {}
 
   /// Remove the leaf node by its ID.
-  ///
-  /// Returns the removed node if it exists, returns `None` if not.
-  /// Returns `None` if the node is root node.
-  ///
   /// This operation also removes the connection between the leaf node and its parent.
   ///
-  /// # Panics
+  /// Returns the removed node if it exists, returns `None` if failed.
   ///
-  /// Panics if it's not a leaf node.
+  /// Fails if:
+  /// 1. It's not a leaf node, or it doesn't exist.
+  ///
+  /// Note: A leaf node cannot be the root node.
   pub fn remove_leaf_node(&mut self, id: NodeId) -> Option<NodePtr> {
-    if self.root_id == Some(id) {
+    // Fails if the node doesn't exist.
+    if !self.contains_node(id) {
       return None;
     }
-    if !self.parent_ids.contains_key(&id) {
-      return None;
-    }
-    if !self.nodes.contains_key(&id) {
+    // Fails if the node has children nodes.
+    let has_children = match self.children_ids.get(&id) {
+      Some(children) => !children.is_empty(),
+      None => false,
+    };
+    if has_children {
       return None;
     }
 
-    let parent_id = self.parent_ids.remove(&id).unwrap();
-    assert!(self.children_ids.contains_key(&parent_id));
+    self.parent_ids.remove(&id);
 
     let child_removed = self.children_ids.get_mut(&parent_id).unwrap().remove(&id);
     assert!(child_removed);
