@@ -10,7 +10,7 @@ use std::vec::Splice;
 
 // Re-export
 pub use crate::ui::frame::cell::Cell;
-pub use crate::ui::frame::cursor::{Cursor, CursorStyle};
+pub use crate::ui::frame::cursor::{Cursor, CursorStyle, CursorStyleFormatter};
 
 #[derive(Debug, Clone)]
 /// Rendering buffer & cursor for the whole terminal.
@@ -98,10 +98,10 @@ mod tests {
 
   #[test]
   fn should_equal_on_buffer_new() {
-    let sz = U16Size::new(1, 2);
+    let sz = U16Size::new(2, 1);
     let b = Frame::new(sz, Cursor::default());
-    assert_eq!(b.size.height, 1);
     assert_eq!(b.size.width, 2);
+    assert_eq!(b.size.height, 1);
     assert_eq!(
       b.cells.len(),
       b.size.height as usize * b.size.width as usize

@@ -6,5 +6,6 @@ pub mod cart;
 pub mod cli;
 pub mod evloop;
 pub mod log;
+pub mod test;
 pub mod ui;
 pub mod uuid;

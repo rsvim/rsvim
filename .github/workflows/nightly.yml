@@ -94,7 +94,6 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           include: README.md,LICENSE-APACHE.txt,LICENSE-VIM.txt
           checksum: sha256
-          bin-leading-dir: bin
           ref: refs/tags/nightly
           profile: nightly
       - name: After Upload

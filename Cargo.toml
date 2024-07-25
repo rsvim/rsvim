@@ -13,6 +13,9 @@ license = "Vim OR Apache-2.0"
 keywords = ["vim", "neovim", "text-editor"]
 categories = ["text-editor"]
 
+[lib]
+doctest = false
+
 [dependencies]
 crossterm = { version = "0.27", features = ["event-stream", "serde"] }
 tracing = "0.1"
@@ -43,7 +46,7 @@ geo = "0.28.0"
 num-traits = "0.2.19"
 
 [dev-dependencies]
-mockall = "0.12.1"
+mockall = "0.13.0"
 
 [profile.release]
 lto = "thin"

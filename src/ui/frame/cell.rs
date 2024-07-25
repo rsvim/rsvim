@@ -98,6 +98,7 @@ impl Default for Cell {
 }
 
 impl Cell {
+  /// Make cell with a symbol, foreground/background color, attributes.
   fn new(symbol: CompactString, fg: Color, bg: Color, attrs: Attributes) -> Self {
     Cell {
       symbol,
@@ -114,11 +115,30 @@ mod tests {
   use super::*;
 
   #[test]
-  fn should_equal_on_cell_default() {
+  fn cell_default() {
     let c = Cell::default();
     assert_eq!(c.symbol(), " ");
     assert_eq!(c.fg(), Color::Reset);
     assert_eq!(c.bg(), Color::Reset);
     assert_eq!(c.attrs(), Attributes::default());
+  }
+
+  #[test]
+  fn cell_new() {
+    let c1 = Cell::new(
+      CompactString::const_new(" "),
+      Color::Reset,
+      Color::Reset,
+      Attributes::default(),
+    );
+    let c2 = Cell::default();
+    assert_eq!(c1.symbol(), " ");
+    assert_eq!(c1.symbol(), c2.symbol());
+    assert_eq!(c1.fg(), Color::Reset);
+    assert_eq!(c1.fg(), c2.fg());
+    assert_eq!(c1.bg(), Color::Reset);
+    assert_eq!(c1.bg(), c2.bg());
+    assert_eq!(c1.attrs(), Attributes::default());
+    assert_eq!(c1.attrs(), c2.attrs());
   }
 }

@@ -12,6 +12,7 @@ use crate::ui::widget::Widget;
 pub type NodeId = usize;
 
 /// Widget node in the tree.
+#[derive(Debug)]
 pub enum Node {
   RootWidgetNode(RootWidget),
   CursorNode(Cursor),

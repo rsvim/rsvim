@@ -22,10 +22,10 @@ pub fn make_terminal_ptr(t: Terminal) -> Arc<RwLock<Terminal>> {
 }
 
 impl Terminal {
-  pub fn new(size: U16Size, cursor: Cursor) -> Self {
+  pub fn new(size: U16Size) -> Self {
     Terminal {
-      prev_frame: Frame::new(size, cursor),
-      frame: Frame::new(size, cursor),
+      prev_frame: Frame::new(size, Cursor::default()),
+      frame: Frame::new(size, Cursor::default()),
     }
   }
 
@@ -114,10 +114,8 @@ mod tests {
   use super::*;
 
   #[test]
-  fn should_equal_on_terminal_new() {
-    let s = U16Size::new(3, 4);
-    let c = Cursor::default();
-    let t = Terminal::new(s, c);
+  fn terminal_new() {
+    let t = Terminal::new(U16Size::new(3, 4));
     assert_eq!(t.frame().size, t.prev_frame().size);
     assert_eq!(t.frame().cursor, t.prev_frame().cursor);
   }

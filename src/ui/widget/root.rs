@@ -7,6 +7,7 @@ use crate::ui::widget::Widget;
 use crate::uuid;
 
 /// Root widget.
+#[derive(Debug, Clone, Copy)]
 pub struct RootWidget {
   id: NodeId,
 }

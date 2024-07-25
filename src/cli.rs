@@ -164,8 +164,8 @@ mod tests {
     let n = input.len();
     for i in 0..n {
       let actual = Cli::parse_from(&input[i]);
-      println!("actual-{i}: {:?}", actual);
-      println!("expect-{i}: {:?}", expect[i]);
+      // println!("actual-{i}: {:?}", actual);
+      // println!("expect-{i}: {:?}", expect[i]);
       assert_eq!(actual.file, expect[i].file);
       assert_eq!(actual.cmd_before, expect[i].cmd_before);
       assert_eq!(actual.cmd_after, expect[i].cmd_after);

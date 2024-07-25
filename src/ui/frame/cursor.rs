@@ -17,7 +17,7 @@ pub struct Cursor {
   pub dirty: bool,
 }
 
-struct CursorStyleFormatter {
+pub struct CursorStyleFormatter {
   style: CursorStyle,
 }
 
