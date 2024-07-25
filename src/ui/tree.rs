@@ -580,6 +580,62 @@ mod tests {
   static INIT: Once = Once::new();
 
   #[test]
+  fn convert_to_actual_shapes() {
+    let inputs: Vec<IRect> = vec![
+      IRect::new((0, 0), (3, 5)),
+      IRect::new((0, 0), (1, 5)),
+      IRect::new((0, 0), (3, 7)),
+      IRect::new((0, 0), (0, 0)),
+      IRect::new((0, 0), (5, 4)),
+    ];
+    for t in inputs.iter() {
+      for p in 0..10 {
+        for q in 0..10 {
+          let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
+          let expect = U16Rect::new((0, 0), (min(t.max().x, p) as u16, min(t.max().y, q) as u16));
+          let actual = convert_to_actual_shape(*t, input_actual_parent_shape);
+          // println!(
+          //   "cart::conversion::tests::convert_to_actual_shapes expect:{:?}, actual:{:?}",
+          //   expect, actual
+          // );
+          assert_eq!(actual, expect);
+        }
+      }
+    }
+  }
+
+  #[test]
+  fn convert_to_actual_shapes2() {
+    INIT.call_once(|| {
+      test_log_init();
+    });
+
+    let inputs: Vec<(IRect, U16Rect)> = vec![
+      (IRect::new((0, 0), (3, 5)), U16Rect::new((0, 0), (7, 8))),
+      (IRect::new((-3, 1), (1, 5)), U16Rect::new((3, 2), (9, 8))),
+      (IRect::new((3, 9), (6, 10)), U16Rect::new((1, 1), (2, 2))),
+      (IRect::new((0, 0), (0, 0)), U16Rect::new((0, 0), (0, 0))),
+      (IRect::new((5, 3), (6, 4)), U16Rect::new((0, 0), (5, 3))),
+    ];
+    let expects: Vec<U16Rect> = vec![
+      U16Rect::new((0, 0), (3, 5)),
+      U16Rect::new((3, 3), (4, 7)),
+      U16Rect::new((2, 2), (2, 2)),
+      U16Rect::new((0, 0), (0, 0)),
+      U16Rect::new((5, 3), (5, 3)),
+    ];
+    for (i, p) in inputs.iter().enumerate() {
+      let actual = convert_to_actual_shape(p.0, p.1);
+      let expect = expects[i];
+      info!(
+        "i-{:?}, input:{:?}, actual:{:?}, expect:{:?}",
+        i, p, actual, expect
+      );
+      assert_eq!(actual, expect);
+    }
+  }
+
+  #[test]
   fn tree_new() {
     INIT.call_once(|| {
       test_log_init();
@@ -1099,62 +1155,6 @@ mod tests {
       assert!(*actual_shape.unwrap() == expect.3);
       assert!(actual_pos.unwrap() == expect.4);
       assert!(actual_size.unwrap() == expect.5);
-    }
-  }
-
-  #[test]
-  fn convert_to_actual_shapes() {
-    let inputs: Vec<IRect> = vec![
-      IRect::new((0, 0), (3, 5)),
-      IRect::new((0, 0), (1, 5)),
-      IRect::new((0, 0), (3, 7)),
-      IRect::new((0, 0), (0, 0)),
-      IRect::new((0, 0), (5, 4)),
-    ];
-    for t in inputs.iter() {
-      for p in 0..10 {
-        for q in 0..10 {
-          let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
-          let expect = U16Rect::new((0, 0), (min(t.max().x, p) as u16, min(t.max().y, q) as u16));
-          let actual = convert_to_actual_shape(*t, input_actual_parent_shape);
-          // println!(
-          //   "cart::conversion::tests::convert_to_actual_shapes expect:{:?}, actual:{:?}",
-          //   expect, actual
-          // );
-          assert_eq!(actual, expect);
-        }
-      }
-    }
-  }
-
-  #[test]
-  fn convert_to_actual_shapes2() {
-    INIT.call_once(|| {
-      test_log_init();
-    });
-
-    let inputs: Vec<(IRect, U16Rect)> = vec![
-      (IRect::new((0, 0), (3, 5)), U16Rect::new((0, 0), (7, 8))),
-      (IRect::new((-3, 1), (1, 5)), U16Rect::new((3, 2), (9, 8))),
-      (IRect::new((3, 9), (6, 10)), U16Rect::new((1, 1), (2, 2))),
-      (IRect::new((0, 0), (0, 0)), U16Rect::new((0, 0), (0, 0))),
-      (IRect::new((5, 3), (6, 4)), U16Rect::new((0, 0), (5, 3))),
-    ];
-    let expects: Vec<U16Rect> = vec![
-      U16Rect::new((0, 0), (3, 5)),
-      U16Rect::new((3, 3), (4, 7)),
-      U16Rect::new((2, 2), (2, 2)),
-      U16Rect::new((0, 0), (0, 0)),
-      U16Rect::new((5, 3), (5, 3)),
-    ];
-    for (i, p) in inputs.iter().enumerate() {
-      let actual = convert_to_actual_shape(p.0, p.1);
-      let expect = expects[i];
-      info!(
-        "i-{:?}, input:{:?}, actual:{:?}, expect:{:?}",
-        i, p, actual, expect
-      );
-      assert_eq!(actual, expect);
     }
   }
 }
