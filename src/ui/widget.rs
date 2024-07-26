@@ -6,7 +6,7 @@ pub mod window;
 
 // Re-export
 pub use crate::ui::widget::cursor::Cursor;
-pub use crate::ui::widget::root::RootWidget;
+pub use crate::ui::widget::root::RootLayout;
 pub use crate::ui::widget::window::Window;
 
 use std::any::Any;
@@ -26,7 +26,7 @@ pub trait Widget: Any {
   }
 }
 
-/// Layout widget is a special widget that has no specific shape or content, but as a logical
+/// Layout widget is a special widget that has no specific shape or content, but works as a logical
 /// container for nested children widgets, and arrange their layout.
 pub trait Layout: Widget {
   fn id(&self) -> NodeId;

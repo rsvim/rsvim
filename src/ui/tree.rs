@@ -680,7 +680,7 @@ mod tests {
   use crate::geo_size_as;
   use crate::test::log::init as test_log_init;
   use crate::ui::term::{make_terminal_ptr, Terminal};
-  use crate::ui::widget::{Cursor, RootWidget, Widget, Window};
+  use crate::ui::widget::{Cursor, RootLayout, Widget, Window};
   use std::cmp::min;
   use std::sync::Once;
   use tracing::info;
@@ -775,7 +775,7 @@ mod tests {
 
     let mut tree = Tree::new(Arc::downgrade(&terminal));
 
-    let n1 = RootWidget::new();
+    let n1 = RootLayout::new();
     let n1 = make_node_ptr(Node::RootWidgetNode(n1));
 
     let n2 = Window::default();
@@ -884,7 +884,7 @@ mod tests {
 
     let mut tree = Tree::new(Arc::downgrade(&terminal));
 
-    let n1 = RootWidget::new();
+    let n1 = RootLayout::new();
     let n1_id = n1.id();
     let n1 = make_node_ptr(Node::RootWidgetNode(n1));
 
@@ -1064,7 +1064,7 @@ mod tests {
 
     let mut tree = Tree::new(Arc::downgrade(&terminal));
 
-    let n1 = RootWidget::new();
+    let n1 = RootLayout::new();
     let nid1 = n1.id();
     let n1 = make_node_ptr(Node::RootWidgetNode(n1));
 
@@ -1281,7 +1281,7 @@ mod tests {
 
     let mut tree = Tree::new(Arc::downgrade(&terminal));
 
-    let n1 = RootWidget::new();
+    let n1 = RootLayout::new();
     let nid1 = n1.id();
     let n1 = make_node_ptr(Node::RootWidgetNode(n1));
 

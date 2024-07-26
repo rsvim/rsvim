@@ -3,29 +3,39 @@
 //! (non-batch-processing) mode.
 
 use crate::ui::tree::node::NodeId;
-use crate::ui::widget::Widget;
+use crate::ui::widget::{Layout, Widget};
 use crate::uuid;
 
 /// Root widget.
 #[derive(Debug, Clone, Copy)]
-pub struct RootWidget {
+pub struct RootLayout {
   id: NodeId,
 }
 
-impl RootWidget {
+impl RootLayout {
   pub fn new() -> Self {
-    RootWidget { id: uuid::next() }
+    RootLayout { id: uuid::next() }
   }
-}
 
-impl Default for RootWidget {
-  fn default() -> Self {
-    RootWidget { id: uuid::next() }
-  }
-}
-
-impl Widget for RootWidget {
-  fn id(&self) -> NodeId {
+  pub fn id(&self) -> NodeId {
     self.id
+  }
+}
+
+impl Default for RootLayout {
+  fn default() -> Self {
+    RootLayout { id: uuid::next() }
+  }
+}
+
+impl Widget for RootLayout {
+  fn id(&self) -> NodeId {
+    RootLayout::id(&self)
+  }
+}
+
+impl Layout for RootLayout {
+  fn id(&self) -> NodeId {
+    RootLayout::id(&self)
   }
 }
