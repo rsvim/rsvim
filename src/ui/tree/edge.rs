@@ -1,5 +1,8 @@
 //! Widget edge that connects two nodes in the tree.
 
+use std::collections::VecDeque;
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+
 use crate::ui::tree::node::NodeId;
 
 /// Widget edge that connects two nodes in the tree.
@@ -34,5 +37,26 @@ impl Ord for Edge {
     let h1 = self.hash_str();
     let h2 = other.hash_str();
     h1.cmp(&h2)
+  }
+}
+
+pub struct EdgesCollection {
+  // A collection of all edges.
+  edges: BTreeSet<Edge>,
+
+  // Maps "parent ID" => its "children IDs".
+  children_ids: HashMap<NodeId, HashSet<NodeId>>,
+
+  // Maps "child ID" => its "parent ID".
+  parent_ids: HashMap<NodeId, NodeId>,
+}
+
+impl EdgesCollection {
+  pub fn new() -> Self {
+    EdgesCollection {
+      edges: BTreeSet::new(),
+      children_ids: HashMap::new(),
+      parent_ids: HashMap::new(),
+    }
   }
 }

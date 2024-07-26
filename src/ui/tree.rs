@@ -1,21 +1,22 @@
 //! The widget tree that manages all the widget components.
 
 use geo::point;
-use std::cmp::{max, min};
 use std::collections::VecDeque;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 use std::sync::{Arc, RwLock, Weak};
 use tracing::debug;
 
+use crate::cart::shapes;
 use crate::cart::{IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
+use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::widget::Widget;
-use crate::{geo_point_as, geo_rect_as};
 
 // Re-export
 pub use crate::ui::tree::edge::Edge;
 pub use crate::ui::tree::node::{make_node_ptr, Node, NodeAttribute, NodeId, NodePtr};
 
+pub mod base;
 pub mod edge;
 pub mod node;
 
@@ -109,6 +110,8 @@ pub struct Tree {
   // Terminal reference.
   terminal: TerminalWk,
 
+  // Root {
+
   // The root node is a dummy node, and is always created along with the tree.
   // All the other node related collections don't contain the root node.
   //
@@ -118,23 +121,34 @@ pub struct Tree {
   // Root node.
   root_node: NodePtr,
 
+  // Root }
+
+  // Node {
+
   // A collection of all nodes, maps from node ID to node struct.
   nodes: BTreeMap<NodeId, NodePtr>,
 
-  // A collection of all edges.
-  edges: BTreeSet<Edge>,
-
-  // Maps node "ID" => its attributes.
+  // A collection of all node attributes, maps from node ID to node attribute.
   attributes: HashMap<NodeId, NodeAttribute>,
 
-  // A collection of all VIM window widget nodes.
-  window_ids: BTreeSet<NodeId>,
+  // Node }
+
+  // Edge {
+
+  // A collection of all edges.
+  edges: BTreeSet<Edge>,
 
   // Maps "parent ID" => its "children IDs".
   children_ids: HashMap<NodeId, HashSet<NodeId>>,
 
   // Maps "child ID" => its "parent ID".
   parent_ids: HashMap<NodeId, NodeId>,
+
+  // Edge }
+
+  // A collection of all VIM window nodes
+  // ([WindowLayout](crate::ui::layout::window::WindowLayout)).
+  window_ids: BTreeSet<NodeId>,
 }
 
 pub type TreePtr = Arc<RwLock<Tree>>;
@@ -144,86 +158,13 @@ pub fn make_tree_ptr(t: Tree) -> Arc<RwLock<Tree>> {
   Arc::new(RwLock::new(t))
 }
 
-/// Convert (relative/logical) shape to actual shape.
-///
-/// Note:
-/// 1. If the widget doesn't have a parent, use the terminal shape as its parent's shape.
-/// 2. If the relative/logical shape is outside of it's parent or the terminal, it will be
-///    automatically bounded inside of it's parent or the terminal's shape.
-fn convert_to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
-  debug!(
-    "shape:{:?}, parent_actual_shape:{:?}",
-    shape, parent_actual_shape
-  );
-  let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
-  let parent_actual_top_left_ipos: IPos = geo_point_as!(parent_actual_top_left_pos, isize);
-  let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
-  let parent_actual_bottom_right_ipos: IPos = geo_point_as!(parent_actual_bottom_right_pos, isize);
-
-  let top_left_pos: IPos = shape.min().into();
-  let bottom_right_pos: IPos = shape.max().into();
-
-  let actual_top_left_ipos: IPos = top_left_pos + parent_actual_top_left_ipos;
-  let actual_top_left_x = min(
-    max(actual_top_left_ipos.x(), parent_actual_top_left_ipos.x()),
-    parent_actual_bottom_right_ipos.x(),
-  );
-  let actual_top_left_y = min(
-    max(actual_top_left_ipos.y(), parent_actual_top_left_ipos.y()),
-    parent_actual_bottom_right_ipos.y(),
-  );
-  let actual_top_left_pos: U16Pos =
-    point!(x: actual_top_left_x as u16, y: actual_top_left_y as u16);
-  debug!(
-    "actual_top_left_ipos:{:?}, actual_top_left_pos:{:?}",
-    actual_top_left_ipos, actual_top_left_pos
-  );
-
-  let actual_bottom_right_ipos: IPos = bottom_right_pos + parent_actual_top_left_ipos;
-  let actual_bottom_right_x = min(
-    max(
-      actual_bottom_right_ipos.x(),
-      parent_actual_top_left_ipos.x(),
-    ),
-    parent_actual_bottom_right_ipos.x(),
-  );
-  let actual_bottom_right_y = min(
-    max(
-      actual_bottom_right_ipos.y(),
-      parent_actual_top_left_ipos.y(),
-    ),
-    parent_actual_bottom_right_ipos.y(),
-  );
-  let actual_bottom_right_pos: U16Pos =
-    point!(x: actual_bottom_right_x as u16, y: actual_bottom_right_y as u16);
-
-  let actual_isize = ISize::new(
-    (actual_bottom_right_pos.x() as isize) - (actual_top_left_pos.x() as isize),
-    (actual_bottom_right_pos.y() as isize) - (actual_top_left_pos.y() as isize),
-  );
-  debug!(
-    "actual_isize:{:?}, actual_top_left_pos:{:?}",
-    actual_isize, actual_top_left_pos
-  );
-  let actual_shape = U16Rect::new(
-    actual_top_left_pos,
-    point!(x: actual_top_left_pos.x() + actual_isize.width() as u16, y: actual_top_left_pos.y() + actual_isize.height() as u16),
-  );
-  debug!(
-    "actual_isize:{:?}, actual_shape:{:?}",
-    actual_isize, actual_shape
-  );
-
-  actual_shape
-}
-
 impl Tree {
   /// Make a widget tree.
   ///
   /// Note: The root node is created along with the tree.
-  pub fn new(terminal: TerminalWk) -> Tree {
+  pub fn new(terminal: TerminalWk) -> Self {
     Tree {
-      terminal: terminal.clone(),
+      terminal,
       nodes: BTreeMap::new(),
       edges: BTreeSet::new(),
       root_id: None,
@@ -234,6 +175,7 @@ impl Tree {
     }
   }
 
+  /// Whether the tree is empty.
   pub fn is_empty(&self) -> bool {
     self.root_id.is_none()
       && self.nodes.is_empty()
@@ -367,7 +309,7 @@ impl Tree {
     self.edges.insert(edge);
 
     let parent_actual_shape = self.attributes.get(&parent_id).unwrap().actual_shape;
-    let actual_shape = convert_to_actual_shape(shape, parent_actual_shape);
+    let actual_shape = shapes::convert_to_actual_shape(shape, parent_actual_shape);
     debug!("Calculated actual shape:{:?}", actual_shape);
     self
       .attributes
@@ -571,13 +513,13 @@ impl Tree {
       let actual_shape = match self.parent_ids.get_mut(&id) {
         Some(parent_id) => {
           let parent_actual_shape = self.attributes.get(parent_id).unwrap().actual_shape;
-          convert_to_actual_shape(shape, parent_actual_shape)
+          shapes::convert_to_actual_shape(shape, parent_actual_shape)
         }
         None => {
           let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
           let terminal_actual_shape: U16Rect =
             U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-          convert_to_actual_shape(shape, terminal_actual_shape)
+          shapes::convert_to_actual_shape(shape, terminal_actual_shape)
         }
       };
       self.attributes.get_mut(&id).unwrap().actual_shape = actual_shape;
@@ -681,67 +623,10 @@ mod tests {
   use crate::test::log::init as test_log_init;
   use crate::ui::term::{make_terminal_ptr, Terminal};
   use crate::ui::widget::{Cursor, RootLayout, Widget, Window};
-  use std::cmp::min;
   use std::sync::Once;
   use tracing::info;
 
   static INIT: Once = Once::new();
-
-  #[test]
-  fn convert_to_actual_shapes() {
-    let inputs: Vec<IRect> = vec![
-      IRect::new((0, 0), (3, 5)),
-      IRect::new((0, 0), (1, 5)),
-      IRect::new((0, 0), (3, 7)),
-      IRect::new((0, 0), (0, 0)),
-      IRect::new((0, 0), (5, 4)),
-    ];
-    for t in inputs.iter() {
-      for p in 0..10 {
-        for q in 0..10 {
-          let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
-          let expect = U16Rect::new((0, 0), (min(t.max().x, p) as u16, min(t.max().y, q) as u16));
-          let actual = convert_to_actual_shape(*t, input_actual_parent_shape);
-          // println!(
-          //   "cart::conversion::tests::convert_to_actual_shapes expect:{:?}, actual:{:?}",
-          //   expect, actual
-          // );
-          assert_eq!(actual, expect);
-        }
-      }
-    }
-  }
-
-  #[test]
-  fn convert_to_actual_shapes2() {
-    INIT.call_once(|| {
-      test_log_init();
-    });
-
-    let inputs: Vec<(IRect, U16Rect)> = vec![
-      (IRect::new((0, 0), (3, 5)), U16Rect::new((0, 0), (7, 8))),
-      (IRect::new((-3, 1), (1, 5)), U16Rect::new((3, 2), (9, 8))),
-      (IRect::new((3, 9), (6, 10)), U16Rect::new((1, 1), (2, 2))),
-      (IRect::new((0, 0), (0, 0)), U16Rect::new((0, 0), (0, 0))),
-      (IRect::new((5, 3), (6, 4)), U16Rect::new((0, 0), (5, 3))),
-    ];
-    let expects: Vec<U16Rect> = vec![
-      U16Rect::new((0, 0), (3, 5)),
-      U16Rect::new((3, 3), (4, 7)),
-      U16Rect::new((2, 2), (2, 2)),
-      U16Rect::new((0, 0), (0, 0)),
-      U16Rect::new((5, 3), (5, 3)),
-    ];
-    for (i, p) in inputs.iter().enumerate() {
-      let actual = convert_to_actual_shape(p.0, p.1);
-      let expect = expects[i];
-      info!(
-        "i-{:?}, input:{:?}, actual:{:?}, expect:{:?}",
-        i, p, actual, expect
-      );
-      assert_eq!(actual, expect);
-    }
-  }
 
   #[test]
   fn tree_new() {
