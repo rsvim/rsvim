@@ -1,6 +1,7 @@
 //! Basic atom of all UI components.
 
 pub mod cursor;
+pub mod layout;
 pub mod window;
 
 // Re-export

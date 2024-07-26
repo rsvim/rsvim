@@ -7,7 +7,7 @@ use tracing::debug;
 use crate::cart::{shapes, IRect, U16Rect};
 use crate::ui::term::TerminalWk;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::root::RootLayout;
+use crate::ui::widget::layout::root::RootLayout;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::Widget;
 
@@ -16,9 +16,9 @@ pub type NodeId = usize;
 /// Widget node in the tree.
 #[derive(Debug)]
 pub enum Node {
-  RootWidgetNode(RootLayout),
-  CursorNode(Cursor),
-  WindowNode(Window),
+  RootLayout(RootLayout),
+  Cursor(Cursor),
+  Window(Window),
 }
 
 pub type NodePtr = Arc<RwLock<Node>>;
@@ -43,17 +43,17 @@ impl PartialEq for Node {
 impl Widget for Node {
   fn id(&self) -> NodeId {
     match self {
-      Self::RootWidgetNode(node) => node.id(),
-      Self::CursorNode(node) => node.id(),
-      Self::WindowNode(node) => node.id(),
+      Self::RootLayout(node) => node.id(),
+      Self::Cursor(node) => node.id(),
+      Self::Window(node) => node.id(),
     }
   }
 
   fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {
     match self {
-      Self::RootWidgetNode(node) => node.draw(actual_shape, terminal.clone()),
-      Self::CursorNode(node) => node.draw(actual_shape, terminal.clone()),
-      Self::WindowNode(node) => node.draw(actual_shape, terminal.clone()),
+      Self::RootLayout(node) => node.draw(actual_shape, terminal.clone()),
+      Self::Cursor(node) => node.draw(actual_shape, terminal.clone()),
+      Self::Window(node) => node.draw(actual_shape, terminal.clone()),
     }
   }
 }

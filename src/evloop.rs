@@ -39,7 +39,7 @@ impl EventLoop {
 
     let root_widget = RootLayout::default();
     let root_widget_id = root_widget.id();
-    let root_widget_node = make_node_ptr(Node::RootWidgetNode(root_widget));
+    let root_widget_node = make_node_ptr(Node::RootLayout(root_widget));
     tree.insert_node(
       root_widget_id,
       root_widget_node.clone(),
@@ -52,7 +52,7 @@ impl EventLoop {
 
     let window = Window::default();
     let window_id = window.id();
-    let window_node = make_node_ptr(Node::WindowNode(window));
+    let window_node = make_node_ptr(Node::Window(window));
     let window_shape = IRect::new(
       (0, 0),
       (screen_size.width() as isize, screen_size.height() as isize),
@@ -66,7 +66,7 @@ impl EventLoop {
 
     let cursor = Cursor::default();
     let cursor_id = cursor.id();
-    let cursor_node = make_node_ptr(Node::CursorNode(cursor));
+    let cursor_node = make_node_ptr(Node::Cursor(cursor));
     let cursor_shape = IRect::new((0, 0), (1, 1));
     tree.insert_node(
       cursor_id,
