@@ -5,7 +5,7 @@ use std::collections::VecDeque;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
 use crate::ui::tree::edge::Edge;
-use crate::ui::tree::node::{make_node_ptr, Node, NodeAttribute, NodeId, NodePtr};
+use crate::ui::tree::node::{make_node_ptr, Node, NodeId, NodePtr};
 use crate::ui::widget::layout::root::RootLayout;
 use crate::ui::widget::Widget;
 use crate::uuid;
@@ -19,7 +19,7 @@ pub struct TreeBase {
   // The tree itself is the root node.
   // All the other node collections don't contain the root node.
   //
-  // Root node id.
+  // Root node ID.
   root_node_id: NodeId,
 
   // Root node.
@@ -32,10 +32,6 @@ pub struct TreeBase {
   // A collection of all nodes.
   // Maps from node ID to node struct.
   nodes: BTreeMap<NodeId, NodePtr>,
-
-  // A collection of all node attributes.
-  // Maps from node ID to node attribute.
-  attributes: HashMap<NodeId, NodeAttribute>,
 
   // Node }
 
@@ -63,7 +59,6 @@ impl TreeBase {
       root_node_id,
       root_node: make_node_ptr(Node::RootLayout(root_node)),
       nodes: BTreeMap::new(),
-      attributes: HashMap::new(),
       edges: BTreeSet::new(),
       children_ids: HashMap::new(),
       parent_ids: HashMap::new(),
@@ -73,19 +68,82 @@ impl TreeBase {
   /// Whether the tree is empty (except the root node).
   pub fn is_empty(&self) -> bool {
     self.nodes.is_empty()
-      && self.attributes.is_empty()
       && self.edges.is_empty()
       && self.children_ids.is_empty()
       && self.parent_ids.is_empty()
   }
 
-  /// Get the collection of all nodes.
+  /// Get root node ID.
+  pub fn root_node_id(&self) -> &NodeId {
+    &self.root_node_id
+  }
+
+  /// Get all nodes.
   pub fn nodes(&self) -> &BTreeMap<NodeId, NodePtr> {
     &self.nodes
   }
 
-  /// Get the collection of all node attributes.
-  pub fn attributes(&self) -> &HashMap<NodeId, NodeAttribute> {
-    &self.attributes
+  /// Get all edges.
+  pub fn edges(&self) -> &BTreeSet<Edge> {
+    &self.edges
   }
+
+  /// Get all "parent" ID => "children" ID mappings.
+  pub fn childrens(&self) -> &HashMap<NodeId, HashSet<NodeId>> {
+    &self.children_ids
+  }
+
+  /// Get all "child" ID => "parent" ID mappings.
+  pub fn parents(&self) -> &HashMap<NodeId, NodeId> {
+    &self.parent_ids
+  }
+
+  /// Get a node by its ID.
+  pub fn get(&self, id: NodeId) -> Option<&NodePtr> {
+    self.nodes.get(&id)
+  }
+
+  /// Whether the tree contains the node.
+  pub fn contains(&self, id: NodeId) -> bool {
+    self.nodes.contains_key(&id) && self.children_ids.contains_key(&id)
+  }
+
+  /// Insert a node by its ID and parent's ID.
+  /// This operation also binds the connection between the node and its parent.
+  ///
+  /// Returns inserted node if succeed, returns `None` if failed.
+  ///
+  /// Fails if:
+  /// 1. The node already exists.
+  /// 2. The parent node doesn't exist.
+  pub fn insert(&self, id: NodeId, node: NodePtr, parent_id: NodeId) -> Option<NodePtr> {
+    // Fails
+    if self.contains(&id)
+      || !self.contains(parent_id)
+      || !self.children_ids.contains_key(&parent_id)
+    {
+      return None;
+    }
+
+    // Maps from parent ID to its child ID.
+    self.children_ids.get_mut(&parent_id).unwrap().insert(id);
+    // Maps from the child ID to its parent ID.
+    self.parent_ids.insert(id, parent_id);
+    // Creates new edge from parent to child.
+    self.edges.insert(Edge::new(parent_id, id));
+  }
+
+  /// Remove a node by its ID.
+  ///
+  /// Returns the removed node if succeed, returns `None` if failed.
+  ///
+  /// Fails if:
+  /// 1. The
+  pub fn remove(&self, id: NodeId) -> Option<Tree> {}
+
+  /// Get children IDs.
+  pub fn get_children(&self, id: NodeId) -> Option<&HashSet<NodeId>> {}
+
+  /// Get parent ID.
+  pub fn get_parent(&self, id: NodeId) -> Option<&NodeId> {}
 }
