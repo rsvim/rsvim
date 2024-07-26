@@ -25,3 +25,13 @@ pub trait Widget: Any {
     // Do nothing.
   }
 }
+
+/// Layout widget is a special widget that has no specific shape or content, but as a logical
+/// container for nested children widgets, and arrange their layout.
+pub trait Layout: Widget {
+  fn id(&self) -> NodeId;
+
+  fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {
+    // Do nothing.
+  }
+}
