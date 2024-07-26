@@ -1,12 +1,10 @@
 //! Basic atom of all UI components.
 
 pub mod cursor;
-pub mod root;
 pub mod window;
 
 // Re-export
 pub use crate::ui::widget::cursor::Cursor;
-pub use crate::ui::widget::root::RootLayout;
 pub use crate::ui::widget::window::Window;
 
 use std::any::Any;
@@ -21,16 +19,6 @@ pub trait Widget: Any {
   fn id(&self) -> NodeId;
 
   /// Draw the widget to terminal, on the specific shape.
-  fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {
-    // Do nothing.
-  }
-}
-
-/// Layout widget is a special widget that has no specific shape or content, but works as a logical
-/// container for nested children widgets, and arrange their layout.
-pub trait Layout: Widget {
-  fn id(&self) -> NodeId;
-
   fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {
     // Do nothing.
   }

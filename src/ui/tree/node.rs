@@ -5,7 +5,7 @@ use std::sync::{Arc, RwLock, Weak};
 use crate::cart::{IRect, U16Rect};
 use crate::ui::term::TerminalWk;
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::root::RootWidget;
+use crate::ui::widget::root::RootLayout;
 use crate::ui::widget::window::Window;
 use crate::ui::widget::Widget;
 
@@ -14,7 +14,7 @@ pub type NodeId = usize;
 /// Widget node in the tree.
 #[derive(Debug)]
 pub enum Node {
-  RootWidgetNode(RootWidget),
+  RootWidgetNode(RootLayout),
   CursorNode(Cursor),
   WindowNode(Window),
 }

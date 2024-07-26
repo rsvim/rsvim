@@ -1,12 +1,11 @@
-//! Root widget is the root UI container for all other widgets.
-//! It always exists along with RSVIM, as long as it runs in non-headless and interactive
-//! (non-batch-processing) mode.
+//! Root layout is the root container for all other UI widgets in the widget tree, it exists along
+//! with the widget tree.
 
 use crate::ui::tree::node::NodeId;
 use crate::ui::widget::{Layout, Widget};
 use crate::uuid;
 
-/// Root widget.
+/// Root layout.
 #[derive(Debug, Clone, Copy)]
 pub struct RootLayout {
   id: NodeId,
