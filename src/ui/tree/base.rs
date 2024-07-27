@@ -1,4 +1,5 @@
-//! The base of a widget tree that manages nodes, edges, parents and children relationship, etc.
+//! The internal tree-structure of a widget tree, it implements the core logic of nodes, edges,
+//! parents and children relationship, etc.
 
 use geo::point;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
@@ -9,15 +10,12 @@ use crate::ui::widget::layout::root::RootLayout;
 use crate::ui::widget::Widget;
 use crate::uuid;
 
-/// The base of a widget tree.
+/// The internal tree-structure of a widget tree.
 ///
-/// Note: The tree itself is also a node, i.e. the root node is created along with the tree.
+/// Note: The tree itself is also a node, or say, the root node is created along with the tree.
 pub struct TreeBase {
   // Root {
 
-  // The tree itself is the root node.
-  // All the other node collections don't contain the root node.
-  //
   // Root node ID.
   root_node_id: NodeId,
 
@@ -28,7 +26,7 @@ pub struct TreeBase {
 
   // Node {
 
-  // A collection of all nodes.
+  // A collection of all nodes (except the root node).
   // Maps from node ID to node struct.
   nodes: BTreeMap<NodeId, NodePtr>,
 
@@ -42,6 +40,12 @@ pub struct TreeBase {
   // Maps "child ID" => its "parent ID".
   parent_ids: HashMap<NodeId, NodeId>,
   // Edge }
+}
+
+#[derive(Copy, Clone)]
+struct ParentChildPair {
+  pub parent_id: NodeId,
+  pub child_id: NodeId,
 }
 
 impl TreeBase {
@@ -116,13 +120,15 @@ impl TreeBase {
     self.children_ids.get_mut(&parent_id).unwrap().insert(id);
     // Maps from the child ID to its parent ID.
     self.parent_ids.insert(id, parent_id);
-    // Maps ID to node.
+    // Initialize its children collection.
+    self.children_ids.insert(id, HashMap::new());
+    // Insert ID and node.
     self.nodes.insert(id, node)
   }
 
   /// Remove a node by its ID.
   ///
-  /// Returns the removed node if succeed, returns `None` if failed.
+  /// Returns the removed node and the nested sub-tree if succeed, returns `None` if failed.
   ///
   /// Fails if:
   /// 1. The node doesn't exist.
@@ -136,9 +142,9 @@ impl TreeBase {
     self.children_ids.get_mut(parent_id).unwrap().remove(&id);
 
     let subtree_root_node_id = id;
-    let subtree_root_node = self.nodes.get(&id).unwrap();
+    let subtree_root_node = self.nodes.get(&subtree_root_node_id).unwrap();
 
-    let subtree = TreeBase {
+    let mut subtree = TreeBase {
       root_node_id: subtree_root_node_id,
       root_node: subtree_root_node,
       nodes: BTreeMap::new(),
@@ -146,16 +152,62 @@ impl TreeBase {
       parent_ids: HashMap::new(),
     };
 
-    let q: VecDeque<NodeId> = self.get_children(id).unwrap().iter().collect();
-    while let Some(e_id) = q.pop_front() {
-      let e = self.nodes.remove(&e_id).unwrap();
-      subtree_nodes.insert(e_id, e);
+    let mut q: VecDeque<ParentChildPair> = self
+      .get_children(subtree_root_node_id)
+      .unwrap()
+      .iter()
+      .map(|child_id| ParentChildPair {
+        parent_id: subtree_root_node_id,
+        child_id,
+      })
+      .collect();
+    while let Some(parent_child_pair) = q.pop_front() {
+      let pid = parent_child_pair.parent_id;
+      let eid = parent_child_pair.child_id;
+      let e = self.nodes.remove(&eid).unwrap();
+      subtree.insert(eid, e, pid);
+      self.parent_ids.remove(&eid);
+      if let Some(e_children) = self.children_ids.get(&eid) {
+        for cid in e_children.iter() {
+          q.push_back(ParentChildPair {
+            parent_id: eid,
+            child_id: cid,
+          });
+        }
+      }
     }
+
+    Some(subtree)
   }
 
-  /// Get children IDs.
-  pub fn get_children(&self, id: NodeId) -> Option<&HashSet<NodeId>> {}
+  /// Get all children IDs by the parent's ID.
+  pub fn get_children(&self, id: NodeId) -> Option<&HashSet<NodeId>> {
+    self.children_ids.get(&id)
+  }
 
-  /// Get parent ID.
-  pub fn get_parent(&self, id: NodeId) -> Option<&NodeId> {}
+  /// Get parent ID by the child ID.
+  pub fn get_parent(&self, id: NodeId) -> Option<&NodeId> {
+    self.parent_ids.get(&id)
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::cart::{IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size};
+  use crate::geo_size_as;
+  use crate::test::log::init as test_log_init;
+  use crate::ui::term::{make_terminal_ptr, Terminal};
+  use crate::ui::widget::{Cursor, RootLayout, Widget, Window};
+  use std::sync::Once;
+  use tracing::info;
+
+  static INIT: Once = Once::new();
+
+  #[test]
+  fn tree_new() {
+    INIT.call_once(|| {
+      test_log_init();
+    });
+  }
 }
