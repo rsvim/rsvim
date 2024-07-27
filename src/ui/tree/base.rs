@@ -37,9 +37,6 @@ pub struct TreeBase {
 
   // Edge {
 
-  // A collection of all edges.
-  edges: BTreeSet<Edge>,
-
   // Maps "parent ID" => its "children IDs".
   children_ids: HashMap<NodeId, HashSet<NodeId>>,
 
@@ -59,7 +56,6 @@ impl TreeBase {
       root_node_id,
       root_node: make_node_ptr(Node::RootLayout(root_node)),
       nodes: BTreeMap::new(),
-      edges: BTreeSet::new(),
       children_ids: HashMap::new(),
       parent_ids: HashMap::new(),
     }
@@ -67,10 +63,7 @@ impl TreeBase {
 
   /// Whether the tree is empty (except the root node).
   pub fn is_empty(&self) -> bool {
-    self.nodes.is_empty()
-      && self.edges.is_empty()
-      && self.children_ids.is_empty()
-      && self.parent_ids.is_empty()
+    self.nodes.is_empty() && self.children_ids.is_empty() && self.parent_ids.is_empty()
   }
 
   /// Get root node ID.
@@ -124,8 +117,8 @@ impl TreeBase {
     self.children_ids.get_mut(&parent_id).unwrap().insert(id);
     // Maps from the child ID to its parent ID.
     self.parent_ids.insert(id, parent_id);
-    // Creates new edge from parent to child.
-    self.edges.insert(Edge::new(parent_id, id));
+    // Maps ID to node.
+    self.nodes.insert(id, node)
   }
 
   /// Remove a node by its ID.
