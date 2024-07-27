@@ -114,9 +114,11 @@ impl TreeBase {
     }
 
     // Maps from parent ID to its child ID.
-    self.children_ids.get_mut(&parent_id).unwrap().insert(id);
+    let inserted_child = self.children_ids.get_mut(&parent_id).unwrap().insert(id);
+    assert!(inserted_child.is_none());
     // Maps from the child ID to its parent ID.
-    self.parent_ids.insert(id, parent_id);
+    let inserted_parent = self.parent_ids.insert(id, parent_id);
+    assert!(inserted_parent.is_none());
     // Maps ID to node.
     self.nodes.insert(id, node)
   }
