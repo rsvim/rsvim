@@ -83,11 +83,6 @@ impl TreeBase {
     &self.nodes
   }
 
-  /// Get all edges.
-  pub fn edges(&self) -> &BTreeSet<Edge> {
-    &self.edges
-  }
-
   /// Get all "parent" ID => "children" ID mappings.
   pub fn childrens(&self) -> &HashMap<NodeId, HashSet<NodeId>> {
     &self.children_ids
@@ -103,7 +98,7 @@ impl TreeBase {
     self.nodes.get(&id)
   }
 
-  /// Whether the tree contains the node.
+  /// Whether contains a node by its ID.
   pub fn contains(&self, id: NodeId) -> bool {
     self.nodes.contains_key(&id) && self.children_ids.contains_key(&id)
   }
