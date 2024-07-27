@@ -1,8 +1,7 @@
 //! The base of a widget tree that manages nodes, edges, parents and children relationship, etc.
 
 use geo::point;
-use std::collections::VecDeque;
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet, VecDeque};
 
 use crate::ui::tree::edge::Edge;
 use crate::ui::tree::node::{make_node_ptr, Node, NodeId, NodePtr};
@@ -104,7 +103,7 @@ impl TreeBase {
   /// Fails if:
   /// 1. The node already exists.
   /// 2. The parent node doesn't exist.
-  pub fn insert(&self, id: NodeId, node: NodePtr, parent_id: NodeId) -> Option<NodePtr> {
+  pub fn insert(&mut self, id: NodeId, node: NodePtr, parent_id: NodeId) -> Option<NodePtr> {
     // Fails
     if self.contains(&id)
       || !self.contains(parent_id)
@@ -114,11 +113,9 @@ impl TreeBase {
     }
 
     // Maps from parent ID to its child ID.
-    let inserted_child = self.children_ids.get_mut(&parent_id).unwrap().insert(id);
-    assert!(inserted_child.is_none());
+    self.children_ids.get_mut(&parent_id).unwrap().insert(id);
     // Maps from the child ID to its parent ID.
-    let inserted_parent = self.parent_ids.insert(id, parent_id);
-    assert!(inserted_parent.is_none());
+    self.parent_ids.insert(id, parent_id);
     // Maps ID to node.
     self.nodes.insert(id, node)
   }
@@ -128,8 +125,33 @@ impl TreeBase {
   /// Returns the removed node if succeed, returns `None` if failed.
   ///
   /// Fails if:
-  /// 1. The
-  pub fn remove(&self, id: NodeId) -> Option<Tree> {}
+  /// 1. The node doesn't exist.
+  pub fn remove(&mut self, id: NodeId) -> Option<TreeBase> {
+    // Fails
+    if !self.contains(&id) || !self.parents.contains_key(&id) {
+      return None;
+    }
+
+    let parent_id = self.get_parent(id).unwrap();
+    self.children_ids.get_mut(parent_id).unwrap().remove(&id);
+
+    let subtree_root_node_id = id;
+    let subtree_root_node = self.nodes.get(&id).unwrap();
+
+    let subtree = TreeBase {
+      root_node_id: subtree_root_node_id,
+      root_node: subtree_root_node,
+      nodes: BTreeMap::new(),
+      children_ids: HashMap::new(),
+      parent_ids: HashMap::new(),
+    };
+
+    let q: VecDeque<NodeId> = self.get_children(id).unwrap().iter().collect();
+    while let Some(e_id) = q.pop_front() {
+      let e = self.nodes.remove(&e_id).unwrap();
+      subtree_nodes.insert(e_id, e);
+    }
+  }
 
   /// Get children IDs.
   pub fn get_children(&self, id: NodeId) -> Option<&HashSet<NodeId>> {}
