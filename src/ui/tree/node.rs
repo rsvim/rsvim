@@ -66,36 +66,6 @@ pub enum Node<C> {
   Leaf(Lnode<C>),
 }
 
-impl PartialOrd for Node {
-  fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-    self.id().partial_cmp(&other.id())
-  }
-}
-
-impl PartialEq for Node {
-  fn eq(&self, other: &Self) -> bool {
-    self.id().eq(&other.id())
-  }
-}
-
-impl Widget for Node {
-  fn id(&self) -> NodeId {
-    match self {
-      Self::RootLayout(node) => node.id(),
-      Self::Cursor(node) => node.id(),
-      Self::Window(node) => node.id(),
-    }
-  }
-
-  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {
-    match self {
-      Self::RootLayout(node) => node.draw(actual_shape, terminal.clone()),
-      Self::Cursor(node) => node.draw(actual_shape, terminal.clone()),
-      Self::Window(node) => node.draw(actual_shape, terminal.clone()),
-    }
-  }
-}
-
 #[derive(Copy, Clone)]
 pub struct NodeAttribute {
   /// Relative and logical shape of a widget node.
