@@ -14,11 +14,17 @@ use crate::ui::widget::Widget;
 pub type NodeId = usize;
 
 /// Widget node in the tree.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Node {
   RootLayout(RootLayout),
   Cursor(Cursor),
   Window(Window),
+}
+
+/// Widget tree node.
+pub struct Node {
+  children: Vec<NodePtr>,
+  depth: usize,
 }
 
 pub type NodePtr = Arc<RwLock<Node>>;
@@ -27,6 +33,16 @@ pub type NodeWk = Weak<RwLock<Node>>;
 pub fn make_node_ptr(n: Node) -> NodePtr {
   Arc::new(RwLock::new(n))
 }
+
+/// The internal node, i.e. either non-root or non-leaf node.
+pub struct Inode {}
+
+/// The layout node, a special kind of internal node that has no shape or text content, but only
+/// manages all its children nodes and arranges their layout.
+pub struct Ynode {}
+
+/// The leaf node.
+pub struct Lnode {}
 
 impl PartialOrd for Node {
   fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
