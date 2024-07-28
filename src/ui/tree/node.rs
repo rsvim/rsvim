@@ -1,6 +1,7 @@
 //! Widget node in the tree.
 
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::marker::PhantomData;
 use std::sync::{Arc, RwLock, Weak};
 use tracing::debug;
 
@@ -13,19 +14,19 @@ use crate::ui::widget::Widget;
 
 pub type NodeId = usize;
 
-/// Widget node in the tree.
-#[derive(Debug, Clone)]
-pub enum Node {
-  RootLayout(RootLayout),
-  Cursor(Cursor),
-  Window(Window),
-}
+// /// Widget node in the tree.
+// #[derive(Debug, Clone)]
+// pub enum Node {
+//   RootLayout(RootLayout),
+//   Cursor(Cursor),
+//   Window(Window),
+// }
 
-/// Widget tree node.
-pub struct Node {
-  children: Vec<NodePtr>,
-  depth: usize,
-}
+// /// Widget tree node.
+// pub struct Node {
+//   children: Vec<NodePtr>,
+//   depth: usize,
+// }
 
 pub type NodePtr = Arc<RwLock<Node>>;
 pub type NodeWk = Weak<RwLock<Node>>;
@@ -35,14 +36,35 @@ pub fn make_node_ptr(n: Node) -> NodePtr {
 }
 
 /// The internal node, i.e. either non-root or non-leaf node.
-pub struct Inode {}
+#[derive(Debug, Clone)]
+pub struct Inode<C> {
+  content: C,
+  children: Vec<NodePtr>,
+  depth: usize,
+}
 
 /// The layout node, a special kind of internal node that has no shape or text content, but only
 /// manages all its children nodes and arranges their layout.
-pub struct Ynode {}
+#[derive(Debug, Clone)]
+pub struct Ynode<C> {
+  content: PhantomData<C>,
+  children: Vec<NodePtr>,
+  depth: usize,
+}
 
 /// The leaf node.
-pub struct Lnode {}
+#[derive(Debug, Clone)]
+pub struct Lnode<C> {
+  content: C,
+}
+
+/// Widget node in the tree.
+#[derive(Debug, Clone)]
+pub enum Node<C> {
+  Internal(Inode<C>),
+  Layout(Ynode<C>),
+  Leaf(Lnode<C>),
+}
 
 impl PartialOrd for Node {
   fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
