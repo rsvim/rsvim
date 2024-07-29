@@ -76,7 +76,7 @@ impl<T> Inode<T> {
     self.children
   }
 
-  /// Push a child node.
+  /// Push a child node at the end of children's vector.
   /// This operation also calculates and updates the actual shape for the pushed node and all its
   /// descendant children.
   pub fn push(&mut self, child: InodePtr<T>) {
@@ -108,6 +108,14 @@ impl<T> Inode<T> {
         }
         None => { /* Do nothing */ }
       }
+    }
+  }
+
+  /// Pop a child node from the end of the chlidren's vector.
+  pub fn pop(&mut self) -> Option<InodePtr<T>> {
+    match self.children {
+      Some(&mut children) => children.pop(),
+      None => None,
     }
   }
 
