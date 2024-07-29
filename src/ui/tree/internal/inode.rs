@@ -76,6 +76,33 @@ impl<T> Inode<T> {
     self.children
   }
 
+  fn update_actual_shape(start: InodePtr<T>, start_parent: InodePtr<T>) {
+    let parent_actual_shape = start_parent.read().unwrap().attr.actual_shape;
+    let mut start1 = start.write().unwrap();
+    start1.attr.actual_shape =
+      shapes::convert_to_actual_shape(start1.attr.shape, parent_actual_shape);
+
+    let mut q: VecDeque<(InodePtr<T>, InodePtr<T>)> = match start1.children {
+      Some(children) => children.iter().map(|child| (start1, child)).collect(),
+      None => vec![].iter().collect(),
+    };
+
+    while let Some(parent_child_pair) = q.pop_front() {
+      let parent_actual_shape = parent_child_pair.0.read().unwrap().attr.actual_shape;
+      let mut child2 = parent_child_pair.1.write().unwrap();
+      let shape = child2.attr.shape;
+      child2.attr.actual_shape = shapes::convert_to_actual_shape(shape, parent_actual_shape);
+      match child2.children {
+        Some(children) => {
+          for c in children.iter() {
+            q.push_back(c);
+          }
+        }
+        None => { /* Do nothing */ }
+      }
+    }
+  }
+
   /// Push a child node at the end of children's vector.
   /// This operation also calculates and updates the actual shape for the pushed node and all its
   /// descendant children.
