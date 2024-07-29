@@ -1,5 +1,6 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
+use std::collections::VecDeque;
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::cart::{IRect, U16Rect};
@@ -53,8 +54,8 @@ impl<T> Inode<T> {
     self.parent
   }
 
-  pub fn children(&self) -> Option<&Vec<InodePtr<T>>> {
-    self.children
+  pub fn id(&self) -> usize {
+    self.id
   }
 
   pub fn attribute(&self) -> InodeAttr {
@@ -65,28 +66,37 @@ impl<T> Inode<T> {
     &self.value
   }
 
-  pub fn get_child(&self, index: usize) -> Option<&InodePtr<T>> {
-    match self.children {
-      Some(c) => c.get(index),
-      None => None,
-    }
+  // Children {
+
+  pub fn children(&self) -> Option<&Vec<InodePtr<T>>> {
+    self.children
   }
 
-  pub fn add_child(&mut self, child: InodePtr<T>) {
-    if self.children.is_none() {
-      self.children = Some(vec![]);
-    }
-
-    match self.children {
-      Some(&mut c) => c.push(child),
-      None => unreachable!(),
-    }
+  pub fn children_mut(&mut self) -> Option<&mut Vec<InodePtr<T>>> {
+    &mut self.children
   }
 
-  pub fn remove_child(&mut self, index: usize) -> Option<&InodePtr<T>> {
-    match self.children {
-      Some(c) => c.remove(index),
-      None => None,
+  /// Get descendant child by its ID, i.e. all nested children under the sub-tree.
+  pub fn get_child(&self, id: usize) -> Option<InodePtr<T>> {
+    let mut q: VecDeque<InodePtr<T>> = match self.children {
+      Some(c) => c.iter().collect(),
+      None => vec![].iter().collect(),
+    };
+    while let Some(e) = q.pop_front() {
+      if e.read().unwrap().id() == id {
+        return Some(e);
+      }
+      match e.children {
+        Some(ec) => {
+          for child in ec.iter() {
+            q.push_back(child);
+          }
+        }
+        None => { /* Do nothing */ }
+      }
     }
+    None
   }
+
+  // Children }
 }
