@@ -18,6 +18,7 @@ pub use crate::ui::tree::node::{make_node_ptr, Node, NodeAttribute, NodeId, Node
 
 pub mod base;
 pub mod edge;
+pub mod internal;
 pub mod node;
 
 /// The widget tree.
