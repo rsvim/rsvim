@@ -1,8 +1,6 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
 use std::collections::VecDeque;
-use std::fs::write;
-use std::ptr::write;
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::cart::{shapes, IRect, U16Rect};
@@ -110,6 +108,14 @@ impl<T> Inode<T> {
         }
         None => { /* Do nothing */ }
       }
+    }
+  }
+
+  /// Remove a child node.
+  pub fn remove(&mut self, index: usize) -> Option<InodePtr<T>> {
+    match self.children {
+      Some(&mut children) => Some(children.remove(index)),
+      None => None,
     }
   }
 
