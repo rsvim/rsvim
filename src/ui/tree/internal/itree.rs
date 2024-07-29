@@ -1,3 +1,8 @@
 //! Internal tree structure implementation: the `Itree` structure.
 
-pub struct Itree {}
+use crate::ui::tree::internal::inode::InodePtr;
+
+#[derive(Debug, Clone)]
+pub struct Itree<T> {
+  root: Option<InodePtr<T>>,
+}
