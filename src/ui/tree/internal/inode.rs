@@ -76,8 +76,7 @@ impl<T> Inode<T> {
     self.children
   }
 
-  fn update_actual_shape(start: InodePtr<T>, start_parent: InodePtr<T>) {
-    let parent_actual_shape = start_parent.read().unwrap().attr.actual_shape;
+  fn update_actual_shape(start: InodePtr<T>, parent_actual_shape: U16Rect) {
     let mut start1 = start.write().unwrap();
     start1.attr.actual_shape =
       shapes::convert_to_actual_shape(start1.attr.shape, parent_actual_shape);
@@ -110,32 +109,16 @@ impl<T> Inode<T> {
     if self.children.is_none() {
       self.children = Some(vec![]);
     }
-    self.children.unwrap().push(child);
+    self.update_actual_shape(child, self.attr.actual_shape);
+    self.children.unwrap().push(child)
+  }
 
-    let mut child1 = child.write().unwrap();
-    child1.attr.actual_shape =
-      shapes::convert_to_actual_shape(child1.attr.shape, self.attr.actual_shape);
-
-    let mut q: VecDeque<(InodePtr<T>, InodePtr<T>)> = match child1.children {
-      Some(children) => children.iter().map(|child| (child1, child)).collect(),
-      None => vec![].iter().collect(),
-    };
-    while let Some(parent_child_pair) = q.pop_front() {
-      let parent2 = parent_child_pair.0;
-      let child2 = parent_child_pair.1;
-      let shape = child2.read().unwrap().attr.shape;
-      let parent_actual_shape = parent2.read().unwrap().attr.actual_shape;
-      child2.write().unwrap().attr.actual_shape =
-        shapes::convert_to_actual_shape(shape, parent_actual_shape);
-      match child2.read().unwrap().children {
-        Some(children) => {
-          for c in children.iter() {
-            q.push_back(c);
-          }
-        }
-        None => { /* Do nothing */ }
-      }
+  pub fn insert(&mut self, index: usize, child: InodePtr<T>) {
+    if self.children.is_none() {
+      self.children = Some(vec![]);
     }
+    self.update_actual_shape(child, self.attr.actual_shape);
+    self.children.unwrap().insert(index, child)
   }
 
   /// Pop a child node from the end of the chlidren's vector.
