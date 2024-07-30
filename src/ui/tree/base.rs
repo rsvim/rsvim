@@ -198,7 +198,7 @@ mod tests {
   use crate::geo_size_as;
   use crate::test::log::init as test_log_init;
   use crate::ui::term::{make_terminal_ptr, Terminal};
-  use crate::ui::widget::{Cursor, RootLayout, Widget, Window};
+  use crate::ui::widget::{Cursor, RootLayout, Widget, WindowContent};
   use std::sync::Once;
   use tracing::info;
 

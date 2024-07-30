@@ -8,6 +8,7 @@ pub mod window;
 pub use crate::ui::widget::cursor::Cursor;
 pub use crate::ui::widget::layout::root::RootLayout;
 pub use crate::ui::widget::layout::window::WindowLayout;
+pub use crate::ui::widget::window::text_content::Window;
 
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalWk;
