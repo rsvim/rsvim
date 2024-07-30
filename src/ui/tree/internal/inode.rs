@@ -100,26 +100,16 @@ impl<T> Inode<T> {
   /// 1. [`depth`](InodeAttr::depth)
   /// 2. [`actual_shape`](InodeAttr::actual_shape)
   fn update_attribute(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
-    Inode::update_depth(start_node, start_parent_node);
-    Inode::update_actual_shape(start_node, start_parent_node);
-  }
-
-  /// Calculate and update all descendants depths, start from the `start_node`.
-  fn update_depth(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
     Inode::level_order_traverse(start_node, start_parent_node, |start, parent| {
-      let read_start = start.write().unwrap();
-      let read_parent = parent.read().unwrap();
-      read_start.attr.depth = read_parent.attr.depth + 1;
+      let parent2 = parent.read().unwrap();
+      let mut start2 = start.write().unwrap();
+      start2.attr.depth = parent2.attr.depth + 1;
     });
-  }
-
-  /// Calculate and update all descendants actual shapes, start from the `start_node`.
-  fn update_actual_shape(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
     Inode::level_order_traverse(start_node, start_parent_node, |start, parent| {
-      let read_start = start.write().unwrap();
-      let read_parent = parent.read().unwrap();
-      read_start.attr.actual_shape =
-        shapes::convert_to_actual_shape(read_start.attr.shape, read_parent.attr.actual_shape);
+      let parent2 = parent.read().unwrap();
+      let mut start2 = start.write().unwrap();
+      start2.attr.actual_shape =
+        shapes::convert_to_actual_shape(start2.attr.shape, parent2.attr.actual_shape);
     });
   }
 
@@ -162,13 +152,19 @@ impl<T> Inode<T> {
   /// (`self`) node, outside of this method.
   /// Because this (`self`) node doesn't have the related `std::sync::Arc` pointer, so this method
   /// cannot do this for you.
-  pub fn push(&mut self, child: InodePtr<T>) {
-    if self.children.is_none() {
-      self.children = Some(Vec::new());
+  pub fn push(self_: InodePtr<T>, child: InodePtr<T>) {
+    let mut start_node = self_.write().unwrap();
+    if start_node.children.is_none() {
+      start_node.children = Some(Vec::new());
     }
-    self.update_attribute(child, self);
+
+    // Update attributes start from `child`, and all its descendants.
+    Inode::update_attribute(child, self_);
+
     let child_zindex = child.read().unwrap().attr.zindex;
-    let higher_zindex_pos: Vec<usize> = self
+    let mut higher_zindex_pos: Vec<usize> = self_
+      .read()
+      .unwrap()
       .children
       .unwrap()
       .iter()
@@ -180,11 +176,16 @@ impl<T> Inode<T> {
     match higher_zindex_pos.pop() {
       Some(insert_pos) => {
         // Got the first child's position that has higher z-index, insert before it.
-        self.children.unwrap().insert(insert_pos, child)
+        self_
+          .write()
+          .unwrap()
+          .children
+          .unwrap()
+          .insert(insert_pos, child)
       }
       None => {
         // No existed children has higher z-index, insert at the end.
-        self.children.unwrap().push(child)
+        self_.write().unwrap().children.unwrap().push(child)
       }
     }
   }
