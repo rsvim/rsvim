@@ -1,14 +1,8 @@
 //! The widget tree that manages all the widget components.
 
-use geo::point;
-use std::collections::VecDeque;
-use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
+use std::collections::BTreeSet;
 use std::sync::{Arc, RwLock, Weak};
-use tracing::debug;
 
-use crate::cart::shapes;
-use crate::cart::{IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
-use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::internal::inode::{Inode, InodePtr};
 use crate::ui::tree::internal::itree::{Itree, ItreeIterateOrder, ItreeIterator};
