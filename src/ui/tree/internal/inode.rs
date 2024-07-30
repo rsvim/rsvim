@@ -161,6 +161,7 @@ impl<T> Inode<T> {
     // Update attributes start from `child`, and all its descendants.
     Inode::update_attribute(child, self_);
 
+    // Insert `child` by the order of z-index.
     let child_zindex = child.read().unwrap().attr.zindex;
     let mut higher_zindex_pos: Vec<usize> = self_
       .read()
