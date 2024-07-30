@@ -1,9 +1,11 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
 use std::collections::VecDeque;
+use std::ops::FnMut;
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::cart::{shapes, IRect, U16Rect};
+use crate::ui::tree::node::Inode;
 use crate::uuid;
 
 #[derive(Debug, Clone)]
@@ -20,6 +22,7 @@ pub type InodeWk<T> = Weak<RwLock<Inode<T>>>;
 
 #[derive(Debug, Clone, Copy)]
 pub struct InodeAttr {
+  pub depth: usize,
   pub shape: IRect,
   pub actual_shape: U16Rect,
   pub zindex: usize,
@@ -28,8 +31,9 @@ pub struct InodeAttr {
 }
 
 impl InodeAttr {
-  pub fn new(shape: IRect, actual_shape: U16Rect) -> Self {
+  pub fn new(depth: usize, shape: IRect, actual_shape: U16Rect) -> Self {
     InodeAttr {
+      depth,
       shape,
       actual_shape,
       zindex: 0,
@@ -76,25 +80,61 @@ impl<T> Inode<T> {
     self.children
   }
 
-  fn update_actual_shape(start: InodePtr<T>, parent_actual_shape: U16Rect) {
-    let mut start1 = start.write().unwrap();
-    start1.attr.actual_shape =
-      shapes::convert_to_actual_shape(start1.attr.shape, parent_actual_shape);
+  /// Calculate and update the `start_node` attributes, based on its parent's attributes.
+  /// Also recursively calculate and update all descendants in the sub-tree, start from the
+  /// `start_node`.
+  ///
+  /// These attributes are relative to the parent node, and need to be calculated and updated when
+  /// the node is been moved in the tree:
+  ///
+  /// 1. [`depth`](InodeAttr::depth)
+  /// 2. [`actual_shape`](InodeAttr::actual_shape)
+  fn update_attribute(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
+    Inode::update_depth(start_node, start_parent_node);
+    Inode::update_actual_shape(start_node, start_parent_node);
+  }
 
-    let mut q: VecDeque<(InodePtr<T>, InodePtr<T>)> = match start1.children {
-      Some(children) => children.iter().map(|child| (start1, child)).collect(),
+  /// Calculate and update all descendants depths, start from the `start_node`.
+  fn update_depth(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
+    Inode::level_order_traversal(start_node, start_parent_node, |start, parent| {
+      let start1 = start.write().unwrap();
+      let parent1 = parent.read().unwrap();
+      start1.attr.depth = parent1.attr.depth + 1;
+    });
+  }
+
+  /// Calculate and update all descendants actual shapes, start from the `start_node`.
+  fn update_actual_shape(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
+    Inode::level_order_traversal(start_node, start_parent_node, |start, parent| {
+      let start1 = start.write().unwrap();
+      let parent1 = parent.read().unwrap();
+      start1.attr.actual_shape =
+        shapes::convert_to_actual_shape(start1.attr.shape, parent1.attr.actual_shape);
+    });
+  }
+
+  fn level_order_traversal(
+    start_node: InodePtr<T>,
+    start_parent_node: InodePtr<T>,
+    mut f: dyn FnMut(InodePtr<T>, InodePtr<T>),
+  ) {
+    f(start_node, start_parent_node);
+
+    let start = start_node.read().unwrap();
+    let mut que: VecDeque<(InodePtr<T>, InodePtr<T>)> = match start.children {
+      Some(children) => children.iter().map(|c| (start, c)).collect(),
       None => vec![].iter().collect(),
     };
 
-    while let Some(parent_child_pair) = q.pop_front() {
-      let parent_actual_shape = parent_child_pair.0.read().unwrap().attr.actual_shape;
-      let mut child2 = parent_child_pair.1.write().unwrap();
-      let shape = child2.attr.shape;
-      child2.attr.actual_shape = shapes::convert_to_actual_shape(shape, parent_actual_shape);
-      match child2.children {
+    while let Some(parent_child_pair) = que.pop_front() {
+      let parent = parent_child_pair.0;
+      let child = parent_child_pair.1;
+      f(child, parent);
+      let child = child.read().unwrap();
+      match child.children {
         Some(children) => {
           for c in children.iter() {
-            q.push_back(c);
+            que.push_back(c);
           }
         }
         None => { /* Do nothing */ }
