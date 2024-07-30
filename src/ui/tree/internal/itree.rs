@@ -17,8 +17,8 @@ pub struct Itree<T> {
 /// The pre-order iterator of the tree.
 ///
 /// It iterates the tree nodes following the order of rendering, i.e. the nodes with lower z-index
-/// that will be covered by other nodes are been visited earlier, the nodes with higher z-index
-/// that will cover other nodes are been visited later.
+/// that can be covered by other nodes are visited earlier, the nodes with higher z-index that will
+/// cover other nodes are visited later.
 pub struct ItreeIterator<T> {
   /// All children under the same node is iterated by the order of z-index value, either ascent or
   /// descent, i.e. from low to high or high to low.
