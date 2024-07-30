@@ -120,8 +120,8 @@ pub struct Tree {
 
 pub type TreePtr = Arc<RwLock<Tree>>;
 pub type TreeWk = Weak<RwLock<Tree>>;
-pub type Node = Inode<WidgetImpl>;
-pub type NodePtr = InodePtr<WidgetImpl>;
+pub type TreeNode = Inode<WidgetImpl>;
+pub type TreeNodePtr = InodePtr<WidgetImpl>;
 pub type TreeIterator = ItreeIterator<WidgetImpl>;
 pub type TreeIterateOrder = ItreeIterateOrder;
 
@@ -148,11 +148,11 @@ impl Tree {
 
   // Node {
 
-  pub fn root(&self) -> Option<NodePtr> {
+  pub fn root(&self) -> Option<TreeNodePtr> {
     self.base.root()
   }
 
-  pub fn set_root(&mut self, root: Option<NodePtr>) -> Option<NodePtr> {
+  pub fn set_root(&mut self, root: Option<TreeNodePtr>) -> Option<TreeNodePtr> {
     self.base.set_root(root)
   }
 
@@ -162,6 +162,18 @@ impl Tree {
 
   pub fn ordered_iter(&self, order: TreeIterateOrder) -> TreeIterator {
     self.base.ordered_iter(order)
+  }
+
+  pub fn insert(&mut self, parent: Option<TreeNodePtr>, child: TreeNodePtr) -> Option<TreeNodePtr> {
+    self.base.insert(parent, child)
+  }
+
+  pub fn get(&self, id: usize) -> Option<TreeNodePtr> {
+    self.base.get(id)
+  }
+
+  pub fn remove(parent: TreeNodePtr, index: usize) -> Option<TreeNodePtr> {
+    Itree::remove(parent, index)
   }
 
   // Node }
@@ -220,16 +232,16 @@ mod tests {
     let mut tree = Tree::new(Arc::downgrade(&terminal));
 
     let n1 = RootContainer::new();
-    let n1 = make_node_ptr(Node::RootLayout(n1));
+    let n1 = make_node_ptr(TreeNode::RootLayout(n1));
 
     let n2 = WindowContent::default();
-    let n2 = make_node_ptr(Node::Window(n2));
+    let n2 = make_node_ptr(TreeNode::Window(n2));
 
     let n3 = WindowContent::default();
-    let n3 = make_node_ptr(Node::Window(n3));
+    let n3 = make_node_ptr(TreeNode::Window(n3));
 
     let n4 = Cursor::default();
-    let n4 = make_node_ptr(Node::Cursor(n4));
+    let n4 = make_node_ptr(TreeNode::Cursor(n4));
 
     tree.insert_node(
       n1.read().unwrap().id(),
@@ -330,19 +342,19 @@ mod tests {
 
     let n1 = RootContainer::new();
     let n1_id = n1.id();
-    let n1 = make_node_ptr(Node::RootLayout(n1));
+    let n1 = make_node_ptr(TreeNode::RootLayout(n1));
 
     let n2 = WindowContent::default();
     let n2_id = n2.id();
-    let n2 = make_node_ptr(Node::Window(n2));
+    let n2 = make_node_ptr(TreeNode::Window(n2));
 
     let n3 = WindowContent::default();
     let n3_id = n3.id();
-    let n3 = make_node_ptr(Node::Window(n3));
+    let n3 = make_node_ptr(TreeNode::Window(n3));
 
     let n4 = Cursor::default();
     let n4_id = n4.id();
-    let n4 = make_node_ptr(Node::Cursor(n4));
+    let n4 = make_node_ptr(TreeNode::Cursor(n4));
 
     tree.insert_root_node(n1.read().unwrap().id(), n1.clone(), terminal_size);
     let shape1 = tree.get_shape(n1_id);
@@ -510,23 +522,23 @@ mod tests {
 
     let n1 = RootContainer::new();
     let nid1 = n1.id();
-    let n1 = make_node_ptr(Node::RootLayout(n1));
+    let n1 = make_node_ptr(TreeNode::RootLayout(n1));
 
     let n2 = WindowContent::default();
     let nid2 = n2.id();
-    let n2 = make_node_ptr(Node::Window(n2));
+    let n2 = make_node_ptr(TreeNode::Window(n2));
 
     let n3 = WindowContent::default();
     let nid3 = n3.id();
-    let n3 = make_node_ptr(Node::Window(n3));
+    let n3 = make_node_ptr(TreeNode::Window(n3));
 
     let n4 = WindowContent::default();
     let nid4 = n4.id();
-    let n4 = make_node_ptr(Node::Window(n4));
+    let n4 = make_node_ptr(TreeNode::Window(n4));
 
     let n5 = Cursor::default();
     let nid5 = n5.id();
-    let n5 = make_node_ptr(Node::Cursor(n5));
+    let n5 = make_node_ptr(TreeNode::Cursor(n5));
 
     tree.insert_root_node(nid1, n1.clone(), terminal_size);
     let shape1 = tree.get_shape(nid1);
@@ -727,23 +739,23 @@ mod tests {
 
     let n1 = RootContainer::new();
     let nid1 = n1.id();
-    let n1 = make_node_ptr(Node::RootLayout(n1));
+    let n1 = make_node_ptr(TreeNode::RootLayout(n1));
 
     let n2 = WindowContent::default();
     let nid2 = n2.id();
-    let n2 = make_node_ptr(Node::Window(n2));
+    let n2 = make_node_ptr(TreeNode::Window(n2));
 
     let n3 = WindowContent::default();
     let nid3 = n3.id();
-    let n3 = make_node_ptr(Node::Window(n3));
+    let n3 = make_node_ptr(TreeNode::Window(n3));
 
     let n4 = WindowContent::default();
     let nid4 = n4.id();
-    let n4 = make_node_ptr(Node::Window(n4));
+    let n4 = make_node_ptr(TreeNode::Window(n4));
 
     let n5 = Cursor::default();
     let nid5 = n5.id();
-    let n5 = make_node_ptr(Node::Cursor(n5));
+    let n5 = make_node_ptr(TreeNode::Cursor(n5));
 
     tree.insert_root_node(nid1, n1.clone(), terminal_size);
     let shape1 = tree.get_shape(nid1);
