@@ -20,8 +20,6 @@ pub struct Itree<T> {
 /// that can be covered by other nodes are visited earlier, the nodes with higher z-index that will
 /// cover other nodes are visited later.
 pub struct ItreeIterator<T> {
-  /// All children under the same node is iterated by the order of z-index value, either ascent or
-  /// descent, i.e. from low to high or high to low.
   order: ItreeIterateOrder,
   queue: VecDeque<InodePtr<T>>,
 }
@@ -66,10 +64,12 @@ impl<T> ItreeIterator<T> {
   }
 }
 
+/// The iterator's visiting order for all children nodes under the same node.
+///
+/// The `Ascent` visits from lower z-index to higher.
+/// The `Descent` visits from higher z-index to lower.
 pub enum ItreeIterateOrder {
-  // Iterate by z-index value, from smallest to biggest.
   Ascent,
-  // Iterate by z-index value, from biggest to smallest.
   Descent,
 }
 
@@ -141,15 +141,15 @@ impl<T> Itree<T> {
 
   /// Get the iterator.
   ///
-  /// By default the iterate order is level order start from the root node, for all the children
-  /// under the same node, traverse from smallest z-index to biggest.
+  /// By default it iterates in pre-order, start from the root. For the children under the same
+  /// node, it visits from lower z-index to higher.
   pub fn iter(&self) -> ItreeIterator<T> {
     ItreeIterator::new(self.root, ItreeIterateOrder::Ascent)
   }
 
-  /// Get the iterator in a children-descent-order.
+  /// Get the iterator in a descent order.
   ///
-  /// For all the children under the same node, traverse from highest z-index to smallest.
+  /// For the children under the same node, it visits from higher z-index to lower.
   pub fn iter_descent(&self) -> ItreeIterator<T> {
     ItreeIterator::new(self.root, ItreeIterateOrder::Descent)
   }
