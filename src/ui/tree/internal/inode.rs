@@ -168,7 +168,7 @@ impl<T> Inode<T> {
     }
     self.update_attribute(child, self);
     let child_zindex = child.read().unwrap().attr.zindex;
-    let higher_indexes: Vec<usize> = self
+    let higher_zindex_pos: Vec<usize> = self
       .children
       .unwrap()
       .iter()
@@ -177,7 +177,7 @@ impl<T> Inode<T> {
       .map(|(index, c)| index)
       .rev()
       .collect();
-    let insert_pos = higher_indexes.pop();
+    let insert_pos = higher_zindex_pos.pop();
     match insert_pos {
       Some(insert_pos) => {
         // Got the first child's position that has higher z-index, insert before it.
