@@ -623,7 +623,7 @@ mod tests {
   use crate::geo_size_as;
   use crate::test::log::init as test_log_init;
   use crate::ui::term::{make_terminal_ptr, Terminal};
-  use crate::ui::widget::{Cursor, RootLayout, Widget, Window};
+  use crate::ui::widget::{Cursor, RootLayout, Widget, WindowContent};
   use std::sync::Once;
   use tracing::info;
 
@@ -664,10 +664,10 @@ mod tests {
     let n1 = RootLayout::new();
     let n1 = make_node_ptr(Node::RootLayout(n1));
 
-    let n2 = Window::default();
+    let n2 = WindowContent::default();
     let n2 = make_node_ptr(Node::Window(n2));
 
-    let n3 = Window::default();
+    let n3 = WindowContent::default();
     let n3 = make_node_ptr(Node::Window(n3));
 
     let n4 = Cursor::default();
@@ -774,11 +774,11 @@ mod tests {
     let n1_id = n1.id();
     let n1 = make_node_ptr(Node::RootLayout(n1));
 
-    let n2 = Window::default();
+    let n2 = WindowContent::default();
     let n2_id = n2.id();
     let n2 = make_node_ptr(Node::Window(n2));
 
-    let n3 = Window::default();
+    let n3 = WindowContent::default();
     let n3_id = n3.id();
     let n3 = make_node_ptr(Node::Window(n3));
 
@@ -954,15 +954,15 @@ mod tests {
     let nid1 = n1.id();
     let n1 = make_node_ptr(Node::RootLayout(n1));
 
-    let n2 = Window::default();
+    let n2 = WindowContent::default();
     let nid2 = n2.id();
     let n2 = make_node_ptr(Node::Window(n2));
 
-    let n3 = Window::default();
+    let n3 = WindowContent::default();
     let nid3 = n3.id();
     let n3 = make_node_ptr(Node::Window(n3));
 
-    let n4 = Window::default();
+    let n4 = WindowContent::default();
     let nid4 = n4.id();
     let n4 = make_node_ptr(Node::Window(n4));
 
@@ -1171,15 +1171,15 @@ mod tests {
     let nid1 = n1.id();
     let n1 = make_node_ptr(Node::RootLayout(n1));
 
-    let n2 = Window::default();
+    let n2 = WindowContent::default();
     let nid2 = n2.id();
     let n2 = make_node_ptr(Node::Window(n2));
 
-    let n3 = Window::default();
+    let n3 = WindowContent::default();
     let nid3 = n3.id();
     let n3 = make_node_ptr(Node::Window(n3));
 
-    let n4 = Window::default();
+    let n4 = WindowContent::default();
     let nid4 = n4.id();
     let n4 = make_node_ptr(Node::Window(n4));
 

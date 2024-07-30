@@ -5,7 +5,6 @@ use std::ops::FnMut;
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::cart::{shapes, IRect, U16Rect};
-use crate::ui::tree::node::Inode;
 use crate::uuid;
 
 #[derive(Debug, Clone)]

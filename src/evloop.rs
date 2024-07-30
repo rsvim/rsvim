@@ -10,7 +10,7 @@ use crate::ui::tree::{make_tree_ptr, Tree, TreePtr};
 use crate::ui::widget::Cursor;
 use crate::ui::widget::RootLayout;
 use crate::ui::widget::Widget;
-use crate::ui::widget::Window;
+use crate::ui::widget::WindowContent;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode,
@@ -50,7 +50,7 @@ impl EventLoop {
       ),
     );
 
-    let window = Window::default();
+    let window = WindowContent::default();
     let window_id = window.id();
     let window_node = make_node_ptr(Node::Window(window));
     let window_shape = IRect::new(

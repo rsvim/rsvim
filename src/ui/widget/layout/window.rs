@@ -2,7 +2,8 @@
 
 use crate::ui::widget::Widget;
 
-/// VIM Window layout.
+/// VIM Window layout, it manages all descendant widget nodes, i.e. all widgets in the
+/// [`crate::ui::widget::window`] module.
 #[derive(Debug, Clone, Copy)]
 pub struct WindowLayout {}
 

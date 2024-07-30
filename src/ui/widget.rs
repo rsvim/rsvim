@@ -8,11 +8,10 @@ pub mod window;
 pub use crate::ui::widget::cursor::Cursor;
 pub use crate::ui::widget::layout::root::RootLayout;
 pub use crate::ui::widget::layout::window::WindowLayout;
-pub use crate::ui::widget::window::text_content::Window;
+pub use crate::ui::widget::window::content::WindowContent;
 
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalWk;
-use crate::ui::tree::node::NodeId;
 
 /// Widget is the base trait for all UI components, it provide a common layer for rendering.
 pub trait Widget {
@@ -23,5 +22,8 @@ pub trait Widget {
 }
 
 pub enum WidgetNode {
-  Root(),
+  RootLayout(RootLayout),
+  WindowLayout(WindowLayout),
+  WindowContent(WindowContent),
+  Cursor(Cursor),
 }
