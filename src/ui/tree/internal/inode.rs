@@ -158,8 +158,8 @@ impl<T> Inode<T> {
   /// This operation also sorts the newly inserted node with other children by the z-index. It also
   /// calculates and updates the attributes for the pushed node and all its descendants.
   ///
-  /// Note: You need to manually assigned the `parent` pointer inside the `child` node, outside of
-  /// this method.
+  /// Note: You need to manually assigned the `parent` pointer inside the `child` node to this
+  /// (`self`) node, outside of this method.
   /// Because this (`self`) node doesn't have its `std::sync::Arc` pointer, so this method cannot
   /// do this for you.
   pub fn push(&mut self, child: InodePtr<T>) {
