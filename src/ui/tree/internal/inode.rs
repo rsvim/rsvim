@@ -219,7 +219,7 @@ impl<T> Inode<T> {
   }
 
   /// Get descendant child by its ID, i.e. search in all children nodes in the sub-tree.
-  pub fn get_descendant_child(&self, id: usize) -> Option<InodePtr<T>> {
+  pub fn get_descendant(&self, id: usize) -> Option<InodePtr<T>> {
     let mut q: VecDeque<InodePtr<T>> = match self.children {
       Some(children) => children.iter().collect(),
       None => vec![].iter().collect(),
