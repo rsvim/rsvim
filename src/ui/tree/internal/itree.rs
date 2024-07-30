@@ -55,7 +55,10 @@ impl<T> ItreeIterator<T> {
       Some(start_node) => q.push_back(start_node),
       None => { /* Do nothing */ }
     }
-    ItreeIterator { order, queue: q }
+    ItreeIterator {
+      order: ItreeIterateOrder::Ascent,
+      queue: q,
+    }
   }
 }
 
@@ -132,8 +135,19 @@ impl<T> Itree<T> {
     }
   }
 
-  pub fn iter(&self, order: ItreeIterateOrder) -> ItreeIterator<T> {
-    ItreeIterator::new(self.root, order)
+  /// Get the iterator.
+  ///
+  /// By default the iterate order is level order start from the root node, for all the children
+  /// under the same node, traverse from smallest z-index to biggest.
+  pub fn iter(&self) -> ItreeIterator<T> {
+    ItreeIterator::new(self.root, ItreeIterateOrder::Ascent)
+  }
+
+  /// Get the iterator in descent order.
+  ///
+  /// For all the children under the same node, traverse from highest z-index to smallest.
+  pub fn iter_descent(&self) -> ItreeIterator<T> {
+    ItreeIterator::new(self.root, ItreeIterateOrder::Descent)
   }
 
   pub fn insert(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {
