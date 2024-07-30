@@ -192,6 +192,32 @@ impl<T> Inode<T> {
     }
   }
 
+  pub fn first(&self) -> Option<InodePtr<T>> {
+    match self.children {
+      Some(children) => {
+        if children.is_empty() {
+          None
+        } else {
+          Some(children[0])
+        }
+      }
+      None => None,
+    }
+  }
+
+  pub fn last(&self) -> Option<InodePtr<T>> {
+    match self.children {
+      Some(children) => {
+        if children.is_empty() {
+          None
+        } else {
+          Some(children[children.len() - 1])
+        }
+      }
+      None => None,
+    }
+  }
+
   /// Pop a child node from the end of the children vector.
   /// This operation also removes the connection between this (`self`) node and the removed child.
   pub fn pop(&mut self) -> Option<InodePtr<T>> {
