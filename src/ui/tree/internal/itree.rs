@@ -2,9 +2,7 @@
 
 use std::{collections::VecDeque, iter::Iterator};
 
-use crate::ui::tree::{internal::inode::InodePtr, node::Inode};
-
-use super::inode::Inode;
+use crate::ui::tree::internal::inode::{Inode, InodePtr};
 
 #[derive(Debug, Clone)]
 pub struct Itree<T> {
@@ -30,19 +28,19 @@ impl<T> Iterator for ItreeIterator<T> {
       match node.read().unwrap().children() {
         Some(children) => match self.order {
           ItreeIterateOrder::Ascent => {
-            for (zindex, child) in children.iter() {
-              self.queue.push_back(child);
+            for child in children.iter() {
+              self.queue.push_back(child.clone());
             }
           }
           ItreeIterateOrder::Descent => {
-            for (zindex, child) in children.iter().rev() {
-              self.queue.push_back(child);
+            for child in children.iter().rev() {
+              self.queue.push_back(child.clone());
             }
           }
         },
         None => { /* Do nothing */ }
       }
-      Some(node)
+      return Some(node);
     }
     None
   }
@@ -50,18 +48,16 @@ impl<T> Iterator for ItreeIterator<T> {
 
 impl<T> ItreeIterator<T> {
   pub fn new(start: Option<InodePtr<T>>, order: ItreeIterateOrder) -> Self {
-    let mut q = VecDeque::new();
+    let mut queue = VecDeque::new();
     match start {
-      Some(start_node) => q.push_back(start_node),
+      Some(start_node) => queue.push_back(start_node),
       None => { /* Do nothing */ }
     }
-    ItreeIterator {
-      order: ItreeIterateOrder::Ascent,
-      queue: q,
-    }
+    ItreeIterator { order, queue }
   }
 }
 
+#[derive(Debug, Clone)]
 /// The iterator's visiting order for all children nodes under the same node.
 ///
 /// The `Ascent` visits from lower z-index to higher.

@@ -10,22 +10,19 @@ use crate::cart::shapes;
 use crate::cart::{IPos, IRect, ISize, U16Pos, U16Rect, U16Size};
 use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
-use crate::ui::widget::Widget;
+use crate::ui::tree::internal::inode::{Inode, InodePtr};
+use crate::ui::tree::internal::itree::{Itree, ItreeIterateOrder, ItreeIterator};
+use crate::ui::widget::WidgetImpl;
 
-// Re-export
-pub use crate::ui::tree::edge::Edge;
-pub use crate::ui::tree::node::{make_node_ptr, Node, NodeAttribute, NodeId, NodePtr};
-
-pub mod base;
-pub mod edge;
 pub mod internal;
-pub mod node;
 
 /// The widget tree.
 ///
-/// A widget tree contains only 1 root node, each node can have 0 or multiple nodes. It manages all
-/// UI components and rendering on the terminal, i.e. the whole terminal is the root widget node,
-/// everything inside is the children nodes, and can recursively go down.
+/// The widget tree manages all UI components and rendering on the terminal, i.e. the whole
+/// terminal is the root widget node, everything inside is the children nodes, and can recursively
+/// go down.
+///
+/// Each widget node inside the tree can contain 0 or more children nodes.
 ///
 /// Here we have several terms:
 /// * Parent: The parent node.
@@ -113,53 +110,20 @@ pub struct Tree {
   // Terminal reference.
   terminal: TerminalWk,
 
-  // Root {
+  // Internal tree.
+  base: Itree<WidgetImpl>,
 
-  // The root node is a dummy node, and is always created along with the tree.
-  // All the other node related collections don't contain the root node.
-  //
-  // Root node id.
-  root_node_id: NodeId,
-
-  // Root node.
-  root_node: NodePtr,
-
-  // Root }
-
-  // Node {
-
-  // A collection of all nodes, maps from node ID to node struct.
-  nodes: BTreeMap<NodeId, NodePtr>,
-
-  // A collection of all node attributes, maps from node ID to node attribute.
-  attributes: HashMap<NodeId, NodeAttribute>,
-
-  // Node }
-
-  // Edge {
-
-  // A collection of all edges.
-  edges: BTreeSet<Edge>,
-
-  // Maps "parent ID" => its "children IDs".
-  children_ids: HashMap<NodeId, HashSet<NodeId>>,
-
-  // Maps "child ID" => its "parent ID".
-  parent_ids: HashMap<NodeId, NodeId>,
-
-  // Edge }
-
-  // A collection of all VIM window nodes
-  // ([WindowLayout](crate::ui::layout::window::WindowLayout)).
-  window_ids: BTreeSet<NodeId>,
+  // A collection of all VIM window node IDs
+  // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)).
+  window_ids: BTreeSet<usize>,
 }
 
 pub type TreePtr = Arc<RwLock<Tree>>;
 pub type TreeWk = Weak<RwLock<Tree>>;
-
-pub fn make_tree_ptr(t: Tree) -> Arc<RwLock<Tree>> {
-  Arc::new(RwLock::new(t))
-}
+pub type Node = Inode<WidgetImpl>;
+pub type NodePtr = InodePtr<WidgetImpl>;
+pub type TreeIterator = ItreeIterator<WidgetImpl>;
+pub type TreeIterateOrder = ItreeIterateOrder;
 
 impl Tree {
   /// Make a widget tree.
@@ -168,447 +132,39 @@ impl Tree {
   pub fn new(terminal: TerminalWk) -> Self {
     Tree {
       terminal,
-      nodes: BTreeMap::new(),
-      edges: BTreeSet::new(),
-      root_id: None,
+      base: Itree::new(),
       window_ids: BTreeSet::new(),
-      children_ids: HashMap::new(),
-      parent_ids: HashMap::new(),
-      attributes: HashMap::new(),
     }
+  }
+
+  pub fn ptr(tree: Tree) -> TreePtr {
+    Arc::new(RwLock::new(tree))
   }
 
   /// Whether the tree is empty.
   pub fn is_empty(&self) -> bool {
-    self.root_id.is_none()
-      && self.nodes.is_empty()
-      && self.edges.is_empty()
-      && self.children_ids.is_empty()
-      && self.parent_ids.is_empty()
-      && self.attributes.is_empty()
-      && self.window_ids.is_empty()
+    self.base.is_empty()
   }
 
   // Node {
 
-  /// Get the collection of all nodes.
-  pub fn get_nodes(&self) -> &BTreeMap<NodeId, NodePtr> {
-    &self.nodes
+  pub fn root(&self) -> Option<NodePtr> {
+    self.base.root()
   }
 
-  /// Get node by its ID.
-  ///
-  /// Returns the node if exists, returns `None` if not.
-  pub fn get_node(&self, id: NodeId) -> Option<NodePtr> {
-    self.nodes.get(&id).cloned()
+  pub fn set_root(&mut self, root: Option<NodePtr>) -> Option<NodePtr> {
+    self.base.set_root(root)
   }
 
-  /// Get the root node ID.
-  ///
-  /// Returns the root node ID if exists, returns `None` if not.
-  pub fn get_root_node_id(&self) -> Option<NodeId> {
-    self.root_id
+  pub fn iter(&self) -> TreeIterator {
+    self.base.iter()
   }
 
-  /// Detect whether contains node by its ID.
-  pub fn contains_node(&self, id: NodeId) -> bool {
-    self.root_id == Some(id)
-      || self.nodes.contains_key(&id)
-      || self.attributes.contains_key(&id)
-      || self.window_ids.contains(&id)
-      || self.parent_ids.contains_key(&id)
-      || self.children_ids.contains_key(&id)
-  }
-
-  /// Insert node, with ID, parent's ID, shape.
-  /// This operation also binds the connection between the inserted node and its parent (if any).
-  ///
-  /// Returns the inserted node if succeeded, returns `None` if failed.
-  ///
-  /// Note:
-  /// 1. When the node is the first inserted node (root node), it doesn't need to provide the
-  ///    `parent_id` , and the `shape` should be the terminal's actual shape.
-  /// 2. This method is a wrapper on [`insert_root_node`](Tree::insert_root_node()) and
-  ///    [`insert_descendant_node`](Tree::insert_descendant_node()).
-  ///
-  /// # Panics
-  ///
-  /// Panics if [`insert_root_node`](Tree::insert_root_node()) (inserted as root node) or
-  /// [`insert_descendant_node`](Tree::insert_descendant_node()) (inserted as non-root node)
-  /// panics.
-  pub fn insert_node(
-    &mut self,
-    id: NodeId,
-    node: NodePtr,
-    parent_id: Option<NodeId>,
-    shape: IRect,
-  ) -> Option<NodePtr> {
-    match parent_id {
-      Some(pid) => self.insert_descendant_node(id, node, pid, shape),
-      None => {
-        let u16shape = geo_rect_as!(shape, u16);
-        let terminal_size = U16Size::from(u16shape);
-        self.insert_root_node(id, node, terminal_size)
-      }
-    }
-  }
-
-  /// Insert root node, with ID, size.
-  ///
-  /// Returns the inserted node if succeeded, returns `None` if failed.
-  ///
-  /// Fails if the tree is not empty.
-  pub fn insert_root_node(
-    &mut self,
-    id: NodeId,
-    node: NodePtr,
-    terminal_size: U16Size,
-  ) -> Option<NodePtr> {
-    // Fails if the tree is not empty.
-    if !self.is_empty() {
-      return None;
-    }
-
-    self.root_id = Some(id);
-    self.children_ids.insert(id, HashSet::new());
-
-    let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-    let shape = geo_rect_as!(actual_shape, isize);
-    self
-      .attributes
-      .insert(id, NodeAttribute::default(shape, actual_shape));
-
-    self.nodes.insert(id, node.clone())
-  }
-
-  /// Insert non-root (descendant) node, with ID, parent's ID, shape.
-  /// This operation also binds the connection between the inserted node and its parent.
-  ///
-  /// Returns the inserted node if succeeded, returns `None` if failed.
-  ///
-  /// Fails if:
-  /// 1. The tree is empty.
-  /// 2. The `parent_id` not exists.
-  /// 3. The `id` already exists.
-  pub fn insert_descendant_node(
-    &mut self,
-    id: NodeId,
-    node: NodePtr,
-    parent_id: NodeId,
-    shape: IRect,
-  ) -> Option<NodePtr> {
-    // Fails if tree is empty.
-    if self.is_empty() {
-      return None;
-    }
-    // Fails if node already exists, or parent node not exists.
-    let edge = Edge::new(parent_id, id);
-    if self.contains_node(id) || !self.contains_node(parent_id) || self.edges.contains(&edge) {
-      return None;
-    }
-
-    self.children_ids.get_mut(&parent_id).unwrap().insert(id);
-    self.parent_ids.insert(id, parent_id);
-    self.edges.insert(edge);
-
-    let parent_actual_shape = self.attributes.get(&parent_id).unwrap().actual_shape;
-    let actual_shape = shapes::convert_to_actual_shape(shape, parent_actual_shape);
-    debug!("Calculated actual shape:{:?}", actual_shape);
-    self
-      .attributes
-      .insert(id, NodeAttribute::default(shape, actual_shape));
-
-    // If `node` is a window widget, add it into the `window_ids` collection.
-    if let Node::Window(window_node) = &*node.read().unwrap() {
-      self.window_ids.insert(window_node.id());
-    }
-
-    self.nodes.insert(id, node.clone())
-  }
-
-  /// Remove node by its ID.
-  ///
-  /// Returns the removed node if it exists, returns `None` if not.
-  /// Returns `None` if the node is root node.
-  ///
-  /// When removing a node, this operation also removes the connection between the node and its
-  /// parent (if any).
-  pub fn remove_node(&mut self, id: NodeId) -> Option<NodePtr> {
-    if self.root_id == Some(id) {
-      return None;
-    }
-    if !self.parent_ids.contains_key(&id) {
-      return None;
-    }
-    if !self.nodes.contains_key(&id) {
-      return None;
-    }
-
-    let parent_id = self.parent_ids.remove(&id).unwrap();
-    assert!(self.children_ids.contains_key(&parent_id));
-
-    let child_removed = self.children_ids.get_mut(&parent_id).unwrap().remove(&id);
-    assert!(child_removed);
-
-    let attribute_removed = self.attributes.remove(&id);
-    assert!(attribute_removed.is_some());
-
-    let edge_removed = self.edges.remove(&Edge::new(parent_id, id));
-    assert!(edge_removed);
-
-    let removed_node = self.nodes.remove(&id).unwrap();
-
-    let removed_window = self.window_ids.remove(&id);
-    match &*removed_node.read().unwrap() {
-      Node::Window(_) => assert!(removed_window),
-      _ => assert!(!removed_window),
-    }
-
-    Some(removed_node)
-  }
-
-  /// Removes an ancestor (non-leaf) node by its ID.
-  ///
-  /// This operation removes the node itself, and all its descendant nodes in the sub-tree (the
-  /// node plays the role of the root node in this sub-tree).
-  ///
-  /// Returns the removed sub-tree if success.
-  /// Returns `None` if failed.
-  pub fn remove_ancestor_node(&mut self, id: NodeId) -> Option<TreePtr> {}
-
-  /// Remove the leaf node by its ID.
-  /// This operation also removes the connection between the leaf node and its parent.
-  ///
-  /// Returns the removed node if it exists, returns `None` if failed.
-  ///
-  /// Fails if:
-  /// 1. It's not a leaf node, or it doesn't exist.
-  ///
-  /// Note: A leaf node cannot be the root node.
-  pub fn remove_leaf_node(&mut self, id: NodeId) -> Option<NodePtr> {
-    // Fails if the node doesn't exist.
-    if !self.contains_node(id) {
-      return None;
-    }
-    // Fails if the node has children nodes.
-    let has_children = match self.children_ids.get(&id) {
-      Some(children) => !children.is_empty(),
-      None => false,
-    };
-    if has_children {
-      return None;
-    }
-
-    self.parent_ids.remove(&id);
-
-    let child_removed = self.children_ids.get_mut(&parent_id).unwrap().remove(&id);
-    assert!(child_removed);
-
-    let attribute_removed = self.attributes.remove(&id);
-    assert!(attribute_removed.is_some());
-
-    let edge_removed = self.edges.remove(&Edge::new(parent_id, id));
-    assert!(edge_removed);
-
-    let removed_node = self.nodes.remove(&id).unwrap();
-
-    let removed_window = self.window_ids.remove(&id);
-    match &*removed_node.read().unwrap() {
-      Node::Window(_) => assert!(removed_window),
-      _ => assert!(!removed_window),
-    }
-
-    Some(removed_node)
+  pub fn ordered_iter(&self, order: TreeIterateOrder) -> TreeIterator {
+    self.base.ordered_iter(order)
   }
 
   // Node }
-
-  // Edge {
-
-  /// Get the collection of all edges.
-  pub fn get_edges(&self) -> &BTreeSet<Edge> {
-    &self.edges
-  }
-
-  /// Get edge by the `from` node ID and the `to` node ID.
-  ///
-  /// Returns the edge if exists, returns `None` if not.
-  pub fn get_edge(&self, from: NodeId, to: NodeId) -> Option<&Edge> {
-    self.edges.get(&Edge { from, to })
-  }
-
-  // Edge }
-
-  // Parent-Children Relationship {
-
-  /// Get the collection of all "parent" => "children" IDs mapping.
-  pub fn get_children_ids(&self) -> &HashMap<NodeId, HashSet<NodeId>> {
-    &self.children_ids
-  }
-
-  /// Get the collection of all "child" => "parent" ID mapping.
-  pub fn get_parent_ids(&self) -> &HashMap<NodeId, NodeId> {
-    &self.parent_ids
-  }
-
-  /// Get the children IDs by the `parent` ID.
-  pub fn get_children(&self, parent_id: NodeId) -> Option<&HashSet<NodeId>> {
-    self.children_ids.get(&parent_id)
-  }
-
-  /// Get the parent ID by the `child` ID.
-  pub fn get_parent(&self, child_id: NodeId) -> Option<&NodeId> {
-    self.parent_ids.get(&child_id)
-  }
-
-  // Parent-Children Relationship }
-
-  // Window Nodes {
-
-  /// Get the collection of all window widget nodes.
-  pub fn get_window_ids(&self) -> &BTreeSet<NodeId> {
-    &self.window_ids
-  }
-
-  // Window Nodes }
-
-  // Attribute {
-
-  /// Get the collection of all node attributes.
-  pub fn get_attributes(&self) -> &HashMap<NodeId, NodeAttribute> {
-    &self.attributes
-  }
-
-  /// Get shape of a node.
-  pub fn get_shape(&self, id: NodeId) -> Option<&IRect> {
-    match self.attributes.get(&id) {
-      Some(attr) => Some(&attr.shape),
-      None => None,
-    }
-  }
-
-  /// Set shape of a node.
-  ///
-  /// Note: This triggers the calculation of its actual shape, and all its descendants actual
-  /// shapes.
-  pub fn set_shape(&mut self, id: NodeId, shape: IRect) -> Option<IRect> {
-    match self.attributes.get_mut(&id) {
-      Some(attr) => {
-        let old_shape = attr.shape;
-        attr.shape = shape;
-        // Update the actual shape of `id`, and all its descendant nodes.
-        self.update_actual_shape(id);
-        Some(old_shape)
-      }
-      None => None,
-    }
-  }
-
-  /// Internal implementation of [`set_shape`](Tree::set_shape()).
-  ///
-  /// It updates the node's (`start_id`) actual shape, and all the descendants actual shapes.
-  fn update_actual_shape(&mut self, start_id: NodeId) {
-    let mut que: VecDeque<NodeId> = VecDeque::new();
-    que.push_back(start_id);
-
-    while let Some(id) = que.pop_front() {
-      let shape = self.attributes.get(&id).unwrap().shape;
-      let actual_shape = match self.parent_ids.get_mut(&id) {
-        Some(parent_id) => {
-          let parent_actual_shape = self.attributes.get(parent_id).unwrap().actual_shape;
-          shapes::convert_to_actual_shape(shape, parent_actual_shape)
-        }
-        None => {
-          let terminal_size = self.terminal.upgrade().unwrap().read().unwrap().size();
-          let terminal_actual_shape: U16Rect =
-            U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-          shapes::convert_to_actual_shape(shape, terminal_actual_shape)
-        }
-      };
-      self.attributes.get_mut(&id).unwrap().actual_shape = actual_shape;
-
-      // Add all children of `id` to the queue.
-      match self.children_ids.get(&id) {
-        Some(children_ids) => {
-          for child_id in children_ids.iter() {
-            que.push_back(*child_id);
-          }
-        }
-        None => {
-          // Do nothing
-        }
-      }
-    }
-  }
-
-  /// Get the position of a node.
-  pub fn get_pos(&self, id: NodeId) -> Option<IPos> {
-    self.attributes.get(&id).map(|attr| attr.shape.min().into())
-  }
-
-  /// Set the position of a node.
-  pub fn set_pos(&mut self, id: NodeId, pos: IPos) -> Option<IPos> {
-    match self.attributes.get_mut(&id) {
-      Some(attr) => {
-        let old_shape = attr.shape;
-        let new_shape = IRect::new(
-          pos,
-          point!(x: pos.x() + old_shape.width(), y: pos.y() + old_shape.height()),
-        );
-        self.set_shape(id, new_shape);
-        Some(old_shape.min().into())
-      }
-      None => None,
-    }
-  }
-
-  /// Get the size of a node.
-  pub fn get_size(&self, id: NodeId) -> Option<ISize> {
-    self.attributes.get(&id).map(|attr| ISize::from(attr.shape))
-  }
-
-  /// Set the size of a node.
-  pub fn set_size(&mut self, id: NodeId, size: ISize) -> Option<ISize> {
-    match self.attributes.get_mut(&id) {
-      Some(attr) => {
-        let old_shape = attr.shape;
-        let old_pos: IPos = old_shape.min().into();
-        let new_shape = IRect::new(
-          old_pos,
-          point!(x: old_pos.x() + size.width(), y: old_pos.y() + size.height()),
-        );
-        self.set_shape(id, new_shape);
-        Some(ISize::from(old_shape))
-      }
-      None => None,
-    }
-  }
-
-  /// Get the actual shape of a node.
-  pub fn get_actual_shape(&self, id: NodeId) -> Option<&U16Rect> {
-    match self.attributes.get(&id) {
-      Some(attr) => Some(&attr.actual_shape),
-      None => None,
-    }
-  }
-
-  /// Get the actual position of a node.
-  pub fn get_actual_pos(&self, id: NodeId) -> Option<U16Pos> {
-    self
-      .attributes
-      .get(&id)
-      .map(|attr| attr.actual_shape.min().into())
-  }
-
-  /// Get the actual size of a node.
-  pub fn get_actual_size(&self, id: NodeId) -> Option<U16Size> {
-    self
-      .attributes
-      .get(&id)
-      .map(|attr| U16Size::from(attr.actual_shape))
-  }
-
-  // Attribute }
 
   // Draw {
 

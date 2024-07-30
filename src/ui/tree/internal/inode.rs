@@ -1,7 +1,6 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
-use std::alloc::realloc;
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::VecDeque;
 use std::ops::FnMut;
 use std::sync::{Arc, RwLock, Weak};
 
