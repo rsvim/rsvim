@@ -10,9 +10,11 @@ pub struct Itree<T> {
 }
 
 #[derive(Debug, Clone)]
+/// The level-order iterator of the tree.
 pub struct ItreeIterator<T> {
+  /// All children under the same node is iterated by the order of z-index value, either ascent or
+  /// descent, i.e. from low to high or high to low.
   order: ItreeIterateOrder,
-  current: InodePtr<T>,
   queue: VecDeque<InodePtr<T>>,
 }
 
@@ -20,39 +22,41 @@ impl<T> Iterator for ItreeIterator<T> {
   type Item = InodePtr<T>;
 
   fn next(&mut self) -> Option<Self::Item> {
-    match self.order {
-      ItreeIterateOrder::LevelOrder => self.level_order_next(),
-      ItreeIterateOrder::InOrder => self.in_order_next(),
-      ItreeIterateOrder::PreOrder => self.pre_order_next(),
-      ItreeIterateOrder::PostOrder => self.post_order_next(),
+    if let Some(node) = self.queue.pop_front() {
+      match node.read().unwrap().children() {
+        Some(children) => match self.order {
+          ItreeIterateOrder::Ascent => {
+            for (zindex, child) in children.iter() {
+              self.queue.push_back(child);
+            }
+          }
+          ItreeIterateOrder::Descent => {
+            for (zindex, child) in children.iter().rev() {
+              self.queue.push_back(child);
+            }
+          }
+        },
+        None => { /* Do nothing */ }
+      }
+      Some(node)
     }
+    None
   }
 }
 
 impl<T> ItreeIterator<T> {
-  pub fn new(current_node: InodePtr<T>, order: ItreeIterateOrder) -> Self {
-    ItreeIterator {
-      current: current_node,
-      order,
-    }
+  pub fn new(start: InodePtr<T>, order: ItreeIterateOrder) -> Self {
+    let mut q = VecDeque::new();
+    q.push_back(start);
+    ItreeIterator { order, queue: q }
   }
-
-  fn level_order_next(&mut self) -> Option<InodePtr<T>> {
-    match self.current {
-      Some(&mut current_node) => {}
-      None => None,
-    }
-  }
-  fn in_order_next(&mut self) -> Option<InodePtr<T>> {}
-  fn pre_order_next(&mut self) -> Option<InodePtr<T>> {}
-  fn post_order_next(&mut self) -> Option<InodePtr<T>> {}
 }
 
 pub enum ItreeIterateOrder {
-  LevelOrder,
-  InOrder,
-  PreOrder,
-  PostOrder,
+  // Iterate by z-index value, from smallest to biggest.
+  Ascent,
+  // Iterate by z-index value, from biggest to smallest.
+  Descent,
 }
 
 impl<T> Itree<T> {
@@ -63,5 +67,7 @@ impl<T> Itree<T> {
     }
   }
 
-  pub fn iter(&self) -> ItreeIterator<T> {}
+  pub fn iter(&self, order: ItreeIterateOrder) -> ItreeIterator<T> {
+    ItreeIterator::new(self.root, order)
+  }
 }
