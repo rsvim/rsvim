@@ -10,7 +10,7 @@ use crate::uuid;
 #[derive(Debug, Clone)]
 pub struct Inode<T> {
   parent: Option<InodeWk<T>>,
-  /// The `zindex` => node b-tree, it sort the children nodes by zindex.
+  /// The children collection is sorted by the z-index of a child.
   children: Option<BTreeMap<usize, InodePtr<T>>>,
   id: usize,
   value: T,
@@ -176,6 +176,19 @@ impl<T> Inode<T> {
   /// This operation also removes the parent pointer of the removed child.
   pub fn pop(&mut self) -> Option<InodePtr<T>> {
     if let Some(&mut children) = self.children {
+      if let Some((_, child)) = children.pop_first() {
+        child.write().unwrap().parent = None;
+        return Some(child);
+      }
+    }
+    None
+  }
+
+  /// Remove a child node by its ID.
+  /// This operation also removes the parent pointer of the removed child.
+  pub fn remove(&mut self, id: usize) -> Option<InodePtr<T>> {
+    if let Some(&mut children) = self.children {
+      for (_, child) in children.iter() {}
       if let Some((_, child)) = children.pop_first() {
         child.write().unwrap().parent = None;
         return Some(child);

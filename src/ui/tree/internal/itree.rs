@@ -152,6 +152,12 @@ impl<T> Itree<T> {
     ItreeIterator::new(self.root, order)
   }
 
+  /// Insert a node as a child of the parent node.
+  ///
+  /// Note:
+  /// 1. When no parent node is provided, the node is inserted as the root node of the tree.
+  /// 2. When a parent node is provided, the node is inserted as the child node of the parent node,
+  ///    you need to get the parent node before insert.
   pub fn insert(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {
     match parent {
       Some(parent) => {
@@ -171,4 +177,16 @@ impl<T> Itree<T> {
       }
     }
   }
+
+  /// Get a node by its ID.
+  pub fn get(&self, id: usize) -> Option<InodePtr<T>> {
+    match self.root {
+      Some(root) => root.read().unwrap().get_descendant_child(id),
+      None => None,
+    }
+  }
+
+  pub fn remove(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {}
+
+  pub fn remove(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {}
 }
