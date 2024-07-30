@@ -196,7 +196,7 @@ impl<T> Inode<T> {
   /// This operation also removes the connection between this (`self`) node and the removed child.
   pub fn pop(&mut self) -> Option<InodePtr<T>> {
     if let Some(&mut children) = self.children {
-      if let Some((_, child)) = children.pop_first() {
+      if let Some(child) = children.pop() {
         child.write().unwrap().parent = None;
         return Some(child);
       }
@@ -204,14 +204,15 @@ impl<T> Inode<T> {
     None
   }
 
-  /// Remove a child node by its ID from the children vector.
+  /// Remove a child node by index from the children vector.
   /// This operation also removes the connection between this (`self`) node and the removed child.
-  pub fn remove(&mut self, id: usize) -> Option<InodePtr<T>> {
+  pub fn remove(&mut self, index: usize) -> Option<InodePtr<T>> {
     if let Some(&mut children) = self.children {
-      for (_, child) in children.iter() {}
-      if let Some((_, child)) = children.pop_first() {
-        child.write().unwrap().parent = None;
-        return Some(child);
+      if children.len() > index {
+        let removed_child = children.remove(index);
+        Some(removed_child)
+      } else {
+        None
       }
     }
     None
@@ -220,7 +221,7 @@ impl<T> Inode<T> {
   /// Get descendant child by its ID, i.e. search in all children nodes in the sub-tree.
   pub fn get_descendant_child(&self, id: usize) -> Option<InodePtr<T>> {
     let mut q: VecDeque<InodePtr<T>> = match self.children {
-      Some(children) => children.iter().map(|(_, c)| c).collect(),
+      Some(children) => children.iter().collect(),
       None => vec![].iter().collect(),
     };
     while let Some(e) = q.pop_front() {
@@ -229,8 +230,8 @@ impl<T> Inode<T> {
       }
       match e.children {
         Some(children) => {
-          for (_, c) in children.iter() {
-            q.push_back(c);
+          for child in children.iter() {
+            q.push_back(child);
           }
         }
         None => { /* Do nothing */ }
