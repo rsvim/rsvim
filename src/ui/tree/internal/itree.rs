@@ -104,7 +104,7 @@ impl<T> Itree<T> {
       .unwrap()
       .write()
       .unwrap()
-      .get_descendant_child(node.id());
+      .get_descendant(node.id());
     assert!(node2.is_some(), "Missing node {} in the tree", node.id());
     assert!(
       node2.unwrap().read().unwrap().id() == node.id(),
@@ -169,7 +169,7 @@ impl<T> Itree<T> {
   /// Get a node by its ID.
   pub fn get(&self, id: usize) -> Option<InodePtr<T>> {
     match self.root {
-      Some(root) => root.read().unwrap().get_descendant_child(id),
+      Some(root) => root.read().unwrap().get_descendant(id),
       None => None,
     }
   }
