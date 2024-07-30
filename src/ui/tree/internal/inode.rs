@@ -5,11 +5,13 @@ use std::ops::FnMut;
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::cart::{shapes, IRect, U16Rect};
+use crate::ui::tree::node::Inode;
 use crate::uuid;
 
 #[derive(Debug, Clone)]
 pub struct Inode<T> {
   parent: Option<InodeWk<T>>,
+  /// The `zindex` => node b-tree, it sort the children nodes by zindex.
   children: Option<BTreeMap<usize, InodePtr<T>>>,
   id: usize,
   value: T,
@@ -51,6 +53,10 @@ impl<T> Inode<T> {
       value,
       attr,
     }
+  }
+
+  pub fn ptr(node: Inode<T>) -> InodePtr<T> {
+    Arc::new(RwLock::new(node))
   }
 
   pub fn id(&self) -> usize {
@@ -159,13 +165,12 @@ impl<T> Inode<T> {
 
   /// Pop a child node from the end of the chlidren's vector.
   pub fn pop(&mut self) -> Option<InodePtr<T>> {
-    match self.children {
-      Some(&mut children) => match children.pop_first() {
-        Some((zindex, child)) => Some(child),
-        None => None,
-      },
-      None => None,
+    if let Some(&mut children) = self.children {
+      if let Some((_, child)) = children.pop_first() {
+        return Some(child);
+      }
     }
+    None
   }
 
   /// Get descendant child by its ID, i.e. search in all children nodes in the sub-tree.
@@ -180,7 +185,7 @@ impl<T> Inode<T> {
       }
       match e.children {
         Some(children) => {
-          for c in children.iter() {
+          for (_, c) in children.iter() {
             q.push_back(c);
           }
         }

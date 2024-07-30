@@ -14,9 +14,6 @@ use crate::ui::tree::node::NodeId;
 
 /// Widget is the base trait for all UI components, it provide a common layer for rendering.
 pub trait Widget {
-  /// Get unique ID of a widget instance.
-  fn id(&self) -> NodeId;
-
   /// Draw the widget to terminal, on the specific shape.
   fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {
     // Do nothing.
