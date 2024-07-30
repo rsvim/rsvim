@@ -2,7 +2,7 @@
 
 use std::{collections::VecDeque, iter::Iterator};
 
-use crate::ui::tree::internal::inode::InodePtr;
+use crate::ui::tree::{internal::inode::InodePtr, node::Inode};
 
 use super::inode::Inode;
 
@@ -177,5 +177,7 @@ impl<T> Itree<T> {
   }
 
   /// Remove a node from the parent node.
-  pub fn remove(parent: Option<InodePtr<T>>, child: InodePtr<T>) -> Option<InodePtr<T>> {}
+  pub fn remove(parent: InodePtr<T>, index: usize) -> Option<InodePtr<T>> {
+    parent.write().unwrap().remove(index)
+  }
 }
