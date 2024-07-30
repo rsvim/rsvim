@@ -86,7 +86,9 @@ pub mod node;
 /// 2. Z-index.
 ///
 ///    The z-index arranges the display priority of the content stack when multiple children
-///    overlap on each other, a widget with higher z-index has higher priority to be displayed.
+///    overlap on each other, a widget with higher z-index has higher priority to be displayed. For
+///    those widgets have the same z-index, the later inserted one will cover the previous inserted
+///    ones.
 ///
 ///    The z-index only works for the children under the same parent. For a child widget, it always
 ///    covers/overrides its parent display.

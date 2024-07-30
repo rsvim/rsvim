@@ -1,6 +1,6 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
-use std::collections::{BTreeMap, VecDeque};
+use std::collections::{BTreeMap, BinaryHeap, VecDeque};
 use std::ops::FnMut;
 use std::sync::{Arc, RwLock, Weak};
 
@@ -10,8 +10,8 @@ use crate::uuid;
 #[derive(Debug, Clone)]
 pub struct Inode<T> {
   parent: Option<InodeWk<T>>,
-  /// The children collection is sorted by the z-index of a child.
-  children: Option<BTreeMap<usize, InodePtr<T>>>,
+  /// The children collection is sorted by the z-index.
+  children: Option<BinaryHeap<usize, InodePtr<T>>>,
   id: usize,
   value: T,
   attr: InodeAttr,
