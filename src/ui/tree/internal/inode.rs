@@ -76,6 +76,12 @@ impl<T> Inode<T> {
     self.parent
   }
 
+  pub fn set_parent(&mut self, parent: Option<InodeWk<T>>) -> Option<InodeWk<T>> {
+    let old_parent = self.parent;
+    self.parent = parent;
+    old_parent
+  }
+
   // Parent }
 
   // Children {
@@ -101,19 +107,19 @@ impl<T> Inode<T> {
   /// Calculate and update all descendants depths, start from the `start_node`.
   fn update_depth(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
     Inode::level_order_traverse(start_node, start_parent_node, |start, parent| {
-      let start1 = start.write().unwrap();
-      let parent1 = parent.read().unwrap();
-      start1.attr.depth = parent1.attr.depth + 1;
+      let read_start = start.write().unwrap();
+      let read_parent = parent.read().unwrap();
+      read_start.attr.depth = read_parent.attr.depth + 1;
     });
   }
 
   /// Calculate and update all descendants actual shapes, start from the `start_node`.
   fn update_actual_shape(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
     Inode::level_order_traverse(start_node, start_parent_node, |start, parent| {
-      let start1 = start.write().unwrap();
-      let parent1 = parent.read().unwrap();
-      start1.attr.actual_shape =
-        shapes::convert_to_actual_shape(start1.attr.shape, parent1.attr.actual_shape);
+      let read_start = start.write().unwrap();
+      let read_parent = parent.read().unwrap();
+      read_start.attr.actual_shape =
+        shapes::convert_to_actual_shape(read_start.attr.shape, read_parent.attr.actual_shape);
     });
   }
 

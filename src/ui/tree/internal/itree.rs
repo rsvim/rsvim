@@ -2,7 +2,10 @@
 
 use std::{collections::VecDeque, iter::Iterator};
 
-use crate::ui::tree::internal::inode::{Inode, InodeAttr, InodePtr};
+use crate::ui::tree::{
+  internal::inode::{Inode, InodeAttr, InodePtr},
+  node::Inode,
+};
 
 #[derive(Debug, Clone)]
 pub struct Itree<T> {
@@ -45,9 +48,12 @@ impl<T> Iterator for ItreeIterator<T> {
 }
 
 impl<T> ItreeIterator<T> {
-  pub fn new(start: InodePtr<T>, order: ItreeIterateOrder) -> Self {
+  pub fn new(start: Option<InodePtr<T>>, order: ItreeIterateOrder) -> Self {
     let mut q = VecDeque::new();
-    q.push_back(start);
+    match start {
+      Some(start_node) => q.push_back(start_node),
+      None => { /* Do nothing */ }
+    }
     ItreeIterator { order, queue: q }
   }
 }
@@ -60,14 +66,55 @@ pub enum ItreeIterateOrder {
 }
 
 impl<T> Itree<T> {
-  pub fn new(root_value: T, root_attr: InodeAttr) -> Self {
-    let node = Inode::new(None, root_value, root_attr);
-    Itree {
-      root: Some(Inode::ptr(node)),
-    }
+  pub fn new() -> Self {
+    Itree { root: None }
+  }
+
+  pub fn root(&self) -> Option<InodePtr<T>> {
+    self.root
   }
 
   pub fn iter(&self, order: ItreeIterateOrder) -> ItreeIterator<T> {
     ItreeIterator::new(self.root, order)
+  }
+
+  pub fn insert(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {
+    match parent {
+      Some(parent) => {
+        assert!(
+          self.root.is_some(),
+          "Doesn't have a root node when inserting with parent"
+        );
+        let write_parent = parent.write().unwrap();
+        let get_parent = self
+          .root
+          .unwrap()
+          .write()
+          .unwrap()
+          .get_descendant_child(write_parent.id());
+        assert!(
+          get_parent.is_some(),
+          "Missing parent {} in the tree",
+          write_parent.id()
+        );
+        assert!(
+          get_parent.unwrap().read().unwrap().id() == write_parent.id(),
+          "Parent ID {} not match in the tree",
+          write_parent.id()
+        );
+
+        node.write().unwrap().set_parent(parent);
+        write_parent.push(node);
+        Some(node)
+      }
+      None => {
+        assert!(
+          self.root.is_none(),
+          "Root node exists when inserting without parent"
+        );
+        self.root = Some(node);
+        Some(node)
+      }
+    }
   }
 }
