@@ -8,7 +8,7 @@ use crate::ui::term::{make_terminal_ptr, Terminal, TerminalPtr};
 use crate::ui::tree::node::{make_node_ptr, Node, NodeId};
 use crate::ui::tree::{make_tree_ptr, Tree, TreePtr};
 use crate::ui::widget::Cursor;
-use crate::ui::widget::RootLayout;
+use crate::ui::widget::RootContainer;
 use crate::ui::widget::Widget;
 use crate::ui::widget::WindowContent;
 use crossterm::event::{
@@ -37,7 +37,7 @@ impl EventLoop {
     let screen = make_terminal_ptr(screen);
     let mut tree = Tree::new(Arc::downgrade(&screen));
 
-    let root_widget = RootLayout::default();
+    let root_widget = RootContainer::default();
     let root_widget_id = root_widget.id();
     let root_widget_node = make_node_ptr(Node::RootLayout(root_widget));
     tree.insert_node(

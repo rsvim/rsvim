@@ -100,7 +100,7 @@ impl<T> Inode<T> {
 
   /// Calculate and update all descendants depths, start from the `start_node`.
   fn update_depth(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
-    Inode::level_order_traversal(start_node, start_parent_node, |start, parent| {
+    Inode::level_order_traverse(start_node, start_parent_node, |start, parent| {
       let start1 = start.write().unwrap();
       let parent1 = parent.read().unwrap();
       start1.attr.depth = parent1.attr.depth + 1;
@@ -109,7 +109,7 @@ impl<T> Inode<T> {
 
   /// Calculate and update all descendants actual shapes, start from the `start_node`.
   fn update_actual_shape(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
-    Inode::level_order_traversal(start_node, start_parent_node, |start, parent| {
+    Inode::level_order_traverse(start_node, start_parent_node, |start, parent| {
       let start1 = start.write().unwrap();
       let parent1 = parent.read().unwrap();
       start1.attr.actual_shape =
@@ -119,7 +119,7 @@ impl<T> Inode<T> {
 
   /// Level-order traverse the sub-tree, start from `start_node`, and apply the `f` function on
   /// each node with its parent.
-  fn level_order_traversal(
+  fn level_order_traverse(
     start_node: InodePtr<T>,
     start_parent_node: InodePtr<T>,
     mut f: dyn FnMut(InodePtr<T>, InodePtr<T>),
@@ -151,6 +151,10 @@ impl<T> Inode<T> {
   /// Push a child node at the end of children's vector.
   /// This operation also calculates and updates the attributes for the pushed node and all its
   /// descendants.
+  ///
+  /// Note: This operation requires the `child` parent pointer to be assigned to this (`self`) node
+  /// outside of this method, to bind the go-upper connection. Because this (`self`) node doesn't
+  /// have its `std::sync::Arc` pointer.
   pub fn push(&mut self, child: InodePtr<T>) {
     if self.children.is_none() {
       self.children = Some(BTreeMap::new());
@@ -163,9 +167,11 @@ impl<T> Inode<T> {
   }
 
   /// Pop a child node from the end of the chlidren's vector.
+  /// This operation also removes the parent pointer of the removed child.
   pub fn pop(&mut self) -> Option<InodePtr<T>> {
     if let Some(&mut children) = self.children {
       if let Some((_, child)) = children.pop_first() {
+        child.write().unwrap().parent = None;
         return Some(child);
       }
     }
