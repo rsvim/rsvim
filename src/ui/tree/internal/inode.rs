@@ -177,8 +177,7 @@ impl<T> Inode<T> {
       .map(|(index, c)| index)
       .rev()
       .collect();
-    let insert_pos = higher_zindex_pos.pop();
-    match insert_pos {
+    match higher_zindex_pos.pop() {
       Some(insert_pos) => {
         // Got the first child's position that has higher z-index, insert before it.
         self.children.unwrap().insert(insert_pos, child)
