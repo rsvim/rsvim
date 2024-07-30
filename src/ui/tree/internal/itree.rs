@@ -2,14 +2,15 @@
 
 use std::{collections::VecDeque, iter::Iterator};
 
-use crate::ui::tree::{
-  internal::inode::{Inode, InodeAttr, InodePtr},
-  node::Inode,
-};
+use crate::ui::tree::internal::inode::InodePtr;
 
 #[derive(Debug, Clone)]
 pub struct Itree<T> {
   root: Option<InodePtr<T>>,
+
+  /// As the widget tree, there's a focus node, i.e. the current widget that the position of the
+  /// user's cursor.
+  current: Option<InodePtr<T>>,
 }
 
 #[derive(Debug, Clone)]
@@ -116,5 +117,9 @@ impl<T> Itree<T> {
         Some(node)
       }
     }
+  }
+
+  pub fn current(&self) -> Option<InodePtr<T>> {
+    self.current
   }
 }
