@@ -160,8 +160,8 @@ impl<T> Inode<T> {
   ///
   /// Note: You need to manually assigned the `parent` pointer inside the `child` node to this
   /// (`self`) node, outside of this method.
-  /// Because this (`self`) node doesn't have its `std::sync::Arc` pointer, so this method cannot
-  /// do this for you.
+  /// Because this (`self`) node doesn't have the related `std::sync::Arc` pointer, so this method
+  /// cannot do this for you.
   pub fn push(&mut self, child: InodePtr<T>) {
     if self.children.is_none() {
       self.children = Some(Vec::new());
