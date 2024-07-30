@@ -143,7 +143,7 @@ impl<T> Itree<T> {
     ItreeIterator::new(self.root, ItreeIterateOrder::Ascent)
   }
 
-  /// Get the iterator in descent order.
+  /// Get the iterator in a children-descent-order.
   ///
   /// For all the children under the same node, traverse from highest z-index to smallest.
   pub fn iter_descent(&self) -> ItreeIterator<T> {
