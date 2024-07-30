@@ -1,5 +1,6 @@
 //! Internal tree structure implementation: the `Itree` structure.
 
+use std::sync::Arc;
 use std::{collections::VecDeque, iter::Iterator};
 
 use crate::ui::tree::internal::inode::{Inode, InodePtr};
@@ -137,7 +138,7 @@ impl<T> Itree<T> {
   /// By default it iterates in pre-order, start from the root. For the children under the same
   /// node, it visits from lower z-index to higher.
   pub fn iter(&self) -> ItreeIterator<T> {
-    ItreeIterator::new(self.root, ItreeIterateOrder::Ascent)
+    ItreeIterator::new(self.root.clone(), ItreeIterateOrder::Ascent)
   }
 
   /// Get the iterator with specified order.
@@ -154,26 +155,28 @@ impl<T> Itree<T> {
   pub fn insert(&mut self, parent: Option<InodePtr<T>>, child: InodePtr<T>) -> Option<InodePtr<T>> {
     match parent {
       Some(parent) => {
-        self.assert_exists(parent);
-
-        child.write().unwrap().set_parent(parent);
-        Inode::push(parent, child);
-        Some(child)
+        self.assert_exists(parent.clone());
+        child
+          .write()
+          .unwrap()
+          .set_parent(Some(Arc::downgrade(&parent)));
+        Inode::push(parent, child.clone());
+        Some(child.clone())
       }
       None => {
         assert!(
           self.root.is_none(),
           "Root node already exists when inserting without parent"
         );
-        self.root = Some(child);
-        Some(child)
+        self.root = Some(child.clone());
+        Some(child.clone())
       }
     }
   }
 
   /// Get a node by its ID.
   pub fn get(&self, id: usize) -> Option<InodePtr<T>> {
-    match self.root {
+    match self.root.clone() {
       Some(root) => root.read().unwrap().get_descendant(id),
       None => None,
     }
