@@ -85,7 +85,6 @@ mod tests {
   use super::*;
   use crate::cart::{IRect, U16Rect};
   use crate::test::log::init as test_log_init;
-  use crate::ui::widget::RootLayout;
   use std::cmp::min;
   use std::sync::Once;
   use tracing::info;
