@@ -4,6 +4,8 @@ use std::{collections::VecDeque, iter::Iterator};
 
 use crate::ui::tree::internal::inode::InodePtr;
 
+use super::inode::Inode;
+
 #[derive(Debug, Clone)]
 pub struct Itree<T> {
   root: Option<InodePtr<T>>,
@@ -140,28 +142,28 @@ impl<T> Itree<T> {
     ItreeIterator::new(self.root, order)
   }
 
-  /// Insert a node as a child of the parent node.
+  /// Insert a child node into the parent node.
   ///
   /// Note:
   /// 1. When no parent node is provided, the node is inserted as the root node of the tree.
   /// 2. When a parent node is provided, the node is inserted as the child node of the parent node,
   ///    you need to get the parent node before insert.
-  pub fn insert(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {
+  pub fn insert(&mut self, parent: Option<InodePtr<T>>, child: InodePtr<T>) -> Option<InodePtr<T>> {
     match parent {
       Some(parent) => {
         self.assert_exists(parent);
 
-        node.write().unwrap().set_parent(parent);
-        parent.write().unwrap().push(node);
-        Some(node)
+        child.write().unwrap().set_parent(parent);
+        Inode::push(parent, child);
+        Some(child)
       }
       None => {
         assert!(
           self.root.is_none(),
           "Root node already exists when inserting without parent"
         );
-        self.root = Some(node);
-        Some(node)
+        self.root = Some(child);
+        Some(child)
       }
     }
   }
@@ -174,7 +176,6 @@ impl<T> Itree<T> {
     }
   }
 
-  pub fn remove(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {}
-
-  pub fn remove(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {}
+  /// Remove a node from the parent node.
+  pub fn remove(parent: Option<InodePtr<T>>, child: InodePtr<T>) -> Option<InodePtr<T>> {}
 }
