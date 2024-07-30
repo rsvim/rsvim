@@ -68,11 +68,68 @@ pub enum ItreeIterateOrder {
 
 impl<T> Itree<T> {
   pub fn new() -> Self {
-    Itree { root: None }
+    Itree {
+      root: None,
+      current: None,
+    }
+  }
+
+  pub fn is_empty(&self) -> bool {
+    self.root.is_none()
   }
 
   pub fn root(&self) -> Option<InodePtr<T>> {
     self.root
+  }
+
+  pub fn current(&self) -> Option<InodePtr<T>> {
+    self.current
+  }
+
+  /// Assert the `node` exists in the tree.
+  ///
+  /// # Panics
+  ///
+  /// Panics when the `node` doesn't exist.
+  fn assert_exists(&self, node: InodePtr<T>) {
+    assert!(
+      self.root.is_some(),
+      "Doesn't have a root node when assert the node exists"
+    );
+    let node = node.write().unwrap();
+    let node2 = self
+      .root
+      .unwrap()
+      .write()
+      .unwrap()
+      .get_descendant_child(node.id());
+    assert!(node2.is_some(), "Missing node {} in the tree", node.id());
+    assert!(
+      node2.unwrap().read().unwrap().id() == node.id(),
+      "Node ID {} not match in the tree",
+      node.id()
+    );
+  }
+
+  /// Assert the `node` is the root node.
+  ///
+  /// # Panics
+  ///
+  /// Panics if the `node` isn't the root node.
+  fn assert_is_root(&self, node: InodePtr<T>) {}
+
+  /// Assert the `node` is not the root node, but exists in the tree.
+  ///
+  /// # Panics
+  ///
+  /// Panics if the `node` is the root node.
+  fn assert_not_root(&self, node: InodePtr<T>) {}
+
+  pub fn set_current(&mut self, node: InodePtr<T>) {
+    match self.root {
+      Some(root) => {}
+      None => {}
+    }
   }
 
   pub fn iter(&self, order: ItreeIterateOrder) -> ItreeIterator<T> {
@@ -82,44 +139,20 @@ impl<T> Itree<T> {
   pub fn insert(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {
     match parent {
       Some(parent) => {
-        assert!(
-          self.root.is_some(),
-          "Doesn't have a root node when inserting with parent"
-        );
-        let write_parent = parent.write().unwrap();
-        let get_parent = self
-          .root
-          .unwrap()
-          .write()
-          .unwrap()
-          .get_descendant_child(write_parent.id());
-        assert!(
-          get_parent.is_some(),
-          "Missing parent {} in the tree",
-          write_parent.id()
-        );
-        assert!(
-          get_parent.unwrap().read().unwrap().id() == write_parent.id(),
-          "Parent ID {} not match in the tree",
-          write_parent.id()
-        );
+        self.assert_exists(parent);
 
         node.write().unwrap().set_parent(parent);
-        write_parent.push(node);
+        parent.write().unwrap().push(node);
         Some(node)
       }
       None => {
         assert!(
           self.root.is_none(),
-          "Root node exists when inserting without parent"
+          "Root node already exists when inserting without parent"
         );
         self.root = Some(node);
         Some(node)
       }
     }
-  }
-
-  pub fn current(&self) -> Option<InodePtr<T>> {
-    self.current
   }
 }
