@@ -77,11 +77,17 @@ impl<T> Itree<T> {
   }
 
   pub fn root(&self) -> Option<InodePtr<T>> {
-    self.root
+    match &self.root {
+      Some(root) => Some(root.clone()),
+      None => None,
+    }
   }
 
   pub fn set_root(&mut self, root: Option<InodePtr<T>>) -> Option<InodePtr<T>> {
-    let old = self.root;
+    let old = match &self.root {
+      Some(root) => Some(root.clone()),
+      None => None,
+    };
     self.root = root;
     old
   }
@@ -99,6 +105,7 @@ impl<T> Itree<T> {
     let node = node.write().unwrap();
     let node2 = self
       .root
+      .clone()
       .unwrap()
       .write()
       .unwrap()
