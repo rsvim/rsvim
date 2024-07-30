@@ -10,7 +10,7 @@ use crate::uuid;
 #[derive(Debug, Clone)]
 pub struct Inode<T> {
   parent: Option<InodeWk<T>>,
-  /// The children collection is sorted by the z-index.
+  /// The children collection is ascent sorted by the z-index, i.e. from lower to higher.
   children: Option<Vec<InodePtr<T>>>,
   id: usize,
   value: T,
@@ -164,13 +164,30 @@ impl<T> Inode<T> {
   /// do this for you.
   pub fn push(&mut self, child: InodePtr<T>) {
     if self.children.is_none() {
-      self.children = Some(BTreeMap::new());
+      self.children = Some(Vec::new());
     }
     self.update_attribute(child, self);
-    self
+    let child_zindex = child.read().unwrap().attr.zindex;
+    let higher_indexes: Vec<usize> = self
       .children
       .unwrap()
-      .insert(child.read().unwrap().attr.zindex, child)
+      .iter()
+      .enumerate()
+      .filter(|(index, c)| c.read().unwrap().attr.zindex >= child_zindex)
+      .map(|(index, c)| index)
+      .rev()
+      .collect();
+    let insert_pos = higher_indexes.pop();
+    match insert_pos {
+      Some(insert_pos) => {
+        // Got the first child's position that has higher z-index, insert before it.
+        self.children.unwrap().insert(insert_pos, child)
+      }
+      None => {
+        // No existed children has higher z-index, insert at the end.
+        self.children.unwrap().push(child)
+      }
+    }
   }
 
   /// Pop a child node from the end of the children vector.
