@@ -150,8 +150,8 @@ impl<T> Itree<T> {
   /// Get the iterator in a descent order.
   ///
   /// For the children under the same node, it visits from higher z-index to lower.
-  pub fn iter_descent(&self) -> ItreeIterator<T> {
-    ItreeIterator::new(self.root, ItreeIterateOrder::Descent)
+  pub fn ordered_iter(&self, order: ItreeIterateOrder) -> ItreeIterator<T> {
+    ItreeIterator::new(self.root, order)
   }
 
   pub fn insert(&mut self, parent: Option<InodePtr<T>>, node: InodePtr<T>) -> Option<InodePtr<T>> {
