@@ -6,7 +6,8 @@ pub mod window;
 
 // Re-export
 pub use crate::ui::widget::cursor::Cursor;
-pub use crate::ui::widget::window::Window;
+pub use crate::ui::widget::layout::root::RootLayout;
+pub use crate::ui::widget::layout::window::WindowLayout;
 
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalWk;
@@ -18,4 +19,8 @@ pub trait Widget {
   fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {
     // Do nothing.
   }
+}
+
+pub enum WidgetNode {
+  Root(),
 }

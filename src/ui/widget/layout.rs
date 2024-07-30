@@ -2,3 +2,4 @@
 //! container that manages all its nested children widgets, and arranges their layout.
 
 pub mod root;
+pub mod window;
