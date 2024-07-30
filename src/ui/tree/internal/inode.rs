@@ -1,6 +1,6 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
-use std::collections::VecDeque;
+use std::collections::{BTreeMap, VecDeque};
 use std::ops::FnMut;
 use std::sync::{Arc, RwLock, Weak};
 
@@ -10,7 +10,7 @@ use crate::uuid;
 #[derive(Debug, Clone)]
 pub struct Inode<T> {
   parent: Option<InodeWk<T>>,
-  children: Option<Vec<InodePtr<T>>>,
+  children: Option<BTreeMap<usize, InodePtr<T>>>,
   id: usize,
   value: T,
   attr: InodeAttr,
@@ -75,7 +75,7 @@ impl<T> Inode<T> {
 
   // Children {
 
-  pub fn children(&self) -> Option<&Vec<InodePtr<T>>> {
+  pub fn children(&self) -> Option<&BTreeMap<usize, InodePtr<T>>> {
     self.children
   }
 
@@ -112,6 +112,8 @@ impl<T> Inode<T> {
     });
   }
 
+  /// Level-order traverse the sub-tree, start from `start_node`, and apply the `f` function on
+  /// each node with its parent.
   fn level_order_traversal(
     start_node: InodePtr<T>,
     start_parent_node: InodePtr<T>,
@@ -121,7 +123,7 @@ impl<T> Inode<T> {
 
     let start = start_node.read().unwrap();
     let mut que: VecDeque<(InodePtr<T>, InodePtr<T>)> = match start.children {
-      Some(children) => children.iter().map(|c| (start, c)).collect(),
+      Some(children) => children.iter().map(|(_, c)| (start, c)).collect(),
       None => vec![].iter().collect(),
     };
 
@@ -132,8 +134,8 @@ impl<T> Inode<T> {
       let child = child.read().unwrap();
       match child.children {
         Some(children) => {
-          for c in children.iter() {
-            que.push_back(c);
+          for (_, c) in children.iter() {
+            que.push_back((child, c));
           }
         }
         None => { /* Do nothing */ }
@@ -142,36 +144,26 @@ impl<T> Inode<T> {
   }
 
   /// Push a child node at the end of children's vector.
-  /// This operation also calculates and updates the actual shape for the pushed node and all its
-  /// descendant children.
+  /// This operation also calculates and updates the attributes for the pushed node and all its
+  /// descendants.
   pub fn push(&mut self, child: InodePtr<T>) {
     if self.children.is_none() {
-      self.children = Some(vec![]);
+      self.children = Some(BTreeMap::new());
     }
-    self.update_actual_shape(child, self.attr.actual_shape);
-    self.children.unwrap().push(child)
-  }
-
-  pub fn insert(&mut self, index: usize, child: InodePtr<T>) {
-    if self.children.is_none() {
-      self.children = Some(vec![]);
-    }
-    self.update_actual_shape(child, self.attr.actual_shape);
-    self.children.unwrap().insert(index, child)
+    self.update_attribute(child, self);
+    self
+      .children
+      .unwrap()
+      .insert(child.read().unwrap().attr.zindex, child)
   }
 
   /// Pop a child node from the end of the chlidren's vector.
   pub fn pop(&mut self) -> Option<InodePtr<T>> {
     match self.children {
-      Some(&mut children) => children.pop(),
-      None => None,
-    }
-  }
-
-  /// Remove a child node.
-  pub fn remove(&mut self, index: usize) -> Option<InodePtr<T>> {
-    match self.children {
-      Some(&mut children) => Some(children.remove(index)),
+      Some(&mut children) => match children.pop_first() {
+        Some((zindex, child)) => Some(child),
+        None => None,
+      },
       None => None,
     }
   }
@@ -179,7 +171,7 @@ impl<T> Inode<T> {
   /// Get descendant child by its ID, i.e. search in all children nodes in the sub-tree.
   pub fn get_descendant_child(&self, id: usize) -> Option<InodePtr<T>> {
     let mut q: VecDeque<InodePtr<T>> = match self.children {
-      Some(c) => c.iter().collect(),
+      Some(children) => children.iter().map(|(_, c)| c).collect(),
       None => vec![].iter().collect(),
     };
     while let Some(e) = q.pop_front() {
@@ -187,9 +179,9 @@ impl<T> Inode<T> {
         return Some(e);
       }
       match e.children {
-        Some(ec) => {
-          for child in ec.iter() {
-            q.push_back(child);
+        Some(children) => {
+          for c in children.iter() {
+            q.push_back(c);
           }
         }
         None => { /* Do nothing */ }
