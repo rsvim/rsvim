@@ -1,5 +1,6 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
+use std::alloc::realloc;
 use std::collections::{BTreeMap, VecDeque};
 use std::ops::FnMut;
 use std::sync::{Arc, RwLock, Weak};
@@ -152,18 +153,18 @@ impl<T> Inode<T> {
   /// (`self`) node, outside of this method.
   /// Because this (`self`) node doesn't have the related `std::sync::Arc` pointer, so this method
   /// cannot do this for you.
-  pub fn push(self_: InodePtr<T>, child: InodePtr<T>) {
-    let mut start_node = self_.write().unwrap();
+  pub fn push(parent: InodePtr<T>, child: InodePtr<T>) {
+    let mut start_node = parent.write().unwrap();
     if start_node.children.is_none() {
       start_node.children = Some(Vec::new());
     }
 
     // Update attributes start from `child`, and all its descendants.
-    Inode::update_attribute(child, self_);
+    Inode::update_attribute(child, parent);
 
     // Insert `child` by the order of z-index.
     let child_zindex = child.read().unwrap().attr.zindex;
-    let mut higher_zindex_pos: Vec<usize> = self_
+    let mut higher_zindex_pos: Vec<usize> = parent
       .read()
       .unwrap()
       .children
@@ -177,7 +178,7 @@ impl<T> Inode<T> {
     match higher_zindex_pos.pop() {
       Some(insert_pos) => {
         // Got the first child's position that has higher z-index, insert before it.
-        self_
+        parent
           .write()
           .unwrap()
           .children
@@ -186,7 +187,7 @@ impl<T> Inode<T> {
       }
       None => {
         // No existed children has higher z-index, insert at the end.
-        self_.write().unwrap().children.unwrap().push(child)
+        parent.write().unwrap().children.unwrap().push(child)
       }
     }
   }
