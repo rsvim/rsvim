@@ -1,6 +1,6 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
-use std::collections::{BTreeMap, BinaryHeap, VecDeque};
+use std::collections::{BTreeMap, VecDeque};
 use std::ops::FnMut;
 use std::sync::{Arc, RwLock, Weak};
 
@@ -11,7 +11,7 @@ use crate::uuid;
 pub struct Inode<T> {
   parent: Option<InodeWk<T>>,
   /// The children collection is sorted by the z-index.
-  children: Option<BinaryHeap<usize, InodePtr<T>>>,
+  children: Option<Vec<InodePtr<T>>>,
   id: usize,
   value: T,
   attr: InodeAttr,
@@ -86,7 +86,7 @@ impl<T> Inode<T> {
 
   // Children {
 
-  pub fn children(&self) -> Option<&BTreeMap<usize, InodePtr<T>>> {
+  pub fn children(&self) -> Option<&Vec<InodePtr<T>>> {
     self.children
   }
 
@@ -134,7 +134,7 @@ impl<T> Inode<T> {
 
     let start = start_node.read().unwrap();
     let mut que: VecDeque<(InodePtr<T>, InodePtr<T>)> = match start.children {
-      Some(children) => children.iter().map(|(_, c)| (start, c)).collect(),
+      Some(children) => children.iter().map(|c| (start, c)).collect(),
       None => vec![].iter().collect(),
     };
 
@@ -145,7 +145,7 @@ impl<T> Inode<T> {
       let child = child.read().unwrap();
       match child.children {
         Some(children) => {
-          for (_, c) in children.iter() {
+          for c in children.iter() {
             que.push_back((child, c));
           }
         }
@@ -154,13 +154,14 @@ impl<T> Inode<T> {
     }
   }
 
-  /// Push a child node at the end of children's vector.
-  /// This operation also calculates and updates the attributes for the pushed node and all its
-  /// descendants.
+  /// Push a child node into the children vector.
+  /// This operation also sorts the newly inserted node with other children by the z-index. It also
+  /// calculates and updates the attributes for the pushed node and all its descendants.
   ///
-  /// Note: This operation requires the `child` parent pointer to be assigned to this (`self`) node
-  /// outside of this method, to bind the go-upper connection. Because this (`self`) node doesn't
-  /// have its `std::sync::Arc` pointer.
+  /// Note: You need to manually assigned the `parent` pointer inside the `child` node, outside of
+  /// this method.
+  /// Because this (`self`) node doesn't have its `std::sync::Arc` pointer, so this method cannot
+  /// do this for you.
   pub fn push(&mut self, child: InodePtr<T>) {
     if self.children.is_none() {
       self.children = Some(BTreeMap::new());
@@ -172,8 +173,8 @@ impl<T> Inode<T> {
       .insert(child.read().unwrap().attr.zindex, child)
   }
 
-  /// Pop a child node from the end of the chlidren's vector.
-  /// This operation also removes the parent pointer of the removed child.
+  /// Pop a child node from the end of the children vector.
+  /// This operation also removes the connection between this (`self`) node and the removed child.
   pub fn pop(&mut self) -> Option<InodePtr<T>> {
     if let Some(&mut children) = self.children {
       if let Some((_, child)) = children.pop_first() {
@@ -184,8 +185,8 @@ impl<T> Inode<T> {
     None
   }
 
-  /// Remove a child node by its ID.
-  /// This operation also removes the parent pointer of the removed child.
+  /// Remove a child node by its ID from the children vector.
+  /// This operation also removes the connection between this (`self`) node and the removed child.
   pub fn remove(&mut self, id: usize) -> Option<InodePtr<T>> {
     if let Some(&mut children) = self.children {
       for (_, child) in children.iter() {}

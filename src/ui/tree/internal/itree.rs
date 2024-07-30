@@ -7,10 +7,6 @@ use crate::ui::tree::internal::inode::InodePtr;
 #[derive(Debug, Clone)]
 pub struct Itree<T> {
   root: Option<InodePtr<T>>,
-
-  /// As the widget tree, there's a focus node, i.e. the current widget that the position of the
-  /// user's cursor.
-  current: Option<InodePtr<T>>,
 }
 
 #[derive(Debug, Clone)]
@@ -75,10 +71,7 @@ pub enum ItreeIterateOrder {
 
 impl<T> Itree<T> {
   pub fn new() -> Self {
-    Itree {
-      root: None,
-      current: None,
-    }
+    Itree { root: None }
   }
 
   pub fn is_empty(&self) -> bool {
@@ -89,8 +82,10 @@ impl<T> Itree<T> {
     self.root
   }
 
-  pub fn current(&self) -> Option<InodePtr<T>> {
-    self.current
+  pub fn set_root(&mut self, root: Option<InodePtr<T>>) -> Option<InodePtr<T>> {
+    let old = self.root;
+    self.root = root;
+    old
   }
 
   /// Assert the `node` exists in the tree.
@@ -131,13 +126,6 @@ impl<T> Itree<T> {
   ///
   /// Panics if the `node` is the root node.
   fn assert_not_root(&self, node: InodePtr<T>) {}
-
-  pub fn set_current(&mut self, node: InodePtr<T>) {
-    match self.root {
-      Some(root) => {}
-      None => {}
-    }
-  }
 
   /// Get the iterator.
   ///
