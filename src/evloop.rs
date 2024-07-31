@@ -35,6 +35,7 @@ impl EventLoop {
     let screen = Terminal::new(screen_size);
     let screen = make_terminal_ptr(screen);
     let mut tree = Tree::new(Arc::downgrade(&screen));
+    debug!("new, screen size: {:?}", screen_size);
 
     let root_container = RootContainer::default();
     let root_container_shape = IRect::new(
@@ -91,6 +92,8 @@ impl EventLoop {
     let cursor_node = TreeNode::arc(cursor_node);
     tree.insert(Some(window_container_node.clone()), cursor_node.clone());
 
+    debug!("new, built widget tree");
+
     Ok(EventLoop {
       screen,
       tree: Tree::arc(tree),
@@ -100,6 +103,7 @@ impl EventLoop {
   pub async fn init(&self) -> IoResult<()> {
     let mut out = std::io::stdout();
 
+    debug!("init, draw cursor");
     let cursor = self.screen.read().unwrap().frame().cursor;
     if cursor.blinking {
       queue!(out, termcursor::EnableBlinking)?;
@@ -116,6 +120,7 @@ impl EventLoop {
     queue!(out, termcursor::MoveTo(cursor.pos.x(), cursor.pos.y()))?;
 
     out.flush()?;
+    debug!("init, draw cursor - done");
 
     Ok(())
   }
@@ -126,11 +131,13 @@ impl EventLoop {
       tokio::select! {
         polled_event = reader.next() => match polled_event {
           Some(Ok(event)) => {
+            debug!("run, polled event: {:?}", event);
             if !self.accept(event).await {
                 break;
             }
           },
           Some(Err(e)) => {
+            debug!("run, error: {:?}", e);
             error!("Error: {:?}\r", e);
             break;
           },
