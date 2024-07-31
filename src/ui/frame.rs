@@ -47,6 +47,7 @@ impl Frame {
     self.size
   }
 
+  /// Set the size, i.e. change the frame size.
   pub fn set_size(&mut self, size: U16Size) -> U16Size {
     let old_size = self.size;
     self.size = size;
