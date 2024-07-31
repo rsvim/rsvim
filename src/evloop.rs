@@ -143,19 +143,20 @@ impl EventLoop {
 
   pub async fn accept(&mut self, event: Event) -> bool {
     debug!("Event::{:?}", event);
+    println!("Event:{:?}", event);
 
-    match event {
-      Event::FocusGained => {}
-      Event::FocusLost => {}
-      Event::Key(key_event) => match key_event.kind {
-        KeyEventKind::Press => {}
-        KeyEventKind::Repeat => {}
-        KeyEventKind::Release => {}
-      },
-      Event::Mouse(_mouse_event) => {}
-      Event::Paste(ref _paste_string) => {}
-      Event::Resize(_columns, _rows) => {}
-    }
+    // match event {
+    //   Event::FocusGained => {}
+    //   Event::FocusLost => {}
+    //   Event::Key(key_event) => match key_event.kind {
+    //     KeyEventKind::Press => {}
+    //     KeyEventKind::Repeat => {}
+    //     KeyEventKind::Release => {}
+    //   },
+    //   Event::Mouse(_mouse_event) => {}
+    //   Event::Paste(ref _paste_string) => {}
+    //   Event::Resize(_columns, _rows) => {}
+    // }
 
     // if event == Event::Key(KeyCode::Char('c').into()) {
     //   println!("Curosr position: {:?}\r", termcursor::position());
@@ -163,6 +164,7 @@ impl EventLoop {
 
     // quit loop
     if event == Event::Key(KeyCode::Esc.into()) {
+      println!("ESC: {:?}\r", termcursor::position());
       return false;
     }
 

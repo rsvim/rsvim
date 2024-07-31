@@ -19,6 +19,8 @@ To develop code, please setup with:
 
   > Recommend using [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
 
+To debug code, please run with `RUST_LOG=debug ./target/debug/rsvim`. It enables all the logs over debugging level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
+
 ## Documentation
 
 To write rust docs, please setup with:
