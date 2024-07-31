@@ -259,19 +259,14 @@ where
 
   /// Get descendant child by its ID, i.e. search in all children nodes in the sub-tree.
   pub fn get_descendant(&self, id: usize) -> Option<InodeArc<T>> {
-    let mut q: VecDeque<InodeArc<T>> = VecDeque::from(self.children);
+    let mut q: VecDeque<InodeArc<T>> = VecDeque::from(self.children.clone());
 
     while let Some(e) = q.pop_front() {
       if e.read().unwrap().id() == id {
         return Some(e);
       }
-      match e.read().unwrap().children {
-        Some(children) => {
-          for child in children.iter() {
-            q.push_back(child.clone());
-          }
-        }
-        None => { /* Do nothing */ }
+      for child in e.read().unwrap().children.iter() {
+        q.push_back(child.clone());
       }
     }
     None
