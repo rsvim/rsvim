@@ -1,6 +1,6 @@
 //! The widget tree that manages all the widget components.
 
-#![warn(dead_code)]
+#![allow(dead_code)]
 
 use std::collections::BTreeSet;
 use std::sync::{Arc, RwLock, Weak};
