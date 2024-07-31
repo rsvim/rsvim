@@ -127,9 +127,13 @@ where
     Inode::level_order_traverse(
       start_node.clone(),
       start_parent_node.clone(),
-      &Inode::update_depth,
+      &mut Inode::update_depth,
     );
-    Inode::level_order_traverse(start_node, start_parent_node, &Inode::update_actual_shape);
+    Inode::level_order_traverse(
+      start_node,
+      start_parent_node,
+      &mut Inode::update_actual_shape,
+    );
   }
 
   fn update_depth(child: InodeArc<T>, parent: InodeArc<T>) {
