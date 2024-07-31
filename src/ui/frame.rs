@@ -2,8 +2,7 @@
 
 #![allow(dead_code)]
 
-pub mod cell;
-pub mod cursor;
+use std::ops::Range;
 
 use crate::cart::{U16Size, UPos};
 use std::vec::Splice;
@@ -12,6 +11,11 @@ use std::vec::Splice;
 pub use crate::ui::frame::cell::Cell;
 pub use crate::ui::frame::cursor::{Cursor, CursorStyle, CursorStyleFormatter};
 
+pub mod cell;
+pub mod cursor;
+
+pub type FrameRange = Range<usize>;
+
 #[derive(Debug, Clone)]
 /// Rendering buffer & cursor for the whole terminal.
 /// All UI components will dump their text contents to a frame first, then flush to terminal.
@@ -19,6 +23,10 @@ pub struct Frame {
   pub size: U16Size,
   pub cells: Vec<Cell>,
   pub cursor: Cursor,
+
+  /// Indicate which part of the frame is dirty, i.e. been updated by widget tree changes.
+  /// When rendering contents to the terminal device, only the dirty ranges will be printed.
+  pub dirty_ranges: Vec<FrameRange>,
 }
 
 impl Frame {
@@ -28,7 +36,16 @@ impl Frame {
       size,
       cells: vec![Cell::default(); size.height as usize * size.width as usize],
       cursor,
+      dirty_ranges: vec![],
     }
+  }
+
+  pub fn size(&self) -> U16Size {
+    self.size
+  }
+
+  pub fn set_size(&mut self, size: U16Size) {
+    self.size = size;
   }
 
   /// Get a cell on specific position.
@@ -42,9 +59,13 @@ impl Frame {
   }
 
   /// Set a cell on specific position.
-  pub fn set_cell(&mut self, pos: UPos, cell: Cell) -> &mut Self {
-    self.cells[pos.x() * pos.y()] = cell;
-    self
+  pub fn set_cell(&mut self, pos: UPos, cell: Cell) {
+    let index = pos.x() * pos.y();
+    self.cells[index] = cell;
+    self.dirty_ranges.push(FrameRange {
+      start: index,
+      end: index + 1,
+    });
   }
 
   /// Get n continuously cells, start from position.
@@ -79,6 +100,7 @@ impl Frame {
 
   pub fn set_cursor(&mut self, cursor: Cursor) {
     self.cursor = cursor;
+    self.cursor.dirty = true;
   }
 }
 
