@@ -182,24 +182,24 @@ where
 
     // Insert `child` by the order of z-index.
     let child_zindex = child.read().unwrap().zindex;
-    let mut higher_zindex_pos: Vec<usize> = parent
+    let higher_zindex_pos: Vec<usize> = parent
       .read()
       .unwrap()
       .children
       .iter()
       .enumerate()
-      .filter(|(_index, c)| c.read().unwrap().zindex >= child_zindex)
+      .filter(|(_index, c)| c.read().unwrap().zindex > child_zindex)
       .map(|(index, _c)| index)
       .rev()
       .collect();
-    match higher_zindex_pos.pop() {
+    match higher_zindex_pos.first() {
       Some(insert_pos) => {
         // Got the first child's position that has higher z-index, insert before it.
         parent
           .write()
           .unwrap()
           .children
-          .insert(insert_pos, child.clone())
+          .insert(*insert_pos, child.clone())
       }
       None => {
         // No existed children has higher z-index, insert at the end.
