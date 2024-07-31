@@ -14,7 +14,7 @@ pub use crate::ui::frame::cursor::{Cursor, CursorStyle, CursorStyleFormatter};
 pub mod cell;
 pub mod cursor;
 
-pub type FrameRange = Range<usize>;
+pub type FrameCellsRange = Range<usize>;
 
 #[derive(Debug, Clone)]
 /// Rendering buffer & cursor for the whole terminal.
@@ -26,7 +26,7 @@ pub struct Frame {
 
   /// Indicate which part of the frame is dirty, i.e. been updated by widget tree changes.
   /// When rendering contents to the terminal device, only the dirty ranges will be printed.
-  pub dirty_cells: Vec<FrameRange>,
+  pub dirty_cells: Vec<FrameCellsRange>,
   pub dirty_cursor: bool,
 }
 
@@ -42,12 +42,9 @@ impl Frame {
     }
   }
 
+  /// Get the size.
   pub fn size(&self) -> U16Size {
     self.size
-  }
-
-  pub fn set_size(&mut self, size: U16Size) {
-    self.size = size;
   }
 
   /// Get a cell on specific position.
@@ -60,7 +57,7 @@ impl Frame {
     let index = pos.x() * pos.y();
     let old = self.cells[index].clone();
     self.cells[index] = cell;
-    self.dirty_cells.push(FrameRange {
+    self.dirty_cells.push(FrameCellsRange {
       start: index,
       end: index + 1,
     });
@@ -83,11 +80,15 @@ impl Frame {
   ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter> {
     let start_at = pos.x() * pos.y();
     let end_at = start_at + cells.len();
-    self.dirty_cells.push(FrameRange {
+    self.dirty_cells.push(FrameCellsRange {
       start: start_at,
       end: end_at,
     });
     self.cells.splice(start_at..end_at, cells)
+  }
+
+  pub fn dirty_cells(&self) -> &Vec<FrameCellsRange> {
+    &self.dirty_cells
   }
 
   pub fn get_cursor(&self) -> &Cursor {
@@ -97,6 +98,15 @@ impl Frame {
   pub fn set_cursor(&mut self, cursor: Cursor) {
     self.cursor = cursor;
     self.dirty_cursor = true;
+  }
+
+  pub fn dirty_cursor(&self) -> bool {
+    self.dirty_cursor
+  }
+
+  pub fn reset_dirty(&mut self) {
+    self.dirty_cells = vec![];
+    self.dirty_cursor = false;
   }
 }
 
