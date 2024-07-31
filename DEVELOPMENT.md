@@ -10,6 +10,15 @@ Please setup your development environment with:
   - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
 - Latest stable [Rust](https://www.rust-lang.org/) compiler, or at least 1.74.0.
 
+## Developing
+
+To develop code, please setup with:
+
+- [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter, format with `cargo fmt` or other ways you like.
+- [rust-clippy](https://github.com/rust-lang/rust-clippy): linter, lint with `cargo clippy` or other ways you like.
+
+  > Recommend using [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
+
 ## Documentation
 
 To write rust docs, please setup with:
