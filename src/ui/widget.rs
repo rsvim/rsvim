@@ -17,7 +17,7 @@ use crate::ui::tree::internal::inode::InodeValue;
 /// Widget is the base trait for all UI components, it provide a common layer for rendering.
 pub trait Widget {
   /// Draw the widget to terminal, on the specific shape.
-  fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {
+  fn draw(&mut self, _actual_shape: U16Rect, _terminal: TerminalWk) {
     // Do nothing.
   }
 }
@@ -33,7 +33,7 @@ pub enum WidgetEnum {
 impl InodeValue for WidgetEnum {}
 
 impl Widget for WidgetEnum {
-  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {
+  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalWk) {
     match self {
       WidgetEnum::RootContainer(widget) => widget.draw(actual_shape, terminal),
       WidgetEnum::WindowContainer(widget) => widget.draw(actual_shape, terminal),
