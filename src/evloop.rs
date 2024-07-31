@@ -153,7 +153,7 @@ impl EventLoop {
         KeyEventKind::Release => {}
       },
       Event::Mouse(_mouse_event) => {}
-      Event::Paste(_paste_string) => {}
+      Event::Paste(ref _paste_string) => {}
       Event::Resize(_columns, _rows) => {}
     }
 
