@@ -47,6 +47,12 @@ impl Frame {
     self.size
   }
 
+  pub fn set_size(&mut self, size: U16Size) -> U16Size {
+    let old_size = self.size;
+    self.size = size;
+    old_size
+  }
+
   /// Get a cell on specific position.
   pub fn get_cell(&self, pos: UPos) -> &Cell {
     &self.cells[pos.x() * pos.y()]
