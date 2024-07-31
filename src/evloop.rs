@@ -7,7 +7,7 @@ use crate::ui::frame::CursorStyle;
 use crate::ui::term::{make_terminal_ptr, Terminal, TerminalPtr};
 use crate::ui::tree::{Tree, TreeArc, TreeNode, TreeNodeArc};
 use crate::ui::widget::{
-  Cursor, RootContainer, Widget, WidgetImpl, WindowContainer, WindowContent,
+  Cursor, RootContainer, Widget, WidgetEnum, WindowContainer, WindowContent,
 };
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
@@ -42,7 +42,7 @@ impl EventLoop {
     );
     let root_container_node = TreeNode::new(
       None,
-      WidgetImpl::RootContainer(root_container),
+      WidgetEnum::RootContainer(root_container),
       root_container_shape,
     );
     let root_container_node = TreeNode::arc(root_container_node);
@@ -55,7 +55,7 @@ impl EventLoop {
     );
     let window_container_node = TreeNode::new(
       Some(Arc::downgrade(&root_container_node)),
-      WidgetImpl::WindowContainer(window_container),
+      WidgetEnum::WindowContainer(window_container),
       window_container_shape,
     );
     let window_container_node = TreeNode::arc(window_container_node);
@@ -71,7 +71,7 @@ impl EventLoop {
     );
     let window_content_node = TreeNode::new(
       Some(Arc::downgrade(&window_container_node)),
-      WidgetImpl::WindowContent(window_content),
+      WidgetEnum::WindowContent(window_content),
       window_content_shape,
     );
     let window_content_node = TreeNode::arc(window_content_node);
@@ -84,7 +84,7 @@ impl EventLoop {
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor_node = TreeNode::new(
       Some(Arc::downgrade(&window_content_node)),
-      WidgetImpl::Cursor(cursor),
+      WidgetEnum::Cursor(cursor),
       cursor_shape,
     );
     let cursor_node = TreeNode::arc(cursor_node);

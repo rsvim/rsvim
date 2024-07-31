@@ -23,11 +23,22 @@ pub trait Widget {
 }
 
 #[derive(Debug, Clone)]
-pub enum WidgetImpl {
+pub enum WidgetEnum {
   RootContainer(RootContainer),
   WindowContainer(WindowContainer),
   WindowContent(WindowContent),
   Cursor(Cursor),
 }
 
-impl InodeValue for WidgetImpl {}
+impl InodeValue for WidgetEnum {}
+
+impl Widget for WidgetEnum {
+  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {
+    match self {
+      WidgetEnum::RootContainer(widget) => widget.draw(actual_shape, terminal),
+      WidgetEnum::WindowContainer(widget) => widget.draw(actual_shape, terminal),
+      WidgetEnum::WindowContent(widget) => widget.draw(actual_shape, terminal),
+      WidgetEnum::Cursor(widget) => widget.draw(actual_shape, terminal),
+    }
+  }
+}

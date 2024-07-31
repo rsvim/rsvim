@@ -5,7 +5,7 @@ use std::{collections::VecDeque, iter::Iterator};
 
 use crate::ui::tree::internal::inode::{Inode, InodeArc, InodeValue};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct Itree<T>
 where
   T: InodeValue,
@@ -130,20 +130,6 @@ where
       node.id()
     );
   }
-
-  /// Assert the `node` is the root node.
-  ///
-  /// # Panics
-  ///
-  /// Panics if the `node` isn't the root node.
-  fn assert_is_root(&self, _node: InodeArc<T>) {}
-
-  /// Assert the `node` is not the root node, but exists in the tree.
-  ///
-  /// # Panics
-  ///
-  /// Panics if the `node` is the root node.
-  fn assert_not_root(&self, _node: InodeArc<T>) {}
 
   /// Get the iterator.
   ///

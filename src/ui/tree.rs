@@ -1,12 +1,14 @@
 //! The widget tree that manages all the widget components.
 
+#![warn(dead_code)]
+
 use std::collections::BTreeSet;
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::internal::inode::{Inode, InodeArc, InodeWk};
 use crate::ui::tree::internal::itree::{Itree, ItreeIterateOrder, ItreeIterator};
-use crate::ui::widget::WidgetImpl;
+use crate::ui::widget::{Widget, WidgetEnum};
 
 pub mod internal;
 
@@ -105,7 +107,7 @@ pub struct Tree {
   terminal: TerminalWk,
 
   // Internal tree.
-  base: Itree<WidgetImpl>,
+  base: Itree<WidgetEnum>,
 
   // A collection of all VIM window node IDs
   // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)).
@@ -114,10 +116,10 @@ pub struct Tree {
 
 pub type TreeArc = Arc<RwLock<Tree>>;
 pub type TreeWk = Weak<RwLock<Tree>>;
-pub type TreeNode = Inode<WidgetImpl>;
-pub type TreeNodeArc = InodeArc<WidgetImpl>;
-pub type TreeNodeWk = InodeWk<WidgetImpl>;
-pub type TreeIterator = ItreeIterator<WidgetImpl>;
+pub type TreeNode = Inode<WidgetEnum>;
+pub type TreeNodeArc = InodeArc<WidgetEnum>;
+pub type TreeNodeWk = InodeWk<WidgetEnum>;
+pub type TreeIterator = ItreeIterator<WidgetEnum>;
 pub type TreeIterateOrder = ItreeIterateOrder;
 
 impl Tree {
@@ -176,7 +178,13 @@ impl Tree {
   // Draw {
 
   /// Draw the widget tree to terminal device.
-  pub fn draw(&mut self) {}
+  pub fn draw(&mut self) {
+    for node in self.base.iter() {
+      let mut node2 = node.write().unwrap();
+      let actual_shape = node2.actual_shape();
+      node2.value_mut().draw(&actual_shape, self.terminal.clone());
+    }
+  }
 
   // Draw }
 }

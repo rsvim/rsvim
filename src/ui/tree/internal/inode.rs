@@ -92,6 +92,10 @@ where
     &self.value
   }
 
+  pub fn value_mut(&mut self) -> &mut T {
+    &mut self.value
+  }
+
   // Attribute }
 
   // Parent {
