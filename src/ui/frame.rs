@@ -38,7 +38,7 @@ impl Frame {
       cells: vec![Cell::default(); size.height as usize * size.width as usize],
       cursor,
       dirty_cells: vec![],
-      dirty_cursor: true,
+      dirty_cursor: false,
     }
   }
 
