@@ -7,7 +7,7 @@ use crate::ui::term::TerminalWk;
 use crate::ui::widget::Widget;
 
 /// The VIM window content.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct WindowContent {
   lines: Vec<CompactString>,
 }
@@ -39,12 +39,6 @@ impl WindowContent {
 
   pub fn set_line(&mut self, index: usize, line: CompactString) {
     self.lines[index] = line;
-  }
-}
-
-impl Default for WindowContent {
-  fn default() -> Self {
-    WindowContent { lines: vec![] }
   }
 }
 

@@ -90,17 +90,11 @@ where
   }
 
   pub fn root(&self) -> Option<InodeArc<T>> {
-    match &self.root {
-      Some(root) => Some(root.clone()),
-      None => None,
-    }
+    self.root.as_ref().map(|root| root.clone())
   }
 
   pub fn set_root(&mut self, root: Option<InodeArc<T>>) -> Option<InodeArc<T>> {
-    let old = match &self.root {
-      Some(root) => Some(root.clone()),
-      None => None,
-    };
+    let old = self.root.as_ref().map(|root| root.clone());
     self.root = root;
     old
   }
