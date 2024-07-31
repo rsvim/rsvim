@@ -12,6 +12,7 @@ pub use crate::ui::widget::window::content::WindowContent;
 
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalWk;
+use crate::ui::tree::internal::inode::InodeValue;
 
 /// Widget is the base trait for all UI components, it provide a common layer for rendering.
 pub trait Widget {
@@ -21,9 +22,12 @@ pub trait Widget {
   }
 }
 
+#[derive(Debug, Clone)]
 pub enum WidgetImpl {
   RootContainer(RootContainer),
   WindowContainer(WindowContainer),
   WindowContent(WindowContent),
   Cursor(Cursor),
 }
+
+impl InodeValue for WidgetImpl {}
