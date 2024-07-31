@@ -209,28 +209,18 @@ where
   }
 
   pub fn first(&self) -> Option<InodeArc<T>> {
-    match self.children {
-      Some(children) => {
-        if children.is_empty() {
-          None
-        } else {
-          Some(children[0])
-        }
-      }
-      None => None,
+    if self.children.is_empty() {
+      None
+    } else {
+      Some(self.children[0].clone())
     }
   }
 
   pub fn last(&self) -> Option<InodeArc<T>> {
-    match self.children {
-      Some(children) => {
-        if children.is_empty() {
-          None
-        } else {
-          Some(children[children.len() - 1])
-        }
-      }
-      None => None,
+    if self.children.is_empty() {
+      None
+    } else {
+      Some(self.children[self.children.len() - 1].clone())
     }
   }
 
