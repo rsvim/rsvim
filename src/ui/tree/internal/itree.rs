@@ -3,10 +3,13 @@
 use std::sync::Arc;
 use std::{collections::VecDeque, iter::Iterator};
 
-use crate::ui::tree::internal::inode::{Inode, InodeArc};
+use crate::ui::tree::internal::inode::{Inode, InodeArc, InodeValue};
 
 #[derive(Debug, Clone)]
-pub struct Itree<T> {
+pub struct Itree<T>
+where
+  T: InodeValue,
+{
   root: Option<InodeArc<T>>,
 }
 
@@ -16,30 +19,33 @@ pub struct Itree<T> {
 /// It iterates the tree nodes following the order of rendering, i.e. the nodes with lower z-index
 /// that can be covered by other nodes are visited earlier, the nodes with higher z-index that will
 /// cover other nodes are visited later.
-pub struct ItreeIterator<T> {
+pub struct ItreeIterator<T>
+where
+  T: InodeValue,
+{
   order: ItreeIterateOrder,
   queue: VecDeque<InodeArc<T>>,
 }
 
-impl<T> Iterator for ItreeIterator<T> {
+impl<T> Iterator for ItreeIterator<T>
+where
+  T: InodeValue,
+{
   type Item = InodeArc<T>;
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(node) = self.queue.pop_front() {
-      match node.read().unwrap().children() {
-        Some(children) => match self.order {
-          ItreeIterateOrder::Ascent => {
-            for child in children.iter() {
-              self.queue.push_back(child.clone());
-            }
+      match self.order {
+        ItreeIterateOrder::Ascent => {
+          for child in node.read().unwrap().children().iter() {
+            self.queue.push_back(child.clone());
           }
-          ItreeIterateOrder::Descent => {
-            for child in children.iter().rev() {
-              self.queue.push_back(child.clone());
-            }
+        }
+        ItreeIterateOrder::Descent => {
+          for child in node.read().unwrap().children().iter().rev() {
+            self.queue.push_back(child.clone());
           }
-        },
-        None => { /* Do nothing */ }
+        }
       }
       return Some(node);
     }
@@ -47,7 +53,10 @@ impl<T> Iterator for ItreeIterator<T> {
   }
 }
 
-impl<T> ItreeIterator<T> {
+impl<T> ItreeIterator<T>
+where
+  T: InodeValue,
+{
   pub fn new(start: Option<InodeArc<T>>, order: ItreeIterateOrder) -> Self {
     let mut queue = VecDeque::new();
     match start {
@@ -68,7 +77,10 @@ pub enum ItreeIterateOrder {
   Descent,
 }
 
-impl<T> Itree<T> {
+impl<T> Itree<T>
+where
+  T: InodeValue,
+{
   pub fn new() -> Self {
     Itree { root: None }
   }
@@ -124,14 +136,14 @@ impl<T> Itree<T> {
   /// # Panics
   ///
   /// Panics if the `node` isn't the root node.
-  fn assert_is_root(&self, node: InodeArc<T>) {}
+  fn assert_is_root(&self, _node: InodeArc<T>) {}
 
   /// Assert the `node` is not the root node, but exists in the tree.
   ///
   /// # Panics
   ///
   /// Panics if the `node` is the root node.
-  fn assert_not_root(&self, node: InodeArc<T>) {}
+  fn assert_not_root(&self, _node: InodeArc<T>) {}
 
   /// Get the iterator.
   ///
@@ -143,7 +155,7 @@ impl<T> Itree<T> {
 
   /// Get the iterator with specified order.
   pub fn ordered_iter(&self, order: ItreeIterateOrder) -> ItreeIterator<T> {
-    ItreeIterator::new(self.root, order)
+    ItreeIterator::new(self.root.clone(), order)
   }
 
   /// Insert a child node into the parent node.
