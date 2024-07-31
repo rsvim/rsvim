@@ -15,10 +15,10 @@ pub struct Inode<T> {
   /// The children collection is ascent sorted by the z-index, i.e. from lower to higher.
   children: Option<Vec<InodePtr<T>>>,
 
-  /// Widget value
+  /// Widget
   value: T,
 
-  /// Widget attributes
+  /// Attributes
   id: usize,
   depth: usize,
   shape: IRect,
