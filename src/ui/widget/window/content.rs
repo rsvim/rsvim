@@ -43,5 +43,5 @@ impl WindowContent {
 }
 
 impl Widget for WindowContent {
-  fn draw(&mut self, _actual_shape: &U16Rect, _terminal: TerminalWk) {}
+  fn draw(&mut self, _actual_shape: U16Rect, _terminal: TerminalWk) {}
 }

@@ -182,7 +182,7 @@ impl Tree {
     for node in self.base.iter() {
       let mut node2 = node.write().unwrap();
       let actual_shape = node2.actual_shape();
-      node2.value_mut().draw(&actual_shape, self.terminal.clone());
+      node2.value_mut().draw(actual_shape, self.terminal.clone());
     }
   }
 
