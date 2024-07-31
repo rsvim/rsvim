@@ -12,14 +12,19 @@ Please setup your development environment with:
 
 ## Developing
 
-To develop code, please setup with:
+To develop the code, please setup with:
 
 - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter, format with `cargo fmt` or other ways you like.
 - [rust-clippy](https://github.com/rust-lang/rust-clippy): linter, lint with `cargo clippy` or other ways you like.
 
   > Recommend using [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
 
-To debug code, please run with `RUST_LOG=debug ./target/debug/rsvim`. It enables all the logs over debugging level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
+To debug the code, please run with:
+
+1. Build the executable binary `rsvim` with `cargo build`.
+2. Run with `RUST_LOG=debug ./target/debug/rsvim`.
+
+   > It enables all the logs over debugging level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
 
 ## Documentation
 
