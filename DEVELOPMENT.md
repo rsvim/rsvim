@@ -10,12 +10,6 @@ Please setup your development environment with:
   - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
 - Latest stable [Rust](https://www.rust-lang.org/) compiler, or at least 1.74.0.
 
-## Developing
-
-To develop, please setup with:
-
-- [bacon](https://github.com/Canop/bacon): Background running lint, start service with `bacon clippy` instead of manually running `cargo clippy`.
-
 ## Documentation
 
 To write rust docs, please setup with:
