@@ -106,6 +106,7 @@ impl Terminal {
 
   pub fn flush(&mut self) {
     self.prev_frame = self.frame.clone();
+    self.frame.reset_dirty();
   }
 }
 

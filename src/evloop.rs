@@ -1,6 +1,7 @@
 //! Main event loop for TUI application.
 
 #![allow(unused_imports, dead_code)]
+
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::geo_size_as;
 use crate::ui::frame::CursorStyle;
@@ -11,7 +12,7 @@ use crate::ui::widget::{
 };
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
-  EventStream, KeyCode,
+  EventStream, KeyCode, KeyEventKind, KeyEventState, KeyModifiers,
 };
 use crossterm::{cursor as termcursor, queue, terminal};
 use futures::StreamExt;
@@ -20,7 +21,7 @@ use heed::types::U16;
 use std::borrow::Borrow;
 use std::io::{Result as IoResult, Write};
 use std::sync::{Arc, RwLock};
-use tracing::debug;
+use tracing::{debug, error};
 
 pub struct EventLoop {
   screen: TerminalPtr,
@@ -112,6 +113,8 @@ impl EventLoop {
     }
 
     queue!(out, cursor.style)?;
+    queue!(out, termcursor::MoveTo(cursor.pos.x(), cursor.pos.y()))?;
+
     out.flush()?;
 
     Ok(())
@@ -128,7 +131,7 @@ impl EventLoop {
             }
           },
           Some(Err(e)) => {
-            println!("Error: {:?}\r", e);
+            error!("Error: {:?}\r", e);
             break;
           },
           None => break,
@@ -139,12 +142,24 @@ impl EventLoop {
   }
 
   pub async fn accept(&mut self, event: Event) -> bool {
-    println!("Event::{:?}\r", event);
     debug!("Event::{:?}", event);
 
-    if event == Event::Key(KeyCode::Char('c').into()) {
-      println!("Curosr position: {:?}\r", termcursor::position());
+    match event {
+      Event::FocusGained => {}
+      Event::FocusLost => {}
+      Event::Key(key_event) => match key_event.kind {
+        KeyEventKind::Press => {}
+        KeyEventKind::Repeat => {}
+        KeyEventKind::Release => {}
+      },
+      Event::Mouse(_mouse_event) => {}
+      Event::Paste(_paste_string) => {}
+      Event::Resize(_columns, _rows) => {}
     }
+
+    // if event == Event::Key(KeyCode::Char('c').into()) {
+    //   println!("Curosr position: {:?}\r", termcursor::position());
+    // }
 
     // quit loop
     if event == Event::Key(KeyCode::Esc.into()) {

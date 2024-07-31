@@ -110,6 +110,11 @@ impl Frame {
   pub fn dirty_cursor(&self) -> bool {
     self.dirty_cursor
   }
+
+  pub fn reset_dirty(&mut self) {
+    self.dirty_cells = vec![];
+    self.dirty_cursor = false;
+  }
 }
 
 #[cfg(test)]
