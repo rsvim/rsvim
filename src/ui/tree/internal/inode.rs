@@ -9,39 +9,27 @@ use crate::uuid;
 
 #[derive(Debug, Clone)]
 pub struct Inode<T> {
+  /// Parent.
   parent: Option<InodeWk<T>>,
+
   /// The children collection is ascent sorted by the z-index, i.e. from lower to higher.
   children: Option<Vec<InodePtr<T>>>,
-  id: usize,
+
+  /// Widget value
   value: T,
-  attr: InodeAttr,
+
+  /// Widget attributes
+  id: usize,
+  depth: usize,
+  shape: IRect,
+  actual_shape: U16Rect,
+  zindex: usize,
+  enabled: bool,
+  visible: bool,
 }
 
 pub type InodePtr<T> = Arc<RwLock<Inode<T>>>;
 pub type InodeWk<T> = Weak<RwLock<Inode<T>>>;
-
-#[derive(Debug, Clone, Copy)]
-pub struct InodeAttr {
-  pub depth: usize,
-  pub shape: IRect,
-  pub actual_shape: U16Rect,
-  pub zindex: usize,
-  pub enabled: bool,
-  pub visible: bool,
-}
-
-impl InodeAttr {
-  pub fn new(depth: usize, shape: IRect, actual_shape: U16Rect) -> Self {
-    InodeAttr {
-      depth,
-      shape,
-      actual_shape,
-      zindex: 0,
-      enabled: true,
-      visible: true,
-    }
-  }
-}
 
 impl<T> Inode<T> {
   pub fn new(parent: Option<InodeWk<T>>, value: T, attr: InodeAttr) -> Self {
