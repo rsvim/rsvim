@@ -149,19 +149,24 @@ where
   fn level_order_traverse(
     start_node: InodeArc<T>,
     start_parent_node: InodeArc<T>,
-    mut f: &dyn FnMut(InodeArc<T>, InodeArc<T>),
+    f: &mut dyn FnMut(InodeArc<T>, InodeArc<T>),
   ) {
-    f(start_node, start_parent_node);
+    f(start_node.clone(), start_parent_node);
 
-    let start = start_node.read().unwrap();
-    let mut que: VecDeque<(InodeArc<T>, InodeArc<T>)> =
-      VecDeque::from(start.children.iter().map(|c| (start, c.clone())).collect()
-        as Vec<(InodeArc<T>, InodeArc<T>)>);
+    let mut que: VecDeque<(InodeArc<T>, InodeArc<T>)> = VecDeque::from(
+      start_node
+        .read()
+        .unwrap()
+        .children
+        .iter()
+        .map(|c| (start_node.clone(), c.clone()))
+        .collect::<Vec<(InodeArc<T>, InodeArc<T>)>>(),
+    );
 
     while let Some(parent_child_pair) = que.pop_front() {
       let parent = parent_child_pair.0;
       let child = parent_child_pair.1;
-      f(child, parent);
+      f(child.clone(), parent.clone());
       for c in child.read().unwrap().children.iter() {
         que.push_back((child.clone(), c.clone()));
       }
@@ -227,35 +232,31 @@ where
   /// Pop a child node from the end of the children vector.
   /// This operation also removes the connection between this (`self`) node and the removed child.
   pub fn pop(&mut self) -> Option<InodeArc<T>> {
-    if let Some(&mut children) = self.children {
-      if let Some(child) = children.pop() {
-        child.write().unwrap().parent = None;
-        return Some(child);
+    match self.children.pop() {
+      Some(removed_child) => {
+        removed_child.write().unwrap().parent = None;
+        Some(removed_child)
       }
+      None => None,
     }
-    None
   }
 
   /// Remove a child node by index from the children vector.
   /// This operation also removes the connection between this (`self`) node and the removed child.
   pub fn remove(&mut self, index: usize) -> Option<InodeArc<T>> {
-    if let Some(&mut children) = self.children {
-      if children.len() > index {
-        let removed_child = children.remove(index);
-        Some(removed_child)
-      } else {
-        None
-      }
+    if self.children.len() > index {
+      let removed_child = self.children.remove(index);
+      removed_child.write().unwrap().parent = None;
+      Some(removed_child)
+    } else {
+      None
     }
-    None
   }
 
   /// Get descendant child by its ID, i.e. search in all children nodes in the sub-tree.
   pub fn get_descendant(&self, id: usize) -> Option<InodeArc<T>> {
-    let mut q: VecDeque<InodeArc<T>> = match self.children {
-      Some(children) => children.iter().collect(),
-      None => vec![].iter().collect(),
-    };
+    let mut q: VecDeque<InodeArc<T>> = VecDeque::from(self.children);
+
     while let Some(e) = q.pop_front() {
       if e.read().unwrap().id() == id {
         return Some(e);
