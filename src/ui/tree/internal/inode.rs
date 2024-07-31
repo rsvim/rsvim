@@ -1,19 +1,25 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
 use std::collections::VecDeque;
-use std::ops::FnMut;
+use std::fmt::Debug;
+use std::ops::{Fn, FnMut, FnOnce};
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::cart::{shapes, IRect, U16Rect};
 use crate::uuid;
 
+pub trait InodeValue: Sized + Clone + Debug {}
+
 #[derive(Debug, Clone)]
-pub struct Inode<T> {
+pub struct Inode<T>
+where
+  T: InodeValue,
+{
   /// Parent.
   parent: Option<InodeWk<T>>,
 
   /// The children collection is ascent sorted by the z-index, i.e. from lower to higher.
-  children: Option<Vec<InodeArc<T>>>,
+  children: Vec<InodeArc<T>>,
 
   /// Attributes
   value: T,
@@ -29,11 +35,14 @@ pub struct Inode<T> {
 pub type InodeArc<T> = Arc<RwLock<Inode<T>>>;
 pub type InodeWk<T> = Weak<RwLock<Inode<T>>>;
 
-impl<T> Inode<T> {
+impl<T> Inode<T>
+where
+  T: InodeValue,
+{
   pub fn new(parent: Option<InodeWk<T>>, value: T, shape: IRect) -> Self {
     Inode {
       parent,
-      children: None,
+      children: vec![],
       value,
       id: uuid::next(),
       depth: 0,
@@ -88,11 +97,11 @@ impl<T> Inode<T> {
   // Parent {
 
   pub fn parent(&self) -> Option<InodeWk<T>> {
-    self.parent
+    self.parent.clone()
   }
 
   pub fn set_parent(&mut self, parent: Option<InodeWk<T>>) -> Option<InodeWk<T>> {
-    let old_parent = self.parent;
+    let old_parent = self.parent.clone();
     self.parent = parent;
     old_parent
   }
@@ -101,8 +110,8 @@ impl<T> Inode<T> {
 
   // Children {
 
-  pub fn children(&self) -> Option<&Vec<InodeArc<T>>> {
-    self.children
+  pub fn children(&self) -> &Vec<InodeArc<T>> {
+    &self.children
   }
 
   /// Calculate and update the `start_node` attributes, based on its parent's attributes.
@@ -115,17 +124,24 @@ impl<T> Inode<T> {
   /// 1. [`depth`](InodeAttr::depth)
   /// 2. [`actual_shape`](InodeAttr::actual_shape)
   fn update_attribute(start_node: InodeArc<T>, start_parent_node: InodeArc<T>) {
-    Inode::level_order_traverse(start_node, start_parent_node, |start, parent| {
-      let parent2 = parent.read().unwrap();
-      let mut start2 = start.write().unwrap();
-      start2.attr.depth = parent2.attr.depth + 1;
-    });
-    Inode::level_order_traverse(start_node, start_parent_node, |start, parent| {
-      let parent2 = parent.read().unwrap();
-      let mut start2 = start.write().unwrap();
-      start2.attr.actual_shape =
-        shapes::convert_to_actual_shape(start2.attr.shape, parent2.attr.actual_shape);
-    });
+    Inode::level_order_traverse(
+      start_node.clone(),
+      start_parent_node.clone(),
+      &Inode::update_depth,
+    );
+    Inode::level_order_traverse(start_node, start_parent_node, &Inode::update_actual_shape);
+  }
+
+  fn update_depth(child: InodeArc<T>, parent: InodeArc<T>) {
+    let parent = parent.read().unwrap();
+    let mut child = child.write().unwrap();
+    child.depth = parent.depth + 1;
+  }
+
+  fn update_actual_shape(child: InodeArc<T>, parent: InodeArc<T>) {
+    let parent = parent.read().unwrap();
+    let mut child = child.write().unwrap();
+    child.actual_shape = shapes::convert_to_actual_shape(child.shape, parent.actual_shape);
   }
 
   /// Level-order traverse the sub-tree, start from `start_node`, and apply the `f` function on
@@ -133,28 +149,21 @@ impl<T> Inode<T> {
   fn level_order_traverse(
     start_node: InodeArc<T>,
     start_parent_node: InodeArc<T>,
-    mut f: dyn FnMut(InodeArc<T>, InodeArc<T>),
+    mut f: &dyn FnMut(InodeArc<T>, InodeArc<T>),
   ) {
     f(start_node, start_parent_node);
 
     let start = start_node.read().unwrap();
-    let mut que: VecDeque<(InodeArc<T>, InodeArc<T>)> = match start.children {
-      Some(children) => children.iter().map(|c| (start, c)).collect(),
-      None => vec![].iter().collect(),
-    };
+    let mut que: VecDeque<(InodeArc<T>, InodeArc<T>)> =
+      VecDeque::from(start.children.iter().map(|c| (start, c.clone())).collect()
+        as Vec<(InodeArc<T>, InodeArc<T>)>);
 
     while let Some(parent_child_pair) = que.pop_front() {
       let parent = parent_child_pair.0;
       let child = parent_child_pair.1;
       f(child, parent);
-      let child = child.read().unwrap();
-      match child.children {
-        Some(children) => {
-          for c in children.iter() {
-            que.push_back((child, c));
-          }
-        }
-        None => { /* Do nothing */ }
+      for c in child.read().unwrap().children.iter() {
+        que.push_back((child.clone(), c.clone()));
       }
     }
   }
@@ -168,25 +177,19 @@ impl<T> Inode<T> {
   /// Because this (`self`) node doesn't have the related `std::sync::Arc` pointer, so this method
   /// cannot do this for you.
   pub fn push(parent: InodeArc<T>, child: InodeArc<T>) {
-    let mut start_node = parent.write().unwrap();
-    if start_node.children.is_none() {
-      start_node.children = Some(Vec::new());
-    }
-
     // Update attributes start from `child`, and all its descendants.
-    Inode::update_attribute(child, parent);
+    Inode::update_attribute(child.clone(), parent.clone());
 
     // Insert `child` by the order of z-index.
-    let child_zindex = child.read().unwrap().attr.zindex;
+    let child_zindex = child.read().unwrap().zindex;
     let mut higher_zindex_pos: Vec<usize> = parent
       .read()
       .unwrap()
       .children
-      .unwrap()
       .iter()
       .enumerate()
-      .filter(|(index, c)| c.read().unwrap().attr.zindex >= child_zindex)
-      .map(|(index, c)| index)
+      .filter(|(_index, c)| c.read().unwrap().zindex >= child_zindex)
+      .map(|(index, _c)| index)
       .rev()
       .collect();
     match higher_zindex_pos.pop() {
@@ -196,12 +199,11 @@ impl<T> Inode<T> {
           .write()
           .unwrap()
           .children
-          .unwrap()
-          .insert(insert_pos, child)
+          .insert(insert_pos, child.clone())
       }
       None => {
         // No existed children has higher z-index, insert at the end.
-        parent.write().unwrap().children.unwrap().push(child)
+        parent.write().unwrap().children.push(child.clone())
       }
     }
   }
@@ -268,10 +270,10 @@ impl<T> Inode<T> {
       if e.read().unwrap().id() == id {
         return Some(e);
       }
-      match e.children {
+      match e.read().unwrap().children {
         Some(children) => {
           for child in children.iter() {
-            q.push_back(child);
+            q.push_back(child.clone());
           }
         }
         None => { /* Do nothing */ }

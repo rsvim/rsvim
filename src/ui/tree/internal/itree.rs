@@ -3,11 +3,11 @@
 use std::sync::Arc;
 use std::{collections::VecDeque, iter::Iterator};
 
-use crate::ui::tree::internal::inode::{Inode, InodePtr};
+use crate::ui::tree::internal::inode::{Inode, InodeArc};
 
 #[derive(Debug, Clone)]
 pub struct Itree<T> {
-  root: Option<InodePtr<T>>,
+  root: Option<InodeArc<T>>,
 }
 
 #[derive(Debug, Clone)]
@@ -18,11 +18,11 @@ pub struct Itree<T> {
 /// cover other nodes are visited later.
 pub struct ItreeIterator<T> {
   order: ItreeIterateOrder,
-  queue: VecDeque<InodePtr<T>>,
+  queue: VecDeque<InodeArc<T>>,
 }
 
 impl<T> Iterator for ItreeIterator<T> {
-  type Item = InodePtr<T>;
+  type Item = InodeArc<T>;
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(node) = self.queue.pop_front() {
@@ -48,7 +48,7 @@ impl<T> Iterator for ItreeIterator<T> {
 }
 
 impl<T> ItreeIterator<T> {
-  pub fn new(start: Option<InodePtr<T>>, order: ItreeIterateOrder) -> Self {
+  pub fn new(start: Option<InodeArc<T>>, order: ItreeIterateOrder) -> Self {
     let mut queue = VecDeque::new();
     match start {
       Some(start_node) => queue.push_back(start_node),
@@ -77,14 +77,14 @@ impl<T> Itree<T> {
     self.root.is_none()
   }
 
-  pub fn root(&self) -> Option<InodePtr<T>> {
+  pub fn root(&self) -> Option<InodeArc<T>> {
     match &self.root {
       Some(root) => Some(root.clone()),
       None => None,
     }
   }
 
-  pub fn set_root(&mut self, root: Option<InodePtr<T>>) -> Option<InodePtr<T>> {
+  pub fn set_root(&mut self, root: Option<InodeArc<T>>) -> Option<InodeArc<T>> {
     let old = match &self.root {
       Some(root) => Some(root.clone()),
       None => None,
@@ -98,7 +98,7 @@ impl<T> Itree<T> {
   /// # Panics
   ///
   /// Panics when the `node` doesn't exist.
-  fn assert_exists(&self, node: InodePtr<T>) {
+  fn assert_exists(&self, node: InodeArc<T>) {
     assert!(
       self.root.is_some(),
       "Doesn't have a root node when assert the node exists"
@@ -124,14 +124,14 @@ impl<T> Itree<T> {
   /// # Panics
   ///
   /// Panics if the `node` isn't the root node.
-  fn assert_is_root(&self, node: InodePtr<T>) {}
+  fn assert_is_root(&self, node: InodeArc<T>) {}
 
   /// Assert the `node` is not the root node, but exists in the tree.
   ///
   /// # Panics
   ///
   /// Panics if the `node` is the root node.
-  fn assert_not_root(&self, node: InodePtr<T>) {}
+  fn assert_not_root(&self, node: InodeArc<T>) {}
 
   /// Get the iterator.
   ///
@@ -152,7 +152,7 @@ impl<T> Itree<T> {
   /// 1. When no parent node is provided, the node is inserted as the root node of the tree.
   /// 2. When a parent node is provided, the node is inserted as the child node of the parent node,
   ///    you need to get the parent node before insert.
-  pub fn insert(&mut self, parent: Option<InodePtr<T>>, child: InodePtr<T>) -> Option<InodePtr<T>> {
+  pub fn insert(&mut self, parent: Option<InodeArc<T>>, child: InodeArc<T>) -> Option<InodeArc<T>> {
     match parent {
       Some(parent) => {
         self.assert_exists(parent.clone());
@@ -175,7 +175,7 @@ impl<T> Itree<T> {
   }
 
   /// Get a node by its ID.
-  pub fn get(&self, id: usize) -> Option<InodePtr<T>> {
+  pub fn get(&self, id: usize) -> Option<InodeArc<T>> {
     match self.root.clone() {
       Some(root) => root.read().unwrap().get_descendant(id),
       None => None,
@@ -183,7 +183,7 @@ impl<T> Itree<T> {
   }
 
   /// Remove a node from the parent node.
-  pub fn remove(parent: InodePtr<T>, index: usize) -> Option<InodePtr<T>> {
+  pub fn remove(parent: InodeArc<T>, index: usize) -> Option<InodeArc<T>> {
     parent.write().unwrap().remove(index)
   }
 }

@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::ui::term::TerminalWk;
-use crate::ui::tree::internal::inode::{Inode, InodePtr};
+use crate::ui::tree::internal::inode::{Inode, InodeArc};
 use crate::ui::tree::internal::itree::{Itree, ItreeIterateOrder, ItreeIterator};
 use crate::ui::widget::WidgetImpl;
 
@@ -115,7 +115,7 @@ pub struct Tree {
 pub type TreePtr = Arc<RwLock<Tree>>;
 pub type TreeWk = Weak<RwLock<Tree>>;
 pub type TreeNode = Inode<WidgetImpl>;
-pub type TreeNodePtr = InodePtr<WidgetImpl>;
+pub type TreeNodePtr = InodeArc<WidgetImpl>;
 pub type TreeIterator = ItreeIterator<WidgetImpl>;
 pub type TreeIterateOrder = ItreeIterateOrder;
 
