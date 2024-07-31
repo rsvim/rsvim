@@ -14,7 +14,6 @@ pub struct Cursor {
   pub blinking: bool,
   pub hidden: bool,
   pub style: CursorStyle,
-  pub dirty: bool,
 }
 
 pub struct CursorStyleFormatter {
@@ -40,7 +39,6 @@ impl Cursor {
       blinking,
       hidden,
       style,
-      dirty: true,
     }
   }
 }
@@ -52,7 +50,6 @@ impl Default for Cursor {
       blinking: false,
       hidden: false,
       style: CursorStyle::DefaultUserShape,
-      dirty: true,
     }
   }
 }

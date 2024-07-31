@@ -26,7 +26,8 @@ pub struct Frame {
 
   /// Indicate which part of the frame is dirty, i.e. been updated by widget tree changes.
   /// When rendering contents to the terminal device, only the dirty ranges will be printed.
-  pub dirty_ranges: Vec<FrameRange>,
+  pub dirty_cells: Vec<FrameRange>,
+  pub dirty_cursor: bool,
 }
 
 impl Frame {
@@ -36,7 +37,8 @@ impl Frame {
       size,
       cells: vec![Cell::default(); size.height as usize * size.width as usize],
       cursor,
-      dirty_ranges: vec![],
+      dirty_cells: vec![],
+      dirty_cursor: true,
     }
   }
 
@@ -54,13 +56,15 @@ impl Frame {
   }
 
   /// Set a cell on specific position.
-  pub fn set_cell(&mut self, pos: UPos, cell: Cell) {
+  pub fn set_cell(&mut self, pos: UPos, cell: Cell) -> Cell {
     let index = pos.x() * pos.y();
+    let old = self.cells[index].clone();
     self.cells[index] = cell;
-    self.dirty_ranges.push(FrameRange {
+    self.dirty_cells.push(FrameRange {
       start: index,
       end: index + 1,
     });
+    old
   }
 
   /// Get n continuously cells, start from position.
@@ -79,7 +83,7 @@ impl Frame {
   ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter> {
     let start_at = pos.x() * pos.y();
     let end_at = start_at + cells.len();
-    self.dirty_ranges.push(FrameRange {
+    self.dirty_cells.push(FrameRange {
       start: start_at,
       end: end_at,
     });
@@ -92,7 +96,7 @@ impl Frame {
 
   pub fn set_cursor(&mut self, cursor: Cursor) {
     self.cursor = cursor;
-    self.cursor.dirty = true;
+    self.dirty_cursor = true;
   }
 }
 
