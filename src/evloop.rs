@@ -5,12 +5,10 @@ use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::geo_size_as;
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::{make_terminal_ptr, Terminal, TerminalPtr};
-use crate::ui::tree::node::{make_node_ptr, Node, NodeId};
-use crate::ui::tree::{make_tree_ptr, Tree, TreePtr};
-use crate::ui::widget::Cursor;
-use crate::ui::widget::RootContainer;
-use crate::ui::widget::Widget;
-use crate::ui::widget::WindowContent;
+use crate::ui::tree::{Tree, TreeArc, TreeNode, TreeNodeArc};
+use crate::ui::widget::{
+  Cursor, RootContainer, Widget, WidgetImpl, WindowContainer, WindowContent,
+};
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode,
@@ -26,7 +24,7 @@ use tracing::debug;
 
 pub struct EventLoop {
   screen: TerminalPtr,
-  tree: TreePtr,
+  tree: TreeArc,
 }
 
 impl EventLoop {
@@ -37,47 +35,64 @@ impl EventLoop {
     let screen = make_terminal_ptr(screen);
     let mut tree = Tree::new(Arc::downgrade(&screen));
 
-    let root_widget = RootContainer::default();
-    let root_widget_id = root_widget.id();
-    let root_widget_node = make_node_ptr(Node::RootLayout(root_widget));
-    tree.insert_node(
-      root_widget_id,
-      root_widget_node.clone(),
-      None,
-      IRect::new(
-        (0, 0),
-        (screen_size.width() as isize, screen_size.height() as isize),
-      ),
-    );
-
-    let window = WindowContent::default();
-    let window_id = window.id();
-    let window_node = make_node_ptr(Node::Window(window));
-    let window_shape = IRect::new(
+    let root_container = RootContainer::default();
+    let root_container_shape = IRect::new(
       (0, 0),
       (screen_size.width() as isize, screen_size.height() as isize),
     );
-    tree.insert_node(
-      window_id,
-      window_node.clone(),
-      Some(root_widget_id),
-      window_shape,
+    let root_container_node = TreeNode::new(
+      None,
+      WidgetImpl::RootContainer(root_container),
+      root_container_shape,
+    );
+    let root_container_node = TreeNode::arc(root_container_node);
+    tree.insert(None, root_container_node.clone());
+
+    let window_container = WindowContainer::default();
+    let window_container_shape = IRect::new(
+      (0, 0),
+      (screen_size.width() as isize, screen_size.height() as isize),
+    );
+    let window_container_node = TreeNode::new(
+      Some(Arc::downgrade(&root_container_node)),
+      WidgetImpl::WindowContainer(window_container),
+      window_container_shape,
+    );
+    let window_container_node = TreeNode::arc(window_container_node);
+    tree.insert(
+      Some(root_container_node.clone()),
+      window_container_node.clone(),
+    );
+
+    let window_content = WindowContent::default();
+    let window_content_shape = IRect::new(
+      (0, 0),
+      (screen_size.width() as isize, screen_size.height() as isize),
+    );
+    let window_content_node = TreeNode::new(
+      Some(Arc::downgrade(&window_container_node)),
+      WidgetImpl::WindowContent(window_content),
+      window_content_shape,
+    );
+    let window_content_node = TreeNode::arc(window_content_node);
+    tree.insert(
+      Some(window_container_node.clone()),
+      window_content_node.clone(),
     );
 
     let cursor = Cursor::default();
-    let cursor_id = cursor.id();
-    let cursor_node = make_node_ptr(Node::Cursor(cursor));
     let cursor_shape = IRect::new((0, 0), (1, 1));
-    tree.insert_node(
-      cursor_id,
-      cursor_node.clone(),
-      Some(window_id),
+    let cursor_node = TreeNode::new(
+      Some(Arc::downgrade(&window_content_node)),
+      WidgetImpl::Cursor(cursor),
       cursor_shape,
     );
+    let cursor_node = TreeNode::arc(cursor_node);
+    tree.insert(Some(window_container_node.clone()), cursor_node.clone());
 
     Ok(EventLoop {
       screen,
-      tree: make_tree_ptr(tree),
+      tree: Tree::arc(tree),
     })
   }
 

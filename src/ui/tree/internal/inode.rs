@@ -2,7 +2,7 @@
 
 use std::collections::VecDeque;
 use std::fmt::Debug;
-use std::ops::{Fn, FnMut, FnOnce};
+use std::ops::FnMut;
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::cart::{shapes, IRect, U16Rect};

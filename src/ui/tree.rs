@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::sync::{Arc, RwLock, Weak};
 
 use crate::ui::term::TerminalWk;
-use crate::ui::tree::internal::inode::{Inode, InodeArc};
+use crate::ui::tree::internal::inode::{Inode, InodeArc, InodeWk};
 use crate::ui::tree::internal::itree::{Itree, ItreeIterateOrder, ItreeIterator};
 use crate::ui::widget::WidgetImpl;
 
@@ -112,10 +112,11 @@ pub struct Tree {
   window_ids: BTreeSet<usize>,
 }
 
-pub type TreePtr = Arc<RwLock<Tree>>;
+pub type TreeArc = Arc<RwLock<Tree>>;
 pub type TreeWk = Weak<RwLock<Tree>>;
 pub type TreeNode = Inode<WidgetImpl>;
-pub type TreeNodePtr = InodeArc<WidgetImpl>;
+pub type TreeNodeArc = InodeArc<WidgetImpl>;
+pub type TreeNodeWk = InodeWk<WidgetImpl>;
 pub type TreeIterator = ItreeIterator<WidgetImpl>;
 pub type TreeIterateOrder = ItreeIterateOrder;
 
@@ -131,7 +132,7 @@ impl Tree {
     }
   }
 
-  pub fn ptr(tree: Tree) -> TreePtr {
+  pub fn arc(tree: Tree) -> TreeArc {
     Arc::new(RwLock::new(tree))
   }
 
@@ -142,11 +143,11 @@ impl Tree {
 
   // Node {
 
-  pub fn root(&self) -> Option<TreeNodePtr> {
+  pub fn root(&self) -> Option<TreeNodeArc> {
     self.base.root()
   }
 
-  pub fn set_root(&mut self, root: Option<TreeNodePtr>) -> Option<TreeNodePtr> {
+  pub fn set_root(&mut self, root: Option<TreeNodeArc>) -> Option<TreeNodeArc> {
     self.base.set_root(root)
   }
 
@@ -158,15 +159,15 @@ impl Tree {
     self.base.ordered_iter(order)
   }
 
-  pub fn insert(&mut self, parent: Option<TreeNodePtr>, child: TreeNodePtr) -> Option<TreeNodePtr> {
+  pub fn insert(&mut self, parent: Option<TreeNodeArc>, child: TreeNodeArc) -> Option<TreeNodeArc> {
     self.base.insert(parent, child)
   }
 
-  pub fn get(&self, id: usize) -> Option<TreeNodePtr> {
+  pub fn get(&self, id: usize) -> Option<TreeNodeArc> {
     self.base.get(id)
   }
 
-  pub fn remove(parent: TreeNodePtr, index: usize) -> Option<TreeNodePtr> {
+  pub fn remove(parent: TreeNodeArc, index: usize) -> Option<TreeNodeArc> {
     Itree::remove(parent, index)
   }
 
