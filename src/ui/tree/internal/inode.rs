@@ -13,12 +13,10 @@ pub struct Inode<T> {
   parent: Option<InodeWk<T>>,
 
   /// The children collection is ascent sorted by the z-index, i.e. from lower to higher.
-  children: Option<Vec<InodePtr<T>>>,
-
-  /// Widget
-  value: T,
+  children: Option<Vec<InodeArc<T>>>,
 
   /// Attributes
+  value: T,
   id: usize,
   depth: usize,
   shape: IRect,
@@ -28,35 +26,64 @@ pub struct Inode<T> {
   visible: bool,
 }
 
-pub type InodePtr<T> = Arc<RwLock<Inode<T>>>;
+pub type InodeArc<T> = Arc<RwLock<Inode<T>>>;
 pub type InodeWk<T> = Weak<RwLock<Inode<T>>>;
 
 impl<T> Inode<T> {
-  pub fn new(parent: Option<InodeWk<T>>, value: T, attr: InodeAttr) -> Self {
+  pub fn new(parent: Option<InodeWk<T>>, value: T, shape: IRect) -> Self {
     Inode {
       parent,
       children: None,
-      id: uuid::next(),
       value,
-      attr,
+      id: uuid::next(),
+      depth: 0,
+      shape,
+      actual_shape: U16Rect::new((0, 0), (0, 0)),
+      zindex: 0,
+      enabled: true,
+      visible: true,
     }
   }
 
-  pub fn ptr(node: Inode<T>) -> InodePtr<T> {
+  pub fn arc(node: Inode<T>) -> InodeArc<T> {
     Arc::new(RwLock::new(node))
   }
+
+  // Attribute {
 
   pub fn id(&self) -> usize {
     self.id
   }
 
-  pub fn attribute(&self) -> InodeAttr {
-    self.attr
+  pub fn depth(&self) -> usize {
+    self.depth
+  }
+
+  pub fn shape(&self) -> IRect {
+    self.shape
+  }
+
+  pub fn actual_shape(&self) -> U16Rect {
+    self.actual_shape
+  }
+
+  pub fn zindex(&self) -> usize {
+    self.zindex
+  }
+
+  pub fn enabled(&self) -> bool {
+    self.enabled
+  }
+
+  pub fn visible(&self) -> bool {
+    self.visible
   }
 
   pub fn value(&self) -> &T {
     &self.value
   }
+
+  // Attribute }
 
   // Parent {
 
@@ -74,7 +101,7 @@ impl<T> Inode<T> {
 
   // Children {
 
-  pub fn children(&self) -> Option<&Vec<InodePtr<T>>> {
+  pub fn children(&self) -> Option<&Vec<InodeArc<T>>> {
     self.children
   }
 
@@ -87,7 +114,7 @@ impl<T> Inode<T> {
   ///
   /// 1. [`depth`](InodeAttr::depth)
   /// 2. [`actual_shape`](InodeAttr::actual_shape)
-  fn update_attribute(start_node: InodePtr<T>, start_parent_node: InodePtr<T>) {
+  fn update_attribute(start_node: InodeArc<T>, start_parent_node: InodeArc<T>) {
     Inode::level_order_traverse(start_node, start_parent_node, |start, parent| {
       let parent2 = parent.read().unwrap();
       let mut start2 = start.write().unwrap();
@@ -104,14 +131,14 @@ impl<T> Inode<T> {
   /// Level-order traverse the sub-tree, start from `start_node`, and apply the `f` function on
   /// each node with its parent.
   fn level_order_traverse(
-    start_node: InodePtr<T>,
-    start_parent_node: InodePtr<T>,
-    mut f: dyn FnMut(InodePtr<T>, InodePtr<T>),
+    start_node: InodeArc<T>,
+    start_parent_node: InodeArc<T>,
+    mut f: dyn FnMut(InodeArc<T>, InodeArc<T>),
   ) {
     f(start_node, start_parent_node);
 
     let start = start_node.read().unwrap();
-    let mut que: VecDeque<(InodePtr<T>, InodePtr<T>)> = match start.children {
+    let mut que: VecDeque<(InodeArc<T>, InodeArc<T>)> = match start.children {
       Some(children) => children.iter().map(|c| (start, c)).collect(),
       None => vec![].iter().collect(),
     };
@@ -140,7 +167,7 @@ impl<T> Inode<T> {
   /// (`self`) node, outside of this method.
   /// Because this (`self`) node doesn't have the related `std::sync::Arc` pointer, so this method
   /// cannot do this for you.
-  pub fn push(parent: InodePtr<T>, child: InodePtr<T>) {
+  pub fn push(parent: InodeArc<T>, child: InodeArc<T>) {
     let mut start_node = parent.write().unwrap();
     if start_node.children.is_none() {
       start_node.children = Some(Vec::new());
@@ -179,7 +206,7 @@ impl<T> Inode<T> {
     }
   }
 
-  pub fn first(&self) -> Option<InodePtr<T>> {
+  pub fn first(&self) -> Option<InodeArc<T>> {
     match self.children {
       Some(children) => {
         if children.is_empty() {
@@ -192,7 +219,7 @@ impl<T> Inode<T> {
     }
   }
 
-  pub fn last(&self) -> Option<InodePtr<T>> {
+  pub fn last(&self) -> Option<InodeArc<T>> {
     match self.children {
       Some(children) => {
         if children.is_empty() {
@@ -207,7 +234,7 @@ impl<T> Inode<T> {
 
   /// Pop a child node from the end of the children vector.
   /// This operation also removes the connection between this (`self`) node and the removed child.
-  pub fn pop(&mut self) -> Option<InodePtr<T>> {
+  pub fn pop(&mut self) -> Option<InodeArc<T>> {
     if let Some(&mut children) = self.children {
       if let Some(child) = children.pop() {
         child.write().unwrap().parent = None;
@@ -219,7 +246,7 @@ impl<T> Inode<T> {
 
   /// Remove a child node by index from the children vector.
   /// This operation also removes the connection between this (`self`) node and the removed child.
-  pub fn remove(&mut self, index: usize) -> Option<InodePtr<T>> {
+  pub fn remove(&mut self, index: usize) -> Option<InodeArc<T>> {
     if let Some(&mut children) = self.children {
       if children.len() > index {
         let removed_child = children.remove(index);
@@ -232,8 +259,8 @@ impl<T> Inode<T> {
   }
 
   /// Get descendant child by its ID, i.e. search in all children nodes in the sub-tree.
-  pub fn get_descendant(&self, id: usize) -> Option<InodePtr<T>> {
-    let mut q: VecDeque<InodePtr<T>> = match self.children {
+  pub fn get_descendant(&self, id: usize) -> Option<InodeArc<T>> {
+    let mut q: VecDeque<InodeArc<T>> = match self.children {
       Some(children) => children.iter().collect(),
       None => vec![].iter().collect(),
     };
