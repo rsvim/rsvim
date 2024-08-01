@@ -278,10 +278,11 @@ mod tests {
   use super::*;
   use crate::cart::IRect;
   use crate::test::log::init as test_log_init;
+  use parking_lot::ReentrantMutexGuard;
   use std::sync::Once;
   use tracing::info;
 
-  #[derive(Clone, Debug, PartialEq, Eq)]
+  #[derive(Clone, Debug)]
   struct TestValue {
     pub value: usize,
   }
@@ -322,8 +323,6 @@ mod tests {
     INIT.call_once(|| {
       test_log_init();
     });
-
-    let prev_id = uuid::next();
 
     let v1 = TestValue { value: 1 };
     let s1 = IRect::new((0, 0), (1, 1));
@@ -385,27 +384,60 @@ mod tests {
 
     let n1 = n1.lock();
     let n2 = n2.lock();
-    assert_eq!(prev_id + 1, n1_id);
-    assert_eq!(prev_id + 2, n2_id);
+    let n3 = n3.lock();
+    let n4 = n4.lock();
+    let n5 = n5.lock();
+    let n6 = n6.lock();
+    info!("n1:{:?}", n1.borrow());
+    info!("n2:{:?}", n2.borrow());
+    info!("n3:{:?}", n3.borrow());
+    info!("n4:{:?}", n4.borrow());
+    info!("n5:{:?}", n5.borrow());
+    info!("n6:{:?}", n6.borrow());
+
+    assert_eq!(n1_id + 1, n2_id);
+    assert_eq!(n2_id + 1, n3_id);
+    assert_eq!(n3_id + 1, n4_id);
+    assert_eq!(n4_id + 1, n5_id);
+    assert_eq!(n5_id + 1, n6_id);
+
     assert_eq!(n1.borrow().depth() + 1, n2.borrow().depth());
+    assert_eq!(n1.borrow().depth() + 1, n3.borrow().depth());
+    assert_eq!(n2.borrow().depth() + 1, n4.borrow().depth());
+    assert_eq!(n2.borrow().depth() + 1, n5.borrow().depth());
+    assert_eq!(n2.borrow().depth() + 1, n6.borrow().depth());
+    assert_eq!(n3.borrow().depth() + 1, n6.borrow().depth());
+
     assert_eq!(n1.borrow().children().len(), 2);
-    assert!(
-      n1.borrow()
+    assert_eq!(n2.borrow().children().len(), 2);
+    assert_eq!(n3.borrow().children().len(), 1);
+    assert_eq!(n4.borrow().children().len(), 0);
+    assert_eq!(n5.borrow().children().len(), 0);
+    assert_eq!(n6.borrow().children().len(), 0);
+
+    let contains_node = |parent: &ReentrantMutexGuard<RefCell<Tnode>>, child_id: usize| -> bool {
+      parent
+        .borrow()
         .children()
         .iter()
-        .filter(|c| c.lock().borrow().id() == n2_id)
+        .filter(|c| c.lock().borrow().id() == child_id)
         .collect::<Vec<_>>()
         .len()
         == 1
-    );
-    assert!(
-      n1.borrow()
-        .children()
-        .iter()
-        .filter(|c| c.lock().borrow().id() == n3_id)
-        .collect::<Vec<_>>()
-        .len()
-        == 1
-    );
+    };
+
+    assert!(contains_node(&n1, n2_id));
+    assert!(contains_node(&n1, n3_id));
+    assert!(!contains_node(&n1, n4_id));
+    assert!(!contains_node(&n1, n5_id));
+    assert!(!contains_node(&n1, n6_id));
+
+    assert!(contains_node(&n2, n4_id));
+    assert!(contains_node(&n2, n5_id));
+    assert!(!contains_node(&n2, n6_id));
+
+    assert!(contains_node(&n3, n6_id));
+    assert!(!contains_node(&n3, n4_id));
+    assert!(!contains_node(&n3, n5_id));
   }
 }
