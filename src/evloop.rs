@@ -5,7 +5,7 @@
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::geo_size_as;
 use crate::ui::frame::CursorStyle;
-use crate::ui::term::{make_terminal_ptr, Terminal, TerminalPtr};
+use crate::ui::term::{Terminal, TerminalArc};
 use crate::ui::tree::{Tree, TreeArc, TreeNode, TreeNodeArc};
 use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetEnum, WindowContainer, WindowContent,
@@ -20,11 +20,11 @@ use geo::point;
 use heed::types::U16;
 use std::borrow::Borrow;
 use std::io::{Result as IoResult, Write};
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 use tracing::{debug, error};
 
 pub struct EventLoop {
-  screen: TerminalPtr,
+  screen: TerminalArc,
   tree: TreeArc,
 }
 
@@ -33,7 +33,7 @@ impl EventLoop {
     let (cols, rows) = terminal::size()?;
     let screen_size = U16Size::new(cols, rows);
     let screen = Terminal::new(screen_size);
-    let screen = make_terminal_ptr(screen);
+    let screen = Terminal::to_arc(screen);
     let mut tree = Tree::new(Arc::downgrade(&screen));
     debug!("new, screen size: {:?}", screen_size);
 
@@ -47,7 +47,7 @@ impl EventLoop {
       WidgetEnum::RootContainer(root_container),
       root_container_shape,
     );
-    let root_container_node = TreeNode::arc(root_container_node);
+    let root_container_node = TreeNode::to_arc(root_container_node);
     tree.insert(None, root_container_node.clone());
 
     let window_container = WindowContainer::default();
@@ -60,7 +60,7 @@ impl EventLoop {
       WidgetEnum::WindowContainer(window_container),
       window_container_shape,
     );
-    let window_container_node = TreeNode::arc(window_container_node);
+    let window_container_node = TreeNode::to_arc(window_container_node);
     tree.insert(
       Some(root_container_node.clone()),
       window_container_node.clone(),
@@ -76,7 +76,7 @@ impl EventLoop {
       WidgetEnum::WindowContent(window_content),
       window_content_shape,
     );
-    let window_content_node = TreeNode::arc(window_content_node);
+    let window_content_node = TreeNode::to_arc(window_content_node);
     tree.insert(
       Some(window_container_node.clone()),
       window_content_node.clone(),
@@ -89,14 +89,14 @@ impl EventLoop {
       WidgetEnum::Cursor(cursor),
       cursor_shape,
     );
-    let cursor_node = TreeNode::arc(cursor_node);
+    let cursor_node = TreeNode::to_arc(cursor_node);
     tree.insert(Some(window_container_node.clone()), cursor_node.clone());
 
     debug!("new, built widget tree");
 
     Ok(EventLoop {
       screen,
-      tree: Tree::arc(tree),
+      tree: Tree::to_arc(tree),
     })
   }
 
@@ -104,7 +104,8 @@ impl EventLoop {
     let mut out = std::io::stdout();
 
     debug!("init, draw cursor");
-    let cursor = self.screen.read().unwrap().frame().cursor;
+    let screen_lock = self.screen.lock();
+    let cursor = screen_lock.borrow().frame().cursor;
     if cursor.blinking {
       queue!(out, termcursor::EnableBlinking)?;
     } else {

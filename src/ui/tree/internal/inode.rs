@@ -1,5 +1,7 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
+use parking_lot::ReentrantMutex;
+use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::ops::FnMut;
@@ -32,8 +34,8 @@ where
   visible: bool,
 }
 
-pub type InodeArc<T> = Arc<RwLock<Inode<T>>>;
-pub type InodeWk<T> = Weak<RwLock<Inode<T>>>;
+pub type InodeArc<T> = Arc<ReentrantMutex<RefCell<Inode<T>>>>;
+pub type InodeWk<T> = Weak<ReentrantMutex<RefCell<Inode<T>>>>;
 
 impl<T> Inode<T>
 where
@@ -54,8 +56,8 @@ where
     }
   }
 
-  pub fn arc(node: Inode<T>) -> InodeArc<T> {
-    Arc::new(RwLock::new(node))
+  pub fn to_arc(node: Inode<T>) -> InodeArc<T> {
+    Arc::new(ReentrantMutex::new(RefCell::new(node)))
   }
 
   // Attribute {
@@ -141,33 +143,34 @@ where
   }
 
   fn update_depth(child: InodeArc<T>, parent: InodeArc<T>) {
-    let parent = parent.read().unwrap();
-    let mut child = child.write().unwrap();
-    child.depth = parent.depth + 1;
+    let parent = parent.lock();
+    let child = child.lock();
+    child.borrow_mut().depth = parent.borrow().depth + 1;
   }
 
   fn update_actual_shape(child: InodeArc<T>, parent: InodeArc<T>) {
-    let parent = parent.read().unwrap();
-    let mut child = child.write().unwrap();
-    child.actual_shape = shapes::convert_to_actual_shape(child.shape, parent.actual_shape);
+    let parent = parent.lock();
+    let child = child.lock();
+    child.borrow_mut().actual_shape =
+      shapes::convert_to_actual_shape(child.borrow().shape, parent.borrow().actual_shape);
   }
 
   /// Level-order traverse the sub-tree, start from `start_node`, and apply the `f` function on
   /// each node with its parent.
   fn level_order_traverse(
-    start_node: InodeArc<T>,
-    start_parent_node: InodeArc<T>,
+    start: InodeArc<T>,
+    parent: InodeArc<T>,
     f: &mut dyn FnMut(InodeArc<T>, InodeArc<T>),
   ) {
-    f(start_node.clone(), start_parent_node);
+    f(start.clone(), parent.clone());
 
     let mut que: VecDeque<(InodeArc<T>, InodeArc<T>)> = VecDeque::from(
-      start_node
-        .read()
-        .unwrap()
+      start
+        .lock()
+        .borrow()
         .children
         .iter()
-        .map(|c| (start_node.clone(), c.clone()))
+        .map(|c| (start.clone(), c.clone()))
         .collect::<Vec<(InodeArc<T>, InodeArc<T>)>>(),
     );
 
@@ -175,7 +178,7 @@ where
       let parent = parent_child_pair.0;
       let child = parent_child_pair.1;
       f(child.clone(), parent.clone());
-      for c in child.read().unwrap().children.iter() {
+      for c in child.lock().borrow().children.iter() {
         que.push_back((child.clone(), c.clone()));
       }
     }
@@ -194,14 +197,14 @@ where
     Inode::update_attribute(child.clone(), parent.clone());
 
     // Insert `child` by the order of z-index.
-    let child_zindex = child.read().unwrap().zindex;
+    let child_zindex = child.lock().borrow().zindex;
     let higher_zindex_pos: Vec<usize> = parent
-      .read()
-      .unwrap()
+      .lock()
+      .borrow()
       .children
       .iter()
       .enumerate()
-      .filter(|(_index, c)| c.read().unwrap().zindex > child_zindex)
+      .filter(|(_index, c)| c.lock().borrow().zindex > child_zindex)
       .map(|(index, _c)| index)
       .rev()
       .collect();
@@ -209,14 +212,14 @@ where
       Some(insert_pos) => {
         // Got the first child's position that has higher z-index, insert before it.
         parent
-          .write()
-          .unwrap()
+          .lock()
+          .borrow_mut()
           .children
           .insert(*insert_pos, child.clone())
       }
       None => {
         // No existed children has higher z-index, insert at the end.
-        parent.write().unwrap().children.push(child.clone())
+        parent.lock().borrow_mut().children.push(child.clone())
       }
     }
   }
@@ -242,7 +245,7 @@ where
   pub fn pop(&mut self) -> Option<InodeArc<T>> {
     match self.children.pop() {
       Some(removed_child) => {
-        removed_child.write().unwrap().parent = None;
+        removed_child.lock().borrow_mut().parent = None;
         Some(removed_child)
       }
       None => None,
@@ -254,7 +257,7 @@ where
   pub fn remove(&mut self, index: usize) -> Option<InodeArc<T>> {
     if self.children.len() > index {
       let removed_child = self.children.remove(index);
-      removed_child.write().unwrap().parent = None;
+      removed_child.lock().borrow_mut().parent = None;
       Some(removed_child)
     } else {
       None
@@ -266,10 +269,10 @@ where
     let mut q: VecDeque<InodeArc<T>> = VecDeque::from(self.children.clone());
 
     while let Some(e) = q.pop_front() {
-      if e.read().unwrap().id() == id {
+      if e.lock().borrow().id() == id {
         return Some(e);
       }
-      for child in e.read().unwrap().children.iter() {
+      for child in e.lock().borrow().children.iter() {
         q.push_back(child.clone());
       }
     }

@@ -37,12 +37,12 @@ where
     if let Some(node) = self.queue.pop_front() {
       match self.order {
         ItreeIterateOrder::Ascent => {
-          for child in node.read().unwrap().children().iter() {
+          for child in node.lock().borrow().children().iter() {
             self.queue.push_back(child.clone());
           }
         }
         ItreeIterateOrder::Descent => {
-          for child in node.read().unwrap().children().iter().rev() {
+          for child in node.lock().borrow().children().iter().rev() {
             self.queue.push_back(child.clone());
           }
         }
@@ -109,19 +109,16 @@ where
       self.root.is_some(),
       "Doesn't have a root node when assert the node exists"
     );
-    let node = node.write().unwrap();
-    let node2 = self
-      .root
-      .clone()
-      .unwrap()
-      .write()
-      .unwrap()
-      .get_descendant(node.id());
-    assert!(node2.is_some(), "Missing node {} in the tree", node.id());
+    let node = node.lock();
+    let node_id = node.borrow().id();
+    let root_node = self.root.clone().unwrap();
+    let node2 = root_node.lock().borrow().get_descendant(node_id);
+    assert!(node2.is_some(), "Missing node {} in the tree", node_id);
+    let node2_id = node2.unwrap().lock().borrow().id();
     assert!(
-      node2.unwrap().read().unwrap().id() == node.id(),
+      node2_id == node_id,
       "Node ID {} not match in the tree",
-      node.id()
+      node_id
     );
   }
 

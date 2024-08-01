@@ -2,8 +2,10 @@
 
 #![allow(dead_code)]
 
+use parking_lot::ReentrantMutex;
+use std::cell::RefCell;
 use std::collections::BTreeSet;
-use std::sync::{Arc, RwLock, Weak};
+use std::sync::{Arc, Weak};
 
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::internal::inode::{Inode, InodeArc, InodeWk};
@@ -114,8 +116,8 @@ pub struct Tree {
   window_ids: BTreeSet<usize>,
 }
 
-pub type TreeArc = Arc<RwLock<Tree>>;
-pub type TreeWk = Weak<RwLock<Tree>>;
+pub type TreeArc = Arc<ReentrantMutex<RefCell<Tree>>>;
+pub type TreeWk = Weak<ReentrantMutex<RefCell<Tree>>>;
 pub type TreeNode = Inode<WidgetEnum>;
 pub type TreeNodeArc = InodeArc<WidgetEnum>;
 pub type TreeNodeWk = InodeWk<WidgetEnum>;
@@ -134,8 +136,8 @@ impl Tree {
     }
   }
 
-  pub fn arc(tree: Tree) -> TreeArc {
-    Arc::new(RwLock::new(tree))
+  pub fn to_arc(tree: Tree) -> TreeArc {
+    Arc::new(ReentrantMutex::new(RefCell::new(tree)))
   }
 
   /// Whether the tree is empty.
@@ -180,9 +182,12 @@ impl Tree {
   /// Draw the widget tree to terminal device.
   pub fn draw(&mut self) {
     for node in self.base.iter() {
-      let mut node2 = node.write().unwrap();
-      let actual_shape = node2.actual_shape();
-      node2.value_mut().draw(actual_shape, self.terminal.clone());
+      let node2 = node.lock();
+      let actual_shape = node2.borrow().actual_shape();
+      node2
+        .borrow_mut()
+        .value_mut()
+        .draw(actual_shape, self.terminal.clone());
     }
   }
 
