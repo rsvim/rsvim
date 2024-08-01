@@ -44,6 +44,7 @@ compact_str = { version = "0.8.0", features = ["serde", "bytes"] }
 ropey = "1.6.1"
 geo = "0.28.0"
 num-traits = "0.2.19"
+parking_lot = "0.12.3"
 
 [dev-dependencies]
 mockall = "0.13.0"
