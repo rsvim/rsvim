@@ -831,43 +831,41 @@ mod tests {
 
     let v1 = TestValue { value: 1 };
     let s1 = IRect::new((0, 0), (10, 10));
-    let us1 = U16Rect::new((0, 0), (10, 10));
     let n1 = Tnode::new(None, v1, s1);
-    let nid1 = n1.id();
     let n1 = Tnode::to_arc(n1);
 
     let v2 = TestValue { value: 2 };
     let s2 = IRect::new((0, 0), (10, 10));
-    let us2 = U16Rect::new((0, 0), (10, 10));
     let n2 = Tnode::new(None, v2, s2);
-    let nid2 = n2.id();
     let n2 = Tnode::to_arc(n2);
 
     let v3 = TestValue { value: 3 };
     let s3 = IRect::new((0, 0), (10, 10));
-    let us3 = U16Rect::new((0, 0), (10, 10));
     let n3 = Tnode::new(None, v3, s3);
-    let nid3 = n3.id();
     let n3 = Tnode::to_arc(n3);
 
     let v4 = TestValue { value: 4 };
     let s4 = IRect::new((0, 0), (10, 10));
-    let us4 = U16Rect::new((0, 0), (10, 10));
     let n4 = Tnode::new(None, v4, s4);
-    let nid4 = n4.id();
     let n4 = Tnode::to_arc(n4);
+
+    let v5 = TestValue { value: 5 };
+    let s5 = IRect::new((0, 0), (10, 10));
+    let n5 = Tnode::new(None, v5, s5);
+    let n5 = Tnode::to_arc(n5);
 
     /**
      * The tree looks like:
      * ```
-     *           n1
-     *         /    \
-     *       n2, n3, n4
+     *             n1
+     *         /        \
+     *       n2, n3, n4, n5
      * ```
      **/
     Inode::push(n1.clone(), n2.clone());
     Inode::push(n1.clone(), n3.clone());
     Inode::push(n1.clone(), n4.clone());
+    Inode::push(n1.clone(), n5.clone());
 
     let n1 = n1.lock();
     let n1 = n1.borrow();
@@ -877,6 +875,8 @@ mod tests {
     let n3 = n3.borrow();
     let n4 = n4.lock();
     let n4 = n4.borrow();
+    let n5 = n5.lock();
+    let n5 = n5.borrow();
 
     assert_eq!(n1.children().len(), 3);
     assert!(!n1.children().is_empty());
@@ -886,6 +886,8 @@ mod tests {
     assert!(n3.children().is_empty());
     assert_eq!(n4.children().len(), 0);
     assert!(n4.children().is_empty());
+    assert_eq!(n5.children().len(), 0);
+    assert!(n5.children().is_empty());
 
     for (i, c) in n1.children().iter().enumerate() {
       assert_eq!(i + 2, c.lock().borrow().value().value);
@@ -905,5 +907,58 @@ mod tests {
     assert!(n3.children().last().is_none());
     assert!(n4.children().first().is_none());
     assert!(n4.children().last().is_none());
+    assert!(n5.children().first().is_none());
+    assert!(n5.children().last().is_none());
+  }
+
+  fn make_nodes(n: usize) -> Vec<InodeArc<TestValue>> {
+    let mut value = 1;
+    let mut result: Vec<InodeArc<TestValue>> = vec![];
+
+    let v = TestValue { value };
+    value += 1;
+    let s = IRect::new((0, 0), (10, 10));
+    let root = Tnode::new(None, v, s);
+    let root = Tnode::to_arc(root);
+    result.push(root.clone());
+
+    for i in 1..n {
+      let v = TestValue { value };
+      value += 1;
+      let n = Tnode::new(None, v, s);
+      let n = Tnode::to_arc(n);
+      Inode::push(root.clone(), n.clone());
+      result.push(n.clone());
+    }
+
+    result
+  }
+
+  #[test]
+  fn pop1() {
+    INIT.call_once(|| {
+      test_log_init();
+    });
+
+    let nodes = make_nodes(5);
+    let root = nodes[0].clone();
+    let remove1 = root.lock().borrow_mut().remove(1);
+    let remove2 = root.lock().borrow_mut().remove(2);
+
+    assert!(remove1.is_some());
+    assert!(remove1.unwrap().lock().borrow().value().value == 3);
+    assert!(remove2.is_some());
+    assert!(remove2.unwrap().lock().borrow().value().value == 5);
+
+    let pop3 = root.lock().borrow_mut().pop();
+    let pop4 = root.lock().borrow_mut().pop();
+    let pop5 = root.lock().borrow_mut().pop();
+
+    // 1,2,(3),4,(5)
+    assert!(pop3.is_some());
+    assert!(pop3.unwrap().lock().borrow().value().value == 4);
+    assert!(pop4.is_some());
+    assert!(pop4.unwrap().lock().borrow().value().value == 2);
+    assert!(pop5.is_none());
   }
 }
