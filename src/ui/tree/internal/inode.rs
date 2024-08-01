@@ -131,26 +131,21 @@ where
   ///
   /// 1. [`depth`](InodeAttr::depth)
   /// 2. [`actual_shape`](InodeAttr::actual_shape)
-  fn update_attribute(start: InodeArc<T>, start_parent_node: InodeArc<T>) {
-    Inode::level_order_traverse(
-      start.clone(),
-      start_parent_node.clone(),
-      &mut Inode::update_depth,
-    );
-    Inode::level_order_traverse(start, start_parent_node, &mut Inode::update_actual_shape);
-  }
+  fn update_attribute(start: InodeArc<T>, parent: InodeArc<T>) {
+    let mut update_depth: fn(InodeArc<T>, InodeArc<T>) = |child, parent| {
+      let parent = parent.lock();
+      let child = child.lock();
+      child.borrow_mut().depth = parent.borrow().depth + 1;
+    };
+    let mut update_actual_shape: fn(InodeArc<T>, InodeArc<T>) = |child, parent| {
+      let parent = parent.lock();
+      let child = child.lock();
+      child.borrow_mut().actual_shape =
+        shapes::convert_to_actual_shape(child.borrow().shape, parent.borrow().actual_shape);
+    };
 
-  fn update_depth(child: InodeArc<T>, parent: InodeArc<T>) {
-    let parent = parent.lock();
-    let child = child.lock();
-    child.borrow_mut().depth = parent.borrow().depth + 1;
-  }
-
-  fn update_actual_shape(child: InodeArc<T>, parent: InodeArc<T>) {
-    let parent = parent.lock();
-    let child = child.lock();
-    child.borrow_mut().actual_shape =
-      shapes::convert_to_actual_shape(child.borrow().shape, parent.borrow().actual_shape);
+    Inode::level_order_traverse(start.clone(), parent.clone(), &mut update_depth);
+    Inode::level_order_traverse(start, parent, &mut update_actual_shape);
   }
 
   /// Level-order traverse the sub-tree, start from `start_node`, and apply the `f` function on
