@@ -281,7 +281,7 @@ mod tests {
   use std::sync::Once;
   use tracing::info;
 
-  #[derive(Clone, Debug)]
+  #[derive(Clone, Debug, PartialEq, Eq)]
   struct TestValue {
     pub value: usize,
   }
@@ -369,13 +369,13 @@ mod tests {
 
     /**
      * The tree looks like:
-     *
-     *       n1
-     *     /   \
-     *    n2   n3
-     *  /  \     \
-     * n4  n5    n6
-     *
+     * ```
+     *           n1
+     *         /   \
+     *        n2   n3
+     *      /  \     \
+     *     n4  n5    n6
+     * ```
      **/
     Inode::push(n1.clone(), n2.clone());
     Inode::push(n1.clone(), n3.clone());
@@ -388,12 +388,21 @@ mod tests {
     assert_eq!(prev_id + 1, n1_id);
     assert_eq!(prev_id + 2, n2_id);
     assert_eq!(n1.borrow().depth() + 1, n2.borrow().depth());
-    assert_eq!(n1.borrow().children().len(), 1);
+    assert_eq!(n1.borrow().children().len(), 2);
     assert!(
       n1.borrow()
         .children()
         .iter()
         .filter(|c| c.lock().borrow().id() == n2_id)
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    );
+    assert!(
+      n1.borrow()
+        .children()
+        .iter()
+        .filter(|c| c.lock().borrow().id() == n3_id)
         .collect::<Vec<_>>()
         .len()
         == 1
