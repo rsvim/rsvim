@@ -182,9 +182,9 @@ impl Tree {
   /// Draw the widget tree to terminal device.
   pub fn draw(&mut self) {
     for node in self.base.iter() {
-      let node2 = node.lock();
-      let actual_shape = node2.borrow().actual_shape();
-      node2
+      let node_guard = node.lock();
+      let actual_shape = node_guard.borrow().actual_shape();
+      node_guard
         .borrow_mut()
         .value_mut()
         .draw(actual_shape, self.terminal.clone());

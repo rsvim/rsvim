@@ -1,5 +1,6 @@
 //! Internal tree structure implementation: the `Inode` structure.
 
+use geo::point;
 use parking_lot::ReentrantMutex;
 use std::cell::RefCell;
 use std::collections::VecDeque;
@@ -8,6 +9,7 @@ use std::ops::FnMut;
 use std::sync::{Arc, Weak};
 
 use crate::cart::{shapes, IRect, U16Rect};
+use crate::geo_rect_as;
 use crate::uuid;
 
 pub trait InodeValue: Sized + Clone + Debug {}
@@ -42,6 +44,7 @@ where
   T: InodeValue,
 {
   pub fn new(parent: Option<InodeWk<T>>, value: T, shape: IRect) -> Self {
+    let actual_shape = geo_rect_as!(shape, u16);
     Inode {
       parent,
       children: vec![],
@@ -49,7 +52,7 @@ where
       id: uuid::next(),
       depth: 0,
       shape,
-      actual_shape: U16Rect::new((0, 0), (0, 0)),
+      actual_shape,
       zindex: 0,
       enabled: true,
       visible: true,
@@ -120,26 +123,21 @@ where
     &self.children
   }
 
-  /// Calculate and update the `start_node` attributes, based on its parent's attributes.
-  /// Also recursively calculate and update all descendants in the sub-tree, start from the
-  /// `start_node`.
+  /// Calculate and update the `start` attributes, based on its parent's attributes. Also
+  /// recursively calculate and update all descendants in the sub-tree, start from the `start`.
   ///
   /// These attributes are relative to the parent node, and need to be calculated and updated when
   /// the node is been moved in the tree:
   ///
   /// 1. [`depth`](InodeAttr::depth)
   /// 2. [`actual_shape`](InodeAttr::actual_shape)
-  fn update_attribute(start_node: InodeArc<T>, start_parent_node: InodeArc<T>) {
+  fn update_attribute(start: InodeArc<T>, start_parent_node: InodeArc<T>) {
     Inode::level_order_traverse(
-      start_node.clone(),
+      start.clone(),
       start_parent_node.clone(),
       &mut Inode::update_depth,
     );
-    Inode::level_order_traverse(
-      start_node,
-      start_parent_node,
-      &mut Inode::update_actual_shape,
-    );
+    Inode::level_order_traverse(start, start_parent_node, &mut Inode::update_actual_shape);
   }
 
   fn update_depth(child: InodeArc<T>, parent: InodeArc<T>) {
@@ -280,4 +278,38 @@ where
   }
 
   // Children }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use crate::cart::IRect;
+  use crate::test::log::init as test_log_init;
+  use std::sync::Once;
+  use tracing::info;
+
+  #[derive(Clone, Debug)]
+  struct TestValue {
+    pub value: usize,
+  }
+
+  impl InodeValue for TestValue {}
+
+  // Test node
+  type Tnode = Inode<TestValue>;
+
+  static INIT: Once = Once::new();
+
+  #[test]
+  fn new_node() {
+    INIT.call_once(|| {
+      test_log_init();
+    });
+
+    let v1 = TestValue { value: 1 };
+    let prev_id = uuid::next();
+    let n1 = Tnode::new(None, v1, IRect::new((0, 0), (1, 1)));
+    let n1 = Tnode::to_arc(n1);
+    assert_eq!(prev_id + 1, n1.lock().borrow().id());
+  }
 }

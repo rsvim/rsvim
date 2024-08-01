@@ -104,8 +104,8 @@ impl EventLoop {
     let mut out = std::io::stdout();
 
     debug!("init, draw cursor");
-    let screen = self.screen.lock();
-    let cursor = screen.borrow().frame().cursor;
+    let screen_guard = self.screen.lock();
+    let cursor = screen_guard.borrow().frame().cursor;
     if cursor.blinking {
       queue!(out, termcursor::EnableBlinking)?;
     } else {
