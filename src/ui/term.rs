@@ -11,6 +11,7 @@ use crossterm::event::{Event, KeyCode};
 use tracing::debug;
 
 /// Backend terminal
+#[derive(Debug, Clone)]
 pub struct Terminal {
   frame: Frame,
   prev_frame: Frame,
