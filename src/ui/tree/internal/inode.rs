@@ -187,7 +187,7 @@ where
     // Assign the `parent` pointer for `child`.
     child.lock().borrow_mut().parent = Some(Arc::downgrade(&parent));
 
-    // Insert `child` by the order of z-index.
+    // Insert `child` to children vector, by the order of z-index.
     let child_zindex = child.lock().borrow().zindex;
     let higher_zindex_pos: Vec<usize> = parent
       .lock()
