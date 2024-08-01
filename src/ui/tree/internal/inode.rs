@@ -469,25 +469,46 @@ mod tests {
     let n3 = Tnode::to_arc(n3);
 
     let v4 = TestValue { value: 4 };
-    let s4 = IRect::new((0, 0), (1, 1));
-    let us4 = U16Rect::new((0, 0), (1, 1));
+    let s4 = IRect::new((3, 5), (20, 14));
+    let us4 = U16Rect::new((3, 5), (15, 14));
     let n4 = Tnode::new(None, v4, s4);
-    let n4_id = n4.id();
+    let nid4 = n4.id();
     let n4 = Tnode::to_arc(n4);
 
     let v5 = TestValue { value: 5 };
-    let s5 = IRect::new((0, 0), (1, 1));
-    let us5 = U16Rect::new((0, 0), (1, 1));
+    let s5 = IRect::new((-3, -5), (10, 20));
+    let us5 = U16Rect::new((0, 0), (10, 15));
     let n5 = Tnode::new(None, v5, s5);
-    let n5_id = n5.id();
+    let nid5 = n5.id();
     let n5 = Tnode::to_arc(n5);
 
     let v6 = TestValue { value: 6 };
-    let s6 = IRect::new((0, 0), (1, 1));
-    let us6 = U16Rect::new((0, 0), (1, 1));
+    let s6 = IRect::new((3, 6), (6, 10));
+    let us6 = U16Rect::new((13, 16), (16, 19));
     let n6 = Tnode::new(None, v6, s6);
-    let n6_id = n6.id();
+    let nid6 = n6.id();
     let n6 = Tnode::to_arc(n6);
+
+    let v7 = TestValue { value: 6 };
+    let s7 = IRect::new((3, 6), (6, 10));
+    let us7 = U16Rect::new((13, 16), (16, 19));
+    let n7 = Tnode::new(None, v7, s7);
+    let nid7 = n7.id();
+    let n7 = Tnode::to_arc(n7);
+
+    let v8 = TestValue { value: 6 };
+    let s8 = IRect::new((3, 6), (6, 10));
+    let us8 = U16Rect::new((13, 16), (16, 19));
+    let n8 = Tnode::new(None, v8, s8);
+    let nid8 = n8.id();
+    let n8 = Tnode::to_arc(n8);
+
+    let v9 = TestValue { value: 6 };
+    let s9 = IRect::new((3, 6), (6, 10));
+    let us9 = U16Rect::new((13, 16), (16, 19));
+    let n9 = Tnode::new(None, v9, s9);
+    let nid9 = n9.id();
+    let n9 = Tnode::to_arc(n9);
 
     /**
      * The tree looks like:
@@ -524,9 +545,9 @@ mod tests {
 
     assert_eq!(nid1 + 1, nid2);
     assert_eq!(nid2 + 1, nid3);
-    assert_eq!(nid3 + 1, n4_id);
-    assert_eq!(n4_id + 1, n5_id);
-    assert_eq!(n5_id + 1, n6_id);
+    assert_eq!(nid3 + 1, nid4);
+    assert_eq!(nid4 + 1, nid5);
+    assert_eq!(nid5 + 1, nid7);
 
     assert_eq!(n1.borrow().depth() + 1, n2.borrow().depth());
     assert_eq!(n1.borrow().depth() + 1, n3.borrow().depth());
@@ -555,16 +576,16 @@ mod tests {
 
     assert!(contains_node(&n1, nid2));
     assert!(contains_node(&n1, nid3));
-    assert!(!contains_node(&n1, n4_id));
-    assert!(!contains_node(&n1, n5_id));
-    assert!(!contains_node(&n1, n6_id));
+    assert!(!contains_node(&n1, nid4));
+    assert!(!contains_node(&n1, nid5));
+    assert!(!contains_node(&n1, nid7));
 
-    assert!(contains_node(&n2, n4_id));
-    assert!(contains_node(&n2, n5_id));
-    assert!(!contains_node(&n2, n6_id));
+    assert!(contains_node(&n2, nid4));
+    assert!(contains_node(&n2, nid5));
+    assert!(!contains_node(&n2, nid7));
 
-    assert!(contains_node(&n3, n6_id));
-    assert!(!contains_node(&n3, n4_id));
-    assert!(!contains_node(&n3, n5_id));
+    assert!(contains_node(&n3, nid7));
+    assert!(!contains_node(&n3, nid4));
+    assert!(!contains_node(&n3, nid5));
   }
 }
