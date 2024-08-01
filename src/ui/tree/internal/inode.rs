@@ -302,9 +302,18 @@ mod tests {
     });
 
     let v1 = TestValue { value: 1 };
+    let s1 = IRect::new((0, 0), (1, 1));
+    let us1 = U16Rect::new((0, 0), (1, 1));
     let prev_id = uuid::next();
-    let n1 = Tnode::new(None, v1, IRect::new((0, 0), (1, 1)));
+    let n1 = Tnode::new(None, v1, s1);
     let n1 = Tnode::to_arc(n1);
-    assert_eq!(prev_id + 1, n1.lock().borrow().id());
+    let n1 = n1.lock();
+    assert_eq!(prev_id + 1, n1.borrow().id());
+    assert_eq!(n1.borrow().shape(), s1);
+    assert_eq!(n1.borrow().actual_shape(), us1);
+    assert_eq!(n1.borrow().zindex(), 0);
+    assert_eq!(n1.borrow().depth(), 0);
+    assert!(n1.borrow().enabled());
+    assert!(n1.borrow().visible());
   }
 }
