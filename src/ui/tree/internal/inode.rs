@@ -305,7 +305,7 @@ mod tests {
     let s1 = IRect::new((0, 0), (1, 1));
     let us1 = U16Rect::new((0, 0), (1, 1));
     let prev_id = uuid::next();
-    let n1 = Tnode::new(None, v1, s1);
+    let n1 = Tnode::new(None, v1.clone(), s1);
     let n1 = Tnode::to_arc(n1);
     let n1 = n1.lock();
     assert_eq!(prev_id + 1, n1.borrow().id());
@@ -315,5 +315,7 @@ mod tests {
     assert_eq!(n1.borrow().depth(), 0);
     assert!(n1.borrow().enabled());
     assert!(n1.borrow().visible());
+    assert_eq!(n1.borrow().value().value, v1.value);
+    assert!(n1.borrow().parent().is_none());
   }
 }
