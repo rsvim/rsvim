@@ -861,12 +861,49 @@ mod tests {
      * The tree looks like:
      * ```
      *           n1
-     *         /   \
-     *       n2 ..  n4
+     *         /    \
+     *       n2, n3, n4
      * ```
      **/
     Inode::push(n1.clone(), n2.clone());
     Inode::push(n1.clone(), n3.clone());
     Inode::push(n1.clone(), n4.clone());
+
+    let n1 = n1.lock();
+    let n1 = n1.borrow();
+    let n2 = n2.lock();
+    let n2 = n2.borrow();
+    let n3 = n3.lock();
+    let n3 = n3.borrow();
+    let n4 = n4.lock();
+    let n4 = n4.borrow();
+
+    assert_eq!(n1.children().len(), 3);
+    assert!(!n1.children().is_empty());
+    assert_eq!(n2.children().len(), 0);
+    assert!(n2.children().is_empty());
+    assert_eq!(n3.children().len(), 0);
+    assert!(n3.children().is_empty());
+    assert_eq!(n4.children().len(), 0);
+    assert!(n4.children().is_empty());
+
+    for (i, c) in n1.children().iter().enumerate() {
+      assert_eq!(i + 2, c.lock().borrow().value().value);
+    }
+
+    let first1 = n1.children().first();
+    assert!(first1.is_some());
+    assert_eq!(first1.unwrap().lock().borrow().value().value, 2);
+
+    let last1 = n1.children().last();
+    assert!(last1.is_some());
+    assert_eq!(last1.unwrap().lock().borrow().value().value, 4);
+
+    assert!(n2.children().first().is_none());
+    assert!(n2.children().last().is_none());
+    assert!(n3.children().first().is_none());
+    assert!(n3.children().last().is_none());
+    assert!(n4.children().first().is_none());
+    assert!(n4.children().last().is_none());
   }
 }
