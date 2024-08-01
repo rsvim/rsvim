@@ -316,4 +316,87 @@ mod tests {
     assert_eq!(n1.borrow().value().value, v1.value);
     assert!(n1.borrow().parent().is_none());
   }
+
+  #[test]
+  fn insert_node() {
+    INIT.call_once(|| {
+      test_log_init();
+    });
+
+    let prev_id = uuid::next();
+
+    let v1 = TestValue { value: 1 };
+    let s1 = IRect::new((0, 0), (1, 1));
+    let us1 = U16Rect::new((0, 0), (1, 1));
+    let n1 = Tnode::new(None, v1.clone(), s1);
+    let n1_id = n1.id();
+    let n1 = Tnode::to_arc(n1);
+
+    let v2 = TestValue { value: 1 };
+    let s2 = IRect::new((0, 0), (1, 1));
+    let us2 = U16Rect::new((0, 0), (1, 1));
+    let n2 = Tnode::new(None, v2.clone(), s2);
+    let n2_id = n2.id();
+    let n2 = Tnode::to_arc(n2);
+
+    let v3 = TestValue { value: 1 };
+    let s3 = IRect::new((0, 0), (1, 1));
+    let us3 = U16Rect::new((0, 0), (1, 1));
+    let n3 = Tnode::new(None, v3.clone(), s3);
+    let n3_id = n3.id();
+    let n3 = Tnode::to_arc(n3);
+
+    let v4 = TestValue { value: 1 };
+    let s4 = IRect::new((0, 0), (1, 1));
+    let us4 = U16Rect::new((0, 0), (1, 1));
+    let n4 = Tnode::new(None, v4.clone(), s4);
+    let n4_id = n4.id();
+    let n4 = Tnode::to_arc(n4);
+
+    let v5 = TestValue { value: 1 };
+    let s5 = IRect::new((0, 0), (1, 1));
+    let us5 = U16Rect::new((0, 0), (1, 1));
+    let n5 = Tnode::new(None, v5.clone(), s5);
+    let n5_id = n5.id();
+    let n5 = Tnode::to_arc(n5);
+
+    let v6 = TestValue { value: 1 };
+    let s6 = IRect::new((0, 0), (1, 1));
+    let us6 = U16Rect::new((0, 0), (1, 1));
+    let n6 = Tnode::new(None, v6.clone(), s6);
+    let n6_id = n6.id();
+    let n6 = Tnode::to_arc(n6);
+
+    /**
+     * The tree looks like:
+     *
+     *       n1
+     *     /   \
+     *    n2   n3
+     *  /  \     \
+     * n4  n5    n6
+     *
+     **/
+    Inode::push(n1.clone(), n2.clone());
+    Inode::push(n1.clone(), n3.clone());
+    Inode::push(n2.clone(), n4.clone());
+    Inode::push(n2.clone(), n5.clone());
+    Inode::push(n3.clone(), n6.clone());
+
+    let n1 = n1.lock();
+    let n2 = n2.lock();
+    assert_eq!(prev_id + 1, n1_id);
+    assert_eq!(prev_id + 2, n2_id);
+    assert_eq!(n1.borrow().depth() + 1, n2.borrow().depth());
+    assert_eq!(n1.borrow().children().len(), 1);
+    assert!(
+      n1.borrow()
+        .children()
+        .iter()
+        .filter(|c| c.lock().borrow().id() == n2_id)
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    );
+  }
 }
