@@ -180,14 +180,12 @@ where
   /// Push a child node into the children vector.
   /// This operation also sorts the newly inserted node with other children by the z-index. It also
   /// calculates and updates the attributes for the pushed node and all its descendants.
-  ///
-  /// Note: You need to manually assigned the `parent` pointer inside the `child` node to this
-  /// (`self`) node, outside of this method.
-  /// Because this (`self`) node doesn't have the related `std::sync::Arc` pointer, so this method
-  /// cannot do this for you.
   pub fn push(parent: InodeArc<T>, child: InodeArc<T>) {
     // Update attributes start from `child`, and all its descendants.
     Inode::update_attribute(child.clone(), parent.clone());
+
+    // Assign the `parent` pointer for `child`.
+    child.lock().borrow_mut().parent = Some(Arc::downgrade(&parent));
 
     // Insert `child` by the order of z-index.
     let child_zindex = child.lock().borrow().zindex;
