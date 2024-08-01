@@ -5,7 +5,7 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::ops::FnMut;
-use std::sync::{Arc, RwLock, Weak};
+use std::sync::{Arc, Weak};
 
 use crate::cart::{shapes, IRect, U16Rect};
 use crate::uuid;
