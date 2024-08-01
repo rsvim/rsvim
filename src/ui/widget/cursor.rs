@@ -52,8 +52,8 @@ impl Widget for Cursor {
     terminal
       .upgrade()
       .unwrap()
-      .write()
-      .unwrap()
+      .lock()
+      .borrow_mut()
       .frame_mut()
       .set_cursor(crate::ui::frame::Cursor::new(
         pos,

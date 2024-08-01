@@ -146,8 +146,8 @@ where
       Some(parent) => {
         self.assert_exists(parent.clone());
         child
-          .write()
-          .unwrap()
+          .lock()
+          .borrow_mut()
           .set_parent(Some(Arc::downgrade(&parent)));
         Inode::push(parent, child.clone());
         Some(child.clone())
@@ -166,13 +166,13 @@ where
   /// Get a node by its ID.
   pub fn get(&self, id: usize) -> Option<InodeArc<T>> {
     match self.root.clone() {
-      Some(root) => root.read().unwrap().get_descendant(id),
+      Some(root) => root.lock().borrow().get_descendant(id),
       None => None,
     }
   }
 
   /// Remove a node from the parent node.
   pub fn remove(parent: InodeArc<T>, index: usize) -> Option<InodeArc<T>> {
-    parent.write().unwrap().remove(index)
+    parent.lock().borrow_mut().remove(index)
   }
 }
