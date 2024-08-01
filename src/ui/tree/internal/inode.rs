@@ -282,7 +282,7 @@ mod tests {
   use std::sync::Once;
   use tracing::info;
 
-  #[derive(Clone, Debug)]
+  #[derive(Copy, Clone, Debug)]
   struct TestValue {
     pub value: usize,
   }
@@ -295,7 +295,7 @@ mod tests {
   static INIT: Once = Once::new();
 
   #[test]
-  fn new_node() {
+  fn new() {
     INIT.call_once(|| {
       test_log_init();
     });
@@ -319,7 +319,7 @@ mod tests {
   }
 
   #[test]
-  fn insert_node() {
+  fn insert() {
     INIT.call_once(|| {
       test_log_init();
     });
@@ -331,35 +331,35 @@ mod tests {
     let n1_id = n1.id();
     let n1 = Tnode::to_arc(n1);
 
-    let v2 = TestValue { value: 1 };
+    let v2 = TestValue { value: 2 };
     let s2 = IRect::new((0, 0), (1, 1));
     let us2 = U16Rect::new((0, 0), (1, 1));
     let n2 = Tnode::new(None, v2.clone(), s2);
     let n2_id = n2.id();
     let n2 = Tnode::to_arc(n2);
 
-    let v3 = TestValue { value: 1 };
+    let v3 = TestValue { value: 3 };
     let s3 = IRect::new((0, 0), (1, 1));
     let us3 = U16Rect::new((0, 0), (1, 1));
     let n3 = Tnode::new(None, v3.clone(), s3);
     let n3_id = n3.id();
     let n3 = Tnode::to_arc(n3);
 
-    let v4 = TestValue { value: 1 };
+    let v4 = TestValue { value: 4 };
     let s4 = IRect::new((0, 0), (1, 1));
     let us4 = U16Rect::new((0, 0), (1, 1));
     let n4 = Tnode::new(None, v4.clone(), s4);
     let n4_id = n4.id();
     let n4 = Tnode::to_arc(n4);
 
-    let v5 = TestValue { value: 1 };
+    let v5 = TestValue { value: 5 };
     let s5 = IRect::new((0, 0), (1, 1));
     let us5 = U16Rect::new((0, 0), (1, 1));
     let n5 = Tnode::new(None, v5.clone(), s5);
     let n5_id = n5.id();
     let n5 = Tnode::to_arc(n5);
 
-    let v6 = TestValue { value: 1 };
+    let v6 = TestValue { value: 6 };
     let s6 = IRect::new((0, 0), (1, 1));
     let us6 = U16Rect::new((0, 0), (1, 1));
     let n6 = Tnode::new(None, v6.clone(), s6);
@@ -442,5 +442,129 @@ mod tests {
   }
 
   #[test]
-  fn actual_shapes() {}
+  fn shape1() {
+    INIT.call_once(|| {
+      test_log_init();
+    });
+
+    let v1 = TestValue { value: 1 };
+    let s1 = IRect::new((0, 0), (20, 20));
+    let us1 = U16Rect::new((0, 0), (20, 20));
+    let n1 = Tnode::new(None, v1, s1);
+    let nid1 = n1.id();
+    let n1 = Tnode::to_arc(n1);
+
+    let v2 = TestValue { value: 2 };
+    let s2 = IRect::new((0, 0), (15, 15));
+    let us2 = U16Rect::new((0, 0), (15, 15));
+    let n2 = Tnode::new(None, v2, s2);
+    let nid2 = n2.id();
+    let n2 = Tnode::to_arc(n2);
+
+    let v3 = TestValue { value: 3 };
+    let s3 = IRect::new((10, 10), (18, 19));
+    let us3 = U16Rect::new((10, 10), (18, 19));
+    let n3 = Tnode::new(None, v3, s3);
+    let nid3 = n3.id();
+    let n3 = Tnode::to_arc(n3);
+
+    let v4 = TestValue { value: 4 };
+    let s4 = IRect::new((0, 0), (1, 1));
+    let us4 = U16Rect::new((0, 0), (1, 1));
+    let n4 = Tnode::new(None, v4, s4);
+    let n4_id = n4.id();
+    let n4 = Tnode::to_arc(n4);
+
+    let v5 = TestValue { value: 5 };
+    let s5 = IRect::new((0, 0), (1, 1));
+    let us5 = U16Rect::new((0, 0), (1, 1));
+    let n5 = Tnode::new(None, v5, s5);
+    let n5_id = n5.id();
+    let n5 = Tnode::to_arc(n5);
+
+    let v6 = TestValue { value: 6 };
+    let s6 = IRect::new((0, 0), (1, 1));
+    let us6 = U16Rect::new((0, 0), (1, 1));
+    let n6 = Tnode::new(None, v6, s6);
+    let n6_id = n6.id();
+    let n6 = Tnode::to_arc(n6);
+
+    /**
+     * The tree looks like:
+     * ```
+     *           n1
+     *         /   \
+     *        n2   n3
+     *      /  \     \
+     *     n4  n5    n6
+     *           \
+     *            n7
+     *           / \
+     *         n8   n9
+     * ```
+     **/
+    Inode::push(n1.clone(), n2.clone());
+    Inode::push(n1.clone(), n3.clone());
+    Inode::push(n2.clone(), n4.clone());
+    Inode::push(n2.clone(), n5.clone());
+    Inode::push(n3.clone(), n6.clone());
+
+    let n1 = n1.lock();
+    let n2 = n2.lock();
+    let n3 = n3.lock();
+    let n4 = n4.lock();
+    let n5 = n5.lock();
+    let n6 = n6.lock();
+    info!("n1:{:?}", n1.borrow());
+    info!("n2:{:?}", n2.borrow());
+    info!("n3:{:?}", n3.borrow());
+    info!("n4:{:?}", n4.borrow());
+    info!("n5:{:?}", n5.borrow());
+    info!("n6:{:?}", n6.borrow());
+
+    assert_eq!(nid1 + 1, nid2);
+    assert_eq!(nid2 + 1, nid3);
+    assert_eq!(nid3 + 1, n4_id);
+    assert_eq!(n4_id + 1, n5_id);
+    assert_eq!(n5_id + 1, n6_id);
+
+    assert_eq!(n1.borrow().depth() + 1, n2.borrow().depth());
+    assert_eq!(n1.borrow().depth() + 1, n3.borrow().depth());
+    assert_eq!(n2.borrow().depth() + 1, n4.borrow().depth());
+    assert_eq!(n2.borrow().depth() + 1, n5.borrow().depth());
+    assert_eq!(n2.borrow().depth() + 1, n6.borrow().depth());
+    assert_eq!(n3.borrow().depth() + 1, n6.borrow().depth());
+
+    assert_eq!(n1.borrow().children().len(), 2);
+    assert_eq!(n2.borrow().children().len(), 2);
+    assert_eq!(n3.borrow().children().len(), 1);
+    assert_eq!(n4.borrow().children().len(), 0);
+    assert_eq!(n5.borrow().children().len(), 0);
+    assert_eq!(n6.borrow().children().len(), 0);
+
+    let contains_node = |parent: &ReentrantMutexGuard<RefCell<Tnode>>, child_id: usize| -> bool {
+      parent
+        .borrow()
+        .children()
+        .iter()
+        .filter(|c| c.lock().borrow().id() == child_id)
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    };
+
+    assert!(contains_node(&n1, nid2));
+    assert!(contains_node(&n1, nid3));
+    assert!(!contains_node(&n1, n4_id));
+    assert!(!contains_node(&n1, n5_id));
+    assert!(!contains_node(&n1, n6_id));
+
+    assert!(contains_node(&n2, n4_id));
+    assert!(contains_node(&n2, n5_id));
+    assert!(!contains_node(&n2, n6_id));
+
+    assert!(contains_node(&n3, n6_id));
+    assert!(!contains_node(&n3, n4_id));
+    assert!(!contains_node(&n3, n5_id));
+  }
 }
