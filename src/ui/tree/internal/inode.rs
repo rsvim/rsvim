@@ -822,4 +822,51 @@ mod tests {
       assert_eq!(expect, actual);
     }
   }
+
+  #[test]
+  fn push1() {
+    INIT.call_once(|| {
+      test_log_init();
+    });
+
+    let v1 = TestValue { value: 1 };
+    let s1 = IRect::new((0, 0), (10, 10));
+    let us1 = U16Rect::new((0, 0), (10, 10));
+    let n1 = Tnode::new(None, v1, s1);
+    let nid1 = n1.id();
+    let n1 = Tnode::to_arc(n1);
+
+    let v2 = TestValue { value: 2 };
+    let s2 = IRect::new((0, 0), (10, 10));
+    let us2 = U16Rect::new((0, 0), (10, 10));
+    let n2 = Tnode::new(None, v2, s2);
+    let nid2 = n2.id();
+    let n2 = Tnode::to_arc(n2);
+
+    let v3 = TestValue { value: 3 };
+    let s3 = IRect::new((0, 0), (10, 10));
+    let us3 = U16Rect::new((0, 0), (10, 10));
+    let n3 = Tnode::new(None, v3, s3);
+    let nid3 = n3.id();
+    let n3 = Tnode::to_arc(n3);
+
+    let v4 = TestValue { value: 4 };
+    let s4 = IRect::new((0, 0), (10, 10));
+    let us4 = U16Rect::new((0, 0), (10, 10));
+    let n4 = Tnode::new(None, v4, s4);
+    let nid4 = n4.id();
+    let n4 = Tnode::to_arc(n4);
+
+    /**
+     * The tree looks like:
+     * ```
+     *           n1
+     *         /   \
+     *       n2 ..  n4
+     * ```
+     **/
+    Inode::push(n1.clone(), n2.clone());
+    Inode::push(n1.clone(), n3.clone());
+    Inode::push(n1.clone(), n4.clone());
+  }
 }
