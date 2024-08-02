@@ -5,9 +5,8 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use std::{collections::VecDeque, iter::Iterator};
 
-use crate::cart::{shapes, IRect, U16Rect};
+use crate::cart::shapes;
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
-use crate::uuid;
 
 #[derive(Debug, Clone, Default)]
 pub struct Itree<T>
@@ -260,9 +259,9 @@ where
     while let Some(parent_and_child) = que.pop_front() {
       let pnode = parent_and_child.0;
       let cnode = parent_and_child.1;
-      cnode.borrow_mut().depth = pnode.borrow().depth + 1;
-      cnode.borrow_mut().actual_shape =
-        shapes::convert_to_actual_shape(cnode.borrow().shape, pnode.borrow().actual_shape);
+      *cnode.borrow_mut().depth_mut() = pnode.borrow().depth() + 1;
+      *cnode.borrow_mut().actual_shape_mut() =
+        shapes::convert_to_actual_shape(*cnode.borrow().shape(), *pnode.borrow().actual_shape());
 
       match self.children_ids.get(&cnode.borrow().id()) {
         Some(descendant_ids) => {
@@ -317,9 +316,10 @@ mod tests {
   use parking_lot::ReentrantMutexGuard;
   use tracing::info;
 
-  use crate::cart::IRect;
+  use crate::cart::{shapes, IRect, U16Rect};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::inode::InodeValue;
+  use crate::uuid;
 
   use super::*;
 
