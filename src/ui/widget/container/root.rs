@@ -4,7 +4,7 @@ use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
 /// Root container.
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy)]
 pub struct RootContainer {
   id: WidgetId,
 }

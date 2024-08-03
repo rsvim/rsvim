@@ -4,17 +4,22 @@ use compact_str::CompactString;
 
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalWk;
-use crate::ui::widget::Widget;
+use crate::ui::widget::{Widget, WidgetId};
+use crate::uuid;
 
 /// The VIM window content.
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 pub struct WindowContent {
+  id: WidgetId,
   lines: Vec<CompactString>,
 }
 
 impl WindowContent {
-  pub fn new(lines: Vec<CompactString>) -> Self {
-    WindowContent { lines }
+  pub fn new() -> Self {
+    WindowContent {
+      id: uuid::next(),
+      lines: vec![],
+    }
   }
 
   pub fn lines(&self) -> &Vec<CompactString> {

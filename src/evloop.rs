@@ -37,60 +37,34 @@ impl EventLoop {
     let mut tree = Tree::new(Arc::downgrade(&screen));
     debug!("new, screen size: {:?}", screen_size);
 
-    let root_container = RootContainer::default();
-    let root_container_shape = IRect::new(
-      (0, 0),
-      (screen_size.width() as isize, screen_size.height() as isize),
-    );
-    let root_container_node = TreeNode::new(
-      None,
-      WidgetValue::RootContainer(root_container),
-      root_container_shape,
-    );
-    let root_container_node = TreeNode::to_arc(root_container_node);
-    tree.insert(None, root_container_node.clone());
-
-    let window_container = WindowContainer::default();
+    let window_container = WindowContainer::new();
+    let window_container_id = window_container.id();
     let window_container_shape = IRect::new(
       (0, 0),
       (screen_size.width() as isize, screen_size.height() as isize),
     );
     let window_container_node = TreeNode::new(
-      Some(Arc::downgrade(&root_container_node)),
       WidgetValue::WindowContainer(window_container),
       window_container_shape,
     );
-    let window_container_node = TreeNode::to_arc(window_container_node);
-    tree.insert(
-      Some(root_container_node.clone()),
-      window_container_node.clone(),
-    );
+    tree.insert(tree.root_id(), window_container_node);
 
-    let window_content = WindowContent::default();
+    let window_content = WindowContent::new();
+    let window_content_id = window_content.id();
     let window_content_shape = IRect::new(
       (0, 0),
       (screen_size.width() as isize, screen_size.height() as isize),
     );
     let window_content_node = TreeNode::new(
-      Some(Arc::downgrade(&window_container_node)),
       WidgetValue::WindowContent(window_content),
       window_content_shape,
     );
-    let window_content_node = TreeNode::to_arc(window_content_node);
-    tree.insert(
-      Some(window_container_node.clone()),
-      window_content_node.clone(),
-    );
+    tree.insert(window_container_id, window_content_node);
 
-    let cursor = Cursor::default();
+    let cursor = Cursor::new();
     let cursor_shape = IRect::new((0, 0), (1, 1));
-    let cursor_node = TreeNode::new(
-      Some(Arc::downgrade(&window_content_node)),
-      WidgetValue::Cursor(cursor),
-      cursor_shape,
-    );
-    let cursor_node = TreeNode::to_arc(cursor_node);
-    tree.insert(Some(window_container_node.clone()), cursor_node.clone());
+    let cursor_node = TreeNode::new(WidgetValue::Cursor(cursor), cursor_shape);
+    tree.insert(window_content_id, cursor_node);
 
     debug!("new, built widget tree");
 

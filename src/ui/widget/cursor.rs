@@ -5,28 +5,21 @@ use std::fmt::Debug;
 use crate::cart::{U16Pos, U16Rect};
 use crate::ui::frame::{CursorStyle, CursorStyleFormatter};
 use crate::ui::term::TerminalWk;
-use crate::ui::widget::Widget;
+use crate::ui::widget::{Widget, WidgetId};
+use crate::uuid;
 
 #[derive(Clone, Copy)]
 pub struct Cursor {
+  id: WidgetId,
   blinking: bool,
   hidden: bool,
   style: CursorStyle,
 }
 
 impl Cursor {
-  pub fn new(blinking: bool, hidden: bool, style: CursorStyle) -> Self {
+  pub fn new() -> Self {
     Cursor {
-      blinking,
-      hidden,
-      style,
-    }
-  }
-}
-
-impl Default for Cursor {
-  fn default() -> Self {
-    Cursor {
+      id: uuid::next(),
       blinking: true,
       hidden: false,
       style: CursorStyle::DefaultUserShape,
