@@ -428,6 +428,7 @@ mod tests {
     tree.insert(nid2, n5);
     tree.insert(nid3, n6);
 
+    assert!(tree.root_id() == nid1);
     let n1 = tree.node(nid1).unwrap();
     let n2 = tree.node(nid2).unwrap();
     let n3 = tree.node(nid3).unwrap();
@@ -574,6 +575,7 @@ mod tests {
     tree.insert(nid7, n8);
     tree.insert(nid7, n9);
 
+    assert!(tree.root_id() == nid1);
     let n1 = tree.node(nid1).unwrap();
     let n2 = tree.node(nid2).unwrap();
     let n3 = tree.node(nid3).unwrap();
@@ -739,6 +741,7 @@ mod tests {
     tree.insert(nid7, n8);
     tree.insert(nid7, n9);
 
+    assert!(tree.root_id() == nid1);
     let n1 = tree.node(nid1).unwrap();
     let n2 = tree.node(nid2).unwrap();
     let n3 = tree.node(nid3).unwrap();
@@ -831,12 +834,13 @@ mod tests {
     tree.insert(nid4, n5);
     tree.insert(nid5, n6);
 
+    assert!(tree.root_id() == nid1);
     let n1 = tree.node(nid1).unwrap();
-    let n2 = n2.lock();
-    let n3 = n3.lock();
-    let n4 = n4.lock();
-    let n5 = n5.lock();
-    let n6 = n6.lock();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
+    let n6 = tree.node(nid6).unwrap();
     info!("n1:{:?}", n1.borrow());
     info!("n2:{:?}", n2.borrow());
     info!("n3:{:?}", n3.borrow());
@@ -849,8 +853,9 @@ mod tests {
     for i in 0..9 {
       let expect = expects[i];
       let node = &nodes[i];
-      let actual = node.borrow().actual_shape();
-      assert_eq!(expect, actual);
+      let node = node.borrow();
+      let actual = node.actual_shape();
+      assert_eq!(expect, *actual);
     }
   }
 
@@ -862,28 +867,28 @@ mod tests {
 
     let v1 = Tvalue { value: 1 };
     let s1 = IRect::new((0, 0), (10, 10));
-    let n1 = Tnode::new(None, v1, s1);
-    let n1 = Tnode::to_arc(n1);
+    let n1 = Tnode::new(v1, s1);
+    let nid1 = n1.id();
 
     let v2 = Tvalue { value: 2 };
     let s2 = IRect::new((0, 0), (10, 10));
-    let n2 = Tnode::new(None, v2, s2);
-    let n2 = Tnode::to_arc(n2);
+    let n2 = Tnode::new(v2, s2);
+    let nid2 = n2.id();
 
     let v3 = Tvalue { value: 3 };
     let s3 = IRect::new((0, 0), (10, 10));
-    let n3 = Tnode::new(None, v3, s3);
-    let n3 = Tnode::to_arc(n3);
+    let n3 = Tnode::new(v3, s3);
+    let nid3 = n3.id();
 
     let v4 = Tvalue { value: 4 };
     let s4 = IRect::new((0, 0), (10, 10));
-    let n4 = Tnode::new(None, v4, s4);
-    let n4 = Tnode::to_arc(n4);
+    let n4 = Tnode::new(v4, s4);
+    let nid4 = n4.id();
 
     let v5 = Tvalue { value: 5 };
     let s5 = IRect::new((0, 0), (10, 10));
-    let n5 = Tnode::new(None, v5, s5);
-    let n5 = Tnode::to_arc(n5);
+    let n5 = Tnode::new(v5, s5);
+    let nid5 = n5.id();
 
     /**
      * The tree looks like:
@@ -893,21 +898,18 @@ mod tests {
      *       n2, n3, n4, n5
      * ```
      **/
-    Inode::push(n1.clone(), n2.clone());
-    Inode::push(n1.clone(), n3.clone());
-    Inode::push(n1.clone(), n4.clone());
-    Inode::push(n1.clone(), n5.clone());
+    let mut tree = Itree::new(n1);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid1, n4);
+    tree.insert(nid1, n5);
 
-    let n1 = n1.lock();
-    let n1 = n1.borrow();
-    let n2 = n2.lock();
-    let n2 = n2.borrow();
-    let n3 = n3.lock();
-    let n3 = n3.borrow();
-    let n4 = n4.lock();
-    let n4 = n4.borrow();
-    let n5 = n5.lock();
-    let n5 = n5.borrow();
+    assert!(tree.root_id() == nid1);
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
 
     assert_eq!(n1.children().len(), 3);
     assert!(!n1.children().is_empty());
