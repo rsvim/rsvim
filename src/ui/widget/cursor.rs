@@ -39,6 +39,10 @@ impl Debug for Cursor {
 }
 
 impl Widget for Cursor {
+  fn id(&self) -> WidgetId {
+    self.id
+  }
+
   fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalWk) {
     let pos: U16Pos = actual_shape.min().into();
 

@@ -6,7 +6,7 @@ use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::geo_size_as;
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::{Terminal, TerminalArc};
-use crate::ui::tree::{Tree, TreeArc, TreeNode, TreeNodeArc};
+use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
 };
