@@ -199,7 +199,7 @@ where
   /// Below node attributes need to update:
   ///
   /// 1. [`depth`](Inode::depth()): The child depth should be always the parent depth + 1.
-  /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always be clipped by parent's boundries.
+  /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
   ///
   /// Fails if:
   ///
@@ -211,7 +211,7 @@ where
 
     // Insert node.
     let child_id = child_node.id();
-    let child_zindex = child_node.zindex();
+    let child_zindex = *child_node.zindex();
     self.nodes.insert(child_id, RefCell::new(child_node));
 
     // Map child ID => parent ID.
@@ -226,7 +226,7 @@ where
       .iter()
       .enumerate()
       .filter(|(_index, cid)| match self.nodes.get(&cid) {
-        Some(cnode) => cnode.borrow().zindex() > child_zindex,
+        Some(cnode) => *cnode.borrow().zindex() > child_zindex,
         None => false,
       })
       .map(|(index, _cid)| index)
