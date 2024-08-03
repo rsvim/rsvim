@@ -8,11 +8,13 @@ use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 
 use crate::cart::{IRect, U16Rect};
+use crate::geo_rect_as;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIterateOrder, ItreeIterator};
 use crate::ui::widget::RootContainer;
 use crate::ui::widget::{Widget, WidgetValue};
+use geo;
 
 pub mod internal;
 
@@ -138,8 +140,10 @@ impl Tree {
         terminal_size.height() as isize,
       ),
     );
+    let actual_shape: U16Rect = geo_rect_as!(shape, u16);
     let root_container = RootContainer::new();
-    let root_node = TreeNode::new(WidgetValue::RootContainer(root_container), shape);
+    let mut root_node = TreeNode::new(WidgetValue::RootContainer(root_container), shape);
+    *root_node.actual_shape_mut() = actual_shape;
     Tree {
       terminal,
       base: Itree::new(root_node),
