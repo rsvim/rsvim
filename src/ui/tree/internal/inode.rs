@@ -1,8 +1,7 @@
 //! The node structure of the internal tree.
 
+use geo;
 use std::fmt::Debug;
-
-use geo::point;
 
 use crate::cart::{IRect, U16Rect};
 use crate::geo_rect_as;
