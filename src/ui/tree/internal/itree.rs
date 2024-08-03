@@ -777,44 +777,38 @@ mod tests {
     let v1 = Tvalue { value: 1 };
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
-    let n1 = Tnode::new(None, v1, s1);
+    let n1 = Tnode::new(v1, s1);
     let nid1 = n1.id();
-    let n1 = Tnode::to_arc(n1);
 
     let v2 = Tvalue { value: 2 };
     let s2 = IRect::new((0, 0), (20, 20));
     let us2 = U16Rect::new((0, 0), (20, 20));
-    let n2 = Tnode::new(None, v2, s2);
+    let n2 = Tnode::new(v2, s2);
     let nid2 = n2.id();
-    let n2 = Tnode::to_arc(n2);
 
     let v3 = Tvalue { value: 3 };
     let s3 = IRect::new((-2, -2), (-1, 0));
     let us3 = U16Rect::new((0, 0), (0, 0));
-    let n3 = Tnode::new(None, v3, s3);
+    let n3 = Tnode::new(v3, s3);
     let nid3 = n3.id();
-    let n3 = Tnode::to_arc(n3);
 
     let v4 = Tvalue { value: 4 };
     let s4 = IRect::new((3, 5), (20, 20));
     let us4 = U16Rect::new((3, 5), (20, 20));
-    let n4 = Tnode::new(None, v4, s4);
+    let n4 = Tnode::new(v4, s4);
     let nid4 = n4.id();
-    let n4 = Tnode::to_arc(n4);
 
     let v5 = Tvalue { value: 5 };
     let s5 = IRect::new((-3, -5), (15, 20));
     let us5 = U16Rect::new((0, 0), (15, 20));
-    let n5 = Tnode::new(None, v5, s5);
+    let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
-    let n5 = Tnode::to_arc(n5);
 
     let v6 = Tvalue { value: 5 };
     let s6 = IRect::new((8, 13), (18, 25));
     let us6 = U16Rect::new((8, 13), (15, 20));
-    let n6 = Tnode::new(None, v6, s6);
+    let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
-    let n6 = Tnode::to_arc(n6);
 
     /**
      * The tree looks like:
@@ -830,13 +824,14 @@ mod tests {
      *     n6
      * ```
      **/
-    Inode::push(n1.clone(), n2.clone());
-    Inode::push(n1.clone(), n3.clone());
-    Inode::push(n2.clone(), n4.clone());
-    Inode::push(n4.clone(), n5.clone());
-    Inode::push(n5.clone(), n6.clone());
+    let mut tree = Itree::new(n1);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid2, n4);
+    tree.insert(nid4, n5);
+    tree.insert(nid5, n6);
 
-    let n1 = n1.lock();
+    let n1 = tree.node(nid1).unwrap();
     let n2 = n2.lock();
     let n3 = n3.lock();
     let n4 = n4.lock();
