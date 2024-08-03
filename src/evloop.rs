@@ -18,7 +18,9 @@ use crossterm::{cursor as termcursor, queue, terminal};
 use futures::StreamExt;
 use geo::point;
 use heed::types::U16;
+use parking_lot::ReentrantMutexGuard;
 use std::borrow::Borrow;
+use std::cell::RefCell;
 use std::io::{Result as IoResult, Write};
 use std::sync::Arc;
 use tracing::{debug, error};
@@ -78,8 +80,9 @@ impl EventLoop {
     let mut out = std::io::stdout();
 
     debug!("init, draw cursor");
-    let screen_guard = self.screen.lock();
-    let cursor = screen_guard.borrow().frame().cursor;
+    let screen: ReentrantMutexGuard<RefCell<Terminal>> = self.screen.lock();
+    let screen: &Terminal = screen.borrow();
+    let cursor = screen.frame().cursor;
     if cursor.blinking {
       queue!(out, termcursor::EnableBlinking)?;
     } else {
