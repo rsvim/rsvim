@@ -883,18 +883,12 @@ mod tests {
      *       n2, n3, n4, n5
      * ```
      **/
-    let mut tree = Itree::new(nodes[0]);
+    let mut tree = Itree::new(nodes[0].clone());
     for i in 1..5 {
-      tree.insert(nodes_ids[0], nodes[i]);
+      tree.insert(nodes_ids[0], nodes[i].clone());
     }
 
     assert!(tree.root_id() == nodes_ids[0]);
-    let nodes: Vec<&RefCell<Tnode>> = (0..5)
-      .collect::<Vec<i32>>()
-      .iter()
-      .map(|i| tree.node(nodes_ids[*i as usize]).unwrap())
-      .collect();
-
     assert!(tree.children_ids(nodes_ids[0]).unwrap().len() == 4);
     assert!(!tree.children_ids(nodes_ids[0]).unwrap().is_empty());
     for i in 1..5 {
