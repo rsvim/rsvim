@@ -292,7 +292,7 @@ where
   /// Fails if:
   /// 1. The removed node doesn't exist.
   /// 2. The removed node is the root node.
-  pub fn remove(&mut self, id: InodeId) -> Option<Inode<T>> {
+  pub fn remove(&mut self, id: InodeId) -> Option<RefCell<Inode<T>>> {
     // Cannot remove root node.
     if id == self.root_id {
       return None;
@@ -302,7 +302,7 @@ where
       Some(removed) => {
         // Remove child `id` => parent ID mapping.
         self.parent_ids.remove(&id);
-        Some(removed.take())
+        Some(removed)
       }
       None => None,
     }

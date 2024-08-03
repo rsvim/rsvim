@@ -9,7 +9,7 @@ use crate::geo_rect_as;
 
 pub type InodeId = usize;
 
-pub trait InodeValue: Sized + Clone + Debug + Default {
+pub trait InodeValue: Sized + Clone + Debug {
   fn id(&self) -> InodeId;
 }
 
