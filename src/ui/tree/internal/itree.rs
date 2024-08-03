@@ -579,10 +579,10 @@ mod tests {
     let n3 = tree.node(nid3).unwrap();
     let n4 = tree.node(nid4).unwrap();
     let n5 = tree.node(nid5).unwrap();
-    let n6 = n6.lock();
-    let n7 = n7.lock();
-    let n8 = n8.lock();
-    let n9 = n9.lock();
+    let n6 = tree.node(nid6).unwrap();
+    let n7 = tree.node(nid7).unwrap();
+    let n8 = tree.node(nid8).unwrap();
+    let n9 = tree.node(nid9).unwrap();
     info!("n1:{:?}", n1.borrow());
     info!("n2:{:?}", n2.borrow());
     info!("n3:{:?}", n3.borrow());
@@ -602,15 +602,15 @@ mod tests {
     assert_eq!(nid7 + 1, nid8);
     assert_eq!(nid8 + 1, nid9);
 
-    assert_eq!(n1.borrow().depth() + 1, n2.borrow().depth());
-    assert_eq!(n1.borrow().depth() + 1, n3.borrow().depth());
-    assert_eq!(n2.borrow().depth() + 1, n4.borrow().depth());
-    assert_eq!(n2.borrow().depth() + 1, n5.borrow().depth());
-    assert_eq!(n2.borrow().depth() + 1, n6.borrow().depth());
-    assert_eq!(n3.borrow().depth() + 1, n6.borrow().depth());
-    assert_eq!(n5.borrow().depth() + 1, n7.borrow().depth());
-    assert_eq!(n7.borrow().depth() + 1, n8.borrow().depth());
-    assert_eq!(n7.borrow().depth() + 1, n9.borrow().depth());
+    assert_eq!(*n1.borrow().depth() + 1, *n2.borrow().depth());
+    assert_eq!(*n1.borrow().depth() + 1, *n3.borrow().depth());
+    assert_eq!(*n2.borrow().depth() + 1, *n4.borrow().depth());
+    assert_eq!(*n2.borrow().depth() + 1, *n5.borrow().depth());
+    assert_eq!(*n2.borrow().depth() + 1, *n6.borrow().depth());
+    assert_eq!(*n3.borrow().depth() + 1, *n6.borrow().depth());
+    assert_eq!(*n5.borrow().depth() + 1, *n7.borrow().depth());
+    assert_eq!(*n7.borrow().depth() + 1, *n8.borrow().depth());
+    assert_eq!(*n7.borrow().depth() + 1, *n9.borrow().depth());
 
     assert_eq!(n1.borrow().children().len(), 2);
     assert_eq!(n2.borrow().children().len(), 2);
