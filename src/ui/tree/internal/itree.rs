@@ -865,30 +865,15 @@ mod tests {
       test_log_init();
     });
 
-    let v1 = Tvalue { value: 1 };
-    let s1 = IRect::new((0, 0), (10, 10));
-    let n1 = Tnode::new(v1, s1);
-    let nid1 = n1.id();
-
-    let v2 = Tvalue { value: 2 };
-    let s2 = IRect::new((0, 0), (10, 10));
-    let n2 = Tnode::new(v2, s2);
-    let nid2 = n2.id();
-
-    let v3 = Tvalue { value: 3 };
-    let s3 = IRect::new((0, 0), (10, 10));
-    let n3 = Tnode::new(v3, s3);
-    let nid3 = n3.id();
-
-    let v4 = Tvalue { value: 4 };
-    let s4 = IRect::new((0, 0), (10, 10));
-    let n4 = Tnode::new(v4, s4);
-    let nid4 = n4.id();
-
-    let v5 = Tvalue { value: 5 };
-    let s5 = IRect::new((0, 0), (10, 10));
-    let n5 = Tnode::new(v5, s5);
-    let nid5 = n5.id();
+    let shape = IRect::new((0, 0), (10, 10));
+    let nodes: Vec<Tnode> = vec![1, 2, 3, 4, 5]
+      .iter()
+      .map(|value| Tvalue {
+        value: *value as usize,
+      })
+      .map(|tv| Tnode::new(tv, shape))
+      .collect::<Vec<Tnode>>();
+    let nodes_ids: Vec<InodeId> = nodes.iter().map(|n| n.id()).collect();
 
     /**
      * The tree looks like:
@@ -898,50 +883,43 @@ mod tests {
      *       n2, n3, n4, n5
      * ```
      **/
-    let mut tree = Itree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid1, n3);
-    tree.insert(nid1, n4);
-    tree.insert(nid1, n5);
-
-    assert!(tree.root_id() == nid1);
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
-    let n4 = tree.node(nid4).unwrap();
-    let n5 = tree.node(nid5).unwrap();
-
-    assert_eq!(n1.children().len(), 3);
-    assert!(!n1.children().is_empty());
-    assert_eq!(n2.children().len(), 0);
-    assert!(n2.children().is_empty());
-    assert_eq!(n3.children().len(), 0);
-    assert!(n3.children().is_empty());
-    assert_eq!(n4.children().len(), 0);
-    assert!(n4.children().is_empty());
-    assert_eq!(n5.children().len(), 0);
-    assert!(n5.children().is_empty());
-
-    for (i, c) in n1.children().iter().enumerate() {
-      assert_eq!(i + 2, c.lock().borrow().value().value);
+    let mut tree = Itree::new(nodes[0]);
+    for i in 1..5 {
+      tree.insert(nodes_ids[0], nodes[i]);
     }
 
-    let first1 = n1.children().first();
+    assert!(tree.root_id() == nodes_ids[0]);
+    let nodes: Vec<&RefCell<Tnode>> = (0..5)
+      .collect::<Vec<i32>>()
+      .iter()
+      .map(|i| tree.node(nodes_ids[*i as usize]).unwrap())
+      .collect();
+
+    assert!(tree.children_ids(nodes_ids[0]).unwrap().len() == 4);
+    assert!(!tree.children_ids(nodes_ids[0]).unwrap().is_empty());
+    for i in 1..5 {
+      assert!(tree.children_ids(nodes_ids[i]).unwrap().len() == 0);
+      assert!(tree.children_ids(nodes_ids[i]).unwrap().is_empty());
+    }
+
+    for i in 0..5 {
+      assert_eq!(i, tree.node(i).unwrap().borrow().value().value);
+    }
+
+    let first1 = tree.children_ids(nodes_ids[0]).unwrap().first();
     assert!(first1.is_some());
-    assert_eq!(first1.unwrap().lock().borrow().value().value, 2);
+    assert_eq!(*first1.unwrap(), nodes_ids[1]);
 
-    let last1 = n1.children().last();
+    let last1 = tree.children_ids(nodes_ids[0]).unwrap().last();
     assert!(last1.is_some());
-    assert_eq!(last1.unwrap().lock().borrow().value().value, 4);
+    assert_eq!(*last1.unwrap(), nodes_ids[4]);
 
-    assert!(n2.children().first().is_none());
-    assert!(n2.children().last().is_none());
-    assert!(n3.children().first().is_none());
-    assert!(n3.children().last().is_none());
-    assert!(n4.children().first().is_none());
-    assert!(n4.children().last().is_none());
-    assert!(n5.children().first().is_none());
-    assert!(n5.children().last().is_none());
+    for i in 1..5 {
+      let first = tree.children_ids(nodes_ids[i]).unwrap().first();
+      let last = tree.children_ids(nodes_ids[i]).unwrap().last();
+      assert!(first.is_none());
+      assert!(last.is_none());
+    }
   }
 
   fn make_nodes(n: crate::ui::tree::internal::inode::InodeArc) -> Vec<InodeArc<Tvalue>> {
