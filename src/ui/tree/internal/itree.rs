@@ -916,55 +916,55 @@ mod tests {
     }
   }
 
-  fn make_nodes(n: crate::ui::tree::internal::inode::InodeArc) -> Vec<InodeArc<Tvalue>> {
+  fn make_tree(n: usize) -> (Vec<InodeId>, Itree<Tvalue>) {
     let mut value = 1;
-    let mut result: Vec<InodeArc<Tvalue>> = vec![];
+    let mut node_ids: Vec<InodeId> = vec![];
 
     let v = Tvalue { value };
     value += 1;
     let s = IRect::new((0, 0), (10, 10));
-    let root = Tnode::new(None, v, s);
-    let root = Tnode::to_arc(root);
-    result.push(root.clone());
+    let root = Tnode::new(v, s);
+    let root_id = root.id();
+    node_ids.push(root_id);
 
+    let mut tree = Itree::new(root);
     for i in 1..n {
       let v = Tvalue { value };
       value += 1;
-      let n = Tnode::new(None, v, s);
-      let n = Tnode::to_arc(n);
-      Inode::push(root.clone(), n.clone());
-      result.push(n.clone());
+      let node = Tnode::new(v, s);
+      let node_id = node.id();
+      tree.insert(root_id, node);
+      node_ids.push(node_id);
     }
 
-    result
+    (node_ids, tree)
   }
 
   #[test]
-  fn pop1() {
+  fn remove1() {
     INIT.call_once(|| {
       test_log_init();
     });
 
-    let nodes = make_nodes(5);
-    let root = nodes[0].clone();
-    let remove1 = root.lock().borrow_mut().remove(1);
-    let remove2 = root.lock().borrow_mut().remove(2);
+    let (node_ids, mut tree) = make_tree(5);
+    let remove0 = tree.remove(node_ids[0]);
+    let remove2 = tree.remove(node_ids[2]);
+    let remove4 = tree.remove(node_ids[4]);
 
-    assert!(remove1.is_some());
-    assert!(remove1.unwrap().lock().borrow().value().value == 3);
+    assert!(remove0.is_none());
     assert!(remove2.is_some());
-    assert!(remove2.unwrap().lock().borrow().value().value == 5);
+    assert!(remove2.unwrap().borrow().value().value == 3);
+    assert!(remove4.is_some());
+    assert!(remove4.unwrap().borrow().value().value == 5);
 
-    let pop3 = root.lock().borrow_mut().pop();
-    let pop4 = root.lock().borrow_mut().pop();
-    let pop5 = root.lock().borrow_mut().pop();
+    let remove1 = tree.remove(node_ids[1]);
+    let remove3 = tree.remove(node_ids[3]);
 
     // 1,2,(3),4,(5)
-    assert!(pop3.is_some());
-    assert!(pop3.unwrap().lock().borrow().value().value == 4);
-    assert!(pop4.is_some());
-    assert!(pop4.unwrap().lock().borrow().value().value == 2);
-    assert!(pop5.is_none());
+    assert!(remove1.is_some());
+    assert!(remove1.unwrap().borrow().value().value == 2);
+    assert!(remove3.is_some());
+    assert!(remove3.unwrap().borrow().value().value == 4);
   }
 
   #[test]
@@ -975,48 +975,48 @@ mod tests {
 
     let v1 = Tvalue { value: 1 };
     let s1 = IRect::new((0, 0), (20, 20));
-    let n1 = Tnode::new(None, v1, s1);
-    let n1 = Tnode::to_arc(n1);
+    let n1 = Tnode::new(v1, s1);
+    let nid1 = n1.id();
 
     let v2 = Tvalue { value: 2 };
     let s2 = IRect::new((0, 0), (15, 15));
-    let n2 = Tnode::new(None, v2, s2);
-    let n2 = Tnode::to_arc(n2);
+    let n2 = Tnode::new(v2, s2);
+    let nid2 = n2.id();
 
     let v3 = Tvalue { value: 3 };
     let s3 = IRect::new((10, 10), (18, 19));
-    let n3 = Tnode::new(None, v3, s3);
-    let n3 = Tnode::to_arc(n3);
+    let n3 = Tnode::new(v3, s3);
+    let nid3 = n3.id();
 
     let v4 = Tvalue { value: 4 };
     let s4 = IRect::new((3, 5), (20, 14));
-    let n4 = Tnode::new(None, v4, s4);
-    let n4 = Tnode::to_arc(n4);
+    let n4 = Tnode::new(v4, s4);
+    let nid4 = n4.id();
 
     let v5 = Tvalue { value: 5 };
     let s5 = IRect::new((-3, -5), (10, 20));
-    let n5 = Tnode::new(None, v5, s5);
-    let n5 = Tnode::to_arc(n5);
+    let n5 = Tnode::new(v5, s5);
+    let nid5 = n5.id();
 
     let v6 = Tvalue { value: 6 };
     let s6 = IRect::new((3, 6), (6, 10));
-    let n6 = Tnode::new(None, v6, s6);
-    let n6 = Tnode::to_arc(n6);
+    let n6 = Tnode::new(v6, s6);
+    let nid6 = n6.id();
 
     let v7 = Tvalue { value: 7 };
     let s7 = IRect::new((3, 6), (15, 25));
-    let n7 = Tnode::new(None, v7, s7);
-    let n7 = Tnode::to_arc(n7);
+    let n7 = Tnode::new(v7, s7);
+    let nid7 = n7.id();
 
     let v8 = Tvalue { value: 8 };
     let s8 = IRect::new((-1, -2), (2, 1));
-    let n8 = Tnode::new(None, v8, s8);
-    let n8 = Tnode::to_arc(n8);
+    let n8 = Tnode::new(v8, s8);
+    let nid8 = n8.id();
 
     let v9 = Tvalue { value: 9 };
     let s9 = IRect::new((5, 6), (9, 8));
-    let n9 = Tnode::new(None, v9, s9);
-    let n9 = Tnode::to_arc(n9);
+    let n9 = Tnode::new(v9, s9);
+    let nid9 = n9.id();
 
     /**
      * The tree looks like:
@@ -1032,24 +1032,26 @@ mod tests {
      *         n8   n9
      * ```
      **/
-    Inode::push(n1.clone(), n2.clone());
-    Inode::push(n1.clone(), n3.clone());
-    Inode::push(n2.clone(), n4.clone());
-    Inode::push(n2.clone(), n5.clone());
-    Inode::push(n3.clone(), n6.clone());
-    Inode::push(n5.clone(), n7.clone());
-    Inode::push(n7.clone(), n8.clone());
-    Inode::push(n7.clone(), n9.clone());
+    let mut tree = Itree::new(n1);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid2, n4);
+    tree.insert(nid2, n5);
+    tree.insert(nid3, n6);
+    tree.insert(nid5, n7);
+    tree.insert(nid7, n8);
+    tree.insert(nid7, n9);
 
-    let n1 = n1.lock();
-    let n2 = n2.lock();
-    let n3 = n3.lock();
-    let n4 = n4.lock();
-    let n5 = n5.lock();
-    let n6 = n6.lock();
-    let n7 = n7.lock();
-    let n8 = n8.lock();
-    let n9 = n9.lock();
+    assert!(nid1 == tree.root_id());
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
+    let n6 = tree.node(nid6).unwrap();
+    let n7 = tree.node(nid7).unwrap();
+    let n8 = tree.node(nid8).unwrap();
+    let n9 = tree.node(nid9).unwrap();
     info!("n1:{:?}", n1.borrow());
     info!("n2:{:?}", n2.borrow());
     info!("n3:{:?}", n3.borrow());
@@ -1070,44 +1072,38 @@ mod tests {
     let v1 = Tvalue { value: 1 };
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
-    let n1 = Tnode::new(None, v1, s1);
+    let n1 = Tnode::new(v1, s1);
     let nid1 = n1.id();
-    let n1 = Tnode::to_arc(n1);
 
     let v2 = Tvalue { value: 2 };
     let s2 = IRect::new((0, 0), (20, 20));
     let us2 = U16Rect::new((0, 0), (20, 20));
-    let n2 = Tnode::new(None, v2, s2);
+    let n2 = Tnode::new(v2, s2);
     let nid2 = n2.id();
-    let n2 = Tnode::to_arc(n2);
 
     let v3 = Tvalue { value: 3 };
     let s3 = IRect::new((-2, -2), (-1, 0));
     let us3 = U16Rect::new((0, 0), (0, 0));
-    let n3 = Tnode::new(None, v3, s3);
+    let n3 = Tnode::new(v3, s3);
     let nid3 = n3.id();
-    let n3 = Tnode::to_arc(n3);
 
     let v4 = Tvalue { value: 4 };
     let s4 = IRect::new((3, 5), (20, 20));
     let us4 = U16Rect::new((3, 5), (20, 20));
-    let n4 = Tnode::new(None, v4, s4);
+    let n4 = Tnode::new(v4, s4);
     let nid4 = n4.id();
-    let n4 = Tnode::to_arc(n4);
 
     let v5 = Tvalue { value: 5 };
     let s5 = IRect::new((-3, -5), (15, 20));
     let us5 = U16Rect::new((0, 0), (15, 20));
-    let n5 = Tnode::new(None, v5, s5);
+    let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
-    let n5 = Tnode::to_arc(n5);
 
     let v6 = Tvalue { value: 5 };
     let s6 = IRect::new((8, 13), (18, 25));
     let us6 = U16Rect::new((8, 13), (15, 20));
-    let n6 = Tnode::new(None, v6, s6);
+    let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
-    let n6 = Tnode::to_arc(n6);
 
     /**
      * The tree looks like:
@@ -1123,18 +1119,19 @@ mod tests {
      *     n6
      * ```
      **/
-    Inode::push(n1.clone(), n2.clone());
-    Inode::push(n1.clone(), n3.clone());
-    Inode::push(n2.clone(), n4.clone());
-    Inode::push(n4.clone(), n5.clone());
-    Inode::push(n5.clone(), n6.clone());
+    let mut tree = Itree::new(n1);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid2, n4);
+    tree.insert(nid4, n5);
+    tree.insert(nid5, n6);
 
-    let n1 = n1.lock();
-    let n2 = n2.lock();
-    let n3 = n3.lock();
-    let n4 = n4.lock();
-    let n5 = n5.lock();
-    let n6 = n6.lock();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
+    let n6 = tree.node(nid6).unwrap();
     info!("n1:{:?}", n1.borrow());
     info!("n2:{:?}", n2.borrow());
     info!("n3:{:?}", n3.borrow());
@@ -1147,8 +1144,9 @@ mod tests {
     for i in 0..9 {
       let expect = expects[i];
       let node = &nodes[i];
-      let actual = node.borrow().actual_shape();
-      assert_eq!(expect, actual);
+      let node = node.borrow();
+      let actual = node.actual_shape();
+      assert_eq!(expect, *actual);
     }
   }
 }

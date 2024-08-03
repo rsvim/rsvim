@@ -28,25 +28,6 @@ where
   visible: bool,
 }
 
-impl<T> Default for Inode<T>
-where
-  T: InodeValue,
-{
-  fn default() -> Self {
-    let shape = IRect::new((0, 0), (0, 0));
-    let actual_shape = U16Rect::new((0, 0), (0, 0));
-    Inode {
-      value: Default::default(),
-      depth: 0,
-      shape,
-      actual_shape,
-      zindex: 0,
-      enabled: true,
-      visible: true,
-    }
-  }
-}
-
 impl<T> Inode<T>
 where
   T: InodeValue,
@@ -164,7 +145,7 @@ mod tests {
       test_log_init();
     });
 
-    let n1 = Tnode::default();
+    let n1 = Tnode::new(Tvalue { value: 0 }, IRect::new((0, 0), (0, 0)));
     let n2 = Tnode::new(Tvalue { value: 2 }, IRect::new((1, 2), (3, 4)));
     let n1 = RefCell::new(n1);
     let n2 = RefCell::new(n2);
