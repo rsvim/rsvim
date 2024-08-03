@@ -612,44 +612,47 @@ mod tests {
     assert_eq!(*n7.borrow().depth() + 1, *n8.borrow().depth());
     assert_eq!(*n7.borrow().depth() + 1, *n9.borrow().depth());
 
-    assert_eq!(n1.borrow().children().len(), 2);
-    assert_eq!(n2.borrow().children().len(), 2);
-    assert_eq!(n3.borrow().children().len(), 1);
-    assert_eq!(n4.borrow().children().len(), 0);
-    assert_eq!(n5.borrow().children().len(), 1);
-    assert_eq!(n6.borrow().children().len(), 0);
-    assert_eq!(n7.borrow().children().len(), 2);
-    assert_eq!(n8.borrow().children().len(), 0);
-    assert_eq!(n9.borrow().children().len(), 0);
+    assert_eq!(tree.children_ids(nid1).unwrap().len(), 2);
+    assert_eq!(tree.children_ids(nid2).unwrap().len(), 2);
+    assert_eq!(tree.children_ids(nid3).unwrap().len(), 1);
+    assert_eq!(tree.children_ids(nid4).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(nid5).unwrap().len(), 1);
+    assert_eq!(tree.children_ids(nid6).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(nid7).unwrap().len(), 2);
+    assert_eq!(tree.children_ids(nid8).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(nid9).unwrap().len(), 0);
 
-    let contains_node = |parent: &ReentrantMutexGuard<RefCell<Tnode>>, child_id: usize| -> bool {
-      parent
-        .borrow()
-        .children()
-        .iter()
-        .filter(|c| c.lock().borrow().id() == child_id)
-        .collect::<Vec<_>>()
-        .len()
-        == 1
+    let contains_child = |parent_id: InodeId, child_id: InodeId| -> bool {
+      match tree.children_ids(parent_id) {
+        Some(children_ids) => {
+          children_ids
+            .iter()
+            .filter(|cid| **cid == child_id)
+            .collect::<Vec<_>>()
+            .len()
+            == 1
+        }
+        None => false,
+      }
     };
 
-    assert!(contains_node(&n1, nid2));
-    assert!(contains_node(&n1, nid3));
-    assert!(!contains_node(&n1, nid4));
-    assert!(!contains_node(&n1, nid5));
-    assert!(!contains_node(&n1, nid7));
+    assert!(contains_child(nid1, nid2));
+    assert!(contains_child(nid1, nid3));
+    assert!(!contains_child(nid1, nid4));
+    assert!(!contains_child(nid1, nid5));
+    assert!(!contains_child(nid1, nid7));
 
-    assert!(contains_node(&n2, nid4));
-    assert!(contains_node(&n2, nid5));
-    assert!(!contains_node(&n2, nid7));
+    assert!(contains_child(nid2, nid4));
+    assert!(contains_child(nid2, nid5));
+    assert!(!contains_child(nid2, nid7));
 
-    assert!(contains_node(&n3, nid7));
-    assert!(!contains_node(&n3, nid4));
-    assert!(!contains_node(&n3, nid5));
+    assert!(contains_child(nid3, nid7));
+    assert!(!contains_child(nid3, nid4));
+    assert!(!contains_child(nid3, nid5));
 
-    assert!(contains_node(&n5, nid7));
-    assert!(contains_node(&n7, nid8));
-    assert!(contains_node(&n7, nid9));
+    assert!(contains_child(nid5, nid7));
+    assert!(contains_child(nid7, nid8));
+    assert!(contains_child(nid7, nid9));
   }
 
   #[test]
