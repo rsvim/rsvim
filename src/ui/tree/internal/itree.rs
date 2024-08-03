@@ -762,8 +762,8 @@ mod tests {
     let nodes = vec![n1, n2, n3, n4, n5, n6, n7, n8, n9];
     for i in 0..9 {
       let expect = expects[i];
-      let node = &nodes[i];
-      let actual = node.borrow().actual_shape();
+      let node = &nodes[i].borrow();
+      let actual = node.actual_shape();
       assert_eq!(expect, *actual);
     }
   }
