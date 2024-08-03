@@ -2,7 +2,8 @@
 
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalWk;
-use crate::ui::tree::internal::inode::InodeValue;
+use crate::ui::tree::internal::inode::{InodeId, InodeValue};
+
 // Re-export
 pub use crate::ui::widget::container::root::RootContainer;
 pub use crate::ui::widget::container::window::WindowContainer;
@@ -26,22 +27,35 @@ pub trait Widget {
 }
 
 #[derive(Debug, Clone)]
-pub enum WidgetEnum {
+pub enum WidgetValue {
   RootContainer(RootContainer),
   WindowContainer(WindowContainer),
   WindowContent(WindowContent),
   Cursor(Cursor),
 }
 
-impl InodeValue for WidgetEnum {}
+impl InodeValue for WidgetValue {
+  fn id(&self) -> InodeId {
+    Widget::id(self)
+  }
+}
 
-impl Widget for WidgetEnum {
+impl Widget for WidgetValue {
+  fn id(&self) -> InodeId {
+    match self {
+      WidgetValue::RootContainer(w) => w.id(),
+      WidgetValue::WindowContainer(w) => w.id(),
+      WidgetValue::WindowContent(w) => w.id(),
+      WidgetValue::Cursor(w) => w.id(),
+    }
+  }
+
   fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalWk) {
     match self {
-      WidgetEnum::RootContainer(widget) => widget.draw(actual_shape, terminal),
-      WidgetEnum::WindowContainer(widget) => widget.draw(actual_shape, terminal),
-      WidgetEnum::WindowContent(widget) => widget.draw(actual_shape, terminal),
-      WidgetEnum::Cursor(widget) => widget.draw(actual_shape, terminal),
+      WidgetValue::RootContainer(w) => w.draw(actual_shape, terminal),
+      WidgetValue::WindowContainer(w) => w.draw(actual_shape, terminal),
+      WidgetValue::WindowContent(w) => w.draw(actual_shape, terminal),
+      WidgetValue::Cursor(w) => w.draw(actual_shape, terminal),
     }
   }
 }

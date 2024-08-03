@@ -149,29 +149,6 @@ where
     self.nodes.get_mut(&id)
   }
 
-  /// Assert the `node` exists in the tree.
-  ///
-  /// # Panics
-  ///
-  /// Panics when the `node` doesn't exist.
-  fn assert_exists(&self, node: InodeArc<T>) {
-    assert!(
-      self.root.is_some(),
-      "Doesn't have a root node when assert the node exists"
-    );
-    let node = node.lock();
-    let node_id = node.borrow().id();
-    let root_node = self.root.clone().unwrap();
-    let node2 = root_node.lock().borrow().get_descendant(node_id);
-    assert!(node2.is_some(), "Missing node {} in the tree", node_id);
-    let node2_id = node2.unwrap().lock().borrow().id();
-    assert!(
-      node2_id == node_id,
-      "Node ID {} not match in the tree",
-      node_id
-    );
-  }
-
   /// Get the iterator.
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
