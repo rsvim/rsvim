@@ -186,9 +186,8 @@ where
   ///
   /// 1. The `parent_id` doesn't exist.
   pub fn insert(&mut self, parent_id: InodeId, child_node: Inode<T>) -> Option<&Mutex<Inode<T>>> {
-    if self.nodes.get(&parent_id).is_none() {
-      return None;
-    }
+    // Returns `None` if `parent_id` not exists.
+    self.nodes.get(&parent_id)?;
 
     // Insert node.
     let child_id = child_node.id();
