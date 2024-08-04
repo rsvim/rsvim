@@ -80,9 +80,7 @@ impl EventLoop {
     let mut out = std::io::stdout();
 
     debug!("init, draw cursor");
-    let screen: ReentrantMutexGuard<RefCell<Terminal>> = self.screen.lock();
-    let screen: &Terminal = screen.borrow();
-    let cursor = screen.frame().cursor;
+    let cursor = self.screen.lock().frame().cursor;
     if cursor.blinking {
       queue!(out, termcursor::EnableBlinking)?;
     } else {

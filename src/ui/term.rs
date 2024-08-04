@@ -1,7 +1,6 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use parking_lot::Mutex;
-use std::cell::RefCell;
 use std::sync::{Arc, Weak};
 
 use crate::cart::U16Size;
@@ -17,8 +16,8 @@ pub struct Terminal {
   prev_frame: Frame,
 }
 
-pub type TerminalArc = Arc<Mutex<RefCell<Terminal>>>;
-pub type TerminalWk = Weak<Mutex<RefCell<Terminal>>>;
+pub type TerminalArc = Arc<Mutex<Terminal>>;
+pub type TerminalWk = Weak<Mutex<Terminal>>;
 
 impl Terminal {
   pub fn new(size: U16Size) -> Self {
@@ -29,7 +28,7 @@ impl Terminal {
   }
 
   pub fn to_arc(t: Terminal) -> TerminalArc {
-    Arc::new(Mutex::new(RefCell::new(t)))
+    Arc::new(Mutex::new(t))
   }
 
   // Current frame {

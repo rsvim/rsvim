@@ -2,8 +2,7 @@
 
 #![allow(dead_code)]
 
-use parking_lot::ReentrantMutex;
-use std::cell::RefCell;
+use parking_lot::Mutex;
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 
@@ -120,8 +119,8 @@ pub struct Tree {
   window_ids: BTreeSet<usize>,
 }
 
-pub type TreeArc = Arc<ReentrantMutex<RefCell<Tree>>>;
-pub type TreeWk = Weak<ReentrantMutex<RefCell<Tree>>>;
+pub type TreeArc = Arc<Mutex<Tree>>;
+pub type TreeWk = Weak<Mutex<Tree>>;
 pub type TreeNode = Inode<WidgetValue>;
 pub type TreeNodeId = InodeId;
 pub type TreeIterator<'a> = ItreeIterator<'a, WidgetValue>;
@@ -132,7 +131,7 @@ impl Tree {
   ///
   /// Note: The root node is created along with the tree.
   pub fn new(terminal: TerminalWk) -> Self {
-    let terminal_size = terminal.upgrade().unwrap().lock().borrow().size();
+    let terminal_size = terminal.upgrade().unwrap().lock().size();
     let shape = IRect::new(
       (0, 0),
       (
@@ -152,7 +151,7 @@ impl Tree {
   }
 
   pub fn to_arc(tree: Tree) -> TreeArc {
-    Arc::new(ReentrantMutex::new(RefCell::new(tree)))
+    Arc::new(Mutex::new(tree))
   }
 
   /// Whether the tree is empty.
@@ -174,11 +173,11 @@ impl Tree {
     self.base.children_ids(id)
   }
 
-  pub fn node(&self, id: TreeNodeId) -> Option<&RefCell<TreeNode>> {
+  pub fn node(&self, id: TreeNodeId) -> Option<&Mutex<TreeNode>> {
     self.base.node(id)
   }
 
-  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut RefCell<TreeNode>> {
+  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut Mutex<TreeNode>> {
     self.base.node_mut(id)
   }
 
@@ -194,11 +193,11 @@ impl Tree {
     &mut self,
     parent_id: TreeNodeId,
     child_node: TreeNode,
-  ) -> Option<&RefCell<TreeNode>> {
+  ) -> Option<&Mutex<TreeNode>> {
     self.base.insert(parent_id, child_node)
   }
 
-  pub fn remove(&mut self, id: TreeNodeId) -> Option<RefCell<TreeNode>> {
+  pub fn remove(&mut self, id: TreeNodeId) -> Option<Mutex<TreeNode>> {
     self.base.remove(id)
   }
 
@@ -209,9 +208,9 @@ impl Tree {
   /// Draw the widget tree to terminal device.
   pub fn draw(&mut self) {
     for node in self.base.iter() {
-      let actual_shape = *node.borrow().actual_shape();
-      node
-        .borrow_mut()
+      let mut node_lock = node.lock();
+      let actual_shape = *node_lock.actual_shape();
+      node_lock
         .value_mut()
         .draw(actual_shape, self.terminal.clone());
     }
