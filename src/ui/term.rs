@@ -5,9 +5,6 @@ use std::sync::{Arc, Weak};
 
 use crate::cart::U16Size;
 use crate::ui::frame::{Cell, Cursor, Frame};
-use crossterm;
-use crossterm::event::{Event, KeyCode};
-use tracing::debug;
 
 /// Backend terminal
 #[derive(Debug, Clone)]
