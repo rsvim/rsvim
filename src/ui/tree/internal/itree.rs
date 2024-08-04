@@ -205,7 +205,7 @@ where
       .unwrap()
       .iter()
       .enumerate()
-      .filter(|(_index, cid)| match self.nodes.get(&cid) {
+      .filter(|(_index, cid)| match self.nodes.get(cid) {
         Some(cnode) => *cnode.lock().zindex() > child_zindex,
         None => false,
       })
@@ -229,7 +229,10 @@ where
     }
 
     // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
-    let mut que: VecDeque<(&Mutex<Inode<T>>, &Mutex<Inode<T>>)> = VecDeque::new();
+
+    type ParentChildPair<'a, T> = (&'a Mutex<Inode<T>>, &'a Mutex<Inode<T>>);
+
+    let mut que: VecDeque<ParentChildPair<T>> = VecDeque::new();
     que.push_back((
       self.nodes.get(&parent_id).unwrap(),
       self.nodes.get(&child_id).unwrap(),
@@ -248,7 +251,7 @@ where
       match self.children_ids.get(&cnode.lock().id()) {
         Some(descendant_ids) => {
           for descendant_id in descendant_ids.iter() {
-            match self.nodes.get(&descendant_id) {
+            match self.nodes.get(descendant_id) {
               Some(dnode) => {
                 que.push_back((cnode, dnode));
               }

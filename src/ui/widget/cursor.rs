@@ -27,6 +27,12 @@ impl Cursor {
   }
 }
 
+impl Default for Cursor {
+  fn default() -> Self {
+    Cursor::new()
+  }
+}
+
 impl Debug for Cursor {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     let style_formatter = CursorStyleFormatter::from(self.style);

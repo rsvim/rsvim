@@ -16,6 +16,12 @@ impl WindowContainer {
   }
 }
 
+impl Default for WindowContainer {
+  fn default() -> Self {
+    WindowContainer::new()
+  }
+}
+
 impl Widget for WindowContainer {
   fn id(&self) -> WidgetId {
     self.id

@@ -15,6 +15,12 @@ impl RootContainer {
   }
 }
 
+impl Default for RootContainer {
+  fn default() -> Self {
+    RootContainer::new()
+  }
+}
+
 impl Widget for RootContainer {
   fn id(&self) -> WidgetId {
     self.id
