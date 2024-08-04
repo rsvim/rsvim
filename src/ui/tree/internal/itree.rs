@@ -129,6 +129,10 @@ where
     self.nodes.len()
   }
 
+  pub fn is_empty(&self) -> bool {
+    self.nodes.len() <= 1
+  }
+
   pub fn root_id(&self) -> InodeId {
     self.root_id
   }
