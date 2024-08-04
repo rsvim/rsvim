@@ -19,12 +19,22 @@ To develop the code, please setup with:
 
   > Recommend using [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
 
+## Testing
+
+To run the unit tests, please run with:
+
+1. Run with `RUST_LOG=debug cargo test`.
+
+   > It enables all the logs over `debug` level, and prints the logs.
+
+## Debugging
+
 To debug the code, please run with:
 
 1. Build the executable binary `rsvim` with `cargo build`.
 2. Run with `RUST_LOG=debug ./target/debug/rsvim`.
 
-   > It enables all the logs over debugging level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
+   > It enables all the logs over `debug` level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
 
 ## Documentation
 
