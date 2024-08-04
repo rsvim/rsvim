@@ -14,7 +14,7 @@ use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode, KeyEventKind, KeyEventState, KeyModifiers,
 };
-use crossterm::{cursor as termcursor, queue, terminal};
+use crossterm::{self, queue, terminal};
 use futures::StreamExt;
 use geo::point;
 use heed::types::U16;
@@ -82,18 +82,21 @@ impl EventLoop {
     debug!("init, draw cursor");
     let cursor = self.screen.lock().frame().cursor;
     if cursor.blinking {
-      queue!(out, termcursor::EnableBlinking)?;
+      queue!(out, crossterm::cursor::EnableBlinking)?;
     } else {
-      queue!(out, termcursor::DisableBlinking)?;
+      queue!(out, crossterm::cursor::DisableBlinking)?;
     }
     if cursor.hidden {
-      queue!(out, termcursor::Hide)?;
+      queue!(out, crossterm::cursor::Hide)?;
     } else {
-      queue!(out, termcursor::Show)?;
+      queue!(out, crossterm::cursor::Show)?;
     }
 
     queue!(out, cursor.style)?;
-    queue!(out, termcursor::MoveTo(cursor.pos.x(), cursor.pos.y()))?;
+    queue!(
+      out,
+      crossterm::cursor::MoveTo(cursor.pos.x(), cursor.pos.y())
+    )?;
 
     out.flush()?;
     debug!("init, draw cursor - done");
@@ -142,12 +145,12 @@ impl EventLoop {
     // }
 
     // if event == Event::Key(KeyCode::Char('c').into()) {
-    //   println!("Curosr position: {:?}\r", termcursor::position());
+    //   println!("Curosr position: {:?}\r", crossterm::cursor::position());
     // }
 
     // quit loop
     if event == Event::Key(KeyCode::Esc.into()) {
-      println!("ESC: {:?}\r", termcursor::position());
+      println!("ESC: {:?}\r", crossterm::cursor::position());
       return false;
     }
 
