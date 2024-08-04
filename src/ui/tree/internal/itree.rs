@@ -242,24 +242,29 @@ where
     while let Some(parent_and_child) = que.pop_front() {
       let pnode = parent_and_child.0;
       let cnode = parent_and_child.1;
-      let pnode_lock = pnode.lock();
-      let mut cnode_lock = cnode.lock();
-      *cnode_lock.depth_mut() = pnode_lock.depth() + 1;
-      *cnode_lock.actual_shape_mut() =
-        shapes::convert_to_actual_shape(*cnode_lock.shape(), *pnode_lock.actual_shape());
 
-      match self.children_ids.get(&cnode.lock().id()) {
-        Some(descendant_ids) => {
-          for descendant_id in descendant_ids.iter() {
-            match self.nodes.get(descendant_id) {
-              Some(dnode) => {
-                que.push_back((cnode, dnode));
+      {
+        let pnode_lock = pnode.lock();
+        let mut cnode_lock = cnode.lock();
+        *cnode_lock.depth_mut() = pnode_lock.depth() + 1;
+        *cnode_lock.actual_shape_mut() =
+          shapes::convert_to_actual_shape(*cnode_lock.shape(), *pnode_lock.actual_shape());
+      }
+
+      {
+        match self.children_ids.get(&cnode.lock().id()) {
+          Some(descendant_ids) => {
+            for descendant_id in descendant_ids.iter() {
+              match self.nodes.get(descendant_id) {
+                Some(dnode) => {
+                  que.push_back((cnode, dnode));
+                }
+                None => { /* Skip */ }
               }
-              None => { /* Skip */ }
             }
           }
+          None => { /* Skip */ }
         }
-        None => { /* Skip */ }
       }
     }
 
