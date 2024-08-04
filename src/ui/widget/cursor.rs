@@ -50,7 +50,6 @@ impl Widget for Cursor {
       .upgrade()
       .unwrap()
       .lock()
-      .borrow_mut()
       .frame_mut()
       .set_cursor(crate::ui::frame::Cursor::new(
         pos,
