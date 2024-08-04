@@ -1,8 +1,10 @@
 //! Coordinate system helper methods for shape/position/size.
 
+#![allow(clippy::let_and_return)]
+
 use geo::point;
 use std::cmp::{max, min};
-use tracing::debug;
+// use tracing::debug;
 
 use crate::cart::{IPos, IRect, ISize, U16Pos, U16Rect};
 use crate::geo_point_as;
@@ -14,10 +16,10 @@ use crate::geo_point_as;
 /// 2. If the relative/logical shape is outside of it's parent or the terminal, it will be
 ///    automatically bounded inside of it's parent or the terminal's shape.
 pub fn convert_to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
-  debug!(
-    "shape:{:?}, parent_actual_shape:{:?}",
-    shape, parent_actual_shape
-  );
+  // debug!(
+  //   "shape:{:?}, parent_actual_shape:{:?}",
+  //   shape, parent_actual_shape
+  // );
   let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
   let parent_actual_top_left_ipos: IPos = geo_point_as!(parent_actual_top_left_pos, isize);
   let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
@@ -37,10 +39,10 @@ pub fn convert_to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U1
   );
   let actual_top_left_pos: U16Pos =
     point!(x: actual_top_left_x as u16, y: actual_top_left_y as u16);
-  debug!(
-    "actual_top_left_ipos:{:?}, actual_top_left_pos:{:?}",
-    actual_top_left_ipos, actual_top_left_pos
-  );
+  // debug!(
+  //   "actual_top_left_ipos:{:?}, actual_top_left_pos:{:?}",
+  //   actual_top_left_ipos, actual_top_left_pos
+  // );
 
   let actual_bottom_right_ipos: IPos = bottom_right_pos + parent_actual_top_left_ipos;
   let actual_bottom_right_x = min(
@@ -64,18 +66,18 @@ pub fn convert_to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U1
     (actual_bottom_right_pos.x() as isize) - (actual_top_left_pos.x() as isize),
     (actual_bottom_right_pos.y() as isize) - (actual_top_left_pos.y() as isize),
   );
-  debug!(
-    "actual_isize:{:?}, actual_top_left_pos:{:?}",
-    actual_isize, actual_top_left_pos
-  );
+  // debug!(
+  //   "actual_isize:{:?}, actual_top_left_pos:{:?}",
+  //   actual_isize, actual_top_left_pos
+  // );
   let actual_shape = U16Rect::new(
     actual_top_left_pos,
     point!(x: actual_top_left_pos.x() + actual_isize.width() as u16, y: actual_top_left_pos.y() + actual_isize.height() as u16),
   );
-  debug!(
-    "actual_isize:{:?}, actual_shape:{:?}",
-    actual_isize, actual_shape
-  );
+  // debug!(
+  //   "actual_isize:{:?}, actual_shape:{:?}",
+  //   actual_isize, actual_shape
+  // );
 
   actual_shape
 }
