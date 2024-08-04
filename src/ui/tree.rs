@@ -12,7 +12,7 @@ use crate::ui::term::TerminalWk;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIterateOrder, ItreeIterator};
 use crate::ui::widget::RootContainer;
-use crate::ui::widget::{Widget, WidgetValue};
+use crate::ui::widget::{Widget, WidgetId, WidgetValue};
 use geo;
 
 pub mod internal;
@@ -116,7 +116,7 @@ pub struct Tree {
 
   // A collection of all VIM window container IDs
   // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)).
-  window_containers_ids: BTreeSet<usize>,
+  window_container_ids: BTreeSet<usize>,
 }
 
 pub type TreeArc = Arc<Mutex<Tree>>;
@@ -146,7 +146,7 @@ impl Tree {
     Tree {
       terminal,
       base: Itree::new(root_node),
-      window_containers_ids: BTreeSet::new(),
+      window_container_ids: BTreeSet::new(),
     }
   }
 
@@ -197,7 +197,7 @@ impl Tree {
     match child_node.value() {
       WidgetValue::WindowContainer(w) => {
         let child_id = w.id();
-        self.window_containers_ids.insert(child_id);
+        self.window_container_ids.insert(child_id);
       }
       _ => { /* Skip */ }
     }
@@ -209,6 +209,10 @@ impl Tree {
   }
 
   // Node }
+
+  pub fn window_container_ids(&self) -> &BTreeSet<WidgetId> {
+    &self.window_container_ids
+  }
 
   // Draw {
 
