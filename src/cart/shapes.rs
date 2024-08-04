@@ -92,7 +92,11 @@ mod tests {
   static INIT: Once = Once::new();
 
   #[test]
-  fn convert_to_actual_shapes() {
+  fn convert_to_actual_shapes1() {
+    INIT.call_once(|| {
+      test_log_init();
+    });
+
     let inputs: Vec<IRect> = vec![
       IRect::new((0, 0), (3, 5)),
       IRect::new((0, 0), (1, 5)),
