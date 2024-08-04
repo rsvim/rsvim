@@ -194,6 +194,13 @@ impl Tree {
     parent_id: TreeNodeId,
     child_node: TreeNode,
   ) -> Option<&Mutex<TreeNode>> {
+    match child_node.value() {
+      WidgetValue::WindowContainer(w) => {
+        let child_id = w.id();
+        self.window_containers_ids.insert(child_id);
+      }
+      _ => { /* Skip */ }
+    }
     self.base.insert(parent_id, child_node)
   }
 
