@@ -156,7 +156,7 @@ impl Tree {
 
   /// Whether the tree is empty.
   pub fn is_empty(&self) -> bool {
-    self.base.len() == 1
+    self.base.is_empty()
   }
 
   // Node {
