@@ -114,9 +114,9 @@ pub struct Tree {
   // Internal tree.
   base: Itree<WidgetValue>,
 
-  // A collection of all VIM window node IDs
+  // A collection of all VIM window container IDs
   // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)).
-  window_ids: BTreeSet<usize>,
+  window_containers_ids: BTreeSet<usize>,
 }
 
 pub type TreeArc = Arc<Mutex<Tree>>;
@@ -146,7 +146,7 @@ impl Tree {
     Tree {
       terminal,
       base: Itree::new(root_node),
-      window_ids: BTreeSet::new(),
+      window_containers_ids: BTreeSet::new(),
     }
   }
 
