@@ -5,7 +5,7 @@ use std::sync::{Arc, Weak};
 
 use crate::cart::U16Size;
 use crate::ui::frame::{Cell, Cursor, Frame};
-use crossterm::cursor as termcursor;
+use crossterm;
 use crossterm::event::{Event, KeyCode};
 use tracing::debug;
 
@@ -94,7 +94,7 @@ impl Terminal {
     debug!("Event::{:?}", event);
 
     if event == Event::Key(KeyCode::Char('c').into()) {
-      println!("Curosr position: {:?}\r", termcursor::position());
+      println!("Curosr position: {:?}\r", crossterm::cursor::position());
     }
 
     // quit loop
