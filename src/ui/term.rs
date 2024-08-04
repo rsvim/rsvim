@@ -87,25 +87,6 @@ impl Terminal {
 
   // Previous frame }
 
-  /// Accept a terminal (keyboard/mouse) event.
-  /// Returns `true` if continue event loop, `false` if quit.
-  pub async fn accept(&mut self, event: Event) -> bool {
-    println!("Event::{:?}\r", event);
-    debug!("Event::{:?}", event);
-
-    if event == Event::Key(KeyCode::Char('c').into()) {
-      println!("Curosr position: {:?}\r", crossterm::cursor::position());
-    }
-
-    // quit loop
-    if event == Event::Key(KeyCode::Esc.into()) {
-      return false;
-    }
-
-    // continue loop
-    true
-  }
-
   pub fn flush(&mut self) {
     self.prev_frame = self.frame.clone();
     self.frame.reset_dirty();
