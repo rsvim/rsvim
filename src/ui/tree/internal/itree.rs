@@ -1,6 +1,6 @@
 //! Internal tree structure that implements the widget tree.
 
-use parking_lot::Mutex;
+use parking_lot::{Mutex, MutexGuard};
 // use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Debug;
@@ -237,9 +237,11 @@ where
     while let Some(parent_and_child) = que.pop_front() {
       let pnode = parent_and_child.0;
       let cnode = parent_and_child.1;
-      *cnode.lock().depth_mut() = pnode.lock().depth() + 1;
-      *cnode.lock().actual_shape_mut() =
-        shapes::convert_to_actual_shape(*cnode.lock().shape(), *pnode.lock().actual_shape());
+      let pnode_lock = pnode.lock();
+      let mut cnode_lock = cnode.lock();
+      *cnode_lock.depth_mut() = pnode_lock.depth() + 1;
+      *cnode_lock.actual_shape_mut() =
+        shapes::convert_to_actual_shape(*cnode_lock.shape(), *pnode_lock.actual_shape());
 
       match self.children_ids.get(&cnode.lock().id()) {
         Some(descendant_ids) => {

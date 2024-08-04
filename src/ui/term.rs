@@ -1,6 +1,6 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
-use parking_lot::ReentrantMutex;
+use parking_lot::Mutex;
 use std::cell::RefCell;
 use std::sync::{Arc, Weak};
 
@@ -17,8 +17,8 @@ pub struct Terminal {
   prev_frame: Frame,
 }
 
-pub type TerminalArc = Arc<ReentrantMutex<RefCell<Terminal>>>;
-pub type TerminalWk = Weak<ReentrantMutex<RefCell<Terminal>>>;
+pub type TerminalArc = Arc<Mutex<RefCell<Terminal>>>;
+pub type TerminalWk = Weak<Mutex<RefCell<Terminal>>>;
 
 impl Terminal {
   pub fn new(size: U16Size) -> Self {
@@ -29,7 +29,7 @@ impl Terminal {
   }
 
   pub fn to_arc(t: Terminal) -> TerminalArc {
-    Arc::new(ReentrantMutex::new(RefCell::new(t)))
+    Arc::new(Mutex::new(RefCell::new(t)))
   }
 
   // Current frame {
