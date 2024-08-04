@@ -50,6 +50,7 @@ impl EventLoop {
       window_container_shape,
     );
     tree.insert(tree.root_id(), window_container_node);
+    debug!("new, insert window container: {:?}", window_container_id);
 
     let window_content = WindowContent::new();
     let window_content_id = window_content.id();
@@ -62,6 +63,7 @@ impl EventLoop {
       window_content_shape,
     );
     tree.insert(window_container_id, window_content_node);
+    debug!("new, insert window content: {:?}", window_content_id);
 
     let cursor = Cursor::new();
     let cursor_shape = IRect::new((0, 0), (1, 1));
