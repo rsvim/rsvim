@@ -37,6 +37,7 @@ impl Debug for Cursor {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     let style_formatter = CursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
+      .field("id", &self.id)
       .field("blinking", &self.blinking)
       .field("hidden", &self.hidden)
       .field("style", &style_formatter)
