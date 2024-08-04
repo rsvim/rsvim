@@ -47,6 +47,12 @@ impl WindowContent {
   }
 }
 
+impl Default for WindowContent {
+  fn default() -> Self {
+    WindowContent::new()
+  }
+}
+
 impl Widget for WindowContent {
   fn id(&self) -> WidgetId {
     self.id
