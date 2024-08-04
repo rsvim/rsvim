@@ -3,7 +3,7 @@
 use std::fmt::Debug;
 
 use crate::cart::{U16Pos, U16Rect};
-use crate::ui::frame::{CursorStyle, CursorStyleFormatter};
+use crate::ui::frame::{self, CursorStyle, CursorStyleFormatter};
 use crate::ui::term::TerminalWk;
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
@@ -57,7 +57,7 @@ impl Widget for Cursor {
       .unwrap()
       .lock()
       .frame_mut()
-      .set_cursor(crate::ui::frame::Cursor::new(
+      .set_cursor(frame::Cursor::new(
         pos,
         self.blinking,
         self.hidden,
