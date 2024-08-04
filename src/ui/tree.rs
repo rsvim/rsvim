@@ -116,7 +116,7 @@ pub struct Tree {
 
   // A collection of all VIM window container IDs
   // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)).
-  window_container_ids: BTreeSet<usize>,
+  window_container_ids: BTreeSet<WidgetId>,
 }
 
 pub type TreeArc = Arc<Mutex<Tree>>;
