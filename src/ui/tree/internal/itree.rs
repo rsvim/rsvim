@@ -1,6 +1,6 @@
 //! Internal tree structure that implements the widget tree.
 
-use parking_lot::{Mutex, MutexGuard};
+use parking_lot::Mutex;
 // use std::cell::RefCell;
 use std::collections::HashMap;
 use std::fmt::Debug;
