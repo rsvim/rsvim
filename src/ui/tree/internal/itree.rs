@@ -518,7 +518,7 @@ mod tests {
     let n9 = Tnode::new(v9, s9);
     let nid9 = n9.id();
 
-    /**
+    /*
      * The tree looks like:
      * ```
      *           n1
@@ -531,7 +531,7 @@ mod tests {
      *           / \
      *         n8   n9
      * ```
-     **/
+     */
     let mut tree = Itree::new(n1);
     tree.insert(nid1, n2);
     tree.insert(nid1, n3);
@@ -684,7 +684,7 @@ mod tests {
     let n9 = Tnode::new(v9, s9);
     let nid9 = n9.id();
 
-    /**
+    /*
      * The tree looks like:
      * ```
      *           n1
@@ -697,7 +697,7 @@ mod tests {
      *           / \
      *         n8   n9
      * ```
-     **/
+     */
     let mut tree = Itree::new(n1);
     tree.insert(nid1, n2);
     tree.insert(nid1, n3);
@@ -780,7 +780,7 @@ mod tests {
     let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
 
-    /**
+    /*
      * The tree looks like:
      * ```
      *           n1
@@ -793,7 +793,7 @@ mod tests {
      *      /
      *     n6
      * ```
-     **/
+     */
     let mut tree = Itree::new(n1);
     tree.insert(nid1, n2);
     tree.insert(nid1, n3);
@@ -842,14 +842,14 @@ mod tests {
       .collect::<Vec<Tnode>>();
     let nodes_ids: Vec<InodeId> = nodes.iter().map(|n| n.id()).collect();
 
-    /**
+    /*
      * The tree looks like:
      * ```
      *             n1
      *         /        \
      *       n2, n3, n4, n5
      * ```
-     **/
+     */
     let mut tree = Itree::new(nodes[0].clone());
     for i in 1..5 {
       tree.insert(nodes_ids[0], nodes[i].clone());
@@ -985,7 +985,7 @@ mod tests {
     let n9 = Tnode::new(v9, s9);
     let nid9 = n9.id();
 
-    /**
+    /*
      * The tree looks like:
      * ```
      *           n1
@@ -998,7 +998,7 @@ mod tests {
      *           / \
      *         n8   n9
      * ```
-     **/
+     */
     let mut tree = Itree::new(n1);
     tree.insert(nid1, n2);
     tree.insert(nid1, n3);
@@ -1072,7 +1072,7 @@ mod tests {
     let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
 
-    /**
+    /*
      * The tree looks like:
      * ```
      *           n1
@@ -1085,7 +1085,7 @@ mod tests {
      *      /
      *     n6
      * ```
-     **/
+     */
     let mut tree = Itree::new(n1);
     tree.insert(nid1, n2);
     tree.insert(nid1, n3);

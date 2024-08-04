@@ -221,14 +221,14 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
-  use crate::cart::{IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size};
-  use crate::geo_size_as;
-  use crate::test::log::init as test_log_init;
-  use crate::ui::term::Terminal;
-  use crate::ui::widget::{Cursor, RootContainer, Widget, WindowContent};
-  use std::sync::Once;
-  use tracing::info;
-
-  static INIT: Once = Once::new();
+  // use super::*;
+  // use crate::cart::{IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size};
+  // use crate::geo_size_as;
+  // use crate::test::log::init as test_log_init;
+  // use crate::ui::term::Terminal;
+  // use crate::ui::widget::{Cursor, RootContainer, Widget, WindowContent};
+  // use std::sync::Once;
+  // use tracing::info;
+  //
+  // static INIT: Once = Once::new();
 }
