@@ -752,7 +752,7 @@ mod tests {
     assert_eq!(tree.children_ids(nid9).unwrap().len(), 0);
 
     let contains_child = |parent_id: InodeId, child_id: InodeId| -> bool {
-      match tree.children_ids(parent_id) {
+      let result = match tree.children_ids(parent_id) {
         Some(children_ids) => {
           children_ids
             .iter()
@@ -762,7 +762,15 @@ mod tests {
             == 1
         }
         None => false,
-      }
+      };
+      info!(
+        "parent: {:?}, child: {:?}, children_ids: {:?}, contains: {:?}",
+        parent_id,
+        child_id,
+        tree.children_ids(parent_id),
+        result
+      );
+      result
     };
 
     assert!(contains_child(nid1, nid2));
@@ -775,7 +783,8 @@ mod tests {
     assert!(contains_child(nid2, nid5));
     assert!(!contains_child(nid2, nid7));
 
-    assert!(contains_child(nid3, nid7));
+    assert!(contains_child(nid3, nid6));
+    assert!(!contains_child(nid3, nid7));
     assert!(!contains_child(nid3, nid4));
     assert!(!contains_child(nid3, nid5));
 
