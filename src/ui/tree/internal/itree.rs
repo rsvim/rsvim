@@ -1027,7 +1027,7 @@ mod tests {
 
     for i in 0..5 {
       let node = tree.node(i).unwrap();
-      assert_node_value_eq!(node, i);
+      assert_node_value_eq!(node, i + 1);
     }
 
     let first1 = tree.children_ids(nodes_ids[0]).unwrap().first();
