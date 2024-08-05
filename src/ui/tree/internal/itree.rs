@@ -4,6 +4,7 @@ use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::{collections::VecDeque, iter::Iterator};
+use tracing::debug;
 
 use crate::cart::shapes;
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
@@ -137,6 +138,10 @@ where
     self.root_id
   }
 
+  pub fn node_ids(&self) -> Vec<InodeId> {
+    self.nodes.iter().map(|(k, _v)| *k).collect()
+  }
+
   pub fn parent_id(&self, id: InodeId) -> Option<&InodeId> {
     self.parent_ids.get(&id)
   }
@@ -188,6 +193,14 @@ where
   pub fn insert(&mut self, parent_id: InodeId, child_node: Inode<T>) -> Option<&Mutex<Inode<T>>> {
     // Returns `None` if `parent_id` not exists.
     self.nodes.get(&parent_id)?;
+
+    debug!(
+      "parent_id:{:?}, node_ids:{:?}, children_ids:{:?}",
+      parent_id,
+      self.node_ids(),
+      self.children_ids
+    );
+    assert!(self.children_ids.contains_key(&parent_id));
 
     // Insert node.
     let child_id = child_node.id();

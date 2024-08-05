@@ -23,9 +23,10 @@ To develop the code, please setup with:
 
 To run the unit tests, please run with:
 
-1. Run all test cases with `RUST_LOG=debug cargo test`.
+1. Run all test cases with `RUST_BACKTRACE=full RUST_LOG=debug cargo test`, it enables:
 
-   > It enables all the logs over `debug` level, and prints the logs.
+   > - All the logs over `debug` level, and prints the logs.
+   > - The backtrace when panics.
 
 2. List all test cases with `cargo test -- --list`.
 3. Run a specific test case with `cargo test {TEST_NAME}`, the `TEST_NAME` is the output items from the 2nd step.
@@ -35,9 +36,10 @@ To run the unit tests, please run with:
 To debug the code, please run with:
 
 1. Build the executable binary `rsvim` with `cargo build`.
-2. Run with `RUST_LOG=debug ./target/debug/rsvim`.
+2. Run with `RUST_BACKTRACE=full RUST_LOG=debug ./target/debug/rsvim`, it enables:
 
-   > It enables all the logs over `debug` level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
+   > - All the logs over `debug` level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
+   > - The backtrace when panics.
 
 ## Documentation
 
