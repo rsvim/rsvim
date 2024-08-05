@@ -237,7 +237,6 @@ mod tests {
   use crate::test::log::init as test_log_init;
   use crate::ui::term::Terminal;
   use std::sync::Once;
-  use tracing::info;
 
   static INIT: Once = Once::new();
 

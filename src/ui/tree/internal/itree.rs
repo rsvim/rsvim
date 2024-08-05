@@ -985,7 +985,8 @@ mod tests {
     INIT.call_once(|| test_log_init());
 
     let shape = IRect::new((0, 0), (10, 10));
-    let nodes: Vec<Tnode> = vec![1, 2, 3, 4, 5]
+    let node_values: Vec<usize> = vec![1, 2, 3, 4, 5];
+    let nodes: Vec<Tnode> = node_values
       .iter()
       .map(|value| Tvalue::new(*value as usize))
       .map(|tv| Tnode::new(tv, shape))
@@ -1013,9 +1014,10 @@ mod tests {
       assert!(tree.children_ids(nodes_ids[i]).unwrap().is_empty());
     }
 
-    for i in 0..5 {
-      let node = tree.node(i).unwrap();
-      assert_node_value_eq!(node, i + 1);
+    for (i, nid) in nodes_ids.iter().enumerate() {
+      let node = tree.node(*nid).unwrap();
+      let expect = node_values[i];
+      assert_node_value_eq!(node, expect);
     }
 
     let first1 = tree.children_ids(nodes_ids[0]).unwrap().first();
