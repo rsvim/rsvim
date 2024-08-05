@@ -51,37 +51,33 @@ where
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(node) = self.queue.pop_front() {
-      match node.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
-        Some(node_guard) => {
-          match self.tree.children_ids(node_guard.id()) {
-            Some(children_ids) => match self.order {
-              ItreeIterateOrder::Ascent => {
-                for child_id in children_ids.iter() {
-                  match self.tree.node(*child_id) {
-                    Some(child) => {
-                      self.queue.push_back(child);
-                    }
-                    None => { /* Skip */ }
-                  }
+      let node_guard = node
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap();
+      match self.tree.children_ids(node_guard.id()) {
+        Some(children_ids) => match self.order {
+          ItreeIterateOrder::Ascent => {
+            for child_id in children_ids.iter() {
+              match self.tree.node(*child_id) {
+                Some(child) => {
+                  self.queue.push_back(child);
                 }
+                None => { /* Skip */ }
               }
-              ItreeIterateOrder::Descent => {
-                for child_id in children_ids.iter().rev() {
-                  match self.tree.node(*child_id) {
-                    Some(child) => {
-                      self.queue.push_back(child);
-                    }
-                    None => { /* Skip */ }
-                  }
-                }
-              }
-            },
-            None => { /* Skip */ }
+            }
           }
-        }
-        None => {
-          unreachable!("Timeout locking node {:?}", node)
-        }
+          ItreeIterateOrder::Descent => {
+            for child_id in children_ids.iter().rev() {
+              match self.tree.node(*child_id) {
+                Some(child) => {
+                  self.queue.push_back(child);
+                }
+                None => { /* Skip */ }
+              }
+            }
+          }
+        },
+        None => { /* Skip */ }
       }
       return Some(node);
     }
@@ -234,10 +230,13 @@ where
       .iter()
       .enumerate()
       .filter(|(_index, cid)| match self.nodes.get(cid) {
-        Some(cnode) => match cnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
-          Some(cnode_guard) => *cnode_guard.zindex() > child_zindex,
-          None => unreachable!("Timeout locking cnode: {:?}", cnode),
-        },
+        Some(cnode) => {
+          *cnode
+            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+            .unwrap()
+            .zindex()
+            > child_zindex
+        }
         None => false,
       })
       .map(|(index, _cid)| index)
@@ -267,18 +266,16 @@ where
     let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
     {
       let pnode = self.nodes.get(&parent_id).unwrap();
-      match pnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
-        Some(pnode_guard) => {
-          let pnode_depth = *pnode_guard.depth();
-          let pnode_actual_shape = *pnode_guard.actual_shape();
-          que.push_back((
-            self.nodes.get(&child_id).unwrap(),
-            pnode_depth,
-            pnode_actual_shape,
-          ));
-        }
-        None => unreachable!("Timeout locking pnode: {:?}", pnode),
-      }
+      let pnode_guard = pnode
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap();
+      let pnode_depth = *pnode_guard.depth();
+      let pnode_actual_shape = *pnode_guard.actual_shape();
+      que.push_back((
+        self.nodes.get(&child_id).unwrap(),
+        pnode_depth,
+        pnode_actual_shape,
+      ));
     }
 
     // Iterate all descendants, and update their attributes.
@@ -288,34 +285,29 @@ where
       let pnode_actual_shape = child_and_parent.2;
 
       {
-        match cnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
-          Some(mut cnode_guard) => {
-            let cnode_id = cnode_guard.id();
-            let cnode_depth = pnode_depth + 1;
-            let cnode_shape = *cnode_guard.shape();
-            let cnode_actual_shape =
-              shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
+        let mut cnode_guard = cnode
+          .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+          .unwrap();
+        let cnode_id = cnode_guard.id();
+        let cnode_depth = pnode_depth + 1;
+        let cnode_shape = *cnode_guard.shape();
+        let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
 
-            *cnode_guard.depth_mut() = cnode_depth;
-            *cnode_guard.actual_shape_mut() = cnode_actual_shape;
+        *cnode_guard.depth_mut() = cnode_depth;
+        *cnode_guard.actual_shape_mut() = cnode_actual_shape;
 
-            match self.children_ids.get(&cnode_id) {
-              Some(descendant_ids) => {
-                for dnode_id in descendant_ids.iter() {
-                  match self.nodes.get(dnode_id) {
-                    Some(dnode) => {
-                      que.push_back((dnode, cnode_depth, cnode_actual_shape));
-                    }
-                    None => { /* Skip */ }
-                  }
+        match self.children_ids.get(&cnode_id) {
+          Some(descendant_ids) => {
+            for dnode_id in descendant_ids.iter() {
+              match self.nodes.get(dnode_id) {
+                Some(dnode) => {
+                  que.push_back((dnode, cnode_depth, cnode_actual_shape));
                 }
+                None => { /* Skip */ }
               }
-              None => { /* Skip */ }
             }
           }
-          None => {
-            unreachable!("Timeout locking cnode: {:?}", cnode)
-          }
+          None => { /* Skip */ }
         }
       }
     }
@@ -353,6 +345,7 @@ where
 
 #[cfg(test)]
 mod tests {
+  use parking_lot::{Mutex, MutexGuard};
   use std::sync::Once;
   use tracing::info;
 
@@ -379,6 +372,61 @@ mod tests {
 
   static INIT: Once = Once::new();
 
+  fn assert_node_id_eq(node: &Mutex<Tnode>, id: InodeId) {
+    assert!(
+      node
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+        .id()
+        == id
+    );
+  }
+
+  fn print_node(node: &Mutex<Tnode>, name: &str) {
+    info!(
+      "{}: {:?}",
+      name,
+      node
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+    );
+  }
+
+  fn assert_parent_child_nodes_depth(parent: &Mutex<Tnode>, child: &Mutex<Tnode>) {
+    assert_eq!(
+      *child
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+        .depth()
+        + 1,
+      *parent
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+        .depth()
+    );
+  }
+
+  fn assert_node_actual_shape_eq(node: &Mutex<Tnode>, expect: U16Rect) {
+    assert_eq!(
+      *node
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+        .actual_shape(),
+      expect
+    );
+  }
+
+  fn assert_node_value_eq(node: &Mutex<Tnode>, expect: usize) {
+    assert_eq!(
+      node
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+        .value()
+        .value,
+      expect
+    );
+  }
+
   #[test]
   fn new() {
     INIT.call_once(|| {
@@ -400,11 +448,11 @@ mod tests {
     assert!(tree.children_ids(nid1).unwrap().is_empty());
 
     for node in tree.iter() {
-      assert!(node.lock().id() == nid1);
+      assert_node_id_eq(node, nid1);
     }
 
     for node in tree.ordered_iter(ItreeIterateOrder::Descent) {
-      assert!(node.lock().id() == nid1);
+      assert_node_id_eq(node, nid1);
     }
   }
 
@@ -468,12 +516,12 @@ mod tests {
     let n4 = tree.node(nid4).unwrap();
     let n5 = tree.node(nid5).unwrap();
     let n6 = tree.node(nid6).unwrap();
-    info!("n1:{:?}", n1.lock());
-    info!("n2:{:?}", n2.lock());
-    info!("n3:{:?}", n3.lock());
-    info!("n4:{:?}", n4.lock());
-    info!("n5:{:?}", n5.lock());
-    info!("n6:{:?}", n6.lock());
+    print_node(n1, "n1");
+    print_node(n2, "n2");
+    print_node(n3, "n3");
+    print_node(n4, "n4");
+    print_node(n5, "n5");
+    print_node(n6, "n6");
 
     assert_eq!(nid1 + 1, nid2);
     assert_eq!(nid2 + 1, nid3);
@@ -481,12 +529,12 @@ mod tests {
     assert_eq!(nid4 + 1, nid5);
     assert_eq!(nid5 + 1, nid6);
 
-    assert_eq!(*n1.lock().depth() + 1, *n2.lock().depth());
-    assert_eq!(*n1.lock().depth() + 1, *n3.lock().depth());
-    assert_eq!(*n2.lock().depth() + 1, *n4.lock().depth());
-    assert_eq!(*n2.lock().depth() + 1, *n5.lock().depth());
-    assert_eq!(*n2.lock().depth() + 1, *n6.lock().depth());
-    assert_eq!(*n3.lock().depth() + 1, *n6.lock().depth());
+    assert_parent_child_nodes_depth(n1, n2);
+    assert_parent_child_nodes_depth(n1, n3);
+    assert_parent_child_nodes_depth(n2, n4);
+    assert_parent_child_nodes_depth(n2, n5);
+    assert_parent_child_nodes_depth(n2, n6);
+    assert_parent_child_nodes_depth(n3, n6);
 
     assert_eq!(tree.children_ids(nid1).unwrap().len(), 2);
     assert_eq!(tree.children_ids(nid2).unwrap().len(), 2);
@@ -609,15 +657,15 @@ mod tests {
     let n7 = tree.node(nid7).unwrap();
     let n8 = tree.node(nid8).unwrap();
     let n9 = tree.node(nid9).unwrap();
-    info!("n1:{:?}", n1.lock().value());
-    info!("n2:{:?}", n2.lock().value());
-    info!("n3:{:?}", n3.lock().value());
-    info!("n4:{:?}", n4.lock().value());
-    info!("n5:{:?}", n5.lock().value());
-    info!("n6:{:?}", n6.lock().value());
-    info!("n7:{:?}", n7.lock().value());
-    info!("n8:{:?}", n8.lock().value());
-    info!("n9:{:?}", n9.lock().value());
+    print_node(n1, "n1");
+    print_node(n2, "n2");
+    print_node(n3, "n3");
+    print_node(n4, "n4");
+    print_node(n5, "n5");
+    print_node(n6, "n6");
+    print_node(n7, "n7");
+    print_node(n8, "n8");
+    print_node(n9, "n9");
 
     assert_eq!(nid1 + 1, nid2);
     assert_eq!(nid2 + 1, nid3);
@@ -628,15 +676,15 @@ mod tests {
     assert_eq!(nid7 + 1, nid8);
     assert_eq!(nid8 + 1, nid9);
 
-    assert_eq!(*n1.lock().depth() + 1, *n2.lock().depth());
-    assert_eq!(*n1.lock().depth() + 1, *n3.lock().depth());
-    assert_eq!(*n2.lock().depth() + 1, *n4.lock().depth());
-    assert_eq!(*n2.lock().depth() + 1, *n5.lock().depth());
-    assert_eq!(*n2.lock().depth() + 1, *n6.lock().depth());
-    assert_eq!(*n3.lock().depth() + 1, *n6.lock().depth());
-    assert_eq!(*n5.lock().depth() + 1, *n7.lock().depth());
-    assert_eq!(*n7.lock().depth() + 1, *n8.lock().depth());
-    assert_eq!(*n7.lock().depth() + 1, *n9.lock().depth());
+    assert_parent_child_nodes_depth(n1, n2);
+    assert_parent_child_nodes_depth(n1, n3);
+    assert_parent_child_nodes_depth(n2, n4);
+    assert_parent_child_nodes_depth(n2, n5);
+    assert_parent_child_nodes_depth(n2, n6);
+    assert_parent_child_nodes_depth(n3, n6);
+    assert_parent_child_nodes_depth(n5, n7);
+    assert_parent_child_nodes_depth(n7, n8);
+    assert_parent_child_nodes_depth(n7, n9);
 
     assert_eq!(tree.children_ids(nid1).unwrap().len(), 2);
     assert_eq!(tree.children_ids(nid2).unwrap().len(), 2);
@@ -775,23 +823,21 @@ mod tests {
     let n7 = tree.node(nid7).unwrap();
     let n8 = tree.node(nid8).unwrap();
     let n9 = tree.node(nid9).unwrap();
-    info!("n1:{:?}", n1.lock().value());
-    info!("n2:{:?}", n2.lock().value());
-    info!("n3:{:?}", n3.lock().value());
-    info!("n4:{:?}", n4.lock().value());
-    info!("n5:{:?}", n5.lock().value());
-    info!("n6:{:?}", n6.lock().value());
-    info!("n7:{:?}", n7.lock().value());
-    info!("n8:{:?}", n8.lock().value());
-    info!("n9:{:?}", n9.lock().value());
+    print_node(n1, "n1");
+    print_node(n2, "n2");
+    print_node(n3, "n3");
+    print_node(n4, "n4");
+    print_node(n5, "n5");
+    print_node(n6, "n6");
+    print_node(n7, "n7");
+    print_node(n8, "n8");
+    print_node(n9, "n9");
 
     let expects = vec![us1, us2, us3, us4, us5, us6, us7, us8, us9];
     let nodes = vec![n1, n2, n3, n4, n5, n6, n7, n8, n9];
     for i in 0..9 {
       let expect = expects[i];
-      let node = &nodes[i].lock();
-      let actual = node.actual_shape();
-      assert_eq!(expect, *actual);
+      assert_node_actual_shape_eq(nodes[i], expect);
     }
   }
 
@@ -865,21 +911,19 @@ mod tests {
     let n4 = tree.node(nid4).unwrap();
     let n5 = tree.node(nid5).unwrap();
     let n6 = tree.node(nid6).unwrap();
-    info!("n1:{:?}", n1.lock().value());
-    info!("n2:{:?}", n2.lock().value());
-    info!("n3:{:?}", n3.lock().value());
-    info!("n4:{:?}", n4.lock().value());
-    info!("n5:{:?}", n5.lock().value());
-    info!("n6:{:?}", n6.lock().value());
+    print_node(n1, "n1");
+    print_node(n2, "n2");
+    print_node(n3, "n3");
+    print_node(n4, "n4");
+    print_node(n5, "n5");
+    print_node(n6, "n6");
 
     let expects = vec![us1, us2, us3, us4, us5, us6];
     let nodes = vec![n1, n2, n3, n4, n5, n6];
     for i in 0..9 {
       let expect = expects[i];
       let node = &nodes[i];
-      let node = node.lock();
-      let actual = node.actual_shape();
-      assert_eq!(expect, *actual);
+      assert_node_actual_shape_eq(node, expect);
     }
   }
 
@@ -921,7 +965,7 @@ mod tests {
     }
 
     for i in 0..5 {
-      assert_eq!(i, tree.node(i).unwrap().lock().value().value);
+      assert_node_value_eq(tree.node(i).unwrap(), i);
     }
 
     let first1 = tree.children_ids(nodes_ids[0]).unwrap().first();
@@ -977,18 +1021,18 @@ mod tests {
 
     assert!(remove0.is_none());
     assert!(remove2.is_some());
-    assert!(remove2.unwrap().lock().value().value == 3);
+    assert_node_value_eq(&remove2.unwrap(), 3);
     assert!(remove4.is_some());
-    assert!(remove4.unwrap().lock().value().value == 5);
+    assert_node_value_eq(&remove4.unwrap(), 5);
 
     let remove1 = tree.remove(node_ids[1]);
     let remove3 = tree.remove(node_ids[3]);
 
     // 1,2,(3),4,(5)
     assert!(remove1.is_some());
-    assert!(remove1.unwrap().lock().value().value == 2);
+    assert_node_value_eq(&remove1.unwrap(), 2);
     assert!(remove3.is_some());
-    assert!(remove3.unwrap().lock().value().value == 4);
+    assert_node_value_eq(&remove3.unwrap(), 4);
   }
 
   #[test]
@@ -1076,15 +1120,15 @@ mod tests {
     let n7 = tree.node(nid7).unwrap();
     let n8 = tree.node(nid8).unwrap();
     let n9 = tree.node(nid9).unwrap();
-    info!("n1:{:?}", n1.lock().value());
-    info!("n2:{:?}", n2.lock().value());
-    info!("n3:{:?}", n3.lock().value());
-    info!("n4:{:?}", n4.lock().value());
-    info!("n5:{:?}", n5.lock().value());
-    info!("n6:{:?}", n6.lock().value());
-    info!("n7:{:?}", n7.lock().value());
-    info!("n8:{:?}", n8.lock().value());
-    info!("n9:{:?}", n9.lock().value());
+    print_node(n1, "n1");
+    print_node(n2, "n2");
+    print_node(n3, "n3");
+    print_node(n4, "n4");
+    print_node(n5, "n5");
+    print_node(n6, "n6");
+    print_node(n7, "n7");
+    print_node(n8, "n8");
+    print_node(n9, "n9");
   }
 
   #[test]
@@ -1156,21 +1200,19 @@ mod tests {
     let n4 = tree.node(nid4).unwrap();
     let n5 = tree.node(nid5).unwrap();
     let n6 = tree.node(nid6).unwrap();
-    info!("n1:{:?}", n1.lock().value());
-    info!("n2:{:?}", n2.lock().value());
-    info!("n3:{:?}", n3.lock().value());
-    info!("n4:{:?}", n4.lock().value());
-    info!("n5:{:?}", n5.lock().value());
-    info!("n6:{:?}", n6.lock().value());
+    print_node(n1, "n1");
+    print_node(n2, "n2");
+    print_node(n3, "n3");
+    print_node(n4, "n4");
+    print_node(n5, "n5");
+    print_node(n6, "n6");
 
     let expects = vec![us1, us2, us3, us4, us5, us6];
     let nodes = vec![n1, n2, n3, n4, n5, n6];
     for i in 0..9 {
       let expect = expects[i];
       let node = &nodes[i];
-      let node = node.lock();
-      let actual = node.actual_shape();
-      assert_eq!(expect, *actual);
+      assert_node_actual_shape_eq(node, expect);
     }
   }
 }
