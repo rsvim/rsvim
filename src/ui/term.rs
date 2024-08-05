@@ -95,7 +95,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn terminal_new() {
+  fn new1() {
     let t = Terminal::new(U16Size::new(3, 4));
     assert_eq!(t.frame().size, t.prev_frame().size);
     assert_eq!(t.frame().cursor, t.prev_frame().cursor);

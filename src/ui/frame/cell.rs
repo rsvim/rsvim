@@ -100,7 +100,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn cell_default() {
+  fn default1() {
     let c = Cell::default();
     assert_eq!(c.symbol(), " ");
     assert_eq!(c.fg(), Color::Reset);
@@ -109,7 +109,7 @@ mod tests {
   }
 
   #[test]
-  fn cell_new() {
+  fn new1() {
     let c1 = Cell::new(
       CompactString::const_new(" "),
       Color::Reset,
