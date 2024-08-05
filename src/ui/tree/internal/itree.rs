@@ -223,7 +223,7 @@ where
     // Map parent ID => children IDs.
     // It inserts child ID to the `children_ids` vector of the parent, sorted by the z-index.
     // For the children that have the same z-index value, it inserts at the end of those children.
-    debug!("before get higher zindex pos");
+    // debug!("before get higher zindex pos");
     let higher_zindex_pos: Vec<usize> = self
       .children_ids
       .get(&parent_id)
@@ -242,7 +242,7 @@ where
       })
       .map(|(index, _cid)| index)
       .collect();
-    debug!("after get higher zindex pos");
+    // debug!("after get higher zindex pos");
     match higher_zindex_pos.first() {
       Some(insert_pos) => {
         self
@@ -265,7 +265,7 @@ where
     // Tuple of (child, parent depth, parent actual shape)
     type ChildAndParentPair<'a, T> = (&'a Mutex<Inode<T>>, usize, U16Rect);
 
-    debug!("before create que");
+    // debug!("before create que");
     let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
     {
       let pnode = self.nodes.get(&parent_id).unwrap();
@@ -280,7 +280,7 @@ where
         pnode_actual_shape,
       ));
     }
-    debug!("after create que");
+    // debug!("after create que");
 
     // Iterate all descendants, and update their attributes.
     while let Some(child_and_parent) = que.pop_front() {
@@ -289,7 +289,7 @@ where
       let pnode_actual_shape = child_and_parent.2;
 
       {
-        debug!("before update cnode attr: {:?}", cnode);
+        // debug!("before update cnode attr: {:?}", cnode);
         let mut cnode_guard = cnode
           .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
           .unwrap();
@@ -300,23 +300,23 @@ where
 
         *cnode_guard.depth_mut() = cnode_depth;
         *cnode_guard.actual_shape_mut() = cnode_actual_shape;
-        debug!("after update cnode attr: {:?}", cnode_id);
+        // debug!("after update cnode attr: {:?}", cnode_id);
 
-        debug!(
-          "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
-          cnode_id, self.children_ids
-        );
+        // debug!(
+        //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
+        //   cnode_id, self.children_ids
+        // );
         match self.children_ids.get(&cnode_id) {
           Some(descendant_ids) => {
             for dnode_id in descendant_ids.iter() {
-              debug!("before push dnode: {:?}", dnode_id);
+              // debug!("before push dnode: {:?}", dnode_id);
               match self.nodes.get(dnode_id) {
                 Some(dnode) => {
                   que.push_back((dnode, cnode_depth, cnode_actual_shape));
                 }
                 None => { /* Skip */ }
               }
-              debug!("after push dnode: {:?}", dnode_id);
+              // debug!("after push dnode: {:?}", dnode_id);
             }
           }
           None => { /* Skip */ }
@@ -1195,7 +1195,6 @@ mod tests {
     let us6 = U16Rect::new((8, 13), (15, 20));
     let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
-    info!("step-1: created nodes");
 
     /*
      * The tree looks like:
@@ -1212,17 +1211,11 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    info!("step-2: new tree with n1");
     tree.insert(nid1, n2);
-    info!("step-2: insert n2");
     tree.insert(nid1, n3);
-    info!("step-2: insert n3");
     tree.insert(nid2, n4);
-    info!("step-2: insert n4");
     tree.insert(nid4, n5);
-    info!("step-2: insert n5");
     tree.insert(nid5, n6);
-    info!("step-2: inesrt n6, inserted all nodes");
 
     let n1 = tree.node(nid1).unwrap();
     let n2 = tree.node(nid2).unwrap();
@@ -1230,7 +1223,6 @@ mod tests {
     let n4 = tree.node(nid4).unwrap();
     let n5 = tree.node(nid5).unwrap();
     let n6 = tree.node(nid6).unwrap();
-    info!("step-3: got nodes");
     // print_node(n1, "n1");
     // print_node(n2, "n2");
     // print_node(n3, "n3");
@@ -1243,10 +1235,6 @@ mod tests {
     for i in 0..9 {
       let expect = expects[i];
       let node = &nodes[i];
-      info!(
-        "step-4: assert nodes, i:{:?}, expect:{:?}, node:{:?}",
-        i, expect, node
-      );
       assert_node_actual_shape_eq(node, expect);
     }
   }

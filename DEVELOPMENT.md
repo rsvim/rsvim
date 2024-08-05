@@ -45,8 +45,10 @@ To run the unit tests, please run with:
    > - All the logs over `debug` level, and prints the logs.
    > - The backtrace when panics.
 
-2. List all test cases with `cargo test -- --list`.
-3. Run a specific test case with `cargo test {TEST_NAME}`, the `TEST_NAME` is the output items from the 2nd step.
+2. Run a specific test case with:
+
+   > 1. First list all test cases with `cargo test -- --list`.
+   > 2. Run the specific test with `cargo test {TEST_NAME}`, the `TEST_NAME` is the output test names in above step.
 
 ### Debugging
 
