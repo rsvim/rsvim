@@ -19,7 +19,20 @@ To develop the code, please setup with:
 
   > Recommend using [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
 
-## Testing
+### Environment Variables
+
+This project uses environment variables to globally control internal behaviors.
+
+To configure debugging/testing behaviors, please setup with:
+
+- `RUST_BACKTRACE`: Print all backtraces when panics.
+- `RUST_LOG`: Set logging level, by default it's `info`. To debug the code, please set to `debug`.
+
+To configure other internal behaviors, please setup with:
+
+- `RSVIM_MUTEX_TIMEOUT`: Set the threading locks timeout by seconds, by default it's [`u64::MAX`](https://doc.rust-lang.org/1.80.0/std/primitive.u64.html#associatedconstant.MAX), i.e. forever.
+
+### Testing
 
 To run the unit tests, please run with:
 
@@ -31,7 +44,7 @@ To run the unit tests, please run with:
 2. List all test cases with `cargo test -- --list`.
 3. Run a specific test case with `cargo test {TEST_NAME}`, the `TEST_NAME` is the output items from the 2nd step.
 
-## Debugging
+### Debugging
 
 To debug the code, please run with:
 
