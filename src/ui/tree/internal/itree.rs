@@ -462,7 +462,7 @@ mod tests {
   }
 
   macro_rules! assert_node_value_eq {
-    ($node: expr, $expect: expr) => {
+    ($node: ident, $expect: expr) => {
       loop {
         assert_eq!(
           $node
@@ -1014,7 +1014,8 @@ mod tests {
     }
 
     for i in 0..5 {
-      assert_node_value_eq!(tree.node(i).unwrap(), i);
+      let node = tree.node(i).unwrap();
+      assert_node_value_eq!(node, i);
     }
 
     let first1 = tree.children_ids(nodes_ids[0]).unwrap().first();
@@ -1070,18 +1071,22 @@ mod tests {
 
     assert!(remove0.is_none());
     assert!(remove2.is_some());
-    assert_node_value_eq(&remove2.unwrap(), 3);
+    let remove2 = &remove2.unwrap();
+    assert_node_value_eq!(remove2, 3);
     assert!(remove4.is_some());
-    assert_node_value_eq(&remove4.unwrap(), 5);
+    let remove4 = &remove4.unwrap();
+    assert_node_value_eq!(remove4, 5);
 
     let remove1 = tree.remove(node_ids[1]);
     let remove3 = tree.remove(node_ids[3]);
 
     // 1,2,(3),4,(5)
     assert!(remove1.is_some());
-    assert_node_value_eq(&remove1.unwrap(), 2);
+    let remove1 = &remove1.unwrap();
+    assert_node_value_eq!(remove1, 2);
     assert!(remove3.is_some());
-    assert_node_value_eq(&remove3.unwrap(), 4);
+    let remove3 = &remove3.unwrap();
+    assert_node_value_eq!(remove3, 4);
   }
 
   #[test]
