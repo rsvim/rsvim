@@ -21,7 +21,11 @@ To develop the code, please setup with:
 
 ### Environment Variables
 
-This project uses environment variables to globally control internal behaviors.
+This project uses environment variables to globally control internal behaviors, i.e. you can run the `rsvim` command with prepending some env vars. For example:
+
+```bash
+RUST_BACKTRACE=full RUST_LOG=debug cargo test
+```
 
 To configure debugging/testing behaviors, please setup with:
 
@@ -30,7 +34,7 @@ To configure debugging/testing behaviors, please setup with:
 
 To configure other internal behaviors, please setup with:
 
-- `RSVIM_MUTEX_TIMEOUT`: Set the threading locks timeout by seconds, by default it's [`u64::MAX`](https://doc.rust-lang.org/1.80.0/std/primitive.u64.html#associatedconstant.MAX), i.e. forever.
+- `RSVIM_MUTEX_TIMEOUT`: Set the threading locks timeout by seconds, by default it's [`u64::MAX`](https://doc.rust-lang.org/1.80.0/std/primitive.u64.html#associatedconstant.MAX) (forever).
 
 ### Testing
 
