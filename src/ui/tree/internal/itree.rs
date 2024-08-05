@@ -3,10 +3,12 @@
 use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::fmt::Debug;
+use std::time::Duration;
 use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
 
 use crate::cart::shapes;
+use crate::glovar;
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 
 #[derive(Debug, Default)]
@@ -49,30 +51,37 @@ where
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(node) = self.queue.pop_front() {
-      match self.tree.children_ids(node.lock().id()) {
-        Some(children_ids) => match self.order {
-          ItreeIterateOrder::Ascent => {
-            for child_id in children_ids.iter() {
-              match self.tree.node(*child_id) {
-                Some(child) => {
-                  self.queue.push_back(child);
+      match node.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
+        Some(node_lock) => {
+          match self.tree.children_ids(node_lock.id()) {
+            Some(children_ids) => match self.order {
+              ItreeIterateOrder::Ascent => {
+                for child_id in children_ids.iter() {
+                  match self.tree.node(*child_id) {
+                    Some(child) => {
+                      self.queue.push_back(child);
+                    }
+                    None => { /* Skip */ }
+                  }
                 }
-                None => { /* Skip */ }
               }
-            }
-          }
-          ItreeIterateOrder::Descent => {
-            for child_id in children_ids.iter().rev() {
-              match self.tree.node(*child_id) {
-                Some(child) => {
-                  self.queue.push_back(child);
+              ItreeIterateOrder::Descent => {
+                for child_id in children_ids.iter().rev() {
+                  match self.tree.node(*child_id) {
+                    Some(child) => {
+                      self.queue.push_back(child);
+                    }
+                    None => { /* Skip */ }
+                  }
                 }
-                None => { /* Skip */ }
               }
-            }
+            },
+            None => { /* Skip */ }
           }
-        },
-        None => { /* Skip */ }
+        }
+        None => {
+          unreachable!("Timeout locking node {:?}", node)
+        }
       }
       return Some(node);
     }
