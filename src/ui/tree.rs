@@ -139,10 +139,8 @@ impl Tree {
         terminal_size.height() as isize,
       ),
     );
-    let actual_shape: U16Rect = geo_rect_as!(shape, u16);
     let root_container = RootContainer::new();
-    let mut root_node = TreeNode::new(WidgetValue::RootContainer(root_container), shape);
-    *root_node.actual_shape_mut() = actual_shape;
+    let root_node = TreeNode::new(WidgetValue::RootContainer(root_container), shape);
     Tree {
       terminal,
       base: Itree::new(root_node),
