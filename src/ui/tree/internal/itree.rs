@@ -148,7 +148,7 @@ where
   }
 
   pub fn node_ids(&self) -> Vec<InodeId> {
-    self.nodes.keys().map(|k| *k).collect()
+    self.nodes.keys().copied().collect()
   }
 
   pub fn parent_id(&self, id: InodeId) -> Option<&InodeId> {
@@ -236,10 +236,7 @@ where
       .filter(|(_index, cid)| match self.nodes.get(cid) {
         Some(cnode) => match cnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
           Some(cnode_guard) => *cnode_guard.zindex() > child_zindex,
-          None => {
-            unreachable!("Timeout locking cnode: {:?}", cnode);
-            false
-          }
+          None => unreachable!("Timeout locking cnode: {:?}", cnode),
         },
         None => false,
       })
