@@ -434,15 +434,15 @@ mod tests {
     ($parent: ident, $child: ident) => {
       loop {
         assert_eq!(
+          *$parent
+            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+            .unwrap()
+            .depth(),
           *$child
             .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
             .unwrap()
             .depth()
             + 1,
-          *$parent
-            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-            .unwrap()
-            .depth()
         );
         break;
       }
