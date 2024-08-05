@@ -302,6 +302,10 @@ where
         *cnode_guard.actual_shape_mut() = cnode_actual_shape;
         debug!("after update cnode attr: {:?}", cnode_id);
 
+        debug!(
+          "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
+          cnode_id, self.children_ids
+        );
         match self.children_ids.get(&cnode_id) {
           Some(descendant_ids) => {
             for dnode_id in descendant_ids.iter() {
@@ -353,7 +357,7 @@ where
 
 #[cfg(test)]
 mod tests {
-  use parking_lot::{Mutex, MutexGuard};
+  use parking_lot::Mutex;
   use std::sync::Once;
   use tracing::info;
 
@@ -366,12 +370,25 @@ mod tests {
 
   #[derive(Copy, Clone, Debug, Default)]
   struct Tvalue {
+    id: InodeId,
     pub value: usize,
+  }
+
+  impl Tvalue {
+    pub fn new(value: usize) -> Self {
+      Tvalue {
+        id: uuid::next(),
+        value,
+      }
+    }
+    pub fn value(&self) -> usize {
+      self.value
+    }
   }
 
   impl InodeValue for Tvalue {
     fn id(&self) -> InodeId {
-      self.value
+      self.id
     }
   }
 
@@ -441,7 +458,7 @@ mod tests {
       test_log_init();
     });
 
-    let v1 = Tvalue { value: 1 };
+    let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (1, 1));
     let prev_id = uuid::next();
     let n1 = Tnode::new(v1, s1);
@@ -470,32 +487,32 @@ mod tests {
       test_log_init();
     });
 
-    let v1 = Tvalue { value: 1 };
+    let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (1, 1));
     let n1 = Tnode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue { value: 2 };
+    let v2 = Tvalue::new(2);
     let s2 = IRect::new((0, 0), (1, 1));
     let n2 = Tnode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue { value: 3 };
+    let v3 = Tvalue::new(3);
     let s3 = IRect::new((0, 0), (1, 1));
     let n3 = Tnode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue { value: 4 };
+    let v4 = Tvalue::new(4);
     let s4 = IRect::new((0, 0), (1, 1));
     let n4 = Tnode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue { value: 5 };
+    let v5 = Tvalue::new(5);
     let s5 = IRect::new((0, 0), (1, 1));
     let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue { value: 6 };
+    let v6 = Tvalue::new(6);
     let s6 = IRect::new((0, 0), (1, 1));
     let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
@@ -586,47 +603,47 @@ mod tests {
       test_log_init();
     });
 
-    let v1 = Tvalue { value: 1 };
+    let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let n1 = Tnode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue { value: 2 };
+    let v2 = Tvalue::new(2);
     let s2 = IRect::new((0, 0), (15, 15));
     let n2 = Tnode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue { value: 3 };
+    let v3 = Tvalue::new(3);
     let s3 = IRect::new((10, 10), (18, 19));
     let n3 = Tnode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue { value: 4 };
+    let v4 = Tvalue::new(4);
     let s4 = IRect::new((3, 5), (20, 14));
     let n4 = Tnode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue { value: 5 };
+    let v5 = Tvalue::new(5);
     let s5 = IRect::new((-3, -5), (10, 20));
     let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue { value: 6 };
+    let v6 = Tvalue::new(6);
     let s6 = IRect::new((3, 6), (6, 10));
     let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
 
-    let v7 = Tvalue { value: 7 };
+    let v7 = Tvalue::new(7);
     let s7 = IRect::new((3, 6), (15, 25));
     let n7 = Tnode::new(v7, s7);
     let nid7 = n7.id();
 
-    let v8 = Tvalue { value: 8 };
+    let v8 = Tvalue::new(8);
     let s8 = IRect::new((-1, -2), (2, 1));
     let n8 = Tnode::new(v8, s8);
     let nid8 = n8.id();
 
-    let v9 = Tvalue { value: 9 };
+    let v9 = Tvalue::new(9);
     let s9 = IRect::new((5, 6), (9, 8));
     let n9 = Tnode::new(v9, s9);
     let nid9 = n9.id();
@@ -743,7 +760,7 @@ mod tests {
       test_log_init();
     });
 
-    let v1 = Tvalue { value: 1 };
+    let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
     let n1 = Tnode::new(v1, s1);
@@ -1175,7 +1192,7 @@ mod tests {
     let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue { value: 5 };
+    let v6 = Tvalue { value: 6 };
     let s6 = IRect::new((8, 13), (18, 25));
     let us6 = U16Rect::new((8, 13), (15, 20));
     let n6 = Tnode::new(v6, s6);
