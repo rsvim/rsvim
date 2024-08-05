@@ -766,49 +766,49 @@ mod tests {
     let n1 = Tnode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue { value: 2 };
+    let v2 = Tvalue::new(2);
     let s2 = IRect::new((0, 0), (15, 15));
     let us2 = U16Rect::new((0, 0), (15, 15));
     let n2 = Tnode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue { value: 3 };
+    let v3 = Tvalue::new(3);
     let s3 = IRect::new((10, 10), (18, 19));
     let us3 = U16Rect::new((10, 10), (18, 19));
     let n3 = Tnode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue { value: 4 };
+    let v4 = Tvalue::new(4);
     let s4 = IRect::new((3, 5), (20, 14));
     let us4 = U16Rect::new((3, 5), (15, 14));
     let n4 = Tnode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue { value: 5 };
+    let v5 = Tvalue::new(5);
     let s5 = IRect::new((-3, -5), (10, 20));
     let us5 = U16Rect::new((0, 0), (10, 15));
     let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue { value: 6 };
+    let v6 = Tvalue::new(6);
     let s6 = IRect::new((3, 6), (6, 10));
     let us6 = U16Rect::new((13, 16), (16, 19));
     let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
 
-    let v7 = Tvalue { value: 7 };
+    let v7 = Tvalue::new(7);
     let s7 = IRect::new((3, 6), (15, 25));
     let us7 = U16Rect::new((3, 6), (10, 15));
     let n7 = Tnode::new(v7, s7);
     let nid7 = n7.id();
 
-    let v8 = Tvalue { value: 8 };
+    let v8 = Tvalue::new(8);
     let s8 = IRect::new((-1, -2), (2, 1));
     let us8 = U16Rect::new((3, 6), (5, 7));
     let n8 = Tnode::new(v8, s8);
     let nid8 = n8.id();
 
-    let v9 = Tvalue { value: 9 };
+    let v9 = Tvalue::new(9);
     let s9 = IRect::new((5, 6), (9, 8));
     let us9 = U16Rect::new((8, 12), (10, 14));
     let n9 = Tnode::new(v9, s9);
@@ -872,37 +872,37 @@ mod tests {
       test_log_init();
     });
 
-    let v1 = Tvalue { value: 1 };
+    let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
     let n1 = Tnode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue { value: 2 };
+    let v2 = Tvalue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
     let us2 = U16Rect::new((0, 0), (20, 20));
     let n2 = Tnode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue { value: 3 };
+    let v3 = Tvalue::new(3);
     let s3 = IRect::new((-2, -2), (-1, 0));
     let us3 = U16Rect::new((0, 0), (0, 0));
     let n3 = Tnode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue { value: 4 };
+    let v4 = Tvalue::new(4);
     let s4 = IRect::new((3, 5), (20, 20));
     let us4 = U16Rect::new((3, 5), (20, 20));
     let n4 = Tnode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue { value: 5 };
+    let v5 = Tvalue::new(5);
     let s5 = IRect::new((-3, -5), (15, 20));
     let us5 = U16Rect::new((0, 0), (15, 20));
     let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue { value: 5 };
+    let v6 = Tvalue::new(6);
     let s6 = IRect::new((8, 13), (18, 25));
     let us6 = U16Rect::new((8, 13), (15, 20));
     let n6 = Tnode::new(v6, s6);
@@ -961,9 +961,7 @@ mod tests {
     let shape = IRect::new((0, 0), (10, 10));
     let nodes: Vec<Tnode> = vec![1, 2, 3, 4, 5]
       .iter()
-      .map(|value| Tvalue {
-        value: *value as usize,
-      })
+      .map(|value| Tvalue::new(*value as usize))
       .map(|tv| Tnode::new(tv, shape))
       .collect::<Vec<Tnode>>();
     let nodes_ids: Vec<InodeId> = nodes.iter().map(|n| n.id()).collect();
@@ -1013,7 +1011,7 @@ mod tests {
     let mut value = 1;
     let mut node_ids: Vec<InodeId> = vec![];
 
-    let v = Tvalue { value };
+    let v = Tvalue::new(value);
     value += 1;
     let s = IRect::new((0, 0), (10, 10));
     let root = Tnode::new(v, s);
@@ -1022,7 +1020,7 @@ mod tests {
 
     let mut tree = Itree::new(root);
     for _ in 1..n {
-      let v = Tvalue { value };
+      let v = Tvalue::new(value);
       value += 1;
       let node = Tnode::new(v, s);
       let node_id = node.id();
@@ -1066,47 +1064,47 @@ mod tests {
       test_log_init();
     });
 
-    let v1 = Tvalue { value: 1 };
+    let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let n1 = Tnode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue { value: 2 };
+    let v2 = Tvalue::new(2);
     let s2 = IRect::new((0, 0), (15, 15));
     let n2 = Tnode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue { value: 3 };
+    let v3 = Tvalue::new(3);
     let s3 = IRect::new((10, 10), (18, 19));
     let n3 = Tnode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue { value: 4 };
+    let v4 = Tvalue::new(4);
     let s4 = IRect::new((3, 5), (20, 14));
     let n4 = Tnode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue { value: 5 };
+    let v5 = Tvalue::new(5);
     let s5 = IRect::new((-3, -5), (10, 20));
     let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue { value: 6 };
+    let v6 = Tvalue::new(6);
     let s6 = IRect::new((3, 6), (6, 10));
     let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
 
-    let v7 = Tvalue { value: 7 };
+    let v7 = Tvalue::new(7);
     let s7 = IRect::new((3, 6), (15, 25));
     let n7 = Tnode::new(v7, s7);
     let nid7 = n7.id();
 
-    let v8 = Tvalue { value: 8 };
+    let v8 = Tvalue::new(8);
     let s8 = IRect::new((-1, -2), (2, 1));
     let n8 = Tnode::new(v8, s8);
     let nid8 = n8.id();
 
-    let v9 = Tvalue { value: 9 };
+    let v9 = Tvalue::new(9);
     let s9 = IRect::new((5, 6), (9, 8));
     let n9 = Tnode::new(v9, s9);
     let nid9 = n9.id();
@@ -1162,37 +1160,37 @@ mod tests {
       test_log_init();
     });
 
-    let v1 = Tvalue { value: 1 };
+    let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
     let n1 = Tnode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue { value: 2 };
+    let v2 = Tvalue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
     let us2 = U16Rect::new((0, 0), (20, 20));
     let n2 = Tnode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue { value: 3 };
+    let v3 = Tvalue::new(3);
     let s3 = IRect::new((-2, -2), (-1, 0));
     let us3 = U16Rect::new((0, 0), (0, 0));
     let n3 = Tnode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue { value: 4 };
+    let v4 = Tvalue::new(4);
     let s4 = IRect::new((3, 5), (20, 20));
     let us4 = U16Rect::new((3, 5), (20, 20));
     let n4 = Tnode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue { value: 5 };
+    let v5 = Tvalue::new(5);
     let s5 = IRect::new((-3, -5), (15, 20));
     let us5 = U16Rect::new((0, 0), (15, 20));
     let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue { value: 6 };
+    let v6 = Tvalue::new(6);
     let s6 = IRect::new((8, 13), (18, 25));
     let us6 = U16Rect::new((8, 13), (15, 20));
     let n6 = Tnode::new(v6, s6);
