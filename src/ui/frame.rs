@@ -123,7 +123,7 @@ mod tests {
   use crossterm::style::{Attributes, Color};
 
   #[test]
-  fn should_equal_on_cell_default() {
+  fn new_cell() {
     let c = Cell::default();
     assert_eq!(c.symbol(), " ");
     assert_eq!(c.fg(), Color::Reset);
@@ -132,7 +132,7 @@ mod tests {
   }
 
   #[test]
-  fn should_equal_on_buffer_new() {
+  fn new_frame() {
     let sz = U16Size::new(2, 1);
     let b = Frame::new(sz, Cursor::default());
     assert_eq!(b.size.width, 2);
