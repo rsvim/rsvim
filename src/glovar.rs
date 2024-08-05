@@ -9,13 +9,11 @@ use std::sync::OnceLock;
 pub fn MUTEX_TIMEOUT() -> u64 {
   static VALUE: OnceLock<u64> = OnceLock::new();
 
-  let result = VALUE.get_or_init(|| match env::var("RSVIM_MUTEX_TIMEOUT") {
+  *VALUE.get_or_init(|| match env::var("RSVIM_MUTEX_TIMEOUT") {
     Ok(v1) => match v1.parse::<u64>() {
       Ok(v2) => v2,
       _ => u64::MAX,
     },
     _ => u64::MAX,
-  });
-
-  *result
+  })
 }
