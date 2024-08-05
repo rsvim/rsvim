@@ -52,8 +52,8 @@ where
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(node) = self.queue.pop_front() {
       match node.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
-        Some(node_lock) => {
-          match self.tree.children_ids(node_lock.id()) {
+        Some(node_guard) => {
+          match self.tree.children_ids(node_guard.id()) {
             Some(children_ids) => match self.order {
               ItreeIterateOrder::Ascent => {
                 for child_id in children_ids.iter() {
@@ -234,7 +234,13 @@ where
       .iter()
       .enumerate()
       .filter(|(_index, cid)| match self.nodes.get(cid) {
-        Some(cnode) => *cnode.lock().zindex() > child_zindex,
+        Some(cnode) => match cnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
+          Some(cnode_guard) => *cnode_guard.zindex() > child_zindex,
+          None => {
+            unreachable!("Timeout locking cnode: {:?}", cnode);
+            false
+          }
+        },
         None => false,
       })
       .map(|(index, _cid)| index)
@@ -272,26 +278,47 @@ where
       let cnode = parent_and_child.1;
 
       {
-        let pnode_lock = pnode.lock();
-        let mut cnode_lock = cnode.lock();
-        *cnode_lock.depth_mut() = pnode_lock.depth() + 1;
-        *cnode_lock.actual_shape_mut() =
-          shapes::convert_to_actual_shape(*cnode_lock.shape(), *pnode_lock.actual_shape());
-      }
-
-      {
-        match self.children_ids.get(&cnode.lock().id()) {
-          Some(descendant_ids) => {
-            for descendant_id in descendant_ids.iter() {
-              match self.nodes.get(descendant_id) {
-                Some(dnode) => {
-                  que.push_back((cnode, dnode));
-                }
-                None => { /* Skip */ }
+        match pnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
+          Some(pnode_guard) => {
+            match cnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
+              Some(mut cnode_guard) => {
+                *cnode_guard.depth_mut() = pnode_guard.depth() + 1;
+                *cnode_guard.actual_shape_mut() = shapes::convert_to_actual_shape(
+                  *cnode_guard.shape(),
+                  *pnode_guard.actual_shape(),
+                );
+              }
+              None => {
+                unreachable!("Timeout locking cnode: {:?}", cnode)
               }
             }
           }
-          None => { /* Skip */ }
+          None => {
+            unreachable!("Timeout locking pnode: {:?}", pnode)
+          }
+        }
+      }
+
+      {
+        match cnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
+          Some(cnode_guard) => {
+            match self.children_ids.get(&cnode_guard.id()) {
+              Some(descendant_ids) => {
+                for descendant_id in descendant_ids.iter() {
+                  match self.nodes.get(descendant_id) {
+                    Some(dnode) => {
+                      que.push_back((cnode, dnode));
+                    }
+                    None => { /* Skip */ }
+                  }
+                }
+              }
+              None => { /* Skip */ }
+            }
+          }
+          None => {
+            unreachable!("Timeout locking cnode: {:?}", cnode);
+          }
         }
       }
     }

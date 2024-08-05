@@ -1,5 +1,7 @@
 //! Global (environment) variables.
 
+#![allow(non_snake_case)]
+
 use std::env;
 use std::sync::OnceLock;
 
