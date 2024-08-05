@@ -152,6 +152,10 @@ impl Tree {
     Arc::new(Mutex::new(tree))
   }
 
+  pub fn len(&self) -> usize {
+    self.base.len()
+  }
+
   /// Whether the tree is empty.
   pub fn is_empty(&self) -> bool {
     self.base.is_empty()
@@ -230,14 +234,27 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  // use super::*;
-  // use crate::cart::{IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size};
-  // use crate::geo_size_as;
-  // use crate::test::log::init as test_log_init;
-  // use crate::ui::term::Terminal;
-  // use crate::ui::widget::{Cursor, RootContainer, Widget, WindowContent};
-  // use std::sync::Once;
-  // use tracing::info;
-  //
-  // static INIT: Once = Once::new();
+  use super::*;
+  use crate::cart::{IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size};
+  use crate::geo_size_as;
+  use crate::test::log::init as test_log_init;
+  use crate::ui::term::Terminal;
+  use crate::ui::widget::{Cursor, RootContainer, Widget, WindowContent};
+  use std::sync::Once;
+  use tracing::info;
+
+  static INIT: Once = Once::new();
+
+  #[test]
+  fn new() {
+    INIT.call_once(|| test_log_init());
+
+    let sz = U16Size::new(18, 10);
+    let t = Terminal::new(sz);
+    let t = Terminal::to_arc(t);
+    let tree = Tree::new(Arc::downgrade(&t));
+    assert!(tree.window_container_ids().is_empty());
+    assert!(tree.is_empty());
+    assert!(tree.len() == 1);
+  }
 }
