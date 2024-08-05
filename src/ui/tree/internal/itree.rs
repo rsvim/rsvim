@@ -7,7 +7,7 @@ use std::time::Duration;
 use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
 
-use crate::cart::shapes;
+use crate::cart::{shapes, U16Rect};
 use crate::glovar;
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 
@@ -261,50 +261,50 @@ where
 
     // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
 
-    type ParentChildPair<'a, T> = (&'a Mutex<Inode<T>>, &'a Mutex<Inode<T>>);
+    // Tuple of (child, parent depth, parent actual shape)
+    type ChildAndParentPair<'a, T> = (&'a Mutex<Inode<T>>, usize, U16Rect);
 
-    let mut que: VecDeque<ParentChildPair<T>> = VecDeque::new();
-    que.push_back((
-      self.nodes.get(&parent_id).unwrap(),
-      self.nodes.get(&child_id).unwrap(),
-    ));
+    let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
+    {
+      let pnode = self.nodes.get(&parent_id).unwrap();
+      match pnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
+        Some(pnode_guard) => {
+          let pnode_depth = *pnode_guard.depth();
+          let pnode_actual_shape = *pnode_guard.actual_shape();
+          que.push_back((
+            self.nodes.get(&child_id).unwrap(),
+            pnode_depth,
+            pnode_actual_shape,
+          ));
+        }
+        None => unreachable!("Timeout locking pnode: {:?}", pnode),
+      }
+    }
 
     // Iterate all descendants, and update their attributes.
-    while let Some(parent_and_child) = que.pop_front() {
-      let pnode = parent_and_child.0;
-      let cnode = parent_and_child.1;
-
-      {
-        match pnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
-          Some(pnode_guard) => {
-            match cnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
-              Some(mut cnode_guard) => {
-                *cnode_guard.depth_mut() = pnode_guard.depth() + 1;
-                *cnode_guard.actual_shape_mut() = shapes::convert_to_actual_shape(
-                  *cnode_guard.shape(),
-                  *pnode_guard.actual_shape(),
-                );
-              }
-              None => {
-                unreachable!("Timeout locking cnode: {:?}", cnode)
-              }
-            }
-          }
-          None => {
-            unreachable!("Timeout locking pnode: {:?}", pnode)
-          }
-        }
-      }
+    while let Some(child_and_parent) = que.pop_front() {
+      let cnode = child_and_parent.0;
+      let pnode_depth = child_and_parent.1;
+      let pnode_actual_shape = child_and_parent.2;
 
       {
         match cnode.try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
-          Some(cnode_guard) => {
-            match self.children_ids.get(&cnode_guard.id()) {
+          Some(mut cnode_guard) => {
+            let cnode_id = cnode_guard.id();
+            let cnode_depth = pnode_depth + 1;
+            let cnode_shape = *cnode_guard.shape();
+            let cnode_actual_shape =
+              shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
+
+            *cnode_guard.depth_mut() = cnode_depth;
+            *cnode_guard.actual_shape_mut() = cnode_actual_shape;
+
+            match self.children_ids.get(&cnode_id) {
               Some(descendant_ids) => {
-                for descendant_id in descendant_ids.iter() {
-                  match self.nodes.get(descendant_id) {
+                for dnode_id in descendant_ids.iter() {
+                  match self.nodes.get(dnode_id) {
                     Some(dnode) => {
-                      que.push_back((cnode, dnode));
+                      que.push_back((dnode, cnode_depth, cnode_actual_shape));
                     }
                     None => { /* Skip */ }
                   }
@@ -314,7 +314,7 @@ where
             }
           }
           None => {
-            unreachable!("Timeout locking cnode: {:?}", cnode);
+            unreachable!("Timeout locking cnode: {:?}", cnode)
           }
         }
       }
