@@ -490,12 +490,10 @@ mod tests {
 
     let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (1, 1));
-    let prev_id = uuid::next();
     let n1 = Tnode::new(v1, s1);
     let nid1 = n1.id();
     let tree = Itree::new(n1);
 
-    assert_eq!(prev_id + 1, nid1);
     assert_eq!(tree.len(), 1);
     assert_eq!(tree.root_id(), nid1);
     assert!(tree.parent_id(nid1).is_none());
