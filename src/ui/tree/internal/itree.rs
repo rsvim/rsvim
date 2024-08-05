@@ -437,12 +437,12 @@ mod tests {
           *$parent
             .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
             .unwrap()
-            .depth(),
+            .depth()
+            + 1,
           *$child
             .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
             .unwrap()
             .depth()
-            + 1,
         );
         break;
       }
