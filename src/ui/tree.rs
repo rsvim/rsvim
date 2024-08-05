@@ -6,14 +6,12 @@ use parking_lot::Mutex;
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 
-use crate::cart::{IRect, U16Rect};
-use crate::geo_rect_as;
+use crate::cart::IRect;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIterateOrder, ItreeIterator};
 use crate::ui::widget::RootContainer;
 use crate::ui::widget::{Widget, WidgetId, WidgetValue};
-use geo;
 
 pub mod internal;
 
@@ -235,11 +233,9 @@ impl Tree {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::cart::{IPos, IRect, ISize, Size, U16Pos, U16Rect, U16Size};
-  use crate::geo_size_as;
+  use crate::cart::U16Size;
   use crate::test::log::init as test_log_init;
   use crate::ui::term::Terminal;
-  use crate::ui::widget::{Cursor, RootContainer, Widget, WindowContent};
   use std::sync::Once;
   use tracing::info;
 
