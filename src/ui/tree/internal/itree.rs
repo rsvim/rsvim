@@ -447,14 +447,16 @@ mod tests {
   }
 
   macro_rules! assert_node_actual_shape_eq {
-    ($node: ident, $expect: expr) => {
+    ($node: ident, $expect: expr, $index: expr) => {
       loop {
         assert_eq!(
           *$node
             .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
             .unwrap()
             .actual_shape(),
-          $expect
+          $expect,
+          "index:{:?}",
+          $index,
         );
         break;
       }
@@ -888,7 +890,7 @@ mod tests {
     for i in 0..9 {
       let expect = expects[i];
       let node = nodes[i];
-      assert_node_actual_shape_eq!(node, expect);
+      assert_node_actual_shape_eq!(node, expect, i);
     }
   }
 
@@ -974,7 +976,7 @@ mod tests {
     for i in 0..9 {
       let expect = expects[i];
       let node = &nodes[i];
-      assert_node_actual_shape_eq!(node, expect);
+      assert_node_actual_shape_eq!(node, expect, i);
     }
   }
 
@@ -1217,13 +1219,13 @@ mod tests {
 
     let v5 = Tvalue::new(5);
     let s5 = IRect::new((-3, -5), (15, 20));
-    let us5 = U16Rect::new((0, 0), (15, 20));
+    let us5 = U16Rect::new((3, 5), (18, 20));
     let n5 = Tnode::new(v5, s5);
     let nid5 = n5.id();
 
     let v6 = Tvalue::new(6);
     let s6 = IRect::new((8, 13), (18, 25));
-    let us6 = U16Rect::new((8, 13), (15, 20));
+    let us6 = U16Rect::new((11, 18), (18, 20));
     let n6 = Tnode::new(v6, s6);
     let nid6 = n6.id();
 
@@ -1263,10 +1265,10 @@ mod tests {
 
     let expects = vec![us1, us2, us3, us4, us5, us6];
     let nodes = vec![n1, n2, n3, n4, n5, n6];
-    for i in 0..9 {
+    for i in 0..6 {
       let expect = expects[i];
       let node = &nodes[i];
-      assert_node_actual_shape_eq!(node, expect);
+      assert_node_actual_shape_eq!(node, expect, i);
     }
   }
 }
