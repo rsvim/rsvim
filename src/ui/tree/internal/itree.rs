@@ -148,7 +148,7 @@ where
   }
 
   pub fn node_ids(&self) -> Vec<InodeId> {
-    self.nodes.iter().map(|(k, _v)| *k).collect()
+    self.nodes.keys().map(|k| *k).collect()
   }
 
   pub fn parent_id(&self, id: InodeId) -> Option<&InodeId> {
