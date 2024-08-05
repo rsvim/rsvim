@@ -262,8 +262,8 @@ where
 
     // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
 
-    // Tuple of (child, parent depth, parent actual shape)
-    type ChildAndParentPair<'a, T> = (&'a Mutex<Inode<T>>, usize, U16Rect);
+    // Tuple of (child, parent id, parent depth, parent actual shape)
+    type ChildAndParentPair<'a, T> = (&'a Mutex<Inode<T>>, InodeId, usize, U16Rect);
 
     // debug!("before create que");
     let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
@@ -272,10 +272,12 @@ where
       let pnode_guard = pnode
         .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
         .unwrap();
+      let pnode_id = pnode_guard.id();
       let pnode_depth = *pnode_guard.depth();
       let pnode_actual_shape = *pnode_guard.actual_shape();
       que.push_back((
         self.nodes.get(&child_id).unwrap(),
+        pnode_id,
         pnode_depth,
         pnode_actual_shape,
       ));
@@ -285,8 +287,9 @@ where
     // Iterate all descendants, and update their attributes.
     while let Some(child_and_parent) = que.pop_front() {
       let cnode = child_and_parent.0;
-      let pnode_depth = child_and_parent.1;
-      let pnode_actual_shape = child_and_parent.2;
+      let pnode_id = child_and_parent.1;
+      let pnode_depth = child_and_parent.2;
+      let pnode_actual_shape = child_and_parent.3;
 
       {
         // debug!("before update cnode attr: {:?}", cnode);
@@ -298,6 +301,7 @@ where
         let cnode_shape = *cnode_guard.shape();
         let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
 
+        debug!("update attr, cnode:{:?}, depth:{:?}, actual shape:{:?}, pnode:{:?}, depth:{:?}, actual shape:{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
         *cnode_guard.depth_mut() = cnode_depth;
         *cnode_guard.actual_shape_mut() = cnode_actual_shape;
         // debug!("after update cnode attr: {:?}", cnode_id);
@@ -312,7 +316,7 @@ where
               // debug!("before push dnode: {:?}", dnode_id);
               match self.nodes.get(dnode_id) {
                 Some(dnode) => {
-                  que.push_back((dnode, cnode_depth, cnode_actual_shape));
+                  que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
                 }
                 None => { /* Skip */ }
               }
@@ -357,7 +361,6 @@ where
 
 #[cfg(test)]
 mod tests {
-  use parking_lot::Mutex;
   use std::sync::Once;
   use tracing::info;
 
