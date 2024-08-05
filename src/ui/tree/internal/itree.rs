@@ -200,12 +200,18 @@ where
       self.node_ids(),
       self.children_ids
     );
-    assert!(self.children_ids.contains_key(&parent_id));
+    assert!(
+      self.children_ids.contains_key(&parent_id),
+      "children_ids {:?} doesn't contains parent_id {:?}",
+      self.children_ids,
+      parent_id
+    );
 
     // Insert node.
     let child_id = child_node.id();
     let child_zindex = *child_node.zindex();
     self.nodes.insert(child_id, Mutex::new(child_node));
+    self.children_ids.insert(child_id, vec![]);
 
     // Map child ID => parent ID.
     self.parent_ids.insert(child_id, parent_id);
