@@ -200,7 +200,7 @@ impl Tree {
     self.base.insert(parent_id, child_node)
   }
 
-  pub fn remove(&mut self, id: TreeNodeId) -> Option<Mutex<TreeNode>> {
+  pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
     self.base.remove(id)
   }
 

@@ -2,12 +2,10 @@
 
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::time::Duration;
 use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
 
 use crate::cart::{shapes, U16Rect};
-use crate::glovar;
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 
 #[derive(Debug, Default)]
@@ -30,15 +28,13 @@ where
 /// The pre-order iterator of the tree.
 ///
 /// For each node, it first visits the node itself, then visits all its children.
+/// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
 /// This also follows the order when rendering the widget tree to terminal device.
-///
-/// By default, the visiting order for the children is from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
 pub struct ItreeIterator<'a, T>
 where
   T: InodeValue,
 {
   tree: &'a Itree<T>,
-  order: ItreeIterateOrder,
   queue: VecDeque<&'a Inode<T>>,
 }
 
@@ -51,28 +47,16 @@ where
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(node) = self.queue.pop_front() {
       match self.tree.children_ids(node.id()) {
-        Some(children_ids) => match self.order {
-          ItreeIterateOrder::Ascent => {
-            for child_id in children_ids.iter() {
-              match self.tree.node(*child_id) {
-                Some(child) => {
-                  self.queue.push_back(child);
-                }
-                None => { /* Skip */ }
+        Some(children_ids) => {
+          for child_id in children_ids.iter() {
+            match self.tree.node(*child_id) {
+              Some(child) => {
+                self.queue.push_back(child);
               }
+              None => { /* Skip */ }
             }
           }
-          ItreeIterateOrder::Descent => {
-            for child_id in children_ids.iter().rev() {
-              match self.tree.node(*child_id) {
-                Some(child) => {
-                  self.queue.push_back(child);
-                }
-                None => { /* Skip */ }
-              }
-            }
-          }
-        },
+        }
         None => { /* Skip */ }
       }
       return Some(node);
@@ -85,24 +69,14 @@ impl<'a, T> ItreeIterator<'a, T>
 where
   T: InodeValue,
 {
-  pub fn new(tree: &'a Itree<T>, order: ItreeIterateOrder, start: Option<&'a Inode<T>>) -> Self {
+  pub fn new(tree: &'a Itree<T>, start: Option<&'a Inode<T>>) -> Self {
     let mut queue = VecDeque::new();
     match start {
       Some(start) => queue.push_back(start),
       None => { /* Do nothing */ }
     }
-    ItreeIterator { tree, order, queue }
+    ItreeIterator { tree, queue }
   }
-}
-
-#[derive(Debug, Clone)]
-/// The iterating order for all the children nodes under the same node.
-///
-/// * The `Ascent` visits from lower z-index to higher.
-/// * The `Descent` visits from higher z-index to lower.
-pub enum ItreeIterateOrder {
-  Ascent,
-  Descent,
 }
 
 impl<T> Itree<T>
@@ -160,16 +134,7 @@ where
   /// By default, it iterates in pre-order iterator which starts from the root.
   /// For the children under the same node, it visits from lower z-index to higher.
   pub fn iter(&self) -> ItreeIterator<T> {
-    ItreeIterator::new(
-      self,
-      ItreeIterateOrder::Ascent,
-      Some(self.nodes.get(&self.root_id).unwrap()),
-    )
-  }
-
-  /// Get the iterator with a specified order.
-  pub fn ordered_iter(&self, order: ItreeIterateOrder) -> ItreeIterator<T> {
-    ItreeIterator::new(self, order, Some(self.nodes.get(&self.root_id).unwrap()))
+    ItreeIterator::new(self, Some(self.nodes.get(&self.root_id).unwrap()))
   }
 
   /// Insert a node to the tree, i.e. push it to the children vector of the parent.
