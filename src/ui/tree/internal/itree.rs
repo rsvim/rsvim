@@ -455,7 +455,7 @@ mod tests {
 
   #[test]
   fn new() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (1, 1));
@@ -476,7 +476,7 @@ mod tests {
 
   #[test]
   fn insert1() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (1, 1));
@@ -590,7 +590,7 @@ mod tests {
 
   #[test]
   fn insert2() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
@@ -754,7 +754,7 @@ mod tests {
 
   #[test]
   fn shape1() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
@@ -865,7 +865,7 @@ mod tests {
 
   #[test]
   fn shape2() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
@@ -949,7 +949,7 @@ mod tests {
 
   #[test]
   fn push1() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let shape = IRect::new((0, 0), (10, 10));
     let node_values: Vec<usize> = vec![1, 2, 3, 4, 5];
@@ -1029,7 +1029,7 @@ mod tests {
 
   #[test]
   fn remove1() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let (node_ids, mut tree) = make_tree(5);
     let remove0 = tree.remove(node_ids[0]);
@@ -1058,7 +1058,7 @@ mod tests {
 
   #[test]
   fn get1() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
@@ -1152,7 +1152,7 @@ mod tests {
 
   #[test]
   fn get2() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let v1 = Tvalue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));

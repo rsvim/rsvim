@@ -1117,7 +1117,6 @@ dependencies = [
  "futures",
  "geo",
  "heed",
- "lazy_static",
  "mockall",
  "num-traits",
  "parking_lot",
