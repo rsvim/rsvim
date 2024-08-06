@@ -1,6 +1,5 @@
 //! Internal tree structure that implements the widget tree.
 
-use parking_lot::Mutex;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::time::Duration;
@@ -19,7 +18,7 @@ where
   // Root node ID.
   root_id: InodeId,
   // Nodes collection, maps from node ID to its node struct.
-  nodes: HashMap<InodeId, Mutex<Inode<T>>>,
+  nodes: HashMap<InodeId, Inode<T>>,
   // Maps from child ID to its parent ID.
   parent_ids: HashMap<InodeId, InodeId>,
   // Maps from parent ID to its children IDs, the children are sorted by zindex value from lower to higher.
@@ -40,21 +39,18 @@ where
 {
   tree: &'a Itree<T>,
   order: ItreeIterateOrder,
-  queue: VecDeque<&'a Mutex<Inode<T>>>,
+  queue: VecDeque<&'a Inode<T>>,
 }
 
 impl<'a, T> Iterator for ItreeIterator<'a, T>
 where
   T: InodeValue,
 {
-  type Item = &'a Mutex<Inode<T>>;
+  type Item = &'a Inode<T>;
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(node) = self.queue.pop_front() {
-      let node_guard = node
-        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-        .unwrap();
-      match self.tree.children_ids(node_guard.id()) {
+      match self.tree.children_ids(node.id()) {
         Some(children_ids) => match self.order {
           ItreeIterateOrder::Ascent => {
             for child_id in children_ids.iter() {
@@ -89,11 +85,7 @@ impl<'a, T> ItreeIterator<'a, T>
 where
   T: InodeValue,
 {
-  pub fn new(
-    tree: &'a Itree<T>,
-    order: ItreeIterateOrder,
-    start: Option<&'a Mutex<Inode<T>>>,
-  ) -> Self {
+  pub fn new(tree: &'a Itree<T>, order: ItreeIterateOrder, start: Option<&'a Inode<T>>) -> Self {
     let mut queue = VecDeque::new();
     match start {
       Some(start) => queue.push_back(start),
@@ -120,7 +112,7 @@ where
   pub fn new(root_node: Inode<T>) -> Self {
     let root_id = root_node.id();
     let mut nodes = HashMap::new();
-    nodes.insert(root_id, Mutex::new(root_node));
+    nodes.insert(root_id, root_node);
     let mut children_ids: HashMap<InodeId, Vec<InodeId>> = HashMap::new();
     children_ids.insert(root_id, vec![]);
     Itree {
@@ -155,11 +147,11 @@ where
     self.children_ids.get(&id)
   }
 
-  pub fn node(&self, id: InodeId) -> Option<&Mutex<Inode<T>>> {
+  pub fn node(&self, id: InodeId) -> Option<&Inode<T>> {
     self.nodes.get(&id)
   }
 
-  pub fn node_mut(&mut self, id: InodeId) -> Option<&mut Mutex<Inode<T>>> {
+  pub fn node_mut(&mut self, id: InodeId) -> Option<&mut Inode<T>> {
     self.nodes.get_mut(&id)
   }
 
@@ -195,7 +187,7 @@ where
   /// Fails if:
   ///
   /// 1. The `parent_id` doesn't exist.
-  pub fn insert(&mut self, parent_id: InodeId, child_node: Inode<T>) -> Option<&Mutex<Inode<T>>> {
+  pub fn insert(&mut self, parent_id: InodeId, child_node: Inode<T>) -> Option<&Inode<T>> {
     // Returns `None` if `parent_id` not exists.
     self.nodes.get(&parent_id)?;
 
@@ -215,7 +207,7 @@ where
     // Insert node.
     let child_id = child_node.id();
     let child_zindex = *child_node.zindex();
-    self.nodes.insert(child_id, Mutex::new(child_node));
+    self.nodes.insert(child_id, child_node);
     self.children_ids.insert(child_id, vec![]);
 
     // Map child ID => parent ID.
@@ -231,13 +223,7 @@ where
       .iter()
       .enumerate()
       .filter(|(_index, cid)| match self.nodes.get(cid) {
-        Some(cnode) => {
-          *cnode
-            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-            .unwrap()
-            .zindex()
-            > child_zindex
-        }
+        Some(cnode) => *cnode.zindex() > child_zindex,
         None => false,
       })
       .map(|(index, _cid)| index)
@@ -263,70 +249,69 @@ where
     // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
 
     // Tuple of (child, parent id, parent depth, parent actual shape)
-    type ChildAndParentPair<'a, T> = (&'a Mutex<Inode<T>>, InodeId, usize, U16Rect);
+    type ChildAndParentPair<'a, T> = (&'a mut Inode<T>, InodeId, usize, U16Rect);
 
-    // debug!("before create que");
-    let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
-    {
-      let pnode = self.nodes.get(&parent_id).unwrap();
-      let pnode_guard = pnode
-        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-        .unwrap();
-      let pnode_id = pnode_guard.id();
-      let pnode_depth = *pnode_guard.depth();
-      let pnode_actual_shape = *pnode_guard.actual_shape();
-      que.push_back((
-        self.nodes.get(&child_id).unwrap(),
-        pnode_id,
-        pnode_depth,
-        pnode_actual_shape,
-      ));
-    }
-    // debug!("after create que");
+    // Avoid the multiple mutable references on `self.nodes.get_mut` when updating all descendants attributes.
+    unsafe {
+      let raw_nodes = &mut self.nodes as *mut HashMap<InodeId, Inode<T>>;
 
-    // Iterate all descendants, and update their attributes.
-    while let Some(child_and_parent) = que.pop_front() {
-      let cnode = child_and_parent.0;
-      let pnode_id = child_and_parent.1;
-      let pnode_depth = child_and_parent.2;
-      let pnode_actual_shape = child_and_parent.3;
-
+      // debug!("before create que");
+      let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
       {
-        // debug!("before update cnode attr: {:?}", cnode);
-        let mut cnode_guard = cnode
-          .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-          .unwrap();
-        let cnode_id = cnode_guard.id();
-        let cnode_depth = pnode_depth + 1;
-        let cnode_shape = *cnode_guard.shape();
-        let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
+        let pnode = (*raw_nodes).get(&parent_id).unwrap();
+        let pnode_id = pnode.id();
+        let pnode_depth = *pnode.depth();
+        let pnode_actual_shape = *pnode.actual_shape();
+        que.push_back((
+          (*raw_nodes).get_mut(&child_id).unwrap(),
+          pnode_id,
+          pnode_depth,
+          pnode_actual_shape,
+        ));
+      }
+      // debug!("after create que");
 
-        debug!("update attr, cnode:{:?}, depth:{:?}, actual shape:{:?}, pnode:{:?}, depth:{:?}, actual shape:{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
-        *cnode_guard.depth_mut() = cnode_depth;
-        *cnode_guard.actual_shape_mut() = cnode_actual_shape;
-        // debug!("after update cnode attr: {:?}", cnode_id);
+      // Iterate all descendants, and update their attributes.
+      while let Some(child_and_parent) = que.pop_front() {
+        let cnode = child_and_parent.0;
+        let pnode_id = child_and_parent.1;
+        let pnode_depth = child_and_parent.2;
+        let pnode_actual_shape = child_and_parent.3;
 
-        // debug!(
-        //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
-        //   cnode_id, self.children_ids
-        // );
-        match self.children_ids.get(&cnode_id) {
-          Some(descendant_ids) => {
-            for dnode_id in descendant_ids.iter() {
-              // debug!("before push dnode: {:?}", dnode_id);
-              match self.nodes.get(dnode_id) {
-                Some(dnode) => {
-                  que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
+        {
+          // debug!("before update cnode attr: {:?}", cnode);
+          let cnode_id = cnode.id();
+          let cnode_depth = pnode_depth + 1;
+          let cnode_shape = *cnode.shape();
+          let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
+
+          debug!("update attr, cnode:{:?}, depth:{:?}, actual shape:{:?}, pnode:{:?}, depth:{:?}, actual shape:{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+          *cnode.depth_mut() = cnode_depth;
+          *cnode.actual_shape_mut() = cnode_actual_shape;
+          // debug!("after update cnode attr: {:?}", cnode_id);
+
+          // debug!(
+          //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
+          //   cnode_id, self.children_ids
+          // );
+          match self.children_ids.get(&cnode_id) {
+            Some(descendant_ids) => {
+              for dnode_id in descendant_ids.iter() {
+                // debug!("before push dnode: {:?}", dnode_id);
+                match (*raw_nodes).get_mut(dnode_id) {
+                  Some(dnode) => {
+                    que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
+                  }
+                  None => { /* Skip */ }
                 }
-                None => { /* Skip */ }
+                // debug!("after push dnode: {:?}", dnode_id);
               }
-              // debug!("after push dnode: {:?}", dnode_id);
             }
+            None => { /* Skip */ }
           }
-          None => { /* Skip */ }
         }
       }
-    }
+    } // unsafe
 
     // Return the inserted child
     self.nodes.get(&child_id)
@@ -342,7 +327,7 @@ where
   /// Fails if:
   /// 1. The removed node doesn't exist.
   /// 2. The removed node is the root node.
-  pub fn remove(&mut self, id: InodeId) -> Option<Mutex<Inode<T>>> {
+  pub fn remove(&mut self, id: InodeId) -> Option<Inode<T>> {
     // Cannot remove root node.
     if id == self.root_id {
       return None;
@@ -403,13 +388,7 @@ mod tests {
   macro_rules! assert_node_id_eq {
     ($node: ident, $id: ident) => {
       loop {
-        assert!(
-          $node
-            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-            .unwrap()
-            .id()
-            == $id
-        );
+        assert!($node.id() == $id);
         break;
       }
     };
@@ -418,13 +397,7 @@ mod tests {
   macro_rules! print_node {
     ($node: ident, $name: expr) => {
       loop {
-        info!(
-          "{}: {:?}",
-          $name,
-          $node
-            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-            .unwrap()
-        );
+        info!("{}: {:?}", $name, $node.clone());
         break;
       }
     };
@@ -433,17 +406,7 @@ mod tests {
   macro_rules! assert_parent_child_nodes_depth {
     ($parent: ident, $child: ident) => {
       loop {
-        assert_eq!(
-          *$parent
-            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-            .unwrap()
-            .depth()
-            + 1,
-          *$child
-            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-            .unwrap()
-            .depth()
-        );
+        assert_eq!(*$parent.depth() + 1, *$child.depth());
         break;
       }
     };
@@ -452,15 +415,7 @@ mod tests {
   macro_rules! assert_node_actual_shape_eq {
     ($node: ident, $expect: expr, $index: expr) => {
       loop {
-        assert_eq!(
-          *$node
-            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-            .unwrap()
-            .actual_shape(),
-          $expect,
-          "index:{:?}",
-          $index,
-        );
+        assert_eq!(*$node.actual_shape(), $expect, "index:{:?}", $index,);
         break;
       }
     };
@@ -469,14 +424,7 @@ mod tests {
   macro_rules! assert_node_value_eq {
     ($node: ident, $expect: expr) => {
       loop {
-        assert_eq!(
-          $node
-            .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-            .unwrap()
-            .value()
-            .value,
-          $expect
-        );
+        assert_eq!($node.value().value, $expect);
         break;
       }
     };

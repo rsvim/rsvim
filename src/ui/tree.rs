@@ -173,11 +173,11 @@ impl Tree {
     self.base.children_ids(id)
   }
 
-  pub fn node(&self, id: TreeNodeId) -> Option<&Mutex<TreeNode>> {
+  pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
     self.base.node(id)
   }
 
-  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut Mutex<TreeNode>> {
+  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
     self.base.node_mut(id)
   }
 
@@ -189,11 +189,7 @@ impl Tree {
     self.base.ordered_iter(order)
   }
 
-  pub fn insert(
-    &mut self,
-    parent_id: TreeNodeId,
-    child_node: TreeNode,
-  ) -> Option<&Mutex<TreeNode>> {
+  pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<&TreeNode> {
     match child_node.value() {
       WidgetValue::WindowContainer(w) => {
         let child_id = w.id();
