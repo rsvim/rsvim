@@ -81,6 +81,9 @@ where
     &mut self.shape
   }
 
+  /// Move shape by (x, y).
+  /// When x < 0, the node moves up. When x > 0, the node moves down.
+  /// When y < 0, the node moves left. When y > 0, the node moves right.
   pub fn move_by(&mut self, x: isize, y: isize) -> IRect {
     let current_shape = self.shape;
     let current_top_left_pos: IPos = current_shape.min().into();
