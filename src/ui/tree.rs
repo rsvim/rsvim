@@ -223,7 +223,6 @@ mod tests {
   use super::*;
   use crate::cart::U16Size;
   use crate::test::log::init as test_log_init;
-  use crate::ui::term::Terminal;
   use std::sync::Once;
 
   static INIT: Once = Once::new();
@@ -232,10 +231,8 @@ mod tests {
   fn new() {
     INIT.call_once(|| test_log_init());
 
-    let sz = U16Size::new(18, 10);
-    let t = Terminal::new(sz);
-    let t = Terminal::to_arc(t);
-    let tree = Tree::new(Arc::downgrade(&t));
+    let terminal_size = U16Size::new(18, 10);
+    let tree = Tree::new(terminal_size);
     assert!(tree.window_container_ids().is_empty());
     assert!(tree.is_empty());
     assert!(tree.len() == 1);
