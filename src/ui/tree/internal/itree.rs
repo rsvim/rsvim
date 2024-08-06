@@ -99,8 +99,7 @@ where
     if let Some(node) = self.queue.pop_front() {
       unsafe {
         let raw_tree = self.tree as *mut Itree<T>;
-
-        match self.tree.children_ids(node.id()) {
+        match (*raw_tree).children_ids(node.id()) {
           Some(children_ids) => {
             for child_id in children_ids.iter() {
               match (*raw_tree).node_mut(*child_id) {
