@@ -36,7 +36,7 @@ impl EventLoop {
     let screen_size = U16Size::new(cols, rows);
     let screen = Terminal::new(screen_size);
     let screen = Terminal::to_arc(screen);
-    let mut tree = Tree::new(Arc::downgrade(&screen));
+    let mut tree = Tree::new(screen_size);
     debug!("new, screen size: {:?}", screen_size);
 
     let window_container = WindowContainer::new();
