@@ -39,7 +39,7 @@ To configure other internal behaviors, please setup with:
 
 ### Linting
 
-To lint the code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-features --all-targets`.
+To lint the code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-features --all-targets`, it enables all warnings.
 
 ### Testing
 
