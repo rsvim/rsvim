@@ -15,6 +15,7 @@ use crate::ui::widget::{Widget, WidgetId, WidgetValue};
 
 pub mod internal;
 
+#[derive(Debug, Clone)]
 /// The widget tree.
 ///
 /// The widget tree manages all UI components and rendering on the terminal, i.e. the whole

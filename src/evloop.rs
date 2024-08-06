@@ -25,6 +25,7 @@ use std::io::{Result as IoResult, Write};
 use std::sync::Arc;
 use tracing::{debug, error};
 
+#[derive(Clone, Debug)]
 pub struct EventLoop {
   screen: TerminalArc,
   tree: TreeArc,
