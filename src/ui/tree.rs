@@ -9,7 +9,7 @@ use std::sync::{Arc, Weak};
 use crate::cart::IRect;
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
-use crate::ui::tree::internal::itree::{Itree, ItreeIterateOrder, ItreeIterator};
+use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::RootContainer;
 use crate::ui::widget::{Widget, WidgetId, WidgetValue};
 
@@ -121,8 +121,8 @@ pub type TreeArc = Arc<Mutex<Tree>>;
 pub type TreeWk = Weak<Mutex<Tree>>;
 pub type TreeNode = Inode<WidgetValue>;
 pub type TreeNodeId = InodeId;
-pub type TreeIterator<'a> = ItreeIterator<'a, WidgetValue>;
-pub type TreeIterateOrder = ItreeIterateOrder;
+pub type TreeIter<'a> = ItreeIter<'a, WidgetValue>;
+pub type TreeIterMut<'a> = ItreeIterMut<'a, WidgetValue>;
 
 impl Tree {
   /// Make a widget tree.
@@ -181,12 +181,12 @@ impl Tree {
     self.base.node_mut(id)
   }
 
-  pub fn iter(&self) -> TreeIterator {
+  pub fn iter(&self) -> TreeIter {
     self.base.iter()
   }
 
-  pub fn ordered_iter(&self, order: TreeIterateOrder) -> TreeIterator {
-    self.base.ordered_iter(order)
+  pub fn iter_mut(&mut self) -> TreeIterMut {
+    self.base.iter_mut()
   }
 
   pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<&TreeNode> {
@@ -214,12 +214,9 @@ impl Tree {
 
   /// Draw the widget tree to terminal device.
   pub fn draw(&mut self) {
-    for node in self.base.iter() {
-      let mut node_lock = node.lock();
-      let actual_shape = *node_lock.actual_shape();
-      node_lock
-        .value_mut()
-        .draw(actual_shape, self.terminal.clone());
+    for node in self.base.iter_mut() {
+      let actual_shape = *node.actual_shape();
+      node.value_mut().draw(actual_shape, self.terminal.clone());
     }
   }
 
