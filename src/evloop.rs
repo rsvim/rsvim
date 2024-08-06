@@ -205,7 +205,15 @@ impl EventLoop {
       return false;
     }
 
+    // Draw UI components to the terminal frame.
     tree.draw(self.screen.clone());
+
+    // Flush terminal frame to the device.
+    self
+      .screen
+      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .flush();
 
     // continue loop
     true
