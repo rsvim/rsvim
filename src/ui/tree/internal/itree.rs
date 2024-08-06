@@ -976,9 +976,9 @@ mod tests {
     assert!(tree.root_id() == nodes_ids[0]);
     assert!(tree.children_ids(nodes_ids[0]).unwrap().len() == 4);
     assert!(!tree.children_ids(nodes_ids[0]).unwrap().is_empty());
-    for i in 1..5 {
-      assert!(tree.children_ids(nodes_ids[i]).unwrap().len() == 0);
-      assert!(tree.children_ids(nodes_ids[i]).unwrap().is_empty());
+    for nid in nodes_ids.iter().skip(1) {
+      assert!(tree.children_ids(*nid).unwrap().len() == 0);
+      assert!(tree.children_ids(*nid).unwrap().is_empty());
     }
 
     for (i, nid) in nodes_ids.iter().enumerate() {
