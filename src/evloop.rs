@@ -145,20 +145,55 @@ impl EventLoop {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
               // Up
-              let cursor_id = self
+              let mut tree = self
                 .tree
                 .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                .unwrap()
-                .cursor_id();
+                .unwrap();
+              match tree.cursor_id() {
+                Some(cursor_id) => {
+                  tree.move_up_by(cursor_id, 1);
+                }
+                None => { /* Skip */ }
+              }
             }
             KeyCode::Down | KeyCode::Char('j') => {
               // Down
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
+              match tree.cursor_id() {
+                Some(cursor_id) => {
+                  tree.move_down_by(cursor_id, 1);
+                }
+                None => { /* Skip */ }
+              }
             }
             KeyCode::Left | KeyCode::Char('h') => {
               // Left
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
+              match tree.cursor_id() {
+                Some(cursor_id) => {
+                  tree.move_left_by(cursor_id, 1);
+                }
+                None => { /* Skip */ }
+              }
             }
             KeyCode::Right | KeyCode::Char('l') => {
               // Right
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
+              match tree.cursor_id() {
+                Some(cursor_id) => {
+                  tree.move_right_by(cursor_id, 1);
+                }
+                None => { /* Skip */ }
+              }
             }
             _ => { /* Skip */ }
           }
@@ -180,6 +215,12 @@ impl EventLoop {
       println!("ESC: {:?}\r", crossterm::cursor::position());
       return false;
     }
+
+    self
+      .tree
+      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .draw(self.screen.clone());
 
     // continue loop
     true

@@ -214,6 +214,34 @@ impl Tree {
     self.base.remove(id)
   }
 
+  pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+    self.base.move_by(id, x, y)
+  }
+
+  pub fn move_y_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
+    self.base.move_y_by(id, diff)
+  }
+
+  pub fn move_up_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+    self.base.move_up_by(id, diff)
+  }
+
+  pub fn move_down_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+    self.base.move_down_by(id, diff)
+  }
+
+  pub fn move_x_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
+    self.base.move_x_by(id, diff)
+  }
+
+  pub fn move_left_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+    self.base.move_left_by(id, diff)
+  }
+
+  pub fn move_right_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+    self.base.move_right_by(id, diff)
+  }
+
   // Node }
 
   pub fn window_container_ids(&self) -> &BTreeSet<WidgetId> {

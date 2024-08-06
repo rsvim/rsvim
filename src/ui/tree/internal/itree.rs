@@ -1,11 +1,12 @@
 //! Internal tree structure that implements the widget tree.
 
+use geo::point;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
 
-use crate::cart::{shapes, U16Rect};
+use crate::cart::{shapes, IPos, IRect, U16Rect};
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 
 #[derive(Debug, Default, Clone)]
@@ -199,6 +200,75 @@ where
     }
   }
 
+  /// Update the `start_id` node attributes, and all the descendants attributes of this node.
+  ///
+  /// Below attributes will be update:
+  ///
+  /// 1. [`depth`](Inode::depth()): The child depth should be always the parent depth + 1.
+  /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
+  unsafe fn update_descendant_attributes(&mut self, start_id: InodeId, start_parent_id: InodeId) {
+    // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
+
+    // Tuple of (child, parent id, parent depth, parent actual shape)
+    type ChildAndParentPair<'a, T> = (&'a mut Inode<T>, InodeId, usize, U16Rect);
+
+    // Avoid the multiple mutable references on `self.nodes.get_mut` when updating all descendants attributes.
+    let raw_nodes = &mut self.nodes as *mut HashMap<InodeId, Inode<T>>;
+
+    // debug!("before create que");
+    let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
+    let pnode = (*raw_nodes).get(&start_parent_id).unwrap();
+    let pnode_id = pnode.id();
+    let pnode_depth = *pnode.depth();
+    let pnode_actual_shape = *pnode.actual_shape();
+    que.push_back((
+      (*raw_nodes).get_mut(&start_id).unwrap(),
+      pnode_id,
+      pnode_depth,
+      pnode_actual_shape,
+    ));
+    // debug!("after create que");
+
+    // Iterate all descendants, and update their attributes.
+    while let Some(child_and_parent) = que.pop_front() {
+      let cnode = child_and_parent.0;
+      let pnode_id = child_and_parent.1;
+      let pnode_depth = child_and_parent.2;
+      let pnode_actual_shape = child_and_parent.3;
+
+      // debug!("before update cnode attr: {:?}", cnode);
+      let cnode_id = cnode.id();
+      let cnode_depth = pnode_depth + 1;
+      let cnode_shape = *cnode.shape();
+      let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
+
+      debug!("update attr, cnode:{:?}, depth:{:?}, actual shape:{:?}, pnode:{:?}, depth:{:?}, actual shape:{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+      *cnode.depth_mut() = cnode_depth;
+      *cnode.actual_shape_mut() = cnode_actual_shape;
+      // debug!("after update cnode attr: {:?}", cnode_id);
+
+      // debug!(
+      //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
+      //   cnode_id, self.children_ids
+      // );
+      match self.children_ids.get(&cnode_id) {
+        Some(descendant_ids) => {
+          for dnode_id in descendant_ids.iter() {
+            // debug!("before push dnode: {:?}", dnode_id);
+            match (*raw_nodes).get_mut(dnode_id) {
+              Some(dnode) => {
+                que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
+              }
+              None => { /* Skip */ }
+            }
+            // debug!("after push dnode: {:?}", dnode_id);
+          }
+        }
+        None => { /* Skip */ }
+      }
+    }
+  }
+
   /// Insert a node to the tree, i.e. push it to the children vector of the parent.
   ///
   /// This operation builds the connection between the parent and the inserted child.
@@ -273,67 +343,9 @@ where
       }
     }
 
-    // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
-
-    // Tuple of (child, parent id, parent depth, parent actual shape)
-    type ChildAndParentPair<'a, T> = (&'a mut Inode<T>, InodeId, usize, U16Rect);
-
-    // Avoid the multiple mutable references on `self.nodes.get_mut` when updating all descendants attributes.
+    // Update all the descendants attributes under the `child_id` node.
     unsafe {
-      let raw_nodes = &mut self.nodes as *mut HashMap<InodeId, Inode<T>>;
-
-      // debug!("before create que");
-      let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
-      let pnode = (*raw_nodes).get(&parent_id).unwrap();
-      let pnode_id = pnode.id();
-      let pnode_depth = *pnode.depth();
-      let pnode_actual_shape = *pnode.actual_shape();
-      que.push_back((
-        (*raw_nodes).get_mut(&child_id).unwrap(),
-        pnode_id,
-        pnode_depth,
-        pnode_actual_shape,
-      ));
-      // debug!("after create que");
-
-      // Iterate all descendants, and update their attributes.
-      while let Some(child_and_parent) = que.pop_front() {
-        let cnode = child_and_parent.0;
-        let pnode_id = child_and_parent.1;
-        let pnode_depth = child_and_parent.2;
-        let pnode_actual_shape = child_and_parent.3;
-
-        // debug!("before update cnode attr: {:?}", cnode);
-        let cnode_id = cnode.id();
-        let cnode_depth = pnode_depth + 1;
-        let cnode_shape = *cnode.shape();
-        let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
-
-        debug!("update attr, cnode:{:?}, depth:{:?}, actual shape:{:?}, pnode:{:?}, depth:{:?}, actual shape:{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
-        *cnode.depth_mut() = cnode_depth;
-        *cnode.actual_shape_mut() = cnode_actual_shape;
-        // debug!("after update cnode attr: {:?}", cnode_id);
-
-        // debug!(
-        //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
-        //   cnode_id, self.children_ids
-        // );
-        match self.children_ids.get(&cnode_id) {
-          Some(descendant_ids) => {
-            for dnode_id in descendant_ids.iter() {
-              // debug!("before push dnode: {:?}", dnode_id);
-              match (*raw_nodes).get_mut(dnode_id) {
-                Some(dnode) => {
-                  que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
-                }
-                None => { /* Skip */ }
-              }
-              // debug!("after push dnode: {:?}", dnode_id);
-            }
-          }
-          None => { /* Skip */ }
-        }
-      }
+      self.update_descendant_attributes(child_id, parent_id);
     } // unsafe
 
     // Return the inserted child
@@ -364,6 +376,61 @@ where
       }
       None => None,
     }
+  }
+
+  /// Move node by (x, y).
+  /// When x < 0, the node moves up. When x > 0, the node moves down.
+  /// When y < 0, the node moves left. When y > 0, the node moves right.
+  ///
+  /// Fails if the node doesn't exist.
+  ///
+  /// Returns the previous shape if move successfully.
+  pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+    match self.nodes.get_mut(&id) {
+      Some(node) => {
+        let current_shape = *node.shape();
+        let current_top_left_pos: IPos = current_shape.min().into();
+        let next_top_left_pos: IPos =
+          point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
+        let next_shape = IRect::new(
+          next_top_left_pos,
+          point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
+        );
+        *node.shape_mut() = next_shape;
+
+        // Update all the descendants attributes under the `id` node.
+        unsafe {
+          self.update_descendant_attributes(id, *self.parent_ids.get(&id).unwrap());
+        }
+
+        Some(current_shape)
+      }
+      None => None,
+    }
+  }
+
+  pub fn move_y_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
+    self.move_by(id, 0, diff)
+  }
+
+  pub fn move_up_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+    self.move_by(id, 0, -(diff as isize))
+  }
+
+  pub fn move_down_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+    self.move_by(id, 0, diff as isize)
+  }
+
+  pub fn move_x_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
+    self.move_by(id, diff, 0)
+  }
+
+  pub fn move_left_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+    self.move_by(id, -(diff as isize), 0)
+  }
+
+  pub fn move_right_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+    self.move_by(id, diff as isize, 0)
   }
 }
 
