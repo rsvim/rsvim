@@ -81,11 +81,11 @@ where
     &mut self.shape
   }
 
-  pub fn move_y_by(&mut self, difference: isize) -> IRect {
+  pub fn move_by(&mut self, x: isize, y: isize) -> IRect {
     let current_shape = self.shape;
     let current_top_left_pos: IPos = current_shape.min().into();
     let next_top_left_pos: IPos =
-      point!(x: current_top_left_pos.x(), y: current_top_left_pos.y() + difference);
+      point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
     let next_shape = IRect::new(
       next_top_left_pos,
       point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
@@ -94,33 +94,28 @@ where
     current_shape
   }
 
-  pub fn move_up_by(&mut self, difference: usize) -> IRect {
-    self.move_y_by(-(difference as isize))
+  pub fn move_y_by(&mut self, diff: isize) -> IRect {
+    self.move_by(0, diff)
   }
 
-  pub fn move_down_by(&mut self, difference: usize) -> IRect {
-    self.move_y_by(difference as isize)
+  pub fn move_up_by(&mut self, diff: usize) -> IRect {
+    self.move_by(0, -(diff as isize))
   }
 
-  pub fn move_x_by(&mut self, difference: isize) -> IRect {
-    let current_shape = self.shape;
-    let current_top_left_pos: IPos = current_shape.min().into();
-    let next_top_left_pos: IPos =
-      point!(x: current_top_left_pos.x() + difference, y: current_top_left_pos.y());
-    let next_shape = IRect::new(
-      next_top_left_pos,
-      point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
-    );
-    self.shape = next_shape;
-    current_shape
+  pub fn move_down_by(&mut self, diff: usize) -> IRect {
+    self.move_by(0, diff as isize)
   }
 
-  pub fn move_left_by(&mut self, difference: usize) -> IRect {
-    self.move_x_by(-(difference as isize))
+  pub fn move_x_by(&mut self, diff: isize) -> IRect {
+    self.move_by(diff, 0)
   }
 
-  pub fn move_right_by(&mut self, difference: usize) -> IRect {
-    self.move_x_by(difference as isize)
+  pub fn move_left_by(&mut self, diff: usize) -> IRect {
+    self.move_by(-(diff as isize), 0)
+  }
+
+  pub fn move_right_by(&mut self, diff: usize) -> IRect {
+    self.move_by(diff as isize, 0)
   }
 
   pub fn actual_shape(&self) -> &U16Rect {
