@@ -1,9 +1,10 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use crossterm::{self, queue};
-use parking_lot::Mutex;
+// use parking_lot::Mutex;
 use std::io::Result as IoResult;
 use std::sync::Arc;
+use tokio::sync::Mutex as AsyncMutex;
 
 use crate::cart::U16Size;
 use crate::ui::frame::{Cell, Cursor, Frame};
@@ -15,7 +16,8 @@ pub struct Terminal {
   prev_frame: Frame,
 }
 
-pub type TerminalArc = Arc<Mutex<Terminal>>;
+pub type TerminalArc = Arc<AsyncMutex<Terminal>>;
+// pub type TerminalAsyncArc = Arc<AsyncMutex<Terminal>>;
 
 impl Terminal {
   pub fn new(size: U16Size) -> Self {
@@ -26,7 +28,7 @@ impl Terminal {
   }
 
   pub fn to_arc(t: Terminal) -> TerminalArc {
-    Arc::new(Mutex::new(t))
+    Arc::new(AsyncMutex::new(t))
   }
 
   // Current frame {

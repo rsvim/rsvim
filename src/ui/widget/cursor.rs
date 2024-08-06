@@ -1,6 +1,7 @@
 //! Cursor widget.
 
 use std::fmt::Debug;
+use std::io::Result as IoResult;
 use tracing::debug;
 
 use crate::cart::{U16Pos, U16Rect};
@@ -51,18 +52,24 @@ impl Widget for Cursor {
     self.id
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
+  async fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) -> IoResult<()> {
     let pos: U16Pos = actual_shape.min().into();
     debug!(
       "draw, actual shape:{:?}, top-left pos:{:?}",
       actual_shape, pos
     );
 
-    terminal.lock().frame_mut().set_cursor(frame::Cursor::new(
-      pos,
-      self.blinking,
-      self.hidden,
-      self.style,
-    ));
+    terminal
+      .lock()
+      .await
+      .frame_mut()
+      .set_cursor(frame::Cursor::new(
+        pos,
+        self.blinking,
+        self.hidden,
+        self.style,
+      ));
+
+    Ok(())
   }
 }

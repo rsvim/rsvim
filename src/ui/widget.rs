@@ -2,6 +2,8 @@
 
 use tracing::debug;
 
+use std::io::Result as IoResult;
+
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalArc;
 use crate::ui::tree::internal::inode::{InodeId, InodeValue};
@@ -23,9 +25,16 @@ pub trait Widget {
   fn id(&self) -> WidgetId;
 
   /// Draw the widget to terminal, on the specific shape.
-  fn draw(&mut self, actual_shape: U16Rect, _terminal: TerminalArc) {
-    // Do nothing.
-    debug!("draw, actual shape:{:?}", actual_shape);
+  fn draw(
+    &mut self,
+    actual_shape: U16Rect,
+    _terminal: TerminalArc,
+  ) -> impl std::future::Future<Output = IoResult<()>> + Send {
+    async move {
+      // Do nothing.
+      debug!("draw, actual shape:{:?}", actual_shape);
+      Ok(())
+    }
   }
 }
 
@@ -53,12 +62,12 @@ impl Widget for WidgetValue {
     }
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
+  async fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) -> IoResult<()> {
     match self {
-      WidgetValue::RootContainer(w) => w.draw(actual_shape, terminal),
-      WidgetValue::WindowContainer(w) => w.draw(actual_shape, terminal),
-      WidgetValue::WindowContent(w) => w.draw(actual_shape, terminal),
-      WidgetValue::Cursor(w) => w.draw(actual_shape, terminal),
+      WidgetValue::RootContainer(w) => w.draw(actual_shape, terminal).await,
+      WidgetValue::WindowContainer(w) => w.draw(actual_shape, terminal).await,
+      WidgetValue::WindowContent(w) => w.draw(actual_shape, terminal).await,
+      WidgetValue::Cursor(w) => w.draw(actual_shape, terminal).await,
     }
   }
 }

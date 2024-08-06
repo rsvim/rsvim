@@ -86,7 +86,7 @@ impl EventLoop {
     let mut out = std::io::stdout();
 
     debug!("init, draw cursor");
-    let cursor = self.screen.lock().frame().cursor;
+    let cursor = self.screen.lock().await.frame().cursor;
     if cursor.blinking {
       queue!(out, crossterm::cursor::EnableBlinking)?;
     } else {
@@ -150,10 +150,7 @@ impl EventLoop {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
               // Up
-              let mut tree = self
-                .tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                .unwrap();
+              let mut tree = self.tree.lock().await;
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_up_by(cursor_id, 1);
@@ -163,10 +160,7 @@ impl EventLoop {
             }
             KeyCode::Down | KeyCode::Char('j') => {
               // Down
-              let mut tree = self
-                .tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                .unwrap();
+              let mut tree = self.tree.lock().await;
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_down_by(cursor_id, 1);
@@ -176,10 +170,7 @@ impl EventLoop {
             }
             KeyCode::Left | KeyCode::Char('h') => {
               // Left
-              let mut tree = self
-                .tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                .unwrap();
+              let mut tree = self.tree.lock().await;
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_left_by(cursor_id, 1);
@@ -189,10 +180,7 @@ impl EventLoop {
             }
             KeyCode::Right | KeyCode::Char('l') => {
               // Right
-              let mut tree = self
-                .tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                .unwrap();
+              let mut tree = self.tree.lock().await;
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_right_by(cursor_id, 1);
@@ -222,20 +210,10 @@ impl EventLoop {
     }
 
     // Draw UI components to the terminal frame.
-    self
-      .tree
-      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap()
-      .draw(self.screen.clone());
+    self.tree.lock().await.draw(self.screen.clone()).await?;
 
     // Flush terminal frame to the device.
-    match self
-      .screen
-      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap()
-      .flush()
-      .await
-    {
+    match self.screen.lock().await.flush().await {
       Ok(_) => Ok(true),
       Err(e) => Err(e),
     }
