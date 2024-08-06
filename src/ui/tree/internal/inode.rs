@@ -1,9 +1,10 @@
 //! The node structure of the internal tree.
 
 use geo;
+use geo::point;
 use std::fmt::Debug;
 
-use crate::cart::{IRect, U16Rect};
+use crate::cart::{IPos, IRect, U16Rect};
 use crate::geo_rect_as;
 
 pub type InodeId = usize;
@@ -78,6 +79,48 @@ where
 
   pub fn shape_mut(&mut self) -> &mut IRect {
     &mut self.shape
+  }
+
+  pub fn move_y_by(&mut self, difference: isize) -> IRect {
+    let current_shape = self.shape;
+    let current_top_left_pos: IPos = current_shape.min().into();
+    let next_top_left_pos: IPos =
+      point!(x: current_top_left_pos.x(), y: current_top_left_pos.y() + difference);
+    let next_shape = IRect::new(
+      next_top_left_pos,
+      point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
+    );
+    self.shape = next_shape;
+    current_shape
+  }
+
+  pub fn move_up_by(&mut self, difference: usize) -> IRect {
+    self.move_y_by(-(difference as isize))
+  }
+
+  pub fn move_down_by(&mut self, difference: usize) -> IRect {
+    self.move_y_by(difference as isize)
+  }
+
+  pub fn move_x_by(&mut self, difference: isize) -> IRect {
+    let current_shape = self.shape;
+    let current_top_left_pos: IPos = current_shape.min().into();
+    let next_top_left_pos: IPos =
+      point!(x: current_top_left_pos.x() + difference, y: current_top_left_pos.y());
+    let next_shape = IRect::new(
+      next_top_left_pos,
+      point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
+    );
+    self.shape = next_shape;
+    current_shape
+  }
+
+  pub fn move_left_by(&mut self, difference: usize) -> IRect {
+    self.move_x_by(-(difference as isize))
+  }
+
+  pub fn move_right_by(&mut self, difference: usize) -> IRect {
+    self.move_x_by(difference as isize)
   }
 
   pub fn actual_shape(&self) -> &U16Rect {

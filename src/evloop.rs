@@ -2,14 +2,6 @@
 
 #![allow(unused_imports, dead_code)]
 
-use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
-use crate::geo_size_as;
-use crate::ui::frame::CursorStyle;
-use crate::ui::term::{Terminal, TerminalArc};
-use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::{
-  Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
-};
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode, KeyEventKind, KeyEventState, KeyModifiers,
@@ -23,7 +15,18 @@ use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::io::{Result as IoResult, Write};
 use std::sync::Arc;
+use std::time::Duration;
 use tracing::{debug, error};
+
+use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
+use crate::geo_size_as;
+use crate::glovar;
+use crate::ui::frame::CursorStyle;
+use crate::ui::term::{Terminal, TerminalArc};
+use crate::ui::tree::{Tree, TreeArc, TreeNode};
+use crate::ui::widget::{
+  Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
+};
 
 #[derive(Clone, Debug)]
 pub struct EventLoop {
@@ -132,20 +135,41 @@ impl EventLoop {
 
   pub async fn accept(&mut self, event: Event) -> bool {
     debug!("Event::{:?}", event);
-    println!("Event:{:?}", event);
+    // println!("Event:{:?}", event);
 
-    // match event {
-    //   Event::FocusGained => {}
-    //   Event::FocusLost => {}
-    //   Event::Key(key_event) => match key_event.kind {
-    //     KeyEventKind::Press => {}
-    //     KeyEventKind::Repeat => {}
-    //     KeyEventKind::Release => {}
-    //   },
-    //   Event::Mouse(_mouse_event) => {}
-    //   Event::Paste(ref _paste_string) => {}
-    //   Event::Resize(_columns, _rows) => {}
-    // }
+    match event {
+      Event::FocusGained => {}
+      Event::FocusLost => {}
+      Event::Key(key_event) => match key_event.kind {
+        KeyEventKind::Press => {
+          match key_event.code {
+            KeyCode::Up | KeyCode::Char('k') => {
+              // Up
+              let cursor_id = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap()
+                .cursor_id();
+            }
+            KeyCode::Down | KeyCode::Char('j') => {
+              // Down
+            }
+            KeyCode::Left | KeyCode::Char('h') => {
+              // Left
+            }
+            KeyCode::Right | KeyCode::Char('l') => {
+              // Right
+            }
+            _ => { /* Skip */ }
+          }
+        }
+        KeyEventKind::Repeat => {}
+        KeyEventKind::Release => {}
+      },
+      Event::Mouse(_mouse_event) => {}
+      Event::Paste(ref _paste_string) => {}
+      Event::Resize(_columns, _rows) => {}
+    }
 
     // if event == Event::Key(KeyCode::Char('c').into()) {
     //   println!("Curosr position: {:?}\r", crossterm::cursor::position());

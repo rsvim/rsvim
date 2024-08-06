@@ -113,6 +113,9 @@ pub struct Tree {
   // A collection of all VIM window container IDs
   // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)).
   window_container_ids: BTreeSet<WidgetId>,
+
+  // The cursor ID.
+  cursor_id: Option<WidgetId>,
 }
 
 pub type TreeArc = Arc<Mutex<Tree>>;
@@ -139,6 +142,7 @@ impl Tree {
     Tree {
       base: Itree::new(root_node),
       window_container_ids: BTreeSet::new(),
+      cursor_id: None,
     }
   }
 
@@ -188,8 +192,12 @@ impl Tree {
   pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<&TreeNode> {
     match child_node.value() {
       WidgetValue::WindowContainer(w) => {
-        let child_id = w.id();
-        self.window_container_ids.insert(child_id);
+        let widget_id = w.id();
+        self.window_container_ids.insert(widget_id);
+      }
+      WidgetValue::Cursor(w) => {
+        let widget_id = w.id();
+        self.cursor_id = Some(widget_id);
       }
       _ => { /* Skip */ }
     }
@@ -197,6 +205,12 @@ impl Tree {
   }
 
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
+    if self.cursor_id == Some(id) {
+      self.cursor_id = None;
+    }
+    if self.window_container_ids.contains(&id) {
+      self.window_container_ids.remove(&id);
+    }
     self.base.remove(id)
   }
 
@@ -204,6 +218,10 @@ impl Tree {
 
   pub fn window_container_ids(&self) -> &BTreeSet<WidgetId> {
     &self.window_container_ids
+  }
+
+  pub fn cursor_id(&self) -> Option<WidgetId> {
+    self.cursor_id
   }
 
   // Draw {
