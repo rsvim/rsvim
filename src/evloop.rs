@@ -117,8 +117,13 @@ impl EventLoop {
         polled_event = reader.next() => match polled_event {
           Some(Ok(event)) => {
             debug!("run, polled event: {:?}", event);
-            if !self.accept(event).await {
-                break;
+            match self.accept(event).await {
+                Ok(next_loop) => {
+                    if !next_loop {
+                        break;
+                    }
+                }
+                _ => break
             }
           },
           Some(Err(e)) => {
@@ -133,14 +138,9 @@ impl EventLoop {
     Ok(())
   }
 
-  pub async fn accept(&mut self, event: Event) -> bool {
+  pub async fn accept(&mut self, event: Event) -> IoResult<bool> {
     debug!("Event::{:?}", event);
     // println!("Event:{:?}", event);
-
-    let mut tree = self
-      .tree
-      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap();
 
     match event {
       Event::FocusGained => {}
@@ -150,6 +150,10 @@ impl EventLoop {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
               // Up
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_up_by(cursor_id, 1);
@@ -159,6 +163,10 @@ impl EventLoop {
             }
             KeyCode::Down | KeyCode::Char('j') => {
               // Down
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_down_by(cursor_id, 1);
@@ -168,6 +176,10 @@ impl EventLoop {
             }
             KeyCode::Left | KeyCode::Char('h') => {
               // Left
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_left_by(cursor_id, 1);
@@ -177,6 +189,10 @@ impl EventLoop {
             }
             KeyCode::Right | KeyCode::Char('l') => {
               // Right
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_right_by(cursor_id, 1);
@@ -202,20 +218,26 @@ impl EventLoop {
     // quit loop
     if event == Event::Key(KeyCode::Esc.into()) {
       println!("ESC: {:?}\r", crossterm::cursor::position());
-      return false;
+      return Ok(false);
     }
 
     // Draw UI components to the terminal frame.
-    tree.draw(self.screen.clone());
+    self
+      .tree
+      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .draw(self.screen.clone());
 
     // Flush terminal frame to the device.
-    self
+    match self
       .screen
       .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap()
-      .flush();
-
-    // continue loop
-    true
+      .flush()
+      .await
+    {
+      Ok(_) => Ok(true),
+      Err(e) => Err(e),
+    }
   }
 }

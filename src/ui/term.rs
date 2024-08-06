@@ -1,6 +1,8 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
+use crossterm::{self, queue};
 use parking_lot::Mutex;
+use std::io::Result as IoResult;
 use std::sync::Arc;
 
 use crate::cart::U16Size;
@@ -83,13 +85,35 @@ impl Terminal {
 
   // Previous frame }
 
-  pub fn flush(&mut self) {
+  pub async fn flush(&mut self) -> IoResult<()> {
     // Dump current frame to device, with a diff-algorithm to reduce the output.
+    if self.frame.dirty_cursor {
+      let mut out = std::io::stdout();
+
+      let cursor = self.frame.cursor;
+      if cursor.blinking {
+        queue!(out, crossterm::cursor::EnableBlinking)?;
+      } else {
+        queue!(out, crossterm::cursor::DisableBlinking)?;
+      }
+      if cursor.hidden {
+        queue!(out, crossterm::cursor::Hide)?;
+      } else {
+        queue!(out, crossterm::cursor::Show)?;
+      }
+      queue!(out, cursor.style)?;
+      queue!(
+        out,
+        crossterm::cursor::MoveTo(cursor.pos.x(), cursor.pos.y())
+      )?;
+    }
 
     // Save current frame.
     self.prev_frame = self.frame.clone();
     // Reset the `dirty` fields.
     self.frame.reset_dirty();
+
+    Ok(())
   }
 }
 

@@ -1,5 +1,7 @@
 //! VIM window's text content widget.
 
+#![allow(unused_imports, dead_code)]
+
 use compact_str::CompactString;
 
 use crate::cart::U16Rect;
