@@ -84,7 +84,11 @@ impl Terminal {
   // Previous frame }
 
   pub fn flush(&mut self) {
+    // Dump current frame to device, with a diff-algorithm to reduce the output.
+
+    // Save current frame.
     self.prev_frame = self.frame.clone();
+    // Reset the `dirty` fields.
     self.frame.reset_dirty();
   }
 }
