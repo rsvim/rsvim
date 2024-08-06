@@ -955,7 +955,7 @@ mod tests {
     let node_values: Vec<usize> = vec![1, 2, 3, 4, 5];
     let nodes: Vec<Tnode> = node_values
       .iter()
-      .map(|value| Tvalue::new(*value as usize))
+      .map(|value| Tvalue::new(*value))
       .map(|tv| Tnode::new(tv, shape))
       .collect::<Vec<Tnode>>();
     let nodes_ids: Vec<InodeId> = nodes.iter().map(|n| n.id()).collect();
@@ -969,8 +969,8 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(nodes[0].clone());
-    for i in 1..5 {
-      tree.insert(nodes_ids[0], nodes[i].clone());
+    for node in nodes.iter().skip(1) {
+      tree.insert(nodes_ids[0], node.clone());
     }
 
     assert!(tree.root_id() == nodes_ids[0]);
