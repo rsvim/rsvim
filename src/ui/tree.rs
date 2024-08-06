@@ -230,7 +230,7 @@ mod tests {
 
   #[test]
   fn new() {
-    INIT.call_once(|| test_log_init());
+    INIT.call_once(test_log_init);
 
     let terminal_size = U16Size::new(18, 10);
     let tree = Tree::new(terminal_size);

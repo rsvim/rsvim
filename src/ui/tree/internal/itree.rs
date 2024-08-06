@@ -854,8 +854,8 @@ mod tests {
     print_node!(n8, "n8");
     print_node!(n9, "n9");
 
-    let expects = vec![us1, us2, us3, us4, us5, us6, us7, us8, us9];
-    let nodes = vec![n1, n2, n3, n4, n5, n6, n7, n8, n9];
+    let expects = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
+    let nodes = [n1, n2, n3, n4, n5, n6, n7, n8, n9];
     for i in 0..9 {
       let expect = expects[i];
       let node = nodes[i];
@@ -938,8 +938,8 @@ mod tests {
     print_node!(n5, "n5");
     print_node!(n6, "n6");
 
-    let expects = vec![us1, us2, us3, us4, us5, us6];
-    let nodes = vec![n1, n2, n3, n4, n5, n6];
+    let expects = [us1, us2, us3, us4, us5, us6];
+    let nodes = [n1, n2, n3, n4, n5, n6];
     for i in 0..6 {
       let expect = expects[i];
       let node = &nodes[i];
@@ -952,7 +952,7 @@ mod tests {
     INIT.call_once(test_log_init);
 
     let shape = IRect::new((0, 0), (10, 10));
-    let node_values: Vec<usize> = vec![1, 2, 3, 4, 5];
+    let node_values: Vec<usize> = [1, 2, 3, 4, 5].to_vec();
     let nodes: Vec<Tnode> = node_values
       .iter()
       .map(|value| Tvalue::new(*value))
@@ -977,7 +977,6 @@ mod tests {
     assert!(tree.children_ids(nodes_ids[0]).unwrap().len() == 4);
     assert!(!tree.children_ids(nodes_ids[0]).unwrap().is_empty());
     for nid in nodes_ids.iter().skip(1) {
-      assert!(tree.children_ids(*nid).unwrap().len() == 0);
       assert!(tree.children_ids(*nid).unwrap().is_empty());
     }
 
@@ -995,9 +994,9 @@ mod tests {
     assert!(last1.is_some());
     assert_eq!(*last1.unwrap(), nodes_ids[4]);
 
-    for i in 1..5 {
-      let first = tree.children_ids(nodes_ids[i]).unwrap().first();
-      let last = tree.children_ids(nodes_ids[i]).unwrap().last();
+    for nid in nodes_ids.iter().skip(1) {
+      let first = tree.children_ids(*nid).unwrap().first();
+      let last = tree.children_ids(*nid).unwrap().last();
       assert!(first.is_none());
       assert!(last.is_none());
     }
@@ -1224,8 +1223,8 @@ mod tests {
     print_node!(n5, "n5");
     print_node!(n6, "n6");
 
-    let expects = vec![us1, us2, us3, us4, us5, us6];
-    let nodes = vec![n1, n2, n3, n4, n5, n6];
+    let expects = [us1, us2, us3, us4, us5, us6];
+    let nodes = [n1, n2, n3, n4, n5, n6];
     for i in 0..6 {
       let expect = expects[i];
       let node = &nodes[i];

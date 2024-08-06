@@ -1,7 +1,7 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use parking_lot::Mutex;
-use std::sync::{Arc, Weak};
+use std::sync::Arc;
 
 use crate::cart::U16Size;
 use crate::ui::frame::{Cell, Cursor, Frame};
