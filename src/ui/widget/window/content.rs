@@ -3,7 +3,7 @@
 use compact_str::CompactString;
 
 use crate::cart::U16Rect;
-use crate::ui::term::TerminalWk;
+use crate::ui::term::TerminalArc;
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
@@ -58,5 +58,5 @@ impl Widget for WindowContent {
     self.id
   }
 
-  fn draw(&mut self, _actual_shape: U16Rect, _terminal: TerminalWk) {}
+  fn draw(&mut self, _actual_shape: U16Rect, _terminal: TerminalArc) {}
 }

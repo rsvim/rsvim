@@ -4,7 +4,7 @@ use std::fmt::Debug;
 
 use crate::cart::{U16Pos, U16Rect};
 use crate::ui::frame::{self, CursorStyle, CursorStyleFormatter};
-use crate::ui::term::TerminalWk;
+use crate::ui::term::TerminalArc;
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
@@ -50,7 +50,7 @@ impl Widget for Cursor {
     self.id
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalWk) {
+  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
     let pos: U16Pos = actual_shape.min().into();
 
     terminal

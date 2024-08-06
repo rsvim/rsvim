@@ -7,7 +7,7 @@ use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 
 use crate::cart::{IRect, U16Size};
-use crate::ui::term::TerminalWk;
+use crate::ui::term::TerminalArc;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::RootContainer;
@@ -209,7 +209,7 @@ impl Tree {
   // Draw {
 
   /// Draw the widget tree to terminal device.
-  pub fn draw(&mut self, terminal: TerminalWk) {
+  pub fn draw(&mut self, terminal: TerminalArc) {
     for node in self.base.iter_mut() {
       let actual_shape = *node.actual_shape();
       node.value_mut().draw(actual_shape, terminal.clone());

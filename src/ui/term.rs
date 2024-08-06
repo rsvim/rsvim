@@ -14,7 +14,6 @@ pub struct Terminal {
 }
 
 pub type TerminalArc = Arc<Mutex<Terminal>>;
-pub type TerminalWk = Weak<Mutex<Terminal>>;
 
 impl Terminal {
   pub fn new(size: U16Size) -> Self {

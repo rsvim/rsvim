@@ -1,7 +1,7 @@
 //! Basic atom of all UI components.
 
 use crate::cart::U16Rect;
-use crate::ui::term::TerminalWk;
+use crate::ui::term::TerminalArc;
 use crate::ui::tree::internal::inode::{InodeId, InodeValue};
 
 // Re-export
@@ -21,7 +21,7 @@ pub trait Widget {
   fn id(&self) -> WidgetId;
 
   /// Draw the widget to terminal, on the specific shape.
-  fn draw(&mut self, _actual_shape: U16Rect, _terminal: TerminalWk) {
+  fn draw(&mut self, _actual_shape: U16Rect, _terminal: TerminalArc) {
     // Do nothing.
   }
 }
@@ -50,7 +50,7 @@ impl Widget for WidgetValue {
     }
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalWk) {
+  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
     match self {
       WidgetValue::RootContainer(w) => w.draw(actual_shape, terminal),
       WidgetValue::WindowContainer(w) => w.draw(actual_shape, terminal),
