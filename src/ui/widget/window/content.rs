@@ -57,6 +57,4 @@ impl Widget for WindowContent {
   fn id(&self) -> WidgetId {
     self.id
   }
-
-  fn draw(&mut self, _actual_shape: U16Rect, _terminal: TerminalArc) {}
 }

@@ -1,5 +1,7 @@
 //! Basic atom of all UI components.
 
+use tracing::debug;
+
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalArc;
 use crate::ui::tree::internal::inode::{InodeId, InodeValue};
@@ -21,8 +23,9 @@ pub trait Widget {
   fn id(&self) -> WidgetId;
 
   /// Draw the widget to terminal, on the specific shape.
-  fn draw(&mut self, _actual_shape: U16Rect, _terminal: TerminalArc) {
+  fn draw(&mut self, actual_shape: U16Rect, _terminal: TerminalArc) {
     // Do nothing.
+    debug!("draw, actual shape:{:?}", actual_shape);
   }
 }
 

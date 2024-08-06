@@ -5,6 +5,7 @@
 use parking_lot::Mutex;
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
+use tracing::debug;
 
 use crate::cart::{IRect, U16Size};
 use crate::ui::term::TerminalArc;
@@ -257,6 +258,7 @@ impl Tree {
   /// Draw the widget tree to terminal device.
   pub fn draw(&mut self, terminal: TerminalArc) {
     for node in self.base.iter_mut() {
+      debug!("draw node:{:?}", node);
       let actual_shape = *node.actual_shape();
       node.value_mut().draw(actual_shape, terminal.clone());
     }
