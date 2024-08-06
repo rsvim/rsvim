@@ -191,6 +191,14 @@ where
     ItreeIter::new(self, Some(self.nodes.get(&self.root_id).unwrap()))
   }
 
+  /// Get the iterator that returns mutable reference.
+  pub fn iter_mut(&mut self) -> ItreeIterMut<T> {
+    unsafe {
+      let raw_nodes = &mut self.nodes as *mut HashMap<InodeId, Inode<T>>;
+      ItreeIterMut::new(self, Some((*raw_nodes).get_mut(&self.root_id).unwrap()))
+    }
+  }
+
   /// Insert a node to the tree, i.e. push it to the children vector of the parent.
   ///
   /// This operation builds the connection between the parent and the inserted child.
