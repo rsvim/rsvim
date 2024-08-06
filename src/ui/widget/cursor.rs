@@ -53,16 +53,11 @@ impl Widget for Cursor {
   fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
     let pos: U16Pos = actual_shape.min().into();
 
-    terminal
-      .upgrade()
-      .unwrap()
-      .lock()
-      .frame_mut()
-      .set_cursor(frame::Cursor::new(
-        pos,
-        self.blinking,
-        self.hidden,
-        self.style,
-      ));
+    terminal.lock().frame_mut().set_cursor(frame::Cursor::new(
+      pos,
+      self.blinking,
+      self.hidden,
+      self.style,
+    ));
   }
 }
