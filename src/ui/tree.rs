@@ -6,7 +6,7 @@ use parking_lot::Mutex;
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 
-use crate::cart::IRect;
+use crate::cart::{IRect, U16Size};
 use crate::ui::term::TerminalWk;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
@@ -106,9 +106,6 @@ pub mod internal;
 ///    doesn't handle or process any input events, the UI keeps still and never changes.
 ///
 pub struct Tree {
-  // Terminal reference.
-  terminal: TerminalWk,
-
   // Internal tree.
   base: Itree<WidgetValue>,
 
@@ -128,8 +125,7 @@ impl Tree {
   /// Make a widget tree.
   ///
   /// Note: The root node is created along with the tree.
-  pub fn new(terminal: TerminalWk) -> Self {
-    let terminal_size = terminal.upgrade().unwrap().lock().size();
+  pub fn new(terminal_size: U16Size) -> Self {
     let shape = IRect::new(
       (0, 0),
       (
@@ -140,7 +136,6 @@ impl Tree {
     let root_container = RootContainer::new();
     let root_node = TreeNode::new(WidgetValue::RootContainer(root_container), shape);
     Tree {
-      terminal,
       base: Itree::new(root_node),
       window_container_ids: BTreeSet::new(),
     }
@@ -213,10 +208,10 @@ impl Tree {
   // Draw {
 
   /// Draw the widget tree to terminal device.
-  pub fn draw(&mut self) {
+  pub fn draw(&mut self, terminal: TerminalWk) {
     for node in self.base.iter_mut() {
       let actual_shape = *node.actual_shape();
-      node.value_mut().draw(actual_shape, self.terminal.clone());
+      node.value_mut().draw(actual_shape, terminal.clone());
     }
   }
 
