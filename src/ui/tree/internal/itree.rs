@@ -8,7 +8,7 @@ use tracing::debug;
 use crate::cart::{shapes, U16Rect};
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Itree<T>
 where
   T: InodeValue,
@@ -24,13 +24,13 @@ where
   children_ids: HashMap<InodeId, Vec<InodeId>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 /// The pre-order iterator of the tree.
 ///
 /// For each node, it first visits the node itself, then visits all its children.
 /// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
 /// This also follows the order when rendering the widget tree to terminal device.
-pub struct ItreeIterator<'a, T>
+pub struct ItreeIter<'a, T>
 where
   T: InodeValue,
 {
@@ -38,7 +38,7 @@ where
   queue: VecDeque<&'a Inode<T>>,
 }
 
-impl<'a, T> Iterator for ItreeIterator<'a, T>
+impl<'a, T> Iterator for ItreeIter<'a, T>
 where
   T: InodeValue,
 {
@@ -65,7 +65,7 @@ where
   }
 }
 
-impl<'a, T> ItreeIterator<'a, T>
+impl<'a, T> ItreeIter<'a, T>
 where
   T: InodeValue,
 {
@@ -75,7 +75,62 @@ where
       Some(start) => queue.push_back(start),
       None => { /* Do nothing */ }
     }
-    ItreeIterator { tree, queue }
+    ItreeIter { tree, queue }
+  }
+}
+
+#[derive(Debug)]
+/// The mutable pre-order iterator of the tree.
+pub struct ItreeIterMut<'a, T>
+where
+  T: InodeValue,
+{
+  tree: &'a mut Itree<T>,
+  queue: VecDeque<&'a mut Inode<T>>,
+}
+
+impl<'a, T> Iterator for ItreeIterMut<'a, T>
+where
+  T: InodeValue,
+{
+  type Item = &'a mut Inode<T>;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if let Some(node) = self.queue.pop_front() {
+      unsafe {
+        let raw_tree = self.tree as *mut Itree<T>;
+
+        match self.tree.children_ids(node.id()) {
+          Some(children_ids) => {
+            for child_id in children_ids.iter() {
+              match (*raw_tree).node_mut(*child_id) {
+                Some(child) => {
+                  self.queue.push_back(child);
+                }
+                None => { /* Skip */ }
+              }
+            }
+          }
+          None => { /* Skip */ }
+        }
+      } // unsafe
+      return Some(node);
+    }
+    None
+  }
+}
+
+impl<'a, T> ItreeIterMut<'a, T>
+where
+  T: InodeValue,
+{
+  pub fn new(tree: &'a mut Itree<T>, start: Option<&'a mut Inode<T>>) -> Self {
+    let mut queue = VecDeque::new();
+    match start {
+      Some(start) => queue.push_back(start),
+      None => { /* Do nothing */ }
+    }
+    ItreeIterMut { tree, queue }
   }
 }
 
@@ -133,8 +188,8 @@ where
   ///
   /// By default, it iterates in pre-order iterator which starts from the root.
   /// For the children under the same node, it visits from lower z-index to higher.
-  pub fn iter(&self) -> ItreeIterator<T> {
-    ItreeIterator::new(self, Some(self.nodes.get(&self.root_id).unwrap()))
+  pub fn iter(&self) -> ItreeIter<T> {
+    ItreeIter::new(self, Some(self.nodes.get(&self.root_id).unwrap()))
   }
 
   /// Insert a node to the tree, i.e. push it to the children vector of the parent.
@@ -222,18 +277,16 @@ where
 
       // debug!("before create que");
       let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
-      {
-        let pnode = (*raw_nodes).get(&parent_id).unwrap();
-        let pnode_id = pnode.id();
-        let pnode_depth = *pnode.depth();
-        let pnode_actual_shape = *pnode.actual_shape();
-        que.push_back((
-          (*raw_nodes).get_mut(&child_id).unwrap(),
-          pnode_id,
-          pnode_depth,
-          pnode_actual_shape,
-        ));
-      }
+      let pnode = (*raw_nodes).get(&parent_id).unwrap();
+      let pnode_id = pnode.id();
+      let pnode_depth = *pnode.depth();
+      let pnode_actual_shape = *pnode.actual_shape();
+      que.push_back((
+        (*raw_nodes).get_mut(&child_id).unwrap(),
+        pnode_id,
+        pnode_depth,
+        pnode_actual_shape,
+      ));
       // debug!("after create que");
 
       // Iterate all descendants, and update their attributes.
@@ -243,37 +296,35 @@ where
         let pnode_depth = child_and_parent.2;
         let pnode_actual_shape = child_and_parent.3;
 
-        {
-          // debug!("before update cnode attr: {:?}", cnode);
-          let cnode_id = cnode.id();
-          let cnode_depth = pnode_depth + 1;
-          let cnode_shape = *cnode.shape();
-          let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
+        // debug!("before update cnode attr: {:?}", cnode);
+        let cnode_id = cnode.id();
+        let cnode_depth = pnode_depth + 1;
+        let cnode_shape = *cnode.shape();
+        let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
 
-          debug!("update attr, cnode:{:?}, depth:{:?}, actual shape:{:?}, pnode:{:?}, depth:{:?}, actual shape:{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
-          *cnode.depth_mut() = cnode_depth;
-          *cnode.actual_shape_mut() = cnode_actual_shape;
-          // debug!("after update cnode attr: {:?}", cnode_id);
+        debug!("update attr, cnode:{:?}, depth:{:?}, actual shape:{:?}, pnode:{:?}, depth:{:?}, actual shape:{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+        *cnode.depth_mut() = cnode_depth;
+        *cnode.actual_shape_mut() = cnode_actual_shape;
+        // debug!("after update cnode attr: {:?}", cnode_id);
 
-          // debug!(
-          //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
-          //   cnode_id, self.children_ids
-          // );
-          match self.children_ids.get(&cnode_id) {
-            Some(descendant_ids) => {
-              for dnode_id in descendant_ids.iter() {
-                // debug!("before push dnode: {:?}", dnode_id);
-                match (*raw_nodes).get_mut(dnode_id) {
-                  Some(dnode) => {
-                    que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
-                  }
-                  None => { /* Skip */ }
+        // debug!(
+        //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
+        //   cnode_id, self.children_ids
+        // );
+        match self.children_ids.get(&cnode_id) {
+          Some(descendant_ids) => {
+            for dnode_id in descendant_ids.iter() {
+              // debug!("before push dnode: {:?}", dnode_id);
+              match (*raw_nodes).get_mut(dnode_id) {
+                Some(dnode) => {
+                  que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
                 }
-                // debug!("after push dnode: {:?}", dnode_id);
+                None => { /* Skip */ }
               }
+              // debug!("after push dnode: {:?}", dnode_id);
             }
-            None => { /* Skip */ }
           }
+          None => { /* Skip */ }
         }
       }
     } // unsafe
@@ -412,10 +463,6 @@ mod tests {
     assert!(tree.children_ids(nid1).unwrap().is_empty());
 
     for node in tree.iter() {
-      assert_node_id_eq!(node, nid1);
-    }
-
-    for node in tree.ordered_iter(ItreeIterateOrder::Descent) {
       assert_node_id_eq!(node, nid1);
     }
   }
