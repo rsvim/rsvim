@@ -1,6 +1,6 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
-use crossterm::{self, queue};
+use crossterm;
 use parking_lot::Mutex;
 use std::fmt;
 use std::fmt::Debug;
@@ -8,7 +8,7 @@ use std::slice::Iter;
 use std::sync::Arc;
 
 use crate::cart::U16Size;
-use crate::ui::frame::cursor::{cursor_style_eq, CursorStyleFormatter};
+use crate::ui::frame::cursor::cursor_style_eq;
 use crate::ui::frame::{Cell, Cursor, Frame};
 
 /// Backend terminal

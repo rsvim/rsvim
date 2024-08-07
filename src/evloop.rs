@@ -22,7 +22,7 @@ use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::ui::frame::CursorStyle;
-use crate::ui::term::{Terminal, TerminalArc};
+use crate::ui::term::{ShaderCommand, Terminal, TerminalArc};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
@@ -86,7 +86,13 @@ impl EventLoop {
     let mut out = std::io::stdout();
 
     debug!("init, draw cursor");
-    let cursor = self.screen.lock().await.frame().cursor;
+    let cursor = self
+      .screen
+      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .frame()
+      .cursor;
+
     if cursor.blinking {
       queue!(out, crossterm::cursor::EnableBlinking)?;
     } else {
@@ -150,7 +156,10 @@ impl EventLoop {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
               // Up
-              let mut tree = self.tree.lock().await;
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_up_by(cursor_id, 1);
@@ -160,7 +169,10 @@ impl EventLoop {
             }
             KeyCode::Down | KeyCode::Char('j') => {
               // Down
-              let mut tree = self.tree.lock().await;
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_down_by(cursor_id, 1);
@@ -170,7 +182,10 @@ impl EventLoop {
             }
             KeyCode::Left | KeyCode::Char('h') => {
               // Left
-              let mut tree = self.tree.lock().await;
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_left_by(cursor_id, 1);
@@ -180,7 +195,10 @@ impl EventLoop {
             }
             KeyCode::Right | KeyCode::Char('l') => {
               // Right
-              let mut tree = self.tree.lock().await;
+              let mut tree = self
+                .tree
+                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.move_right_by(cursor_id, 1);
@@ -210,12 +228,69 @@ impl EventLoop {
     }
 
     // Draw UI components to the terminal frame.
-    self.tree.lock().await.draw(self.screen.clone()).await?;
+    self
+      .tree
+      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .draw(self.screen.clone());
 
-    // Flush terminal frame to the device.
-    match self.screen.lock().await.flush().await {
-      Ok(_) => Ok(true),
-      Err(e) => Err(e),
+    // Compute the commands that need to output to the terminal device.
+    let shader = self
+      .screen
+      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .shade();
+
+    let mut out = std::io::stdout();
+    for shader_command in shader.iter() {
+      match shader_command {
+        ShaderCommand::CursorSetCursorStyle(command) => queue!(out, command)?,
+        ShaderCommand::CursorDisableBlinking(command) => queue!(out, command)?,
+        ShaderCommand::CursorEnableBlinking(command) => queue!(out, command)?,
+        ShaderCommand::CursorHide(command) => queue!(out, command)?,
+        ShaderCommand::CursorMoveDown(command) => queue!(out, command)?,
+        ShaderCommand::CursorMoveLeft(command) => queue!(out, command)?,
+        ShaderCommand::CursorMoveRight(command) => queue!(out, command)?,
+        ShaderCommand::CursorMoveTo(command) => queue!(out, command)?,
+        ShaderCommand::CursorMoveToColumn(command) => queue!(out, command)?,
+        ShaderCommand::CursorMoveToNextLine(command) => queue!(out, command)?,
+        ShaderCommand::CursorMoveToPreviousLine(command) => queue!(out, command)?,
+        ShaderCommand::CursorMoveToRow(command) => queue!(out, command)?,
+        ShaderCommand::CursorMoveUp(command) => queue!(out, command)?,
+        ShaderCommand::CursorRestorePosition(command) => queue!(out, command)?,
+        ShaderCommand::CursorSavePosition(command) => queue!(out, command)?,
+        ShaderCommand::CursorShow(command) => queue!(out, command)?,
+        ShaderCommand::EventDisableBracketedPaste(command) => queue!(out, command)?,
+        ShaderCommand::EventDisableFocusChange(command) => queue!(out, command)?,
+        ShaderCommand::EventDisableMouseCapture(command) => queue!(out, command)?,
+        ShaderCommand::EventEnableBracketedPaste(command) => queue!(out, command)?,
+        ShaderCommand::EventEnableFocusChange(command) => queue!(out, command)?,
+        ShaderCommand::EventEnableMouseCapture(command) => queue!(out, command)?,
+        ShaderCommand::EventPopKeyboardEnhancementFlags(command) => queue!(out, command)?,
+        ShaderCommand::EventPushKeyboardEnhancementFlags(command) => queue!(out, command)?,
+        ShaderCommand::StyleResetColor(command) => queue!(out, command)?,
+        ShaderCommand::StyleSetAttribute(command) => queue!(out, command)?,
+        ShaderCommand::StyleSetAttributes(command) => queue!(out, command)?,
+        ShaderCommand::StyleSetBackgroundColor(command) => queue!(out, command)?,
+        ShaderCommand::StyleSetColors(command) => queue!(out, command)?,
+        ShaderCommand::StyleSetForegroundColor(command) => queue!(out, command)?,
+        ShaderCommand::StyleSetStyle(command) => queue!(out, command)?,
+        ShaderCommand::StyleSetUnderlineColor(command) => queue!(out, command)?,
+        ShaderCommand::TerminalBeginSynchronizedUpdate(command) => queue!(out, command)?,
+        ShaderCommand::TerminalClear(command) => queue!(out, command)?,
+        ShaderCommand::TerminalDisableLineWrap(command) => queue!(out, command)?,
+        ShaderCommand::TerminalEnableLineWrap(command) => queue!(out, command)?,
+        ShaderCommand::TerminalEndSynchronizedUpdate(command) => queue!(out, command)?,
+        ShaderCommand::TerminalEnterAlternateScreen(command) => queue!(out, command)?,
+        ShaderCommand::TerminalLeaveAlternateScreen(command) => queue!(out, command)?,
+        ShaderCommand::TerminalScrollDown(command) => queue!(out, command)?,
+        ShaderCommand::TerminalScrollUp(command) => queue!(out, command)?,
+        ShaderCommand::TerminalSetSize(command) => queue!(out, command)?,
+      }
     }
+
+    out.flush()?;
+
+    Ok(true)
   }
 }

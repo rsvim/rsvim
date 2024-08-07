@@ -2,11 +2,10 @@
 
 #![allow(dead_code)]
 
-// use parking_lot::Mutex;
+use parking_lot::Mutex;
 use std::collections::BTreeSet;
 use std::io::Result as IoResult;
 use std::sync::{Arc, Weak};
-use tokio::sync::Mutex;
 use tracing::debug;
 
 use crate::cart::{IRect, U16Size};
@@ -258,17 +257,12 @@ impl Tree {
   // Draw {
 
   /// Draw the widget tree to terminal device.
-  pub async fn draw(&mut self, terminal: TerminalArc) -> IoResult<()> {
+  pub fn draw(&mut self, terminal: TerminalArc) {
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
       let actual_shape = *node.actual_shape();
-      node
-        .value_mut()
-        .draw(actual_shape, terminal.clone())
-        .await?;
+      node.value_mut().draw(actual_shape, terminal.clone());
     }
-
-    Ok(())
   }
 
   // Draw }
