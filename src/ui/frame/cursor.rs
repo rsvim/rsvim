@@ -9,34 +9,27 @@ pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 /// Whether two `CursorStyle` equals.
 pub fn cursor_style_eq(a: CursorStyle, b: CursorStyle) -> bool {
   match a {
-    crossterm::cursor::SetCursorStyle::DefaultUserShape => match b {
-      crossterm::cursor::SetCursorStyle::DefaultUserShape => true,
-      _ => false,
-    },
-    crossterm::cursor::SetCursorStyle::BlinkingBlock => match b {
-      crossterm::cursor::SetCursorStyle::BlinkingBlock => true,
-      _ => false,
-    },
-    crossterm::cursor::SetCursorStyle::SteadyBlock => match b {
-      crossterm::cursor::SetCursorStyle::SteadyBlock => true,
-      _ => false,
-    },
-    crossterm::cursor::SetCursorStyle::BlinkingUnderScore => match b {
-      crossterm::cursor::SetCursorStyle::BlinkingUnderScore => true,
-      _ => false,
-    },
-    crossterm::cursor::SetCursorStyle::SteadyUnderScore => match b {
-      crossterm::cursor::SetCursorStyle::SteadyUnderScore => true,
-      _ => false,
-    },
-    crossterm::cursor::SetCursorStyle::BlinkingBar => match b {
-      crossterm::cursor::SetCursorStyle::BlinkingBar => true,
-      _ => false,
-    },
-    crossterm::cursor::SetCursorStyle::SteadyBar => match b {
-      crossterm::cursor::SetCursorStyle::SteadyBar => true,
-      _ => false,
-    },
+    crossterm::cursor::SetCursorStyle::DefaultUserShape => {
+      matches!(b, crossterm::cursor::SetCursorStyle::DefaultUserShape)
+    }
+    crossterm::cursor::SetCursorStyle::BlinkingBlock => {
+      matches!(b, crossterm::cursor::SetCursorStyle::BlinkingBlock)
+    }
+    crossterm::cursor::SetCursorStyle::SteadyBlock => {
+      matches!(b, crossterm::cursor::SetCursorStyle::SteadyBlock)
+    }
+    crossterm::cursor::SetCursorStyle::BlinkingUnderScore => {
+      matches!(b, crossterm::cursor::SetCursorStyle::BlinkingUnderScore)
+    }
+    crossterm::cursor::SetCursorStyle::SteadyUnderScore => {
+      matches!(b, crossterm::cursor::SetCursorStyle::SteadyUnderScore)
+    }
+    crossterm::cursor::SetCursorStyle::BlinkingBar => {
+      matches!(b, crossterm::cursor::SetCursorStyle::BlinkingBar)
+    }
+    crossterm::cursor::SetCursorStyle::SteadyBar => {
+      matches!(b, crossterm::cursor::SetCursorStyle::SteadyBar)
+    }
   }
 }
 

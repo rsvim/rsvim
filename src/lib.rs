@@ -7,7 +7,6 @@ pub mod cli;
 pub mod evloop;
 pub mod glovar;
 pub mod log;
-pub mod shader;
 pub mod test;
 pub mod ui;
 pub mod uuid;

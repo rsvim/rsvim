@@ -4,7 +4,6 @@
 
 use parking_lot::Mutex;
 use std::collections::BTreeSet;
-use std::io::Result as IoResult;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 

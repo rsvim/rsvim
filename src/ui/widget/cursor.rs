@@ -1,10 +1,11 @@
 //! Cursor widget.
 
 use std::fmt::Debug;
-use std::io::Result as IoResult;
+use std::time::Duration;
 use tracing::debug;
 
 use crate::cart::{U16Pos, U16Rect};
+use crate::glovar;
 use crate::ui::frame::{self, CursorStyle, CursorStyleFormatter};
 use crate::ui::term::TerminalArc;
 use crate::ui::widget::{Widget, WidgetId};
@@ -52,7 +53,7 @@ impl Widget for Cursor {
     self.id
   }
 
-  async fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) -> IoResult<()> {
+  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
     let pos: U16Pos = actual_shape.min().into();
     debug!(
       "draw, actual shape:{:?}, top-left pos:{:?}",
@@ -60,8 +61,8 @@ impl Widget for Cursor {
     );
 
     terminal
-      .lock()
-      .await
+      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
       .frame_mut()
       .set_cursor(frame::Cursor::new(
         pos,
@@ -69,7 +70,5 @@ impl Widget for Cursor {
         self.hidden,
         self.style,
       ));
-
-    Ok(())
   }
 }
