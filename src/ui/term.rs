@@ -85,7 +85,7 @@ impl Terminal {
 
   // Previous frame }
 
-  pub fn compare(&mut self) {
+  pub fn shade(&mut self) -> CrosstermCommands {
     // Dump current frame to device, with a diff-algorithm to reduce the output.
     if self.frame.dirty_cursor {
       let mut out = std::io::stdout();
@@ -114,64 +114,6 @@ impl Terminal {
     self.frame.reset_dirty();
   }
 }
-
-/// Generic parameter `C` is for `crossterm::style::PrintStyledContent<C>`.
-/// Generic parameter `P` is for `crossterm::style::Print<P>`.
-/// Generic parameter `T` is for `crossterm::terminal::SetTitle<T>`.
-pub enum CrosstermCommand<C, P, T>
-where
-  C: Display + Debug + Clone + Copy,
-  P: Display + Debug + Clone + Copy + PartialEq + Eq,
-  T: Display + Debug + Clone + Copy + PartialEq + Eq,
-{
-  CursorSetCursorStyle(crossterm::cursor::SetCursorStyle),
-  CursorDisableBlinking(crossterm::cursor::DisableBlinking),
-  CursorEnableBlinking(crossterm::cursor::EnableBlinking),
-  CursorHide(crossterm::cursor::Hide),
-  CursorMoveDown(crossterm::cursor::MoveDown),
-  CursorMoveLeft(crossterm::cursor::MoveLeft),
-  CursorMoveRight(crossterm::cursor::MoveRight),
-  CursorMoveTo(crossterm::cursor::MoveTo),
-  CursorMoveToColumn(crossterm::cursor::MoveToColumn),
-  CursorMoveToNextLine(crossterm::cursor::MoveToNextLine),
-  CursorMoveToPreviousLine(crossterm::cursor::MoveToPreviousLine),
-  CursorMoveToRow(crossterm::cursor::MoveToRow),
-  CursorMoveUp(crossterm::cursor::MoveUp),
-  CursorRestorePosition(crossterm::cursor::RestorePosition),
-  CursorSavePosition(crossterm::cursor::SavePosition),
-  CursorShow(crossterm::cursor::Show),
-  EventDisableBracketedPaste(crossterm::event::DisableBracketedPaste),
-  EventDisableFocusChange(crossterm::event::DisableFocusChange),
-  EventDisableMouseCapture(crossterm::event::DisableMouseCapture),
-  EventEnableBracketedPaste(crossterm::event::EnableBracketedPaste),
-  EventEnableFocusChange(crossterm::event::EnableFocusChange),
-  EventEnableMouseCapture(crossterm::event::EnableMouseCapture),
-  EventPopKeyboardEnhancementFlags(crossterm::event::PopKeyboardEnhancementFlags),
-  EventPushKeyboardEnhancementFlags(crossterm::event::PushKeyboardEnhancementFlags),
-  StyleResetColor(crossterm::style::ResetColor),
-  StyleSetAttribute(crossterm::style::SetAttribute),
-  StyleSetAttributes(crossterm::style::SetAttributes),
-  StyleSetBackgroundColor(crossterm::style::SetBackgroundColor),
-  StyleSetColors(crossterm::style::SetColors),
-  StyleSetForegroundColor(crossterm::style::SetForegroundColor),
-  StyleSetStyle(crossterm::style::SetStyle),
-  StyleSetUnderlineColor(crossterm::style::SetUnderlineColor),
-  StylePrintStyledContent(crossterm::style::PrintStyledContent<C>),
-  StylePrint(crossterm::style::Print<P>),
-  TerminalBeginSynchronizedUpdate(crossterm::terminal::BeginSynchronizedUpdate),
-  TerminalClear(crossterm::terminal::Clear),
-  TerminalDisableLineWrap(crossterm::terminal::DisableLineWrap),
-  TerminalEnableLineWrap(crossterm::terminal::EnableLineWrap),
-  TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate),
-  TerminalEnterAlternateScreen(crossterm::terminal::EnterAlternateScreen),
-  TerminalLeaveAlternateScreen(crossterm::terminal::LeaveAlternateScreen),
-  TerminalScrollDown(crossterm::terminal::ScrollDown),
-  TerminalScrollUp(crossterm::terminal::ScrollUp),
-  TerminalSetSize(crossterm::terminal::SetSize),
-  TerminalSetTitle(crossterm::terminal::SetTitle<T>),
-}
-
-pub struct CrosstermCommands {}
 
 #[cfg(test)]
 mod tests {
