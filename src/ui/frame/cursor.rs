@@ -6,6 +6,39 @@ use std::{cmp, fmt, hash};
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
+pub fn cursor_style_eq(a: CursorStyle, b: CursorStyle) -> bool {
+  match a {
+    crossterm::cursor::SetCursorStyle::DefaultUserShape => match b {
+      crossterm::cursor::SetCursorStyle::DefaultUserShape => true,
+      _ => false,
+    },
+    crossterm::cursor::SetCursorStyle::BlinkingBlock => match b {
+      crossterm::cursor::SetCursorStyle::BlinkingBlock => true,
+      _ => false,
+    },
+    crossterm::cursor::SetCursorStyle::SteadyBlock => match b {
+      crossterm::cursor::SetCursorStyle::SteadyBlock => true,
+      _ => false,
+    },
+    crossterm::cursor::SetCursorStyle::BlinkingUnderScore => match b {
+      crossterm::cursor::SetCursorStyle::BlinkingUnderScore => true,
+      _ => false,
+    },
+    crossterm::cursor::SetCursorStyle::SteadyUnderScore => match b {
+      crossterm::cursor::SetCursorStyle::SteadyUnderScore => true,
+      _ => false,
+    },
+    crossterm::cursor::SetCursorStyle::BlinkingBar => match b {
+      crossterm::cursor::SetCursorStyle::BlinkingBar => true,
+      _ => false,
+    },
+    crossterm::cursor::SetCursorStyle::SteadyBar => match b {
+      crossterm::cursor::SetCursorStyle::SteadyBar => true,
+      _ => false,
+    },
+  }
+}
+
 #[derive(Copy, Clone)]
 /// Terminal cursor.
 /// Note: This is the real terminal cursor of the device, not a virtual one in multiple cursors.

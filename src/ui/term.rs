@@ -2,10 +2,13 @@
 
 use crossterm::{self, queue};
 use parking_lot::Mutex;
-use std::fmt::{Debug, Display};
+use std::fmt;
+use std::fmt::Debug;
+use std::slice::Iter;
 use std::sync::Arc;
 
 use crate::cart::U16Size;
+use crate::ui::frame::cursor::CursorStyleFormatter;
 use crate::ui::frame::{Cell, Cursor, Frame};
 
 /// Backend terminal
@@ -85,22 +88,33 @@ impl Terminal {
 
   // Previous frame }
 
-  pub fn shade(&mut self) -> CrosstermCommands {
+  pub fn shade(&mut self) -> Shader {
+    let mut shader = Shader::new();
+
     // Dump current frame to device, with a diff-algorithm to reduce the output.
     if self.frame.dirty_cursor {
       let mut out = std::io::stdout();
 
       let cursor = self.frame.cursor;
-      if cursor.blinking {
-        queue!(out, crossterm::cursor::EnableBlinking)?;
-      } else {
-        queue!(out, crossterm::cursor::DisableBlinking)?;
+
+      if cursor.blinking != self.prev_frame.cursor.blinking {
+        shader.push(if cursor.blinking {
+          ShaderCommand::CursorEnableBlinking(crossterm::cursor::EnableBlinking)
+        } else {
+          ShaderCommand::CursorDisableBlinking(crossterm::cursor::DisableBlinking)
+        });
       }
-      if cursor.hidden {
-        queue!(out, crossterm::cursor::Hide)?;
-      } else {
-        queue!(out, crossterm::cursor::Show)?;
+      if cursor.hidden != self.prev_frame.cursor.hidden {
+        shader.push(if cursor.hidden {
+          ShaderCommand::CursorHide(crossterm::cursor::Hide)
+        } else {
+          ShaderCommand::CursorShow(crossterm::cursor::Show)
+        });
       }
+      if cursor.style != self.prev_frame.cursor.style {
+        shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style));
+      }
+
       queue!(out, cursor.style)?;
       queue!(
         out,
@@ -112,6 +126,90 @@ impl Terminal {
     self.prev_frame = self.frame.clone();
     // Reset the `dirty` fields.
     self.frame.reset_dirty();
+
+    shader
+  }
+}
+
+#[derive(Clone)]
+pub enum ShaderCommand {
+  CursorSetCursorStyle(crossterm::cursor::SetCursorStyle),
+  CursorDisableBlinking(crossterm::cursor::DisableBlinking),
+  CursorEnableBlinking(crossterm::cursor::EnableBlinking),
+  CursorHide(crossterm::cursor::Hide),
+  CursorMoveDown(crossterm::cursor::MoveDown),
+  CursorMoveLeft(crossterm::cursor::MoveLeft),
+  CursorMoveRight(crossterm::cursor::MoveRight),
+  CursorMoveTo(crossterm::cursor::MoveTo),
+  CursorMoveToColumn(crossterm::cursor::MoveToColumn),
+  CursorMoveToNextLine(crossterm::cursor::MoveToNextLine),
+  CursorMoveToPreviousLine(crossterm::cursor::MoveToPreviousLine),
+  CursorMoveToRow(crossterm::cursor::MoveToRow),
+  CursorMoveUp(crossterm::cursor::MoveUp),
+  CursorRestorePosition(crossterm::cursor::RestorePosition),
+  CursorSavePosition(crossterm::cursor::SavePosition),
+  CursorShow(crossterm::cursor::Show),
+  EventDisableBracketedPaste(crossterm::event::DisableBracketedPaste),
+  EventDisableFocusChange(crossterm::event::DisableFocusChange),
+  EventDisableMouseCapture(crossterm::event::DisableMouseCapture),
+  EventEnableBracketedPaste(crossterm::event::EnableBracketedPaste),
+  EventEnableFocusChange(crossterm::event::EnableFocusChange),
+  EventEnableMouseCapture(crossterm::event::EnableMouseCapture),
+  EventPopKeyboardEnhancementFlags(crossterm::event::PopKeyboardEnhancementFlags),
+  EventPushKeyboardEnhancementFlags(crossterm::event::PushKeyboardEnhancementFlags),
+  StyleResetColor(crossterm::style::ResetColor),
+  StyleSetAttribute(crossterm::style::SetAttribute),
+  StyleSetAttributes(crossterm::style::SetAttributes),
+  StyleSetBackgroundColor(crossterm::style::SetBackgroundColor),
+  StyleSetColors(crossterm::style::SetColors),
+  StyleSetForegroundColor(crossterm::style::SetForegroundColor),
+  StyleSetStyle(crossterm::style::SetStyle),
+  StyleSetUnderlineColor(crossterm::style::SetUnderlineColor),
+  TerminalBeginSynchronizedUpdate(crossterm::terminal::BeginSynchronizedUpdate),
+  TerminalClear(crossterm::terminal::Clear),
+  TerminalDisableLineWrap(crossterm::terminal::DisableLineWrap),
+  TerminalEnableLineWrap(crossterm::terminal::EnableLineWrap),
+  TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate),
+  TerminalEnterAlternateScreen(crossterm::terminal::EnterAlternateScreen),
+  TerminalLeaveAlternateScreen(crossterm::terminal::LeaveAlternateScreen),
+  TerminalScrollDown(crossterm::terminal::ScrollDown),
+  TerminalScrollUp(crossterm::terminal::ScrollUp),
+  TerminalSetSize(crossterm::terminal::SetSize),
+}
+
+impl fmt::Debug for ShaderCommand {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+    match self {
+      ShaderCommand::CursorSetCursorStyle(s) => {
+        let style_formatter = CursorStyleFormatter::from(*s);
+        f.debug_struct("ShaderCommand::CursorSetCursorStyle")
+          .field("0", &style_formatter)
+          .finish()
+      }
+      _ => {
+        let s = format!("{:?}", self);
+        f.debug_struct(&s).finish()
+      }
+    }
+  }
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct Shader {
+  commands: Vec<ShaderCommand>,
+}
+
+impl Shader {
+  pub fn new() -> Self {
+    Shader { commands: vec![] }
+  }
+
+  pub fn push(&mut self, command: ShaderCommand) {
+    self.commands.push(command)
+  }
+
+  pub fn iter(&self) -> Iter<ShaderCommand> {
+    self.commands.iter()
   }
 }
 
