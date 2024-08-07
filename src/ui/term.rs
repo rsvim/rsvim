@@ -180,18 +180,8 @@ pub enum ShaderCommand {
 
 impl fmt::Debug for ShaderCommand {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    match self {
-      ShaderCommand::CursorSetCursorStyle(s) => {
-        let style_formatter = CursorStyleFormatter::from(*s);
-        f.debug_struct("ShaderCommand::CursorSetCursorStyle")
-          .field("0", &style_formatter)
-          .finish()
-      }
-      _ => {
-        let s = format!("{:?}", self);
-        f.debug_struct(&s).finish()
-      }
-    }
+    let s = format!("ShaderCommand::{:?}", self);
+    f.debug_struct(&s).finish()
   }
 }
 
@@ -223,5 +213,16 @@ mod tests {
     let t = Terminal::new(U16Size::new(3, 4));
     assert_eq!(t.frame().size, t.prev_frame().size);
     assert_eq!(t.frame().cursor, t.prev_frame().cursor);
+  }
+
+  #[test]
+  fn shader_command_debug() {
+    assert_eq!(
+      format!(
+        "{:?}",
+        ShaderCommand::TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate)
+      ),
+      "ShaderCommand::TerminalEndSynchronizedUpdate"
+    );
   }
 }
