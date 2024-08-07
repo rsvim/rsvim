@@ -6,6 +6,33 @@ use std::{cmp, fmt, hash};
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
+/// Whether two `CursorStyle` equals.
+pub fn cursor_style_eq(a: CursorStyle, b: CursorStyle) -> bool {
+  match a {
+    crossterm::cursor::SetCursorStyle::DefaultUserShape => {
+      matches!(b, crossterm::cursor::SetCursorStyle::DefaultUserShape)
+    }
+    crossterm::cursor::SetCursorStyle::BlinkingBlock => {
+      matches!(b, crossterm::cursor::SetCursorStyle::BlinkingBlock)
+    }
+    crossterm::cursor::SetCursorStyle::SteadyBlock => {
+      matches!(b, crossterm::cursor::SetCursorStyle::SteadyBlock)
+    }
+    crossterm::cursor::SetCursorStyle::BlinkingUnderScore => {
+      matches!(b, crossterm::cursor::SetCursorStyle::BlinkingUnderScore)
+    }
+    crossterm::cursor::SetCursorStyle::SteadyUnderScore => {
+      matches!(b, crossterm::cursor::SetCursorStyle::SteadyUnderScore)
+    }
+    crossterm::cursor::SetCursorStyle::BlinkingBar => {
+      matches!(b, crossterm::cursor::SetCursorStyle::BlinkingBar)
+    }
+    crossterm::cursor::SetCursorStyle::SteadyBar => {
+      matches!(b, crossterm::cursor::SetCursorStyle::SteadyBar)
+    }
+  }
+}
+
 #[derive(Copy, Clone)]
 /// Terminal cursor.
 /// Note: This is the real terminal cursor of the device, not a virtual one in multiple cursors.
@@ -14,22 +41,21 @@ pub struct Cursor {
   pub blinking: bool,
   pub hidden: bool,
   pub style: CursorStyle,
-  pub dirty: bool,
 }
 
 pub struct CursorStyleFormatter {
-  style: CursorStyle,
+  value: CursorStyle,
 }
 
 impl From<CursorStyle> for CursorStyleFormatter {
   fn from(style: CursorStyle) -> Self {
-    CursorStyleFormatter { style }
+    CursorStyleFormatter { value: style }
   }
 }
 
 impl fmt::Debug for CursorStyleFormatter {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    write!(f, "{}", self.style)
+    write!(f, "{}", self.value)
   }
 }
 
@@ -40,7 +66,6 @@ impl Cursor {
       blinking,
       hidden,
       style,
-      dirty: true,
     }
   }
 }
@@ -52,7 +77,6 @@ impl Default for Cursor {
       blinking: false,
       hidden: false,
       style: CursorStyle::DefaultUserShape,
-      dirty: true,
     }
   }
 }

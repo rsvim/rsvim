@@ -1,41 +1,38 @@
 //! Cursor widget.
 
 use std::fmt::Debug;
+use std::time::Duration;
+use tracing::debug;
 
 use crate::cart::{U16Pos, U16Rect};
-use crate::ui::frame::{CursorStyle, CursorStyleFormatter};
-use crate::ui::term::TerminalWk;
-use crate::ui::tree::node::NodeId;
-use crate::ui::widget::Widget;
+use crate::glovar;
+use crate::ui::frame::{self, CursorStyle, CursorStyleFormatter};
+use crate::ui::term::TerminalArc;
+use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
 #[derive(Clone, Copy)]
 pub struct Cursor {
-  id: NodeId,
+  id: WidgetId,
   blinking: bool,
   hidden: bool,
   style: CursorStyle,
 }
 
 impl Cursor {
-  pub fn new(blinking: bool, hidden: bool, style: CursorStyle) -> Self {
-    Cursor {
-      id: uuid::next(),
-      blinking,
-      hidden,
-      style,
-    }
-  }
-}
-
-impl Default for Cursor {
-  fn default() -> Self {
+  pub fn new() -> Self {
     Cursor {
       id: uuid::next(),
       blinking: true,
       hidden: false,
       style: CursorStyle::DefaultUserShape,
     }
+  }
+}
+
+impl Default for Cursor {
+  fn default() -> Self {
+    Cursor::new()
   }
 }
 
@@ -52,20 +49,22 @@ impl Debug for Cursor {
 }
 
 impl Widget for Cursor {
-  fn id(&self) -> NodeId {
+  fn id(&self) -> WidgetId {
     self.id
   }
 
-  fn draw(&mut self, actual_shape: &U16Rect, terminal: TerminalWk) {
+  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
     let pos: U16Pos = actual_shape.min().into();
+    debug!(
+      "draw, actual shape:{:?}, top-left pos:{:?}",
+      actual_shape, pos
+    );
 
     terminal
-      .upgrade()
-      .unwrap()
-      .write()
+      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap()
       .frame_mut()
-      .set_cursor(crate::ui::frame::Cursor::new(
+      .set_cursor(frame::Cursor::new(
         pos,
         self.blinking,
         self.hidden,

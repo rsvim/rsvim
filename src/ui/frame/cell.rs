@@ -16,9 +16,6 @@ pub struct Cell {
   pub bg: Color,
   /// Attributes: underline, bold, italic, etc.
   pub attrs: Attributes,
-  /// Indicates whether this cell is been modified, other UI components will modify a cell and make
-  /// it dirty, and it comes back to clean after been flushed to terminal.
-  pub dirty: bool,
 }
 
 impl Cell {
@@ -30,7 +27,6 @@ impl Cell {
   /// Set symbol.
   pub fn set_symbol(&mut self, symbol: &str) -> &mut Self {
     self.symbol = CompactString::new(symbol);
-    self.dirty = true;
     self
   }
 
@@ -38,7 +34,6 @@ impl Cell {
   pub fn set_char(&mut self, ch: char) -> &mut Self {
     let mut buf = [0; 4];
     self.symbol = CompactString::new(ch.encode_utf8(&mut buf));
-    self.dirty = true;
     self
   }
 
@@ -50,7 +45,6 @@ impl Cell {
   /// Set foreground color.
   pub fn set_fg(&mut self, color: Color) -> &mut Self {
     self.fg = color;
-    self.dirty = true;
     self
   }
 
@@ -62,7 +56,6 @@ impl Cell {
   /// Set background color.
   pub fn set_bg(&mut self, color: Color) -> &mut Self {
     self.bg = color;
-    self.dirty = true;
     self
   }
 
@@ -74,13 +67,7 @@ impl Cell {
   /// Set attributes.
   pub fn set_attrs(&mut self, attrs: Attributes) -> &mut Self {
     self.attrs = attrs;
-    self.dirty = true;
     self
-  }
-
-  /// Indicate whether this cell is dirty.
-  pub fn dirty(&self) -> bool {
-    self.dirty
   }
 }
 
@@ -92,7 +79,6 @@ impl Default for Cell {
       fg: Color::Reset,
       bg: Color::Reset,
       attrs: Attributes::default(),
-      dirty: true,
     }
   }
 }
@@ -105,7 +91,6 @@ impl Cell {
       fg,
       bg,
       attrs,
-      dirty: true,
     }
   }
 }
@@ -115,7 +100,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn cell_default() {
+  fn default1() {
     let c = Cell::default();
     assert_eq!(c.symbol(), " ");
     assert_eq!(c.fg(), Color::Reset);
@@ -124,7 +109,7 @@ mod tests {
   }
 
   #[test]
-  fn cell_new() {
+  fn new1() {
     let c1 = Cell::new(
       CompactString::const_new(" "),
       Color::Reset,

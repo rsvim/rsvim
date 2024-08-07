@@ -5,6 +5,7 @@ pub mod buffer;
 pub mod cart;
 pub mod cli;
 pub mod evloop;
+pub mod glovar;
 pub mod log;
 pub mod test;
 pub mod ui;

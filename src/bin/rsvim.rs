@@ -63,6 +63,7 @@ async fn main() -> IoResult<()> {
 
   init().await?;
   let mut ev = EventLoop::new().await?;
+  ev.init().await?;
   ev.run().await?;
   shutdown().await
 }
