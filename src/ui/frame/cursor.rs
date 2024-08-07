@@ -6,6 +6,7 @@ use std::{cmp, fmt, hash};
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
+/// Whether two `CursorStyle` equals.
 pub fn cursor_style_eq(a: CursorStyle, b: CursorStyle) -> bool {
   match a {
     crossterm::cursor::SetCursorStyle::DefaultUserShape => match b {
@@ -50,18 +51,18 @@ pub struct Cursor {
 }
 
 pub struct CursorStyleFormatter {
-  style: CursorStyle,
+  value: CursorStyle,
 }
 
 impl From<CursorStyle> for CursorStyleFormatter {
   fn from(style: CursorStyle) -> Self {
-    CursorStyleFormatter { style }
+    CursorStyleFormatter { value: style }
   }
 }
 
 impl fmt::Debug for CursorStyleFormatter {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    write!(f, "{}", self.style)
+    write!(f, "{}", self.value)
   }
 }
 

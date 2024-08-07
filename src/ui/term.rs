@@ -8,7 +8,7 @@ use std::slice::Iter;
 use std::sync::Arc;
 
 use crate::cart::U16Size;
-use crate::ui::frame::cursor::CursorStyleFormatter;
+use crate::ui::frame::cursor::{cursor_style_eq, CursorStyleFormatter};
 use crate::ui::frame::{Cell, Cursor, Frame};
 
 /// Backend terminal
@@ -88,38 +88,39 @@ impl Terminal {
 
   // Previous frame }
 
+  /// Get the shader commands that should print to the terminal device.
+  /// It uses a diff-algorithm to reduce the output.
   pub fn shade(&mut self) -> Shader {
     let mut shader = Shader::new();
 
-    // Dump current frame to device, with a diff-algorithm to reduce the output.
+    // For cursor.
     if self.frame.dirty_cursor {
-      let mut out = std::io::stdout();
-
       let cursor = self.frame.cursor;
+      let prev_cursor = self.prev_frame.cursor;
 
-      if cursor.blinking != self.prev_frame.cursor.blinking {
+      if cursor.blinking != prev_cursor.blinking {
         shader.push(if cursor.blinking {
           ShaderCommand::CursorEnableBlinking(crossterm::cursor::EnableBlinking)
         } else {
           ShaderCommand::CursorDisableBlinking(crossterm::cursor::DisableBlinking)
         });
       }
-      if cursor.hidden != self.prev_frame.cursor.hidden {
+      if cursor.hidden != prev_cursor.hidden {
         shader.push(if cursor.hidden {
           ShaderCommand::CursorHide(crossterm::cursor::Hide)
         } else {
           ShaderCommand::CursorShow(crossterm::cursor::Show)
         });
       }
-      if cursor.style != self.prev_frame.cursor.style {
+      if !cursor_style_eq(cursor.style, prev_cursor.style) {
         shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style));
       }
-
-      queue!(out, cursor.style)?;
-      queue!(
-        out,
-        crossterm::cursor::MoveTo(cursor.pos.x(), cursor.pos.y())
-      )?;
+      if cursor.pos != prev_cursor.pos {
+        shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
+          cursor.pos.x(),
+          cursor.pos.y(),
+        )));
+      }
     }
 
     // Save current frame.
