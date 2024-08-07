@@ -1,10 +1,9 @@
 //! Backend terminal for receiving user inputs & canvas for UI rendering.
 
 use crossterm::{self, queue};
-// use parking_lot::Mutex;
-use std::io::Result as IoResult;
+use parking_lot::Mutex;
+use std::fmt::{Debug, Display};
 use std::sync::Arc;
-use tokio::sync::Mutex as AsyncMutex;
 
 use crate::cart::U16Size;
 use crate::ui::frame::{Cell, Cursor, Frame};
@@ -16,8 +15,7 @@ pub struct Terminal {
   prev_frame: Frame,
 }
 
-pub type TerminalArc = Arc<AsyncMutex<Terminal>>;
-// pub type TerminalAsyncArc = Arc<AsyncMutex<Terminal>>;
+pub type TerminalArc = Arc<Mutex<Terminal>>;
 
 impl Terminal {
   pub fn new(size: U16Size) -> Self {
@@ -28,7 +26,7 @@ impl Terminal {
   }
 
   pub fn to_arc(t: Terminal) -> TerminalArc {
-    Arc::new(AsyncMutex::new(t))
+    Arc::new(Mutex::new(t))
   }
 
   // Current frame {
@@ -87,7 +85,7 @@ impl Terminal {
 
   // Previous frame }
 
-  pub async fn flush(&mut self) -> IoResult<()> {
+  pub fn compare(&mut self) {
     // Dump current frame to device, with a diff-algorithm to reduce the output.
     if self.frame.dirty_cursor {
       let mut out = std::io::stdout();
@@ -114,10 +112,66 @@ impl Terminal {
     self.prev_frame = self.frame.clone();
     // Reset the `dirty` fields.
     self.frame.reset_dirty();
-
-    Ok(())
   }
 }
+
+/// Generic parameter `C` is for `crossterm::style::PrintStyledContent<C>`.
+/// Generic parameter `P` is for `crossterm::style::Print<P>`.
+/// Generic parameter `T` is for `crossterm::terminal::SetTitle<T>`.
+pub enum CrosstermCommand<C, P, T>
+where
+  C: Display + Debug + Clone + Copy,
+  P: Display + Debug + Clone + Copy + PartialEq + Eq,
+  T: Display + Debug + Clone + Copy + PartialEq + Eq,
+{
+  CursorSetCursorStyle(crossterm::cursor::SetCursorStyle),
+  CursorDisableBlinking(crossterm::cursor::DisableBlinking),
+  CursorEnableBlinking(crossterm::cursor::EnableBlinking),
+  CursorHide(crossterm::cursor::Hide),
+  CursorMoveDown(crossterm::cursor::MoveDown),
+  CursorMoveLeft(crossterm::cursor::MoveLeft),
+  CursorMoveRight(crossterm::cursor::MoveRight),
+  CursorMoveTo(crossterm::cursor::MoveTo),
+  CursorMoveToColumn(crossterm::cursor::MoveToColumn),
+  CursorMoveToNextLine(crossterm::cursor::MoveToNextLine),
+  CursorMoveToPreviousLine(crossterm::cursor::MoveToPreviousLine),
+  CursorMoveToRow(crossterm::cursor::MoveToRow),
+  CursorMoveUp(crossterm::cursor::MoveUp),
+  CursorRestorePosition(crossterm::cursor::RestorePosition),
+  CursorSavePosition(crossterm::cursor::SavePosition),
+  CursorShow(crossterm::cursor::Show),
+  EventDisableBracketedPaste(crossterm::event::DisableBracketedPaste),
+  EventDisableFocusChange(crossterm::event::DisableFocusChange),
+  EventDisableMouseCapture(crossterm::event::DisableMouseCapture),
+  EventEnableBracketedPaste(crossterm::event::EnableBracketedPaste),
+  EventEnableFocusChange(crossterm::event::EnableFocusChange),
+  EventEnableMouseCapture(crossterm::event::EnableMouseCapture),
+  EventPopKeyboardEnhancementFlags(crossterm::event::PopKeyboardEnhancementFlags),
+  EventPushKeyboardEnhancementFlags(crossterm::event::PushKeyboardEnhancementFlags),
+  StyleResetColor(crossterm::style::ResetColor),
+  StyleSetAttribute(crossterm::style::SetAttribute),
+  StyleSetAttributes(crossterm::style::SetAttributes),
+  StyleSetBackgroundColor(crossterm::style::SetBackgroundColor),
+  StyleSetColors(crossterm::style::SetColors),
+  StyleSetForegroundColor(crossterm::style::SetForegroundColor),
+  StyleSetStyle(crossterm::style::SetStyle),
+  StyleSetUnderlineColor(crossterm::style::SetUnderlineColor),
+  StylePrintStyledContent(crossterm::style::PrintStyledContent<C>),
+  StylePrint(crossterm::style::Print<P>),
+  TerminalBeginSynchronizedUpdate(crossterm::terminal::BeginSynchronizedUpdate),
+  TerminalClear(crossterm::terminal::Clear),
+  TerminalDisableLineWrap(crossterm::terminal::DisableLineWrap),
+  TerminalEnableLineWrap(crossterm::terminal::EnableLineWrap),
+  TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate),
+  TerminalEnterAlternateScreen(crossterm::terminal::EnterAlternateScreen),
+  TerminalLeaveAlternateScreen(crossterm::terminal::LeaveAlternateScreen),
+  TerminalScrollDown(crossterm::terminal::ScrollDown),
+  TerminalScrollUp(crossterm::terminal::ScrollUp),
+  TerminalSetSize(crossterm::terminal::SetSize),
+  TerminalSetTitle(crossterm::terminal::SetTitle<T>),
+}
+
+pub struct CrosstermCommands {}
 
 #[cfg(test)]
 mod tests {
