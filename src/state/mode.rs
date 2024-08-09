@@ -88,13 +88,13 @@ impl Mode {
   }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Modes {
   values: HashSet<Mode>,
 }
 
 impl Modes {
-  pub fn none() -> Self {
+  pub fn new() -> Self {
     Modes {
       values: HashSet::new(),
     }
