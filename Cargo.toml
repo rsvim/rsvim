@@ -2,7 +2,7 @@
 name = "rsvim"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.74.0"
+rust-version = "1.79.0"
 authors = ["Lin Rongbin <linrongbin16@outlook.com>"]
 description = "The VIM editor reinvented in Rust+Typescript."
 repository = "https://github.com/rsvim/rsvim"
@@ -21,7 +21,6 @@ crossterm = { version = "0.28", features = ["event-stream", "serde"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
-tracing-core = "0.1.32"
 tokio = { version = "1", features = ["full"] }
 clap = { version = "4.5.13", features = ["derive", "unicode"] }
 futures = "0.3"
@@ -44,6 +43,7 @@ ropey = "1.6.1"
 geo = "0.28.0"
 num-traits = "0.2.19"
 parking_lot = "0.12.3"
+v8 = "0.102.0"
 
 [dev-dependencies]
 mockall = "0.13.0"

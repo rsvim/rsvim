@@ -40,8 +40,8 @@ jobs:
           cargo binstall --force --no-confirm cargo-msrv
           echo "cargo msrv --version"
           cargo msrv --version
-          echo "cargo msrv show"
-          cargo msrv show
+          echo "cargo msrv --linear --min 1.70.0"
+          cargo msrv --linear --min 1.70.0
           echo "cargo msrv verify"
           cargo msrv verify
   unit_test:
