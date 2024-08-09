@@ -12,7 +12,7 @@ pub mod mode;
 
 #[derive(Debug, Clone)]
 pub struct State {
-  event_handler: FsmEventHandler,
+  handler: FsmEventHandler,
 }
 
 pub type StateArc = Arc<Mutex<State>>;
@@ -21,7 +21,7 @@ pub type StateWk = Weak<Mutex<State>>;
 impl State {
   pub fn new() -> Self {
     State {
-      event_handler: FsmEventHandler::default(),
+      handler: FsmEventHandler::default(),
     }
   }
 
@@ -30,7 +30,7 @@ impl State {
   }
 
   pub fn mode(&self) -> Mode {
-    self.event_handler.mode()
+    self.handler.mode()
   }
 }
 
