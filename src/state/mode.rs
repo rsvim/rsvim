@@ -132,3 +132,21 @@ impl Modes {
     &mut self.values
   }
 }
+
+impl From<Mode> for Modes {
+  fn from(mode: Mode) -> Self {
+    let mut values = HashSet::new();
+    values.insert(mode);
+    Modes { values }
+  }
+}
+
+impl From<Vec<Mode>> for Modes {
+  fn from(modes: Vec<Mode>) -> Self {
+    let mut values = HashSet::new();
+    for m in modes.iter() {
+      values.insert(*m);
+    }
+    Modes { values }
+  }
+}
