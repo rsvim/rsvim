@@ -42,6 +42,8 @@ jobs:
           cargo msrv --version
           echo "cargo msrv list"
           cargo msrv list
+          echo "cargo msrv --linear --min 1.70.0"
+          cargo msrv --linear --min 1.70.0
           echo "cargo msrv verify"
           cargo msrv verify
   unit_test:
