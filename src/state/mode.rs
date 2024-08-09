@@ -22,6 +22,7 @@ pub enum Mode {
 }
 
 impl ToString for Mode {
+  /// Convert enum to `String`.
   fn to_string(&self) -> String {
     match self {
       Mode::Normal => "Normal".to_string(),
@@ -38,6 +39,7 @@ impl ToString for Mode {
 impl FromStr for Mode {
   type Err = &'static str;
 
+  /// Parse `str` to enum.
   fn from_str(s: &str) -> Result<Self, Self::Err> {
     match s {
       "Normal" => Ok(Mode::Normal),
@@ -55,7 +57,17 @@ impl FromStr for Mode {
 impl TryFrom<&str> for Mode {
   type Error = &'static str;
 
+  /// Parse `str` to enum.
   fn try_from(s: &str) -> Result<Self, Self::Error> {
     FromStr::from_str(s)
+  }
+}
+
+impl TryFrom<String> for Mode {
+  type Error = &'static str;
+
+  /// Parse `String` to enum.
+  fn try_from(s: String) -> Result<Self, Self::Error> {
+    TryFrom::try_from(s.as_str())
   }
 }
