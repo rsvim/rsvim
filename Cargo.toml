@@ -21,7 +21,6 @@ crossterm = { version = "0.28", features = ["event-stream", "serde"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
-tracing-core = "0.1.32"
 tokio = { version = "1", features = ["full"] }
 clap = { version = "4.5.13", features = ["derive", "unicode"] }
 futures = "0.3"
