@@ -6,6 +6,7 @@ use tracing::debug;
 
 use crate::state::mode::{Mode, Modes};
 
+pub mod fsm;
 pub mod mode;
 
 #[derive(Debug, Clone)]
