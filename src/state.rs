@@ -1,4 +1,4 @@
 //! The global editing state of the editor.
 
-/// The editing state.
+/// The global editing state.
 pub struct State {}
