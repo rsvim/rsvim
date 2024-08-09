@@ -87,3 +87,32 @@ impl Mode {
     ]
   }
 }
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Modes {
+  values: HashSet<Mode>,
+}
+
+impl Modes {
+  pub fn new() -> Self {
+    Modes {
+      values: HashSet::new(),
+    }
+  }
+
+  pub fn contains(&self, value: &Mode) -> bool {
+    self.values.contains(value)
+  }
+
+  pub fn insert(&mut self, value: Mode) -> bool {
+    self.values.insert(value)
+  }
+
+  pub fn remove(&mut self, value: &Mode) -> bool {
+    self.values.remove(&value)
+  }
+
+  pub fn all(&self) -> &HashSet<Mode> {
+    &self.values
+  }
+}
