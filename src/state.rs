@@ -4,6 +4,7 @@ use parking_lot::Mutex;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
+use crate::state::fsm::{Fsm, FsmEventHandler};
 use crate::state::mode::{Mode, Modes};
 
 pub mod fsm;
@@ -12,6 +13,7 @@ pub mod mode;
 #[derive(Debug, Clone)]
 pub struct State {
   current_mode: Mode,
+  current_event_handler: FsmEventHandler,
 }
 
 pub type StateArc = Arc<Mutex<State>>;
@@ -21,6 +23,7 @@ impl State {
   pub fn new() -> Self {
     State {
       current_mode: Mode::Normal,
+      current_event_handler: FsmEventHandler::default(),
     }
   }
 
