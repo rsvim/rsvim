@@ -21,6 +21,7 @@ use tracing::{debug, error};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::geo_size_as;
 use crate::glovar;
+use crate::state::{State, StateArc};
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::{ShaderCommand, Terminal, TerminalArc};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
@@ -32,6 +33,7 @@ use crate::ui::widget::{
 pub struct EventLoop {
   screen: TerminalArc,
   tree: TreeArc,
+  state: StateArc,
 }
 
 impl EventLoop {
@@ -76,9 +78,12 @@ impl EventLoop {
 
     debug!("new, built widget tree");
 
+    let state = State::new();
+
     Ok(EventLoop {
       screen,
       tree: Tree::to_arc(tree),
+      state: State::to_arc(state),
     })
   }
 
