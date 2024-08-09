@@ -1,8 +1,10 @@
 //! Editing mode.
 
+use std::collections::HashSet;
 use std::str::FromStr;
 use std::string::ToString;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// Editing mode enums.
 pub enum Mode {
   /// Normal mode.
@@ -69,5 +71,19 @@ impl TryFrom<String> for Mode {
   /// Parse `String` to enum.
   fn try_from(s: String) -> Result<Self, Self::Error> {
     TryFrom::try_from(s.as_str())
+  }
+}
+
+impl Mode {
+  pub fn all() -> Vec<Mode> {
+    vec![
+      Mode::Normal,
+      Mode::Visual,
+      Mode::Select,
+      Mode::OperatorPending,
+      Mode::Insert,
+      Mode::CommandLine,
+      Mode::Terminal,
+    ]
   }
 }
