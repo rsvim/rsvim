@@ -94,44 +94,17 @@ pub struct Modes {
 }
 
 impl Modes {
-  type Iter = std::collections::hash_set::Iter<'a, Mode>;
-  type IterMut = std::collections::hash_set::IterMut<Mode>;
-
   pub fn new() -> Self {
     Modes {
       values: HashSet::new(),
     }
   }
 
-  pub fn contains(&self, value: &Mode) -> bool {
-    self.values.contains(value)
-  }
-
-  pub fn insert(&mut self, value: Mode) -> bool {
-    self.values.insert(value)
-  }
-
-  pub fn remove(&mut self, value: &Mode) -> bool {
-    self.values.remove(&value)
-  }
-
-  pub fn clear(&mut self) {
-    self.values.clear()
-  }
-
-  pub fn is_empty(&self) -> bool {
-    self.values.is_empty()
-  }
-
-  pub fn len(&self) -> usize {
-    self.values.len()
-  }
-
-  pub fn iter(&self) -> usize {
-    self.values.len()
-  }
-
-  pub fn all(&self) -> &HashSet<Mode> {
+  pub fn values(&self) -> &HashSet<Mode> {
     &self.values
+  }
+
+  pub fn values_mut(&mut self) -> &mut HashSet<Mode> {
+    &mut self.values
   }
 }
