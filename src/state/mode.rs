@@ -94,10 +94,34 @@ pub struct Modes {
 }
 
 impl Modes {
-  pub fn new() -> Self {
+  pub fn none() -> Self {
     Modes {
       values: HashSet::new(),
     }
+  }
+
+  pub fn with(&self, mode: Mode) -> Self {
+    let mut values = self.values.clone();
+    values.insert(mode);
+    Modes { values }
+  }
+
+  pub fn without(&self, mode: Mode) -> Self {
+    let mut values = self.values.clone();
+    values.remove(&mode);
+    Modes { values }
+  }
+
+  pub fn set(&mut self, mode: Mode) -> bool {
+    self.values.insert(mode)
+  }
+
+  pub fn unset(&mut self, mode: Mode) -> bool {
+    self.values.remove(&mode)
+  }
+
+  pub fn extend(&mut self, modes: Modes) {
+    self.values.extend(modes.values.iter())
   }
 
   pub fn values(&self) -> &HashSet<Mode> {
