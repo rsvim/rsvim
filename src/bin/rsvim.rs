@@ -11,7 +11,6 @@ use crossterm::{execute, terminal};
 use rsvim::evloop::EventLoop;
 use std::io::Result as IoResult;
 use tracing::debug;
-use v8;
 
 pub async fn init() -> IoResult<()> {
   if !terminal::is_raw_mode_enabled()? {
