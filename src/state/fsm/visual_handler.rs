@@ -1,6 +1,6 @@
 //! The visual mode editing state.
 
-use crate::state::fsm::{Fsm, FsmHandler};
+use crate::state::fsm::{NextStateful, Stateful};
 use crate::state::mode::Mode;
 use crate::state::{State, StateArc};
 use crate::ui::tree::TreeArc;
@@ -8,9 +8,9 @@ use crate::ui::tree::TreeArc;
 #[derive(Debug, Copy, Clone, Default)]
 pub struct VisualHandler {}
 
-impl Fsm for VisualHandler {
-  fn handle(&self, state: &mut State, tree: TreeArc) -> FsmHandler {
-    FsmHandler::Visual(VisualHandler::default())
+impl Stateful for VisualHandler {
+  fn handle(&self, tree: TreeArc) -> NextStateful {
+    NextStateful::Visual(VisualHandler::default())
   }
 
   fn mode(&self) -> Mode {

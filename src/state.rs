@@ -4,7 +4,7 @@ use parking_lot::Mutex;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
-use crate::state::fsm::{Fsm, FsmHandler};
+use crate::state::fsm::{NextStateful, Stateful};
 use crate::state::mode::{Mode, Modes};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 
@@ -13,7 +13,7 @@ pub mod mode;
 
 #[derive(Debug, Clone)]
 pub struct State {
-  handler: FsmHandler,
+  stateful: NextStateful,
 }
 
 pub type StateArc = Arc<Mutex<State>>;
@@ -22,7 +22,7 @@ pub type StateWk = Weak<Mutex<State>>;
 impl State {
   pub fn new() -> Self {
     State {
-      handler: FsmHandler::default(),
+      stateful: NextStateful::default(),
     }
   }
 
@@ -31,11 +31,13 @@ impl State {
   }
 
   pub fn handle(&mut self, tree: TreeArc) {
-    let new_handler = self.handler.handle(self, tree);
+    let next_stateful = self.stateful.handle(tree);
+    debug!("Stateful now:{:?}, next:{:?}", self.stateful, next_stateful);
+    self.stateful = next_stateful;
   }
 
   pub fn mode(&self) -> Mode {
-    self.handler.mode()
+    self.stateful.mode()
   }
 }
 

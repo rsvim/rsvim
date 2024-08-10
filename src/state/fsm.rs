@@ -1,49 +1,49 @@
 //! The finite-state machine for VIM's editing mode.
 //! The editing mode of the editor is a global state, and moves from one to another.
 
-use crate::state::fsm::normal_handler::NormalHandler;
+use crate::state::fsm::normal_stateful::NormalStateful;
 use crate::state::fsm::visual_handler::VisualHandler;
 use crate::state::mode::Mode;
 use crate::state::{State, StateArc};
 use crate::ui::tree::TreeArc;
 
-pub mod normal_handler;
+pub mod normal_stateful;
 pub mod visual_handler;
 
-pub trait Fsm {
+pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the state and update UI tree.
   ///
-  /// Returns next Fsm state.
-  fn handle(&self, state: &mut State, tree: TreeArc) -> FsmHandler;
+  /// Returns next state.
+  fn handle(&self, tree: TreeArc) -> NextStateful;
 
   /// Returns VIM mode.
   fn mode(&self) -> Mode;
 }
 
 #[derive(Debug, Copy, Clone)]
-pub enum FsmHandler {
-  Normal(NormalHandler),
+pub enum NextStateful {
+  Normal(NormalStateful),
   Visual(VisualHandler),
 }
 
-impl Default for FsmHandler {
+impl Default for NextStateful {
   fn default() -> Self {
-    FsmHandler::Normal(NormalHandler::default())
+    NextStateful::Normal(NormalStateful::default())
   }
 }
 
-impl FsmHandler {
-  pub fn handle(&self, state: &mut State, tree: TreeArc) -> FsmHandler {
+impl NextStateful {
+  pub fn handle(&self, tree: TreeArc) -> NextStateful {
     match self {
-      FsmHandler::Normal(h) => h.handle(state, tree),
-      FsmHandler::Visual(h) => h.handle(state, tree),
+      NextStateful::Normal(h) => h.handle(tree),
+      NextStateful::Visual(h) => h.handle(tree),
     }
   }
 
   pub fn mode(&self) -> Mode {
     match self {
-      FsmHandler::Normal(h) => h.mode(),
-      FsmHandler::Visual(h) => h.mode(),
+      NextStateful::Normal(h) => h.mode(),
+      NextStateful::Visual(h) => h.mode(),
     }
   }
 }
