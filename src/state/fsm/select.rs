@@ -1,6 +1,6 @@
 //! The select mode.
 
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulDataAccessMut, StatefulValue};
+use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 
 #[derive(Debug, Copy, Clone, Default)]

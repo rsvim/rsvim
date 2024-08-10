@@ -13,9 +13,8 @@
 
 use crossterm::event::Event;
 
-use crate::state::mode::Mode;
-use crate::state::{State, StateArc, StateWk};
-use crate::ui::tree::{TreeArc, TreeWk};
+use crate::state::State;
+use crate::ui::tree::TreeArc;
 
 // Re-export
 pub use crate::state::fsm::command_line::CommandLineStateful;
@@ -99,7 +98,7 @@ impl Stateful for StatefulValue {
       StatefulValue::InsertMode(s) => s.handle(data_access),
       StatefulValue::CommandLineMode(s) => s.handle(data_access),
       StatefulValue::TerminalMode(s) => s.handle(data_access),
-      StatefulValue::QuitState(s) => unreachable!("Never handle QuitStateful"),
+      StatefulValue::QuitState(_) => unreachable!("Never handle QuitStateful"),
     }
   }
 }

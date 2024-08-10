@@ -1,5 +1,7 @@
 //! The normal mode.
 
+#![allow(unused_imports)]
+
 use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
 use std::time::Duration;
 
