@@ -48,7 +48,7 @@ impl<'a> StatefulDataAccessMut<'a> {
   }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct StatefulDataAccess<'a> {
   pub state: &'a State,
   pub tree: TreeArc,
