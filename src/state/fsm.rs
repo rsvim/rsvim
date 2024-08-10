@@ -5,12 +5,14 @@ use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
 
 // Re-export
+pub use crate::state::fsm::command_line_stateful::CommandLineStateful;
 pub use crate::state::fsm::insert_stateful::InsertStateful;
 pub use crate::state::fsm::normal_stateful::NormalStateful;
 pub use crate::state::fsm::operator_pending_stateful::OperatorPendingStateful;
 pub use crate::state::fsm::select_stateful::SelectStateful;
 pub use crate::state::fsm::visual_stateful::VisualStateful;
 
+pub mod command_line_stateful;
 pub mod insert_stateful;
 pub mod normal_stateful;
 pub mod operator_pending_stateful;
@@ -45,6 +47,7 @@ pub enum NextStateful {
   Select(SelectStateful),
   OperatorPending(OperatorPendingStateful),
   Insert(InsertStateful),
+  CommandLine(CommandLineStateful),
 }
 
 impl Default for NextStateful {
@@ -61,6 +64,7 @@ impl Stateful for NextStateful {
       NextStateful::Select(s) => s.handle(data_access),
       NextStateful::OperatorPending(s) => s.handle(data_access),
       NextStateful::Insert(s) => s.handle(data_access),
+      NextStateful::CommandLine(s) => s.handle(data_access),
     }
   }
 
@@ -71,6 +75,7 @@ impl Stateful for NextStateful {
       NextStateful::Select(s) => s.mode(),
       NextStateful::OperatorPending(s) => s.mode(),
       NextStateful::Insert(s) => s.mode(),
+      NextStateful::CommandLine(s) => s.mode(),
     }
   }
 }
