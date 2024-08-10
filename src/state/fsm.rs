@@ -1,5 +1,17 @@
 //! The finite-state machine for VIM's editing mode.
-//! The editing mode of the editor is a global state, and moves from one to another.
+//!
+//! The VIM's [editing mode](https://en.wikipedia.org/wiki/Vim_(text_editor)) is a global state,
+//! i.e the editor starts with normal mode, then press `i` to insert mode, or press `SHIFT-V` to
+//! visual mode. In insert mode, press `ESC` to back normal mode. And more similar cases.
+//!
+//! Each editing mode handles user keyboard/mouse inputs in a different way, so a finite-state
+//! machine (FSM) separates code logic in these different modes. Each editing mode is a state
+//! inside this FSM. Besides, there're some other internal states which are not editing modes or
+//! visible to user, but help maintaining the internal state of the editor:
+//!
+//! * Quit state: The editor instance should exit in this state.
+
+use crossterm::event::Event;
 
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
@@ -9,6 +21,7 @@ pub use crate::state::fsm::command_line::CommandLineStateful;
 pub use crate::state::fsm::insert::InsertStateful;
 pub use crate::state::fsm::normal::NormalStateful;
 pub use crate::state::fsm::operator_pending::OperatorPendingStateful;
+pub use crate::state::fsm::quit::QuitStateful;
 pub use crate::state::fsm::select::SelectStateful;
 pub use crate::state::fsm::terminal::TerminalStateful;
 pub use crate::state::fsm::visual::VisualStateful;
@@ -17,6 +30,7 @@ pub mod command_line;
 pub mod insert;
 pub mod normal;
 pub mod operator_pending;
+pub mod quit;
 pub mod select;
 pub mod terminal;
 pub mod visual;
@@ -24,11 +38,12 @@ pub mod visual;
 #[derive(Debug, Clone)]
 pub struct StatefulDataAccess {
   pub tree: TreeArc,
+  pub event: Event,
 }
 
 impl StatefulDataAccess {
-  pub fn new(tree: TreeArc) -> Self {
-    StatefulDataAccess { tree }
+  pub fn new(tree: TreeArc, event: Event) -> Self {
+    StatefulDataAccess { tree, event }
   }
 }
 

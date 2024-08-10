@@ -1,5 +1,6 @@
 //! The global editing state.
 
+use crossterm::event::Event;
 use parking_lot::Mutex;
 use std::sync::{Arc, Weak};
 use tracing::debug;
@@ -30,8 +31,8 @@ impl State {
     Arc::new(Mutex::new(s))
   }
 
-  pub fn handle(&mut self, tree: TreeArc) {
-    let data_access = StatefulDataAccess::new(tree);
+  pub fn handle(&mut self, tree: TreeArc, event: Event) {
+    let data_access = StatefulDataAccess::new(tree, event);
     let next_stateful = self.stateful.handle(data_access);
     debug!("Stateful now:{:?}, next:{:?}", self.stateful, next_stateful);
     self.stateful = next_stateful;
