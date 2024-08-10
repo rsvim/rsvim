@@ -1,8 +1,8 @@
 //! Editing mode.
 
 use std::collections::HashSet;
+use std::fmt::Display;
 use std::str::FromStr;
-use std::string::ToString;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// Editing mode enums.
@@ -23,17 +23,16 @@ pub enum Mode {
   Terminal,
 }
 
-impl ToString for Mode {
-  /// Convert enum to `String`.
-  fn to_string(&self) -> String {
+impl Display for Mode {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
-      Mode::Normal => "Normal".to_string(),
-      Mode::Visual => "Visual".to_string(),
-      Mode::Select => "Select".to_string(),
-      Mode::OperatorPending => "Operator-pending".to_string(),
-      Mode::Insert => "Insert".to_string(),
-      Mode::CommandLine => "Command-line".to_string(),
-      Mode::Terminal => "Terminal".to_string(),
+      Mode::Normal => write!(f, "Normal"),
+      Mode::Visual => write!(f, "Visual"),
+      Mode::Select => write!(f, "Select"),
+      Mode::OperatorPending => write!(f, "Operator-pending"),
+      Mode::Insert => write!(f, "Insert"),
+      Mode::CommandLine => write!(f, "Command-line"),
+      Mode::Terminal => write!(f, "Terminal"),
     }
   }
 }
