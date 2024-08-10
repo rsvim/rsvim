@@ -5,19 +5,21 @@ use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
 
 // Re-export
-pub use crate::state::fsm::command_line_stateful::CommandLineStateful;
-pub use crate::state::fsm::insert_stateful::InsertStateful;
-pub use crate::state::fsm::normal_stateful::NormalStateful;
-pub use crate::state::fsm::operator_pending_stateful::OperatorPendingStateful;
-pub use crate::state::fsm::select_stateful::SelectStateful;
-pub use crate::state::fsm::visual_stateful::VisualStateful;
+pub use crate::state::fsm::command_line::CommandLineStateful;
+pub use crate::state::fsm::insert::InsertStateful;
+pub use crate::state::fsm::normal::NormalStateful;
+pub use crate::state::fsm::operator_pending::OperatorPendingStateful;
+pub use crate::state::fsm::select::SelectStateful;
+pub use crate::state::fsm::terminal::TerminalStateful;
+pub use crate::state::fsm::visual::VisualStateful;
 
-pub mod command_line_stateful;
-pub mod insert_stateful;
-pub mod normal_stateful;
-pub mod operator_pending_stateful;
-pub mod select_stateful;
-pub mod visual_stateful;
+pub mod command_line;
+pub mod insert;
+pub mod normal;
+pub mod operator_pending;
+pub mod select;
+pub mod terminal;
+pub mod visual;
 
 #[derive(Debug, Clone)]
 pub struct StatefulDataAccess {
@@ -48,6 +50,7 @@ pub enum NextStateful {
   OperatorPending(OperatorPendingStateful),
   Insert(InsertStateful),
   CommandLine(CommandLineStateful),
+  Terminal(TerminalStateful),
 }
 
 impl Default for NextStateful {
@@ -65,6 +68,7 @@ impl Stateful for NextStateful {
       NextStateful::OperatorPending(s) => s.handle(data_access),
       NextStateful::Insert(s) => s.handle(data_access),
       NextStateful::CommandLine(s) => s.handle(data_access),
+      NextStateful::Terminal(s) => s.handle(data_access),
     }
   }
 
@@ -76,6 +80,7 @@ impl Stateful for NextStateful {
       NextStateful::OperatorPending(s) => s.mode(),
       NextStateful::Insert(s) => s.mode(),
       NextStateful::CommandLine(s) => s.mode(),
+      NextStateful::Terminal(s) => s.mode(),
     }
   }
 }
