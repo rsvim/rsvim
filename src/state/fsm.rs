@@ -1,12 +1,16 @@
 //! The finite-state machine for VIM's editing mode.
 //! The editing mode of the editor is a global state, and moves from one to another.
 
-use crate::state::fsm::normal_stateful::NormalStateful;
-use crate::state::fsm::visual_stateful::VisualStateful;
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
 
+// Re-export
+pub use crate::state::fsm::normal_stateful::NormalStateful;
+pub use crate::state::fsm::select_stateful::SelectStateful;
+pub use crate::state::fsm::visual_stateful::VisualStateful;
+
 pub mod normal_stateful;
+pub mod select_stateful;
 pub mod visual_stateful;
 
 #[derive(Debug, Clone)]
@@ -34,6 +38,7 @@ pub trait Stateful {
 pub enum NextStateful {
   Normal(NormalStateful),
   Visual(VisualStateful),
+  Select(SelectStateful),
 }
 
 impl Default for NextStateful {
@@ -47,6 +52,7 @@ impl Stateful for NextStateful {
     match self {
       NextStateful::Normal(h) => h.handle(data_access),
       NextStateful::Visual(h) => h.handle(data_access),
+      NextStateful::Select(h) => h.handle(data_access),
     }
   }
 
@@ -54,6 +60,7 @@ impl Stateful for NextStateful {
     match self {
       NextStateful::Normal(h) => h.mode(),
       NextStateful::Visual(h) => h.mode(),
+      NextStateful::Select(h) => h.mode(),
     }
   }
 }

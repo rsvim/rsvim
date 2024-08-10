@@ -1,4 +1,4 @@
-//! The visual mode editing state.
+//! The visual mode.
 
 use crate::state::fsm::{NextStateful, Stateful, StatefulDataAccess};
 use crate::state::mode::Mode;

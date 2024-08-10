@@ -1,17 +1,17 @@
-//! The normal mode.
+//! The select mode.
 
 use crate::state::fsm::{NextStateful, Stateful, StatefulDataAccess};
 use crate::state::mode::Mode;
 
 #[derive(Debug, Copy, Clone, Default)]
-pub struct NormalStateful {}
+pub struct SelectStateful {}
 
-impl Stateful for NormalStateful {
+impl Stateful for SelectStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
-    NextStateful::Normal(NormalStateful::default())
+    NextStateful::Select(SelectStateful::default())
   }
 
   fn mode(&self) -> Mode {
-    Mode::Normal
+    Mode::Select
   }
 }
