@@ -7,7 +7,7 @@ use std::time::Duration;
 use tracing::debug;
 
 use crate::glovar;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
 
@@ -18,6 +18,9 @@ pub mod mode;
 pub struct State {
   stateful: StatefulValue,
   last_stateful: StatefulValue,
+
+  // Editing mode
+  mode: Mode,
 }
 
 pub type StateArc = Arc<Mutex<State>>;
@@ -28,6 +31,7 @@ impl State {
     State {
       stateful: StatefulValue::default(),
       last_stateful: StatefulValue::default(),
+      mode: Mode::Normal,
     }
   }
 
@@ -35,31 +39,28 @@ impl State {
     Arc::new(Mutex::new(s))
   }
 
-  pub fn handle(self_: StateArc, tree: TreeArc, event: Event) {
-    let stateful = {
-      // Lock guard
-      self_
-        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-        .unwrap()
-        .stateful
-    };
+  pub fn handle(&mut self, tree: TreeArc, event: Event) {
+    // Current stateful
+    let stateful = self.stateful;
 
-    let data_access = StatefulDataAccess::new(Arc::downgrade(&tree), Arc::downgrade(&self_), event);
+    let data_access = StatefulDataAccessMut::new(self, tree, event);
     let next_stateful = stateful.handle(data_access);
     debug!("Stateful now:{:?}, next:{:?}", stateful, next_stateful);
 
-    {
-      // Lock guard
-      let mut self2_ = self_
-        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-        .unwrap();
-      self2_.last_stateful = self2_.stateful; // Save last stateful
-      self2_.stateful = next_stateful; // Set next stateful
-    }
+    // Save current stateful
+    self.last_stateful = stateful;
+    // Set next stateful
+    self.stateful = next_stateful;
   }
 
   pub fn mode(&self) -> Mode {
-    self.stateful.mode()
+    self.mode
+  }
+
+  pub fn set_mode(&mut self, mode: Mode) -> Mode {
+    let last_mod = self.mode;
+    self.mode = mode;
+    last_mod
   }
 }
 

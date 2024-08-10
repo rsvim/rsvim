@@ -36,16 +36,29 @@ pub mod select;
 pub mod terminal;
 pub mod visual;
 
-#[derive(Debug, Clone)]
-pub struct StatefulDataAccess {
-  pub tree: TreeWk,
-  pub state: StateWk,
+#[derive(Debug)]
+pub struct StatefulDataAccessMut<'a> {
+  pub state: &'a mut State,
+  pub tree: TreeArc,
   pub event: Event,
 }
 
-impl StatefulDataAccess {
-  pub fn new(tree: TreeWk, state: StateWk, event: Event) -> Self {
-    StatefulDataAccess { tree, state, event }
+impl<'a> StatefulDataAccessMut<'a> {
+  pub fn new(state: &'a mut State, tree: TreeArc, event: Event) -> Self {
+    StatefulDataAccessMut { state, tree, event }
+  }
+}
+
+#[derive(Debug)]
+pub struct StatefulDataAccess<'a> {
+  pub state: &'a State,
+  pub tree: TreeArc,
+  pub event: Event,
+}
+
+impl<'a> StatefulDataAccess<'a> {
+  pub fn new(state: &'a State, tree: TreeArc, event: Event) -> Self {
+    StatefulDataAccess { state, tree, event }
   }
 }
 
@@ -53,12 +66,7 @@ pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the global state and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
-
-  /// Returns VIM mode.
-  ///
-  /// For internal states, there will be no editing mode.
-  fn mode(&self) -> Mode;
+  fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue;
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -82,7 +90,7 @@ impl Default for StatefulValue {
 }
 
 impl Stateful for StatefulValue {
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+  fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue {
     match self {
       StatefulValue::NormalMode(s) => s.handle(data_access),
       StatefulValue::VisualMode(s) => s.handle(data_access),
@@ -92,19 +100,6 @@ impl Stateful for StatefulValue {
       StatefulValue::CommandLineMode(s) => s.handle(data_access),
       StatefulValue::TerminalMode(s) => s.handle(data_access),
       StatefulValue::QuitState(s) => s.handle(data_access),
-    }
-  }
-
-  fn mode(&self) -> Mode {
-    match self {
-      StatefulValue::NormalMode(s) => s.mode(),
-      StatefulValue::VisualMode(s) => s.mode(),
-      StatefulValue::SelectMode(s) => s.mode(),
-      StatefulValue::OperatorPendingMode(s) => s.mode(),
-      StatefulValue::InsertMode(s) => s.mode(),
-      StatefulValue::CommandLineMode(s) => s.mode(),
-      StatefulValue::TerminalMode(s) => s.mode(),
-      StatefulValue::QuitState(s) => s.mode(),
     }
   }
 }

@@ -5,17 +5,19 @@ use std::time::Duration;
 
 use crate::glovar;
 use crate::state::fsm::quit::QuitStateful;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    let state = data_access.state.upgrade().unwrap();
-    let tree = data_access.tree.upgrade().unwrap();
+  fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue {
+    let state = data_access.state;
+    let tree = data_access.tree;
     let event = data_access.event;
+
+    state.set_mode(Mode::Normal);
 
     match event {
       Event::FocusGained => {}
@@ -93,9 +95,5 @@ impl Stateful for NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
-  }
-
-  fn mode(&self) -> Mode {
-    Mode::Normal
   }
 }
