@@ -90,7 +90,7 @@ impl Stateful for NormalStateful {
 
     // quit loop
     if event == Event::Key(KeyCode::Esc.into()) {
-      println!("ESC: {:?}\r", crossterm::cursor::position());
+      // println!("ESC: {:?}\r", crossterm::cursor::position());
       return StatefulValue::QuitState(QuitStateful::default());
     }
 
