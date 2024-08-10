@@ -5,11 +5,13 @@ use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
 
 // Re-export
+pub use crate::state::fsm::insert_stateful::InsertStateful;
 pub use crate::state::fsm::normal_stateful::NormalStateful;
 pub use crate::state::fsm::operator_pending_stateful::OperatorPendingStateful;
 pub use crate::state::fsm::select_stateful::SelectStateful;
 pub use crate::state::fsm::visual_stateful::VisualStateful;
 
+pub mod insert_stateful;
 pub mod normal_stateful;
 pub mod operator_pending_stateful;
 pub mod select_stateful;
@@ -42,6 +44,7 @@ pub enum NextStateful {
   Visual(VisualStateful),
   Select(SelectStateful),
   OperatorPending(OperatorPendingStateful),
+  Insert(InsertStateful),
 }
 
 impl Default for NextStateful {
@@ -53,19 +56,21 @@ impl Default for NextStateful {
 impl Stateful for NextStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
     match self {
-      NextStateful::Normal(h) => h.handle(data_access),
-      NextStateful::Visual(h) => h.handle(data_access),
-      NextStateful::Select(h) => h.handle(data_access),
-      NextStateful::OperatorPending(h) => h.handle(data_access),
+      NextStateful::Normal(s) => s.handle(data_access),
+      NextStateful::Visual(s) => s.handle(data_access),
+      NextStateful::Select(s) => s.handle(data_access),
+      NextStateful::OperatorPending(s) => s.handle(data_access),
+      NextStateful::Insert(s) => s.handle(data_access),
     }
   }
 
   fn mode(&self) -> Mode {
     match self {
-      NextStateful::Normal(h) => h.mode(),
-      NextStateful::Visual(h) => h.mode(),
-      NextStateful::Select(h) => h.mode(),
-      NextStateful::OperatorPending(h) => h.mode(),
+      NextStateful::Normal(s) => s.mode(),
+      NextStateful::Visual(s) => s.mode(),
+      NextStateful::Select(s) => s.mode(),
+      NextStateful::OperatorPending(s) => s.mode(),
+      NextStateful::Insert(s) => s.mode(),
     }
   }
 }
