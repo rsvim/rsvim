@@ -38,14 +38,14 @@ impl State {
     Arc::new(Mutex::new(s))
   }
 
-  pub fn handle(&mut self, tree: TreeArc, event: Event) -> IoResult<bool> {
+  pub fn handle(&mut self, tree: TreeArc, event: Event) -> bool {
     // Current stateful
     let stateful = self.stateful;
 
     match stateful {
       // Quit state, exit.
       StatefulValue::QuitState(_s) => {
-        return Ok(false);
+        return false;
       }
       // Other states, continue.
       _ => { /* Skip */ }
@@ -60,7 +60,7 @@ impl State {
     // Set next stateful
     self.stateful = next_stateful;
 
-    Ok(true)
+    true
   }
 
   pub fn mode(&self) -> Mode {
