@@ -21,8 +21,10 @@ use tracing::{debug, error};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::geo_size_as;
 use crate::glovar;
+use crate::state::fsm::{QuitStateful, StatefulValue};
+use crate::state::{State, StateArc};
 use crate::ui::frame::CursorStyle;
-use crate::ui::term::{ShaderCommand, Terminal, TerminalArc};
+use crate::ui::term::{Shader, ShaderCommand, Terminal, TerminalArc};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
@@ -32,6 +34,7 @@ use crate::ui::widget::{
 pub struct EventLoop {
   screen: TerminalArc,
   tree: TreeArc,
+  state: StateArc,
 }
 
 impl EventLoop {
@@ -76,9 +79,12 @@ impl EventLoop {
 
     debug!("new, built widget tree");
 
+    let state = State::new();
+
     Ok(EventLoop {
       screen,
       tree: Tree::to_arc(tree),
+      state: State::to_arc(state),
     })
   }
 
@@ -148,99 +154,45 @@ impl EventLoop {
     debug!("Event::{:?}", event);
     // println!("Event:{:?}", event);
 
-    match event {
-      Event::FocusGained => {}
-      Event::FocusLost => {}
-      Event::Key(key_event) => match key_event.kind {
-        KeyEventKind::Press => {
-          match key_event.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-              // Up
-              let mut tree = self
-                .tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                .unwrap();
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.move_up_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
-            }
-            KeyCode::Down | KeyCode::Char('j') => {
-              // Down
-              let mut tree = self
-                .tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                .unwrap();
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.move_down_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
-            }
-            KeyCode::Left | KeyCode::Char('h') => {
-              // Left
-              let mut tree = self
-                .tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                .unwrap();
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.move_left_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
-            }
-            KeyCode::Right | KeyCode::Char('l') => {
-              // Right
-              let mut tree = self
-                .tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                .unwrap();
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.move_right_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
-            }
-            _ => { /* Skip */ }
-          }
-        }
-        KeyEventKind::Repeat => {}
-        KeyEventKind::Release => {}
-      },
-      Event::Mouse(_mouse_event) => {}
-      Event::Paste(ref _paste_string) => {}
-      Event::Resize(_columns, _rows) => {}
+    let state_response = {
+      self
+        .state
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+        .handle(self.tree.clone(), event)
+    };
+
+    match state_response.next_stateful {
+      StatefulValue::QuitState(_) => {
+        return Ok(false);
+      }
+      _ => { /*Skip*/ }
     }
 
-    // if event == Event::Key(KeyCode::Char('c').into()) {
-    //   println!("Curosr position: {:?}\r", crossterm::cursor::position());
-    // }
-
-    // quit loop
-    if event == Event::Key(KeyCode::Esc.into()) {
-      println!("ESC: {:?}\r", crossterm::cursor::position());
-      return Ok(false);
+    {
+      // Draw UI components to the terminal frame.
+      self
+        .tree
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+        .draw(self.screen.clone());
     }
 
-    // Draw UI components to the terminal frame.
-    self
-      .tree
-      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap()
-      .draw(self.screen.clone());
+    let shader = {
+      // Compute the commands that need to output to the terminal device.
+      self
+        .screen
+        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+        .shade()
+    };
 
-    // Compute the commands that need to output to the terminal device.
-    let shader = self
-      .screen
-      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap()
-      .shade();
+    self.render(shader).await?;
 
+    Ok(true)
+  }
+
+  async fn render(&self, shader: Shader) -> IoResult<()> {
     let mut out = std::io::stdout();
     for shader_command in shader.iter() {
       match shader_command {
@@ -291,6 +243,6 @@ impl EventLoop {
 
     out.flush()?;
 
-    Ok(true)
+    Ok(())
   }
 }

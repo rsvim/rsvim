@@ -44,6 +44,7 @@ geo = "0.28.0"
 num-traits = "0.2.19"
 parking_lot = "0.12.3"
 v8 = "0.102.0"
+async-trait = "0.1.81"
 
 [dev-dependencies]
 mockall = "0.13.0"
