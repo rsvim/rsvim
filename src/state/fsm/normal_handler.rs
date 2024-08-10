@@ -9,7 +9,7 @@ use crate::ui::tree::TreeArc;
 pub struct NormalHandler {}
 
 impl Fsm for NormalHandler {
-  fn handle(_state: StateArc, _tree: TreeArc) -> FsmHandler {
+  fn handle(&self, state: &mut State, tree: TreeArc) -> FsmHandler {
     FsmHandler::Normal(NormalHandler::default())
   }
 

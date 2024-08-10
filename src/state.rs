@@ -6,6 +6,7 @@ use tracing::debug;
 
 use crate::state::fsm::{Fsm, FsmHandler};
 use crate::state::mode::{Mode, Modes};
+use crate::ui::tree::{Tree, TreeArc, TreeNode};
 
 pub mod fsm;
 pub mod mode;
@@ -27,6 +28,10 @@ impl State {
 
   pub fn to_arc(s: State) -> StateArc {
     Arc::new(Mutex::new(s))
+  }
+
+  pub fn handle(&mut self, tree: TreeArc) {
+    let new_handler = self.handler.handle(self, tree);
   }
 
   pub fn mode(&self) -> Mode {

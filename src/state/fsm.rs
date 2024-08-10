@@ -14,7 +14,7 @@ pub trait Fsm {
   /// Handle user's keyboard/mouse event, this method can access the state and update UI tree.
   ///
   /// Returns next Fsm state.
-  fn handle(state: StateArc, tree: TreeArc) -> FsmHandler;
+  fn handle(&self, state: &mut State, tree: TreeArc) -> FsmHandler;
 
   /// Returns VIM mode.
   fn mode(&self) -> Mode;
@@ -33,6 +33,13 @@ impl Default for FsmHandler {
 }
 
 impl FsmHandler {
+  pub fn handle(&self, state: &mut State, tree: TreeArc) -> FsmHandler {
+    match self {
+      FsmHandler::Normal(h) => h.handle(state, tree),
+      FsmHandler::Visual(h) => h.handle(state, tree),
+    }
+  }
+
   pub fn mode(&self) -> Mode {
     match self {
       FsmHandler::Normal(h) => h.mode(),

@@ -9,7 +9,7 @@ use crate::ui::tree::TreeArc;
 pub struct VisualHandler {}
 
 impl Fsm for VisualHandler {
-  fn handle(_state: StateArc, _tree: TreeArc) -> FsmHandler {
+  fn handle(&self, state: &mut State, tree: TreeArc) -> FsmHandler {
     FsmHandler::Visual(VisualHandler::default())
   }
 
