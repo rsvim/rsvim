@@ -21,6 +21,7 @@ use tracing::{debug, error};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::geo_size_as;
 use crate::glovar;
+use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::frame::CursorStyle;
 use crate::ui::term::{Shader, ShaderCommand, Terminal, TerminalArc};
@@ -153,7 +154,7 @@ impl EventLoop {
     debug!("Event::{:?}", event);
     // println!("Event:{:?}", event);
 
-    let run_next_loop = {
+    let state_response = {
       self
         .state
         .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
@@ -161,8 +162,11 @@ impl EventLoop {
         .handle(self.tree.clone(), event)
     };
 
-    if !run_next_loop {
-      return Ok(false);
+    match state_response.next_stateful {
+      StatefulValue::QuitState(_) => {
+        return Ok(false);
+      }
+      _ => { /*Skip*/ }
     }
 
     {
