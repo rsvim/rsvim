@@ -2,12 +2,11 @@
 
 use crossterm::event::Event;
 use parking_lot::Mutex;
+use std::io::Result as IoResult;
 use std::sync::{Arc, Weak};
-use std::time::Duration;
 use tracing::debug;
 
-use crate::glovar;
-use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
+use crate::state::fsm::{QuitStateful, Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
 
@@ -39,9 +38,18 @@ impl State {
     Arc::new(Mutex::new(s))
   }
 
-  pub fn handle(&mut self, tree: TreeArc, event: Event) {
+  pub fn handle(&mut self, tree: TreeArc, event: Event) -> IoResult<bool> {
     // Current stateful
     let stateful = self.stateful;
+
+    match stateful {
+      // Quit state, exit.
+      StatefulValue::QuitState(_s) => {
+        return Ok(false);
+      }
+      // Other states, continue.
+      _ => { /* Skip */ }
+    }
 
     let data_access = StatefulDataAccessMut::new(self, tree, event);
     let next_stateful = stateful.handle(data_access);
@@ -51,6 +59,8 @@ impl State {
     self.last_stateful = stateful;
     // Set next stateful
     self.stateful = next_stateful;
+
+    Ok(true)
   }
 
   pub fn mode(&self) -> Mode {
