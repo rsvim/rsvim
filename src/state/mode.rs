@@ -93,6 +93,8 @@ pub struct Modes {
   values: HashSet<Mode>,
 }
 
+type ModesIter<'a> = std::collections::hash_set::Iter<'a, Mode>;
+
 impl Modes {
   pub fn new() -> Self {
     Modes {
@@ -124,12 +126,20 @@ impl Modes {
     self.values.extend(modes.values.iter())
   }
 
-  pub fn values(&self) -> &HashSet<Mode> {
-    &self.values
+  pub fn is_empty(&self) -> bool {
+    self.values.is_empty()
   }
 
-  pub fn values_mut(&mut self) -> &mut HashSet<Mode> {
-    &mut self.values
+  pub fn len(&self) -> usize {
+    self.values.len()
+  }
+
+  pub fn contains(&self, mode: &Mode) -> bool {
+    self.values.contains(mode)
+  }
+
+  pub fn iter(&self) -> ModesIter {
+    self.values.iter()
   }
 }
 
