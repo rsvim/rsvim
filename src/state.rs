@@ -4,7 +4,7 @@ use parking_lot::Mutex;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
-use crate::state::fsm::{NextStateful, Stateful};
+use crate::state::fsm::{NextStateful, Stateful, StatefulDataAccess};
 use crate::state::mode::{Mode, Modes};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 
@@ -31,7 +31,8 @@ impl State {
   }
 
   pub fn handle(&mut self, tree: TreeArc) {
-    let next_stateful = self.stateful.handle(tree);
+    let data_access = StatefulDataAccess::new(tree);
+    let next_stateful = self.stateful.handle(data_access);
     debug!("Stateful now:{:?}, next:{:?}", self.stateful, next_stateful);
     self.stateful = next_stateful;
   }

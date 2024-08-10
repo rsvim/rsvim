@@ -2,19 +2,29 @@
 //! The editing mode of the editor is a global state, and moves from one to another.
 
 use crate::state::fsm::normal_stateful::NormalStateful;
-use crate::state::fsm::visual_handler::VisualHandler;
+use crate::state::fsm::visual_stateful::VisualStateful;
 use crate::state::mode::Mode;
-use crate::state::{State, StateArc};
 use crate::ui::tree::TreeArc;
 
 pub mod normal_stateful;
-pub mod visual_handler;
+pub mod visual_stateful;
+
+#[derive(Debug, Clone)]
+pub struct StatefulDataAccess {
+  pub tree: TreeArc,
+}
+
+impl StatefulDataAccess {
+  pub fn new(tree: TreeArc) -> Self {
+    StatefulDataAccess { tree }
+  }
+}
 
 pub trait Stateful {
-  /// Handle user's keyboard/mouse event, this method can access the state and update UI tree.
+  /// Handle user's keyboard/mouse event, this method can access the global state and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, tree: TreeArc) -> NextStateful;
+  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful;
 
   /// Returns VIM mode.
   fn mode(&self) -> Mode;
@@ -23,7 +33,7 @@ pub trait Stateful {
 #[derive(Debug, Copy, Clone)]
 pub enum NextStateful {
   Normal(NormalStateful),
-  Visual(VisualHandler),
+  Visual(VisualStateful),
 }
 
 impl Default for NextStateful {
@@ -32,15 +42,15 @@ impl Default for NextStateful {
   }
 }
 
-impl NextStateful {
-  pub fn handle(&self, tree: TreeArc) -> NextStateful {
+impl Stateful for NextStateful {
+  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
     match self {
-      NextStateful::Normal(h) => h.handle(tree),
-      NextStateful::Visual(h) => h.handle(tree),
+      NextStateful::Normal(h) => h.handle(data_access),
+      NextStateful::Visual(h) => h.handle(data_access),
     }
   }
 
-  pub fn mode(&self) -> Mode {
+  fn mode(&self) -> Mode {
     match self {
       NextStateful::Normal(h) => h.mode(),
       NextStateful::Visual(h) => h.mode(),

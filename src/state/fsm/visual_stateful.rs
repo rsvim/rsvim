@@ -1,17 +1,17 @@
-//! The normal mode editing state.
+//! The visual mode editing state.
 
 use crate::state::fsm::{NextStateful, Stateful, StatefulDataAccess};
 use crate::state::mode::Mode;
 
 #[derive(Debug, Copy, Clone, Default)]
-pub struct NormalStateful {}
+pub struct VisualStateful {}
 
-impl Stateful for NormalStateful {
+impl Stateful for VisualStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
-    NextStateful::Normal(NormalStateful::default())
+    NextStateful::Visual(VisualStateful::default())
   }
 
   fn mode(&self) -> Mode {
-    Mode::Normal
+    Mode::Visual
   }
 }
