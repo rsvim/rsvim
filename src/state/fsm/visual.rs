@@ -7,7 +7,7 @@ use crate::state::mode::Mode;
 pub struct VisualStateful {}
 
 impl Stateful for VisualStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
+  fn handle(&self, _data_access: StatefulDataAccess) -> NextStateful {
     NextStateful::Visual(VisualStateful::default())
   }
 

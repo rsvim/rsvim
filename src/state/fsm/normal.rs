@@ -7,7 +7,7 @@ use crate::state::mode::Mode;
 pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
+  fn handle(&self, _data_access: StatefulDataAccess) -> NextStateful {
     NextStateful::Normal(NormalStateful::default())
   }
 

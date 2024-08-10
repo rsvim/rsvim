@@ -1,5 +1,7 @@
 //! The V8 Javascript engine.
 
+#![allow(dead_code)]
+
 use std::sync::Once;
 
 static INIT: Once = Once::new();
@@ -20,5 +22,11 @@ impl JsEngine {
     let isolate = v8::Isolate::new(Default::default());
 
     JsEngine { isolate }
+  }
+}
+
+impl Default for JsEngine {
+  fn default() -> Self {
+    JsEngine::new()
   }
 }

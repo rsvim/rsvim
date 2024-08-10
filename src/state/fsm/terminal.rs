@@ -7,7 +7,7 @@ use crate::state::mode::Mode;
 pub struct TerminalStateful {}
 
 impl Stateful for TerminalStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
+  fn handle(&self, _data_access: StatefulDataAccess) -> NextStateful {
     NextStateful::Terminal(TerminalStateful::default())
   }
 

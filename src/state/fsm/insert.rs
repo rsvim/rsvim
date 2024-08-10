@@ -7,7 +7,7 @@ use crate::state::mode::Mode;
 pub struct InsertStateful {}
 
 impl Stateful for InsertStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
+  fn handle(&self, _data_access: StatefulDataAccess) -> NextStateful {
     NextStateful::Insert(InsertStateful::default())
   }
 

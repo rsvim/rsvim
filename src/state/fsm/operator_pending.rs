@@ -7,7 +7,7 @@ use crate::state::mode::Mode;
 pub struct OperatorPendingStateful {}
 
 impl Stateful for OperatorPendingStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
+  fn handle(&self, _data_access: StatefulDataAccess) -> NextStateful {
     NextStateful::OperatorPending(OperatorPendingStateful::default())
   }
 

@@ -7,7 +7,7 @@ use crate::state::mode::Mode;
 pub struct CommandLineStateful {}
 
 impl Stateful for CommandLineStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
+  fn handle(&self, _data_access: StatefulDataAccess) -> NextStateful {
     NextStateful::CommandLine(CommandLineStateful::default())
   }
 

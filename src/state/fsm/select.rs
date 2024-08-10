@@ -7,7 +7,7 @@ use crate::state::mode::Mode;
 pub struct SelectStateful {}
 
 impl Stateful for SelectStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
+  fn handle(&self, _data_access: StatefulDataAccess) -> NextStateful {
     NextStateful::Select(SelectStateful::default())
   }
 

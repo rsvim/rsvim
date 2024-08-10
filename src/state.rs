@@ -5,8 +5,8 @@ use std::sync::{Arc, Weak};
 use tracing::debug;
 
 use crate::state::fsm::{NextStateful, Stateful, StatefulDataAccess};
-use crate::state::mode::{Mode, Modes};
-use crate::ui::tree::{Tree, TreeArc, TreeNode};
+use crate::state::mode::Mode;
+use crate::ui::tree::TreeArc;
 
 pub mod fsm;
 pub mod mode;
