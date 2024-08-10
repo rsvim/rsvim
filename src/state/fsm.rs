@@ -14,7 +14,8 @@
 use crossterm::event::Event;
 
 use crate::state::mode::Mode;
-use crate::ui::tree::TreeArc;
+use crate::state::{State, StateArc, StateWk};
+use crate::ui::tree::{TreeArc, TreeWk};
 
 // Re-export
 pub use crate::state::fsm::command_line::CommandLineStateful;
@@ -37,13 +38,14 @@ pub mod visual;
 
 #[derive(Debug, Clone)]
 pub struct StatefulDataAccess {
-  pub tree: TreeArc,
+  pub tree: TreeWk,
+  pub state: StateWk,
   pub event: Event,
 }
 
 impl StatefulDataAccess {
-  pub fn new(tree: TreeArc, event: Event) -> Self {
-    StatefulDataAccess { tree, event }
+  pub fn new(tree: TreeWk, state: StateWk, event: Event) -> Self {
+    StatefulDataAccess { tree, state, event }
   }
 }
 
@@ -51,51 +53,58 @@ pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the global state and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful;
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
 
   /// Returns VIM mode.
+  ///
+  /// For internal states, there will be no editing mode.
   fn mode(&self) -> Mode;
 }
 
 #[derive(Debug, Copy, Clone)]
-pub enum NextStateful {
-  Normal(NormalStateful),
-  Visual(VisualStateful),
-  Select(SelectStateful),
-  OperatorPending(OperatorPendingStateful),
-  Insert(InsertStateful),
-  CommandLine(CommandLineStateful),
-  Terminal(TerminalStateful),
+pub enum StatefulValue {
+  // Editing modes.
+  NormalMode(NormalStateful),
+  VisualMode(VisualStateful),
+  SelectMode(SelectStateful),
+  OperatorPendingMode(OperatorPendingStateful),
+  InsertMode(InsertStateful),
+  CommandLineMode(CommandLineStateful),
+  TerminalMode(TerminalStateful),
+  // Internal states.
+  QuitState(QuitStateful),
 }
 
-impl Default for NextStateful {
+impl Default for StatefulValue {
   fn default() -> Self {
-    NextStateful::Normal(NormalStateful::default())
+    StatefulValue::NormalMode(NormalStateful::default())
   }
 }
 
-impl Stateful for NextStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
+impl Stateful for StatefulValue {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     match self {
-      NextStateful::Normal(s) => s.handle(data_access),
-      NextStateful::Visual(s) => s.handle(data_access),
-      NextStateful::Select(s) => s.handle(data_access),
-      NextStateful::OperatorPending(s) => s.handle(data_access),
-      NextStateful::Insert(s) => s.handle(data_access),
-      NextStateful::CommandLine(s) => s.handle(data_access),
-      NextStateful::Terminal(s) => s.handle(data_access),
+      StatefulValue::NormalMode(s) => s.handle(data_access),
+      StatefulValue::VisualMode(s) => s.handle(data_access),
+      StatefulValue::SelectMode(s) => s.handle(data_access),
+      StatefulValue::OperatorPendingMode(s) => s.handle(data_access),
+      StatefulValue::InsertMode(s) => s.handle(data_access),
+      StatefulValue::CommandLineMode(s) => s.handle(data_access),
+      StatefulValue::TerminalMode(s) => s.handle(data_access),
+      StatefulValue::QuitState(s) => s.handle(data_access),
     }
   }
 
   fn mode(&self) -> Mode {
     match self {
-      NextStateful::Normal(s) => s.mode(),
-      NextStateful::Visual(s) => s.mode(),
-      NextStateful::Select(s) => s.mode(),
-      NextStateful::OperatorPending(s) => s.mode(),
-      NextStateful::Insert(s) => s.mode(),
-      NextStateful::CommandLine(s) => s.mode(),
-      NextStateful::Terminal(s) => s.mode(),
+      StatefulValue::NormalMode(s) => s.mode(),
+      StatefulValue::VisualMode(s) => s.mode(),
+      StatefulValue::SelectMode(s) => s.mode(),
+      StatefulValue::OperatorPendingMode(s) => s.mode(),
+      StatefulValue::InsertMode(s) => s.mode(),
+      StatefulValue::CommandLineMode(s) => s.mode(),
+      StatefulValue::TerminalMode(s) => s.mode(),
+      StatefulValue::QuitState(s) => s.mode(),
     }
   }
 }

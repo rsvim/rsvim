@@ -1,21 +1,20 @@
 //! The normal mode.
 
-use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
-  EventStream, KeyCode, KeyEventKind, KeyEventState, KeyModifiers,
-};
+use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
 use std::time::Duration;
 
 use crate::glovar;
-use crate::state::fsm::{NextStateful, Stateful, StatefulDataAccess};
+use crate::state::fsm::quit::QuitStateful;
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
 
 #[derive(Debug, Copy, Clone, Default)]
 pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> NextStateful {
-    let tree = data_access.tree;
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+    let state = data_access.state.upgrade().unwrap();
+    let tree = data_access.tree.upgrade().unwrap();
     let event = data_access.event;
 
     match event {
@@ -38,8 +37,7 @@ impl Stateful for NormalStateful {
             }
             KeyCode::Down | KeyCode::Char('j') => {
               // Down
-              let mut tree = self
-                .tree
+              let mut tree = tree
                 .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
               match tree.cursor_id() {
@@ -51,8 +49,7 @@ impl Stateful for NormalStateful {
             }
             KeyCode::Left | KeyCode::Char('h') => {
               // Left
-              let mut tree = self
-                .tree
+              let mut tree = tree
                 .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
               match tree.cursor_id() {
@@ -64,8 +61,7 @@ impl Stateful for NormalStateful {
             }
             KeyCode::Right | KeyCode::Char('l') => {
               // Right
-              let mut tree = self
-                .tree
+              let mut tree = tree
                 .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
               match tree.cursor_id() {
@@ -93,10 +89,10 @@ impl Stateful for NormalStateful {
     // quit loop
     if event == Event::Key(KeyCode::Esc.into()) {
       println!("ESC: {:?}\r", crossterm::cursor::position());
-      return Ok(false);
+      return StatefulValue::QuitState(QuitStateful::default());
     }
 
-    NextStateful::Normal(NormalStateful::default())
+    StatefulValue::NormalMode(NormalStateful::default())
   }
 
   fn mode(&self) -> Mode {
