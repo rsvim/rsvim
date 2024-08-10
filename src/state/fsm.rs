@@ -99,7 +99,7 @@ impl Stateful for StatefulValue {
       StatefulValue::InsertMode(s) => s.handle(data_access),
       StatefulValue::CommandLineMode(s) => s.handle(data_access),
       StatefulValue::TerminalMode(s) => s.handle(data_access),
-      StatefulValue::QuitState(s) => s.handle(data_access),
+      StatefulValue::QuitState(s) => unreachable!("Never handle QuitStateful"),
     }
   }
 }

@@ -8,6 +8,6 @@ pub struct QuitStateful {}
 
 impl Stateful for QuitStateful {
   fn handle(&self, _data_access: StatefulDataAccessMut) -> StatefulValue {
-    unreachable!("Never enter QuitStateful");
+    unreachable!("Never handle QuitStateful");
   }
 }
