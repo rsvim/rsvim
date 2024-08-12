@@ -1,6 +1,13 @@
 # Development
 
-## Environment
+- [Toolchain](#toolchain)
+- [Coding](#coding)
+  - [Global Control](#global-control)
+  - [Lint](#lint)
+  - [Test](#test)
+  - [Debug](#debug)
+
+## Toolchain
 
 Please setup your development environment with:
 
@@ -37,11 +44,11 @@ To configure other internal behaviors, please setup with:
 
 - `RSVIM_MUTEX_TIMEOUT`: Set the threading locks timeout by seconds, by default it's [`u64::MAX`](https://doc.rust-lang.org/1.80.0/std/primitive.u64.html#associatedconstant.MAX) (forever).
 
-### Linting
+### Lint
 
 To lint the code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-features --all-targets`, it enables all warnings.
 
-### Testing
+### Test
 
 To run the unit tests, please run with:
 
@@ -55,7 +62,7 @@ To run the unit tests, please run with:
    > 1. First list all test cases with `cargo test -- --list`.
    > 2. Run the specific test with `cargo test {TEST_NAME} -j 1 -- --test-threads 1`, the `TEST_NAME` is the output test names in above step. It also uses single thread to run the test case, instead of multiple threadings.
 
-### Debugging
+### Debug
 
 To debug the code, please run with:
 
