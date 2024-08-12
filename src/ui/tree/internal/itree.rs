@@ -607,8 +607,6 @@ mod tests {
   // Test node
   type Tnode = Inode<Tvalue>;
 
-  static INIT: Once = Once::new();
-
   macro_rules! assert_node_id_eq {
     ($node: ident, $id: ident) => {
       loop {
