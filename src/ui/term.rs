@@ -11,8 +11,8 @@ use crate::cart::U16Size;
 use crate::ui::frame::cursor::cursor_style_eq;
 use crate::ui::frame::{Cell, Cursor, Frame};
 
-/// Backend terminal
 #[derive(Debug, Clone)]
+/// Backend terminal.
 pub struct Terminal {
   frame: Frame,
   prev_frame: Frame,
