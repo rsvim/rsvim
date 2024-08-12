@@ -4,6 +4,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 
 #[derive(Debug, Copy, Clone, Default)]
+/// The operator-pending editing mode.
 pub struct OperatorPendingStateful {}
 
 impl Stateful for OperatorPendingStateful {
