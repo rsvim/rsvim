@@ -94,23 +94,30 @@ impl Frame {
     self.cells.splice(start_at..end_at, cells)
   }
 
+  /// Get dirty cells.
   pub fn dirty_cells(&self) -> &Vec<FrameCellsRange> {
     &self.dirty_cells
   }
 
+  /// Get cursor.
   pub fn get_cursor(&self) -> &Cursor {
     &self.cursor
   }
 
+  /// Set cursor.
   pub fn set_cursor(&mut self, cursor: Cursor) {
     self.cursor = cursor;
     self.dirty_cursor = true;
   }
 
+  /// Whether cursor is dirty.
   pub fn dirty_cursor(&self) -> bool {
     self.dirty_cursor
   }
 
+  /// Reset/clean all dirty components.
+  ///
+  /// Note: This method should be called after each frame been flushed to terminal device.
   pub fn reset_dirty(&mut self) {
     self.dirty_cells = vec![];
     self.dirty_cursor = false;

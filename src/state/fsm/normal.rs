@@ -11,6 +11,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 
 #[derive(Debug, Copy, Clone, Default)]
+/// The normal editing mode.
 pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {

@@ -4,6 +4,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 
 #[derive(Debug, Copy, Clone, Default)]
+/// The visual editing mode.
 pub struct VisualStateful {}
 
 impl Stateful for VisualStateful {

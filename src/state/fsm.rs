@@ -2,14 +2,15 @@
 //!
 //! The VIM's [editing mode](https://en.wikipedia.org/wiki/Vim_(text_editor)) is a global state,
 //! i.e the editor starts with normal mode, then press `i` to insert mode, or press `SHIFT-V` to
-//! visual mode. In insert mode, press `ESC` to back normal mode. And more similar cases.
+//! visual mode. In insert mode, press `ESC` to back normal mode. And or so.
 //!
-//! Each editing mode handles user keyboard/mouse inputs in a different way, so a finite-state
-//! machine (FSM) separates code logic in these different modes. Each editing mode is a state
-//! inside this FSM. Besides, there're some other internal states which are not editing modes or
-//! visible to user, but help maintaining the internal state of the editor:
+//! Each editing mode handles user keyboard/mouse inputs in a different way, this a finite-state
+//! machine (FSM) separates code logic in different modes. Each editing mode is a FSM state.
 //!
-//! * Quit state: The editor instance should exit in this state.
+//! Besides, there're some other internal states which are not editing modes or visible to
+//! user, but help maintaining the internal state of the editor:
+//!
+//! * Quit state: The editor should quit on this state.
 
 use crossterm::event::Event;
 
@@ -36,6 +37,7 @@ pub mod terminal;
 pub mod visual;
 
 #[derive(Debug)]
+/// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StatefulDataAccessMut<'a> {
   pub state: &'a mut State,
   pub tree: TreeArc,
@@ -49,6 +51,7 @@ impl<'a> StatefulDataAccessMut<'a> {
 }
 
 #[derive(Debug, Clone)]
+/// The immutable data passed to each state handler, and allow them access the editor.
 pub struct StatefulDataAccess<'a> {
   pub state: &'a State,
   pub tree: TreeArc,
@@ -61,14 +64,16 @@ impl<'a> StatefulDataAccess<'a> {
   }
 }
 
+/// The FSM state trait.
 pub trait Stateful {
-  /// Handle user's keyboard/mouse event, this method can access the global state and update UI tree.
+  /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
   fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue;
 }
 
 #[derive(Debug, Copy, Clone)]
+/// The value holder for each FSM state.
 pub enum StatefulValue {
   // Editing modes.
   NormalMode(NormalStateful),
@@ -83,12 +88,17 @@ pub enum StatefulValue {
 }
 
 impl Default for StatefulValue {
+  /// Returns the default FMS state, by default it's the
+  /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
   fn default() -> Self {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 }
 
 impl Stateful for StatefulValue {
+  /// Dispatch data with current FSM state.
+  ///
+  /// Returns the next FSM state.
   fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue {
     match self {
       StatefulValue::NormalMode(s) => s.handle(data_access),

@@ -1,11 +1,11 @@
-//! Editing mode.
+//! The VIM's editing mode.
 
 use std::collections::HashSet;
 use std::fmt::Display;
 use std::str::FromStr;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-/// Editing mode enums.
+/// Editing mode.
 pub enum Mode {
   /// Normal mode.
   Normal,
@@ -74,6 +74,7 @@ impl TryFrom<String> for Mode {
 }
 
 impl Mode {
+  /// Get all modes.
   pub fn all() -> Vec<Mode> {
     vec![
       Mode::Normal,
@@ -88,61 +89,74 @@ impl Mode {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
+/// The modes collection.
 pub struct Modes {
   values: HashSet<Mode>,
 }
 
-type ModesIter<'a> = std::collections::hash_set::Iter<'a, Mode>;
-
 impl Modes {
+  /// Make a new modes collection with no mode inside.
   pub fn new() -> Self {
     Modes {
       values: HashSet::new(),
     }
   }
 
+  /// Make a new modes collection with all of current modes, and with a new mode.
   pub fn with(&self, mode: Mode) -> Self {
     let mut values = self.values.clone();
     values.insert(mode);
     Modes { values }
   }
 
+  /// Make a new modes collection with all of current modes, but without the specified mode.
   pub fn without(&self, mode: Mode) -> Self {
     let mut values = self.values.clone();
     values.remove(&mode);
     Modes { values }
   }
 
+  /// Add/set the specified mode.
   pub fn set(&mut self, mode: Mode) -> bool {
     self.values.insert(mode)
   }
 
+  /// Remove/unset the specified mode.
   pub fn unset(&mut self, mode: Mode) -> bool {
     self.values.remove(&mode)
   }
 
+  /// Add/set all the specified modes.
   pub fn extend(&mut self, modes: Modes) {
     self.values.extend(modes.values.iter())
   }
 
+  /// Whether current collection is empty.
   pub fn is_empty(&self) -> bool {
     self.values.is_empty()
   }
 
+  /// Current collection's mode count.
   pub fn len(&self) -> usize {
     self.values.len()
   }
 
+  /// Whether current collection contains a mode.
   pub fn contains(&self, mode: &Mode) -> bool {
     self.values.contains(mode)
   }
 
-  pub fn iter(&self) -> ModesIter {
+  /// Get the iterator of current collection.
+  ///
+  /// Note: The internal collection is [`HashSet`](std::collections::HashSet) and the iterator is
+  /// non-ordered.
+  pub fn iter(&self) -> std::collections::hash_set::Iter<Mode> {
     self.values.iter()
   }
 }
 
 impl From<Mode> for Modes {
+  /// Create a collection from a mode.
   fn from(mode: Mode) -> Self {
     let mut values = HashSet::new();
     values.insert(mode);
@@ -151,6 +165,7 @@ impl From<Mode> for Modes {
 }
 
 impl From<Vec<Mode>> for Modes {
+  /// Create a collection from a mode vector.
   fn from(modes: Vec<Mode>) -> Self {
     let mut values = HashSet::new();
     for m in modes.iter() {

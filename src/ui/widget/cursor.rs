@@ -12,6 +12,7 @@ use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
 #[derive(Clone, Copy)]
+/// Cursor widget.
 pub struct Cursor {
   id: WidgetId,
   blinking: bool,

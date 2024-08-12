@@ -3,6 +3,7 @@
 //! Note: This module should only be used in unit tests, not some where else.
 
 #[cfg(test)]
+/// Initialize the logging prints to `stderr`.
 pub fn init() {
   let subscriber = tracing_subscriber::FmtSubscriber::builder()
     .with_file(true)

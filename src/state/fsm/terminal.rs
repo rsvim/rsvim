@@ -4,6 +4,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 
 #[derive(Debug, Copy, Clone, Default)]
+/// The terminal editing mode.
 pub struct TerminalStateful {}
 
 impl Stateful for TerminalStateful {

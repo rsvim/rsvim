@@ -11,8 +11,12 @@ use crate::cart::U16Size;
 use crate::ui::frame::cursor::cursor_style_eq;
 use crate::ui::frame::{Cell, Cursor, Frame};
 
-/// Backend terminal
 #[derive(Debug, Clone)]
+/// Backend logical terminal.
+///
+/// It helps manage the current frame and previous frame that the UI widgets tree draws on, and
+/// internally uses a diff-algorithm to compare what changes UI tree made. When flushing to the
+/// terminal device, it only runs on the needed parts to reduce IO operations.
 pub struct Terminal {
   frame: Frame,
   prev_frame: Frame,
@@ -21,6 +25,7 @@ pub struct Terminal {
 pub type TerminalArc = Arc<Mutex<Terminal>>;
 
 impl Terminal {
+  /// Make new terminal with device's actual size.
   pub fn new(size: U16Size) -> Self {
     Terminal {
       prev_frame: Frame::new(size, Cursor::default()),
@@ -28,40 +33,49 @@ impl Terminal {
     }
   }
 
+  /// Convert terminal struct into smart pointer.
   pub fn to_arc(t: Terminal) -> TerminalArc {
     Arc::new(Mutex::new(t))
   }
 
   // Current frame {
 
+  /// Get current frame.
   pub fn frame(&self) -> &Frame {
     &self.frame
   }
 
+  /// Get mutable current frame.
   pub fn frame_mut(&mut self) -> &mut Frame {
     &mut self.frame
   }
 
+  /// Get current frame size.
   pub fn size(&self) -> U16Size {
     self.frame.size
   }
 
+  /// Set current frame size.
   pub fn set_size(&mut self, size: U16Size) {
     self.frame.size = size;
   }
 
+  /// Get current frame cells.
   pub fn cells(&self) -> &Vec<Cell> {
     &self.frame.cells
   }
 
+  /// Get mutable current frame cells.
   pub fn cells_mut(&mut self) -> &mut Vec<Cell> {
     &mut self.frame.cells
   }
 
+  /// Get current frame cursor.
   pub fn cursor(&self) -> &Cursor {
     &self.frame.cursor
   }
 
+  /// Get mutable current frame cursor.
   pub fn cursor_mut(&mut self) -> &mut Cursor {
     &mut self.frame.cursor
   }
@@ -70,26 +84,30 @@ impl Terminal {
 
   // Previous frame {
 
+  /// Get previous frame.
   pub fn prev_frame(&self) -> &Frame {
     &self.prev_frame
   }
 
+  /// Get previous frame size.
   pub fn prev_size(&self) -> U16Size {
     self.prev_frame.size
   }
 
+  /// Get previous frame cells.
   pub fn prev_cells(&self) -> &Vec<Cell> {
     &self.prev_frame.cells
   }
 
+  /// Get previous frame cursor.
   pub fn prev_cursor(&self) -> &Cursor {
     &self.prev_frame.cursor
   }
 
   // Previous frame }
 
-  /// Get the shader commands that should print to the terminal device.
-  /// It uses a diff-algorithm to reduce the output.
+  /// Get the shader commands that should print to the terminal device, it internally uses a
+  /// diff-algorithm to reduce the outputs.
   pub fn shade(&mut self) -> Shader {
     let mut shader = Shader::new();
 
@@ -133,6 +151,10 @@ impl Terminal {
 }
 
 #[derive(Clone)]
+/// Shader command enums.
+///
+/// All-in-one wrapper to wrap all the [`crossterm::Command`](crossterm::Command), thus helps to
+/// return the rendering updates for the terminal.
 pub enum ShaderCommand {
   CursorSetCursorStyle(crossterm::cursor::SetCursorStyle),
   CursorDisableBlinking(crossterm::cursor::DisableBlinking),
@@ -229,19 +251,25 @@ impl fmt::Debug for ShaderCommand {
 }
 
 #[derive(Debug, Default, Clone)]
+/// The rendering updates on each draw, returns from terminal's [`shade`](Terminal::shade) method.
+///
+/// It's simply a collection of [`ShaderCommand`](ShaderCommand).
 pub struct Shader {
   commands: Vec<ShaderCommand>,
 }
 
 impl Shader {
+  /// Make new shader.
   pub fn new() -> Self {
     Shader { commands: vec![] }
   }
 
+  /// Push a shader command.
   pub fn push(&mut self, command: ShaderCommand) {
     self.commands.push(command)
   }
 
+  /// Get an iterator of the collection.
   pub fn iter(&self) -> Iter<ShaderCommand> {
     self.commands.iter()
   }

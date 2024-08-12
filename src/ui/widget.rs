@@ -18,7 +18,7 @@ pub mod window;
 
 pub type WidgetId = usize;
 
-/// Widget is the base trait for all UI components, it provide a common layer for rendering.
+/// Base trait for all UI widgets.
 pub trait Widget {
   fn id(&self) -> WidgetId;
 
@@ -30,6 +30,7 @@ pub trait Widget {
 }
 
 #[derive(Debug, Clone)]
+/// The value holder for each widget.
 pub enum WidgetValue {
   RootContainer(RootContainer),
   WindowContainer(WindowContainer),
@@ -38,13 +39,15 @@ pub enum WidgetValue {
 }
 
 impl InodeValue for WidgetValue {
+  /// Get widget tree node ID.
   fn id(&self) -> InodeId {
     Widget::id(self)
   }
 }
 
 impl Widget for WidgetValue {
-  fn id(&self) -> InodeId {
+  /// Get widget ID.
+  fn id(&self) -> WidgetId {
     match self {
       WidgetValue::RootContainer(w) => w.id(),
       WidgetValue::WindowContainer(w) => w.id(),
@@ -53,6 +56,7 @@ impl Widget for WidgetValue {
     }
   }
 
+  /// Draw widget with (already calculated) actual shape, on the logical terminal.
   fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
     match self {
       WidgetValue::RootContainer(w) => w.draw(actual_shape, terminal),
