@@ -5,8 +5,9 @@
 //! visual mode. In insert mode, press `ESC` to back normal mode. And or so.
 //!
 //! Each editing mode handles user keyboard/mouse inputs in a different way, this a finite-state
-//! machine (FSM) separates code logic in different modes. Each editing mode is a state inside the
-//! FSM. Besides, there're some other internal states which are not editing modes or visible to
+//! machine (FSM) separates code logic in different modes. Each editing mode is a FSM state.
+//!
+//! Besides, there're some other internal states which are not editing modes or visible to
 //! user, but help maintaining the internal state of the editor:
 //!
 //! * Quit state: The editor instance should exit in this state.
