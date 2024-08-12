@@ -97,6 +97,7 @@ impl Default for StatefulValue {
 
 impl Stateful for StatefulValue {
   /// Dispatch data with current FSM state.
+  ///
   /// Returns the next FSM state.
   fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue {
     match self {
