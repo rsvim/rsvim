@@ -116,30 +116,40 @@ impl Modes {
     Modes { values }
   }
 
+  /// Add/set the specified mode.
   pub fn set(&mut self, mode: Mode) -> bool {
     self.values.insert(mode)
   }
 
+  /// Remove/unset the specified mode.
   pub fn unset(&mut self, mode: Mode) -> bool {
     self.values.remove(&mode)
   }
 
+  /// Add/set all the specified modes.
   pub fn extend(&mut self, modes: Modes) {
     self.values.extend(modes.values.iter())
   }
 
+  /// Whether current collection is empty.
   pub fn is_empty(&self) -> bool {
     self.values.is_empty()
   }
 
+  /// Current collection's mode count.
   pub fn len(&self) -> usize {
     self.values.len()
   }
 
+  /// Whether current collection contains a mode.
   pub fn contains(&self, mode: &Mode) -> bool {
     self.values.contains(mode)
   }
 
+  /// Get the iterator of current collection.
+  ///
+  /// Note: The internal collection is [`HashSet`](std::collections::HashSet) and the iterator is
+  /// non-ordered.
   pub fn iter(&self) -> std::collections::hash_set::Iter<Mode> {
     self.values.iter()
   }
