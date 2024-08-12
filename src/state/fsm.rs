@@ -66,7 +66,7 @@ impl<'a> StatefulDataAccess<'a> {
 
 /// The FSM state trait.
 pub trait Stateful {
-  /// Handle user's keyboard/mouse event, this method can access the global state and update UI tree.
+  /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
   fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue;
