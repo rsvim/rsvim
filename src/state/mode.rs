@@ -156,7 +156,7 @@ impl Modes {
 }
 
 impl From<Mode> for Modes {
-  /// Create modes collection from a mode.
+  /// Create a collection from a mode.
   fn from(mode: Mode) -> Self {
     let mut values = HashSet::new();
     values.insert(mode);
@@ -165,7 +165,7 @@ impl From<Mode> for Modes {
 }
 
 impl From<Vec<Mode>> for Modes {
-  /// Create modes collection from a collection.
+  /// Create a collection from a mode vector.
   fn from(modes: Vec<Mode>) -> Self {
     let mut values = HashSet::new();
     for m in modes.iter() {
