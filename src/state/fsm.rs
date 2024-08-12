@@ -10,7 +10,7 @@
 //! Besides, there're some other internal states which are not editing modes or visible to
 //! user, but help maintaining the internal state of the editor:
 //!
-//! * Quit state: The editor instance should exit in this state.
+//! * Quit state: The editor should quit on this state.
 
 use crossterm::event::Event;
 
