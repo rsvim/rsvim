@@ -35,6 +35,7 @@ pub fn cursor_style_eq(a: CursorStyle, b: CursorStyle) -> bool {
 
 #[derive(Copy, Clone)]
 /// Terminal cursor.
+///
 /// Note: This is the real terminal cursor of the device, not a virtual one in multiple cursors.
 pub struct Cursor {
   pub pos: U16Pos,
