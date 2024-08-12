@@ -10,7 +10,7 @@ Please setup your development environment with:
   - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
 - Latest stable [Rust](https://www.rust-lang.org/) compiler, or at least 1.74.0.
 
-## Developing
+## Coding
 
 To develop the code, please setup with:
 
@@ -19,9 +19,9 @@ To develop the code, please setup with:
 
   > Recommend using [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
 
-### Environment Variables
+### Global Control
 
-This project uses environment variables to globally control internal behaviors, i.e. you can run the `rsvim` command with prepending some env vars. For example:
+This project uses environment variables to control some behaviors globally, i.e. you can run the `rsvim` command with prepending some env vars. For example:
 
 ```bash
 RUST_BACKTRACE=full RUST_LOG=debug cargo test
