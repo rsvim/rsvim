@@ -3,9 +3,9 @@
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
+#[derive(Debug, Clone, Copy)]
 /// VIM Window container, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
-#[derive(Debug, Clone, Copy)]
 pub struct WindowContainer {
   id: WidgetId,
 }
