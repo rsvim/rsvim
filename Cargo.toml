@@ -22,7 +22,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 tracing-appender = "0.2"
 tokio = { version = "1", features = ["full"] }
-clap = { version = "4.5.13", features = ["derive", "unicode"] }
+clap = { version = "4.5.15", features = ["derive", "unicode"] }
 futures = "0.3"
 time = { version = "0.3.36", features = [
   "std",
