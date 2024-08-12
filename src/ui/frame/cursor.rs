@@ -63,6 +63,7 @@ impl fmt::Debug for CursorStyleFormatter {
 }
 
 impl Cursor {
+  /// Make new terminal cursor.
   pub fn new(pos: U16Pos, blinking: bool, hidden: bool, style: CursorStyle) -> Self {
     Cursor {
       pos,
@@ -74,6 +75,7 @@ impl Cursor {
 }
 
 impl Default for Cursor {
+  /// Make default terminal cursor.
   fn default() -> Self {
     Cursor {
       pos: point! {x:0_u16, y:0_u16},
@@ -97,7 +99,7 @@ impl fmt::Debug for Cursor {
 }
 
 impl cmp::PartialEq for Cursor {
-  /// Whether equals to other.
+  /// Whether two cursors equals to each other.
   fn eq(&self, other: &Self) -> bool {
     self.pos == other.pos
   }
@@ -106,6 +108,7 @@ impl cmp::PartialEq for Cursor {
 impl cmp::Eq for Cursor {}
 
 impl hash::Hash for Cursor {
+  /// Make hash for cursor.
   fn hash<H: hash::Hasher>(&self, state: &mut H) {
     self.pos.hash(state);
   }
