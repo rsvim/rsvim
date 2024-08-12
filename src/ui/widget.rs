@@ -30,6 +30,7 @@ pub trait Widget {
 }
 
 #[derive(Debug, Clone)]
+/// The value holder for each widget.
 pub enum WidgetValue {
   RootContainer(RootContainer),
   WindowContainer(WindowContainer),
@@ -38,13 +39,15 @@ pub enum WidgetValue {
 }
 
 impl InodeValue for WidgetValue {
+  /// Get widget tree node ID.
   fn id(&self) -> InodeId {
     Widget::id(self)
   }
 }
 
 impl Widget for WidgetValue {
-  fn id(&self) -> InodeId {
+  /// Get widget ID.
+  fn id(&self) -> WidgetId {
     match self {
       WidgetValue::RootContainer(w) => w.id(),
       WidgetValue::WindowContainer(w) => w.id(),
