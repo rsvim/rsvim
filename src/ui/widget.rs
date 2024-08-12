@@ -56,6 +56,7 @@ impl Widget for WidgetValue {
     }
   }
 
+  /// Draw widget to the logical terminal, on the actual shape.
   fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
     match self {
       WidgetValue::RootContainer(w) => w.draw(actual_shape, terminal),
