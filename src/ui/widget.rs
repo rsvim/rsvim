@@ -18,7 +18,7 @@ pub mod window;
 
 pub type WidgetId = usize;
 
-/// Widget is the base trait for all UI components, it provide a common layer for rendering.
+/// Base trait for all UI widgets.
 pub trait Widget {
   fn id(&self) -> WidgetId;
 
