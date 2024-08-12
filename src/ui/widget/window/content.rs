@@ -9,8 +9,8 @@ use crate::ui::term::TerminalArc;
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
-/// The VIM window content.
 #[derive(Debug, Clone)]
+/// The VIM window content.
 pub struct WindowContent {
   id: WidgetId,
   lines: Vec<CompactString>,
