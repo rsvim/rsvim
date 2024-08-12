@@ -2,7 +2,7 @@
 //!
 //! The VIM's [editing mode](https://en.wikipedia.org/wiki/Vim_(text_editor)) is a global state,
 //! i.e the editor starts with normal mode, then press `i` to insert mode, or press `SHIFT-V` to
-//! visual mode. In insert mode, press `ESC` to back normal mode. And more similar cases.
+//! visual mode. In insert mode, press `ESC` to back normal mode. And or so.
 //!
 //! Each editing mode handles user keyboard/mouse inputs in a different way, so a finite-state
 //! machine (FSM) separates code logic in these different modes. Each editing mode is a state
