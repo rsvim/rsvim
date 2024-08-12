@@ -1,11 +1,11 @@
-//! Editing mode.
+//! The VIM's editing mode.
 
 use std::collections::HashSet;
 use std::fmt::Display;
 use std::str::FromStr;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-/// Editing mode enums.
+/// Editing mode.
 pub enum Mode {
   /// Normal mode.
   Normal,
@@ -74,6 +74,7 @@ impl TryFrom<String> for Mode {
 }
 
 impl Mode {
+  /// Get all modes.
   pub fn all() -> Vec<Mode> {
     vec![
       Mode::Normal,
@@ -88,25 +89,27 @@ impl Mode {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
+/// The modes collection.
 pub struct Modes {
   values: HashSet<Mode>,
 }
 
-type ModesIter<'a> = std::collections::hash_set::Iter<'a, Mode>;
-
 impl Modes {
+  /// Make a new modes collection with no mode inside.
   pub fn new() -> Self {
     Modes {
       values: HashSet::new(),
     }
   }
 
+  /// Make a new modes collection with all of current modes, and with a new mode.
   pub fn with(&self, mode: Mode) -> Self {
     let mut values = self.values.clone();
     values.insert(mode);
     Modes { values }
   }
 
+  /// Make a new modes collection with all of current modes, but without the specified mode.
   pub fn without(&self, mode: Mode) -> Self {
     let mut values = self.values.clone();
     values.remove(&mode);
@@ -137,7 +140,7 @@ impl Modes {
     self.values.contains(mode)
   }
 
-  pub fn iter(&self) -> ModesIter {
+  pub fn iter(&self) -> std::collections::hash_set::Iter<Mode> {
     self.values.iter()
   }
 }
