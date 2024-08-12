@@ -12,7 +12,7 @@ use crate::ui::frame::cursor::cursor_style_eq;
 use crate::ui::frame::{Cell, Cursor, Frame};
 
 #[derive(Debug, Clone)]
-/// Backend terminal.
+/// Backend logical terminal.
 pub struct Terminal {
   frame: Frame,
   prev_frame: Frame,
