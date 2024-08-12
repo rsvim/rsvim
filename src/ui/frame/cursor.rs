@@ -107,3 +107,31 @@ impl hash::Hash for Cursor {
     self.pos.hash(state);
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn cursor_style_equals1() {
+    assert!(cursor_style_eq(
+      CursorStyle::DefaultUserShape,
+      CursorStyle::DefaultUserShape
+    ));
+    let cs1 = CursorStyle::DefaultUserShape;
+    let cs2 = CursorStyle::BlinkingBlock;
+    let cs3 = CursorStyle::SteadyBlock;
+    let cs4 = CursorStyle::BlinkingUnderScore;
+    let cs5 = CursorStyle::SteadyUnderScore;
+    let cs6 = CursorStyle::BlinkingBar;
+    let cs7 = CursorStyle::SteadyBar;
+    let cs8 = CursorStyle::DefaultUserShape;
+    assert!(!cursor_style_eq(cs1, cs2));
+    assert!(!cursor_style_eq(cs1, cs3));
+    assert!(!cursor_style_eq(cs1, cs4));
+    assert!(!cursor_style_eq(cs1, cs5));
+    assert!(!cursor_style_eq(cs1, cs6));
+    assert!(!cursor_style_eq(cs1, cs7));
+    assert!(cursor_style_eq(cs1, cs8));
+  }
+}
