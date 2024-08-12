@@ -115,7 +115,7 @@ impl Frame {
     self.dirty_cursor
   }
 
-  /// Reset all dirty components to `false` (or empty).
+  /// Reset/clean all dirty components.
   pub fn reset_dirty(&mut self) {
     self.dirty_cells = vec![];
     self.dirty_cursor = false;
