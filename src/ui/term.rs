@@ -25,6 +25,7 @@ pub struct Terminal {
 pub type TerminalArc = Arc<Mutex<Terminal>>;
 
 impl Terminal {
+  /// Make new terminal with device's actual size.
   pub fn new(size: U16Size) -> Self {
     Terminal {
       prev_frame: Frame::new(size, Cursor::default()),
