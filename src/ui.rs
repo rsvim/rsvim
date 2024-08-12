@@ -4,3 +4,4 @@ pub mod frame;
 pub mod term;
 pub mod tree;
 pub mod widget;
+pub mod move;

@@ -215,27 +215,27 @@ impl Tree {
     self.base.remove(id)
   }
 
-  pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.move_by(id, x, y)
   }
 
-  pub fn move_y_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
+  pub fn bounded_move_y(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
     self.base.move_y_by(id, diff)
   }
 
-  pub fn move_up_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+  pub fn bounded_move_up(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
     self.base.move_up_by(id, diff)
   }
 
-  pub fn move_down_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+  pub fn bounded_move_down(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
     self.base.move_down_by(id, diff)
   }
 
-  pub fn move_x_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
+  pub fn bounded_move_x(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
     self.base.move_x_by(id, diff)
   }
 
-  pub fn move_left_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
+  pub fn bounded_move_left(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
     self.base.move_left_by(id, diff)
   }
 
