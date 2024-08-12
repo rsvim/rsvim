@@ -17,7 +17,7 @@ pub struct State {
   stateful: StatefulValue,
   last_stateful: StatefulValue,
 
-  // Editing mode
+  // Editing mode.
   mode: Mode,
 }
 

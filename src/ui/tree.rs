@@ -111,8 +111,8 @@ pub struct Tree {
   // Internal tree.
   base: Itree<WidgetValue>,
 
-  // A collection of all VIM window container IDs
-  // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)).
+  // A collection of all VIM window container
+  // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)) IDs.
   window_container_ids: BTreeSet<WidgetId>,
 
   // The cursor ID.
