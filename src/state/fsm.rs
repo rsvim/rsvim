@@ -37,6 +37,7 @@ pub mod terminal;
 pub mod visual;
 
 #[derive(Debug)]
+/// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StatefulDataAccessMut<'a> {
   pub state: &'a mut State,
   pub tree: TreeArc,
@@ -50,6 +51,7 @@ impl<'a> StatefulDataAccessMut<'a> {
 }
 
 #[derive(Debug, Clone)]
+/// The immutable data passed to each state handler, and allow them access the editor.
 pub struct StatefulDataAccess<'a> {
   pub state: &'a State,
   pub tree: TreeArc,
