@@ -4,7 +4,7 @@
 //! i.e the editor starts with normal mode, then press `i` to insert mode, or press `SHIFT-V` to
 //! visual mode. In insert mode, press `ESC` to back normal mode. And or so.
 //!
-//! Each editing mode handles user keyboard/mouse inputs in a different way, so a finite-state
+//! Each editing mode handles user keyboard/mouse inputs in a different way, this a finite-state
 //! machine (FSM) separates code logic in these different modes. Each editing mode is a state
 //! inside this FSM. Besides, there're some other internal states which are not editing modes or
 //! visible to user, but help maintaining the internal state of the editor:
