@@ -13,6 +13,10 @@ use crate::ui::frame::{Cell, Cursor, Frame};
 
 #[derive(Debug, Clone)]
 /// Backend logical terminal.
+///
+/// It helps manage the current frame and previous frame that the UI widgets tree draws on, and
+/// internally uses a diff-algorithm to compare what changes UI tree made. When flushing to the
+/// terminal device, it only runs on the needed parts to reduce IO operations.
 pub struct Terminal {
   frame: Frame,
   prev_frame: Frame,
