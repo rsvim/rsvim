@@ -64,6 +64,7 @@ impl<'a> StatefulDataAccess<'a> {
   }
 }
 
+/// The FSM state trait.
 pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the global state and update UI tree.
   ///
@@ -72,6 +73,7 @@ pub trait Stateful {
 }
 
 #[derive(Debug, Copy, Clone)]
+/// The value holder for each FSM state.
 pub enum StatefulValue {
   // Editing modes.
   NormalMode(NormalStateful),
@@ -86,12 +88,16 @@ pub enum StatefulValue {
 }
 
 impl Default for StatefulValue {
+  /// Returns the default FMS state, by default it's the
+  /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
   fn default() -> Self {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 }
 
 impl Stateful for StatefulValue {
+  /// Dispatch data with current FSM state.
+  /// Returns the next FSM state.
   fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue {
     match self {
       StatefulValue::NormalMode(s) => s.handle(data_access),
