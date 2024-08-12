@@ -35,7 +35,7 @@ impl Stateful for NormalStateful {
                 .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.move_up_by(cursor_id, 1);
+                  tree.bounded_move_up(cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }
@@ -47,7 +47,7 @@ impl Stateful for NormalStateful {
                 .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.move_down_by(cursor_id, 1);
+                  tree.bounded_move_down(cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }
@@ -59,7 +59,7 @@ impl Stateful for NormalStateful {
                 .unwrap();
               match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.move_left_by(cursor_id, 1);
+                  tree.bounded_move_left(cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }

@@ -486,30 +486,6 @@ where
       None => None,
     }
   }
-
-  pub fn move_y_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
-    self.move_by(id, 0, diff)
-  }
-
-  pub fn move_up_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
-    self.move_by(id, 0, -(diff as isize))
-  }
-
-  pub fn move_down_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
-    self.move_by(id, 0, diff as isize)
-  }
-
-  pub fn move_x_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
-    self.move_by(id, diff, 0)
-  }
-
-  pub fn move_left_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
-    self.move_by(id, -(diff as isize), 0)
-  }
-
-  pub fn move_right_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
-    self.move_by(id, diff as isize, 0)
-  }
 }
 
 #[cfg(test)]
