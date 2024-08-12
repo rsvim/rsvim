@@ -42,6 +42,10 @@ pub struct Cursor {
   pub style: CursorStyle,
 }
 
+/// The [`CursorStyle`] formatter that helps implement the `Debug`/`Display` trait.
+///
+/// Note: The [`SetCursorStyle`](crossterm::cursor::SetCursorStyle) doesn't implement the
+/// `Debug`/`Display` traitn before 0.28.1.
 pub struct CursorStyleFormatter {
   value: CursorStyle,
 }
