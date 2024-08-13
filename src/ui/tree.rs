@@ -190,7 +190,7 @@ impl Tree {
     self.base.iter_mut()
   }
 
-  pub fn insert(&mut self, parent_id: &TreeNodeId, mut child_node: TreeNode) -> Option<&TreeNode> {
+  pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<&TreeNode> {
     match child_node.value() {
       WidgetValue::WindowContainer(w) => {
         let widget_id = w.id();
