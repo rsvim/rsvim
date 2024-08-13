@@ -225,51 +225,62 @@ impl Tree {
   ///
   /// Returns the shape after movement.
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
-    match self.base.parent_id(id) {
-      Some(parent_id) => match self.base.node(*parent_id) {
-        Some(parent_node) => match self.base.node_mut(id) {
-          Some(node) => {
-            let parent_shape = *parent_node.shape();
-            let parent_bottom_right_pos: IPos = parent_shape.max().into();
+    // Fix mutable borrow on `self.base.node_mut`.
+    unsafe {
+      let raw_base = &mut self.base as *mut Itree<WidgetValue>;
 
-            let current_shape = *node.shape();
-            let current_top_left_pos: IPos = current_shape.min().into();
-            let next_top_left_pos: IPos =
-              point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
-            let expected_shape = IRect::new(
-              next_top_left_pos,
-              point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
-            );
-            // Detect whether the expected shape is out of its parent's boundary.
-            let expected_top_left_pos: IPos = expected_shape.min().into();
-            let expected_bottom_right_pos: IPos = expected_shape.max().into();
-            let final_x = if expected_top_left_pos.x() < 0 {
-              let x_diff = num_traits::sign::abs(expected_top_left_pos.x());
-              x + x_diff
-            } else if expected_bottom_right_pos.x() >= parent_bottom_right_pos.x() {
-              let x_diff =
-                num_traits::sign::abs_sub(expected_top_left_pos.x(), parent_bottom_right_pos.x());
-              x - x_diff
-            } else {
-              x
-            };
-            let final_y = if expected_top_left_pos.y() < 0 {
-              let y_diff = num_traits::sign::abs(expected_top_left_pos.y());
-              y + y_diff
-            } else if expected_bottom_right_pos.y() >= parent_bottom_right_pos.y() {
-              let y_diff =
-                num_traits::sign::abs_sub(expected_top_left_pos.y(), parent_bottom_right_pos.y());
-              y - y_diff
-            } else {
-              y
-            };
-            self.base.move_by(id, final_x, final_y)
+      match (*raw_base).parent_id(id) {
+        Some(parent_id) => match (*raw_base).node(*parent_id) {
+          Some(parent_node) => {
+            match (*raw_base).node_mut(id) {
+              Some(node) => {
+                let parent_shape = *parent_node.shape();
+                let parent_bottom_right_pos: IPos = parent_shape.max().into();
+
+                let current_shape = *node.shape();
+                let current_top_left_pos: IPos = current_shape.min().into();
+                let next_top_left_pos: IPos =
+                  point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
+                let expected_shape = IRect::new(
+                  next_top_left_pos,
+                  point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
+                );
+                // Detect whether the expected shape is out of its parent's boundary.
+                let expected_top_left_pos: IPos = expected_shape.min().into();
+                let expected_bottom_right_pos: IPos = expected_shape.max().into();
+                let final_x = if expected_top_left_pos.x() < 0 {
+                  let x_diff = num_traits::sign::abs(expected_top_left_pos.x());
+                  x + x_diff
+                } else if expected_bottom_right_pos.x() >= parent_bottom_right_pos.x() {
+                  let x_diff = num_traits::sign::abs_sub(
+                    expected_top_left_pos.x(),
+                    parent_bottom_right_pos.x(),
+                  );
+                  x - x_diff
+                } else {
+                  x
+                };
+                let final_y = if expected_top_left_pos.y() < 0 {
+                  let y_diff = num_traits::sign::abs(expected_top_left_pos.y());
+                  y + y_diff
+                } else if expected_bottom_right_pos.y() >= parent_bottom_right_pos.y() {
+                  let y_diff = num_traits::sign::abs_sub(
+                    expected_top_left_pos.y(),
+                    parent_bottom_right_pos.y(),
+                  );
+                  y - y_diff
+                } else {
+                  y
+                };
+                (*raw_base).move_by(id, final_x, final_y)
+              }
+              None => None,
+            }
           }
           None => None,
         },
         None => None,
-      },
-      None => None,
+      }
     }
   }
 
