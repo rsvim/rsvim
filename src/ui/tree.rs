@@ -215,6 +215,7 @@ impl Tree {
     self.base.remove(id)
   }
 
+  /// 
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.move_by(id, x, y)
   }

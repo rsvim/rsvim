@@ -277,7 +277,14 @@ impl Shader {
 
 #[cfg(test)]
 mod tests {
+  use std::sync::Once;
+  use tracing::info;
+
+  use crate::test::log::init as test_log_init;
+
   use super::*;
+
+  static INIT: Once = Once::new();
 
   #[test]
   fn new1() {
@@ -288,6 +295,11 @@ mod tests {
 
   #[test]
   fn shader_command_debug() {
+    INIT.call_once(test_log_init);
+    info!(
+      "ShaderCommand::TerminalEndSynchronizedUpdate: {:?}",
+      ShaderCommand::TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate)
+    );
     assert_eq!(
       format!(
         "{:?}",

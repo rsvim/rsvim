@@ -490,6 +490,7 @@ where
 
 #[cfg(test)]
 mod tests {
+  use rand::prelude::*;
   use std::cmp::min;
   use std::sync::Once;
   use tracing::info;
@@ -557,14 +558,14 @@ mod tests {
   }
 
   #[derive(Copy, Clone, Debug, Default)]
-  struct Tvalue {
+  struct TestValue {
     id: InodeId,
     pub value: usize,
   }
 
-  impl Tvalue {
+  impl TestValue {
     pub fn new(value: usize) -> Self {
-      Tvalue {
+      TestValue {
         id: uuid::next(),
         value,
       }
@@ -574,14 +575,13 @@ mod tests {
     }
   }
 
-  impl InodeValue for Tvalue {
+  impl InodeValue for TestValue {
     fn id(&self) -> InodeId {
       self.id
     }
   }
 
-  // Test node
-  type Tnode = Inode<Tvalue>;
+  type TestNode = Inode<TestValue>;
 
   macro_rules! assert_node_id_eq {
     ($node: ident, $id: ident) => {
@@ -632,9 +632,9 @@ mod tests {
   fn new() {
     INIT.call_once(test_log_init);
 
-    let v1 = Tvalue::new(1);
+    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (1, 1));
-    let n1 = Tnode::new(v1, s1);
+    let n1 = TestNode::new(v1, s1);
     let nid1 = n1.id();
     let tree = Itree::new(n1);
 
@@ -653,34 +653,34 @@ mod tests {
   fn insert1() {
     INIT.call_once(test_log_init);
 
-    let v1 = Tvalue::new(1);
+    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (1, 1));
-    let n1 = Tnode::new(v1, s1);
+    let n1 = TestNode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue::new(2);
+    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (1, 1));
-    let n2 = Tnode::new(v2, s2);
+    let n2 = TestNode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue::new(3);
+    let v3 = TestValue::new(3);
     let s3 = IRect::new((0, 0), (1, 1));
-    let n3 = Tnode::new(v3, s3);
+    let n3 = TestNode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue::new(4);
+    let v4 = TestValue::new(4);
     let s4 = IRect::new((0, 0), (1, 1));
-    let n4 = Tnode::new(v4, s4);
+    let n4 = TestNode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue::new(5);
+    let v5 = TestValue::new(5);
     let s5 = IRect::new((0, 0), (1, 1));
-    let n5 = Tnode::new(v5, s5);
+    let n5 = TestNode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue::new(6);
+    let v6 = TestValue::new(6);
     let s6 = IRect::new((0, 0), (1, 1));
-    let n6 = Tnode::new(v6, s6);
+    let n6 = TestNode::new(v6, s6);
     let nid6 = n6.id();
 
     /*
@@ -767,49 +767,49 @@ mod tests {
   fn insert2() {
     INIT.call_once(test_log_init);
 
-    let v1 = Tvalue::new(1);
+    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
-    let n1 = Tnode::new(v1, s1);
+    let n1 = TestNode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue::new(2);
+    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (15, 15));
-    let n2 = Tnode::new(v2, s2);
+    let n2 = TestNode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue::new(3);
+    let v3 = TestValue::new(3);
     let s3 = IRect::new((10, 10), (18, 19));
-    let n3 = Tnode::new(v3, s3);
+    let n3 = TestNode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue::new(4);
+    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 14));
-    let n4 = Tnode::new(v4, s4);
+    let n4 = TestNode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue::new(5);
+    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (10, 20));
-    let n5 = Tnode::new(v5, s5);
+    let n5 = TestNode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue::new(6);
+    let v6 = TestValue::new(6);
     let s6 = IRect::new((3, 6), (6, 10));
-    let n6 = Tnode::new(v6, s6);
+    let n6 = TestNode::new(v6, s6);
     let nid6 = n6.id();
 
-    let v7 = Tvalue::new(7);
+    let v7 = TestValue::new(7);
     let s7 = IRect::new((3, 6), (15, 25));
-    let n7 = Tnode::new(v7, s7);
+    let n7 = TestNode::new(v7, s7);
     let nid7 = n7.id();
 
-    let v8 = Tvalue::new(8);
+    let v8 = TestValue::new(8);
     let s8 = IRect::new((-1, -2), (2, 1));
-    let n8 = Tnode::new(v8, s8);
+    let n8 = TestNode::new(v8, s8);
     let nid8 = n8.id();
 
-    let v9 = Tvalue::new(9);
+    let v9 = TestValue::new(9);
     let s9 = IRect::new((5, 6), (9, 8));
-    let n9 = Tnode::new(v9, s9);
+    let n9 = TestNode::new(v9, s9);
     let nid9 = n9.id();
 
     /*
@@ -931,58 +931,58 @@ mod tests {
   fn shape1() {
     INIT.call_once(test_log_init);
 
-    let v1 = Tvalue::new(1);
+    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
-    let n1 = Tnode::new(v1, s1);
+    let n1 = TestNode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue::new(2);
+    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (15, 15));
     let us2 = U16Rect::new((0, 0), (15, 15));
-    let n2 = Tnode::new(v2, s2);
+    let n2 = TestNode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue::new(3);
+    let v3 = TestValue::new(3);
     let s3 = IRect::new((10, 10), (18, 19));
     let us3 = U16Rect::new((10, 10), (18, 19));
-    let n3 = Tnode::new(v3, s3);
+    let n3 = TestNode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue::new(4);
+    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 14));
     let us4 = U16Rect::new((3, 5), (15, 14));
-    let n4 = Tnode::new(v4, s4);
+    let n4 = TestNode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue::new(5);
+    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (10, 20));
     let us5 = U16Rect::new((0, 0), (10, 15));
-    let n5 = Tnode::new(v5, s5);
+    let n5 = TestNode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue::new(6);
+    let v6 = TestValue::new(6);
     let s6 = IRect::new((3, 6), (6, 10));
     let us6 = U16Rect::new((13, 16), (16, 19));
-    let n6 = Tnode::new(v6, s6);
+    let n6 = TestNode::new(v6, s6);
     let nid6 = n6.id();
 
-    let v7 = Tvalue::new(7);
+    let v7 = TestValue::new(7);
     let s7 = IRect::new((3, 6), (15, 25));
     let us7 = U16Rect::new((3, 6), (10, 15));
-    let n7 = Tnode::new(v7, s7);
+    let n7 = TestNode::new(v7, s7);
     let nid7 = n7.id();
 
-    let v8 = Tvalue::new(8);
+    let v8 = TestValue::new(8);
     let s8 = IRect::new((-1, -2), (2, 1));
     let us8 = U16Rect::new((3, 6), (5, 7));
-    let n8 = Tnode::new(v8, s8);
+    let n8 = TestNode::new(v8, s8);
     let nid8 = n8.id();
 
-    let v9 = Tvalue::new(9);
+    let v9 = TestValue::new(9);
     let s9 = IRect::new((5, 6), (9, 8));
     let us9 = U16Rect::new((8, 12), (10, 14));
-    let n9 = Tnode::new(v9, s9);
+    let n9 = TestNode::new(v9, s9);
     let nid9 = n9.id();
 
     /*
@@ -1042,40 +1042,40 @@ mod tests {
   fn shape2() {
     INIT.call_once(test_log_init);
 
-    let v1 = Tvalue::new(1);
+    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
-    let n1 = Tnode::new(v1, s1);
+    let n1 = TestNode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue::new(2);
+    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
     let us2 = U16Rect::new((0, 0), (20, 20));
-    let n2 = Tnode::new(v2, s2);
+    let n2 = TestNode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue::new(3);
+    let v3 = TestValue::new(3);
     let s3 = IRect::new((-2, -2), (-1, 0));
     let us3 = U16Rect::new((0, 0), (0, 0));
-    let n3 = Tnode::new(v3, s3);
+    let n3 = TestNode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue::new(4);
+    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 20));
     let us4 = U16Rect::new((3, 5), (20, 20));
-    let n4 = Tnode::new(v4, s4);
+    let n4 = TestNode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue::new(5);
+    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (15, 20));
     let us5 = U16Rect::new((3, 5), (18, 20));
-    let n5 = Tnode::new(v5, s5);
+    let n5 = TestNode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue::new(6);
+    let v6 = TestValue::new(6);
     let s6 = IRect::new((8, 13), (18, 25));
     let us6 = U16Rect::new((11, 18), (18, 20));
-    let n6 = Tnode::new(v6, s6);
+    let n6 = TestNode::new(v6, s6);
     let nid6 = n6.id();
 
     /*
@@ -1128,11 +1128,11 @@ mod tests {
 
     let shape = IRect::new((0, 0), (10, 10));
     let node_values: Vec<usize> = [1, 2, 3, 4, 5].to_vec();
-    let nodes: Vec<Tnode> = node_values
+    let nodes: Vec<TestNode> = node_values
       .iter()
-      .map(|value| Tvalue::new(*value))
-      .map(|tv| Tnode::new(tv, shape))
-      .collect::<Vec<Tnode>>();
+      .map(|value| TestValue::new(*value))
+      .map(|tv| TestNode::new(tv, shape))
+      .collect::<Vec<TestNode>>();
     let nodes_ids: Vec<InodeId> = nodes.iter().map(|n| n.id()).collect();
 
     /*
@@ -1177,22 +1177,22 @@ mod tests {
     }
   }
 
-  fn make_tree(n: usize) -> (Vec<InodeId>, Itree<Tvalue>) {
+  fn make_tree(n: usize) -> (Vec<InodeId>, Itree<TestValue>) {
     let mut value = 1;
     let mut node_ids: Vec<InodeId> = vec![];
 
-    let v = Tvalue::new(value);
+    let v = TestValue::new(value);
     value += 1;
     let s = IRect::new((0, 0), (10, 10));
-    let root = Tnode::new(v, s);
+    let root = TestNode::new(v, s);
     let root_id = root.id();
     node_ids.push(root_id);
 
     let mut tree = Itree::new(root);
     for _ in 1..n {
-      let v = Tvalue::new(value);
+      let v = TestValue::new(value);
       value += 1;
-      let node = Tnode::new(v, s);
+      let node = TestNode::new(v, s);
       let node_id = node.id();
       tree.insert(root_id, node);
       node_ids.push(node_id);
@@ -1234,49 +1234,49 @@ mod tests {
   fn get1() {
     INIT.call_once(test_log_init);
 
-    let v1 = Tvalue::new(1);
+    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
-    let n1 = Tnode::new(v1, s1);
+    let n1 = TestNode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue::new(2);
+    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (15, 15));
-    let n2 = Tnode::new(v2, s2);
+    let n2 = TestNode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue::new(3);
+    let v3 = TestValue::new(3);
     let s3 = IRect::new((10, 10), (18, 19));
-    let n3 = Tnode::new(v3, s3);
+    let n3 = TestNode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue::new(4);
+    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 14));
-    let n4 = Tnode::new(v4, s4);
+    let n4 = TestNode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue::new(5);
+    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (10, 20));
-    let n5 = Tnode::new(v5, s5);
+    let n5 = TestNode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue::new(6);
+    let v6 = TestValue::new(6);
     let s6 = IRect::new((3, 6), (6, 10));
-    let n6 = Tnode::new(v6, s6);
+    let n6 = TestNode::new(v6, s6);
     let nid6 = n6.id();
 
-    let v7 = Tvalue::new(7);
+    let v7 = TestValue::new(7);
     let s7 = IRect::new((3, 6), (15, 25));
-    let n7 = Tnode::new(v7, s7);
+    let n7 = TestNode::new(v7, s7);
     let nid7 = n7.id();
 
-    let v8 = Tvalue::new(8);
+    let v8 = TestValue::new(8);
     let s8 = IRect::new((-1, -2), (2, 1));
-    let n8 = Tnode::new(v8, s8);
+    let n8 = TestNode::new(v8, s8);
     let nid8 = n8.id();
 
-    let v9 = Tvalue::new(9);
+    let v9 = TestValue::new(9);
     let s9 = IRect::new((5, 6), (9, 8));
-    let n9 = Tnode::new(v9, s9);
+    let n9 = TestNode::new(v9, s9);
     let nid9 = n9.id();
 
     /*
@@ -1328,40 +1328,40 @@ mod tests {
   fn get2() {
     INIT.call_once(test_log_init);
 
-    let v1 = Tvalue::new(1);
+    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
-    let n1 = Tnode::new(v1, s1);
+    let n1 = TestNode::new(v1, s1);
     let nid1 = n1.id();
 
-    let v2 = Tvalue::new(2);
+    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
     let us2 = U16Rect::new((0, 0), (20, 20));
-    let n2 = Tnode::new(v2, s2);
+    let n2 = TestNode::new(v2, s2);
     let nid2 = n2.id();
 
-    let v3 = Tvalue::new(3);
+    let v3 = TestValue::new(3);
     let s3 = IRect::new((-2, -2), (-1, 0));
     let us3 = U16Rect::new((0, 0), (0, 0));
-    let n3 = Tnode::new(v3, s3);
+    let n3 = TestNode::new(v3, s3);
     let nid3 = n3.id();
 
-    let v4 = Tvalue::new(4);
+    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 20));
     let us4 = U16Rect::new((3, 5), (20, 20));
-    let n4 = Tnode::new(v4, s4);
+    let n4 = TestNode::new(v4, s4);
     let nid4 = n4.id();
 
-    let v5 = Tvalue::new(5);
+    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (15, 20));
     let us5 = U16Rect::new((3, 5), (18, 20));
-    let n5 = Tnode::new(v5, s5);
+    let n5 = TestNode::new(v5, s5);
     let nid5 = n5.id();
 
-    let v6 = Tvalue::new(6);
+    let v6 = TestValue::new(6);
     let s6 = IRect::new((8, 13), (18, 25));
     let us6 = U16Rect::new((11, 18), (18, 20));
-    let n6 = Tnode::new(v6, s6);
+    let n6 = TestNode::new(v6, s6);
     let nid6 = n6.id();
 
     /*
@@ -1404,6 +1404,95 @@ mod tests {
       let expect = expects[i];
       let node = &nodes[i];
       assert_node_actual_shape_eq!(node, expect, i);
+    }
+  }
+
+  #[test]
+  fn move_by1() {
+    INIT.call_once(test_log_init);
+
+    let v1 = TestValue::new(1);
+    let s1 = IRect::new((0, 0), (20, 20));
+    let us1 = U16Rect::new((0, 0), (20, 20));
+    let n1 = TestNode::new(v1, s1);
+    let nid1 = n1.id();
+
+    let v2 = TestValue::new(2);
+    let s2 = IRect::new((0, 0), (20, 20));
+    let us2 = U16Rect::new((0, 0), (20, 20));
+    let n2 = TestNode::new(v2, s2);
+    let nid2 = n2.id();
+
+    let v3 = TestValue::new(3);
+    let s3 = IRect::new((0, 0), (1, 1));
+    let us3 = U16Rect::new((0, 0), (1, 1));
+    let n3 = TestNode::new(v3, s3);
+    let nid3 = n3.id();
+
+    /*
+     * The tree looks like:
+     * ```
+     *           n1
+     *         /
+     *        n2
+     *       /
+     *      n3
+     * ```
+     */
+    let mut tree = Itree::new(n1);
+    tree.insert(nid1, n2);
+    tree.insert(nid2, n3);
+
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    print_node!(n1, "n1");
+    print_node!(n2, "n2");
+    print_node!(n3, "n3");
+
+    let mut rng = rand::thread_rng();
+    let count = 1000_usize;
+
+    // Move: (x, y)
+    let n3_moves = (0..count)
+      .collect::<Vec<_>>()
+      .iter()
+      .map(|_i| (rng.next_u32() as isize, rng.next_u32() as isize))
+      .collect::<Vec<(isize, isize)>>();
+
+    for m in n3_moves.iter() {
+      let x = m.0;
+      let y = m.1;
+      let old_shape = *tree.node(nid3).unwrap().shape();
+      let old_top_left_pos: IPos = old_shape.min().into();
+      let old_bottom_right_pos: IPos = old_shape.max().into();
+      let old_actual_shape = *tree.node(nid3).unwrap().actual_shape();
+      let old_top_left_actual_pos: U16Pos = old_actual_shape.min().into();
+      let old_bottom_right_actual_pos: U16Pos = old_actual_shape.max().into();
+      tree.move_by(nid3, x, y);
+      let new_shape = *tree.node(nid3).unwrap().shape();
+      let new_top_left_pos: IPos = new_shape.min().into();
+      let new_bottom_right_pos: IPos = new_shape.max().into();
+      let new_actual_shape = *tree.node(nid3).unwrap().actual_shape();
+      let new_top_left_actual_pos: U16Pos = new_actual_shape.min().into();
+      let new_bottom_right_actual_pos: U16Pos = new_actual_shape.max().into();
+      assert!(old_top_left_pos.x() + x == new_top_left_pos.x());
+      assert!(old_top_left_pos.y() + y == new_top_left_pos.y());
+      assert!(old_bottom_right_pos.x() + x == new_bottom_right_pos.x());
+      assert!(old_bottom_right_pos.y() + y == new_bottom_right_pos.y());
+      assert_eq!(new_shape.height(), old_shape.height());
+      assert_eq!(new_shape.width(), old_shape.width());
+      let parent_actual_shape = *tree.node(nid2).unwrap().actual_shape();
+      let parent_top_left_actual_pos: U16Pos = parent_actual_shape.min().into();
+      let parent_bottom_right_actual_pos: U16Pos = parent_actual_shape.max().into();
+      assert!(old_top_left_actual_pos.x() >= parent_top_left_actual_pos.x());
+      assert!(old_top_left_actual_pos.y() >= parent_top_left_actual_pos.y());
+      assert!(old_bottom_right_actual_pos.x() <= parent_bottom_right_actual_pos.x());
+      assert!(old_bottom_right_actual_pos.y() <= parent_bottom_right_actual_pos.y());
+      assert!(new_top_left_actual_pos.x() >= parent_top_left_actual_pos.x());
+      assert!(new_top_left_actual_pos.y() >= parent_top_left_actual_pos.y());
+      assert!(new_bottom_right_actual_pos.x() <= parent_bottom_right_actual_pos.x());
+      assert!(new_bottom_right_actual_pos.y() <= parent_bottom_right_actual_pos.y());
     }
   }
 }
