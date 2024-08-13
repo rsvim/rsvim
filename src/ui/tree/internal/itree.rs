@@ -3,6 +3,8 @@
 use geo::point;
 use std::collections::HashMap;
 use std::fmt::Debug;
+use std::marker::PhantomData;
+use std::ptr::NonNull;
 use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
 
@@ -84,8 +86,9 @@ pub struct ItreeIterMut<'a, T>
 where
   T: InodeValue,
 {
-  tree: &'a mut Itree<T>,
+  tree: NonNull<Itree<T>>,
   queue: VecDeque<InodeId>,
+  phantom: PhantomData<&'a mut Itree<T>>,
 }
 
 impl<'a, T> Iterator for ItreeIterMut<'a, T>
@@ -96,21 +99,19 @@ where
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.queue.pop_front() {
-      let raw_tree = self.tree as *mut Itree<T>;
-
-      match self.tree.children_ids(&id) {
-        Some(children_ids) => {
-          for child_id in children_ids.iter() {
-            if self.tree.node(child_id).is_some() {
-              self.queue.push_back(*child_id);
-            }
-          }
-        }
-        None => { /* Skip */ }
-      }
       // Fix `self.tree` mutable references.
       unsafe {
-        return (*raw_tree).node_mut(&id);
+        match self.tree.as_ref().children_ids(&id) {
+          Some(children_ids) => {
+            for child_id in children_ids.iter() {
+              if self.tree.as_ref().node(child_id).is_some() {
+                self.queue.push_back(*child_id);
+              }
+            }
+          }
+          None => { /* Skip */ }
+        }
+        return self.tree.as_mut().node_mut(&id);
       }
     }
     None
@@ -127,7 +128,11 @@ where
       Some(id) => queue.push_back(id),
       None => { /* Do nothing */ }
     }
-    ItreeIterMut { tree, queue }
+    ItreeIterMut {
+      tree,
+      queue,
+      phantom: PhantomData,
+    }
   }
 }
 
