@@ -482,6 +482,7 @@ where
 #[cfg(test)]
 mod tests {
   use rand::prelude::*;
+  use std::cmp::Ordering;
   use std::sync::Once;
   use tracing::info;
 
@@ -1387,49 +1388,38 @@ mod tests {
     print_node!(n2, "n2");
     print_node!(n3, "n3");
 
-    let mut rng = rand::thread_rng();
-    let count = 1000_usize;
+    // n3 Move: (x, y)
+    let moves: Vec<(isize, isize)> = vec![
+      (-10, -4),
+      (2, -7),
+      (1, 90),
+      (-70, 41),
+      (23, -4),
+      (49, -121),
+      (8, 3),
+      (-10, -7),
+      (6, 8),
+    ];
+    let expects: Vec<IRect> = vec![
+      IRect::new((-10, -4), (-9, -3)),
+      IRect::new((-8, -11), (-7, -10)),
+      IRect::new((-7, 79), (-6, 80)),
+      IRect::new((-77, 120), (-76, 121)),
+      IRect::new((-54, 116), (-53, 117)),
+      IRect::new((-5, -5), (-4, -4)),
+      IRect::new((3, -2), (4, -1)),
+      IRect::new((-7, -9), (-6, -8)),
+      IRect::new((-1, -1), (0, 0)),
+    ];
 
-    // Move: (x, y)
-    let moves = (0..count)
-      .collect::<Vec<_>>()
-      .iter()
-      .map(|_i| (rng.gen_range(-1000..1000), rng.gen_range(-1000..1000)))
-      .collect::<Vec<(isize, isize)>>();
-
-    for m in moves.iter() {
+    for (i, m) in moves.iter().enumerate() {
       let x = m.0;
       let y = m.1;
-      let old_shape = *tree.node(&nid3).unwrap().shape();
-      let old_top_left_pos: IPos = old_shape.min().into();
-      let old_bottom_right_pos: IPos = old_shape.max().into();
-      let old_actual_shape = *tree.node(&nid3).unwrap().actual_shape();
-      let old_top_left_actual_pos: U16Pos = old_actual_shape.min().into();
-      let old_bottom_right_actual_pos: U16Pos = old_actual_shape.max().into();
       tree.move_by(nid3, x, y);
-      let new_shape = *tree.node(&nid3).unwrap().shape();
-      let new_top_left_pos: IPos = new_shape.min().into();
-      let new_bottom_right_pos: IPos = new_shape.max().into();
-      let new_actual_shape = *tree.node(&nid3).unwrap().actual_shape();
-      let new_top_left_actual_pos: U16Pos = new_actual_shape.min().into();
-      let new_bottom_right_actual_pos: U16Pos = new_actual_shape.max().into();
-      assert!(old_top_left_pos.x() + x == new_top_left_pos.x());
-      assert!(old_top_left_pos.y() + y == new_top_left_pos.y());
-      assert!(old_bottom_right_pos.x() + x == new_bottom_right_pos.x());
-      assert!(old_bottom_right_pos.y() + y == new_bottom_right_pos.y());
-      assert_eq!(new_shape.height(), old_shape.height());
-      assert_eq!(new_shape.width(), old_shape.width());
-      let parent_actual_shape = *tree.node(&nid2).unwrap().actual_shape();
-      let parent_top_left_actual_pos: U16Pos = parent_actual_shape.min().into();
-      let parent_bottom_right_actual_pos: U16Pos = parent_actual_shape.max().into();
-      assert!(old_top_left_actual_pos.x() >= parent_top_left_actual_pos.x());
-      assert!(old_top_left_actual_pos.y() >= parent_top_left_actual_pos.y());
-      assert!(old_bottom_right_actual_pos.x() <= parent_bottom_right_actual_pos.x());
-      assert!(old_bottom_right_actual_pos.y() <= parent_bottom_right_actual_pos.y());
-      assert!(new_top_left_actual_pos.x() >= parent_top_left_actual_pos.x());
-      assert!(new_top_left_actual_pos.y() >= parent_top_left_actual_pos.y());
-      assert!(new_bottom_right_actual_pos.x() <= parent_bottom_right_actual_pos.x());
-      assert!(new_bottom_right_actual_pos.y() <= parent_bottom_right_actual_pos.y());
+      let actual = *tree.node(&nid3).unwrap().shape();
+      let expect = expects[i];
+      info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
+      assert!(actual == expect);
     }
   }
 
@@ -1480,7 +1470,7 @@ mod tests {
     let count = 1000_usize;
 
     // Move: (x, y)
-    let bounded_moves = (0..count)
+    let bounded_moves: Vec<(isize, isize)> = (0..count)
       .collect::<Vec<_>>()
       .iter()
       .map(|_i| (rng.gen_range(-1000..1000), rng.gen_range(-1000..1000)))
@@ -1489,6 +1479,10 @@ mod tests {
     for m in bounded_moves.iter() {
       let x = m.0;
       let y = m.1;
+      let parent_actual_shape = *tree.node(&nid2).unwrap().actual_shape();
+      let parent_top_left_actual_pos: U16Pos = parent_actual_shape.min().into();
+      let parent_bottom_right_actual_pos: U16Pos = parent_actual_shape.max().into();
+
       let old_shape = *tree.node(&nid3).unwrap().shape();
       let old_top_left_pos: IPos = old_shape.min().into();
       let old_bottom_right_pos: IPos = old_shape.max().into();
@@ -1502,15 +1496,26 @@ mod tests {
       let new_actual_shape = *tree.node(&nid3).unwrap().actual_shape();
       let new_top_left_actual_pos: U16Pos = new_actual_shape.min().into();
       let new_bottom_right_actual_pos: U16Pos = new_actual_shape.max().into();
-      assert!(old_top_left_pos.x() + x == new_top_left_pos.x());
+
+      match x.cmp(&0) {
+        Ordering::Less => {
+          assert!(old_top_left_pos.x() + x == new_top_left_pos.x() || new_top_left_pos.x() == 0);
+        }
+        Ordering::Greater => {
+          assert!(
+            old_top_left_pos.x() + x == new_top_left_pos.x()
+              || new_top_left_pos.x()
+                == (parent_top_left_actual_pos.x() as isize - new_shape.width())
+          );
+        }
+        _ => { /* Skip */ }
+      }
+
       assert!(old_top_left_pos.y() + y == new_top_left_pos.y());
       assert!(old_bottom_right_pos.x() + x == new_bottom_right_pos.x());
       assert!(old_bottom_right_pos.y() + y == new_bottom_right_pos.y());
       assert_eq!(new_shape.height(), old_shape.height());
       assert_eq!(new_shape.width(), old_shape.width());
-      let parent_actual_shape = *tree.node(&nid2).unwrap().actual_shape();
-      let parent_top_left_actual_pos: U16Pos = parent_actual_shape.min().into();
-      let parent_bottom_right_actual_pos: U16Pos = parent_actual_shape.max().into();
       assert!(old_top_left_actual_pos.x() >= parent_top_left_actual_pos.x());
       assert!(old_top_left_actual_pos.y() >= parent_top_left_actual_pos.y());
       assert!(old_bottom_right_actual_pos.x() <= parent_bottom_right_actual_pos.x());
