@@ -411,6 +411,78 @@ where
       None => None,
     }
   }
+
+  /// Bounded move node by `(x, y)`.
+  ///
+  /// Similar to [`move_by`](Itree::move_by), but when a widget hits the actual boundary of its
+  /// parent, it simply stops moving.
+  ///
+  /// Note: This operation moves all the descendants together with the node.
+  ///
+  /// Fails if the widget doesn't exist.
+  ///
+  /// Returns the shape after movement.
+  pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+    match self.parent_ids.get(&id) {
+      Some(parent_id) => {
+        // Fix mutable borrow on `self.base.node_mut`.
+        unsafe {
+          let raw_nodes = &mut self.nodes as *mut HashMap<InodeId, Inode<T>>;
+
+          match (*raw_nodes).get(parent_id) {
+            Some(parent_node) => {
+              match (*raw_nodes).get_mut(&id) {
+                Some(node) => {
+                  let parent_shape = *parent_node.shape();
+                  let parent_bottom_right_pos: IPos = parent_shape.max().into();
+
+                  let current_shape = *node.shape();
+                  let current_top_left_pos: IPos = current_shape.min().into();
+                  let next_top_left_pos: IPos =
+                    point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
+                  let expected_shape = IRect::new(
+                    next_top_left_pos,
+                    point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
+                  );
+                  // Detect whether the expected shape is out of its parent's boundary.
+                  let expected_top_left_pos: IPos = expected_shape.min().into();
+                  let expected_bottom_right_pos: IPos = expected_shape.max().into();
+                  let final_x = if expected_top_left_pos.x() < 0 {
+                    let x_diff = num_traits::sign::abs(expected_top_left_pos.x());
+                    x + x_diff
+                  } else if expected_bottom_right_pos.x() >= parent_bottom_right_pos.x() {
+                    let x_diff = num_traits::sign::abs_sub(
+                      expected_top_left_pos.x(),
+                      parent_bottom_right_pos.x(),
+                    );
+                    x - x_diff
+                  } else {
+                    x
+                  };
+                  let final_y = if expected_top_left_pos.y() < 0 {
+                    let y_diff = num_traits::sign::abs(expected_top_left_pos.y());
+                    y + y_diff
+                  } else if expected_bottom_right_pos.y() >= parent_bottom_right_pos.y() {
+                    let y_diff = num_traits::sign::abs_sub(
+                      expected_top_left_pos.y(),
+                      parent_bottom_right_pos.y(),
+                    );
+                    y - y_diff
+                  } else {
+                    y
+                  };
+                  self.move_by(id, final_x, final_y)
+                }
+                None => None,
+              }
+            }
+            None => None,
+          }
+        }
+      }
+      None => None,
+    }
+  }
 }
 
 #[cfg(test)]
@@ -1328,7 +1400,7 @@ mod tests {
     let n3_moves = (0..count)
       .collect::<Vec<_>>()
       .iter()
-      .map(|_i| (rng.next_u32() as isize, rng.next_u32() as isize))
+      .map(|_i| (rng.gen_range(-1000..1000), rng.gen_range(-1000..1000)))
       .collect::<Vec<(isize, isize)>>();
 
     for m in n3_moves.iter() {
