@@ -419,7 +419,7 @@ mod tests {
   use std::sync::Once;
   use tracing::info;
 
-  use crate::cart::{IRect, U16Rect};
+  use crate::cart::{IRect, U16Pos, U16Rect};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::inode::InodeValue;
   use crate::uuid;

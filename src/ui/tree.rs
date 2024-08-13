@@ -8,7 +8,7 @@ use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
-use crate::cart::{IPos, IRect, U16Pos, U16Size};
+use crate::cart::{IPos, IRect, U16Size};
 use crate::ui::term::TerminalArc;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
