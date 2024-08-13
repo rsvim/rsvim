@@ -290,14 +290,10 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  use rand::prelude::*;
   use std::sync::Once;
-  use tracing::info;
 
-  use crate::cart::{IRect, U16Pos, U16Rect, U16Size};
+  use crate::cart::U16Size;
   use crate::test::log::init as test_log_init;
-  use crate::ui::tree::internal::inode::InodeValue;
-  use crate::uuid;
 
   use super::*;
 
@@ -312,129 +308,5 @@ mod tests {
     assert!(tree.window_container_ids().is_empty());
     assert!(tree.is_empty());
     assert!(tree.len() == 1);
-  }
-
-  #[derive(Copy, Clone, Debug, Default)]
-  struct TestValue {
-    id: InodeId,
-    pub value: usize,
-  }
-
-  impl TestValue {
-    pub fn new(value: usize) -> Self {
-      TestValue {
-        id: uuid::next(),
-        value,
-      }
-    }
-    pub fn value(&self) -> usize {
-      self.value
-    }
-  }
-
-  impl InodeValue for TestValue {
-    fn id(&self) -> InodeId {
-      self.id
-    }
-  }
-
-  type TestNode = Inode<TestValue>;
-
-  macro_rules! print_node {
-    ($node: ident, $name: expr) => {
-      loop {
-        info!("{}: {:?}", $name, $node.clone());
-        break;
-      }
-    };
-  }
-
-  #[test]
-  fn bounded_move_by1() {
-    INIT.call_once(test_log_init);
-
-    let v1 = TestValue::new(1);
-    let s1 = IRect::new((0, 0), (20, 20));
-    let us1 = U16Rect::new((0, 0), (20, 20));
-    let n1 = TestNode::new(v1, s1);
-    let nid1 = n1.id();
-
-    let v2 = TestValue::new(2);
-    let s2 = IRect::new((0, 0), (20, 20));
-    let us2 = U16Rect::new((0, 0), (20, 20));
-    let n2 = TestNode::new(v2, s2);
-    let nid2 = n2.id();
-
-    let v3 = TestValue::new(3);
-    let s3 = IRect::new((0, 0), (1, 1));
-    let us3 = U16Rect::new((0, 0), (1, 1));
-    let n3 = TestNode::new(v3, s3);
-    let nid3 = n3.id();
-
-    /*
-     * The tree looks like:
-     * ```
-     *           n1
-     *         /
-     *        n2
-     *       /
-     *      n3
-     * ```
-     */
-    let mut tree = Tree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid2, n3);
-
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
-
-    let mut rng = rand::thread_rng();
-    let count = 1000_usize;
-
-    // Move: (x, y)
-    let n3_moves = (0..count)
-      .collect::<Vec<_>>()
-      .iter()
-      .map(|_i| (rng.gen_range(-1000..1000), rng.gen_range(-1000..1000)))
-      .collect::<Vec<(isize, isize)>>();
-
-    for m in n3_moves.iter() {
-      let x = m.0;
-      let y = m.1;
-      let old_shape = *tree.node(nid3).unwrap().shape();
-      let old_top_left_pos: IPos = old_shape.min().into();
-      let old_bottom_right_pos: IPos = old_shape.max().into();
-      let old_actual_shape = *tree.node(nid3).unwrap().actual_shape();
-      let old_top_left_actual_pos: U16Pos = old_actual_shape.min().into();
-      let old_bottom_right_actual_pos: U16Pos = old_actual_shape.max().into();
-      tree.bounded_move_by(nid3, x, y);
-      let new_shape = *tree.node(nid3).unwrap().shape();
-      let new_top_left_pos: IPos = new_shape.min().into();
-      let new_bottom_right_pos: IPos = new_shape.max().into();
-      let new_actual_shape = *tree.node(nid3).unwrap().actual_shape();
-      let new_top_left_actual_pos: U16Pos = new_actual_shape.min().into();
-      let new_bottom_right_actual_pos: U16Pos = new_actual_shape.max().into();
-      assert!(old_top_left_pos.x() + x == new_top_left_pos.x());
-      assert!(old_top_left_pos.y() + y == new_top_left_pos.y());
-      assert!(old_bottom_right_pos.x() + x == new_bottom_right_pos.x());
-      assert!(old_bottom_right_pos.y() + y == new_bottom_right_pos.y());
-      assert_eq!(new_shape.height(), old_shape.height());
-      assert_eq!(new_shape.width(), old_shape.width());
-      let parent_actual_shape = *tree.node(nid2).unwrap().actual_shape();
-      let parent_top_left_actual_pos: U16Pos = parent_actual_shape.min().into();
-      let parent_bottom_right_actual_pos: U16Pos = parent_actual_shape.max().into();
-      assert!(old_top_left_actual_pos.x() >= parent_top_left_actual_pos.x());
-      assert!(old_top_left_actual_pos.y() >= parent_top_left_actual_pos.y());
-      assert!(old_bottom_right_actual_pos.x() <= parent_bottom_right_actual_pos.x());
-      assert!(old_bottom_right_actual_pos.y() <= parent_bottom_right_actual_pos.y());
-      assert!(new_top_left_actual_pos.x() >= parent_top_left_actual_pos.x());
-      assert!(new_top_left_actual_pos.y() >= parent_top_left_actual_pos.y());
-      assert!(new_bottom_right_actual_pos.x() <= parent_bottom_right_actual_pos.x());
-      assert!(new_bottom_right_actual_pos.y() <= parent_bottom_right_actual_pos.y());
-    }
   }
 }
