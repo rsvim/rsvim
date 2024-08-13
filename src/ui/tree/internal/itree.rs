@@ -280,12 +280,14 @@ where
   /// 1. [`depth`](Inode::depth()): The child depth should be always the parent depth + 1.
   /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
   ///
-  /// Returns:
+  /// # Returns
   ///
   /// 1. `None` if the `child_node` doesn't exist.
-  /// 1. The previous node on the same `child_node` ID, i.e. the inserted key.
+  /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
   ///
-  /// Panics if `parent_id` doesn't exist.
+  /// # Panics
+  ///
+  /// If `parent_id` doesn't exist.
   pub fn insert(&mut self, parent_id: &InodeId, child_node: Inode<T>) -> Option<Inode<T>> {
     // Returns `None` if `parent_id` not exists.
     self.nodes.get(parent_id)?;
@@ -357,14 +359,18 @@ where
   /// But the relationships between the removed node and its descendants still remains in the tree,
   /// thus once you insert it back in the same tree, its descendants are still connected with the removed node.
   ///
-  /// Fails if:
-  /// 1. The removed node doesn't exist.
-  /// 2. The removed node is the root node.
+  /// # Returns
+  ///
+  /// 1. `None` if node `id` doesn't exist.
+  /// 2. The removed node on the node `id`.
+  ///
+  /// # Panics
+  ///
+  /// If the node `id` is the root node id since root node cannot be removed.
   pub fn remove(&mut self, id: InodeId) -> Option<Inode<T>> {
     // Cannot remove root node.
-    if id == self.root_id {
-      return None;
-    }
+    assert!(id != self.root_id);
+
     // Remove child from nodes collection.
     match self.nodes.remove(&id) {
       Some(removed) => {
