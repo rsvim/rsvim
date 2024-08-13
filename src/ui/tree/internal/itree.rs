@@ -289,15 +289,15 @@ where
   ///
   /// If `parent_id` doesn't exist.
   pub fn insert(&mut self, parent_id: &InodeId, child_node: Inode<T>) -> Option<Inode<T>> {
-    // Returns `None` if `parent_id` not exists.
-    self.nodes.get(parent_id)?;
-
     debug!(
       "parent_id:{:?}, node_ids:{:?}, children_ids:{:?}",
       parent_id,
       self.node_ids(),
       self.children_ids
     );
+
+    // Panics if `parent_id` not exists.
+    assert!(self.nodes.contains_key(parent_id));
     assert!(
       self.children_ids.contains_key(parent_id),
       "children_ids {:?} doesn't contains parent_id {:?}",
@@ -350,6 +350,65 @@ where
 
     // Return the inserted child
     result
+  }
+
+  /// Insert a node to the tree.
+  ///
+  /// It works similar to [`insert`](Itree::insert) method, except it limits the inserted node
+  /// boundary based the parent's actual shape. This affects two aspects:
+  ///
+  /// 1. For size, if the inserted `child_node` is larger than the parent actual shape. The size
+  ///    will be truncated to fit its parent. The bottom-right part will be removed, while the
+  ///    top-left part will be keeped.
+  /// 2. For position, if the inserted `child_node` hits the boundary of its parent. It simply
+  ///    stops at its parent boundary.
+  ///
+  /// # Returns
+  ///
+  /// 1. `None` if the `child_node` doesn't exist.
+  /// 2. The previous node on the same `child_node` ID, i.e. the inserted key.
+  ///
+  /// # Panics
+  ///
+  /// If `parent_id` doesn't exist.
+  pub fn bounded_insert(
+    &mut self,
+    parent_id: &InodeId,
+    mut child_node: Inode<T>,
+  ) -> Option<Inode<T>> {
+    // Panics if `parent_id` not exists.
+    assert!(self.nodes.contains_key(parent_id));
+
+    let parent_node = self.nodes.get(parent_id).unwrap();
+
+    // Fix mutable references on `child_node.shape_mut()`
+    unsafe {
+      let raw_child_shape = NonNull::new(child_node.shape_mut() as *mut IRect).unwrap();
+
+      let parent_actual_shape = parent_node.actual_shape();
+
+      // If size is larger than parent actual size.
+      if raw_child_shape.as_ref().height() > parent_actual_shape.height() as isize
+        || raw_child_shape.as_ref().width() > parent_actual_shape.width() as isize
+      {
+        let top_left_pos: IPos = raw_child_shape.as_ref().min().into();
+        let new_shape = IRect::new(
+          top_left_pos,
+          point!(x: top_left_pos.x() + parent_actual_shape.width() as isize, y: top_left_pos.y() + parent_actual_shape.height() as isize),
+        );
+        // Truncate child shape
+        *raw_child_shape.as_ptr() = new_shape;
+      }
+
+      // If position is out of parent boundary.
+      if raw_child_shape.as_ref().min().x < 0
+        || raw_child_shape.as_ref().max().x >= parent_actual_shape.width() as isize
+        || raw_child_shape.as_ref().min().y < 0
+        || raw_child_shape.as_ref().max().y >= parent_actual_shape.height() as isize
+      {}
+    }
+
+    self.insert(parent_id, child_node)
   }
 
   /// Remove a node by its ID.
@@ -458,10 +517,12 @@ where
                   // Detect whether the expected shape is out of its parent's boundary.
                   let expected_top_left_pos: IPos = expected_shape.min().into();
                   let expected_bottom_right_pos: IPos = expected_shape.max().into();
+
+                  // X-axis
                   let final_x = if expected_top_left_pos.x() < 0 {
                     let x_diff = num_traits::sign::abs(expected_top_left_pos.x());
                     x + x_diff
-                  } else if expected_bottom_right_pos.x() >= parent_bottom_right_pos.x() {
+                  } else if expected_bottom_right_pos.x() > parent_bottom_right_pos.x() {
                     let x_diff = num_traits::sign::abs_sub(
                       expected_top_left_pos.x(),
                       parent_bottom_right_pos.x(),
@@ -470,10 +531,12 @@ where
                   } else {
                     x
                   };
+
+                  // X-axis
                   let final_y = if expected_top_left_pos.y() < 0 {
                     let y_diff = num_traits::sign::abs(expected_top_left_pos.y());
                     y + y_diff
-                  } else if expected_bottom_right_pos.y() >= parent_bottom_right_pos.y() {
+                  } else if expected_bottom_right_pos.y() > parent_bottom_right_pos.y() {
                     let y_diff = num_traits::sign::abs_sub(
                       expected_top_left_pos.y(),
                       parent_bottom_right_pos.y(),
@@ -482,6 +545,8 @@ where
                   } else {
                     y
                   };
+
+                  // Real movement
                   self.move_by(id, final_x, final_y)
                 }
                 None => None,
