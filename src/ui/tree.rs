@@ -215,7 +215,10 @@ impl Tree {
     self.base.remove(id)
   }
 
-  /// 
+  /// Bounded move by (x, y), or (columns, rows). When a widget hits the actual boundary of its
+  /// parent, it simply stops moving.
+  ///
+  /// Returns the shape after movement.
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.move_by(id, x, y)
   }

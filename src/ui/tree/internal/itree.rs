@@ -462,7 +462,7 @@ where
   ///
   /// Fails if the node doesn't exist.
   ///
-  /// Returns the previous shape if move successfully.
+  /// Returns the shape after a successful movement.
   pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     match self.nodes.get_mut(&id) {
       Some(node) => {
