@@ -462,7 +462,7 @@ where
   ///
   /// Fails if the node doesn't exist.
   ///
-  /// Returns the shape after a successful movement.
+  /// Returns the new shape after a successful movement.
   pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     match self.nodes.get_mut(&id) {
       Some(node) => {
@@ -481,7 +481,7 @@ where
           self.update_descendant_attributes(id, *self.parent_ids.get(&id).unwrap());
         }
 
-        Some(current_shape)
+        Some(next_shape)
       }
       None => None,
     }
