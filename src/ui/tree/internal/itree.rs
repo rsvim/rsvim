@@ -460,6 +460,8 @@ where
   /// When x < 0, the node moves up. When x > 0, the node moves down.
   /// When y < 0, the node moves left. When y > 0, the node moves right.
   ///
+  /// Note: This operation moves all the descendants together with the node.
+  ///
   /// Fails if the node doesn't exist.
   ///
   /// Returns the new shape after a successful movement.
