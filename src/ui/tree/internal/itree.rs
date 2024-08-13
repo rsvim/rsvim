@@ -382,15 +382,19 @@ where
     }
   }
 
-  /// Move node by (x, y).
-  /// When x < 0, the node moves up. When x > 0, the node moves down.
-  /// When y < 0, the node moves left. When y > 0, the node moves right.
+  /// Move node by `(x, y)`.
   ///
-  /// Note: This operation moves all the descendants together with the node.
+  /// * The node moves left when `x < 0`.
+  /// * The node moves right when `x > 0`.
+  /// * The node moves up when `y < 0`.
+  /// * The node moves down when `y > 0`.
   ///
-  /// Fails if the node doesn't exist.
+  /// Note: This operation also updates all descendants attributes such as [`insert`](Itree::insert) method.
   ///
-  /// Returns the new shape after a successful movement.
+  /// # Returns
+  ///
+  /// 1. The new shape after movement if successfully.
+  /// 2. `None` if the node `id` doesn't exist.
   pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     match self.nodes.get_mut(&id) {
       Some(node) => {
@@ -417,14 +421,13 @@ where
 
   /// Bounded move node by `(x, y)`.
   ///
-  /// Similar to [`move_by`](Itree::move_by), but when a widget hits the actual boundary of its
-  /// parent, it simply stops moving.
+  /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
+  /// its parent, it simply stops moving.
   ///
-  /// Note: This operation moves all the descendants together with the node.
+  /// # Returns
   ///
-  /// Fails if the widget doesn't exist.
-  ///
-  /// Returns the shape after movement.
+  /// 1. The new shape after movement if successfully.
+  /// 2. `None` if the node `id` doesn't exist.
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     match self.parent_ids.get(&id) {
       Some(parent_id) => {
