@@ -56,7 +56,7 @@ impl EventLoop {
       WidgetValue::WindowContainer(window_container),
       window_container_shape,
     );
-    tree.insert(tree.root_id(), window_container_node);
+    tree.insert(&tree.root_id(), window_container_node);
     debug!("new, insert window container: {:?}", window_container_id);
 
     let window_content = WindowContent::new();
@@ -69,13 +69,13 @@ impl EventLoop {
       WidgetValue::WindowContent(window_content),
       window_content_shape,
     );
-    tree.insert(window_container_id, window_content_node);
+    tree.insert(&window_container_id, window_content_node);
     debug!("new, insert window content: {:?}", window_content_id);
 
     let cursor = Cursor::new();
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor_node = TreeNode::new(WidgetValue::Cursor(cursor), cursor_shape);
-    tree.insert(window_content_id, cursor_node);
+    tree.insert(&window_content_id, cursor_node);
 
     debug!("new, built widget tree");
 

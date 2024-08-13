@@ -212,16 +212,16 @@ where
     type ChildAndParentPair<'a, T> = (&'a mut Inode<T>, InodeId, usize, U16Rect);
 
     // Avoid the multiple mutable references on `self.nodes.get_mut` when updating all descendants attributes.
-    let raw_nodes = &mut self.nodes as *mut HashMap<InodeId, Inode<T>>;
+    let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, Inode<T>>).unwrap();
 
     // debug!("before create que");
     let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
-    let pnode = (*raw_nodes).get(&start_parent_id).unwrap();
+    let pnode = raw_nodes.as_ref().get(&start_parent_id).unwrap();
     let pnode_id = pnode.id();
     let pnode_depth = *pnode.depth();
     let pnode_actual_shape = *pnode.actual_shape();
     que.push_back((
-      (*raw_nodes).get_mut(&start_id).unwrap(),
+      raw_nodes.as_mut().get_mut(&start_id).unwrap(),
       pnode_id,
       pnode_depth,
       pnode_actual_shape,
@@ -254,7 +254,7 @@ where
         Some(descendant_ids) => {
           for dnode_id in descendant_ids.iter() {
             // debug!("before push dnode: {:?}", dnode_id);
-            match (*raw_nodes).get_mut(dnode_id) {
+            match raw_nodes.as_mut().get_mut(dnode_id) {
               Some(dnode) => {
                 que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
               }
@@ -283,9 +283,9 @@ where
   /// Fails if:
   ///
   /// 1. The `parent_id` doesn't exist.
-  pub fn insert(&mut self, parent_id: InodeId, child_node: Inode<T>) -> Option<&Inode<T>> {
+  pub fn insert(&mut self, parent_id: &InodeId, child_node: Inode<T>) -> Option<&Inode<T>> {
     // Returns `None` if `parent_id` not exists.
-    self.nodes.get(&parent_id)?;
+    self.nodes.get(parent_id)?;
 
     debug!(
       "parent_id:{:?}, node_ids:{:?}, children_ids:{:?}",
@@ -294,7 +294,7 @@ where
       self.children_ids
     );
     assert!(
-      self.children_ids.contains_key(&parent_id),
+      self.children_ids.contains_key(parent_id),
       "children_ids {:?} doesn't contains parent_id {:?}",
       self.children_ids,
       parent_id
@@ -307,14 +307,14 @@ where
     self.children_ids.insert(child_id, vec![]);
 
     // Map child ID => parent ID.
-    self.parent_ids.insert(child_id, parent_id);
+    self.parent_ids.insert(child_id, *parent_id);
     // Map parent ID => children IDs.
     // It inserts child ID to the `children_ids` vector of the parent, sorted by the z-index.
     // For the children that have the same z-index value, it inserts at the end of those children.
     // debug!("before get higher zindex pos");
     let higher_zindex_pos: Vec<usize> = self
       .children_ids
-      .get(&parent_id)
+      .get(parent_id)
       .unwrap()
       .iter()
       .enumerate()
@@ -329,22 +329,18 @@ where
       Some(insert_pos) => {
         self
           .children_ids
-          .get_mut(&parent_id)
+          .get_mut(parent_id)
           .unwrap()
           .insert(*insert_pos, child_id);
       }
       None => {
-        self
-          .children_ids
-          .get_mut(&parent_id)
-          .unwrap()
-          .push(child_id);
+        self.children_ids.get_mut(parent_id).unwrap().push(child_id);
       }
     }
 
     // Update all the descendants attributes under the `child_id` node.
     unsafe {
-      self.update_descendant_attributes(child_id, parent_id);
+      self.update_descendant_attributes(child_id, *parent_id);
     } // unsafe
 
     // Return the inserted child
@@ -635,11 +631,11 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid1, n3);
-    tree.insert(nid2, n4);
-    tree.insert(nid2, n5);
-    tree.insert(nid3, n6);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid1, n3);
+    tree.insert(&nid2, n4);
+    tree.insert(&nid2, n5);
+    tree.insert(&nid3, n6);
 
     assert!(tree.root_id() == nid1);
     let n1 = tree.node(&nid1).unwrap();
@@ -768,14 +764,14 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid1, n3);
-    tree.insert(nid2, n4);
-    tree.insert(nid2, n5);
-    tree.insert(nid3, n6);
-    tree.insert(nid5, n7);
-    tree.insert(nid7, n8);
-    tree.insert(nid7, n9);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid1, n3);
+    tree.insert(&nid2, n4);
+    tree.insert(&nid2, n5);
+    tree.insert(&nid3, n6);
+    tree.insert(&nid5, n7);
+    tree.insert(&nid7, n8);
+    tree.insert(&nid7, n9);
 
     assert!(tree.root_id() == nid1);
     let n1 = tree.node(&nid1).unwrap();
@@ -941,14 +937,14 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid1, n3);
-    tree.insert(nid2, n4);
-    tree.insert(nid2, n5);
-    tree.insert(nid3, n6);
-    tree.insert(nid5, n7);
-    tree.insert(nid7, n8);
-    tree.insert(nid7, n9);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid1, n3);
+    tree.insert(&nid2, n4);
+    tree.insert(&nid2, n5);
+    tree.insert(&nid3, n6);
+    tree.insert(&nid5, n7);
+    tree.insert(&nid7, n8);
+    tree.insert(&nid7, n9);
 
     assert!(tree.root_id() == nid1);
     let n1 = tree.node(&nid1).unwrap();
@@ -1034,11 +1030,11 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid1, n3);
-    tree.insert(nid2, n4);
-    tree.insert(nid4, n5);
-    tree.insert(nid5, n6);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid1, n3);
+    tree.insert(&nid2, n4);
+    tree.insert(&nid4, n5);
+    tree.insert(&nid5, n6);
 
     assert!(tree.root_id() == nid1);
     let n1 = tree.node(&nid1).unwrap();
@@ -1086,7 +1082,7 @@ mod tests {
      */
     let mut tree = Itree::new(nodes[0].clone());
     for node in nodes.iter().skip(1) {
-      tree.insert(nodes_ids[0], node.clone());
+      tree.insert(&nodes_ids[0], node.clone());
     }
 
     assert!(tree.root_id() == nodes_ids[0]);
@@ -1135,7 +1131,7 @@ mod tests {
       value += 1;
       let node = TestNode::new(v, s);
       let node_id = node.id();
-      tree.insert(root_id, node);
+      tree.insert(&root_id, node);
       node_ids.push(node_id);
     }
 
@@ -1235,14 +1231,14 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid1, n3);
-    tree.insert(nid2, n4);
-    tree.insert(nid2, n5);
-    tree.insert(nid3, n6);
-    tree.insert(nid5, n7);
-    tree.insert(nid7, n8);
-    tree.insert(nid7, n9);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid1, n3);
+    tree.insert(&nid2, n4);
+    tree.insert(&nid2, n5);
+    tree.insert(&nid3, n6);
+    tree.insert(&nid5, n7);
+    tree.insert(&nid7, n8);
+    tree.insert(&nid7, n9);
 
     assert!(nid1 == tree.root_id());
     let n1 = tree.node(&nid1).unwrap();
@@ -1320,11 +1316,11 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid1, n3);
-    tree.insert(nid2, n4);
-    tree.insert(nid4, n5);
-    tree.insert(nid5, n6);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid1, n3);
+    tree.insert(&nid2, n4);
+    tree.insert(&nid4, n5);
+    tree.insert(&nid5, n6);
 
     let n1 = tree.node(&nid1).unwrap();
     let n2 = tree.node(&nid2).unwrap();
@@ -1381,8 +1377,8 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid2, n3);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid2, n3);
 
     let n1 = tree.node(&nid1).unwrap();
     let n2 = tree.node(&nid2).unwrap();
@@ -1470,8 +1466,8 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(nid1, n2);
-    tree.insert(nid2, n3);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid2, n3);
 
     let n1 = tree.node(&nid1).unwrap();
     let n2 = tree.node(&nid2).unwrap();
