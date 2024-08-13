@@ -121,10 +121,10 @@ impl<'a, T> ItreeIterMut<'a, T>
 where
   T: InodeValue,
 {
-  pub fn new(tree: &'a mut Itree<T>, start: Option<&'a mut Inode<T>>) -> Self {
+  pub fn new(tree: &'a mut Itree<T>, start_node_id: Option<InodeId>) -> Self {
     let mut queue = VecDeque::new();
-    match start {
-      Some(start) => queue.push_back(start),
+    match start_node_id {
+      Some(id) => queue.push_back(id),
       None => { /* Do nothing */ }
     }
     ItreeIterMut { tree, queue }
@@ -191,10 +191,7 @@ where
 
   /// Get the iterator that returns mutable reference.
   pub fn iter_mut(&mut self) -> ItreeIterMut<T> {
-    unsafe {
-      let raw_nodes = &mut self.nodes as *mut HashMap<InodeId, Inode<T>>;
-      ItreeIterMut::new(self, (*raw_nodes).get_mut(&self.root_id))
-    }
+    ItreeIterMut::new(self, Some(self.root_id))
   }
 
   /// Update the `start_id` node attributes, and all the descendants attributes of this node.
