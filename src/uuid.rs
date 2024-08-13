@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 /// Returns the next global unique ID.
 pub fn next() -> usize {
   static GLOBAL: AtomicUsize = AtomicUsize::new(0_usize);
-  GLOBAL.fetch_add(1_usize, Ordering::SeqCst)
+  GLOBAL.fetch_add(1_usize, Ordering::Relaxed)
 }
 
 #[cfg(test)]
