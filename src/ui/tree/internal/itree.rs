@@ -424,6 +424,8 @@ where
   /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
   /// its parent, it simply stops moving.
   ///
+  /// Note: This operation also updates all descendants attributes such as [`insert`](Itree::insert) method.
+  ///
   /// # Returns
   ///
   /// 1. The new shape after movement if successfully.
