@@ -37,7 +37,7 @@ where
   T: InodeValue,
 {
   tree: &'a Itree<T>,
-  queue: VecDeque<&'a Inode<T>>,
+  queue: VecDeque<InodeId>,
 }
 
 impl<'a, T> Iterator for ItreeIter<'a, T>
@@ -47,21 +47,18 @@ where
   type Item = &'a Inode<T>;
 
   fn next(&mut self) -> Option<Self::Item> {
-    if let Some(node) = self.queue.pop_front() {
-      match self.tree.children_ids(&node.id()) {
+    if let Some(id) = self.queue.pop_front() {
+      match self.tree.children_ids(&id) {
         Some(children_ids) => {
           for child_id in children_ids.iter() {
-            match self.tree.node(child_id) {
-              Some(child) => {
-                self.queue.push_back(child);
-              }
-              None => { /* Skip */ }
+            if self.tree.node(child_id).is_some() {
+              self.queue.push_back(*child_id);
             }
           }
         }
         None => { /* Skip */ }
       }
-      return Some(node);
+      return self.tree.node(&id);
     }
     None
   }
@@ -71,10 +68,10 @@ impl<'a, T> ItreeIter<'a, T>
 where
   T: InodeValue,
 {
-  pub fn new(tree: &'a Itree<T>, start: Option<&'a Inode<T>>) -> Self {
+  pub fn new(tree: &'a Itree<T>, start_node_id: Option<InodeId>) -> Self {
     let mut queue = VecDeque::new();
-    match start {
-      Some(start) => queue.push_back(start),
+    match start_node_id {
+      Some(id) => queue.push_back(id),
       None => { /* Do nothing */ }
     }
     ItreeIter { tree, queue }
@@ -88,7 +85,7 @@ where
   T: InodeValue,
 {
   tree: &'a mut Itree<T>,
-  queue: VecDeque<&'a mut Inode<T>>,
+  queue: VecDeque<InodeId>,
 }
 
 impl<'a, T> Iterator for ItreeIterMut<'a, T>
@@ -98,24 +95,23 @@ where
   type Item = &'a mut Inode<T>;
 
   fn next(&mut self) -> Option<Self::Item> {
-    if let Some(node) = self.queue.pop_front() {
-      unsafe {
-        let raw_tree = self.tree as *mut Itree<T>;
-        match (*raw_tree).children_ids(&node.id()) {
-          Some(children_ids) => {
-            for child_id in children_ids.iter() {
-              match (*raw_tree).node_mut(child_id) {
-                Some(child) => {
-                  self.queue.push_back(child);
-                }
-                None => { /* Skip */ }
-              }
+    if let Some(id) = self.queue.pop_front() {
+      let raw_tree = self.tree as *mut Itree<T>;
+
+      match self.tree.children_ids(&id) {
+        Some(children_ids) => {
+          for child_id in children_ids.iter() {
+            if self.tree.node(child_id).is_some() {
+              self.queue.push_back(*child_id);
             }
           }
-          None => { /* Skip */ }
         }
-      } // unsafe
-      return Some(node);
+        None => { /* Skip */ }
+      }
+      // Fix `self.tree` mutable references.
+      unsafe {
+        return (*raw_tree).node_mut(&id);
+      }
     }
     None
   }
@@ -190,14 +186,14 @@ where
   /// By default, it iterates in pre-order iterator which starts from the root.
   /// For the children under the same node, it visits from lower z-index to higher.
   pub fn iter(&self) -> ItreeIter<T> {
-    ItreeIter::new(self, Some(self.nodes.get(&self.root_id).unwrap()))
+    ItreeIter::new(self, Some(self.root_id))
   }
 
   /// Get the iterator that returns mutable reference.
   pub fn iter_mut(&mut self) -> ItreeIterMut<T> {
     unsafe {
       let raw_nodes = &mut self.nodes as *mut HashMap<InodeId, Inode<T>>;
-      ItreeIterMut::new(self, Some((*raw_nodes).get_mut(&self.root_id).unwrap()))
+      ItreeIterMut::new(self, (*raw_nodes).get_mut(&self.root_id))
     }
   }
 
