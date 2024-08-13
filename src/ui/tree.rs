@@ -2,13 +2,12 @@
 
 #![allow(dead_code)]
 
-use geo::point;
 use parking_lot::Mutex;
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
-use crate::cart::{IPos, IRect, U16Size};
+use crate::cart::{IRect, U16Size};
 use crate::ui::term::TerminalArc;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
@@ -167,19 +166,19 @@ impl Tree {
     self.base.root_id()
   }
 
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
+  pub fn parent_id(&self, id: &TreeNodeId) -> Option<&TreeNodeId> {
     self.base.parent_id(id)
   }
 
-  pub fn children_ids(&self, id: TreeNodeId) -> Option<&Vec<TreeNodeId>> {
+  pub fn children_ids(&self, id: &TreeNodeId) -> Option<&Vec<TreeNodeId>> {
     self.base.children_ids(id)
   }
 
-  pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
+  pub fn node(&self, id: &TreeNodeId) -> Option<&TreeNode> {
     self.base.node(id)
   }
 
-  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
+  pub fn node_mut(&mut self, id: &TreeNodeId) -> Option<&mut TreeNode> {
     self.base.node_mut(id)
   }
 

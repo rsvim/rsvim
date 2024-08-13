@@ -48,10 +48,10 @@ where
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(node) = self.queue.pop_front() {
-      match self.tree.children_ids(node.id()) {
+      match self.tree.children_ids(&node.id()) {
         Some(children_ids) => {
           for child_id in children_ids.iter() {
-            match self.tree.node(*child_id) {
+            match self.tree.node(child_id) {
               Some(child) => {
                 self.queue.push_back(child);
               }
@@ -101,10 +101,10 @@ where
     if let Some(node) = self.queue.pop_front() {
       unsafe {
         let raw_tree = self.tree as *mut Itree<T>;
-        match (*raw_tree).children_ids(node.id()) {
+        match (*raw_tree).children_ids(&node.id()) {
           Some(children_ids) => {
             for child_id in children_ids.iter() {
-              match (*raw_tree).node_mut(*child_id) {
+              match (*raw_tree).node_mut(child_id) {
                 Some(child) => {
                   self.queue.push_back(child);
                 }
@@ -169,20 +169,20 @@ where
     self.nodes.keys().copied().collect()
   }
 
-  pub fn parent_id(&self, id: InodeId) -> Option<&InodeId> {
-    self.parent_ids.get(&id)
+  pub fn parent_id(&self, id: &InodeId) -> Option<&InodeId> {
+    self.parent_ids.get(id)
   }
 
-  pub fn children_ids(&self, id: InodeId) -> Option<&Vec<InodeId>> {
-    self.children_ids.get(&id)
+  pub fn children_ids(&self, id: &InodeId) -> Option<&Vec<InodeId>> {
+    self.children_ids.get(id)
   }
 
-  pub fn node(&self, id: InodeId) -> Option<&Inode<T>> {
-    self.nodes.get(&id)
+  pub fn node(&self, id: &InodeId) -> Option<&Inode<T>> {
+    self.nodes.get(id)
   }
 
-  pub fn node_mut(&mut self, id: InodeId) -> Option<&mut Inode<T>> {
-    self.nodes.get_mut(&id)
+  pub fn node_mut(&mut self, id: &InodeId) -> Option<&mut Inode<T>> {
+    self.nodes.get_mut(id)
   }
 
   /// Get the iterator.
@@ -583,9 +583,9 @@ mod tests {
 
     assert_eq!(tree.len(), 1);
     assert_eq!(tree.root_id(), nid1);
-    assert!(tree.parent_id(nid1).is_none());
-    assert!(tree.children_ids(nid1).is_some());
-    assert!(tree.children_ids(nid1).unwrap().is_empty());
+    assert!(tree.parent_id(&nid1).is_none());
+    assert!(tree.children_ids(&nid1).is_some());
+    assert!(tree.children_ids(&nid1).unwrap().is_empty());
 
     for node in tree.iter() {
       assert_node_id_eq!(node, nid1);
@@ -644,12 +644,12 @@ mod tests {
     tree.insert(nid3, n6);
 
     assert!(tree.root_id() == nid1);
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
-    let n4 = tree.node(nid4).unwrap();
-    let n5 = tree.node(nid5).unwrap();
-    let n6 = tree.node(nid6).unwrap();
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
+    let n4 = tree.node(&nid4).unwrap();
+    let n5 = tree.node(&nid5).unwrap();
+    let n6 = tree.node(&nid6).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -670,15 +670,15 @@ mod tests {
     assert_parent_child_nodes_depth!(n2, n6);
     assert_parent_child_nodes_depth!(n3, n6);
 
-    assert_eq!(tree.children_ids(nid1).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(nid2).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(nid3).unwrap().len(), 1);
-    assert_eq!(tree.children_ids(nid4).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(nid5).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(nid6).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(&nid1).unwrap().len(), 2);
+    assert_eq!(tree.children_ids(&nid2).unwrap().len(), 2);
+    assert_eq!(tree.children_ids(&nid3).unwrap().len(), 1);
+    assert_eq!(tree.children_ids(&nid4).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(&nid5).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(&nid6).unwrap().len(), 0);
 
     let contains_child = |parent_id: InodeId, child_id: InodeId| -> bool {
-      match tree.children_ids(parent_id) {
+      match tree.children_ids(&parent_id) {
         Some(children_ids) => {
           children_ids
             .iter()
@@ -780,15 +780,15 @@ mod tests {
     tree.insert(nid7, n9);
 
     assert!(tree.root_id() == nid1);
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
-    let n4 = tree.node(nid4).unwrap();
-    let n5 = tree.node(nid5).unwrap();
-    let n6 = tree.node(nid6).unwrap();
-    let n7 = tree.node(nid7).unwrap();
-    let n8 = tree.node(nid8).unwrap();
-    let n9 = tree.node(nid9).unwrap();
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
+    let n4 = tree.node(&nid4).unwrap();
+    let n5 = tree.node(&nid5).unwrap();
+    let n6 = tree.node(&nid6).unwrap();
+    let n7 = tree.node(&nid7).unwrap();
+    let n8 = tree.node(&nid8).unwrap();
+    let n9 = tree.node(&nid9).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -818,18 +818,18 @@ mod tests {
     assert_parent_child_nodes_depth!(n7, n8);
     assert_parent_child_nodes_depth!(n7, n9);
 
-    assert_eq!(tree.children_ids(nid1).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(nid2).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(nid3).unwrap().len(), 1);
-    assert_eq!(tree.children_ids(nid4).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(nid5).unwrap().len(), 1);
-    assert_eq!(tree.children_ids(nid6).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(nid7).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(nid8).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(nid9).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(&nid1).unwrap().len(), 2);
+    assert_eq!(tree.children_ids(&nid2).unwrap().len(), 2);
+    assert_eq!(tree.children_ids(&nid3).unwrap().len(), 1);
+    assert_eq!(tree.children_ids(&nid4).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(&nid5).unwrap().len(), 1);
+    assert_eq!(tree.children_ids(&nid6).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(&nid7).unwrap().len(), 2);
+    assert_eq!(tree.children_ids(&nid8).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(&nid9).unwrap().len(), 0);
 
     let contains_child = |parent_id: InodeId, child_id: InodeId| -> bool {
-      let result = match tree.children_ids(parent_id) {
+      let result = match tree.children_ids(&parent_id) {
         Some(children_ids) => {
           children_ids
             .iter()
@@ -844,7 +844,7 @@ mod tests {
         "parent: {:?}, child: {:?}, children_ids: {:?}, contains: {:?}",
         parent_id,
         child_id,
-        tree.children_ids(parent_id),
+        tree.children_ids(&parent_id),
         result
       );
       result
@@ -953,15 +953,15 @@ mod tests {
     tree.insert(nid7, n9);
 
     assert!(tree.root_id() == nid1);
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
-    let n4 = tree.node(nid4).unwrap();
-    let n5 = tree.node(nid5).unwrap();
-    let n6 = tree.node(nid6).unwrap();
-    let n7 = tree.node(nid7).unwrap();
-    let n8 = tree.node(nid8).unwrap();
-    let n9 = tree.node(nid9).unwrap();
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
+    let n4 = tree.node(&nid4).unwrap();
+    let n5 = tree.node(&nid5).unwrap();
+    let n6 = tree.node(&nid6).unwrap();
+    let n7 = tree.node(&nid7).unwrap();
+    let n8 = tree.node(&nid8).unwrap();
+    let n9 = tree.node(&nid9).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1043,12 +1043,12 @@ mod tests {
     tree.insert(nid5, n6);
 
     assert!(tree.root_id() == nid1);
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
-    let n4 = tree.node(nid4).unwrap();
-    let n5 = tree.node(nid5).unwrap();
-    let n6 = tree.node(nid6).unwrap();
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
+    let n4 = tree.node(&nid4).unwrap();
+    let n5 = tree.node(&nid5).unwrap();
+    let n6 = tree.node(&nid6).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1092,29 +1092,29 @@ mod tests {
     }
 
     assert!(tree.root_id() == nodes_ids[0]);
-    assert!(tree.children_ids(nodes_ids[0]).unwrap().len() == 4);
-    assert!(!tree.children_ids(nodes_ids[0]).unwrap().is_empty());
+    assert!(tree.children_ids(&nodes_ids[0]).unwrap().len() == 4);
+    assert!(!tree.children_ids(&nodes_ids[0]).unwrap().is_empty());
     for nid in nodes_ids.iter().skip(1) {
-      assert!(tree.children_ids(*nid).unwrap().is_empty());
+      assert!(tree.children_ids(nid).unwrap().is_empty());
     }
 
     for (i, nid) in nodes_ids.iter().enumerate() {
-      let node = tree.node(*nid).unwrap();
+      let node = tree.node(nid).unwrap();
       let expect = node_values[i];
       assert_node_value_eq!(node, expect);
     }
 
-    let first1 = tree.children_ids(nodes_ids[0]).unwrap().first();
+    let first1 = tree.children_ids(&nodes_ids[0]).unwrap().first();
     assert!(first1.is_some());
     assert_eq!(*first1.unwrap(), nodes_ids[1]);
 
-    let last1 = tree.children_ids(nodes_ids[0]).unwrap().last();
+    let last1 = tree.children_ids(&nodes_ids[0]).unwrap().last();
     assert!(last1.is_some());
     assert_eq!(*last1.unwrap(), nodes_ids[4]);
 
     for nid in nodes_ids.iter().skip(1) {
-      let first = tree.children_ids(*nid).unwrap().first();
-      let last = tree.children_ids(*nid).unwrap().last();
+      let first = tree.children_ids(nid).unwrap().first();
+      let last = tree.children_ids(nid).unwrap().last();
       assert!(first.is_none());
       assert!(last.is_none());
     }
@@ -1247,15 +1247,15 @@ mod tests {
     tree.insert(nid7, n9);
 
     assert!(nid1 == tree.root_id());
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
-    let n4 = tree.node(nid4).unwrap();
-    let n5 = tree.node(nid5).unwrap();
-    let n6 = tree.node(nid6).unwrap();
-    let n7 = tree.node(nid7).unwrap();
-    let n8 = tree.node(nid8).unwrap();
-    let n9 = tree.node(nid9).unwrap();
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
+    let n4 = tree.node(&nid4).unwrap();
+    let n5 = tree.node(&nid5).unwrap();
+    let n6 = tree.node(&nid6).unwrap();
+    let n7 = tree.node(&nid7).unwrap();
+    let n8 = tree.node(&nid8).unwrap();
+    let n9 = tree.node(&nid9).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1328,12 +1328,12 @@ mod tests {
     tree.insert(nid4, n5);
     tree.insert(nid5, n6);
 
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
-    let n4 = tree.node(nid4).unwrap();
-    let n5 = tree.node(nid5).unwrap();
-    let n6 = tree.node(nid6).unwrap();
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
+    let n4 = tree.node(&nid4).unwrap();
+    let n5 = tree.node(&nid5).unwrap();
+    let n6 = tree.node(&nid6).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1386,9 +1386,9 @@ mod tests {
     tree.insert(nid1, n2);
     tree.insert(nid2, n3);
 
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1406,17 +1406,17 @@ mod tests {
     for m in moves.iter() {
       let x = m.0;
       let y = m.1;
-      let old_shape = *tree.node(nid3).unwrap().shape();
+      let old_shape = *tree.node(&nid3).unwrap().shape();
       let old_top_left_pos: IPos = old_shape.min().into();
       let old_bottom_right_pos: IPos = old_shape.max().into();
-      let old_actual_shape = *tree.node(nid3).unwrap().actual_shape();
+      let old_actual_shape = *tree.node(&nid3).unwrap().actual_shape();
       let old_top_left_actual_pos: U16Pos = old_actual_shape.min().into();
       let old_bottom_right_actual_pos: U16Pos = old_actual_shape.max().into();
       tree.move_by(nid3, x, y);
-      let new_shape = *tree.node(nid3).unwrap().shape();
+      let new_shape = *tree.node(&nid3).unwrap().shape();
       let new_top_left_pos: IPos = new_shape.min().into();
       let new_bottom_right_pos: IPos = new_shape.max().into();
-      let new_actual_shape = *tree.node(nid3).unwrap().actual_shape();
+      let new_actual_shape = *tree.node(&nid3).unwrap().actual_shape();
       let new_top_left_actual_pos: U16Pos = new_actual_shape.min().into();
       let new_bottom_right_actual_pos: U16Pos = new_actual_shape.max().into();
       assert!(old_top_left_pos.x() + x == new_top_left_pos.x());
@@ -1425,7 +1425,7 @@ mod tests {
       assert!(old_bottom_right_pos.y() + y == new_bottom_right_pos.y());
       assert_eq!(new_shape.height(), old_shape.height());
       assert_eq!(new_shape.width(), old_shape.width());
-      let parent_actual_shape = *tree.node(nid2).unwrap().actual_shape();
+      let parent_actual_shape = *tree.node(&nid2).unwrap().actual_shape();
       let parent_top_left_actual_pos: U16Pos = parent_actual_shape.min().into();
       let parent_bottom_right_actual_pos: U16Pos = parent_actual_shape.max().into();
       assert!(old_top_left_actual_pos.x() >= parent_top_left_actual_pos.x());
@@ -1475,9 +1475,9 @@ mod tests {
     tree.insert(nid1, n2);
     tree.insert(nid2, n3);
 
-    let n1 = tree.node(nid1).unwrap();
-    let n2 = tree.node(nid2).unwrap();
-    let n3 = tree.node(nid3).unwrap();
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1495,17 +1495,17 @@ mod tests {
     for m in bounded_moves.iter() {
       let x = m.0;
       let y = m.1;
-      let old_shape = *tree.node(nid3).unwrap().shape();
+      let old_shape = *tree.node(&nid3).unwrap().shape();
       let old_top_left_pos: IPos = old_shape.min().into();
       let old_bottom_right_pos: IPos = old_shape.max().into();
-      let old_actual_shape = *tree.node(nid3).unwrap().actual_shape();
+      let old_actual_shape = *tree.node(&nid3).unwrap().actual_shape();
       let old_top_left_actual_pos: U16Pos = old_actual_shape.min().into();
       let old_bottom_right_actual_pos: U16Pos = old_actual_shape.max().into();
       tree.bounded_move_by(nid3, x, y);
-      let new_shape = *tree.node(nid3).unwrap().shape();
+      let new_shape = *tree.node(&nid3).unwrap().shape();
       let new_top_left_pos: IPos = new_shape.min().into();
       let new_bottom_right_pos: IPos = new_shape.max().into();
-      let new_actual_shape = *tree.node(nid3).unwrap().actual_shape();
+      let new_actual_shape = *tree.node(&nid3).unwrap().actual_shape();
       let new_top_left_actual_pos: U16Pos = new_actual_shape.min().into();
       let new_bottom_right_actual_pos: U16Pos = new_actual_shape.max().into();
       assert!(old_top_left_pos.x() + x == new_top_left_pos.x());
@@ -1514,7 +1514,7 @@ mod tests {
       assert!(old_bottom_right_pos.y() + y == new_bottom_right_pos.y());
       assert_eq!(new_shape.height(), old_shape.height());
       assert_eq!(new_shape.width(), old_shape.width());
-      let parent_actual_shape = *tree.node(nid2).unwrap().actual_shape();
+      let parent_actual_shape = *tree.node(&nid2).unwrap().actual_shape();
       let parent_top_left_actual_pos: U16Pos = parent_actual_shape.min().into();
       let parent_bottom_right_actual_pos: U16Pos = parent_actual_shape.max().into();
       assert!(old_top_left_actual_pos.x() >= parent_top_left_actual_pos.x());
