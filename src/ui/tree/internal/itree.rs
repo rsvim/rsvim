@@ -129,7 +129,7 @@ where
       None => { /* Do nothing */ }
     }
     ItreeIterMut {
-      tree,
+      tree: NonNull::new(tree as *mut Itree<T>).unwrap(),
       queue,
       phantom: PhantomData,
     }
