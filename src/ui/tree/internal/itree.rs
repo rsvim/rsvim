@@ -280,10 +280,13 @@ where
   /// 1. [`depth`](Inode::depth()): The child depth should be always the parent depth + 1.
   /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
   ///
-  /// Fails if:
+  /// Returns:
   ///
-  /// 1. The `parent_id` doesn't exist.
-  pub fn insert(&mut self, parent_id: &InodeId, child_node: Inode<T>) -> Option<&Inode<T>> {
+  /// 1. `None` if the `child_node` doesn't exist.
+  /// 1. The previous node on the same `child_node` ID, i.e. the inserted key.
+  ///
+  /// Panics if `parent_id` doesn't exist.
+  pub fn insert(&mut self, parent_id: &InodeId, child_node: Inode<T>) -> Option<Inode<T>> {
     // Returns `None` if `parent_id` not exists.
     self.nodes.get(parent_id)?;
 
@@ -303,7 +306,7 @@ where
     // Insert node.
     let child_id = child_node.id();
     let child_zindex = *child_node.zindex();
-    self.nodes.insert(child_id, child_node);
+    let result = self.nodes.insert(child_id, child_node);
     self.children_ids.insert(child_id, vec![]);
 
     // Map child ID => parent ID.
@@ -344,7 +347,7 @@ where
     } // unsafe
 
     // Return the inserted child
-    self.nodes.get(&child_id)
+    result
   }
 
   /// Remove a node by its ID.
