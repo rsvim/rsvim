@@ -130,10 +130,7 @@ pub fn bound_position(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
 
   IRect::new(
     (top_left_x, top_left_y),
-    (
-      top_left_x + shape.width() as isize,
-      top_left_y + shape.height() as isize,
-    ),
+    (top_left_x + shape.width(), top_left_y + shape.height()),
   )
 }
 
@@ -231,6 +228,35 @@ mod tests {
     ];
     for (i, p) in inputs.iter().enumerate() {
       let actual = bound_size(p.0, p.1);
+      let expect = expects[i];
+      info!(
+        "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
+        i, p, actual, expect
+      );
+      assert!(actual == expect);
+    }
+  }
+
+  #[test]
+  fn bound_position1() {
+    INIT.call_once(test_log_init);
+
+    let inputs: Vec<(IRect, U16Rect)> = vec![
+      (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((3, 2), (10, 10)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((3, -2), (12, 9)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((3, 1), (12, 9)), U16Rect::new((0, 0), (0, 0))),
+      (IRect::new((-1, -1), (1, 1)), U16Rect::new((0, 0), (0, 0))),
+    ];
+    let expects: Vec<IRect> = vec![
+      IRect::new((0, 0), (7, 8)),
+      IRect::new((3, 2), (10, 10)),
+      IRect::new((3, -2), (12, 8)),
+      IRect::new((3, 1), (3, 1)),
+      IRect::new((-1, -1), (-1, -1)),
+    ];
+    for (i, p) in inputs.iter().enumerate() {
+      let actual = bound_position(p.0, p.1);
       let expect = expects[i];
       info!(
         "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
