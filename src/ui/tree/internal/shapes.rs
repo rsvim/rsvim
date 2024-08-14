@@ -4,7 +4,7 @@
 
 use geo::point;
 use std::cmp::{max, min};
-// use tracing::debug;
+use tracing::debug;
 
 use crate::cart::{IPos, IRect, ISize, U16Pos, U16Rect};
 use crate::geo_point_as;
@@ -110,21 +110,39 @@ pub fn bound_position(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
 
   // X-axis
   let top_left_x = if top_left_pos.x() < 0 {
+    debug!("x-1, top_left_pos:{:?}", top_left_pos);
     0
   } else if bottom_right_pos.x() > parent_bottom_right_upos.x() as isize {
-    let x_diff = num_traits::sign::abs_sub(top_left_pos.x(), parent_bottom_right_upos.x() as isize);
-    top_left_pos.x() - x_diff
+    debug!(
+      "x-2, bottom_right_pos:{:?}, parent_bottom_right_upos:{:?}",
+      bottom_right_pos, parent_bottom_right_upos
+    );
+    let x_diff =
+      num_traits::sign::abs_sub(bottom_right_pos.x(), parent_bottom_right_upos.x() as isize);
+    let result = top_left_pos.x() - x_diff;
+    debug!("x-2, x_diff:{:?}, result:{:?}", x_diff, result);
+    result
   } else {
+    debug!("x-3, top_left_pos:{:?}", top_left_pos);
     top_left_pos.x()
   };
 
   // Y-axis
   let top_left_y = if top_left_pos.y() < 0 {
+    debug!("y-1, top_left_pos:{:?}", top_left_pos);
     0
   } else if bottom_right_pos.y() > parent_bottom_right_upos.y() as isize {
-    let y_diff = num_traits::sign::abs_sub(top_left_pos.y(), parent_bottom_right_upos.y() as isize);
-    top_left_pos.y() - y_diff
+    debug!(
+      "y-2, bottom_right_pos:{:?}, parent_bottom_right_upos:{:?}",
+      bottom_right_pos, parent_bottom_right_upos
+    );
+    let y_diff =
+      num_traits::sign::abs_sub(bottom_right_pos.y(), parent_bottom_right_upos.y() as isize);
+    let result = top_left_pos.y() - y_diff;
+    debug!("y-2, y_diff:{:?}, result:{:?}", y_diff, result);
+    result
   } else {
+    debug!("y-3, top_left_pos:{:?}", top_left_pos);
     top_left_pos.y()
   };
 
@@ -243,17 +261,20 @@ mod tests {
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
       (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
-      (IRect::new((3, 2), (10, 10)), U16Rect::new((0, 0), (10, 10))),
-      (IRect::new((3, -2), (12, 9)), U16Rect::new((0, 0), (10, 10))),
-      (IRect::new((3, 1), (12, 9)), U16Rect::new((0, 0), (0, 0))),
-      (IRect::new((-1, -1), (1, 1)), U16Rect::new((0, 0), (0, 0))),
+      (IRect::new((3, 2), (12, 11)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((7, -2), (13, 8)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((-8, 8), (-3, 16)), U16Rect::new((3, 7), (8, 15))),
+      (
+        IRect::new((-5, 19), (-3, 21)),
+        U16Rect::new((10, 15), (15, 20)),
+      ),
     ];
     let expects: Vec<IRect> = vec![
       IRect::new((0, 0), (7, 8)),
-      IRect::new((3, 2), (10, 10)),
-      IRect::new((3, -2), (12, 8)),
-      IRect::new((3, 1), (3, 1)),
-      IRect::new((-1, -1), (-1, -1)),
+      IRect::new((1, 1), (10, 10)),
+      IRect::new((4, 0), (10, 10)),
+      IRect::new((0, 0), (5, 8)),
+      IRect::new((0, 3), (2, 5)),
     ];
     for (i, p) in inputs.iter().enumerate() {
       let actual = bound_position(p.0, p.1);
