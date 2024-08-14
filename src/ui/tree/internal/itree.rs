@@ -526,7 +526,7 @@ where
                     let x_diff = num_traits::sign::abs_sub(
                       expected_top_left_pos.x(),
                       parent_bottom_right_pos.x(),
-                    );
+                    ) + 1;
                     x - x_diff
                   } else {
                     x
@@ -540,7 +540,7 @@ where
                     let y_diff = num_traits::sign::abs_sub(
                       expected_top_left_pos.y(),
                       parent_bottom_right_pos.y(),
-                    );
+                    ) + 1;
                     y - y_diff
                   } else {
                     y
