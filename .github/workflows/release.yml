@@ -81,7 +81,7 @@ jobs:
           tar: all
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
-          include: README.md,LICENSE-APACHE.txt,LICENSE-VIM.txt
+          include: README.md,CHANGELOG.md,LICENSE-APACHE.txt,LICENSE-VIM.txt
           checksum: sha256
           profile: release
       - name: After Upload
