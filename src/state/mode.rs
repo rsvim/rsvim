@@ -148,8 +148,7 @@ impl Modes {
 
   /// Get the iterator of current collection.
   ///
-  /// Note: The internal collection is [`HashSet`](std::collections::HashSet) and the iterator is
-  /// non-ordered.
+  /// Note: The internal collection is [`HashSet`] and the iterator is non-ordered.
   pub fn iter(&self) -> std::collections::hash_set::Iter<Mode> {
     self.values.iter()
   }
