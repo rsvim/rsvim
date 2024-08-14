@@ -303,13 +303,13 @@ mod tests {
     ];
     let expects: Vec<IRect> = vec![
       IRect::new((0, 0), (7, 8)),
-      IRect::new((0, 1), (10, 9)),
+      IRect::new((0, 1), (10, 10)),
       IRect::new((0, 0), (5, 5)),
       IRect::new((0, 2), (8, 10)),
       IRect::new((0, 4), (6, 8)),
     ];
     for (i, p) in inputs.iter().enumerate() {
-      let actual = bound_position(p.0, p.1);
+      let actual = bound_shape(p.0, p.1);
       let expect = expects[i];
       info!(
         "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
