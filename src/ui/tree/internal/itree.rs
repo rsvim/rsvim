@@ -99,8 +99,8 @@ where
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.queue.pop_front() {
-      // Fix `self.tree` mutable references.
       unsafe {
+        // Fix `self.tree` mutable references.
         match self.tree.as_ref().children_ids(&id) {
           Some(children_ids) => {
             for child_id in children_ids.iter() {
@@ -241,7 +241,8 @@ where
       let cnode_shape = *cnode.shape();
       let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
 
-      debug!("update attr, cnode:{:?}, depth:{:?}, actual shape:{:?}, pnode:{:?}, depth:{:?}, actual shape:{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+      debug!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+
       *cnode.depth_mut() = cnode_depth;
       *cnode.actual_shape_mut() = cnode_actual_shape;
       // debug!("after update cnode attr: {:?}", cnode_id);
@@ -288,7 +289,7 @@ where
   /// # Panics
   ///
   /// If `parent_id` doesn't exist.
-  pub fn insert(&mut self, parent_id: &InodeId, child_node: Inode<T>) -> Option<Inode<T>> {
+  pub fn insert(&mut self, parent_id: &InodeId, mut child_node: Inode<T>) -> Option<Inode<T>> {
     debug!(
       "parent_id:{:?}, node_ids:{:?}, children_ids:{:?}",
       parent_id,
@@ -308,15 +309,15 @@ where
     // Insert node.
     let child_id = child_node.id();
     let child_zindex = *child_node.zindex();
-    let result = self.nodes.insert(child_id, child_node);
+
+    // Maps the inserted child => its parent.
     self.children_ids.insert(child_id, vec![]);
 
-    // Map child ID => parent ID.
-    self.parent_ids.insert(child_id, *parent_id);
-    // Map parent ID => children IDs.
-    // It inserts child ID to the `children_ids` vector of the parent, sorted by the z-index.
+    // Maps its parent => the inserted child.
+    //
+    // It inserts child ID to the `children_ids` vector of the parent, sorted by the Z-index.
     // For the children that have the same z-index value, it inserts at the end of those children.
-    // debug!("before get higher zindex pos");
+    self.parent_ids.insert(child_id, *parent_id);
     let higher_zindex_pos: Vec<usize> = self
       .children_ids
       .get(parent_id)
@@ -329,7 +330,6 @@ where
       })
       .map(|(index, _cid)| index)
       .collect();
-    // debug!("after get higher zindex pos");
     match higher_zindex_pos.first() {
       Some(insert_pos) => {
         self
@@ -343,13 +343,34 @@ where
       }
     }
 
+    // Update the inserted child attributes:
+    // 1. Depth.
+    // 2. Actual shape.
+    let parent_node = self.nodes.get(parent_id).unwrap();
+    let parent_depth = *parent_node.depth();
+    let parent_actual_shape = *parent_node.actual_shape();
+    *child_node.depth_mut() = parent_depth + 1;
+    *child_node.actual_shape_mut() =
+      shapes::convert_to_actual_shape(*child_node.shape(), parent_actual_shape);
+
     // Update all the descendants attributes under the `child_id` node.
     unsafe {
-      self.update_descendant_attributes(child_id, *parent_id);
+      // Fix mutable references on `self.update_descendant_attributes`.
+      let mut raw_self = NonNull::new(self as *mut Itree<T>).unwrap();
+
+      match raw_self.as_ref().children_ids.get(&child_id) {
+        Some(descendant_ids) => {
+          for dnode_id in descendant_ids.iter() {
+            raw_self
+              .as_mut()
+              .update_descendant_attributes(*dnode_id, child_id);
+          }
+        }
+        None => { /* Skip */ }
+      }
     } // unsafe
 
-    // Return the inserted child
-    result
+    self.nodes.insert(child_id, child_node)
   }
 
   /// Insert a node to the tree.
@@ -494,8 +515,8 @@ where
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     match self.parent_ids.get(&id) {
       Some(parent_id) => {
-        // Fix mutable borrow on `self.base.node_mut`.
         unsafe {
+          // Fix mutable borrow on `self.base.node_mut`.
           let mut raw_nodes =
             NonNull::new(&mut self.nodes as *mut HashMap<InodeId, Inode<T>>).unwrap();
 
