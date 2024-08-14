@@ -370,6 +370,7 @@ where
       }
     } // unsafe
 
+    // Maps inserted child ID => the struct itself.
     self.nodes.insert(child_id, child_node)
   }
 
