@@ -7,7 +7,6 @@ use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
-use tracing_subscriber::filter;
 
 use crate::cart::{IPos, IRect, U16Rect};
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
@@ -1427,19 +1426,16 @@ mod tests {
 
     let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
-    let us1 = U16Rect::new((0, 0), (20, 20));
     let n1 = TestNode::new(v1, s1);
     let nid1 = n1.id();
 
     let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
-    let us2 = U16Rect::new((0, 0), (20, 20));
     let n2 = TestNode::new(v2, s2);
     let nid2 = n2.id();
 
     let v3 = TestValue::new(3);
     let s3 = IRect::new((0, 0), (1, 1));
-    let us3 = U16Rect::new((0, 0), (1, 1));
     let n3 = TestNode::new(v3, s3);
     let nid3 = n3.id();
 
@@ -1505,19 +1501,16 @@ mod tests {
 
     let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
-    let us1 = U16Rect::new((0, 0), (20, 20));
     let n1 = TestNode::new(v1, s1);
     let nid1 = n1.id();
 
     let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
-    let us2 = U16Rect::new((0, 0), (20, 20));
     let n2 = TestNode::new(v2, s2);
     let nid2 = n2.id();
 
     let v3 = TestValue::new(3);
     let s3 = IRect::new((0, 0), (1, 1));
-    let us3 = U16Rect::new((0, 0), (1, 1));
     let n3 = TestNode::new(v3, s3);
     let nid3 = n3.id();
 
