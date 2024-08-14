@@ -147,10 +147,12 @@ impl Tree {
     }
   }
 
+  /// Convert `Tree` struct to `Arc<Mutex<_>>` pointer.
   pub fn to_arc(tree: Tree) -> TreeArc {
     Arc::new(Mutex::new(tree))
   }
 
+  /// Nodes count, include the root node.
   pub fn len(&self) -> usize {
     self.base.len()
   }
@@ -162,34 +164,42 @@ impl Tree {
 
   // Node {
 
+  /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
     self.base.root_id()
   }
 
+  /// Get the parent ID by a node `id`.
   pub fn parent_id(&self, id: &TreeNodeId) -> Option<&TreeNodeId> {
     self.base.parent_id(id)
   }
 
+  /// Get the children IDs by a node `id`.
   pub fn children_ids(&self, id: &TreeNodeId) -> Option<&Vec<TreeNodeId>> {
     self.base.children_ids(id)
   }
 
+  /// Get the node struct by its `id`.
   pub fn node(&self, id: &TreeNodeId) -> Option<&TreeNode> {
     self.base.node(id)
   }
 
+  /// Get mutable node struct by its `id`.
   pub fn node_mut(&mut self, id: &TreeNodeId) -> Option<&mut TreeNode> {
     self.base.node_mut(id)
   }
 
+  /// Get iterator.
   pub fn iter(&self) -> TreeIter {
     self.base.iter()
   }
 
+  /// Get mutable iterator.
   pub fn iter_mut(&mut self) -> TreeIterMut {
     self.base.iter_mut()
   }
 
+  /// Insert a child node with its parent ID.
   pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
     match child_node.value() {
       WidgetValue::WindowContainer(w) => {
@@ -205,6 +215,7 @@ impl Tree {
     self.base.insert(parent_id, child_node)
   }
 
+  /// Remove a child node by its ID.
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
     if self.cursor_id == Some(id) {
       self.cursor_id = None;
@@ -217,12 +228,6 @@ impl Tree {
 
   /// Bounded move by `(x, y)`. When a widget hits the actual boundary of its parent, it simply
   /// stops moving.
-  ///
-  /// Note: This operation moves all the descendants together with the node.
-  ///
-  /// Fails if the widget doesn't exist.
-  ///
-  /// Returns the shape after movement.
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_by(id, x, y)
   }
