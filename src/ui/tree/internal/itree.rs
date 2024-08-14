@@ -239,7 +239,7 @@ where
       let cnode_id = cnode.id();
       let cnode_depth = pnode_depth + 1;
       let cnode_shape = *cnode.shape();
-      let cnode_actual_shape = shapes::convert_to_actual_shape(cnode_shape, pnode_actual_shape);
+      let cnode_actual_shape = shapes::make_actual_shape(cnode_shape, pnode_actual_shape);
 
       debug!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
 
@@ -351,7 +351,7 @@ where
     let parent_actual_shape = *parent_node.actual_shape();
     *child_node.depth_mut() = parent_depth + 1;
     *child_node.actual_shape_mut() =
-      shapes::convert_to_actual_shape(*child_node.shape(), parent_actual_shape);
+      shapes::make_actual_shape(*child_node.shape(), parent_actual_shape);
 
     // Update all the descendants attributes under the `child_id` node.
     unsafe {
@@ -402,32 +402,37 @@ where
     assert!(self.nodes.contains_key(parent_id));
 
     let parent_node = self.nodes.get(parent_id).unwrap();
+    let parent_actual_shape = parent_node.actual_shape();
 
     // Fix mutable references on `child_node.shape_mut()`
     unsafe {
       let raw_child_shape = NonNull::new(child_node.shape_mut() as *mut IRect).unwrap();
 
-      let parent_actual_shape = parent_node.actual_shape();
-
-      // If size is larger than parent actual size.
-      if raw_child_shape.as_ref().height() > parent_actual_shape.height() as isize
-        || raw_child_shape.as_ref().width() > parent_actual_shape.width() as isize
-      {
-        let top_left_pos: IPos = raw_child_shape.as_ref().min().into();
-        let new_shape = IRect::new(
-          top_left_pos,
-          point!(x: top_left_pos.x() + parent_actual_shape.width() as isize, y: top_left_pos.y() + parent_actual_shape.height() as isize),
-        );
-        // Truncate child shape
-        *raw_child_shape.as_ptr() = new_shape;
-      }
+      let final_height = std::cmp::max(
+        raw_child_shape.as_ref().height(),
+        parent_actual_shape.height() as isize,
+      );
+      let final_width = std::cmp::max(
+        raw_child_shape.as_ref().width(),
+        parent_actual_shape.width() as isize,
+      );
+      // Truncate child shape if size is larger than parent.
+      let child_top_left_pos: IPos = raw_child_shape.as_ref().min().into();
+      *raw_child_shape.as_ptr() = IRect::new(
+        child_top_left_pos,
+        point!(x: child_top_left_pos.x() + final_width, y: child_top_left_pos.y() + final_height),
+      );
 
       // If position is out of parent boundary.
-      if raw_child_shape.as_ref().min().x < 0
-        || raw_child_shape.as_ref().max().x >= parent_actual_shape.width() as isize
-        || raw_child_shape.as_ref().min().y < 0
-        || raw_child_shape.as_ref().max().y >= parent_actual_shape.height() as isize
-      {}
+      let child_top_left_pos: IPos = raw_child_shape.as_ref().min().into();
+      // let final_top_left_x = if child_top_left_pos.x() < 0 {
+      //
+      // }
+      // if raw_child_shape.as_ref().min().x < 0
+      //   || raw_child_shape.as_ref().max().x >= parent_actual_shape.width() as isize
+      //   || raw_child_shape.as_ref().min().y < 0
+      //   || raw_child_shape.as_ref().max().y >= parent_actual_shape.height() as isize
+      // {}
     }
 
     self.insert(parent_id, child_node)

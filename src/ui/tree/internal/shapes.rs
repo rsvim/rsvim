@@ -15,7 +15,7 @@ use crate::geo_point_as;
 /// 1. If the widget doesn't have a parent, use the terminal shape as its parent's shape.
 /// 2. If the relative/logical shape is outside of it's parent or the terminal, it will be
 ///    automatically bounded inside of it's parent or the terminal's shape.
-pub fn convert_to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
+pub fn make_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect {
   // debug!(
   //   "shape:{:?}, parent_actual_shape:{:?}",
   //   shape, parent_actual_shape
@@ -82,6 +82,69 @@ pub fn convert_to_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U1
   actual_shape
 }
 
+/// Bound (truncate) child size by its parent actual size.
+pub fn bound_size(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
+  use std::cmp::{max, min};
+
+  let top_left_pos: IPos = shape.min().into();
+
+  // Truncate shape if size is larger than parent.
+  let height = max(
+    min(shape.height(), parent_actual_shape.height() as isize),
+    0,
+  );
+  let width = max(min(shape.width(), parent_actual_shape.width() as isize), 0);
+  IRect::new(
+    top_left_pos,
+    point!(x: top_left_pos.x() + width, y: top_left_pos.y() + height),
+  )
+}
+
+/// Bound child position by its parent actual shape.
+/// When it's out of its parent, simply put it at the boundary.
+pub fn bound_position(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
+  let top_left_pos: IPos = shape.min().into();
+  let bottom_right_pos: IPos = shape.max().into();
+  // let parent_top_left_upos: U16Pos = parent_actual_shape.min().into();
+  let parent_bottom_right_upos: U16Pos = parent_actual_shape.max().into();
+
+  // X-axis
+  let top_left_x = if top_left_pos.x() < 0 {
+    0
+  } else if bottom_right_pos.x() > parent_bottom_right_upos.x() as isize {
+    let x_diff = num_traits::sign::abs_sub(top_left_pos.x(), parent_bottom_right_upos.x() as isize);
+    top_left_pos.x() - x_diff
+  } else {
+    top_left_pos.x()
+  };
+
+  // Y-axis
+  let top_left_y = if top_left_pos.y() < 0 {
+    0
+  } else if bottom_right_pos.y() > parent_bottom_right_upos.y() as isize {
+    let y_diff = num_traits::sign::abs_sub(top_left_pos.y(), parent_bottom_right_upos.y() as isize);
+    top_left_pos.y() - y_diff
+  } else {
+    top_left_pos.y()
+  };
+
+  IRect::new(
+    (top_left_x, top_left_y),
+    (
+      top_left_x + shape.width() as isize,
+      top_left_y + shape.height() as isize,
+    ),
+  )
+}
+
+/// Bound (truncate) child shape (both position and size) by its parent actual shape.
+///
+/// Note: This is a wrapper on both [`bound_size`] and [`bound_position`].
+pub fn bound_shape(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
+  let bounded = bound_size(shape, parent_actual_shape);
+  bound_position(bounded, parent_actual_shape)
+}
+
 #[cfg(test)]
 mod tests {
   use std::cmp::min;
@@ -96,7 +159,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn convert_to_actual_shapes1() {
+  fn make_actual_shapes1() {
     INIT.call_once(test_log_init);
 
     let inputs: Vec<IRect> = vec![
@@ -111,7 +174,7 @@ mod tests {
         for q in 0..10 {
           let input_actual_parent_shape = U16Rect::new((0, 0), (p as u16, q as u16));
           let expect = U16Rect::new((0, 0), (min(t.max().x, p) as u16, min(t.max().y, q) as u16));
-          let actual = convert_to_actual_shape(*t, input_actual_parent_shape);
+          let actual = make_actual_shape(*t, input_actual_parent_shape);
           info!("expect:{:?}, actual:{:?}", expect, actual);
           assert_eq!(actual, expect);
         }
@@ -120,7 +183,7 @@ mod tests {
   }
 
   #[test]
-  fn convert_to_actual_shapes2() {
+  fn make_actual_shapes2() {
     INIT.call_once(test_log_init);
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
@@ -138,13 +201,42 @@ mod tests {
       U16Rect::new((5, 3), (5, 3)),
     ];
     for (i, p) in inputs.iter().enumerate() {
-      let actual = convert_to_actual_shape(p.0, p.1);
+      let actual = make_actual_shape(p.0, p.1);
       let expect = expects[i];
       info!(
         "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
         i, p, actual, expect
       );
       assert_eq!(actual, expect);
+    }
+  }
+
+  #[test]
+  fn bound_size1() {
+    INIT.call_once(test_log_init);
+
+    let inputs: Vec<(IRect, U16Rect)> = vec![
+      (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((3, 2), (10, 10)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((3, -2), (12, 9)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((3, 1), (12, 9)), U16Rect::new((0, 0), (0, 0))),
+      (IRect::new((-1, -1), (1, 1)), U16Rect::new((0, 0), (0, 0))),
+    ];
+    let expects: Vec<IRect> = vec![
+      IRect::new((0, 0), (7, 8)),
+      IRect::new((3, 2), (10, 10)),
+      IRect::new((3, -2), (12, 8)),
+      IRect::new((3, 1), (3, 1)),
+      IRect::new((-1, -1), (-1, -1)),
+    ];
+    for (i, p) in inputs.iter().enumerate() {
+      let actual = bound_size(p.0, p.1);
+      let expect = expects[i];
+      info!(
+        "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
+        i, p, actual, expect
+      );
+      assert!(actual == expect);
     }
   }
 }
