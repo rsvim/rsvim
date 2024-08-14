@@ -122,6 +122,9 @@ pub struct Tree {
 
   // The cursor ID.
   cursor_id: Option<WidgetId>,
+
+  // The current window container ID.
+  current_window_container_id: Option<WidgetId>,
 }
 
 pub type TreeArc = Arc<Mutex<Tree>>;
