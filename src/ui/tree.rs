@@ -279,10 +279,12 @@ impl Tree {
 
   // Node }
 
+  /// Get all the window containers widget IDs.
   pub fn window_container_ids(&self) -> &BTreeSet<WidgetId> {
     &self.window_container_ids
   }
 
+  /// Get the cursor widget ID.
   pub fn cursor_id(&self) -> Option<WidgetId> {
     self.cursor_id
   }
