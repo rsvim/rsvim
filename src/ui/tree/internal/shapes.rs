@@ -105,20 +105,19 @@ pub fn bound_size(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
 pub fn bound_position(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
   let top_left_pos: IPos = shape.min().into();
   let bottom_right_pos: IPos = shape.max().into();
-  // let parent_top_left_upos: U16Pos = parent_actual_shape.min().into();
-  let parent_bottom_right_upos: U16Pos = parent_actual_shape.max().into();
 
   // X-axis
   let top_left_x = if top_left_pos.x() < 0 {
     debug!("x-1, top_left_pos:{:?}", top_left_pos);
     0
-  } else if bottom_right_pos.x() > parent_bottom_right_upos.x() as isize {
+  } else if bottom_right_pos.x() > parent_actual_shape.width() as isize {
     debug!(
-      "x-2, bottom_right_pos:{:?}, parent_bottom_right_upos:{:?}",
-      bottom_right_pos, parent_bottom_right_upos
+      "x-2, bottom_right_pos:{:?}, parent_actual_shape.width:{:?}",
+      bottom_right_pos,
+      parent_actual_shape.width()
     );
     let x_diff =
-      num_traits::sign::abs_sub(bottom_right_pos.x(), parent_bottom_right_upos.x() as isize);
+      num_traits::sign::abs_sub(bottom_right_pos.x(), parent_actual_shape.width() as isize);
     let result = top_left_pos.x() - x_diff;
     debug!("x-2, x_diff:{:?}, result:{:?}", x_diff, result);
     result
@@ -131,13 +130,14 @@ pub fn bound_position(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
   let top_left_y = if top_left_pos.y() < 0 {
     debug!("y-1, top_left_pos:{:?}", top_left_pos);
     0
-  } else if bottom_right_pos.y() > parent_bottom_right_upos.y() as isize {
+  } else if bottom_right_pos.y() > parent_actual_shape.height() as isize {
     debug!(
-      "y-2, bottom_right_pos:{:?}, parent_bottom_right_upos:{:?}",
-      bottom_right_pos, parent_bottom_right_upos
+      "y-2, bottom_right_pos:{:?}, parent_actual_shape.height:{:?}",
+      bottom_right_pos,
+      parent_actual_shape.height()
     );
     let y_diff =
-      num_traits::sign::abs_sub(bottom_right_pos.y(), parent_bottom_right_upos.y() as isize);
+      num_traits::sign::abs_sub(bottom_right_pos.y(), parent_actual_shape.height() as isize);
     let result = top_left_pos.y() - y_diff;
     debug!("y-2, y_diff:{:?}, result:{:?}", y_diff, result);
     result
