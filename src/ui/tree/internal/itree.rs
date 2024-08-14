@@ -1219,11 +1219,9 @@ mod tests {
     INIT.call_once(test_log_init);
 
     let (node_ids, mut tree) = make_tree(5);
-    let remove0 = tree.remove(node_ids[0]);
     let remove2 = tree.remove(node_ids[2]);
     let remove4 = tree.remove(node_ids[4]);
 
-    assert!(remove0.is_none());
     assert!(remove2.is_some());
     let remove2 = &remove2.unwrap();
     assert_node_value_eq!(remove2, 3);
@@ -1241,6 +1239,15 @@ mod tests {
     assert!(remove3.is_some());
     let remove3 = &remove3.unwrap();
     assert_node_value_eq!(remove3, 4);
+  }
+
+  #[test]
+  #[should_panic]
+  fn remove2() {
+    INIT.call_once(test_log_init);
+
+    let (node_ids, mut tree) = make_tree(5);
+    tree.remove(node_ids[0]);
   }
 
   #[test]
