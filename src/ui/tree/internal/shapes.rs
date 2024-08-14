@@ -286,4 +286,36 @@ mod tests {
       assert!(actual == expect);
     }
   }
+
+  #[test]
+  fn bound_shape1() {
+    INIT.call_once(test_log_init);
+
+    let inputs: Vec<(IRect, U16Rect)> = vec![
+      (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((3, 2), (17, 11)), U16Rect::new((0, 0), (10, 10))),
+      (IRect::new((7, -2), (13, 8)), U16Rect::new((0, 0), (5, 5))),
+      (IRect::new((-5, 8), (3, 16)), U16Rect::new((3, 7), (13, 17))),
+      (
+        IRect::new((-5, 17), (1, 21)),
+        U16Rect::new((10, 15), (18, 23)),
+      ),
+    ];
+    let expects: Vec<IRect> = vec![
+      IRect::new((0, 0), (7, 8)),
+      IRect::new((0, 1), (10, 9)),
+      IRect::new((0, 0), (5, 5)),
+      IRect::new((0, 2), (8, 10)),
+      IRect::new((0, 4), (6, 8)),
+    ];
+    for (i, p) in inputs.iter().enumerate() {
+      let actual = bound_position(p.0, p.1);
+      let expect = expects[i];
+      info!(
+        "i:{:?}, input:{:?}, actual:{:?}, expect:{:?}",
+        i, p, actual, expect
+      );
+      assert!(actual == expect);
+    }
+  }
 }
