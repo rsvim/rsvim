@@ -225,6 +225,26 @@ impl Tree {
     self.base.insert(parent_id, child_node)
   }
 
+  /// See [`Itree::bounded_insert`].
+  pub fn bounded_insert(
+    &mut self,
+    parent_id: &TreeNodeId,
+    child_node: TreeNode,
+  ) -> Option<TreeNode> {
+    match child_node.value() {
+      WidgetValue::WindowContainer(w) => {
+        let widget_id = w.id();
+        self.window_container_ids.insert(widget_id);
+      }
+      WidgetValue::Cursor(w) => {
+        let widget_id = w.id();
+        self.cursor_id = Some(widget_id);
+      }
+      _ => { /* Skip */ }
+    }
+    self.base.bounded_insert(parent_id, child_node)
+  }
+
   /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
     if self.cursor_id == Some(id) {

@@ -7,6 +7,7 @@ use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
+use tracing_subscriber::filter;
 
 use crate::cart::{IPos, IRect, U16Rect};
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
@@ -433,7 +434,27 @@ where
     match self.nodes.remove(&id) {
       Some(removed) => {
         // Remove child `id` => parent ID mapping.
-        self.parent_ids.remove(&id);
+        match self.parent_ids.remove(&id) {
+          Some(parent_id) => {
+            // Remove the child `id` from the children vector of its parent.
+            match self.children_ids.get_mut(&parent_id) {
+              Some(children_ids) => {
+                let filtered_indexes = children_ids
+                  .iter()
+                  .enumerate()
+                  .filter(|(_index, cid)| **cid == id)
+                  .map(|(index, _cid)| index)
+                  .collect::<Vec<usize>>();
+                if !filtered_indexes.is_empty() {
+                  let removed_index = filtered_indexes[0];
+                  children_ids.remove(removed_index);
+                }
+              }
+              None => { /* Skip */ }
+            }
+          }
+          None => { /* Skip */ }
+        }
         Some(removed)
       }
       None => None,
