@@ -492,7 +492,11 @@ where
 
         // Update all the descendants attributes under the `id` node.
         unsafe {
-          self.update_descendant_attributes(id, *self.parent_ids.get(&id).unwrap());
+          // Fix mutable references on `self.update_descendant_attributes`.
+          let mut raw_self = NonNull::new(self as *mut Itree<T>).unwrap();
+          raw_self
+            .as_mut()
+            .update_descendant_attributes(id, *self.parent_ids.get(&id).unwrap());
         }
 
         Some(next_shape)
