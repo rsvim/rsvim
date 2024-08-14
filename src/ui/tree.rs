@@ -25,94 +25,99 @@ pub mod internal;
 ///
 /// Each widget node inside the tree can contain 0 or more children nodes.
 ///
-/// Here we have several terms:
+/// # Terms
+///
 /// * Parent: The parent node.
 /// * Child: The child node.
 /// * Ancestor: Either the parent, or the parent of some ancestor of the node.
 /// * Descendant: Either the child, or the child of some descendant of the node.
 /// * Sibling: Other children nodes under the same parent.
 ///
-/// The widget tree ensures:
+/// # Guarantees
 ///
-/// 1. Parent owns all its children.
+/// ## Ownership
 ///
-///    * Children will be destroyed when their parent is.
-///    * Coordinate system are relative to their parent's top-left corner, while the absolute
-///      coordinates are based on the terminal's top-left corner.
-///    * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
-///      the size of each node can be logically infinite on the imaginary canvas.
-///    * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
-///      parent, unless they're explicitly been set.
+/// Parent owns all its children.
 ///
-/// 2. Children have higher priority than their parent to display and process input events.
+/// * Children will be destroyed when their parent is.
+/// * Coordinate system are relative to their parent's top-left corner, while the absolute
+///   coordinates are based on the terminal's top-left corner.
+/// * Children are displayed inside their parent's geometric shape, clipped by boundaries. While
+///   the size of each node can be logically infinite on the imaginary canvas.
+/// * The `visible` and `enabled` attributes of a child are implicitly inherited from it's
+///   parent, unless they're explicitly been set.
 ///
-///    * Children are always displayed on top of their parent, and has higher priority to process
-///      a user's input event when the event occurs within the shape of the child. The event will
-///      fallback to their parent if the child doesn't process it.
-///    * For children that shade each other, the one with higher z-index has higher priority to
-///      display and process the input events.
+/// ## Priority
 ///
-/// A widget has several attributes:
+/// Children have higher priority than their parent to both display and process input events.
 ///
-/// 1. Shape, i.e. position and size.
+/// * Children are always displayed on top of their parent, and has higher priority to process
+///   a user's input event when the event occurs within the shape of the child. The event will
+///   fallback to their parent if the child doesn't process it.
+/// * For children that shade each other, the one with higher z-index has higher priority to
+///   display and process the input events.
 ///
-///    A shape can be relative/logical or absolute/actual, and always rectangle. The position is by
-///    default relative to its parent top-left corner, and the size is by default logically
-///    infinite. While rendering to the terminal device, we need to calculate its absolute position
-///    and actual size.
+/// # Attributes
 ///
-///    There're two kinds of positions:
-///    * Relative: Based on it's parent's position.
-///    * Absolute: Based on the terminal device.
+/// ## Shape (position and size)
 ///
-///    There're two kinds of sizes:
-///    * Logical: An infinite size on the imaginary canvas.
-///    * Actual: An actual size bounded by it's parent's actual shape, if it doesn't have a parent,
-///      bounded by the terminal device's actual shape.
+/// A shape can be relative/logical or absolute/actual, and always rectangle. The position is by
+/// default relative to its parent top-left corner, and the size is by default logically
+/// infinite. While rendering to the terminal device, we need to calculate its absolute position
+/// and actual size.
 ///
-///    The shape boundary uses top-left open, bottom-right closed interval. For example the
-///    terminal shape is `((0,0), (10,10))`, the top-left position `(0,0)` is inclusive, i.e.
-///    inside the shape, the bottom-right position `(10,10)` is exclusive, i.e. outside the shape.
-///    The width and height of the shape is both `10`.
+/// There're two kinds of positions:
+/// * Relative: Based on it's parent's position.
+/// * Absolute: Based on the terminal device.
 ///
-///    The absolute/actual shape is calculated with a "copy-on-write" policy. Based on the fact
-///    that a widget's shape is often read and rarely modified, thus the "copy-on-write" policy to
-///    avoid too many duplicated calculations. i.e. we always calculates a widget's absolute
-///    position and actual size right after it's shape is been changed, and also caches the result.
-///    Thus we simply get the cached results when need.
+/// There're two kinds of sizes:
+/// * Logical: An infinite size on the imaginary canvas.
+/// * Actual: An actual size bounded by it's parent's actual shape, if it doesn't have a parent,
+///   bounded by the terminal device's actual shape.
 ///
-/// 2. Z-index.
+/// The shape boundary uses top-left open, bottom-right closed interval. For example the
+/// terminal shape is `((0,0), (10,10))`, the top-left position `(0,0)` is inclusive, i.e.
+/// inside the shape, the bottom-right position `(10,10)` is exclusive, i.e. outside the shape.
+/// The width and height of the shape is both `10`.
 ///
-///    The z-index arranges the display priority of the content stack when multiple children
-///    overlap on each other, a widget with higher z-index has higher priority to be displayed. For
-///    those widgets have the same z-index, the later inserted one will cover the previous inserted
-///    ones.
+/// The absolute/actual shape is calculated with a "copy-on-write" policy. Based on the fact
+/// that a widget's shape is often read and rarely modified, thus the "copy-on-write" policy to
+/// avoid too many duplicated calculations. i.e. we always calculates a widget's absolute
+/// position and actual size right after it's shape is been changed, and also caches the result.
+/// Thus we simply get the cached results when need.
 ///
-///    The z-index only works for the children under the same parent. For a child widget, it always
-///    covers/overrides its parent display.
-///    To change the visibility priority between children and parent, you need to change the
-///    relationship between them.
+/// ## Z-index
 ///
-///    For example, now we have two children under the same parent: A and B. A has 100 z-index, B
-///    has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
-///    still covers C, because it's a sibling of B.
+/// The z-index arranges the display priority of the content stack when multiple children
+/// overlap on each other, a widget with higher z-index has higher priority to be displayed. For
+/// those widgets have the same z-index, the later inserted one will cover the previous inserted
+/// ones.
 ///
-/// 3. Visible and enabled.
+/// The z-index only works for the children under the same parent. For a child widget, it always
+/// covers/overrides its parent display.
+/// To change the visibility priority between children and parent, you need to change the
+/// relationship between them.
 ///
-///    A widget can be visible or invisible. When it's visible, it handles user's input events,
-///    processes them and updates the UI contents. When it's invisible, it's just like not existed,
-///    so it doesn't handle or process any input events, the UI hides.
+/// For example, now we have two children under the same parent: A and B. A has 100 z-index, B
+/// has 10 z-index. Now B has a child: C, with z-index 1000. Even the z-index 1000 > 100 > 10, A
+/// still covers C, because it's a sibling of B.
 ///
-///    A widget can be enabled or disabled. When it's enabled, it handles input events, processes
-///    them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
-///    doesn't handle or process any input events, the UI keeps still and never changes.
+/// ## Visible and enabled
+///
+/// A widget can be visible or invisible. When it's visible, it handles user's input events,
+/// processes them and updates the UI contents. When it's invisible, it's just like not existed,
+/// so it doesn't handle or process any input events, the UI hides.
+///
+/// A widget can be enabled or disabled. When it's enabled, it handles input events, processes
+/// them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
+/// doesn't handle or process any input events, the UI keeps still and never changes.
 ///
 pub struct Tree {
   // Internal tree.
   base: Itree<WidgetValue>,
 
-  // A collection of all VIM window container IDs
-  // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)).
+  // A collection of all VIM window container
+  // ([`WindowContainer`](crate::ui::widget::container::window::WindowContainer)) IDs.
   window_container_ids: BTreeSet<WidgetId>,
 
   // The cursor ID.
@@ -147,10 +152,12 @@ impl Tree {
     }
   }
 
+  /// Convert `Tree` struct to `Arc<Mutex<_>>` pointer.
   pub fn to_arc(tree: Tree) -> TreeArc {
     Arc::new(Mutex::new(tree))
   }
 
+  /// Nodes count, include the root node.
   pub fn len(&self) -> usize {
     self.base.len()
   }
@@ -162,35 +169,48 @@ impl Tree {
 
   // Node {
 
+  /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
     self.base.root_id()
   }
 
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<&TreeNodeId> {
+  /// All node IDs collection.
+  pub fn node_ids(&self) -> Vec<TreeNodeId> {
+    self.base.node_ids()
+  }
+
+  /// Get the parent ID by a node `id`.
+  pub fn parent_id(&self, id: &TreeNodeId) -> Option<&TreeNodeId> {
     self.base.parent_id(id)
   }
 
-  pub fn children_ids(&self, id: TreeNodeId) -> Option<&Vec<TreeNodeId>> {
+  /// Get the children IDs by a node `id`.
+  pub fn children_ids(&self, id: &TreeNodeId) -> Option<&Vec<TreeNodeId>> {
     self.base.children_ids(id)
   }
 
-  pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
+  /// Get the node struct by its `id`.
+  pub fn node(&self, id: &TreeNodeId) -> Option<&TreeNode> {
     self.base.node(id)
   }
 
-  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
+  /// Get mutable node struct by its `id`.
+  pub fn node_mut(&mut self, id: &TreeNodeId) -> Option<&mut TreeNode> {
     self.base.node_mut(id)
   }
 
+  /// See [`Itree::iter`].
   pub fn iter(&self) -> TreeIter {
     self.base.iter()
   }
 
+  /// See [`Itree::iter_mut`].
   pub fn iter_mut(&mut self) -> TreeIterMut {
     self.base.iter_mut()
   }
 
-  pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<&TreeNode> {
+  /// See [`Itree::insert`].
+  pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
     match child_node.value() {
       WidgetValue::WindowContainer(w) => {
         let widget_id = w.id();
@@ -205,6 +225,27 @@ impl Tree {
     self.base.insert(parent_id, child_node)
   }
 
+  /// See [`Itree::bounded_insert`].
+  pub fn bounded_insert(
+    &mut self,
+    parent_id: &TreeNodeId,
+    child_node: TreeNode,
+  ) -> Option<TreeNode> {
+    match child_node.value() {
+      WidgetValue::WindowContainer(w) => {
+        let widget_id = w.id();
+        self.window_container_ids.insert(widget_id);
+      }
+      WidgetValue::Cursor(w) => {
+        let widget_id = w.id();
+        self.cursor_id = Some(widget_id);
+      }
+      _ => { /* Skip */ }
+    }
+    self.base.bounded_insert(parent_id, child_node)
+  }
+
+  /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
     if self.cursor_id == Some(id) {
       self.cursor_id = None;
@@ -215,40 +256,55 @@ impl Tree {
     self.base.remove(id)
   }
 
-  pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
-    self.base.move_by(id, x, y)
+  /// See [`Itree::bounded_move_by`].
+  pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+    self.base.bounded_move_by(id, x, y)
   }
 
-  pub fn move_y_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
-    self.base.move_y_by(id, diff)
+  /// Bounded move by Y-axis (or `rows`). This is simply a wrapper method on
+  /// [`bounded_move_by`](Tree::bounded_move_by).
+  pub fn bounded_move_y_by(&mut self, id: InodeId, rows: isize) -> Option<IRect> {
+    self.bounded_move_by(id, 0, rows)
   }
 
-  pub fn move_up_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
-    self.base.move_up_by(id, diff)
+  /// Bounded move up by Y-axis (or `rows`). This is simply a wrapper method on
+  /// [`bounded_move_by`](Tree::bounded_move_by).
+  pub fn bounded_move_up_by(&mut self, id: InodeId, rows: usize) -> Option<IRect> {
+    self.bounded_move_by(id, 0, -(rows as isize))
   }
 
-  pub fn move_down_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
-    self.base.move_down_by(id, diff)
+  /// Bounded move down by Y-axis (or `rows`). This is simply a wrapper method on
+  /// [`bounded_move_by`](Tree::bounded_move_by).
+  pub fn bounded_move_down_by(&mut self, id: InodeId, rows: usize) -> Option<IRect> {
+    self.bounded_move_by(id, 0, rows as isize)
   }
 
-  pub fn move_x_by(&mut self, id: InodeId, diff: isize) -> Option<IRect> {
-    self.base.move_x_by(id, diff)
+  /// Bounded move by X-axis (or `columns`). This is simply a wrapper method on
+  /// [`bounded_move_by`](Tree::bounded_move_by).
+  pub fn bounded_move_x_by(&mut self, id: InodeId, cols: isize) -> Option<IRect> {
+    self.bounded_move_by(id, cols, 0)
   }
 
-  pub fn move_left_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
-    self.base.move_left_by(id, diff)
+  /// Bounded move left by X-axis (or `columns`). This is simply a wrapper method on
+  /// [`bounded_move_by`](Tree::bounded_move_by).
+  pub fn bounded_move_left_by(&mut self, id: InodeId, cols: usize) -> Option<IRect> {
+    self.bounded_move_by(id, -(cols as isize), 0)
   }
 
-  pub fn move_right_by(&mut self, id: InodeId, diff: usize) -> Option<IRect> {
-    self.base.move_right_by(id, diff)
+  /// Bounded move right by X-axis (or `columns`). This is simply a wrapper method on
+  /// [`bounded_move_by`](Tree::bounded_move_by).
+  pub fn bounded_move_right_by(&mut self, id: InodeId, cols: usize) -> Option<IRect> {
+    self.bounded_move_by(id, cols as isize, 0)
   }
 
   // Node }
 
+  /// Get all the window containers widget IDs.
   pub fn window_container_ids(&self) -> &BTreeSet<WidgetId> {
     &self.window_container_ids
   }
 
+  /// Get the cursor widget ID.
   pub fn cursor_id(&self) -> Option<WidgetId> {
     self.cursor_id
   }
@@ -269,10 +325,12 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+  use std::sync::Once;
+
   use crate::cart::U16Size;
   use crate::test::log::init as test_log_init;
-  use std::sync::Once;
+
+  use super::*;
 
   static INIT: Once = Once::new();
 

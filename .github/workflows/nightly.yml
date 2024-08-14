@@ -34,17 +34,12 @@ jobs:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Create Changelog
-        run: |
-          cargo install git-cliff --all-features
-          git-cliff -u --verbose -o UPDATES.md
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           prerelease: true
           makeLatest: true
           name: "Nightly Build"
-          bodyFile: UPDATES.md
           removeArtifacts: true
           tag: nightly
           commit: main
@@ -92,7 +87,7 @@ jobs:
           tar: all
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
-          include: README.md,LICENSE-APACHE.txt,LICENSE-VIM.txt
+          include: README.md,CHANGELOG.md,LICENSE-APACHE.txt,LICENSE-VIM.txt
           checksum: sha256
           ref: refs/tags/nightly
           profile: nightly

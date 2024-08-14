@@ -153,8 +153,8 @@ impl Terminal {
 #[derive(Clone)]
 /// Shader command enums.
 ///
-/// All-in-one wrapper to wrap all the [`crossterm::Command`](crossterm::Command), thus helps to
-/// return the rendering updates for the terminal.
+/// All-in-one wrapper to wrap all the [`crossterm::Command`], thus helps to return the rendering
+/// updates for the terminal.
 pub enum ShaderCommand {
   CursorSetCursorStyle(crossterm::cursor::SetCursorStyle),
   CursorDisableBlinking(crossterm::cursor::DisableBlinking),
@@ -253,7 +253,7 @@ impl fmt::Debug for ShaderCommand {
 #[derive(Debug, Default, Clone)]
 /// The rendering updates on each draw, returns from terminal's [`shade`](Terminal::shade) method.
 ///
-/// It's simply a collection of [`ShaderCommand`](ShaderCommand).
+/// It's simply a collection of [`ShaderCommand`].
 pub struct Shader {
   commands: Vec<ShaderCommand>,
 }
@@ -277,7 +277,14 @@ impl Shader {
 
 #[cfg(test)]
 mod tests {
+  use std::sync::Once;
+  use tracing::info;
+
+  use crate::test::log::init as test_log_init;
+
   use super::*;
+
+  static INIT: Once = Once::new();
 
   #[test]
   fn new1() {
@@ -288,6 +295,11 @@ mod tests {
 
   #[test]
   fn shader_command_debug() {
+    INIT.call_once(test_log_init);
+    info!(
+      "ShaderCommand::TerminalEndSynchronizedUpdate: {:?}",
+      ShaderCommand::TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate)
+    );
     assert_eq!(
       format!(
         "{:?}",
