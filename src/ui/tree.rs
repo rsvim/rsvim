@@ -204,12 +204,12 @@ impl Tree {
     self.base.iter()
   }
 
-  /// Get mutable iterator.
+  /// See [`Itree::iter_mut`].
   pub fn iter_mut(&mut self) -> TreeIterMut {
     self.base.iter_mut()
   }
 
-  /// Insert a child node with its parent ID.
+  /// See [`Itree::insert`].
   pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
     match child_node.value() {
       WidgetValue::WindowContainer(w) => {
@@ -225,7 +225,7 @@ impl Tree {
     self.base.insert(parent_id, child_node)
   }
 
-  /// Remove a child node by its ID.
+  /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
     if self.cursor_id == Some(id) {
       self.cursor_id = None;
@@ -236,8 +236,7 @@ impl Tree {
     self.base.remove(id)
   }
 
-  /// Bounded move by `(x, y)`. When a widget hits the actual boundary of its parent, it simply
-  /// stops moving.
+  /// See [`Itree::bounded_move_by`].
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_by(id, x, y)
   }
