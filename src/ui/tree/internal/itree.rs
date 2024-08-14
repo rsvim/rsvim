@@ -404,36 +404,8 @@ where
     let parent_node = self.nodes.get(parent_id).unwrap();
     let parent_actual_shape = parent_node.actual_shape();
 
-    // Fix mutable references on `child_node.shape_mut()`
-    unsafe {
-      let raw_child_shape = NonNull::new(child_node.shape_mut() as *mut IRect).unwrap();
-
-      let final_height = std::cmp::max(
-        raw_child_shape.as_ref().height(),
-        parent_actual_shape.height() as isize,
-      );
-      let final_width = std::cmp::max(
-        raw_child_shape.as_ref().width(),
-        parent_actual_shape.width() as isize,
-      );
-      // Truncate child shape if size is larger than parent.
-      let child_top_left_pos: IPos = raw_child_shape.as_ref().min().into();
-      *raw_child_shape.as_ptr() = IRect::new(
-        child_top_left_pos,
-        point!(x: child_top_left_pos.x() + final_width, y: child_top_left_pos.y() + final_height),
-      );
-
-      // If position is out of parent boundary.
-      let child_top_left_pos: IPos = raw_child_shape.as_ref().min().into();
-      // let final_top_left_x = if child_top_left_pos.x() < 0 {
-      //
-      // }
-      // if raw_child_shape.as_ref().min().x < 0
-      //   || raw_child_shape.as_ref().max().x >= parent_actual_shape.width() as isize
-      //   || raw_child_shape.as_ref().min().y < 0
-      //   || raw_child_shape.as_ref().max().y >= parent_actual_shape.height() as isize
-      // {}
-    }
+    // Bound child shape
+    *child_node.shape_mut() = shapes::bound_shape(*child_node.shape(), *parent_actual_shape);
 
     self.insert(parent_id, child_node)
   }
@@ -534,50 +506,22 @@ where
             Some(parent_node) => {
               match raw_nodes.as_mut().get_mut(&id) {
                 Some(node) => {
-                  let parent_shape = *parent_node.shape();
-                  let parent_bottom_right_pos: IPos = parent_shape.max().into();
-
                   let current_shape = *node.shape();
                   let current_top_left_pos: IPos = current_shape.min().into();
-                  let next_top_left_pos: IPos =
+                  let expected_top_left_pos: IPos =
                     point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
                   let expected_shape = IRect::new(
-                    next_top_left_pos,
-                    point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
+                    expected_top_left_pos,
+                    point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
                   );
-                  // Detect whether the expected shape is out of its parent's boundary.
-                  let expected_top_left_pos: IPos = expected_shape.min().into();
-                  let expected_bottom_right_pos: IPos = expected_shape.max().into();
 
-                  // X-axis
-                  let final_x = if expected_top_left_pos.x() < 0 {
-                    let x_diff = num_traits::sign::abs(expected_top_left_pos.x());
-                    x + x_diff
-                  } else if expected_bottom_right_pos.x() > parent_bottom_right_pos.x() {
-                    let x_diff = num_traits::sign::abs_sub(
-                      expected_top_left_pos.x(),
-                      parent_bottom_right_pos.x(),
-                    ) + 1;
-                    x - x_diff
-                  } else {
-                    x
-                  };
-
-                  // X-axis
-                  let final_y = if expected_top_left_pos.y() < 0 {
-                    let y_diff = num_traits::sign::abs(expected_top_left_pos.y());
-                    y + y_diff
-                  } else if expected_bottom_right_pos.y() > parent_bottom_right_pos.y() {
-                    let y_diff = num_traits::sign::abs_sub(
-                      expected_top_left_pos.y(),
-                      parent_bottom_right_pos.y(),
-                    ) + 1;
-                    y - y_diff
-                  } else {
-                    y
-                  };
+                  let parent_actual_shape = *parent_node.actual_shape();
+                  let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
+                  let final_top_left_pos: IPos = final_shape.min().into();
 
                   // Real movement
+                  let final_x = final_top_left_pos.x() - current_top_left_pos.x();
+                  let final_y = final_top_left_pos.y() - current_top_left_pos.y();
                   self.move_by(id, final_x, final_y)
                 }
                 None => None,
