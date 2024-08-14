@@ -44,6 +44,10 @@ jobs:
           cargo msrv --linear --min 1.70.0
           echo "cargo msrv verify"
           cargo msrv verify
+      - name: Docs
+        run: |
+          echo "cargo doc --workspace"
+          cargo doc --workspace
   unit_test:
     name: Unit Test
     strategy:
