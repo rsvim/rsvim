@@ -34,17 +34,12 @@ jobs:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Create Changelog
-        run: |
-          cargo install git-cliff --all-features
-          git-cliff -u --verbose -o UPDATES.md
       - uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           prerelease: true
           makeLatest: true
           name: "Nightly Build"
-          bodyFile: UPDATES.md
           removeArtifacts: true
           tag: nightly
           commit: main
