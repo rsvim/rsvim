@@ -84,7 +84,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn test_cli() {
+  fn cli_opt1() {
     let input = vec![
       vec!["rsvim".to_string()],
       vec![
