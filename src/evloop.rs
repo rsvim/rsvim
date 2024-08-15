@@ -14,10 +14,14 @@ use parking_lot::ReentrantMutexGuard;
 use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::io::{Result as IoResult, Write};
+use std::ptr::NonNull;
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::fs;
+use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
 
+use crate::buffer::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
 use crate::geo_size_as;
@@ -31,13 +35,12 @@ use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
 };
 
-#[derive(Debug)]
 pub struct EventLoop {
   cli_opt: CliOpt,
   screen: TerminalArc,
   tree: TreeArc,
   state: StateArc,
-  task_queue: tokio_util::time::DelayQueue<tokio::task::JoinHandle<IoResult<bool>>>,
+  buffers: BuffersArc,
 }
 
 impl EventLoop {
@@ -81,13 +84,14 @@ impl EventLoop {
     tree.insert(&window_content_id, cursor_node);
 
     let state = State::new();
+    let buffers = Buffers::new();
 
     Ok(EventLoop {
       cli_opt,
       screen,
       tree: Tree::to_arc(tree),
       state: State::to_arc(state),
-      task_queue: tokio_util::time::DelayQueue::new(),
+      buffers: Buffers::to_arc(buffers),
     })
   }
 
@@ -120,6 +124,40 @@ impl EventLoop {
 
     out.flush()?;
 
+    // Has input files.
+    if !self.cli_opt.file().is_empty() {
+      unsafe {
+        // Fix `self` lifetime requires 'static in spawn.
+        let raw_self = NonNull::new(self as *mut EventLoop).unwrap();
+        for (i, input_file) in raw_self.as_ref().cli_opt.file().iter().enumerate() {
+          tokio::spawn(async move {
+            debug!("Read the {} input file: {:?}", i, input_file);
+            match fs::File::open(input_file).await {
+              Ok(mut file) => {
+                let mut buffer = Buffer::new();
+
+                let mut rbuf: Vec<u8> = vec![0_u8; std::mem::size_of::<usize>()];
+                loop {
+                  match file.read_buf(&mut rbuf).await {
+                    Ok(n) => {
+                      debug!("Read {} bytes", n);
+                    }
+                    Err(e) => {
+                      // Unexpected error
+                      println!("Failed to read file {:?} with error {:?}", input_file, e);
+                    }
+                  }
+                }
+              }
+              Err(e) => {
+                println!("Failed to open file {:?} with error {:?}", input_file, e);
+              }
+            }
+          });
+        }
+      }
+    }
+
     Ok(())
   }
 
@@ -145,14 +183,6 @@ impl EventLoop {
             break;
           },
           None => break,
-        },
-        polled_task = self.task_queue.next() => match polled_task {
-            Some(mut task) => {
-              let task_deadline = task.deadline();
-              let task_result = task.get_mut().await?;
-              debug!("polled_task deadline: {:?}", task_deadline);
-            }
-            None => {/* Skip */}
         }
       }
     }
