@@ -15,6 +15,8 @@ use crate::uuid;
 pub struct WindowContent {
   id: WidgetId,
   lines: Vec<CompactString>,
+  line_wrap: bool,
+  word_wrap: bool,
 }
 
 impl WindowContent {
@@ -22,6 +24,8 @@ impl WindowContent {
     WindowContent {
       id: uuid::next(),
       lines: vec![],
+      line_wrap: false,
+      word_wrap: false,
     }
   }
 
@@ -33,20 +37,12 @@ impl WindowContent {
     &mut self.lines
   }
 
-  pub fn set_lines(&mut self, lines: Vec<CompactString>) {
-    self.lines = lines;
-  }
-
   pub fn line(&self, index: usize) -> &CompactString {
     &self.lines[index]
   }
 
   pub fn line_mut(&mut self, index: usize) -> &mut CompactString {
     &mut self.lines[index]
-  }
-
-  pub fn set_line(&mut self, index: usize, line: CompactString) {
-    self.lines[index] = line;
   }
 }
 
@@ -61,6 +57,8 @@ impl From<Vec<CompactString>> for WindowContent {
     WindowContent {
       id: uuid::next(),
       lines,
+      line_wrap: false,
+      word_wrap: false,
     }
   }
 }
