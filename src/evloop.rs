@@ -91,7 +91,7 @@ impl EventLoop {
     })
   }
 
-  pub async fn init(&self) -> IoResult<()> {
+  pub async fn init(&mut self) -> IoResult<()> {
     let mut out = std::io::stdout();
 
     let cursor = self
@@ -193,7 +193,7 @@ impl EventLoop {
     Ok(true)
   }
 
-  async fn render(&self, shader: Shader) -> IoResult<()> {
+  async fn render(&mut self, shader: Shader) -> IoResult<()> {
     let mut out = std::io::stdout();
     for shader_command in shader.iter() {
       match shader_command {
