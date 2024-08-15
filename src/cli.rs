@@ -38,24 +38,18 @@ pub struct CliOpt {
 
 impl CliOpt {
   /// Input files.
-  pub fn file(&self) -> Vec<&str> {
-    self.file.iter().map(|f| &**f).collect()
+  pub fn file(&self) -> &Vec<String> {
+    &self.file
   }
 
   /// Commands should be execute before loading any config.
-  pub fn cmd_before(&self) -> Option<Vec<&str>> {
-    self
-      .cmd_before
-      .as_ref()
-      .map(|cb| cb.iter().map(|c| &**c).collect())
+  pub fn cmd_before(&self) -> &Option<Vec<String>> {
+    &self.cmd_before
   }
 
   /// Commands should be execute after loading any config and first line.
-  pub fn cmd_after(&self) -> Option<Vec<&str>> {
-    self
-      .cmd_after
-      .as_ref()
-      .map(|ca| ca.iter().map(|c| &**c).collect())
+  pub fn cmd_after(&self) -> &Option<Vec<String>> {
+    &self.cmd_after
   }
 
   /// Run in diff mode.
