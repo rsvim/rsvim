@@ -80,6 +80,10 @@ impl Buffers {
   pub fn to_arc(buffers: Buffers) -> BuffersArc {
     Arc::new(Mutex::new(buffers))
   }
+
+  pub fn insert(&mut self, buf: Buffer) -> Option<Buffer> {
+    self.bufs.insert(buf.id, buf)
+  }
 }
 
 impl Default for Buffers {

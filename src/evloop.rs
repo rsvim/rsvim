@@ -11,6 +11,7 @@ use futures::StreamExt;
 use geo::point;
 // use heed::types::U16;
 use parking_lot::ReentrantMutexGuard;
+use ropey::RopeBuilder;
 use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::io::{Result as IoResult, Write};
@@ -130,17 +131,30 @@ impl EventLoop {
         // Fix `self` lifetime requires 'static in spawn.
         let raw_self = NonNull::new(self as *mut EventLoop).unwrap();
         for (i, input_file) in raw_self.as_ref().cli_opt.file().iter().enumerate() {
+          let buffers = raw_self.as_ref().buffers.clone();
           tokio::spawn(async move {
             debug!("Read the {} input file: {:?}", i, input_file);
             match fs::File::open(input_file).await {
               Ok(mut file) => {
-                let mut buffer = Buffer::new();
+                let mut builder = RopeBuilder::new();
 
                 let mut rbuf: Vec<u8> = vec![0_u8; std::mem::size_of::<usize>()];
                 loop {
                   match file.read_buf(&mut rbuf).await {
                     Ok(n) => {
                       debug!("Read {} bytes", n);
+                      let rbuf1: &[u8] = &rbuf;
+                      let rbuf_str = String::from_utf8_lossy(rbuf1).into_owned();
+                      builder.append(&rbuf_str.to_owned());
+                      if n == 0 {
+                        // Finish reading
+                        let buffer = Buffer::from(builder);
+                        buffers
+                          .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                          .unwrap()
+                          .insert(buffer);
+                        break;
+                      }
                     }
                     Err(e) => {
                       // Unexpected error
