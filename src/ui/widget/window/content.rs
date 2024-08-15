@@ -3,6 +3,7 @@
 #![allow(unused_imports, dead_code)]
 
 use compact_str::CompactString;
+use std::convert::From;
 
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalArc;
@@ -52,6 +53,15 @@ impl WindowContent {
 impl Default for WindowContent {
   fn default() -> Self {
     WindowContent::new()
+  }
+}
+
+impl From<Vec<CompactString>> for WindowContent {
+  fn from(lines: Vec<CompactString>) -> Self {
+    WindowContent {
+      id: uuid::next(),
+      lines,
+    }
   }
 }
 
