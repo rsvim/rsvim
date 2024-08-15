@@ -37,7 +37,7 @@ pub struct EventLoop {
   screen: TerminalArc,
   tree: TreeArc,
   state: StateArc,
-  task_queue: tokio_util::time::DelayQueue<()>,
+  task_queue: tokio_util::time::DelayQueue<tokio::task::JoinHandle<IoResult<bool>>>,
 }
 
 impl EventLoop {
@@ -145,6 +145,14 @@ impl EventLoop {
             break;
           },
           None => break,
+        },
+        polled_task = self.task_queue.next() => match polled_task {
+            Some(mut task) => {
+              let task_deadline = task.deadline();
+              let task_result = task.get_mut().await?;
+              debug!("polled_task deadline: {:?}", task_deadline);
+            }
+            None => {/* Skip */}
         }
       }
     }
