@@ -47,7 +47,7 @@ pub async fn shutdown() -> IoResult<()> {
   Ok(())
 }
 
-#[tokio::main]
+#[tokio::main(flavor = "multi_thread")]
 async fn main() -> IoResult<()> {
   log::init();
 
