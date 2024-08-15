@@ -36,6 +36,7 @@ use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
 };
 
+#[derive(Clone)]
 pub struct EventLoop {
   cli_opt: CliOpt,
   screen: TerminalArc,
