@@ -44,6 +44,26 @@ impl WindowContent {
   pub fn line_mut(&mut self, index: usize) -> &mut CompactString {
     &mut self.lines[index]
   }
+
+  pub fn line_wrap(&self) -> bool {
+    self.line_wrap
+  }
+
+  pub fn set_line_wrap(&mut self, line_wrap: bool) -> bool {
+    let old_value = self.line_wrap;
+    self.line_wrap = line_wrap;
+    old_value
+  }
+
+  pub fn word_wrap(&self) -> bool {
+    self.word_wrap
+  }
+
+  pub fn set_word_wrap(&mut self, word_wrap: bool) -> bool {
+    let old_value = self.word_wrap;
+    self.word_wrap = word_wrap;
+    old_value
+  }
 }
 
 impl Default for WindowContent {
