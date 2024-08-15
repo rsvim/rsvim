@@ -80,8 +80,6 @@ impl EventLoop {
     let cursor_node = TreeNode::new(WidgetValue::Cursor(cursor), cursor_shape);
     tree.insert(&window_content_id, cursor_node);
 
-    debug!("new, built widget tree");
-
     let state = State::new();
 
     Ok(EventLoop {
@@ -96,7 +94,6 @@ impl EventLoop {
   pub async fn init(&self) -> IoResult<()> {
     let mut out = std::io::stdout();
 
-    debug!("init, draw cursor");
     let cursor = self
       .screen
       .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
@@ -122,7 +119,6 @@ impl EventLoop {
     )?;
 
     out.flush()?;
-    debug!("init, draw cursor - done");
 
     Ok(())
   }
@@ -133,7 +129,7 @@ impl EventLoop {
       tokio::select! {
         polled_event = reader.next() => match polled_event {
           Some(Ok(event)) => {
-            debug!("run, polled event: {:?}", event);
+            debug!("polled_event ok: {:?}", event);
             match self.accept(event).await {
                 Ok(next_loop) => {
                     if !next_loop {
@@ -144,7 +140,7 @@ impl EventLoop {
             }
           },
           Some(Err(e)) => {
-            debug!("run, error: {:?}", e);
+            debug!("polled_event error: {:?}", e);
             error!("Error: {:?}\r", e);
             break;
           },
@@ -156,7 +152,7 @@ impl EventLoop {
   }
 
   pub async fn accept(&mut self, event: Event) -> IoResult<bool> {
-    debug!("Event::{:?}", event);
+    debug!("event: {:?}", event);
     // println!("Event:{:?}", event);
 
     let state_response = {
