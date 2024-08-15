@@ -153,6 +153,7 @@ impl EventLoop {
                           .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                           .unwrap()
                           .insert(buffer);
+                        println!("Read file {:?} into buffer", input_file);
                         break;
                       }
                     }
