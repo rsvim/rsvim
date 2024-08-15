@@ -151,6 +151,7 @@ impl Tree {
       base: Itree::new(root_node),
       window_container_ids: BTreeSet::new(),
       cursor_id: None,
+      current_window_container_id: None,
     }
   }
 

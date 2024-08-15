@@ -1,14 +1,16 @@
 //! The VIM editor reinvented in Rust+Typescript.
 
+#![allow(unused_imports, dead_code)]
+
 use clap::Parser;
-use rsvim::{cli, log};
-// use heed::types as heed_types;
-// use heed::{byteorder, Database, EnvOpenOptions};
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{execute, terminal};
+use heed::types as heed_types;
+use heed::{byteorder, Database, EnvOpenOptions};
 use rsvim::evloop::EventLoop;
+use rsvim::{cli, log};
 use std::io::Result as IoResult;
 use tracing::debug;
 
@@ -49,8 +51,8 @@ pub async fn shutdown() -> IoResult<()> {
 async fn main() -> IoResult<()> {
   log::init();
 
-  let cli = cli::Cli::parse();
-  debug!("cli: {:?}", cli);
+  let cli_opt = cli::CliOpt::parse();
+  debug!("cli_opt: {:?}", cli_opt);
 
   // let dir = tempfile::tempdir().unwrap();
   // debug!("tempdir:{:?}", dir);
@@ -85,7 +87,7 @@ async fn main() -> IoResult<()> {
   );
 
   // Event loop
-  let mut event_loop = EventLoop::new().await?;
+  let mut event_loop = EventLoop::new(cli_opt).await?;
   event_loop.init().await?;
   event_loop.run().await?;
 

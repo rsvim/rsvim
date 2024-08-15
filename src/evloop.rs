@@ -9,7 +9,7 @@ use crossterm::event::{
 use crossterm::{self, queue, terminal};
 use futures::StreamExt;
 use geo::point;
-use heed::types::U16;
+// use heed::types::U16;
 use parking_lot::ReentrantMutexGuard;
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -19,6 +19,7 @@ use std::time::Duration;
 use tracing::{debug, error};
 
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
+use crate::cli::CliOpt;
 use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
@@ -30,15 +31,17 @@ use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct EventLoop {
+  cli_opt: CliOpt,
   screen: TerminalArc,
   tree: TreeArc,
   state: StateArc,
+  task_queue: tokio_util::time::DelayQueue<()>,
 }
 
 impl EventLoop {
-  pub async fn new() -> IoResult<Self> {
+  pub async fn new(cli_opt: CliOpt) -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
     let screen_size = U16Size::new(cols, rows);
     let screen = Terminal::new(screen_size);
@@ -82,9 +85,11 @@ impl EventLoop {
     let state = State::new();
 
     Ok(EventLoop {
+      cli_opt,
       screen,
       tree: Tree::to_arc(tree),
       state: State::to_arc(state),
+      task_queue: tokio_util::time::DelayQueue::new(),
     })
   }
 

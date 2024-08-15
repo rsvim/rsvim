@@ -5,7 +5,7 @@ use clap::Parser;
 #[derive(Parser, Debug)]
 #[command(version, about, long_about=None)]
 /// Command line options.
-pub struct Cli {
+pub struct CliOpt {
   #[arg(help = "Edit file(s)")]
   file: Vec<String>,
 
@@ -36,7 +36,7 @@ pub struct Cli {
   debug: bool,
 }
 
-impl Cli {
+impl CliOpt {
   /// Input files.
   pub fn file(&self) -> Vec<&str> {
     self.file.iter().map(|f| &**f).collect()
@@ -113,7 +113,7 @@ mod tests {
       ],
     ] as Vec<Vec<String>>;
     let expect = vec![
-      Cli {
+      CliOpt {
         file: vec![],
         cmd_before: None,
         cmd_after: None,
@@ -122,7 +122,7 @@ mod tests {
         verbose: false,
         debug: false,
       },
-      Cli {
+      CliOpt {
         file: vec![],
         cmd_before: None,
         cmd_after: None,
@@ -131,7 +131,7 @@ mod tests {
         verbose: false,
         debug: true,
       },
-      Cli {
+      CliOpt {
         file: vec!["README.md".to_string()],
         cmd_before: None,
         cmd_after: None,
@@ -140,7 +140,7 @@ mod tests {
         verbose: false,
         debug: false,
       },
-      Cli {
+      CliOpt {
         file: vec!["README.md".to_string(), "LICENSE".to_string()],
         cmd_before: None,
         cmd_after: None,
@@ -149,7 +149,7 @@ mod tests {
         verbose: false,
         debug: false,
       },
-      Cli {
+      CliOpt {
         file: vec!["README.md".to_string(), "LICENSE".to_string()],
         cmd_before: Some(vec!["echo 1".to_string()]),
         cmd_after: Some(vec!["quit".to_string()]),
@@ -163,7 +163,7 @@ mod tests {
     assert_eq!(input.len(), expect.len());
     let n = input.len();
     for i in 0..n {
-      let actual = Cli::parse_from(&input[i]);
+      let actual = CliOpt::parse_from(&input[i]);
       // println!("actual-{i}: {:?}", actual);
       // println!("expect-{i}: {:?}", expect[i]);
       assert_eq!(actual.file, expect[i].file);
