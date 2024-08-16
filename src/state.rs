@@ -2,12 +2,14 @@
 
 use crossterm::event::Event;
 use parking_lot::Mutex;
+use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
 use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
+use crate::ui::widget::WidgetId;
 
 pub mod fsm;
 pub mod mode;
@@ -19,6 +21,14 @@ pub struct State {
 
   // Editing mode.
   mode: Mode,
+
+  // [`cursor`](crate::ui::widget::cursor::Cursor) widget ID.
+  cursor_widget: Option<WidgetId>,
+  // Current [`window`](crate::ui::widget::window::Window) widget ID that the cursor widget belongs
+  // to.
+  current_window_widget: Option<WidgetId>,
+  // All [`window`](crate::ui::widget::window::Window) widget IDs.
+  window_widgets: BTreeSet<WidgetId>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -45,6 +55,9 @@ impl State {
       stateful: StatefulValue::default(),
       last_stateful: StatefulValue::default(),
       mode: Mode::Normal,
+      cursor_widget: None,
+      current_window_widget: None,
+      window_widgets: BTreeSet::new(),
     }
   }
 
@@ -76,6 +89,26 @@ impl State {
     let last_mod = self.mode;
     self.mode = mode;
     last_mod
+  }
+
+  pub fn cursor_widget(&self) -> &Option<WidgetId> {
+    &self.cursor_widget
+  }
+
+  pub fn set_cursor_widget(&mut self, widget_id: Option<WidgetId>) -> Option<WidgetId> {
+    let old_widget = self.cursor_widget;
+    self.cursor_widget = widget_id;
+    old_widget
+  }
+
+  pub fn current_window_widget(&self) -> &Option<WidgetId> {
+    &self.current_window_widget
+  }
+
+  pub fn set_current_window_widget(&mut self, window_widget: Option<WidgetId>) -> Option<WidgetId> {
+    let old_widget = self.cursor_widget;
+    self.cursor_widget = window_widget;
+    old_widget
   }
 }
 

@@ -113,17 +113,8 @@ pub mod internal;
 /// doesn't handle or process any input events, the UI keeps still and never changes.
 ///
 pub struct Tree {
-  // Internal tree.
+  // Internal implementation.
   base: Itree<WidgetValue>,
-
-  // A collection of all window container IDs.
-  window_container_ids: BTreeSet<WidgetId>,
-
-  // The cursor ID.
-  cursor_id: Option<WidgetId>,
-
-  // The current window container ID.
-  current_window_container_id: Option<WidgetId>,
 }
 
 pub type TreeArc = Arc<Mutex<Tree>>;
@@ -149,9 +140,6 @@ impl Tree {
     let root_node = TreeNode::new(WidgetValue::RootContainer(root_container), shape);
     Tree {
       base: Itree::new(root_node),
-      window_container_ids: BTreeSet::new(),
-      cursor_id: None,
-      current_window_container_id: None,
     }
   }
 
@@ -214,17 +202,6 @@ impl Tree {
 
   /// See [`Itree::insert`].
   pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
-    match child_node.value() {
-      WidgetValue::WindowContainer(w) => {
-        let widget_id = w.id();
-        self.window_container_ids.insert(widget_id);
-      }
-      WidgetValue::Cursor(w) => {
-        let widget_id = w.id();
-        self.cursor_id = Some(widget_id);
-      }
-      _ => { /* Skip */ }
-    }
     self.base.insert(parent_id, child_node)
   }
 
@@ -234,28 +211,11 @@ impl Tree {
     parent_id: &TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
-    match child_node.value() {
-      WidgetValue::WindowContainer(w) => {
-        let widget_id = w.id();
-        self.window_container_ids.insert(widget_id);
-      }
-      WidgetValue::Cursor(w) => {
-        let widget_id = w.id();
-        self.cursor_id = Some(widget_id);
-      }
-      _ => { /* Skip */ }
-    }
     self.base.bounded_insert(parent_id, child_node)
   }
 
   /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
-    if self.cursor_id == Some(id) {
-      self.cursor_id = None;
-    }
-    if self.window_container_ids.contains(&id) {
-      self.window_container_ids.remove(&id);
-    }
     self.base.remove(id)
   }
 
@@ -302,16 +262,6 @@ impl Tree {
 
   // Node }
 
-  /// Get all the window containers widget IDs.
-  pub fn window_container_ids(&self) -> &BTreeSet<WidgetId> {
-    &self.window_container_ids
-  }
-
-  /// Get the cursor widget ID.
-  pub fn cursor_id(&self) -> Option<WidgetId> {
-    self.cursor_id
-  }
-
   // Draw {
 
   /// Draw the widget tree to terminal device.
@@ -343,7 +293,6 @@ mod tests {
 
     let terminal_size = U16Size::new(18, 10);
     let tree = Tree::new(terminal_size);
-    assert!(tree.window_container_ids().is_empty());
     assert!(tree.is_empty());
     assert!(tree.len() == 1);
   }
