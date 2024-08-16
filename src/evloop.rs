@@ -156,14 +156,17 @@ impl EventLoop {
                       debug!("Read {} bytes", n);
                       let rbuf1: &[u8] = &rbuf;
                       let rbuf_str: String = String::from_utf8_lossy(rbuf1).into_owned();
+
+                      // Lock state
+                      let mut state = state
+                        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                        .unwrap();
+
                       builder.append(&rbuf_str.to_owned());
                       if n == 0 {
                         // Finish reading
                         let buffer = Buffer::from(builder);
                         let buffer_id = buffer.id();
-                        let mut state = state
-                          .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                          .unwrap();
 
                         // Setup buffers.
                         state.buffers_mut().insert(buffer_id, buffer);
