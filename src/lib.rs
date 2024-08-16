@@ -9,6 +9,7 @@ pub mod glovar;
 pub mod jsengine;
 pub mod log;
 pub mod state;
+pub mod task;
 pub mod test;
 pub mod ui;
 pub mod uuid;
