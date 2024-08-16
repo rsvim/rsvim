@@ -140,7 +140,7 @@ impl EventLoop {
         };
 
         tokio::spawn(async move {
-          let mut current_window_updated = false;
+          let mut _current_window_updated = false;
 
           for (i, one_file) in cli_opt.file().iter().enumerate() {
             debug!("Read the {} input file: {:?}", i, one_file);
