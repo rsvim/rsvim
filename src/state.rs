@@ -115,8 +115,16 @@ impl State {
     &self.window_widgets
   }
 
-  pub fn window_widgets_mut(&mut self) -> &mut BTreeSet<WidgetId> {
-    &mut self.window_widgets
+  pub fn insert_window_widget(&mut self, window_widget: WidgetId) -> bool {
+    self.window_widgets.insert(window_widget)
+  }
+
+  pub fn remove_window_widget(&mut self, window_widget: &WidgetId) -> bool {
+    self.window_widgets.remove(window_widget)
+  }
+
+  pub fn contains_window_widget(&mut self, window_widget: &WidgetId) -> bool {
+    self.window_widgets.contains(window_widget)
   }
 }
 

@@ -68,6 +68,7 @@ impl EventLoop {
     );
     tree.insert(&tree.root_id(), window_container_node);
     state.set_current_window_widget(Some(window_container_id));
+    state.insert_window_widget(window_container_id);
     debug!("new, insert window container: {:?}", window_container_id);
 
     let window_content = WindowContent::new();
