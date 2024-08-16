@@ -110,6 +110,14 @@ impl State {
     self.cursor_widget = window_widget;
     old_widget
   }
+
+  pub fn window_widgets(&self) -> &BTreeSet<WidgetId> {
+    &self.window_widgets
+  }
+
+  pub fn window_widgets_mut(&mut self) -> &mut BTreeSet<WidgetId> {
+    &mut self.window_widgets
+  }
 }
 
 impl Default for State {

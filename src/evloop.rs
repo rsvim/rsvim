@@ -52,6 +52,8 @@ impl EventLoop {
     let screen = Terminal::new(screen_size);
     let screen = Terminal::to_arc(screen);
     let mut tree = Tree::new(screen_size);
+    let mut state = State::new();
+    let buffers = Buffers::new();
     debug!("new, screen size: {:?}", screen_size);
 
     let window_container = WindowContainer::new();
@@ -65,6 +67,7 @@ impl EventLoop {
       window_container_shape,
     );
     tree.insert(&tree.root_id(), window_container_node);
+    state.set_current_window_widget(Some(window_container_id));
     debug!("new, insert window container: {:?}", window_container_id);
 
     let window_content = WindowContent::new();
@@ -81,12 +84,11 @@ impl EventLoop {
     debug!("new, insert window content: {:?}", window_content_id);
 
     let cursor = Cursor::new();
+    let cursor_id = cursor.id();
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor_node = TreeNode::new(WidgetValue::Cursor(cursor), cursor_shape);
     tree.insert(&window_content_id, cursor_node);
-
-    let state = State::new();
-    let buffers = Buffers::new();
+    state.set_cursor_widget(Some(cursor_id));
 
     Ok(EventLoop {
       cli_opt,
