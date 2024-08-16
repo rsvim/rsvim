@@ -133,21 +133,29 @@ impl EventLoop {
         let raw_self = NonNull::new(self as *mut EventLoop).unwrap();
         let cli_opt = raw_self.as_ref().cli_opt.clone();
         let state = raw_self.as_ref().state.clone();
+        static RBUF_SIZE: usize = if std::mem::size_of::<usize>() < 8 {
+          4096
+        } else {
+          8192
+        };
 
         tokio::spawn(async move {
+          let mut current_window_updated = false;
+
           for (i, one_file) in cli_opt.file().iter().enumerate() {
             debug!("Read the {} input file: {:?}", i, one_file);
             match fs::File::open(one_file).await {
               Ok(mut file) => {
                 let mut builder = RopeBuilder::new();
 
-                let mut rbuf: Vec<u8> = vec![0_u8; std::mem::size_of::<usize>()];
+                let mut rbuf: Vec<u8> = vec![0_u8; RBUF_SIZE];
+                debug!("Read buffer bytes size: {}", rbuf.len());
                 loop {
                   match file.read_buf(&mut rbuf).await {
                     Ok(n) => {
                       debug!("Read {} bytes", n);
                       let rbuf1: &[u8] = &rbuf;
-                      let rbuf_str = String::from_utf8_lossy(rbuf1).into_owned();
+                      let rbuf_str: String = String::from_utf8_lossy(rbuf1).into_owned();
                       builder.append(&rbuf_str.to_owned());
                       if n == 0 {
                         // Finish reading
@@ -156,10 +164,13 @@ impl EventLoop {
                         let mut state = state
                           .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                           .unwrap();
+
+                        // Setup buffers.
                         state.buffers_mut().insert(buffer_id, buffer);
                         if state.current_buffer().is_none() {
                           state.set_current_buffer(Some(buffer_id));
                         }
+
                         // println!("Read file {:?} into buffer", input_file);
                         break;
                       }
