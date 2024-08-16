@@ -7,13 +7,13 @@ use crate::ui::term::TerminalArc;
 use crate::ui::tree::internal::inode::{InodeId, InodeValue};
 
 // Re-export
-pub use crate::ui::widget::container::root::RootContainer;
-pub use crate::ui::widget::container::window::WindowContainer;
 pub use crate::ui::widget::cursor::Cursor;
+pub use crate::ui::widget::root::RootContainer;
 pub use crate::ui::widget::window::content::WindowContent;
+pub use crate::ui::widget::window::WindowContainer;
 
-pub mod container;
 pub mod cursor;
+pub mod root;
 pub mod window;
 
 pub type WidgetId = usize;

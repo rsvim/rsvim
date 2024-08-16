@@ -9,16 +9,22 @@ use crossterm::event::{
 use crossterm::{self, queue, terminal};
 use futures::StreamExt;
 use geo::point;
-use heed::types::U16;
+// use heed::types::U16;
 use parking_lot::ReentrantMutexGuard;
+use ropey::RopeBuilder;
 use std::borrow::Borrow;
 use std::cell::RefCell;
 use std::io::{Result as IoResult, Write};
+use std::ptr::NonNull;
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::fs;
+use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
 
+use crate::buffer::Buffer;
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
+use crate::cli::CliOpt;
 use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
@@ -30,20 +36,22 @@ use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
 };
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct EventLoop {
-  screen: TerminalArc,
-  tree: TreeArc,
-  state: StateArc,
+  pub cli_opt: CliOpt,
+  pub screen: TerminalArc,
+  pub tree: TreeArc,
+  pub state: StateArc,
 }
 
 impl EventLoop {
-  pub async fn new() -> IoResult<Self> {
+  pub async fn new(cli_opt: CliOpt) -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
     let screen_size = U16Size::new(cols, rows);
     let screen = Terminal::new(screen_size);
     let screen = Terminal::to_arc(screen);
     let mut tree = Tree::new(screen_size);
+    let mut state = State::new();
     debug!("new, screen size: {:?}", screen_size);
 
     let window_container = WindowContainer::new();
@@ -57,6 +65,8 @@ impl EventLoop {
       window_container_shape,
     );
     tree.insert(&tree.root_id(), window_container_node);
+    state.set_current_window_widget(Some(window_container_id));
+    state.window_widgets_mut().insert(window_container_id);
     debug!("new, insert window container: {:?}", window_container_id);
 
     let window_content = WindowContent::new();
@@ -73,25 +83,23 @@ impl EventLoop {
     debug!("new, insert window content: {:?}", window_content_id);
 
     let cursor = Cursor::new();
+    let cursor_id = cursor.id();
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor_node = TreeNode::new(WidgetValue::Cursor(cursor), cursor_shape);
     tree.insert(&window_content_id, cursor_node);
-
-    debug!("new, built widget tree");
-
-    let state = State::new();
+    state.set_cursor_widget(Some(cursor_id));
 
     Ok(EventLoop {
+      cli_opt,
       screen,
       tree: Tree::to_arc(tree),
       state: State::to_arc(state),
     })
   }
 
-  pub async fn init(&self) -> IoResult<()> {
+  pub async fn init(&mut self) -> IoResult<()> {
     let mut out = std::io::stdout();
 
-    debug!("init, draw cursor");
     let cursor = self
       .screen
       .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
@@ -117,7 +125,74 @@ impl EventLoop {
     )?;
 
     out.flush()?;
-    debug!("init, draw cursor - done");
+
+    // Has input files.
+    if !self.cli_opt.file().is_empty() {
+      unsafe {
+        // Fix `self` lifetime requires 'static in spawn.
+        let raw_self = NonNull::new(self as *mut EventLoop).unwrap();
+        let cli_opt = raw_self.as_ref().cli_opt.clone();
+        let state = raw_self.as_ref().state.clone();
+        static RBUF_SIZE: usize = if std::mem::size_of::<usize>() < 8 {
+          4096
+        } else {
+          8192
+        };
+
+        tokio::spawn(async move {
+          let mut _current_window_updated = false;
+
+          for (i, one_file) in cli_opt.file().iter().enumerate() {
+            debug!("Read the {} input file: {:?}", i, one_file);
+            match fs::File::open(one_file).await {
+              Ok(mut file) => {
+                let mut builder = RopeBuilder::new();
+
+                let mut rbuf: Vec<u8> = vec![0_u8; RBUF_SIZE];
+                debug!("Read buffer bytes size: {}", rbuf.len());
+                loop {
+                  match file.read_buf(&mut rbuf).await {
+                    Ok(n) => {
+                      debug!("Read {} bytes", n);
+                      let rbuf1: &[u8] = &rbuf;
+                      let rbuf_str: String = String::from_utf8_lossy(rbuf1).into_owned();
+
+                      // Lock state
+                      let mut state = state
+                        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                        .unwrap();
+
+                      builder.append(&rbuf_str.to_owned());
+                      if n == 0 {
+                        // Finish reading
+                        let buffer = Buffer::from(builder);
+                        let buffer_id = buffer.id();
+
+                        // Setup buffers.
+                        state.buffers_mut().insert(buffer_id, buffer);
+                        if state.current_buffer().is_none() {
+                          state.set_current_buffer(Some(buffer_id));
+                        }
+
+                        // println!("Read file {:?} into buffer", input_file);
+                        break;
+                      }
+                    }
+                    Err(e) => {
+                      // Unexpected error
+                      println!("Failed to read file {:?} with error {:?}", one_file, e);
+                    }
+                  }
+                }
+              }
+              Err(e) => {
+                println!("Failed to open file {:?} with error {:?}", one_file, e);
+              }
+            }
+          }
+        });
+      }
+    }
 
     Ok(())
   }
@@ -128,7 +203,7 @@ impl EventLoop {
       tokio::select! {
         polled_event = reader.next() => match polled_event {
           Some(Ok(event)) => {
-            debug!("run, polled event: {:?}", event);
+            debug!("polled_event ok: {:?}", event);
             match self.accept(event).await {
                 Ok(next_loop) => {
                     if !next_loop {
@@ -139,7 +214,7 @@ impl EventLoop {
             }
           },
           Some(Err(e)) => {
-            debug!("run, error: {:?}", e);
+            debug!("polled_event error: {:?}", e);
             error!("Error: {:?}\r", e);
             break;
           },
@@ -151,7 +226,7 @@ impl EventLoop {
   }
 
   pub async fn accept(&mut self, event: Event) -> IoResult<bool> {
-    debug!("Event::{:?}", event);
+    debug!("event: {:?}", event);
     // println!("Event:{:?}", event);
 
     let state_response = {
@@ -192,7 +267,7 @@ impl EventLoop {
     Ok(true)
   }
 
-  async fn render(&self, shader: Shader) -> IoResult<()> {
+  async fn render(&mut self, shader: Shader) -> IoResult<()> {
     let mut out = std::io::stdout();
     for shader_command in shader.iter() {
       match shader_command {

@@ -106,8 +106,10 @@ impl Frame {
 
   /// Set cursor.
   pub fn set_cursor(&mut self, cursor: Cursor) {
-    self.cursor = cursor;
-    self.dirty_cursor = true;
+    if self.cursor != cursor {
+      self.cursor = cursor;
+      self.dirty_cursor = true;
+    }
   }
 
   /// Whether cursor is dirty.

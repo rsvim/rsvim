@@ -3,6 +3,7 @@
 #![allow(unused_imports, dead_code)]
 
 use compact_str::CompactString;
+use std::convert::From;
 
 use crate::cart::U16Rect;
 use crate::ui::term::TerminalArc;
@@ -14,6 +15,8 @@ use crate::uuid;
 pub struct WindowContent {
   id: WidgetId,
   lines: Vec<CompactString>,
+  line_wrap: bool,
+  word_wrap: bool,
 }
 
 impl WindowContent {
@@ -21,6 +24,8 @@ impl WindowContent {
     WindowContent {
       id: uuid::next(),
       lines: vec![],
+      line_wrap: false,
+      word_wrap: false,
     }
   }
 
@@ -32,10 +37,6 @@ impl WindowContent {
     &mut self.lines
   }
 
-  pub fn set_lines(&mut self, lines: Vec<CompactString>) {
-    self.lines = lines;
-  }
-
   pub fn line(&self, index: usize) -> &CompactString {
     &self.lines[index]
   }
@@ -44,14 +45,41 @@ impl WindowContent {
     &mut self.lines[index]
   }
 
-  pub fn set_line(&mut self, index: usize, line: CompactString) {
-    self.lines[index] = line;
+  pub fn line_wrap(&self) -> bool {
+    self.line_wrap
+  }
+
+  pub fn set_line_wrap(&mut self, line_wrap: bool) -> bool {
+    let old_value = self.line_wrap;
+    self.line_wrap = line_wrap;
+    old_value
+  }
+
+  pub fn word_wrap(&self) -> bool {
+    self.word_wrap
+  }
+
+  pub fn set_word_wrap(&mut self, word_wrap: bool) -> bool {
+    let old_value = self.word_wrap;
+    self.word_wrap = word_wrap;
+    old_value
   }
 }
 
 impl Default for WindowContent {
   fn default() -> Self {
     WindowContent::new()
+  }
+}
+
+impl From<Vec<CompactString>> for WindowContent {
+  fn from(lines: Vec<CompactString>) -> Self {
+    WindowContent {
+      id: uuid::next(),
+      lines,
+      line_wrap: false,
+      word_wrap: false,
+    }
   }
 }
 

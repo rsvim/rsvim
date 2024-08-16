@@ -1219,17 +1219,23 @@ mod tests {
     INIT.call_once(test_log_init);
 
     let (node_ids, mut tree) = make_tree(5);
-    let remove0 = tree.remove(node_ids[0]);
     let remove2 = tree.remove(node_ids[2]);
     let remove4 = tree.remove(node_ids[4]);
 
-    assert!(remove0.is_none());
     assert!(remove2.is_some());
     let remove2 = &remove2.unwrap();
     assert_node_value_eq!(remove2, 3);
+    assert!(!tree
+      .children_ids(&tree.root_id())
+      .unwrap()
+      .contains(&remove2.id()));
     assert!(remove4.is_some());
     let remove4 = &remove4.unwrap();
     assert_node_value_eq!(remove4, 5);
+    assert!(!tree
+      .children_ids(&tree.root_id())
+      .unwrap()
+      .contains(&remove4.id()));
 
     let remove1 = tree.remove(node_ids[1]);
     let remove3 = tree.remove(node_ids[3]);
@@ -1238,9 +1244,26 @@ mod tests {
     assert!(remove1.is_some());
     let remove1 = &remove1.unwrap();
     assert_node_value_eq!(remove1, 2);
+    assert!(!tree
+      .children_ids(&tree.root_id())
+      .unwrap()
+      .contains(&remove1.id()));
     assert!(remove3.is_some());
     let remove3 = &remove3.unwrap();
     assert_node_value_eq!(remove3, 4);
+    assert!(!tree
+      .children_ids(&tree.root_id())
+      .unwrap()
+      .contains(&remove3.id()));
+  }
+
+  #[test]
+  #[should_panic]
+  fn remove2() {
+    INIT.call_once(test_log_init);
+
+    let (node_ids, mut tree) = make_tree(5);
+    tree.remove(node_ids[0]);
   }
 
   #[test]

@@ -130,7 +130,7 @@ impl Terminal {
           ShaderCommand::CursorShow(crossterm::cursor::Show)
         });
       }
-      if !cursor_style_eq(cursor.style, prev_cursor.style) {
+      if !cursor_style_eq(&cursor.style, &prev_cursor.style) {
         shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style));
       }
       if cursor.pos != prev_cursor.pos {
