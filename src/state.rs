@@ -24,8 +24,8 @@ pub struct State {
 
   // [`cursor`](crate::ui::widget::cursor::Cursor) widget ID.
   cursor_widget: Option<WidgetId>,
-  // Current [`window`](crate::ui::widget::window::Window) widget ID that the cursor widget belongs
-  // to.
+  // Current [`window container`](crate::ui::widget::window::WindowContainer) widget ID that the
+  // cursor widget belongs to.
   current_window_widget: Option<WidgetId>,
   // All [`window`](crate::ui::widget::window::Window) widget IDs.
   window_widgets: BTreeSet<WidgetId>,

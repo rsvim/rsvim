@@ -33,9 +33,9 @@ impl Stateful for NormalStateful {
               let mut tree = tree
                 .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
-              match tree.cursor_id() {
+              match state.cursor_widget() {
                 Some(cursor_id) => {
-                  tree.bounded_move_up_by(cursor_id, 1);
+                  tree.bounded_move_up_by(*cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }
@@ -45,9 +45,9 @@ impl Stateful for NormalStateful {
               let mut tree = tree
                 .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
-              match tree.cursor_id() {
+              match state.cursor_widget() {
                 Some(cursor_id) => {
-                  tree.bounded_move_down_by(cursor_id, 1);
+                  tree.bounded_move_down_by(*cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }
@@ -57,9 +57,9 @@ impl Stateful for NormalStateful {
               let mut tree = tree
                 .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
-              match tree.cursor_id() {
+              match state.cursor_widget() {
                 Some(cursor_id) => {
-                  tree.bounded_move_left_by(cursor_id, 1);
+                  tree.bounded_move_left_by(*cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }
@@ -69,9 +69,9 @@ impl Stateful for NormalStateful {
               let mut tree = tree
                 .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
-              match tree.cursor_id() {
+              match state.cursor_widget() {
                 Some(cursor_id) => {
-                  tree.bounded_move_right_by(cursor_id, 1);
+                  tree.bounded_move_right_by(*cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }

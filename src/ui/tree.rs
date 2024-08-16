@@ -3,7 +3,6 @@
 #![allow(dead_code)]
 
 use parking_lot::Mutex;
-use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
@@ -12,7 +11,7 @@ use crate::ui::term::TerminalArc;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::RootContainer;
-use crate::ui::widget::{Widget, WidgetId, WidgetValue};
+use crate::ui::widget::{Widget, WidgetValue};
 
 pub mod internal;
 
