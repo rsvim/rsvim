@@ -1,10 +1,11 @@
 //! Async task/job.
 
+#![allow(dead_code)]
+
 use futures::Future;
 use std::io::Result as IoResult;
 use std::sync::Arc;
 
-use crate::buffer::BuffersArc;
 use crate::cli::CliOpt;
 use crate::evloop::EventLoop;
 use crate::state::StateArc;
@@ -40,7 +41,6 @@ pub struct TaskContext {
   cli_opt: CliOpt,
   tree: TreeArc,
   state: StateArc,
-  buffers: BuffersArc,
 }
 
 impl From<EventLoop> for TaskContext {
@@ -49,7 +49,6 @@ impl From<EventLoop> for TaskContext {
       cli_opt: value.cli_opt.clone(),
       tree: Arc::clone(&value.tree),
       state: Arc::clone(&value.state),
-      buffers: Arc::clone(&value.buffers),
     }
   }
 }

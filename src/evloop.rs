@@ -152,11 +152,14 @@ impl EventLoop {
                       if n == 0 {
                         // Finish reading
                         let buffer = Buffer::from(builder);
-                        state
+                        let buffer_id = buffer.id();
+                        let mut state = state
                           .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                          .unwrap()
-                          .buffers_mut()
-                          .insert(buffer.id, buffer);
+                          .unwrap();
+                        state.buffers_mut().insert(buffer_id, buffer);
+                        if state.current_buffer().is_none() {
+                          state.set_current_buffer(Some(buffer_id));
+                        }
                         // println!("Read file {:?} into buffer", input_file);
                         break;
                       }

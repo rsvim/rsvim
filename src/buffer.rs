@@ -2,10 +2,7 @@
 
 #![allow(dead_code)]
 
-use parking_lot::Mutex;
-use std::collections::HashMap;
 use std::convert::From;
-use std::sync::{Arc, Weak};
 
 use ropey::{Rope, RopeBuilder};
 
@@ -15,8 +12,8 @@ pub type BufferId = usize;
 
 #[derive(Clone, Debug)]
 pub struct Buffer {
-  pub id: BufferId,
-  pub rope: Rope,
+  id: BufferId,
+  rope: Rope,
 }
 
 impl Buffer {
@@ -25,6 +22,18 @@ impl Buffer {
       id: uuid::next(),
       rope: Rope::new(),
     }
+  }
+
+  pub fn id(&self) -> BufferId {
+    self.id
+  }
+
+  pub fn rope(&self) -> &Rope {
+    &self.rope
+  }
+
+  pub fn rope_mut(&mut self) -> &mut Rope {
+    &mut self.rope
   }
 }
 
