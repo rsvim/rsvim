@@ -60,38 +60,6 @@ impl PartialEq for Buffer {
 
 impl Eq for Buffer {}
 
-#[derive(Clone, Debug)]
-pub struct Buffers {
-  bufs: HashMap<BufferId, Buffer>,
-  current_buffer_id: Option<BufferId>,
-}
-
-pub type BuffersArc = Arc<Mutex<Buffers>>;
-pub type BuffersWk = Weak<Mutex<Buffers>>;
-
-impl Buffers {
-  pub fn new() -> Self {
-    Buffers {
-      bufs: HashMap::new(),
-      current_buffer_id: None,
-    }
-  }
-
-  pub fn to_arc(buffers: Buffers) -> BuffersArc {
-    Arc::new(Mutex::new(buffers))
-  }
-
-  pub fn insert(&mut self, buf: Buffer) -> Option<Buffer> {
-    self.bufs.insert(buf.id, buf)
-  }
-}
-
-impl Default for Buffers {
-  fn default() -> Self {
-    Buffers::new()
-  }
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
