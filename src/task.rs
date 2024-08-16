@@ -35,8 +35,7 @@ impl Future for TaskValue {
 #[derive(Debug, Clone)]
 /// Shareable context passed through async threads.
 ///
-/// Note: This is almost a copy of [`EventLoop`](crate::evloop::EventLoop) that contains all global
-/// editor data structures.
+/// Note: This is almost a copy of [`EventLoop`] that contains all global editor data structures.
 pub struct TaskContext {
   cli_opt: CliOpt,
   tree: TreeArc,
