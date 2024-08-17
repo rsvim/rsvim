@@ -7,7 +7,7 @@ use std::sync::{Arc, Weak};
 use tracing::debug;
 
 use crate::cart::{IRect, U16Size};
-use crate::ui::term::TerminalArc;
+use crate::ui::term::CanvasArc;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::RootContainer;
@@ -18,11 +18,9 @@ pub mod internal;
 #[derive(Debug, Clone)]
 /// The widget tree.
 ///
-/// The widget tree manages all UI components and rendering on the terminal, i.e. the whole
-/// terminal is the root widget node, everything inside is the children nodes, and can recursively
-/// go down.
-///
-/// Each widget node inside the tree can contain 0 or more children nodes.
+/// The widget tree manages all UI components and rendering on the canvas, each widget is a tree
+/// node on the widget tree, everything inside is the node's children. While the terminal itself is
+/// the root widget node.
 ///
 /// # Terms
 ///
@@ -263,12 +261,12 @@ impl Tree {
 
   // Draw {
 
-  /// Draw the widget tree to terminal device.
-  pub fn draw(&mut self, terminal: TerminalArc) {
+  /// Draw the widget tree to canvas.
+  pub fn draw(&mut self, canvas: CanvasArc) {
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
       let actual_shape = *node.actual_shape();
-      node.value_mut().draw(actual_shape, terminal.clone());
+      node.value_mut().draw(actual_shape, canvas.clone());
     }
   }
 

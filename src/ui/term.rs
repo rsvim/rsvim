@@ -1,4 +1,4 @@
-//! Backend terminal for receiving user inputs & canvas for UI rendering.
+//! Logical canvas for terminal rendering.
 
 use crossterm;
 use parking_lot::Mutex;
@@ -12,29 +12,29 @@ use crate::ui::frame::cursor::cursor_style_eq;
 use crate::ui::frame::{Cell, Cursor, Frame};
 
 #[derive(Debug, Clone)]
-/// Backend logical terminal.
+/// Logical canvas.
 ///
-/// It helps manage the current frame and previous frame that the UI widgets tree draws on, and
-/// internally uses a diff-algorithm to compare what changes UI tree made. When flushing to the
-/// terminal device, it only runs on the needed parts to reduce IO operations.
-pub struct Terminal {
+/// It manages both the current frame and the last frame as a screenshot, and internally uses a
+/// diff-algorithm to compare the TUI changes, thus only flushing the changed parts to reduce IO
+/// operations.
+pub struct Canvas {
   frame: Frame,
   prev_frame: Frame,
 }
 
-pub type TerminalArc = Arc<Mutex<Terminal>>;
+pub type CanvasArc = Arc<Mutex<Canvas>>;
 
-impl Terminal {
-  /// Make new terminal with device's actual size.
+impl Canvas {
+  /// Make new canvas with terminal actual size.
   pub fn new(size: U16Size) -> Self {
-    Terminal {
+    Canvas {
       prev_frame: Frame::new(size, Cursor::default()),
       frame: Frame::new(size, Cursor::default()),
     }
   }
 
-  /// Convert terminal struct into smart pointer.
-  pub fn to_arc(t: Terminal) -> TerminalArc {
+  /// Convert struct into smart pointer.
+  pub fn to_arc(t: Canvas) -> CanvasArc {
     Arc::new(Mutex::new(t))
   }
 
@@ -251,7 +251,7 @@ impl fmt::Debug for ShaderCommand {
 }
 
 #[derive(Debug, Default, Clone)]
-/// The rendering updates on each draw, returns from terminal's [`shade`](Terminal::shade) method.
+/// The rendering updates on each draw, returns from [`Canvas::shade`] method.
 ///
 /// It's simply a collection of [`ShaderCommand`].
 pub struct Shader {
@@ -288,7 +288,7 @@ mod tests {
 
   #[test]
   fn new1() {
-    let t = Terminal::new(U16Size::new(3, 4));
+    let t = Canvas::new(U16Size::new(3, 4));
     assert_eq!(t.frame().size, t.prev_frame().size);
     assert_eq!(t.frame().cursor, t.prev_frame().cursor);
   }

@@ -30,7 +30,7 @@ use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::frame::CursorStyle;
-use crate::ui::term::{Shader, ShaderCommand, Terminal, TerminalArc};
+use crate::ui::term::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
@@ -39,7 +39,7 @@ use crate::ui::widget::{
 #[derive(Clone)]
 pub struct EventLoop {
   pub cli_opt: CliOpt,
-  pub screen: TerminalArc,
+  pub canvas: CanvasArc,
   pub tree: TreeArc,
   pub state: StateArc,
 }
@@ -48,8 +48,8 @@ impl EventLoop {
   pub async fn new(cli_opt: CliOpt) -> IoResult<Self> {
     let (cols, rows) = terminal::size()?;
     let screen_size = U16Size::new(cols, rows);
-    let screen = Terminal::new(screen_size);
-    let screen = Terminal::to_arc(screen);
+    let screen = Canvas::new(screen_size);
+    let screen = Canvas::to_arc(screen);
     let mut tree = Tree::new(screen_size);
     let mut state = State::new();
     debug!("new, screen size: {:?}", screen_size);
@@ -91,7 +91,7 @@ impl EventLoop {
 
     Ok(EventLoop {
       cli_opt,
-      screen,
+      canvas: screen,
       tree: Tree::to_arc(tree),
       state: State::to_arc(state),
     })
@@ -101,7 +101,7 @@ impl EventLoop {
     let mut out = std::io::stdout();
 
     let cursor = self
-      .screen
+      .canvas
       .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap()
       .frame()
@@ -245,18 +245,18 @@ impl EventLoop {
     }
 
     {
-      // Draw UI components to the terminal frame.
+      // Draw UI components to the canvas.
       self
         .tree
         .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
         .unwrap()
-        .draw(self.screen.clone());
+        .draw(self.canvas.clone());
     }
 
     let shader = {
       // Compute the commands that need to output to the terminal device.
       self
-        .screen
+        .canvas
         .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
         .unwrap()
         .shade()
