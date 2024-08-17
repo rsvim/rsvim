@@ -8,8 +8,8 @@ use crate::cart::{U16Size, UPos};
 use std::vec::Splice;
 
 // Re-export
-pub use crate::ui::frame::cell::Cell;
-pub use crate::ui::frame::cursor::{Cursor, CursorStyle, CursorStyleFormatter};
+pub use crate::ui::canvas::frame::cell::Cell;
+pub use crate::ui::canvas::frame::cursor::{Cursor, CursorStyle, CursorStyleFormatter};
 
 pub mod cell;
 pub mod cursor;

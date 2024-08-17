@@ -6,8 +6,7 @@ use tracing::debug;
 
 use crate::cart::{U16Pos, U16Rect};
 use crate::glovar;
-use crate::ui::frame::{self, CursorStyle, CursorStyleFormatter};
-use crate::ui::term::TerminalArc;
+use crate::ui::canvas::{frame, CanvasArc, CursorStyle, CursorStyleFormatter};
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
@@ -54,7 +53,7 @@ impl Widget for Cursor {
     self.id
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, terminal: TerminalArc) {
+  fn draw(&mut self, actual_shape: U16Rect, terminal: CanvasArc) {
     let pos: U16Pos = actual_shape.min().into();
     debug!(
       "draw, actual shape:{:?}, top-left pos:{:?}",

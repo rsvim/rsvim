@@ -6,7 +6,7 @@ use compact_str::CompactString;
 use std::convert::From;
 
 use crate::cart::U16Rect;
-use crate::ui::term::TerminalArc;
+use crate::ui::canvas::CanvasArc;
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
