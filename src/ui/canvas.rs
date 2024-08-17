@@ -8,8 +8,12 @@ use std::slice::Iter;
 use std::sync::Arc;
 
 use crate::cart::U16Size;
-use crate::ui::frame::cursor::cursor_style_eq;
-use crate::ui::frame::{Cell, Cursor, Frame};
+use crate::ui::canvas::frame::cursor::cursor_style_eq;
+
+// Re-export
+pub use crate::ui::canvas::frame::{Cell, Cursor, CursorStyle, CursorStyleFormatter, Frame};
+
+pub mod frame;
 
 #[derive(Debug, Clone)]
 /// Logical canvas.

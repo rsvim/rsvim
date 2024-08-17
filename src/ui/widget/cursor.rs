@@ -6,8 +6,7 @@ use tracing::debug;
 
 use crate::cart::{U16Pos, U16Rect};
 use crate::glovar;
-use crate::ui::frame::{self, CursorStyle, CursorStyleFormatter};
-use crate::ui::term::CanvasArc;
+use crate::ui::canvas::{frame, CanvasArc, CursorStyle, CursorStyleFormatter};
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 

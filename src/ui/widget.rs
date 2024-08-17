@@ -3,7 +3,7 @@
 use tracing::debug;
 
 use crate::cart::U16Rect;
-use crate::ui::term::CanvasArc;
+use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::internal::inode::{InodeId, InodeValue};
 
 // Re-export

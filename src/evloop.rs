@@ -29,8 +29,7 @@ use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
-use crate::ui::frame::CursorStyle;
-use crate::ui::term::{Canvas, CanvasArc, Shader, ShaderCommand};
+use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{
   Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
