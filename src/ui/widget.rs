@@ -3,7 +3,7 @@
 use tracing::debug;
 
 use crate::cart::U16Rect;
-use crate::ui::canvas::CanvasArc;
+use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::inode::{InodeId, InodeValue};
 
 // Re-export
@@ -23,7 +23,7 @@ pub trait Widget {
   fn id(&self) -> WidgetId;
 
   /// Draw the widget to canvas, on the specific shape.
-  fn draw(&mut self, actual_shape: U16Rect, _canvas: CanvasArc) {
+  fn draw(&mut self, actual_shape: U16Rect, _canvas: &mut Canvas) {
     // Do nothing.
     debug!("draw, actual shape:{:?}", actual_shape);
   }
@@ -57,7 +57,7 @@ impl Widget for WidgetValue {
   }
 
   /// Draw widget with (already calculated) actual shape, on the canvas.
-  fn draw(&mut self, actual_shape: U16Rect, canvas: CanvasArc) {
+  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
     match self {
       WidgetValue::RootContainer(w) => w.draw(actual_shape, canvas),
       WidgetValue::WindowContainer(w) => w.draw(actual_shape, canvas),
