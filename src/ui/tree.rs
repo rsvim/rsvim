@@ -4,9 +4,11 @@
 
 use parking_lot::Mutex;
 use std::sync::{Arc, Weak};
+use std::time::Duration;
 use tracing::debug;
 
 use crate::cart::{IRect, U16Size};
+use crate::glovar;
 use crate::ui::canvas::CanvasArc;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
@@ -263,10 +265,13 @@ impl Tree {
 
   /// Draw the widget tree to canvas.
   pub fn draw(&mut self, canvas: CanvasArc) {
+    let mut canvas = canvas
+      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap();
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
       let actual_shape = *node.actual_shape();
-      node.value_mut().draw(actual_shape, canvas.clone());
+      node.value_mut().draw(actual_shape, &mut canvas);
     }
   }
 

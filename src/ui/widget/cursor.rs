@@ -1,12 +1,10 @@
 //! Cursor widget.
 
 use std::fmt::Debug;
-use std::time::Duration;
 use tracing::debug;
 
 use crate::cart::{U16Pos, U16Rect};
-use crate::glovar;
-use crate::ui::canvas::{frame, CanvasArc, CursorStyle, CursorStyleFormatter};
+use crate::ui::canvas::{frame, Canvas, CursorStyle, CursorStyleFormatter};
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
@@ -53,22 +51,18 @@ impl Widget for Cursor {
     self.id
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, terminal: CanvasArc) {
+  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
     let pos: U16Pos = actual_shape.min().into();
     debug!(
       "draw, actual shape:{:?}, top-left pos:{:?}",
       actual_shape, pos
     );
 
-    terminal
-      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap()
-      .frame_mut()
-      .set_cursor(frame::Cursor::new(
-        pos,
-        self.blinking,
-        self.hidden,
-        self.style,
-      ));
+    canvas.frame_mut().set_cursor(frame::Cursor::new(
+      pos,
+      self.blinking,
+      self.hidden,
+      self.style,
+    ));
   }
 }
