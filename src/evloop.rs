@@ -31,9 +31,7 @@ use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::{
-  Cursor, RootContainer, Widget, WidgetValue, WindowContainer, WindowContent,
-};
+use crate::ui::widget::{Cursor, RootContainer, Widget, WidgetValue, Window};
 
 #[derive(Clone)]
 pub struct EventLoop {
@@ -53,39 +51,23 @@ impl EventLoop {
     let mut state = State::new();
     debug!("new, screen size: {:?}", screen_size);
 
-    let window_container = WindowContainer::new();
-    let window_container_id = window_container.id();
-    let window_container_shape = IRect::new(
+    let window_shape = IRect::new(
       (0, 0),
       (screen_size.width() as isize, screen_size.height() as isize),
     );
-    let window_container_node = TreeNode::new(
-      WidgetValue::WindowContainer(window_container),
-      window_container_shape,
-    );
-    tree.insert(&tree.root_id(), window_container_node);
-    state.set_current_window_widget(Some(window_container_id));
-    state.window_widgets_mut().insert(window_container_id);
-    debug!("new, insert window container: {:?}", window_container_id);
-
-    let window_content = WindowContent::new();
-    let window_content_id = window_content.id();
-    let window_content_shape = IRect::new(
-      (0, 0),
-      (screen_size.width() as isize, screen_size.height() as isize),
-    );
-    let window_content_node = TreeNode::new(
-      WidgetValue::WindowContent(window_content),
-      window_content_shape,
-    );
-    tree.insert(&window_container_id, window_content_node);
-    debug!("new, insert window content: {:?}", window_content_id);
+    let window = Window::new(window_shape);
+    let window_id = window.id();
+    let window_node = TreeNode::new(WidgetValue::Window(window), window_shape);
+    tree.insert(&tree.root_id(), window_node);
+    state.set_current_window_widget(Some(window_id));
+    state.window_widgets_mut().insert(window_id);
+    debug!("new, insert window container: {:?}", window_id);
 
     let cursor = Cursor::new();
     let cursor_id = cursor.id();
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor_node = TreeNode::new(WidgetValue::Cursor(cursor), cursor_shape);
-    tree.insert(&window_content_id, cursor_node);
+    tree.insert(&window_id, cursor_node);
     state.set_cursor_widget(Some(cursor_id));
 
     Ok(EventLoop {

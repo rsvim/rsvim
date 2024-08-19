@@ -9,8 +9,7 @@ use crate::ui::tree::internal::inode::{InodeId, InodeValue};
 // Re-export
 pub use crate::ui::widget::cursor::Cursor;
 pub use crate::ui::widget::root::RootContainer;
-pub use crate::ui::widget::window::content::WindowContent;
-pub use crate::ui::widget::window::WindowContainer;
+pub use crate::ui::widget::window::Window;
 
 pub mod cursor;
 pub mod root;
@@ -33,8 +32,7 @@ pub trait Widget {
 /// The value holder for each widget.
 pub enum WidgetValue {
   RootContainer(RootContainer),
-  WindowContainer(WindowContainer),
-  WindowContent(WindowContent),
+  Window(Window),
   Cursor(Cursor),
 }
 
@@ -50,8 +48,7 @@ impl Widget for WidgetValue {
   fn id(&self) -> WidgetId {
     match self {
       WidgetValue::RootContainer(w) => w.id(),
-      WidgetValue::WindowContainer(w) => w.id(),
-      WidgetValue::WindowContent(w) => w.id(),
+      WidgetValue::Window(w) => w.id(),
       WidgetValue::Cursor(w) => w.id(),
     }
   }
@@ -60,8 +57,7 @@ impl Widget for WidgetValue {
   fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
     match self {
       WidgetValue::RootContainer(w) => w.draw(actual_shape, canvas),
-      WidgetValue::WindowContainer(w) => w.draw(actual_shape, canvas),
-      WidgetValue::WindowContent(w) => w.draw(actual_shape, canvas),
+      WidgetValue::Window(w) => w.draw(actual_shape, canvas),
       WidgetValue::Cursor(w) => w.draw(actual_shape, canvas),
     }
   }
