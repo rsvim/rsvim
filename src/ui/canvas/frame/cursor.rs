@@ -122,6 +122,14 @@ mod tests {
   use super::*;
 
   #[test]
+  fn new1() {
+    let c = Cursor::default();
+    assert!(!c.blinking);
+    assert!(!c.hidden);
+    assert!(cursor_style_eq(&c.style, &CursorStyle::DefaultUserShape));
+  }
+
+  #[test]
   fn cursor_style_equals1() {
     assert!(cursor_style_eq(
       &CursorStyle::DefaultUserShape,

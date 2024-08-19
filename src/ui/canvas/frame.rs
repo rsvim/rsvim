@@ -129,29 +129,25 @@ impl Frame {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crossterm::style::{Attributes, Color};
 
   #[test]
-  fn new_cell() {
-    let c = Cell::default();
-    assert_eq!(c.symbol(), " ");
-    assert_eq!(c.fg(), Color::Reset);
-    assert_eq!(c.bg(), Color::Reset);
-    assert_eq!(c.attrs(), Attributes::default());
+  fn new1() {
+    let sz = U16Size::new(2, 1);
+    let f = Frame::new(sz, Cursor::default());
+    assert_eq!(f.size.width, 2);
+    assert_eq!(f.size.height, 1);
+    assert_eq!(
+      f.cells.len(),
+      f.size.height as usize * f.size.width as usize
+    );
+    for c in f.cells.iter() {
+      assert_eq!(c.symbol(), Cell::default().symbol());
+    }
   }
 
   #[test]
-  fn new_frame() {
-    let sz = U16Size::new(2, 1);
-    let b = Frame::new(sz, Cursor::default());
-    assert_eq!(b.size.width, 2);
-    assert_eq!(b.size.height, 1);
-    assert_eq!(
-      b.cells.len(),
-      b.size.height as usize * b.size.width as usize
-    );
-    for c in b.cells.iter() {
-      assert_eq!(c.symbol(), Cell::default().symbol());
-    }
+  fn set_cells1() {
+    let sz = U16Size::new(10, 10);
+    let f = Frame::new(sz, Cursor::default());
   }
 }

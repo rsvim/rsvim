@@ -50,9 +50,13 @@ impl Widget for Window {
     self.base.root_id()
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, _canvas: &mut Canvas) {
+  fn draw(&mut self, _actual_shape: U16Rect, canvas: &mut Canvas) {
     // Do nothing.
-    debug!("draw, actual shape:{:?}", actual_shape);
+    for node in self.base.iter_mut() {
+      debug!("draw node:{:?}", node);
+      let actual_shape = *node.actual_shape();
+      node.value_mut().draw(actual_shape, canvas);
+    }
   }
 }
 
@@ -138,6 +142,24 @@ impl InodeValue for WindowValue {
     match self {
       WindowValue::WindowContent(w) => w.id(),
       WindowValue::WindowRootContainer(w) => w.id(),
+    }
+  }
+}
+
+impl Widget for WindowValue {
+  /// Get widget ID.
+  fn id(&self) -> WidgetId {
+    match self {
+      WindowValue::WindowRootContainer(w) => w.id(),
+      WindowValue::WindowContent(w) => w.id(),
+    }
+  }
+
+  /// Draw widget with (already calculated) actual shape, on the canvas.
+  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
+    match self {
+      WindowValue::WindowRootContainer(w) => w.draw(actual_shape, canvas),
+      WindowValue::WindowContent(w) => w.draw(actual_shape, canvas),
     }
   }
 }
