@@ -58,7 +58,7 @@ impl EventLoop {
     let window = Window::new(window_shape);
     let window_id = window.id();
     let window_node = TreeNode::new(WidgetValue::Window(window), window_shape);
-    tree.insert(&tree.root_id(), window_node);
+    tree.bounded_insert(&tree.root_id(), window_node);
     state.set_current_window_widget(Some(window_id));
     state.window_widgets_mut().insert(window_id);
     debug!("new, insert window container: {:?}", window_id);
@@ -67,7 +67,7 @@ impl EventLoop {
     let cursor_id = cursor.id();
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor_node = TreeNode::new(WidgetValue::Cursor(cursor), cursor_shape);
-    tree.insert(&window_id, cursor_node);
+    tree.bounded_insert(&window_id, cursor_node);
     state.set_cursor_widget(Some(cursor_id));
 
     Ok(EventLoop {

@@ -4,9 +4,10 @@
 
 use compact_str::CompactString;
 use std::convert::From;
+use tracing::debug;
 
-use crate::cart::U16Rect;
-use crate::ui::canvas::CanvasArc;
+use crate::cart::{IRect, U16Rect};
+use crate::ui::canvas::Canvas;
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
@@ -86,5 +87,10 @@ impl From<Vec<CompactString>> for WindowContent {
 impl Widget for WindowContent {
   fn id(&self) -> WidgetId {
     self.id
+  }
+
+  fn draw(&mut self, actual_shape: U16Rect, _canvas: &mut Canvas) {
+    // Do nothing.
+    debug!("draw, actual shape:{:?}", actual_shape);
   }
 }
