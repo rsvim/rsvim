@@ -1,8 +1,10 @@
 //! The VIM window.
 
 use compact_str::CompactString;
+use tracing::debug;
 
-use crate::cart::IRect;
+use crate::cart::{IRect, U16Rect};
+use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::window::content::WindowContent;
@@ -46,6 +48,11 @@ impl Window {
 impl Widget for Window {
   fn id(&self) -> WidgetId {
     self.base.root_id()
+  }
+
+  fn draw(&mut self, actual_shape: U16Rect, _canvas: &mut Canvas) {
+    // Do nothing.
+    debug!("draw, actual shape:{:?}", actual_shape);
   }
 }
 

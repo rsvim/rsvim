@@ -56,14 +56,8 @@ impl Canvas {
     &mut self.frame
   }
 
-  /// Get current frame size.
   pub fn size(&self) -> U16Size {
     self.frame.size
-  }
-
-  /// Set current frame size.
-  pub fn set_size(&mut self, size: U16Size) {
-    self.frame.size = size;
   }
 
   /// Get current frame cells.
@@ -71,19 +65,9 @@ impl Canvas {
     &self.frame.cells
   }
 
-  /// Get mutable current frame cells.
-  pub fn cells_mut(&mut self) -> &mut Vec<Cell> {
-    &mut self.frame.cells
-  }
-
   /// Get current frame cursor.
   pub fn cursor(&self) -> &Cursor {
     &self.frame.cursor
-  }
-
-  /// Get mutable current frame cursor.
-  pub fn cursor_mut(&mut self) -> &mut Cursor {
-    &mut self.frame.cursor
   }
 
   // Current frame }
@@ -95,7 +79,6 @@ impl Canvas {
     &self.prev_frame
   }
 
-  /// Get previous frame size.
   pub fn prev_size(&self) -> U16Size {
     self.prev_frame.size
   }
