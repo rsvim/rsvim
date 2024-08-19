@@ -6,7 +6,6 @@ use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::{Widget, WidgetId};
-use crate::uuid;
 
 pub mod content;
 pub mod root;
@@ -43,7 +42,7 @@ impl Widget for Window {
 }
 
 #[derive(Debug, Clone)]
-/// The value holder for each widget.
+/// The value holder for each window widget.
 pub enum WindowValue {
   WindowContent(WindowContent),
   WindowRootContainer(WindowRootContainer),
