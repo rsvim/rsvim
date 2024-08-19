@@ -18,6 +18,7 @@ pub struct WindowContent {
   lines: Vec<CompactString>,
   line_wrap: bool,
   word_wrap: bool,
+  dirty: bool,
 }
 
 impl WindowContent {
@@ -27,6 +28,7 @@ impl WindowContent {
       lines: vec![],
       line_wrap: false,
       word_wrap: false,
+      dirty: false,
     }
   }
 
@@ -51,9 +53,14 @@ impl WindowContent {
   }
 
   pub fn set_line_wrap(&mut self, line_wrap: bool) -> bool {
-    let old_value = self.line_wrap;
-    self.line_wrap = line_wrap;
-    old_value
+    if self.line_wrap != line_wrap {
+      let old_value = self.line_wrap;
+      self.line_wrap = line_wrap;
+      self.dirty = true;
+      old_value
+    } else {
+      self.line_wrap
+    }
   }
 
   pub fn word_wrap(&self) -> bool {
@@ -61,9 +68,14 @@ impl WindowContent {
   }
 
   pub fn set_word_wrap(&mut self, word_wrap: bool) -> bool {
-    let old_value = self.word_wrap;
-    self.word_wrap = word_wrap;
-    old_value
+    if self.word_wrap != word_wrap {
+      let old_value = self.word_wrap;
+      self.word_wrap = word_wrap;
+      self.dirty = true;
+      old_value
+    } else {
+      self.word_wrap
+    }
   }
 }
 
@@ -80,6 +92,7 @@ impl From<Vec<CompactString>> for WindowContent {
       lines,
       line_wrap: false,
       word_wrap: false,
+      dirty: false,
     }
   }
 }
@@ -89,8 +102,12 @@ impl Widget for WindowContent {
     self.id
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, _canvas: &mut Canvas) {
-    // Do nothing.
-    debug!("draw, actual shape:{:?}", actual_shape);
+  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
+    if !self.dirty {
+      return;
+    }
+    if self.lines.is_empty() {}
+
+    self.dirty = false;
   }
 }
