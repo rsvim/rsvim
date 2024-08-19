@@ -15,6 +15,9 @@ pub mod root;
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
   base: Itree<WindowValue>,
+
+  // The Window content widget ID.
+  content: InodeId,
 }
 
 impl Window {
@@ -31,7 +34,10 @@ impl Window {
 
     base.bounded_insert(&window_root_id, window_content_node);
 
-    Window { base }
+    Window {
+      base,
+      content: window_content_id,
+    }
   }
 }
 
@@ -40,6 +46,8 @@ impl Widget for Window {
     self.base.root_id()
   }
 }
+
+impl Window {}
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
