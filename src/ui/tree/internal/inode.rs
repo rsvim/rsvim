@@ -209,10 +209,6 @@ mod tests {
 
   static INIT: Once = Once::new();
 
-  fn shape_eq<T: CoordNum>(s1: Rect<T>, s2: Rect<T>) -> bool {
-    s1.min() == s2.min() && s1.max() == s2.max()
-  }
-
   #[test]
   fn new() {
     INIT.call_once(test_log_init);
@@ -236,7 +232,7 @@ mod tests {
     assert!(n1.borrow().enabled());
     assert!(n1.borrow().visible());
 
-    assert!(shape_eq(*n1.borrow().shape(), IRect::new((0, 0), (0, 0))));
-    assert!(shape_eq(*n2.borrow().shape(), IRect::new((1, 2), (3, 4))));
+    assert_eq!(*n1.borrow().shape(), IRect::new((0, 0), (0, 0)));
+    assert_eq!(*n2.borrow().shape(), IRect::new((1, 2), (3, 4)));
   }
 }

@@ -7,6 +7,7 @@ use std::collections::VecDeque;
 use std::convert::From;
 use tracing::debug;
 
+use crate::buffer::{Buffer, BufferView};
 use crate::cart::{IRect, U16Rect};
 use crate::inode_value_generate_impl;
 use crate::ui::canvas::Canvas;
@@ -15,144 +16,128 @@ use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
 #[derive(Debug, Clone)]
-/// The VIM window content.
-pub struct WindowContent {
+/// The content of the VIM window.
+///
+/// There are some methods related the the `line`. The `line` here is a logical concept related to
+/// normal lines in the files user editing. Not the rows that render to the terminal.
+///
+/// Note: For a window with **N** rows height, it can contains at most **N** lines (including the
+/// empty lines). If there is some very long line, and the `line_wrap` option is set, then 1
+/// logical line can actually take more than 1 rows height.
+pub struct WindowContent<'a> {
   base: Inode,
-  lines: VecDeque<CompactString>,
-  dirty_lines: VecDeque<bool>,
+
+  // Buffer view
+  buffer: &'a Buffer,
+  buffer_view: BufferView,
+
+  // Options
   line_wrap: bool,
   word_wrap: bool,
-  dirty_option: bool,
 }
 
-impl WindowContent {
-  pub fn new(shape: IRect) -> Self {
+impl<'a> WindowContent<'a> {
+  pub fn new(shape: IRect, buffer: &'a Buffer, buffer_view: BufferView) -> Self {
     WindowContent {
       base: Inode::new(shape),
-      lines: VecDeque::new(),
-      dirty_lines: VecDeque::new(),
+      buffer,
+      buffer_view,
       line_wrap: false,
       word_wrap: false,
-      dirty_option: false,
     }
-  }
-
-  pub fn lines(&self) -> &VecDeque<CompactString> {
-    &self.lines
-  }
-
-  pub fn line(&self, index: usize) -> &CompactString {
-    &self.lines[index]
-  }
-
-  pub fn set_line(&mut self, index: usize, line: CompactString) {
-    self.lines[index] = line;
-    self.dirty_lines[index] = true;
-  }
-
-  /// Get the first line.
-  pub fn front_line(&self) -> Option<&CompactString> {
-    self.lines.front()
-  }
-
-  /// Get the last line.
-  pub fn back_line(&self) -> Option<&CompactString> {
-    self.lines.back()
-  }
-
-  pub fn front_line_mut(&mut self) -> Option<&mut CompactString> {
-    self.lines.front_mut()
-  }
-
-  pub fn back_line_mut(&mut self) -> Option<&mut CompactString> {
-    self.lines.back_mut()
-  }
-
-  pub fn resize(&mut self, new_len: usize) {
-    self.lines.resize(new_len, CompactString::const_new(""));
-    self.dirty_lines.resize(new_len, false);
-  }
-
-  pub fn push_back_line(&mut self, line: CompactString) {
-    self.lines.push_back(line);
-    self.dirty_lines.push_back(false);
-  }
-
-  pub fn pop_back_line(&mut self) -> Option<CompactString> {
-    let result = self.lines.pop_back();
-    self.dirty_lines.pop_back();
-    result
-  }
-
-  pub fn push_front_line(&mut self, line: CompactString) {
-    self.lines.push_front(line);
-    self.dirty_lines.push_front(false);
-  }
-
-  pub fn pop_front_line(&mut self) -> Option<CompactString> {
-    let result = self.lines.pop_front();
-    self.dirty_lines.pop_front();
-    result
   }
 
   pub fn line_wrap(&self) -> bool {
     self.line_wrap
   }
 
-  pub fn set_line_wrap(&mut self, line_wrap: bool) -> bool {
-    if self.line_wrap != line_wrap {
-      let old_value = self.line_wrap;
-      self.line_wrap = line_wrap;
-      self.dirty_option = true;
-      old_value
-    } else {
-      self.line_wrap
-    }
+  pub fn set_line_wrap(&mut self, line_wrap: bool) {
+    self.line_wrap = line_wrap;
   }
 
   pub fn word_wrap(&self) -> bool {
     self.word_wrap
   }
 
-  pub fn set_word_wrap(&mut self, word_wrap: bool) -> bool {
-    if self.word_wrap != word_wrap {
-      let old_value = self.word_wrap;
-      self.word_wrap = word_wrap;
-      self.dirty_option = true;
-      old_value
-    } else {
-      self.word_wrap
-    }
+  pub fn set_word_wrap(&mut self, word_wrap: bool) {
+    self.word_wrap = word_wrap;
+  }
+
+  pub fn buffer(&self) -> &Buffer {
+    &self.buffer
+  }
+
+  pub fn set_buffer_mut(&mut self, buffer: &'a Buffer) {
+    self.buffer = buffer;
+  }
+
+  pub fn buffer_view(&self) -> &BufferView {
+    &self.buffer_view
+  }
+
+  pub fn set_buffer_view(&mut self, buffer_view: BufferView) {
+    self.buffer_view = buffer_view;
   }
 }
 
-impl From<Vec<CompactString>> for WindowContent {
-  fn from(shape: IRect, lines: Vec<CompactString>) -> Self {
-    let dirty_lines = lines.iter().map(|_| false).collect();
-    WindowContent {
-      base: Inode::new(shape),
-      lines,
-      dirty_lines,
-      line_wrap: false,
-      word_wrap: false,
-      dirty_option: true,
-    }
+impl<'a> InodeValue for WindowContent<'a> {
+  fn id(&self) -> InodeId {
+    self.base.id()
+  }
+
+  fn depth(&self) -> &usize {
+    self.base.depth()
+  }
+
+  fn depth_mut(&mut self) -> &mut usize {
+    self.base.depth_mut()
+  }
+
+  fn zindex(&self) -> &usize {
+    self.base.zindex()
+  }
+
+  fn zindex_mut(&mut self) -> &mut usize {
+    self.base.zindex_mut()
+  }
+
+  fn shape(&self) -> &IRect {
+    self.base.shape()
+  }
+
+  fn shape_mut(&mut self) -> &mut IRect {
+    self.base.shape_mut()
+  }
+
+  fn actual_shape(&self) -> &U16Rect {
+    self.base.actual_shape()
+  }
+
+  fn actual_shape_mut(&mut self) -> &mut U16Rect {
+    self.base.actual_shape_mut()
+  }
+
+  fn enabled(&self) -> &bool {
+    self.base.enabled()
+  }
+
+  fn enabled_mut(&mut self) -> &mut bool {
+    self.base.enabled_mut()
+  }
+
+  fn visible(&self) -> &bool {
+    self.base.visible()
+  }
+
+  fn visible_mut(&mut self) -> &mut bool {
+    self.base.visible_mut()
   }
 }
 
-inode_value_generate_impl!(WindowContent, base);
-
-impl Widget for WindowContent {
+impl<'a> Widget for WindowContent<'a> {
   fn id(&self) -> WidgetId {
     self.base.id()
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
-    if !self.dirty {
-      return;
-    }
-    if self.lines.is_empty() {}
-
-    self.dirty = false;
-  }
+  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {}
 }

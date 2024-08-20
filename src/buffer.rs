@@ -2,11 +2,15 @@
 
 #![allow(dead_code)]
 
+use ropey::{Rope, RopeBuilder};
 use std::convert::From;
 
-use ropey::{Rope, RopeBuilder};
-
 use crate::uuid;
+
+// Re-export
+pub use crate::buffer::view::BufferView;
+
+pub mod view;
 
 pub type BufferId = usize;
 

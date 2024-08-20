@@ -1,5 +1,7 @@
 //! The VIM window.
 
+use std::collections::VecDeque;
+
 use compact_str::CompactString;
 use tracing::debug;
 
@@ -134,41 +136,31 @@ impl Widget for Window {
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
       let actual_shape = *node.actual_shape();
-      node.value_mut().draw(actual_shape, canvas);
+      node.draw(actual_shape, canvas);
     }
   }
 }
 
 impl Window {
-  pub fn lines(&self) -> &Vec<CompactString> {
-    if let WindowValue::WindowContent(c) = self.base.node(&self.content_id).unwrap().value() {
+  pub fn lines(&self) -> &VecDeque<CompactString> {
+    if let WindowValue::WindowContent(c) = self.base.node(&self.content_id).unwrap() {
       c.lines()
     } else {
       unreachable!()
     }
   }
 
-  pub fn lines_mut(&mut self) -> &mut Vec<CompactString> {
-    if let WindowValue::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap().value_mut()
-    {
-      c.lines_mut()
-    } else {
-      unreachable!()
-    }
-  }
-
   pub fn line(&self, index: usize) -> &CompactString {
-    if let WindowValue::WindowContent(c) = self.base.node(&self.content_id).unwrap().value() {
+    if let WindowValue::WindowContent(c) = self.base.node(&self.content_id).unwrap() {
       c.line(index)
     } else {
       unreachable!()
     }
   }
 
-  pub fn line_mut(&mut self, index: usize) -> &mut CompactString {
-    if let WindowValue::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap().value_mut()
-    {
-      c.line_mut(index)
+  pub fn set_line(&mut self, index: usize, line: CompactString) -> &mut CompactString {
+    if let WindowValue::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap() {
+      c.set_line(index, line)
     } else {
       unreachable!()
     }
