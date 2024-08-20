@@ -20,7 +20,7 @@ where
   // Root node ID.
   root_id: InodeId,
   // Nodes collection, maps from node ID to its node struct.
-  nodes: HashMap<InodeId, Inode<T>>,
+  nodes: HashMap<InodeId, T>,
   // Maps from child ID to its parent ID.
   parent_ids: HashMap<InodeId, InodeId>,
   // Maps from parent ID to its children IDs, the children are sorted by zindex value from lower to higher.
@@ -46,7 +46,7 @@ impl<'a, T> Iterator for ItreeIter<'a, T>
 where
   T: InodeValue,
 {
-  type Item = &'a Inode<T>;
+  type Item = &'a T;
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.queue.pop_front() {
@@ -95,7 +95,7 @@ impl<'a, T> Iterator for ItreeIterMut<'a, T>
 where
   T: InodeValue,
 {
-  type Item = &'a mut Inode<T>;
+  type Item = &'a mut T;
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.queue.pop_front() {
@@ -140,7 +140,7 @@ impl<T> Itree<T>
 where
   T: InodeValue,
 {
-  pub fn new(root_node: Inode<T>) -> Self {
+  pub fn new(root_node: T) -> Self {
     let root_id = root_node.id();
     let mut nodes = HashMap::new();
     nodes.insert(root_id, root_node);
@@ -178,11 +178,11 @@ where
     self.children_ids.get(id)
   }
 
-  pub fn node(&self, id: &InodeId) -> Option<&Inode<T>> {
+  pub fn node(&self, id: &InodeId) -> Option<&T> {
     self.nodes.get(id)
   }
 
-  pub fn node_mut(&mut self, id: &InodeId) -> Option<&mut Inode<T>> {
+  pub fn node_mut(&mut self, id: &InodeId) -> Option<&mut T> {
     self.nodes.get_mut(id)
   }
 
@@ -209,10 +209,10 @@ where
     // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
 
     // Tuple of (child, parent id, parent depth, parent actual shape)
-    type ChildAndParentPair<'a, T> = (&'a mut Inode<T>, InodeId, usize, U16Rect);
+    type ChildAndParentPair<'a, T> = (&'a mut T, InodeId, usize, U16Rect);
 
     // Avoid the multiple mutable references on `self.nodes.get_mut` when updating all descendants attributes.
-    let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, Inode<T>>).unwrap();
+    let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
 
     // debug!("before create que");
     let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
@@ -289,7 +289,7 @@ where
   /// # Panics
   ///
   /// If `parent_id` doesn't exist.
-  pub fn insert(&mut self, parent_id: &InodeId, mut child_node: Inode<T>) -> Option<Inode<T>> {
+  pub fn insert(&mut self, parent_id: &InodeId, mut child_node: T) -> Option<T> {
     debug!(
       "parent_id:{:?}, node_ids:{:?}, children_ids:{:?}",
       parent_id,
@@ -393,11 +393,7 @@ where
   /// # Panics
   ///
   /// If `parent_id` doesn't exist.
-  pub fn bounded_insert(
-    &mut self,
-    parent_id: &InodeId,
-    mut child_node: Inode<T>,
-  ) -> Option<Inode<T>> {
+  pub fn bounded_insert(&mut self, parent_id: &InodeId, mut child_node: T) -> Option<T> {
     // Panics if `parent_id` not exists.
     assert!(self.nodes.contains_key(parent_id));
 
@@ -425,7 +421,7 @@ where
   /// # Panics
   ///
   /// If the node `id` is the root node id since root node cannot be removed.
-  pub fn remove(&mut self, id: InodeId) -> Option<Inode<T>> {
+  pub fn remove(&mut self, id: InodeId) -> Option<T> {
     // Cannot remove root node.
     assert!(id != self.root_id);
 
@@ -519,8 +515,7 @@ where
       Some(parent_id) => {
         unsafe {
           // Fix mutable borrow on `self.base.node_mut`.
-          let mut raw_nodes =
-            NonNull::new(&mut self.nodes as *mut HashMap<InodeId, Inode<T>>).unwrap();
+          let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
 
           match raw_nodes.as_ref().get(parent_id) {
             Some(parent_node) => {
@@ -558,6 +553,7 @@ where
 
 #[cfg(test)]
 mod tests {
+  use crate::inode_value_generate_impl;
   use std::sync::Once;
   use tracing::info;
 
@@ -572,29 +568,20 @@ mod tests {
 
   #[derive(Copy, Clone, Debug, Default)]
   struct TestValue {
-    id: InodeId,
-    pub value: usize,
+    value: i32,
+    base: Inode,
   }
 
   impl TestValue {
-    pub fn new(value: usize) -> Self {
+    pub fn new(value: i32, shape: IRect) -> Self {
       TestValue {
-        id: uuid::next(),
         value,
+        base: Inode::new(shape),
       }
     }
-    pub fn value(&self) -> usize {
-      self.value
-    }
   }
 
-  impl InodeValue for TestValue {
-    fn id(&self) -> InodeId {
-      self.id
-    }
-  }
-
-  type TestNode = Inode<TestValue>;
+  inode_value_generate_impl!(TestValue, base);
 
   macro_rules! assert_node_id_eq {
     ($node: ident, $id: ident) => {
@@ -645,9 +632,8 @@ mod tests {
   fn new() {
     INIT.call_once(test_log_init);
 
-    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (1, 1));
-    let n1 = TestNode::new(v1, s1);
+    let n1 = TestValue::new(1, s1);
     let nid1 = n1.id();
     let tree = Itree::new(n1);
 
@@ -666,34 +652,28 @@ mod tests {
   fn insert1() {
     INIT.call_once(test_log_init);
 
-    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (1, 1));
-    let n1 = TestNode::new(v1, s1);
+    let n1 = TestValue::new(1, s1);
     let nid1 = n1.id();
 
-    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (1, 1));
-    let n2 = TestNode::new(v2, s2);
+    let n2 = TestValue::new(2, s2);
     let nid2 = n2.id();
 
-    let v3 = TestValue::new(3);
     let s3 = IRect::new((0, 0), (1, 1));
-    let n3 = TestNode::new(v3, s3);
+    let n3 = TestValue::new(3, s3);
     let nid3 = n3.id();
 
-    let v4 = TestValue::new(4);
     let s4 = IRect::new((0, 0), (1, 1));
-    let n4 = TestNode::new(v4, s4);
+    let n4 = TestValue::new(4, s4);
     let nid4 = n4.id();
 
-    let v5 = TestValue::new(5);
     let s5 = IRect::new((0, 0), (1, 1));
-    let n5 = TestNode::new(v5, s5);
+    let n5 = TestValue::new(5, s5);
     let nid5 = n5.id();
 
-    let v6 = TestValue::new(6);
     let s6 = IRect::new((0, 0), (1, 1));
-    let n6 = TestNode::new(v6, s6);
+    let n6 = TestValue::new(6, s6);
     let nid6 = n6.id();
 
     /*
@@ -780,49 +760,40 @@ mod tests {
   fn insert2() {
     INIT.call_once(test_log_init);
 
-    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
-    let n1 = TestNode::new(v1, s1);
+    let n1 = TestValue::new(1, s1);
     let nid1 = n1.id();
 
-    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (15, 15));
-    let n2 = TestNode::new(v2, s2);
+    let n2 = TestValue::new(2, s2);
     let nid2 = n2.id();
 
-    let v3 = TestValue::new(3);
     let s3 = IRect::new((10, 10), (18, 19));
-    let n3 = TestNode::new(v3, s3);
+    let n3 = TestValue::new(3, s3);
     let nid3 = n3.id();
 
-    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 14));
-    let n4 = TestNode::new(v4, s4);
+    let n4 = TestValue::new(4, s4);
     let nid4 = n4.id();
 
-    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (10, 20));
-    let n5 = TestNode::new(v5, s5);
+    let n5 = TestValue::new(5, s5);
     let nid5 = n5.id();
 
-    let v6 = TestValue::new(6);
     let s6 = IRect::new((3, 6), (6, 10));
-    let n6 = TestNode::new(v6, s6);
+    let n6 = TestValue::new(6, s6);
     let nid6 = n6.id();
 
-    let v7 = TestValue::new(7);
     let s7 = IRect::new((3, 6), (15, 25));
-    let n7 = TestNode::new(v7, s7);
+    let n7 = TestValue::new(7, s7);
     let nid7 = n7.id();
 
-    let v8 = TestValue::new(8);
     let s8 = IRect::new((-1, -2), (2, 1));
-    let n8 = TestNode::new(v8, s8);
+    let n8 = TestValue::new(8, s8);
     let nid8 = n8.id();
 
-    let v9 = TestValue::new(9);
     let s9 = IRect::new((5, 6), (9, 8));
-    let n9 = TestNode::new(v9, s9);
+    let n9 = TestValue::new(9, s9);
     let nid9 = n9.id();
 
     /*
@@ -944,58 +915,49 @@ mod tests {
   fn shape1() {
     INIT.call_once(test_log_init);
 
-    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
-    let n1 = TestNode::new(v1, s1);
+    let n1 = TestValue::new(1, s1);
     let nid1 = n1.id();
 
-    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (15, 15));
     let us2 = U16Rect::new((0, 0), (15, 15));
-    let n2 = TestNode::new(v2, s2);
+    let n2 = TestValue::new(2, s2);
     let nid2 = n2.id();
 
-    let v3 = TestValue::new(3);
     let s3 = IRect::new((10, 10), (18, 19));
     let us3 = U16Rect::new((10, 10), (18, 19));
-    let n3 = TestNode::new(v3, s3);
+    let n3 = TestValue::new(3, s3);
     let nid3 = n3.id();
 
-    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 14));
     let us4 = U16Rect::new((3, 5), (15, 14));
-    let n4 = TestNode::new(v4, s4);
+    let n4 = TestValue::new(4, s4);
     let nid4 = n4.id();
 
-    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (10, 20));
     let us5 = U16Rect::new((0, 0), (10, 15));
-    let n5 = TestNode::new(v5, s5);
+    let n5 = TestValue::new(5, s5);
     let nid5 = n5.id();
 
-    let v6 = TestValue::new(6);
     let s6 = IRect::new((3, 6), (6, 10));
     let us6 = U16Rect::new((13, 16), (16, 19));
-    let n6 = TestNode::new(v6, s6);
+    let n6 = TestValue::new(6, s6);
     let nid6 = n6.id();
 
-    let v7 = TestValue::new(7);
     let s7 = IRect::new((3, 6), (15, 25));
     let us7 = U16Rect::new((3, 6), (10, 15));
-    let n7 = TestNode::new(v7, s7);
+    let n7 = TestValue::new(7, s7);
     let nid7 = n7.id();
 
-    let v8 = TestValue::new(8);
     let s8 = IRect::new((-1, -2), (2, 1));
     let us8 = U16Rect::new((3, 6), (5, 7));
-    let n8 = TestNode::new(v8, s8);
+    let n8 = TestValue::new(8, s8);
     let nid8 = n8.id();
 
-    let v9 = TestValue::new(9);
     let s9 = IRect::new((5, 6), (9, 8));
     let us9 = U16Rect::new((8, 12), (10, 14));
-    let n9 = TestNode::new(v9, s9);
+    let n9 = TestValue::new(9, s9);
     let nid9 = n9.id();
 
     /*
