@@ -3,7 +3,8 @@
 use compact_str::CompactString;
 use tracing::debug;
 
-use crate::cart::{IRect, U16Rect};
+use crate::cart::{IRect, U16Pos, U16Rect};
+use crate::inode_value_generate_impl;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
@@ -42,6 +43,84 @@ impl Window {
       base,
       content_id: window_content_id,
     }
+  }
+}
+
+impl InodeValue for Window {
+  fn id(&self) -> InodeId {
+    self.base.root_id()
+  }
+
+  fn depth(&self) -> &usize {
+    self.base.node(&self.base.root_id()).unwrap().depth()
+  }
+
+  fn depth_mut(&mut self) -> &mut usize {
+    self
+      .base
+      .node_mut(&self.base.root_id())
+      .unwrap()
+      .depth_mut()
+  }
+
+  fn zindex(&self) -> &usize {
+    self.base.node(&self.base.root_id()).unwrap().zindex()
+  }
+
+  fn zindex_mut(&mut self) -> &mut usize {
+    self
+      .base
+      .node_mut(&self.base.root_id())
+      .unwrap()
+      .zindex_mut()
+  }
+
+  fn shape(&self) -> &IRect {
+    self.base.node(&self.base.root_id()).unwrap().shape()
+  }
+
+  fn shape_mut(&mut self) -> &mut IRect {
+    self
+      .base
+      .node_mut(&self.base.root_id())
+      .unwrap()
+      .shape_mut()
+  }
+
+  fn actual_shape(&self) -> &U16Rect {
+    self.base.node(&self.base.root_id()).unwrap().actual_shape()
+  }
+
+  fn actual_shape_mut(&mut self) -> &mut U16Rect {
+    self
+      .base
+      .node_mut(&self.base.root_id())
+      .unwrap()
+      .actual_shape_mut()
+  }
+
+  fn enabled(&self) -> &bool {
+    self.base.node(&self.base.root_id()).unwrap().enabled()
+  }
+
+  fn enabled_mut(&mut self) -> &mut bool {
+    self
+      .base
+      .node_mut(&self.base.root_id())
+      .unwrap()
+      .enabled_mut()
+  }
+
+  fn visible(&self) -> &bool {
+    self.base.node(&self.base.root_id()).unwrap().visible()
+  }
+
+  fn visible_mut(&mut self) -> &mut bool {
+    self
+      .base
+      .node_mut(&self.base.root_id())
+      .unwrap()
+      .visible_mut()
   }
 }
 

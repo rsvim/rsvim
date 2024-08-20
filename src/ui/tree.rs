@@ -10,12 +10,73 @@ use tracing::debug;
 use crate::cart::{IRect, U16Size};
 use crate::glovar;
 use crate::ui::canvas::CanvasArc;
+use crate::ui::tree::internal::inode::InodeValue;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::RootContainer;
 use crate::ui::widget::{Widget, WidgetValue};
 
 pub mod internal;
+
+#[derive(Debug, Clone)]
+/// The value holder for each widget.
+pub enum TreeNode {
+  RootContainer(RootContainer),
+  Window(Window),
+  Cursor(Cursor),
+}
+
+impl InodeValue for TreeNode {
+  fn id(&self) -> InodeId {
+    match self {
+      TreeNode::RootContainer(n) => n.id(),
+    }
+  }
+
+  fn depth(&self) -> &usize;
+
+  fn depth_mut(&mut self) -> &mut usize;
+
+  fn zindex(&self) -> &usize;
+
+  fn zindex_mut(&mut self) -> &mut usize;
+
+  fn shape(&self) -> &IRect;
+
+  fn shape_mut(&mut self) -> &mut IRect;
+
+  fn actual_shape(&self) -> &U16Rect;
+
+  fn actual_shape_mut(&mut self) -> &mut U16Rect;
+
+  fn enabled(&self) -> &bool;
+
+  fn enabled_mut(&mut self) -> &mut bool;
+
+  fn visible(&self) -> &bool;
+
+  fn visible_mut(&mut self) -> &mut bool;
+}
+
+impl Widget for TreeNode {
+  /// Get widget ID.
+  fn id(&self) -> WidgetId {
+    match self {
+      TreeNode::RootContainer(w) => w.id(),
+      TreeNode::Window(w) => w.id(),
+      TreeNode::Cursor(w) => w.id(),
+    }
+  }
+
+  /// Draw widget with (already calculated) actual shape, on the canvas.
+  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
+    match self {
+      TreeNode::RootContainer(w) => w.draw(actual_shape, canvas),
+      TreeNode::Window(w) => w.draw(actual_shape, canvas),
+      TreeNode::Cursor(w) => w.draw(actual_shape, canvas),
+    }
+  }
+}
 
 #[derive(Debug, Clone)]
 /// The widget tree.
@@ -113,15 +174,15 @@ pub mod internal;
 ///
 pub struct Tree {
   // Internal implementation.
-  base: Itree<WidgetValue>,
+  base: Itree<TreeNode>,
 }
 
 pub type TreeArc = Arc<Mutex<Tree>>;
 pub type TreeWk = Weak<Mutex<Tree>>;
-pub type TreeNode = Inode<WidgetValue>;
+pub type TreeNode = Inode<TreeNode>;
 pub type TreeNodeId = InodeId;
-pub type TreeIter<'a> = ItreeIter<'a, WidgetValue>;
-pub type TreeIterMut<'a> = ItreeIterMut<'a, WidgetValue>;
+pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
+pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
 impl Tree {
   /// Make a widget tree.
@@ -136,7 +197,7 @@ impl Tree {
       ),
     );
     let root_container = RootContainer::new();
-    let root_node = TreeNode::new(WidgetValue::RootContainer(root_container), shape);
+    let root_node = TreeNode::new(TreeNode::RootContainer(root_container), shape);
     Tree {
       base: Itree::new(root_node),
     }

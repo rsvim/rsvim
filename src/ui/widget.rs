@@ -27,38 +27,3 @@ pub trait Widget {
     debug!("draw, actual shape:{:?}", actual_shape);
   }
 }
-
-#[derive(Debug, Clone)]
-/// The value holder for each widget.
-pub enum WidgetValue {
-  RootContainer(RootContainer),
-  Window(Window),
-  Cursor(Cursor),
-}
-
-impl InodeValue for WidgetValue {
-  /// Get widget tree node ID.
-  fn id(&self) -> InodeId {
-    Widget::id(self)
-  }
-}
-
-impl Widget for WidgetValue {
-  /// Get widget ID.
-  fn id(&self) -> WidgetId {
-    match self {
-      WidgetValue::RootContainer(w) => w.id(),
-      WidgetValue::Window(w) => w.id(),
-      WidgetValue::Cursor(w) => w.id(),
-    }
-  }
-
-  /// Draw widget with (already calculated) actual shape, on the canvas.
-  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
-    match self {
-      WidgetValue::RootContainer(w) => w.draw(actual_shape, canvas),
-      WidgetValue::Window(w) => w.draw(actual_shape, canvas),
-      WidgetValue::Cursor(w) => w.draw(actual_shape, canvas),
-    }
-  }
-}

@@ -560,13 +560,12 @@ mod tests {
   use crate::cart::{IRect, U16Rect};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::inode::InodeValue;
-  use crate::uuid;
 
   static INIT: Once = Once::new();
 
   use super::*;
 
-  #[derive(Copy, Clone, Debug, Default)]
+  #[derive(Copy, Clone, Debug)]
   struct TestValue {
     value: i32,
     base: Inode,
@@ -622,7 +621,7 @@ mod tests {
   macro_rules! assert_node_value_eq {
     ($node: ident, $expect: expr) => {
       loop {
-        assert_eq!($node.value().value, $expect);
+        assert_eq!($node.value, $expect);
         break;
       }
     };
@@ -1017,40 +1016,34 @@ mod tests {
   fn shape2() {
     INIT.call_once(test_log_init);
 
-    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
-    let n1 = TestNode::new(v1, s1);
+    let n1 = TestValue::new(1, s1);
     let nid1 = n1.id();
 
-    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
     let us2 = U16Rect::new((0, 0), (20, 20));
-    let n2 = TestNode::new(v2, s2);
+    let n2 = TestValue::new(2, s2);
     let nid2 = n2.id();
 
-    let v3 = TestValue::new(3);
     let s3 = IRect::new((-2, -2), (-1, 0));
     let us3 = U16Rect::new((0, 0), (0, 0));
-    let n3 = TestNode::new(v3, s3);
+    let n3 = TestValue::new(3, s3);
     let nid3 = n3.id();
 
-    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 20));
     let us4 = U16Rect::new((3, 5), (20, 20));
-    let n4 = TestNode::new(v4, s4);
+    let n4 = TestValue::new(4, s4);
     let nid4 = n4.id();
 
-    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (15, 20));
     let us5 = U16Rect::new((3, 5), (18, 20));
-    let n5 = TestNode::new(v5, s5);
+    let n5 = TestValue::new(5, s5);
     let nid5 = n5.id();
 
-    let v6 = TestValue::new(6);
     let s6 = IRect::new((8, 13), (18, 25));
     let us6 = U16Rect::new((11, 18), (18, 20));
-    let n6 = TestNode::new(v6, s6);
+    let n6 = TestValue::new(6, s6);
     let nid6 = n6.id();
 
     /*
@@ -1102,12 +1095,11 @@ mod tests {
     INIT.call_once(test_log_init);
 
     let shape = IRect::new((0, 0), (10, 10));
-    let node_values: Vec<usize> = [1, 2, 3, 4, 5].to_vec();
-    let nodes: Vec<TestNode> = node_values
+    let node_values: Vec<i32> = [1, 2, 3, 4, 5].to_vec();
+    let nodes: Vec<TestValue> = node_values
       .iter()
-      .map(|value| TestValue::new(*value))
-      .map(|tv| TestNode::new(tv, shape))
-      .collect::<Vec<TestNode>>();
+      .map(|value| TestValue::new(*value, shape))
+      .collect();
     let nodes_ids: Vec<InodeId> = nodes.iter().map(|n| n.id()).collect();
 
     /*
@@ -1156,19 +1148,17 @@ mod tests {
     let mut value = 1;
     let mut node_ids: Vec<InodeId> = vec![];
 
-    let v = TestValue::new(value);
-    value += 1;
     let s = IRect::new((0, 0), (10, 10));
-    let root = TestNode::new(v, s);
+    let root = TestValue::new(value, s);
     let root_id = root.id();
     node_ids.push(root_id);
+    value += 1;
 
     let mut tree = Itree::new(root);
     for _ in 1..n {
-      let v = TestValue::new(value);
-      value += 1;
-      let node = TestNode::new(v, s);
+      let node = TestValue::new(value, s);
       let node_id = node.id();
+      value += 1;
       tree.insert(&root_id, node);
       node_ids.push(node_id);
     }
@@ -1232,49 +1222,40 @@ mod tests {
   fn get1() {
     INIT.call_once(test_log_init);
 
-    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
-    let n1 = TestNode::new(v1, s1);
+    let n1 = TestValue::new(1, s1);
     let nid1 = n1.id();
 
-    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (15, 15));
-    let n2 = TestNode::new(v2, s2);
+    let n2 = TestValue::new(2, s2);
     let nid2 = n2.id();
 
-    let v3 = TestValue::new(3);
     let s3 = IRect::new((10, 10), (18, 19));
-    let n3 = TestNode::new(v3, s3);
+    let n3 = TestValue::new(3, s3);
     let nid3 = n3.id();
 
-    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 14));
-    let n4 = TestNode::new(v4, s4);
+    let n4 = TestValue::new(4, s4);
     let nid4 = n4.id();
 
-    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (10, 20));
-    let n5 = TestNode::new(v5, s5);
+    let n5 = TestValue::new(5, s5);
     let nid5 = n5.id();
 
-    let v6 = TestValue::new(6);
     let s6 = IRect::new((3, 6), (6, 10));
-    let n6 = TestNode::new(v6, s6);
+    let n6 = TestValue::new(6, s6);
     let nid6 = n6.id();
 
-    let v7 = TestValue::new(7);
     let s7 = IRect::new((3, 6), (15, 25));
-    let n7 = TestNode::new(v7, s7);
+    let n7 = TestValue::new(7, s7);
     let nid7 = n7.id();
 
-    let v8 = TestValue::new(8);
     let s8 = IRect::new((-1, -2), (2, 1));
-    let n8 = TestNode::new(v8, s8);
+    let n8 = TestValue::new(8, s8);
     let nid8 = n8.id();
 
-    let v9 = TestValue::new(9);
     let s9 = IRect::new((5, 6), (9, 8));
-    let n9 = TestNode::new(v9, s9);
+    let n9 = TestValue::new(9, s9);
     let nid9 = n9.id();
 
     /*
@@ -1326,40 +1307,34 @@ mod tests {
   fn get2() {
     INIT.call_once(test_log_init);
 
-    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
-    let n1 = TestNode::new(v1, s1);
+    let n1 = TestValue::new(1, s1);
     let nid1 = n1.id();
 
-    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
     let us2 = U16Rect::new((0, 0), (20, 20));
-    let n2 = TestNode::new(v2, s2);
+    let n2 = TestValue::new(2, s2);
     let nid2 = n2.id();
 
-    let v3 = TestValue::new(3);
     let s3 = IRect::new((-2, -2), (-1, 0));
     let us3 = U16Rect::new((0, 0), (0, 0));
-    let n3 = TestNode::new(v3, s3);
+    let n3 = TestValue::new(3, s3);
     let nid3 = n3.id();
 
-    let v4 = TestValue::new(4);
     let s4 = IRect::new((3, 5), (20, 20));
     let us4 = U16Rect::new((3, 5), (20, 20));
-    let n4 = TestNode::new(v4, s4);
+    let n4 = TestValue::new(4, s4);
     let nid4 = n4.id();
 
-    let v5 = TestValue::new(5);
     let s5 = IRect::new((-3, -5), (15, 20));
     let us5 = U16Rect::new((3, 5), (18, 20));
-    let n5 = TestNode::new(v5, s5);
+    let n5 = TestValue::new(5, s5);
     let nid5 = n5.id();
 
-    let v6 = TestValue::new(6);
     let s6 = IRect::new((8, 13), (18, 25));
     let us6 = U16Rect::new((11, 18), (18, 20));
-    let n6 = TestNode::new(v6, s6);
+    let n6 = TestValue::new(6, s6);
     let nid6 = n6.id();
 
     /*
@@ -1409,19 +1384,16 @@ mod tests {
   fn move_by1() {
     INIT.call_once(test_log_init);
 
-    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
-    let n1 = TestNode::new(v1, s1);
+    let n1 = TestValue::new(1, s1);
     let nid1 = n1.id();
 
-    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
-    let n2 = TestNode::new(v2, s2);
+    let n2 = TestValue::new(2, s2);
     let nid2 = n2.id();
 
-    let v3 = TestValue::new(3);
     let s3 = IRect::new((0, 0), (1, 1));
-    let n3 = TestNode::new(v3, s3);
+    let n3 = TestValue::new(3, s3);
     let nid3 = n3.id();
 
     /*
@@ -1484,19 +1456,16 @@ mod tests {
   fn bounded_move_by1() {
     INIT.call_once(test_log_init);
 
-    let v1 = TestValue::new(1);
     let s1 = IRect::new((0, 0), (20, 20));
-    let n1 = TestNode::new(v1, s1);
+    let n1 = TestValue::new(1, s1);
     let nid1 = n1.id();
 
-    let v2 = TestValue::new(2);
     let s2 = IRect::new((0, 0), (20, 20));
-    let n2 = TestNode::new(v2, s2);
+    let n2 = TestValue::new(2, s2);
     let nid2 = n2.id();
 
-    let v3 = TestValue::new(3);
     let s3 = IRect::new((0, 0), (1, 1));
-    let n3 = TestNode::new(v3, s3);
+    let n3 = TestValue::new(3, s3);
     let nid3 = n3.id();
 
     /*

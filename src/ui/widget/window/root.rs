@@ -1,28 +1,28 @@
 //! Window root container.
 
+use crate::cart::{IRect, U16Rect};
+use crate::inode_value_generate_impl;
+use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 use crate::ui::widget::{Widget, WidgetId};
-use crate::uuid;
 
 #[derive(Debug, Clone, Copy)]
 /// Window root container.
 pub struct WindowRootContainer {
-  id: WidgetId,
+  base: Inode,
 }
 
 impl WindowRootContainer {
-  pub fn new() -> Self {
-    WindowRootContainer { id: uuid::next() }
-  }
-}
-
-impl Default for WindowRootContainer {
-  fn default() -> Self {
-    WindowRootContainer::new()
+  pub fn new(shape: IRect) -> Self {
+    WindowRootContainer {
+      base: Inode::new(shape),
+    }
   }
 }
 
 impl Widget for WindowRootContainer {
   fn id(&self) -> WidgetId {
-    self.id
+    self.base.id()
   }
 }
+
+inode_value_generate_impl!(WindowRootContainer, base);

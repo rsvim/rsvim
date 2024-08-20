@@ -3,24 +3,25 @@
 use std::fmt::Debug;
 use tracing::debug;
 
-use crate::cart::{U16Pos, U16Rect};
+use crate::cart::{IRect, U16Pos, U16Rect};
+use crate::inode_value_generate_impl;
 use crate::ui::canvas::{frame, Canvas, CursorStyle, CursorStyleFormatter};
+use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 use crate::ui::widget::{Widget, WidgetId};
-use crate::uuid;
 
 #[derive(Clone, Copy)]
 /// Cursor widget.
 pub struct Cursor {
-  id: WidgetId,
+  base: Inode,
   blinking: bool,
   hidden: bool,
   style: CursorStyle,
 }
 
 impl Cursor {
-  pub fn new() -> Self {
+  pub fn new(shape: IRect) -> Self {
     Cursor {
-      id: uuid::next(),
+      base: Inode::new(shape),
       blinking: true,
       hidden: false,
       style: CursorStyle::DefaultUserShape,
@@ -28,17 +29,11 @@ impl Cursor {
   }
 }
 
-impl Default for Cursor {
-  fn default() -> Self {
-    Cursor::new()
-  }
-}
-
 impl Debug for Cursor {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     let style_formatter = CursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
-      .field("id", &self.id)
+      .field("id", &self.base.id())
       .field("blinking", &self.blinking)
       .field("hidden", &self.hidden)
       .field("style", &style_formatter)
@@ -46,9 +41,11 @@ impl Debug for Cursor {
   }
 }
 
+inode_value_generate_impl!(Cursor, base);
+
 impl Widget for Cursor {
   fn id(&self) -> WidgetId {
-    self.id
+    self.base.id()
   }
 
   fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {

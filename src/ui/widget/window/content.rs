@@ -8,14 +8,16 @@ use std::convert::From;
 use tracing::debug;
 
 use crate::cart::{IRect, U16Rect};
+use crate::inode_value_generate_impl;
 use crate::ui::canvas::Canvas;
+use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
 #[derive(Debug, Clone)]
 /// The VIM window content.
 pub struct WindowContent {
-  id: WidgetId,
+  base: Inode,
   lines: VecDeque<CompactString>,
   dirty_lines: VecDeque<bool>,
   line_wrap: bool,
@@ -24,9 +26,9 @@ pub struct WindowContent {
 }
 
 impl WindowContent {
-  pub fn new() -> Self {
+  pub fn new(shape: IRect) -> Self {
     WindowContent {
-      id: uuid::next(),
+      base: Inode::new(shape),
       lines: VecDeque::new(),
       dirty_lines: VecDeque::new(),
       line_wrap: false,
@@ -124,17 +126,11 @@ impl WindowContent {
   }
 }
 
-impl Default for WindowContent {
-  fn default() -> Self {
-    WindowContent::new()
-  }
-}
-
 impl From<Vec<CompactString>> for WindowContent {
-  fn from(lines: Vec<CompactString>) -> Self {
+  fn from(shape: IRect, lines: Vec<CompactString>) -> Self {
     let dirty_lines = lines.iter().map(|_| false).collect();
     WindowContent {
-      id: uuid::next(),
+      base: Inode::new(shape),
       lines,
       dirty_lines,
       line_wrap: false,
@@ -144,9 +140,11 @@ impl From<Vec<CompactString>> for WindowContent {
   }
 }
 
+inode_value_generate_impl!(WindowContent, base);
+
 impl Widget for WindowContent {
   fn id(&self) -> WidgetId {
-    self.id
+    self.base.id()
   }
 
   fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
