@@ -71,6 +71,18 @@ impl Frame {
     old
   }
 
+  /// Reset/clear a cell on specific position.
+  pub fn reset_cell(&mut self, pos: UPos) -> Cell {
+    let index = pos.x() * pos.y();
+    let old = self.cells[index].clone();
+    self.cells[index] = Cell::default();
+    self.dirty_cells.push(FrameCellsRange {
+      start: index,
+      end: index + 1,
+    });
+    old
+  }
+
   /// Get n continuously cells, start from position.
   pub fn get_cells(&self, pos: UPos, n: usize) -> &[Cell] {
     let start_at = pos.x() * pos.y();
@@ -92,6 +104,23 @@ impl Frame {
       end: end_at,
     });
     self.cells.splice(start_at..end_at, cells)
+  }
+
+  /// Reset/clear continuously cells, start from position.
+  /// Returns n old cells.
+  pub fn reset_cells(
+    &mut self,
+    pos: UPos,
+    cells: usize,
+  ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter> {
+    let start_at = pos.x() * pos.y();
+    let end_at = start_at + cells;
+    self.dirty_cells.push(FrameCellsRange {
+      start: start_at,
+      end: end_at,
+    });
+    let values: Vec<Cell> = vec![Cell::default(); cells];
+    self.cells.splice(start_at..end_at, values)
   }
 
   /// Get dirty cells.

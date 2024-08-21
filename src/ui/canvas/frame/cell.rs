@@ -85,7 +85,7 @@ impl Default for Cell {
 
 impl Cell {
   /// Make cell with a symbol, foreground/background color, attributes.
-  fn new(symbol: CompactString, fg: Color, bg: Color, attrs: Attributes) -> Self {
+  pub fn new(symbol: CompactString, fg: Color, bg: Color, attrs: Attributes) -> Self {
     Cell {
       symbol,
       fg,

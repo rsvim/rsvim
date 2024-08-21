@@ -3,6 +3,8 @@
 #![allow(unused_imports, dead_code)]
 
 use compact_str::CompactString;
+use crossterm::style::{Attributes, Color};
+use geo::point;
 use std::collections::VecDeque;
 use std::convert::From;
 use std::marker::{PhantomData, PhantomPinned};
@@ -12,16 +14,22 @@ use tracing::debug;
 use crate::buffer::Buffer;
 use crate::cart::{IRect, U16Rect};
 use crate::inode_value_generate_impl;
-use crate::ui::canvas::Canvas;
+use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
 #[derive(Debug, Copy, Clone)]
+/// The view of a buffer. The range is left-open right-closed, or top-open bottom-closed, i.e.
+/// `[start_line, end_line)` or `[start_column, end_column)`.
 struct BufferView {
+  /// Start line number
   pub lstart: Option<usize>,
+  /// End line number.
   pub lend: Option<usize>,
+  /// Start column.
   pub cstart: Option<usize>,
+  /// End column.
   pub cend: Option<usize>,
 }
 
@@ -95,11 +103,14 @@ pub struct WindowContent<'a> {
 
 impl<'a> WindowContent<'a> {
   pub fn new(shape: IRect, buffer: &'a mut Buffer) -> Self {
+    let mut buffer_view = BufferView::default();
+    buffer_view.lstart = Some(0);
+    buffer_view.cstart = Some(0);
     WindowContent {
       base: Inode::new(shape),
       buffer: NonNull::new(buffer as *mut Buffer).unwrap(),
       phantom: PhantomData,
-      buffer_view: BufferView::default(),
+      buffer_view,
       line_wrap: false,
       word_wrap: false,
     }
@@ -133,32 +144,36 @@ impl<'a> WindowContent<'a> {
     self.buffer_view.lstart
   }
 
-  pub fn set_buffer_view_lstart(&mut self, lstart: Option<usize>) {
-    self.buffer_view.lstart = lstart;
+  pub fn set_buffer_view_lstart(&mut self, lstart: usize) {
+    self.buffer_view.lstart = Some(lstart);
+    self.buffer_view.lend = None;
   }
 
   pub fn buffer_view_lend(&self) -> Option<usize> {
     self.buffer_view.lend
   }
 
-  pub fn set_buffer_view_lend(&mut self, lend: Option<usize>) {
-    self.buffer_view.lend = lend;
+  pub fn set_buffer_view_lend(&mut self, lend: usize) {
+    self.buffer_view.lend = Some(lend);
+    self.buffer_view.lstart = None;
   }
 
   pub fn buffer_view_cstart(&self) -> Option<usize> {
     self.buffer_view.cstart
   }
 
-  pub fn set_buffer_view_cstart(&mut self, cstart: Option<usize>) {
-    self.buffer_view.cstart = cstart;
+  pub fn set_buffer_view_cstart(&mut self, cstart: usize) {
+    self.buffer_view.cstart = Some(cstart);
+    self.buffer_view.cend = Some(cstart + self.base.actual_shape().width() as usize);
   }
 
   pub fn buffer_view_cend(&self) -> Option<usize> {
     self.buffer_view.cend
   }
 
-  pub fn set_buffer_view_cend(&mut self, cend: Option<usize>) {
-    self.buffer_view.cend = cend;
+  pub fn set_buffer_view_cend(&mut self, cend: usize) {
+    self.buffer_view.cend = Some(cend);
+    self.buffer_view.cstart = Some(cend - self.base.actual_shape().width() as usize);
   }
 }
 
@@ -221,5 +236,77 @@ impl<'a> Widget for WindowContent<'a> {
     self.base.id()
   }
 
-  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {}
+  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
+    match self.buffer_view {
+      BufferView {
+        lstart: Some(lstart),
+        lend,
+        cstart: Some(cstart),
+        cend: Some(cend),
+      } => {
+        let actual_shape = self.actual_shape();
+        let height = actual_shape.height();
+        let width = actual_shape.width();
+
+        let total_lines = unsafe { self.buffer.as_ref().rope().len_lines() };
+        let mut buffer_lines: Option<ropey::iter::Lines> = None;
+
+        for row in 0..height {
+          let l = lstart + row as usize;
+          if l < total_lines && buffer_lines.is_none() {
+            buffer_lines = unsafe { Some(self.buffer.as_ref().rope().lines_at(l)) };
+          }
+          match buffer_lines {
+            Some(mut buffer_lines) => match buffer_lines.next() {
+              Some(one_line) => {
+                let mut col = 0_usize;
+                for chunk in one_line.chunks() {
+                  let cells = chunk
+                    .chars()
+                    .map(|c| {
+                      let mut tmp_buf = [0; 8];
+                      Cell::new(
+                        CompactString::const_new(c.encode_utf8(&mut tmp_buf)),
+                        Color::Reset,
+                        Color::Reset,
+                        Attributes::default(),
+                      )
+                    })
+                    .collect();
+                  canvas
+                    .frame_mut()
+                    .set_cells(point!(x: col,y: row as usize), cells);
+                  col += cells.len();
+                }
+                canvas
+                  .frame_mut()
+                  .reset_cells(point!(x: col, y: row as usize), width as usize - col);
+              }
+              None => {
+                // This line has no text contents, set empty line
+                canvas
+                  .frame_mut()
+                  .reset_cells(point!(x: 0_usize, y: row as usize), width as usize);
+              }
+            },
+            None => {
+              // This line has no text contents, set empty line
+              canvas
+                .frame_mut()
+                .reset_cells(point!(x: 0_usize, y: row as usize), width as usize);
+            }
+          }
+        }
+      }
+      BufferView {
+        lstart,
+        lend: Some(lend),
+        cstart: Some(cstart),
+        cend: Some(cend),
+      } => {}
+      _ => {
+        unreachable!("Missing buffer view!")
+      }
+    }
+  }
 }
