@@ -5,15 +5,42 @@
 use compact_str::CompactString;
 use std::collections::VecDeque;
 use std::convert::From;
+use std::marker::{PhantomData, PhantomPinned};
+use std::ptr::NonNull;
 use tracing::debug;
 
-use crate::buffer::{Buffer, BufferView};
+use crate::buffer::Buffer;
 use crate::cart::{IRect, U16Rect};
 use crate::inode_value_generate_impl;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
+
+#[derive(Debug, Copy, Clone)]
+struct BufferView {
+  pub lstart: Option<usize>,
+  pub lend: Option<usize>,
+  pub cstart: Option<usize>,
+  pub cend: Option<usize>,
+}
+
+impl BufferView {
+  pub fn new() -> Self {
+    BufferView {
+      lstart: None,
+      lend: None,
+      cstart: None,
+      cend: None,
+    }
+  }
+}
+
+impl Default for BufferView {
+  fn default() -> Self {
+    BufferView::new()
+  }
+}
 
 #[derive(Debug, Clone)]
 /// The content of the VIM window.
@@ -41,20 +68,25 @@ use crate::uuid;
 ///
 /// For the last kind of view, it contains exactly `X` lines of a buffer at most, but the lines
 /// longer than the window's width are truncated by the window's boundary.
+///
+/// A view contains 4 fields:
+///
+/// * Start line (`lstart`).
+/// * End line (`lend`).
+/// * Start column (`cstart`).
+/// * End column (`cend`).
+///
+/// We can always calculates the two fields based on the other two fields on the diagonal corner,
+/// with window size, buffer's text contents, and the line-wrap/word-wrap options.
 pub struct WindowContent<'a> {
   base: Inode,
 
-  // Buffer view
-  buffer: &'a Buffer,
+  // Buffer reference
+  buffer: NonNull<Buffer>,
+  phantom: PhantomData<&'a mut Buffer>,
 
-  // Start line
-  lstart: Option<usize>,
-  // End line
-  lend: Option<usize>,
-  // Start column
-  cstart: Option<usize>,
-  // End column
-  cend: Option<usize>,
+  // Buffer view
+  buffer_view: BufferView,
 
   // Options
   line_wrap: bool,
@@ -62,11 +94,12 @@ pub struct WindowContent<'a> {
 }
 
 impl<'a> WindowContent<'a> {
-  pub fn new(shape: IRect, buffer: &'a Buffer) -> Self {
+  pub fn new(shape: IRect, buffer: &'a mut Buffer) -> Self {
     WindowContent {
       base: Inode::new(shape),
-      buffer,
-      buffer_view,
+      buffer: NonNull::new(buffer as *mut Buffer).unwrap(),
+      phantom: PhantomData,
+      buffer_view: BufferView::default(),
       line_wrap: false,
       word_wrap: false,
     }
@@ -89,19 +122,43 @@ impl<'a> WindowContent<'a> {
   }
 
   pub fn buffer(&self) -> &Buffer {
-    &self.buffer
+    unsafe { self.buffer.as_ref() }
   }
 
-  pub fn set_buffer_mut(&mut self, buffer: &'a Buffer) {
-    self.buffer = buffer;
+  pub fn buffer_mut(&mut self) -> &mut Buffer {
+    unsafe { self.buffer.as_mut() }
   }
 
-  pub fn buffer_view(&self) -> &BufferView {
-    &self.buffer_view
+  pub fn buffer_view_lstart(&self) -> Option<usize> {
+    self.buffer_view.lstart
   }
 
-  pub fn set_buffer_view(&mut self, buffer_view: BufferView) {
-    self.buffer_view = buffer_view;
+  pub fn set_buffer_view_lstart(&mut self, lstart: Option<usize>) {
+    self.buffer_view.lstart = lstart;
+  }
+
+  pub fn buffer_view_lend(&self) -> Option<usize> {
+    self.buffer_view.lend
+  }
+
+  pub fn set_buffer_view_lend(&mut self, lend: Option<usize>) {
+    self.buffer_view.lend = lend;
+  }
+
+  pub fn buffer_view_cstart(&self) -> Option<usize> {
+    self.buffer_view.cstart
+  }
+
+  pub fn set_buffer_view_cstart(&mut self, cstart: Option<usize>) {
+    self.buffer_view.cstart = cstart;
+  }
+
+  pub fn buffer_view_cend(&self) -> Option<usize> {
+    self.buffer_view.cend
+  }
+
+  pub fn set_buffer_view_cend(&mut self, cend: Option<usize>) {
+    self.buffer_view.cend = cend;
   }
 }
 

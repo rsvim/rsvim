@@ -7,11 +7,6 @@ use std::convert::From;
 
 use crate::uuid;
 
-// Re-export
-pub use crate::buffer::view::BufferView;
-
-pub mod view;
-
 pub type BufferId = usize;
 
 #[derive(Clone, Debug)]
