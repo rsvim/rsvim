@@ -36,9 +36,11 @@ use crate::uuid;
 /// * Both Line-wrap and word-wrap disabled.
 ///
 /// For the first 3 kinds of view, when a window that has `X` rows height, it may contains less
-/// than `X` lines for a buffer. Because very long lines or words can take extra spaces and
-/// trigger line breaks. The real lines the window can contain needs a specific algorithm to
-/// calculate.
+/// than `X` lines of a buffer. Because very long lines or words can take extra spaces and trigger
+/// line breaks. The real lines the window can contain needs a specific algorithm to calculate.
+///
+/// For the last kind of view, it contains exactly `X` lines of a buffer at most, but the lines
+/// longer than the window's width are truncated by the window's boundary.
 pub struct WindowContent<'a> {
   base: Inode,
 
