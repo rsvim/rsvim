@@ -303,9 +303,11 @@ impl<'a> Widget for WindowContent<'a> {
         lend: Some(lend),
         cstart: Some(cstart),
         cend: Some(cend),
-      } => {}
+      } => {
+        unreachable!("Not implement")
+      }
       _ => {
-        unreachable!("Missing buffer view!")
+        unreachable!("Missing buffer view")
       }
     }
   }
