@@ -136,6 +136,9 @@ impl<'a> BufferView for BothWrappedBufferView<'a> {
     self.base.lstart
   }
 
+  /// Set start line.
+  ///
+  /// This operation calculates
   fn set_lstart(&mut self, lstart: usize) {}
 
   /// Get end line.

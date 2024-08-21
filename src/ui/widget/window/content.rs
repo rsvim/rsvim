@@ -18,18 +18,41 @@ use crate::uuid;
 #[derive(Debug, Clone)]
 /// The content of the VIM window.
 ///
-/// There are some methods related the the `line`. The `line` here is a logical concept related to
-/// normal lines in the files user editing. Not the rows that render to the terminal.
+/// Besides buffer and window, here introduce several terms and concepts:
 ///
-/// Note: For a window with **N** rows height, it can contains at most **N** lines (including the
-/// empty lines). If there is some very long line, and the `line_wrap` option is set, then 1
-/// logical line can actually take more than 1 rows height.
+/// * Line: One line of text content in a buffer.
+/// * Row/column: The width/height of a window.
+/// * View: A window only shows part of a buffer when the buffer is too big to put all the text
+///   contents in the window. When a buffer shows in a window, thus the window starts and ends at
+///   specific lines and columns of the buffer.
+///
+/// There are two options related to the view:
+/// [line-wrap and word-wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap), so we have 4
+/// kinds of views.
+///
+/// * Both line-wrap and word-wrap enabled.
+/// * Line-wrap enabled and word-wrap disabled.
+/// * Line-wrap disabled and word-wrap enabled.
+/// * Both Line-wrap and word-wrap disabled.
+///
+/// For the first 3 kinds of view, when a window that has `X` rows height, it may contains less
+/// than `X` lines for a buffer. Because very long lines or words can take extra spaces and
+/// trigger line breaks. The real lines the window can contain needs a specific algorithm to
+/// calculate.
 pub struct WindowContent<'a> {
   base: Inode,
 
   // Buffer view
   buffer: &'a Buffer,
-  buffer_view: BufferView,
+
+  // Start line
+  lstart: Option<usize>,
+  // End line
+  lend: Option<usize>,
+  // Start column
+  cstart: Option<usize>,
+  // End column
+  cend: Option<usize>,
 
   // Options
   line_wrap: bool,
@@ -37,7 +60,7 @@ pub struct WindowContent<'a> {
 }
 
 impl<'a> WindowContent<'a> {
-  pub fn new(shape: IRect, buffer: &'a Buffer, buffer_view: BufferView) -> Self {
+  pub fn new(shape: IRect, buffer: &'a Buffer) -> Self {
     WindowContent {
       base: Inode::new(shape),
       buffer,
