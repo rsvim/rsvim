@@ -18,6 +18,7 @@ use std::io::{Result as IoResult, Write};
 use std::ptr::NonNull;
 use std::sync::Arc;
 use std::time::Duration;
+use time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
@@ -67,8 +68,6 @@ impl EventLoop {
     let window_id = window.id();
     let window_node = TreeNode::Window(window);
     tree.bounded_insert(&tree.root_id(), window_node);
-    state.set_current_window_widget(Some(window_id));
-    state.window_widgets_mut().insert(window_id);
     debug!("new, insert window container: {:?}", window_id);
 
     let cursor_shape = IRect::new((0, 0), (1, 1));
@@ -76,16 +75,16 @@ impl EventLoop {
     let cursor_id = cursor.id();
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
-    state.set_cursor_widget(Some(cursor_id));
 
     // State
-    let mut state = State::new();
+    let state = State::default();
 
     Ok(EventLoop {
       cli_opt,
       canvas,
       tree: Tree::to_arc(tree),
       state: State::to_arc(state),
+      buffers: Buffers::to_arc(buffers),
     })
   }
 
@@ -94,7 +93,7 @@ impl EventLoop {
 
     let cursor = self
       .canvas
-      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap()
       .frame()
       .cursor;
@@ -124,7 +123,7 @@ impl EventLoop {
         // Fix `self` lifetime requires 'static in spawn.
         let raw_self = NonNull::new(self as *mut EventLoop).unwrap();
         let cli_opt = raw_self.as_ref().cli_opt.clone();
-        let state = raw_self.as_ref().state.clone();
+        let buffers = raw_self.as_ref().buffers.clone();
         static RBUF_SIZE: usize = if std::mem::size_of::<usize>() < 8 {
           4096
         } else {
@@ -149,22 +148,14 @@ impl EventLoop {
                       let rbuf1: &[u8] = &rbuf;
                       let rbuf_str: String = String::from_utf8_lossy(rbuf1).into_owned();
 
-                      // Lock state
-                      let mut state = state
-                        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                        .unwrap();
-
                       builder.append(&rbuf_str.to_owned());
                       if n == 0 {
-                        // Finish reading
+                        // Finish reading, create new buffer
                         let buffer = Buffer::from(builder);
-                        let buffer_id = buffer.id();
-
-                        // Setup buffers.
-                        state.buffers_mut().insert(buffer_id, buffer);
-                        if state.current_buffer().is_none() {
-                          state.set_current_buffer(Some(buffer_id));
-                        }
+                        buffers
+                          .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                          .unwrap()
+                          .insert(Buffer::to_arc(buffer));
 
                         // println!("Read file {:?} into buffer", input_file);
                         break;
