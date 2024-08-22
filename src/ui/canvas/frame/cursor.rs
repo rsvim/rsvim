@@ -87,8 +87,8 @@ impl Default for Cursor {
   }
 }
 
-impl fmt::Debug for Cursor {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+impl std::fmt::Debug for Cursor {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
     let style_formatter = CursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
       .field("pos", &self.pos)
