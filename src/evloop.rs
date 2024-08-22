@@ -89,31 +89,7 @@ impl EventLoop {
 
   pub async fn init(&mut self) -> IoResult<()> {
     let mut out = std::io::stdout();
-
-    let cursor = self
-      .canvas
-      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap()
-      .frame()
-      .cursor;
-
-    if cursor.blinking() {
-      queue!(out, crossterm::cursor::EnableBlinking)?;
-    } else {
-      queue!(out, crossterm::cursor::DisableBlinking)?;
-    }
-    if cursor.hidden() {
-      queue!(out, crossterm::cursor::Hide)?;
-    } else {
-      queue!(out, crossterm::cursor::Show)?;
-    }
-
-    queue!(out, cursor.style())?;
-    queue!(
-      out,
-      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
-    )?;
-
+    self.queue_cursor(&mut out).await?;
     out.flush()?;
 
     // Has input files.
@@ -242,13 +218,14 @@ impl EventLoop {
         .shade()
     };
 
-    self.render(shader).await?;
+    let mut out = std::io::stdout();
+    self.queue_shader(shader, &mut out).await?;
+    out.flush()?;
 
     Ok(true)
   }
 
-  async fn render(&mut self, shader: Shader) -> IoResult<()> {
-    let mut out = std::io::stdout();
+  async fn queue_shader(&mut self, shader: Shader, out: &mut std::io::Stdout) -> IoResult<()> {
     for shader_command in shader.iter() {
       match shader_command {
         ShaderCommand::CursorSetCursorStyle(command) => queue!(out, command)?,
@@ -296,7 +273,33 @@ impl EventLoop {
       }
     }
 
-    out.flush()?;
+    Ok(())
+  }
+
+  async fn queue_cursor(&self, out: &mut std::io::Stdout) -> IoResult<()> {
+    let cursor = *self
+      .canvas
+      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .frame()
+      .cursor();
+
+    if cursor.blinking() {
+      queue!(out, crossterm::cursor::EnableBlinking)?;
+    } else {
+      queue!(out, crossterm::cursor::DisableBlinking)?;
+    }
+    if cursor.hidden() {
+      queue!(out, crossterm::cursor::Hide)?;
+    } else {
+      queue!(out, crossterm::cursor::Show)?;
+    }
+
+    queue!(out, cursor.style())?;
+    queue!(
+      out,
+      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
+    )?;
 
     Ok(())
   }
