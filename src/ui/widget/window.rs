@@ -137,59 +137,33 @@ impl Widget for Window {
 }
 
 impl Window {
-  pub fn lines(&self) -> &VecDeque<CompactString> {
-    if let WindowNode::WindowContent(c) = self.base.node(&self.content_id).unwrap() {
-      c.lines()
-    } else {
-      unreachable!()
-    }
-  }
-
-  pub fn line(&self, index: usize) -> &CompactString {
-    if let WindowNode::WindowContent(c) = self.base.node(&self.content_id).unwrap() {
-      c.line(index)
-    } else {
-      unreachable!()
-    }
-  }
-
-  pub fn set_line(&mut self, index: usize, line: CompactString) -> &mut CompactString {
-    if let WindowNode::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap() {
-      c.set_line(index, line)
-    } else {
-      unreachable!()
-    }
-  }
-
   pub fn line_wrap(&self) -> bool {
-    if let WindowNode::WindowContent(c) = self.base.node(&self.content_id).unwrap().value() {
+    if let WindowNode::WindowContent(c) = self.base.node(&self.content_id).unwrap() {
       c.line_wrap()
     } else {
       unreachable!()
     }
   }
 
-  pub fn set_line_wrap(&mut self, line_wrap: bool) -> bool {
-    if let WindowNode::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap().value_mut()
-    {
-      c.set_line_wrap(line_wrap)
+  pub fn set_line_wrap(&mut self, line_wrap: bool) {
+    if let WindowNode::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap() {
+      c.set_line_wrap(line_wrap);
     } else {
       unreachable!()
     }
   }
 
   pub fn word_wrap(&self) -> bool {
-    if let WindowNode::WindowContent(c) = self.base.node(&self.content_id).unwrap().value() {
+    if let WindowNode::WindowContent(c) = self.base.node(&self.content_id).unwrap() {
       c.word_wrap()
     } else {
       unreachable!()
     }
   }
 
-  pub fn set_word_wrap(&mut self, word_wrap: bool) -> bool {
-    if let WindowNode::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap().value_mut()
-    {
-      c.set_word_wrap(word_wrap)
+  pub fn set_word_wrap(&mut self, word_wrap: bool) {
+    if let WindowNode::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap() {
+      c.set_word_wrap(word_wrap);
     } else {
       unreachable!()
     }

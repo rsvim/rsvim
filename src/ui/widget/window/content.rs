@@ -193,19 +193,13 @@ impl Widget for WindowContent {
         // Get buffer Arc pointer
         if let Some(buffer) = self.buffer.upgrade() {
           // Lock buffer for read
-          if let Some(buffer_guard) =
-            buffer.try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-          {
-            let total_lines = buffer_guard.rope().len_lines();
-            let mut buffer_lines: Option<ropey::iter::Lines> = None;
-
-            for row in 0..height {
-              let l = lstart + row as usize;
-              if l < total_lines && buffer_lines.is_none() {
-                buffer_lines = Some(buffer_guard.rope().lines_at(l));
-              }
-              match buffer_lines {
-                Some(mut buffer_lines) => match buffer_lines.next() {
+          if let Some(buffer) = buffer.try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
+            let total_lines = buffer.rope().len_lines();
+            if lstart <= total_lines {
+              let mut buffer_lines = buffer.rope().lines_at(lstart);
+              for row in 0..height {
+                let l = lstart + row as usize;
+                match buffer_lines.next() {
                   Some(one_line) => {
                     let mut col = 0_usize;
                     for chunk in one_line.chunks() {
@@ -239,13 +233,6 @@ impl Widget for WindowContent {
                       width as usize,
                     );
                   }
-                },
-                None => {
-                  // This line has no text contents, set empty line
-                  canvas.frame_mut().reset_cells(
-                    point!(x: actual_pos.x() as usize, y: actual_pos.y() as usize),
-                    width as usize,
-                  );
                 }
               }
             }
