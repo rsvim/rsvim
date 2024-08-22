@@ -20,9 +20,9 @@ pub mod internal;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
-pub enum TreeNode<'a> {
+pub enum TreeNode {
   RootContainer(RootContainer),
-  Window(Window<'a>),
+  Window(Window),
   Cursor(Cursor),
 }
 
@@ -36,7 +36,7 @@ macro_rules! tree_node_generate_dispatch {
   };
 }
 
-impl<'a> InodeValue for TreeNode<'a> {
+impl InodeValue for TreeNode {
   fn id(&self) -> InodeId {
     tree_node_generate_dispatch!(self, id)
   }
@@ -90,7 +90,7 @@ impl<'a> InodeValue for TreeNode<'a> {
   }
 }
 
-impl<'a> Widget for TreeNode<'a> {
+impl Widget for TreeNode {
   /// Get widget ID.
   fn id(&self) -> WidgetId {
     match self {
@@ -204,9 +204,9 @@ impl<'a> Widget for TreeNode<'a> {
 /// them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
 /// doesn't handle or process any input events, the UI keeps still and never changes.
 ///
-pub struct Tree<'a> {
+pub struct Tree {
   // Internal implementation.
-  base: Itree<TreeNode<'a>>,
+  base: Itree<TreeNode>,
 
   // Cursor and window state {
 
@@ -218,11 +218,11 @@ pub struct Tree<'a> {
   // Cursor and window state }
 }
 
-pub type TreeArc<'a> = Arc<RwLock<Tree<'a>>>;
-pub type TreeWk<'a> = Weak<RwLock<Tree<'a>>>;
+pub type TreeArc = Arc<RwLock<Tree>>;
+pub type TreeWk = Weak<RwLock<Tree>>;
 pub type TreeNodeId = InodeId;
-pub type TreeIter<'a> = ItreeIter<'a, TreeNode<'a>>;
-pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode<'a>>;
+pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
+pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
 impl Tree {
   /// Make a widget tree.
@@ -300,8 +300,25 @@ impl Tree {
     self.base.iter_mut()
   }
 
+  fn insert_widget_ids(&mut self, node: &TreeNode) {
+    match node {
+      TreeNode::Cursor(n) => {
+        self.cursor_id = Some(n.id());
+      }
+      TreeNode::Window(n) => {
+        self.windows_ids.insert(n.id());
+      }
+      _ => { /* Skip */ }
+    }
+  }
+
+  fn remove_window_widget_ids(&mut self, id: &TreeNodeId) {
+    self.windows_ids.remove(id);
+  }
+
   /// See [`Itree::insert`].
   pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
+    self.insert_widget_ids(child_node.id());
     self.base.insert(parent_id, child_node)
   }
 
@@ -311,11 +328,13 @@ impl Tree {
     parent_id: &TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
+    self.insert_widget_ids(child_node.id());
     self.base.bounded_insert(parent_id, child_node)
   }
 
   /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
+    self.remove_window_widget_ids(&id);
     self.base.remove(id)
   }
 
@@ -370,25 +389,25 @@ impl Tree {
   }
 
   /// Set current cursor node ID.
-  pub fn set_cursor_id(&self, cursor_id: Option<TreeNodeId>) {
+  pub fn set_cursor_id(&mut self, cursor_id: Option<TreeNodeId>) {
     self.cursor_id = cursor_id;
   }
 
   /// Get current window node ID. A window is current because the cursor is inside it.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
-    match self.cursor_id {
-      Some(cursor_id) => {
-        let mut id = cursor_id;
-        while let Some(parent_id) = self.parent_id(&id) {
-          if let TreeNode::Window(w) = self.node(parent_id) {
-            return Some(parent_id);
+    if let Some(cursor_id) = self.cursor_id {
+      let mut id = cursor_id;
+      while let Some(parent_id) = self.parent_id(&id) {
+        if let Some(parent_node) = self.node(parent_id) {
+          if let TreeNode::Window(_w) = parent_node {
+            return Some(*parent_id);
           }
-          id = parent_id;
         }
-        None
+        id = *parent_id;
       }
-      None => None,
     }
+
+    None
   }
 
   // Cursor and Window }

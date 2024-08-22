@@ -44,19 +44,26 @@ pub struct EventLoop {
 
 impl EventLoop {
   pub async fn new(cli_opt: CliOpt) -> IoResult<Self> {
+    // Canvas
     let (cols, rows) = terminal::size()?;
-    let screen_size = U16Size::new(cols, rows);
-    let screen = Canvas::new(screen_size);
-    let screen = Canvas::to_arc(screen);
-    let mut tree = Tree::new(screen_size);
-    let mut state = State::new();
-    debug!("new, screen size: {:?}", screen_size);
+    let canvas_size = U16Size::new(cols, rows);
+    let canvas = Canvas::new(canvas_size);
+    let canvas = Canvas::to_arc(canvas);
+
+    // UI Tree
+    let mut tree = Tree::new(canvas_size);
+    debug!("new, screen size: {:?}", canvas_size);
+
+    // Buffers
+    let mut buffers = Buffers::new();
+    let buffer = Buffer::to_arc(Buffer::new());
+    buffers.insert(buffer.clone());
 
     let window_shape = IRect::new(
       (0, 0),
-      (screen_size.width() as isize, screen_size.height() as isize),
+      (canvas_size.width() as isize, canvas_size.height() as isize),
     );
-    let window = Window::new(window_shape);
+    let window = Window::new(window_shape, Arc::downgrade(&buffer));
     let window_id = window.id();
     let window_node = TreeNode::Window(window);
     tree.bounded_insert(&tree.root_id(), window_node);
@@ -71,9 +78,12 @@ impl EventLoop {
     tree.bounded_insert(&window_id, cursor_node);
     state.set_cursor_widget(Some(cursor_id));
 
+    // State
+    let mut state = State::new();
+
     Ok(EventLoop {
       cli_opt,
-      canvas: screen,
+      canvas,
       tree: Tree::to_arc(tree),
       state: State::to_arc(state),
     })

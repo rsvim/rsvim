@@ -5,6 +5,7 @@ use std::collections::VecDeque;
 use compact_str::CompactString;
 use tracing::debug;
 
+use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_value_generate_impl;
 use crate::ui::canvas::Canvas;
@@ -20,22 +21,22 @@ pub mod root;
 #[derive(Debug, Clone)]
 /// The VIM window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
-pub struct Window<'a> {
-  base: Itree<WindowNode<'a>>,
+pub struct Window {
+  base: Itree<WindowNode>,
 
   // The Window content widget ID.
   content_id: InodeId,
 }
 
-impl<'a> Window<'a> {
-  pub fn new(shape: IRect) -> Self {
+impl Window {
+  pub fn new(shape: IRect, buffer: BufferWk) -> Self {
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
 
     let mut base = Itree::new(window_root_node);
 
-    let window_content = WindowContent::new(shape);
+    let window_content = WindowContent::new(shape, buffer);
     let window_content_id = window_content.id();
     let window_content_node = WindowNode::WindowContent(window_content);
 
@@ -203,9 +204,9 @@ impl Window {
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
-pub enum WindowNode<'a> {
+pub enum WindowNode {
   WindowRootContainer(WindowRootContainer),
-  WindowContent(WindowContent<'a>),
+  WindowContent(WindowContent),
 }
 
 macro_rules! window_node_generate_dispatch {
@@ -217,7 +218,7 @@ macro_rules! window_node_generate_dispatch {
   };
 }
 
-impl<'a> InodeValue for WindowNode<'a> {
+impl InodeValue for WindowNode {
   fn id(&self) -> InodeId {
     window_node_generate_dispatch!(self, id)
   }
@@ -271,7 +272,7 @@ impl<'a> InodeValue for WindowNode<'a> {
   }
 }
 
-impl<'a> Widget for WindowNode<'a> {
+impl Widget for WindowNode {
   /// Get widget ID.
   fn id(&self) -> WidgetId {
     window_node_generate_dispatch!(self, id)
