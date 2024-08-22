@@ -8,7 +8,7 @@ use tracing::debug;
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::ui::canvas::Canvas;
-use crate::ui::tree::internal::inode::{InodeId, InodeValue};
+use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
@@ -48,7 +48,7 @@ impl Window {
   }
 }
 
-impl InodeValue for Window {
+impl Inode for Window {
   fn id(&self) -> InodeId {
     self.base.root_id()
   }
@@ -186,7 +186,7 @@ macro_rules! window_node_generate_dispatch {
   };
 }
 
-impl InodeValue for WindowNode {
+impl Inode for WindowNode {
   fn id(&self) -> InodeId {
     window_node_generate_dispatch!(self, id)
   }

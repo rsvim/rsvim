@@ -6,13 +6,13 @@ use tracing::debug;
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_value_generate_impl;
 use crate::ui::canvas::{frame, Canvas, CursorStyle, CursorStyleFormatter};
-use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
+use crate::ui::tree::internal::inode::{Inode, InodeBase, InodeId};
 use crate::ui::widget::{Widget, WidgetId};
 
 #[derive(Clone, Copy)]
 /// Cursor widget.
 pub struct Cursor {
-  base: Inode,
+  base: InodeBase,
   blinking: bool,
   hidden: bool,
   style: CursorStyle,
@@ -21,7 +21,7 @@ pub struct Cursor {
 impl Cursor {
   pub fn new(shape: IRect) -> Self {
     Cursor {
-      base: Inode::new(shape),
+      base: InodeBase::new(shape),
       blinking: true,
       hidden: false,
       style: CursorStyle::DefaultUserShape,

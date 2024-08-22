@@ -15,7 +15,7 @@ use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::glovar;
 use crate::inode_value_generate_impl;
 use crate::ui::canvas::{Canvas, Cell};
-use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
+use crate::ui::tree::internal::inode::{Inode, InodeBase, InodeId};
 use crate::ui::widget::{Widget, WidgetId};
 use crate::uuid;
 
@@ -87,7 +87,7 @@ impl Default for BufferView {
 /// We can always calculates the two fields based on the other two fields on the diagonal corner,
 /// with window size, buffer's text contents, and the line-wrap/word-wrap options.
 pub struct WindowContent {
-  base: Inode,
+  base: InodeBase,
 
   // Buffer
   buffer: BufferWk,
@@ -105,7 +105,7 @@ impl WindowContent {
     view.lstart = Some(0);
     view.cstart = Some(0);
     WindowContent {
-      base: Inode::new(shape),
+      base: InodeBase::new(shape),
       buffer,
       view,
       line_wrap: false,

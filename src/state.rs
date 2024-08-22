@@ -2,7 +2,6 @@
 
 use crossterm::event::Event;
 use parking_lot::RwLock;
-use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
@@ -10,7 +9,6 @@ use crate::buf::BuffersArc;
 use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
-use crate::ui::widget::WidgetId;
 
 pub mod fsm;
 pub mod mode;

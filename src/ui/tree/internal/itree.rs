@@ -9,13 +9,13 @@ use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
 
 use crate::cart::{IPos, IRect, U16Rect};
-use crate::ui::tree::internal::inode::{InodeId, InodeValue};
+use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::shapes;
 
 #[derive(Debug, Default, Clone)]
 pub struct Itree<T>
 where
-  T: InodeValue,
+  T: Inode,
 {
   // Root node ID.
   root_id: InodeId,
@@ -36,7 +36,7 @@ where
 /// This also follows the order when rendering the widget tree to terminal device.
 pub struct ItreeIter<'a, T>
 where
-  T: InodeValue,
+  T: Inode,
 {
   tree: &'a Itree<T>,
   queue: VecDeque<InodeId>,
@@ -44,7 +44,7 @@ where
 
 impl<'a, T> Iterator for ItreeIter<'a, T>
 where
-  T: InodeValue,
+  T: Inode,
 {
   type Item = &'a T;
 
@@ -68,7 +68,7 @@ where
 
 impl<'a, T> ItreeIter<'a, T>
 where
-  T: InodeValue,
+  T: Inode,
 {
   pub fn new(tree: &'a Itree<T>, start_node_id: Option<InodeId>) -> Self {
     let mut queue = VecDeque::new();
@@ -84,7 +84,7 @@ where
 /// The mutable pre-order iterator of the tree.
 pub struct ItreeIterMut<'a, T>
 where
-  T: InodeValue,
+  T: Inode,
 {
   tree: NonNull<Itree<T>>,
   queue: VecDeque<InodeId>,
@@ -93,7 +93,7 @@ where
 
 impl<'a, T> Iterator for ItreeIterMut<'a, T>
 where
-  T: InodeValue,
+  T: Inode,
 {
   type Item = &'a mut T;
 
@@ -120,7 +120,7 @@ where
 
 impl<'a, T> ItreeIterMut<'a, T>
 where
-  T: InodeValue,
+  T: Inode,
 {
   pub fn new(tree: &'a mut Itree<T>, start_node_id: Option<InodeId>) -> Self {
     let mut queue = VecDeque::new();
@@ -138,7 +138,7 @@ where
 
 impl<T> Itree<T>
 where
-  T: InodeValue,
+  T: Inode,
 {
   pub fn new(root_node: T) -> Self {
     let root_id = root_node.id();
@@ -559,7 +559,7 @@ mod tests {
 
   use crate::cart::{IRect, U16Rect};
   use crate::test::log::init as test_log_init;
-  use crate::ui::tree::internal::inode::InodeValue;
+  use crate::ui::tree::internal::inode::Inode;
 
   static INIT: Once = Once::new();
 

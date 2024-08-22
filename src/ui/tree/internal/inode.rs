@@ -8,7 +8,7 @@ use crate::{geo_rect_as, uuid};
 
 pub type InodeId = usize;
 
-pub trait InodeValue: Sized + Clone + Debug {
+pub trait Inode: Sized + Clone + Debug {
   fn id(&self) -> InodeId;
 
   fn depth(&self) -> &usize;
@@ -40,7 +40,7 @@ pub trait InodeValue: Sized + Clone + Debug {
 #[macro_export]
 macro_rules! inode_value_generate_impl {
   ($struct_name:ty,$base_name:ident) => {
-    impl InodeValue for $struct_name {
+    impl Inode for $struct_name {
       fn id(&self) -> InodeId {
         self.$base_name.id()
       }
@@ -98,7 +98,7 @@ macro_rules! inode_value_generate_impl {
 
 #[derive(Debug, Clone, Copy)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
-pub struct Inode {
+pub struct InodeBase {
   id: InodeId,
   depth: usize,
   shape: IRect,
@@ -108,10 +108,10 @@ pub struct Inode {
   visible: bool,
 }
 
-impl Inode {
+impl InodeBase {
   pub fn new(shape: IRect) -> Self {
     let actual_shape = geo_rect_as!(shape, u16);
-    Inode {
+    InodeBase {
       id: uuid::next(),
       depth: 0,
       shape,
@@ -193,14 +193,14 @@ mod tests {
   #[derive(Copy, Clone, Debug)]
   struct TestNode {
     pub value: usize,
-    pub base: Inode,
+    pub base: InodeBase,
   }
 
   impl TestNode {
     pub fn new(value: usize, shape: IRect) -> Self {
       TestNode {
         value,
-        base: Inode::new(shape),
+        base: InodeBase::new(shape),
       }
     }
   }
