@@ -9,7 +9,7 @@ use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
 
 use crate::cart::{IPos, IRect, U16Rect};
-use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
+use crate::ui::tree::internal::inode::{InodeId, InodeValue};
 use crate::ui::tree::internal::shapes;
 
 #[derive(Debug, Default, Clone)]

@@ -2,18 +2,25 @@
 
 #![allow(dead_code)]
 
+use parking_lot::RwLock;
 use ropey::{Rope, RopeBuilder};
+use std::collections::BTreeMap;
 use std::convert::From;
+use std::sync::{Arc, Weak};
 
 use crate::uuid;
 
 pub type BufferId = usize;
 
 #[derive(Clone, Debug)]
+/// The VIM buffer.
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
 }
+
+pub type BufferArc = Arc<RwLock<Buffer>>;
+pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
   pub fn new() -> Self {
@@ -21,6 +28,10 @@ impl Buffer {
       id: uuid::next(),
       rope: Rope::new(),
     }
+  }
+
+  pub fn to_arc(b: Buffer) -> BufferArc {
+    Arc::new(RwLock::new(b))
   }
 
   pub fn id(&self) -> BufferId {
@@ -67,6 +78,34 @@ impl PartialEq for Buffer {
 }
 
 impl Eq for Buffer {}
+
+#[derive(Debug, Clone)]
+/// The manager for all buffers.
+pub struct Buffers {
+  // Buffers collection
+  buffers: BTreeMap<BufferId, BufferArc>,
+}
+
+impl Buffers {
+  pub fn new() -> Self {
+    Buffers {
+      buffers: BTreeMap::new(),
+    }
+  }
+
+  pub fn to_arc(b: Buffers) -> BuffersArc {
+    Arc::new(RwLock::new(b))
+  }
+}
+
+impl Default for Buffers {
+  fn default() -> Self {
+    Buffers::new()
+  }
+}
+
+pub type BuffersArc = Arc<RwLock<Buffers>>;
+pub type BuffersWk = Weak<RwLock<Buffers>>;
 
 #[cfg(test)]
 mod tests {

@@ -7,12 +7,12 @@ use crossterm::style::{Attributes, Color};
 use geo::point;
 use std::collections::VecDeque;
 use std::convert::From;
-use std::marker::{PhantomData, PhantomPinned};
-use std::ptr::NonNull;
+use std::time::Duration;
 use tracing::debug;
 
-use crate::buffer::Buffer;
-use crate::cart::{IRect, U16Rect};
+use crate::buf::{Buffer, BufferWk};
+use crate::cart::{IRect, U16Pos, U16Rect};
+use crate::glovar;
 use crate::inode_value_generate_impl;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::inode::{Inode, InodeId, InodeValue};
@@ -86,31 +86,28 @@ impl Default for BufferView {
 ///
 /// We can always calculates the two fields based on the other two fields on the diagonal corner,
 /// with window size, buffer's text contents, and the line-wrap/word-wrap options.
-pub struct WindowContent<'a> {
+pub struct WindowContent {
   base: Inode,
 
-  // Buffer reference
-  buffer: NonNull<Buffer>,
-  phantom: PhantomData<&'a mut Buffer>,
-
+  // Buffer
+  buffer: BufferWk,
   // Buffer view
-  buffer_view: BufferView,
+  view: BufferView,
 
   // Options
   line_wrap: bool,
   word_wrap: bool,
 }
 
-impl<'a> WindowContent<'a> {
-  pub fn new(shape: IRect, buffer: &'a mut Buffer) -> Self {
-    let mut buffer_view = BufferView::default();
-    buffer_view.lstart = Some(0);
-    buffer_view.cstart = Some(0);
+impl WindowContent {
+  pub fn new(shape: IRect, buffer: BufferWk) -> Self {
+    let mut view = BufferView::default();
+    view.lstart = Some(0);
+    view.cstart = Some(0);
     WindowContent {
       base: Inode::new(shape),
-      buffer: NonNull::new(buffer as *mut Buffer).unwrap(),
-      phantom: PhantomData,
-      buffer_view,
+      buffer,
+      view,
       line_wrap: false,
       word_wrap: false,
     }
@@ -132,52 +129,52 @@ impl<'a> WindowContent<'a> {
     self.word_wrap = word_wrap;
   }
 
-  pub fn buffer(&self) -> &Buffer {
-    unsafe { self.buffer.as_ref() }
+  pub fn buffer(&self) -> BufferWk {
+    self.buffer.clone()
   }
 
-  pub fn buffer_mut(&mut self) -> &mut Buffer {
-    unsafe { self.buffer.as_mut() }
+  pub fn set_buffer(&mut self, buffer: BufferWk) {
+    self.buffer = buffer;
   }
 
-  pub fn buffer_view_lstart(&self) -> Option<usize> {
-    self.buffer_view.lstart
+  pub fn view_lstart(&self) -> Option<usize> {
+    self.view.lstart
   }
 
-  pub fn set_buffer_view_lstart(&mut self, lstart: usize) {
-    self.buffer_view.lstart = Some(lstart);
-    self.buffer_view.lend = None;
+  pub fn set_view_lstart(&mut self, lstart: usize) {
+    self.view.lstart = Some(lstart);
+    self.view.lend = None;
   }
 
-  pub fn buffer_view_lend(&self) -> Option<usize> {
-    self.buffer_view.lend
+  pub fn view_lend(&self) -> Option<usize> {
+    self.view.lend
   }
 
-  pub fn set_buffer_view_lend(&mut self, lend: usize) {
-    self.buffer_view.lend = Some(lend);
-    self.buffer_view.lstart = None;
+  pub fn set_view_lend(&mut self, lend: usize) {
+    self.view.lend = Some(lend);
+    self.view.lstart = None;
   }
 
-  pub fn buffer_view_cstart(&self) -> Option<usize> {
-    self.buffer_view.cstart
+  pub fn view_cstart(&self) -> Option<usize> {
+    self.view.cstart
   }
 
-  pub fn set_buffer_view_cstart(&mut self, cstart: usize) {
-    self.buffer_view.cstart = Some(cstart);
-    self.buffer_view.cend = Some(cstart + self.base.actual_shape().width() as usize);
+  pub fn set_view_cstart(&mut self, cstart: usize) {
+    self.view.cstart = Some(cstart);
+    self.view.cend = Some(cstart + self.base.actual_shape().width() as usize);
   }
 
-  pub fn buffer_view_cend(&self) -> Option<usize> {
-    self.buffer_view.cend
+  pub fn view_cend(&self) -> Option<usize> {
+    self.view.cend
   }
 
-  pub fn set_buffer_view_cend(&mut self, cend: usize) {
-    self.buffer_view.cend = Some(cend);
-    self.buffer_view.cstart = Some(cend - self.base.actual_shape().width() as usize);
+  pub fn set_view_cend(&mut self, cend: usize) {
+    self.view.cend = Some(cend);
+    self.view.cstart = Some(cend - self.base.actual_shape().width() as usize);
   }
 }
 
-impl<'a> InodeValue for WindowContent<'a> {
+impl InodeValue for WindowContent {
   fn id(&self) -> InodeId {
     self.base.id()
   }
@@ -231,13 +228,13 @@ impl<'a> InodeValue for WindowContent<'a> {
   }
 }
 
-impl<'a> Widget for WindowContent<'a> {
+impl Widget for WindowContent {
   fn id(&self) -> WidgetId {
     self.base.id()
   }
 
   fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
-    match self.buffer_view {
+    match self.view {
       BufferView {
         lstart: Some(lstart),
         lend,
@@ -245,58 +242,72 @@ impl<'a> Widget for WindowContent<'a> {
         cend: Some(cend),
       } => {
         let actual_shape = self.actual_shape();
+        let actual_pos: U16Pos = actual_shape.min().into();
         let height = actual_shape.height();
         let width = actual_shape.width();
 
-        let total_lines = unsafe { self.buffer.as_ref().rope().len_lines() };
-        let mut buffer_lines: Option<ropey::iter::Lines> = None;
+        // Get buffer Arc pointer
+        if let Some(buffer) = self.buffer.upgrade() {
+          // Lock buffer for read
+          if let Some(buffer_guard) =
+            buffer.try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+          {
+            let total_lines = buffer_guard.rope().len_lines();
+            let mut buffer_lines: Option<ropey::iter::Lines> = None;
 
-        for row in 0..height {
-          let l = lstart + row as usize;
-          if l < total_lines && buffer_lines.is_none() {
-            buffer_lines = unsafe { Some(self.buffer.as_ref().rope().lines_at(l)) };
-          }
-          match buffer_lines {
-            Some(mut buffer_lines) => match buffer_lines.next() {
-              Some(one_line) => {
-                let mut col = 0_usize;
-                for chunk in one_line.chunks() {
-                  let cells = chunk
-                    .chars()
-                    .map(|c| {
-                      let mut tmp_buf = [0; 8];
-                      Cell::new(
-                        CompactString::const_new(c.encode_utf8(&mut tmp_buf)),
-                        Color::Reset,
-                        Color::Reset,
-                        Attributes::default(),
-                      )
-                    })
-                    .collect();
-                  canvas
-                    .frame_mut()
-                    .set_cells(point!(x: col,y: row as usize), cells);
-                  col += cells.len();
+            for row in 0..height {
+              let l = lstart + row as usize;
+              if l < total_lines && buffer_lines.is_none() {
+                buffer_lines = Some(buffer_guard.rope().lines_at(l));
+              }
+              match buffer_lines {
+                Some(mut buffer_lines) => match buffer_lines.next() {
+                  Some(one_line) => {
+                    let mut col = 0_usize;
+                    for chunk in one_line.chunks() {
+                      let cells = chunk
+                        .chars()
+                        .map(|c| {
+                          let mut tmp_buf = [0; 8];
+                          Cell::new(
+                            CompactString::const_new(c.encode_utf8(&mut tmp_buf)),
+                            Color::Reset,
+                            Color::Reset,
+                            Attributes::default(),
+                          )
+                        })
+                        .collect();
+                      canvas
+                        .frame_mut()
+                        .set_cells(point!(x: col,y: (row + actual_pos.y()) as usize), cells);
+                      col += cells.len();
+                    }
+                    canvas.frame_mut().reset_cells(
+                      point!(x: col, y: (row  + actual_pos.y())as usize),
+                      width as usize - col,
+                    );
+                  }
+                  None => {
+                    // This line has no text contents, set empty line
+                    canvas.frame_mut().reset_cells(
+                      point!(x: actual_pos.x() as usize, y: actual_pos.y() as usize),
+                      width as usize,
+                    );
+                  }
+                },
+                None => {
+                  // This line has no text contents, set empty line
+                  canvas.frame_mut().reset_cells(
+                    point!(x: actual_pos.x() as usize, y: actual_pos.y() as usize),
+                    width as usize,
+                  );
                 }
-                canvas
-                  .frame_mut()
-                  .reset_cells(point!(x: col, y: row as usize), width as usize - col);
               }
-              None => {
-                // This line has no text contents, set empty line
-                canvas
-                  .frame_mut()
-                  .reset_cells(point!(x: 0_usize, y: row as usize), width as usize);
-              }
-            },
-            None => {
-              // This line has no text contents, set empty line
-              canvas
-                .frame_mut()
-                .reset_cells(point!(x: 0_usize, y: row as usize), width as usize);
             }
           }
         }
+
+        // Failed to upgrade to Arc pointer or lock , do nothing.
       }
       BufferView {
         lstart,

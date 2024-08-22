@@ -22,7 +22,7 @@ use tokio::fs;
 use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
 
-use crate::buffer::Buffer;
+use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
 use crate::geo_size_as;
@@ -31,7 +31,7 @@ use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::{Cursor, RootContainer, Widget, WidgetValue, Window};
+use crate::ui::widget::{Cursor, RootContainer, Widget, WidgetId, Window};
 
 #[derive(Clone)]
 pub struct EventLoop {
@@ -39,6 +39,7 @@ pub struct EventLoop {
   pub canvas: CanvasArc,
   pub tree: TreeArc,
   pub state: StateArc,
+  pub buffers: BuffersArc,
 }
 
 impl EventLoop {
@@ -57,16 +58,16 @@ impl EventLoop {
     );
     let window = Window::new(window_shape);
     let window_id = window.id();
-    let window_node = TreeNode::new(WidgetValue::Window(window), window_shape);
+    let window_node = TreeNode::Window(window);
     tree.bounded_insert(&tree.root_id(), window_node);
     state.set_current_window_widget(Some(window_id));
     state.window_widgets_mut().insert(window_id);
     debug!("new, insert window container: {:?}", window_id);
 
-    let cursor = Cursor::new();
-    let cursor_id = cursor.id();
     let cursor_shape = IRect::new((0, 0), (1, 1));
-    let cursor_node = TreeNode::new(WidgetValue::Cursor(cursor), cursor_shape);
+    let cursor = Cursor::new(cursor_shape);
+    let cursor_id = cursor.id();
+    let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
     state.set_cursor_widget(Some(cursor_id));
 

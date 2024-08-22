@@ -2,63 +2,95 @@
 
 #![allow(dead_code)]
 
-use parking_lot::Mutex;
+use parking_lot::RwLock;
+use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 use std::time::Duration;
 use tracing::debug;
 
-use crate::cart::{IRect, U16Size};
+use crate::cart::{IRect, U16Rect, U16Size};
 use crate::glovar;
-use crate::ui::canvas::CanvasArc;
+use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::inode::InodeValue;
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
-use crate::ui::widget::RootContainer;
-use crate::ui::widget::{Widget, WidgetValue};
+use crate::ui::widget::{Cursor, RootContainer, Widget, WidgetId, Window};
 
 pub mod internal;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
-pub enum TreeNode {
+pub enum TreeNode<'a> {
   RootContainer(RootContainer),
-  Window(Window),
+  Window(Window<'a>),
   Cursor(Cursor),
 }
 
-impl InodeValue for TreeNode {
-  fn id(&self) -> InodeId {
-    match self {
-      TreeNode::RootContainer(n) => n.id(),
+macro_rules! tree_node_generate_dispatch {
+  ($self_name:ident,$method_name:ident) => {
+    match $self_name {
+      TreeNode::RootContainer(n) => n.$method_name(),
+      TreeNode::Window(n) => n.$method_name(),
+      TreeNode::Cursor(n) => n.$method_name(),
     }
-  }
-
-  fn depth(&self) -> &usize;
-
-  fn depth_mut(&mut self) -> &mut usize;
-
-  fn zindex(&self) -> &usize;
-
-  fn zindex_mut(&mut self) -> &mut usize;
-
-  fn shape(&self) -> &IRect;
-
-  fn shape_mut(&mut self) -> &mut IRect;
-
-  fn actual_shape(&self) -> &U16Rect;
-
-  fn actual_shape_mut(&mut self) -> &mut U16Rect;
-
-  fn enabled(&self) -> &bool;
-
-  fn enabled_mut(&mut self) -> &mut bool;
-
-  fn visible(&self) -> &bool;
-
-  fn visible_mut(&mut self) -> &mut bool;
+  };
 }
 
-impl Widget for TreeNode {
+impl<'a> InodeValue for TreeNode<'a> {
+  fn id(&self) -> InodeId {
+    tree_node_generate_dispatch!(self, id)
+  }
+
+  fn depth(&self) -> &usize {
+    tree_node_generate_dispatch!(self, depth)
+  }
+
+  fn depth_mut(&mut self) -> &mut usize {
+    tree_node_generate_dispatch!(self, depth_mut)
+  }
+
+  fn zindex(&self) -> &usize {
+    tree_node_generate_dispatch!(self, zindex)
+  }
+
+  fn zindex_mut(&mut self) -> &mut usize {
+    tree_node_generate_dispatch!(self, zindex_mut)
+  }
+
+  fn shape(&self) -> &IRect {
+    tree_node_generate_dispatch!(self, shape)
+  }
+
+  fn shape_mut(&mut self) -> &mut IRect {
+    tree_node_generate_dispatch!(self, shape_mut)
+  }
+
+  fn actual_shape(&self) -> &U16Rect {
+    tree_node_generate_dispatch!(self, actual_shape)
+  }
+
+  fn actual_shape_mut(&mut self) -> &mut U16Rect {
+    tree_node_generate_dispatch!(self, actual_shape_mut)
+  }
+
+  fn enabled(&self) -> &bool {
+    tree_node_generate_dispatch!(self, enabled)
+  }
+
+  fn enabled_mut(&mut self) -> &mut bool {
+    tree_node_generate_dispatch!(self, enabled_mut)
+  }
+
+  fn visible(&self) -> &bool {
+    tree_node_generate_dispatch!(self, visible)
+  }
+
+  fn visible_mut(&mut self) -> &mut bool {
+    tree_node_generate_dispatch!(self, visible_mut)
+  }
+}
+
+impl<'a> Widget for TreeNode<'a> {
   /// Get widget ID.
   fn id(&self) -> WidgetId {
     match self {
@@ -172,17 +204,25 @@ impl Widget for TreeNode {
 /// them and updates the UI contents. When it's disabled, it's just like been fronzen, so it
 /// doesn't handle or process any input events, the UI keeps still and never changes.
 ///
-pub struct Tree {
+pub struct Tree<'a> {
   // Internal implementation.
-  base: Itree<TreeNode>,
+  base: Itree<TreeNode<'a>>,
+
+  // Cursor and window state {
+
+  // [`cursor`](crate::ui::widget::cursor::Cursor) node ID.
+  cursor_id: Option<TreeNodeId>,
+
+  // All [`Window`](crate::ui::widget::Window) node IDs.
+  windows_ids: BTreeSet<TreeNodeId>,
+  // Cursor and window state }
 }
 
-pub type TreeArc = Arc<Mutex<Tree>>;
-pub type TreeWk = Weak<Mutex<Tree>>;
-pub type TreeNode = Inode<TreeNode>;
+pub type TreeArc<'a> = Arc<RwLock<Tree<'a>>>;
+pub type TreeWk<'a> = Weak<RwLock<Tree<'a>>>;
 pub type TreeNodeId = InodeId;
-pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
-pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
+pub type TreeIter<'a> = ItreeIter<'a, TreeNode<'a>>;
+pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode<'a>>;
 
 impl Tree {
   /// Make a widget tree.
@@ -196,16 +236,16 @@ impl Tree {
         terminal_size.height() as isize,
       ),
     );
-    let root_container = RootContainer::new();
-    let root_node = TreeNode::new(TreeNode::RootContainer(root_container), shape);
+    let root_container = RootContainer::new(shape);
+    let root_node = TreeNode::RootContainer(root_container);
     Tree {
       base: Itree::new(root_node),
     }
   }
 
-  /// Convert `Tree` struct to `Arc<Mutex<_>>` pointer.
+  /// Convert `Tree` struct to `Arc<RwLock<_>>` pointer.
   pub fn to_arc(tree: Tree) -> TreeArc {
-    Arc::new(Mutex::new(tree))
+    Arc::new(RwLock::new(tree))
   }
 
   /// Nodes count, include the root node.
@@ -322,17 +362,48 @@ impl Tree {
 
   // Node }
 
+  // Cursor and Window {
+
+  /// Get current cursor node ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
+
+  /// Set current cursor node ID.
+  pub fn set_cursor_id(&self, cursor_id: Option<TreeNodeId>) {
+    self.cursor_id = cursor_id;
+  }
+
+  /// Get current window node ID. A window is current because the cursor is inside it.
+  pub fn current_window_id(&self) -> Option<TreeNodeId> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        let mut id = cursor_id;
+        while let Some(parent_id) = self.parent_id(&id) {
+          if let TreeNode::Window(w) = self.node(parent_id) {
+            return Some(parent_id);
+          }
+          id = parent_id;
+        }
+        None
+      }
+      None => None,
+    }
+  }
+
+  // Cursor and Window }
+
   // Draw {
 
   /// Draw the widget tree to canvas.
   pub fn draw(&mut self, canvas: CanvasArc) {
     let mut canvas = canvas
-      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap();
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
       let actual_shape = *node.actual_shape();
-      node.value_mut().draw(actual_shape, &mut canvas);
+      node.draw(actual_shape, &mut canvas);
     }
   }
 

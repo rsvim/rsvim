@@ -1,7 +1,7 @@
 //! Logical canvas for terminal rendering.
 
 use crossterm;
-use parking_lot::Mutex;
+use parking_lot::RwLock;
 use std::fmt;
 use std::fmt::Debug;
 use std::slice::Iter;
@@ -28,7 +28,7 @@ pub struct Canvas {
   prev_frame: Frame,
 }
 
-pub type CanvasArc = Arc<Mutex<Canvas>>;
+pub type CanvasArc = Arc<RwLock<Canvas>>;
 
 impl Canvas {
   /// Make new canvas with terminal actual size.
@@ -41,7 +41,7 @@ impl Canvas {
 
   /// Convert struct into smart pointer.
   pub fn to_arc(t: Canvas) -> CanvasArc {
-    Arc::new(Mutex::new(t))
+    Arc::new(RwLock::new(t))
   }
 
   // Current frame {
