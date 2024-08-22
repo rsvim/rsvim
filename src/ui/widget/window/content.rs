@@ -199,17 +199,7 @@ impl Widgetable for WindowContent {
                   Some(one_line) => {
                     let mut col = 0_usize;
                     for chunk in one_line.chunks() {
-                      let cells: Vec<Cell> = chunk
-                        .chars()
-                        .map(|c| {
-                          Cell::new(
-                            c.to_compact_string(),
-                            Color::Reset,
-                            Color::Reset,
-                            Attributes::default(),
-                          )
-                        })
-                        .collect();
+                      let cells: Vec<Cell> = chunk.chars().map(Cell::from).collect();
                       let cells_len = cells.len();
                       canvas
                         .frame_mut()

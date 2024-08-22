@@ -99,6 +99,17 @@ impl Cell {
   }
 }
 
+impl From<char> for Cell {
+  fn from(value: char) -> Self {
+    Cell::new(
+      value.to_compact_string(),
+      Color::Reset,
+      Color::Reset,
+      Attributes::default(),
+    )
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -115,7 +126,7 @@ mod tests {
   #[test]
   fn new1() {
     let c1 = Cell::new(
-      CompactString::const_new(" "),
+      CompactString::new(" "),
       Color::Reset,
       Color::Reset,
       Attributes::default(),
