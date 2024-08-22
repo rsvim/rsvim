@@ -100,12 +100,12 @@ impl InodeValue for TreeNode {
 }
 
 impl Widget for TreeNode {
-  /// Draw widget with (already calculated) actual shape, on the canvas.
-  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
+  /// Draw widget on the canvas.
+  fn draw(&mut self, canvas: &mut Canvas) {
     match self {
-      TreeNode::RootContainer(w) => w.draw(actual_shape, canvas),
-      TreeNode::Window(w) => w.draw(actual_shape, canvas),
-      TreeNode::Cursor(w) => w.draw(actual_shape, canvas),
+      TreeNode::RootContainer(w) => w.draw(canvas),
+      TreeNode::Window(w) => w.draw(canvas),
+      TreeNode::Cursor(w) => w.draw(canvas),
     }
   }
 }
@@ -423,8 +423,7 @@ impl Tree {
       .unwrap();
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
-      let actual_shape = *node.actual_shape();
-      node.draw(actual_shape, &mut canvas);
+      node.draw(&mut canvas);
     }
   }
 

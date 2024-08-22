@@ -177,7 +177,7 @@ impl WindowContent {
 inode_value_generate_impl!(WindowContent, base);
 
 impl Widget for WindowContent {
-  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
+  fn draw(&mut self, canvas: &mut Canvas) {
     match self.view {
       BufferView {
         lstart: Some(lstart),

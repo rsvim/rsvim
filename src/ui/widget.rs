@@ -20,8 +20,8 @@ pub type WidgetId = usize;
 /// Base trait for all UI widgets.
 pub trait Widget {
   /// Draw the widget to canvas, on the specific shape.
-  fn draw(&mut self, actual_shape: U16Rect, _canvas: &mut Canvas) {
+  fn draw(&mut self, _canvas: &mut Canvas) {
     // Do nothing.
-    debug!("draw, actual shape:{:?}", actual_shape);
+    debug!("draw canvas");
   }
 }

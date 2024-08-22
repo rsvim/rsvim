@@ -44,7 +44,8 @@ impl Debug for Cursor {
 inode_value_generate_impl!(Cursor, base);
 
 impl Widget for Cursor {
-  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
+  fn draw(&mut self, canvas: &mut Canvas) {
+    let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();
     debug!(
       "draw, actual shape:{:?}, top-left pos:{:?}",
