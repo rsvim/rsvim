@@ -240,6 +240,8 @@ impl Tree {
     let root_node = TreeNode::RootContainer(root_container);
     Tree {
       base: Itree::new(root_node),
+      cursor_id: None,
+      windows_ids: BTreeSet::new(),
     }
   }
 
@@ -318,7 +320,7 @@ impl Tree {
 
   /// See [`Itree::insert`].
   pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
-    self.insert_widget_ids(child_node.id());
+    self.insert_widget_ids(&child_node);
     self.base.insert(parent_id, child_node)
   }
 
@@ -328,7 +330,7 @@ impl Tree {
     parent_id: &TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
-    self.insert_widget_ids(child_node.id());
+    self.insert_widget_ids(&child_node);
     self.base.bounded_insert(parent_id, child_node)
   }
 
