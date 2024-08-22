@@ -20,20 +20,23 @@ pub struct Cell {
 
 impl Cell {
   /// Get symbol.
-  pub fn symbol(&self) -> &str {
-    self.symbol.as_str()
+  pub fn symbol(&self) -> &CompactString {
+    &self.symbol
   }
 
   /// Set symbol.
-  pub fn set_symbol(&mut self, symbol: &str) -> &mut Self {
-    self.symbol = CompactString::new(symbol);
-    self
+  pub fn set_symbol(&mut self, symbol: CompactString) {
+    self.symbol = symbol;
   }
 
   /// Set symbol by char.
-  pub fn set_char(&mut self, ch: char) -> &mut Self {
+  pub fn set_char(&mut self, ch: char) {
     self.symbol = ch.to_compact_string();
-    self
+  }
+
+  /// Set symbol by str.
+  pub fn set_str(&mut self, s: &str) {
+    self.symbol = CompactString::new(s);
   }
 
   /// Get foreground color.
@@ -42,9 +45,8 @@ impl Cell {
   }
 
   /// Set foreground color.
-  pub fn set_fg(&mut self, color: Color) -> &mut Self {
+  pub fn set_fg(&mut self, color: Color) {
     self.fg = color;
-    self
   }
 
   /// Get background color.
@@ -53,9 +55,8 @@ impl Cell {
   }
 
   /// Set background color.
-  pub fn set_bg(&mut self, color: Color) -> &mut Self {
+  pub fn set_bg(&mut self, color: Color) {
     self.bg = color;
-    self
   }
 
   /// Get attributes.
@@ -64,21 +65,15 @@ impl Cell {
   }
 
   /// Set attributes.
-  pub fn set_attrs(&mut self, attrs: Attributes) -> &mut Self {
+  pub fn set_attrs(&mut self, attrs: Attributes) {
     self.attrs = attrs;
-    self
   }
 }
 
 impl Default for Cell {
   /// Make cell with a whitespace and no color, empty attributes.
   fn default() -> Self {
-    Cell {
-      symbol: CompactString::const_new(" "),
-      fg: Color::Reset,
-      bg: Color::Reset,
-      attrs: Attributes::default(),
-    }
+    Cell::none()
   }
 }
 
@@ -90,6 +85,16 @@ impl Cell {
       fg,
       bg,
       attrs,
+    }
+  }
+
+  /// Make none cell, it's the default invisible cell.
+  pub fn none() -> Self {
+    Cell {
+      symbol: CompactString::new(" "),
+      fg: Color::Reset,
+      bg: Color::Reset,
+      attrs: Attributes::default(),
     }
   }
 }
