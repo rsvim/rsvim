@@ -5,7 +5,7 @@ use tracing::debug;
 
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_generate_impl;
-use crate::ui::canvas::{frame, Canvas, CursorStyle, CursorStyleFormatter};
+use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
 use crate::ui::tree::internal::{Inode, InodeBase, InodeId};
 use crate::ui::widget::Widget;
 
@@ -52,7 +52,7 @@ impl Widget for Cursor {
       actual_shape, pos
     );
 
-    canvas.frame_mut().set_cursor(frame::Cursor::new(
+    canvas.frame_mut().set_cursor(canvas::Cursor::new(
       pos,
       self.blinking,
       self.hidden,

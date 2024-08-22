@@ -11,9 +11,9 @@ use crate::cart::U16Size;
 use crate::ui::canvas::frame::cursor::cursor_style_eq;
 
 // Re-export
-pub use crate::ui::canvas::frame::{
-  Cell, Cursor, CursorStyle, CursorStyleFormatter, Frame, FrameCellsRange,
-};
+pub use crate::ui::canvas::frame::cell::Cell;
+pub use crate::ui::canvas::frame::cursor::{Cursor, CursorStyle, CursorStyleFormatter};
+pub use crate::ui::canvas::frame::{Frame, FrameCellsRange};
 
 pub mod frame;
 

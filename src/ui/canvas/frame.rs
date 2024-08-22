@@ -3,13 +3,11 @@
 #![allow(dead_code)]
 
 use std::ops::Range;
-
-use crate::cart::{U16Size, UPos};
 use std::vec::Splice;
 
-// Re-export
-pub use crate::ui::canvas::frame::cell::Cell;
-pub use crate::ui::canvas::frame::cursor::{Cursor, CursorStyle, CursorStyleFormatter};
+use crate::cart::{U16Size, UPos};
+use crate::ui::canvas::frame::cell::Cell;
+use crate::ui::canvas::frame::cursor::Cursor;
 
 pub mod cell;
 pub mod cursor;
