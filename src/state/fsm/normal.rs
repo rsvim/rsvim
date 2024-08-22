@@ -31,11 +31,11 @@ impl Stateful for NormalStateful {
             KeyCode::Up | KeyCode::Char('k') => {
               // Up
               let mut tree = tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
-              match state.cursor_widget() {
+              match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.bounded_move_up_by(*cursor_id, 1);
+                  tree.bounded_move_up_by(cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }
@@ -43,11 +43,11 @@ impl Stateful for NormalStateful {
             KeyCode::Down | KeyCode::Char('j') => {
               // Down
               let mut tree = tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
-              match state.cursor_widget() {
+              match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.bounded_move_down_by(*cursor_id, 1);
+                  tree.bounded_move_down_by(cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }
@@ -55,11 +55,11 @@ impl Stateful for NormalStateful {
             KeyCode::Left | KeyCode::Char('h') => {
               // Left
               let mut tree = tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
-              match state.cursor_widget() {
+              match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.bounded_move_left_by(*cursor_id, 1);
+                  tree.bounded_move_left_by(cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }
@@ -67,11 +67,11 @@ impl Stateful for NormalStateful {
             KeyCode::Right | KeyCode::Char('l') => {
               // Right
               let mut tree = tree
-                .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap();
-              match state.cursor_widget() {
+              match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.bounded_move_right_by(*cursor_id, 1);
+                  tree.bounded_move_right_by(cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }

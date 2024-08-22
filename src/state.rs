@@ -6,6 +6,7 @@ use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
+use crate::buf::BuffersArc;
 use crate::state::fsm::{Stateful, StatefulDataAccessMut, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
@@ -55,11 +56,16 @@ impl State {
     Arc::new(RwLock::new(s))
   }
 
-  pub fn handle(&mut self, tree: TreeArc, event: Event) -> StateHandleResponse {
+  pub fn handle(
+    &mut self,
+    tree: TreeArc,
+    buffers: BuffersArc,
+    event: Event,
+  ) -> StateHandleResponse {
     // Current stateful
     let stateful = self.stateful;
 
-    let data_access = StatefulDataAccessMut::new(self, tree, event);
+    let data_access = StatefulDataAccessMut::new(self, tree, buffers, event);
     let next_stateful = stateful.handle(data_access);
     debug!("Stateful now:{:?}, next:{:?}", stateful, next_stateful);
 

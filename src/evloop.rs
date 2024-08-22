@@ -216,7 +216,7 @@ impl EventLoop {
         .state
         .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
         .unwrap()
-        .handle(self.tree.clone(), event)
+        .handle(self.tree.clone(), self.buffers.clone(), event)
     };
 
     // Exit loop and quit.
