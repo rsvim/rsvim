@@ -13,17 +13,19 @@ pub mod cell;
 pub mod cursor;
 
 #[derive(Debug, Clone)]
-/// Rendering buffer & cursor for the whole terminal.
-/// All UI components will dump their text contents to a frame first, then flush to terminal.
+/// Logical frame for the canvas.
+///
+/// When UI widget tree drawing on the canvas, it actually draws on the current frame. Then the
+/// canvas will diff the changes made by UI tree, and only print the changes to hardware device.
 pub struct Frame {
-  pub size: U16Size,
-  pub cells: Vec<Cell>,
-  pub cursor: Cursor,
+  size: U16Size,
+  cells: Vec<Cell>,
+  cursor: Cursor,
 
-  /// Indicate which part of the frame is dirty, i.e. been updated by widget tree changes.
-  /// When rendering contents to the terminal device, only the dirty ranges will be printed.
-  pub dirty_cells: Vec<Range<usize>>,
-  pub dirty_cursor: bool,
+  /// Indicate which part of the frame is dirty, i.e. it's been drawn by the UI widget tree. When
+  /// rendering to the hardware device, only dirty parts will be printed.
+  dirty_cells: Vec<Range<usize>>,
+  dirty_cursor: bool,
 }
 
 impl Frame {
