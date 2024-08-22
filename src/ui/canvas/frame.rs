@@ -161,6 +161,6 @@ mod tests {
   #[test]
   fn set_cells1() {
     let sz = U16Size::new(10, 10);
-    let f = Frame::new(sz, Cursor::default());
+    let _f = Frame::new(sz, Cursor::default());
   }
 }

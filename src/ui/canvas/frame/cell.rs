@@ -2,7 +2,7 @@
 
 #![allow(dead_code)]
 
-use compact_str::CompactString;
+use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -32,8 +32,7 @@ impl Cell {
 
   /// Set symbol by char.
   pub fn set_char(&mut self, ch: char) -> &mut Self {
-    let mut buf = [0; 4];
-    self.symbol = CompactString::new(ch.encode_utf8(&mut buf));
+    self.symbol = ch.to_compact_string();
     self
   }
 
