@@ -73,6 +73,46 @@ impl Cursor {
       style,
     }
   }
+
+  /// Get position.
+  pub fn pos(&self) -> &U16Pos {
+    &self.pos
+  }
+
+  /// Set position.
+  pub fn set_pos(&mut self, pos: U16Pos) {
+    self.pos = pos;
+  }
+
+  /// Get blinking.
+  pub fn blinking(&self) -> bool {
+    self.blinking
+  }
+
+  /// Set blinking.
+  pub fn set_blinking(&mut self, blinking: bool) {
+    self.blinking = blinking;
+  }
+
+  /// Get hidden.
+  pub fn hidden(&self) -> bool {
+    self.hidden
+  }
+
+  /// Set hidden.
+  pub fn set_hidden(&mut self, hidden: bool) {
+    self.hidden = hidden;
+  }
+
+  /// Get style.
+  pub fn style(&self) -> CursorStyle {
+    self.style
+  }
+
+  /// Set style.
+  pub fn set_style(&mut self, style: CursorStyle) {
+    self.style = style;
+  }
 }
 
 impl Default for Cursor {
