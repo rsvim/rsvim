@@ -11,7 +11,7 @@ use tracing::debug;
 use crate::cart::{IRect, U16Rect, U16Size};
 use crate::glovar;
 use crate::ui::canvas::{Canvas, CanvasArc};
-use crate::ui::tree::internal::{Inode, InodeId, Itree, ItreeIter, ItreeIterMut};
+use crate::ui::tree::internal::{InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::{Cursor, RootContainer, Widget, Window};
 
 pub mod internal;
@@ -44,7 +44,7 @@ impl TreeNode {
   }
 }
 
-impl Inode for TreeNode {
+impl Inodeable for TreeNode {
   fn id(&self) -> InodeId {
     tree_node_generate_dispatch!(self, id)
   }

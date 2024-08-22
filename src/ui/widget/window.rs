@@ -5,7 +5,7 @@ use tracing::debug;
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Rect};
 use crate::ui::canvas::Canvas;
-use crate::ui::tree::internal::{Inode, InodeId, Itree};
+use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widget;
@@ -44,7 +44,7 @@ impl Window {
   }
 }
 
-impl Inode for Window {
+impl Inodeable for Window {
   fn id(&self) -> InodeId {
     self.base.root_id()
   }
@@ -182,7 +182,7 @@ macro_rules! window_node_generate_dispatch {
   };
 }
 
-impl Inode for WindowNode {
+impl Inodeable for WindowNode {
   fn id(&self) -> InodeId {
     window_node_generate_dispatch!(self, id)
   }

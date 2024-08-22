@@ -8,7 +8,7 @@ use crate::{geo_rect_as, uuid};
 
 pub type InodeId = usize;
 
-pub trait Inode: Sized + Clone + Debug {
+pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> InodeId;
 
   fn depth(&self) -> &usize;
@@ -40,7 +40,7 @@ pub trait Inode: Sized + Clone + Debug {
 #[macro_export]
 macro_rules! inode_generate_impl {
   ($struct_name:ty,$base_name:ident) => {
-    impl Inode for $struct_name {
+    impl Inodeable for $struct_name {
       fn id(&self) -> InodeId {
         self.$base_name.id()
       }
@@ -177,12 +177,8 @@ impl InodeBase {
 
 #[cfg(test)]
 mod tests {
-  use std::borrow::Borrow;
   use std::cell::RefCell;
   use std::sync::Once;
-
-  use geo::CoordNum;
-  use geo::Rect;
 
   use crate::cart::IRect;
   use crate::test::log::init as test_log_init;

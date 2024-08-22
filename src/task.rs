@@ -15,7 +15,7 @@ pub type TaskId = usize;
 
 pub mod startup;
 
-pub trait Task: Future {
+pub trait Taskable: Future {
   fn id(&self) -> TaskId;
 }
 

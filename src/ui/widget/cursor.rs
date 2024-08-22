@@ -6,7 +6,7 @@ use tracing::debug;
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_generate_impl;
 use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
-use crate::ui::tree::internal::{Inode, InodeBase, InodeId};
+use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::Widget;
 
 #[derive(Clone, Copy)]
