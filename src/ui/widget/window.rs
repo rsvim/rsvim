@@ -12,7 +12,7 @@ use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
-use crate::ui::widget::{Widget, WidgetId};
+use crate::ui::widget::Widget;
 
 pub mod content;
 pub mod root;

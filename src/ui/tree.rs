@@ -13,7 +13,7 @@ use crate::glovar;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
-use crate::ui::widget::{Cursor, RootContainer, Widget, WidgetId, Window};
+use crate::ui::widget::{Cursor, RootContainer, Widget, Window};
 
 pub mod internal;
 

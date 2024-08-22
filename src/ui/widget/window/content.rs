@@ -16,7 +16,7 @@ use crate::glovar;
 use crate::inode_value_generate_impl;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::inode::{Inode, InodeBase, InodeId};
-use crate::ui::widget::{Widget, WidgetId};
+use crate::ui::widget::Widget;
 use crate::uuid;
 
 #[derive(Debug, Copy, Clone)]

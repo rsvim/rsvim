@@ -32,7 +32,7 @@ use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
 use crate::ui::tree::internal::inode::Inode;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::{Cursor, RootContainer, Widget, WidgetId, Window};
+use crate::ui::widget::{Cursor, RootContainer, Widget, Window};
 
 #[derive(Clone)]
 pub struct EventLoop {

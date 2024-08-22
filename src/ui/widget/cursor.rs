@@ -7,7 +7,7 @@ use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_value_generate_impl;
 use crate::ui::canvas::{frame, Canvas, CursorStyle, CursorStyleFormatter};
 use crate::ui::tree::internal::inode::{Inode, InodeBase, InodeId};
-use crate::ui::widget::{Widget, WidgetId};
+use crate::ui::widget::Widget;
 
 #[derive(Clone, Copy)]
 /// Cursor widget.
