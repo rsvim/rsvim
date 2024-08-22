@@ -11,8 +11,7 @@ use tracing::debug;
 use crate::cart::{IRect, U16Rect, U16Size};
 use crate::glovar;
 use crate::ui::canvas::{Canvas, CanvasArc};
-use crate::ui::tree::internal::inode::{Inode, InodeId};
-use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
+use crate::ui::tree::internal::{Inode, InodeId, Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::{Cursor, RootContainer, Widget, Window};
 
 pub mod internal;

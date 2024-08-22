@@ -1,15 +1,11 @@
 //! The VIM window.
 
-use std::collections::VecDeque;
-
-use compact_str::CompactString;
 use tracing::debug;
 
 use crate::buf::BufferWk;
-use crate::cart::{IRect, U16Pos, U16Rect};
+use crate::cart::{IRect, U16Rect};
 use crate::ui::canvas::Canvas;
-use crate::ui::tree::internal::inode::{Inode, InodeId};
-use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
+use crate::ui::tree::internal::{Inode, InodeId, Itree};
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widget;

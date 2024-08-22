@@ -9,8 +9,8 @@ use std::{collections::VecDeque, iter::Iterator};
 use tracing::debug;
 
 use crate::cart::{IPos, IRect, U16Rect};
-use crate::ui::tree::internal::inode::{Inode, InodeId};
 use crate::ui::tree::internal::shapes;
+use crate::ui::tree::internal::{Inode, InodeId};
 
 #[derive(Debug, Default, Clone)]
 pub struct Itree<T>
@@ -559,7 +559,7 @@ mod tests {
 
   use crate::cart::{IRect, U16Rect};
   use crate::test::log::init as test_log_init;
-  use crate::ui::tree::internal::inode::Inode;
+  use crate::ui::tree::internal::Inode;
 
   static INIT: Once = Once::new();
 
