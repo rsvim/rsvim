@@ -54,7 +54,7 @@ impl Frame {
   }
 
   /// Get a cell.
-  pub fn get_cell(&self, pos: UPos) -> &Cell {
+  pub fn cell(&self, pos: UPos) -> &Cell {
     &self.cells[pos.x() * pos.y()]
   }
 
@@ -68,7 +68,7 @@ impl Frame {
   }
 
   /// Get n continuously cells, start from position.
-  pub fn get_cells(&self, pos: UPos, n: usize) -> &[Cell] {
+  pub fn cells(&self, pos: UPos, n: usize) -> &[Cell] {
     let start_at = pos.x() * pos.y();
     let end_at = start_at + n;
     &self.cells[start_at..end_at]
@@ -93,7 +93,7 @@ impl Frame {
   }
 
   /// Get cursor.
-  pub fn get_cursor(&self) -> &Cursor {
+  pub fn cursor(&self) -> &Cursor {
     &self.cursor
   }
 
