@@ -160,7 +160,7 @@ mod tests {
     let c = Cursor::default();
     assert!(c.blinking);
     assert!(!c.hidden);
-    assert!(cursor_style_eq(&c.style, &CursorStyle::DefaultUserShape));
+    assert!(cursor_style_eq(&c.style(), &CursorStyle::DefaultUserShape));
   }
 
   #[test]
