@@ -225,6 +225,7 @@ impl EventLoop {
     Ok(true)
   }
 
+  /// Put (render) canvas shader.
   async fn queue_shader(&mut self, shader: Shader, out: &mut std::io::Stdout) -> IoResult<()> {
     for shader_command in shader.iter() {
       match shader_command {
@@ -276,6 +277,7 @@ impl EventLoop {
     Ok(())
   }
 
+  /// Put (render) canvas cursor.
   async fn queue_cursor(&self, out: &mut std::io::Stdout) -> IoResult<()> {
     let cursor = *self
       .canvas
