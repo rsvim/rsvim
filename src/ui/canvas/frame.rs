@@ -12,8 +12,6 @@ use crate::ui::canvas::frame::cursor::Cursor;
 pub mod cell;
 pub mod cursor;
 
-pub type FrameCellsRange = Range<usize>;
-
 #[derive(Debug, Clone)]
 /// Rendering buffer & cursor for the whole terminal.
 /// All UI components will dump their text contents to a frame first, then flush to terminal.
@@ -24,7 +22,7 @@ pub struct Frame {
 
   /// Indicate which part of the frame is dirty, i.e. been updated by widget tree changes.
   /// When rendering contents to the terminal device, only the dirty ranges will be printed.
-  pub dirty_cells: Vec<FrameCellsRange>,
+  pub dirty_cells: Vec<Range<usize>>,
   pub dirty_cursor: bool,
 }
 
@@ -110,7 +108,7 @@ impl Frame {
   }
 
   /// Get dirty cells.
-  pub fn dirty_cells(&self) -> &Vec<FrameCellsRange> {
+  pub fn dirty_cells(&self) -> &Vec<Range<usize>> {
     &self.dirty_cells
   }
 
