@@ -174,65 +174,9 @@ impl WindowContent {
   }
 }
 
-impl InodeValue for WindowContent {
-  fn id(&self) -> InodeId {
-    self.base.id()
-  }
-
-  fn depth(&self) -> &usize {
-    self.base.depth()
-  }
-
-  fn depth_mut(&mut self) -> &mut usize {
-    self.base.depth_mut()
-  }
-
-  fn zindex(&self) -> &usize {
-    self.base.zindex()
-  }
-
-  fn zindex_mut(&mut self) -> &mut usize {
-    self.base.zindex_mut()
-  }
-
-  fn shape(&self) -> &IRect {
-    self.base.shape()
-  }
-
-  fn shape_mut(&mut self) -> &mut IRect {
-    self.base.shape_mut()
-  }
-
-  fn actual_shape(&self) -> &U16Rect {
-    self.base.actual_shape()
-  }
-
-  fn actual_shape_mut(&mut self) -> &mut U16Rect {
-    self.base.actual_shape_mut()
-  }
-
-  fn enabled(&self) -> &bool {
-    self.base.enabled()
-  }
-
-  fn enabled_mut(&mut self) -> &mut bool {
-    self.base.enabled_mut()
-  }
-
-  fn visible(&self) -> &bool {
-    self.base.visible()
-  }
-
-  fn visible_mut(&mut self) -> &mut bool {
-    self.base.visible_mut()
-  }
-}
+inode_value_generate_impl!(WindowContent, base);
 
 impl Widget for WindowContent {
-  fn id(&self) -> WidgetId {
-    self.base.id()
-  }
-
   fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
     match self.view {
       BufferView {
@@ -265,10 +209,10 @@ impl Widget for WindowContent {
                   Some(one_line) => {
                     let mut col = 0_usize;
                     for chunk in one_line.chunks() {
-                      let cells = chunk
+                      let mut tmp_buf = [0; 8];
+                      let cells: Vec<Cell> = chunk
                         .chars()
                         .map(|c| {
-                          let mut tmp_buf = [0; 8];
                           Cell::new(
                             CompactString::const_new(c.encode_utf8(&mut tmp_buf)),
                             Color::Reset,
@@ -277,10 +221,11 @@ impl Widget for WindowContent {
                           )
                         })
                         .collect();
+                      let cells_len = cells.len();
                       canvas
                         .frame_mut()
                         .set_cells(point!(x: col,y: (row + actual_pos.y()) as usize), cells);
-                      col += cells.len();
+                      col += cells_len;
                     }
                     canvas.frame_mut().reset_cells(
                       point!(x: col, y: (row  + actual_pos.y())as usize),

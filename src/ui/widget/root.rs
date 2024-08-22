@@ -19,10 +19,6 @@ impl RootContainer {
   }
 }
 
-impl Widget for RootContainer {
-  fn id(&self) -> WidgetId {
-    self.base.id()
-  }
-}
-
 inode_value_generate_impl!(RootContainer, base);
+
+impl Widget for RootContainer {}

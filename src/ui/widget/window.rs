@@ -7,7 +7,6 @@ use tracing::debug;
 
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Pos, U16Rect};
-use crate::inode_value_generate_impl;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::inode::{InodeId, InodeValue};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
@@ -128,10 +127,6 @@ impl InodeValue for Window {
 }
 
 impl Widget for Window {
-  fn id(&self) -> WidgetId {
-    self.base.root_id()
-  }
-
   fn draw(&mut self, _actual_shape: U16Rect, canvas: &mut Canvas) {
     // Do nothing.
     for node in self.base.iter_mut() {
@@ -273,11 +268,6 @@ impl InodeValue for WindowNode {
 }
 
 impl Widget for WindowNode {
-  /// Get widget ID.
-  fn id(&self) -> WidgetId {
-    window_node_generate_dispatch!(self, id)
-  }
-
   /// Draw widget with (already calculated) actual shape, on the canvas.
   fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
     match self {

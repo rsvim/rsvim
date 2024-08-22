@@ -11,8 +11,7 @@ use tracing::debug;
 use crate::cart::{IRect, U16Rect, U16Size};
 use crate::glovar;
 use crate::ui::canvas::{Canvas, CanvasArc};
-use crate::ui::tree::internal::inode::InodeValue;
-use crate::ui::tree::internal::inode::{Inode, InodeId};
+use crate::ui::tree::internal::inode::{InodeId, InodeValue};
 use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::{Cursor, RootContainer, Widget, WidgetId, Window};
 
@@ -34,6 +33,16 @@ macro_rules! tree_node_generate_dispatch {
       TreeNode::Cursor(n) => n.$method_name(),
     }
   };
+}
+
+impl TreeNode {
+  pub fn id(&self) -> TreeNodeId {
+    match self {
+      TreeNode::RootContainer(n) => n.id(),
+      TreeNode::Window(n) => n.id(),
+      TreeNode::Cursor(n) => n.id(),
+    }
+  }
 }
 
 impl InodeValue for TreeNode {
@@ -91,15 +100,6 @@ impl InodeValue for TreeNode {
 }
 
 impl Widget for TreeNode {
-  /// Get widget ID.
-  fn id(&self) -> WidgetId {
-    match self {
-      TreeNode::RootContainer(w) => w.id(),
-      TreeNode::Window(w) => w.id(),
-      TreeNode::Cursor(w) => w.id(),
-    }
-  }
-
   /// Draw widget with (already calculated) actual shape, on the canvas.
   fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
     match self {

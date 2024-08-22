@@ -19,10 +19,6 @@ impl WindowRootContainer {
   }
 }
 
-impl Widget for WindowRootContainer {
-  fn id(&self) -> WidgetId {
-    self.base.id()
-  }
-}
-
 inode_value_generate_impl!(WindowRootContainer, base);
+
+impl Widget for WindowRootContainer {}
