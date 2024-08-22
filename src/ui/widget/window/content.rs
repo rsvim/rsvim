@@ -50,7 +50,7 @@ impl BufferView {
 }
 
 #[derive(Debug, Clone)]
-/// The content of a window.
+/// The content of VIM window.
 ///
 /// Besides buffer and window, here introduce several terms and concepts:
 ///
