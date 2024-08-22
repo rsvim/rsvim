@@ -19,7 +19,7 @@ use crate::ui::tree::internal::{Inode, InodeBase, InodeId};
 use crate::ui::widget::Widget;
 use crate::uuid;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Default)]
 /// The view of a buffer. The range is left-open right-closed, or top-open bottom-closed, i.e.
 /// `[start_line, end_line)` or `[start_column, end_column)`.
 struct BufferView {
@@ -34,19 +34,18 @@ struct BufferView {
 }
 
 impl BufferView {
-  pub fn new() -> Self {
+  pub fn new(
+    lstart: Option<usize>,
+    lend: Option<usize>,
+    cstart: Option<usize>,
+    cend: Option<usize>,
+  ) -> Self {
     BufferView {
-      lstart: None,
-      lend: None,
-      cstart: None,
-      cend: None,
+      lstart,
+      lend,
+      cstart,
+      cend,
     }
-  }
-}
-
-impl Default for BufferView {
-  fn default() -> Self {
-    BufferView::new()
   }
 }
 
@@ -101,9 +100,7 @@ pub struct WindowContent {
 
 impl WindowContent {
   pub fn new(shape: IRect, buffer: BufferWk) -> Self {
-    let mut view = BufferView::default();
-    view.lstart = Some(0);
-    view.cstart = Some(0);
+    let view = BufferView::new(Some(0), None, Some(0), None);
     WindowContent {
       base: InodeBase::new(shape),
       buffer,

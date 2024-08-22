@@ -72,7 +72,6 @@ impl EventLoop {
 
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor = Cursor::new(cursor_shape);
-    let cursor_id = cursor.id();
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
 
