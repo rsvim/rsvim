@@ -70,8 +70,8 @@ pub type U16Rect = Rect<u16>;
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 pub struct Size<T: Copy> {
-  pub width: T,
-  pub height: T,
+  width: T,
+  height: T,
 }
 
 impl<T> Size<T>

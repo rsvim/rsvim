@@ -31,46 +31,38 @@ pub struct Frame {
 impl Frame {
   /// Make new frame.
   pub fn new(size: U16Size, cursor: Cursor) -> Self {
+    let n = size.height() as usize * size.width() as usize;
     Frame {
       size,
-      cells: vec![Cell::default(); size.height as usize * size.width as usize],
+      cells: vec![Cell::default(); n],
       cursor,
-      dirty_cells: vec![],
+      dirty_cells: vec![], // When first create, it's not dirty.
       dirty_cursor: false,
     }
   }
 
-  /// Get the size.
+  /// Get current frame size.
   pub fn size(&self) -> U16Size {
     self.size
   }
 
-  /// Set the size, i.e. change the frame size.
+  /// Set current frame size.
   pub fn set_size(&mut self, size: U16Size) -> U16Size {
     let old_size = self.size;
     self.size = size;
     old_size
   }
 
-  /// Get a cell on specific position.
+  /// Get a cell.
   pub fn get_cell(&self, pos: UPos) -> &Cell {
     &self.cells[pos.x() * pos.y()]
   }
 
-  /// Set a cell on specific position.
+  /// Set a cell.
   pub fn set_cell(&mut self, pos: UPos, cell: Cell) -> Cell {
     let index = pos.x() * pos.y();
     let old = self.cells[index].clone();
     self.cells[index] = cell;
-    self.dirty_cells.push(index..(index + 1));
-    old
-  }
-
-  /// Reset/clear a cell on specific position.
-  pub fn reset_cell(&mut self, pos: UPos) -> Cell {
-    let index = pos.x() * pos.y();
-    let old = self.cells[index].clone();
-    self.cells[index] = Cell::default();
     self.dirty_cells.push(index..(index + 1));
     old
   }
@@ -93,20 +85,6 @@ impl Frame {
     let end_at = start_at + cells.len();
     self.dirty_cells.push(start_at..end_at);
     self.cells.splice(start_at..end_at, cells)
-  }
-
-  /// Reset/clear continuously cells, start from position.
-  /// Returns n old cells.
-  pub fn reset_cells(
-    &mut self,
-    pos: UPos,
-    cells: usize,
-  ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter> {
-    let start_at = pos.x() * pos.y();
-    let end_at = start_at + cells;
-    self.dirty_cells.push(start_at..end_at);
-    let values: Vec<Cell> = vec![Cell::default(); cells];
-    self.cells.splice(start_at..end_at, values)
   }
 
   /// Get dirty cells.

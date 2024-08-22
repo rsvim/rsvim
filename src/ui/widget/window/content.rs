@@ -206,16 +206,16 @@ impl Widgetable for WindowContent {
                         .set_cells(point!(x: col,y: (row + actual_pos.y()) as usize), cells);
                       col += cells_len;
                     }
-                    canvas.frame_mut().reset_cells(
+                    canvas.frame_mut().set_cells(
                       point!(x: col, y: (row  + actual_pos.y())as usize),
-                      width as usize - col,
+                      vec![Cell::none(); width as usize - col],
                     );
                   }
                   None => {
                     // This line has no text contents, set empty line
-                    canvas.frame_mut().reset_cells(
+                    canvas.frame_mut().set_cells(
                       point!(x: actual_pos.x() as usize, y: actual_pos.y() as usize),
-                      width as usize,
+                      vec![Cell::none(); width as usize],
                     );
                   }
                 }
