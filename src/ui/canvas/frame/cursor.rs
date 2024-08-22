@@ -4,7 +4,6 @@ use crate::cart::U16Pos;
 use geo::point;
 use std::cmp::{Eq, PartialEq};
 use std::fmt;
-use std::hash::{Hash, Hasher};
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
@@ -81,7 +80,7 @@ impl Default for Cursor {
   fn default() -> Self {
     Cursor {
       pos: point! {x:0_u16, y:0_u16},
-      blinking: false,
+      blinking: true,
       hidden: false,
       style: CursorStyle::DefaultUserShape,
     }
@@ -111,13 +110,6 @@ impl PartialEq for Cursor {
 }
 
 impl Eq for Cursor {}
-
-impl Hash for Cursor {
-  /// Make hash for cursor.
-  fn hash<H: Hasher>(&self, state: &mut H) {
-    self.pos.hash(state);
-  }
-}
 
 #[cfg(test)]
 mod tests {
