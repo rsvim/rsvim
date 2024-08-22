@@ -62,10 +62,7 @@ impl Frame {
     let index = pos.x() * pos.y();
     let old = self.cells[index].clone();
     self.cells[index] = cell;
-    self.dirty_cells.push(FrameCellsRange {
-      start: index,
-      end: index + 1,
-    });
+    self.dirty_cells.push(index..(index + 1));
     old
   }
 
@@ -74,10 +71,7 @@ impl Frame {
     let index = pos.x() * pos.y();
     let old = self.cells[index].clone();
     self.cells[index] = Cell::default();
-    self.dirty_cells.push(FrameCellsRange {
-      start: index,
-      end: index + 1,
-    });
+    self.dirty_cells.push(index..(index + 1));
     old
   }
 
@@ -97,10 +91,7 @@ impl Frame {
   ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter> {
     let start_at = pos.x() * pos.y();
     let end_at = start_at + cells.len();
-    self.dirty_cells.push(FrameCellsRange {
-      start: start_at,
-      end: end_at,
-    });
+    self.dirty_cells.push(start_at..end_at);
     self.cells.splice(start_at..end_at, cells)
   }
 
@@ -113,10 +104,7 @@ impl Frame {
   ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter> {
     let start_at = pos.x() * pos.y();
     let end_at = start_at + cells;
-    self.dirty_cells.push(FrameCellsRange {
-      start: start_at,
-      end: end_at,
-    });
+    self.dirty_cells.push(start_at..end_at);
     let values: Vec<Cell> = vec![Cell::default(); cells];
     self.cells.splice(start_at..end_at, values)
   }
