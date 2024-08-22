@@ -141,4 +141,18 @@ mod tests {
     assert_eq!(c1.attrs(), Attributes::default());
     assert_eq!(c1.attrs(), c2.attrs());
   }
+
+  #[test]
+  fn from1() {
+    let expects = vec!['a', 'b', 'c', 'd', 'e', 'F', 'G', 'H', 'I'];
+    for (i, input) in expects.iter().enumerate() {
+      let c: Cell = (*input).into();
+      let s = c.symbol().as_str();
+      let cs: Vec<char> = s.chars().collect();
+      let expect = expects[i];
+      assert!(s.len() == 1);
+      assert!(cs.len() == 1);
+      assert!(cs[0] == expect);
+    }
+  }
 }
