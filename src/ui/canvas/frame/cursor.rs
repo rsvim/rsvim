@@ -3,6 +3,7 @@
 use crate::cart::U16Pos;
 use geo::point;
 use std::cmp::{Eq, PartialEq};
+use std::fmt;
 use std::hash::{Hash, Hasher};
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
@@ -57,8 +58,8 @@ impl From<CursorStyle> for CursorStyleFormatter {
   }
 }
 
-impl std::fmt::Debug for CursorStyleFormatter {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl fmt::Debug for CursorStyleFormatter {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
     write!(f, "{}", self.value)
   }
 }
@@ -87,8 +88,8 @@ impl Default for Cursor {
   }
 }
 
-impl std::fmt::Debug for Cursor {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl fmt::Debug for Cursor {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
     let style_formatter = CursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
       .field("pos", &self.pos)
