@@ -116,7 +116,7 @@ mod tests {
   use super::*;
 
   #[test]
-  fn new1() {
+  fn default1() {
     let c = Cursor::default();
     assert!(c.blinking);
     assert!(!c.hidden);
