@@ -16,7 +16,7 @@ use crate::glovar;
 use crate::inode_generate_impl;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
-use crate::ui::widget::Widget;
+use crate::ui::widget::Widgetable;
 use crate::uuid;
 
 #[derive(Debug, Copy, Clone, Default)]
@@ -173,7 +173,7 @@ impl WindowContent {
 
 inode_generate_impl!(WindowContent, base);
 
-impl Widget for WindowContent {
+impl Widgetable for WindowContent {
   fn draw(&mut self, canvas: &mut Canvas) {
     match self.view {
       BufferView {

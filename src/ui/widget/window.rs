@@ -8,7 +8,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
-use crate::ui::widget::Widget;
+use crate::ui::widget::Widgetable;
 
 pub mod content;
 pub mod root;
@@ -122,7 +122,7 @@ impl Inodeable for Window {
   }
 }
 
-impl Widget for Window {
+impl Widgetable for Window {
   fn draw(&mut self, canvas: &mut Canvas) {
     // Do nothing.
     for node in self.base.iter_mut() {
@@ -236,7 +236,7 @@ impl Inodeable for WindowNode {
   }
 }
 
-impl Widget for WindowNode {
+impl Widgetable for WindowNode {
   /// Draw widget on the canvas.
   fn draw(&mut self, canvas: &mut Canvas) {
     match self {

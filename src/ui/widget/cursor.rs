@@ -7,7 +7,7 @@ use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_generate_impl;
 use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
-use crate::ui::widget::Widget;
+use crate::ui::widget::Widgetable;
 
 #[derive(Clone, Copy)]
 /// Cursor widget.
@@ -43,7 +43,7 @@ impl Debug for Cursor {
 
 inode_generate_impl!(Cursor, base);
 
-impl Widget for Cursor {
+impl Widgetable for Cursor {
   fn draw(&mut self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();

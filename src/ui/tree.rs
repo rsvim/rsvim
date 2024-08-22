@@ -12,7 +12,7 @@ use crate::cart::{IRect, U16Rect, U16Size};
 use crate::glovar;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut};
-use crate::ui::widget::{Cursor, RootContainer, Widget, Window};
+use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
 pub mod internal;
 
@@ -98,7 +98,7 @@ impl Inodeable for TreeNode {
   }
 }
 
-impl Widget for TreeNode {
+impl Widgetable for TreeNode {
   /// Draw widget on the canvas.
   fn draw(&mut self, canvas: &mut Canvas) {
     match self {
