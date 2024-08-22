@@ -553,7 +553,7 @@ where
 
 #[cfg(test)]
 mod tests {
-  use crate::inode_value_generate_impl;
+  use crate::inode_generate_impl;
   use std::sync::Once;
   use tracing::info;
 
@@ -580,7 +580,7 @@ mod tests {
     }
   }
 
-  inode_value_generate_impl!(TestValue, base);
+  inode_generate_impl!(TestValue, base);
 
   macro_rules! assert_node_id_eq {
     ($node: ident, $id: ident) => {

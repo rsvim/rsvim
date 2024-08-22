@@ -4,7 +4,7 @@ use std::fmt::Debug;
 use tracing::debug;
 
 use crate::cart::{IRect, U16Pos, U16Rect};
-use crate::inode_value_generate_impl;
+use crate::inode_generate_impl;
 use crate::ui::canvas::{frame, Canvas, CursorStyle, CursorStyleFormatter};
 use crate::ui::tree::internal::{Inode, InodeBase, InodeId};
 use crate::ui::widget::Widget;
@@ -41,7 +41,7 @@ impl Debug for Cursor {
   }
 }
 
-inode_value_generate_impl!(Cursor, base);
+inode_generate_impl!(Cursor, base);
 
 impl Widget for Cursor {
   fn draw(&mut self, canvas: &mut Canvas) {

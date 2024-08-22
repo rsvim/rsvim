@@ -36,9 +36,9 @@ pub trait Inode: Sized + Clone + Debug {
   fn visible_mut(&mut self) -> &mut bool;
 }
 
-/// Generate getter/setter for Inode base.
+/// Generate getter/setter for Inode.
 #[macro_export]
-macro_rules! inode_value_generate_impl {
+macro_rules! inode_generate_impl {
   ($struct_name:ty,$base_name:ident) => {
     impl Inode for $struct_name {
       fn id(&self) -> InodeId {
@@ -205,7 +205,7 @@ mod tests {
     }
   }
 
-  inode_value_generate_impl!(TestNode, base);
+  inode_generate_impl!(TestNode, base);
 
   static INIT: Once = Once::new();
 

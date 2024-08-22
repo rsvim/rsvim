@@ -1,7 +1,7 @@
 //! Root container is the root node in the widget tree.
 
 use crate::cart::{IRect, U16Rect};
-use crate::inode_value_generate_impl;
+use crate::inode_generate_impl;
 use crate::ui::tree::internal::{Inode, InodeBase, InodeId};
 use crate::ui::widget::Widget;
 
@@ -19,6 +19,6 @@ impl RootContainer {
   }
 }
 
-inode_value_generate_impl!(RootContainer, base);
+inode_generate_impl!(RootContainer, base);
 
 impl Widget for RootContainer {}

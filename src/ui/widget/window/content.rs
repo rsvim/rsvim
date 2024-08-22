@@ -13,7 +13,7 @@ use tracing::debug;
 use crate::buf::{Buffer, BufferWk};
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::glovar;
-use crate::inode_value_generate_impl;
+use crate::inode_generate_impl;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{Inode, InodeBase, InodeId};
 use crate::ui::widget::Widget;
@@ -171,7 +171,7 @@ impl WindowContent {
   }
 }
 
-inode_value_generate_impl!(WindowContent, base);
+inode_generate_impl!(WindowContent, base);
 
 impl Widget for WindowContent {
   fn draw(&mut self, canvas: &mut Canvas) {
