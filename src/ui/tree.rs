@@ -399,10 +399,8 @@ impl Tree {
     if let Some(cursor_id) = self.cursor_id {
       let mut id = cursor_id;
       while let Some(parent_id) = self.parent_id(&id) {
-        if let Some(parent_node) = self.node(parent_id) {
-          if let TreeNode::Window(_w) = parent_node {
-            return Some(*parent_id);
-          }
+        if let Some(TreeNode::Window(_w)) = self.node(parent_id) {
+          return Some(*parent_id);
         }
         id = *parent_id;
       }

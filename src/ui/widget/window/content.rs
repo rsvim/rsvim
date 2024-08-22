@@ -178,9 +178,9 @@ impl Widget for WindowContent {
     match self.view {
       BufferView {
         lstart: Some(lstart),
-        lend,
-        cstart: Some(cstart),
-        cend: Some(cend),
+        lend: _,
+        cstart: Some(_cstart),
+        cend: Some(_cend),
       } => {
         let actual_shape = self.actual_shape();
         let actual_pos: U16Pos = actual_shape.min().into();
@@ -195,7 +195,6 @@ impl Widget for WindowContent {
             if lstart <= total_lines {
               let mut buffer_lines = buffer.rope().lines_at(lstart);
               for row in 0..height {
-                let l = lstart + row as usize;
                 match buffer_lines.next() {
                   Some(one_line) => {
                     let mut col = 0_usize;
@@ -238,10 +237,10 @@ impl Widget for WindowContent {
         // Failed to upgrade to Arc pointer or lock , do nothing.
       }
       BufferView {
-        lstart,
-        lend: Some(lend),
-        cstart: Some(cstart),
-        cend: Some(cend),
+        lstart: _,
+        lend: Some(_lend),
+        cstart: Some(_cstart),
+        cend: Some(_cend),
       } => {
         unreachable!("Not implement")
       }
