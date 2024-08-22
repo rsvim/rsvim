@@ -37,10 +37,10 @@ pub fn cursor_style_eq(a: &CursorStyle, b: &CursorStyle) -> bool {
 #[derive(Copy, Clone)]
 /// Terminal cursor.
 pub struct Cursor {
-  pub pos: U16Pos,
-  pub blinking: bool,
-  pub hidden: bool,
-  pub style: CursorStyle,
+  pos: U16Pos,
+  blinking: bool,
+  hidden: bool,
+  style: CursorStyle,
 }
 
 /// The [`CursorStyle`] formatter that helps implement the `Debug`/`Display` trait.

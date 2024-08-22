@@ -97,21 +97,21 @@ impl EventLoop {
       .frame()
       .cursor;
 
-    if cursor.blinking {
+    if cursor.blinking() {
       queue!(out, crossterm::cursor::EnableBlinking)?;
     } else {
       queue!(out, crossterm::cursor::DisableBlinking)?;
     }
-    if cursor.hidden {
+    if cursor.hidden() {
       queue!(out, crossterm::cursor::Hide)?;
     } else {
       queue!(out, crossterm::cursor::Show)?;
     }
 
-    queue!(out, cursor.style)?;
+    queue!(out, cursor.style())?;
     queue!(
       out,
-      crossterm::cursor::MoveTo(cursor.pos.x(), cursor.pos.y())
+      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
     )?;
 
     out.flush()?;

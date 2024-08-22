@@ -106,27 +106,31 @@ impl Canvas {
       let cursor = self.frame.cursor;
       let prev_cursor = self.prev_frame.cursor;
 
-      if cursor.blinking != prev_cursor.blinking {
-        shader.push(if cursor.blinking {
-          ShaderCommand::CursorEnableBlinking(crossterm::cursor::EnableBlinking)
+      if cursor.blinking() != prev_cursor.blinking() {
+        if cursor.blinking() {
+          shader.push(ShaderCommand::CursorEnableBlinking(
+            crossterm::cursor::EnableBlinking,
+          ));
         } else {
-          ShaderCommand::CursorDisableBlinking(crossterm::cursor::DisableBlinking)
-        });
+          shader.push(ShaderCommand::CursorDisableBlinking(
+            crossterm::cursor::DisableBlinking,
+          ));
+        }
       }
-      if cursor.hidden != prev_cursor.hidden {
-        shader.push(if cursor.hidden {
-          ShaderCommand::CursorHide(crossterm::cursor::Hide)
+      if cursor.hidden() != prev_cursor.hidden() {
+        if cursor.hidden() {
+          shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
         } else {
-          ShaderCommand::CursorShow(crossterm::cursor::Show)
-        });
+          shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+        }
       }
-      if !cursor_style_eq(&cursor.style, &prev_cursor.style) {
-        shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style));
+      if !cursor_style_eq(&cursor.style(), &prev_cursor.style()) {
+        shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
-      if cursor.pos != prev_cursor.pos {
+      if cursor.pos() != prev_cursor.pos() {
         shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-          cursor.pos.x(),
-          cursor.pos.y(),
+          cursor.pos().x(),
+          cursor.pos().y(),
         )));
       }
     }
