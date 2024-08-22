@@ -6,6 +6,9 @@ use tracing_appender;
 use tracing_subscriber;
 use tzdb;
 
+/// Initialize logging.
+///
+/// It uses `RUST_LOG` environment variable to control the logging level. By default it's `INFO`.
 pub fn init() {
   let now = tzdb::now::local().unwrap();
   let now = OffsetDateTime::new_in_offset(
