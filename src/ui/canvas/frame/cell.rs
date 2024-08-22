@@ -8,14 +8,14 @@ use crossterm::style::{Attributes, Color};
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// Single character/grapheme rendering unit, it accepts ansi/unicode/emoji/nerd font symbol.
 pub struct Cell {
-  /// The character/grapheme.
-  pub symbol: CompactString,
-  /// Foreground color.
-  pub fg: Color,
-  /// Background color.
-  pub bg: Color,
-  /// Attributes: underline, bold, italic, etc.
-  pub attrs: Attributes,
+  // The character/grapheme.
+  symbol: CompactString,
+  // Foreground color.
+  fg: Color,
+  // Background color.
+  bg: Color,
+  // Attributes: underline, bold, italic, etc.
+  attrs: Attributes,
 }
 
 impl Cell {
