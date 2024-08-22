@@ -2,7 +2,8 @@
 
 use crate::cart::U16Pos;
 use geo::point;
-use std::{cmp, fmt, hash};
+use std::cmp::{Eq, PartialEq};
+use std::hash::{Hash, Hasher};
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
@@ -56,8 +57,8 @@ impl From<CursorStyle> for CursorStyleFormatter {
   }
 }
 
-impl fmt::Debug for CursorStyleFormatter {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+impl std::fmt::Debug for CursorStyleFormatter {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
     write!(f, "{}", self.value)
   }
 }
@@ -98,7 +99,7 @@ impl fmt::Debug for Cursor {
   }
 }
 
-impl cmp::PartialEq for Cursor {
+impl PartialEq for Cursor {
   /// Whether two cursors equals to each other.
   fn eq(&self, other: &Self) -> bool {
     self.pos == other.pos
@@ -108,11 +109,11 @@ impl cmp::PartialEq for Cursor {
   }
 }
 
-impl cmp::Eq for Cursor {}
+impl Eq for Cursor {}
 
-impl hash::Hash for Cursor {
+impl Hash for Cursor {
   /// Make hash for cursor.
-  fn hash<H: hash::Hasher>(&self, state: &mut H) {
+  fn hash<H: Hasher>(&self, state: &mut H) {
     self.pos.hash(state);
   }
 }
