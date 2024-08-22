@@ -2,7 +2,7 @@
 
 #![allow(unused_imports, dead_code)]
 
-use compact_str::CompactString;
+use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
 use geo::point;
 use std::collections::VecDeque;
@@ -203,12 +203,11 @@ impl Widget for WindowContent {
                   Some(one_line) => {
                     let mut col = 0_usize;
                     for chunk in one_line.chunks() {
-                      let mut tmp_buf = [0; 8];
                       let cells: Vec<Cell> = chunk
                         .chars()
                         .map(|c| {
                           Cell::new(
-                            CompactString::const_new(c.encode_utf8(&mut tmp_buf)),
+                            c.to_compact_string(),
                             Color::Reset,
                             Color::Reset,
                             Attributes::default(),
