@@ -18,7 +18,6 @@ use std::io::{Result as IoResult, Write};
 use std::ptr::NonNull;
 use std::sync::Arc;
 use std::time::Duration;
-use time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
@@ -215,23 +214,21 @@ impl EventLoop {
     let state_response = {
       self
         .state
-        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
         .unwrap()
         .handle(self.tree.clone(), event)
     };
 
-    match state_response.next_stateful {
-      StatefulValue::QuitState(_) => {
-        return Ok(false);
-      }
-      _ => { /*Skip*/ }
+    // Exit loop and quit.
+    if let StatefulValue::QuitState(_) = state_response.next_stateful {
+      return Ok(false);
     }
 
     {
       // Draw UI components to the canvas.
       self
         .tree
-        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
         .unwrap()
         .draw(self.canvas.clone());
     }
@@ -240,7 +237,7 @@ impl EventLoop {
       // Compute the commands that need to output to the terminal device.
       self
         .canvas
-        .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
         .unwrap()
         .shade()
     };
