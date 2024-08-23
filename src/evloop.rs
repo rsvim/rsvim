@@ -43,6 +43,9 @@ pub struct EventLoop {
   pub buffers: BuffersArc,
 }
 
+// type IoWrite = std::io::Stderr;
+type IoWrite = std::io::Stdout;
+
 impl EventLoop {
   pub async fn new(cli_opt: CliOpt) -> IoResult<Self> {
     // Canvas
@@ -226,7 +229,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas shader.
-  async fn queue_shader(&mut self, shader: Shader, out: &mut std::io::Stdout) -> IoResult<()> {
+  async fn queue_shader(&mut self, shader: Shader, out: &mut IoWrite) -> IoResult<()> {
     for shader_command in shader.iter() {
       match shader_command {
         ShaderCommand::CursorSetCursorStyle(command) => queue!(out, command)?,
@@ -278,7 +281,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas cursor.
-  async fn queue_cursor(&self, out: &mut std::io::Stdout) -> IoResult<()> {
+  async fn queue_cursor(&self, out: &mut IoWrite) -> IoResult<()> {
     let cursor = *self
       .canvas
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
