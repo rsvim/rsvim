@@ -59,7 +59,15 @@ impl From<CursorStyle> for CursorStyleFormatter {
 
 impl fmt::Debug for CursorStyleFormatter {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    write!(f, "{}", self.value)
+    match self.value {
+      CursorStyle::DefaultUserShape => write!(f, "CursorStyle::DefaultUserShape"),
+      CursorStyle::BlinkingBlock => write!(f, "CursorStyle::BlinkingBlock"),
+      CursorStyle::SteadyBlock => write!(f, "CursorStyle::SteadyBlock"),
+      CursorStyle::BlinkingUnderScore => write!(f, "CursorStyle::BlinkingUnderScore"),
+      CursorStyle::SteadyUnderScore => write!(f, "CursorStyle::SteadyUnderScore"),
+      CursorStyle::BlinkingBar => write!(f, "CursorStyle::BlinkingBar"),
+      CursorStyle::SteadyBar => write!(f, "CursorStyle::SteadyBar"),
+    }
   }
 }
 
@@ -116,7 +124,7 @@ impl Cursor {
 }
 
 impl Default for Cursor {
-  /// Make default terminal cursor.
+  /// Make default cursor.
   fn default() -> Self {
     Cursor {
       pos: point! {x:0_u16, y:0_u16},
@@ -174,5 +182,34 @@ mod tests {
     let cs3 = CursorStyle::DefaultUserShape;
     assert!(!cursor_style_eq(&cs1, &cs2));
     assert!(cursor_style_eq(&cs1, &cs3));
+  }
+
+  #[test]
+  fn debug1() {
+    let cursors = [
+      Cursor::default(),
+      Cursor::new(
+        point!(x: 0_u16, y: 10_u16),
+        false,
+        true,
+        CursorStyle::SteadyUnderScore,
+      ),
+      Cursor::new(
+        point!(x: 7_u16, y: 3_u16),
+        true,
+        false,
+        CursorStyle::BlinkingBar,
+      ),
+    ];
+    let expects = [
+        "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: true, hidden: false, style: CursorStyle::DefaultUserShape }",
+        "Cursor { pos: Point(Coord { x: 0, y: 10 }), blinking: false, hidden: true, style: CursorStyle::SteadyUnderScore }",
+        "Cursor { pos: Point(Coord { x: 7, y: 3 }), blinking: true, hidden: false, style: CursorStyle::BlinkingBar }"
+    ];
+    for (i, c) in cursors.iter().enumerate() {
+      let actual = format!("{:?}", c);
+      let expect = expects[i];
+      assert_eq!(expect, actual);
+    }
   }
 }
