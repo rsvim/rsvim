@@ -58,12 +58,12 @@ impl Canvas {
   }
 
   pub fn size(&self) -> U16Size {
-    self.frame.size
+    self.frame.size()
   }
 
   /// Get current frame cells.
   pub fn cells(&self) -> &Vec<Cell> {
-    &self.frame.cells
+    &self.frame.cells()
   }
 
   /// Get current frame cursor.

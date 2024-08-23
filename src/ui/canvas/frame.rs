@@ -67,24 +67,45 @@ impl Frame {
     old
   }
 
-  /// Get n continuously cells, start from position.
-  pub fn cells(&self, pos: UPos, n: usize) -> &[Cell] {
-    let start_at = pos.x() * pos.y();
-    let end_at = start_at + n;
-    &self.cells[start_at..end_at]
+  /// Get all cells.
+  pub fn cells(&self) -> &Vec<Cell> {
+    &self.cells
   }
 
-  /// Set continuously cells, start from position.
-  /// Returns n old cells.
-  pub fn set_cells(
+  /// Get cells in range.
+  pub fn cells_at(&self, range: Range<usize>) -> &[Cell] {
+    &self.cells[range]
+  }
+
+  /// [`Splice`](std::vec::Vec::splice) cells at a range.
+  ///
+  /// Returns old cells.
+  pub fn splice_cells<I>(
     &mut self,
-    pos: UPos,
-    cells: Vec<Cell>,
-  ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter> {
-    let start_at = pos.x() * pos.y();
-    let end_at = start_at + cells.len();
-    self.dirty_cells.push(start_at..end_at);
-    self.cells.splice(start_at..end_at, cells)
+    range: Range<usize>,
+    cells: I,
+  ) -> Splice<'_, <I as IntoIterator>::IntoIter>
+  where
+    I: std::iter::IntoIterator<Item = Cell>,
+  {
+    self.dirty_cells.push(range.clone());
+    self.cells.splice(range, cells)
+  }
+
+  /// Repeatedly [`splice`](std::vec::Vec::splice) the same cell at a range.
+  ///
+  /// Returns old cells.
+  pub fn splice_cells_repeatedly<I>(
+    &mut self,
+    range: Range<usize>,
+    cell: Cell,
+  ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter>
+  where
+    I: std::iter::IntoIterator<Item = Cell>,
+  {
+    self.dirty_cells.push(range.clone());
+    let cells = vec![cell; range.end - range.start];
+    self.cells.splice(range, cells)
   }
 
   /// Get dirty cells.
