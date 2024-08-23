@@ -3,7 +3,6 @@
 #![allow(dead_code)]
 
 use std::ops::Range;
-use std::vec::Splice;
 
 use crate::cart::{U16Size, UPos};
 use crate::ui::canvas::frame::cell::Cell;
@@ -50,6 +49,10 @@ impl Frame {
   pub fn set_size(&mut self, size: U16Size) -> U16Size {
     let old_size = self.size;
     self.size = size;
+    self.cells.resize(
+      size.height() as usize * size.width() as usize,
+      Cell::default(),
+    );
     old_size
   }
 
