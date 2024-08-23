@@ -4,7 +4,7 @@
 
 use std::ops::Range;
 
-use crate::cart::{U16Size, UPos};
+use crate::cart::{U16Pos, U16Size};
 use crate::ui::canvas::frame::cell::Cell;
 use crate::ui::canvas::frame::cursor::Cursor;
 
@@ -25,6 +25,19 @@ pub struct Frame {
   /// rendering to the hardware device, only dirty parts will be printed.
   dirty_cells: Vec<Range<usize>>,
   dirty_cursor: bool,
+}
+
+// Make range from start position and length of following N elements.
+fn range_from_pos(pos: U16Pos, n: usize) -> Range<usize> {
+  let start_at = pos.x() as usize * pos.y() as usize;
+  let end_at = start_at + n;
+  start_at..end_at
+}
+
+// Make range from start index and length of following N elements.
+fn range_from_idx(index: usize, n: usize) -> Range<usize> {
+  let end_at = index + n;
+  index..end_at
 }
 
 impl Frame {
@@ -57,13 +70,13 @@ impl Frame {
   }
 
   /// Get a cell.
-  pub fn cell(&self, pos: UPos) -> &Cell {
-    &self.cells[pos.x() * pos.y()]
+  pub fn cell(&self, pos: U16Pos) -> &Cell {
+    &self.cells[pos.x() as usize * pos.y() as usize]
   }
 
   /// Set a cell.
-  pub fn set_cell(&mut self, pos: UPos, cell: Cell) -> Cell {
-    let index = pos.x() * pos.y();
+  pub fn set_cell(&mut self, pos: U16Pos, cell: Cell) -> Cell {
+    let index = pos.x() as usize * pos.y() as usize;
     let old = self.cells[index].clone();
     self.cells[index] = cell;
     self.dirty_cells.push(index..(index + 1));
@@ -75,17 +88,20 @@ impl Frame {
     &self.cells
   }
 
-  /// Get cells in range.
-  pub fn cells_at(&self, range: Range<usize>) -> &[Cell] {
-    &self.cells[range]
+  /// Get a range of continuously cells, start from specific position, last for N elements.
+  pub fn cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
+    let start_at = pos.x() as usize * pos.y() as usize;
+    let end_at = start_at + n;
+    &self.cells[start_at..end_at]
   }
 
   /// Set (replace) cells at a range.
   ///
-  /// Note: The behavior is exactly same with [`Vec::splice`].
+  /// NOTE: The behavior is almost same with [`Vec::splice`], except use specific position and N
+  /// elements instead of [`Range`].
   ///
   /// Returns old cells.
-  pub fn set_cells_at(&mut self, range: Range<usize>, cells: Vec<Cell>) -> Vec<Cell> {
+  pub fn set_cells_at(&mut self, pos: U16Pos, n: usize, cells: Vec<Cell>) -> Vec<Cell> {
     self.dirty_cells.push(range.clone());
     self.cells.splice(range, cells).collect()
   }

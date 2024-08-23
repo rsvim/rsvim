@@ -4,6 +4,7 @@ use crossterm;
 use parking_lot::RwLock;
 use std::fmt;
 use std::fmt::Debug;
+use std::ops::Range;
 use std::slice::Iter;
 use std::sync::Arc;
 
@@ -24,6 +25,9 @@ pub mod frame;
 /// It manages both the current frame and the last frame as a screenshot, and internally uses a
 /// diff-algorithm to compare the TUI changes, thus only flushing the changed parts to reduce IO
 /// operations.
+///
+/// NOTE: All APIs named with `prev_` are previous frame, when without `prev_` the APIs are for
+/// current frame.
 pub struct Canvas {
   frame: Frame,
   prev_frame: Frame,
@@ -68,7 +72,7 @@ impl Canvas {
 
   /// Get current frame cursor.
   pub fn cursor(&self) -> &Cursor {
-    &self.frame.cursor
+    &self.frame.cursor()
   }
 
   // Current frame }
@@ -81,17 +85,22 @@ impl Canvas {
   }
 
   pub fn prev_size(&self) -> U16Size {
-    self.prev_frame.size
+    self.prev_frame.size()
   }
 
   /// Get previous frame cells.
   pub fn prev_cells(&self) -> &Vec<Cell> {
-    &self.prev_frame.cells
+    &self.prev_frame.cells()
+  }
+
+  /// Get previous frame cells at specific range.
+  pub fn prev_cells_at(&self, range: Range<usize>) -> &[Cell] {
+    &self.prev_frame.cells_at(range)
   }
 
   /// Get previous frame cursor.
   pub fn prev_cursor(&self) -> &Cursor {
-    &self.prev_frame.cursor
+    &self.prev_frame.cursor()
   }
 
   // Previous frame }
@@ -102,9 +111,9 @@ impl Canvas {
     let mut shader = Shader::new();
 
     // For cursor.
-    if self.frame.dirty_cursor {
-      let cursor = self.frame.cursor;
-      let prev_cursor = self.prev_frame.cursor;
+    if self.frame.dirty_cursor() {
+      let cursor = self.frame.cursor();
+      let prev_cursor = self.prev_frame.cursor();
 
       if cursor.blinking() != prev_cursor.blinking() {
         if cursor.blinking() {
@@ -283,8 +292,8 @@ mod tests {
   #[test]
   fn new1() {
     let t = Canvas::new(U16Size::new(3, 4));
-    assert_eq!(t.frame().size, t.prev_frame().size);
-    assert_eq!(t.frame().cursor, t.prev_frame().cursor);
+    assert_eq!(t.frame().size(), t.prev_frame().size());
+    assert_eq!(*t.frame().cursor(), *t.prev_frame().cursor());
   }
 
   #[test]

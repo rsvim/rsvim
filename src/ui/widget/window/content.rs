@@ -203,7 +203,7 @@ impl Widgetable for WindowContent {
                       let cells_len = cells.len();
                       canvas
                         .frame_mut()
-                        .set_cells(point!(x: col,y: (row + actual_pos.y()) as usize), cells);
+                        .set_cells_at(point!(x: col,y: (row + actual_pos.y()) as usize), cells);
                       col += cells_len;
                     }
                     canvas.frame_mut().set_cells(
