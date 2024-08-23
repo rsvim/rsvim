@@ -144,7 +144,7 @@ mod tests {
 
   #[test]
   fn from1() {
-    let expects = vec!['a', 'b', 'c', 'd', 'e', 'F', 'G', 'H', 'I'];
+    let expects = ['a', 'b', 'c', 'd', 'e', 'F', 'G', 'H', 'I'];
     for (i, input) in expects.iter().enumerate() {
       let c: Cell = (*input).into();
       let s = c.symbol().as_str();
