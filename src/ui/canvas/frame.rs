@@ -93,24 +93,26 @@ impl Frame {
     &self.cells[range_from_pos(pos, n)]
   }
 
-  /// Set (replace) cells at a range.
+  /// Splice (set/replace) cells at a range.
   ///
   /// NOTE: The behavior is almost same with [`Vec::splice`], except use a start position and
   /// following N elements instead of [`Range`].
   ///
   /// Returns old cells.
-  pub fn set_cells_at(&mut self, pos: U16Pos, n: usize, cells: Vec<Cell>) -> Vec<Cell> {
+  pub fn splice_cells_at(&mut self, pos: U16Pos, n: usize, cells: Vec<Cell>) -> Vec<Cell> {
+    let range = range_from_pos(pos, n);
     self.dirty_cells.push(range.clone());
     self.cells.splice(range, cells).collect()
   }
 
-  /// Repeatedly set (replace) the same cell at a range.
+  /// Splice (set/replace) repeatedly with the same cell at a range.
   ///
   /// NOTE: The behavior is almost same with [`Vec::splice`], except use a start position and
   /// following N elements instead of [`Range`].
   ///
   /// Returns old cells.
-  pub fn repeatedly_set_cell_at(&mut self, range: Range<usize>, cell: Cell) -> Vec<Cell> {
+  pub fn splice_cells_repeatedly_at(&mut self, pos: U16Pos, n: usize, cell: Cell) -> Vec<Cell> {
+    let range = range_from_pos(pos, n);
     self.dirty_cells.push(range.clone());
     let cells = vec![cell; range.end - range.start];
     self.cells.splice(range, cells).collect()

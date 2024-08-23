@@ -463,7 +463,7 @@ where
   /// * The node moves up when `y < 0`.
   /// * The node moves down when `y > 0`.
   ///
-  /// Note: This operation also updates all descendants attributes such as
+  /// NOTE: This operation also updates all descendants attributes such as
   /// [`insert`](Itree::insert) method.
   ///
   /// # Returns
@@ -503,7 +503,7 @@ where
   /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
   /// its parent, it simply stops moving.
   ///
-  /// Note: This operation also updates all descendants attributes such as
+  /// NOTE: This operation also updates all descendants attributes such as
   /// [`insert`](Itree::insert) method.
   ///
   /// # Returns

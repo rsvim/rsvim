@@ -197,25 +197,32 @@ impl Widgetable for WindowContent {
               for row in 0..height {
                 match buffer_lines.next() {
                   Some(one_line) => {
-                    let mut col = 0_usize;
+                    // Write the line.
+                    let mut col = 0_u16;
                     for chunk in one_line.chunks() {
                       let cells: Vec<Cell> = chunk.chars().map(Cell::from).collect();
                       let cells_len = cells.len();
-                      canvas
-                        .frame_mut()
-                        .set_cells_at(point!(x: col,y: (row + actual_pos.y()) as usize), cells);
-                      col += cells_len;
+                      canvas.frame_mut().splice_cells_at(
+                        point!(x: col, y: row + actual_pos.y()),
+                        (width - col) as usize,
+                        cells,
+                      );
+                      col += cells_len as u16;
                     }
-                    canvas.frame_mut().set_cells(
-                      point!(x: col, y: (row  + actual_pos.y())as usize),
-                      vec![Cell::none(); width as usize - col],
+
+                    // Clear the left parts (at the end) of the line.
+                    canvas.frame_mut().splice_cells_repeatedly_at(
+                      point!(x: col, y: row  + actual_pos.y()),
+                      (width - col) as usize,
+                      Cell::none(),
                     );
                   }
                   None => {
-                    // This line has no text contents, set empty line
-                    canvas.frame_mut().set_cells(
-                      point!(x: actual_pos.x() as usize, y: actual_pos.y() as usize),
-                      vec![Cell::none(); width as usize],
+                    // Set empty line
+                    canvas.frame_mut().splice_cells_repeatedly_at(
+                      point!(x: actual_pos.x(), y: row + actual_pos.y()),
+                      width as usize,
+                      Cell::none(),
                     );
                   }
                 }

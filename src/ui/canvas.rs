@@ -8,7 +8,7 @@ use std::ops::Range;
 use std::slice::Iter;
 use std::sync::Arc;
 
-use crate::cart::U16Size;
+use crate::cart::{U16Pos, U16Size};
 
 // Re-export
 pub use crate::ui::canvas::frame::cell::Cell;
@@ -94,8 +94,8 @@ impl Canvas {
   }
 
   /// Get previous frame cells at specific range.
-  pub fn prev_cells_at(&self, range: Range<usize>) -> &[Cell] {
-    &self.prev_frame.cells_at(range)
+  pub fn prev_cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
+    &self.prev_frame.cells_at(pos, n)
   }
 
   /// Get previous frame cursor.
