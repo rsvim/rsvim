@@ -4,7 +4,6 @@ use crossterm;
 use parking_lot::RwLock;
 use std::fmt;
 use std::fmt::Debug;
-use std::ops::Range;
 use std::slice::Iter;
 use std::sync::Arc;
 
@@ -67,12 +66,12 @@ impl Canvas {
 
   /// Get current frame cells.
   pub fn cells(&self) -> &Vec<Cell> {
-    &self.frame.cells()
+    self.frame.cells()
   }
 
   /// Get current frame cursor.
   pub fn cursor(&self) -> &Cursor {
-    &self.frame.cursor()
+    self.frame.cursor()
   }
 
   // Current frame }
@@ -90,17 +89,17 @@ impl Canvas {
 
   /// Get previous frame cells.
   pub fn prev_cells(&self) -> &Vec<Cell> {
-    &self.prev_frame.cells()
+    self.prev_frame.cells()
   }
 
   /// Get previous frame cells at specific range.
   pub fn prev_cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
-    &self.prev_frame.cells_at(pos, n)
+    self.prev_frame.cells_at(pos, n)
   }
 
   /// Get previous frame cursor.
   pub fn prev_cursor(&self) -> &Cursor {
-    &self.prev_frame.cursor()
+    self.prev_frame.cursor()
   }
 
   // Previous frame }
