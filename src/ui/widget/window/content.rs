@@ -231,7 +231,7 @@ impl Widgetable for WindowContent {
           }
         }
 
-        // Failed to upgrade to Arc pointer or lock , do nothing.
+        // Failed to upgrade to Arc pointer or lock, don't do anything and keep the current contents.
       }
       BufferView {
         lstart: _,
