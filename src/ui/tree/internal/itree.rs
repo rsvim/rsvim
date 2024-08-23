@@ -278,8 +278,8 @@ where
   ///
   /// Below node attributes need to update:
   ///
-  /// 1. [`depth`](Inode::depth()): The child depth should be always the parent depth + 1.
-  /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
+  /// 1. [`depth`](Inodeable::depth()): The child depth should be always the parent depth + 1.
+  /// 2. [`actual_shape`](Inodeable::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
   ///
   /// # Returns
   ///
