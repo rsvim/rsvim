@@ -158,11 +158,11 @@ mod tests {
   fn new1() {
     let sz = U16Size::new(2, 1);
     let f = Frame::new(sz, Cursor::default());
-    assert_eq!(f.size.width, 2);
-    assert_eq!(f.size.height, 1);
+    assert_eq!(f.size.width(), 2);
+    assert_eq!(f.size.height(), 1);
     assert_eq!(
       f.cells.len(),
-      f.size.height as usize * f.size.width as usize
+      f.size.height() as usize * f.size.width() as usize
     );
     for c in f.cells.iter() {
       assert_eq!(c.symbol(), Cell::default().symbol());
