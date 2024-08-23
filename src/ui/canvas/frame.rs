@@ -77,35 +77,25 @@ impl Frame {
     &self.cells[range]
   }
 
-  /// [`Splice`](std::vec::Vec::splice) cells at a range.
+  /// Set (replace) cells at a range.
+  ///
+  /// Note: The behavior is exactly same with [`Vec::splice`].
   ///
   /// Returns old cells.
-  pub fn splice_cells<I>(
-    &mut self,
-    range: Range<usize>,
-    cells: I,
-  ) -> Splice<'_, <I as IntoIterator>::IntoIter>
-  where
-    I: std::iter::IntoIterator<Item = Cell>,
-  {
+  pub fn set_cells_at(&mut self, range: Range<usize>, cells: Vec<Cell>) -> Vec<Cell> {
     self.dirty_cells.push(range.clone());
-    self.cells.splice(range, cells)
+    self.cells.splice(range, cells).collect()
   }
 
-  /// Repeatedly [`splice`](std::vec::Vec::splice) the same cell at a range.
+  /// Repeatedly set (replace) the same cell at a range.
+  ///
+  /// Note: The behavior is exactly same with [`Vec::splice`].
   ///
   /// Returns old cells.
-  pub fn splice_cells_repeatedly<I>(
-    &mut self,
-    range: Range<usize>,
-    cell: Cell,
-  ) -> Splice<'_, <Vec<Cell> as IntoIterator>::IntoIter>
-  where
-    I: std::iter::IntoIterator<Item = Cell>,
-  {
+  pub fn repeatedly_set_cell_at(&mut self, range: Range<usize>, cell: Cell) -> Vec<Cell> {
     self.dirty_cells.push(range.clone());
     let cells = vec![cell; range.end - range.start];
-    self.cells.splice(range, cells)
+    self.cells.splice(range, cells).collect()
   }
 
   /// Get dirty cells.
