@@ -1,6 +1,6 @@
 //! Loggings for testing.
 //!
-//! Note: This module should only be used in unit tests, not some where else.
+//! NOTE: This module should only be used in unit tests, not some where else.
 
 #[cfg(test)]
 /// Initialize the logging prints to `stderr`.

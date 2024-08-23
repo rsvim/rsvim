@@ -77,10 +77,10 @@ impl Frame {
   /// Set a cell.
   pub fn set_cell(&mut self, pos: U16Pos, cell: Cell) -> Cell {
     let index = pos.x() as usize * pos.y() as usize;
-    let old = self.cells[index].clone();
+    let old_cell = self.cells[index].clone();
     self.cells[index] = cell;
-    self.dirty_cells.push(index..(index + 1));
-    old
+    self.dirty_cells.push(range_from_idx(index, 1));
+    old_cell
   }
 
   /// Get all cells.
@@ -88,17 +88,15 @@ impl Frame {
     &self.cells
   }
 
-  /// Get a range of continuously cells, start from specific position, last for N elements.
+  /// Get a range of continuously cells, start from a position and last for N elements.
   pub fn cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
-    let start_at = pos.x() as usize * pos.y() as usize;
-    let end_at = start_at + n;
-    &self.cells[start_at..end_at]
+    &self.cells[range_from_pos(pos, n)]
   }
 
   /// Set (replace) cells at a range.
   ///
-  /// NOTE: The behavior is almost same with [`Vec::splice`], except use specific position and N
-  /// elements instead of [`Range`].
+  /// NOTE: The behavior is almost same with [`Vec::splice`], except use a start position and
+  /// following N elements instead of [`Range`].
   ///
   /// Returns old cells.
   pub fn set_cells_at(&mut self, pos: U16Pos, n: usize, cells: Vec<Cell>) -> Vec<Cell> {
@@ -108,7 +106,8 @@ impl Frame {
 
   /// Repeatedly set (replace) the same cell at a range.
   ///
-  /// Note: The behavior is exactly same with [`Vec::splice`].
+  /// NOTE: The behavior is almost same with [`Vec::splice`], except use a start position and
+  /// following N elements instead of [`Range`].
   ///
   /// Returns old cells.
   pub fn repeatedly_set_cell_at(&mut self, range: Range<usize>, cell: Cell) -> Vec<Cell> {
@@ -142,7 +141,7 @@ impl Frame {
 
   /// Reset/clean all dirty components.
   ///
-  /// Note: This method should be called after each frame been flushed to terminal device.
+  /// NOTE: This method should be called after each frame been flushed to terminal device.
   pub fn reset_dirty(&mut self) {
     self.dirty_cells = vec![];
     self.dirty_cursor = false;

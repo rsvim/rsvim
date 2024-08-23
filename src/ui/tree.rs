@@ -226,7 +226,7 @@ pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 impl Tree {
   /// Make a widget tree.
   ///
-  /// Note: The root node is created along with the tree.
+  /// NOTE: The root node is created along with the tree.
   pub fn new(terminal_size: U16Size) -> Self {
     let shape = IRect::new(
       (0, 0),
