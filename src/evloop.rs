@@ -35,7 +35,7 @@ use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
-#[derive(Clone)]
+#[derive(Debug)]
 pub struct EventLoop {
   pub cli_opt: CliOpt,
   pub canvas: CanvasArc,
@@ -91,7 +91,6 @@ impl EventLoop {
   }
 
   pub async fn init(&mut self) -> IoResult<()> {
-    let mut out = std::io::stdout();
     self.queue_cursor().await?;
     self.writer.flush()?;
 
