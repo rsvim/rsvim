@@ -14,6 +14,7 @@ use parking_lot::ReentrantMutexGuard;
 use ropey::RopeBuilder;
 use std::borrow::Borrow;
 use std::cell::RefCell;
+use std::io::{BufWriter, Stdout};
 use std::io::{Result as IoResult, Write};
 use std::ptr::NonNull;
 use std::sync::Arc;
@@ -41,10 +42,8 @@ pub struct EventLoop {
   pub tree: TreeArc,
   pub state: StateArc,
   pub buffers: BuffersArc,
+  pub writer: BufWriter<Stdout>,
 }
-
-// type IoWrite = std::io::Stderr;
-type IoWrite = std::io::Stdout;
 
 impl EventLoop {
   pub async fn new(cli_opt: CliOpt) -> IoResult<Self> {
@@ -87,13 +86,14 @@ impl EventLoop {
       tree: Tree::to_arc(tree),
       state: State::to_arc(state),
       buffers: Buffers::to_arc(buffers),
+      writer: BufWriter::new(std::io::stdout()),
     })
   }
 
   pub async fn init(&mut self) -> IoResult<()> {
     let mut out = std::io::stdout();
-    self.queue_cursor(&mut out).await?;
-    out.flush()?;
+    self.queue_cursor().await?;
+    self.writer.flush()?;
 
     // Has input files.
     if !self.cli_opt.file().is_empty() {
@@ -221,59 +221,59 @@ impl EventLoop {
         .shade()
     };
 
-    let mut out = std::io::stdout();
-    self.queue_shader(shader, &mut out).await?;
-    out.flush()?;
+    self.queue_shader(shader).await?;
+
+    self.writer.flush()?;
 
     Ok(true)
   }
 
   /// Put (render) canvas shader.
-  async fn queue_shader(&mut self, shader: Shader, out: &mut IoWrite) -> IoResult<()> {
+  async fn queue_shader(&mut self, shader: Shader) -> IoResult<()> {
     for shader_command in shader.iter() {
       match shader_command {
-        ShaderCommand::CursorSetCursorStyle(command) => queue!(out, command)?,
-        ShaderCommand::CursorDisableBlinking(command) => queue!(out, command)?,
-        ShaderCommand::CursorEnableBlinking(command) => queue!(out, command)?,
-        ShaderCommand::CursorHide(command) => queue!(out, command)?,
-        ShaderCommand::CursorMoveDown(command) => queue!(out, command)?,
-        ShaderCommand::CursorMoveLeft(command) => queue!(out, command)?,
-        ShaderCommand::CursorMoveRight(command) => queue!(out, command)?,
-        ShaderCommand::CursorMoveTo(command) => queue!(out, command)?,
-        ShaderCommand::CursorMoveToColumn(command) => queue!(out, command)?,
-        ShaderCommand::CursorMoveToNextLine(command) => queue!(out, command)?,
-        ShaderCommand::CursorMoveToPreviousLine(command) => queue!(out, command)?,
-        ShaderCommand::CursorMoveToRow(command) => queue!(out, command)?,
-        ShaderCommand::CursorMoveUp(command) => queue!(out, command)?,
-        ShaderCommand::CursorRestorePosition(command) => queue!(out, command)?,
-        ShaderCommand::CursorSavePosition(command) => queue!(out, command)?,
-        ShaderCommand::CursorShow(command) => queue!(out, command)?,
-        ShaderCommand::EventDisableBracketedPaste(command) => queue!(out, command)?,
-        ShaderCommand::EventDisableFocusChange(command) => queue!(out, command)?,
-        ShaderCommand::EventDisableMouseCapture(command) => queue!(out, command)?,
-        ShaderCommand::EventEnableBracketedPaste(command) => queue!(out, command)?,
-        ShaderCommand::EventEnableFocusChange(command) => queue!(out, command)?,
-        ShaderCommand::EventEnableMouseCapture(command) => queue!(out, command)?,
-        ShaderCommand::EventPopKeyboardEnhancementFlags(command) => queue!(out, command)?,
-        ShaderCommand::EventPushKeyboardEnhancementFlags(command) => queue!(out, command)?,
-        ShaderCommand::StyleResetColor(command) => queue!(out, command)?,
-        ShaderCommand::StyleSetAttribute(command) => queue!(out, command)?,
-        ShaderCommand::StyleSetAttributes(command) => queue!(out, command)?,
-        ShaderCommand::StyleSetBackgroundColor(command) => queue!(out, command)?,
-        ShaderCommand::StyleSetColors(command) => queue!(out, command)?,
-        ShaderCommand::StyleSetForegroundColor(command) => queue!(out, command)?,
-        ShaderCommand::StyleSetStyle(command) => queue!(out, command)?,
-        ShaderCommand::StyleSetUnderlineColor(command) => queue!(out, command)?,
-        ShaderCommand::TerminalBeginSynchronizedUpdate(command) => queue!(out, command)?,
-        ShaderCommand::TerminalClear(command) => queue!(out, command)?,
-        ShaderCommand::TerminalDisableLineWrap(command) => queue!(out, command)?,
-        ShaderCommand::TerminalEnableLineWrap(command) => queue!(out, command)?,
-        ShaderCommand::TerminalEndSynchronizedUpdate(command) => queue!(out, command)?,
-        ShaderCommand::TerminalEnterAlternateScreen(command) => queue!(out, command)?,
-        ShaderCommand::TerminalLeaveAlternateScreen(command) => queue!(out, command)?,
-        ShaderCommand::TerminalScrollDown(command) => queue!(out, command)?,
-        ShaderCommand::TerminalScrollUp(command) => queue!(out, command)?,
-        ShaderCommand::TerminalSetSize(command) => queue!(out, command)?,
+        ShaderCommand::CursorSetCursorStyle(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorDisableBlinking(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorEnableBlinking(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorHide(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveDown(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveLeft(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveRight(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveTo(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveToColumn(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveToNextLine(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveToPreviousLine(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveToRow(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorMoveUp(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorRestorePosition(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorSavePosition(command) => queue!(self.writer, command)?,
+        ShaderCommand::CursorShow(command) => queue!(self.writer, command)?,
+        ShaderCommand::EventDisableBracketedPaste(command) => queue!(self.writer, command)?,
+        ShaderCommand::EventDisableFocusChange(command) => queue!(self.writer, command)?,
+        ShaderCommand::EventDisableMouseCapture(command) => queue!(self.writer, command)?,
+        ShaderCommand::EventEnableBracketedPaste(command) => queue!(self.writer, command)?,
+        ShaderCommand::EventEnableFocusChange(command) => queue!(self.writer, command)?,
+        ShaderCommand::EventEnableMouseCapture(command) => queue!(self.writer, command)?,
+        ShaderCommand::EventPopKeyboardEnhancementFlags(command) => queue!(self.writer, command)?,
+        ShaderCommand::EventPushKeyboardEnhancementFlags(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleResetColor(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleSetAttribute(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleSetAttributes(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleSetBackgroundColor(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleSetColors(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleSetForegroundColor(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleSetStyle(command) => queue!(self.writer, command)?,
+        ShaderCommand::StyleSetUnderlineColor(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalBeginSynchronizedUpdate(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalClear(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalDisableLineWrap(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalEnableLineWrap(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalEndSynchronizedUpdate(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalEnterAlternateScreen(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalLeaveAlternateScreen(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalScrollDown(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalScrollUp(command) => queue!(self.writer, command)?,
+        ShaderCommand::TerminalSetSize(command) => queue!(self.writer, command)?,
       }
     }
 
@@ -281,7 +281,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas cursor.
-  async fn queue_cursor(&self, out: &mut IoWrite) -> IoResult<()> {
+  async fn queue_cursor(&mut self) -> IoResult<()> {
     let cursor = *self
       .canvas
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
@@ -290,19 +290,19 @@ impl EventLoop {
       .cursor();
 
     if cursor.blinking() {
-      queue!(out, crossterm::cursor::EnableBlinking)?;
+      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
     } else {
-      queue!(out, crossterm::cursor::DisableBlinking)?;
+      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
     }
     if cursor.hidden() {
-      queue!(out, crossterm::cursor::Hide)?;
+      queue!(self.writer, crossterm::cursor::Hide)?;
     } else {
-      queue!(out, crossterm::cursor::Show)?;
+      queue!(self.writer, crossterm::cursor::Show)?;
     }
 
-    queue!(out, cursor.style())?;
+    queue!(self.writer, cursor.style())?;
     queue!(
-      out,
+      self.writer,
       crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
     )?;
 
