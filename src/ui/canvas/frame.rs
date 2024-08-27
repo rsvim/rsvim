@@ -242,7 +242,7 @@ mod tests {
       .collect();
     for frame_size in sizes.into_iter() {
       let frame = Frame::new(frame_size, Cursor::default());
-      for row in 0..(2 * frame_size.height()) {
+      for row in 0..(2 * frame_size.height() + 10) {
         let actual = frame.row_boundary(row);
         if row >= frame_size.height() {
           assert!(actual.is_none());
@@ -266,7 +266,7 @@ mod tests {
       .collect();
     for frame_size in sizes.into_iter() {
       let frame = Frame::new(frame_size, Cursor::default());
-      for column in 0..(2 * frame_size.width()) {
+      for column in 0..(2 * frame_size.width() + 10) {
         let actual = frame.column_boundary(column);
         if column >= frame_size.width() {
           assert!(actual.is_none());
