@@ -237,4 +237,52 @@ mod tests {
     let sz = U16Size::new(10, 10);
     let _f = Frame::new(sz, Cursor::default());
   }
+
+  #[test]
+  fn row_boundary1() {
+    let sizes: Vec<U16Size> = [(10, 20), (20, 7), (13, 18), (15, 15), (0, 0)]
+      .into_iter()
+      .map(|(width, height)| U16Size::new(width, height))
+      .collect();
+    for frame_size in sizes.into_iter() {
+      let frame = Frame::new(frame_size, Cursor::default());
+      for column in 0..(2 * frame_size.width()) {
+        let actual = frame.column_boundary(column);
+        if column >= frame_size.width() {
+          assert!(actual.is_none());
+        } else {
+          assert!(actual.is_some());
+          let (start_at, end_at) = actual.unwrap();
+          assert_eq!(start_at.x(), 0);
+          assert_eq!(start_at.y(), column);
+          assert_eq!(end_at.x(), frame_size.height() - 1);
+          assert_eq!(end_at.y(), column);
+        }
+      }
+    }
+  }
+
+  #[test]
+  fn column_boundary1() {
+    let sizes: Vec<U16Size> = [(10, 20), (20, 7), (13, 18), (15, 15), (0, 0)]
+      .into_iter()
+      .map(|(width, height)| U16Size::new(width, height))
+      .collect();
+    for frame_size in sizes.into_iter() {
+      let frame = Frame::new(frame_size, Cursor::default());
+      for row in 0..(2 * frame_size.height()) {
+        let actual = frame.row_boundary(row);
+        if row >= frame_size.height() {
+          assert!(actual.is_none());
+        } else {
+          assert!(actual.is_some());
+          let (start_at, end_at) = actual.unwrap();
+          assert_eq!(start_at.x(), 0);
+          assert_eq!(start_at.y(), row);
+          assert_eq!(end_at.x(), frame_size.width() - 1);
+          assert_eq!(end_at.y(), row);
+        }
+      }
+    }
+  }
 }
