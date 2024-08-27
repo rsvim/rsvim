@@ -196,7 +196,7 @@ impl Frame {
   ///    this column.
   /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this column.
   pub fn column_boundary(&self, col: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.height() > 0 && self.size.width() > 0 && self.size.width() >= col {
+    if self.size.height() > 0 && self.size.width() > 0 && self.size.width() > col {
       Some((
         point!(x: col, y: 0_u16),
         point!(x: col, y: self.size.height()-1),
