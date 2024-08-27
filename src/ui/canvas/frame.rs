@@ -242,17 +242,17 @@ mod tests {
       .collect();
     for frame_size in sizes.into_iter() {
       let frame = Frame::new(frame_size, Cursor::default());
-      for column in 0..(2 * frame_size.width()) {
-        let actual = frame.column_boundary(column);
-        if column >= frame_size.width() {
+      for row in 0..(2 * frame_size.height()) {
+        let actual = frame.row_boundary(row);
+        if row >= frame_size.height() {
           assert!(actual.is_none());
         } else {
           assert!(actual.is_some());
           let (start_at, end_at) = actual.unwrap();
           assert_eq!(start_at.x(), 0);
-          assert_eq!(start_at.y(), column);
+          assert_eq!(start_at.y(), row);
           assert_eq!(end_at.x(), frame_size.height() - 1);
-          assert_eq!(end_at.y(), column);
+          assert_eq!(end_at.y(), row);
         }
       }
     }
@@ -266,17 +266,17 @@ mod tests {
       .collect();
     for frame_size in sizes.into_iter() {
       let frame = Frame::new(frame_size, Cursor::default());
-      for row in 0..(2 * frame_size.height()) {
-        let actual = frame.row_boundary(row);
-        if row >= frame_size.height() {
+      for column in 0..(2 * frame_size.width()) {
+        let actual = frame.column_boundary(column);
+        if column >= frame_size.width() {
           assert!(actual.is_none());
         } else {
           assert!(actual.is_some());
           let (start_at, end_at) = actual.unwrap();
           assert_eq!(start_at.x(), 0);
-          assert_eq!(start_at.y(), row);
+          assert_eq!(start_at.y(), column);
           assert_eq!(end_at.x(), frame_size.width() - 1);
-          assert_eq!(end_at.y(), row);
+          assert_eq!(end_at.y(), column);
         }
       }
     }
