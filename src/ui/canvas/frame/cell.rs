@@ -1,4 +1,4 @@
-//! Basic unit of terminal frame.
+//! Basic unit of canvas frame.
 
 #![allow(dead_code)]
 

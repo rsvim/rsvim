@@ -1,4 +1,4 @@
-//! Logical canvas for terminal rendering.
+//! Canvas.
 
 use crossterm;
 use parking_lot::RwLock;

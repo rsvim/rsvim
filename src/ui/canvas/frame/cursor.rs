@@ -1,4 +1,4 @@
-//! Cursor on a terminal frame.
+//! Cursor of canvas frame.
 
 use crate::cart::U16Pos;
 use geo::point;

@@ -1,4 +1,4 @@
-//! Frame for terminal rendering.
+//! Canvas frame.
 
 #![allow(dead_code)]
 
