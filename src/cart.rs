@@ -69,6 +69,7 @@ pub type U16Rect = Rect<u16>;
 // Size {
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
+/// Rectangle size.
 pub struct Size<T: Copy> {
   width: T,
   height: T,
@@ -78,12 +79,19 @@ impl<T> Size<T>
 where
   T: Copy + PartialOrd + std::fmt::Debug + num_traits::Num + num_traits::NumCast,
 {
+  /// Make size from width(columns) and height(rows).
+  ///
+  /// NOTE: Width/columns is Y-axis, height/rows is X-axis.
   pub fn new(width: T, height: T) -> Self {
     Size { width, height }
   }
+
+  /// Get width(columns).
   pub fn width(&self) -> T {
     self.width
   }
+
+  /// Get height(rows).
   pub fn height(&self) -> T {
     self.height
   }

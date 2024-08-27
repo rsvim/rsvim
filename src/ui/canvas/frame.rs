@@ -167,7 +167,7 @@ impl Frame {
   /// Get (first,last) boundary positions by row. The `first` is the left position of the row,
   /// the `last` is the right position of the row.
   ///
-  /// The `row` parameter starts from 0.
+  /// The `row` parameter starts from 0. NOTE: Row is X-axis.
   ///
   /// # Returns
   ///
@@ -175,7 +175,7 @@ impl Frame {
   ///    this row.
   /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this row.
   pub fn row_boundary(&self, row: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.width() > 0 && self.size.height() > 0 && self.size.height() >= row {
+    if self.size.width() > 0 && self.size.height() > 0 && self.size.height() > row {
       Some((
         point!(x: 0_u16, y: row),
         point!(x: self.size.width()-1, y: row),
@@ -188,7 +188,7 @@ impl Frame {
   /// Get (first,last) boundary positions by column. The `first` is the top position of the column,
   /// the `last` is the bottom position of the column.
   ///
-  /// The `col` parameter starts from 0.
+  /// The `col` parameter starts from 0. NOTE: Column is Y-axis.
   ///
   /// # Returns
   ///
