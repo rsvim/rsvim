@@ -202,27 +202,23 @@ impl Widgetable for WindowContent {
                     for chunk in one_line.chunks() {
                       let cells: Vec<Cell> = chunk.chars().map(Cell::from).collect();
                       let cells_len = cells.len();
-                      canvas.frame_mut().splice_cells_at(
-                        point!(x: col, y: row + actual_pos.y()),
-                        (width - col) as usize,
-                        cells,
-                      );
+                      canvas
+                        .frame_mut()
+                        .set_cells_at(point!(x: col, y: row + actual_pos.y()), cells);
                       col += cells_len as u16;
                     }
 
                     // Clear the left parts (at the end) of the line.
-                    canvas.frame_mut().splice_cells_repeatedly_at(
+                    canvas.frame_mut().set_cells_at(
                       point!(x: col, y: row  + actual_pos.y()),
-                      (width - col) as usize,
-                      Cell::space(),
+                      vec![Cell::empty(); (width - col) as usize],
                     );
                   }
                   None => {
                     // Set empty line
-                    canvas.frame_mut().splice_cells_repeatedly_at(
+                    canvas.frame_mut().set_cells_at(
                       point!(x: actual_pos.x(), y: row + actual_pos.y()),
-                      width as usize,
-                      Cell::space(),
+                      vec![Cell::empty(); width as usize],
                     );
                   }
                 }
