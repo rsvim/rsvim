@@ -214,7 +214,7 @@ impl Widgetable for WindowContent {
                     canvas.frame_mut().splice_cells_repeatedly_at(
                       point!(x: col, y: row  + actual_pos.y()),
                       (width - col) as usize,
-                      Cell::none(),
+                      Cell::space(),
                     );
                   }
                   None => {
@@ -222,7 +222,7 @@ impl Widgetable for WindowContent {
                     canvas.frame_mut().splice_cells_repeatedly_at(
                       point!(x: actual_pos.x(), y: row + actual_pos.y()),
                       width as usize,
-                      Cell::none(),
+                      Cell::space(),
                     );
                   }
                 }

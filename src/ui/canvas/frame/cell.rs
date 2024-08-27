@@ -71,7 +71,7 @@ impl Cell {
 }
 
 impl Default for Cell {
-  /// Make cell with empty string.
+  /// Make default cell, same with [`Cell::empty()`].
   fn default() -> Self {
     Cell::empty()
   }

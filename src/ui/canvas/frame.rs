@@ -56,8 +56,8 @@ impl Frame {
     Frame {
       size,
       cells: vec![Cell::default(); n],
-      cursor,
       dirty_cells: vec![], // When first create, it's not dirty.
+      cursor,
       dirty_cursor: false,
     }
   }
@@ -84,12 +84,21 @@ impl Frame {
   }
 
   /// Set a cell.
+  ///
+  /// Returns the old cell.
   pub fn set_cell(&mut self, pos: U16Pos, cell: Cell) -> Cell {
     let index = pos.x() as usize * pos.y() as usize;
     let old_cell = self.cells[index].clone();
     self.cells[index] = cell;
     self.dirty_cells.push(range_from_idx(index, 1));
     old_cell
+  }
+
+  /// Set an empty cell.
+  ///
+  /// Returns the old cell.
+  pub fn set_empty_cell(&mut self, pos: U16Pos) -> Cell {
+    self.set_cell(pos, Cell::empty())
   }
 
   /// Get all cells.
@@ -102,29 +111,29 @@ impl Frame {
     &self.cells[range_from_pos(pos, n)]
   }
 
-  /// Splice (set/replace) cells at a range.
-  ///
-  /// NOTE: The behavior is almost same with [`Vec::splice`], except use a start position and
-  /// following N elements instead of [`Range`].
+  /// Set (replace) cells at a range.
   ///
   /// Returns old cells.
-  pub fn splice_cells_at(&mut self, pos: U16Pos, n: usize, cells: Vec<Cell>) -> Vec<Cell> {
-    let range = range_from_pos(pos, n);
+  ///
+  /// # Panics
+  ///
+  /// If `cells` length exceed the canvas.
+  pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
+    let range = range_from_pos(pos, cells.len());
+    assert!(range.end <= self.cells.len());
     self.dirty_cells.push(range.clone());
     self.cells.splice(range, cells).collect()
   }
 
-  /// Splice (set/replace) repeatedly with the same cell at a range.
-  ///
-  /// NOTE: The behavior is almost same with [`Vec::splice`], except use a start position and
-  /// following N elements instead of [`Range`].
+  /// Set (replace) repeatedly with the same cell at a range.
   ///
   /// Returns old cells.
-  pub fn splice_cells_repeatedly_at(&mut self, pos: U16Pos, n: usize, cell: Cell) -> Vec<Cell> {
-    let range = range_from_pos(pos, n);
-    self.dirty_cells.push(range.clone());
-    let cells = vec![cell; range.end - range.start];
-    self.cells.splice(range, cells).collect()
+  ///
+  /// # Panics
+  ///
+  /// If `cells` length exceed the canvas.
+  pub fn set_cells_repeatedly_at(&mut self, pos: U16Pos, cell: Cell, n: usize) -> Vec<Cell> {
+    self.set_cells_at(pos, vec![cell; n])
   }
 
   /// Get dirty cells.
