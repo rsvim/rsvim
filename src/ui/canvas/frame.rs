@@ -18,12 +18,21 @@ pub mod cursor;
 /// canvas will diff the changes made by UI tree, and only print the changes to hardware device.
 pub struct Frame {
   size: U16Size,
+
+  /// Cells
   cells: Vec<Cell>,
+
+  /// Indicate which part of the frame is dirty.
+  ///
+  /// NOTE: This is only for fast locating the changed parts, but can be false positive, i.e. if a
+  /// location is marked in this collection, it can still be unchanged. But if a location is not
+  /// marked in this collection, it must be unchanged.
+  dirty_cells: Vec<Range<usize>>,
+
+  /// Cursor
   cursor: Cursor,
 
-  /// Indicate which part of the frame is dirty, i.e. it's been drawn by the UI widget tree. When
-  /// rendering to the hardware device, only dirty parts will be printed.
-  dirty_cells: Vec<Range<usize>>,
+  /// Indicate whether the cursor is changed.
   dirty_cursor: bool,
 }
 
