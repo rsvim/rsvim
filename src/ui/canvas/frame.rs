@@ -2,6 +2,7 @@
 
 #![allow(dead_code)]
 
+use geo::point;
 use std::ops::Range;
 
 use crate::cart::{U16Pos, U16Size};
@@ -160,6 +161,56 @@ impl Frame {
     self.dirty_cells = vec![];
     self.dirty_cursor = false;
   }
+
+  // Rows/Columns Helper {
+
+  /// Get (start,end) boundary positions by row. The `start` is the left position of the row,
+  /// `end` is the right position of the row.
+  ///
+  /// The `row` parameter starts from 0.
+  ///
+  /// # Returns
+  ///
+  /// 1. Returns a pair/tuple of two positions, i.e. start and end positions, if the frame has this
+  ///    row.
+  /// 2. Returns `None`, if the frame doesn't have this row.
+  pub fn row_boundary(&self, row: u16) -> Option<(U16Pos, U16Pos)> {
+    if self.size.width() == 0 {
+      return None;
+    }
+    if self.size.height() < row {
+      return None;
+    }
+    return Some((
+      point!(x: 0_u16, y: row),
+      point!(x: self.size.width()-1, y: row),
+    ));
+  }
+
+  /// Get (start,end) boundary positions by column. The `start` is the top position of the column,
+  /// the `end` is the bottom position of the column.
+  ///
+  /// The `col` parameter starts from 0.
+  ///
+  /// # Returns
+  ///
+  /// 1. Returns a pair/tuple of two positions, i.e. start and end positions, if the frame has this
+  ///    row.
+  /// 2. Returns `None`, if the frame doesn't have this row.
+  pub fn column_boundary(&self, col: u16) -> Option<(U16Pos, U16Pos)> {
+    if self.size.height() == 0 {
+      return None;
+    }
+    if self.size.width() < col {
+      return None;
+    }
+    return Some((
+      point!(x: col, y: 0_u16),
+      point!(x: col, y: self.size.height()-1),
+    ));
+  }
+
+  // Rows/Columns Helper }
 }
 
 #[cfg(test)]

@@ -25,8 +25,7 @@ pub mod frame;
 /// diff-algorithm to compare the TUI changes, thus only flushing the changed parts to reduce IO
 /// operations.
 ///
-/// NOTE: All APIs named with `prev_` are previous frame, when without `prev_` the APIs are for
-/// current frame.
+/// NOTE: APIs named without `prev_` are current frame, with `prev_` are for previous frame.
 pub struct Canvas {
   frame: Frame,
   prev_frame: Frame,
