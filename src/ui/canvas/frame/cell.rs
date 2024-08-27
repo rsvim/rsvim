@@ -88,10 +88,20 @@ impl Cell {
     }
   }
 
-  /// Make a space cell, it's the default invisible cell.
+  /// Make a space cell.
   pub fn space() -> Self {
     Cell {
       symbol: " ".to_compact_string(),
+      fg: Color::Reset,
+      bg: Color::Reset,
+      attrs: Attributes::default(),
+    }
+  }
+
+  /// Make an empty cell.
+  pub fn empty() -> Self {
+    Cell {
+      symbol: CompactString::const_new(""),
       fg: Color::Reset,
       bg: Color::Reset,
       attrs: Attributes::default(),
