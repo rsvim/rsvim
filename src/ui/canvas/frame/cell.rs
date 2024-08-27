@@ -71,9 +71,9 @@ impl Cell {
 }
 
 impl Default for Cell {
-  /// Make cell with a whitespace and no color, empty attributes.
+  /// Make cell with empty string.
   fn default() -> Self {
-    Cell::space()
+    Cell::empty()
   }
 }
 
