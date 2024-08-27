@@ -73,7 +73,7 @@ impl Cell {
 impl Default for Cell {
   /// Make cell with a whitespace and no color, empty attributes.
   fn default() -> Self {
-    Cell::none()
+    Cell::space()
   }
 }
 
@@ -88,10 +88,10 @@ impl Cell {
     }
   }
 
-  /// Make none cell, it's the default invisible cell.
-  pub fn none() -> Self {
+  /// Make a space cell, it's the default invisible cell.
+  pub fn space() -> Self {
     Cell {
-      symbol: CompactString::new(" "),
+      symbol: " ".to_compact_string(),
       fg: Color::Reset,
       bg: Color::Reset,
       attrs: Attributes::default(),
