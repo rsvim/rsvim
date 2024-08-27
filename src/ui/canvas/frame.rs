@@ -175,16 +175,14 @@ impl Frame {
   ///    row.
   /// 2. Returns `None`, if the frame doesn't have this row.
   pub fn row_boundary(&self, row: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.width() == 0 {
-      return None;
+    if self.size.width() > 0 && self.size.height() >= row {
+      Some((
+        point!(x: 0_u16, y: row),
+        point!(x: self.size.width()-1, y: row),
+      ))
+    } else {
+      None
     }
-    if self.size.height() < row {
-      return None;
-    }
-    return Some((
-      point!(x: 0_u16, y: row),
-      point!(x: self.size.width()-1, y: row),
-    ));
   }
 
   /// Get (start,end) boundary positions by column. The `start` is the top position of the column,
@@ -198,16 +196,14 @@ impl Frame {
   ///    row.
   /// 2. Returns `None`, if the frame doesn't have this row.
   pub fn column_boundary(&self, col: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.height() == 0 {
-      return None;
+    if self.size.height() > 0 && self.size.width() >= col {
+      Some((
+        point!(x: col, y: 0_u16),
+        point!(x: col, y: self.size.height()-1),
+      ))
+    } else {
+      None
     }
-    if self.size.width() < col {
-      return None;
-    }
-    return Some((
-      point!(x: col, y: 0_u16),
-      point!(x: col, y: self.size.height()-1),
-    ));
   }
 
   // Rows/Columns Helper }
