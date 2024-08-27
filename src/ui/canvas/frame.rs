@@ -125,15 +125,9 @@ impl Frame {
     self.cells.splice(range, cells).collect()
   }
 
-  /// Set (replace) repeatedly with the same cell at a range.
-  ///
-  /// Returns old cells.
-  ///
-  /// # Panics
-  ///
-  /// If `cells` length exceed the canvas.
-  pub fn set_cells_repeatedly_at(&mut self, pos: U16Pos, cell: Cell, n: usize) -> Vec<Cell> {
-    self.set_cells_at(pos, vec![cell; n])
+  /// Set (replace) empty cells at a range.
+  pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Vec<Cell> {
+    self.set_cells_at(pos, vec![Cell::empty(); n])
   }
 
   /// Get dirty cells.
