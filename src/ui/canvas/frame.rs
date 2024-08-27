@@ -155,7 +155,7 @@ impl Frame {
 
   /// Reset/clean all dirty components.
   ///
-  /// NOTE: This method should be called after each frame been flushed to terminal device.
+  /// NOTE: This method should be called after current frame flushed to terminal device.
   pub fn reset_dirty(&mut self) {
     self.dirty_cells = vec![];
     self.dirty_cursor = false;
