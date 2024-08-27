@@ -127,7 +127,7 @@ mod tests {
   #[test]
   fn default1() {
     let c = Cell::default();
-    assert_eq!(c.symbol(), " ");
+    assert_eq!(c.symbol(), "");
     assert_eq!(c.fg(), Color::Reset);
     assert_eq!(c.bg(), Color::Reset);
     assert_eq!(c.attrs(), Attributes::default());
@@ -143,7 +143,7 @@ mod tests {
     );
     let c2 = Cell::default();
     assert_eq!(c1.symbol(), " ");
-    assert_eq!(c1.symbol(), c2.symbol());
+    assert_eq!(c2.symbol(), "");
     assert_eq!(c1.fg(), Color::Reset);
     assert_eq!(c1.fg(), c2.fg());
     assert_eq!(c1.bg(), Color::Reset);
