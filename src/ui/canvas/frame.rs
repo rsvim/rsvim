@@ -164,15 +164,15 @@ impl Frame {
 
   // Rows/Columns Helper {
 
-  /// Get (start,end) boundary positions by row. The `start` is the left position of the row,
-  /// `end` is the right position of the row.
+  /// Get (first,last) boundary positions by row. The `first` is the left position of the row,
+  /// the `last` is the right position of the row.
   ///
   /// The `row` parameter starts from 0.
   ///
   /// # Returns
   ///
-  /// 1. Returns a pair/tuple of two positions, i.e. start and end positions, if the frame has this
-  ///    row.
+  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
+  ///    this row.
   /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this row.
   pub fn row_boundary(&self, row: u16) -> Option<(U16Pos, U16Pos)> {
     if self.size.width() > 0 && self.size.height() > 0 && self.size.height() >= row {
@@ -185,15 +185,15 @@ impl Frame {
     }
   }
 
-  /// Get (start,end) boundary positions by column. The `start` is the top position of the column,
-  /// the `end` is the bottom position of the column.
+  /// Get (first,last) boundary positions by column. The `first` is the top position of the column,
+  /// the `last` is the bottom position of the column.
   ///
   /// The `col` parameter starts from 0.
   ///
   /// # Returns
   ///
-  /// 1. Returns a pair/tuple of two positions, i.e. start and end positions, if the frame has this
-  ///    row.
+  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
+  ///    this column.
   /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this row.
   pub fn column_boundary(&self, col: u16) -> Option<(U16Pos, U16Pos)> {
     if self.size.height() > 0 && self.size.width() > 0 && self.size.width() >= col {
@@ -211,7 +211,13 @@ impl Frame {
 
 #[cfg(test)]
 mod tests {
+  use std::sync::Once;
+  use tracing::info;
+
   use super::*;
+  use crate::test::log::init as test_log_init;
+
+  static INIT: Once = Once::new();
 
   #[test]
   fn new1() {
@@ -236,6 +242,7 @@ mod tests {
 
   #[test]
   fn row_boundary1() {
+    INIT.call_once(test_log_init);
     let sizes: Vec<U16Size> = [(10, 20), (20, 7), (13, 18), (15, 15), (0, 0)]
       .into_iter()
       .map(|(width, height)| U16Size::new(width, height))
@@ -244,6 +251,10 @@ mod tests {
       let frame = Frame::new(frame_size, Cursor::default());
       for row in 0..(2 * frame_size.height() + 10) {
         let actual = frame.row_boundary(row);
+        info!(
+          "frame size:{:?}, row:{:?}, actual:{:?}",
+          frame_size, row, actual
+        );
         if row >= frame_size.height() {
           assert!(actual.is_none());
         } else {
@@ -260,6 +271,7 @@ mod tests {
 
   #[test]
   fn column_boundary1() {
+    INIT.call_once(test_log_init);
     let sizes: Vec<U16Size> = [(10, 20), (20, 7), (13, 18), (15, 15), (0, 0)]
       .into_iter()
       .map(|(width, height)| U16Size::new(width, height))
@@ -268,6 +280,10 @@ mod tests {
       let frame = Frame::new(frame_size, Cursor::default());
       for column in 0..(2 * frame_size.width() + 10) {
         let actual = frame.column_boundary(column);
+        info!(
+          "frame size:{:?}, column:{:?}, actual:{:?}",
+          frame_size, column, actual
+        );
         if column >= frame_size.width() {
           assert!(actual.is_none());
         } else {
