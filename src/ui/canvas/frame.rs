@@ -173,9 +173,9 @@ impl Frame {
   ///
   /// 1. Returns a pair/tuple of two positions, i.e. start and end positions, if the frame has this
   ///    row.
-  /// 2. Returns `None`, if the frame doesn't have this row.
+  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this row.
   pub fn row_boundary(&self, row: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.width() > 0 && self.size.height() >= row {
+    if self.size.width() > 0 && self.size.height() > 0 && self.size.height() >= row {
       Some((
         point!(x: 0_u16, y: row),
         point!(x: self.size.width()-1, y: row),
@@ -194,9 +194,9 @@ impl Frame {
   ///
   /// 1. Returns a pair/tuple of two positions, i.e. start and end positions, if the frame has this
   ///    row.
-  /// 2. Returns `None`, if the frame doesn't have this row.
+  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this row.
   pub fn column_boundary(&self, col: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.height() > 0 && self.size.width() >= col {
+    if self.size.height() > 0 && self.size.width() > 0 && self.size.width() >= col {
       Some((
         point!(x: col, y: 0_u16),
         point!(x: col, y: self.size.height()-1),
