@@ -262,7 +262,7 @@ mod tests {
           let (start_at, end_at) = actual.unwrap();
           assert_eq!(start_at.x(), 0);
           assert_eq!(start_at.y(), row);
-          assert_eq!(end_at.x(), frame_size.height() - 1);
+          assert_eq!(end_at.x(), frame_size.width() - 1);
           assert_eq!(end_at.y(), row);
         }
       }
@@ -289,10 +289,10 @@ mod tests {
         } else {
           assert!(actual.is_some());
           let (start_at, end_at) = actual.unwrap();
-          assert_eq!(start_at.x(), 0);
-          assert_eq!(start_at.y(), column);
-          assert_eq!(end_at.x(), frame_size.width() - 1);
-          assert_eq!(end_at.y(), column);
+          assert_eq!(start_at.x(), column);
+          assert_eq!(start_at.y(), 0);
+          assert_eq!(end_at.x(), column);
+          assert_eq!(end_at.y(), frame_size.height() - 1);
         }
       }
     }
