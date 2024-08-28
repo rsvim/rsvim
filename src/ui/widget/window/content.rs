@@ -101,6 +101,7 @@ pub struct WindowContent {
 }
 
 impl WindowContent {
+  /// Make window content from buffer. The view starts from the first line.
   pub fn new(shape: IRect, buffer: BufferWk) -> Self {
     let view = BufferView::new(Some(0), None, Some(0), None);
     WindowContent {
@@ -113,34 +114,47 @@ impl WindowContent {
     }
   }
 
+  /// Get line-wrap option.
   pub fn line_wrap(&self) -> bool {
     self.line_wrap
   }
 
+  /// Set line-wrap option.
   pub fn set_line_wrap(&mut self, line_wrap: bool) {
     self.line_wrap = line_wrap;
   }
 
+  /// Get word-wrap option.
   pub fn word_wrap(&self) -> bool {
     self.word_wrap
   }
 
+  /// Set word-wrap option.
   pub fn set_word_wrap(&mut self, word_wrap: bool) {
     self.word_wrap = word_wrap;
   }
 
+  /// Get buffer reference.
   pub fn buffer(&self) -> BufferWk {
     self.buffer.clone()
   }
 
+  /// Set buffer reference.
   pub fn set_buffer(&mut self, buffer: BufferWk) {
     self.buffer = buffer;
   }
 
+  /// Get view's start line.
   pub fn view_lstart(&self) -> Option<usize> {
     self.view.lstart
   }
 
+  /// Set view's start line.
+  ///
+  /// NOTE: This operation will unset view's end line. Because with different line-wrap/word-wrap
+  /// options, the window may contains less lines in buffer. We cannot know the end line unless
+  /// iterating over the whole view from start line, but it can increase the CPU usage and is not
+  /// necessary.
   pub fn set_view_lstart(&mut self, lstart: usize) {
     self.view.lstart = Some(lstart);
     self.view.lend = None;
@@ -175,6 +189,10 @@ impl WindowContent {
 
   pub fn modified_lines(&self) -> &BTreeSet<usize> {
     &self.modified_lines
+  }
+
+  pub fn clear_modified_lines(&mut self) {
+    self.modified_lines = BTreeSet::new();
   }
 
   pub fn set_modified_line(&mut self, line_no: usize) -> bool {
