@@ -6,11 +6,11 @@
 //! The 2-dimensional coordinate system in mathematics usually look like:
 //!
 //! ```text
-//!                  y
+//!                  Y
 //!                  |
 //!                (0,1)
 //!                  |
-//!  x ----(-1,0)--(0,0)--(1,0)-----
+//!  X-----(-1,0)--(0,0)--(1,0)-----
 //!                  |
 //!                (0,-1)
 //!                  |
@@ -25,16 +25,15 @@
 //! Thus we need to flip the coordinate system upside down:
 //!
 //! ```text
-//!                  y
-//!                  |
-//!                (0,-1)
-//!                  |
-//!  x ----(-1,0)--(0,0)--(1,0)-----------(width,0)
-//!                  |                         |
-//!                (0,1)     terminal     (width,1)
-//!                  |                         |
-//!                  |                         |
-//!                (0,height)-------------(width,height)
+//!
+//!   (0,0)------------------(width,0)--------Y
+//!     |                         |
+//!     |  Terminal               |
+//!     |                         |
+//!     |                         |
+//!   (0,height)-------------(width,height)
+//!     |
+//!     X
 //! ```
 //!
 //! NOTE: The X-axis remains the same, the Y-axis is upside down.
