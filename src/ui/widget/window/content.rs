@@ -5,7 +5,7 @@
 use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
 use geo::point;
-use std::collections::VecDeque;
+use std::collections::{BTreeSet, VecDeque};
 use std::convert::From;
 use std::time::Duration;
 use tracing::debug;
@@ -92,6 +92,8 @@ pub struct WindowContent {
   buffer: BufferWk,
   // Buffer view
   view: BufferView,
+  // Modified lines, index start from 0.
+  modified_lines: BTreeSet<usize>,
 
   // Options
   line_wrap: bool,
@@ -105,6 +107,7 @@ impl WindowContent {
       base: InodeBase::new(shape),
       buffer,
       view,
+      modified_lines: (0..shape.height()).map(|l| l as usize).collect(),
       line_wrap: false,
       word_wrap: false,
     }
@@ -168,6 +171,18 @@ impl WindowContent {
   pub fn set_view_cend(&mut self, cend: usize) {
     self.view.cend = Some(cend);
     self.view.cstart = Some(cend - self.base.actual_shape().width() as usize);
+  }
+
+  pub fn modified_lines(&self) -> &BTreeSet<usize> {
+    &self.modified_lines
+  }
+
+  pub fn set_modified_line(&mut self, line_no: usize) -> bool {
+    self.modified_lines.insert(line_no)
+  }
+
+  pub fn reset_modified_line(&mut self, line_no: &usize) -> bool {
+    self.modified_lines.remove(line_no)
   }
 }
 
