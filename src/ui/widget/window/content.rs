@@ -22,29 +22,29 @@ use crate::uuid;
 #[derive(Debug, Copy, Clone, Default)]
 /// The view of a buffer. The range is left-open right-closed, or top-open bottom-closed, i.e.
 /// `[start_line, end_line)` or `[start_column, end_column)`.
-struct BufferView {
+pub struct BufferView {
   /// Start line number
-  pub lstart: Option<usize>,
+  pub start_line: Option<usize>,
   /// End line number.
-  pub lend: Option<usize>,
+  pub end_line: Option<usize>,
   /// Start column.
-  pub cstart: Option<usize>,
+  pub start_column: Option<usize>,
   /// End column.
-  pub cend: Option<usize>,
+  pub end_column: Option<usize>,
 }
 
 impl BufferView {
   pub fn new(
-    lstart: Option<usize>,
-    lend: Option<usize>,
-    cstart: Option<usize>,
-    cend: Option<usize>,
+    start_line: Option<usize>,
+    end_line: Option<usize>,
+    start_column: Option<usize>,
+    end_column: Option<usize>,
   ) -> Self {
     BufferView {
-      lstart,
-      lend,
-      cstart,
-      cend,
+      start_line,
+      end_line,
+      start_column,
+      end_column,
     }
   }
 }
@@ -78,10 +78,10 @@ impl BufferView {
 ///
 /// A view contains 4 fields:
 ///
-/// * Start line (`lstart`).
-/// * End line (`lend`).
-/// * Start column (`cstart`).
-/// * End column (`cend`).
+/// * Start line.
+/// * End line.
+/// * Start column.
+/// * End column.
 ///
 /// We can always calculates the two fields based on the other two fields on the diagonal corner,
 /// with window size, buffer's text contents, and the line-wrap/word-wrap options.
@@ -92,7 +92,8 @@ pub struct WindowContent {
   buffer: BufferWk,
   // Buffer view
   view: BufferView,
-  // Modified lines, index start from 0.
+  // Modified lines in buffer view, index start from 0. This dataset dedups lines iterating on
+  // buffer view in each drawing.
   modified_lines: BTreeSet<usize>,
 
   // Options
@@ -144,71 +145,68 @@ impl WindowContent {
     self.buffer = buffer;
   }
 
-  /// Get view's start line, index start from 0.
-  pub fn view_lstart(&self) -> Option<usize> {
-    self.view.lstart
+  /// Get start line, index start from 0.
+  pub fn start_line(&self) -> Option<usize> {
+    self.view.start_line
   }
 
-  /// Set view's start line.
+  /// Set start line.
   ///
-  /// NOTE: This operation will unset view's end line. Because with different line-wrap/word-wrap
-  /// options, the window may contains less lines in buffer. We cannot know the end line unless
-  /// iterating over the whole view from start line, but it can increase the CPU usage and is not
-  /// necessary.
-  pub fn set_view_lstart(&mut self, lstart: usize) {
-    self.view.lstart = Some(lstart);
-    self.view.lend = None;
+  /// This operation will unset the end line. Because with different line-wrap/word-wrap options,
+  /// the window may contains less lines than its height. We cannot know the end line unless
+  /// iterating over the buffer from start line.
+  pub fn set_start_line(&mut self, line: usize) {
+    self.view.start_line = Some(line);
+    self.view.end_line = None;
   }
 
-  /// Get view's end line, index start from 0.
-  pub fn view_lend(&self) -> Option<usize> {
-    self.view.lend
+  /// Get end line, index start from 0.
+  pub fn end_line(&self) -> Option<usize> {
+    self.view.end_line
   }
 
-  /// Set view's end line.
+  /// Set end line.
   ///
-  /// NOTE: This operation will unset view's start line. Because with different line-wrap/word-wrap
-  /// options, the window may contains less lines in buffer. We cannot know the start line unless
-  /// iterating reversely over the whole view from end line.
-  pub fn set_view_lend(&mut self, lend: usize) {
-    self.view.lend = Some(lend);
-    self.view.lstart = None;
+  /// This operation will unset the start line. Because with different line-wrap/word-wrap options,
+  /// the window may contains less lines than the height. We cannot know the start line unless
+  /// reversely iterating over the buffer from end line.
+  pub fn set_end_line(&mut self, lend: usize) {
+    self.view.end_line = Some(lend);
+    self.view.start_line = None;
   }
 
-  /// Get view's start column, index start from 0.
-  pub fn view_cstart(&self) -> Option<usize> {
-    self.view.cstart
+  /// Get start column, index start from 0.
+  pub fn start_column(&self) -> Option<usize> {
+    self.view.start_column
   }
 
-  /// Set view's start column.
+  /// Set start column.
   ///
-  /// NOTE: This operation will calculate the end column and set it as well, based on widget's
-  /// width.
-  pub fn set_view_cstart(&mut self, cstart: usize) {
-    self.view.cstart = Some(cstart);
-    self.view.cend = Some(cstart + self.base.actual_shape().width() as usize);
+  /// This operation also calculates the end column based on widget's width, and set it as well.
+  pub fn set_start_column(&mut self, cstart: usize) {
+    self.view.start_column = Some(cstart);
+    self.view.end_column = Some(cstart + self.base.actual_shape().width() as usize);
   }
 
-  /// Get view's end column, index start from 0.
-  pub fn view_cend(&self) -> Option<usize> {
-    self.view.cend
+  /// Get end column, index start from 0.
+  pub fn end_column(&self) -> Option<usize> {
+    self.view.end_column
   }
 
-  /// Set view's end column.
+  /// Set end column.
   ///
-  /// NOTE: This operation will calculate the end column and set it as well, based on widget's
-  /// width.
-  pub fn set_view_cend(&mut self, cend: usize) {
-    self.view.cend = Some(cend);
-    self.view.cstart = Some(cend - self.base.actual_shape().width() as usize);
+  /// This operation also calculates the start column based on widget's width, and set it as well.
+  pub fn set_end_column(&mut self, cend: usize) {
+    self.view.end_column = Some(cend);
+    self.view.start_column = Some(cend - self.base.actual_shape().width() as usize);
   }
 
-  /// Get modified lines.
+  /// Get modified lines (in the view).
   pub fn modified_lines(&self) -> &BTreeSet<usize> {
     &self.modified_lines
   }
 
-  /// Set all lines to modified.
+  /// Set all lines (in the view) to modified.
   pub fn modify_all_lines(&mut self) {
     self.modified_lines = (0..self.shape().height()).map(|l| l as usize).collect();
   }
@@ -235,10 +233,10 @@ impl Widgetable for WindowContent {
   fn draw(&mut self, canvas: &mut Canvas) {
     match self.view {
       BufferView {
-        lstart: Some(lstart),
-        lend: _,
-        cstart: Some(_cstart),
-        cend: Some(_cend),
+        start_line: Some(lstart),
+        end_line: _,
+        start_column: Some(_cstart),
+        end_column: Some(_cend),
       } => {
         let actual_shape = self.actual_shape();
         let actual_pos: U16Pos = actual_shape.min().into();
@@ -288,10 +286,10 @@ impl Widgetable for WindowContent {
         }
       }
       BufferView {
-        lstart: _,
-        lend: Some(_lend),
-        cstart: Some(_cstart),
-        cend: Some(_cend),
+        start_line: _,
+        end_line: Some(_lend),
+        start_column: Some(_cstart),
+        end_column: Some(_cend),
       } => {
         unreachable!("Not implement")
       }
