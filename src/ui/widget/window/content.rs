@@ -208,18 +208,23 @@ impl WindowContent {
     &self.modified_lines
   }
 
+  /// Set all lines to modified.
+  pub fn modify_all_lines(&mut self) {
+    self.modified_lines = (0..self.shape().height()).map(|l| l as usize).collect();
+  }
+
   /// Clear all modified lines. This operation should be called after drawing to canvas.
   pub fn clear_modified_lines(&mut self) {
     self.modified_lines = BTreeSet::new();
   }
 
   /// Set modified line. This operation should be called after editing a line on buffer.
-  pub fn set_modified_line(&mut self, line: usize) -> bool {
+  pub fn modify_line(&mut self, line: usize) -> bool {
     self.modified_lines.insert(line)
   }
 
   /// Reset modified line to unmodified.
-  pub fn reset_modified_line(&mut self, line_no: &usize) -> bool {
+  pub fn unmodify_line(&mut self, line_no: &usize) -> bool {
     self.modified_lines.remove(line_no)
   }
 }
