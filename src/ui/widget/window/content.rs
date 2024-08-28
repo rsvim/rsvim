@@ -115,6 +115,8 @@ impl WindowContent {
     }
   }
 
+  // Options {
+
   /// Get line-wrap option.
   pub fn line_wrap(&self) -> bool {
     self.line_wrap
@@ -134,6 +136,10 @@ impl WindowContent {
   pub fn set_word_wrap(&mut self, word_wrap: bool) {
     self.word_wrap = word_wrap;
   }
+
+  // Options }
+
+  // Buffer/View {
 
   /// Get buffer reference.
   pub fn buffer(&self) -> BufferWk {
@@ -201,6 +207,10 @@ impl WindowContent {
     self.view.start_column = Some(cend - self.base.actual_shape().width() as usize);
   }
 
+  // Buffer/View }
+
+  // Modified {
+
   /// Get modified lines (in the view).
   pub fn modified_lines(&self) -> &BTreeSet<usize> {
     &self.modified_lines
@@ -225,6 +235,73 @@ impl WindowContent {
   pub fn unmodify_line(&mut self, line_no: &usize) -> bool {
     self.modified_lines.remove(line_no)
   }
+
+  // Modified }
+
+  fn draw_from_start_line(
+    &mut self,
+    canvas: &mut Canvas,
+    start_line: usize,
+    _start_column: usize,
+    _end_column: usize,
+  ) {
+    let actual_shape = self.actual_shape();
+    let actual_pos: U16Pos = actual_shape.min().into();
+    let height = actual_shape.height();
+    let width = actual_shape.width();
+
+    // Get buffer arc pointer
+    let buffer = self.buffer.upgrade().unwrap();
+
+    // Lock buffer for read
+    let buffer = buffer
+      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap();
+
+    let total_lines = buffer.rope().len_lines();
+    if start_line <= total_lines {
+      let mut buffer_lines = buffer.rope().lines_at(start_line);
+      for row in 0..height {
+        match buffer_lines.next() {
+          Some(one_line) => {
+            // Write the line.
+            let mut col = 0_u16;
+            for chunk in one_line.chunks() {
+              let cells: Vec<Cell> = chunk.chars().map(Cell::from).collect();
+              let cells_len = cells.len();
+              canvas
+                .frame_mut()
+                .set_cells_at(point!(x: col, y: row + actual_pos.y()), cells);
+              col += cells_len as u16;
+            }
+
+            // Clear the left parts (at the end) of the line.
+            canvas.frame_mut().set_cells_at(
+              point!(x: col, y: row  + actual_pos.y()),
+              vec![Cell::empty(); (width - col) as usize],
+            );
+          }
+          None => {
+            // Set empty line
+            canvas.frame_mut().set_cells_at(
+              point!(x: actual_pos.x(), y: row + actual_pos.y()),
+              vec![Cell::empty(); width as usize],
+            );
+          }
+        }
+      }
+    }
+  }
+
+  fn draw_from_end_line(
+    &mut self,
+    canvas: &mut Canvas,
+    end_line: usize,
+    _start_column: usize,
+    _end_column: usize,
+  ) {
+    unimplemented!()
+  }
 }
 
 inode_generate_impl!(WindowContent, base);
@@ -233,68 +310,19 @@ impl Widgetable for WindowContent {
   fn draw(&mut self, canvas: &mut Canvas) {
     match self.view {
       BufferView {
-        start_line: Some(lstart),
+        start_line: Some(start_line),
         end_line: _,
-        start_column: Some(_cstart),
-        end_column: Some(_cend),
-      } => {
-        let actual_shape = self.actual_shape();
-        let actual_pos: U16Pos = actual_shape.min().into();
-        let height = actual_shape.height();
-        let width = actual_shape.width();
-
-        // Get buffer arc pointer
-        let buffer = self.buffer.upgrade().unwrap();
-
-        // Lock buffer for read
-        let buffer = buffer
-          .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-          .unwrap();
-
-        let total_lines = buffer.rope().len_lines();
-        if lstart <= total_lines {
-          let mut buffer_lines = buffer.rope().lines_at(lstart);
-          for row in 0..height {
-            match buffer_lines.next() {
-              Some(one_line) => {
-                // Write the line.
-                let mut col = 0_u16;
-                for chunk in one_line.chunks() {
-                  let cells: Vec<Cell> = chunk.chars().map(Cell::from).collect();
-                  let cells_len = cells.len();
-                  canvas
-                    .frame_mut()
-                    .set_cells_at(point!(x: col, y: row + actual_pos.y()), cells);
-                  col += cells_len as u16;
-                }
-
-                // Clear the left parts (at the end) of the line.
-                canvas.frame_mut().set_cells_at(
-                  point!(x: col, y: row  + actual_pos.y()),
-                  vec![Cell::empty(); (width - col) as usize],
-                );
-              }
-              None => {
-                // Set empty line
-                canvas.frame_mut().set_cells_at(
-                  point!(x: actual_pos.x(), y: row + actual_pos.y()),
-                  vec![Cell::empty(); width as usize],
-                );
-              }
-            }
-          }
-        }
-      }
+        start_column: Some(start_column),
+        end_column: Some(end_column),
+      } => self.draw_from_start_line(canvas, start_line, start_column, end_column),
       BufferView {
         start_line: _,
-        end_line: Some(_lend),
-        start_column: Some(_cstart),
-        end_column: Some(_cend),
-      } => {
-        unreachable!("Not implement")
-      }
+        end_line: Some(end_line),
+        start_column: Some(start_column),
+        end_column: Some(end_column),
+      } => self.draw_from_end_line(canvas, end_line, start_column, end_column),
       _ => {
-        unreachable!("Missing buffer view")
+        unreachable!("Invalid buffer view")
       }
     }
   }
