@@ -203,18 +203,22 @@ impl WindowContent {
     self.view.cstart = Some(cend - self.base.actual_shape().width() as usize);
   }
 
+  /// Get modified lines.
   pub fn modified_lines(&self) -> &BTreeSet<usize> {
     &self.modified_lines
   }
 
+  /// Clear all modified lines. This operation should be called after drawing to canvas.
   pub fn clear_modified_lines(&mut self) {
     self.modified_lines = BTreeSet::new();
   }
 
-  pub fn set_modified_line(&mut self, line_no: usize) -> bool {
-    self.modified_lines.insert(line_no)
+  /// Set modified line. This operation should be called after editing a line on buffer.
+  pub fn set_modified_line(&mut self, line: usize) -> bool {
+    self.modified_lines.insert(line)
   }
 
+  /// Reset modified line to unmodified.
   pub fn reset_modified_line(&mut self, line_no: &usize) -> bool {
     self.modified_lines.remove(line_no)
   }
@@ -236,48 +240,47 @@ impl Widgetable for WindowContent {
         let height = actual_shape.height();
         let width = actual_shape.width();
 
-        // Get buffer Arc pointer
-        if let Some(buffer) = self.buffer.upgrade() {
-          // Lock buffer for read
-          if let Some(buffer) = buffer.try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())) {
-            let total_lines = buffer.rope().len_lines();
-            if lstart <= total_lines {
-              let mut buffer_lines = buffer.rope().lines_at(lstart);
-              for row in 0..height {
-                match buffer_lines.next() {
-                  Some(one_line) => {
-                    // Write the line.
-                    let mut col = 0_u16;
-                    for chunk in one_line.chunks() {
-                      let cells: Vec<Cell> = chunk.chars().map(Cell::from).collect();
-                      let cells_len = cells.len();
-                      canvas
-                        .frame_mut()
-                        .set_cells_at(point!(x: col, y: row + actual_pos.y()), cells);
-                      col += cells_len as u16;
-                    }
+        // Get buffer arc pointer
+        let buffer = self.buffer.upgrade().unwrap();
 
-                    // Clear the left parts (at the end) of the line.
-                    canvas.frame_mut().set_cells_at(
-                      point!(x: col, y: row  + actual_pos.y()),
-                      vec![Cell::empty(); (width - col) as usize],
-                    );
-                  }
-                  None => {
-                    // Set empty line
-                    canvas.frame_mut().set_cells_at(
-                      point!(x: actual_pos.x(), y: row + actual_pos.y()),
-                      vec![Cell::empty(); width as usize],
-                    );
-                  }
+        // Lock buffer for read
+        let buffer = buffer
+          .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+          .unwrap();
+
+        let total_lines = buffer.rope().len_lines();
+        if lstart <= total_lines {
+          let mut buffer_lines = buffer.rope().lines_at(lstart);
+          for row in 0..height {
+            match buffer_lines.next() {
+              Some(one_line) => {
+                // Write the line.
+                let mut col = 0_u16;
+                for chunk in one_line.chunks() {
+                  let cells: Vec<Cell> = chunk.chars().map(Cell::from).collect();
+                  let cells_len = cells.len();
+                  canvas
+                    .frame_mut()
+                    .set_cells_at(point!(x: col, y: row + actual_pos.y()), cells);
+                  col += cells_len as u16;
                 }
+
+                // Clear the left parts (at the end) of the line.
+                canvas.frame_mut().set_cells_at(
+                  point!(x: col, y: row  + actual_pos.y()),
+                  vec![Cell::empty(); (width - col) as usize],
+                );
+              }
+              None => {
+                // Set empty line
+                canvas.frame_mut().set_cells_at(
+                  point!(x: actual_pos.x(), y: row + actual_pos.y()),
+                  vec![Cell::empty(); width as usize],
+                );
               }
             }
           }
         }
-
-        // Failed to upgrade to Arc pointer or lock, don't do anything and keep the current
-        // contents.
       }
       BufferView {
         lstart: _,
