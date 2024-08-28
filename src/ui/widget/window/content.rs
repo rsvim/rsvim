@@ -144,7 +144,7 @@ impl WindowContent {
     self.buffer = buffer;
   }
 
-  /// Get view's start line.
+  /// Get view's start line, index start from 0.
   pub fn view_lstart(&self) -> Option<usize> {
     self.view.lstart
   }
@@ -160,28 +160,44 @@ impl WindowContent {
     self.view.lend = None;
   }
 
+  /// Get view's end line, index start from 0.
   pub fn view_lend(&self) -> Option<usize> {
     self.view.lend
   }
 
+  /// Set view's end line.
+  ///
+  /// NOTE: This operation will unset view's start line. Because with different line-wrap/word-wrap
+  /// options, the window may contains less lines in buffer. We cannot know the start line unless
+  /// iterating reversely over the whole view from end line.
   pub fn set_view_lend(&mut self, lend: usize) {
     self.view.lend = Some(lend);
     self.view.lstart = None;
   }
 
+  /// Get view's start column, index start from 0.
   pub fn view_cstart(&self) -> Option<usize> {
     self.view.cstart
   }
 
+  /// Set view's start column.
+  ///
+  /// NOTE: This operation will calculate the end column and set it as well, based on widget's
+  /// width.
   pub fn set_view_cstart(&mut self, cstart: usize) {
     self.view.cstart = Some(cstart);
     self.view.cend = Some(cstart + self.base.actual_shape().width() as usize);
   }
 
+  /// Get view's end column, index start from 0.
   pub fn view_cend(&self) -> Option<usize> {
     self.view.cend
   }
 
+  /// Set view's end column.
+  ///
+  /// NOTE: This operation will calculate the end column and set it as well, based on widget's
+  /// width.
   pub fn set_view_cend(&mut self, cend: usize) {
     self.view.cend = Some(cend);
     self.view.cstart = Some(cend - self.base.actual_shape().width() as usize);
