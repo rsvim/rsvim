@@ -5,6 +5,7 @@
 use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
 use geo::point;
+use ropey::RopeSlice;
 use std::collections::{BTreeSet, VecDeque};
 use std::convert::From;
 use std::time::Duration;
@@ -22,7 +23,7 @@ use crate::uuid;
 #[derive(Debug, Copy, Clone, Default)]
 /// The view of a buffer. The range is left-open right-closed, or top-open bottom-closed, i.e.
 /// `[start_line, end_line)` or `[start_column, end_column)`.
-pub struct BufferView {
+struct BufferView {
   /// Start line number
   pub start_line: Option<usize>,
   /// End line number.
@@ -238,6 +239,25 @@ impl WindowContent {
 
   // Modified }
 
+  fn collect_cells_for(&self, buffer_line: &RopeSlice, max_cells: u16) -> Vec<Cell> {
+    assert!(max_cells > 0);
+    let mut cells = Vec::with_capacity(max_cells as usize);
+    // Collect cells in the line.
+    let mut idx = 0_u16;
+    for chunk in buffer_line.chunks() {
+      let mut tmp: Vec<Cell> = chunk
+        .chars()
+        .take((max_cells - idx) as usize)
+        .map(Cell::from)
+        .collect();
+      let tmp_len = tmp.len();
+      idx += tmp_len as u16;
+      cells.append(&mut tmp);
+    }
+    cells
+  }
+
+  /// Draw buffer from `start_line`
   fn draw_from_start_line(
     &mut self,
     canvas: &mut Canvas,
@@ -246,9 +266,14 @@ impl WindowContent {
     _end_column: usize,
   ) {
     let actual_shape = self.actual_shape();
-    let actual_pos: U16Pos = actual_shape.min().into();
+    let upos: U16Pos = actual_shape.min().into();
     let height = actual_shape.height();
     let width = actual_shape.width();
+
+    // If window is zero-sized.
+    if height == 0 || width == 0 {
+      return;
+    }
 
     // Get buffer arc pointer
     let buffer = self.buffer.upgrade().unwrap();
@@ -260,6 +285,8 @@ impl WindowContent {
 
     let total_lines = buffer.rope().len_lines();
     if start_line <= total_lines {
+      // View's start is inside of buffer's lines.
+
       let mut buffer_lines = buffer.rope().lines_at(start_line);
       for row in 0..height {
         match buffer_lines.next() {
@@ -271,32 +298,35 @@ impl WindowContent {
               let cells_len = cells.len();
               canvas
                 .frame_mut()
-                .set_cells_at(point!(x: col, y: row + actual_pos.y()), cells);
+                .set_cells_at(point!(x: col, y: row + upos.y()), cells);
               col += cells_len as u16;
             }
 
             // Clear the left parts (at the end) of the line.
             canvas.frame_mut().set_cells_at(
-              point!(x: col, y: row  + actual_pos.y()),
+              point!(x: col, y: row  + upos.y()),
               vec![Cell::empty(); (width - col) as usize],
             );
           }
           None => {
             // Set empty line
             canvas.frame_mut().set_cells_at(
-              point!(x: actual_pos.x(), y: row + actual_pos.y()),
+              point!(x: upos.x(), y: row + upos.y()),
               vec![Cell::empty(); width as usize],
             );
           }
         }
       }
+    } else {
+      // View's start is outside of buffer's lines.
     }
   }
 
+  /// Draw buffer from `end_line` in reverse order.
   fn draw_from_end_line(
     &mut self,
-    canvas: &mut Canvas,
-    end_line: usize,
+    _canvas: &mut Canvas,
+    _end_line: usize,
     _start_column: usize,
     _end_column: usize,
   ) {
