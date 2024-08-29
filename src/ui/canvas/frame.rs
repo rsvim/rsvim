@@ -2,6 +2,7 @@
 
 #![allow(dead_code)]
 
+use compact_str::CompactString;
 use geo::point;
 use std::ops::Range;
 
@@ -110,6 +111,22 @@ impl Frame {
   /// Get a range of continuously cells, start from a position and last for N elements.
   pub fn cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
     &self.cells[range_from_pos(pos, n)]
+  }
+
+  /// Get raw symbols of all cells.
+  ///
+  /// NOTE: This method is mostly for debugging and testing.
+  pub fn raw_symbols_of_cells(&self) -> Vec<Vec<CompactString>> {
+    let mut raw_symbols: Vec<Vec<CompactString>> = Vec::with_capacity(self.size.height() as usize);
+    for row in 0..self.size.height() {
+      let mut row_symbols: Vec<CompactString> = Vec::with_capacity(self.size.width() as usize);
+      for col in 0..self.size.width() {
+        let idx = (row * col) as usize;
+        row_symbols.push(self.cells[idx].symbol().clone());
+      }
+      raw_symbols.push(row_symbols);
+    }
+    raw_symbols
   }
 
   /// Set (replace) cells at a range.

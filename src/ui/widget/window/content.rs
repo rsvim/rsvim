@@ -425,7 +425,7 @@ mod tests {
     let mut canvas = Canvas::new(canvas_size);
 
     window_content._draw_from_start_line(&mut canvas, 0, 0, 10);
-    info!("canvas after draw:");
-    info!("{:?}", canvas);
+    info!("frame after draw:");
+    info!("{:?}", canvas.frame().raw_symbols_of_cells());
   }
 }
