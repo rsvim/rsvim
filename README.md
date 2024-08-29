@@ -31,9 +31,9 @@ Please checkout RSVIM's [Documentation](https://rsvim.github.io/) for more detai
 
 ## Contribution
 
-Some guidelines about contributing to RSVIM can be found in below documents:
+Some guidelines about contributing to RSVIM can be found in below files:
 
-- DEVELOPMENT.md
+- [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md)
 - DOCUMENTATION.md
 - RELEASE.md
 
