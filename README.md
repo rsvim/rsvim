@@ -15,6 +15,8 @@ The VIM editor reinvented in Rust+Typescript.
   <a href="https://app.codacy.com/gh/rsvim/rsvim/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img alt="codacy" src="https://img.shields.io/codacy/grade/1c6a3d21352c4f8bb84ff6c7e3ef0399/main" /></a>
 </p>
 
+## About
+
 The goal of RSVIM is to follow the philosophy of the VIM editor, but also to be:
 
 - A powerful TUI engine similar to GUI frameworks that provides widgets, event handlers, MVC, etc.
@@ -23,4 +25,12 @@ The goal of RSVIM is to follow the philosophy of the VIM editor, but also to be:
 - A text processing tool that batch processes text contents.
 - A modern project that leverages community works for theme, documentation, development, etc.
 
-Please checkout RSVIM's [documentation](https://rsvim.github.io/) for more details!
+## Get Started
+
+Please checkout RSVIM's [Documentation](https://rsvim.github.io/) for more details!
+
+## Contribution
+
+Roadmap and high-level design can be found in RSVIM's [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they're quite big and involves a lot of effort.
+
+## Supporting the Project
