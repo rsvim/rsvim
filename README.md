@@ -18,7 +18,7 @@ The VIM editor reinvented in Rust+Typescript.
 
 > [!CAUTION]
 >
-> _**This project is still under heavily development and not ready for use. Please choose alternatives [Neovim](https://neovim.io/) and [Vim](https://www.vim.org/).**_
+> _**This project is still in the very early stages of development and not ready for use. Please choose alternatives [Neovim](https://neovim.io/) and [Vim](https://www.vim.org/).**_
 
 ## About
 
