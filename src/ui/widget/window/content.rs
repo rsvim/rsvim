@@ -293,7 +293,7 @@ impl WindowContent {
                   let cell = Cell::from(ch);
                   let cell_upos = point!(x: idx + upos.x(), y: row + upos.y());
                   debug!(
-                    "row:{:?}, idx:{:?}, line:{:?}, ch:{:?}, cell upos:{:?}",
+                    "1-row:{:?}, idx:{:?}, line:{:?}, ch:{:?}, cell upos:{:?}",
                     row,
                     idx,
                     line.as_str(),
@@ -311,7 +311,7 @@ impl WindowContent {
                 let cells_upos = point!(x: idx + upos.x(), y: row + upos.y());
                 let cells_len = (width - idx) as usize;
                 debug!(
-                  "row:{:?}, idx:{:?}, line:{:?}, cells upos:{:?}, cells len:{:?}",
+                  "2-row:{:?}, idx:{:?}, line:{:?}, cells upos:{:?}, cells len:{:?}",
                   row,
                   idx,
                   line.as_str(),
@@ -329,7 +329,7 @@ impl WindowContent {
               let cells_upos = point!(x: upos.x(), y: row + upos.y());
               let cells_len = width as usize;
               debug!(
-                "row:{:?}, cells upos:{:?}, cells len:{:?}",
+                "3-row:{:?}, cells upos:{:?}, cells len:{:?}",
                 row, cells_upos, cells_len,
               );
               canvas
@@ -353,7 +353,7 @@ impl WindowContent {
           let cells_upos = point!(x: upos.x(), y: row + upos.y());
           let cells_len = width as usize;
           debug!(
-            "row:{:?}, cells upos:{:?}, cells len:{:?}",
+            "4-row:{:?}, cells upos:{:?}, cells len:{:?}",
             row, cells_upos, cells_len,
           );
           canvas
