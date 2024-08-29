@@ -22,3 +22,5 @@ The goal of RSVIM is to follow the philosophy of the VIM editor, but also to be:
 - A background editing service that allows multiple remote clients to access and work together.
 - A text processing tool that batch processes text contents.
 - A modern project that leverages community works for theme, documentation, development, etc.
+
+Please checkout RSVIM's [documentation](https://rsvim.github.io/) for more details!
