@@ -368,7 +368,7 @@ impl Widgetable for WindowContent {
         end_column: Some(end_column),
       } => self._draw_from_end_line(canvas, end_line, start_column, end_column),
       _ => {
-        unreachable!("Invalid buffer view")
+        unreachable!("Invalid view")
       }
     }
   }
