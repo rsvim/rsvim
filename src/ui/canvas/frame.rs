@@ -54,26 +54,58 @@ impl Frame {
 
   // Utils {
 
-  // Convert start position and length of following N elements into Vec range.
-  fn pos2range(&self, pos: U16Pos, n: usize) -> Range<usize> {
-    let start_at = pos.x() as usize * pos.y() as usize;
-    let end_at = start_at + n;
-    start_at..end_at
+  /// Convert start position and length of following N elements into Vec range.
+  ///
+  /// # Panics
+  ///
+  /// If the range is outside of frame shape.
+  pub fn pos2range(&self, pos: U16Pos, n: usize) -> Range<usize> {
+    assert_eq!(
+      self.size.height() as usize * self.size.width() as usize,
+      self.cells.len()
+    );
+    let start_idx = self.pos2idx(pos);
+    let end_idx = start_idx + n;
+    assert!(end_idx <= self.cells.len());
+    start_idx..end_idx
   }
 
-  // Convert start index and length of following N elements into Vec range.
-  fn idx2range(&self, index: usize, n: usize) -> Range<usize> {
-    let end_at = index + n;
-    index..end_at
+  /// Convert start index and length of following N elements into Vec range.
+  ///
+  /// # Panics
+  ///
+  /// If the range is outside of frame shape.
+  pub fn idx2range(&self, index: usize, n: usize) -> Range<usize> {
+    assert_eq!(
+      self.size.height() as usize * self.size.width() as usize,
+      self.cells.len()
+    );
+    let end_idx = index + n;
+    assert!(end_idx <= self.cells.len());
+    index..end_idx
   }
 
-  // Convert (position) X and Y into Vec index.
-  fn xy2idx(&self, x: usize, y: usize) -> usize {
-    y * self.size.width() as usize + x
+  /// Convert (position) X and Y into Vec index.
+  ///
+  /// # Panics
+  ///
+  /// If x and y is outside of frame shape.
+  pub fn xy2idx(&self, x: usize, y: usize) -> usize {
+    assert_eq!(
+      self.size.height() as usize * self.size.width() as usize,
+      self.cells.len()
+    );
+    let index = y * self.size.width() as usize + x;
+    assert!(index <= self.cells.len());
+    index
   }
 
-  // Convert position into Vec index.
-  fn xy2pos(&self, pos: U16Pos) -> usize {
+  /// Convert position into Vec index.
+  ///
+  /// # Panics
+  ///
+  /// If position is outside of frame shape.
+  pub fn pos2idx(&self, pos: U16Pos) -> usize {
     self.xy2idx(pos.x() as usize, pos.y() as usize)
   }
 
@@ -97,7 +129,7 @@ impl Frame {
 
   /// Get a cell.
   pub fn cell(&self, pos: U16Pos) -> &Cell {
-    let index = pos.x() as usize * pos.y() as usize;
+    let index = self.pos2idx(pos);
     let result = &self.cells[index];
     debug!("get cell at index:{:?}, cell:{:?}", index, result);
     result
@@ -107,7 +139,7 @@ impl Frame {
   ///
   /// Returns the old cell.
   pub fn set_cell(&mut self, pos: U16Pos, cell: Cell) -> Cell {
-    let index = pos.x() as usize * pos.y() as usize;
+    let index = self.pos2idx(pos);
     let old_cell = self.cells[index].clone();
     debug!(
       "set cell at index:{:?}, new cell:{:?}, old cell:{:?}",
@@ -275,6 +307,15 @@ mod tests {
     for c in f.cells.iter() {
       assert_eq!(c.symbol(), Cell::default().symbol());
     }
+  }
+
+  #[test]
+  fn pos2range1() {
+    let frame_size = U16Size::new(10, 10);
+    let frame = Frame::new(frame_size, Cursor::default());
+    assert_eq!(frame.pos2range(point!(x: 0, y:0), 7), 0..7);
+    assert_eq!(frame.pos2range(point!(x: 7, y:2), 23), 27..50);
+    assert_eq!(frame.pos2range(point!(x: 7, y:2), 23), 27..50);
   }
 
   #[test]
