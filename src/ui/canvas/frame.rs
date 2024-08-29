@@ -315,7 +315,18 @@ mod tests {
     let frame = Frame::new(frame_size, Cursor::default());
     assert_eq!(frame.pos2range(point!(x: 0, y:0), 7), 0..7);
     assert_eq!(frame.pos2range(point!(x: 7, y:2), 23), 27..50);
-    assert_eq!(frame.pos2range(point!(x: 7, y:2), 23), 27..50);
+    assert_eq!(frame.pos2range(point!(x: 8, y:9), 1), 98..99);
+    assert_eq!(frame.pos2range(point!(x: 9, y:9), 1), 99..100);
+  }
+
+  #[test]
+  fn idx2range1() {
+    let frame_size = U16Size::new(10, 10);
+    let frame = Frame::new(frame_size, Cursor::default());
+    assert_eq!(frame.idx2range(0, 7), 0..7);
+    assert_eq!(frame.idx2range(27, 23), 27..50);
+    assert_eq!(frame.idx2range(98, 1), 98..99);
+    assert_eq!(frame.idx2range(99, 1), 99..100);
   }
 
   #[test]
