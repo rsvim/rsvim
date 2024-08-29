@@ -9,7 +9,7 @@ use ropey::RopeSlice;
 use std::collections::{BTreeSet, VecDeque};
 use std::convert::From;
 use std::time::Duration;
-use tracing::debug;
+use tracing::{debug, error};
 
 use crate::buf::{Buffer, BufferWk};
 use crate::cart::{IRect, U16Pos, U16Rect};
@@ -368,6 +368,7 @@ impl Widgetable for WindowContent {
         end_column: Some(end_column),
       } => self._draw_from_end_line(canvas, end_line, start_column, end_column),
       _ => {
+        error!("Invalid view: {:?}", self.view);
         unreachable!("Invalid view")
       }
     }
