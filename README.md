@@ -21,15 +21,13 @@ The VIM editor reinvented in Rust+Typescript.
 
 ## About
 
-The goal of RSVIM is to be a highly configurable text editor by following the philosophy of the [VIM](https://www.vim.org/) editor, while also to be:
+The goal of RSVIM is to be a highly configurable text editor by following the main functionalities and philosophy of the (Neo)VIM editor, while also to be:
 
 - A powerful TUI engine similar to GUI frameworks that provides widgets, event handlers, MVC, etc.
 - A programmable editor that provides a consistent scripting runtime environment, with built-in support for type system, async, plugin manager, etc.
 - A background editing service that allows multiple remote clients to access and work together.
 - A text processing tool that batch processes text contents.
 - A modern project that leverages community works for theme, documentation, development, etc.
-
-RSVIM would not exist without [Neovim](https://neovim.io/) and [Vim](https://www.vim.org/).
 
 ## Get Started
 
@@ -51,4 +49,4 @@ If you like RSVIM, please consider sponsoring it. Your support encourages contri
 
 ## License
 
-RSVIM is licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE-VIM.txt) and [Apache License Version 2.0](https://github.com/rsvim/rsvim/blob/main/LICENSE-APACHE.txt).
+Licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE-VIM.txt) and [Apache License Version 2.0](https://github.com/rsvim/rsvim/blob/main/LICENSE-APACHE.txt).
