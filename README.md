@@ -15,6 +15,10 @@ The VIM editor reinvented in Rust+Typescript.
   <a href="https://app.codacy.com/gh/rsvim/rsvim/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img alt="codacy" src="https://img.shields.io/codacy/grade/1c6a3d21352c4f8bb84ff6c7e3ef0399/main" /></a>
 </p>
 
+> [!CAUTION]
+>
+> _**This project is still under heavily development and not ready for use. Please choose alternatives [Neovim](https://neovim.io/) and [Vim](https://www.vim.org/).**_
+
 ## About
 
 The goal of RSVIM is to follow the philosophy of the VIM editor, but also to be:
