@@ -250,6 +250,10 @@ impl WindowContent {
     let upos: U16Pos = actual_shape.min().into();
     let height = actual_shape.height();
     let width = actual_shape.width();
+    debug!(
+      "actual shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
+      actual_shape, upos, height, width
+    );
 
     // If window is zero-sized.
     if height == 0 || width == 0 {
@@ -289,8 +293,7 @@ impl WindowContent {
                   let cell = Cell::from(ch);
                   let cell_upos = point!(x: idx + upos.x(), y: row + upos.y());
                   debug!(
-                    "upos:{:?}, row:{:?}, idx:{:?}, line:{:?}, ch:{:?}, cell upos:{:?}",
-                    upos,
+                    "row:{:?}, idx:{:?}, line:{:?}, ch:{:?}, cell upos:{:?}",
                     row,
                     idx,
                     line.as_str(),
@@ -307,6 +310,14 @@ impl WindowContent {
               if idx < width - 1 {
                 let cells_upos = point!(x: idx + upos.x(), y: row + upos.y());
                 let cells_len = (width - idx) as usize;
+                debug!(
+                  "row:{:?}, idx:{:?}, line:{:?}, cells upos:{:?}, cells len:{:?}",
+                  row,
+                  idx,
+                  line.as_str(),
+                  cells_upos,
+                  cells_len,
+                );
                 canvas
                   .frame_mut()
                   .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
@@ -317,6 +328,10 @@ impl WindowContent {
               // left parts of the window.
               let cells_upos = point!(x: upos.x(), y: row + upos.y());
               let cells_len = width as usize;
+              debug!(
+                "row:{:?}, cells upos:{:?}, cells len:{:?}",
+                row, cells_upos, cells_len,
+              );
               canvas
                 .frame_mut()
                 .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
@@ -337,6 +352,10 @@ impl WindowContent {
           // There's no lines in the buffer, simply set the whole line to empty.
           let cells_upos = point!(x: upos.x(), y: row + upos.y());
           let cells_len = width as usize;
+          debug!(
+            "row:{:?}, cells upos:{:?}, cells len:{:?}",
+            row, cells_upos, cells_len,
+          );
           canvas
             .frame_mut()
             .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
