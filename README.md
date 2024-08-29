@@ -31,7 +31,7 @@ The goal of RSVIM is to follow the philosophy of the VIM editor, but also to be:
 
 ## Get Started
 
-Please checkout RSVIM's [Documentation](https://rsvim.github.io/) for more details!
+Please checkout [Documentation](https://rsvim.github.io/) for more details!
 
 ## Contribution
 
@@ -41,7 +41,7 @@ Some guidelines about contributing to RSVIM can be found in below files:
 - [DOCUMENTATION.md](https://github.com/rsvim/rsvim/blob/main/DOCUMENTATION.md)
 - [RELEASE.md](https://github.com/rsvim/rsvim/blob/main/RELEASE.md)
 
-Roadmap and high-level design can be found in RSVIM's [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they need fairly large effort.
+Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they need fairly large effort.
 
 ## Supporting the Project
 
