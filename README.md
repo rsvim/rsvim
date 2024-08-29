@@ -31,6 +31,6 @@ Please checkout RSVIM's [Documentation](https://rsvim.github.io/) for more detai
 
 ## Contribution
 
-Roadmap and high-level design can be found in RSVIM's [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they're quite big and involves a lot of effort.
+Roadmap and high-level design can be found in RSVIM's [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they need fairly large effort.
 
 ## Supporting the Project
