@@ -239,24 +239,6 @@ impl WindowContent {
 
   // Modified }
 
-  fn collect_cells_for(&self, buffer_line: &RopeSlice, max_cells: u16) -> Vec<Cell> {
-    assert!(max_cells > 0);
-    let mut cells = Vec::with_capacity(max_cells as usize);
-    // Collect cells in the line.
-    let mut idx = 0_u16;
-    for chunk in buffer_line.chunks() {
-      let mut tmp: Vec<Cell> = chunk
-        .chars()
-        .take((max_cells - idx) as usize)
-        .map(Cell::from)
-        .collect();
-      let tmp_len = tmp.len();
-      idx += tmp_len as u16;
-      cells.append(&mut tmp);
-    }
-    cells
-  }
-
   /// Draw buffer from `start_line`
   fn draw_from_start_line(
     &mut self,
@@ -283,42 +265,76 @@ impl WindowContent {
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap();
 
-    let total_lines = buffer.rope().len_lines();
-    if start_line <= total_lines {
-      // View's start is inside of buffer's lines.
+    match buffer.rope().get_lines_at(start_line) {
+      Some(mut buflines) => {
+        // The `start_line` is inside the buffer.
+        // Render the lines from `start_line` till the end of the buffer or the window widget.
 
-      let mut buffer_lines = buffer.rope().lines_at(start_line);
-      for row in 0..height {
-        match buffer_lines.next() {
-          Some(one_line) => {
-            // Write the line.
-            let mut col = 0_u16;
-            for chunk in one_line.chunks() {
-              let cells: Vec<Cell> = chunk.chars().map(Cell::from).collect();
-              let cells_len = cells.len();
+        // The first `row` (0) in the window maps to the `start_line` in the buffer.
+        let mut row = 0;
+
+        while row < height {
+          match buflines.next() {
+            Some(line) => {
+              // For the row in current window widget, if has the line in buffer.
+              let mut idx = 0_u16;
+
+              for chunk in line.chunks() {
+                if idx >= width {
+                  break;
+                }
+                for ch in chunk.chars() {
+                  if idx >= width {
+                    break;
+                  }
+                  let cell = Cell::from(ch);
+                  let cell_upos = point!(x: idx + upos.x(), y: row + upos.y());
+                  canvas.frame_mut().set_cell(cell_upos, cell);
+                  idx += 1;
+                }
+              }
+
+              // The line doesn't fill the whole row in current widget, fill left parts with empty
+              // cells.
+              if idx < width - 1 {
+                let cells_upos = point!(x: idx + upos.x(), y: row + upos.y());
+                let cells_len = (width - idx) as usize;
+                canvas
+                  .frame_mut()
+                  .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
+              }
+            }
+            None => {
+              // If there's no more lines in the buffer, simply set the whole line to empty for
+              // left parts of the window.
+              let cells_upos = point!(x: upos.x(), y: row + upos.y());
+              let cells_len = width as usize;
               canvas
                 .frame_mut()
-                .set_cells_at(point!(x: col, y: row + upos.y()), cells);
-              col += cells_len as u16;
+                .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
             }
-
-            // Clear the left parts (at the end) of the line.
-            canvas.frame_mut().set_cells_at(
-              point!(x: col, y: row  + upos.y()),
-              vec![Cell::empty(); (width - col) as usize],
-            );
           }
-          None => {
-            // Set empty line
-            canvas.frame_mut().set_cells_at(
-              point!(x: upos.x(), y: row + upos.y()),
-              vec![Cell::empty(); width as usize],
-            );
-          }
+          // Iterate to next row.
+          row += 1;
         }
       }
-    } else {
-      // View's start is outside of buffer's lines.
+      None => {
+        // The `start_line` is outside of the buffer.
+        // Render the whole window contents as empty cells.
+
+        // The first `row` (0) in the window maps to the `start_line` in the buffer.
+        let mut row = 0;
+
+        while row < height {
+          // There's no lines in the buffer, simply set the whole line to empty.
+          let cells_upos = point!(x: upos.x(), y: row + upos.y());
+          let cells_len = width as usize;
+          canvas
+            .frame_mut()
+            .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
+          row += 1;
+        }
+      }
     }
   }
 
