@@ -39,19 +39,6 @@ pub struct Frame {
   dirty_cursor: bool,
 }
 
-// Make range from start position and length of following N elements.
-fn range_from_pos(pos: U16Pos, n: usize) -> Range<usize> {
-  let start_at = pos.x() as usize * pos.y() as usize;
-  let end_at = start_at + n;
-  start_at..end_at
-}
-
-// Make range from start index and length of following N elements.
-fn range_from_idx(index: usize, n: usize) -> Range<usize> {
-  let end_at = index + n;
-  index..end_at
-}
-
 impl Frame {
   /// Make new frame.
   pub fn new(size: U16Size, cursor: Cursor) -> Self {
@@ -64,6 +51,33 @@ impl Frame {
       dirty_cursor: false,
     }
   }
+
+  // Utils {
+
+  // Convert start position and length of following N elements into Vec range.
+  fn pos2range(&self, pos: U16Pos, n: usize) -> Range<usize> {
+    let start_at = pos.x() as usize * pos.y() as usize;
+    let end_at = start_at + n;
+    start_at..end_at
+  }
+
+  // Convert start index and length of following N elements into Vec range.
+  fn idx2range(&self, index: usize, n: usize) -> Range<usize> {
+    let end_at = index + n;
+    index..end_at
+  }
+
+  // Convert (position) X and Y into Vec index.
+  fn xy2idx(&self, x: usize, y: usize) -> usize {
+    y * self.size.width() as usize + x
+  }
+
+  // Convert position into Vec index.
+  fn xy2pos(&self, pos: U16Pos) -> usize {
+    self.xy2idx(pos.x() as usize, pos.y() as usize)
+  }
+
+  // Utils }
 
   /// Get current frame size.
   pub fn size(&self) -> U16Size {
@@ -100,7 +114,8 @@ impl Frame {
       index, cell, old_cell
     );
     self.cells[index] = cell;
-    self.dirty_cells.push(range_from_idx(index, 1));
+    let range = self.idx2range(index, 1);
+    self.dirty_cells.push(range);
     old_cell
   }
 
@@ -118,7 +133,8 @@ impl Frame {
 
   /// Get a range of continuously cells, start from a position and last for N elements.
   pub fn cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
-    &self.cells[range_from_pos(pos, n)]
+    let range = self.pos2range(pos, n);
+    &self.cells[range]
   }
 
   /// Get raw symbols of all cells.
@@ -145,7 +161,7 @@ impl Frame {
   ///
   /// If `cells` length exceed the canvas.
   pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
-    let range = range_from_pos(pos, cells.len());
+    let range = self.pos2range(pos, cells.len());
     assert!(range.end <= self.cells.len());
     self.dirty_cells.push(range.clone());
     self.cells.splice(range, cells).collect()
