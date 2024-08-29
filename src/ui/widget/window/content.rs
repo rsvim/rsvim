@@ -2,7 +2,6 @@
 
 #![allow(unused_imports, dead_code)]
 
-use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
 use geo::point;
 use ropey::RopeSlice;
@@ -289,6 +288,15 @@ impl WindowContent {
                   }
                   let cell = Cell::from(ch);
                   let cell_upos = point!(x: idx + upos.x(), y: row + upos.y());
+                  debug!(
+                    "upos:{:?}, row:{:?}, idx:{:?}, line:{:?}, ch:{:?}, cell upos:{:?}",
+                    upos,
+                    row,
+                    idx,
+                    line.as_str(),
+                    ch,
+                    cell_upos
+                  );
                   canvas.frame_mut().set_cell(cell_upos, cell);
                   idx += 1;
                 }
