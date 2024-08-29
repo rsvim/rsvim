@@ -40,3 +40,7 @@ Some guidelines about contributing to RSVIM can be found in below files:
 Roadmap and high-level design can be found in RSVIM's [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they need fairly large effort.
 
 ## Supporting the Project
+
+## License
+
+RSVIM is licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE-VIM.txt) and [Apache License Version 2.0](https://github.com/rsvim/rsvim/blob/main/LICENSE-APACHE.txt).
