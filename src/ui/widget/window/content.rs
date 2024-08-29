@@ -105,7 +105,7 @@ pub struct WindowContent {
 impl WindowContent {
   /// Make window content from buffer. The view starts from the first line.
   pub fn new(shape: IRect, buffer: BufferWk) -> Self {
-    let view = BufferView::new(Some(0), None, Some(0), None);
+    let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
     WindowContent {
       base: InodeBase::new(shape),
       buffer,
@@ -372,5 +372,60 @@ impl Widgetable for WindowContent {
         unreachable!("Invalid view")
       }
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use ropey::{Rope, RopeBuilder};
+  use std::fs::File;
+  use std::io::{BufReader, BufWriter};
+  use std::sync::Arc;
+  use std::sync::Once;
+  use tracing::info;
+
+  use super::*;
+  use crate::buf::BufferArc;
+  use crate::cart::U16Size;
+  use crate::test::log::init as test_log_init;
+
+  static INIT: Once = Once::new();
+
+  fn make_buffer_from_file(filename: String) -> BufferArc {
+    let rop: Rope = Rope::from_reader(BufReader::new(File::open(filename).unwrap())).unwrap();
+    let buf: Buffer = Buffer::from(rop);
+    Buffer::to_arc(buf)
+  }
+
+  fn make_buffer_from_lines(lines: Vec<&str>) -> BufferArc {
+    let mut rop: RopeBuilder = RopeBuilder::new();
+    for line in lines.iter() {
+      rop.append(line);
+    }
+    let buf: Buffer = Buffer::from(rop);
+    Buffer::to_arc(buf)
+  }
+
+  #[test]
+  fn _draw_from_start_line1() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again.\n",
+    ]);
+    let window_content_shape = IRect::new((0, 0), (10, 10));
+    let mut window_content = WindowContent::new(window_content_shape, Arc::downgrade(&buffer));
+    let canvas_size = U16Size::new(10, 10);
+    let mut canvas = Canvas::new(canvas_size);
+
+    window_content._draw_from_start_line(&mut canvas, 0, 0, 10);
+    info!("canvas after draw:");
+    info!("{:?}", canvas);
   }
 }
