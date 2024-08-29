@@ -240,7 +240,7 @@ impl WindowContent {
   // Modified }
 
   /// Draw buffer from `start_line`
-  fn draw_from_start_line(
+  pub fn _draw_from_start_line(
     &mut self,
     canvas: &mut Canvas,
     start_line: usize,
@@ -339,7 +339,7 @@ impl WindowContent {
   }
 
   /// Draw buffer from `end_line` in reverse order.
-  fn draw_from_end_line(
+  pub fn _draw_from_end_line(
     &mut self,
     _canvas: &mut Canvas,
     _end_line: usize,
@@ -360,13 +360,13 @@ impl Widgetable for WindowContent {
         end_line: _,
         start_column: Some(start_column),
         end_column: Some(end_column),
-      } => self.draw_from_start_line(canvas, start_line, start_column, end_column),
+      } => self._draw_from_start_line(canvas, start_line, start_column, end_column),
       BufferView {
         start_line: _,
         end_line: Some(end_line),
         start_column: Some(start_column),
         end_column: Some(end_column),
-      } => self.draw_from_end_line(canvas, end_line, start_column, end_column),
+      } => self._draw_from_end_line(canvas, end_line, start_column, end_column),
       _ => {
         unreachable!("Invalid buffer view")
       }
