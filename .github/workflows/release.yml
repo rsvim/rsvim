@@ -29,14 +29,9 @@ jobs:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Create Changelog
-        run: |
-          cargo install git-cliff --all-features
-          git-cliff -l --verbose -o UPDATES.md
       - uses: ncipollo/release-action@v1
         with:
           draft: true
-          bodyFile: UPDATES.md
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
