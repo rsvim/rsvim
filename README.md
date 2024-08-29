@@ -31,6 +31,12 @@ Please checkout RSVIM's [Documentation](https://rsvim.github.io/) for more detai
 
 ## Contribution
 
+Some guidelines about contributing to RSVIM can be found in below documents:
+
+- DEVELOPMENT.md
+- DOCUMENTATION.md
+- RELEASE.md
+
 Roadmap and high-level design can be found in RSVIM's [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they need fairly large effort.
 
 ## Supporting the Project
