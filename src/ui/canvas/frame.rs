@@ -574,20 +574,28 @@ mod tests {
     ];
 
     for (i, input) in inputs.iter().enumerate() {
-      let actual = frame.set_cells_at(
-        input.0,
-        input.1.chars().map(|c| Cell::with_char(c)).collect(),
-      );
-      let expect = expects[i];
+      let actual = frame.set_cells_at(input.0, input.1.chars().map(Cell::with_char).collect());
+      info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
+      assert!(actual.len() == input.1.len());
+      assert!(actual
+        .iter()
+        .filter(|c| !c.symbol().is_empty())
+        .collect::<Vec<_>>()
+        .is_empty());
+    }
+    for (i, expect) in expects.into_iter().enumerate() {
+      let pos: U16Pos = point!(x:0_u16,y:i as u16);
+      let actual = frame.cells_at(pos, 10);
       info!(
-        "{:?} input:{:?}, actual:{:?}, expect:{:?}",
-        i, input, actual, expect
+        "{:?} pos:{:?}, actual:{:?}, expect:{:?}",
+        i, pos, actual, expect
       );
+      assert!(actual.len() == expect.len());
       assert_eq!(
         actual
           .iter()
           .map(|c| if c.symbol().is_empty() {
-            "".to_string()
+            " ".to_string()
           } else {
             c.symbol().to_string()
           })
