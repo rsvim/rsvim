@@ -453,6 +453,6 @@ mod tests {
 
     window_content._draw_from_start_line(&mut canvas, 0, 0, 10);
     info!("frame after draw:");
-    info!("{:?}", canvas.frame().raw_symbols_of_cells());
+    info!("{:?}", canvas.frame().raw_symbols());
   }
 }

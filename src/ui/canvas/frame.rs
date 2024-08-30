@@ -1,8 +1,6 @@
 //! Canvas frame.
 
-#![allow(dead_code)]
-
-use compact_str::{CompactString, CompactStringExt};
+use compact_str::CompactString;
 use geo::point;
 use std::ops::Range;
 use tracing::debug;
@@ -599,26 +597,13 @@ mod tests {
       info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
       assert!(actual.len() == input.1.len());
     }
+    let actuals = frame.raw_symbols_with_placeholder(" ".to_compact_string());
+    assert_eq!(actuals.len(), expects.len());
     for (i, expect) in expects.into_iter().enumerate() {
-      let pos: U16Pos = point!(x:0_u16,y:i as u16);
-      let actual = frame.cells_at(pos, 10);
-      info!(
-        "{:?} pos:{:?}, actual:{:?}, expect:{:?}",
-        i, pos, actual, expect
-      );
+      let actual = actuals[i].join("");
+      info!("{:?} actual:{:?}, expect:{:?}", i, actual, expect);
       assert!(actual.len() == expect.len());
-      assert_eq!(
-        actual
-          .iter()
-          .map(|c| if c.symbol().is_empty() {
-            " ".to_string()
-          } else {
-            c.symbol().to_string()
-          })
-          .collect::<Vec<_>>()
-          .join(""),
-        expect
-      );
+      assert_eq!(actual, expect);
     }
   }
 
