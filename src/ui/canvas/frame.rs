@@ -330,6 +330,28 @@ mod tests {
   }
 
   #[test]
+  fn xy2idx1() {
+    let frame_size = U16Size::new(10, 10);
+    let frame = Frame::new(frame_size, Cursor::default());
+    assert_eq!(frame.xy2idx(0, 7), 70);
+    assert_eq!(frame.xy2idx(7, 3), 37);
+    assert_eq!(frame.xy2idx(1, 0), 1);
+    assert_eq!(frame.xy2idx(0, 9), 90);
+    assert_eq!(frame.xy2idx(9, 9), 99);
+  }
+
+  #[test]
+  fn pos2idx1() {
+    let frame_size = U16Size::new(10, 10);
+    let frame = Frame::new(frame_size, Cursor::default());
+    assert_eq!(frame.pos2idx(point!(x:0, y:7)), 70);
+    assert_eq!(frame.pos2idx(point!(x:7, y:3)), 37);
+    assert_eq!(frame.pos2idx(point!(x:1, y:0)), 1);
+    assert_eq!(frame.pos2idx(point!(x:0, y:9)), 90);
+    assert_eq!(frame.pos2idx(point!(x:9, y:9)), 99);
+  }
+
+  #[test]
   fn set_cell1() {
     INIT.call_once(test_log_init);
     let frame_size = U16Size::new(10, 10);
