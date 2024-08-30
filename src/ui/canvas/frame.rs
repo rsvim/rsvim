@@ -477,7 +477,7 @@ mod tests {
       info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
       assert_eq!(actual.symbol(), CompactString::new(""));
     }
-    // info!("2-raw_symbols_of_cells:{:?}", frame.raw_symbols_of_cells(),);
+    info!("1-raw_symbols_of_cells:{:?}", frame.raw_symbols_of_cells(),);
     for i in 0..10 {
       let pos: U16Pos = point!(x:0, y:i);
       let cells = frame.cells_at(pos, 10);
@@ -513,11 +513,11 @@ mod tests {
           .join("")
       })
       .collect::<Vec<_>>();
-    // info!(
-    //   "1-raw_symbols_of_cells:{:?}, actual:{:?}",
-    //   frame.raw_symbols_of_cells(),
-    //   actual
-    // );
+    info!(
+      "2-raw_symbols_of_cells:{:?}, actual:{:?}",
+      frame.raw_symbols_of_cells(),
+      actual
+    );
     assert_eq!(expects.len(), actual.len());
     for (i, expect) in expects.iter().enumerate() {
       let a = actual[i].clone();
