@@ -453,15 +453,36 @@ mod tests {
     let mut canvas = Canvas::new(canvas_size);
 
     window_content._draw_from_start_line(&mut canvas, 0, 0, 10);
-    info!("frame after draw:");
-    info!(
-      "{:?}",
-      canvas
-        .frame()
-        .raw_symbols_with_placeholder(" ".to_compact_string())
-        .iter()
-        .map(|cs| cs.join(""))
-        .collect::<Vec<_>>()
-    );
+    let actual = canvas
+      .frame()
+      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{:?}", actual);
+    let expect = buffer
+      .read()
+      .rope()
+      .lines()
+      .take(10)
+      .map(|l| l.as_str().unwrap().chars().take(10).collect::<String>())
+      .collect::<Vec<_>>();
+    info!("expect:{:?}", expect);
+    assert_eq!(actual.len(), 10);
+    assert!(expect.len() <= 10);
+    for (i, a) in actual.into_iter().enumerate() {
+      assert!(a.len() == 10);
+      if i < expect.len() {
+        let e = expect[i].clone();
+        info!("{:?} a:{:?}, e:{:?}", i, a, e);
+        assert!(a.len() == e.len() || e.is_empty());
+        if a.len() == e.len() {
+          assert_eq!(a, e);
+        }
+      } else {
+        info!("{:?} a:{:?}, e:empty", i, a);
+        assert_eq!(a, [" "; 10].join(""));
+      }
+    }
   }
 }
