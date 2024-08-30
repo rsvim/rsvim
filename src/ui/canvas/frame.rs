@@ -164,6 +164,10 @@ impl Frame {
   }
 
   /// Get a range of continuously cells, start from a position and last for N elements.
+  ///
+  /// # Panics
+  ///
+  /// If the range is outside of frame shape.
   pub fn cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
     let range = self.pos2range(pos, n);
     &self.cells[range]
@@ -384,6 +388,104 @@ mod tests {
       assert_eq!(actual.fg(), Color::Reset);
       assert_eq!(actual.bg(), Color::Reset);
       assert_eq!(actual.attrs(), Attributes::default());
+    }
+  }
+
+  #[test]
+  fn set_empty_cell1() {
+    INIT.call_once(test_log_init);
+    let frame_size = U16Size::new(10, 10);
+    let mut frame = Frame::new(frame_size, Cursor::default());
+
+    let inputs: Vec<(U16Pos, char)> = vec![
+      (point!(x: 0, y: 0), 'A'),
+      (point!(x: 7, y: 8), 'B'),
+      (point!(x: 1, y: 3), 'C'),
+      (point!(x: 9, y: 2), 'D'),
+      (point!(x: 9, y: 9), 'E'),
+      (point!(x: 2, y: 9), 'F'),
+      (point!(x: 9, y: 7), 'G'),
+    ];
+
+    for (i, input) in inputs.iter().enumerate() {
+      let mut c = Cell::default();
+      c.set_symbol(input.1.to_compact_string());
+      let actual = frame.set_cell(input.0, c);
+      info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
+      assert_eq!(actual.symbol(), CompactString::new(""));
+      assert_eq!(actual.fg(), Color::Reset);
+      assert_eq!(actual.bg(), Color::Reset);
+      assert_eq!(actual.attrs(), Attributes::default());
+    }
+    for (i, input) in inputs.iter().enumerate() {
+      let actual = frame.cell(input.0);
+      info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
+      assert_eq!(actual.symbol(), input.1.to_compact_string());
+      assert_eq!(actual.fg(), Color::Reset);
+      assert_eq!(actual.bg(), Color::Reset);
+      assert_eq!(actual.attrs(), Attributes::default());
+    }
+    for (i, input) in inputs.iter().enumerate() {
+      let mut c = Cell::default();
+      c.set_symbol(input.1.to_compact_string());
+      let actual = frame.set_empty_cell(input.0);
+      info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
+      assert_eq!(actual.symbol(), input.1.to_compact_string());
+    }
+    for (i, input) in inputs.iter().enumerate() {
+      let actual = frame.cell(input.0);
+      info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
+      assert_eq!(actual.symbol(), CompactString::new(""));
+    }
+  }
+
+  #[test]
+  fn cells_at1() {
+    INIT.call_once(test_log_init);
+    let frame_size = U16Size::new(10, 10);
+    let mut frame = Frame::new(frame_size, Cursor::default());
+
+    let inputs: Vec<(U16Pos, char)> = vec![
+      (point!(x: 0, y: 0), 'A'),
+      (point!(x: 7, y: 8), 'B'),
+      (point!(x: 1, y: 3), 'C'),
+      (point!(x: 9, y: 2), 'D'),
+      (point!(x: 9, y: 9), 'E'),
+      (point!(x: 2, y: 9), 'F'),
+      (point!(x: 9, y: 7), 'G'),
+    ];
+    let expects = [
+      "A         ",
+      "      B   ",
+      " C        ",
+      "         D",
+      "         E",
+      "  F       ",
+      "         G",
+    ];
+
+    for (i, input) in inputs.iter().enumerate() {
+      let mut c = Cell::default();
+      c.set_symbol(input.1.to_compact_string());
+      let actual = frame.set_cell(input.0, c);
+      info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
+      assert_eq!(actual.symbol(), CompactString::new(""));
+    }
+    for i in 0..10 {
+      let cells = frame.cells_at(point!(x:0, y:i), 10);
+      let actual = cells
+        .iter()
+        .map(|c| {
+          if c.symbol().is_empty() {
+            " ".to_string()
+          } else {
+            c.symbol().to_string()
+          }
+        })
+        .collect::<Vec<_>>()
+        .join("");
+      let expect = expects[i as usize];
+      assert_eq!(actual, expect);
     }
   }
 
