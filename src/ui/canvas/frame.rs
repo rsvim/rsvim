@@ -478,6 +478,7 @@ mod tests {
       assert_eq!(actual.symbol(), CompactString::new(""));
     }
     info!("1-raw_symbols_of_cells:{:?}", frame.raw_symbols_of_cells(),);
+    let all_cells = frame.cells();
     for i in 0..10 {
       let pos: U16Pos = point!(x:0, y:i);
       let cells = frame.cells_at(pos, 10);
@@ -494,6 +495,21 @@ mod tests {
         .join("");
       let expect = expects[i as usize];
       info!("{i:?} pos:{pos:?}, cells:{cells:?}, actual:{actual:?}, expect:{expect:?}");
+      assert_eq!(actual, expect);
+
+      let idx = frame.pos2idx(pos);
+      let cells = &all_cells[idx..(idx + 10)];
+      let actual = cells
+        .iter()
+        .map(|c| {
+          if c.symbol().is_empty() {
+            " ".to_string()
+          } else {
+            c.symbol().to_string()
+          }
+        })
+        .collect::<Vec<_>>()
+        .join("");
       assert_eq!(actual, expect);
     }
 
@@ -522,6 +538,63 @@ mod tests {
     for (i, expect) in expects.iter().enumerate() {
       let a = actual[i].clone();
       assert_eq!(a, expect.to_string());
+    }
+  }
+
+  #[test]
+  fn set_cells_at1() {
+    INIT.call_once(test_log_init);
+    let frame_size = U16Size::new(10, 10);
+    let mut frame = Frame::new(frame_size, Cursor::default());
+
+    let inputs: Vec<(U16Pos, &str)> = vec![
+      (point!(x: 0, y: 0), "ABCD"),
+      (point!(x: 7, y: 1), "EFGHIJK"),
+      (point!(x: 1, y: 2), "LMN"),
+      (point!(x: 6, y: 3), "OP"),
+      (point!(x: 5, y: 4), "Q"),
+      (point!(x: 4, y: 5), ""),
+      (point!(x: 2, y: 6), "RSTUV"),
+      (point!(x: 0, y: 7), "'WXYZ"),
+      (point!(x: 9, y: 8), "abcdefghijk"),
+      (point!(x: 3, y: 9), "opqrstu"),
+    ];
+
+    let expects = [
+      "ABCD      ",
+      "       EFG",
+      "HLMN      ",
+      "      OP  ",
+      "     Q    ",
+      "          ",
+      "  RSTUV   ",
+      "'WXYZ     ",
+      "         a",
+      "bcdopqrstu",
+    ];
+
+    for (i, input) in inputs.iter().enumerate() {
+      let actual = frame.set_cells_at(
+        input.0,
+        input.1.chars().map(|c| Cell::with_char(c)).collect(),
+      );
+      let expect = expects[i];
+      info!(
+        "{:?} input:{:?}, actual:{:?}, expect:{:?}",
+        i, input, actual, expect
+      );
+      assert_eq!(
+        actual
+          .iter()
+          .map(|c| if c.symbol().is_empty() {
+            "".to_string()
+          } else {
+            c.symbol().to_string()
+          })
+          .collect::<Vec<_>>()
+          .join(""),
+        expect
+      );
     }
   }
 

@@ -107,6 +107,24 @@ impl Cell {
       attrs: Attributes::default(),
     }
   }
+
+  pub fn with_char(c: char) -> Self {
+    Cell {
+      symbol: c.to_compact_string(),
+      fg: Color::Reset,
+      bg: Color::Reset,
+      attrs: Attributes::default(),
+    }
+  }
+
+  pub fn with_symbol(s: CompactString) -> Self {
+    Cell {
+      symbol: s,
+      fg: Color::Reset,
+      bg: Color::Reset,
+      attrs: Attributes::default(),
+    }
+  }
 }
 
 impl From<char> for Cell {
