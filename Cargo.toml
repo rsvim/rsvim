@@ -33,7 +33,6 @@ time = { version = "0.3.36", features = [
   "macros",
   "formatting",
   "parsing",
-  "locale-offset",
   "serde",
   "serde-human-readable",
   "rand",
