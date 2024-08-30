@@ -447,21 +447,27 @@ mod tests {
 
     let inputs: Vec<(U16Pos, char)> = vec![
       (point!(x: 0, y: 0), 'A'),
-      (point!(x: 7, y: 8), 'B'),
-      (point!(x: 1, y: 3), 'C'),
-      (point!(x: 9, y: 2), 'D'),
-      (point!(x: 9, y: 9), 'E'),
-      (point!(x: 2, y: 9), 'F'),
-      (point!(x: 9, y: 7), 'G'),
+      (point!(x: 7, y: 1), 'B'),
+      (point!(x: 1, y: 2), 'C'),
+      (point!(x: 6, y: 3), 'D'),
+      (point!(x: 5, y: 4), 'E'),
+      (point!(x: 4, y: 5), 'F'),
+      (point!(x: 2, y: 6), 'G'),
+      (point!(x: 0, y: 7), 'H'),
+      (point!(x: 9, y: 8), 'I'),
+      (point!(x: 3, y: 9), 'J'),
     ];
     let expects = [
       "A         ",
-      "      B   ",
+      "       B  ",
       " C        ",
-      "         D",
-      "         E",
-      "  F       ",
-      "         G",
+      "      D   ",
+      "     E    ",
+      "    F     ",
+      "  G       ",
+      "H         ",
+      "         I",
+      "   J      ",
     ];
 
     for (i, input) in inputs.iter().enumerate() {
@@ -472,7 +478,8 @@ mod tests {
       assert_eq!(actual.symbol(), CompactString::new(""));
     }
     for i in 0..10 {
-      let cells = frame.cells_at(point!(x:0, y:i), 10);
+      let pos: U16Pos = point!(x:0, y:i);
+      let cells = frame.cells_at(pos, 10);
       let actual = cells
         .iter()
         .map(|c| {
@@ -485,6 +492,7 @@ mod tests {
         .collect::<Vec<_>>()
         .join("");
       let expect = expects[i as usize];
+      info!("{i:?} pos:{pos:?}, cells:{cells:?}, actual:{actual:?}, expect:{expect:?}");
       assert_eq!(actual, expect);
     }
   }
