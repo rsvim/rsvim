@@ -579,7 +579,7 @@ mod tests {
       assert!(actual.len() == input.1.len());
       assert!(actual
         .iter()
-        .filter(|c| !c.symbol().is_empty())
+        .filter(|c| c.symbol().is_empty())
         .collect::<Vec<_>>()
         .is_empty());
     }
