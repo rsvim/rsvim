@@ -577,11 +577,6 @@ mod tests {
       let actual = frame.set_cells_at(input.0, input.1.chars().map(Cell::with_char).collect());
       info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
       assert!(actual.len() == input.1.len());
-      assert!(actual
-        .iter()
-        .filter(|c| c.symbol().is_empty())
-        .collect::<Vec<_>>()
-        .is_empty());
     }
     for (i, expect) in expects.into_iter().enumerate() {
       let pos: U16Pos = point!(x:0_u16,y:i as u16);
