@@ -181,7 +181,7 @@ impl Frame {
     for row in 0..self.size.height() {
       let mut row_symbols: Vec<CompactString> = Vec::with_capacity(self.size.width() as usize);
       for col in 0..self.size.width() {
-        let idx = (row * col) as usize;
+        let idx = self.xy2idx(col as usize, row as usize);
         row_symbols.push(self.cells[idx].symbol().clone());
       }
       raw_symbols.push(row_symbols);
