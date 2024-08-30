@@ -404,6 +404,7 @@ impl Widgetable for WindowContent {
 
 #[cfg(test)]
 mod tests {
+  use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
   use std::fs::File;
   use std::io::{BufReader, BufWriter};
@@ -453,6 +454,14 @@ mod tests {
 
     window_content._draw_from_start_line(&mut canvas, 0, 0, 10);
     info!("frame after draw:");
-    info!("{:?}", canvas.frame().raw_symbols());
+    info!(
+      "{:?}",
+      canvas
+        .frame()
+        .raw_symbols_with_placeholder(" ".to_compact_string())
+        .iter()
+        .map(|cs| cs.join(""))
+        .collect::<Vec<_>>()
+    );
   }
 }
