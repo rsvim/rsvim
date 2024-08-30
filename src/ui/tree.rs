@@ -2,20 +2,112 @@
 
 #![allow(dead_code)]
 
-use parking_lot::Mutex;
+use parking_lot::RwLock;
+use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 use std::time::Duration;
 use tracing::debug;
 
-use crate::cart::{IRect, U16Size};
+use crate::cart::{IRect, U16Rect, U16Size};
 use crate::glovar;
-use crate::ui::canvas::CanvasArc;
-use crate::ui::tree::internal::inode::{Inode, InodeId};
-use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
-use crate::ui::widget::RootContainer;
-use crate::ui::widget::{Widget, WidgetValue};
+use crate::ui::canvas::{Canvas, CanvasArc};
+use crate::ui::tree::internal::{InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut};
+use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
 pub mod internal;
+
+#[derive(Debug, Clone)]
+/// The value holder for each widget.
+pub enum TreeNode {
+  RootContainer(RootContainer),
+  Window(Window),
+  Cursor(Cursor),
+}
+
+macro_rules! tree_node_generate_dispatch {
+  ($self_name:ident,$method_name:ident) => {
+    match $self_name {
+      TreeNode::RootContainer(n) => n.$method_name(),
+      TreeNode::Window(n) => n.$method_name(),
+      TreeNode::Cursor(n) => n.$method_name(),
+    }
+  };
+}
+
+impl TreeNode {
+  pub fn id(&self) -> TreeNodeId {
+    match self {
+      TreeNode::RootContainer(n) => n.id(),
+      TreeNode::Window(n) => n.id(),
+      TreeNode::Cursor(n) => n.id(),
+    }
+  }
+}
+
+impl Inodeable for TreeNode {
+  fn id(&self) -> InodeId {
+    tree_node_generate_dispatch!(self, id)
+  }
+
+  fn depth(&self) -> &usize {
+    tree_node_generate_dispatch!(self, depth)
+  }
+
+  fn depth_mut(&mut self) -> &mut usize {
+    tree_node_generate_dispatch!(self, depth_mut)
+  }
+
+  fn zindex(&self) -> &usize {
+    tree_node_generate_dispatch!(self, zindex)
+  }
+
+  fn zindex_mut(&mut self) -> &mut usize {
+    tree_node_generate_dispatch!(self, zindex_mut)
+  }
+
+  fn shape(&self) -> &IRect {
+    tree_node_generate_dispatch!(self, shape)
+  }
+
+  fn shape_mut(&mut self) -> &mut IRect {
+    tree_node_generate_dispatch!(self, shape_mut)
+  }
+
+  fn actual_shape(&self) -> &U16Rect {
+    tree_node_generate_dispatch!(self, actual_shape)
+  }
+
+  fn actual_shape_mut(&mut self) -> &mut U16Rect {
+    tree_node_generate_dispatch!(self, actual_shape_mut)
+  }
+
+  fn enabled(&self) -> &bool {
+    tree_node_generate_dispatch!(self, enabled)
+  }
+
+  fn enabled_mut(&mut self) -> &mut bool {
+    tree_node_generate_dispatch!(self, enabled_mut)
+  }
+
+  fn visible(&self) -> &bool {
+    tree_node_generate_dispatch!(self, visible)
+  }
+
+  fn visible_mut(&mut self) -> &mut bool {
+    tree_node_generate_dispatch!(self, visible_mut)
+  }
+}
+
+impl Widgetable for TreeNode {
+  /// Draw widget on the canvas.
+  fn draw(&mut self, canvas: &mut Canvas) {
+    match self {
+      TreeNode::RootContainer(w) => w.draw(canvas),
+      TreeNode::Window(w) => w.draw(canvas),
+      TreeNode::Cursor(w) => w.draw(canvas),
+    }
+  }
+}
 
 #[derive(Debug, Clone)]
 /// The widget tree.
@@ -113,20 +205,28 @@ pub mod internal;
 ///
 pub struct Tree {
   // Internal implementation.
-  base: Itree<WidgetValue>,
+  base: Itree<TreeNode>,
+
+  // Cursor and window state {
+
+  // [`cursor`](crate::ui::widget::cursor::Cursor) node ID.
+  cursor_id: Option<TreeNodeId>,
+
+  // All [`Window`](crate::ui::widget::Window) node IDs.
+  windows_ids: BTreeSet<TreeNodeId>,
+  // Cursor and window state }
 }
 
-pub type TreeArc = Arc<Mutex<Tree>>;
-pub type TreeWk = Weak<Mutex<Tree>>;
-pub type TreeNode = Inode<WidgetValue>;
+pub type TreeArc = Arc<RwLock<Tree>>;
+pub type TreeWk = Weak<RwLock<Tree>>;
 pub type TreeNodeId = InodeId;
-pub type TreeIter<'a> = ItreeIter<'a, WidgetValue>;
-pub type TreeIterMut<'a> = ItreeIterMut<'a, WidgetValue>;
+pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
+pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
 impl Tree {
   /// Make a widget tree.
   ///
-  /// Note: The root node is created along with the tree.
+  /// NOTE: The root node is created along with the tree.
   pub fn new(terminal_size: U16Size) -> Self {
     let shape = IRect::new(
       (0, 0),
@@ -135,16 +235,18 @@ impl Tree {
         terminal_size.height() as isize,
       ),
     );
-    let root_container = RootContainer::new();
-    let root_node = TreeNode::new(WidgetValue::RootContainer(root_container), shape);
+    let root_container = RootContainer::new(shape);
+    let root_node = TreeNode::RootContainer(root_container);
     Tree {
       base: Itree::new(root_node),
+      cursor_id: None,
+      windows_ids: BTreeSet::new(),
     }
   }
 
-  /// Convert `Tree` struct to `Arc<Mutex<_>>` pointer.
+  /// Convert `Tree` struct to `Arc<RwLock<_>>` pointer.
   pub fn to_arc(tree: Tree) -> TreeArc {
-    Arc::new(Mutex::new(tree))
+    Arc::new(RwLock::new(tree))
   }
 
   /// Nodes count, include the root node.
@@ -199,8 +301,25 @@ impl Tree {
     self.base.iter_mut()
   }
 
+  fn insert_widget_ids(&mut self, node: &TreeNode) {
+    match node {
+      TreeNode::Cursor(n) => {
+        self.cursor_id = Some(n.id());
+      }
+      TreeNode::Window(n) => {
+        self.windows_ids.insert(n.id());
+      }
+      _ => { /* Skip */ }
+    }
+  }
+
+  fn remove_window_widget_ids(&mut self, id: &TreeNodeId) {
+    self.windows_ids.remove(id);
+  }
+
   /// See [`Itree::insert`].
   pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
+    self.insert_widget_ids(&child_node);
     self.base.insert(parent_id, child_node)
   }
 
@@ -210,11 +329,13 @@ impl Tree {
     parent_id: &TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
+    self.insert_widget_ids(&child_node);
     self.base.bounded_insert(parent_id, child_node)
   }
 
   /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
+    self.remove_window_widget_ids(&id);
     self.base.remove(id)
   }
 
@@ -261,17 +382,45 @@ impl Tree {
 
   // Node }
 
+  // Cursor and Window {
+
+  /// Get current cursor node ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
+
+  /// Set current cursor node ID.
+  pub fn set_cursor_id(&mut self, cursor_id: Option<TreeNodeId>) {
+    self.cursor_id = cursor_id;
+  }
+
+  /// Get current window node ID. A window is current because the cursor is inside it.
+  pub fn current_window_id(&self) -> Option<TreeNodeId> {
+    if let Some(cursor_id) = self.cursor_id {
+      let mut id = cursor_id;
+      while let Some(parent_id) = self.parent_id(&id) {
+        if let Some(TreeNode::Window(_w)) = self.node(parent_id) {
+          return Some(*parent_id);
+        }
+        id = *parent_id;
+      }
+    }
+
+    None
+  }
+
+  // Cursor and Window }
+
   // Draw {
 
   /// Draw the widget tree to canvas.
   pub fn draw(&mut self, canvas: CanvasArc) {
     let mut canvas = canvas
-      .try_lock_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap();
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
-      let actual_shape = *node.actual_shape();
-      node.value_mut().draw(actual_shape, &mut canvas);
+      node.draw(&mut canvas);
     }
   }
 

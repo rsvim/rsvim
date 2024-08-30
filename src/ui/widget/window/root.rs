@@ -1,4 +1,4 @@
-//! Root container is the root node in the widget tree.
+//! Window root container.
 
 use crate::cart::{IRect, U16Rect};
 use crate::inode_generate_impl;
@@ -6,19 +6,19 @@ use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::Widgetable;
 
 #[derive(Debug, Clone, Copy)]
-/// Root container.
-pub struct RootContainer {
+/// Window root container.
+pub struct WindowRootContainer {
   base: InodeBase,
 }
 
-impl RootContainer {
+impl WindowRootContainer {
   pub fn new(shape: IRect) -> Self {
-    RootContainer {
+    WindowRootContainer {
       base: InodeBase::new(shape),
     }
   }
 }
 
-inode_generate_impl!(RootContainer, base);
+inode_generate_impl!(WindowRootContainer, base);
 
-impl Widgetable for RootContainer {}
+impl Widgetable for WindowRootContainer {}

@@ -1,8 +1,9 @@
-//! Cursor on a terminal frame.
+//! Cursor of canvas frame.
 
 use crate::cart::U16Pos;
 use geo::point;
-use std::{cmp, fmt, hash};
+use std::cmp::{Eq, PartialEq};
+use std::fmt;
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
@@ -36,16 +37,16 @@ pub fn cursor_style_eq(a: &CursorStyle, b: &CursorStyle) -> bool {
 #[derive(Copy, Clone)]
 /// Terminal cursor.
 pub struct Cursor {
-  pub pos: U16Pos,
-  pub blinking: bool,
-  pub hidden: bool,
-  pub style: CursorStyle,
+  pos: U16Pos,
+  blinking: bool,
+  hidden: bool,
+  style: CursorStyle,
 }
 
 /// The [`CursorStyle`] formatter that helps implement the `Debug`/`Display` trait.
 ///
-/// Note: The [`SetCursorStyle`](crossterm::cursor::SetCursorStyle) doesn't implement the
-/// `Debug`/`Display` traitn before 0.28.1.
+/// NOTE: The [`SetCursorStyle`](crossterm::cursor::SetCursorStyle) doesn't implement the
+/// `Debug`/`Display` trait before 0.28.1.
 pub struct CursorStyleFormatter {
   value: CursorStyle,
 }
@@ -58,7 +59,15 @@ impl From<CursorStyle> for CursorStyleFormatter {
 
 impl fmt::Debug for CursorStyleFormatter {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    write!(f, "{}", self.value)
+    match self.value {
+      CursorStyle::DefaultUserShape => write!(f, "CursorStyle::DefaultUserShape"),
+      CursorStyle::BlinkingBlock => write!(f, "CursorStyle::BlinkingBlock"),
+      CursorStyle::SteadyBlock => write!(f, "CursorStyle::SteadyBlock"),
+      CursorStyle::BlinkingUnderScore => write!(f, "CursorStyle::BlinkingUnderScore"),
+      CursorStyle::SteadyUnderScore => write!(f, "CursorStyle::SteadyUnderScore"),
+      CursorStyle::BlinkingBar => write!(f, "CursorStyle::BlinkingBar"),
+      CursorStyle::SteadyBar => write!(f, "CursorStyle::SteadyBar"),
+    }
   }
 }
 
@@ -72,14 +81,54 @@ impl Cursor {
       style,
     }
   }
+
+  /// Get position.
+  pub fn pos(&self) -> &U16Pos {
+    &self.pos
+  }
+
+  /// Set position.
+  pub fn set_pos(&mut self, pos: U16Pos) {
+    self.pos = pos;
+  }
+
+  /// Get blinking.
+  pub fn blinking(&self) -> bool {
+    self.blinking
+  }
+
+  /// Set blinking.
+  pub fn set_blinking(&mut self, blinking: bool) {
+    self.blinking = blinking;
+  }
+
+  /// Get hidden.
+  pub fn hidden(&self) -> bool {
+    self.hidden
+  }
+
+  /// Set hidden.
+  pub fn set_hidden(&mut self, hidden: bool) {
+    self.hidden = hidden;
+  }
+
+  /// Get style.
+  pub fn style(&self) -> CursorStyle {
+    self.style
+  }
+
+  /// Set style.
+  pub fn set_style(&mut self, style: CursorStyle) {
+    self.style = style;
+  }
 }
 
 impl Default for Cursor {
-  /// Make default terminal cursor.
+  /// Make default cursor.
   fn default() -> Self {
     Cursor {
       pos: point! {x:0_u16, y:0_u16},
-      blinking: false,
+      blinking: true,
       hidden: false,
       style: CursorStyle::DefaultUserShape,
     }
@@ -98,7 +147,7 @@ impl fmt::Debug for Cursor {
   }
 }
 
-impl cmp::PartialEq for Cursor {
+impl PartialEq for Cursor {
   /// Whether two cursors equals to each other.
   fn eq(&self, other: &Self) -> bool {
     self.pos == other.pos
@@ -108,18 +157,19 @@ impl cmp::PartialEq for Cursor {
   }
 }
 
-impl cmp::Eq for Cursor {}
-
-impl hash::Hash for Cursor {
-  /// Make hash for cursor.
-  fn hash<H: hash::Hasher>(&self, state: &mut H) {
-    self.pos.hash(state);
-  }
-}
+impl Eq for Cursor {}
 
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn default1() {
+    let c = Cursor::default();
+    assert!(c.blinking);
+    assert!(!c.hidden);
+    assert!(cursor_style_eq(&c.style(), &CursorStyle::DefaultUserShape));
+  }
 
   #[test]
   fn cursor_style_equals1() {
@@ -132,5 +182,34 @@ mod tests {
     let cs3 = CursorStyle::DefaultUserShape;
     assert!(!cursor_style_eq(&cs1, &cs2));
     assert!(cursor_style_eq(&cs1, &cs3));
+  }
+
+  #[test]
+  fn debug1() {
+    let cursors = [
+      Cursor::default(),
+      Cursor::new(
+        point!(x: 0_u16, y: 10_u16),
+        false,
+        true,
+        CursorStyle::SteadyUnderScore,
+      ),
+      Cursor::new(
+        point!(x: 7_u16, y: 3_u16),
+        true,
+        false,
+        CursorStyle::BlinkingBar,
+      ),
+    ];
+    let expects = [
+        "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: true, hidden: false, style: CursorStyle::DefaultUserShape }",
+        "Cursor { pos: Point(Coord { x: 0, y: 10 }), blinking: false, hidden: true, style: CursorStyle::SteadyUnderScore }",
+        "Cursor { pos: Point(Coord { x: 7, y: 3 }), blinking: true, hidden: false, style: CursorStyle::BlinkingBar }"
+    ];
+    for (i, c) in cursors.iter().enumerate() {
+      let actual = format!("{:?}", c);
+      let expect = expects[i];
+      assert_eq!(expect, actual);
+    }
   }
 }

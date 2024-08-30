@@ -3,24 +3,25 @@
 use std::fmt::Debug;
 use tracing::debug;
 
-use crate::cart::{U16Pos, U16Rect};
-use crate::ui::canvas::{frame, Canvas, CursorStyle, CursorStyleFormatter};
-use crate::ui::widget::{Widget, WidgetId};
-use crate::uuid;
+use crate::cart::{IRect, U16Pos, U16Rect};
+use crate::inode_generate_impl;
+use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
+use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
+use crate::ui::widget::Widgetable;
 
 #[derive(Clone, Copy)]
 /// Cursor widget.
 pub struct Cursor {
-  id: WidgetId,
+  base: InodeBase,
   blinking: bool,
   hidden: bool,
   style: CursorStyle,
 }
 
 impl Cursor {
-  pub fn new() -> Self {
+  pub fn new(shape: IRect) -> Self {
     Cursor {
-      id: uuid::next(),
+      base: InodeBase::new(shape),
       blinking: true,
       hidden: false,
       style: CursorStyle::DefaultUserShape,
@@ -28,17 +29,11 @@ impl Cursor {
   }
 }
 
-impl Default for Cursor {
-  fn default() -> Self {
-    Cursor::new()
-  }
-}
-
 impl Debug for Cursor {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     let style_formatter = CursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
-      .field("id", &self.id)
+      .field("id", &self.base.id())
       .field("blinking", &self.blinking)
       .field("hidden", &self.hidden)
       .field("style", &style_formatter)
@@ -46,19 +41,18 @@ impl Debug for Cursor {
   }
 }
 
-impl Widget for Cursor {
-  fn id(&self) -> WidgetId {
-    self.id
-  }
+inode_generate_impl!(Cursor, base);
 
-  fn draw(&mut self, actual_shape: U16Rect, canvas: &mut Canvas) {
+impl Widgetable for Cursor {
+  fn draw(&mut self, canvas: &mut Canvas) {
+    let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();
     debug!(
       "draw, actual shape:{:?}, top-left pos:{:?}",
       actual_shape, pos
     );
 
-    canvas.frame_mut().set_cursor(frame::Cursor::new(
+    canvas.frame_mut().set_cursor(canvas::Cursor::new(
       pos,
       self.blinking,
       self.hidden,

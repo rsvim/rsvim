@@ -1,19 +1,20 @@
-//! Logical canvas for terminal rendering.
+//! Canvas.
 
 use crossterm;
-use parking_lot::Mutex;
+use parking_lot::RwLock;
 use std::fmt;
 use std::fmt::Debug;
 use std::slice::Iter;
 use std::sync::Arc;
 
-use crate::cart::U16Size;
-use crate::ui::canvas::frame::cursor::cursor_style_eq;
+use crate::cart::{U16Pos, U16Size};
 
 // Re-export
-pub use crate::ui::canvas::frame::{
-  Cell, Cursor, CursorStyle, CursorStyleFormatter, Frame, FrameCellsRange,
+pub use crate::ui::canvas::frame::cell::Cell;
+pub use crate::ui::canvas::frame::cursor::{
+  cursor_style_eq, Cursor, CursorStyle, CursorStyleFormatter,
 };
+pub use crate::ui::canvas::frame::Frame;
 
 pub mod frame;
 
@@ -23,12 +24,14 @@ pub mod frame;
 /// It manages both the current frame and the last frame as a screenshot, and internally uses a
 /// diff-algorithm to compare the TUI changes, thus only flushing the changed parts to reduce IO
 /// operations.
+///
+/// NOTE: APIs named without `prev_` are current frame, with `prev_` are for previous frame.
 pub struct Canvas {
   frame: Frame,
   prev_frame: Frame,
 }
 
-pub type CanvasArc = Arc<Mutex<Canvas>>;
+pub type CanvasArc = Arc<RwLock<Canvas>>;
 
 impl Canvas {
   /// Make new canvas with terminal actual size.
@@ -41,7 +44,7 @@ impl Canvas {
 
   /// Convert struct into smart pointer.
   pub fn to_arc(t: Canvas) -> CanvasArc {
-    Arc::new(Mutex::new(t))
+    Arc::new(RwLock::new(t))
   }
 
   // Current frame {
@@ -56,34 +59,18 @@ impl Canvas {
     &mut self.frame
   }
 
-  /// Get current frame size.
   pub fn size(&self) -> U16Size {
-    self.frame.size
-  }
-
-  /// Set current frame size.
-  pub fn set_size(&mut self, size: U16Size) {
-    self.frame.size = size;
+    self.frame.size()
   }
 
   /// Get current frame cells.
   pub fn cells(&self) -> &Vec<Cell> {
-    &self.frame.cells
-  }
-
-  /// Get mutable current frame cells.
-  pub fn cells_mut(&mut self) -> &mut Vec<Cell> {
-    &mut self.frame.cells
+    self.frame.cells()
   }
 
   /// Get current frame cursor.
   pub fn cursor(&self) -> &Cursor {
-    &self.frame.cursor
-  }
-
-  /// Get mutable current frame cursor.
-  pub fn cursor_mut(&mut self) -> &mut Cursor {
-    &mut self.frame.cursor
+    self.frame.cursor()
   }
 
   // Current frame }
@@ -95,19 +82,23 @@ impl Canvas {
     &self.prev_frame
   }
 
-  /// Get previous frame size.
   pub fn prev_size(&self) -> U16Size {
-    self.prev_frame.size
+    self.prev_frame.size()
   }
 
   /// Get previous frame cells.
   pub fn prev_cells(&self) -> &Vec<Cell> {
-    &self.prev_frame.cells
+    self.prev_frame.cells()
+  }
+
+  /// Get previous frame cells at specific range.
+  pub fn prev_cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
+    self.prev_frame.cells_at(pos, n)
   }
 
   /// Get previous frame cursor.
   pub fn prev_cursor(&self) -> &Cursor {
-    &self.prev_frame.cursor
+    self.prev_frame.cursor()
   }
 
   // Previous frame }
@@ -118,31 +109,35 @@ impl Canvas {
     let mut shader = Shader::new();
 
     // For cursor.
-    if self.frame.dirty_cursor {
-      let cursor = self.frame.cursor;
-      let prev_cursor = self.prev_frame.cursor;
+    if self.frame.dirty_cursor() {
+      let cursor = self.frame.cursor();
+      let prev_cursor = self.prev_frame.cursor();
 
-      if cursor.blinking != prev_cursor.blinking {
-        shader.push(if cursor.blinking {
-          ShaderCommand::CursorEnableBlinking(crossterm::cursor::EnableBlinking)
+      if cursor.blinking() != prev_cursor.blinking() {
+        if cursor.blinking() {
+          shader.push(ShaderCommand::CursorEnableBlinking(
+            crossterm::cursor::EnableBlinking,
+          ));
         } else {
-          ShaderCommand::CursorDisableBlinking(crossterm::cursor::DisableBlinking)
-        });
+          shader.push(ShaderCommand::CursorDisableBlinking(
+            crossterm::cursor::DisableBlinking,
+          ));
+        }
       }
-      if cursor.hidden != prev_cursor.hidden {
-        shader.push(if cursor.hidden {
-          ShaderCommand::CursorHide(crossterm::cursor::Hide)
+      if cursor.hidden() != prev_cursor.hidden() {
+        if cursor.hidden() {
+          shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
         } else {
-          ShaderCommand::CursorShow(crossterm::cursor::Show)
-        });
+          shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
+        }
       }
-      if !cursor_style_eq(&cursor.style, &prev_cursor.style) {
-        shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style));
+      if !cursor_style_eq(&cursor.style(), &prev_cursor.style()) {
+        shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
-      if cursor.pos != prev_cursor.pos {
+      if cursor.pos() != prev_cursor.pos() {
         shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
-          cursor.pos.x(),
-          cursor.pos.y(),
+          cursor.pos().x(),
+          cursor.pos().y(),
         )));
       }
     }
@@ -295,8 +290,8 @@ mod tests {
   #[test]
   fn new1() {
     let t = Canvas::new(U16Size::new(3, 4));
-    assert_eq!(t.frame().size, t.prev_frame().size);
-    assert_eq!(t.frame().cursor, t.prev_frame().cursor);
+    assert_eq!(t.frame().size(), t.prev_frame().size());
+    assert_eq!(*t.frame().cursor(), *t.prev_frame().cursor());
   }
 
   #[test]

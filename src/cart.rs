@@ -6,11 +6,11 @@
 //! The 2-dimensional coordinate system in mathematics usually look like:
 //!
 //! ```text
-//!                  y
+//!                  Y
 //!                  |
 //!                (0,1)
 //!                  |
-//!  x ----(-1,0)--(0,0)--(1,0)-----
+//!  X-----(-1,0)--(0,0)--(1,0)-----
 //!                  |
 //!                (0,-1)
 //!                  |
@@ -25,19 +25,18 @@
 //! Thus we need to flip the coordinate system upside down:
 //!
 //! ```text
-//!                  y
-//!                  |
-//!                (0,-1)
-//!                  |
-//!  x ----(-1,0)--(0,0)--(1,0)-----------(width,0)
-//!                  |                         |
-//!                (0,1)     terminal     (width,1)
-//!                  |                         |
-//!                  |                         |
-//!                (0,height)-------------(width,height)
+//!
+//!   (0,0)------------------(width,0)--------Y
+//!     |                         |
+//!     |  Terminal               |
+//!     |                         |
+//!     |                         |
+//!   (0,height)-------------(width,height)
+//!     |
+//!     X
 //! ```
 //!
-//! Note: The X-axis remains the same, the Y-axis is upside down.
+//! NOTE: The X-axis remains the same, the Y-axis is upside down.
 //!
 //! The top-left of the terminal is the `(0,0)` position, the bottom-right of the terminal is the
 //! `(width,height)` position, where the `width` and `height` is the size of the terminal.
@@ -69,21 +68,29 @@ pub type U16Rect = Rect<u16>;
 // Size {
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
+/// Rectangle size.
 pub struct Size<T: Copy> {
-  pub width: T,
-  pub height: T,
+  width: T,
+  height: T,
 }
 
 impl<T> Size<T>
 where
   T: Copy + PartialOrd + std::fmt::Debug + num_traits::Num + num_traits::NumCast,
 {
+  /// Make size from width(columns) and height(rows).
+  ///
+  /// NOTE: Width/columns is Y-axis, height/rows is X-axis.
   pub fn new(width: T, height: T) -> Self {
     Size { width, height }
   }
+
+  /// Get width(columns).
   pub fn width(&self) -> T {
     self.width
   }
+
+  /// Get height(rows).
   pub fn height(&self) -> T {
     self.height
   }

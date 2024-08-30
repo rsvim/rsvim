@@ -2,89 +2,487 @@
 
 #![allow(unused_imports, dead_code)]
 
-use compact_str::CompactString;
+use crossterm::style::{Attributes, Color};
+use geo::point;
+use ropey::RopeSlice;
+use std::collections::{BTreeSet, VecDeque};
 use std::convert::From;
+use std::time::Duration;
+use tracing::{debug, error};
 
-use crate::cart::U16Rect;
-use crate::ui::canvas::CanvasArc;
-use crate::ui::widget::{Widget, WidgetId};
+use crate::buf::{Buffer, BufferWk};
+use crate::cart::{IRect, U16Pos, U16Rect};
+use crate::glovar;
+use crate::inode_generate_impl;
+use crate::ui::canvas::{Canvas, Cell};
+use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
+use crate::ui::widget::Widgetable;
 use crate::uuid;
 
+#[derive(Debug, Copy, Clone, Default)]
+/// The view of a buffer. The range is left-open right-closed, or top-open bottom-closed, i.e.
+/// `[start_line, end_line)` or `[start_column, end_column)`.
+struct BufferView {
+  /// Start line number
+  pub start_line: Option<usize>,
+  /// End line number.
+  pub end_line: Option<usize>,
+  /// Start column.
+  pub start_column: Option<usize>,
+  /// End column.
+  pub end_column: Option<usize>,
+}
+
+impl BufferView {
+  pub fn new(
+    start_line: Option<usize>,
+    end_line: Option<usize>,
+    start_column: Option<usize>,
+    end_column: Option<usize>,
+  ) -> Self {
+    BufferView {
+      start_line,
+      end_line,
+      start_column,
+      end_column,
+    }
+  }
+}
+
 #[derive(Debug, Clone)]
-/// The VIM window content.
+/// The content of VIM window.
+///
+/// Besides buffer and window, here introduce several terms and concepts:
+///
+/// * Line: One line of text content in a buffer.
+/// * Row/column: The width/height of a window.
+/// * View: A window only shows part of a buffer when the buffer is too big to put all the text
+///   contents in the window. When a buffer shows in a window, thus the window starts and ends at
+///   specific lines and columns of the buffer.
+///
+/// There are two options related to the view:
+/// [line-wrap and word-wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap), so we have 4
+/// kinds of views.
+///
+/// * Both line-wrap and word-wrap enabled.
+/// * Line-wrap enabled and word-wrap disabled.
+/// * Line-wrap disabled and word-wrap enabled.
+/// * Both Line-wrap and word-wrap disabled.
+///
+/// For the first 3 kinds of view, when a window that has `X` rows height, it may contains less
+/// than `X` lines of a buffer. Because very long lines or words can take extra spaces and trigger
+/// line breaks. The real lines the window can contain needs a specific algorithm to calculate.
+///
+/// For the last kind of view, it contains exactly `X` lines of a buffer at most, but the lines
+/// longer than the window's width are truncated by the window's boundary.
+///
+/// A view contains 4 fields:
+///
+/// * Start line.
+/// * End line.
+/// * Start column.
+/// * End column.
+///
+/// We can always calculates the two fields based on the other two fields on the diagonal corner,
+/// with window size, buffer's text contents, and the line-wrap/word-wrap options.
 pub struct WindowContent {
-  id: WidgetId,
-  lines: Vec<CompactString>,
+  base: InodeBase,
+
+  // Buffer
+  buffer: BufferWk,
+  // Buffer view
+  view: BufferView,
+  // Modified lines in buffer view, index start from 0. This dataset dedups lines iterating on
+  // buffer view in each drawing.
+  modified_lines: BTreeSet<usize>,
+
+  // Options
   line_wrap: bool,
   word_wrap: bool,
 }
 
 impl WindowContent {
-  pub fn new() -> Self {
+  /// Make window content from buffer. The view starts from the first line.
+  pub fn new(shape: IRect, buffer: BufferWk) -> Self {
+    let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
     WindowContent {
-      id: uuid::next(),
-      lines: vec![],
+      base: InodeBase::new(shape),
+      buffer,
+      view,
+      modified_lines: (0..shape.height()).map(|l| l as usize).collect(),
       line_wrap: false,
       word_wrap: false,
     }
   }
 
-  pub fn lines(&self) -> &Vec<CompactString> {
-    &self.lines
-  }
+  // Options {
 
-  pub fn lines_mut(&mut self) -> &mut Vec<CompactString> {
-    &mut self.lines
-  }
-
-  pub fn line(&self, index: usize) -> &CompactString {
-    &self.lines[index]
-  }
-
-  pub fn line_mut(&mut self, index: usize) -> &mut CompactString {
-    &mut self.lines[index]
-  }
-
+  /// Get line-wrap option.
   pub fn line_wrap(&self) -> bool {
     self.line_wrap
   }
 
-  pub fn set_line_wrap(&mut self, line_wrap: bool) -> bool {
-    let old_value = self.line_wrap;
+  /// Set line-wrap option.
+  pub fn set_line_wrap(&mut self, line_wrap: bool) {
     self.line_wrap = line_wrap;
-    old_value
   }
 
+  /// Get word-wrap option.
   pub fn word_wrap(&self) -> bool {
     self.word_wrap
   }
 
-  pub fn set_word_wrap(&mut self, word_wrap: bool) -> bool {
-    let old_value = self.word_wrap;
+  /// Set word-wrap option.
+  pub fn set_word_wrap(&mut self, word_wrap: bool) {
     self.word_wrap = word_wrap;
-    old_value
+  }
+
+  // Options }
+
+  // Buffer/View {
+
+  /// Get buffer reference.
+  pub fn buffer(&self) -> BufferWk {
+    self.buffer.clone()
+  }
+
+  /// Set buffer reference.
+  pub fn set_buffer(&mut self, buffer: BufferWk) {
+    self.buffer = buffer;
+  }
+
+  /// Get start line, index start from 0.
+  pub fn start_line(&self) -> Option<usize> {
+    self.view.start_line
+  }
+
+  /// Set start line.
+  ///
+  /// This operation will unset the end line. Because with different line-wrap/word-wrap options,
+  /// the window may contains less lines than its height. We cannot know the end line unless
+  /// iterating over the buffer from start line.
+  pub fn set_start_line(&mut self, line: usize) {
+    self.view.start_line = Some(line);
+    self.view.end_line = None;
+  }
+
+  /// Get end line, index start from 0.
+  pub fn end_line(&self) -> Option<usize> {
+    self.view.end_line
+  }
+
+  /// Set end line.
+  ///
+  /// This operation will unset the start line. Because with different line-wrap/word-wrap options,
+  /// the window may contains less lines than the height. We cannot know the start line unless
+  /// reversely iterating over the buffer from end line.
+  pub fn set_end_line(&mut self, lend: usize) {
+    self.view.end_line = Some(lend);
+    self.view.start_line = None;
+  }
+
+  /// Get start column, index start from 0.
+  pub fn start_column(&self) -> Option<usize> {
+    self.view.start_column
+  }
+
+  /// Set start column.
+  ///
+  /// This operation also calculates the end column based on widget's width, and set it as well.
+  pub fn set_start_column(&mut self, cstart: usize) {
+    self.view.start_column = Some(cstart);
+    self.view.end_column = Some(cstart + self.base.actual_shape().width() as usize);
+  }
+
+  /// Get end column, index start from 0.
+  pub fn end_column(&self) -> Option<usize> {
+    self.view.end_column
+  }
+
+  /// Set end column.
+  ///
+  /// This operation also calculates the start column based on widget's width, and set it as well.
+  pub fn set_end_column(&mut self, cend: usize) {
+    self.view.end_column = Some(cend);
+    self.view.start_column = Some(cend - self.base.actual_shape().width() as usize);
+  }
+
+  // Buffer/View }
+
+  // Modified {
+
+  /// Get modified lines (in the view).
+  pub fn modified_lines(&self) -> &BTreeSet<usize> {
+    &self.modified_lines
+  }
+
+  /// Set all lines (in the view) to modified.
+  pub fn modify_all_lines(&mut self) {
+    self.modified_lines = (0..self.shape().height()).map(|l| l as usize).collect();
+  }
+
+  /// Clear all modified lines. This operation should be called after drawing to canvas.
+  pub fn clear_modified_lines(&mut self) {
+    self.modified_lines = BTreeSet::new();
+  }
+
+  /// Set modified line. This operation should be called after editing a line on buffer.
+  pub fn modify_line(&mut self, line: usize) -> bool {
+    self.modified_lines.insert(line)
+  }
+
+  /// Reset modified line to unmodified.
+  pub fn unmodify_line(&mut self, line_no: &usize) -> bool {
+    self.modified_lines.remove(line_no)
+  }
+
+  // Modified }
+
+  /// Draw buffer from `start_line`
+  pub fn _draw_from_start_line(
+    &mut self,
+    canvas: &mut Canvas,
+    start_line: usize,
+    _start_column: usize,
+    _end_column: usize,
+  ) {
+    let actual_shape = self.actual_shape();
+    let upos: U16Pos = actual_shape.min().into();
+    let height = actual_shape.height();
+    let width = actual_shape.width();
+    debug!(
+      "actual shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
+      actual_shape, upos, height, width
+    );
+
+    // If window is zero-sized.
+    if height == 0 || width == 0 {
+      return;
+    }
+
+    // Get buffer arc pointer
+    let buffer = self.buffer.upgrade().unwrap();
+
+    // Lock buffer for read
+    let buffer = buffer
+      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap();
+
+    match buffer.rope().get_lines_at(start_line) {
+      Some(mut buflines) => {
+        // The `start_line` is inside the buffer.
+        // Render the lines from `start_line` till the end of the buffer or the window widget.
+
+        // The first `row` (0) in the window maps to the `start_line` in the buffer.
+        let mut row = 0;
+
+        while row < height {
+          match buflines.next() {
+            Some(line) => {
+              // For the row in current window widget, if has the line in buffer.
+              let mut idx = 0_u16;
+
+              for chunk in line.chunks() {
+                if idx >= width {
+                  break;
+                }
+                for ch in chunk.chars() {
+                  if idx >= width {
+                    break;
+                  }
+                  let cell = Cell::from(ch);
+                  let cell_upos = point!(x: idx + upos.x(), y: row + upos.y());
+                  debug!(
+                    "1-row:{:?}, idx:{:?}, line:{:?}, ch:{:?}, cell upos:{:?}",
+                    row,
+                    idx,
+                    line.as_str(),
+                    ch,
+                    cell_upos
+                  );
+                  canvas.frame_mut().set_cell(cell_upos, cell);
+                  idx += 1;
+                }
+              }
+
+              // The line doesn't fill the whole row in current widget, fill left parts with empty
+              // cells.
+              if idx < width - 1 {
+                let cells_upos = point!(x: idx + upos.x(), y: row + upos.y());
+                let cells_len = (width - idx) as usize;
+                debug!(
+                  "2-row:{:?}, idx:{:?}, line:{:?}, cells upos:{:?}, cells len:{:?}",
+                  row,
+                  idx,
+                  line.as_str(),
+                  cells_upos,
+                  cells_len,
+                );
+                canvas
+                  .frame_mut()
+                  .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
+              }
+            }
+            None => {
+              // If there's no more lines in the buffer, simply set the whole line to empty for
+              // left parts of the window.
+              let cells_upos = point!(x: upos.x(), y: row + upos.y());
+              let cells_len = width as usize;
+              debug!(
+                "3-row:{:?}, cells upos:{:?}, cells len:{:?}",
+                row, cells_upos, cells_len,
+              );
+              canvas
+                .frame_mut()
+                .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
+            }
+          }
+          // Iterate to next row.
+          row += 1;
+        }
+      }
+      None => {
+        // The `start_line` is outside of the buffer.
+        // Render the whole window contents as empty cells.
+
+        // The first `row` (0) in the window maps to the `start_line` in the buffer.
+        let mut row = 0;
+
+        while row < height {
+          // There's no lines in the buffer, simply set the whole line to empty.
+          let cells_upos = point!(x: upos.x(), y: row + upos.y());
+          let cells_len = width as usize;
+          debug!(
+            "4-row:{:?}, cells upos:{:?}, cells len:{:?}",
+            row, cells_upos, cells_len,
+          );
+          canvas
+            .frame_mut()
+            .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
+          row += 1;
+        }
+      }
+    }
+  }
+
+  /// Draw buffer from `end_line` in reverse order.
+  pub fn _draw_from_end_line(
+    &mut self,
+    _canvas: &mut Canvas,
+    _end_line: usize,
+    _start_column: usize,
+    _end_column: usize,
+  ) {
+    unimplemented!()
   }
 }
 
-impl Default for WindowContent {
-  fn default() -> Self {
-    WindowContent::new()
-  }
-}
+inode_generate_impl!(WindowContent, base);
 
-impl From<Vec<CompactString>> for WindowContent {
-  fn from(lines: Vec<CompactString>) -> Self {
-    WindowContent {
-      id: uuid::next(),
-      lines,
-      line_wrap: false,
-      word_wrap: false,
+impl Widgetable for WindowContent {
+  fn draw(&mut self, canvas: &mut Canvas) {
+    match self.view {
+      BufferView {
+        start_line: Some(start_line),
+        end_line: _,
+        start_column: Some(start_column),
+        end_column: Some(end_column),
+      } => self._draw_from_start_line(canvas, start_line, start_column, end_column),
+      BufferView {
+        start_line: _,
+        end_line: Some(end_line),
+        start_column: Some(start_column),
+        end_column: Some(end_column),
+      } => self._draw_from_end_line(canvas, end_line, start_column, end_column),
+      _ => {
+        error!("Invalid view: {:?}", self.view);
+        unreachable!("Invalid view")
+      }
     }
   }
 }
 
-impl Widget for WindowContent {
-  fn id(&self) -> WidgetId {
-    self.id
+#[cfg(test)]
+mod tests {
+  use compact_str::ToCompactString;
+  use ropey::{Rope, RopeBuilder};
+  use std::fs::File;
+  use std::io::{BufReader, BufWriter};
+  use std::sync::Arc;
+  use std::sync::Once;
+  use tracing::info;
+
+  use super::*;
+  use crate::buf::BufferArc;
+  use crate::cart::U16Size;
+  use crate::test::log::init as test_log_init;
+
+  static INIT: Once = Once::new();
+
+  fn make_buffer_from_file(filename: String) -> BufferArc {
+    let rop: Rope = Rope::from_reader(BufReader::new(File::open(filename).unwrap())).unwrap();
+    let buf: Buffer = Buffer::from(rop);
+    Buffer::to_arc(buf)
+  }
+
+  fn make_buffer_from_lines(lines: Vec<&str>) -> BufferArc {
+    let mut rop: RopeBuilder = RopeBuilder::new();
+    for line in lines.iter() {
+      rop.append(line);
+    }
+    let buf: Buffer = Buffer::from(rop);
+    Buffer::to_arc(buf)
+  }
+
+  #[test]
+  fn _draw_from_start_line1() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let window_content_shape = IRect::new((0, 0), (10, 10));
+    let mut window_content = WindowContent::new(window_content_shape, Arc::downgrade(&buffer));
+    let canvas_size = U16Size::new(10, 10);
+    let mut canvas = Canvas::new(canvas_size);
+
+    window_content._draw_from_start_line(&mut canvas, 0, 0, 10);
+    let actual = canvas
+      .frame()
+      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{:?}", actual);
+    let expect = buffer
+      .read()
+      .rope()
+      .lines()
+      .take(10)
+      .map(|l| l.as_str().unwrap().chars().take(10).collect::<String>())
+      .collect::<Vec<_>>();
+    info!("expect:{:?}", expect);
+    assert_eq!(actual.len(), 10);
+    assert!(expect.len() <= 10);
+    for (i, a) in actual.into_iter().enumerate() {
+      assert!(a.len() == 10);
+      if i < expect.len() {
+        let e = expect[i].clone();
+        info!("{:?} a:{:?}, e:{:?}", i, a, e);
+        assert!(a.len() == e.len() || e.is_empty());
+        if a.len() == e.len() {
+          assert_eq!(a, e);
+        }
+      } else {
+        info!("{:?} a:{:?}, e:empty", i, a);
+        assert_eq!(a, [" "; 10].join(""));
+      }
+    }
   }
 }

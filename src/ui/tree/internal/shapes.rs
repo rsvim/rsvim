@@ -11,7 +11,7 @@ use crate::geo_point_as;
 
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
 ///
-/// Note:
+/// NOTE:
 /// 1. If the widget doesn't have a parent, use the terminal shape as its parent's shape.
 /// 2. If the relative/logical shape is outside of it's parent or the terminal, it will be
 ///    automatically bounded inside of it's parent or the terminal's shape.
@@ -154,7 +154,7 @@ pub fn bound_position(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
 
 /// Bound (truncate) child shape (both position and size) by its parent actual shape.
 ///
-/// Note: This is a wrapper on both [`bound_size`] and [`bound_position`].
+/// NOTE: This is a wrapper on both [`bound_size`] and [`bound_position`].
 pub fn bound_shape(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
   let bounded = bound_size(shape, parent_actual_shape);
   bound_position(bounded, parent_actual_shape)

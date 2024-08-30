@@ -49,8 +49,6 @@ v8 = "0.102.0"
 async-trait = "0.1.81"
 
 [dev-dependencies]
-mockall = "0.13.0"
-rand = "0.8.5"
 
 [profile.release]
 lto = "thin"

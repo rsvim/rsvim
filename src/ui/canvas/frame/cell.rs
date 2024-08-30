@@ -1,40 +1,42 @@
-//! Basic unit of terminal frame.
+//! Basic unit of canvas frame.
 
 #![allow(dead_code)]
 
-use compact_str::CompactString;
+use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 /// Single character/grapheme rendering unit, it accepts ansi/unicode/emoji/nerd font symbol.
 pub struct Cell {
-  /// The character/grapheme.
-  pub symbol: CompactString,
-  /// Foreground color.
-  pub fg: Color,
-  /// Background color.
-  pub bg: Color,
-  /// Attributes: underline, bold, italic, etc.
-  pub attrs: Attributes,
+  // The character/grapheme.
+  symbol: CompactString,
+  // Foreground color.
+  fg: Color,
+  // Background color.
+  bg: Color,
+  // Attributes: underline, bold, italic, etc.
+  attrs: Attributes,
 }
 
 impl Cell {
   /// Get symbol.
-  pub fn symbol(&self) -> &str {
-    self.symbol.as_str()
+  pub fn symbol(&self) -> &CompactString {
+    &self.symbol
   }
 
   /// Set symbol.
-  pub fn set_symbol(&mut self, symbol: &str) -> &mut Self {
-    self.symbol = CompactString::new(symbol);
-    self
+  pub fn set_symbol(&mut self, symbol: CompactString) {
+    self.symbol = symbol;
   }
 
   /// Set symbol by char.
-  pub fn set_char(&mut self, ch: char) -> &mut Self {
-    let mut buf = [0; 4];
-    self.symbol = CompactString::new(ch.encode_utf8(&mut buf));
-    self
+  pub fn set_char(&mut self, ch: char) {
+    self.symbol = ch.to_compact_string();
+  }
+
+  /// Set symbol by str.
+  pub fn set_str(&mut self, s: &str) {
+    self.symbol = CompactString::new(s);
   }
 
   /// Get foreground color.
@@ -43,9 +45,8 @@ impl Cell {
   }
 
   /// Set foreground color.
-  pub fn set_fg(&mut self, color: Color) -> &mut Self {
+  pub fn set_fg(&mut self, color: Color) {
     self.fg = color;
-    self
   }
 
   /// Get background color.
@@ -54,9 +55,8 @@ impl Cell {
   }
 
   /// Set background color.
-  pub fn set_bg(&mut self, color: Color) -> &mut Self {
+  pub fn set_bg(&mut self, color: Color) {
     self.bg = color;
-    self
   }
 
   /// Get attributes.
@@ -65,17 +65,61 @@ impl Cell {
   }
 
   /// Set attributes.
-  pub fn set_attrs(&mut self, attrs: Attributes) -> &mut Self {
+  pub fn set_attrs(&mut self, attrs: Attributes) {
     self.attrs = attrs;
-    self
   }
 }
 
 impl Default for Cell {
-  /// Make cell with a whitespace and no color, empty attributes.
+  /// Make default cell, same with [`Cell::empty()`].
   fn default() -> Self {
+    Cell::empty()
+  }
+}
+
+impl Cell {
+  /// Make cell with a symbol, foreground/background color, attributes.
+  pub fn new(symbol: CompactString, fg: Color, bg: Color, attrs: Attributes) -> Self {
     Cell {
-      symbol: CompactString::const_new(" "),
+      symbol,
+      fg,
+      bg,
+      attrs,
+    }
+  }
+
+  /// Make a space cell.
+  pub fn space() -> Self {
+    Cell {
+      symbol: " ".to_compact_string(),
+      fg: Color::Reset,
+      bg: Color::Reset,
+      attrs: Attributes::default(),
+    }
+  }
+
+  /// Make an empty cell.
+  pub fn empty() -> Self {
+    Cell {
+      symbol: CompactString::const_new(""),
+      fg: Color::Reset,
+      bg: Color::Reset,
+      attrs: Attributes::default(),
+    }
+  }
+
+  pub fn with_char(c: char) -> Self {
+    Cell {
+      symbol: c.to_compact_string(),
+      fg: Color::Reset,
+      bg: Color::Reset,
+      attrs: Attributes::default(),
+    }
+  }
+
+  pub fn with_symbol(s: CompactString) -> Self {
+    Cell {
+      symbol: s,
       fg: Color::Reset,
       bg: Color::Reset,
       attrs: Attributes::default(),
@@ -83,15 +127,14 @@ impl Default for Cell {
   }
 }
 
-impl Cell {
-  /// Make cell with a symbol, foreground/background color, attributes.
-  fn new(symbol: CompactString, fg: Color, bg: Color, attrs: Attributes) -> Self {
-    Cell {
-      symbol,
-      fg,
-      bg,
-      attrs,
-    }
+impl From<char> for Cell {
+  fn from(value: char) -> Self {
+    Cell::new(
+      value.to_compact_string(),
+      Color::Reset,
+      Color::Reset,
+      Attributes::default(),
+    )
   }
 }
 
@@ -102,7 +145,7 @@ mod tests {
   #[test]
   fn default1() {
     let c = Cell::default();
-    assert_eq!(c.symbol(), " ");
+    assert_eq!(c.symbol(), "");
     assert_eq!(c.fg(), Color::Reset);
     assert_eq!(c.bg(), Color::Reset);
     assert_eq!(c.attrs(), Attributes::default());
@@ -111,19 +154,33 @@ mod tests {
   #[test]
   fn new1() {
     let c1 = Cell::new(
-      CompactString::const_new(" "),
+      CompactString::new(" "),
       Color::Reset,
       Color::Reset,
       Attributes::default(),
     );
     let c2 = Cell::default();
     assert_eq!(c1.symbol(), " ");
-    assert_eq!(c1.symbol(), c2.symbol());
+    assert_eq!(c2.symbol(), "");
     assert_eq!(c1.fg(), Color::Reset);
     assert_eq!(c1.fg(), c2.fg());
     assert_eq!(c1.bg(), Color::Reset);
     assert_eq!(c1.bg(), c2.bg());
     assert_eq!(c1.attrs(), Attributes::default());
     assert_eq!(c1.attrs(), c2.attrs());
+  }
+
+  #[test]
+  fn from1() {
+    let expects = ['a', 'b', 'c', 'd', 'e', 'F', 'G', 'H', 'I'];
+    for (i, input) in expects.iter().enumerate() {
+      let c: Cell = (*input).into();
+      let s = c.symbol().as_str();
+      let cs: Vec<char> = s.chars().collect();
+      let expect = expects[i];
+      assert!(s.len() == 1);
+      assert!(cs.len() == 1);
+      assert!(cs[0] == expect);
+    }
   }
 }

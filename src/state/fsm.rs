@@ -14,6 +14,7 @@
 
 use crossterm::event::Event;
 
+use crate::buf::BuffersArc;
 use crate::state::State;
 use crate::ui::tree::TreeArc;
 
@@ -41,12 +42,18 @@ pub mod visual;
 pub struct StatefulDataAccessMut<'a> {
   pub state: &'a mut State,
   pub tree: TreeArc,
+  pub buffers: BuffersArc,
   pub event: Event,
 }
 
 impl<'a> StatefulDataAccessMut<'a> {
-  pub fn new(state: &'a mut State, tree: TreeArc, event: Event) -> Self {
-    StatefulDataAccessMut { state, tree, event }
+  pub fn new(state: &'a mut State, tree: TreeArc, buffers: BuffersArc, event: Event) -> Self {
+    StatefulDataAccessMut {
+      state,
+      tree,
+      buffers,
+      event,
+    }
   }
 }
 
@@ -55,12 +62,18 @@ impl<'a> StatefulDataAccessMut<'a> {
 pub struct StatefulDataAccess<'a> {
   pub state: &'a State,
   pub tree: TreeArc,
+  pub buffers: BuffersArc,
   pub event: Event,
 }
 
 impl<'a> StatefulDataAccess<'a> {
-  pub fn new(state: &'a State, tree: TreeArc, event: Event) -> Self {
-    StatefulDataAccess { state, tree, event }
+  pub fn new(state: &'a State, tree: TreeArc, buffers: BuffersArc, event: Event) -> Self {
+    StatefulDataAccess {
+      state,
+      tree,
+      buffers,
+      event,
+    }
   }
 }
 
