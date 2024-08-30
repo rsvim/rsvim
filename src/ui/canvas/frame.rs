@@ -2,7 +2,7 @@
 
 #![allow(dead_code)]
 
-use compact_str::CompactString;
+use compact_str::{CompactString, CompactStringExt};
 use geo::point;
 use std::ops::Range;
 use tracing::debug;
@@ -176,17 +176,38 @@ impl Frame {
   /// Get raw symbols of all cells.
   ///
   /// NOTE: This method is mostly for debugging and testing.
-  pub fn raw_symbols_of_cells(&self) -> Vec<Vec<CompactString>> {
-    let mut raw_symbols: Vec<Vec<CompactString>> = Vec::with_capacity(self.size.height() as usize);
+  pub fn raw_symbols(&self) -> Vec<Vec<CompactString>> {
+    let mut results: Vec<Vec<CompactString>> = Vec::with_capacity(self.size.height() as usize);
     for row in 0..self.size.height() {
       let mut row_symbols: Vec<CompactString> = Vec::with_capacity(self.size.width() as usize);
       for col in 0..self.size.width() {
         let idx = self.xy2idx(col as usize, row as usize);
         row_symbols.push(self.cells[idx].symbol().clone());
       }
-      raw_symbols.push(row_symbols);
+      results.push(row_symbols);
     }
-    raw_symbols
+    results
+  }
+
+  /// Get raw symbols of all cells, with printable placeholder for empty symbol ("").
+  ///
+  /// NOTE: This method is mostly for debugging and testing.
+  pub fn raw_symbols_with_placeholder(&self, printable: CompactString) -> Vec<Vec<CompactString>> {
+    let mut results: Vec<Vec<CompactString>> = Vec::with_capacity(self.size.height() as usize);
+    for row in 0..self.size.height() {
+      let mut row_symbols: Vec<CompactString> = Vec::with_capacity(self.size.width() as usize);
+      for col in 0..self.size.width() {
+        let idx = self.xy2idx(col as usize, row as usize);
+        let s = self.cells[idx].symbol();
+        row_symbols.push(if s.is_empty() {
+          printable.clone()
+        } else {
+          s.clone()
+        });
+      }
+      results.push(row_symbols);
+    }
+    results
   }
 
   /// Set (replace) cells at a range.
@@ -477,7 +498,7 @@ mod tests {
       info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
       assert_eq!(actual.symbol(), CompactString::new(""));
     }
-    info!("1-raw_symbols_of_cells:{:?}", frame.raw_symbols_of_cells(),);
+    info!("1-raw_symbols:{:?}", frame.raw_symbols(),);
     let all_cells = frame.cells();
     for i in 0..10 {
       let pos: U16Pos = point!(x:0, y:i);
@@ -514,7 +535,7 @@ mod tests {
     }
 
     let actual = frame
-      .raw_symbols_of_cells()
+      .raw_symbols()
       .iter()
       .map(|sv| {
         sv.iter()
@@ -530,8 +551,8 @@ mod tests {
       })
       .collect::<Vec<_>>();
     info!(
-      "2-raw_symbols_of_cells:{:?}, actual:{:?}",
-      frame.raw_symbols_of_cells(),
+      "2-raw_symbols:{:?}, actual:{:?}",
+      frame.raw_symbols(),
       actual
     );
     assert_eq!(expects.len(), actual.len());
