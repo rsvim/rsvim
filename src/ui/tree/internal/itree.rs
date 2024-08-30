@@ -1110,9 +1110,9 @@ mod tests {
      *       n2, n3, n4, n5
      * ```
      */
-    let mut tree = Itree::new(nodes[0].clone());
+    let mut tree = Itree::new(nodes[0]);
     for node in nodes.iter().skip(1) {
-      tree.insert(&nodes_ids[0], node.clone());
+      tree.insert(&nodes_ids[0], *node);
     }
 
     assert!(tree.root_id() == nodes_ids[0]);
