@@ -432,9 +432,9 @@ mod tests {
 
   #[test]
   fn new1() {
-    let t = Canvas::new(U16Size::new(3, 4));
-    assert_eq!(t.frame().size(), t.prev_frame().size());
-    assert_eq!(*t.frame().cursor(), *t.prev_frame().cursor());
+    let can = Canvas::new(U16Size::new(3, 4));
+    assert_eq!(can.frame().size(), can.prev_frame().size());
+    assert_eq!(*can.frame().cursor(), *can.prev_frame().cursor());
   }
 
   #[test]
@@ -454,5 +454,14 @@ mod tests {
   }
 
   #[test]
-  fn _next_same_cell_index_in_row1() {}
+  fn _shade_cursor1() {
+    INIT.call_once(test_log_init);
+    let can = Canvas::new(U16Size::new(10, 10));
+  }
+
+  #[test]
+  fn _next_same_cell_index_in_row1() {
+    INIT.call_once(test_log_init);
+    let can = Canvas::new(U16Size::new(10, 10));
+  }
 }
