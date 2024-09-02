@@ -2,6 +2,7 @@
 
 use compact_str::CompactString;
 use geo::point;
+use std::collections::BTreeSet;
 use std::ops::Range;
 use tracing::debug;
 
@@ -23,11 +24,11 @@ pub struct Frame {
   /// Cells
   cells: Vec<Cell>,
 
-  /// Indicate which part of the frame is dirty.
+  /// Indicate what rows of the frame is dirty.
   ///
-  /// NOTE: This is for fast locating the changed lines. The lines are facing to terminal device,
-  /// i.e. the whole TUI screen instead of the rows in any UI widget window.
-  dirty_cells: Vec<Range<usize>>,
+  /// NOTE: This is for fast locating the changed rows inside the terminal device, i.e. the whole
+  /// TUI screen instead of the rows inside UI widget window.
+  dirty_rows: Vec<bool>,
 
   /// Cursor
   cursor: Cursor,
@@ -40,7 +41,7 @@ impl Frame {
     Frame {
       size,
       cells: vec![Cell::default(); n],
-      dirty_cells: vec![], // When first create, it's not dirty.
+      dirty_rows: vec![false; n], // When a frame first create, it's not dirty.
       cursor,
     }
   }
@@ -102,6 +103,76 @@ impl Frame {
     self.xy2idx(pos.x() as usize, pos.y() as usize)
   }
 
+  /// Convert index into (position) X and Y.
+  ///
+  /// Returns `(x, y)`.
+  ///
+  /// # Panics
+  ///
+  /// If index is outside of frame shape.
+  pub fn idx2xy(&self, index: usize) -> (usize, usize) {
+    assert_eq!(
+      self.size.height() as usize * self.size.width() as usize,
+      self.cells.len()
+    );
+    assert!(index <= self.cells.len());
+    let x = index % self.size.width() as usize;
+    let y = index / self.size.width() as usize;
+    (x, y)
+  }
+
+  /// Convert index into position.
+  ///
+  /// # Panics
+  ///
+  /// If index is outside of frame shape.
+  pub fn idx2pos(&self, index: usize) -> U16Pos {
+    let (x, y) = self.idx2xy(index);
+    point!(x: x as u16, y: y as u16)
+  }
+
+  /// Get (first,last) boundary positions by row. The `first` is the left position of the row,
+  /// the `last` is the right position of the row.
+  ///
+  /// The `row` parameter starts from 0. NOTE: Row is X-axis.
+  ///
+  /// # Returns
+  ///
+  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
+  ///    this row.
+  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this row.
+  pub fn row_boundary(&self, row: u16) -> Option<(U16Pos, U16Pos)> {
+    if self.size.width() > 0 && self.size.height() > 0 && self.size.height() > row {
+      Some((
+        point!(x: 0_u16, y: row),
+        point!(x: self.size.width()-1, y: row),
+      ))
+    } else {
+      None
+    }
+  }
+
+  /// Get (first,last) boundary positions by column. The `first` is the top position of the column,
+  /// the `last` is the bottom position of the column.
+  ///
+  /// The `col` parameter starts from 0. NOTE: Column is Y-axis.
+  ///
+  /// # Returns
+  ///
+  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
+  ///    this column.
+  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this column.
+  pub fn column_boundary(&self, col: u16) -> Option<(U16Pos, U16Pos)> {
+    if self.size.height() > 0 && self.size.width() > 0 && self.size.width() > col {
+      Some((
+        point!(x: col, y: 0_u16),
+        point!(x: col, y: self.size.height()-1),
+      ))
+    } else {
+      None
+    }
+  }
+
   // Utils }
 
   /// Get current frame size.
@@ -117,6 +188,7 @@ impl Frame {
       size.height() as usize * size.width() as usize,
       Cell::default(),
     );
+    self.dirty_rows = vec![true; size.height() as usize];
     old_size
   }
 
@@ -139,8 +211,7 @@ impl Frame {
       index, cell, old_cell
     );
     self.cells[index] = cell;
-    let range = self.idx2range(index, 1);
-    self.dirty_cells.push(range);
+    self.dirty_rows[pos.y() as usize] = true;
     old_cell
   }
 
@@ -213,7 +284,7 @@ impl Frame {
   pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
     let range = self.pos2range(pos, cells.len());
     assert!(range.end <= self.cells.len());
-    self.dirty_cells.push(range.clone());
+    let end_at = self.self.dirty_cells.push(range.clone());
     self.cells.splice(range, cells).collect()
   }
 
@@ -245,52 +316,6 @@ impl Frame {
   pub fn reset_dirty(&mut self) {
     self.dirty_cells = vec![];
   }
-
-  // Rows/Columns Helper {
-
-  /// Get (first,last) boundary positions by row. The `first` is the left position of the row,
-  /// the `last` is the right position of the row.
-  ///
-  /// The `row` parameter starts from 0. NOTE: Row is X-axis.
-  ///
-  /// # Returns
-  ///
-  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
-  ///    this row.
-  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this row.
-  pub fn row_boundary(&self, row: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.width() > 0 && self.size.height() > 0 && self.size.height() > row {
-      Some((
-        point!(x: 0_u16, y: row),
-        point!(x: self.size.width()-1, y: row),
-      ))
-    } else {
-      None
-    }
-  }
-
-  /// Get (first,last) boundary positions by column. The `first` is the top position of the column,
-  /// the `last` is the bottom position of the column.
-  ///
-  /// The `col` parameter starts from 0. NOTE: Column is Y-axis.
-  ///
-  /// # Returns
-  ///
-  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
-  ///    this column.
-  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this column.
-  pub fn column_boundary(&self, col: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.height() > 0 && self.size.width() > 0 && self.size.width() > col {
-      Some((
-        point!(x: col, y: 0_u16),
-        point!(x: col, y: self.size.height()-1),
-      ))
-    } else {
-      None
-    }
-  }
-
-  // Rows/Columns Helper }
 }
 
 #[cfg(test)]
