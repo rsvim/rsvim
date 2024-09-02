@@ -183,15 +183,17 @@ impl Canvas {
   pub fn _shade_cells(&mut self) -> Vec<ShaderCommand> {
     if self.size() == self.prev_size() {
       // When terminal size remains the same, use dirty-marks diff-algorithm.
-      self._dirty_marks_shade_cells()
+      self._dirty_marks_diff()
     } else {
       // When terminal size remains the same, use brute-force diff-algorithm.
-      self._brute_force_shade_cells()
+      self._brute_force_diff()
     }
   }
 
-  /// Find next same cell index in current frame row.
-  pub fn _next_same_cell_index_in_row(&self, row: u16, col: u16) -> u16 {
+  /// Find next same cell in current row of frame.
+  ///
+  /// Returns the cell index, started from 0.
+  pub fn _next_same_cell_in_row(&self, row: u16, col: u16) -> u16 {
     let frame = self.frame();
     let prev_frame = self.prev_frame();
 
@@ -207,12 +209,7 @@ impl Canvas {
     col_end_at
   }
 
-  pub fn _make_print_shader_command(
-    &self,
-    row: u16,
-    start_col: u16,
-    end_col: u16,
-  ) -> ShaderCommand {
+  pub fn _make_print_shader(&self, row: u16, start_col: u16, end_col: u16) -> ShaderCommand {
     let frame = self.frame();
 
     assert!(end_col > start_col);
@@ -239,7 +236,7 @@ impl Canvas {
   ///
   /// This algorithm is useful when the whole terminal size is changed, and row/column based
   /// diff-algorithm becomes invalid.
-  pub fn _brute_force_shade_cells(&mut self) -> Vec<ShaderCommand> {
+  pub fn _brute_force_diff(&mut self) -> Vec<ShaderCommand> {
     let frame = self.frame();
     let size = self.size();
     let prev_frame = self.prev_frame();
@@ -260,11 +257,11 @@ impl Canvas {
           }
 
           // Find the continuously changed parts by iterating over columns
-          let col_end_at = self._next_same_cell_index_in_row(row, col);
+          let col_end_at = self._next_same_cell_in_row(row, col);
 
           if col_end_at > col {
-            let print_string_shader_command = self._make_print_shader_command(row, col, col_end_at);
-            shaders.push(print_string_shader_command);
+            let print_shader = self._make_print_shader(row, col, col_end_at);
+            shaders.push(print_shader);
             col = col_end_at;
           }
         }
@@ -278,7 +275,7 @@ impl Canvas {
   /// widgets.
   ///
   /// This algorithm is more performant when the whole terminal size remains unchanged.
-  pub fn _dirty_marks_shade_cells(&mut self) -> Vec<ShaderCommand> {
+  pub fn _dirty_marks_diff(&mut self) -> Vec<ShaderCommand> {
     let frame = self.frame();
     let size = self.size();
     let prev_frame = self.prev_frame();
@@ -300,12 +297,11 @@ impl Canvas {
             }
 
             // Find the continuously changed parts by iterating over columns
-            let col_end_at = self._next_same_cell_index_in_row(row as u16, col);
+            let col_end_at = self._next_same_cell_in_row(row as u16, col);
 
             if col_end_at > col {
-              let print_string_shader_command =
-                self._make_print_shader_command(row as u16, col, col_end_at);
-              shaders.push(print_string_shader_command);
+              let print_shader = self._make_print_shader(row as u16, col, col_end_at);
+              shaders.push(print_shader);
               col = col_end_at;
             }
           }
@@ -698,7 +694,7 @@ mod tests {
   }
 
   #[test]
-  fn _next_same_cell_index_in_row1() {
+  fn _next_same_cell_in_row1() {
     INIT.call_once(test_log_init);
     let can = Canvas::new(U16Size::new(10, 10));
   }
