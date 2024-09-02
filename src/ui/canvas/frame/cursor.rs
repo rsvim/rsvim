@@ -60,13 +60,13 @@ impl From<CursorStyle> for CursorStyleFormatter {
 impl fmt::Debug for CursorStyleFormatter {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
     match self.value {
-      CursorStyle::DefaultUserShape => write!(f, "CursorStyle::DefaultUserShape"),
-      CursorStyle::BlinkingBlock => write!(f, "CursorStyle::BlinkingBlock"),
-      CursorStyle::SteadyBlock => write!(f, "CursorStyle::SteadyBlock"),
-      CursorStyle::BlinkingUnderScore => write!(f, "CursorStyle::BlinkingUnderScore"),
-      CursorStyle::SteadyUnderScore => write!(f, "CursorStyle::SteadyUnderScore"),
-      CursorStyle::BlinkingBar => write!(f, "CursorStyle::BlinkingBar"),
-      CursorStyle::SteadyBar => write!(f, "CursorStyle::SteadyBar"),
+      CursorStyle::DefaultUserShape => write!(f, "DefaultUserShape"),
+      CursorStyle::BlinkingBlock => write!(f, "BlinkingBlock"),
+      CursorStyle::SteadyBlock => write!(f, "SteadyBlock"),
+      CursorStyle::BlinkingUnderScore => write!(f, "BlinkingUnderScore"),
+      CursorStyle::SteadyUnderScore => write!(f, "SteadyUnderScore"),
+      CursorStyle::BlinkingBar => write!(f, "BlinkingBar"),
+      CursorStyle::SteadyBar => write!(f, "SteadyBar"),
     }
   }
 }

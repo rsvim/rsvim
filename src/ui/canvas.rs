@@ -366,51 +366,135 @@ pub enum ShaderCommand {
 impl fmt::Debug for ShaderCommand {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
     let s = match self {
-      ShaderCommand::CursorSetCursorStyle(command) => format!("{}", command),
-      ShaderCommand::CursorDisableBlinking(command) => format!("{:?}", command),
-      ShaderCommand::CursorEnableBlinking(command) => format!("{:?}", command),
-      ShaderCommand::CursorHide(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveDown(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveLeft(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveRight(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveTo(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveToColumn(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveToNextLine(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveToPreviousLine(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveToRow(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveUp(command) => format!("{:?}", command),
-      ShaderCommand::CursorRestorePosition(command) => format!("{:?}", command),
-      ShaderCommand::CursorSavePosition(command) => format!("{:?}", command),
-      ShaderCommand::CursorShow(command) => format!("{:?}", command),
-      ShaderCommand::EventDisableBracketedPaste(command) => format!("{:?}", command),
-      ShaderCommand::EventDisableFocusChange(command) => format!("{:?}", command),
-      ShaderCommand::EventDisableMouseCapture(command) => format!("{:?}", command),
-      ShaderCommand::EventEnableBracketedPaste(command) => format!("{:?}", command),
-      ShaderCommand::EventEnableFocusChange(command) => format!("{:?}", command),
-      ShaderCommand::EventEnableMouseCapture(command) => format!("{:?}", command),
-      ShaderCommand::EventPopKeyboardEnhancementFlags(command) => format!("{:?}", command),
-      ShaderCommand::EventPushKeyboardEnhancementFlags(command) => format!("{:?}", command),
-      ShaderCommand::StyleResetColor(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetAttribute(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetAttributes(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetBackgroundColor(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetColors(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetForegroundColor(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetStyle(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetUnderlineColor(command) => format!("{:?}", command),
-      ShaderCommand::StylePrintStyledContentString(command) => format!("{:?}", command),
-      ShaderCommand::StylePrintString(command) => format!("{:?}", command),
-      ShaderCommand::TerminalBeginSynchronizedUpdate(command) => format!("{:?}", command),
-      ShaderCommand::TerminalClear(command) => format!("{:?}", command),
-      ShaderCommand::TerminalDisableLineWrap(command) => format!("{:?}", command),
-      ShaderCommand::TerminalEnableLineWrap(command) => format!("{:?}", command),
-      ShaderCommand::TerminalEndSynchronizedUpdate(command) => format!("{:?}", command),
-      ShaderCommand::TerminalEnterAlternateScreen(command) => format!("{:?}", command),
-      ShaderCommand::TerminalLeaveAlternateScreen(command) => format!("{:?}", command),
-      ShaderCommand::TerminalScrollDown(command) => format!("{:?}", command),
-      ShaderCommand::TerminalScrollUp(command) => format!("{:?}", command),
-      ShaderCommand::TerminalSetSize(command) => format!("{:?}", command),
+      ShaderCommand::CursorSetCursorStyle(command) => {
+        format!(
+          "CursorSetCursorStyle({:?})",
+          CursorStyleFormatter::from(*command)
+        )
+      }
+      ShaderCommand::CursorDisableBlinking(command) => {
+        format!("CursorDisableBlinking({:?})", command)
+      }
+      ShaderCommand::CursorEnableBlinking(command) => {
+        format!("CursorEnableBlinking({:?})", command)
+      }
+      ShaderCommand::CursorHide(command) => format!("CursorHide({:?})", command),
+      ShaderCommand::CursorMoveDown(command) => {
+        format!("CursorMoveDown({:?})", command)
+      }
+      ShaderCommand::CursorMoveLeft(command) => {
+        format!("CursorMoveLeft({:?})", command)
+      }
+      ShaderCommand::CursorMoveRight(command) => {
+        format!("CursorMoveRight({:?})", command)
+      }
+      ShaderCommand::CursorMoveTo(command) => format!("CursorMoveTo({:?})", command),
+      ShaderCommand::CursorMoveToColumn(command) => {
+        format!("CursorMoveToColumn({:?})", command)
+      }
+      ShaderCommand::CursorMoveToNextLine(command) => {
+        format!("CursorMoveToNextLine({:?})", command)
+      }
+      ShaderCommand::CursorMoveToPreviousLine(command) => {
+        format!("CursorMoveToPreviousLine({:?})", command)
+      }
+      ShaderCommand::CursorMoveToRow(command) => {
+        format!("CursorMoveToRow({:?})", command)
+      }
+      ShaderCommand::CursorMoveUp(command) => format!("CursorMoveUp({:?})", command),
+      ShaderCommand::CursorRestorePosition(command) => {
+        format!("CursorRestorePosition({:?})", command)
+      }
+      ShaderCommand::CursorSavePosition(command) => {
+        format!("CursorSavePosition({:?})", command)
+      }
+      ShaderCommand::CursorShow(command) => format!("CursorShow({:?})", command),
+      ShaderCommand::EventDisableBracketedPaste(command) => {
+        format!("EventDisableBracketedPaste({:?})", command)
+      }
+      ShaderCommand::EventDisableFocusChange(command) => {
+        format!("EventDisableFocusChange({:?})", command)
+      }
+      ShaderCommand::EventDisableMouseCapture(command) => {
+        format!("EventDisableMouseCapture({:?})", command)
+      }
+      ShaderCommand::EventEnableBracketedPaste(command) => {
+        format!("EventEnableBracketedPaste({:?})", command)
+      }
+      ShaderCommand::EventEnableFocusChange(command) => {
+        format!("EventEnableFocusChange({:?})", command)
+      }
+      ShaderCommand::EventEnableMouseCapture(command) => {
+        format!("EventEnableMouseCapture({:?})", command)
+      }
+      ShaderCommand::EventPopKeyboardEnhancementFlags(command) => {
+        format!("EventPopKeyboardEnhancementFlags({:?})", command)
+      }
+      ShaderCommand::EventPushKeyboardEnhancementFlags(command) => {
+        format!("EventPushKeyboardEnhancementFlags({:?})", command)
+      }
+      ShaderCommand::StyleResetColor(command) => {
+        format!("StyleResetColor({:?})", command)
+      }
+      ShaderCommand::StyleSetAttribute(command) => {
+        format!("StyleSetAttribute({:?})", command)
+      }
+      ShaderCommand::StyleSetAttributes(command) => {
+        format!("StyleSetAttributes({:?})", command)
+      }
+      ShaderCommand::StyleSetBackgroundColor(command) => {
+        format!("StyleSetBackgroundColor({:?})", command)
+      }
+      ShaderCommand::StyleSetColors(command) => {
+        format!("StyleSetColors({:?})", command)
+      }
+      ShaderCommand::StyleSetForegroundColor(command) => {
+        format!("StyleSetForegroundColor({:?})", command)
+      }
+      ShaderCommand::StyleSetStyle(command) => {
+        format!("StyleSetStyle({:?})", command)
+      }
+      ShaderCommand::StyleSetUnderlineColor(command) => {
+        format!("StyleSetUnderlineColor({:?})", command)
+      }
+      ShaderCommand::StylePrintStyledContentString(command) => {
+        format!("StylePrintStyledContentString({:?})", command)
+      }
+      ShaderCommand::StylePrintString(command) => {
+        format!("StylePrintString({:?})", command)
+      }
+      ShaderCommand::TerminalBeginSynchronizedUpdate(command) => {
+        format!("TerminalBeginSynchronizedUpdate({:?})", command)
+      }
+      ShaderCommand::TerminalClear(command) => {
+        format!("TerminalClear({:?})", command)
+      }
+      ShaderCommand::TerminalDisableLineWrap(command) => {
+        format!("TerminalDisableLineWrap({:?})", command)
+      }
+      ShaderCommand::TerminalEnableLineWrap(command) => {
+        format!("TerminalEnableLineWrap({:?})", command)
+      }
+      ShaderCommand::TerminalEndSynchronizedUpdate(command) => {
+        format!("TerminalEndSynchronizedUpdate({:?})", command)
+      }
+      ShaderCommand::TerminalEnterAlternateScreen(command) => {
+        format!("TerminalEnterAlternateScreen({:?})", command)
+      }
+      ShaderCommand::TerminalLeaveAlternateScreen(command) => {
+        format!("TerminalLeaveAlternateScreen({:?})", command)
+      }
+      ShaderCommand::TerminalScrollDown(command) => {
+        format!("TerminalScrollDown({:?})", command)
+      }
+      ShaderCommand::TerminalScrollUp(command) => {
+        format!("TerminalScrollUp({:?})", command)
+      }
+      ShaderCommand::TerminalSetSize(command) => {
+        format!("TerminalSetSize({:?})", command)
+      }
     };
+    let s = format!("ShaderCommand::{}", s);
     f.debug_struct(&s).finish()
   }
 }
@@ -451,7 +535,6 @@ mod tests {
   use tracing::info;
 
   use crate::test::log::init as test_log_init;
-  use crate::ui::canvas;
 
   use super::*;
 
@@ -476,7 +559,18 @@ mod tests {
         "{:?}",
         ShaderCommand::TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate)
       ),
-      "ShaderCommand::TerminalEndSynchronizedUpdate"
+      "ShaderCommand::TerminalEndSynchronizedUpdate(EndSynchronizedUpdate)"
+    );
+    info!(
+      "ShaderCommand::CursorSetCursorStyle(DefaultUserShape): {:?}",
+      ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::DefaultUserShape)
+    );
+    assert_eq!(
+      format!(
+        "{:?}",
+        ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::DefaultUserShape)
+      ),
+      "ShaderCommand::CursorSetCursorStyle(DefaultUserShape)"
     );
   }
 
