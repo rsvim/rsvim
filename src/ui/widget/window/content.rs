@@ -498,12 +498,12 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
-    let window_content_shape = IRect::new((0, 0), (10, 10));
+    let window_content_shape = IRect::new((0, 0), (27, 15));
     let mut window_content = WindowContent::new(window_content_shape, Arc::downgrade(&buffer));
-    let canvas_size = U16Size::new(10, 10);
+    let canvas_size = U16Size::new(27, 15);
     let mut canvas = Canvas::new(canvas_size);
 
-    window_content._draw_from_start_line(&mut canvas, 1, 2, 27);
+    window_content._draw_from_start_line(&mut canvas, 1, 0, 0);
     let actual = canvas
       .frame()
       .raw_symbols_with_placeholder(" ".to_compact_string())
@@ -516,21 +516,14 @@ mod tests {
       .rope()
       .lines()
       .skip(1)
-      .take(10)
-      .map(|l| {
-        l.as_str()
-          .unwrap()
-          .chars()
-          .skip(2)
-          .take(25)
-          .collect::<String>()
-      })
+      .take(15)
+      .map(|l| l.as_str().unwrap().chars().take(27).collect::<String>())
       .collect::<Vec<_>>();
     info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), 10);
-    assert!(expect.len() <= 10);
+    assert_eq!(actual.len(), 15);
+    assert!(expect.len() <= 15);
     for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 10);
+      assert!(a.len() == 27);
       if i < expect.len() {
         let e = expect[i].clone();
         info!("{:?} a:{:?}, e:{:?}", i, a, e);
@@ -540,7 +533,7 @@ mod tests {
         }
       } else {
         info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 25].join(""));
+        assert_eq!(a, [" "; 27].join(""));
       }
     }
   }
