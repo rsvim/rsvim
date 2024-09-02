@@ -25,9 +25,8 @@ pub struct Frame {
 
   /// Indicate which part of the frame is dirty.
   ///
-  /// NOTE: This is only for fast locating the changed parts, but can be false positive, i.e. if a
-  /// location is marked in this collection, it can still be unchanged. But if a location is not
-  /// marked in this collection, it must be unchanged.
+  /// NOTE: This is for fast locating the changed lines. The lines are facing to terminal device,
+  /// i.e. the whole TUI screen instead of the rows in any UI widget window.
   dirty_cells: Vec<Range<usize>>,
 
   /// Cursor
