@@ -171,22 +171,6 @@ impl Canvas {
     }
   }
 
-  /// Brute force diff-algorithm, it iterates all cells on current frame, and compares with
-  /// previous frame to find out the changed cells.
-  ///
-  /// This algorithm is useful when the whole terminal size is changed, and row/column based
-  /// diff-algorithm becomes invalid.
-  pub fn _brute_force_shade_cells(&mut self, shader: &mut Shader) {
-    let frame = self.frame();
-    let size = self.size();
-    let prev_frame = self.prev_frame();
-    let prev_size = self.prev_size();
-
-    if !frame.zero_sized() {
-      for row in (0..size.height()) {}
-    }
-  }
-
   /// Find next same cell index in current frame row.
   pub fn _next_same_cell_index_in_row(&self, row: u16, col: u16) -> u16 {
     let frame = self.frame();
@@ -202,6 +186,69 @@ impl Canvas {
       col_end_at += 1;
     }
     col_end_at
+  }
+
+  pub fn _make_print_shader_command(
+    &self,
+    row: u16,
+    start_col: u16,
+    end_col: u16,
+  ) -> ShaderCommand {
+    let frame = self.frame();
+
+    assert!(end_col > start_col);
+    let new_cells = frame.cells_at(
+      point!(x: start_col, y: row as u16),
+      end_col as usize - start_col as usize,
+    );
+    let new_contents = new_cells
+      .iter()
+      .map(|c| {
+        if c.symbol().is_empty() {
+          " ".to_compact_string()
+        } else {
+          c.symbol().clone()
+        }
+      })
+      .collect::<Vec<_>>()
+      .join("");
+    ShaderCommand::StylePrintString(crossterm::style::Print(new_contents.to_string()))
+  }
+
+  /// Brute force diff-algorithm, it iterates all cells on current frame, and compares with
+  /// previous frame to find out the changed cells.
+  ///
+  /// This algorithm is useful when the whole terminal size is changed, and row/column based
+  /// diff-algorithm becomes invalid.
+  pub fn _brute_force_shade_cells(&mut self, shader: &mut Shader) {
+    let frame = self.frame();
+    let size = self.size();
+    let prev_frame = self.prev_frame();
+    let _prev_size = self.prev_size();
+
+    if !frame.zero_sized() {
+      for row in 0..size.height() {
+        let mut col = 0_u16;
+        while col < size.width() {
+          // Skip unchanged columns
+          let cell = frame.cell(point!(x: col, y: row as u16));
+          let prev_cell = prev_frame.cell(point!(x: col, y: row as u16));
+          if cell == prev_cell {
+            col += 1;
+            continue;
+          }
+
+          // Find the continuously changed parts by iterating over columns
+          let col_end_at = self._next_same_cell_index_in_row(row as u16, col);
+
+          if col_end_at > col {
+            let print_string_shader_command = self._make_print_shader_command(row, col, col_end_at);
+            shader.push(print_string_shader_command);
+            col = col_end_at;
+          }
+        }
+      }
+    }
   }
 
   /// Dirty marks diff-algorithm, it only iterates on the area that has been marked as dirty by UI
@@ -231,24 +278,9 @@ impl Canvas {
             let col_end_at = self._next_same_cell_index_in_row(row as u16, col);
 
             if col_end_at > col {
-              let new_cells = frame.cells_at(
-                point!(x: col, y: row as u16),
-                col_end_at as usize - col as usize,
-              );
-              let new_contents = new_cells
-                .iter()
-                .map(|c| {
-                  if c.symbol().is_empty() {
-                    " ".to_compact_string()
-                  } else {
-                    c.symbol().clone()
-                  }
-                })
-                .collect::<Vec<_>>()
-                .join("");
-              shader.push(ShaderCommand::StylePrintString(crossterm::style::Print(
-                new_contents.to_string(),
-              )));
+              let print_string_shader_command =
+                self._make_print_shader_command(row as u16, col, col_end_at);
+              shader.push(print_string_shader_command);
               col = col_end_at;
             }
           }
