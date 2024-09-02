@@ -543,6 +543,10 @@ mod tests {
 
   static INIT: Once = Once::new();
 
+  fn int2letter(i: u8) -> char {
+    (i + 65) as char
+  }
+
   #[test]
   fn new1() {
     let can = Canvas::new(U16Size::new(3, 4));
@@ -720,11 +724,11 @@ mod tests {
     can.frame_mut().set_cells_at(
       point!(x:3,y:5),
       (0..9)
-        .map(|i| Cell::with_char((i + 65) as u8 as char))
+        .map(|i| Cell::with_char(int2letter(i)))
         .collect::<Vec<_>>(),
     );
     let chars = (0_u8..9_u8)
-      .map(|i| ((i + 65) as char).to_compact_string())
+      .map(|i| int2letter(i).to_compact_string())
       .collect::<Vec<_>>();
     info!(
       "frame:{:?}",
@@ -776,7 +780,7 @@ mod tests {
     can.frame_mut().set_cells_at(
       point!(x:2,y:3),
       (0..4)
-        .map(|i| Cell::with_char((i + 65) as u8 as char))
+        .map(|i| Cell::with_char(int2letter(i)))
         .collect::<Vec<_>>(),
     );
     let mut char_index = 0_u8;
@@ -802,7 +806,7 @@ mod tests {
         } else if (2..6).contains(&col) {
           assert_eq!(actual, 6);
           assert_eq!(
-            ((char_index + 65) as char).to_compact_string(),
+            int2letter(char_index).to_compact_string(),
             can.frame().cell(point!(x:col, y:row)).symbol()
           );
           char_index += 1;
