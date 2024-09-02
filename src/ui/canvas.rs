@@ -190,7 +190,7 @@ impl Canvas {
     }
   }
 
-  /// Find next same cell in current row of frame.
+  /// Find next same cell in current row of frame. NOTE: row is y, col is x.
   ///
   /// Returns the cell index, started from 0.
   pub fn _next_same_cell_in_row(&self, row: u16, col: u16) -> u16 {
@@ -696,6 +696,50 @@ mod tests {
   #[test]
   fn _next_same_cell_in_row1() {
     INIT.call_once(test_log_init);
-    let can = Canvas::new(U16Size::new(10, 10));
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can
+      .frame_mut()
+      .set_cells_at(point!(x:0,y:0), vec![Cell::with_char('A'); 20]);
+    for i in 0..10 {
+      let actual = can._next_same_cell_in_row(0, i);
+      assert_eq!(actual, 10);
+    }
+    for i in 0..10 {
+      let actual = can._next_same_cell_in_row(1, i);
+      assert_eq!(actual, 20);
+    }
+  }
+
+  #[test]
+  fn _next_same_cell_in_row2() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can.frame_mut().set_cells_at(
+      point!(x:1,y:5),
+      (0..4)
+        .map(|i| Cell::with_char(i as u8 as char))
+        .collect::<Vec<_>>(),
+    );
+    info!(
+      "frame:{:?}",
+      can
+        .frame()
+        .raw_symbols_with_placeholder(" ".to_compact_string())
+    );
+    for col in 0..10 {
+      for row in 0..10 {
+        let actual = can._next_same_cell_in_row(row, col);
+        info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
+        if row != 5 {
+          assert_eq!(actual, (row + 1) * 10);
+        } else if (5..9).contains(&col) {
+          assert_eq!(actual, 9);
+        } else {
+          assert_eq!(actual, col);
+        }
+      }
+    }
   }
 }
