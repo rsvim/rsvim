@@ -92,9 +92,10 @@ pub struct WindowContent {
   buffer: BufferWk,
   // Buffer view
   view: BufferView,
-  // Modified lines in buffer view, index start from 0. This dataset dedups lines iterating on
-  // buffer view in each drawing.
-  modified_lines: BTreeSet<usize>,
+  // First modified line in buffer view, index (line number) start from 0.
+  // When rendering window content with line-wrap/word-wrap options, once a line is modified, it's
+  // possible that the following lines are modified too.
+  first_modified_line: Option<usize>,
 
   // Options
   line_wrap: bool,
@@ -109,7 +110,7 @@ impl WindowContent {
       base: InodeBase::new(shape),
       buffer,
       view,
-      modified_lines: (0..shape.height()).map(|l| l as usize).collect(),
+      first_modified_line: Some(0),
       line_wrap: false,
       word_wrap: false,
     }
@@ -211,29 +212,29 @@ impl WindowContent {
 
   // Modified {
 
-  /// Get modified lines (in the view).
-  pub fn modified_lines(&self) -> &BTreeSet<usize> {
-    &self.modified_lines
-  }
-
-  /// Set all lines (in the view) to modified.
-  pub fn modify_all_lines(&mut self) {
-    self.modified_lines = (0..self.shape().height()).map(|l| l as usize).collect();
-  }
-
-  /// Clear all modified lines. This operation should be called after drawing to canvas.
-  pub fn clear_modified_lines(&mut self) {
-    self.modified_lines = BTreeSet::new();
+  /// Get the first modified line.
+  pub fn first_modified_line(&self) -> &Option<usize> {
+    &self.first_modified_line
   }
 
   /// Set modified line. This operation should be called after editing a line on buffer.
-  pub fn modify_line(&mut self, line: usize) -> bool {
-    self.modified_lines.insert(line)
+  pub fn modify_line(&mut self, line: usize) {
+    let smaller_line = match self.first_modified_line {
+      Some(first_modified) => {
+        if first_modified > line {
+          line
+        } else {
+          first_modified
+        }
+      }
+      None => line,
+    };
+    self.first_modified_line = Some(smaller_line);
   }
 
-  /// Reset modified line to unmodified.
-  pub fn unmodify_line(&mut self, line_no: &usize) -> bool {
-    self.modified_lines.remove(line_no)
+  /// Reset (clear) first modified line. This operation should be called after drawing on canvas.
+  pub fn reset_first_modified_line(&mut self) {
+    self.first_modified_line = None;
   }
 
   // Modified }
