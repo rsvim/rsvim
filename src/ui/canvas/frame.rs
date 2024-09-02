@@ -312,9 +312,7 @@ impl Frame {
 
   /// Set cursor.
   pub fn set_cursor(&mut self, cursor: Cursor) {
-    if self.cursor != cursor {
-      self.cursor = cursor;
-    }
+    self.cursor = cursor;
   }
 
   /// Reset/clean all dirty components.

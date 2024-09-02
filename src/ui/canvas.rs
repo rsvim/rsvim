@@ -111,9 +111,12 @@ impl Canvas {
     let mut shader = Shader::new();
 
     // For cursor
-    self._shade_cursor(&mut shader);
+    let mut cursor_shaders = self._shade_cursor();
+    shader.append(&mut cursor_shaders);
+
     // For cells
-    self._shade_cells(&mut shader);
+    let mut cells_shaders = self._shade_cells();
+    shader.append(&mut cells_shaders);
 
     // Save current frame.
     self.prev_frame = self.frame.clone();
@@ -124,9 +127,10 @@ impl Canvas {
   }
 
   /// Shade cursor and append results into shader vector.
-  pub fn _shade_cursor(&mut self, shader: &mut Shader) {
+  pub fn _shade_cursor(&mut self) -> Vec<ShaderCommand> {
     let cursor = self.frame.cursor();
     let prev_cursor = self.prev_frame.cursor();
+    let mut shader = vec![];
 
     // If cursor is changed.
     if cursor != prev_cursor {
@@ -158,16 +162,18 @@ impl Canvas {
         )));
       }
     }
+
+    shader
   }
 
   /// Shade cells and append results into shader vector.
-  pub fn _shade_cells(&mut self, shader: &mut Shader) {
+  pub fn _shade_cells(&mut self) -> Vec<ShaderCommand> {
     if self.size() == self.prev_size() {
       // When terminal size remains the same, use dirty-marks diff-algorithm.
-      self._dirty_marks_shade_cells(shader);
+      self._dirty_marks_shade_cells()
     } else {
       // When terminal size remains the same, use brute-force diff-algorithm.
-      self._brute_force_shade_cells(shader);
+      self._brute_force_shade_cells()
     }
   }
 
@@ -220,11 +226,13 @@ impl Canvas {
   ///
   /// This algorithm is useful when the whole terminal size is changed, and row/column based
   /// diff-algorithm becomes invalid.
-  pub fn _brute_force_shade_cells(&mut self, shader: &mut Shader) {
+  pub fn _brute_force_shade_cells(&mut self) -> Vec<ShaderCommand> {
     let frame = self.frame();
     let size = self.size();
     let prev_frame = self.prev_frame();
     let _prev_size = self.prev_size();
+
+    let mut shaders = vec![];
 
     if !frame.zero_sized() {
       for row in 0..size.height() {
@@ -243,23 +251,27 @@ impl Canvas {
 
           if col_end_at > col {
             let print_string_shader_command = self._make_print_shader_command(row, col, col_end_at);
-            shader.push(print_string_shader_command);
+            shaders.push(print_string_shader_command);
             col = col_end_at;
           }
         }
       }
     }
+
+    shaders
   }
 
   /// Dirty marks diff-algorithm, it only iterates on the area that has been marked as dirty by UI
   /// widgets.
   ///
   /// This algorithm is more performant when the whole terminal size remains unchanged.
-  pub fn _dirty_marks_shade_cells(&mut self, shader: &mut Shader) {
+  pub fn _dirty_marks_shade_cells(&mut self) -> Vec<ShaderCommand> {
     let frame = self.frame();
     let size = self.size();
     let prev_frame = self.prev_frame();
     let _prev_size = self.prev_size();
+
+    let mut shaders = vec![];
 
     if !frame.zero_sized() {
       for (row, dirty) in self.frame().dirty_rows().iter().enumerate() {
@@ -280,13 +292,15 @@ impl Canvas {
             if col_end_at > col {
               let print_string_shader_command =
                 self._make_print_shader_command(row as u16, col, col_end_at);
-              shader.push(print_string_shader_command);
+              shaders.push(print_string_shader_command);
               col = col_end_at;
             }
           }
         }
       }
     }
+
+    shaders
   }
 }
 
@@ -413,6 +427,11 @@ impl Shader {
     self.commands.push(command)
   }
 
+  /// Append a vector of shader commands.
+  pub fn append(&mut self, commands: &mut Vec<ShaderCommand>) {
+    self.commands.append(commands);
+  }
+
   /// Get an iterator of the collection.
   pub fn iter(&self) -> Iter<ShaderCommand> {
     self.commands.iter()
@@ -425,6 +444,7 @@ mod tests {
   use tracing::info;
 
   use crate::test::log::init as test_log_init;
+  use crate::ui::canvas;
 
   use super::*;
 
@@ -456,7 +476,12 @@ mod tests {
   #[test]
   fn _shade_cursor1() {
     INIT.call_once(test_log_init);
-    let can = Canvas::new(U16Size::new(10, 10));
+    let mut can = Canvas::new(U16Size::new(10, 10));
+    let cursor1 = Cursor::default();
+    can.frame_mut().set_cursor(cursor1);
+
+    let cursor2 = Cursor::new(point!(x:3, y:7), false, true, CursorStyle::BlinkingBar);
+    let cursor3 = Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
   }
 
   #[test]
