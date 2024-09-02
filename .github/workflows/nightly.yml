@@ -44,6 +44,7 @@ jobs:
           tag: nightly
           commit: main
           body: ""
+          omitBody: true
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}

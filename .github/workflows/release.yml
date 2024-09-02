@@ -33,6 +33,7 @@ jobs:
         with:
           draft: true
           body: ""
+          omitBody: true
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
