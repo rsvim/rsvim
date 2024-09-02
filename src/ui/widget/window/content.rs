@@ -232,11 +232,6 @@ impl WindowContent {
     self.first_modified_line = Some(smaller_line);
   }
 
-  /// Reset (clear) first modified line. This operation should be called after drawing on canvas.
-  pub fn reset_first_modified_line(&mut self) {
-    self.first_modified_line = None;
-  }
-
   // Modified }
 
   /// Draw buffer from `start_line`
@@ -400,6 +395,9 @@ impl Widgetable for WindowContent {
         unreachable!("Invalid view")
       }
     }
+
+    // Reset first modified line after drawing.
+    self.first_modified_line = None;
   }
 }
 
