@@ -718,11 +718,12 @@ mod tests {
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
-      point!(x:1,y:5),
-      (0..6)
+      point!(x:3,y:5),
+      (0..9)
         .map(|i| Cell::with_char((i + 65) as u8 as char))
         .collect::<Vec<_>>(),
     );
+    let mut char_index = 0_u8;
     info!(
       "frame:{:?}",
       can
@@ -739,11 +740,29 @@ mod tests {
     for col in 0..10 {
       for row in 0..10 {
         let actual = can._next_same_cell_in_row(row, col);
-        info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
-        if row != 5 {
+        info!(
+          "row:{:?}, col:{:?}, actual:{:?}, char:{:?}",
+          row,
+          col,
+          actual,
+          (char_index + 65) as char
+        );
+        if !(5..7).contains(&row) {
           assert_eq!(actual, col);
-        } else if (1..7).contains(&col) {
-          assert_eq!(actual, 7);
+        } else if row == 5 && (3..10).contains(&col) {
+          assert_eq!(actual, 10);
+          assert_eq!(
+            ((char_index + 65) as char).to_compact_string(),
+            can.frame().cell(point!(x:col, y:row)).symbol()
+          );
+          char_index += 1;
+        } else if row == 6 && (0..2).contains(&col) {
+          assert_eq!(actual, 2);
+          assert_eq!(
+            ((char_index + 65) as char).to_compact_string(),
+            can.frame().cell(point!(x:col, y:row)).symbol()
+          );
+          char_index += 1;
         } else {
           assert_eq!(actual, col);
         }
@@ -762,6 +781,7 @@ mod tests {
         .map(|i| Cell::with_char((i + 65) as u8 as char))
         .collect::<Vec<_>>(),
     );
+    let mut char_index = 0_u8;
     info!(
       "frame:{:?}",
       can
@@ -783,10 +803,28 @@ mod tests {
           assert_eq!(actual, col);
         } else if (2..6).contains(&col) {
           assert_eq!(actual, 6);
+          assert_eq!(
+            ((char_index + 65) as char).to_compact_string(),
+            can.frame().cell(point!(x:col, y:row)).symbol()
+          );
+          char_index += 1;
         } else {
           assert_eq!(actual, col);
         }
       }
     }
+  }
+
+  #[test]
+  fn _make_print_shader1() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can.frame_mut().set_cells_at(
+      point!(x:2,y:3),
+      (0..4)
+        .map(|i| Cell::with_char((i + 65) as u8 as char))
+        .collect::<Vec<_>>(),
+    );
   }
 }
