@@ -179,6 +179,11 @@ impl Frame {
     self.size
   }
 
+  /// Whether the frame is zero sized.
+  pub fn zero_sized(&self) -> bool {
+    self.size.height() == 0 || self.size.width() == 0
+  }
+
   /// Set current frame size.
   pub fn set_size(&mut self, size: U16Size) -> U16Size {
     let old_size = self.size;

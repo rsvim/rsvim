@@ -160,7 +160,54 @@ impl Canvas {
 
   /// Shade cells and append results into shader vector.
   pub fn _shade_cells(&mut self, shader: &mut Shader) {
-    for (i, dirty) in self.frame().dirty_rows().iter().enumerate() {}
+    if self.size() == self.prev_size() {
+      // When terminal size remains the same, use dirty-marks diff-algorithm.
+      self._dirty_marks_shade_cells(shader);
+    } else {
+      // When terminal size remains the same, use brute-force diff-algorithm.
+      self._brute_force_shade_cells(shader);
+    }
+  }
+
+  /// Brute force diff-algorithm, it iterates all cells on current frame, and compares with
+  /// previous frame to find out the changed cells.
+  ///
+  /// This algorithm is useful when the whole terminal size is changed, and row/column based
+  /// diff-algorithm becomes invalid.
+  pub fn _brute_force_shade_cells(&mut self, shader: &mut Shader) {
+    let frame = self.frame();
+    let size = self.size();
+    let prev_frame = self.prev_frame();
+    let prev_size = self.prev_size();
+
+    if size.width() > 0 && size.height() > 0 {
+      for row in (0..size.height()) {}
+    }
+  }
+
+  /// Dirty marks diff-algorithm, it only iterates on the area that has been marked as dirty by UI
+  /// widgets.
+  ///
+  /// This algorithm is more performant when the whole terminal size remains unchanged.
+  pub fn _dirty_marks_shade_cells(&mut self, shader: &mut Shader) {
+    let frame = self.frame();
+    let size = self.size();
+    let prev_frame = self.prev_frame();
+    let prev_size = self.prev_size();
+
+    if size.width() > 0 && size.height() > 0 {
+      for (row, dirty) in self.frame().dirty_rows().iter().enumerate() {
+        if *dirty {
+          let mut col = 0_u16;
+          while col < current_size.width() {
+            // Skip unchanged columns
+            let cell = frame.cell(point!(x: col, y: row));
+
+            // Find the continuously changed parts by iterating over columns
+          }
+        }
+      }
+    }
   }
 }
 
