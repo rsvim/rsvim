@@ -178,8 +178,8 @@ impl Canvas {
 
     let mut col_end_at = col;
     while col_end_at < frame.size().width() {
-      let cell2 = frame.cell(point!(x: col_end_at, y: row as u16));
-      let prev_cell2 = prev_frame.cell(point!(x: col_end_at, y: row as u16));
+      let cell2 = frame.cell(point!(x: col_end_at, y: row));
+      let prev_cell2 = prev_frame.cell(point!(x: col_end_at, y: row));
       if cell2 == prev_cell2 {
         break;
       }
@@ -198,7 +198,7 @@ impl Canvas {
 
     assert!(end_col > start_col);
     let new_cells = frame.cells_at(
-      point!(x: start_col, y: row as u16),
+      point!(x: start_col, y: row),
       end_col as usize - start_col as usize,
     );
     let new_contents = new_cells
@@ -231,15 +231,15 @@ impl Canvas {
         let mut col = 0_u16;
         while col < size.width() {
           // Skip unchanged columns
-          let cell = frame.cell(point!(x: col, y: row as u16));
-          let prev_cell = prev_frame.cell(point!(x: col, y: row as u16));
+          let cell = frame.cell(point!(x: col, y: row));
+          let prev_cell = prev_frame.cell(point!(x: col, y: row));
           if cell == prev_cell {
             col += 1;
             continue;
           }
 
           // Find the continuously changed parts by iterating over columns
-          let col_end_at = self._next_same_cell_index_in_row(row as u16, col);
+          let col_end_at = self._next_same_cell_index_in_row(row, col);
 
           if col_end_at > col {
             let print_string_shader_command = self._make_print_shader_command(row, col, col_end_at);

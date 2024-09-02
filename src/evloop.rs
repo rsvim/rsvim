@@ -263,6 +263,8 @@ impl EventLoop {
         ShaderCommand::StyleSetForegroundColor(command) => queue!(self.writer, command)?,
         ShaderCommand::StyleSetStyle(command) => queue!(self.writer, command)?,
         ShaderCommand::StyleSetUnderlineColor(command) => queue!(self.writer, command)?,
+        ShaderCommand::StylePrintStyledContentString(command) => queue!(self.writer, command)?,
+        ShaderCommand::StylePrintString(command) => queue!(self.writer, command)?,
         ShaderCommand::TerminalBeginSynchronizedUpdate(command) => queue!(self.writer, command)?,
         ShaderCommand::TerminalClear(command) => queue!(self.writer, command)?,
         ShaderCommand::TerminalDisableLineWrap(command) => queue!(self.writer, command)?,
