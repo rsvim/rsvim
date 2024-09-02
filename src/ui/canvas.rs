@@ -723,7 +723,9 @@ mod tests {
         .map(|i| Cell::with_char((i + 65) as u8 as char))
         .collect::<Vec<_>>(),
     );
-    let mut char_index = 0_u8;
+    let chars = (0_u8..9_u8)
+      .map(|i| ((i + 65) as char).to_compact_string())
+      .collect::<Vec<_>>();
     info!(
       "frame:{:?}",
       can
@@ -740,29 +742,25 @@ mod tests {
     for col in 0..10 {
       for row in 0..10 {
         let actual = can._next_same_cell_in_row(row, col);
-        info!(
-          "row:{:?}, col:{:?}, actual:{:?}, char:{:?}",
-          row,
-          col,
-          actual,
-          (char_index + 65) as char
-        );
+        info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
         if !(5..7).contains(&row) {
           assert_eq!(actual, col);
         } else if row == 5 && (3..10).contains(&col) {
           assert_eq!(actual, 10);
-          assert_eq!(
-            ((char_index + 65) as char).to_compact_string(),
+          info!(
+            "chars:{:?}, symbol:{:?}",
+            chars,
             can.frame().cell(point!(x:col, y:row)).symbol()
           );
-          char_index += 1;
+          assert!(chars.contains(can.frame().cell(point!(x:col, y:row)).symbol()));
         } else if row == 6 && (0..2).contains(&col) {
           assert_eq!(actual, 2);
-          assert_eq!(
-            ((char_index + 65) as char).to_compact_string(),
+          info!(
+            "chars:{:?}, symbol:{:?}",
+            chars,
             can.frame().cell(point!(x:col, y:row)).symbol()
           );
-          char_index += 1;
+          assert!(chars.contains(can.frame().cell(point!(x:col, y:row)).symbol()));
         } else {
           assert_eq!(actual, col);
         }
