@@ -395,6 +395,17 @@ mod tests {
   }
 
   #[test]
+  fn idx2xy1() {
+    let frame_size = U16Size::new(10, 10);
+    let frame = Frame::new(frame_size, Cursor::default());
+    assert_eq!(frame.idx2xy(70), (0, 7));
+    assert_eq!(frame.idx2xy(37), (7, 3));
+    assert_eq!(frame.idx2xy(1), (1, 0));
+    assert_eq!(frame.idx2xy(90), (0, 9));
+    assert_eq!(frame.idx2xy(99), (9, 9));
+  }
+
+  #[test]
   fn set_cell1() {
     INIT.call_once(test_log_init);
     let frame_size = U16Size::new(10, 10);
