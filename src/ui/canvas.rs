@@ -160,7 +160,7 @@ impl Canvas {
 
   /// Shade cells and append results into shader vector.
   pub fn _shade_cells(&mut self, shader: &mut Shader) {
-    for (i, dirty_cell_range) in self.frame().dirty_cells().iter().enumerate() {}
+    for (i, dirty) in self.frame().dirty_rows().iter().enumerate() {}
   }
 }
 
