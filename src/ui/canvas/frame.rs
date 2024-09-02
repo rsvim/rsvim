@@ -32,9 +32,6 @@ pub struct Frame {
 
   /// Cursor
   cursor: Cursor,
-
-  /// Indicate whether the cursor is changed.
-  dirty_cursor: bool,
 }
 
 impl Frame {
@@ -46,7 +43,6 @@ impl Frame {
       cells: vec![Cell::default(); n],
       dirty_cells: vec![], // When first create, it's not dirty.
       cursor,
-      dirty_cursor: false,
     }
   }
 
@@ -241,13 +237,7 @@ impl Frame {
   pub fn set_cursor(&mut self, cursor: Cursor) {
     if self.cursor != cursor {
       self.cursor = cursor;
-      self.dirty_cursor = true;
     }
-  }
-
-  /// Whether cursor is dirty.
-  pub fn dirty_cursor(&self) -> bool {
-    self.dirty_cursor
   }
 
   /// Reset/clean all dirty components.
@@ -255,7 +245,6 @@ impl Frame {
   /// NOTE: This method should be called after current frame flushed to terminal device.
   pub fn reset_dirty(&mut self) {
     self.dirty_cells = vec![];
-    self.dirty_cursor = false;
   }
 
   // Rows/Columns Helper {

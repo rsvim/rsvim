@@ -123,11 +123,11 @@ impl Canvas {
 
   /// Shade cursor and append results into shader vector.
   pub fn _shade_cursor(&mut self, shader: &mut Shader) {
-    // For cursor.
-    if self.frame.dirty_cursor() {
-      let cursor = self.frame.cursor();
-      let prev_cursor = self.prev_frame.cursor();
+    let cursor = self.frame.cursor();
+    let prev_cursor = self.prev_frame.cursor();
 
+    // If cursor is changed.
+    if cursor != prev_cursor {
       if cursor.blinking() != prev_cursor.blinking() {
         if cursor.blinking() {
           shader.push(ShaderCommand::CursorEnableBlinking(
