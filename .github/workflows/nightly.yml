@@ -43,8 +43,7 @@ jobs:
           removeArtifacts: true
           tag: nightly
           commit: main
-          body: ""
-          omitBody: true
+          body: "Nightly Build"
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
