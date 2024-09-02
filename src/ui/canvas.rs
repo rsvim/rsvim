@@ -192,7 +192,7 @@ impl Canvas {
 
   /// Find next same cell in current row of frame. NOTE: row is y, col is x.
   ///
-  /// Returns the cell index, started from 0.
+  /// Returns the cell column number, started from 0.
   pub fn _next_same_cell_in_row(&self, row: u16, col: u16) -> u16 {
     let frame = self.frame();
     let prev_frame = self.prev_frame();
@@ -719,8 +719,8 @@ mod tests {
 
     can.frame_mut().set_cells_at(
       point!(x:1,y:5),
-      (0..4)
-        .map(|i| Cell::with_char(i as u8 as char))
+      (0..6)
+        .map(|i| Cell::with_char((i + 65) as u8 as char))
         .collect::<Vec<_>>(),
     );
     info!(
@@ -742,8 +742,47 @@ mod tests {
         info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
         if row != 5 {
           assert_eq!(actual, col);
-        } else if (1..5).contains(&col) {
-          assert_eq!(actual, 5);
+        } else if (1..7).contains(&col) {
+          assert_eq!(actual, 7);
+        } else {
+          assert_eq!(actual, col);
+        }
+      }
+    }
+  }
+
+  #[test]
+  fn _next_same_cell_in_row3() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can.frame_mut().set_cells_at(
+      point!(x:2,y:3),
+      (0..4)
+        .map(|i| Cell::with_char((i + 65) as u8 as char))
+        .collect::<Vec<_>>(),
+    );
+    info!(
+      "frame:{:?}",
+      can
+        .frame()
+        .raw_symbols_with_placeholder(" ".to_compact_string())
+        .iter()
+        .map(|cs| cs
+          .iter()
+          .map(CompactString::to_string)
+          .collect::<Vec<_>>()
+          .join(""))
+        .collect::<Vec<_>>()
+    );
+    for col in 0..10 {
+      for row in 0..10 {
+        let actual = can._next_same_cell_in_row(row, col);
+        info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
+        if row != 3 {
+          assert_eq!(actual, col);
+        } else if (2..6).contains(&col) {
+          assert_eq!(actual, 6);
         } else {
           assert_eq!(actual, col);
         }
