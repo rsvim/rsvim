@@ -438,7 +438,7 @@ mod tests {
   }
 
   #[test]
-  fn shader_command_debug() {
+  fn shader_command_debug1() {
     INIT.call_once(test_log_init);
     info!(
       "ShaderCommand::TerminalEndSynchronizedUpdate: {:?}",
@@ -452,4 +452,7 @@ mod tests {
       "ShaderCommand::TerminalEndSynchronizedUpdate"
     );
   }
+
+  #[test]
+  fn _next_same_cell_index_in_row1() {}
 }
