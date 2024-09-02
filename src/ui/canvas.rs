@@ -108,6 +108,21 @@ impl Canvas {
   pub fn shade(&mut self) -> Shader {
     let mut shader = Shader::new();
 
+    // For cursor
+    self._shade_cursor(&mut shader);
+    // For cells
+    self._shade_cells(&mut shader);
+
+    // Save current frame.
+    self.prev_frame = self.frame.clone();
+    // Reset the `dirty` fields.
+    self.frame.reset_dirty();
+
+    shader
+  }
+
+  /// Shade cursor and append results into shader vector.
+  pub fn _shade_cursor(&mut self, shader: &mut Shader) {
     // For cursor.
     if self.frame.dirty_cursor() {
       let cursor = self.frame.cursor();
@@ -141,14 +156,10 @@ impl Canvas {
         )));
       }
     }
-
-    // Save current frame.
-    self.prev_frame = self.frame.clone();
-    // Reset the `dirty` fields.
-    self.frame.reset_dirty();
-
-    shader
   }
+
+  /// Shade cells and append results into shader vector.
+  pub fn _shade_cells(&mut self, shader: &mut Shader) {}
 }
 
 #[derive(Clone)]
