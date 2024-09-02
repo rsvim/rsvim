@@ -289,7 +289,7 @@ impl Frame {
     let range = self.pos2range(pos, cells.len());
     assert!(range.end <= self.cells.len());
     let end_at = self.idx2pos(range.end);
-    for row in pos.y()..end_at.y() {
+    for row in pos.y()..(end_at.y() + 1) {
       self.dirty_rows[row as usize] = true;
     }
     self.cells.splice(range, cells).collect()

@@ -284,7 +284,8 @@ impl Canvas {
     let mut shaders = vec![];
 
     if !frame.zero_sized() {
-      for (row, dirty) in self.frame().dirty_rows().iter().enumerate() {
+      debug!("dirty_rows:{:?}", frame.dirty_rows());
+      for (row, dirty) in frame.dirty_rows().iter().enumerate() {
         if *dirty {
           let mut col = 0_u16;
           while col < size.width() {
@@ -839,6 +840,29 @@ mod tests {
     ));
     if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = shader {
       assert_eq!(contents, "ABCD".to_string());
+    }
+  }
+
+  #[test]
+  fn _dirty_marks_diff1() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can.frame_mut().set_cells_at(
+      point!(x:2,y:3),
+      (0..4)
+        .map(|i| Cell::with_char(int2letter(i)))
+        .collect::<Vec<_>>(),
+    );
+    let actual = can._dirty_marks_diff();
+    info!("dirty marks:{:?}", actual);
+    assert_eq!(actual.len(), 1);
+    assert!(matches!(
+      actual[0],
+      ShaderCommand::StylePrintString(crossterm::style::Print(_))
+    ));
+    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &actual[0] {
+      assert_eq!(*contents, "ABCD".to_string());
     }
   }
 }
