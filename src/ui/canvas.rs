@@ -533,6 +533,7 @@ impl Shader {
 
 #[cfg(test)]
 mod tests {
+  use compact_str::CompactString;
   use std::sync::Once;
   use tracing::info;
 
@@ -594,7 +595,7 @@ mod tests {
     info!("actual2:{:?}", actual2);
     assert!(!actual2.is_empty());
     assert_eq!(actual2.len(), 4);
-    assert!(
+    assert_eq!(
       actual2
         .iter()
         .filter(
@@ -605,10 +606,10 @@ mod tests {
           }
         )
         .collect::<Vec<_>>()
-        .len()
-        == 1
+        .len(),
+      1
     );
-    assert!(
+    assert_eq!(
       actual2
         .iter()
         .filter(|sh| {
@@ -618,18 +619,18 @@ mod tests {
           )
         })
         .collect::<Vec<_>>()
-        .len()
-        == 1
+        .len(),
+      1
     );
-    assert!(
+    assert_eq!(
       actual2
         .iter()
         .filter(|sh| { matches!(sh, ShaderCommand::CursorHide(crossterm::cursor::Hide)) })
         .collect::<Vec<_>>()
-        .len()
-        == 1
+        .len(),
+      1
     );
-    assert!(
+    assert_eq!(
       actual2
         .iter()
         .filter(|sh| {
@@ -639,8 +640,8 @@ mod tests {
           )
         })
         .collect::<Vec<_>>()
-        .len()
-        == 1
+        .len(),
+      1
     );
 
     let cursor3 = Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
@@ -649,7 +650,7 @@ mod tests {
     can._shade_done();
     info!("actual3:{:?}", actual3);
     assert_eq!(actual3.len(), 3);
-    assert!(
+    assert_eq!(
       actual3
         .iter()
         .filter(
@@ -660,10 +661,10 @@ mod tests {
           }
         )
         .collect::<Vec<_>>()
-        .len()
-        == 1
+        .len(),
+      1
     );
-    assert!(
+    assert_eq!(
       actual3
         .iter()
         .filter(|sh| {
@@ -673,10 +674,10 @@ mod tests {
           )
         })
         .collect::<Vec<_>>()
-        .len()
-        == 1
+        .len(),
+      1
     );
-    assert!(
+    assert_eq!(
       actual3
         .iter()
         .filter(|sh| {
@@ -688,8 +689,8 @@ mod tests {
           )
         })
         .collect::<Vec<_>>()
-        .len()
-        == 1
+        .len(),
+      1
     );
   }
 
@@ -727,15 +728,22 @@ mod tests {
       can
         .frame()
         .raw_symbols_with_placeholder(" ".to_compact_string())
+        .iter()
+        .map(|cs| cs
+          .iter()
+          .map(CompactString::to_string)
+          .collect::<Vec<_>>()
+          .join(""))
+        .collect::<Vec<_>>()
     );
     for col in 0..10 {
       for row in 0..10 {
         let actual = can._next_same_cell_in_row(row, col);
         info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
         if row != 5 {
-          assert_eq!(actual, (row + 1) * 10);
-        } else if (5..9).contains(&col) {
-          assert_eq!(actual, 9);
+          assert_eq!(actual, col);
+        } else if (1..5).contains(&col) {
+          assert_eq!(actual, 5);
         } else {
           assert_eq!(actual, col);
         }
