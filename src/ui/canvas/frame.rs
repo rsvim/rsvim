@@ -2,7 +2,6 @@
 
 use compact_str::CompactString;
 use geo::point;
-use std::collections::BTreeSet;
 use std::ops::Range;
 use tracing::debug;
 
@@ -284,7 +283,10 @@ impl Frame {
   pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
     let range = self.pos2range(pos, cells.len());
     assert!(range.end <= self.cells.len());
-    let end_at = self.self.dirty_cells.push(range.clone());
+    let end_at = self.idx2pos(range.end);
+    for row in (pos.y()..end_at.y()).into_iter() {
+      self.dirty_rows[row as usize] = true;
+    }
     self.cells.splice(range, cells).collect()
   }
 
@@ -293,9 +295,9 @@ impl Frame {
     self.set_cells_at(pos, vec![Cell::empty(); n])
   }
 
-  /// Get dirty cells.
-  pub fn dirty_cells(&self) -> &Vec<Range<usize>> {
-    &self.dirty_cells
+  /// Get dirty rows.
+  pub fn dirty_rows(&self) -> &Vec<bool> {
+    &self.dirty_rows
   }
 
   /// Get cursor.
@@ -314,7 +316,7 @@ impl Frame {
   ///
   /// NOTE: This method should be called after current frame flushed to terminal device.
   pub fn reset_dirty(&mut self) {
-    self.dirty_cells = vec![];
+    self.dirty_rows = vec![false; self.size.height() as usize];
   }
 }
 
