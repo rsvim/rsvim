@@ -119,12 +119,18 @@ impl Canvas {
     let mut cells_shaders = self._shade_cells();
     shader.append(&mut cells_shaders);
 
+    // Finish shade.
+    self._shade_done();
+
+    shader
+  }
+
+  /// Shade done.
+  pub fn _shade_done(&mut self) {
     // Save current frame.
     self.prev_frame = self.frame.clone();
     // Reset the `dirty` fields.
     self.frame.reset_dirty();
-
-    shader
   }
 
   /// Shade cursor and append results into shader vector.
@@ -582,11 +588,13 @@ mod tests {
     let cursor1 = Cursor::default();
     can.frame_mut().set_cursor(cursor1);
     let actual1 = can._shade_cursor();
+    can._shade_done();
     assert!(actual1.is_empty());
 
     let cursor2 = Cursor::new(point!(x:3, y:7), false, true, CursorStyle::BlinkingBar);
     can.frame_mut().set_cursor(cursor2);
     let actual2 = can._shade_cursor();
+    can._shade_done();
     info!("actual2:{:?}", actual2);
     assert!(!actual2.is_empty());
     assert_eq!(actual2.len(), 4);
@@ -642,6 +650,7 @@ mod tests {
     let cursor3 = Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
     can.frame_mut().set_cursor(cursor3);
     let actual3 = can._shade_cursor();
+    can._shade_done();
     info!("actual3:{:?}", actual3);
     assert_eq!(actual3.len(), 3);
     assert!(
