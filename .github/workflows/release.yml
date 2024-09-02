@@ -32,6 +32,7 @@ jobs:
       - uses: ncipollo/release-action@v1
         with:
           draft: true
+          body: ""
   upload-assets:
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
