@@ -188,12 +188,10 @@ impl Canvas {
   }
 
   /// Find next same cell index in current frame row.
-  pub fn _next_same_cell_index_in_row(
-    row: u16,
-    col: u16,
-    frame: &Frame,
-    prev_frame: &Frame,
-  ) -> u16 {
+  pub fn _next_same_cell_index_in_row(&self, row: u16, col: u16) -> u16 {
+    let frame = self.frame();
+    let prev_frame = self.prev_frame();
+
     let mut col_end_at = col;
     while col_end_at < frame.size().width() {
       let cell2 = frame.cell(point!(x: col_end_at, y: row as u16));
@@ -230,8 +228,7 @@ impl Canvas {
             }
 
             // Find the continuously changed parts by iterating over columns
-            let col_end_at =
-              Canvas::_next_same_cell_index_in_row(row as u16, col, frame, prev_frame);
+            let col_end_at = self._next_same_cell_index_in_row(row as u16, col);
 
             if col_end_at > col {
               let new_cells = frame.cells_at(
