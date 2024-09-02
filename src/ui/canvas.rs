@@ -825,8 +825,20 @@ mod tests {
     can.frame_mut().set_cells_at(
       point!(x:2,y:3),
       (0..4)
-        .map(|i| Cell::with_char((i + 65) as u8 as char))
+        .map(|i| Cell::with_char(int2letter(i)))
         .collect::<Vec<_>>(),
     );
+    let col = 2;
+    let row = 3;
+    let col_end_at = can._next_same_cell_in_row(row, col);
+    let shader = can._make_print_shader(row, col, col_end_at);
+    info!("shader:{:?}", shader);
+    assert!(matches!(
+      shader,
+      ShaderCommand::StylePrintString(crossterm::style::Print(_))
+    ));
+    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = shader {
+      assert_eq!(contents, "ABCD".to_string());
+    }
   }
 }
