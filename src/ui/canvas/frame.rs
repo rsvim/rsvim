@@ -406,6 +406,17 @@ mod tests {
   }
 
   #[test]
+  fn idx2pos1() {
+    let frame_size = U16Size::new(10, 10);
+    let frame = Frame::new(frame_size, Cursor::default());
+    assert_eq!(frame.idx2pos(70), point!(x:0, y:7));
+    assert_eq!(frame.idx2pos(37), point!(x:7, y:3));
+    assert_eq!(frame.idx2pos(1), point!(x:1, y:0));
+    assert_eq!(frame.idx2pos(90), point!(x:0, y:9));
+    assert_eq!(frame.idx2pos(99), point!(x:9, y:9));
+  }
+
+  #[test]
   fn set_cell1() {
     INIT.call_once(test_log_init);
     let frame_size = U16Size::new(10, 10);
