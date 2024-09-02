@@ -408,7 +408,7 @@ mod tests {
   use std::fs::File;
   use std::io::{BufReader, BufWriter};
   use std::sync::Arc;
-  use std::sync::Once;
+  use std::sync::{Once, OnceLock};
   use tracing::info;
 
   use super::*;
@@ -481,6 +481,66 @@ mod tests {
       } else {
         info!("{:?} a:{:?}, e:empty", i, a);
         assert_eq!(a, [" "; 10].join(""));
+      }
+    }
+  }
+
+  #[test]
+  fn _draw_from_start_line2() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let window_content_shape = IRect::new((0, 0), (10, 10));
+    let mut window_content = WindowContent::new(window_content_shape, Arc::downgrade(&buffer));
+    let canvas_size = U16Size::new(10, 10);
+    let mut canvas = Canvas::new(canvas_size);
+
+    window_content._draw_from_start_line(&mut canvas, 1, 2, 27);
+    let actual = canvas
+      .frame()
+      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{:?}", actual);
+    let expect = buffer
+      .read()
+      .rope()
+      .lines()
+      .skip(1)
+      .take(10)
+      .map(|l| {
+        l.as_str()
+          .unwrap()
+          .chars()
+          .skip(2)
+          .take(25)
+          .collect::<String>()
+      })
+      .collect::<Vec<_>>();
+    info!("expect:{:?}", expect);
+    assert_eq!(actual.len(), 10);
+    assert!(expect.len() <= 10);
+    for (i, a) in actual.into_iter().enumerate() {
+      assert!(a.len() == 10);
+      if i < expect.len() {
+        let e = expect[i].clone();
+        info!("{:?} a:{:?}, e:{:?}", i, a, e);
+        assert!(a.len() == e.len() || e.is_empty());
+        if a.len() == e.len() {
+          assert_eq!(a, e);
+        }
+      } else {
+        info!("{:?} a:{:?}, e:empty", i, a);
+        assert_eq!(a, [" "; 25].join(""));
       }
     }
   }
