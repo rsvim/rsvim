@@ -408,7 +408,7 @@ mod tests {
   use std::fs::File;
   use std::io::{BufReader, BufWriter};
   use std::sync::Arc;
-  use std::sync::{Once, OnceLock};
+  use std::sync::Once;
   use tracing::info;
 
   use super::*;
