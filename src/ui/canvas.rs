@@ -477,11 +477,112 @@ mod tests {
   fn _shade_cursor1() {
     INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
+
     let cursor1 = Cursor::default();
     can.frame_mut().set_cursor(cursor1);
+    let actual1 = can._shade_cursor();
+    assert!(actual1.is_empty());
 
     let cursor2 = Cursor::new(point!(x:3, y:7), false, true, CursorStyle::BlinkingBar);
+    can.frame_mut().set_cursor(cursor2);
+    let actual2 = can._shade_cursor();
+    assert!(!actual2.is_empty());
+    assert_eq!(actual2.len(), 4);
+    assert!(
+      actual2
+        .iter()
+        .filter(
+          |sh| if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh {
+            *x == 3 && *y == 7
+          } else {
+            false
+          }
+        )
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    );
+    assert!(
+      actual2
+        .iter()
+        .filter(|sh| {
+          matches!(
+            sh,
+            ShaderCommand::CursorDisableBlinking(crossterm::cursor::DisableBlinking)
+          )
+        })
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    );
+    assert!(
+      actual2
+        .iter()
+        .filter(|sh| { matches!(sh, ShaderCommand::CursorHide(crossterm::cursor::Hide)) })
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    );
+    assert!(
+      actual2
+        .iter()
+        .filter(|sh| {
+          matches!(
+            sh,
+            ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::BlinkingBar)
+          )
+        })
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    );
+
     let cursor3 = Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
+    can.frame_mut().set_cursor(cursor3);
+    let actual3 = can._shade_cursor();
+    assert_eq!(actual3.len(), 3);
+    assert!(
+      actual3
+        .iter()
+        .filter(
+          |sh| if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh {
+            *x == 4 && *y == 5
+          } else {
+            false
+          }
+        )
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    );
+    assert!(
+      actual3
+        .iter()
+        .filter(|sh| {
+          matches!(
+            sh,
+            ShaderCommand::CursorEnableBlinking(crossterm::cursor::EnableBlinking)
+          )
+        })
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    );
+    assert!(
+      actual3
+        .iter()
+        .filter(|sh| {
+          matches!(
+            sh,
+            ShaderCommand::CursorSetCursorStyle(
+              crossterm::cursor::SetCursorStyle::SteadyUnderScore
+            )
+          )
+        })
+        .collect::<Vec<_>>()
+        .len()
+        == 1
+    );
   }
 
   #[test]
