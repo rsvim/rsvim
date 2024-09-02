@@ -1,6 +1,8 @@
 //! Canvas.
 
+use compact_str::ToCompactString;
 use crossterm;
+use geo::point;
 use parking_lot::RwLock;
 use std::fmt;
 use std::fmt::Debug;
@@ -180,9 +182,28 @@ impl Canvas {
     let prev_frame = self.prev_frame();
     let prev_size = self.prev_size();
 
-    if size.width() > 0 && size.height() > 0 {
+    if !frame.zero_sized() {
       for row in (0..size.height()) {}
     }
+  }
+
+  /// Find next same cell index in current frame row.
+  pub fn _next_same_cell_index_in_row(
+    row: u16,
+    col: u16,
+    frame: &Frame,
+    prev_frame: &Frame,
+  ) -> u16 {
+    let mut col_end_at = col;
+    while col_end_at < frame.size().width() {
+      let cell2 = frame.cell(point!(x: col_end_at, y: row as u16));
+      let prev_cell2 = prev_frame.cell(point!(x: col_end_at, y: row as u16));
+      if cell2 == prev_cell2 {
+        break;
+      }
+      col_end_at += 1;
+    }
+    col_end_at
   }
 
   /// Dirty marks diff-algorithm, it only iterates on the area that has been marked as dirty by UI
@@ -193,17 +214,46 @@ impl Canvas {
     let frame = self.frame();
     let size = self.size();
     let prev_frame = self.prev_frame();
-    let prev_size = self.prev_size();
+    let _prev_size = self.prev_size();
 
-    if size.width() > 0 && size.height() > 0 {
+    if !frame.zero_sized() {
       for (row, dirty) in self.frame().dirty_rows().iter().enumerate() {
         if *dirty {
           let mut col = 0_u16;
-          while col < current_size.width() {
+          while col < size.width() {
             // Skip unchanged columns
-            let cell = frame.cell(point!(x: col, y: row));
+            let cell = frame.cell(point!(x: col, y: row as u16));
+            let prev_cell = prev_frame.cell(point!(x: col, y: row as u16));
+            if cell == prev_cell {
+              col += 1;
+              continue;
+            }
 
             // Find the continuously changed parts by iterating over columns
+            let col_end_at =
+              Canvas::_next_same_cell_index_in_row(row as u16, col, frame, prev_frame);
+
+            if col_end_at > col {
+              let new_cells = frame.cells_at(
+                point!(x: col, y: row as u16),
+                col_end_at as usize - col as usize,
+              );
+              let new_contents = new_cells
+                .iter()
+                .map(|c| {
+                  if c.symbol().is_empty() {
+                    " ".to_compact_string()
+                  } else {
+                    c.symbol().clone()
+                  }
+                })
+                .collect::<Vec<_>>()
+                .join("");
+              shader.push(ShaderCommand::StylePrintString(crossterm::style::Print(
+                new_contents.to_string(),
+              )));
+              col = col_end_at;
+            }
           }
         }
       }
