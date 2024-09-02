@@ -8,6 +8,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::slice::Iter;
 use std::sync::Arc;
+use tracing::debug;
 
 use crate::cart::{U16Pos, U16Size};
 
@@ -136,10 +137,12 @@ impl Canvas {
     if cursor != prev_cursor {
       if cursor.blinking() != prev_cursor.blinking() {
         if cursor.blinking() {
+          debug!("blinking:true");
           shader.push(ShaderCommand::CursorEnableBlinking(
             crossterm::cursor::EnableBlinking,
           ));
         } else {
+          debug!("blinking:false");
           shader.push(ShaderCommand::CursorDisableBlinking(
             crossterm::cursor::DisableBlinking,
           ));
@@ -147,15 +150,19 @@ impl Canvas {
       }
       if cursor.hidden() != prev_cursor.hidden() {
         if cursor.hidden() {
+          debug!("hidden:true");
           shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
         } else {
+          debug!("hidden:false");
           shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
         }
       }
       if !cursor_style_eq(&cursor.style(), &prev_cursor.style()) {
+        debug!("style:{:?}", CursorStyleFormatter::from(cursor.style()));
         shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
       if cursor.pos() != prev_cursor.pos() {
+        debug!("pos:{:?}", cursor.pos());
         shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
           cursor.pos().x(),
           cursor.pos().y(),
@@ -486,6 +493,7 @@ mod tests {
     let cursor2 = Cursor::new(point!(x:3, y:7), false, true, CursorStyle::BlinkingBar);
     can.frame_mut().set_cursor(cursor2);
     let actual2 = can._shade_cursor();
+    info!("actual2:{:?}", actual2);
     assert!(!actual2.is_empty());
     assert_eq!(actual2.len(), 4);
     assert!(
@@ -540,6 +548,7 @@ mod tests {
     let cursor3 = Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
     can.frame_mut().set_cursor(cursor3);
     let actual3 = can._shade_cursor();
+    info!("actual3:{:?}", actual3);
     assert_eq!(actual3.len(), 3);
     assert!(
       actual3
