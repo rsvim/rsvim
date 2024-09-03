@@ -23,18 +23,14 @@ pub struct Frame {
   /// Cells
   cells: Vec<Cell>,
 
-  /// Indicate which part of the frame is dirty.
+  /// Indicate what rows of the frame is dirty.
   ///
-  /// NOTE: This is only for fast locating the changed parts, but can be false positive, i.e. if a
-  /// location is marked in this collection, it can still be unchanged. But if a location is not
-  /// marked in this collection, it must be unchanged.
-  dirty_cells: Vec<Range<usize>>,
+  /// NOTE: This is for fast locating the changed rows inside the terminal device, i.e. the whole
+  /// TUI screen instead of the rows inside UI widget window.
+  dirty_rows: Vec<bool>,
 
   /// Cursor
   cursor: Cursor,
-
-  /// Indicate whether the cursor is changed.
-  dirty_cursor: bool,
 }
 
 impl Frame {
@@ -44,9 +40,8 @@ impl Frame {
     Frame {
       size,
       cells: vec![Cell::default(); n],
-      dirty_cells: vec![], // When first create, it's not dirty.
+      dirty_rows: vec![false; n], // When a frame first create, it's not dirty.
       cursor,
-      dirty_cursor: false,
     }
   }
 
@@ -107,11 +102,86 @@ impl Frame {
     self.xy2idx(pos.x() as usize, pos.y() as usize)
   }
 
+  /// Convert index into (position) X and Y.
+  ///
+  /// Returns `(x, y)`.
+  ///
+  /// # Panics
+  ///
+  /// If index is outside of frame shape.
+  pub fn idx2xy(&self, index: usize) -> (usize, usize) {
+    assert_eq!(
+      self.size.height() as usize * self.size.width() as usize,
+      self.cells.len()
+    );
+    assert!(index <= self.cells.len());
+    let x = index % self.size.width() as usize;
+    let y = index / self.size.width() as usize;
+    (x, y)
+  }
+
+  /// Convert index into position.
+  ///
+  /// # Panics
+  ///
+  /// If index is outside of frame shape.
+  pub fn idx2pos(&self, index: usize) -> U16Pos {
+    let (x, y) = self.idx2xy(index);
+    point!(x: x as u16, y: y as u16)
+  }
+
+  /// Get (first,last) boundary positions by row. The `first` is the left position of the row,
+  /// the `last` is the right position of the row.
+  ///
+  /// The `row` parameter starts from 0. NOTE: Row is X-axis.
+  ///
+  /// # Returns
+  ///
+  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
+  ///    this row.
+  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this row.
+  pub fn row_boundary(&self, row: u16) -> Option<(U16Pos, U16Pos)> {
+    if self.size.width() > 0 && self.size.height() > 0 && self.size.height() > row {
+      Some((
+        point!(x: 0_u16, y: row),
+        point!(x: self.size.width()-1, y: row),
+      ))
+    } else {
+      None
+    }
+  }
+
+  /// Get (first,last) boundary positions by column. The `first` is the top position of the column,
+  /// the `last` is the bottom position of the column.
+  ///
+  /// The `col` parameter starts from 0. NOTE: Column is Y-axis.
+  ///
+  /// # Returns
+  ///
+  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
+  ///    this column.
+  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this column.
+  pub fn column_boundary(&self, col: u16) -> Option<(U16Pos, U16Pos)> {
+    if self.size.height() > 0 && self.size.width() > 0 && self.size.width() > col {
+      Some((
+        point!(x: col, y: 0_u16),
+        point!(x: col, y: self.size.height()-1),
+      ))
+    } else {
+      None
+    }
+  }
+
   // Utils }
 
   /// Get current frame size.
   pub fn size(&self) -> U16Size {
     self.size
+  }
+
+  /// Whether the frame is zero sized.
+  pub fn zero_sized(&self) -> bool {
+    self.size.height() == 0 || self.size.width() == 0
   }
 
   /// Set current frame size.
@@ -122,6 +192,7 @@ impl Frame {
       size.height() as usize * size.width() as usize,
       Cell::default(),
     );
+    self.dirty_rows = vec![true; size.height() as usize];
     old_size
   }
 
@@ -144,8 +215,7 @@ impl Frame {
       index, cell, old_cell
     );
     self.cells[index] = cell;
-    let range = self.idx2range(index, 1);
-    self.dirty_cells.push(range);
+    self.dirty_rows[pos.y() as usize] = true;
     old_cell
   }
 
@@ -218,7 +288,10 @@ impl Frame {
   pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
     let range = self.pos2range(pos, cells.len());
     assert!(range.end <= self.cells.len());
-    self.dirty_cells.push(range.clone());
+    let end_at = self.idx2pos(range.end);
+    for row in pos.y()..(end_at.y() + 1) {
+      self.dirty_rows[row as usize] = true;
+    }
     self.cells.splice(range, cells).collect()
   }
 
@@ -227,9 +300,9 @@ impl Frame {
     self.set_cells_at(pos, vec![Cell::empty(); n])
   }
 
-  /// Get dirty cells.
-  pub fn dirty_cells(&self) -> &Vec<Range<usize>> {
-    &self.dirty_cells
+  /// Get dirty rows.
+  pub fn dirty_rows(&self) -> &Vec<bool> {
+    &self.dirty_rows
   }
 
   /// Get cursor.
@@ -239,70 +312,15 @@ impl Frame {
 
   /// Set cursor.
   pub fn set_cursor(&mut self, cursor: Cursor) {
-    if self.cursor != cursor {
-      self.cursor = cursor;
-      self.dirty_cursor = true;
-    }
-  }
-
-  /// Whether cursor is dirty.
-  pub fn dirty_cursor(&self) -> bool {
-    self.dirty_cursor
+    self.cursor = cursor;
   }
 
   /// Reset/clean all dirty components.
   ///
   /// NOTE: This method should be called after current frame flushed to terminal device.
   pub fn reset_dirty(&mut self) {
-    self.dirty_cells = vec![];
-    self.dirty_cursor = false;
+    self.dirty_rows = vec![false; self.size.height() as usize];
   }
-
-  // Rows/Columns Helper {
-
-  /// Get (first,last) boundary positions by row. The `first` is the left position of the row,
-  /// the `last` is the right position of the row.
-  ///
-  /// The `row` parameter starts from 0. NOTE: Row is X-axis.
-  ///
-  /// # Returns
-  ///
-  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
-  ///    this row.
-  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this row.
-  pub fn row_boundary(&self, row: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.width() > 0 && self.size.height() > 0 && self.size.height() > row {
-      Some((
-        point!(x: 0_u16, y: row),
-        point!(x: self.size.width()-1, y: row),
-      ))
-    } else {
-      None
-    }
-  }
-
-  /// Get (first,last) boundary positions by column. The `first` is the top position of the column,
-  /// the `last` is the bottom position of the column.
-  ///
-  /// The `col` parameter starts from 0. NOTE: Column is Y-axis.
-  ///
-  /// # Returns
-  ///
-  /// 1. Returns a pair/tuple of two positions, i.e. first and last positions, if the frame has
-  ///    this column.
-  /// 2. Returns `None`, if the frame is zero-sized or it doesn't have this column.
-  pub fn column_boundary(&self, col: u16) -> Option<(U16Pos, U16Pos)> {
-    if self.size.height() > 0 && self.size.width() > 0 && self.size.width() > col {
-      Some((
-        point!(x: col, y: 0_u16),
-        point!(x: col, y: self.size.height()-1),
-      ))
-    } else {
-      None
-    }
-  }
-
-  // Rows/Columns Helper }
 }
 
 #[cfg(test)]
@@ -372,6 +390,28 @@ mod tests {
     assert_eq!(frame.pos2idx(point!(x:1, y:0)), 1);
     assert_eq!(frame.pos2idx(point!(x:0, y:9)), 90);
     assert_eq!(frame.pos2idx(point!(x:9, y:9)), 99);
+  }
+
+  #[test]
+  fn idx2xy1() {
+    let frame_size = U16Size::new(10, 10);
+    let frame = Frame::new(frame_size, Cursor::default());
+    assert_eq!(frame.idx2xy(70), (0, 7));
+    assert_eq!(frame.idx2xy(37), (7, 3));
+    assert_eq!(frame.idx2xy(1), (1, 0));
+    assert_eq!(frame.idx2xy(90), (0, 9));
+    assert_eq!(frame.idx2xy(99), (9, 9));
+  }
+
+  #[test]
+  fn idx2pos1() {
+    let frame_size = U16Size::new(10, 10);
+    let frame = Frame::new(frame_size, Cursor::default());
+    assert_eq!(frame.idx2pos(70), point!(x:0, y:7));
+    assert_eq!(frame.idx2pos(37), point!(x:7, y:3));
+    assert_eq!(frame.idx2pos(1), point!(x:1, y:0));
+    assert_eq!(frame.idx2pos(90), point!(x:0, y:9));
+    assert_eq!(frame.idx2pos(99), point!(x:9, y:9));
   }
 
   #[test]

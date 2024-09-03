@@ -60,13 +60,13 @@ impl From<CursorStyle> for CursorStyleFormatter {
 impl fmt::Debug for CursorStyleFormatter {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
     match self.value {
-      CursorStyle::DefaultUserShape => write!(f, "CursorStyle::DefaultUserShape"),
-      CursorStyle::BlinkingBlock => write!(f, "CursorStyle::BlinkingBlock"),
-      CursorStyle::SteadyBlock => write!(f, "CursorStyle::SteadyBlock"),
-      CursorStyle::BlinkingUnderScore => write!(f, "CursorStyle::BlinkingUnderScore"),
-      CursorStyle::SteadyUnderScore => write!(f, "CursorStyle::SteadyUnderScore"),
-      CursorStyle::BlinkingBar => write!(f, "CursorStyle::BlinkingBar"),
-      CursorStyle::SteadyBar => write!(f, "CursorStyle::SteadyBar"),
+      CursorStyle::DefaultUserShape => write!(f, "DefaultUserShape"),
+      CursorStyle::BlinkingBlock => write!(f, "BlinkingBlock"),
+      CursorStyle::SteadyBlock => write!(f, "SteadyBlock"),
+      CursorStyle::BlinkingUnderScore => write!(f, "BlinkingUnderScore"),
+      CursorStyle::SteadyUnderScore => write!(f, "SteadyUnderScore"),
+      CursorStyle::BlinkingBar => write!(f, "BlinkingBar"),
+      CursorStyle::SteadyBar => write!(f, "SteadyBar"),
     }
   }
 }
@@ -202,9 +202,9 @@ mod tests {
       ),
     ];
     let expects = [
-        "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: true, hidden: false, style: CursorStyle::DefaultUserShape }",
-        "Cursor { pos: Point(Coord { x: 0, y: 10 }), blinking: false, hidden: true, style: CursorStyle::SteadyUnderScore }",
-        "Cursor { pos: Point(Coord { x: 7, y: 3 }), blinking: true, hidden: false, style: CursorStyle::BlinkingBar }"
+        "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: true, hidden: false, style: DefaultUserShape }",
+        "Cursor { pos: Point(Coord { x: 0, y: 10 }), blinking: false, hidden: true, style: SteadyUnderScore }",
+        "Cursor { pos: Point(Coord { x: 7, y: 3 }), blinking: true, hidden: false, style: BlinkingBar }"
     ];
     for (i, c) in cursors.iter().enumerate() {
       let actual = format!("{:?}", c);

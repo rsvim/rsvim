@@ -92,9 +92,10 @@ pub struct WindowContent {
   buffer: BufferWk,
   // Buffer view
   view: BufferView,
-  // Modified lines in buffer view, index start from 0. This dataset dedups lines iterating on
-  // buffer view in each drawing.
-  modified_lines: BTreeSet<usize>,
+  // First modified line in buffer view, index (line number) start from 0.
+  // When rendering window content with line-wrap/word-wrap options, once a line is modified, it's
+  // possible that the following lines are modified too.
+  first_modified_line: Option<usize>,
 
   // Options
   line_wrap: bool,
@@ -109,7 +110,7 @@ impl WindowContent {
       base: InodeBase::new(shape),
       buffer,
       view,
-      modified_lines: (0..shape.height()).map(|l| l as usize).collect(),
+      first_modified_line: Some(0),
       line_wrap: false,
       word_wrap: false,
     }
@@ -211,29 +212,24 @@ impl WindowContent {
 
   // Modified {
 
-  /// Get modified lines (in the view).
-  pub fn modified_lines(&self) -> &BTreeSet<usize> {
-    &self.modified_lines
-  }
-
-  /// Set all lines (in the view) to modified.
-  pub fn modify_all_lines(&mut self) {
-    self.modified_lines = (0..self.shape().height()).map(|l| l as usize).collect();
-  }
-
-  /// Clear all modified lines. This operation should be called after drawing to canvas.
-  pub fn clear_modified_lines(&mut self) {
-    self.modified_lines = BTreeSet::new();
+  /// Get the first modified line.
+  pub fn first_modified_line(&self) -> &Option<usize> {
+    &self.first_modified_line
   }
 
   /// Set modified line. This operation should be called after editing a line on buffer.
-  pub fn modify_line(&mut self, line: usize) -> bool {
-    self.modified_lines.insert(line)
-  }
-
-  /// Reset modified line to unmodified.
-  pub fn unmodify_line(&mut self, line_no: &usize) -> bool {
-    self.modified_lines.remove(line_no)
+  pub fn modify_line(&mut self, line: usize) {
+    let smaller_line = match self.first_modified_line {
+      Some(first_modified) => {
+        if first_modified > line {
+          line
+        } else {
+          first_modified
+        }
+      }
+      None => line,
+    };
+    self.first_modified_line = Some(smaller_line);
   }
 
   // Modified }
@@ -399,6 +395,9 @@ impl Widgetable for WindowContent {
         unreachable!("Invalid view")
       }
     }
+
+    // Reset first modified line after drawing.
+    self.first_modified_line = None;
   }
 }
 
@@ -482,6 +481,59 @@ mod tests {
       } else {
         info!("{:?} a:{:?}, e:empty", i, a);
         assert_eq!(a, [" "; 10].join(""));
+      }
+    }
+  }
+
+  #[test]
+  fn _draw_from_start_line2() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let window_content_shape = IRect::new((0, 0), (27, 15));
+    let mut window_content = WindowContent::new(window_content_shape, Arc::downgrade(&buffer));
+    let canvas_size = U16Size::new(27, 15);
+    let mut canvas = Canvas::new(canvas_size);
+
+    window_content._draw_from_start_line(&mut canvas, 1, 0, 0);
+    let actual = canvas
+      .frame()
+      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{:?}", actual);
+    let expect = buffer
+      .read()
+      .rope()
+      .lines()
+      .skip(1)
+      .take(15)
+      .map(|l| l.as_str().unwrap().chars().take(27).collect::<String>())
+      .collect::<Vec<_>>();
+    info!("expect:{:?}", expect);
+    assert_eq!(actual.len(), 15);
+    assert!(expect.len() <= 15);
+    for (i, a) in actual.into_iter().enumerate() {
+      assert!(a.len() == 27);
+      if i < expect.len() {
+        let e = expect[i].clone();
+        info!("{:?} a:{:?}, e:{:?}", i, a, e);
+        assert!(a.len() == e.len() || e.is_empty());
+        if a.len() == e.len() {
+          assert_eq!(a, e);
+        }
+      } else {
+        info!("{:?} a:{:?}, e:empty", i, a);
+        assert_eq!(a, [" "; 27].join(""));
       }
     }
   }
