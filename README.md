@@ -13,7 +13,7 @@ The VIM editor reinvented in Rust+Typescript.
   <a href="https://github.com/rsvim/rsvim/actions/workflows/build.yml"><img alt="build.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/build.yml?branch=main&label=build" /></a>
   <a href="https://app.codecov.io/gh/rsvim/rsvim"><img alt="codecov" src="https://img.shields.io/codecov/c/github/rsvim/rsvim/main" /></a>
   <a href="https://app.codacy.com/gh/rsvim/rsvim/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img alt="codacy" src="https://img.shields.io/codacy/grade/1c6a3d21352c4f8bb84ff6c7e3ef0399/main" /></a>
-  <a href="https://discord.gg/5KtRUCAByB"><img alt="push.yml" src="https://img.shields.io/discord/1220171472329379870?logo=discord" /></a>
+  <a href="https://discord.gg/5KtRUCAByB"><img alt="push.yml" src="https://img.shields.io/discord/1220171472329379870?label=discord" /></a>
 </p>
 
 > [!CAUTION]
