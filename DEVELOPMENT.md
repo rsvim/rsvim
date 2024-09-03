@@ -26,6 +26,10 @@ To develop the code, please setup with:
 
   > Recommend using [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
 
+### Coding Style
+
+- Public methods named with `_` prefix are private, the public decorator is only for testing.
+
 ### Global Control
 
 This project uses environment variables to control some behaviors globally, i.e. you can run the `rsvim` command with prepending some env vars. For example:

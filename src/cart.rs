@@ -69,14 +69,30 @@ pub type U16Rect = Rect<u16>;
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 /// Rectangle size.
-pub struct Size<T: Copy> {
+pub struct Size<
+  T: Copy
+    + PartialOrd
+    + Ord
+    + PartialEq
+    + Eq
+    + std::fmt::Debug
+    + num_traits::Num
+    + num_traits::NumCast,
+> {
   width: T,
   height: T,
 }
 
 impl<T> Size<T>
 where
-  T: Copy + PartialOrd + std::fmt::Debug + num_traits::Num + num_traits::NumCast,
+  T: Copy
+    + PartialOrd
+    + Ord
+    + PartialEq
+    + Eq
+    + std::fmt::Debug
+    + num_traits::Num
+    + num_traits::NumCast,
 {
   /// Make size from width(columns) and height(rows).
   ///
@@ -98,7 +114,14 @@ where
 
 impl<T> From<Rect<T>> for Size<T>
 where
-  T: Copy + PartialOrd + std::fmt::Debug + num_traits::Num + num_traits::NumCast,
+  T: Copy
+    + PartialOrd
+    + Ord
+    + PartialEq
+    + Eq
+    + std::fmt::Debug
+    + num_traits::Num
+    + num_traits::NumCast,
 {
   fn from(rect: Rect<T>) -> Size<T> {
     Size::new(rect.width() as T, rect.height() as T)

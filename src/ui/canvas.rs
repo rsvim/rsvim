@@ -1,11 +1,14 @@
 //! Canvas.
 
+use compact_str::ToCompactString;
 use crossterm;
+use geo::point;
 use parking_lot::RwLock;
 use std::fmt;
 use std::fmt::Debug;
 use std::slice::Iter;
 use std::sync::Arc;
+use tracing::debug;
 
 use crate::cart::{U16Pos, U16Size};
 
@@ -108,17 +111,44 @@ impl Canvas {
   pub fn shade(&mut self) -> Shader {
     let mut shader = Shader::new();
 
-    // For cursor.
-    if self.frame.dirty_cursor() {
-      let cursor = self.frame.cursor();
-      let prev_cursor = self.prev_frame.cursor();
+    // For cursor
+    let mut cursor_shaders = self._shade_cursor();
+    shader.append(&mut cursor_shaders);
 
+    // For cells
+    let mut cells_shaders = self._shade_cells();
+    shader.append(&mut cells_shaders);
+
+    // Finish shade.
+    self._shade_done();
+
+    shader
+  }
+
+  /// Shade done.
+  pub fn _shade_done(&mut self) {
+    // Save current frame.
+    self.prev_frame = self.frame.clone();
+    // Reset the `dirty` fields.
+    self.frame.reset_dirty();
+  }
+
+  /// Shade cursor and append results into shader vector.
+  pub fn _shade_cursor(&mut self) -> Vec<ShaderCommand> {
+    let cursor = self.frame.cursor();
+    let prev_cursor = self.prev_frame.cursor();
+    let mut shader = vec![];
+
+    // If cursor is changed.
+    if cursor != prev_cursor {
       if cursor.blinking() != prev_cursor.blinking() {
         if cursor.blinking() {
+          debug!("blinking:true");
           shader.push(ShaderCommand::CursorEnableBlinking(
             crossterm::cursor::EnableBlinking,
           ));
         } else {
+          debug!("blinking:false");
           shader.push(ShaderCommand::CursorDisableBlinking(
             crossterm::cursor::DisableBlinking,
           ));
@@ -126,15 +156,19 @@ impl Canvas {
       }
       if cursor.hidden() != prev_cursor.hidden() {
         if cursor.hidden() {
+          debug!("hidden:true");
           shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
         } else {
+          debug!("hidden:false");
           shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
         }
       }
       if !cursor_style_eq(&cursor.style(), &prev_cursor.style()) {
+        debug!("style:{:?}", CursorStyleFormatter::from(cursor.style()));
         shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
       if cursor.pos() != prev_cursor.pos() {
+        debug!("pos:{:?}", cursor.pos());
         shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
           cursor.pos().x(),
           cursor.pos().y(),
@@ -142,12 +176,141 @@ impl Canvas {
       }
     }
 
-    // Save current frame.
-    self.prev_frame = self.frame.clone();
-    // Reset the `dirty` fields.
-    self.frame.reset_dirty();
-
     shader
+  }
+
+  /// Shade cells and append results into shader vector.
+  pub fn _shade_cells(&mut self) -> Vec<ShaderCommand> {
+    if self.size() == self.prev_size() {
+      // When terminal size remains the same, use dirty-marks diff-algorithm.
+      self._dirty_marks_diff()
+    } else {
+      // When terminal size remains the same, use brute-force diff-algorithm.
+      self._brute_force_diff()
+    }
+  }
+
+  /// Find next same cell in current row of frame. NOTE: row is y, col is x.
+  ///
+  /// Returns the cell column number, started from 0.
+  pub fn _next_same_cell_in_row(&self, row: u16, col: u16) -> u16 {
+    let frame = self.frame();
+    let prev_frame = self.prev_frame();
+
+    let mut col_end_at = col;
+    while col_end_at < frame.size().width() {
+      let cell2 = frame.cell(point!(x: col_end_at, y: row));
+      let prev_cell2 = prev_frame.cell(point!(x: col_end_at, y: row));
+      if cell2 == prev_cell2 {
+        break;
+      }
+      col_end_at += 1;
+    }
+    col_end_at
+  }
+
+  pub fn _make_print_shader(&self, row: u16, start_col: u16, end_col: u16) -> ShaderCommand {
+    let frame = self.frame();
+
+    assert!(end_col > start_col);
+    let new_cells = frame.cells_at(
+      point!(x: start_col, y: row),
+      end_col as usize - start_col as usize,
+    );
+    let new_contents = new_cells
+      .iter()
+      .map(|c| {
+        if c.symbol().is_empty() {
+          " ".to_compact_string()
+        } else {
+          c.symbol().clone()
+        }
+      })
+      .collect::<Vec<_>>()
+      .join("");
+    ShaderCommand::StylePrintString(crossterm::style::Print(new_contents.to_string()))
+  }
+
+  /// Brute force diff-algorithm, it iterates all cells on current frame, and compares with
+  /// previous frame to find out the changed cells.
+  ///
+  /// This algorithm is useful when the whole terminal size is changed, and row/column based
+  /// diff-algorithm becomes invalid.
+  pub fn _brute_force_diff(&mut self) -> Vec<ShaderCommand> {
+    let frame = self.frame();
+    let size = self.size();
+    let prev_frame = self.prev_frame();
+    let _prev_size = self.prev_size();
+
+    let mut shaders = vec![];
+
+    if !frame.zero_sized() {
+      for row in 0..size.height() {
+        let mut col = 0_u16;
+        while col < size.width() {
+          // Skip unchanged columns
+          let cell = frame.cell(point!(x: col, y: row));
+          let prev_cell = prev_frame.cell(point!(x: col, y: row));
+          if cell == prev_cell {
+            col += 1;
+            continue;
+          }
+
+          // Find the continuously changed parts by iterating over columns
+          let col_end_at = self._next_same_cell_in_row(row, col);
+
+          if col_end_at > col {
+            let print_shader = self._make_print_shader(row, col, col_end_at);
+            shaders.push(print_shader);
+            col = col_end_at;
+          }
+        }
+      }
+    }
+
+    shaders
+  }
+
+  /// Dirty marks diff-algorithm, it only iterates on the area that has been marked as dirty by UI
+  /// widgets.
+  ///
+  /// This algorithm is more performant when the whole terminal size remains unchanged.
+  pub fn _dirty_marks_diff(&mut self) -> Vec<ShaderCommand> {
+    let frame = self.frame();
+    let size = self.size();
+    let prev_frame = self.prev_frame();
+    let _prev_size = self.prev_size();
+
+    let mut shaders = vec![];
+
+    if !frame.zero_sized() {
+      debug!("dirty_rows:{:?}", frame.dirty_rows());
+      for (row, dirty) in frame.dirty_rows().iter().enumerate() {
+        if *dirty {
+          let mut col = 0_u16;
+          while col < size.width() {
+            // Skip unchanged columns
+            let cell = frame.cell(point!(x: col, y: row as u16));
+            let prev_cell = prev_frame.cell(point!(x: col, y: row as u16));
+            if cell == prev_cell {
+              col += 1;
+              continue;
+            }
+
+            // Find the continuously changed parts by iterating over columns
+            let col_end_at = self._next_same_cell_in_row(row as u16, col);
+
+            if col_end_at > col {
+              let print_shader = self._make_print_shader(row as u16, col, col_end_at);
+              shaders.push(print_shader);
+              col = col_end_at;
+            }
+          }
+        }
+      }
+    }
+
+    shaders
   }
 }
 
@@ -189,6 +352,8 @@ pub enum ShaderCommand {
   StyleSetForegroundColor(crossterm::style::SetForegroundColor),
   StyleSetStyle(crossterm::style::SetStyle),
   StyleSetUnderlineColor(crossterm::style::SetUnderlineColor),
+  StylePrintStyledContentString(crossterm::style::PrintStyledContent<String>),
+  StylePrintString(crossterm::style::Print<String>),
   TerminalBeginSynchronizedUpdate(crossterm::terminal::BeginSynchronizedUpdate),
   TerminalClear(crossterm::terminal::Clear),
   TerminalDisableLineWrap(crossterm::terminal::DisableLineWrap),
@@ -204,49 +369,135 @@ pub enum ShaderCommand {
 impl fmt::Debug for ShaderCommand {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
     let s = match self {
-      ShaderCommand::CursorSetCursorStyle(command) => format!("{}", command),
-      ShaderCommand::CursorDisableBlinking(command) => format!("{:?}", command),
-      ShaderCommand::CursorEnableBlinking(command) => format!("{:?}", command),
-      ShaderCommand::CursorHide(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveDown(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveLeft(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveRight(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveTo(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveToColumn(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveToNextLine(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveToPreviousLine(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveToRow(command) => format!("{:?}", command),
-      ShaderCommand::CursorMoveUp(command) => format!("{:?}", command),
-      ShaderCommand::CursorRestorePosition(command) => format!("{:?}", command),
-      ShaderCommand::CursorSavePosition(command) => format!("{:?}", command),
-      ShaderCommand::CursorShow(command) => format!("{:?}", command),
-      ShaderCommand::EventDisableBracketedPaste(command) => format!("{:?}", command),
-      ShaderCommand::EventDisableFocusChange(command) => format!("{:?}", command),
-      ShaderCommand::EventDisableMouseCapture(command) => format!("{:?}", command),
-      ShaderCommand::EventEnableBracketedPaste(command) => format!("{:?}", command),
-      ShaderCommand::EventEnableFocusChange(command) => format!("{:?}", command),
-      ShaderCommand::EventEnableMouseCapture(command) => format!("{:?}", command),
-      ShaderCommand::EventPopKeyboardEnhancementFlags(command) => format!("{:?}", command),
-      ShaderCommand::EventPushKeyboardEnhancementFlags(command) => format!("{:?}", command),
-      ShaderCommand::StyleResetColor(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetAttribute(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetAttributes(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetBackgroundColor(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetColors(command) => format!("{}", command),
-      ShaderCommand::StyleSetForegroundColor(command) => format!("{}", command),
-      ShaderCommand::StyleSetStyle(command) => format!("{:?}", command),
-      ShaderCommand::StyleSetUnderlineColor(command) => format!("{:?}", command),
-      ShaderCommand::TerminalBeginSynchronizedUpdate(command) => format!("{:?}", command),
-      ShaderCommand::TerminalClear(command) => format!("{}", command),
-      ShaderCommand::TerminalDisableLineWrap(command) => format!("{:?}", command),
-      ShaderCommand::TerminalEnableLineWrap(command) => format!("{:?}", command),
-      ShaderCommand::TerminalEndSynchronizedUpdate(command) => format!("{:?}", command),
-      ShaderCommand::TerminalEnterAlternateScreen(command) => format!("{:?}", command),
-      ShaderCommand::TerminalLeaveAlternateScreen(command) => format!("{:?}", command),
-      ShaderCommand::TerminalScrollDown(command) => format!("{:?}", command),
-      ShaderCommand::TerminalScrollUp(command) => format!("{:?}", command),
-      ShaderCommand::TerminalSetSize(command) => format!("{:?}", command),
+      ShaderCommand::CursorSetCursorStyle(command) => {
+        format!(
+          "CursorSetCursorStyle({:?})",
+          CursorStyleFormatter::from(*command)
+        )
+      }
+      ShaderCommand::CursorDisableBlinking(command) => {
+        format!("CursorDisableBlinking({:?})", command)
+      }
+      ShaderCommand::CursorEnableBlinking(command) => {
+        format!("CursorEnableBlinking({:?})", command)
+      }
+      ShaderCommand::CursorHide(command) => format!("CursorHide({:?})", command),
+      ShaderCommand::CursorMoveDown(command) => {
+        format!("CursorMoveDown({:?})", command)
+      }
+      ShaderCommand::CursorMoveLeft(command) => {
+        format!("CursorMoveLeft({:?})", command)
+      }
+      ShaderCommand::CursorMoveRight(command) => {
+        format!("CursorMoveRight({:?})", command)
+      }
+      ShaderCommand::CursorMoveTo(command) => format!("CursorMoveTo({:?})", command),
+      ShaderCommand::CursorMoveToColumn(command) => {
+        format!("CursorMoveToColumn({:?})", command)
+      }
+      ShaderCommand::CursorMoveToNextLine(command) => {
+        format!("CursorMoveToNextLine({:?})", command)
+      }
+      ShaderCommand::CursorMoveToPreviousLine(command) => {
+        format!("CursorMoveToPreviousLine({:?})", command)
+      }
+      ShaderCommand::CursorMoveToRow(command) => {
+        format!("CursorMoveToRow({:?})", command)
+      }
+      ShaderCommand::CursorMoveUp(command) => format!("CursorMoveUp({:?})", command),
+      ShaderCommand::CursorRestorePosition(command) => {
+        format!("CursorRestorePosition({:?})", command)
+      }
+      ShaderCommand::CursorSavePosition(command) => {
+        format!("CursorSavePosition({:?})", command)
+      }
+      ShaderCommand::CursorShow(command) => format!("CursorShow({:?})", command),
+      ShaderCommand::EventDisableBracketedPaste(command) => {
+        format!("EventDisableBracketedPaste({:?})", command)
+      }
+      ShaderCommand::EventDisableFocusChange(command) => {
+        format!("EventDisableFocusChange({:?})", command)
+      }
+      ShaderCommand::EventDisableMouseCapture(command) => {
+        format!("EventDisableMouseCapture({:?})", command)
+      }
+      ShaderCommand::EventEnableBracketedPaste(command) => {
+        format!("EventEnableBracketedPaste({:?})", command)
+      }
+      ShaderCommand::EventEnableFocusChange(command) => {
+        format!("EventEnableFocusChange({:?})", command)
+      }
+      ShaderCommand::EventEnableMouseCapture(command) => {
+        format!("EventEnableMouseCapture({:?})", command)
+      }
+      ShaderCommand::EventPopKeyboardEnhancementFlags(command) => {
+        format!("EventPopKeyboardEnhancementFlags({:?})", command)
+      }
+      ShaderCommand::EventPushKeyboardEnhancementFlags(command) => {
+        format!("EventPushKeyboardEnhancementFlags({:?})", command)
+      }
+      ShaderCommand::StyleResetColor(command) => {
+        format!("StyleResetColor({:?})", command)
+      }
+      ShaderCommand::StyleSetAttribute(command) => {
+        format!("StyleSetAttribute({:?})", command)
+      }
+      ShaderCommand::StyleSetAttributes(command) => {
+        format!("StyleSetAttributes({:?})", command)
+      }
+      ShaderCommand::StyleSetBackgroundColor(command) => {
+        format!("StyleSetBackgroundColor({:?})", command)
+      }
+      ShaderCommand::StyleSetColors(command) => {
+        format!("StyleSetColors({:?})", command)
+      }
+      ShaderCommand::StyleSetForegroundColor(command) => {
+        format!("StyleSetForegroundColor({:?})", command)
+      }
+      ShaderCommand::StyleSetStyle(command) => {
+        format!("StyleSetStyle({:?})", command)
+      }
+      ShaderCommand::StyleSetUnderlineColor(command) => {
+        format!("StyleSetUnderlineColor({:?})", command)
+      }
+      ShaderCommand::StylePrintStyledContentString(command) => {
+        format!("StylePrintStyledContentString({:?})", command)
+      }
+      ShaderCommand::StylePrintString(command) => {
+        format!("StylePrintString({:?})", command)
+      }
+      ShaderCommand::TerminalBeginSynchronizedUpdate(command) => {
+        format!("TerminalBeginSynchronizedUpdate({:?})", command)
+      }
+      ShaderCommand::TerminalClear(command) => {
+        format!("TerminalClear({:?})", command)
+      }
+      ShaderCommand::TerminalDisableLineWrap(command) => {
+        format!("TerminalDisableLineWrap({:?})", command)
+      }
+      ShaderCommand::TerminalEnableLineWrap(command) => {
+        format!("TerminalEnableLineWrap({:?})", command)
+      }
+      ShaderCommand::TerminalEndSynchronizedUpdate(command) => {
+        format!("TerminalEndSynchronizedUpdate({:?})", command)
+      }
+      ShaderCommand::TerminalEnterAlternateScreen(command) => {
+        format!("TerminalEnterAlternateScreen({:?})", command)
+      }
+      ShaderCommand::TerminalLeaveAlternateScreen(command) => {
+        format!("TerminalLeaveAlternateScreen({:?})", command)
+      }
+      ShaderCommand::TerminalScrollDown(command) => {
+        format!("TerminalScrollDown({:?})", command)
+      }
+      ShaderCommand::TerminalScrollUp(command) => {
+        format!("TerminalScrollUp({:?})", command)
+      }
+      ShaderCommand::TerminalSetSize(command) => {
+        format!("TerminalSetSize({:?})", command)
+      }
     };
+    let s = format!("ShaderCommand::{}", s);
     f.debug_struct(&s).finish()
   }
 }
@@ -270,6 +521,11 @@ impl Shader {
     self.commands.push(command)
   }
 
+  /// Append a vector of shader commands.
+  pub fn append(&mut self, commands: &mut Vec<ShaderCommand>) {
+    self.commands.append(commands);
+  }
+
   /// Get an iterator of the collection.
   pub fn iter(&self) -> Iter<ShaderCommand> {
     self.commands.iter()
@@ -278,6 +534,7 @@ impl Shader {
 
 #[cfg(test)]
 mod tests {
+  use compact_str::CompactString;
   use std::sync::Once;
   use tracing::info;
 
@@ -287,15 +544,19 @@ mod tests {
 
   static INIT: Once = Once::new();
 
-  #[test]
-  fn new1() {
-    let t = Canvas::new(U16Size::new(3, 4));
-    assert_eq!(t.frame().size(), t.prev_frame().size());
-    assert_eq!(*t.frame().cursor(), *t.prev_frame().cursor());
+  fn int2letter(i: u8) -> char {
+    (i + 65) as char
   }
 
   #[test]
-  fn shader_command_debug() {
+  fn new1() {
+    let can = Canvas::new(U16Size::new(3, 4));
+    assert_eq!(can.frame().size(), can.prev_frame().size());
+    assert_eq!(*can.frame().cursor(), *can.prev_frame().cursor());
+  }
+
+  #[test]
+  fn shader_command_debug1() {
     INIT.call_once(test_log_init);
     info!(
       "ShaderCommand::TerminalEndSynchronizedUpdate: {:?}",
@@ -306,7 +567,312 @@ mod tests {
         "{:?}",
         ShaderCommand::TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate)
       ),
-      "ShaderCommand::TerminalEndSynchronizedUpdate"
+      "ShaderCommand::TerminalEndSynchronizedUpdate(EndSynchronizedUpdate)"
     );
+    info!(
+      "ShaderCommand::CursorSetCursorStyle(DefaultUserShape): {:?}",
+      ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::DefaultUserShape)
+    );
+    assert_eq!(
+      format!(
+        "{:?}",
+        ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::DefaultUserShape)
+      ),
+      "ShaderCommand::CursorSetCursorStyle(DefaultUserShape)"
+    );
+  }
+
+  #[test]
+  fn _shade_cursor1() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    let cursor1 = Cursor::default();
+    can.frame_mut().set_cursor(cursor1);
+    let actual1 = can._shade_cursor();
+    can._shade_done();
+    assert!(actual1.is_empty());
+
+    let cursor2 = Cursor::new(point!(x:3, y:7), false, true, CursorStyle::BlinkingBar);
+    can.frame_mut().set_cursor(cursor2);
+    let actual2 = can._shade_cursor();
+    can._shade_done();
+    info!("actual2:{:?}", actual2);
+    assert!(!actual2.is_empty());
+    assert_eq!(actual2.len(), 4);
+    assert_eq!(
+      actual2
+        .iter()
+        .filter(
+          |sh| if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh {
+            *x == 3 && *y == 7
+          } else {
+            false
+          }
+        )
+        .collect::<Vec<_>>()
+        .len(),
+      1
+    );
+    assert_eq!(
+      actual2
+        .iter()
+        .filter(|sh| {
+          matches!(
+            sh,
+            ShaderCommand::CursorDisableBlinking(crossterm::cursor::DisableBlinking)
+          )
+        })
+        .collect::<Vec<_>>()
+        .len(),
+      1
+    );
+    assert_eq!(
+      actual2
+        .iter()
+        .filter(|sh| { matches!(sh, ShaderCommand::CursorHide(crossterm::cursor::Hide)) })
+        .collect::<Vec<_>>()
+        .len(),
+      1
+    );
+    assert_eq!(
+      actual2
+        .iter()
+        .filter(|sh| {
+          matches!(
+            sh,
+            ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::BlinkingBar)
+          )
+        })
+        .collect::<Vec<_>>()
+        .len(),
+      1
+    );
+
+    let cursor3 = Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
+    can.frame_mut().set_cursor(cursor3);
+    let actual3 = can._shade_cursor();
+    can._shade_done();
+    info!("actual3:{:?}", actual3);
+    assert_eq!(actual3.len(), 3);
+    assert_eq!(
+      actual3
+        .iter()
+        .filter(
+          |sh| if let ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(x, y)) = sh {
+            *x == 4 && *y == 5
+          } else {
+            false
+          }
+        )
+        .collect::<Vec<_>>()
+        .len(),
+      1
+    );
+    assert_eq!(
+      actual3
+        .iter()
+        .filter(|sh| {
+          matches!(
+            sh,
+            ShaderCommand::CursorEnableBlinking(crossterm::cursor::EnableBlinking)
+          )
+        })
+        .collect::<Vec<_>>()
+        .len(),
+      1
+    );
+    assert_eq!(
+      actual3
+        .iter()
+        .filter(|sh| {
+          matches!(
+            sh,
+            ShaderCommand::CursorSetCursorStyle(
+              crossterm::cursor::SetCursorStyle::SteadyUnderScore
+            )
+          )
+        })
+        .collect::<Vec<_>>()
+        .len(),
+      1
+    );
+  }
+
+  #[test]
+  fn _next_same_cell_in_row1() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can
+      .frame_mut()
+      .set_cells_at(point!(x:0,y:0), vec![Cell::with_char('A'); 20]);
+    for i in 0..10 {
+      let actual = can._next_same_cell_in_row(0, i);
+      assert_eq!(actual, 10);
+    }
+    for i in 0..10 {
+      let actual = can._next_same_cell_in_row(1, i);
+      assert_eq!(actual, 20);
+    }
+  }
+
+  #[test]
+  fn _next_same_cell_in_row2() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can.frame_mut().set_cells_at(
+      point!(x:3,y:5),
+      (0..9)
+        .map(|i| Cell::with_char(int2letter(i)))
+        .collect::<Vec<_>>(),
+    );
+    let chars = (0_u8..9_u8)
+      .map(|i| int2letter(i).to_compact_string())
+      .collect::<Vec<_>>();
+    info!(
+      "frame:{:?}",
+      can
+        .frame()
+        .raw_symbols_with_placeholder(" ".to_compact_string())
+        .iter()
+        .map(|cs| cs
+          .iter()
+          .map(CompactString::to_string)
+          .collect::<Vec<_>>()
+          .join(""))
+        .collect::<Vec<_>>()
+    );
+    for col in 0..10 {
+      for row in 0..10 {
+        let actual = can._next_same_cell_in_row(row, col);
+        info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
+        if !(5..7).contains(&row) {
+          assert_eq!(actual, col);
+        } else if row == 5 && (3..10).contains(&col) {
+          assert_eq!(actual, 10);
+          info!(
+            "chars:{:?}, symbol:{:?}",
+            chars,
+            can.frame().cell(point!(x:col, y:row)).symbol()
+          );
+          assert!(chars.contains(can.frame().cell(point!(x:col, y:row)).symbol()));
+        } else if row == 6 && (0..2).contains(&col) {
+          assert_eq!(actual, 2);
+          info!(
+            "chars:{:?}, symbol:{:?}",
+            chars,
+            can.frame().cell(point!(x:col, y:row)).symbol()
+          );
+          assert!(chars.contains(can.frame().cell(point!(x:col, y:row)).symbol()));
+        } else {
+          assert_eq!(actual, col);
+        }
+      }
+    }
+  }
+
+  #[test]
+  fn _next_same_cell_in_row3() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can.frame_mut().set_cells_at(
+      point!(x:2,y:3),
+      (0..4)
+        .map(|i| Cell::with_char(int2letter(i)))
+        .collect::<Vec<_>>(),
+    );
+    let mut char_index = 0_u8;
+    info!(
+      "frame:{:?}",
+      can
+        .frame()
+        .raw_symbols_with_placeholder(" ".to_compact_string())
+        .iter()
+        .map(|cs| cs
+          .iter()
+          .map(CompactString::to_string)
+          .collect::<Vec<_>>()
+          .join(""))
+        .collect::<Vec<_>>()
+    );
+    for col in 0..10 {
+      for row in 0..10 {
+        let actual = can._next_same_cell_in_row(row, col);
+        info!("row:{:?}, col:{:?}, actual:{:?}", row, col, actual);
+        if row != 3 {
+          assert_eq!(actual, col);
+        } else if (2..6).contains(&col) {
+          assert_eq!(actual, 6);
+          assert_eq!(
+            int2letter(char_index).to_compact_string(),
+            can.frame().cell(point!(x:col, y:row)).symbol()
+          );
+          char_index += 1;
+        } else {
+          assert_eq!(actual, col);
+        }
+      }
+    }
+  }
+
+  #[test]
+  fn _make_print_shader1() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can.frame_mut().set_cells_at(
+      point!(x:2,y:3),
+      (0..4)
+        .map(|i| Cell::with_char(int2letter(i)))
+        .collect::<Vec<_>>(),
+    );
+    let col = 2;
+    let row = 3;
+    let col_end_at = can._next_same_cell_in_row(row, col);
+    let shader = can._make_print_shader(row, col, col_end_at);
+    info!("shader:{:?}", shader);
+    assert!(matches!(
+      shader,
+      ShaderCommand::StylePrintString(crossterm::style::Print(_))
+    ));
+    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = shader {
+      assert_eq!(contents, "ABCD".to_string());
+    }
+  }
+
+  #[test]
+  fn diff1() {
+    INIT.call_once(test_log_init);
+    let mut can = Canvas::new(U16Size::new(10, 10));
+
+    can.frame_mut().set_cells_at(
+      point!(x:2,y:3),
+      (0..4)
+        .map(|i| Cell::with_char(int2letter(i)))
+        .collect::<Vec<_>>(),
+    );
+    let actual1 = can._dirty_marks_diff();
+    let actual2 = can._brute_force_diff();
+    info!("dirty marks:{:?}", actual1);
+    info!("brute force:{:?}", actual2);
+    assert_eq!(actual1.len(), 1);
+    assert!(matches!(
+      actual1[0],
+      ShaderCommand::StylePrintString(crossterm::style::Print(_))
+    ));
+    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &actual1[0] {
+      assert_eq!(*contents, "ABCD".to_string());
+    }
+    assert_eq!(actual2.len(), 1);
+    assert!(matches!(
+      actual2[0],
+      ShaderCommand::StylePrintString(crossterm::style::Print(_))
+    ));
+    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &actual2[0] {
+      assert_eq!(*contents, "ABCD".to_string());
+    }
   }
 }
