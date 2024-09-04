@@ -7,8 +7,8 @@ use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{execute, terminal};
-use heed::types as heed_types;
-use heed::{byteorder, Database, EnvOpenOptions};
+// use heed::types as heed_types;
+// use heed::{byteorder, Database, EnvOpenOptions};
 use rsvim::evloop::EventLoop;
 use rsvim::{cli, log};
 use std::io::Result as IoResult;
