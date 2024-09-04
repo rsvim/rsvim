@@ -27,15 +27,17 @@ use tracing::{debug, error};
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
+use crate::evloop::task::{Task, TaskResult};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
-use crate::task::{Task, TaskResult};
 use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
+
+pub mod task;
 
 #[derive(Debug)]
 pub struct EventLoop {
@@ -90,6 +92,7 @@ impl EventLoop {
       state: State::to_arc(state),
       buffers: Buffers::to_arc(buffers),
       writer: BufWriter::new(std::io::stdout()),
+      task_queue: FuturesUnordered::new(),
     })
   }
 
