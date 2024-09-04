@@ -28,20 +28,20 @@ impl<'a> TaskableDataAccessMut<'a> {
   }
 }
 
-#[derive(Debug, Clone)]
-/// The immutable data passed to task, and allow them access the editor.
-pub struct TaskableDataAccess<'a> {
-  pub state: &'a State,
-  pub tree: TreeArc,
-  pub buffers: BuffersArc,
-}
-
-impl<'a> TaskableDataAccess<'a> {
-  pub fn new(state: &'a State, tree: TreeArc, buffers: BuffersArc) -> Self {
-    TaskableDataAccess {
-      state,
-      tree,
-      buffers,
-    }
-  }
-}
+// #[derive(Debug, Clone)]
+// /// The immutable data passed to task, and allow them access the editor.
+// pub struct TaskableDataAccess<'a> {
+//   pub state: &'a State,
+//   pub tree: TreeArc,
+//   pub buffers: BuffersArc,
+// }
+//
+// impl<'a> TaskableDataAccess<'a> {
+//   pub fn new(state: &'a State, tree: TreeArc, buffers: BuffersArc) -> Self {
+//     TaskableDataAccess {
+//       state,
+//       tree,
+//       buffers,
+//     }
+//   }
+// }
