@@ -1,7 +1,6 @@
 //! Async task.
 
 use futures::Future;
-use std::convert::From;
 use std::pin::Pin;
 
 use crate::buf::BuffersArc;
