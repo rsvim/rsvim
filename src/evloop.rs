@@ -10,6 +10,7 @@ use crossterm::{self, queue, terminal};
 use futures::StreamExt;
 use geo::point;
 // use heed::types::U16;
+use futures::stream::FuturesUnordered;
 use parking_lot::ReentrantMutexGuard;
 use ropey::RopeBuilder;
 use std::borrow::Borrow;
@@ -30,6 +31,7 @@ use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
+use crate::task::{Task, TaskResult};
 use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
@@ -43,6 +45,7 @@ pub struct EventLoop {
   pub state: StateArc,
   pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
+  pub task_queue: FuturesUnordered<Task>,
 }
 
 impl EventLoop {
