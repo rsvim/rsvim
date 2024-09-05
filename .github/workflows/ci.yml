@@ -40,8 +40,8 @@ jobs:
           cargo binstall --force --no-confirm cargo-msrv
           echo "Info: cargo msrv --version"
           cargo msrv --version
-          echo "Info: cargo msrv --linear --min 1.70.0"
-          cargo msrv --linear --min 1.70.0
+          echo "Info: cargo msrv list"
+          cargo msrv list
           echo "Info: cargo msrv verify"
           cargo msrv verify
       - name: Docs
