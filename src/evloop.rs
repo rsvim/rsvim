@@ -27,7 +27,7 @@ use tracing::{debug, error};
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
-use crate::evloop::task::{TaskResult, TaskRunnable};
+use crate::evloop::task::{Task, TaskResult, TaskableDataAccessMut};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
@@ -47,7 +47,7 @@ pub struct EventLoop {
   pub state: StateArc,
   pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
-  pub task_queue: FuturesUnordered<TaskRunnable>,
+  pub task_queue: FuturesUnordered<Task>,
 }
 
 impl EventLoop {
@@ -102,62 +102,15 @@ impl EventLoop {
 
     // Has input files.
     if !self.cli_opt.file().is_empty() {
-      unsafe {
-        // Fix `self` lifetime requires 'static in spawn.
-        let raw_self = NonNull::new(self as *mut EventLoop).unwrap();
-        let cli_opt = raw_self.as_ref().cli_opt.clone();
-        let buffers = raw_self.as_ref().buffers.clone();
-        static RBUF_SIZE: usize = if std::mem::size_of::<usize>() < 8 {
-          4096
-        } else {
-          8192
-        };
-
-        tokio::spawn(async move {
-          let mut _current_window_updated = false;
-
-          for (i, one_file) in cli_opt.file().iter().enumerate() {
-            debug!("Read the {} input file: {:?}", i, one_file);
-            match fs::File::open(one_file).await {
-              Ok(mut file) => {
-                let mut builder = RopeBuilder::new();
-
-                let mut rbuf: Vec<u8> = vec![0_u8; RBUF_SIZE];
-                debug!("Read buffer bytes size: {}", rbuf.len());
-                loop {
-                  match file.read_buf(&mut rbuf).await {
-                    Ok(n) => {
-                      debug!("Read {} bytes", n);
-                      let rbuf1: &[u8] = &rbuf;
-                      let rbuf_str: String = String::from_utf8_lossy(rbuf1).into_owned();
-
-                      builder.append(&rbuf_str.to_owned());
-                      if n == 0 {
-                        // Finish reading, create new buffer
-                        let buffer = Buffer::from(builder);
-                        buffers
-                          .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                          .unwrap()
-                          .insert(Buffer::to_arc(buffer));
-
-                        // println!("Read file {:?} into buffer", input_file);
-                        break;
-                      }
-                    }
-                    Err(e) => {
-                      // Unexpected error
-                      println!("Failed to read file {:?} with error {:?}", one_file, e);
-                    }
-                  }
-                }
-              }
-              Err(e) => {
-                println!("Failed to open file {:?} with error {:?}", one_file, e);
-              }
-            }
-          }
-        });
-      }
+      let data_access =
+        TaskableDataAccessMut::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
+      let input_files = self.cli_opt.file().to_vec();
+      self
+        .task_queue
+        .push(Box::pin(task::startup::edit_files::edit_files(
+          data_access,
+          input_files,
+        )));
     }
 
     Ok(())
@@ -165,26 +118,34 @@ impl EventLoop {
 
   pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
-    loop {
-      tokio::select! {
-        polled_event = reader.next() => match polled_event {
-          Some(Ok(event)) => {
-            debug!("polled_event ok: {:?}", event);
-            match self.accept(event).await {
-                Ok(next_loop) => {
-                    if !next_loop {
-                        break;
-                    }
-                }
-                _ => break
-            }
+    unsafe {
+      // Fix multiple mutable references on `self`.
+      let mut raw_self = NonNull::new(self as *mut EventLoop).unwrap();
+      loop {
+        tokio::select! {
+          polled_event = reader.next() => match polled_event {
+            Some(Ok(event)) => {
+              debug!("polled_event ok: {:?}", event);
+              match raw_self.as_mut().accept(event).await {
+                  Ok(next_loop) => {
+                      if !next_loop {
+                          break;
+                      }
+                  }
+                  _ => break
+              }
+            },
+            Some(Err(e)) => {
+              debug!("polled_event error: {:?}", e);
+              error!("Error: {:?}\r", e);
+              break;
+            },
+            None => break,
           },
-          Some(Err(e)) => {
-            debug!("polled_event error: {:?}", e);
-            error!("Error: {:?}\r", e);
-            break;
-          },
-          None => break,
+          Some(task) = raw_self.as_mut().task_queue.next() => match task {
+              Ok(_) => {/* Skip */}
+              Err(e) => error!("{e}")
+          }
         }
       }
     }
