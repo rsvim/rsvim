@@ -9,11 +9,11 @@ use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
 
 use crate::buf::{Buffer, Buffers, BuffersArc};
-use crate::evloop::task::{Task, TaskFuture, TaskId, TaskResult, Taskable, TaskableDataAccessMut};
+use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::glovar;
 
 /// Edit files
-pub async fn edit_files(data_access: TaskableDataAccessMut, files: Vec<String>) -> TaskResult {
+pub async fn edit_files(data_access: TaskableDataAccess, files: Vec<String>) -> TaskResult {
   let rbuf_size = 4096_usize;
   let buffers = data_access.buffers.clone();
 

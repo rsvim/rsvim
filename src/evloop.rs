@@ -9,6 +9,7 @@ use crossterm::event::{
 use crossterm::{self, queue, terminal};
 use futures::StreamExt;
 use geo::point;
+use std::collections::HashMap;
 // use heed::types::U16;
 use futures::stream::FuturesUnordered;
 use parking_lot::ReentrantMutexGuard;
@@ -22,12 +23,13 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
+use tokio::task::{AbortHandle, JoinSet};
 use tracing::{debug, error};
 
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
-use crate::evloop::task::{Task, TaskResult, TaskableDataAccessMut};
+use crate::evloop::task::{TaskId, TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
@@ -47,7 +49,8 @@ pub struct EventLoop {
   pub state: StateArc,
   pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
-  pub task_queue: FuturesUnordered<Task>,
+  pub tasks: JoinSet<TaskResult>,
+  pub task_handles: HashMap<TaskId, AbortHandle>,
 }
 
 impl EventLoop {
@@ -92,7 +95,8 @@ impl EventLoop {
       state: State::to_arc(state),
       buffers: Buffers::to_arc(buffers),
       writer: BufWriter::new(std::io::stdout()),
-      task_queue: FuturesUnordered::new(),
+      tasks: JoinSet::new(),
+      task_handles: HashMap::new(),
     })
   }
 
@@ -103,14 +107,14 @@ impl EventLoop {
     // Has input files.
     if !self.cli_opt.file().is_empty() {
       let data_access =
-        TaskableDataAccessMut::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
+        TaskableDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
       let input_files = self.cli_opt.file().to_vec();
+      let task_abort_handle = self.tasks.spawn(async move {
+        task::startup::edit_files::edit_files(data_access, input_files).await
+      });
       self
-        .task_queue
-        .push(Box::pin(task::startup::edit_files::edit_files(
-          data_access,
-          input_files,
-        )));
+        .task_handles
+        .insert(task_abort_handle.id(), task_abort_handle);
     }
 
     Ok(())
@@ -144,9 +148,9 @@ impl EventLoop {
             None => break,
           },
           // Get async task result
-          Some(task) = raw_self.as_mut().task_queue.next() => match task {
-              Ok(_) => {/* Skip */}
-              Err(e) => error!("{e}")
+          Some(joined_task) = raw_self.as_mut().tasks.join_next_with_id() => match joined_task {
+              Ok((task_id, task_result)) => {/* Skip */}
+              Err(joined_error) => error!("{joined_error}")
           }
         }
       }
