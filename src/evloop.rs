@@ -123,6 +123,7 @@ impl EventLoop {
       let mut raw_self = NonNull::new(self as *mut EventLoop).unwrap();
       loop {
         tokio::select! {
+          // Get user event
           polled_event = reader.next() => match polled_event {
             Some(Ok(event)) => {
               debug!("polled_event ok: {:?}", event);
@@ -142,6 +143,7 @@ impl EventLoop {
             },
             None => break,
           },
+          // Get async task result
           Some(task) = raw_self.as_mut().task_queue.next() => match task {
               Ok(_) => {/* Skip */}
               Err(e) => error!("{e}")
