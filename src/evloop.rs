@@ -27,7 +27,7 @@ use tracing::{debug, error};
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
-use crate::evloop::task::{Task, TaskResult};
+use crate::evloop::task::{TaskResult, TaskRunnable};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
@@ -47,7 +47,7 @@ pub struct EventLoop {
   pub state: StateArc,
   pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
-  pub task_queue: FuturesUnordered<Task>,
+  pub task_queue: FuturesUnordered<TaskRunnable>,
 }
 
 impl EventLoop {

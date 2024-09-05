@@ -8,8 +8,14 @@ use crate::evloop::EventLoop;
 use crate::state::{State, StateArc};
 use crate::ui::tree::TreeArc;
 
+pub type TaskId = usize;
 pub type TaskResult = Result<(), String>;
-pub type Task = Pin<Box<dyn Future<Output = TaskResult>>>;
+
+pub trait Taskable: Future<Output = TaskResult> {
+  fn id(&self) -> TaskId;
+}
+
+pub type Task = Pin<Box<dyn Taskable>>;
 
 #[derive(Debug)]
 /// The mutable data passed to task, and allow them access the editor.
@@ -25,14 +31,6 @@ impl TaskableDataAccessMut {
       state,
       tree,
       buffers,
-    }
-  }
-
-  pub fn from(value: &EventLoop) -> Self {
-    TaskableDataAccessMut {
-      state: value.state.clone(),
-      tree: value.tree.clone(),
-      buffers: value.buffers.clone(),
     }
   }
 }
