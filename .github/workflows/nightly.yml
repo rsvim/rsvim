@@ -3,7 +3,7 @@ permissions:
   contents: write
 on:
   schedule:
-    - cron: "0 0 1 * *"
+    - cron: "0 0 * * 1"
   workflow_dispatch:
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
@@ -25,10 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
-      - uses: dev-drprasad/delete-tag-and-release@v1.1
-        with:
-          tag_name: nightly
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - run: gh release delete nightly --cleanup-tag -y
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
