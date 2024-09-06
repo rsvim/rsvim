@@ -57,25 +57,25 @@ impl<'a> StatefulDataAccessMut<'a> {
   }
 }
 
-#[derive(Debug, Clone)]
-/// The immutable data passed to each state handler, and allow them access the editor.
-pub struct StatefulDataAccess<'a> {
-  pub state: &'a State,
-  pub tree: TreeArc,
-  pub buffers: BuffersArc,
-  pub event: Event,
-}
-
-impl<'a> StatefulDataAccess<'a> {
-  pub fn new(state: &'a State, tree: TreeArc, buffers: BuffersArc, event: Event) -> Self {
-    StatefulDataAccess {
-      state,
-      tree,
-      buffers,
-      event,
-    }
-  }
-}
+// #[derive(Debug, Clone)]
+// /// The immutable data passed to each state handler, and allow them access the editor.
+// pub struct StatefulDataAccess<'a> {
+//   pub state: &'a State,
+//   pub tree: TreeArc,
+//   pub buffers: BuffersArc,
+//   pub event: Event,
+// }
+//
+// impl<'a> StatefulDataAccess<'a> {
+//   pub fn new(state: &'a State, tree: TreeArc, buffers: BuffersArc, event: Event) -> Self {
+//     StatefulDataAccess {
+//       state,
+//       tree,
+//       buffers,
+//       event,
+//     }
+//   }
+// }
 
 /// The FSM state trait.
 pub trait Stateful {

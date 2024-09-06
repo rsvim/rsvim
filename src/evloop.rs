@@ -9,7 +9,9 @@ use crossterm::event::{
 use crossterm::{self, queue, terminal};
 use futures::StreamExt;
 use geo::point;
+use std::collections::HashMap;
 // use heed::types::U16;
+use futures::stream::FuturesUnordered;
 use parking_lot::ReentrantMutexGuard;
 use ropey::RopeBuilder;
 use std::borrow::Borrow;
@@ -21,11 +23,13 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
+use tokio::task::{AbortHandle, JoinSet};
 use tracing::{debug, error};
 
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
+use crate::evloop::task::{TaskId, TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
@@ -35,6 +39,8 @@ use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
+pub mod task;
+
 #[derive(Debug)]
 pub struct EventLoop {
   pub cli_opt: CliOpt,
@@ -43,6 +49,8 @@ pub struct EventLoop {
   pub state: StateArc,
   pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
+  pub tasks: JoinSet<TaskResult>,
+  pub task_handles: HashMap<TaskId, AbortHandle>,
 }
 
 impl EventLoop {
@@ -87,6 +95,8 @@ impl EventLoop {
       state: State::to_arc(state),
       buffers: Buffers::to_arc(buffers),
       writer: BufWriter::new(std::io::stdout()),
+      tasks: JoinSet::new(),
+      task_handles: HashMap::new(),
     })
   }
 
@@ -96,62 +106,15 @@ impl EventLoop {
 
     // Has input files.
     if !self.cli_opt.file().is_empty() {
-      unsafe {
-        // Fix `self` lifetime requires 'static in spawn.
-        let raw_self = NonNull::new(self as *mut EventLoop).unwrap();
-        let cli_opt = raw_self.as_ref().cli_opt.clone();
-        let buffers = raw_self.as_ref().buffers.clone();
-        static RBUF_SIZE: usize = if std::mem::size_of::<usize>() < 8 {
-          4096
-        } else {
-          8192
-        };
-
-        tokio::spawn(async move {
-          let mut _current_window_updated = false;
-
-          for (i, one_file) in cli_opt.file().iter().enumerate() {
-            debug!("Read the {} input file: {:?}", i, one_file);
-            match fs::File::open(one_file).await {
-              Ok(mut file) => {
-                let mut builder = RopeBuilder::new();
-
-                let mut rbuf: Vec<u8> = vec![0_u8; RBUF_SIZE];
-                debug!("Read buffer bytes size: {}", rbuf.len());
-                loop {
-                  match file.read_buf(&mut rbuf).await {
-                    Ok(n) => {
-                      debug!("Read {} bytes", n);
-                      let rbuf1: &[u8] = &rbuf;
-                      let rbuf_str: String = String::from_utf8_lossy(rbuf1).into_owned();
-
-                      builder.append(&rbuf_str.to_owned());
-                      if n == 0 {
-                        // Finish reading, create new buffer
-                        let buffer = Buffer::from(builder);
-                        buffers
-                          .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-                          .unwrap()
-                          .insert(Buffer::to_arc(buffer));
-
-                        // println!("Read file {:?} into buffer", input_file);
-                        break;
-                      }
-                    }
-                    Err(e) => {
-                      // Unexpected error
-                      println!("Failed to read file {:?} with error {:?}", one_file, e);
-                    }
-                  }
-                }
-              }
-              Err(e) => {
-                println!("Failed to open file {:?} with error {:?}", one_file, e);
-              }
-            }
-          }
-        });
-      }
+      let data_access =
+        TaskableDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
+      let input_files = self.cli_opt.file().to_vec();
+      let task_abort_handle = self.tasks.spawn(async move {
+        task::startup::edit_files::edit_files(data_access, input_files).await
+      });
+      self
+        .task_handles
+        .insert(task_abort_handle.id(), task_abort_handle);
     }
 
     Ok(())
@@ -159,26 +122,36 @@ impl EventLoop {
 
   pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
-    loop {
-      tokio::select! {
-        polled_event = reader.next() => match polled_event {
-          Some(Ok(event)) => {
-            debug!("polled_event ok: {:?}", event);
-            match self.accept(event).await {
-                Ok(next_loop) => {
-                    if !next_loop {
-                        break;
-                    }
-                }
-                _ => break
-            }
+    unsafe {
+      // Fix multiple mutable references on `self`.
+      let mut raw_self = NonNull::new(self as *mut EventLoop).unwrap();
+      loop {
+        tokio::select! {
+          // Get user event
+          polled_event = reader.next() => match polled_event {
+            Some(Ok(event)) => {
+              debug!("polled_event ok: {:?}", event);
+              match raw_self.as_mut().accept(event).await {
+                  Ok(next_loop) => {
+                      if !next_loop {
+                          break;
+                      }
+                  }
+                  _ => break
+              }
+            },
+            Some(Err(e)) => {
+              debug!("polled_event error: {:?}", e);
+              error!("Error: {:?}\r", e);
+              break;
+            },
+            None => break,
           },
-          Some(Err(e)) => {
-            debug!("polled_event error: {:?}", e);
-            error!("Error: {:?}\r", e);
-            break;
-          },
-          None => break,
+          // Get async task result
+          Some(joined_task) = raw_self.as_mut().tasks.join_next_with_id() => match joined_task {
+              Ok((_task_id, _task_result)) => {/* Skip */}
+              Err(joined_error) => error!("{joined_error}")
+          }
         }
       }
     }
