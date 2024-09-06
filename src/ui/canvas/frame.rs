@@ -201,9 +201,9 @@ impl Frame {
     index < self.cells.len()
   }
 
-  /// Whether range is inside frame cells.
+  /// Whether both range start and end is inside frame cells.
   pub fn _contains_range(&self, range: &Range<usize>) -> bool {
-    self._contains_index(range.start) && self._contains_index(range.end)
+    range.start < self.cells.len() && range.end < self.cells.len()
   }
 
   /// Get a cell.

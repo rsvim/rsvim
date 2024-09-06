@@ -316,7 +316,8 @@ impl WindowContent {
                 );
                 canvas
                   .frame_mut()
-                  .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
+                  .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
+                  .unwrap();
               }
             }
             None => {
@@ -330,7 +331,8 @@ impl WindowContent {
               );
               canvas
                 .frame_mut()
-                .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
+                .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
+                .unwrap();
             }
           }
           // Iterate to next row.
@@ -354,7 +356,8 @@ impl WindowContent {
           );
           canvas
             .frame_mut()
-            .set_cells_at(cells_upos, vec![Cell::empty(); cells_len]);
+            .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
+            .unwrap();
           row += 1;
         }
       }
