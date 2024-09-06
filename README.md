@@ -30,6 +30,14 @@ The goal of RSVIM is to be a highly extensible text editor by following the main
 - A text processing tool that batch processes text contents.
 - A modern project that leverages community works for theme, documentation, development, etc.
 
+## Installation
+
+Please download pre-built executables in [releases](https://github.com/rsvim/rsvim/releases) page, or build with cargo:
+
+```bash
+cargo install --locked rsvim
+```
+
 ## Get Started
 
 Please checkout [Documentation](https://rsvim.github.io/) for more details!
