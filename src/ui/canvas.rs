@@ -68,7 +68,7 @@ impl Canvas {
 
   /// Get current frame cells.
   pub fn cells(&self) -> &Vec<Cell> {
-    self.frame.cells()
+    self.frame.get_cells()
   }
 
   /// Get current frame cursor.
@@ -91,12 +91,12 @@ impl Canvas {
 
   /// Get previous frame cells.
   pub fn prev_cells(&self) -> &Vec<Cell> {
-    self.prev_frame.cells()
+    self.prev_frame.get_cells()
   }
 
   /// Get previous frame cells at specific range.
   pub fn prev_cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
-    self.prev_frame.cells_at(pos, n)
+    self.prev_frame.get_cells_at(pos, n)
   }
 
   /// Get previous frame cursor.
@@ -213,7 +213,7 @@ impl Canvas {
     let frame = self.frame();
 
     assert!(end_col > start_col);
-    let new_cells = frame.cells_at(
+    let new_cells = frame.get_cells_at(
       point!(x: start_col, y: row),
       end_col as usize - start_col as usize,
     );

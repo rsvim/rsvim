@@ -215,7 +215,7 @@ impl Frame {
     self.try_get_cell(pos).unwrap()
   }
 
-  /// Try get a cell, non-panic version of [`get_cell`].
+  /// Try get a cell, non-panic version of [`get_cell`](Frame::get_cell).
   pub fn try_get_cell(&self, pos: U16Pos) -> Option<&Cell> {
     let index = self.pos2idx(pos);
     if self._contains_index(index) {
@@ -239,7 +239,7 @@ impl Frame {
     self.try_set_cell(pos, cell).unwrap()
   }
 
-  /// Try set a cell, non-panic version of [`set_cell`].
+  /// Try set a cell, non-panic version of [`set_cell`](Frame::set_cell).
   pub fn try_set_cell(&mut self, pos: U16Pos, cell: Cell) -> Option<Cell> {
     let index = self.pos2idx(pos);
     if self._contains_index(index) {
@@ -268,7 +268,7 @@ impl Frame {
     self.set_cell(pos, Cell::empty())
   }
 
-  /// Try set an empty cell, non-panic version of [`set_empty_cell`].
+  /// Try set an empty cell, non-panic version of [`set_empty_cell`](Frame::set_empty_cell).
   pub fn try_set_empty_cell(&mut self, pos: U16Pos) -> Option<Cell> {
     self.try_set_cell(pos, Cell::empty())
   }
@@ -287,7 +287,8 @@ impl Frame {
     self.try_get_cells_at(pos, n).unwrap()
   }
 
-  /// Try get a range of continuously cells, non-panic version of [`get_cells_at`].
+  /// Try get a range of continuously cells, non-panic version of
+  /// [`get_cells_at`](Frame::get_cells_at).
   pub fn try_get_cells_at(&self, pos: U16Pos, n: usize) -> Option<&[Cell]> {
     let range = self.pos2range(pos, n);
     if self._contains_range(&range) {
@@ -346,7 +347,8 @@ impl Frame {
     self.try_set_cells_at(pos, cells).unwrap()
   }
 
-  /// Try set (replace) cells at a range, non-panic version of [`set_cells_at`].
+  /// Try set (replace) cells at a range, non-panic version of
+  /// [`set_cells_at`](Frame::set_cells_at).
   pub fn try_set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Option<Vec<Cell>> {
     let range = self.pos2range(pos, cells.len());
     if self._contains_range(&range) {
@@ -369,7 +371,8 @@ impl Frame {
     self.set_cells_at(pos, vec![Cell::empty(); n])
   }
 
-  /// Try set (replace) empty cells at a range, non-panic version of [`set_empty_cells_at`].
+  /// Try set (replace) empty cells at a range, non-panic version of
+  /// [`set_empty_cells_at`](Frame::set_empty_cells_at).
   pub fn try_set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Option<Vec<Cell>> {
     self.try_set_cells_at(pos, vec![Cell::empty(); n])
   }
