@@ -197,8 +197,13 @@ impl Frame {
   }
 
   /// Whether index is inside frame cells.
-  pub fn _contains(&self, index: usize) -> bool {
+  pub fn _contains_index(&self, index: usize) -> bool {
     index < self.cells.len()
+  }
+
+  /// Whether range is inside frame cells.
+  pub fn _contains_range(&self, range: &Range<usize>) -> bool {
+    self._contains_index(range.start) && self._contains_index(range.end)
   }
 
   /// Get a cell.
@@ -213,7 +218,7 @@ impl Frame {
   /// Try get a cell, non-panic version of [`get_cell`].
   pub fn try_get_cell(&self, pos: U16Pos) -> Option<&Cell> {
     let index = self.pos2idx(pos);
-    if self._contains(index) {
+    if self._contains_index(index) {
       let result = &self.cells[index];
       debug!("try get cell at index:{:?}, cell:{:?}", index, result);
       Some(result)
@@ -237,7 +242,7 @@ impl Frame {
   /// Try set a cell, non-panic version of [`set_cell`].
   pub fn try_set_cell(&mut self, pos: U16Pos, cell: Cell) -> Option<Cell> {
     let index = self.pos2idx(pos);
-    if self._contains(index) {
+    if self._contains_index(index) {
       let old_cell = self.cells[index].clone();
       debug!(
         "try set cell at index:{:?}, new cell:{:?}, old cell:{:?}",
@@ -273,21 +278,19 @@ impl Frame {
     &self.cells
   }
 
-  /// Get a range of continuously cells, start from a position and last for N elements.
+  /// Get a range of continuously cells.
   ///
   /// # Panics
   ///
   /// If the range is outside of frame shape.
   pub fn get_cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
-    let range = self.pos2range(pos, n);
-    &self.cells[range]
+    self.try_get_cells_at(pos, n).unwrap()
   }
 
-  /// Try get a range of continuously cells, start from a position and last for N elements.
-  /// Non-panic version of [`get_cells_at`].
+  /// Try get a range of continuously cells, non-panic version of [`get_cells_at`].
   pub fn try_get_cells_at(&self, pos: U16Pos, n: usize) -> Option<&[Cell]> {
     let range = self.pos2range(pos, n);
-    if self._contains(range.start) && self._contains(range.end) {
+    if self._contains_range(&range) {
       Some(&self.cells[range])
     } else {
       debug!("try get cells at invalid range:{:?}", range);
@@ -340,13 +343,21 @@ impl Frame {
   ///
   /// If any positions of `cells` is outside of frame shape.
   pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
+    self.try_set_cells_at(pos, cells).unwrap()
+  }
+
+  /// Try set (replace) cells at a range, non-panic version of [`set_cells_at`].
+  pub fn try_set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Option<Vec<Cell>> {
     let range = self.pos2range(pos, cells.len());
-    assert!(range.end <= self.cells.len());
-    let end_at = self.idx2pos(range.end);
-    for row in pos.y()..(end_at.y() + 1) {
-      self.dirty_rows[row as usize] = true;
+    if self._contains_range(&range) {
+      let end_at = self.idx2pos(range.end);
+      for row in pos.y()..(end_at.y() + 1) {
+        self.dirty_rows[row as usize] = true;
+      }
+      Some(self.cells.splice(range, cells).collect())
+    } else {
+      None
     }
-    self.cells.splice(range, cells).collect()
   }
 
   /// Set (replace) empty cells at a range.
@@ -356,6 +367,11 @@ impl Frame {
   /// If any positions of `cells` is outside of frame shape.
   pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Vec<Cell> {
     self.set_cells_at(pos, vec![Cell::empty(); n])
+  }
+
+  /// Try set (replace) empty cells at a range, non-panic version of [`set_empty_cells_at`].
+  pub fn try_set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Option<Vec<Cell>> {
+    self.try_set_cells_at(pos, vec![Cell::empty(); n])
   }
 
   /// Get dirty rows.
