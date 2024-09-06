@@ -196,16 +196,31 @@ impl Frame {
     old_size
   }
 
+  /// Whether index is inside frame cells.
+  pub fn _contains(&self, index: usize) -> bool {
+    index < self.cells.len()
+  }
+
   /// Get a cell.
   ///
   /// # Panics
   ///
   /// If the position is outside of frame shape.
-  pub fn cell(&self, pos: U16Pos) -> &Cell {
+  pub fn get_cell(&self, pos: U16Pos) -> &Cell {
+    self.try_get_cell(pos).unwrap()
+  }
+
+  /// Try get a cell, non-panic version of [`get_cell`].
+  pub fn try_get_cell(&self, pos: U16Pos) -> Option<&Cell> {
     let index = self.pos2idx(pos);
-    let result = &self.cells[index];
-    debug!("get cell at index:{:?}, cell:{:?}", index, result);
-    result
+    if self._contains(index) {
+      let result = &self.cells[index];
+      debug!("try get cell at index:{:?}, cell:{:?}", index, result);
+      Some(result)
+    } else {
+      debug!("try get cell invalid index:{:?}", index);
+      None
+    }
   }
 
   /// Set a cell.
@@ -216,15 +231,25 @@ impl Frame {
   ///
   /// If the position is outside of frame shape.
   pub fn set_cell(&mut self, pos: U16Pos, cell: Cell) -> Cell {
+    self.try_set_cell(pos, cell).unwrap()
+  }
+
+  /// Try set a cell, non-panic version of [`set_cell`].
+  pub fn try_set_cell(&mut self, pos: U16Pos, cell: Cell) -> Option<Cell> {
     let index = self.pos2idx(pos);
-    let old_cell = self.cells[index].clone();
-    debug!(
-      "set cell at index:{:?}, new cell:{:?}, old cell:{:?}",
-      index, cell, old_cell
-    );
-    self.cells[index] = cell;
-    self.dirty_rows[pos.y() as usize] = true;
-    old_cell
+    if self._contains(index) {
+      let old_cell = self.cells[index].clone();
+      debug!(
+        "try set cell at index:{:?}, new cell:{:?}, old cell:{:?}",
+        index, cell, old_cell
+      );
+      self.cells[index] = cell;
+      self.dirty_rows[pos.y() as usize] = true;
+      Some(old_cell)
+    } else {
+      debug!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
+      None
+    }
   }
 
   /// Set an empty cell.
@@ -238,12 +263,13 @@ impl Frame {
     self.set_cell(pos, Cell::empty())
   }
 
+  /// Try set an empty cell, non-panic version of [`set_empty_cell`].
+  pub fn try_set_empty_cell(&mut self, pos: U16Pos) -> Option<Cell> {
+    self.try_set_cell(pos, Cell::empty())
+  }
+
   /// Get all cells.
-  ///
-  /// # Panics
-  ///
-  /// If the position is outside of frame shape.
-  pub fn cells(&self) -> &Vec<Cell> {
+  pub fn get_cells(&self) -> &Vec<Cell> {
     &self.cells
   }
 
@@ -252,9 +278,21 @@ impl Frame {
   /// # Panics
   ///
   /// If the range is outside of frame shape.
-  pub fn cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
+  pub fn get_cells_at(&self, pos: U16Pos, n: usize) -> &[Cell] {
     let range = self.pos2range(pos, n);
     &self.cells[range]
+  }
+
+  /// Try get a range of continuously cells, start from a position and last for N elements.
+  /// Non-panic version of [`get_cells_at`].
+  pub fn try_get_cells_at(&self, pos: U16Pos, n: usize) -> Option<&[Cell]> {
+    let range = self.pos2range(pos, n);
+    if self._contains(range.start) && self._contains(range.end) {
+      Some(&self.cells[range])
+    } else {
+      debug!("try get cells at invalid range:{:?}", range);
+      None
+    }
   }
 
   /// Get raw symbols of all cells.
@@ -461,7 +499,7 @@ mod tests {
       assert_eq!(actual.attrs(), Attributes::default());
     }
     for (i, input) in inputs.iter().enumerate() {
-      let actual = frame.cell(input.0);
+      let actual = frame.get_cell(input.0);
       info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
       assert_eq!(actual.symbol(), input.1.to_compact_string());
       assert_eq!(actual.fg(), Color::Reset);
@@ -497,7 +535,7 @@ mod tests {
       assert_eq!(actual.attrs(), Attributes::default());
     }
     for (i, input) in inputs.iter().enumerate() {
-      let actual = frame.cell(input.0);
+      let actual = frame.get_cell(input.0);
       info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
       assert_eq!(actual.symbol(), input.1.to_compact_string());
       assert_eq!(actual.fg(), Color::Reset);
@@ -512,7 +550,7 @@ mod tests {
       assert_eq!(actual.symbol(), input.1.to_compact_string());
     }
     for (i, input) in inputs.iter().enumerate() {
-      let actual = frame.cell(input.0);
+      let actual = frame.get_cell(input.0);
       info!("{:?} input:{:?}, actual:{:?}", i, input, actual);
       assert_eq!(actual.symbol(), CompactString::new(""));
     }
@@ -557,10 +595,10 @@ mod tests {
       assert_eq!(actual.symbol(), CompactString::new(""));
     }
     info!("1-raw_symbols:{:?}", frame.raw_symbols(),);
-    let all_cells = frame.cells();
+    let all_cells = frame.get_cells();
     for i in 0..10 {
       let pos: U16Pos = point!(x:0, y:i);
-      let cells = frame.cells_at(pos, 10);
+      let cells = frame.get_cells_at(pos, 10);
       let actual = cells
         .iter()
         .map(|c| {

@@ -199,8 +199,8 @@ impl Canvas {
 
     let mut col_end_at = col;
     while col_end_at < frame.size().width() {
-      let cell2 = frame.cell(point!(x: col_end_at, y: row));
-      let prev_cell2 = prev_frame.cell(point!(x: col_end_at, y: row));
+      let cell2 = frame.get_cell(point!(x: col_end_at, y: row));
+      let prev_cell2 = prev_frame.get_cell(point!(x: col_end_at, y: row));
       if cell2 == prev_cell2 {
         break;
       }
@@ -249,8 +249,8 @@ impl Canvas {
         let mut col = 0_u16;
         while col < size.width() {
           // Skip unchanged columns
-          let cell = frame.cell(point!(x: col, y: row));
-          let prev_cell = prev_frame.cell(point!(x: col, y: row));
+          let cell = frame.get_cell(point!(x: col, y: row));
+          let prev_cell = prev_frame.get_cell(point!(x: col, y: row));
           if cell == prev_cell {
             col += 1;
             continue;
@@ -290,8 +290,8 @@ impl Canvas {
           let mut col = 0_u16;
           while col < size.width() {
             // Skip unchanged columns
-            let cell = frame.cell(point!(x: col, y: row as u16));
-            let prev_cell = prev_frame.cell(point!(x: col, y: row as u16));
+            let cell = frame.get_cell(point!(x: col, y: row as u16));
+            let prev_cell = prev_frame.get_cell(point!(x: col, y: row as u16));
             if cell == prev_cell {
               col += 1;
               continue;
@@ -755,17 +755,17 @@ mod tests {
           info!(
             "chars:{:?}, symbol:{:?}",
             chars,
-            can.frame().cell(point!(x:col, y:row)).symbol()
+            can.frame().get_cell(point!(x:col, y:row)).symbol()
           );
-          assert!(chars.contains(can.frame().cell(point!(x:col, y:row)).symbol()));
+          assert!(chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol()));
         } else if row == 6 && (0..2).contains(&col) {
           assert_eq!(actual, 2);
           info!(
             "chars:{:?}, symbol:{:?}",
             chars,
-            can.frame().cell(point!(x:col, y:row)).symbol()
+            can.frame().get_cell(point!(x:col, y:row)).symbol()
           );
-          assert!(chars.contains(can.frame().cell(point!(x:col, y:row)).symbol()));
+          assert!(chars.contains(can.frame().get_cell(point!(x:col, y:row)).symbol()));
         } else {
           assert_eq!(actual, col);
         }
@@ -808,7 +808,7 @@ mod tests {
           assert_eq!(actual, 6);
           assert_eq!(
             int2letter(char_index).to_compact_string(),
-            can.frame().cell(point!(x:col, y:row)).symbol()
+            can.frame().get_cell(point!(x:col, y:row)).symbol()
           );
           char_index += 1;
         } else {
