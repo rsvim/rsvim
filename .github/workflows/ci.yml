@@ -10,7 +10,11 @@ concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 env:
-  RUSTFLAGS: "-Dwarnings"
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 3
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-Dwarnings --cfg tokio_unstable"
   RUST_BACKTRACE: "full"
 jobs:
   lint:

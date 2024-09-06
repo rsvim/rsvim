@@ -11,11 +11,11 @@ concurrency:
 env:
   CARGO_INCREMENTAL: 0
   CARGO_NET_GIT_FETCH_WITH_CLI: true
-  CARGO_NET_RETRY: 10
+  CARGO_NET_RETRY: 3
   CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: 1
-  RUSTFLAGS: -D warnings
-  RUSTUP_MAX_RETRIES: 10
+  RUSTFLAGS: "-Dwarnings --cfg tokio_unstable"
+  RUST_BACKTRACE: "full"
+  RUSTUP_MAX_RETRIES: 3
 defaults:
   run:
     shell: bash
