@@ -300,7 +300,7 @@ impl Frame {
   ///
   /// # Panics
   ///
-  /// If `cells` length exceed the canvas.
+  /// If any positions of `cells` is outside of frame shape.
   pub fn set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Vec<Cell> {
     let range = self.pos2range(pos, cells.len());
     assert!(range.end <= self.cells.len());
@@ -312,6 +312,10 @@ impl Frame {
   }
 
   /// Set (replace) empty cells at a range.
+  ///
+  /// # Panics
+  ///
+  /// If any positions of `cells` is outside of frame shape.
   pub fn set_empty_cells_at(&mut self, pos: U16Pos, n: usize) -> Vec<Cell> {
     self.set_cells_at(pos, vec![Cell::empty(); n])
   }
