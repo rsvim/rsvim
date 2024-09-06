@@ -568,7 +568,6 @@ mod tests {
     for (i, a) in actual.into_iter().enumerate() {
       assert!(a.len() == 20);
       info!("{:?} a:{:?}", i, a);
-      assert!(a.len() == 18);
       assert!(a
         .chars()
         .filter(|c| *c != ' ')
