@@ -20,8 +20,8 @@ use crate::ui::widget::Widgetable;
 use crate::uuid;
 
 #[derive(Debug, Copy, Clone, Default)]
-/// The view of a buffer. The range is left-open right-closed, or top-open bottom-closed, i.e.
-/// `[start_line, end_line)` or `[start_column, end_column)`.
+/// The view of a buffer. The range is left-inclusive right-exclusive, or top-inclusive
+/// bottom-exclusive, i.e. `[start_line, end_line)` or `[start_column, end_column)`.
 struct BufferView {
   /// Start line number
   pub start_line: Option<usize>,
@@ -436,6 +436,11 @@ mod tests {
     Buffer::to_arc(buf)
   }
 
+  fn make_empty_buffer() -> BufferArc {
+    let buf: Buffer = RopeBuilder::new().into();
+    Buffer::to_arc(buf)
+  }
+
   #[test]
   fn _draw_from_start_line1() {
     INIT.call_once(test_log_init);
@@ -538,6 +543,37 @@ mod tests {
         info!("{:?} a:{:?}, e:empty", i, a);
         assert_eq!(a, [" "; 27].join(""));
       }
+    }
+  }
+
+  #[test]
+  fn _draw_from_start_line3() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_empty_buffer();
+    let window_content_shape = IRect::new((0, 0), (20, 18));
+    let mut window_content = WindowContent::new(window_content_shape, Arc::downgrade(&buffer));
+    let canvas_size = U16Size::new(20, 18);
+    let mut canvas = Canvas::new(canvas_size);
+
+    window_content._draw_from_start_line(&mut canvas, 0, 0, 0);
+    let actual = canvas
+      .frame()
+      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{:?}", actual);
+    assert_eq!(actual.len(), 18);
+    for (i, a) in actual.into_iter().enumerate() {
+      assert!(a.len() == 20);
+      info!("{:?} a:{:?}", i, a);
+      assert!(a.len() == 18);
+      assert!(a
+        .chars()
+        .filter(|c| *c != ' ')
+        .collect::<Vec<_>>()
+        .is_empty());
     }
   }
 }

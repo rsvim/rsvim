@@ -49,55 +49,25 @@ impl Frame {
 
   /// Convert start position and length of following N elements into Vec range.
   ///
-  /// # Panics
-  ///
-  /// If the range is outside of frame shape.
+  /// Returns the left-inclusive right-exclusive index range.
   pub fn pos2range(&self, pos: U16Pos, n: usize) -> Range<usize> {
-    assert_eq!(
-      self.size.height() as usize * self.size.width() as usize,
-      self.cells.len()
-    );
     let start_idx = self.pos2idx(pos);
     let end_idx = start_idx + n;
-    assert!(end_idx <= self.cells.len());
     start_idx..end_idx
   }
 
   /// Convert start index and length of following N elements into Vec range.
-  ///
-  /// # Panics
-  ///
-  /// If the range is outside of frame shape.
   pub fn idx2range(&self, index: usize, n: usize) -> Range<usize> {
-    assert_eq!(
-      self.size.height() as usize * self.size.width() as usize,
-      self.cells.len()
-    );
     let end_idx = index + n;
-    assert!(end_idx <= self.cells.len());
     index..end_idx
   }
 
   /// Convert (position) X and Y into Vec index.
-  ///
-  /// # Panics
-  ///
-  /// If x and y is outside of frame shape.
   pub fn xy2idx(&self, x: usize, y: usize) -> usize {
-    assert_eq!(
-      self.size.height() as usize * self.size.width() as usize,
-      self.cells.len()
-    );
-    let index = y * self.size.width() as usize + x;
-    assert!(index <= self.cells.len());
-    index
+    y * self.size.width() as usize + x
   }
 
   /// Convert position into Vec index.
-  ///
-  /// # Panics
-  ///
-  /// If position is outside of frame shape.
   pub fn pos2idx(&self, pos: U16Pos) -> usize {
     self.xy2idx(pos.x() as usize, pos.y() as usize)
   }
@@ -110,10 +80,6 @@ impl Frame {
   ///
   /// If index is outside of frame shape.
   pub fn idx2xy(&self, index: usize) -> (usize, usize) {
-    assert_eq!(
-      self.size.height() as usize * self.size.width() as usize,
-      self.cells.len()
-    );
     assert!(index <= self.cells.len());
     let x = index % self.size.width() as usize;
     let y = index / self.size.width() as usize;
@@ -201,9 +167,9 @@ impl Frame {
     index < self.cells.len()
   }
 
-  /// Whether both range start and end is inside frame cells.
+  /// Whether range is inside frame cells. The range is left-inclusive, right-exclusive.
   pub fn _contains_range(&self, range: &Range<usize>) -> bool {
-    range.start < self.cells.len() && range.end < self.cells.len()
+    range.start < self.cells.len() && range.end <= self.cells.len()
   }
 
   /// Get a cell.
@@ -351,9 +317,14 @@ impl Frame {
   /// [`set_cells_at`](Frame::set_cells_at).
   pub fn try_set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Option<Vec<Cell>> {
     let range = self.pos2range(pos, cells.len());
+    debug!(
+      "try set cells at range:{:?}, cells len:{:?}",
+      range,
+      self.cells.len()
+    );
     if self._contains_range(&range) {
       let end_at = self.idx2pos(range.end);
-      for row in pos.y()..(end_at.y() + 1) {
+      for row in pos.y()..end_at.y() {
         self.dirty_rows[row as usize] = true;
       }
       Some(self.cells.splice(range, cells).collect())
