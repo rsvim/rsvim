@@ -8,5 +8,5 @@ To release new version, please setup with:
 
 - [cargo-release](https://github.com/crate-ci/cargo-release): Release a new version, run below commands:
 
-  1. Dry run with `cargo release patch|minor|major`.
-  2. Run with `cargo release patch|minor|major --execute`.
+  1. Dry run with `cargo release patch|minor|major|alpha|beta|rc`.
+  2. Run with `cargo release patch|minor|major|alpha|beta|rc --execute`.
