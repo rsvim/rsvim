@@ -197,6 +197,10 @@ impl Frame {
   }
 
   /// Get a cell.
+  ///
+  /// # Panics
+  ///
+  /// If the position is outside of frame shape.
   pub fn cell(&self, pos: U16Pos) -> &Cell {
     let index = self.pos2idx(pos);
     let result = &self.cells[index];
@@ -207,6 +211,10 @@ impl Frame {
   /// Set a cell.
   ///
   /// Returns the old cell.
+  ///
+  /// # Panics
+  ///
+  /// If the position is outside of frame shape.
   pub fn set_cell(&mut self, pos: U16Pos, cell: Cell) -> Cell {
     let index = self.pos2idx(pos);
     let old_cell = self.cells[index].clone();
@@ -222,11 +230,19 @@ impl Frame {
   /// Set an empty cell.
   ///
   /// Returns the old cell.
+  ///
+  /// # Panics
+  ///
+  /// If the position is outside of frame shape.
   pub fn set_empty_cell(&mut self, pos: U16Pos) -> Cell {
     self.set_cell(pos, Cell::empty())
   }
 
   /// Get all cells.
+  ///
+  /// # Panics
+  ///
+  /// If the position is outside of frame shape.
   pub fn cells(&self) -> &Vec<Cell> {
     &self.cells
   }
