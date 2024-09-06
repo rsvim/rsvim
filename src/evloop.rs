@@ -149,7 +149,7 @@ impl EventLoop {
           },
           // Get async task result
           Some(joined_task) = raw_self.as_mut().tasks.join_next_with_id() => match joined_task {
-              Ok((task_id, task_result)) => {/* Skip */}
+              Ok((_task_id, _task_result)) => {/* Skip */}
               Err(joined_error) => error!("{joined_error}")
           }
         }
