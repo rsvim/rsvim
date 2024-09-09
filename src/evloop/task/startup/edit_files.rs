@@ -8,7 +8,7 @@ use tokio::fs;
 use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
 
-use crate::buf::{Buffer, Buffers, BuffersArc};
+use crate::buf::{Buffer, BufferArc, Buffers, BuffersArc};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::glovar;
 
@@ -42,16 +42,32 @@ pub async fn edit_files(data_access: TaskableDataAccess, files: Vec<String>) -> 
             Ok(n) => {
               debug!("Read {} bytes", n);
 
-              builder.append(into_repo(&buf));
               if first_block_read {
                 first_block_read = false;
+
+                // After read the first block, immediately update the default buffer.
+                // So the UI tree could show it for user view.
+                buffers
+                  .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                  .unwrap()
+                  .first_key_value()
+                  .unwrap()
+                  .1
+                  .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                  .unwrap()
+                  .rope_mut()
+                  .append(into_repo(&buf));
+
                 // After read the first block, immediately yield to the main thread so UI tree can
                 // render it on terminal.
                 tokio::task::yield_now().await;
+              } else {
+                // Or just append to the builder
+                builder.append(into_repo(&buf));
               }
 
+              // Finish reading
               if n == 0 {
-                // Finish reading
                 if !first_buffer_created {
                   // For the default (first) buffer, append it
                   buffers
