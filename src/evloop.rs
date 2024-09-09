@@ -152,7 +152,9 @@ impl EventLoop {
           },
           // Get async task result
           Some(joined_task) = raw_self.as_mut().tasks.join_next_with_id() => match joined_task {
-              Ok((_task_id, _task_result)) => {/* Skip */}
+              Ok((task_id, _task_result)) => {
+                  raw_self.as_mut().task_handles.try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())).unwrap().remove(&task_id);
+              }
               Err(joined_error) => error!("{joined_error}")
           }
         }
