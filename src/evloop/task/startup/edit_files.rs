@@ -60,6 +60,7 @@ pub async fn edit_files(data_access: TaskableDataAccess, files: Vec<String>) -> 
 
                 // After read the first block, immediately yield to the main thread so UI tree can
                 // render it on terminal.
+                debug!("Yield back to main thread after first block");
                 tokio::task::yield_now().await;
               } else {
                 // Or just append to the builder
