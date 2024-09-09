@@ -17,6 +17,15 @@ pub async fn edit_files(data_access: TaskableDataAccess, files: Vec<String>) -> 
   let rbuf_size = 4096_usize;
   let buffers = data_access.buffers.clone();
 
+  let default_buffer = {
+    buffers
+      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .first_key_value()
+      .unwrap()
+      .1
+  };
+
   for (i, file) in files.iter().enumerate() {
     debug!("Read the {} input file: {:?}", i, file);
     match fs::File::open(file).await {
