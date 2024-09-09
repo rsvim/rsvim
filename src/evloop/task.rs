@@ -29,7 +29,7 @@ pub struct TaskableDataAccess {
   pub buffers: BuffersArc,
 }
 
-impl<'a> TaskableDataAccess {
+impl TaskableDataAccess {
   pub fn new(state: StateArc, tree: TreeArc, buffers: BuffersArc) -> Self {
     TaskableDataAccess {
       state,
