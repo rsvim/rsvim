@@ -48,7 +48,7 @@ ropey = "1.6.1"
 geo = { version = "0.28.0", features = ["serde"] }
 num-traits = "0.2.19"
 parking_lot = "0.12.3"
-v8 = "0.105.0"
+v8 = "0.106.0"
 async-trait = "0.1.82"
 
 [dev-dependencies]
