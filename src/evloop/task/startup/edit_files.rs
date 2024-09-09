@@ -22,7 +22,7 @@ fn into_repo(buf: &[u8]) -> Rope {
 }
 
 /// Edit files
-pub async fn edit_files<'a>(data_access: TaskableDataAccess, files: Vec<String>) -> TaskResult {
+pub async fn edit_files(data_access: TaskableDataAccess, files: Vec<String>) -> TaskResult {
   let rbuf_size = 4096_usize;
   let buffers = data_access.buffers.clone();
 
@@ -45,7 +45,7 @@ pub async fn edit_files<'a>(data_access: TaskableDataAccess, files: Vec<String>)
               builder.append(into_repo(&buf));
               if first_block_read {
                 first_block_read = false;
-                // After read first block, immediately yield to the main thread so UI tree can
+                // After read the first block, immediately yield to the main thread so UI tree can
                 // render it on terminal.
                 tokio::task::yield_now().await;
               }
