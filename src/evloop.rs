@@ -13,6 +13,7 @@ use std::collections::HashMap;
 // use heed::types::U16;
 use futures::stream::FuturesUnordered;
 use parking_lot::ReentrantMutexGuard;
+use parking_lot::RwLock;
 use ropey::RopeBuilder;
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -29,7 +30,7 @@ use tracing::{debug, error};
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
-use crate::evloop::task::{TaskId, TaskResult, TaskableDataAccess};
+use crate::evloop::task::{TaskHandles, TaskId, TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
@@ -50,7 +51,7 @@ pub struct EventLoop {
   pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
   pub tasks: JoinSet<TaskResult>,
-  pub task_handles: HashMap<TaskId, AbortHandle>,
+  pub task_handles: TaskHandles,
 }
 
 impl EventLoop {
@@ -96,7 +97,7 @@ impl EventLoop {
       buffers: Buffers::to_arc(buffers),
       writer: BufWriter::new(std::io::stdout()),
       tasks: JoinSet::new(),
-      task_handles: HashMap::new(),
+      task_handles: Arc::new(RwLock::new(HashMap::new())),
     })
   }
 
@@ -114,6 +115,8 @@ impl EventLoop {
       });
       self
         .task_handles
+        .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
         .insert(task_abort_handle.id(), task_abort_handle);
     }
 
