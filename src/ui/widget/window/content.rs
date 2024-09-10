@@ -4,7 +4,7 @@
 
 use crossterm::style::{Attributes, Color};
 use geo::point;
-use ropey::{Lines, RopeSlice};
+use ropey::RopeSlice;
 use std::collections::{BTreeSet, VecDeque};
 use std::convert::From;
 use std::time::Duration;
