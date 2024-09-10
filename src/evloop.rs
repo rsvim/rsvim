@@ -24,12 +24,16 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::task::{AbortHandle, JoinSet};
+use tokio_util::sync::CancellationToken;
+use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
 
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
+use crate::evloop::message::NotifyDone;
 use crate::evloop::task::{TaskHandles, TaskId, TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
@@ -40,6 +44,7 @@ use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
+pub mod message;
 pub mod task;
 
 #[derive(Debug)]
@@ -50,8 +55,14 @@ pub struct EventLoop {
   pub state: StateArc,
   pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
-  pub tasks: JoinSet<TaskResult>,
-  pub task_handles: TaskHandles,
+
+  // Spawned tasks.
+  // Here name the spawned tasks "worker", the main loop thread "master".
+  pub cancellation_token: CancellationToken,
+  pub task_tracker: TaskTracker,
+  // Sender that allow workers send messages to master.
+  pub worker_sender: UnboundedSender<NotifyDone>,
+  pub master_receiver: UnboundedReceiver<NotifyDone>,
 }
 
 impl EventLoop {
@@ -96,8 +107,8 @@ impl EventLoop {
       state: State::to_arc(state),
       buffers: Buffers::to_arc(buffers),
       writer: BufWriter::new(std::io::stdout()),
-      tasks: JoinSet::new(),
-      task_handles: Arc::new(RwLock::new(HashMap::new())),
+      cancellation_token: CancellationToken::new(),
+      task_tracker: TaskTracker::new(),
     })
   }
 
@@ -110,14 +121,9 @@ impl EventLoop {
       let data_access =
         TaskableDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
       let input_files = self.cli_opt.file().to_vec();
-      let task_abort_handle = self.tasks.spawn(async move {
+      self.task_tracker.spawn(async move {
         task::startup::edit_files::edit_files(data_access, input_files).await
       });
-      self
-        .task_handles
-        .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-        .unwrap()
-        .insert(task_abort_handle.id(), task_abort_handle);
     }
 
     Ok(())
