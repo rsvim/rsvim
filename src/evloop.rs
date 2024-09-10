@@ -33,7 +33,7 @@ use tracing::{debug, error};
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
-use crate::evloop::message::Dummy;
+use crate::evloop::message::{Dummy, Notify};
 use crate::evloop::task::{TaskHandles, TaskId, TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
@@ -60,9 +60,9 @@ pub struct EventLoop {
   // Here name the spawned tasks "worker", the main loop thread "master".
   pub cancellation_token: CancellationToken,
   pub task_tracker: TaskTracker,
-  // Sender and receiver that allow workers send a dummy message to master.
-  pub worker_sender: UnboundedSender<Dummy>,
-  pub master_receiver: UnboundedReceiver<Dummy>,
+  // Sender and receiver that allow workers send a notification to master.
+  pub worker_sender: UnboundedSender<Notify>,
+  pub master_receiver: UnboundedReceiver<Notify>,
 }
 
 impl EventLoop {
@@ -100,6 +100,9 @@ impl EventLoop {
     // State
     let state = State::default();
 
+    // Sender/receiver
+    let (worker_sender, master_receiver) = unbounded_channel();
+
     Ok(EventLoop {
       cli_opt,
       canvas,
@@ -109,6 +112,8 @@ impl EventLoop {
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
       task_tracker: TaskTracker::new(),
+      worker_sender,
+      master_receiver,
     })
   }
 
@@ -118,8 +123,12 @@ impl EventLoop {
 
     // Has input files.
     if !self.cli_opt.file().is_empty() {
-      let data_access =
-        TaskableDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
+      let data_access = TaskableDataAccess::new(
+        self.state.clone(),
+        self.tree.clone(),
+        self.buffers.clone(),
+        self.worker_sender.clone(),
+      );
       let input_files = self.cli_opt.file().to_vec();
       self.task_tracker.spawn(async move {
         task::startup::edit_files::edit_files(data_access, input_files).await
@@ -136,17 +145,13 @@ impl EventLoop {
       let mut raw_self = NonNull::new(self as *mut EventLoop).unwrap();
       loop {
         tokio::select! {
-          // Get user event
-          polled_event = reader.next() => match polled_event {
+          // Receive keyboard/mouse events
+          next_event = reader.next() => match next_event {
             Some(Ok(event)) => {
               debug!("polled_event ok: {:?}", event);
               match raw_self.as_mut().accept(event).await {
-                  Ok(next_loop) => {
-                      if !next_loop {
-                          break;
-                      }
-                  }
-                  _ => break
+                  Ok(_) => { /* Skip */ }
+                  Err(e) => { error!("processing terminal event error:{}", e); break; }
               }
             },
             Some(Err(e)) => {
@@ -154,14 +159,14 @@ impl EventLoop {
               error!("Error: {:?}\r", e);
               break;
             },
-            None => break,
+            None => {
+                debug!("There's no next event, exit loop");
+                break; },
           },
-          // Get async task result
-          Some(joined_task) = raw_self.as_mut().tasks.join_next_with_id() => match joined_task {
-              Ok((task_id, _task_result)) => {
-                raw_self.as_mut().task_handles.try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT())).unwrap().remove(&task_id);
-              }
-              Err(joined_error) => error!("{joined_error}")
+          // Receive cancellation notify
+          _ = raw_self.as_ref().cancellation_token.cancelled() => {
+              debug!("Receive cancellation token, exit loop");
+              break;
           }
         }
       }
@@ -169,7 +174,7 @@ impl EventLoop {
     Ok(())
   }
 
-  pub async fn accept(&mut self, event: Event) -> IoResult<bool> {
+  pub async fn accept(&mut self, event: Event) -> IoResult<()> {
     debug!("event: {:?}", event);
     // println!("Event:{:?}", event);
 
@@ -183,7 +188,8 @@ impl EventLoop {
 
     // Exit loop and quit.
     if let StatefulValue::QuitState(_) = state_response.next_stateful {
-      return Ok(false);
+      self.cancellation_token.cancel();
+      return Ok(());
     }
 
     {
@@ -208,7 +214,7 @@ impl EventLoop {
 
     self.writer.flush()?;
 
-    Ok(true)
+    Ok(())
   }
 
   /// Put (render) canvas shader.

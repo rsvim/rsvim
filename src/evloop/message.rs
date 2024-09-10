@@ -2,7 +2,7 @@
 
 // Notification {
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Dummy {}
 
 impl Dummy {
