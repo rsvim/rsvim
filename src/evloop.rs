@@ -131,7 +131,7 @@ impl EventLoop {
       );
       let input_files = self.cli_opt.file().to_vec();
       self.task_tracker.spawn(async move {
-        task::startup::edit_files::edit_files(data_access, input_files).await
+        task::startup::edit_files::edit_files_for_new_buffers(data_access, input_files).await
       });
     }
 
