@@ -155,14 +155,23 @@ impl EventLoop {
     match next_event {
       Some(Ok(event)) => {
         debug!("Polled_terminal event ok: {:?}", event);
-        match self.accept(event).await {
-          Ok(run_next_loop) => {
-            return run_next_loop;
-          }
-          Err(e) => {
-            error!("Processed terminal event error:{:?}", e);
-          }
+
+        // Handle by state machine
+        let state_response = {
+          self
+            .state
+            .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+            .unwrap()
+            .handle(self.tree.clone(), self.buffers.clone(), event)
+        };
+
+        // Exit loop and quit.
+        if let StatefulValue::QuitState(_) = state_response.next_stateful {
+          self.cancellation_token.cancel();
+          return false;
         }
+
+        return true;
       }
       Some(Err(e)) => {
         error!("Polled terminal event error: {:?}", e);
@@ -208,28 +217,13 @@ impl EventLoop {
             // break;
         }
       }
+
+      self.render().await?;
     }
     Ok(())
   }
 
-  pub async fn accept(&mut self, event: Event) -> IoResult<bool> {
-    debug!("event: {:?}", event);
-    // println!("Event:{:?}", event);
-
-    let state_response = {
-      self
-        .state
-        .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-        .unwrap()
-        .handle(self.tree.clone(), self.buffers.clone(), event)
-    };
-
-    // Exit loop and quit.
-    if let StatefulValue::QuitState(_) = state_response.next_stateful {
-      self.cancellation_token.cancel();
-      return Ok(false);
-    }
-
+  async fn render(&mut self) -> IoResult<()> {
     {
       // Draw UI components to the canvas.
       self
@@ -252,7 +246,7 @@ impl EventLoop {
 
     self.writer.flush()?;
 
-    Ok(true)
+    Ok(())
   }
 
   /// Put (render) canvas shader.
