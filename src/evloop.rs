@@ -186,7 +186,8 @@ impl EventLoop {
 
   pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
-    let mut received_notifies: Vec<Notify> = Vec::new();
+    let received_limit = 100_usize;
+    let mut received_notifies: Vec<Notify> = Vec::with_capacity(received_limit);
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
@@ -196,7 +197,7 @@ impl EventLoop {
             }
         }
         // Receive notification from workers
-        received_count = self.master_receiver.recv_many(&mut received_notifies, 100) => {
+        received_count = self.master_receiver.recv_many(&mut received_notifies, received_limit) => {
             if !self.process_notify(&mut received_notifies, received_count).await {
                 break;
             }
