@@ -102,6 +102,14 @@ pub struct WindowContent {
   word_wrap: bool,
 }
 
+fn rslice2line(s: &RopeSlice) -> String {
+  let mut builder: String = String::new();
+  for chunk in s.chunks() {
+    builder.push_str(chunk);
+  }
+  builder
+}
+
 impl WindowContent {
   /// Make window content from buffer. The view starts from the first line.
   pub fn new(shape: IRect, buffer: BufferWk) -> Self {
@@ -268,10 +276,10 @@ impl WindowContent {
       debug!(
         "buffer.get_line ({:?}):'{:?}'",
         start_line,
-        line.chars().iter().collect::<Vec<_>>().join("")
+        rslice2line(&line),
       );
     } else {
-      debug!("buffer.get_line ({:?}):None", start_line,);
+      debug!("buffer.get_line ({:?}):None", start_line);
     }
 
     match buffer.rope().get_lines_at(start_line) {
