@@ -289,12 +289,8 @@ impl WindowContent {
                   let cell = Cell::from(ch);
                   let cell_upos = point!(x: idx + upos.x(), y: row + upos.y());
                   debug!(
-                    "1-row:{:?}, idx:{:?}, line:{:?}, ch:{:?}, cell upos:{:?}",
-                    row,
-                    idx,
-                    line.as_str(),
-                    ch,
-                    cell_upos
+                    "1-row:{:?}, idx:{:?}, ch:{:?}, cell upos:{:?}",
+                    row, idx, ch, cell_upos
                   );
                   canvas.frame_mut().set_cell(cell_upos, cell);
                   idx += 1;
@@ -307,12 +303,8 @@ impl WindowContent {
                 let cells_upos = point!(x: idx + upos.x(), y: row + upos.y());
                 let cells_len = (width - idx) as usize;
                 debug!(
-                  "2-row:{:?}, idx:{:?}, line:{:?}, cells upos:{:?}, cells len:{:?}",
-                  row,
-                  idx,
-                  line.as_str(),
-                  cells_upos,
-                  cells_len,
+                  "2-row:{:?}, idx:{:?}, cells upos:{:?}, cells len:{:?}",
+                  row, idx, cells_upos, cells_len,
                 );
                 canvas
                   .frame_mut()
