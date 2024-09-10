@@ -60,7 +60,7 @@ pub struct EventLoop {
   // Here name the spawned tasks "worker", the main loop thread "master".
   pub cancellation_token: CancellationToken,
   pub task_tracker: TaskTracker,
-  // Sender that allow workers send messages to master.
+  // Sender and receiver that allow workers send messages to master.
   pub worker_sender: UnboundedSender<NotifyDone>,
   pub master_receiver: UnboundedReceiver<NotifyDone>,
 }

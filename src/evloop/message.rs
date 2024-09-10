@@ -2,8 +2,6 @@
 
 // Notification {
 
-pub struct NotifyDone {
-  result: Result<(), String>,
-}
+pub struct NotifyDone {}
 
 // Notification }
