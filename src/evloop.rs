@@ -153,7 +153,7 @@ impl EventLoop {
 
   pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
-    let mut received_notifications: Vec<Notify> = Vec::new();
+    // let mut received_notifications: Vec<Notify> = Vec::new();
     unsafe {
       // Fix multiple mutable references on `self`.
       let mut raw_self = NonNull::new(self as *mut EventLoop).unwrap();
@@ -161,44 +161,50 @@ impl EventLoop {
         tokio::select! {
           // Receive keyboard/mouse events
           next_event = reader.next() => match next_event {
-              Some(maybe_event) => match maybe_event {
-                  Ok(event) => {
-              debug!("Polled_terminal event ok: {:?}", event);
-              match raw_self.as_mut().accept(event).await {
-                  Ok(_) => { /* Skip */ }
-                  Err(e) => { error!("Processed terminal event error:{}", e); break; }
+            Some(Ok(event)) => {
+            debug!("Polled_terminal event ok: {:?}", event);
+            match raw_self.as_mut().accept(event).await {
+              Ok(run_next_loop) => {
+                if !run_next_loop {
+                  break;
+                }
               }
-                  }
-                  Err(e) => {
-              error!("Terminal event error: {:?}\r", e);
+              Err(e) => { error!("Processed terminal event error:{:?}", e); break; }
+            }
+            }
+            Some(Err(e)) => {
+              error!("Polled terminal event error: {:?}", e);
               break;
-                  }
-              }
-              None => {
-                error!("Terminal event stream is exhausted, exit loop");
-                break;
-              }
+            }
+            None => {
+              error!("Terminal event stream is exhausted, exit loop");
+              break;
+            }
           }
           // Receive notification from workers
-          received_count = raw_self.as_mut().master_receiver.recv_many(&received_notifications, 100) => {
-              debug!("Received {:?} notifications from workers", received_count);
-              for (i, notify) in received_notifications.iter().enumerate() {
-                  /* Skip */
-              }
-              received_notifications.clear();
-          }
+          // received_notification = raw_self.as_mut().master_receiver.recv() => match received_notification {
+          //     Some(notify) => { /* Skip */ }
+          //     None => {
+          //         break;
+          //     }
+          //     // debug!("Received {:?} notifications from workers", received_count);
+          //     // for (i, notify) in received_notifications.iter().enumerate() {
+          //     //     /* Skip */
+          //     // }
+          //     // received_notifications.clear();
+          // }
           // Receive cancellation notify
-          _ = raw_self.as_ref().cancellation_token.cancelled() => {
-              debug!("Receive cancellation token, exit loop");
-              break;
-          }
+          // _ = raw_self.as_ref().cancellation_token.cancelled() => {
+          //     debug!("Receive cancellation token, exit loop");
+          //     // break;
+          // }
         }
       }
     }
     Ok(())
   }
 
-  pub async fn accept(&mut self, event: Event) -> IoResult<()> {
+  pub async fn accept(&mut self, event: Event) -> IoResult<bool> {
     debug!("event: {:?}", event);
     // println!("Event:{:?}", event);
 
@@ -213,7 +219,7 @@ impl EventLoop {
     // Exit loop and quit.
     if let StatefulValue::QuitState(_) = state_response.next_stateful {
       self.cancellation_token.cancel();
-      return Ok(());
+      return Ok(false);
     }
 
     {
@@ -238,7 +244,7 @@ impl EventLoop {
 
     self.writer.flush()?;
 
-    Ok(())
+    Ok(true)
   }
 
   /// Put (render) canvas shader.
