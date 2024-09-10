@@ -151,56 +151,66 @@ impl EventLoop {
     Ok(())
   }
 
+  async fn process_event(&mut self, next_event: Option<IoResult<Event>>) -> bool {
+    match next_event {
+      Some(Ok(event)) => {
+        debug!("Polled_terminal event ok: {:?}", event);
+        match self.accept(event).await {
+          Ok(run_next_loop) => {
+            return run_next_loop;
+          }
+          Err(e) => {
+            error!("Processed terminal event error:{:?}", e);
+          }
+        }
+      }
+      Some(Err(e)) => {
+        error!("Polled terminal event error: {:?}", e);
+      }
+      None => {
+        error!("Terminal event stream is exhausted, exit loop");
+      }
+    }
+    false
+  }
+
+  async fn process_notify(
+    &mut self,
+    received_notifications: &mut Vec<Notify>,
+    received_count: usize,
+  ) -> bool {
+    debug!("Received {:?} notifications from workers", received_count);
+    received_notifications.clear();
+    true
+  }
+
   pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
-    // let mut received_notifications: Vec<Notify> = Vec::new();
-    unsafe {
-      // Fix multiple mutable references on `self`.
-      let mut raw_self = NonNull::new(self as *mut EventLoop).unwrap();
-      loop {
-        tokio::select! {
-          // Receive keyboard/mouse events
-          next_event = reader.next() => match next_event {
-            Some(Ok(event)) => {
-            debug!("Polled_terminal event ok: {:?}", event);
-            match raw_self.as_mut().accept(event).await {
-              Ok(run_next_loop) => {
-                if !run_next_loop {
-                  break;
-                }
-              }
-              Err(e) => { error!("Processed terminal event error:{:?}", e); break; }
+    let mut received_notifies: Vec<Notify> = Vec::new();
+    // unsafe {
+    // Fix multiple mutable references on `self`.
+    loop {
+      tokio::select! {
+        // Receive keyboard/mouse events
+        next_event = reader.next() => {
+            if !self.process_event(next_event).await {
+                break;
             }
+        }
+        // Receive notification from workers
+        received_count = self.master_receiver.recv_many(&mut received_notifies, 100) => {
+            if !self.process_notify(&mut received_notifies, received_count).await {
+                break;
             }
-            Some(Err(e)) => {
-              error!("Polled terminal event error: {:?}", e);
-              break;
-            }
-            None => {
-              error!("Terminal event stream is exhausted, exit loop");
-              break;
-            }
-          }
-          // Receive notification from workers
-          // received_notification = raw_self.as_mut().master_receiver.recv() => match received_notification {
-          //     Some(notify) => { /* Skip */ }
-          //     None => {
-          //         break;
-          //     }
-          //     // debug!("Received {:?} notifications from workers", received_count);
-          //     // for (i, notify) in received_notifications.iter().enumerate() {
-          //     //     /* Skip */
-          //     // }
-          //     // received_notifications.clear();
-          // }
-          // Receive cancellation notify
-          // _ = raw_self.as_ref().cancellation_token.cancelled() => {
-          //     debug!("Receive cancellation token, exit loop");
-          //     // break;
-          // }
+        }
+        // Receive cancellation notify
+        _ = self.cancellation_token.cancelled() => {
+            debug!("Receive cancellation token, exit loop");
+            // break;
         }
       }
     }
+    // }
     Ok(())
   }
 
