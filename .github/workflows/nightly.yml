@@ -22,7 +22,7 @@ defaults:
     shell: bash
 jobs:
   prepare:
-    name: Release Nighty
+    name: Release Nightly
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
