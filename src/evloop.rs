@@ -130,8 +130,21 @@ impl EventLoop {
         self.worker_sender.clone(),
       );
       let input_files = self.cli_opt.file().to_vec();
+      let (default_input_file, other_input_files) = input_files.split_first().unwrap();
+      let default_input_file = default_input_file.clone();
       self.task_tracker.spawn(async move {
-        task::startup::edit_files::edit_files_for_new_buffers(data_access, input_files).await
+        task::startup::input_files::edit_default_file(data_access.clone(), default_input_file).await
+      });
+
+      let data_access = TaskableDataAccess::new(
+        self.state.clone(),
+        self.tree.clone(),
+        self.buffers.clone(),
+        self.worker_sender.clone(),
+      );
+      let other_input_files = other_input_files.to_vec();
+      self.task_tracker.spawn(async move {
+        task::startup::input_files::edit_other_files(data_access.clone(), other_input_files).await
       });
     }
 

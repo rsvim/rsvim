@@ -23,7 +23,7 @@ pub type TaskId = tokio::task::Id;
 pub type TaskResult = Result<(), String>;
 pub type TaskHandles = Arc<RwLock<HashMap<TaskId, AbortHandle>>>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// The mutable data passed to task, and allow them access the editor.
 pub struct TaskableDataAccess {
   pub state: StateArc,
