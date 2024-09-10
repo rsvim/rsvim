@@ -153,6 +153,7 @@ impl EventLoop {
 
   pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
+    let mut received_notifications: Vec<Notify> = Vec::new();
     unsafe {
       // Fix multiple mutable references on `self`.
       let mut raw_self = NonNull::new(self as *mut EventLoop).unwrap();
@@ -162,10 +163,10 @@ impl EventLoop {
           next_event = reader.next() => match next_event {
               Some(maybe_event) => match maybe_event {
                   Ok(event) => {
-              debug!("polled_event ok: {:?}", event);
+              debug!("Polled_terminal event ok: {:?}", event);
               match raw_self.as_mut().accept(event).await {
                   Ok(_) => { /* Skip */ }
-                  Err(e) => { error!("processing terminal event error:{}", e); break; }
+                  Err(e) => { error!("Processed terminal event error:{}", e); break; }
               }
                   }
                   Err(e) => {
@@ -177,7 +178,15 @@ impl EventLoop {
                 error!("Terminal event stream is exhausted, exit loop");
                 break;
               }
-          },
+          }
+          // Receive notification from workers
+          received_count = raw_self.as_mut().master_receiver.recv_many(&received_notifications, 100) => {
+              debug!("Received {:?} notifications from workers", received_count);
+              for (i, notify) in received_notifications.iter().enumerate() {
+                  /* Skip */
+              }
+              received_notifications.clear();
+          }
           // Receive cancellation notify
           _ = raw_self.as_ref().cancellation_token.cancelled() => {
               debug!("Receive cancellation token, exit loop");
