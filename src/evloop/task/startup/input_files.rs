@@ -14,12 +14,14 @@ use crate::evloop::message::{Dummy, Notify};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::glovar;
 
-fn into_repo(buf: &[u8]) -> Rope {
-  let buf1: &[u8] = buf;
-  let buf1str: String = String::from_utf8_lossy(buf1).into_owned();
+fn into_str(buf: &[u8], bufsize: usize) -> String {
+  String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
+}
 
+fn into_repo(buf: &[u8], bufsize: usize) -> Rope {
+  let bufstr = into_str(buf, bufsize);
   let mut block = RopeBuilder::new();
-  block.append(&buf1str.to_owned());
+  block.append(&bufstr.to_owned());
   block.finish()
 }
 
@@ -37,7 +39,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
       loop {
         match fp.read_buf(&mut buf).await {
           Ok(n) => {
-            debug!("Read {} bytes", n);
+            debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
             // For the first buffer, append to the **default** buffer.
             buffers
@@ -49,7 +51,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
               .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
               .unwrap()
               .rope_mut()
-              .append(into_repo(&buf));
+              .append(into_repo(&buf, n));
 
             // After read each block, immediately notify main thread so UI tree can render it on
             // terminal.
@@ -113,13 +115,13 @@ pub async fn edit_other_files(
         loop {
           match fp.read_buf(&mut buf).await {
             Ok(n) => {
-              debug!("Read {} bytes", n);
+              debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
               buffer
                 .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap()
                 .rope_mut()
-                .append(into_repo(&buf));
+                .append(into_repo(&buf, n));
 
               // After read each block, immediately notify main thread so UI tree can render it on
               // terminal.
