@@ -187,8 +187,6 @@ impl EventLoop {
   pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
     let mut received_notifies: Vec<Notify> = Vec::new();
-    // unsafe {
-    // Fix multiple mutable references on `self`.
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
@@ -210,7 +208,6 @@ impl EventLoop {
         }
       }
     }
-    // }
     Ok(())
   }
 
