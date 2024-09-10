@@ -2,6 +2,19 @@
 
 // Notification {
 
-pub struct NotifyDone {}
+#[derive(Debug)]
+pub struct Dummy {}
+
+impl Dummy {
+  pub fn new() -> Self {
+    Dummy {}
+  }
+}
+
+#[derive(Debug)]
+/// Notification.
+pub enum Notify {
+  Dummy(Dummy),
+}
 
 // Notification }

@@ -33,7 +33,7 @@ use tracing::{debug, error};
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
-use crate::evloop::message::NotifyDone;
+use crate::evloop::message::Dummy;
 use crate::evloop::task::{TaskHandles, TaskId, TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
@@ -60,9 +60,9 @@ pub struct EventLoop {
   // Here name the spawned tasks "worker", the main loop thread "master".
   pub cancellation_token: CancellationToken,
   pub task_tracker: TaskTracker,
-  // Sender and receiver that allow workers send messages to master.
-  pub worker_sender: UnboundedSender<NotifyDone>,
-  pub master_receiver: UnboundedReceiver<NotifyDone>,
+  // Sender and receiver that allow workers send a dummy message to master.
+  pub worker_sender: UnboundedSender<Dummy>,
+  pub master_receiver: UnboundedReceiver<Dummy>,
 }
 
 impl EventLoop {
