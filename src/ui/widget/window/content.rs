@@ -4,7 +4,7 @@
 
 use crossterm::style::{Attributes, Color};
 use geo::point;
-use ropey::RopeSlice;
+use ropey::{Lines, RopeSlice};
 use std::collections::{BTreeSet, VecDeque};
 use std::convert::From;
 use std::time::Duration;
@@ -248,7 +248,7 @@ impl WindowContent {
     let width = actual_shape.width();
     debug!(
       "actual shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
-      actual_shape, upos, height, width
+      actual_shape, upos, height, width,
     );
 
     // If window is zero-sized.
@@ -263,6 +263,16 @@ impl WindowContent {
     let buffer = buffer
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap();
+
+    if let Some(line) = buffer.rope().get_line(start_line) {
+      debug!(
+        "buffer.get_line ({:?}):'{:?}'",
+        start_line,
+        line.chars().iter().collect::<Vec<_>>().join("")
+      );
+    } else {
+      debug!("buffer.get_line ({:?}):None", start_line,);
+    }
 
     match buffer.rope().get_lines_at(start_line) {
       Some(mut buflines) => {
