@@ -147,21 +147,23 @@ impl EventLoop {
         tokio::select! {
           // Receive keyboard/mouse events
           next_event = reader.next() => match next_event {
-            Some(Ok(event)) => {
+              Some(maybe_event) => match maybe_event {
+                  Ok(event) => {
               debug!("polled_event ok: {:?}", event);
               match raw_self.as_mut().accept(event).await {
                   Ok(_) => { /* Skip */ }
                   Err(e) => { error!("processing terminal event error:{}", e); break; }
               }
-            },
-            Some(Err(e)) => {
-              debug!("polled_event error: {:?}", e);
-              error!("Error: {:?}\r", e);
+                  }
+                  Err(e) => {
+              error!("Terminal event error: {:?}\r", e);
               break;
-            },
-            None => {
-                debug!("There's no next event, exit loop");
-                break; },
+                  }
+              }
+              None => {
+                error!("Terminal event stream is exhausted, exit loop");
+                break;
+              }
           },
           // Receive cancellation notify
           _ = raw_self.as_ref().cancellation_token.cancelled() => {
