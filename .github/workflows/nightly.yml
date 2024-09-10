@@ -16,6 +16,7 @@ env:
   RUSTFLAGS: "-Dwarnings --cfg tokio_unstable"
   RUST_BACKTRACE: "full"
   RUSTUP_MAX_RETRIES: 3
+  GH_TOKEN: ${{ github.token }}
 defaults:
   run:
     shell: bash

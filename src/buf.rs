@@ -137,6 +137,14 @@ impl Buffers {
   pub fn iter(&self) -> std::collections::btree_map::Iter<BufferId, BufferArc> {
     self.buffers.iter()
   }
+
+  pub fn first_key_value(&self) -> Option<(&BufferId, &BufferArc)> {
+    self.buffers.first_key_value()
+  }
+
+  pub fn last_key_value(&self) -> Option<(&BufferId, &BufferArc)> {
+    self.buffers.last_key_value()
+  }
 }
 
 impl Default for Buffers {

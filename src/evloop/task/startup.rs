@@ -1,3 +1,3 @@
 //! Tasks on start up.
 
-pub mod edit_files;
+pub mod input_files;

@@ -13,6 +13,7 @@ use std::collections::HashMap;
 // use heed::types::U16;
 use futures::stream::FuturesUnordered;
 use parking_lot::ReentrantMutexGuard;
+use parking_lot::RwLock;
 use ropey::RopeBuilder;
 use std::borrow::Borrow;
 use std::cell::RefCell;
@@ -23,13 +24,17 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 use tokio::task::{AbortHandle, JoinSet};
+use tokio_util::sync::CancellationToken;
+use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
 
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
-use crate::evloop::task::{TaskId, TaskResult, TaskableDataAccess};
+use crate::evloop::message::{Dummy, Notify};
+use crate::evloop::task::{TaskHandles, TaskId, TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::state::fsm::{QuitStateful, StatefulValue};
@@ -39,6 +44,7 @@ use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
+pub mod message;
 pub mod task;
 
 #[derive(Debug)]
@@ -49,8 +55,14 @@ pub struct EventLoop {
   pub state: StateArc,
   pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
-  pub tasks: JoinSet<TaskResult>,
-  pub task_handles: HashMap<TaskId, AbortHandle>,
+
+  // Spawned tasks.
+  // Here name the spawned tasks "worker", the main loop thread "master".
+  pub cancellation_token: CancellationToken,
+  pub task_tracker: TaskTracker,
+  // Sender and receiver that allow workers send a notification to master.
+  pub worker_sender: UnboundedSender<Notify>,
+  pub master_receiver: UnboundedReceiver<Notify>,
 }
 
 impl EventLoop {
@@ -88,6 +100,9 @@ impl EventLoop {
     // State
     let state = State::default();
 
+    // Sender/receiver
+    let (worker_sender, master_receiver) = unbounded_channel();
+
     Ok(EventLoop {
       cli_opt,
       canvas,
@@ -95,8 +110,10 @@ impl EventLoop {
       state: State::to_arc(state),
       buffers: Buffers::to_arc(buffers),
       writer: BufWriter::new(std::io::stdout()),
-      tasks: JoinSet::new(),
-      task_handles: HashMap::new(),
+      cancellation_token: CancellationToken::new(),
+      task_tracker: TaskTracker::new(),
+      worker_sender,
+      master_receiver,
     })
   }
 
@@ -106,75 +123,107 @@ impl EventLoop {
 
     // Has input files.
     if !self.cli_opt.file().is_empty() {
-      let data_access =
-        TaskableDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
+      let data_access = TaskableDataAccess::new(
+        self.state.clone(),
+        self.tree.clone(),
+        self.buffers.clone(),
+        self.worker_sender.clone(),
+      );
       let input_files = self.cli_opt.file().to_vec();
-      let task_abort_handle = self.tasks.spawn(async move {
-        task::startup::edit_files::edit_files(data_access, input_files).await
+      let (default_input_file, other_input_files) = input_files.split_first().unwrap();
+      let default_input_file = default_input_file.clone();
+      self.task_tracker.spawn(async move {
+        task::startup::input_files::edit_default_file(data_access.clone(), default_input_file).await
       });
-      self
-        .task_handles
-        .insert(task_abort_handle.id(), task_abort_handle);
+
+      let data_access = TaskableDataAccess::new(
+        self.state.clone(),
+        self.tree.clone(),
+        self.buffers.clone(),
+        self.worker_sender.clone(),
+      );
+      let other_input_files = other_input_files.to_vec();
+      self.task_tracker.spawn(async move {
+        task::startup::input_files::edit_other_files(data_access.clone(), other_input_files).await
+      });
     }
 
     Ok(())
+  }
+
+  async fn process_event(&mut self, next_event: Option<IoResult<Event>>) -> bool {
+    match next_event {
+      Some(Ok(event)) => {
+        debug!("Polled_terminal event ok: {:?}", event);
+
+        // Handle by state machine
+        let state_response = {
+          self
+            .state
+            .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+            .unwrap()
+            .handle(self.tree.clone(), self.buffers.clone(), event)
+        };
+
+        // Exit loop and quit.
+        if let StatefulValue::QuitState(_) = state_response.next_stateful {
+          self.cancellation_token.cancel();
+          return false;
+        }
+
+        return true;
+      }
+      Some(Err(e)) => {
+        error!("Polled terminal event error: {:?}", e);
+      }
+      None => {
+        error!("Terminal event stream is exhausted, exit loop");
+      }
+    }
+    false
+  }
+
+  async fn process_notify(
+    &mut self,
+    received_notifications: &mut Vec<Notify>,
+    received_count: usize,
+  ) -> bool {
+    debug!("Received {:?} notifications from workers", received_count);
+    received_notifications.clear();
+    true
   }
 
   pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
-    unsafe {
-      // Fix multiple mutable references on `self`.
-      let mut raw_self = NonNull::new(self as *mut EventLoop).unwrap();
-      loop {
-        tokio::select! {
-          // Get user event
-          polled_event = reader.next() => match polled_event {
-            Some(Ok(event)) => {
-              debug!("polled_event ok: {:?}", event);
-              match raw_self.as_mut().accept(event).await {
-                  Ok(next_loop) => {
-                      if !next_loop {
-                          break;
-                      }
-                  }
-                  _ => break
-              }
-            },
-            Some(Err(e)) => {
-              debug!("polled_event error: {:?}", e);
-              error!("Error: {:?}\r", e);
-              break;
-            },
-            None => break,
-          },
-          // Get async task result
-          Some(joined_task) = raw_self.as_mut().tasks.join_next_with_id() => match joined_task {
-              Ok((_task_id, _task_result)) => {/* Skip */}
-              Err(joined_error) => error!("{joined_error}")
-          }
+    let received_limit = 100_usize;
+    let mut received_notifies: Vec<Notify> = Vec::with_capacity(received_limit);
+    loop {
+      tokio::select! {
+        // Receive keyboard/mouse events
+        next_event = reader.next() => {
+            if !self.process_event(next_event).await {
+                break;
+            }
+        }
+        // Receive notification from workers
+        received_count = self.master_receiver.recv_many(&mut received_notifies, received_limit) => {
+            if !self.process_notify(&mut received_notifies, received_count).await {
+                break;
+            }
+        }
+        // Receive cancellation notify
+        _ = self.cancellation_token.cancelled() => {
+            debug!("Receive cancellation token, exit loop");
+            // break;
         }
       }
+
+      self.render().await?;
     }
     Ok(())
   }
 
-  pub async fn accept(&mut self, event: Event) -> IoResult<bool> {
-    debug!("event: {:?}", event);
-    // println!("Event:{:?}", event);
-
-    let state_response = {
-      self
-        .state
-        .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-        .unwrap()
-        .handle(self.tree.clone(), self.buffers.clone(), event)
-    };
-
-    // Exit loop and quit.
-    if let StatefulValue::QuitState(_) = state_response.next_stateful {
-      return Ok(false);
-    }
-
+  async fn render(&mut self) -> IoResult<()> {
     {
       // Draw UI components to the canvas.
       self
@@ -197,7 +246,7 @@ impl EventLoop {
 
     self.writer.flush()?;
 
-    Ok(true)
+    Ok(())
   }
 
   /// Put (render) canvas shader.
