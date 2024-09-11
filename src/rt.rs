@@ -1,4 +1,4 @@
-//! The script runtime, i.e. the javascript runtime implemented by V8 engine.
+//! The JavaScript runtime.
 
 #![allow(dead_code)]
 
