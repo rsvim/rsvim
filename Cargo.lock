@@ -1028,7 +1028,7 @@ dependencies = [
 
 [[package]]
 name = "rsvim"
-version = "0.1.1-alpha.2"
+version = "0.1.1-alpha.3"
 dependencies = [
  "async-trait",
  "bytes",
