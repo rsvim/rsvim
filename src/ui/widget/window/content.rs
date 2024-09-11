@@ -304,13 +304,15 @@ impl WindowContent {
                   if idx >= width {
                     break;
                   }
-                  let cell = Cell::from(ch);
-                  let cell_upos = point!(x: idx + upos.x(), y: row + upos.y());
-                  debug!(
-                    "1-row:{:?}, idx:{:?}, ch:{:?}, cell upos:{:?}",
-                    row, idx, ch, cell_upos
-                  );
-                  canvas.frame_mut().set_cell(cell_upos, cell);
+                  if ch != '\n' {
+                    let cell = Cell::from(ch);
+                    let cell_upos = point!(x: idx + upos.x(), y: row + upos.y());
+                    debug!(
+                      "1-row:{:?}, idx:{:?}, ch:{:?}, cell upos:{:?}",
+                      row, idx, ch, cell_upos
+                    );
+                    canvas.frame_mut().set_cell(cell_upos, cell);
+                  }
                   idx += 1;
                 }
               }
