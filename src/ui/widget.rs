@@ -1,5 +1,7 @@
 //! Basic atom of all UI components.
 
+#![allow(unused_imports, dead_code)]
+
 use tracing::debug;
 
 use crate::ui::canvas::Canvas;

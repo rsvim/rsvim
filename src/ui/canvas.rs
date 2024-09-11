@@ -846,13 +846,18 @@ mod tests {
     let col = 2;
     let row = 3;
     let col_end_at = can._next_same_cell_in_row(row, col);
-    let shader = can._make_print_shaders(row, col, col_end_at);
-    info!("shader:{:?}", shader);
+    let shaders = can._make_print_shaders(row, col, col_end_at);
+    info!("shader:{:?}", shaders);
+    assert_eq!(shaders.len(), 2);
     assert!(matches!(
-      shader,
+      shaders[0],
+      ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(_, _))
+    ));
+    assert!(matches!(
+      shaders[1],
       ShaderCommand::StylePrintString(crossterm::style::Print(_))
     ));
-    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = shader {
+    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = shaders[1] {
       assert_eq!(contents, "ABCD".to_string());
     }
   }
