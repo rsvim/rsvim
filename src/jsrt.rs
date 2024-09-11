@@ -1,4 +1,4 @@
-//! The V8 Javascript engine.
+//! The V8 javascript runtime.
 
 #![allow(dead_code)]
 
