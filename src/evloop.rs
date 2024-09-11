@@ -142,10 +142,12 @@ impl EventLoop {
         self.buffers.clone(),
         self.worker_sender.clone(),
       );
-      let other_input_files = other_input_files.to_vec();
-      self.task_tracker.spawn(async move {
-        task::startup::input_files::edit_other_files(data_access.clone(), other_input_files).await
-      });
+      if !other_input_files.is_empty() {
+        let other_input_files = other_input_files.to_vec();
+        self.task_tracker.spawn(async move {
+          task::startup::input_files::edit_other_files(data_access.clone(), other_input_files).await
+        });
+      }
     }
 
     Ok(())

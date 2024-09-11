@@ -1,5 +1,7 @@
 //! Basic atom of all UI components.
 
+#![allow(unused_imports, dead_code)]
+
 use tracing::debug;
 
 use crate::ui::canvas::Canvas;
@@ -18,6 +20,6 @@ pub trait Widgetable {
   /// Draw the widget to canvas, on the specific shape.
   fn draw(&mut self, _canvas: &mut Canvas) {
     // Do nothing.
-    debug!("draw canvas");
+    // debug!("draw canvas");
   }
 }

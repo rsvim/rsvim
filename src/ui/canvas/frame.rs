@@ -3,7 +3,7 @@
 use compact_str::CompactString;
 use geo::point;
 use std::ops::Range;
-use tracing::debug;
+// use tracing::debug;
 
 use crate::cart::{U16Pos, U16Size};
 use crate::ui::canvas::frame::cell::Cell;
@@ -186,10 +186,10 @@ impl Frame {
     let index = self.pos2idx(pos);
     if self._contains_index(index) {
       let result = &self.cells[index];
-      debug!("try get cell at index:{:?}, cell:{:?}", index, result);
+      // debug!("try get cell at index:{:?}, cell:{:?}", index, result);
       Some(result)
     } else {
-      debug!("try get cell invalid index:{:?}", index);
+      // debug!("try get cell invalid index:{:?}", index);
       None
     }
   }
@@ -210,15 +210,15 @@ impl Frame {
     let index = self.pos2idx(pos);
     if self._contains_index(index) {
       let old_cell = self.cells[index].clone();
-      debug!(
-        "try set cell at index:{:?}, new cell:{:?}, old cell:{:?}",
-        index, cell, old_cell
-      );
+      // debug!(
+      //   "try set cell at index:{:?}, new cell:{:?}, old cell:{:?}",
+      //   index, cell, old_cell
+      // );
       self.cells[index] = cell;
       self.dirty_rows[pos.y() as usize] = true;
       Some(old_cell)
     } else {
-      debug!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
+      // debug!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
       None
     }
   }
@@ -260,7 +260,7 @@ impl Frame {
     if self._contains_range(&range) {
       Some(&self.cells[range])
     } else {
-      debug!("try get cells at invalid range:{:?}", range);
+      // debug!("try get cells at invalid range:{:?}", range);
       None
     }
   }
@@ -317,11 +317,11 @@ impl Frame {
   /// [`set_cells_at`](Frame::set_cells_at).
   pub fn try_set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Option<Vec<Cell>> {
     let range = self.pos2range(pos, cells.len());
-    debug!(
-      "try set cells at range:{:?}, cells len:{:?}",
-      range,
-      self.cells.len()
-    );
+    // debug!(
+    //   "try set cells at range:{:?}, cells len:{:?}",
+    //   range,
+    //   self.cells.len()
+    // );
     if self._contains_range(&range) {
       let end_at = self.idx2pos(range.end);
       for row in pos.y()..end_at.y() {

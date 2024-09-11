@@ -14,30 +14,37 @@ use crate::evloop::message::{Dummy, Notify};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::glovar;
 
-fn into_repo(buf: &[u8]) -> Rope {
-  let buf1: &[u8] = buf;
-  let buf1str: String = String::from_utf8_lossy(buf1).into_owned();
+fn buf_size() -> usize {
+  static VALUE: OnceLock<usize> = OnceLock::new();
 
+  *VALUE.get_or_init(|| 8192_usize)
+}
+
+fn into_str(buf: &[u8], bufsize: usize) -> String {
+  String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
+}
+
+fn into_repo(buf: &[u8], bufsize: usize) -> Rope {
+  let bufstr = into_str(buf, bufsize);
   let mut block = RopeBuilder::new();
-  block.append(&buf1str.to_owned());
+  block.append(&bufstr.to_owned());
   block.finish()
 }
 
 /// Edit default input file for the default buffer, i.e. the empty buffer created along with
 /// default window.
 pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: String) -> TaskResult {
-  let buf_size = 8192_usize;
   let buffers = data_access.buffers.clone();
   let worker_sender = data_access.worker_sender;
 
   debug!("Read the default input file: {:?}", file_name.as_str());
   match fs::File::open(file_name.as_str()).await {
     Ok(mut fp) => {
-      let mut buf: Vec<u8> = vec![0_u8; buf_size];
+      let mut buf: Vec<u8> = vec![0_u8; buf_size()];
       loop {
-        match fp.read_buf(&mut buf).await {
+        match fp.read(&mut buf).await {
           Ok(n) => {
-            debug!("Read {} bytes", n);
+            debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
             // For the first buffer, append to the **default** buffer.
             buffers
@@ -49,7 +56,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
               .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
               .unwrap()
               .rope_mut()
-              .append(into_repo(&buf));
+              .append(into_repo(&buf, n));
 
             // After read each block, immediately notify main thread so UI tree can render it on
             // terminal.
@@ -93,7 +100,6 @@ pub async fn edit_other_files(
   data_access: TaskableDataAccess,
   file_names: Vec<String>,
 ) -> TaskResult {
-  let buf_size = 8192_usize;
   let buffers = data_access.buffers.clone();
   let worker_sender = data_access.worker_sender;
 
@@ -101,7 +107,7 @@ pub async fn edit_other_files(
     debug!("Read the {} input file: {:?}", i, file_name.as_str());
     match fs::File::open(file_name.as_str()).await {
       Ok(mut fp) => {
-        let mut buf: Vec<u8> = vec![0_u8; buf_size];
+        let mut buf: Vec<u8> = vec![0_u8; buf_size()];
 
         // Create new buffer
         let buffer = Buffer::to_arc(Buffer::from(Rope::new()));
@@ -113,13 +119,13 @@ pub async fn edit_other_files(
         loop {
           match fp.read_buf(&mut buf).await {
             Ok(n) => {
-              debug!("Read {} bytes", n);
+              debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
               buffer
                 .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap()
                 .rope_mut()
-                .append(into_repo(&buf));
+                .append(into_repo(&buf, n));
 
               // After read each block, immediately notify main thread so UI tree can render it on
               // terminal.
