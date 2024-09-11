@@ -24,10 +24,10 @@ The VIM editor reinvented in Rust+Typescript.
 
 The goal of RSVIM is to be a highly extensible text editor by following the main features and philosophy of ([Neo](https://neovim.io/))[VIM](https://www.vim.org/) editor, while also to be:
 
-- A powerful TUI engine similar to GUI frameworks that provides widgets, event handlers, MVC, etc.
+- A powerful TUI engine similar to GUI frameworks that provides widgets, event handlers, layouts, etc.
 - A programmable editor that provides a consistent script runtime, with builtin support for type system, async/await, plugin management, etc.
 - A background editing service that allows multiple remote clients to access and work together.
-- A text processing tool that batch processes text contents.
+- A text processing tool that batch processes text contents and integrates with shell environment.
 - A modern project that leverages community works for theme, documentation, development, etc.
 
 ## Installation
