@@ -10,8 +10,8 @@ readme = "README.md"
 homepage = "https://github.com/rsvim/rsvim"
 documentation = "https://docs.rs/rsvim"
 license = "Vim OR Apache-2.0"
-keywords = ["vim", "neovim", "text-editor"]
-categories = ["Text editors", "Development tools"]
+keywords = ["vim", "neovim", "text-editor", "editor", "terminal"]
+categories = ["text-editors"]
 
 [lib]
 doctest = false
