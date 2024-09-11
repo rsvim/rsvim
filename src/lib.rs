@@ -6,7 +6,7 @@ pub mod cart;
 pub mod cli;
 pub mod evloop;
 pub mod glovar;
-pub mod jsengine;
+pub mod jsrt;
 pub mod log;
 pub mod state;
 pub mod test;
