@@ -1,6 +1,6 @@
 [package]
 name = "rsvim"
-version = "0.1.1-alpha.1"
+version = "0.1.1-alpha.2"
 edition = "2021"
 rust-version = "1.79.0"
 authors = ["Lin Rongbin <linrongbin16@outlook.com>"]
@@ -10,8 +10,8 @@ readme = "README.md"
 homepage = "https://github.com/rsvim/rsvim"
 documentation = "https://docs.rs/rsvim"
 license = "Vim OR Apache-2.0"
-keywords = ["vim", "neovim", "text-editor"]
-categories = ["Text editors", "Development tools"]
+keywords = ["vim", "neovim", "text-editor", "editor", "terminal"]
+categories = ["text-editors"]
 
 [lib]
 doctest = false
