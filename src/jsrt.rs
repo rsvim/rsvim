@@ -12,21 +12,21 @@ fn init_v8_platform() {
   v8::V8::initialize();
 }
 
-pub struct JsEngine {
+pub struct JsRuntime {
   isolate: v8::OwnedIsolate,
 }
 
-impl JsEngine {
+impl JsRuntime {
   pub fn new() -> Self {
     INIT.call_once(init_v8_platform);
     let isolate = v8::Isolate::new(Default::default());
 
-    JsEngine { isolate }
+    JsRuntime { isolate }
   }
 }
 
-impl Default for JsEngine {
+impl Default for JsRuntime {
   fn default() -> Self {
-    JsEngine::new()
+    JsRuntime::new()
   }
 }
