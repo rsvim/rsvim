@@ -857,8 +857,8 @@ mod tests {
       shaders[1],
       ShaderCommand::StylePrintString(crossterm::style::Print(_))
     ));
-    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = shaders[1] {
-      assert_eq!(contents, "ABCD".to_string());
+    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &shaders[1] {
+      assert_eq!(*contents, "ABCD".to_string());
     }
   }
 
