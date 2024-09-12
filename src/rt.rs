@@ -32,7 +32,7 @@ impl JsRuntime {
     }
   }
 
-  pub async fn run(&mut self) -> Result<(), String> {
+  pub async fn run(&mut self, data_access: JsDataAccess) -> Result<(), String> {
     Ok(())
   }
 }

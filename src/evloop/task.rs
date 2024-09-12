@@ -14,12 +14,13 @@ use tokio_util::task::TaskTracker;
 use crate::buf::BuffersArc;
 use crate::evloop::message::Notify;
 use crate::evloop::EventLoop;
+use crate::result::VoidResult;
 use crate::state::{State, StateArc};
 use crate::ui::tree::TreeArc;
 
 pub mod startup;
 
-pub type TaskResult = Result<(), String>;
+pub type TaskResult = VoidResult;
 
 #[derive(Debug, Clone)]
 /// The mutable data passed to task, and allow them access the editor.

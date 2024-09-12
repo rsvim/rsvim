@@ -13,6 +13,7 @@ use crate::buf::{Buffer, BufferArc, Buffers, BuffersArc};
 use crate::evloop::message::{Dummy, Notify};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::glovar;
+use crate::result::ErrorCode;
 
 fn buf_size() -> usize {
   static VALUE: OnceLock<usize> = OnceLock::new();
@@ -76,7 +77,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
               e
             );
             error!("{msg}");
-            return Err(msg);
+            return Err(ErrorCode::Message(msg));
           }
         }
       }
@@ -88,7 +89,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
         e
       );
       error!("{msg}");
-      return Err(msg);
+      return Err(ErrorCode::Message(msg));
     }
   }
 
@@ -146,7 +147,7 @@ pub async fn edit_other_files(
                 e
               );
               error!("{msg}");
-              return Err(msg);
+              return Err(ErrorCode::Message(msg));
             }
           }
         }
@@ -159,7 +160,7 @@ pub async fn edit_other_files(
           e
         );
         error!("{msg}");
-        return Err(msg);
+        return Err(ErrorCode::Message(msg));
       }
     }
   }

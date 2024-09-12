@@ -17,8 +17,8 @@ use parking_lot::RwLock;
 use ropey::RopeBuilder;
 use std::borrow::Borrow;
 use std::cell::RefCell;
+use std::io::Write;
 use std::io::{BufWriter, Stdout};
-use std::io::{Result as IoResult, Write};
 use std::ptr::NonNull;
 use std::sync::Arc;
 use std::time::Duration;
@@ -37,6 +37,7 @@ use crate::evloop::message::{Dummy, Notify};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
+use crate::result::{IoResult, VoidIoResult};
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
@@ -123,7 +124,7 @@ impl EventLoop {
     })
   }
 
-  pub async fn init(&mut self) -> IoResult<()> {
+  pub async fn init(&mut self) -> VoidIoResult {
     self.queue_cursor().await?;
     self.writer.flush()?;
 
@@ -197,7 +198,7 @@ impl EventLoop {
     true
   }
 
-  pub async fn run(&mut self) -> IoResult<()> {
+  pub async fn run(&mut self) -> VoidIoResult {
     let mut reader = EventStream::new();
     let received_limit = 100_usize;
     let mut received_notifies: Vec<Notify> = Vec::with_capacity(received_limit);
@@ -227,7 +228,7 @@ impl EventLoop {
     Ok(())
   }
 
-  async fn render(&mut self) -> IoResult<()> {
+  async fn render(&mut self) -> VoidIoResult {
     {
       // Draw UI components to the canvas.
       self
@@ -254,7 +255,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas shader.
-  async fn queue_shader(&mut self, shader: Shader) -> IoResult<()> {
+  async fn queue_shader(&mut self, shader: Shader) -> VoidIoResult {
     for shader_command in shader.iter() {
       match shader_command {
         ShaderCommand::CursorSetCursorStyle(command) => queue!(self.writer, command)?,
@@ -308,7 +309,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas cursor.
-  async fn queue_cursor(&mut self) -> IoResult<()> {
+  async fn queue_cursor(&mut self) -> VoidIoResult {
     let cursor = *self
       .canvas
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))

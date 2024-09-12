@@ -7,6 +7,7 @@ pub mod cli;
 pub mod evloop;
 pub mod glovar;
 pub mod log;
+pub mod result;
 pub mod rt;
 pub mod state;
 pub mod test;
