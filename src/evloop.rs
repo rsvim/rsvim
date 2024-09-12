@@ -50,11 +50,17 @@ pub mod task;
 #[derive(Debug)]
 pub struct EventLoop {
   pub cli_opt: CliOpt,
+
+  // UI
   pub canvas: CanvasArc,
   pub tree: TreeArc,
-  pub state: StateArc,
-  pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
+
+  // State
+  pub state: StateArc,
+
+  // Buffers
+  pub buffers: BuffersArc,
 
   // Spawned tasks.
   // Here name the spawned tasks "worker", the main loop thread "master".
