@@ -14,19 +14,19 @@ fn init_v8_platform() {
 
 pub struct JsRuntime {
   isolate: v8::OwnedIsolate,
+  config_entry: String,
 }
 
 impl JsRuntime {
-  pub fn new() -> Self {
+  pub fn new(config_entry: String) -> Self {
     INIT.call_once(init_v8_platform);
     let isolate = v8::Isolate::new(Default::default());
 
-    JsRuntime { isolate }
+    JsRuntime {
+      isolate,
+      config_entry,
+    }
   }
-}
 
-impl Default for JsRuntime {
-  fn default() -> Self {
-    JsRuntime::new()
-  }
+  pub async fn run(&mut self) -> Result<(), String> {}
 }
