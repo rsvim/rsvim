@@ -126,15 +126,15 @@ impl Buffers {
     self.buffers.contains_key(id)
   }
 
-  pub fn keys(&self) -> std::collections::btree_map::Keys<BufferId, BufferArc> {
+  pub fn keys(&self) -> BuffersKeys {
     self.buffers.keys()
   }
 
-  pub fn values(&self) -> std::collections::btree_map::Values<BufferId, BufferArc> {
+  pub fn values(&self) -> BuffersValues {
     self.buffers.values()
   }
 
-  pub fn iter(&self) -> std::collections::btree_map::Iter<BufferId, BufferArc> {
+  pub fn iter(&self) -> BuffersIter {
     self.buffers.iter()
   }
 
@@ -155,6 +155,9 @@ impl Default for Buffers {
 
 pub type BuffersArc = Arc<RwLock<Buffers>>;
 pub type BuffersWk = Weak<RwLock<Buffers>>;
+pub type BuffersKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
+pub type BuffersValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;
+pub type BuffersIter<'a> = std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
 
 #[cfg(test)]
 mod tests {
