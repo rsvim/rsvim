@@ -5,6 +5,7 @@
 use std::sync::Once;
 
 use crate::buf::BuffersArc;
+use crate::result::VoidResult;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
@@ -32,7 +33,7 @@ impl JsRuntime {
     }
   }
 
-  pub async fn run(&mut self, data_access: JsDataAccess) -> Result<(), String> {
+  pub async fn run(&mut self, data_access: JsDataAccess) -> VoidResult {
     Ok(())
   }
 }
