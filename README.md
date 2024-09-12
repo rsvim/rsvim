@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-The VIM editor reinvented in Rust+Typescript.
+The VIM editor reinvented in Rust+TypeScript.
 </p>
 
 <p>

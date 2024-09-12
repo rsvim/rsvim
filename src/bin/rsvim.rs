@@ -1,4 +1,4 @@
-//! The VIM editor reinvented in Rust+Typescript.
+//! The VIM editor reinvented in Rust+TypeScript.
 
 #![allow(unused_imports, dead_code)]
 
