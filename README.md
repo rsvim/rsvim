@@ -27,8 +27,8 @@ The goal of RSVIM is to be a highly extensible text editor by following the main
 - A fast editor that fully utilizes all CPU cores and never freezes.
 - A powerful TUI engine that provides widgets, event handlers, layouts, etc.
 - A consistent scripting runtime with built-in support for type system, async/await, plugin management, etc.
-- A background editing service that allows multiple remote clients to access and work together.
-- A text processing tool that batch processes text contents and integrates with shell environment.
+- An editing service that allows multiple users to access remotely and work together.
+- A text processing tool that integrates with the shell environment.
 
 ## Installation
 
