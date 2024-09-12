@@ -4,6 +4,10 @@
 
 use std::sync::Once;
 
+use crate::buf::BuffersArc;
+use crate::state::StateArc;
+use crate::ui::tree::TreeArc;
+
 static INIT: Once = Once::new();
 
 fn init_v8_platform() {
@@ -30,5 +34,23 @@ impl JsRuntime {
 
   pub async fn run(&mut self) -> Result<(), String> {
     Ok(())
+  }
+}
+
+#[derive(Debug)]
+/// The mutable data passed to each state handler, and allow them access the editor.
+pub struct JsDataAccess {
+  pub state: StateArc,
+  pub tree: TreeArc,
+  pub buffers: BuffersArc,
+}
+
+impl JsDataAccess {
+  pub fn new(state: StateArc, tree: TreeArc, buffers: BuffersArc) -> Self {
+    JsDataAccess {
+      state,
+      tree,
+      buffers,
+    }
   }
 }
