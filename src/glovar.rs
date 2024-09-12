@@ -17,3 +17,26 @@ pub fn MUTEX_TIMEOUT() -> u64 {
     _ => u64::MAX,
   })
 }
+
+/// The buffer size of IO operations: file, sockets, etc.
+pub fn IO_BUF_SIZE() -> usize {
+  8192_usize
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn mutex_timeout1() {
+    unsafe {
+      env::set_var("RSVIM_MUTEX_TIMEOUT", "128");
+      assert_eq!(MUTEX_TIMEOUT(), 128_u64);
+    }
+  }
+
+  #[test]
+  fn io_buf_size1() {
+    assert!(IO_BUF_SIZE() > 0);
+  }
+}

@@ -430,6 +430,26 @@ impl Tree {
 
   // Cursor and Window }
 
+  // Global options {
+
+  pub fn line_wrap(&self) -> bool {
+    self.line_wrap
+  }
+
+  pub fn set_line_wrap(&mut self, line_wrap: bool) {
+    self.line_wrap = line_wrap;
+  }
+
+  pub fn word_wrap(&self) -> bool {
+    self.word_wrap
+  }
+
+  pub fn set_word_wrap(&mut self, word_wrap: bool) {
+    self.word_wrap = word_wrap;
+  }
+
+  // Global options }
+
   // Draw {
 
   /// Draw the widget tree to canvas.
