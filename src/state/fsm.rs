@@ -39,16 +39,16 @@ pub mod visual;
 
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.
-pub struct StatefulDataAccessMut<'a> {
+pub struct StatefulDataAccess<'a> {
   pub state: &'a mut State,
   pub tree: TreeArc,
   pub buffers: BuffersArc,
   pub event: Event,
 }
 
-impl<'a> StatefulDataAccessMut<'a> {
+impl<'a> StatefulDataAccess<'a> {
   pub fn new(state: &'a mut State, tree: TreeArc, buffers: BuffersArc, event: Event) -> Self {
-    StatefulDataAccessMut {
+    StatefulDataAccess {
       state,
       tree,
       buffers,
@@ -57,32 +57,12 @@ impl<'a> StatefulDataAccessMut<'a> {
   }
 }
 
-// #[derive(Debug, Clone)]
-// /// The immutable data passed to each state handler, and allow them access the editor.
-// pub struct StatefulDataAccess<'a> {
-//   pub state: &'a State,
-//   pub tree: TreeArc,
-//   pub buffers: BuffersArc,
-//   pub event: Event,
-// }
-//
-// impl<'a> StatefulDataAccess<'a> {
-//   pub fn new(state: &'a State, tree: TreeArc, buffers: BuffersArc, event: Event) -> Self {
-//     StatefulDataAccess {
-//       state,
-//       tree,
-//       buffers,
-//       event,
-//     }
-//   }
-// }
-
 /// The FSM state trait.
 pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue;
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -112,7 +92,7 @@ impl Stateful for StatefulValue {
   /// Dispatch data with current FSM state.
   ///
   /// Returns the next FSM state.
-  fn handle(&self, data_access: StatefulDataAccessMut) -> StatefulValue {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     match self {
       StatefulValue::NormalMode(s) => s.handle(data_access),
       StatefulValue::VisualMode(s) => s.handle(data_access),
