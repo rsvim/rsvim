@@ -1,5 +1,5 @@
 //! The core library for [RSVIM](https://github.com/rsvim/rsvim), the VIM editor reinvented in
-//! Rust+Typescript.
+//! Rust+TypeScript.
 
 pub mod buf;
 pub mod cart;
