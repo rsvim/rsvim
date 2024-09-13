@@ -1,3 +1,11 @@
+## [0.1.1-alpha.4](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.3..0.1.1-alpha.4) - 2024-09-13
+
+[909f5f9f](https://github.com/rsvim/rsvim/commit/909f5f9f9ad6d4287d6a66371458c52a5a15b442)...[0ded2fda](https://github.com/rsvim/rsvim/commit/0ded2fdafb1267c81a3cbf0ae64377ed31c4f7a1)
+
+### <!-- 0 -->Features
+
+- *(script)* Add js runtime (#109) ([da718832](https://github.com/rsvim/rsvim/commit/da718832eb301ad75080396de04fc5f989d59d0f)) by @linrongbin16 ([#109](https://github.com/rsvim/rsvim/pull/109))
+
 ## unreleased
 
 ### <!-- 0 -->Features
@@ -19,5 +27,4 @@
 - *(poc)* Refactor code, add docs (#71) ([6d9cc7f3](https://github.com/rsvim/rsvim/commit/6d9cc7f3cf673a3947e1261d48885acac8695e98)) by @linrongbin16 ([#71](https://github.com/rsvim/rsvim/pull/71))
 
 - Rename 'Terminal' to 'Canvas' (#74) ([aafad5ca](https://github.com/rsvim/rsvim/commit/aafad5ca88205f41c81832a33d5101c077e4160b)) by @linrongbin16 ([#74](https://github.com/rsvim/rsvim/pull/74))
-
 
