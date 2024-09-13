@@ -26,6 +26,7 @@ fn init_v8_platform() {
   v8::V8::initialize();
 }
 
+#[derive(Debug)]
 pub struct JsRuntime {
   isolate: v8::OwnedIsolate,
   config_file: String,

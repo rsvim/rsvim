@@ -38,6 +38,7 @@ use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::result::{IoResult, VoidIoResult};
+use crate::rt::{JsDataAccess, JsRuntime};
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
@@ -70,6 +71,9 @@ pub struct EventLoop {
   // Sender and receiver that allow workers send a notification to master.
   pub worker_sender: UnboundedSender<Notify>,
   pub master_receiver: UnboundedReceiver<Notify>,
+
+  // JavaScript Runtime
+  pub js_runtime: JsRuntime,
 }
 
 impl EventLoop {
@@ -121,6 +125,7 @@ impl EventLoop {
       task_tracker: TaskTracker::new(),
       worker_sender,
       master_receiver,
+      js_runtime: JsRuntime::new(".rsvim.js".to_string()),
     })
   }
 
@@ -151,6 +156,13 @@ impl EventLoop {
               .await;
         }
       });
+    }
+
+    // Initialize user scripts
+    {
+      let data_access =
+        JsDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
+      let _ = self.js_runtime.start(data_access).await;
     }
 
     Ok(())
