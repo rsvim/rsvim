@@ -3,3 +3,6 @@ extend-ignore-words-re = [
   # Valid words
   "visibles",
 ]
+
+[files]
+extend-exclude = ["CHANGELOG.md"]
