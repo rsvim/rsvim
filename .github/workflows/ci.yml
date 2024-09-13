@@ -26,6 +26,7 @@ jobs:
       - uses: cargo-bins/cargo-binstall@main
       - uses: actions/checkout@v4
       - uses: crate-ci/typos@master
+        if: ${{ github.ref != 'refs/heads/main' }}
       - name: Rustfmt
         run: cargo fmt --check
       - name: Taplo
