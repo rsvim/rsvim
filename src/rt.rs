@@ -97,7 +97,7 @@ impl JsRuntime {
 
     debug!("Load config file {:?}", self.config_file.as_str());
     match fs::read_to_string(self.config_file.as_str()).await {
-      Ok(source) => {}
+      Ok(_source) => {}
       Err(e) => {
         let msg = format!(
           "Failed to load user config file {:?} with error {:?}",
