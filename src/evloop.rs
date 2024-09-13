@@ -133,6 +133,14 @@ impl EventLoop {
     self.queue_cursor().await?;
     self.writer.flush()?;
 
+    // Initialize user scripts
+    // NOTE: This operation is sync, the Js runtime runs along with the main thread
+    {
+      let data_access =
+        JsDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
+      let _ = self.js_runtime.start(data_access).await;
+    }
+
     // Has input files.
     if !self.cli_opt.file().is_empty() {
       let data_access = TaskableDataAccess::new(
@@ -156,13 +164,6 @@ impl EventLoop {
               .await;
         }
       });
-    }
-
-    // Initialize user scripts
-    {
-      let data_access =
-        JsDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
-      let _ = self.js_runtime.start(data_access).await;
     }
 
     Ok(())
