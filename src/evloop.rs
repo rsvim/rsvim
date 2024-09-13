@@ -17,8 +17,8 @@ use parking_lot::RwLock;
 use ropey::RopeBuilder;
 use std::borrow::Borrow;
 use std::cell::RefCell;
+use std::io::Write;
 use std::io::{BufWriter, Stdout};
-use std::io::{Result as IoResult, Write};
 use std::ptr::NonNull;
 use std::sync::Arc;
 use std::time::Duration;
@@ -34,9 +34,11 @@ use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
 use crate::evloop::message::{Dummy, Notify};
-use crate::evloop::task::{TaskHandles, TaskId, TaskResult, TaskableDataAccess};
+use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
+use crate::result::{IoResult, VoidIoResult};
+use crate::rt::{JsDataAccess, JsRuntime};
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
@@ -50,11 +52,17 @@ pub mod task;
 #[derive(Debug)]
 pub struct EventLoop {
   pub cli_opt: CliOpt,
+
+  // UI
   pub canvas: CanvasArc,
   pub tree: TreeArc,
-  pub state: StateArc,
-  pub buffers: BuffersArc,
   pub writer: BufWriter<Stdout>,
+
+  // State
+  pub state: StateArc,
+
+  // Buffers
+  pub buffers: BuffersArc,
 
   // Spawned tasks.
   // Here name the spawned tasks "worker", the main loop thread "master".
@@ -63,6 +71,9 @@ pub struct EventLoop {
   // Sender and receiver that allow workers send a notification to master.
   pub worker_sender: UnboundedSender<Notify>,
   pub master_receiver: UnboundedReceiver<Notify>,
+
+  // JavaScript Runtime
+  pub js_runtime: JsRuntime,
 }
 
 impl EventLoop {
@@ -114,12 +125,21 @@ impl EventLoop {
       task_tracker: TaskTracker::new(),
       worker_sender,
       master_receiver,
+      js_runtime: JsRuntime::new(".rsvim.js".to_string()),
     })
   }
 
-  pub async fn init(&mut self) -> IoResult<()> {
+  pub async fn init(&mut self) -> VoidIoResult {
     self.queue_cursor().await?;
     self.writer.flush()?;
+
+    // Initialize user scripts
+    // NOTE: This operation is sync, the Js runtime runs along with the main thread
+    {
+      let data_access =
+        JsDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
+      let _ = self.js_runtime.start(data_access).await;
+    }
 
     // Has input files.
     if !self.cli_opt.file().is_empty() {
@@ -130,24 +150,20 @@ impl EventLoop {
         self.worker_sender.clone(),
       );
       let input_files = self.cli_opt.file().to_vec();
-      let (default_input_file, other_input_files) = input_files.split_first().unwrap();
-      let default_input_file = default_input_file.clone();
       self.task_tracker.spawn(async move {
-        task::startup::input_files::edit_default_file(data_access.clone(), default_input_file).await
+        let (default_input_file, other_input_files) = input_files.split_first().unwrap();
+        let default_input_file = default_input_file.clone();
+        if task::startup::input_files::edit_default_file(data_access.clone(), default_input_file)
+          .await
+          .is_ok()
+          && !other_input_files.is_empty()
+        {
+          let other_input_files = other_input_files.to_vec();
+          let _ =
+            task::startup::input_files::edit_other_files(data_access.clone(), other_input_files)
+              .await;
+        }
       });
-
-      let data_access = TaskableDataAccess::new(
-        self.state.clone(),
-        self.tree.clone(),
-        self.buffers.clone(),
-        self.worker_sender.clone(),
-      );
-      if !other_input_files.is_empty() {
-        let other_input_files = other_input_files.to_vec();
-        self.task_tracker.spawn(async move {
-          task::startup::input_files::edit_other_files(data_access.clone(), other_input_files).await
-        });
-      }
     }
 
     Ok(())
@@ -195,7 +211,7 @@ impl EventLoop {
     true
   }
 
-  pub async fn run(&mut self) -> IoResult<()> {
+  pub async fn run(&mut self) -> VoidIoResult {
     let mut reader = EventStream::new();
     let received_limit = 100_usize;
     let mut received_notifies: Vec<Notify> = Vec::with_capacity(received_limit);
@@ -225,7 +241,7 @@ impl EventLoop {
     Ok(())
   }
 
-  async fn render(&mut self) -> IoResult<()> {
+  async fn render(&mut self) -> VoidIoResult {
     {
       // Draw UI components to the canvas.
       self
@@ -252,7 +268,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas shader.
-  async fn queue_shader(&mut self, shader: Shader) -> IoResult<()> {
+  async fn queue_shader(&mut self, shader: Shader) -> VoidIoResult {
     for shader_command in shader.iter() {
       match shader_command {
         ShaderCommand::CursorSetCursorStyle(command) => queue!(self.writer, command)?,
@@ -306,7 +322,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas cursor.
-  async fn queue_cursor(&mut self) -> IoResult<()> {
+  async fn queue_cursor(&mut self) -> VoidIoResult {
     let cursor = *self
       .canvas
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))

@@ -13,18 +13,13 @@ use crate::buf::{Buffer, BufferArc, Buffers, BuffersArc};
 use crate::evloop::message::{Dummy, Notify};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::glovar;
-
-fn buf_size() -> usize {
-  static VALUE: OnceLock<usize> = OnceLock::new();
-
-  *VALUE.get_or_init(|| 8192_usize)
-}
+use crate::result::ErrorCode;
 
 fn into_str(buf: &[u8], bufsize: usize) -> String {
   String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
 }
 
-fn into_repo(buf: &[u8], bufsize: usize) -> Rope {
+fn into_rope(buf: &[u8], bufsize: usize) -> Rope {
   let bufstr = into_str(buf, bufsize);
   let mut block = RopeBuilder::new();
   block.append(&bufstr.to_owned());
@@ -40,7 +35,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
   debug!("Read the default input file: {:?}", file_name.as_str());
   match fs::File::open(file_name.as_str()).await {
     Ok(mut fp) => {
-      let mut buf: Vec<u8> = vec![0_u8; buf_size()];
+      let mut buf: Vec<u8> = vec![0_u8; glovar::IO_BUF_SIZE()];
       loop {
         match fp.read(&mut buf).await {
           Ok(n) => {
@@ -56,7 +51,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
               .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
               .unwrap()
               .rope_mut()
-              .append(into_repo(&buf, n));
+              .append(into_rope(&buf, n));
 
             // After read each block, immediately notify main thread so UI tree can render it on
             // terminal.
@@ -76,7 +71,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
               e
             );
             error!("{msg}");
-            return Err(msg);
+            return Err(ErrorCode::Message(msg));
           }
         }
       }
@@ -88,7 +83,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
         e
       );
       error!("{msg}");
-      return Err(msg);
+      return Err(ErrorCode::Message(msg));
     }
   }
 
@@ -107,7 +102,7 @@ pub async fn edit_other_files(
     debug!("Read the {} input file: {:?}", i, file_name.as_str());
     match fs::File::open(file_name.as_str()).await {
       Ok(mut fp) => {
-        let mut buf: Vec<u8> = vec![0_u8; buf_size()];
+        let mut buf: Vec<u8> = vec![0_u8; glovar::IO_BUF_SIZE()];
 
         // Create new buffer
         let buffer = Buffer::to_arc(Buffer::from(Rope::new()));
@@ -125,7 +120,7 @@ pub async fn edit_other_files(
                 .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
                 .unwrap()
                 .rope_mut()
-                .append(into_repo(&buf, n));
+                .append(into_rope(&buf, n));
 
               // After read each block, immediately notify main thread so UI tree can render it on
               // terminal.
@@ -146,7 +141,7 @@ pub async fn edit_other_files(
                 e
               );
               error!("{msg}");
-              return Err(msg);
+              return Err(ErrorCode::Message(msg));
             }
           }
         }
@@ -159,7 +154,7 @@ pub async fn edit_other_files(
           e
         );
         error!("{msg}");
-        return Err(msg);
+        return Err(ErrorCode::Message(msg));
       }
     }
   }

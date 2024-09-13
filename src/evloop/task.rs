@@ -8,20 +8,19 @@ use std::pin::Pin;
 use std::ptr::NonNull;
 use std::sync::Arc;
 use tokio::sync::mpsc::UnboundedSender;
-use tokio::task::JoinHandle;
 use tokio::task::{AbortHandle, JoinSet};
+use tokio_util::task::TaskTracker;
 
 use crate::buf::BuffersArc;
 use crate::evloop::message::Notify;
 use crate::evloop::EventLoop;
+use crate::result::VoidResult;
 use crate::state::{State, StateArc};
 use crate::ui::tree::TreeArc;
 
 pub mod startup;
 
-pub type TaskId = tokio::task::Id;
-pub type TaskResult = Result<(), String>;
-pub type TaskHandles = Arc<RwLock<HashMap<TaskId, AbortHandle>>>;
+pub type TaskResult = VoidResult;
 
 #[derive(Debug, Clone)]
 /// The mutable data passed to task, and allow them access the editor.

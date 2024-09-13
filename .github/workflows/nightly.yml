@@ -13,7 +13,7 @@ env:
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   CARGO_NET_RETRY: 3
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-Dwarnings --cfg tokio_unstable"
+  RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
   RUSTUP_MAX_RETRIES: 3
   GH_TOKEN: ${{ github.token }}

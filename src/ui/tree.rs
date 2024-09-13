@@ -215,6 +215,11 @@ pub struct Tree {
   // All [`Window`](crate::ui::widget::Window) node IDs.
   windows_ids: BTreeSet<TreeNodeId>,
   // Cursor and window state }
+
+  // Global options {
+  line_wrap: bool,
+  word_wrap: bool,
+  // Global options }
 }
 
 pub type TreeArc = Arc<RwLock<Tree>>;
@@ -222,6 +227,18 @@ pub type TreeWk = Weak<RwLock<Tree>>;
 pub type TreeNodeId = InodeId;
 pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
 pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
+
+// Defaults of global options {
+
+fn line_wrap_default() -> bool {
+  false
+}
+
+fn word_wrap_default() -> bool {
+  false
+}
+
+// Defaults of global options }
 
 impl Tree {
   /// Make a widget tree.
@@ -241,6 +258,8 @@ impl Tree {
       base: Itree::new(root_node),
       cursor_id: None,
       windows_ids: BTreeSet::new(),
+      line_wrap: line_wrap_default(),
+      word_wrap: word_wrap_default(),
     }
   }
 
@@ -410,6 +429,26 @@ impl Tree {
   }
 
   // Cursor and Window }
+
+  // Global options {
+
+  pub fn line_wrap(&self) -> bool {
+    self.line_wrap
+  }
+
+  pub fn set_line_wrap(&mut self, line_wrap: bool) {
+    self.line_wrap = line_wrap;
+  }
+
+  pub fn word_wrap(&self) -> bool {
+    self.word_wrap
+  }
+
+  pub fn set_word_wrap(&mut self, word_wrap: bool) {
+    self.word_wrap = word_wrap;
+  }
+
+  // Global options }
 
   // Draw {
 
