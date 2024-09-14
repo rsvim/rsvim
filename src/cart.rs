@@ -1,9 +1,7 @@
 //! Cartesian coordinate system.
 //!
 //! For terminal based coordinate system, it's not working like the 2-dimensional coordinate system
-//! in mathematics. In mathematics, the 2-dimensional coordinates look like:
-//!
-//! The 2-dimensional coordinate system in mathematics usually look like:
+//! in mathematics. In mathematics, 2-dimensional coordinate system usually look like:
 //!
 //! ```text
 //!                  Y
@@ -20,9 +18,7 @@
 //!
 //! We usually say the line in the top is the first line, the line in the bottom is the last line,
 //! the column in the left side is the first column, the column in the right side is the last
-//! column.
-//!
-//! Thus we need to flip the coordinate system upside down:
+//! column. Thus we need to flip the coordinate system upside down:
 //!
 //! ```text
 //!
@@ -41,7 +37,7 @@
 //! The top-left of the terminal is the `(0,0)` position, the bottom-right of the terminal is the
 //! `(width,height)` position, where the `width` and `height` is the size of the terminal.
 //!
-//! This is also compatible with the coordinates used by the
+//! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
 use geo::{Point, Rect};
