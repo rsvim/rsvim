@@ -46,63 +46,70 @@ impl JsRuntime {
     }
   }
 
-  pub fn start(&mut self, mut data_access: JsDataAccess) -> VoidResult {
+  pub fn start(&mut self, _data_access: JsDataAccess) -> VoidResult {
     let isolate = &mut v8::Isolate::new(Default::default());
     let scope = &mut v8::HandleScope::new(isolate);
 
-    // Create the `vim` global object {
-
-    let global_vim_template = v8::ObjectTemplate::new(scope);
-    let mut accessor_property = v8::PropertyAttribute::NONE;
-    accessor_property = accessor_property | v8::PropertyAttribute::READ_ONLY;
-
-    let line_wrap_getter = {
-      let external = v8::External::new(
-        scope,
-        CallbackInfo::new_raw((&mut data_access) as *mut JsDataAccess) as *mut _,
-      );
-      let function = v8::FunctionTemplate::builder_raw(line_wrap_getter_call_fn)
-        .data(external.into())
-        .build(scope);
-
-      if let Some(v8str) = v8::String::new(scope, "getLineWrap").unwrap().into() {
-        function.set_class_name(v8str);
-      }
-
-      function
-    };
-
-    let line_wrap_setter = {
-      let external = v8::External::new(
-        scope,
-        CallbackInfo::new_raw((&mut data_access) as *mut JsDataAccess) as *mut _,
-      );
-      let function = v8::FunctionTemplate::builder_raw(line_wrap_setter_call_fn)
-        .data(external.into())
-        .build(scope);
-
-      if let Some(v8str) = v8::String::new(scope, "setLineWrap").unwrap().into() {
-        function.set_class_name(v8str);
-      }
-
-      function
-    };
-
-    global_vim_template.set_accessor_property(
-      v8::String::new(scope, "vim").unwrap().into(),
-      Some(line_wrap_getter),
-      Some(line_wrap_setter),
-      accessor_property,
-    );
-
-    // Create the `vim` global object }
+    // // Create the `vim` global object {
+    //
+    // let global_vim_template = v8::ObjectTemplate::new(scope);
+    // let mut accessor_property = v8::PropertyAttribute::NONE;
+    // accessor_property = accessor_property | v8::PropertyAttribute::READ_ONLY;
+    //
+    // let line_wrap_getter = {
+    //   let external = v8::External::new(
+    //     scope,
+    //     CallbackInfo::new_raw((&mut data_access) as *mut JsDataAccess) as *mut _,
+    //   );
+    //   let function = v8::FunctionTemplate::builder_raw(line_wrap_getter_call_fn)
+    //     .data(external.into())
+    //     .build(scope);
+    //
+    //   if let Some(v8str) = v8::String::new(scope, "getLineWrap").unwrap().into() {
+    //     function.set_class_name(v8str);
+    //   }
+    //
+    //   function
+    // };
+    //
+    // let line_wrap_setter = {
+    //   let external = v8::External::new(
+    //     scope,
+    //     CallbackInfo::new_raw((&mut data_access) as *mut JsDataAccess) as *mut _,
+    //   );
+    //   let function = v8::FunctionTemplate::builder_raw(line_wrap_setter_call_fn)
+    //     .data(external.into())
+    //     .build(scope);
+    //
+    //   if let Some(v8str) = v8::String::new(scope, "setLineWrap").unwrap().into() {
+    //     function.set_class_name(v8str);
+    //   }
+    //
+    //   function
+    // };
+    //
+    // global_vim_template.set_accessor_property(
+    //   v8::String::new(scope, "vim").unwrap().into(),
+    //   Some(line_wrap_getter),
+    //   Some(line_wrap_setter),
+    //   accessor_property,
+    // );
+    //
+    // // Create the `vim` global object }
 
     let context = v8::Context::new(scope, Default::default());
-    let _scope = &mut v8::ContextScope::new(scope, context);
+    let scope = &mut v8::ContextScope::new(scope, context);
 
     debug!("Load config file {:?}", self.config_file.as_str());
     match std::fs::read_to_string(self.config_file.as_str()) {
-      Ok(_source) => {}
+      Ok(source) => {
+        debug!("Load source code:{:?}", source.as_str());
+        let code = v8::String::new(scope, source.as_str()).unwrap();
+        let script = v8::Script::compile(scope, code, None).unwrap();
+        let result = script.run(scope).unwrap();
+        let result = result.to_string(scope).unwrap();
+        debug!("Execute result: {}", result.to_rust_string_lossy(scope));
+      }
       Err(e) => {
         let msg = format!(
           "Failed to load user config file {:?} with error {:?}",

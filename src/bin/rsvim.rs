@@ -101,6 +101,9 @@ async fn main() -> IoResult<()> {
   // Since rusty_v8 (for now) only support single thread mode, and the `Isolate` is not safe to be
   // sent between threads, here we allocate a single thread to run it. This is completely out of
   // tokio async runtime, and uses channel to communicate between V8 and the event loop.
+  //
+  // This is quite like a parent-child process relationship, js runtime thread can directly access
+  // the EventLoop by simply acquire the RwLock.
   init_v8_platform();
   let mut js_runtime = JsRuntime::new(
     ".rsvim.js".to_string(),
@@ -113,8 +116,21 @@ async fn main() -> IoResult<()> {
     event_loop.buffers.clone(),
   );
   std::thread::spawn(move || {
+    // Basically, this thread is simply running a single js/ts file, there are several tasks need
+    // to complete:
+    // 1. Resolve all the modules marked by `import` and `require` keywords, and recursively
+    //    resolve the nested modules inside them.
+    // 2. Update editor configurations and settings via the OPs.
+    // 3. Bind callbacks (most interactives are triggered by callbacks) on the related Vim events,
+    //    and schedule timeout/delay background jobs.
     let _ = js_runtime.start(data_access);
+
+    // After loading user config is done, this thread is waiting for Event Loop to notify it to
+    // exit. If the editor is quit before loading is done, then we need to insert some checks to
+    // manually break config loading and exit this thread.
   });
+
+  event_loop.run().await?;
 
   shutdown()
 }
