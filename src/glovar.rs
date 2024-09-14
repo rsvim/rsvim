@@ -1,4 +1,4 @@
-//! Global (environment) variables.
+//! Global constants and (environment) variables.
 
 #![allow(non_snake_case)]
 

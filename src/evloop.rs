@@ -1,4 +1,4 @@
-//! Main event loop for TUI application.
+//! Main event loop.
 
 #![allow(unused_imports, dead_code)]
 

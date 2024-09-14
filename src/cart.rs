@@ -1,4 +1,4 @@
-//! Cartesian coordinate system on the 2-dimensional plane.
+//! Cartesian coordinate system.
 //!
 //! For terminal based coordinate system, it's not working like the 2-dimensional coordinate system
 //! in mathematics. In mathematics, the 2-dimensional coordinates look like:
