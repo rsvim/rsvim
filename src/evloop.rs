@@ -75,7 +75,7 @@ pub struct EventLoop {
   /// (Global) editing state.
   pub state: StateArc,
 
-  // Vim buffers.
+  /// Vim buffers.
   pub buffers: BuffersArc,
 
   /// Cancellation token to notify the main loop to exit.
