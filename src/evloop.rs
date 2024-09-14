@@ -59,6 +59,8 @@ pub mod task;
 ///
 /// * Master: The event loop itself.
 /// * Worker: A spawned task.
+///
+/// Js runtime and this event loop communicate via another two pairs of channels.
 pub struct EventLoop {
   /// Command line options.
   pub cli_opt: CliOpt,
@@ -86,8 +88,9 @@ pub struct EventLoop {
   /// Receiver of the channel that workers send messages to master.
   pub master_recv_from_worker: UnboundedReceiver<WorkerToMasterMessage>,
 
-  // Channels between this running loop and js runtime.
+  // Sender of the channel that event loop send messages to js runtime.
   evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
+  // Receiver of the channel that js runtime send messages to event loop.
   evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
 }
 
