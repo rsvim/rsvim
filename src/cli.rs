@@ -26,7 +26,11 @@ use clap::Parser;
 // verbose: bool,
 
 #[derive(Parser, Debug, Clone)]
-#[command(version, about, long_about=None)]
+#[command(
+  version,
+  about,
+  long_about = "The VIM editor reinvented in Rust+TypeScript.\nPlease checkout https://rsvim.github.io/ for more documentation."
+)]
 /// Command line options.
 pub struct CliOpt {
   #[arg(help = "Edit file(s)")]

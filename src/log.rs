@@ -8,8 +8,9 @@ use tzdb;
 
 /// Initialize logging.
 ///
-/// It uses `RUST_LOG` environment variable to control the logging level. By default it's `INFO`.
-pub fn init() {
+/// It uses `RUST_LOG` environment variable or the `--debug` flag to control the logging level. By
+/// default is `INFO`.
+pub fn init(force_debug: bool) {
   let now = tzdb::now::local().unwrap();
   let now = OffsetDateTime::new_in_offset(
     Date::from_calendar_date(
@@ -26,15 +27,29 @@ pub fn init() {
   )
   .unwrap();
   let log_name = now.format(&fmt).unwrap();
-  let subscriber = tracing_subscriber::FmtSubscriber::builder()
-    .with_file(true)
-    .with_line_number(true)
-    .with_thread_ids(true)
-    .with_thread_names(true)
-    .with_level(true)
-    .with_ansi(false)
-    .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-    .with_writer(tracing_appender::rolling::never(".", log_name))
-    .finish();
-  tracing::subscriber::set_global_default(subscriber).unwrap();
+  if force_debug {
+    let subscriber = tracing_subscriber::FmtSubscriber::builder()
+      .with_file(true)
+      .with_line_number(true)
+      .with_thread_ids(true)
+      .with_thread_names(true)
+      .with_level(true)
+      .with_ansi(false)
+      .with_max_level(tracing_subscriber::filter::LevelFilter::DEBUG)
+      .with_writer(tracing_appender::rolling::never(".", log_name))
+      .finish();
+    tracing::subscriber::set_global_default(subscriber).unwrap();
+  } else {
+    let subscriber = tracing_subscriber::FmtSubscriber::builder()
+      .with_file(true)
+      .with_line_number(true)
+      .with_thread_ids(true)
+      .with_thread_names(true)
+      .with_level(true)
+      .with_ansi(false)
+      .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+      .with_writer(tracing_appender::rolling::never(".", log_name))
+      .finish();
+    tracing::subscriber::set_global_default(subscriber).unwrap();
+  };
 }
