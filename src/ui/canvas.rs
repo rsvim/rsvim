@@ -715,7 +715,7 @@ mod tests {
 
   #[test]
   fn _next_same_cell_in_row1() {
-    test_log_init();
+    // test_log_init();
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can
@@ -866,7 +866,7 @@ mod tests {
 
   #[test]
   fn diff1() {
-    // INIT.call_once(test_log_init);
+    test_log_init();
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -879,20 +879,28 @@ mod tests {
     let actual2 = can._brute_force_diff();
     info!("dirty marks:{:?}", actual1);
     info!("brute force:{:?}", actual2);
-    assert_eq!(actual1.len(), 1);
+    assert_eq!(actual1.len(), 2);
     assert!(matches!(
       actual1[0],
+      ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(_, _))
+    ));
+    assert!(matches!(
+      actual1[1],
       ShaderCommand::StylePrintString(crossterm::style::Print(_))
     ));
-    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &actual1[0] {
+    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &actual1[1] {
       assert_eq!(*contents, "ABCD".to_string());
     }
-    assert_eq!(actual2.len(), 1);
+    assert_eq!(actual2.len(), 2);
     assert!(matches!(
       actual2[0],
+      ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(_, _))
+    ));
+    assert!(matches!(
+      actual2[1],
       ShaderCommand::StylePrintString(crossterm::style::Print(_))
     ));
-    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &actual2[0] {
+    if let ShaderCommand::StylePrintString(crossterm::style::Print(contents)) = &actual2[1] {
       assert_eq!(*contents, "ABCD".to_string());
     }
   }

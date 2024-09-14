@@ -3,7 +3,7 @@
 use compact_str::CompactString;
 use geo::point;
 use std::ops::Range;
-// use tracing::debug;
+use tracing::debug;
 
 use crate::cart::{U16Pos, U16Size};
 use crate::ui::canvas::frame::cell::Cell;
@@ -317,16 +317,21 @@ impl Frame {
   /// [`set_cells_at`](Frame::set_cells_at).
   pub fn try_set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Option<Vec<Cell>> {
     let range = self.pos2range(pos, cells.len());
-    // debug!(
-    //   "try set cells at range:{:?}, cells len:{:?}",
-    //   range,
-    //   self.cells.len()
-    // );
+    debug!(
+      "try set cells at range:{:?}, cells len:{:?}",
+      range,
+      self.cells.len()
+    );
     if self._contains_range(&range) {
       let end_at = self.idx2pos(range.end);
-      for row in pos.y()..end_at.y() {
+      for row in pos.y()..(end_at.y() + 1) {
         self.dirty_rows[row as usize] = true;
       }
+      debug!(
+        "try set cells dirty at row range:{:?}-{:?}",
+        pos.y(),
+        end_at.y() + 1
+      );
       Some(self.cells.splice(range, cells).collect())
     } else {
       None
