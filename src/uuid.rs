@@ -1,4 +1,4 @@
-//! ID generator and UUID.
+//! ID generator.
 
 use std::sync::atomic::{AtomicUsize, Ordering};
 

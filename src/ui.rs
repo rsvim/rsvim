@@ -1,4 +1,4 @@
-//! User interfaces, inputs & events.
+//! User interface.
 
 pub mod canvas;
 pub mod tree;

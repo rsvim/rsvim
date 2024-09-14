@@ -1,4 +1,4 @@
-//! Main event loop for TUI application.
+//! Main event loop.
 
 #![allow(unused_imports, dead_code)]
 
@@ -51,34 +51,51 @@ pub mod msg;
 pub mod task;
 
 #[derive(Debug)]
+/// For slow tasks that are suitable to put in the background, this event loop will spawn them in
+/// tokio's async tasks and let them sync back data once they are done. The event loop controls all
+/// the tasks with [`CancellationToken`] and [`TaskTracker`].
+///
+/// # Terms
+///
+/// * Master: The event loop itself.
+/// * Worker: A spawned task.
+///
+/// Js runtime and this event loop communicate via another two pairs of channels.
 pub struct EventLoop {
+  /// Command line options.
   pub cli_opt: CliOpt,
 
-  // UI
+  /// Canvas for UI.
   pub canvas: CanvasArc,
+  /// Widget tree for UI.
   pub tree: TreeArc,
+  /// Stdout writer for UI.
   pub writer: BufWriter<Stdout>,
 
-  // State
+  /// (Global) editing state.
   pub state: StateArc,
 
-  // Buffers
+  /// Vim buffers.
   pub buffers: BuffersArc,
 
-  // Spawned tasks inside running loop.
-  // Here name the spawned tasks "worker", the main loop thread "master".
+  /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
+  /// Task tracker for all spawned tasks.
   pub task_tracker: TaskTracker,
-  // Channels that workers send messages to master.
+
+  /// Channel sender: workers send messages to master.
   pub worker_send_to_master: UnboundedSender<WorkerToMasterMessage>,
+  /// Channel receiver: master receive messages from workers.
   pub master_recv_from_worker: UnboundedReceiver<WorkerToMasterMessage>,
 
-  // Channels between this running loop and js runtime.
-  evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
-  evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
+  /// Channel sender: event loop send messages to js runtime.
+  pub evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
+  /// Channel receiver: event loop receive messages from js runtime.
+  pub evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
 }
 
 impl EventLoop {
+  /// Make new event loop.
   pub fn new(
     cli_opt: CliOpt,
     evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
@@ -136,6 +153,7 @@ impl EventLoop {
     })
   }
 
+  /// Initialize start up tasks such as input files, etc.
   pub fn init(&mut self) -> VoidIoResult {
     self.queue_cursor()?;
     self.writer.flush()?;
@@ -210,6 +228,14 @@ impl EventLoop {
     true
   }
 
+  /// Running the loop, it repeatedly do following steps:
+  ///
+  /// 1. Receives several things:
+  ///    1. User keyboard/mouse events.
+  ///    2. Messages sent from workers.
+  ///    3. Cancellation request (which tells this event loop to quit).
+  /// 2. Use the editing state (FSM) to handle the event.
+  /// 3. Render the terminal.
   pub async fn run(&mut self) -> VoidIoResult {
     let mut reader = EventStream::new();
     let received_limit = 100_usize;

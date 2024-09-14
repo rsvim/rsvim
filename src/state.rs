@@ -1,4 +1,4 @@
-//! The global editing state.
+//! Editing mode.
 
 use crossterm::event::Event;
 use parking_lot::RwLock;

@@ -1,4 +1,4 @@
-//! The VIM buffer.
+//! VIM buffers.
 
 #![allow(dead_code)]
 

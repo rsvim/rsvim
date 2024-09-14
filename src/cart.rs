@@ -1,9 +1,7 @@
-//! Cartesian coordinate system on the 2-dimensional plane.
+//! Cartesian coordinate system.
 //!
 //! For terminal based coordinate system, it's not working like the 2-dimensional coordinate system
-//! in mathematics. In mathematics, the 2-dimensional coordinates look like:
-//!
-//! The 2-dimensional coordinate system in mathematics usually look like:
+//! in mathematics. In mathematics, 2-dimensional coordinate system usually look like:
 //!
 //! ```text
 //!                  Y
@@ -20,9 +18,7 @@
 //!
 //! We usually say the line in the top is the first line, the line in the bottom is the last line,
 //! the column in the left side is the first column, the column in the right side is the last
-//! column.
-//!
-//! Thus we need to flip the coordinate system upside down:
+//! column. Thus we need to flip the coordinate system upside down:
 //!
 //! ```text
 //!
@@ -41,7 +37,7 @@
 //! The top-left of the terminal is the `(0,0)` position, the bottom-right of the terminal is the
 //! `(width,height)` position, where the `width` and `height` is the size of the terminal.
 //!
-//! This is also compatible with the coordinates used by the
+//! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
 use geo::{Point, Rect};
@@ -49,18 +45,26 @@ use std::marker::Copy;
 
 // Positions {
 
+/// Position that uses [`isize`] as internal type.
 pub type IPos = Point<isize>;
 
+/// Position that uses [`usize`] as internal type.
 pub type UPos = Point<usize>;
+
+/// Position that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
 pub type U16Pos = Point<u16>;
 
 // Positions }
 
 // Rectangles {
 
+/// Rectangle that uses [`isize`] as internal type.
 pub type IRect = Rect<isize>;
 
+/// Rectangle that uses [`usize`] as internal type.
 pub type URect = Rect<usize>;
+
+/// Rectangle that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
 pub type U16Rect = Rect<u16>;
 
 // Rectangles }
@@ -68,7 +72,7 @@ pub type U16Rect = Rect<u16>;
 // Size {
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
-/// Rectangle size.
+/// Generic rectangle size.
 pub struct Size<
   T: Copy
     + PartialOrd
@@ -123,13 +127,19 @@ where
     + num_traits::Num
     + num_traits::NumCast,
 {
+  /// Make size from [`Rect`].
   fn from(rect: Rect<T>) -> Size<T> {
     Size::new(rect.width() as T, rect.height() as T)
   }
 }
 
+/// Size that uses [`isize`] as internal type.
 pub type ISize = Size<isize>;
+
+/// Size that uses [`usize`] as internal type.
 pub type USize = Size<usize>;
+
+/// Size that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
 pub type U16Size = Size<u16>;
 
 // Size }
