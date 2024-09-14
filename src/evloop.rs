@@ -89,9 +89,9 @@ pub struct EventLoop {
   pub master_recv_from_worker: UnboundedReceiver<WorkerToMasterMessage>,
 
   // Sender of the channel that event loop send messages to js runtime.
-  evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
+  pub evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
   // Receiver of the channel that js runtime send messages to event loop.
-  evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
+  pub evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
 }
 
 impl EventLoop {
