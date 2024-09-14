@@ -14,7 +14,7 @@ use rsvim::{cli, log};
 use std::io::Result as IoResult;
 use tracing::debug;
 
-pub async fn init() -> IoResult<()> {
+pub fn init() -> IoResult<()> {
   if !terminal::is_raw_mode_enabled()? {
     terminal::enable_raw_mode()?;
   }
@@ -31,7 +31,7 @@ pub async fn init() -> IoResult<()> {
   Ok(())
 }
 
-pub async fn shutdown() -> IoResult<()> {
+pub fn shutdown() -> IoResult<()> {
   let mut out = std::io::stdout();
   execute!(
     out,
@@ -63,7 +63,7 @@ async fn main() -> IoResult<()> {
   // db.put(&mut wtxn, "seven", &7).unwrap();
   // wtxn.commit().unwrap();
 
-  init().await?;
+  init()?;
 
   // // V8 engine
   // let v8_platform = v8::new_default_platform(0, false).make_shared();
@@ -91,5 +91,5 @@ async fn main() -> IoResult<()> {
   event_loop.init().await?;
   event_loop.run().await?;
 
-  shutdown().await
+  shutdown()
 }
