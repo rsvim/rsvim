@@ -51,26 +51,39 @@ pub mod msg;
 pub mod task;
 
 #[derive(Debug)]
+/// For slow tasks that are suitable to put in the background, this event loop will spawn them in
+/// tokio's async tasks and let them sync back data once they are done. The event loop controls all
+/// the tasks with [`CancellationToken`] and [`TaskTracker`].
+///
+/// # Terms
+///
+/// * Master: The event loop itself.
+/// * Worker: A spawned task.
 pub struct EventLoop {
+  /// Command line options.
   pub cli_opt: CliOpt,
 
-  // UI
+  /// Canvas for UI.
   pub canvas: CanvasArc,
+  /// Widget tree for UI.
   pub tree: TreeArc,
+  /// Stdout writer for UI.
   pub writer: BufWriter<Stdout>,
 
-  // State
+  /// (Global) editing state.
   pub state: StateArc,
 
-  // Buffers
+  // Vim buffers.
   pub buffers: BuffersArc,
 
-  // Spawned tasks inside running loop.
-  // Here name the spawned tasks "worker", the main loop thread "master".
+  /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
+  /// Task tracker for all spawned tasks.
   pub task_tracker: TaskTracker,
-  // Channels that workers send messages to master.
+
+  /// Sender of the channel that workers send messages to master.
   pub worker_send_to_master: UnboundedSender<WorkerToMasterMessage>,
+  /// Receiver of the channel that workers send messages to master.
   pub master_recv_from_worker: UnboundedReceiver<WorkerToMasterMessage>,
 
   // Channels between this running loop and js runtime.
