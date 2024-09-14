@@ -181,7 +181,7 @@ mod tests {
   use std::sync::Once;
 
   use crate::cart::IRect;
-  use crate::test::log::init as test_log_init;
+  // use crate::test::log::init as test_log_init;
 
   use super::*;
 
@@ -203,11 +203,11 @@ mod tests {
 
   inode_generate_impl!(TestNode, base);
 
-  static INIT: Once = Once::new();
+  // static INIT: Once = Once::new();
 
   #[test]
   fn new() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let n1 = TestNode::new(1, IRect::new((0, 0), (0, 0)));
     let n2 = TestNode::new(2, IRect::new((1, 2), (3, 4)));

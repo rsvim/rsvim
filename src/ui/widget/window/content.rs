@@ -429,9 +429,9 @@ mod tests {
   use super::*;
   use crate::buf::BufferArc;
   use crate::cart::U16Size;
-  use crate::test::log::init as test_log_init;
+  // use crate::test::log::init as test_log_init;
 
-  static INIT: Once = Once::new();
+  // static INIT: Once = Once::new();
 
   fn make_buffer_from_file(filename: String) -> BufferArc {
     let rop: Rope = Rope::from_reader(BufReader::new(File::open(filename).unwrap())).unwrap();
@@ -455,7 +455,7 @@ mod tests {
 
   #[test]
   fn _draw_from_start_line1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -507,7 +507,7 @@ mod tests {
 
   #[test]
   fn _draw_from_start_line2() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -560,7 +560,7 @@ mod tests {
 
   #[test]
   fn _draw_from_start_line3() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
     let window_content_shape = IRect::new((0, 0), (20, 18));

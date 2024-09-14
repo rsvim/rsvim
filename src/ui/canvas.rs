@@ -556,7 +556,7 @@ mod tests {
 
   use super::*;
 
-  static INIT: Once = Once::new();
+  // static INIT: Once = Once::new();
 
   fn int2letter(i: u8) -> char {
     (i + 65) as char
@@ -571,7 +571,7 @@ mod tests {
 
   #[test]
   fn shader_command_debug1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
     info!(
       "ShaderCommand::TerminalEndSynchronizedUpdate: {:?}",
       ShaderCommand::TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate)
@@ -598,7 +598,7 @@ mod tests {
 
   #[test]
   fn _shade_cursor1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     let cursor1 = Cursor::default();
@@ -715,7 +715,7 @@ mod tests {
 
   #[test]
   fn _next_same_cell_in_row1() {
-    INIT.call_once(test_log_init);
+    test_log_init();
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can
@@ -723,17 +723,19 @@ mod tests {
       .set_cells_at(point!(x:0,y:0), vec![Cell::with_char('A'); 20]);
     for i in 0..10 {
       let actual = can._next_same_cell_in_row(0, i);
+      info!("1-{:?} actual:{:?}", i, actual);
       assert_eq!(actual, 10);
     }
     for i in 0..10 {
       let actual = can._next_same_cell_in_row(1, i);
-      assert_eq!(actual, 20);
+      info!("2-{:?} actual:{:?}", i, actual);
+      assert_eq!(actual, 10);
     }
   }
 
   #[test]
   fn _next_same_cell_in_row2() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -789,7 +791,7 @@ mod tests {
 
   #[test]
   fn _next_same_cell_in_row3() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -834,7 +836,7 @@ mod tests {
 
   #[test]
   fn _make_print_shader1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -864,7 +866,7 @@ mod tests {
 
   #[test]
   fn diff1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(

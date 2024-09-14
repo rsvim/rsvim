@@ -167,15 +167,15 @@ mod tests {
   use tracing::info;
 
   use crate::cart::{IRect, U16Rect};
-  use crate::test::log::init as test_log_init;
+  // use crate::test::log::init as test_log_init;
 
-  static INIT: Once = Once::new();
+  // static INIT: Once = Once::new();
 
   use super::*;
 
   #[test]
   fn make_actual_shapes1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let inputs: Vec<IRect> = vec![
       IRect::new((0, 0), (3, 5)),
@@ -199,7 +199,7 @@ mod tests {
 
   #[test]
   fn make_actual_shapes2() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
       (IRect::new((0, 0), (3, 5)), U16Rect::new((0, 0), (7, 8))),
@@ -228,7 +228,7 @@ mod tests {
 
   #[test]
   fn bound_size1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
       (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
@@ -257,7 +257,7 @@ mod tests {
 
   #[test]
   fn bound_position1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
       (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
@@ -289,7 +289,7 @@ mod tests {
 
   #[test]
   fn bound_shape1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
       (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
