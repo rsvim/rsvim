@@ -83,14 +83,14 @@ pub struct EventLoop {
   /// Task tracker for all spawned tasks.
   pub task_tracker: TaskTracker,
 
-  /// Sender of the channel that workers send messages to master.
+  /// Channel sender: workers send messages to master.
   pub worker_send_to_master: UnboundedSender<WorkerToMasterMessage>,
-  /// Receiver of the channel that workers send messages to master.
+  /// Channel receiver: master receive messages from workers.
   pub master_recv_from_worker: UnboundedReceiver<WorkerToMasterMessage>,
 
-  // Sender of the channel that event loop send messages to js runtime.
+  /// Channel sender: event loop send messages to js runtime.
   pub evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
-  // Receiver of the channel that js runtime send messages to event loop.
+  /// Channel receiver: event loop receive messages from js runtime.
   pub evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
 }
 
