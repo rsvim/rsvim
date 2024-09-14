@@ -95,6 +95,7 @@ pub struct EventLoop {
 }
 
 impl EventLoop {
+  /// Make new event loop.
   pub fn new(
     cli_opt: CliOpt,
     evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
@@ -152,6 +153,7 @@ impl EventLoop {
     })
   }
 
+  /// Initialize start up tasks such as input files, etc.
   pub fn init(&mut self) -> VoidIoResult {
     self.queue_cursor()?;
     self.writer.flush()?;
@@ -226,6 +228,14 @@ impl EventLoop {
     true
   }
 
+  /// Running the loop, it repeatedly do following steps:
+  ///
+  /// 1. Receives several things:
+  ///    1. User keyboard/mouse events.
+  ///    2. Messages sent from workers.
+  ///    3. Cancellation request (which tells this event loop to quit).
+  /// 2. Use the editing state (FSM) to handle the event.
+  /// 3. Render the terminal.
   pub async fn run(&mut self) -> VoidIoResult {
     let mut reader = EventStream::new();
     let received_limit = 100_usize;
