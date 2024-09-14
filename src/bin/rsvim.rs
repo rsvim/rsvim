@@ -2,19 +2,22 @@
 
 #![allow(unused_imports, dead_code)]
 
+use rsvim::evloop::EventLoop;
+use rsvim::rt::{init_v8_platform, JsDataAccess, JsRuntime};
+use rsvim::{cli, log};
+
 use clap::Parser;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{execute, terminal};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
-use rsvim::evloop::EventLoop;
-use rsvim::{cli, log};
 use std::io::Result as IoResult;
 use tracing::debug;
 
-pub async fn init() -> IoResult<()> {
+pub fn init() -> IoResult<()> {
   if !terminal::is_raw_mode_enabled()? {
     terminal::enable_raw_mode()?;
   }
@@ -31,7 +34,7 @@ pub async fn init() -> IoResult<()> {
   Ok(())
 }
 
-pub async fn shutdown() -> IoResult<()> {
+pub fn shutdown() -> IoResult<()> {
   let mut out = std::io::stdout();
   execute!(
     out,
@@ -63,7 +66,7 @@ async fn main() -> IoResult<()> {
   // db.put(&mut wtxn, "seven", &7).unwrap();
   // wtxn.commit().unwrap();
 
-  init().await?;
+  init()?;
 
   // // V8 engine
   // let v8_platform = v8::new_default_platform(0, false).make_shared();
@@ -86,10 +89,48 @@ async fn main() -> IoResult<()> {
   // //   js_result.to_rust_string_lossy(v8_context_scope)
   // // );
 
-  // Event loop
-  let mut event_loop = EventLoop::new(cli_opt).await?;
-  event_loop.init().await?;
+  let (js_send_to_evloop, evloop_recv_from_js) = unbounded_channel();
+  let (evloop_send_to_js, js_recv_from_evloop) = unbounded_channel();
+
+  // Event loop initialize
+  let mut event_loop = EventLoop::new(cli_opt, evloop_send_to_js, evloop_recv_from_js)?;
+  event_loop.init()?;
+
+  // Js runtime initialize.
+  //
+  // Since rusty_v8 (for now) only support single thread mode, and the `Isolate` is not safe to be
+  // sent between threads, here we allocate a single thread to run it. This is completely out of
+  // tokio async runtime, and uses channel to communicate between V8 and the event loop.
+  //
+  // This is quite like a parent-child process relationship, js runtime thread can directly access
+  // the EventLoop by simply acquire the RwLock.
+  init_v8_platform();
+  let mut js_runtime = JsRuntime::new(
+    ".rsvim.js".to_string(),
+    js_send_to_evloop,
+    js_recv_from_evloop,
+  );
+  let data_access = JsDataAccess::new(
+    event_loop.state.clone(),
+    event_loop.tree.clone(),
+    event_loop.buffers.clone(),
+  );
+  std::thread::spawn(move || {
+    // Basically, this thread is simply running a single js/ts file, there are several tasks need
+    // to complete:
+    // 1. Resolve all the modules marked by `import` and `require` keywords, and recursively
+    //    resolve the nested modules inside them.
+    // 2. Update editor configurations and settings via the OPs.
+    // 3. Bind callbacks (most interactives are triggered by callbacks) on the related Vim events,
+    //    and schedule timeout/delay background jobs.
+    let _ = js_runtime.start(data_access);
+
+    // After loading user config is done, this thread is waiting for Event Loop to notify it to
+    // exit. If the editor is quit before loading is done, then we need to insert some checks to
+    // manually break config loading and exit this thread.
+  });
+
   event_loop.run().await?;
 
-  shutdown().await
+  shutdown()
 }
