@@ -1,4 +1,4 @@
-//! The JavaScript runtime.
+//! JavaScript runtime.
 
 #![allow(dead_code)]
 
