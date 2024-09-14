@@ -10,7 +10,7 @@ use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
 
 use crate::buf::{Buffer, BufferArc, Buffers, BuffersArc};
-use crate::evloop::message::{Dummy, Notify};
+use crate::evloop::msg::{Dummy, WorkerToMasterMessage};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::glovar;
 use crate::result::ErrorCode;
@@ -30,7 +30,7 @@ fn into_rope(buf: &[u8], bufsize: usize) -> Rope {
 /// default window.
 pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: String) -> TaskResult {
   let buffers = data_access.buffers.clone();
-  let worker_sender = data_access.worker_sender;
+  let worker_send_to_master = data_access.worker_send_to_master;
 
   debug!("Read the default input file: {:?}", file_name.as_str());
   match fs::File::open(file_name.as_str()).await {
@@ -56,7 +56,9 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
             // After read each block, immediately notify main thread so UI tree can render it on
             // terminal.
             debug!("Notify master after each block read");
-            worker_sender.send(Notify::Dummy(Dummy::default())).unwrap();
+            worker_send_to_master
+              .send(WorkerToMasterMessage::Dummy(Dummy::default()))
+              .unwrap();
 
             if n == 0 {
               // Finish reading, exit loop
@@ -96,7 +98,7 @@ pub async fn edit_other_files(
   file_names: Vec<String>,
 ) -> TaskResult {
   let buffers = data_access.buffers.clone();
-  let worker_sender = data_access.worker_sender;
+  let worker_sender = data_access.worker_send_to_master;
 
   for (i, file_name) in file_names.iter().enumerate() {
     debug!("Read the {} input file: {:?}", i, file_name.as_str());
@@ -125,7 +127,9 @@ pub async fn edit_other_files(
               // After read each block, immediately notify main thread so UI tree can render it on
               // terminal.
               debug!("Notify master after each block read");
-              worker_sender.send(Notify::Dummy(Dummy::default())).unwrap();
+              worker_sender
+                .send(WorkerToMasterMessage::Dummy(Dummy::default()))
+                .unwrap();
 
               if n == 0 {
                 // Finish reading, exit loop

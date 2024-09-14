@@ -33,11 +33,12 @@ use tracing::{debug, error};
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
-use crate::evloop::message::{Dummy, Notify};
+use crate::evloop::msg::{Dummy, WorkerToMasterMessage};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
 use crate::result::{IoResult, VoidIoResult};
+use crate::rt::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::rt::{JsDataAccess, JsRuntime};
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
@@ -46,7 +47,7 @@ use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
-pub mod message;
+pub mod msg;
 pub mod task;
 
 #[derive(Debug)]
@@ -64,20 +65,25 @@ pub struct EventLoop {
   // Buffers
   pub buffers: BuffersArc,
 
-  // Spawned tasks.
+  // Spawned tasks inside running loop.
   // Here name the spawned tasks "worker", the main loop thread "master".
   pub cancellation_token: CancellationToken,
   pub task_tracker: TaskTracker,
-  // Sender and receiver that allow workers send a notification to master.
-  pub worker_sender: UnboundedSender<Notify>,
-  pub master_receiver: UnboundedReceiver<Notify>,
+  // Channels that workers send messages to master.
+  pub worker_send_to_master: UnboundedSender<WorkerToMasterMessage>,
+  pub master_recv_from_worker: UnboundedReceiver<WorkerToMasterMessage>,
 
-  // JavaScript Runtime
-  pub js_runtime: JsRuntime,
+  // Channels between this running loop and js runtime.
+  evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
+  evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
 }
 
 impl EventLoop {
-  pub fn new(cli_opt: CliOpt) -> IoResult<Self> {
+  pub fn new(
+    cli_opt: CliOpt,
+    evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
+    evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
+  ) -> IoResult<Self> {
     // Canvas
     let (cols, rows) = terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
@@ -112,7 +118,7 @@ impl EventLoop {
     let state = State::default();
 
     // Sender/receiver
-    let (worker_sender, master_receiver) = unbounded_channel();
+    let (worker_send_to_master, master_recv_from_worker) = unbounded_channel();
 
     Ok(EventLoop {
       cli_opt,
@@ -123,9 +129,10 @@ impl EventLoop {
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
       task_tracker: TaskTracker::new(),
-      worker_sender,
-      master_receiver,
-      js_runtime: JsRuntime::new(".rsvim.js".to_string()),
+      worker_send_to_master,
+      master_recv_from_worker,
+      evloop_send_to_js,
+      evloop_recv_from_js,
     })
   }
 
@@ -133,21 +140,13 @@ impl EventLoop {
     self.queue_cursor()?;
     self.writer.flush()?;
 
-    // Initialize user scripts
-    // NOTE: This operation is sync, the Js runtime runs along with the main thread
-    // {
-    //   let data_access =
-    //     JsDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
-    //   let _ = self.js_runtime.start(data_access).await;
-    // }
-
     // Has input files.
     if !self.cli_opt.file().is_empty() {
       let data_access = TaskableDataAccess::new(
         self.state.clone(),
         self.tree.clone(),
         self.buffers.clone(),
-        self.worker_sender.clone(),
+        self.worker_send_to_master.clone(),
       );
       let input_files = self.cli_opt.file().to_vec();
       self.task_tracker.spawn(async move {
@@ -203,7 +202,7 @@ impl EventLoop {
 
   async fn process_notify(
     &mut self,
-    received_notifications: &mut Vec<Notify>,
+    received_notifications: &mut Vec<WorkerToMasterMessage>,
     received_count: usize,
   ) -> bool {
     debug!("Received {:?} notifications from workers", received_count);
@@ -214,7 +213,7 @@ impl EventLoop {
   pub async fn run(&mut self) -> VoidIoResult {
     let mut reader = EventStream::new();
     let received_limit = 100_usize;
-    let mut received_notifies: Vec<Notify> = Vec::with_capacity(received_limit);
+    let mut received_notifies: Vec<WorkerToMasterMessage> = Vec::with_capacity(received_limit);
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
@@ -224,7 +223,7 @@ impl EventLoop {
             }
         }
         // Receive notification from workers
-        received_count = self.master_receiver.recv_many(&mut received_notifies, received_limit) => {
+        received_count = self.master_recv_from_worker.recv_many(&mut received_notifies, received_limit) => {
             if !self.process_notify(&mut received_notifies, received_count).await {
                 break;
             }

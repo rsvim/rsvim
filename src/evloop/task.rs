@@ -12,7 +12,7 @@ use tokio::task::{AbortHandle, JoinSet};
 use tokio_util::task::TaskTracker;
 
 use crate::buf::BuffersArc;
-use crate::evloop::message::Notify;
+use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::EventLoop;
 use crate::result::VoidResult;
 use crate::state::{State, StateArc};
@@ -28,7 +28,7 @@ pub struct TaskableDataAccess {
   pub state: StateArc,
   pub tree: TreeArc,
   pub buffers: BuffersArc,
-  pub worker_sender: UnboundedSender<Notify>,
+  pub worker_send_to_master: UnboundedSender<WorkerToMasterMessage>,
 }
 
 impl TaskableDataAccess {
@@ -36,13 +36,13 @@ impl TaskableDataAccess {
     state: StateArc,
     tree: TreeArc,
     buffers: BuffersArc,
-    worker_sender: UnboundedSender<Notify>,
+    worker_send_to_master: UnboundedSender<WorkerToMasterMessage>,
   ) -> Self {
     TaskableDataAccess {
       state,
       tree,
       buffers,
-      worker_sender,
+      worker_send_to_master,
     }
   }
 }

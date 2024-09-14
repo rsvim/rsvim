@@ -2,15 +2,18 @@
 
 #![allow(unused_imports, dead_code)]
 
+use rsvim::evloop::EventLoop;
+use rsvim::rt::{init_v8_platform, JsDataAccess, JsRuntime};
+use rsvim::{cli, log};
+
 use clap::Parser;
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{execute, terminal};
+use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
-use rsvim::evloop::EventLoop;
-use rsvim::{cli, log};
 use std::io::Result as IoResult;
 use tracing::debug;
 
@@ -86,11 +89,32 @@ async fn main() -> IoResult<()> {
   // //   js_result.to_rust_string_lossy(v8_context_scope)
   // // );
 
-  // Event loop
-  let mut event_loop = EventLoop::new(cli_opt)?;
+  let (js_send_to_evloop, evloop_recv_from_js) = unbounded_channel();
+  let (evloop_send_to_js, js_recv_from_evloop) = unbounded_channel();
+
+  // Event loop initialize
+  let mut event_loop = EventLoop::new(cli_opt, evloop_send_to_js, evloop_recv_from_js)?;
   event_loop.init()?;
 
-  event_loop.run().await?;
+  // Js runtime initialize.
+  //
+  // Since rusty_v8 (for now) only support single thread mode, and the `Isolate` is not safe to be
+  // sent between threads, here we allocate a single thread to run it. This is completely out of
+  // tokio async runtime, and uses channel to communicate between V8 and the event loop.
+  init_v8_platform();
+  let mut js_runtime = JsRuntime::new(
+    ".rsvim.js".to_string(),
+    js_send_to_evloop,
+    js_recv_from_evloop,
+  );
+  let data_access = JsDataAccess::new(
+    event_loop.state.clone(),
+    event_loop.tree.clone(),
+    event_loop.buffers.clone(),
+  );
+  std::thread::spawn(move || {
+    let _ = js_runtime.start(data_access);
+  });
 
   shutdown()
 }

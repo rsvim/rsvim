@@ -2,25 +2,25 @@
 
 #![allow(dead_code)]
 
-use std::sync::Once;
 use std::time::Duration;
-use tokio::fs;
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 use tracing::{debug, error};
 // use v8::MapFnTo;
 
 use crate::buf::BuffersArc;
 use crate::glovar;
 use crate::result::{ErrorCode, VoidResult};
+use crate::rt::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
-static INIT: Once = Once::new();
+pub mod msg;
 
 fn into_str(buf: &[u8], bufsize: usize) -> String {
   String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
 }
 
-fn init_v8_platform() {
+pub fn init_v8_platform() {
   let platform = v8::new_default_platform(0, false).make_shared();
   v8::V8::initialize_platform(platform);
   v8::V8::initialize();
@@ -28,23 +28,27 @@ fn init_v8_platform() {
 
 #[derive(Debug)]
 pub struct JsRuntime {
-  isolate: v8::OwnedIsolate,
   config_file: String,
+  js_send_to_evloop: UnboundedSender<JsRuntimeToEventLoopMessage>,
+  js_recv_from_evloop: UnboundedReceiver<EventLoopToJsRuntimeMessage>,
 }
 
 impl JsRuntime {
-  pub fn new(config_file: String) -> Self {
-    INIT.call_once(init_v8_platform);
-    let isolate = v8::Isolate::new(Default::default());
-
+  pub fn new(
+    config_file: String,
+    js_send_to_evloop: UnboundedSender<JsRuntimeToEventLoopMessage>,
+    js_recv_from_evloop: UnboundedReceiver<EventLoopToJsRuntimeMessage>,
+  ) -> Self {
     JsRuntime {
-      isolate,
       config_file,
+      js_send_to_evloop,
+      js_recv_from_evloop,
     }
   }
 
-  pub async fn start(&mut self, mut data_access: JsDataAccess) -> VoidResult {
-    let scope = &mut v8::HandleScope::new(&mut self.isolate);
+  pub fn start(&mut self, mut data_access: JsDataAccess) -> VoidResult {
+    let isolate = &mut v8::Isolate::new(Default::default());
+    let scope = &mut v8::HandleScope::new(isolate);
 
     // Create the `vim` global object {
 
@@ -97,7 +101,7 @@ impl JsRuntime {
     let _scope = &mut v8::ContextScope::new(scope, context);
 
     debug!("Load config file {:?}", self.config_file.as_str());
-    match fs::read_to_string(self.config_file.as_str()).await {
+    match std::fs::read_to_string(self.config_file.as_str()) {
       Ok(_source) => {}
       Err(e) => {
         let msg = format!(
