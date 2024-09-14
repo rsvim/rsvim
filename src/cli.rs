@@ -8,6 +8,22 @@ use clap::Parser;
 //   help = "Execute <CMD> before loading any config"
 // )]
 // cmd_before: Option<Vec<String>>,
+//
+// #[clap(
+//   value_name = "CMD",
+//   short = 'c',
+//   help = "Execute <CMD> after loading config and first file"
+// )]
+// cmd_after: Option<Vec<String>>,
+//
+// #[arg(short = 'd', long, help = "Run in diff mode")]
+// diff: bool,
+//
+// #[arg(long, help = "Run in headless mode, without a user interface")]
+// headless: bool,
+//
+// #[arg(long, help = "Run in verbose mode")]
+// verbose: bool,
 
 #[derive(Parser, Debug, Clone)]
 #[command(version, about, long_about=None)]
@@ -15,22 +31,6 @@ use clap::Parser;
 pub struct CliOpt {
   #[arg(help = "Edit file(s)")]
   file: Vec<String>,
-
-  #[clap(
-    value_name = "CMD",
-    short = 'c',
-    help = "Execute <CMD> after loading config and first file"
-  )]
-  cmd_after: Option<Vec<String>>,
-
-  #[arg(short = 'd', long, help = "Run in diff mode")]
-  diff: bool,
-
-  #[arg(long, help = "Run in headless mode, without a user interface")]
-  headless: bool,
-
-  #[arg(long, help = "Run in verbose mode")]
-  verbose: bool,
 
   #[arg(long, help = "Run in debug mode")]
   debug: bool,
@@ -46,26 +46,26 @@ impl CliOpt {
   // pub fn cmd_before(&self) -> &Option<Vec<String>> {
   //   &self.cmd_before
   // }
-
-  /// Commands should be execute after loading any config and first line.
-  pub fn cmd_after(&self) -> &Option<Vec<String>> {
-    &self.cmd_after
-  }
-
-  /// Run in diff mode.
-  pub fn diff(&self) -> bool {
-    self.diff
-  }
-
-  /// Run in headless mode, without TUI.
-  pub fn headless(&self) -> bool {
-    self.headless
-  }
-
-  /// Run in verbose mode.
-  pub fn verbose(&self) -> bool {
-    self.verbose
-  }
+  //
+  // /// Commands should be execute after loading any config and first line.
+  // pub fn cmd_after(&self) -> &Option<Vec<String>> {
+  //   &self.cmd_after
+  // }
+  //
+  // /// Run in diff mode.
+  // pub fn diff(&self) -> bool {
+  //   self.diff
+  // }
+  //
+  // /// Run in headless mode, without TUI.
+  // pub fn headless(&self) -> bool {
+  //   self.headless
+  // }
+  //
+  // /// Run in verbose mode.
+  // pub fn verbose(&self) -> bool {
+  //   self.verbose
+  // }
 
   /// Run in debug mode.
   pub fn debug(&self) -> bool {
