@@ -77,7 +77,7 @@ pub struct EventLoop {
 }
 
 impl EventLoop {
-  pub async fn new(cli_opt: CliOpt) -> IoResult<Self> {
+  pub fn new(cli_opt: CliOpt) -> IoResult<Self> {
     // Canvas
     let (cols, rows) = terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
@@ -129,17 +129,17 @@ impl EventLoop {
     })
   }
 
-  pub async fn init(&mut self) -> VoidIoResult {
-    self.queue_cursor().await?;
+  pub fn init(&mut self) -> VoidIoResult {
+    self.queue_cursor()?;
     self.writer.flush()?;
 
     // Initialize user scripts
     // NOTE: This operation is sync, the Js runtime runs along with the main thread
-    {
-      let data_access =
-        JsDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
-      let _ = self.js_runtime.start(data_access).await;
-    }
+    // {
+    //   let data_access =
+    //     JsDataAccess::new(self.state.clone(), self.tree.clone(), self.buffers.clone());
+    //   let _ = self.js_runtime.start(data_access).await;
+    // }
 
     // Has input files.
     if !self.cli_opt.file().is_empty() {
@@ -236,12 +236,13 @@ impl EventLoop {
         }
       }
 
-      self.render().await?;
+      // Update terminal
+      self.render()?;
     }
     Ok(())
   }
 
-  async fn render(&mut self) -> VoidIoResult {
+  fn render(&mut self) -> VoidIoResult {
     {
       // Draw UI components to the canvas.
       self
@@ -260,7 +261,7 @@ impl EventLoop {
         .shade()
     };
 
-    self.queue_shader(shader).await?;
+    self.queue_shader(shader)?;
 
     self.writer.flush()?;
 
@@ -268,7 +269,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas shader.
-  async fn queue_shader(&mut self, shader: Shader) -> VoidIoResult {
+  fn queue_shader(&mut self, shader: Shader) -> VoidIoResult {
     for shader_command in shader.iter() {
       match shader_command {
         ShaderCommand::CursorSetCursorStyle(command) => queue!(self.writer, command)?,
@@ -322,7 +323,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas cursor.
-  async fn queue_cursor(&mut self) -> VoidIoResult {
+  fn queue_cursor(&mut self) -> VoidIoResult {
     let cursor = *self
       .canvas
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))

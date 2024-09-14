@@ -87,8 +87,9 @@ async fn main() -> IoResult<()> {
   // // );
 
   // Event loop
-  let mut event_loop = EventLoop::new(cli_opt).await?;
-  event_loop.init().await?;
+  let mut event_loop = EventLoop::new(cli_opt)?;
+  event_loop.init()?;
+
   event_loop.run().await?;
 
   shutdown()
