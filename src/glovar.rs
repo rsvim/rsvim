@@ -5,7 +5,9 @@
 use std::env;
 use std::sync::OnceLock;
 
-/// The `RSVIM_MUTEX_TIMEOUT` env var.
+/// Mutex locking timeout, by default [`u64::MAX`].
+///
+/// NOTE: This constants can be configured through `RSVIM_MUTEX_TIMEOUT` environment variable.
 pub fn MUTEX_TIMEOUT() -> u64 {
   static VALUE: OnceLock<u64> = OnceLock::new();
 
@@ -18,7 +20,7 @@ pub fn MUTEX_TIMEOUT() -> u64 {
   })
 }
 
-/// The buffer size of IO operations: file, sockets, etc.
+/// Buffer size of IO operations such as file, sockets, etc.
 pub fn IO_BUF_SIZE() -> usize {
   8192_usize
 }
