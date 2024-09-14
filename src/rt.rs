@@ -14,8 +14,8 @@ use crate::rt::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
+pub mod bridge;
 pub mod msg;
-pub mod ops;
 
 fn into_str(buf: &[u8], bufsize: usize) -> String {
   String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
