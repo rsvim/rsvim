@@ -45,18 +45,26 @@ use std::marker::Copy;
 
 // Positions {
 
+/// Position that uses [`isize`] as internal type.
 pub type IPos = Point<isize>;
 
+/// Position that uses [`usize`] as internal type.
 pub type UPos = Point<usize>;
+
+/// Position that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
 pub type U16Pos = Point<u16>;
 
 // Positions }
 
 // Rectangles {
 
+/// Rectangle that uses [`isize`] as internal type.
 pub type IRect = Rect<isize>;
 
+/// Rectangle that uses [`usize`] as internal type.
 pub type URect = Rect<usize>;
+
+/// Rectangle that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
 pub type U16Rect = Rect<u16>;
 
 // Rectangles }
@@ -64,7 +72,7 @@ pub type U16Rect = Rect<u16>;
 // Size {
 
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
-/// Rectangle size.
+/// Generic rectangle size.
 pub struct Size<
   T: Copy
     + PartialOrd
@@ -119,13 +127,19 @@ where
     + num_traits::Num
     + num_traits::NumCast,
 {
+  /// Make size from [`Rect`].
   fn from(rect: Rect<T>) -> Size<T> {
     Size::new(rect.width() as T, rect.height() as T)
   }
 }
 
+/// Size that uses [`isize`] as internal type.
 pub type ISize = Size<isize>;
+
+/// Size that uses [`usize`] as internal type.
 pub type USize = Size<usize>;
+
+/// Size that uses [`u16`] as internal type. NOTE: This is especially for terminal devices.
 pub type U16Size = Size<u16>;
 
 // Size }
