@@ -57,7 +57,6 @@ Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc
 If you like RSVIM, please consider sponsoring it. Your support encourages contributors and maintainers of this project, and other fees or efforts spent on it.
 
 - [GitHub Sponsor](https://github.com/rsvim)
-- [Open Collective](https://opencollective.com/dashboard/rsvim)
 
 ## License
 

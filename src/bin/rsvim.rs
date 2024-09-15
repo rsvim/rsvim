@@ -3,7 +3,8 @@
 #![allow(unused_imports, dead_code)]
 
 use rsvim::evloop::EventLoop;
-use rsvim::rt::{init_v8_platform, JsDataAccess, JsRuntime};
+use rsvim::js::{init_v8_platform, JsDataAccess, JsRuntime};
+use rsvim::result::VoidIoResult;
 use rsvim::{cli, log};
 
 use clap::Parser;
@@ -14,10 +15,10 @@ use crossterm::{execute, terminal};
 use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
-use std::io::Result as IoResult;
 use tracing::debug;
 
-pub fn init() -> IoResult<()> {
+/// Initialize TUI.
+pub fn init_tui() -> VoidIoResult {
   if !terminal::is_raw_mode_enabled()? {
     terminal::enable_raw_mode()?;
   }
@@ -34,7 +35,8 @@ pub fn init() -> IoResult<()> {
   Ok(())
 }
 
-pub fn shutdown() -> IoResult<()> {
+/// Shutdown TUI.
+pub fn shutdown_tui() -> VoidIoResult {
   let mut out = std::io::stdout();
   execute!(
     out,
@@ -50,11 +52,16 @@ pub fn shutdown() -> IoResult<()> {
   Ok(())
 }
 
-#[tokio::main]
-async fn main() -> IoResult<()> {
+fn main() -> VoidIoResult {
   log::init();
   let cli_opt = cli::CliOpt::parse();
   debug!("cli_opt: {:?}", cli_opt);
+  let cpu_cores = if let Ok(n) = std::thread::available_parallelism() {
+    n.get()
+  } else {
+    8_usize
+  };
+  debug!("CPU cores: {:?}", cpu_cores);
 
   // let dir = tempfile::tempdir().unwrap();
   // debug!("tempdir:{:?}", dir);
@@ -65,44 +72,14 @@ async fn main() -> IoResult<()> {
   // db.put(&mut wtxn, "seven", &7).unwrap();
   // wtxn.commit().unwrap();
 
-  init()?;
-
-  // // V8 engine
-  // let v8_platform = v8::new_default_platform(0, false).make_shared();
-  // v8::V8::initialize_platform(v8_platform);
-  // v8::V8::initialize();
-  // let v8_isolate = &mut v8::Isolate::new(Default::default());
-  // let v8_handle_scope = &mut v8::HandleScope::new(v8_isolate);
-  // let v8_context = v8::Context::new(v8_handle_scope, Default::default());
-  // let v8_context_scope = &mut v8::ContextScope::new(v8_handle_scope, v8_context);
-  // let js_code = v8::String::new(v8_context_scope, "'Hello' + ' World!'").unwrap();
-  // // debug!(
-  // //   "javascript code: {}",
-  // //   js_code.to_rust_string_lossy(v8_context_scope)
-  // // );
-  // let v8_script = v8::Script::compile(v8_context_scope, js_code, None).unwrap();
-  // let js_result = v8_script.run(v8_context_scope).unwrap();
-  // let _js_result = js_result.to_string(v8_context_scope).unwrap();
-  // // debug!(
-  // //   "javascript result: {}",
-  // //   js_result.to_rust_string_lossy(v8_context_scope)
-  // // );
-
+  // Two sender/receiver to send messages between js runtime and event loop in bidirections.
   let (js_send_to_evloop, evloop_recv_from_js) = unbounded_channel();
   let (evloop_send_to_js, js_recv_from_evloop) = unbounded_channel();
 
-  // Event loop initialize
+  // Initialize EventLoop.
   let mut event_loop = EventLoop::new(cli_opt, evloop_send_to_js, evloop_recv_from_js)?;
-  event_loop.init()?;
 
-  // Js runtime initialize.
-  //
-  // Since rusty_v8 (for now) only support single thread mode, and the `Isolate` is not safe to be
-  // sent between threads, here we allocate a single thread to run it. This is completely out of
-  // tokio async runtime, and uses channel to communicate between V8 and the event loop.
-  //
-  // This is quite like a parent-child process relationship, js runtime thread can directly access
-  // the EventLoop by simply acquire the RwLock.
+  // Initialize JavaScript runtime.
   init_v8_platform();
   let mut js_runtime = JsRuntime::new(
     ".rsvim.js".to_string(),
@@ -129,7 +106,16 @@ async fn main() -> IoResult<()> {
     // manually break config loading and exit this thread.
   });
 
-  event_loop.run().await?;
+  // Explicitly create tokio runtime for the EventLoop.
+  let evloop_rt = tokio::runtime::Runtime::new()?;
+  evloop_rt.block_on(async {
+    init_tui()?;
 
-  shutdown()
+    // Move
+    event_loop.init()?;
+
+    event_loop.run().await?;
+
+    shutdown_tui()
+  })
 }

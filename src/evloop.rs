@@ -6,7 +6,7 @@ use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
   EventStream, KeyCode, KeyEventKind, KeyEventState, KeyModifiers,
 };
-use crossterm::{self, queue, terminal};
+use crossterm::{self, queue};
 use futures::StreamExt;
 use geo::point;
 use std::collections::HashMap;
@@ -37,9 +37,9 @@ use crate::evloop::msg::{Dummy, WorkerToMasterMessage};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
+use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::{JsDataAccess, JsRuntime};
 use crate::result::{IoResult, VoidIoResult};
-use crate::rt::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::rt::{JsDataAccess, JsRuntime};
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
@@ -102,7 +102,7 @@ impl EventLoop {
     evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
   ) -> IoResult<Self> {
     // Canvas
-    let (cols, rows) = terminal::size()?;
+    let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
     let canvas = Canvas::new(canvas_size);
     let canvas = Canvas::to_arc(canvas);
