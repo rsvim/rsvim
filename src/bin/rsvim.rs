@@ -3,8 +3,8 @@
 #![allow(unused_imports, dead_code)]
 
 use rsvim::evloop::EventLoop;
+use rsvim::js::{init_v8_platform, JsDataAccess, JsRuntime};
 use rsvim::result::VoidIoResult;
-use rsvim::rt::{init_v8_platform, JsDataAccess, JsRuntime};
 use rsvim::{cli, log};
 
 use clap::Parser;

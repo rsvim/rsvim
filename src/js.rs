@@ -9,8 +9,8 @@ use tracing::{debug, error};
 
 use crate::buf::BuffersArc;
 use crate::glovar;
+use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::result::{ErrorCode, VoidResult};
-use crate::rt::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
