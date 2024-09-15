@@ -52,8 +52,8 @@ pub fn shutdown() -> IoResult<()> {
 
 #[tokio::main]
 async fn main() -> IoResult<()> {
+  log::init();
   let cli_opt = cli::CliOpt::parse();
-  log::init(cli_opt.debug());
   debug!("cli_opt: {:?}", cli_opt);
 
   // let dir = tempfile::tempdir().unwrap();
