@@ -52,8 +52,7 @@ pub fn shutdown_tui() -> VoidIoResult {
   Ok(())
 }
 
-#[tokio::main]
-async fn main() -> VoidIoResult {
+fn main() -> VoidIoResult {
   log::init();
   let cli_opt = cli::CliOpt::parse();
   debug!("cli_opt: {:?}", cli_opt);
@@ -73,23 +72,14 @@ async fn main() -> VoidIoResult {
   // db.put(&mut wtxn, "seven", &7).unwrap();
   // wtxn.commit().unwrap();
 
-  init_tui()?;
-
+  // Two sender/receiver to send messages between js runtime and event loop in bidirections.
   let (js_send_to_evloop, evloop_recv_from_js) = unbounded_channel();
   let (evloop_send_to_js, js_recv_from_evloop) = unbounded_channel();
 
-  // Event loop initialize
+  // Initialize EventLoop.
   let mut event_loop = EventLoop::new(cli_opt, evloop_send_to_js, evloop_recv_from_js)?;
-  event_loop.init()?;
 
-  // Js runtime initialize.
-  //
-  // Since rusty_v8 (for now) only support single thread mode, and the `Isolate` is not safe to be
-  // sent between threads, here we allocate a single thread to run it. This is completely out of
-  // tokio async runtime, and uses channel to communicate between V8 and the event loop.
-  //
-  // This is quite like a parent-child process relationship, js runtime thread can directly access
-  // the EventLoop by simply acquire the RwLock.
+  // Initialize JavaScript runtime.
   init_v8_platform();
   let mut js_runtime = JsRuntime::new(
     ".rsvim.js".to_string(),
@@ -116,7 +106,16 @@ async fn main() -> VoidIoResult {
     // manually break config loading and exit this thread.
   });
 
-  event_loop.run().await?;
+  // Explicitly create tokio runtime for the EventLoop.
+  let evloop_rt = tokio::runtime::Runtime::new()?;
+  evloop_rt.block_on(async {
+    init_tui()?;
 
-  shutdown_tui()
+    // Move
+    event_loop.init()?;
+
+    event_loop.run().await?;
+
+    shutdown_tui()
+  })
 }
