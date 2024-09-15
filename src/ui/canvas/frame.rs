@@ -1,4 +1,4 @@
-//! Canvas frame.
+//! Frame inside the canvas.
 
 use compact_str::CompactString;
 use geo::point;
