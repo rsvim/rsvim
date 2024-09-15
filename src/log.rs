@@ -8,7 +8,7 @@ use tzdb;
 
 /// Initialize logging.
 ///
-/// It uses `RUST_LOG` environment variable to control the logging level. By default it's `INFO`.
+/// It uses `RUST_LOG` environment variable to control the logging level. By default is `INFO`.
 pub fn init() {
   let now = tzdb::now::local().unwrap();
   let now = OffsetDateTime::new_in_offset(
@@ -33,7 +33,7 @@ pub fn init() {
     .with_thread_names(true)
     .with_level(true)
     .with_ansi(false)
-    .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+    .with_max_level(tracing_subscriber::filter::LevelFilter::DEBUG)
     .with_writer(tracing_appender::rolling::never(".", log_name))
     .finish();
   tracing::subscriber::set_global_default(subscriber).unwrap();

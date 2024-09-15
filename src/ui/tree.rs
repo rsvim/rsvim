@@ -468,18 +468,14 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  use std::sync::Once;
-
   use crate::cart::U16Size;
-  use crate::test::log::init as test_log_init;
+  // use crate::test::log::init as test_log_init;
 
   use super::*;
 
-  static INIT: Once = Once::new();
-
   #[test]
   fn new() {
-    INIT.call_once(test_log_init);
+    // test_log_init();
 
     let terminal_size = U16Size::new(18, 10);
     let tree = Tree::new(terminal_size);
