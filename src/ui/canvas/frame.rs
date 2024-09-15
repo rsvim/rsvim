@@ -391,9 +391,9 @@ mod tests {
   use tracing::info;
 
   use super::*;
-  // use crate::test::log::init as test_log_init;
+  use crate::test::log::init as test_log_init;
 
-  // static INIT: Once = Once::new();
+  static INIT: Once = Once::new();
 
   #[test]
   fn new1() {
@@ -476,7 +476,7 @@ mod tests {
 
   #[test]
   fn set_cell1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let frame_size = U16Size::new(10, 10);
     let mut frame = Frame::new(frame_size, Cursor::default());
 
@@ -512,7 +512,7 @@ mod tests {
 
   #[test]
   fn set_empty_cell1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let frame_size = U16Size::new(10, 10);
     let mut frame = Frame::new(frame_size, Cursor::default());
 
@@ -560,7 +560,7 @@ mod tests {
 
   #[test]
   fn cells_at1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let frame_size = U16Size::new(10, 10);
     let mut frame = Frame::new(frame_size, Cursor::default());
 
@@ -662,7 +662,7 @@ mod tests {
 
   #[test]
   fn set_cells_at1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let frame_size = U16Size::new(10, 10);
     let mut frame = Frame::new(frame_size, Cursor::default());
 
@@ -709,7 +709,7 @@ mod tests {
 
   #[test]
   fn row_boundary1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let sizes: Vec<U16Size> = [(10, 20), (20, 7), (13, 18), (15, 15), (0, 0)]
       .into_iter()
       .map(|(width, height)| U16Size::new(width, height))
@@ -738,7 +738,7 @@ mod tests {
 
   #[test]
   fn column_boundary1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let sizes: Vec<U16Size> = [(10, 20), (20, 7), (13, 18), (15, 15), (0, 0)]
       .into_iter()
       .map(|(width, height)| U16Size::new(width, height))
