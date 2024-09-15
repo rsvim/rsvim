@@ -554,14 +554,11 @@ where
 #[cfg(test)]
 mod tests {
   use crate::inode_generate_impl;
-  use std::sync::Once;
   use tracing::info;
 
   use crate::cart::{IRect, U16Rect};
   // use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::{InodeBase, Inodeable};
-
-  // static INIT: Once = Once::new();
 
   use super::*;
 
@@ -629,7 +626,7 @@ mod tests {
 
   #[test]
   fn new() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let s1 = IRect::new((0, 0), (1, 1));
     let n1 = TestValue::new(1, s1);
@@ -649,7 +646,7 @@ mod tests {
 
   #[test]
   fn insert1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let s1 = IRect::new((0, 0), (1, 1));
     let n1 = TestValue::new(1, s1);
@@ -757,7 +754,7 @@ mod tests {
 
   #[test]
   fn insert2() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let s1 = IRect::new((0, 0), (20, 20));
     let n1 = TestValue::new(1, s1);
@@ -912,7 +909,7 @@ mod tests {
 
   #[test]
   fn shape1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
@@ -1014,7 +1011,7 @@ mod tests {
 
   #[test]
   fn shape2() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
@@ -1092,7 +1089,7 @@ mod tests {
 
   #[test]
   fn push1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let shape = IRect::new((0, 0), (10, 10));
     let node_values: Vec<i32> = [1, 2, 3, 4, 5].to_vec();
@@ -1168,7 +1165,7 @@ mod tests {
 
   #[test]
   fn remove1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let (node_ids, mut tree) = make_tree(5);
     let remove2 = tree.remove(node_ids[2]);
@@ -1212,7 +1209,7 @@ mod tests {
   #[test]
   #[should_panic]
   fn remove2() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let (node_ids, mut tree) = make_tree(5);
     tree.remove(node_ids[0]);
@@ -1220,7 +1217,7 @@ mod tests {
 
   #[test]
   fn get1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let s1 = IRect::new((0, 0), (20, 20));
     let n1 = TestValue::new(1, s1);
@@ -1305,7 +1302,7 @@ mod tests {
 
   #[test]
   fn get2() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let s1 = IRect::new((0, 0), (20, 20));
     let us1 = U16Rect::new((0, 0), (20, 20));
@@ -1382,7 +1379,7 @@ mod tests {
 
   #[test]
   fn move_by1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let s1 = IRect::new((0, 0), (20, 20));
     let n1 = TestValue::new(1, s1);
@@ -1454,7 +1451,7 @@ mod tests {
 
   #[test]
   fn bounded_move_by1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let s1 = IRect::new((0, 0), (20, 20));
     let n1 = TestValue::new(1, s1);

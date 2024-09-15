@@ -163,19 +163,16 @@ pub fn bound_shape(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
 #[cfg(test)]
 mod tests {
   use std::cmp::min;
-  use std::sync::Once;
   use tracing::info;
 
   use crate::cart::{IRect, U16Rect};
   // use crate::test::log::init as test_log_init;
 
-  // static INIT: Once = Once::new();
-
   use super::*;
 
   #[test]
   fn make_actual_shapes1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let inputs: Vec<IRect> = vec![
       IRect::new((0, 0), (3, 5)),
@@ -199,7 +196,7 @@ mod tests {
 
   #[test]
   fn make_actual_shapes2() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
       (IRect::new((0, 0), (3, 5)), U16Rect::new((0, 0), (7, 8))),
@@ -228,7 +225,7 @@ mod tests {
 
   #[test]
   fn bound_size1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
       (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
@@ -257,7 +254,7 @@ mod tests {
 
   #[test]
   fn bound_position1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
       (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
@@ -289,7 +286,7 @@ mod tests {
 
   #[test]
   fn bound_shape1() {
-    // INIT.call_once(test_log_init);
+    // test_log_init();
 
     let inputs: Vec<(IRect, U16Rect)> = vec![
       (IRect::new((0, 0), (7, 8)), U16Rect::new((0, 0), (10, 10))),
