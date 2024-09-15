@@ -24,6 +24,9 @@ use clap::Parser;
 //
 // #[arg(long, help = "Run in verbose mode")]
 // verbose: bool,
+//
+// #[arg(long, help = "Run in debug mode")]
+// debug: bool,
 
 #[derive(Parser, Debug, Clone)]
 #[command(
@@ -35,9 +38,6 @@ use clap::Parser;
 pub struct CliOpt {
   #[arg(help = "Edit file(s)")]
   file: Vec<String>,
-
-  #[arg(long, help = "Run in debug mode")]
-  debug: bool,
 }
 
 impl CliOpt {
@@ -70,11 +70,11 @@ impl CliOpt {
   // pub fn verbose(&self) -> bool {
   //   self.verbose
   // }
-
-  /// Run in debug mode.
-  pub fn debug(&self) -> bool {
-    self.debug
-  }
+  //
+  // /// Run in debug mode.
+  // pub fn debug(&self) -> bool {
+  //   self.debug
+  // }
 }
 
 #[cfg(test)]
