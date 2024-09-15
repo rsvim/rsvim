@@ -40,7 +40,7 @@ impl Frame {
     Frame {
       size,
       cells: vec![Cell::default(); n],
-      dirty_rows: vec![false; n], // When a frame first create, it's not dirty.
+      dirty_rows: vec![false; size.height() as usize], // When a frame first create, it's not dirty.
       cursor,
     }
   }
@@ -163,12 +163,12 @@ impl Frame {
   }
 
   /// Whether index is inside frame cells.
-  pub fn _contains_index(&self, index: usize) -> bool {
+  pub fn contains_index(&self, index: usize) -> bool {
     index < self.cells.len()
   }
 
   /// Whether range is inside frame cells. The range is left-inclusive, right-exclusive.
-  pub fn _contains_range(&self, range: &Range<usize>) -> bool {
+  pub fn contains_range(&self, range: &Range<usize>) -> bool {
     range.start < self.cells.len() && range.end <= self.cells.len()
   }
 
@@ -184,12 +184,15 @@ impl Frame {
   /// Try get a cell, non-panic version of [`get_cell`](Frame::get_cell).
   pub fn try_get_cell(&self, pos: U16Pos) -> Option<&Cell> {
     let index = self.pos2idx(pos);
-    if self._contains_index(index) {
+    if self.contains_index(index) {
       let result = &self.cells[index];
-      // debug!("try get cell at index:{:?}, cell:{:?}", index, result);
+      // debug!(
+      //   "try get cell at pos:{:?}, index:{:?}, cell:{:?}",
+      //   pos, index, result
+      // );
       Some(result)
     } else {
-      // debug!("try get cell invalid index:{:?}", index);
+      // debug!("try get cell invalid at pos:{:?}, index:{:?}", pos, index);
       None
     }
   }
@@ -208,7 +211,7 @@ impl Frame {
   /// Try set a cell, non-panic version of [`set_cell`](Frame::set_cell).
   pub fn try_set_cell(&mut self, pos: U16Pos, cell: Cell) -> Option<Cell> {
     let index = self.pos2idx(pos);
-    if self._contains_index(index) {
+    if self.contains_index(index) {
       let old_cell = self.cells[index].clone();
       // debug!(
       //   "try set cell at index:{:?}, new cell:{:?}, old cell:{:?}",
@@ -257,7 +260,7 @@ impl Frame {
   /// [`get_cells_at`](Frame::get_cells_at).
   pub fn try_get_cells_at(&self, pos: U16Pos, n: usize) -> Option<&[Cell]> {
     let range = self.pos2range(pos, n);
-    if self._contains_range(&range) {
+    if self.contains_range(&range) {
       Some(&self.cells[range])
     } else {
       // debug!("try get cells at invalid range:{:?}", range);
@@ -317,21 +320,25 @@ impl Frame {
   /// [`set_cells_at`](Frame::set_cells_at).
   pub fn try_set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Option<Vec<Cell>> {
     let range = self.pos2range(pos, cells.len());
-    debug!(
-      "try set cells at range:{:?}, cells len:{:?}",
-      range,
-      self.cells.len()
-    );
-    if self._contains_range(&range) {
+    // debug!(
+    //   "try set cells at range:{:?}, cells len:{:?}",
+    //   range,
+    //   self.cells.len()
+    // );
+    if self.contains_range(&range) {
       let end_at = self.idx2pos(range.end);
+      // debug!("try set dirty rows for pos:{:?}, end_at:{:?}", pos, end_at);
       for row in pos.y()..(end_at.y() + 1) {
-        self.dirty_rows[row as usize] = true;
+        // debug!("try set dirty rows at row:{:?}", row);
+        if (row as usize) < self.dirty_rows.len() {
+          self.dirty_rows[row as usize] = true;
+        }
       }
-      debug!(
-        "try set cells dirty at row range:{:?}-{:?}",
-        pos.y(),
-        end_at.y() + 1
-      );
+      // debug!(
+      //   "try set cells dirty at row range:{:?}-{:?}",
+      //   pos.y(),
+      //   end_at.y() + 1
+      // );
       Some(self.cells.splice(range, cells).collect())
     } else {
       None

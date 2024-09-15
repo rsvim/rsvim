@@ -148,12 +148,10 @@ impl Canvas {
     if cursor != prev_cursor {
       if cursor.blinking() != prev_cursor.blinking() {
         if cursor.blinking() {
-          debug!("blinking:true");
           shader.push(ShaderCommand::CursorEnableBlinking(
             crossterm::cursor::EnableBlinking,
           ));
         } else {
-          debug!("blinking:false");
           shader.push(ShaderCommand::CursorDisableBlinking(
             crossterm::cursor::DisableBlinking,
           ));
@@ -161,19 +159,15 @@ impl Canvas {
       }
       if cursor.hidden() != prev_cursor.hidden() {
         if cursor.hidden() {
-          debug!("hidden:true");
           shader.push(ShaderCommand::CursorHide(crossterm::cursor::Hide));
         } else {
-          debug!("hidden:false");
           shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
         }
       }
       if !cursor_style_eq(&cursor.style(), &prev_cursor.style()) {
-        debug!("style:{:?}", CursorStyleFormatter::from(cursor.style()));
         shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
       if cursor.pos() != prev_cursor.pos() {
-        debug!("pos:{:?}", cursor.pos());
         shader.push(ShaderCommand::CursorMoveTo(crossterm::cursor::MoveTo(
           cursor.pos().x(),
           cursor.pos().y(),
@@ -197,15 +191,19 @@ impl Canvas {
 
   /// Find next same cell in current row of frame. NOTE: row is y, col is x.
   ///
-  /// Returns the cell column number, started from 0.
+  /// Returns
+  ///
+  /// 1. The column number if found the same cell, column number started from 0.
+  /// 2. The end column index on the row if not found, i.e. the width of current frame.
   pub fn _next_same_cell_in_row(&self, row: u16, col: u16) -> u16 {
     let frame = self.frame();
     let prev_frame = self.prev_frame();
 
     let mut col_end_at = col;
     while col_end_at < frame.size().width() {
-      let cell2 = frame.get_cell(point!(x: col_end_at, y: row));
-      let prev_cell2 = prev_frame.get_cell(point!(x: col_end_at, y: row));
+      let pos: U16Pos = point!(x: col_end_at, y: row);
+      let cell2 = frame.get_cell(pos);
+      let prev_cell2 = prev_frame.get_cell(pos);
       if cell2 == prev_cell2 {
         break;
       }
@@ -262,8 +260,9 @@ impl Canvas {
         let mut col = 0_u16;
         while col < size.width() {
           // Skip unchanged columns
-          let cell = frame.get_cell(point!(x: col, y: row));
-          let prev_cell = prev_frame.get_cell(point!(x: col, y: row));
+          let pos: U16Pos = point!(x: col, y: row);
+          let cell = frame.get_cell(pos);
+          let prev_cell = prev_frame.get_cell(pos);
           if cell == prev_cell {
             col += 1;
             continue;
@@ -298,14 +297,14 @@ impl Canvas {
     let mut shaders = vec![];
 
     if !frame.zero_sized() {
-      debug!("dirty_rows:{:?}", frame.dirty_rows());
       for (row, dirty) in frame.dirty_rows().iter().enumerate() {
-        if *dirty {
+        if row < size.height() as usize && *dirty {
           let mut col = 0_u16;
           while col < size.width() {
             // Skip unchanged columns
-            let cell = frame.get_cell(point!(x: col, y: row as u16));
-            let prev_cell = prev_frame.get_cell(point!(x: col, y: row as u16));
+            let pos: U16Pos = point!(x: col, y: row as u16);
+            let cell = frame.get_cell(pos);
+            let prev_cell = prev_frame.get_cell(pos);
             if cell == prev_cell {
               col += 1;
               continue;
@@ -556,7 +555,7 @@ mod tests {
 
   use super::*;
 
-  // static INIT: Once = Once::new();
+  static INIT: Once = Once::new();
 
   fn int2letter(i: u8) -> char {
     (i + 65) as char
@@ -571,7 +570,7 @@ mod tests {
 
   #[test]
   fn shader_command_debug1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     info!(
       "ShaderCommand::TerminalEndSynchronizedUpdate: {:?}",
       ShaderCommand::TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate)
@@ -598,7 +597,7 @@ mod tests {
 
   #[test]
   fn _shade_cursor1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     let cursor1 = Cursor::default();
@@ -715,7 +714,7 @@ mod tests {
 
   #[test]
   fn _next_same_cell_in_row1() {
-    // test_log_init();
+    INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can
@@ -735,7 +734,7 @@ mod tests {
 
   #[test]
   fn _next_same_cell_in_row2() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -791,7 +790,7 @@ mod tests {
 
   #[test]
   fn _next_same_cell_in_row3() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -836,7 +835,7 @@ mod tests {
 
   #[test]
   fn _make_print_shader1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -866,7 +865,7 @@ mod tests {
 
   #[test]
   fn diff1() {
-    test_log_init();
+    INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
