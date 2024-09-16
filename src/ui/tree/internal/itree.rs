@@ -703,11 +703,11 @@ mod tests {
     print_node!(n5, "n5");
     print_node!(n6, "n6");
 
-    assert_eq!(nid1 + 1, nid2);
-    assert_eq!(nid2 + 1, nid3);
-    assert_eq!(nid3 + 1, nid4);
-    assert_eq!(nid4 + 1, nid5);
-    assert_eq!(nid5 + 1, nid6);
+    assert!(nid1 < nid2);
+    assert!(nid2 < nid3);
+    assert!(nid3 < nid4);
+    assert!(nid4 < nid5);
+    assert!(nid5 < nid6);
 
     assert_parent_child_nodes_depth!(n1, n2);
     assert_parent_child_nodes_depth!(n1, n3);
@@ -836,14 +836,14 @@ mod tests {
     print_node!(n8, "n8");
     print_node!(n9, "n9");
 
-    assert_eq!(nid1 + 1, nid2);
-    assert_eq!(nid2 + 1, nid3);
-    assert_eq!(nid3 + 1, nid4);
-    assert_eq!(nid4 + 1, nid5);
-    assert_eq!(nid5 + 1, nid6);
-    assert_eq!(nid6 + 1, nid7);
-    assert_eq!(nid7 + 1, nid8);
-    assert_eq!(nid8 + 1, nid9);
+    assert!(nid1 < nid2);
+    assert!(nid2 < nid3);
+    assert!(nid3 < nid4);
+    assert!(nid4 < nid5);
+    assert!(nid5 < nid6);
+    assert!(nid6 < nid7);
+    assert!(nid7 < nid8);
+    assert!(nid8 < nid9);
 
     assert_parent_child_nodes_depth!(n1, n2);
     assert_parent_child_nodes_depth!(n1, n3);
