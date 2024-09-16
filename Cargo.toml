@@ -37,7 +37,7 @@ time = { version = "0.3.36", features = [
   "serde-human-readable",
   "rand",
 ] }
-tz-rs = "0.6.14"
+tz-rs = "0.7.0"
 tzdb = "0.6.1"
 rand = "0.8.5"
 # heed = "0.20.5"

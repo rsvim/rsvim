@@ -1049,7 +1049,7 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
- "tz-rs",
+ "tz-rs 0.7.0",
  "tzdb",
  "v8",
 ]
@@ -1452,13 +1452,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "tz-rs"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1450bf2b99397e72070e7935c89facaa80092ac812502200375f1f7d33c71a1"
+
+[[package]]
 name = "tzdb"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1b580f6b365fa89f5767cdb619a55d534d04a4e14c2d7e5b9a31e94598687fb1"
 dependencies = [
  "iana-time-zone",
- "tz-rs",
+ "tz-rs 0.6.14",
  "tzdb_data",
 ]
 
@@ -1468,7 +1474,7 @@ version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d1889fdffac09d65c1d95c42d5202e9b21ad8c758f426e9fe09088817ea998d6"
 dependencies = [
- "tz-rs",
+ "tz-rs 0.6.14",
 ]
 
 [[package]]
