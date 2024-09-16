@@ -38,7 +38,7 @@ time = { version = "0.3.36", features = [
   "rand",
 ] }
 tz-rs = "0.7.0"
-tzdb = "0.6.1"
+tzdb = "0.7.2"
 rand = "0.8.5"
 # heed = "0.20.5"
 tempfile = "3"
