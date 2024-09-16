@@ -54,17 +54,22 @@ To lint the code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-featu
 
 ### Test
 
-To run the unit tests, please run with:
+To test the code, please setup with:
 
-1. Run all test cases with `RUST_BACKTRACE=full RUST_LOG=debug cargo test`, it enables:
+- [cargo-nextest](https://github.com/nextest-rs/nextest): Test runner.
+
+To run the tests, please run with:
+
+1. Run all test cases with `RUST_BACKTRACE=full RUST_LOG=debug cargo nextest run -j1`, it does:
 
    - All the logs over `debug` level, and prints the logs.
-   - The backtrace when panics.
+   - Full stacktrace message when panics.
+   - Run all tests in one single thread, since all unit tests are designed to run in single thread environment to keep it simple.
 
 2. Run a specific test case with:
 
-   1. First list all test cases with `cargo test -- --list`.
-   2. Run the specific test with `cargo test {TEST_NAME} -j 1 -- --test-threads 1`, the `TEST_NAME` is the output test names in above step. It also uses single thread to run the test case, instead of multiple threadings.
+   1. First list all test cases with `cargo nextest list`.
+   2. Run the specific test with `cargo nextest run {TEST_NAME}`, the `TEST_NAME` is the output test names in above step.
 
 ### Debug
 
