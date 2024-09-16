@@ -2,7 +2,7 @@
 name = "rsvim"
 version = "0.1.1-alpha.5"
 edition = "2021"
-rust-version = "1.79.0"
+rust-version = "1.81.0"
 authors = ["Lin Rongbin <linrongbin16@outlook.com>"]
 description = "The VIM editor reinvented in Rust+TypeScript."
 repository = "https://github.com/rsvim/rsvim"
