@@ -24,7 +24,7 @@ To develop the code, please setup with:
 - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter, format with `cargo fmt` or other ways you like.
 - [rust-clippy](https://github.com/rust-lang/rust-clippy): linter, lint with `cargo clippy` or other ways you like.
 
-  > Recommend using [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
+  > Recommend to use [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
 
 ### Coding Style
 
@@ -54,22 +54,19 @@ To lint the code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-featu
 
 ### Test
 
-To test the code, please setup with:
+To run the unit tests, please run with:
 
-- [cargo-nextest](https://github.com/nextest-rs/nextest): Test runner.
-
-To run the tests, please run with:
-
-1. Run all test cases with `RUST_BACKTRACE=full RUST_LOG=debug cargo nextest run -j1`, it does:
+1. Run all test cases with `RUST_BACKTRACE=full RUST_LOG=debug cargo test`, it enables:
 
    - All the logs over `debug` level, and prints the logs.
-   - Full stacktrace message when panics.
-   - Run all tests in one single thread, since all unit tests are designed to run in single thread environment to keep it simple.
+   - The backtrace when panics.
 
 2. Run a specific test case with:
 
-   1. First list all test cases with `cargo nextest list`.
-   2. Run the specific test with `cargo nextest run {TEST_NAME}`, the `TEST_NAME` is the output test names in above step.
+   1. First list all test cases with `cargo test -- --list`.
+   2. Run the specific test with `cargo test {TEST_NAME}`, the `TEST_NAME` is the output test names in above step.
+
+> Recommend to use [cargo-nextest](https://github.com/nextest-rs/nextest) instead of `cargo test` for better testing experiences.
 
 ### Debug
 
