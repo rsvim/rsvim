@@ -186,7 +186,7 @@ impl EventLoop {
     Ok(())
   }
 
-  async fn process_event(&mut self, next_event: Option<IoResult<Event>>) -> bool {
+  async fn process_event(&mut self, next_event: Option<IoResult<Event>>) {
     match next_event {
       Some(Ok(event)) => {
         debug!("Polled_terminal event ok: {:?}", event);
@@ -203,29 +203,26 @@ impl EventLoop {
         // Exit loop and quit.
         if let StatefulValue::QuitState(_) = state_response.next_stateful {
           self.cancellation_token.cancel();
-          return false;
         }
-
-        return true;
       }
       Some(Err(e)) => {
         error!("Polled terminal event error: {:?}", e);
+        self.cancellation_token.cancel();
       }
       None => {
         error!("Terminal event stream is exhausted, exit loop");
+        self.cancellation_token.cancel();
       }
     }
-    false
   }
 
   async fn process_notify(
     &mut self,
     received_notifications: &mut Vec<WorkerToMasterMessage>,
     received_count: usize,
-  ) -> bool {
+  ) {
     debug!("Received {:?} notifications from workers", received_count);
     received_notifications.clear();
-    true
   }
 
   /// Running the loop, it repeatedly do following steps:
@@ -243,21 +240,15 @@ impl EventLoop {
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
-        next_event = reader.next() => {
-            if !self.process_event(next_event).await {
-                break;
-            }
-        }
+        next_event = reader.next() => self.process_event(next_event).await,
         // Receive notification from workers
         received_count = self.master_recv_from_worker.recv_many(&mut received_notifies, received_limit) => {
-            if !self.process_notify(&mut received_notifies, received_count).await {
-                break;
-            }
+            self.process_notify(&mut received_notifies, received_count).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
             debug!("Receive cancellation token, exit loop");
-            // break;
+            break;
         }
       }
 
