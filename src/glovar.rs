@@ -37,11 +37,11 @@ pub fn IO_BUF_SIZE() -> usize {
 
 /// The channels received limit inside event loop, by default is 1000.
 ///
-/// NOTE: This constant can be configured through `RSVIM_CHANNELS_RECEIVED_LIMIT` environment variable.
-pub fn channels_received_limit() -> usize {
+/// NOTE: This constant can be configured through `RSVIM_CHANNEL_RECEIVED_LIMIT` environment variable.
+pub fn CHANNEL_RECEIVED_LIMIT() -> usize {
   static VALUE: OnceLock<usize> = OnceLock::new();
 
-  *VALUE.get_or_init(|| match env::var("RSVIM_CHANNELS_RECEIVED_LIMIT") {
+  *VALUE.get_or_init(|| match env::var("RSVIM_CHANNEL_RECEIVED_LIMIT") {
     Ok(v1) => match v1.parse::<usize>() {
       Ok(v2) => v2,
       _ => 1000_usize,

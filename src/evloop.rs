@@ -235,14 +235,14 @@ impl EventLoop {
   /// 3. Render the terminal.
   pub async fn run(&mut self) -> VoidIoResult {
     let mut reader = EventStream::new();
-    let received_limit = 100_usize;
-    let mut received_notifies: Vec<WorkerToMasterMessage> = Vec::with_capacity(received_limit);
+    let mut received_notifies: Vec<WorkerToMasterMessage> =
+      Vec::with_capacity(glovar::CHANNEL_RECEIVED_LIMIT());
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
         next_event = reader.next() => self.process_event(next_event).await,
         // Receive notification from workers
-        received_count = self.master_recv_from_worker.recv_many(&mut received_notifies, received_limit) => {
+        received_count = self.master_recv_from_worker.recv_many(&mut received_notifies, glovar::CHANNEL_RECEIVED_LIMIT()) => {
             self.process_notify(&mut received_notifies, received_count).await;
         }
         // Receive cancellation notify
