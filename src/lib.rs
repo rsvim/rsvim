@@ -5,7 +5,7 @@ pub mod cart;
 pub mod cli;
 pub mod evloop;
 pub mod glovar;
-pub mod js_runtime;
+pub mod js;
 pub mod log;
 pub mod result;
 pub mod state;

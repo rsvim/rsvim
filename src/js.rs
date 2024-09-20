@@ -11,8 +11,8 @@ use tracing::{debug, error};
 
 use crate::buf::BuffersArc;
 use crate::glovar;
-use crate::js_runtime::module::transpiler::transpile_extension;
-use crate::js_runtime::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::module::transpiler::transpile_extension;
+use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::result::{ErrorCode, VoidResult};
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;

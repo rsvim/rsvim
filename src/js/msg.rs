@@ -1,11 +1,11 @@
 //! Messages synced between [`EventLoop`](crate::evloop::EventLoop) and
-//! [`JsRuntime`](crate::js_runtime::JsRuntime).
+//! [`JsRuntime`](crate::js::JsRuntime).
 
 // The message JsRuntime send to EventLoop {
 
 #[derive(Debug)]
 /// Message between [`EventLoop`](crate::evloop::EventLoop) and
-/// [`JsRuntime`](crate::js_runtime::JsRuntime).
+/// [`JsRuntime`](crate::js::JsRuntime).
 pub enum JsRuntimeToEventLoopMessage {
   Dummy(Dummy),
 }
@@ -16,7 +16,7 @@ pub enum JsRuntimeToEventLoopMessage {
 
 #[derive(Debug)]
 /// Message between [`EventLoop`](crate::evloop::EventLoop) and
-/// [`JsRuntime`](crate::js_runtime::JsRuntime).
+/// [`JsRuntime`](crate::js::JsRuntime).
 pub enum EventLoopToJsRuntimeMessage {
   /// Event loop notify Js runtime to shutdown this thread.
   Shutdown(Dummy),

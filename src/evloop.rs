@@ -37,10 +37,8 @@ use crate::evloop::msg::{self as evmsg, WorkerToMasterMessage};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
-use crate::js_runtime::msg::{
-  self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage,
-};
-use crate::js_runtime::{JsDataAccess, JsRuntime};
+use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::{JsDataAccess, JsRuntime};
 use crate::result::{IoResult, VoidIoResult};
 use crate::state::fsm::{QuitStateful, StatefulValue};
 use crate::state::{State, StateArc};
