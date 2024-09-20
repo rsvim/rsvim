@@ -24,7 +24,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: latest
-          cache: npm
       - run: npm install -g typescript@5.5
   rs_lint:
     name: Rust Lint
