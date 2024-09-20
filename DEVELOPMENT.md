@@ -3,9 +3,12 @@
 - [Rust](#rust)
   - [Toolchain](#toolchain)
   - [Global Control](#global-control)
-  - [Lint](#lint)
+  - [Check](#check)
   - [Test](#test)
   - [Debug](#debug)
+- [TypeScript/JavaScript](#typescriptjavascript)
+  - [Toolchain](#toolchain)
+  - [Check](#check)
 
 ## Rust
 
