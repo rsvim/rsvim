@@ -8,7 +8,7 @@
   - [Debug](#debug)
 - [TypeScript/JavaScript](#typescriptjavascript)
   - [Toolchain](#toolchain)
-  - [Check](#check)
+  - [Check & Compile](#check--compile)
 
 ## Rust
 
@@ -98,8 +98,7 @@ Please setup your development environment with:
 To develop code, please run with:
 
 - Format code with `deno fmt script/{source}`.
-- Compile ts (in `script` directory) to js (in `runtime` directory) with `tsc --outDir runtime script/{source}`.
 
-### Check
+### Check & Compile
 
-To check code, please run with `tsc --checkJs --strict script/{source}`.
+To check & compile code (from ts in `script` folder to js in `runtime` folder), please run with `tsc --checkJs --strict --outDir runtime script/{source}`.
