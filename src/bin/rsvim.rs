@@ -3,6 +3,7 @@
 #![allow(unused_imports, dead_code)]
 
 use rsvim::evloop::EventLoop;
+use rsvim::glovar;
 use rsvim::js::{init_v8_platform, JsDataAccess, JsRuntime};
 use rsvim::result::VoidIoResult;
 use rsvim::{cli, log};
@@ -12,7 +13,7 @@ use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{execute, terminal};
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
 use tracing::debug;
@@ -73,8 +74,8 @@ fn main() -> VoidIoResult {
   // wtxn.commit().unwrap();
 
   // Two sender/receiver to send messages between js runtime and event loop in bidirections.
-  let (js_send_to_evloop, evloop_recv_from_js) = unbounded_channel();
-  let (evloop_send_to_js, js_recv_from_evloop) = unbounded_channel();
+  let (js_send_to_evloop, evloop_recv_from_js) = channel(glovar::CHANNEL_BUF_SIZE());
+  let (evloop_send_to_js, js_recv_from_evloop) = channel(glovar::CHANNEL_BUF_SIZE());
 
   // Initialize EventLoop.
   let mut event_loop = EventLoop::new(cli_opt, evloop_send_to_js, evloop_recv_from_js)?;

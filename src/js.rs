@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 
 use std::time::Duration;
-use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{debug, error};
 // use v8::MapFnTo;
 
@@ -31,15 +31,15 @@ pub fn init_v8_platform() {
 #[derive(Debug)]
 pub struct JsRuntime {
   config_file: String,
-  js_send_to_evloop: UnboundedSender<JsRuntimeToEventLoopMessage>,
-  js_recv_from_evloop: UnboundedReceiver<EventLoopToJsRuntimeMessage>,
+  js_send_to_evloop: Sender<JsRuntimeToEventLoopMessage>,
+  js_recv_from_evloop: Receiver<EventLoopToJsRuntimeMessage>,
 }
 
 impl JsRuntime {
   pub fn new(
     config_file: String,
-    js_send_to_evloop: UnboundedSender<JsRuntimeToEventLoopMessage>,
-    js_recv_from_evloop: UnboundedReceiver<EventLoopToJsRuntimeMessage>,
+    js_send_to_evloop: Sender<JsRuntimeToEventLoopMessage>,
+    js_recv_from_evloop: Receiver<EventLoopToJsRuntimeMessage>,
   ) -> Self {
     JsRuntime {
       config_file,
