@@ -63,6 +63,17 @@ impl JsRuntime {
         .load_main_es_module(&main_module)
         .await
         .unwrap();
+      debug!("Load main module id: {:?}", main_module_id);
+      let evaluate_result = deno_runtime.mod_evaluate(main_module_id);
+      let run_evloop_result = deno_runtime
+        .run_event_loop(deno_core::PollEventLoopOptions::default())
+        .await;
+      debug!(
+        "Run event loop on main module result: {:?}",
+        run_evloop_result
+      );
+      let result = evaluate_result.await;
+      debug!("Evaluate main module result: {:?}", result);
     }
 
     // debug!("Load config file {:?}", config_file.as_str());
