@@ -1,3 +1,5 @@
+//! Forever loop notifications in a fixed rate.
+
 use futures::future::{BoxFuture, Future};
 use ropey::{Rope, RopeBuilder};
 use std::pin::Pin;
@@ -33,6 +35,7 @@ pub async fn update_in_fixed_rate(data_access: TaskableDataAccess, millis: u64) 
       .send(WorkerToMasterMessage::Dummy(Dummy::default()))
       .await
       .unwrap();
+    debug!("Send message to update in fixed FPS rate");
     tokio::time::sleep(Duration::from_millis(millis)).await;
   }
 }
