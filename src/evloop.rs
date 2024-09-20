@@ -33,11 +33,11 @@ use tracing::{debug, error};
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
 use crate::cli::CliOpt;
-use crate::evloop::msg::{Dummy, WorkerToMasterMessage};
+use crate::evloop::msg::{self as evmsg, WorkerToMasterMessage};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::geo_size_as;
 use crate::glovar;
-use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsDataAccess, JsRuntime};
 use crate::result::{IoResult, VoidIoResult};
 use crate::state::fsm::{QuitStateful, StatefulValue};
@@ -251,6 +251,7 @@ impl EventLoop {
         _ = self.cancellation_token.cancelled() => {
             debug!("Receive cancellation token, exit loop");
             self.task_tracker.close();
+            let _ = self.evloop_send_to_js.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
             break;
         }
       }

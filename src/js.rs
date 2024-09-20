@@ -30,19 +30,16 @@ pub fn init_v8_platform() {
 
 #[derive(Debug)]
 pub struct JsRuntime {
-  config_file: String,
   js_send_to_evloop: Sender<JsRuntimeToEventLoopMessage>,
   js_recv_from_evloop: Receiver<EventLoopToJsRuntimeMessage>,
 }
 
 impl JsRuntime {
   pub fn new(
-    config_file: String,
     js_send_to_evloop: Sender<JsRuntimeToEventLoopMessage>,
     js_recv_from_evloop: Receiver<EventLoopToJsRuntimeMessage>,
   ) -> Self {
     JsRuntime {
-      config_file,
       js_send_to_evloop,
       js_recv_from_evloop,
     }
@@ -101,9 +98,10 @@ impl JsRuntime {
 
     let context = v8::Context::new(scope, Default::default());
     let scope = &mut v8::ContextScope::new(scope, context);
+    let config_file = ".rsvim.js".to_string();
 
-    debug!("Load config file {:?}", self.config_file.as_str());
-    match std::fs::read_to_string(self.config_file.as_str()) {
+    debug!("Load config file {:?}", config_file.as_str());
+    match std::fs::read_to_string(config_file.as_str()) {
       Ok(source) => {
         debug!("Load source code:{:?}", source.as_str());
         let code = v8::String::new(scope, source.as_str()).unwrap();
@@ -115,7 +113,7 @@ impl JsRuntime {
       Err(e) => {
         let msg = format!(
           "Failed to load user config file {:?} with error {:?}",
-          self.config_file.as_str(),
+          config_file.as_str(),
           e
         );
         error!("{msg}");

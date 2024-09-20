@@ -82,11 +82,7 @@ fn main() -> VoidIoResult {
 
   // Initialize JavaScript runtime.
   init_v8_platform();
-  let mut js_runtime = JsRuntime::new(
-    ".rsvim.js".to_string(),
-    js_send_to_evloop,
-    js_recv_from_evloop,
-  );
+  let mut js_runtime = JsRuntime::new(js_send_to_evloop, js_recv_from_evloop);
   let data_access = JsDataAccess::new(
     event_loop.state.clone(),
     event_loop.tree.clone(),
