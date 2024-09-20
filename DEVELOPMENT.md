@@ -99,6 +99,10 @@ To develop code, please run with:
 
 - Format code with [prettier](https://prettier.io/).
 
-### Check & Compile
+### Check
 
-To check & compile code (from ts in `script` folder to js in `runtime` folder), please run with `tsc`.
+To check code, please run with `deno check ./script/{source}.ts`.
+
+### Transpile
+
+To transpile ts code (in `script` folder) to js code (in `runtime` folder), please run with `tsc`.
