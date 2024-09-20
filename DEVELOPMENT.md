@@ -97,8 +97,8 @@ Please setup your development environment with:
 
 To develop code, please run with:
 
-- Format code with `deno fmt script/{source}`.
+- Format code with [prettier](https://prettier.io/).
 
 ### Check & Compile
 
-To check & compile code (from ts in `script` folder to js in `runtime` folder), please run with `tsc --checkJs --strict --outDir runtime script/{source}`.
+To check & compile code (from ts in `script` folder to js in `runtime` folder), please run with `tsc --outDir runtime`.
