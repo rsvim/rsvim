@@ -5,9 +5,9 @@
 use std::env;
 use std::sync::OnceLock;
 
-/// Mutex locking timeout, by default [`u64::MAX`].
+/// Mutex locking timeout, by default is [`u64::MAX`].
 ///
-/// NOTE: This constants can be configured through `RSVIM_MUTEX_TIMEOUT` environment variable.
+/// NOTE: This constant can be configured through `RSVIM_MUTEX_TIMEOUT` environment variable.
 pub fn MUTEX_TIMEOUT() -> u64 {
   static VALUE: OnceLock<u64> = OnceLock::new();
 
@@ -20,14 +20,34 @@ pub fn MUTEX_TIMEOUT() -> u64 {
   })
 }
 
-/// Buffer size for IO operations such as file, sockets, etc.
+/// Buffer size for IO operations such as file, sockets, etc. By default is 8192.
+///
+/// NOTE: This constant can be configured through `RSVIM_IO_BUF_SIZE` environment variable.
 pub fn IO_BUF_SIZE() -> usize {
-  8192_usize
+  static VALUE: OnceLock<usize> = OnceLock::new();
+
+  *VALUE.get_or_init(|| match env::var("RSVIM_IO_BUF_SIZE") {
+    Ok(v1) => match v1.parse::<usize>() {
+      Ok(v2) => v2,
+      _ => 8192_usize,
+    },
+    _ => 8192_usize,
+  })
 }
 
-/// Buffer size for channels.
+/// Buffer size for channels communication, by default is 1000.
+///
+/// NOTE: This constant can be configured through `RSVIM_CHANNEL_BUF_SIZE` environment variable.
 pub fn CHANNEL_BUF_SIZE() -> usize {
-  1000_usize
+  static VALUE: OnceLock<usize> = OnceLock::new();
+
+  *VALUE.get_or_init(|| match env::var("RSVIM_CHANNEL_BUF_SIZE") {
+    Ok(v1) => match v1.parse::<usize>() {
+      Ok(v2) => v2,
+      _ => 1000_usize,
+    },
+    _ => 1000_usize,
+  })
 }
 
 #[cfg(test)]
