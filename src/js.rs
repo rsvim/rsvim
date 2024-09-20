@@ -3,6 +3,7 @@
 #![allow(dead_code, unused)]
 
 use std::cell::RefCell;
+use std::path::Path;
 use std::rc::Rc;
 use std::time::Duration;
 use tokio::sync::mpsc::{Receiver, Sender};
@@ -19,6 +20,7 @@ use crate::ui::tree::TreeArc;
 pub mod bridge;
 pub mod module;
 pub mod msg;
+pub mod path_config;
 
 pub struct JsRuntime {
   js_send_to_evloop: Sender<JsRuntimeToEventLoopMessage>,
