@@ -1,4 +1,4 @@
-//! Messages used between [`EventLoop`](crate::evloop::EventLoop) and
+//! Messages synced between [`EventLoop`](crate::evloop::EventLoop) and
 //! [`JsRuntime`](crate::js_runtime::JsRuntime).
 
 // The message JsRuntime send to EventLoop {
