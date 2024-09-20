@@ -24,7 +24,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
-use tokio::sync::mpsc::{unbounded_channel, UnboundedReceiver, UnboundedSender};
+use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio::task::{AbortHandle, JoinSet};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
@@ -84,22 +84,22 @@ pub struct EventLoop {
   pub task_tracker: TaskTracker,
 
   /// Channel sender: workers send messages to master.
-  pub worker_send_to_master: UnboundedSender<WorkerToMasterMessage>,
+  pub worker_send_to_master: Sender<WorkerToMasterMessage>,
   /// Channel receiver: master receive messages from workers.
-  pub master_recv_from_worker: UnboundedReceiver<WorkerToMasterMessage>,
+  pub master_recv_from_worker: Receiver<WorkerToMasterMessage>,
 
   /// Channel sender: event loop send messages to js runtime.
-  pub evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
+  pub evloop_send_to_js: Sender<EventLoopToJsRuntimeMessage>,
   /// Channel receiver: event loop receive messages from js runtime.
-  pub evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
+  pub evloop_recv_from_js: Receiver<JsRuntimeToEventLoopMessage>,
 }
 
 impl EventLoop {
   /// Make new event loop.
   pub fn new(
     cli_opt: CliOpt,
-    evloop_send_to_js: UnboundedSender<EventLoopToJsRuntimeMessage>,
-    evloop_recv_from_js: UnboundedReceiver<JsRuntimeToEventLoopMessage>,
+    evloop_send_to_js: Sender<EventLoopToJsRuntimeMessage>,
+    evloop_recv_from_js: Receiver<JsRuntimeToEventLoopMessage>,
   ) -> IoResult<Self> {
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
@@ -135,7 +135,7 @@ impl EventLoop {
     let state = State::default();
 
     // Sender/receiver
-    let (worker_send_to_master, master_recv_from_worker) = unbounded_channel();
+    let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
 
     Ok(EventLoop {
       cli_opt,
@@ -186,7 +186,7 @@ impl EventLoop {
     Ok(())
   }
 
-  async fn process_event(&mut self, next_event: Option<IoResult<Event>>) -> bool {
+  async fn process_event(&mut self, next_event: Option<IoResult<Event>>) {
     match next_event {
       Some(Ok(event)) => {
         debug!("Polled_terminal event ok: {:?}", event);
@@ -203,29 +203,26 @@ impl EventLoop {
         // Exit loop and quit.
         if let StatefulValue::QuitState(_) = state_response.next_stateful {
           self.cancellation_token.cancel();
-          return false;
         }
-
-        return true;
       }
       Some(Err(e)) => {
         error!("Polled terminal event error: {:?}", e);
+        self.cancellation_token.cancel();
       }
       None => {
         error!("Terminal event stream is exhausted, exit loop");
+        self.cancellation_token.cancel();
       }
     }
-    false
   }
 
   async fn process_notify(
     &mut self,
     received_notifications: &mut Vec<WorkerToMasterMessage>,
     received_count: usize,
-  ) -> bool {
+  ) {
     debug!("Received {:?} notifications from workers", received_count);
     received_notifications.clear();
-    true
   }
 
   /// Running the loop, it repeatedly do following steps:
@@ -238,32 +235,31 @@ impl EventLoop {
   /// 3. Render the terminal.
   pub async fn run(&mut self) -> VoidIoResult {
     let mut reader = EventStream::new();
-    let received_limit = 100_usize;
-    let mut received_notifies: Vec<WorkerToMasterMessage> = Vec::with_capacity(received_limit);
+    let mut received_messages: Vec<WorkerToMasterMessage> =
+      Vec::with_capacity(glovar::CHANNEL_BUF_SIZE());
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
         next_event = reader.next() => {
-            if !self.process_event(next_event).await {
-                break;
-            }
+            self.process_event(next_event).await;
         }
         // Receive notification from workers
-        received_count = self.master_recv_from_worker.recv_many(&mut received_notifies, received_limit) => {
-            if !self.process_notify(&mut received_notifies, received_count).await {
-                break;
-            }
+        received_count = self.master_recv_from_worker.recv_many(&mut received_messages, glovar::CHANNEL_BUF_SIZE()) => {
+            self.process_notify(&mut received_messages, received_count).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
             debug!("Receive cancellation token, exit loop");
-            // break;
+            self.task_tracker.close();
+            break;
         }
       }
 
       // Update terminal
       self.render()?;
     }
+
+    self.task_tracker.wait().await;
     Ok(())
   }
 

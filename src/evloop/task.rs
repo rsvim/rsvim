@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 use std::pin::Pin;
 use std::ptr::NonNull;
 use std::sync::Arc;
-use tokio::sync::mpsc::UnboundedSender;
+use tokio::sync::mpsc::Sender;
 use tokio::task::{AbortHandle, JoinSet};
 use tokio_util::task::TaskTracker;
 
@@ -28,7 +28,7 @@ pub struct TaskableDataAccess {
   pub state: StateArc,
   pub tree: TreeArc,
   pub buffers: BuffersArc,
-  pub worker_send_to_master: UnboundedSender<WorkerToMasterMessage>,
+  pub worker_send_to_master: Sender<WorkerToMasterMessage>,
 }
 
 impl TaskableDataAccess {
@@ -36,7 +36,7 @@ impl TaskableDataAccess {
     state: StateArc,
     tree: TreeArc,
     buffers: BuffersArc,
-    worker_send_to_master: UnboundedSender<WorkerToMasterMessage>,
+    worker_send_to_master: Sender<WorkerToMasterMessage>,
   ) -> Self {
     TaskableDataAccess {
       state,

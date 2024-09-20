@@ -20,9 +20,14 @@ pub fn MUTEX_TIMEOUT() -> u64 {
   })
 }
 
-/// Buffer size of IO operations such as file, sockets, etc.
+/// Buffer size for IO operations such as file, sockets, etc.
 pub fn IO_BUF_SIZE() -> usize {
   8192_usize
+}
+
+/// Buffer size for channels.
+pub fn CHANNEL_BUF_SIZE() -> usize {
+  1000_usize
 }
 
 #[cfg(test)]
