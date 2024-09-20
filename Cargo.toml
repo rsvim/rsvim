@@ -58,10 +58,10 @@ directories = "5.0.1"
 [dev-dependencies]
 
 [profile.release]
-lto = "thin"
+lto = true
 strip = true
 opt-level = "z"
-
+codegen-units = 1
 
 [profile.nightly]
 inherits = "release"
