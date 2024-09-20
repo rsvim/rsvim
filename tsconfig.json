@@ -22,7 +22,8 @@
     "strictNullChecks": true,
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "outDir": "runtime"
   },
   "include": ["script/*.ts"]
 }

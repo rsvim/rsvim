@@ -101,4 +101,4 @@ To develop code, please run with:
 
 ### Check & Compile
 
-To check & compile code (from ts in `script` folder to js in `runtime` folder), please run with `tsc --outDir runtime`.
+To check & compile code (from ts in `script` folder to js in `runtime` folder), please run with `tsc`.
