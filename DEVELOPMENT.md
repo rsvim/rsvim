@@ -48,9 +48,9 @@ To configure other internal behaviors, please setup with:
 
 - `RSVIM_MUTEX_TIMEOUT`: Set the threading locks timeout by seconds, by default it's [`u64::MAX`](https://doc.rust-lang.org/1.80.0/std/primitive.u64.html#associatedconstant.MAX) (forever).
 
-### Lint
+### Check
 
-To lint code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-features --all-targets`, it enables all warnings.
+To check code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-features --all-targets`, it enables all warnings.
 
 ### Test
 
@@ -92,11 +92,11 @@ Please setup your development environment with:
      - For npm, please install with `npm install -g typescript@5.5`.
   3. Run `tsc --version` and see if it's successful.
 
-To develop code, please setup with:
+To develop code, please run with:
 
-- Use `deno fmt {source}` to format source code.
-- Use `tsc --outDir bundle script/runtime.ts` to compile ts into js.
+- Format code with `deno fmt script/{source}`.
+- Compile ts (in `script` directory) to js (in `bundle` directory) with `tsc --outDir bundle script/{source}`.
 
-### Lint
+### Check
 
-To lint code, please run with `deno lint {source}`.
+To check code, please run with `tsc --checkJs --strict script/{source}`.
