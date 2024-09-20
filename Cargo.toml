@@ -59,7 +59,9 @@ directories = "5.0.1"
 
 [profile.release]
 lto = "thin"
-strip = "debuginfo"
+strip = true
+opt-level = "z"
+
 
 [profile.nightly]
 inherits = "release"
