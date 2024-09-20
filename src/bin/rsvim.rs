@@ -4,7 +4,7 @@
 
 use rsvim::evloop::EventLoop;
 use rsvim::glovar;
-use rsvim::js::{init_v8_platform, JsDataAccess, JsRuntime};
+use rsvim::js::{JsDataAccess, JsRuntime};
 use rsvim::result::VoidIoResult;
 use rsvim::{cli, log};
 
@@ -80,8 +80,6 @@ fn main() -> VoidIoResult {
   // Initialize EventLoop.
   let mut event_loop = EventLoop::new(cli_opt, evloop_send_to_js, evloop_recv_from_js)?;
 
-  // Initialize JavaScript runtime.
-  init_v8_platform();
   let mut js_runtime = JsRuntime::new(js_send_to_evloop, js_recv_from_evloop);
   let data_access = JsDataAccess::new(
     event_loop.state.clone(),
