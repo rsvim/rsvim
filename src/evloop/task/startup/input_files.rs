@@ -58,6 +58,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
             debug!("Notify master after each block read");
             worker_send_to_master
               .send(WorkerToMasterMessage::Dummy(Dummy::default()))
+              .await
               .unwrap();
 
             if n == 0 {
@@ -129,6 +130,7 @@ pub async fn edit_other_files(
               debug!("Notify master after each block read");
               worker_sender
                 .send(WorkerToMasterMessage::Dummy(Dummy::default()))
+                .await
                 .unwrap();
 
               if n == 0 {
