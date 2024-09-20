@@ -14,3 +14,7 @@ target/
 
 # Jetbrains IDE
 .idea
+
+# Node/Deno
+package.json
+package-lock.json

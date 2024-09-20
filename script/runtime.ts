@@ -2,7 +2,7 @@
 ((globalThis) => {
   const core = Deno.core;
 
-  function argsToMessage(...args) {
+  function argsToMessage(...args: any[]) {
     return args.map((arg) => JSON.stringify(arg)).join(" ");
   }
 
