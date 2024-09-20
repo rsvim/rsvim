@@ -94,6 +94,11 @@ impl PathConfig {
   pub fn config_file(&self) -> &Option<PathBuf> {
     &self.config_file
   }
+
+  /// Get the cache directory.
+  pub fn cache_dir(&self) -> &PathBuf {
+    &self.cache_dir
+  }
 }
 
 impl Default for PathConfig {
