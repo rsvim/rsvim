@@ -7,7 +7,7 @@
 /// Message between [`EventLoop`](crate::evloop::EventLoop) and
 /// [`JsRuntime`](crate::rt::JsRuntime).
 pub enum JsRuntimeToEventLoopMessage {
-  Exit(Dummy),
+  Dummy(Dummy),
 }
 
 // The message JsRuntime send to EventLoop }
@@ -18,7 +18,8 @@ pub enum JsRuntimeToEventLoopMessage {
 /// Message between [`EventLoop`](crate::evloop::EventLoop) and
 /// [`JsRuntime`](crate::rt::JsRuntime).
 pub enum EventLoopToJsRuntimeMessage {
-  Exit(Dummy),
+  /// Event loop notify Js runtime to shutdown this thread.
+  Shutdown(Dummy),
 }
 
 // The message JsRuntime receive from EventLoop }
