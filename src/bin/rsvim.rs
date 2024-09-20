@@ -4,7 +4,7 @@
 
 use rsvim::evloop::EventLoop;
 use rsvim::glovar;
-use rsvim::js::{init_v8_platform, JsDataAccess, JsRuntime};
+use rsvim::js::{JsDataAccess, JsRuntime};
 use rsvim::result::VoidIoResult;
 use rsvim::{cli, log};
 
@@ -80,8 +80,6 @@ fn main() -> VoidIoResult {
   // Initialize EventLoop.
   let mut event_loop = EventLoop::new(cli_opt, evloop_send_to_js, evloop_recv_from_js)?;
 
-  // Initialize JavaScript runtime.
-  init_v8_platform();
   let mut js_runtime = JsRuntime::new(js_send_to_evloop, js_recv_from_evloop);
   let data_access = JsDataAccess::new(
     event_loop.state.clone(),
@@ -89,23 +87,29 @@ fn main() -> VoidIoResult {
     event_loop.buffers.clone(),
   );
   let js_runtime_join_handle = std::thread::spawn(move || {
-    // Basically, this thread is simply running a single js/ts file, there are several tasks need
-    // to complete:
-    // 1. Resolve all the modules marked by `import` and `require` keywords, and recursively
-    //    resolve the nested modules inside them.
-    // 2. Update editor configurations and settings via the OPs.
-    // 3. Bind callbacks (most interactives are triggered by callbacks) on the related Vim events,
-    //    and schedule timeout/delay background jobs.
-    let _ = js_runtime.start(data_access);
+    let js_tokio_runtime = tokio::runtime::Builder::new_current_thread()
+      .enable_all()
+      .build()
+      .unwrap();
+    js_tokio_runtime.block_on(async move {
+      // Basically, this thread is simply running a single js/ts file, there are several tasks need
+      // to complete:
+      // 1. Resolve all the modules marked by `import` and `require` keywords, and recursively
+      //    resolve the nested modules inside them.
+      // 2. Update editor configurations and settings via the OPs.
+      // 3. Bind callbacks (most interactives are triggered by callbacks) on the related Vim events,
+      //    and schedule timeout/delay background jobs.
+      let _ = js_runtime.start(data_access).await;
 
-    // After loading user config is done, this thread is waiting for Event Loop to notify it to
-    // exit. If the editor is quit before loading is done, then we need to insert some checks to
-    // manually break config loading and exit this thread.
+      // After loading user config is done, this thread is waiting for Event Loop to notify it to
+      // exit. If the editor is quit before loading is done, then we need to insert some checks to
+      // manually break config loading and exit this thread.
+    });
   });
 
   // Explicitly create tokio runtime for the EventLoop.
-  let evloop_rt = tokio::runtime::Runtime::new()?;
-  let event_loop_result = evloop_rt.block_on(async {
+  let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
+  let event_loop_result = evloop_tokio_runtime.block_on(async {
     init_tui()?;
 
     // Move

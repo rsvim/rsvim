@@ -158,6 +158,24 @@ impl EventLoop {
     self.queue_cursor()?;
     self.writer.flush()?;
 
+    // // Register fixed FPS loop to update self (to update the terminal), thus avoid duplicated
+    // // messages sent from js runtime side, because our channels are fixed sized.
+    // {
+    //   let data_access = TaskableDataAccess::new(
+    //     self.state.clone(),
+    //     self.tree.clone(),
+    //     self.buffers.clone(),
+    //     self.worker_send_to_master.clone(),
+    //   );
+    //   self.task_tracker.spawn(async move {
+    //     let _ = task::startup::fixed_rate_update::update_in_fixed_rate(
+    //       data_access,
+    //       glovar::FIXED_RATE_UPDATE_MILLIS(),
+    //     )
+    //     .await;
+    //   });
+    // }
+
     // Has input files.
     if !self.cli_opt.file().is_empty() {
       let data_access = TaskableDataAccess::new(
