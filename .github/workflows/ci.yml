@@ -17,8 +17,17 @@ env:
   RUSTFLAGS: "-Dwarnings --cfg tokio_unstable"
   RUST_BACKTRACE: "full"
 jobs:
-  lint:
-    name: Lint
+  ts_lint:
+    name: Typescript Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+          cache: npm
+      - run: npm install -g typescript@5.5
+  rs_lint:
+    name: Rust Lint
     runs-on: ubuntu-latest
     steps:
       - uses: dtolnay/rust-toolchain@stable
