@@ -7,4 +7,6 @@
   "MD033": false,
   // First line in a file should be a top-level heading
   "MD041": false,
+  // Multiple headings with the same content
+  "MD024": false,
 }
