@@ -4,6 +4,7 @@
 pub enum ErrorCode {
   Dummy,
   Message(String),
+  IoError(std::io::Error),
 }
 
 /// Void value result, error uses [`ErrorCode`].

@@ -19,7 +19,6 @@ use crate::ui::tree::TreeArc;
 
 pub mod module;
 pub mod msg;
-pub mod path_config;
 
 pub struct JsRuntime {
   js_send_to_evloop: Sender<JsRuntimeToEventLoopMessage>,
@@ -37,14 +36,34 @@ impl JsRuntime {
     }
   }
 
-  pub fn start(&mut self, _data_access: JsDataAccess) -> VoidResult {
-    let deno_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
-      module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
-      extension_transpiler: Some(Rc::new(|specifier, code| {
-        transpile_extension(&specifier, &code)
-      })),
-      ..Default::default()
-    });
+  pub async fn start(&mut self, data_access: JsDataAccess) -> VoidResult {
+    let path_config = {
+      data_access
+        .state
+        .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .unwrap()
+        .path_config()
+        .clone()
+    };
+
+    if let Some(config_entry) = path_config.config_file() {
+      debug!("Read config entry: {:?}", config_entry);
+      let cwd = std::env::current_dir().unwrap();
+      let main_module = deno_core::resolve_path(config_entry, cwd.as_path()).unwrap();
+
+      let mut deno_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
+        module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
+        extension_transpiler: Some(Rc::new(|specifier, code| {
+          transpile_extension(&specifier, &code)
+        })),
+        ..Default::default()
+      });
+
+      let main_module_id = deno_runtime
+        .load_main_es_module(&main_module)
+        .await
+        .unwrap();
+    }
 
     // debug!("Load config file {:?}", config_file.as_str());
     // match std::fs::read_to_string(config_file.as_str()) {
