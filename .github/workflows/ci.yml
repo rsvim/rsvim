@@ -32,8 +32,8 @@ jobs:
           echo $PWD
           echo "ls -la"
           ls -la
-          echo "tsc ./script/opts.ts"
-          tsc --checkJs --strict --outDir runtime ./script/opts.ts
+          echo "tsc"
+          tsc
   rs_lint:
     name: Rust Lint
     runs-on: ubuntu-latest
