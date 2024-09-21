@@ -3,7 +3,12 @@
 #![allow(non_snake_case)]
 
 use std::env;
+use std::path::{Path, PathBuf};
 use std::sync::OnceLock;
+
+use crate::glovar::path_cfg::PathConfig;
+
+pub mod path_cfg;
 
 /// Mutex locking timeout, by default is [`u64::MAX`].
 ///
@@ -63,6 +68,32 @@ pub fn FIXED_RATE_UPDATE_MILLIS() -> u64 {
     },
     _ => 10_u64,
   })
+}
+
+static PATH_CONFIG_VALUE: OnceLock<PathConfig> = OnceLock::new();
+
+/// Config file path, the config file is located by following orders:
+///
+/// 1. $XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}
+/// 2. $HOME/.rsvim/rsvim.{ts.js}
+/// 3. $HOME/.rsvim.{ts.js}
+///
+/// NOTE:
+/// 1. Typescript file is preferred over javascript, if both exist.
+/// 2. For macOS, the `$XDG_CONFIG_HOME` also detects the `$HOME/.config` folder.
+pub fn CONFIG_FILE_PATH() -> Option<PathBuf> {
+  PATH_CONFIG_VALUE
+    .get_or_init(|| PathConfig::new())
+    .config_file()
+    .clone()
+}
+
+/// Cache directory path.
+pub fn CACHE_DIR_PATH() -> PathBuf {
+  PATH_CONFIG_VALUE
+    .get_or_init(|| PathConfig::new())
+    .cache_dir()
+    .clone()
 }
 
 #[cfg(test)]

@@ -1,4 +1,4 @@
-//! Js config of config file path.
+//! File path configs.
 
 use directories::BaseDirs;
 use std::path::{Path, PathBuf};
@@ -70,27 +70,16 @@ fn get_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
 impl PathConfig {
   /// Make new path config.
   pub fn new() -> Self {
-    if let Some(base_dirs) = BaseDirs::new() {
-      let config_file = get_config_file(&base_dirs);
-      let cache_dir = get_cache_dir(&base_dirs);
-      PathConfig {
-        config_file,
-        cache_dir,
-      }
-    } else {
-      unreachable!("Failed to find `$HOME` directory!")
+    let base_dirs = BaseDirs::new().unwrap();
+    let config_file = get_config_file(&base_dirs);
+    let cache_dir = get_cache_dir(&base_dirs);
+    PathConfig {
+      config_file,
+      cache_dir,
     }
   }
 
-  /// Get the config file in following directories and ts/js files.
-  ///
-  /// 1. $XDG_CONFIG_HOME/rsvim/rsvim.{ts,js}
-  /// 2. $HOME/.rsvim/rsvim.{ts.js}
-  /// 3. $HOME/.rsvim.{ts.js}
-  ///
-  /// NOTE:
-  /// 1. If both `.ts` and `.js` files exist, prefer the `.ts` file.
-  /// 2. For macOS, the `$XDG_CONFIG_HOME` also detects the `$HOME/.config` folder.
+  /// Get the config file.
   pub fn config_file(&self) -> &Option<PathBuf> {
     &self.config_file
   }
