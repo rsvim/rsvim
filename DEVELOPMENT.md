@@ -8,7 +8,8 @@
   - [Debug](#debug)
 - [TypeScript/JavaScript](#typescriptjavascript)
   - [Toolchain](#toolchain)
-  - [Check & Compile](#check--compile)
+  - [Check](#check)
+  - [Transpile (Compile)](#transpile-compile)
 
 ## Rust
 
@@ -103,6 +104,6 @@ To develop code, please run with:
 
 To check code, please run with `deno check ./script/{source}.ts`.
 
-### Transpile
+### Transpile (Compile)
 
 To transpile ts code (in `script` folder) to js code (in `bundle` folder), please run with `tsc`.
