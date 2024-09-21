@@ -105,4 +105,4 @@ To check code, please run with `deno check ./script/{source}.ts`.
 
 ### Transpile
 
-To transpile ts code (in `script` folder) to js code (in `runtime` folder), please run with `tsc`.
+To transpile ts code (in `script` folder) to js code (in `bundle` folder), please run with `tsc`.
