@@ -20,11 +20,15 @@ use crate::ui::tree::TreeArc;
 pub mod module;
 pub mod msg;
 
+pub fn build_extensions() -> deno_core::Extension {}
+
 pub async fn start(data_access: JsDataAccess) -> VoidResult {
   if let Some(config_entry) = glovar::CONFIG_FILE_PATH() {
     debug!("Read config entry: {:?}", config_entry);
     let cwd = std::env::current_dir().unwrap();
     let main_module = deno_core::resolve_path(config_entry, cwd.as_path()).unwrap();
+
+    let fs_ext = deno_core::extension!(vim_fs,);
 
     let mut deno_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
       module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
