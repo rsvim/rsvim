@@ -89,7 +89,7 @@ To debug code, please run with:
 Please setup your development environment with:
 
 - Latest stable [deno](https://deno.com/).
-- Compatible version of [typescript](https://www.typescriptlang.org/) compiler, please install with following steps:
+- [Typescript](https://www.typescriptlang.org/) compiler that is compatible with the tsc/swc included with `deno`. Please install with following steps:
   1. Use `deno --version` to find out the typescript compiler version, say `typescript 5.5.2`.
   2. Install typescript compiler with the compatible version:
      - For deno, please install with `deno install -g npm:typescript@5.5`.
