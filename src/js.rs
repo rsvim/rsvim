@@ -33,6 +33,9 @@ pub async fn start(data_access: JsDataAccess) -> VoidResult {
       })),
       ..Default::default()
     });
+    deno_runtime
+      .execute_script("[vim:runtime.js]", include_str!("./runtime.js"))
+      .unwrap();
 
     let main_module_id = deno_runtime
       .load_main_es_module(&main_module)
