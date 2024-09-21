@@ -102,8 +102,8 @@ To develop code, please run with:
 
 ### Check
 
-To check code, please run with `deno check ./script/runtime.ts`.
+To check code, please run with `deno check ./src/runtime.ts`.
 
 ### Transpile (Compile)
 
-To transpile ts code (in `script` folder) to js code (in `bundle` folder), please run with `tsc`.
+To transpile ts code to js code (in `src` folder), please run with `tsc`.

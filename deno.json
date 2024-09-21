@@ -23,6 +23,6 @@
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
     "useUnknownInCatchVariables": false,
-    "outDir": "bundle"
+    "outDir": "src"
   }
 }

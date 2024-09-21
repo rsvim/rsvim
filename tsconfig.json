@@ -23,7 +23,7 @@
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
     "useUnknownInCatchVariables": false,
-    "outDir": "bundle"
+    "outDir": "src"
   },
-  "include": ["script/*.ts"]
+  "include": ["src/runtime.ts"]
 }
