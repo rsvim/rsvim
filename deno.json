@@ -23,6 +23,6 @@
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
     "useUnknownInCatchVariables": false,
-    "outDir": "runtime"
+    "outDir": "bundle"
   }
 }

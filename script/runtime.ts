@@ -1,4 +1,4 @@
-// RSVIM runtime operations.
+// RSVIM js runtime.
 ((globalThis) => {
   const core = Deno.core;
 
