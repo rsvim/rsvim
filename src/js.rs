@@ -51,27 +51,6 @@ pub async fn start(data_access: JsDataAccess) -> VoidResult {
     debug!("Evaluate main module result: {:?}", result);
   }
 
-  // debug!("Load config file {:?}", config_file.as_str());
-  // match std::fs::read_to_string(config_file.as_str()) {
-  //   Ok(source) => {
-  //     debug!("Load source code:{:?}", source.as_str());
-  //     let code = v8::String::new(scope, source.as_str()).unwrap();
-  //     let script = v8::Script::compile(scope, code, None).unwrap();
-  //     let result = script.run(scope).unwrap();
-  //     let result = result.to_string(scope).unwrap();
-  //     debug!("Execute result: {}", result.to_rust_string_lossy(scope));
-  //   }
-  //   Err(e) => {
-  //     let msg = format!(
-  //       "Failed to load user config file {:?} with error {:?}",
-  //       config_file.as_str(),
-  //       e
-  //     );
-  //     error!("{msg}");
-  //     return Err(ErrorCode::Message(msg));
-  //   }
-  // }
-
   Ok(())
 }
 
