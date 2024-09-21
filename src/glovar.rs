@@ -3,7 +3,7 @@
 #![allow(non_snake_case)]
 
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::OnceLock;
 
 use crate::glovar::path_cfg::PathConfig;
@@ -83,7 +83,7 @@ static PATH_CONFIG_VALUE: OnceLock<PathConfig> = OnceLock::new();
 /// 2. For macOS, the `$XDG_CONFIG_HOME` also detects the `$HOME/.config` folder.
 pub fn CONFIG_FILE_PATH() -> Option<PathBuf> {
   PATH_CONFIG_VALUE
-    .get_or_init(|| PathConfig::new())
+    .get_or_init(PathConfig::new)
     .config_file()
     .clone()
 }
@@ -91,7 +91,7 @@ pub fn CONFIG_FILE_PATH() -> Option<PathBuf> {
 /// Cache directory path.
 pub fn CACHE_DIR_PATH() -> PathBuf {
   PATH_CONFIG_VALUE
-    .get_or_init(|| PathConfig::new())
+    .get_or_init(PathConfig::new)
     .cache_dir()
     .clone()
 }

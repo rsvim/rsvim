@@ -8,20 +8,15 @@ use tracing::debug;
 use crate::buf::BuffersArc;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
-use crate::state::path_config::PathConfig;
 use crate::ui::tree::TreeArc;
 
 pub mod fsm;
 pub mod mode;
-pub mod path_config;
 
 #[derive(Debug, Clone)]
 pub struct State {
   stateful: StatefulValue,
   last_stateful: StatefulValue,
-
-  // Path configs.
-  path_config: PathConfig,
 
   // Editing mode.
   mode: Mode,
@@ -50,7 +45,6 @@ impl State {
     State {
       stateful: StatefulValue::default(),
       last_stateful: StatefulValue::default(),
-      path_config: PathConfig::new(),
       mode: Mode::Normal,
     }
   }
@@ -89,10 +83,6 @@ impl State {
     let last_mod = self.mode;
     self.mode = mode;
     last_mod
-  }
-
-  pub fn path_config(&self) -> &PathConfig {
-    &self.path_config
   }
 }
 

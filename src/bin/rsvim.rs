@@ -4,7 +4,7 @@
 
 use rsvim::evloop::EventLoop;
 use rsvim::glovar;
-use rsvim::js::{JsDataAccess, JsRuntime};
+use rsvim::js::{start as js_start, JsDataAccess};
 use rsvim::result::VoidIoResult;
 use rsvim::{cli, log};
 
@@ -80,8 +80,9 @@ fn main() -> VoidIoResult {
   // Initialize EventLoop.
   let mut event_loop = EventLoop::new(cli_opt, evloop_send_to_js, evloop_recv_from_js)?;
 
-  let mut js_runtime = JsRuntime::new(js_send_to_evloop, js_recv_from_evloop);
   let data_access = JsDataAccess::new(
+    js_send_to_evloop,
+    js_recv_from_evloop,
     event_loop.state.clone(),
     event_loop.tree.clone(),
     event_loop.buffers.clone(),
@@ -99,7 +100,7 @@ fn main() -> VoidIoResult {
       // 2. Update editor configurations and settings via the OPs.
       // 3. Bind callbacks (most interactives are triggered by callbacks) on the related Vim events,
       //    and schedule timeout/delay background jobs.
-      let _ = js_runtime.start(data_access).await;
+      let _ = js_start(data_access).await;
 
       // After loading user config is done, this thread is waiting for Event Loop to notify it to
       // exit. If the editor is quit before loading is done, then we need to insert some checks to
