@@ -22,8 +22,7 @@
     "strictNullChecks": true,
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
-    "useUnknownInCatchVariables": false,
-    "outDir": "src"
+    "useUnknownInCatchVariables": false
   },
   "include": ["src/runtime.ts"]
 }

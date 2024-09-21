@@ -2,6 +2,7 @@
 // RSVIM js runtime.
 (function (globalThis) {
     var core = Deno.core;
+    core.initializeAsyncOps();
     function argsToMessage() {
         var args = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -23,6 +24,19 @@
                 args[_i] = arguments[_i];
             }
             core.print("[err]: ".concat(argsToMessage.apply(void 0, args), "\n"), true);
+        },
+    };
+    globalThis.vim = {
+        fs: {
+            readFile: function (path) {
+                return core.ops.op_read_file(path);
+            },
+            writeFile: function (path, contents) {
+                return core.ops.op_write_file(path, contents);
+            },
+            removeFile: function (path) {
+                return core.ops.op_remove_file(path);
+            },
         },
     };
 })(globalThis);
