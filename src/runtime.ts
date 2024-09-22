@@ -16,17 +16,17 @@
     },
   };
 
-  globalThis.vim = {
-    fs: {
-      readFile: (path: string) => {
-        return core.ops.op_read_file(path);
-      },
-      writeFile: (path: string, contents: string) => {
-        return core.ops.op_write_file(path, contents);
-      },
-      removeFile: (path: string) => {
-        return core.ops.op_remove_file(path);
-      },
-    },
-  };
+  // globalThis.vim = {
+  //   fs: {
+  //     readFile: (path: string) => {
+  //       return core.ops.op_read_file(path);
+  //     },
+  //     writeFile: (path: string, contents: string) => {
+  //       return core.ops.op_write_file(path, contents);
+  //     },
+  //     removeFile: (path: string) => {
+  //       return core.ops.op_remove_file(path);
+  //     },
+  //   },
+  // };
 })(globalThis);
