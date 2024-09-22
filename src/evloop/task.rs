@@ -1,21 +1,11 @@
 //! Async task.
 
-use futures::future::{BoxFuture, Future};
-use parking_lot::RwLock;
-use std::collections::HashMap;
-use std::marker::PhantomData;
-use std::pin::Pin;
-use std::ptr::NonNull;
-use std::sync::Arc;
 use tokio::sync::mpsc::Sender;
-use tokio::task::{AbortHandle, JoinSet};
-use tokio_util::task::TaskTracker;
 
 use crate::buf::BuffersArc;
 use crate::evloop::msg::WorkerToMasterMessage;
-use crate::evloop::EventLoop;
 use crate::result::VoidResult;
-use crate::state::{State, StateArc};
+use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
 pub mod startup;

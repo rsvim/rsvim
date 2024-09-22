@@ -1,15 +1,12 @@
 //! Edit input files on start up.
 
-use futures::future::{BoxFuture, Future};
 use ropey::{Rope, RopeBuilder};
-use std::pin::Pin;
-use std::sync::OnceLock;
 use std::time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
 
-use crate::buf::{Buffer, BufferArc, Buffers, BuffersArc};
+use crate::buf::Buffer;
 use crate::evloop::msg::{Dummy, WorkerToMasterMessage};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::glovar;

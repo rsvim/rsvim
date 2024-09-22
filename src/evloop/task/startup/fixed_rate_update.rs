@@ -1,19 +1,10 @@
 //! Forever loop notifications in a fixed rate.
 
-use futures::future::{BoxFuture, Future};
-use ropey::{Rope, RopeBuilder};
-use std::pin::Pin;
-use std::sync::OnceLock;
 use std::time::Duration;
-use tokio::fs;
-use tokio::io::AsyncReadExt;
-use tracing::{debug, error};
+use tracing::debug;
 
-use crate::buf::{Buffer, BufferArc, Buffers, BuffersArc};
 use crate::evloop::msg::{Dummy, WorkerToMasterMessage};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
-use crate::glovar;
-use crate::result::ErrorCode;
 
 /// Register a forever loop job to run in a fixed rate, each time this job simply send a message to
 /// master.

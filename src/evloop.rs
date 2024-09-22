@@ -1,51 +1,34 @@
 //! Main event loop.
 
-#![allow(unused_imports, dead_code)]
+#![allow(dead_code)]
 
-use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
-  EventStream, KeyCode, KeyEventKind, KeyEventState, KeyModifiers,
-};
+use crossterm::event::{Event, EventStream};
 use crossterm::{self, queue};
 use futures::StreamExt;
-use geo::point;
-use std::collections::HashMap;
 // use heed::types::U16;
-use futures::stream::FuturesUnordered;
-use parking_lot::ReentrantMutexGuard;
-use parking_lot::RwLock;
-use ropey::RopeBuilder;
-use std::borrow::Borrow;
-use std::cell::RefCell;
 use std::io::Write;
 use std::io::{BufWriter, Stdout};
-use std::ptr::NonNull;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::fs;
-use tokio::io::AsyncReadExt;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
-use tokio::task::{AbortHandle, JoinSet};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
 
 use crate::buf::{Buffer, Buffers, BuffersArc};
-use crate::cart::{IRect, Size, U16Rect, U16Size, URect};
+use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
-use crate::evloop::msg::{self as evmsg, WorkerToMasterMessage};
-use crate::evloop::task::{TaskResult, TaskableDataAccess};
-use crate::geo_size_as;
+use crate::evloop::msg::WorkerToMasterMessage;
+use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::js::{JsDataAccess, JsRuntime};
 use crate::result::{IoResult, VoidIoResult};
-use crate::state::fsm::{QuitStateful, StatefulValue};
+use crate::state::fsm::StatefulValue;
 use crate::state::{State, StateArc};
-use crate::ui::canvas::{Canvas, CanvasArc, CursorStyle, Shader, ShaderCommand};
+use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
+use crate::ui::widget::{Cursor, Window};
 
 pub mod msg;
 pub mod task;
