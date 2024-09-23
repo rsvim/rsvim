@@ -11,7 +11,7 @@ use std::sync::OnceLock;
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 
 #[allow(non_snake_case)]
-pub fn CORE_MODULES() -> &HashMap<&'static str, &'static str> {
+pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
   static VALUE: OnceLock<HashMap<&'static str, &'static str>> = OnceLock::new();
   VALUE.get_or_init(|| {
     let modules = vec![

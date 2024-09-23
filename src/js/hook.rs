@@ -1,5 +1,6 @@
-// use crate::bindings::set_exception_code;
-// use crate::bindings::throw_type_error;
+//! Js runtime hooks: promise, import and import.meta, etc.
+
+use crate::js::binding::{set_exception_code, throw_type_error};
 // use crate::errors::unwrap_or_exit;
 // use crate::modules::load_import;
 use crate::js::module::resolve_import;
@@ -31,12 +32,7 @@ pub fn module_resolve_cb<'a>(
   let dependant = state.module_map.get_path(referrer);
 
   let specifier = specifier.to_rust_string_lossy(scope);
-  let specifier = unwrap_or_exit(resolve_import(
-    dependant.as_deref(),
-    &specifier,
-    false,
-    import_map,
-  ));
+  let specifier = resolve_import(dependant.as_deref(), &specifier, false, import_map).unwrap();
 
   // This call should always give us back the module.
   let module = state.module_map.get(&specifier).unwrap();

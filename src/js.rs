@@ -13,7 +13,7 @@ use tracing::{debug, error};
 
 // use crate::buf::BuffersArc;
 // use crate::glovar;
-// use crate::js::module::transpiler::transpile_extension;
+use crate::js::module::{ImportMap, ModuleMap};
 // use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 // use crate::result::VoidResult;
 // use crate::state::StateArc;
@@ -99,8 +99,8 @@ pub struct JsRuntimeOptions {
   // pub reload: bool,
   // The main entry point for the program.
   pub root: Option<String>,
-  // // Holds user defined import maps for module loading.
-  // pub import_map: Option<ImportMap>,
+  // Holds user defined import maps for module loading.
+  pub import_map: Option<ImportMap>,
   // // The numbers of threads used by the thread-pool.
   // pub num_threads: Option<usize>,
   // // Indicates if we're running JavaScript tests.
@@ -114,8 +114,8 @@ pub struct JsRuntimeOptions {
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
   pub context: v8::Global<v8::Context>,
-  // /// Holds information about resolved ES modules.
-  // pub module_map: ModuleMap,
+  /// Holds information about resolved ES modules.
+  pub module_map: ModuleMap,
   // /// A handle to the runtime's event-loop.
   // pub handle: LoopHandle,
   // /// A handle to the event-loop that can interrupt the poll-phase.
