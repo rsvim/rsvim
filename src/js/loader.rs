@@ -144,10 +144,10 @@ impl ModuleLoader for FsModuleLoader {
     match path_extension {
       "wasm" => Ok(Wasm::parse(&source)),
       "ts" => TypeScript::compile(fname, &source).map_err(|e| generic_error(e.to_string())),
-      "jsx" => Jsx::compile(fname, &source).map_err(|e| generic_error(e.to_string())),
-      "tsx" => Jsx::compile(fname, &source)
-        .and_then(|output| TypeScript::compile(fname, &output))
-        .map_err(|e| generic_error(e.to_string())),
+      // "jsx" => Jsx::compile(fname, &source).map_err(|e| generic_error(e.to_string())),
+      // "tsx" => Jsx::compile(fname, &source)
+      //   .and_then(|output| TypeScript::compile(fname, &output))
+      //   .map_err(|e| generic_error(e.to_string())),
       _ => Ok(source),
     }
   }
