@@ -9,7 +9,6 @@ use crate::js::transpiler::Wasm;
 use crate::result::AnyError;
 
 use anyhow::bail;
-use anyhow::Result as AnyResult;
 use regex::Regex;
 // use sha::sha1::Sha1;
 // use sha::utils::Digest;
@@ -23,8 +22,8 @@ use std::sync::OnceLock;
 
 /// Defines the interface of a module loader.
 pub trait ModuleLoader {
-  fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
-  fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
+  fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource>;
+  fn resolve(&self, base: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath>;
 }
 
 static FILE_NAME_EXT: &[&str] = &["js", "jsx", "ts", "tsx", "json", "wasm"];
@@ -52,7 +51,7 @@ impl FsModuleLoader {
   }
 
   /// Loads contents from a file.
-  fn load_source(&self, path: &Path) -> AnyResult<ModuleSource> {
+  fn load_source(&self, path: &Path) -> anyhow::Result<ModuleSource> {
     let source = fs::read_to_string(path)?;
     let source = match self.is_json_import(path) {
       true => self.wrap_json(source.as_str()),
@@ -63,7 +62,7 @@ impl FsModuleLoader {
   }
 
   /// Loads import as file.
-  fn load_as_file(&self, path: &Path) -> AnyResult<ModuleSource> {
+  fn load_as_file(&self, path: &Path) -> anyhow::Result<ModuleSource> {
     // 1. Check if path is already a valid file.
     if path.is_file() {
       return self.load_source(path);
@@ -84,7 +83,7 @@ impl FsModuleLoader {
   }
 
   /// Loads import as directory using the 'index.[ext]' convention.
-  fn load_as_directory(&self, path: &Path) -> AnyResult<ModuleSource> {
+  fn load_as_directory(&self, path: &Path) -> anyhow::Result<ModuleSource> {
     for ext in FILE_NAME_EXT {
       let path = &path.join(format!("index.{ext}"));
       if path.is_file() {
@@ -96,7 +95,7 @@ impl FsModuleLoader {
 }
 
 impl ModuleLoader for FsModuleLoader {
-  fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
+  fn resolve(&self, base: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
     // Resolve absolute import.
     if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
       return Ok(self.transform(std::path::absolute(Path::new(specifier))?));
@@ -113,7 +112,7 @@ impl ModuleLoader for FsModuleLoader {
     bail!(format!("Module not found \"{specifier}\""));
   }
 
-  fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
+  fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
     let maybe_source = self
@@ -165,7 +164,7 @@ impl ModuleLoader for FsModuleLoader {
 // }
 //
 // impl ModuleLoader for UrlModuleLoader {
-//   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
+//   fn resolve(&self, base: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
 //     // 1. Check if specifier is a valid URL.
 //     if let Ok(url) = Url::parse(specifier) {
 //       return Ok(url.into());
@@ -186,7 +185,7 @@ impl ModuleLoader for FsModuleLoader {
 //     bail!("Base is not a valid URL");
 //   }
 //
-//   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
+//   fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource> {
 //     // Create the cache directory.
 //     if fs::create_dir_all(CACHE_DIR.as_path()).is_err() {
 //       bail!("Failed to create module caching directory");
@@ -237,13 +236,13 @@ impl ModuleLoader for FsModuleLoader {
 pub struct CoreModuleLoader;
 
 impl ModuleLoader for CoreModuleLoader {
-  fn resolve(&self, _: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
+  fn resolve(&self, _: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
     match CORE_MODULES().get(specifier) {
       Some(_) => Ok(specifier.to_string()),
       None => bail!(format!("Module not found \"{specifier}\"")),
     }
   }
-  fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
+  fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource> {
     // Since any errors will be caught at the resolve stage, we can
     // go ahead an unwrap the value with no worries.
     Ok(CORE_MODULES().get(specifier).unwrap().to_string())
