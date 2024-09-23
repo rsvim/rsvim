@@ -1,6 +1,6 @@
 //! Js module loader.
 
-use crate::js::constants::WINDOWS_REGEX;
+use crate::js::constant::WINDOWS_REGEX;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::js::module::CORE_MODULES;

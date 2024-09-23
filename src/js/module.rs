@@ -9,7 +9,7 @@ use std::rc::Rc;
 use std::sync::OnceLock;
 use url::Url;
 
-use crate::js::constants::{URL_REGEX, WINDOWS_REGEX};
+use crate::js::constant::{URL_REGEX, WINDOWS_REGEX};
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 
 #[allow(non_snake_case)]
@@ -71,6 +71,53 @@ pub struct EsModule {
   pub is_dynamic_import: bool,
 }
 
+impl EsModule {
+  // Traverses the dependency tree to check if the module is ready.
+  pub fn fast_forward(&mut self, seen_modules: &mut HashMap<ModulePath, ModuleStatus>) {
+    // If the module is ready, no need to check the sub-tree.
+    if self.status == ModuleStatus::Ready {
+      return;
+    }
+
+    // If it's a duplicate module we need to check the module status cache.
+    if self.status == ModuleStatus::Duplicate {
+      let status_ref = seen_modules.get(&self.path).unwrap();
+      if status_ref == &ModuleStatus::Ready {
+        self.status = ModuleStatus::Ready;
+      }
+      return;
+    }
+
+    // Fast-forward all dependencies.
+    self
+      .dependencies
+      .iter_mut()
+      .for_each(|dep| dep.borrow_mut().fast_forward(seen_modules));
+
+    // The module is compiled and has 0 dependencies.
+    if self.dependencies.is_empty() && self.status == ModuleStatus::Resolving {
+      self.status = ModuleStatus::Ready;
+      seen_modules.insert(self.path.clone(), self.status);
+      return;
+    }
+
+    // At this point, the module is still being fetched...
+    if self.dependencies.is_empty() {
+      return;
+    }
+
+    if !self
+      .dependencies
+      .iter_mut()
+      .map(|m| m.borrow().status)
+      .any(|status| status != ModuleStatus::Ready)
+    {
+      self.status = ModuleStatus::Ready;
+      seen_modules.insert(self.path.clone(), self.status);
+    }
+  }
+}
+
 #[derive(Debug)]
 pub struct ModuleGraph {
   pub kind: ImportKind,
@@ -124,6 +171,51 @@ pub struct ModuleMap {
   pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
   pub seen: HashMap<ModulePath, ModuleStatus>,
   pub pending: Vec<Rc<RefCell<ModuleGraph>>>,
+}
+
+impl ModuleMap {
+  // Creates a new module-map instance.
+  pub fn new() -> ModuleMap {
+    Self {
+      main: None,
+      index: HashMap::new(),
+      seen: HashMap::new(),
+      pending: vec![],
+    }
+  }
+
+  // Inserts a compiled ES module to the map.
+  pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
+    // No main module has been set, so let's update the value.
+    if self.main.is_none() && (fs::metadata(path).is_ok() || path.starts_with("http")) {
+      self.main = Some(path.into());
+    }
+    self.index.insert(path.into(), module);
+  }
+
+  // Returns if there are still pending imports to be loaded.
+  pub fn has_pending_imports(&self) -> bool {
+    !self.pending.is_empty()
+  }
+
+  // Returns a v8 module reference from me module-map.
+  pub fn get(&self, key: &str) -> Option<v8::Global<v8::Module>> {
+    self.index.get(key).cloned()
+  }
+
+  // Returns a specifier given a v8 module.
+  pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
+    self
+      .index
+      .iter()
+      .find(|(_, m)| **m == module)
+      .map(|(p, _)| p.clone())
+  }
+
+  // Returns the main entry point.
+  pub fn main(&self) -> Option<ModulePath> {
+    self.main.clone()
+  }
 }
 
 /// A single import mapping (specifier, target).

@@ -9,6 +9,7 @@ use std::sync::Once;
 use std::time::Duration;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender};
+use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
 
 // use crate::buf::BuffersArc;
@@ -20,7 +21,7 @@ use crate::js::module::{ImportMap, ModuleMap};
 // use crate::ui::tree::TreeArc;
 
 pub mod binding;
-pub mod constants;
+pub mod constant;
 pub mod hook;
 pub mod loader;
 pub mod module;
@@ -110,6 +111,8 @@ pub struct JsRuntimeOptions {
   // pub inspect: Option<(SocketAddrV4, bool)>,
   // // Exposes v8's garbage collector.
   // pub expose_gc: bool,
+  // Task tracker of tokio runtime.
+  pub task_tracker: TaskTracker,
 }
 
 pub struct JsRuntimeState {
@@ -135,6 +138,8 @@ pub struct JsRuntimeState {
   pub options: JsRuntimeOptions,
   // /// Tracks wake event for current loop iteration.
   // pub wake_event_queued: bool,
+  /// Task tracker of tokio runtime.
+  pub task_tracker: TaskTracker,
 }
 
 pub struct JsRuntime {
@@ -171,8 +176,9 @@ impl JsRuntime {
     isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
-    isolate.set_host_import_module_dynamically_callback(host_import_module_dynamically_cb);
-    isolate.set_host_initialize_import_meta_object_callback(host_initialize_import_meta_object_cb);
+    isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
+    isolate
+      .set_host_initialize_import_meta_object_callback(hook::host_initialize_import_meta_object_cb);
 
     let context = {
       let scope = &mut v8::HandleScope::new(&mut *isolate);
@@ -208,25 +214,26 @@ impl JsRuntime {
     // https://v8docs.nodesource.com/node-4.8/d5/dda/classv8_1_1_isolate.html#a7acadfe7965997e9c386a05f098fbe36
     let state = Rc::new(RefCell::new(JsRuntimeState {
       context,
-      // module_map: ModuleMap::new(),
+      module_map: ModuleMap::new(),
       // handle: event_loop.handle(),
       // interrupt_handle: event_loop.interrupt_handle(),
       // pending_futures: Vec::new(),
       startup_moment: Instant::now(),
       time_origin,
       // next_tick_queue: Vec::new(),
-      exceptions: ExceptionState::new(),
+      // exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
+      task_tracker: options.task_tracker,
     }));
 
     isolate.set_slot(state.clone());
 
     let mut runtime = JsRuntime {
       isolate,
-      event_loop,
+      // event_loop,
       state,
-      inspector,
+      // inspector,
     };
 
     runtime.load_main_environment();

@@ -1,9 +1,7 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
 use crate::js::binding::{set_exception_code, throw_type_error};
-// use crate::errors::unwrap_or_exit;
-// use crate::modules::load_import;
-use crate::js::module::{resolve_import, ModuleGraph, ModuleStatus};
+use crate::js::module::{load_import, resolve_import, ModuleGraph, ModuleStatus};
 // use crate::modules::EsModuleFuture;
 // use crate::modules::ModuleStatus;
 use crate::js::JsRuntime;
