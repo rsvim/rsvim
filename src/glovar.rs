@@ -6,9 +6,9 @@ use std::env;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
-use crate::glovar::path_cfg::PathConfig;
+use crate::glovar::path_config::PathConfig;
 
-pub mod path_cfg;
+pub mod path_config;
 
 /// Mutex locking timeout, by default is [`u64::MAX`].
 ///
