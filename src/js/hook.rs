@@ -2,7 +2,7 @@
 // use crate::bindings::throw_type_error;
 // use crate::errors::unwrap_or_exit;
 // use crate::modules::load_import;
-// use crate::modules::resolve_import;
+use crate::js::module::resolve_import;
 // use crate::modules::EsModuleFuture;
 // use crate::modules::ModuleGraph;
 // use crate::modules::ModuleStatus;
@@ -12,97 +12,97 @@ use crate::js::JsRuntime;
 use std::cell::RefCell;
 use std::rc::Rc;
 
-// /// Called during Module::instantiate_module.
-// /// https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html
-// pub fn module_resolve_cb<'a>(
-//   context: v8::Local<'a, v8::Context>,
-//   specifier: v8::Local<'a, v8::String>,
-//   _: v8::Local<'a, v8::FixedArray>,
-//   referrer: v8::Local<'a, v8::Module>,
-// ) -> Option<v8::Local<'a, v8::Module>> {
-//   // Get `CallbackScope` from context.
-//   let scope = &mut unsafe { v8::CallbackScope::new(context) };
-//   let state = JsRuntime::state(scope);
-//   let state = state.borrow();
-//
-//   let import_map = state.options.import_map.clone();
-//   let referrer = v8::Global::new(scope, referrer);
-//
-//   let dependant = state.module_map.get_path(referrer);
-//
-//   let specifier = specifier.to_rust_string_lossy(scope);
-//   let specifier = unwrap_or_exit(resolve_import(
-//     dependant.as_deref(),
-//     &specifier,
-//     false,
-//     import_map,
-//   ));
-//
-//   // This call should always give us back the module.
-//   let module = state.module_map.get(&specifier).unwrap();
-//
-//   Some(v8::Local::new(scope, module))
-// }
-//
-// /// Called the first time import.meta is accessed for a module.
-// /// https://docs.rs/v8/0.49.0/v8/type.HostInitializeImportMetaObjectCallback.html
-// pub extern "C" fn host_initialize_import_meta_object_cb(
-//   context: v8::Local<v8::Context>,
-//   module: v8::Local<v8::Module>,
-//   meta: v8::Local<v8::Object>,
-// ) {
-//   // Get `CallbackScope` from context.
-//   let scope = &mut unsafe { v8::CallbackScope::new(context) };
-//   let scope = &mut v8::HandleScope::new(scope);
-//
-//   let state = JsRuntime::state(scope);
-//   let state = state.borrow();
-//
-//   // Make the module global.
-//   let module = v8::Global::new(scope, module);
-//
-//   let url = state.module_map.get_path(module).unwrap();
-//   let is_main = state.module_map.main() == Some(url.to_owned());
-//
-//   // Setup import.url property.
-//   let key = v8::String::new(scope, "url").unwrap();
-//   let value = v8::String::new(scope, &url).unwrap();
-//   meta.create_data_property(scope, key.into(), value.into());
-//
-//   // Setup import.main property.
-//   let key = v8::String::new(scope, "main").unwrap();
-//   let value = v8::Boolean::new(scope, is_main);
-//   meta.create_data_property(scope, key.into(), value.into());
-//
-//   let url = v8::String::new(scope, &url).unwrap();
-//   let builder = v8::FunctionBuilder::new(import_meta_resolve).data(url.into());
-//
-//   // Setup import.resolve() method.
-//   let key = v8::String::new(scope, "resolve").unwrap();
-//   let value = v8::FunctionBuilder::<v8::Function>::build(builder, scope).unwrap();
-//   meta.set(scope, key.into(), value.into());
-// }
-//
-// fn import_meta_resolve(
-//   scope: &mut v8::HandleScope,
-//   args: v8::FunctionCallbackArguments,
-//   mut rv: v8::ReturnValue,
-// ) {
-//   // Check for provided arguments.
-//   if args.length() == 0 {
-//     throw_type_error(scope, "Not enough arguments specified.");
-//     return;
-//   }
-//
-//   let base = args.data().to_rust_string_lossy(scope);
-//   let specifier = args.get(0).to_rust_string_lossy(scope);
-//   let import_map = JsRuntime::state(scope).borrow().options.import_map.clone();
-//
-//   match resolve_import(Some(&base), &specifier, false, import_map) {
-//     Ok(path) => rv.set(v8::String::new(scope, &path).unwrap().into()),
-//     Err(e) => throw_type_error(scope, &e.to_string()),
-//   };
-// }
+/// Called during Module::instantiate_module.
+/// https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html
+pub fn module_resolve_cb<'a>(
+  context: v8::Local<'a, v8::Context>,
+  specifier: v8::Local<'a, v8::String>,
+  _: v8::Local<'a, v8::FixedArray>,
+  referrer: v8::Local<'a, v8::Module>,
+) -> Option<v8::Local<'a, v8::Module>> {
+  // Get `CallbackScope` from context.
+  let scope = &mut unsafe { v8::CallbackScope::new(context) };
+  let state = JsRuntime::state(scope);
+  let state = state.borrow();
+
+  let import_map = state.options.import_map.clone();
+  let referrer = v8::Global::new(scope, referrer);
+
+  let dependant = state.module_map.get_path(referrer);
+
+  let specifier = specifier.to_rust_string_lossy(scope);
+  let specifier = unwrap_or_exit(resolve_import(
+    dependant.as_deref(),
+    &specifier,
+    false,
+    import_map,
+  ));
+
+  // This call should always give us back the module.
+  let module = state.module_map.get(&specifier).unwrap();
+
+  Some(v8::Local::new(scope, module))
+}
+
+/// Called the first time import.meta is accessed for a module.
+/// https://docs.rs/v8/0.49.0/v8/type.HostInitializeImportMetaObjectCallback.html
+pub extern "C" fn host_initialize_import_meta_object_cb(
+  context: v8::Local<v8::Context>,
+  module: v8::Local<v8::Module>,
+  meta: v8::Local<v8::Object>,
+) {
+  // Get `CallbackScope` from context.
+  let scope = &mut unsafe { v8::CallbackScope::new(context) };
+  let scope = &mut v8::HandleScope::new(scope);
+
+  let state = JsRuntime::state(scope);
+  let state = state.borrow();
+
+  // Make the module global.
+  let module = v8::Global::new(scope, module);
+
+  let url = state.module_map.get_path(module).unwrap();
+  let is_main = state.module_map.main() == Some(url.to_owned());
+
+  // Setup import.url property.
+  let key = v8::String::new(scope, "url").unwrap();
+  let value = v8::String::new(scope, &url).unwrap();
+  meta.create_data_property(scope, key.into(), value.into());
+
+  // Setup import.main property.
+  let key = v8::String::new(scope, "main").unwrap();
+  let value = v8::Boolean::new(scope, is_main);
+  meta.create_data_property(scope, key.into(), value.into());
+
+  let url = v8::String::new(scope, &url).unwrap();
+  let builder = v8::FunctionBuilder::new(import_meta_resolve).data(url.into());
+
+  // Setup import.resolve() method.
+  let key = v8::String::new(scope, "resolve").unwrap();
+  let value = v8::FunctionBuilder::<v8::Function>::build(builder, scope).unwrap();
+  meta.set(scope, key.into(), value.into());
+}
+
+fn import_meta_resolve(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  // Check for provided arguments.
+  if args.length() == 0 {
+    throw_type_error(scope, "Not enough arguments specified.");
+    return;
+  }
+
+  let base = args.data().to_rust_string_lossy(scope);
+  let specifier = args.get(0).to_rust_string_lossy(scope);
+  let import_map = JsRuntime::state(scope).borrow().options.import_map.clone();
+
+  match resolve_import(Some(&base), &specifier, false, import_map) {
+    Ok(path) => rv.set(v8::String::new(scope, &path).unwrap().into()),
+    Err(e) => throw_type_error(scope, &e.to_string()),
+  };
+}
 
 /// Called when a promise rejects with no rejection handler specified.
 /// https://docs.rs/v8/0.49.0/v8/type.PromiseRejectCallback.html
