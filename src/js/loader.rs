@@ -1,11 +1,11 @@
 //! Js module loader.
 
-use crate::errors::generic_error;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::js::module::CORE_MODULES;
 use crate::js::transpiler::TypeScript;
 use crate::js::transpiler::Wasm;
+use crate::result::AnyError;
 
 use anyhow::bail;
 use anyhow::Result as AnyResult;
@@ -143,7 +143,8 @@ impl ModuleLoader for FsModuleLoader {
     // Use a preprocessor if necessary.
     match path_extension {
       "wasm" => Ok(Wasm::parse(&source)),
-      "ts" => TypeScript::compile(fname, &source).map_err(|e| generic_error(e.to_string())),
+      "ts" => TypeScript::compile(fname, &source)
+        .map_err(|e| AnyError::with_message(e.to_string()).into()),
       // "jsx" => Jsx::compile(fname, &source).map_err(|e| generic_error(e.to_string())),
       // "tsx" => Jsx::compile(fname, &source)
       //   .and_then(|output| TypeScript::compile(fname, &output))

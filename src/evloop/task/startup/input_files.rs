@@ -10,7 +10,7 @@ use crate::buf::Buffer;
 use crate::evloop::msg::{Dummy, WorkerToMasterMessage};
 use crate::evloop::task::{TaskResult, TaskableDataAccess};
 use crate::glovar;
-use crate::result::ErrorCode;
+use crate::result::AnyError;
 
 fn into_str(buf: &[u8], bufsize: usize) -> String {
   String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
@@ -71,7 +71,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
               e
             );
             error!("{msg}");
-            return Err(ErrorCode::Message(msg.into()));
+            return Err(AnyError::with_message(msg));
           }
         }
       }
@@ -83,7 +83,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
         e
       );
       error!("{msg}");
-      return Err(ErrorCode::Message(msg.into()));
+      return Err(AnyError::with_message(msg));
     }
   }
 
@@ -144,7 +144,7 @@ pub async fn edit_other_files(
                 e
               );
               error!("{msg}");
-              return Err(ErrorCode::Message(msg.into()));
+              return Err(AnyError::with_message(msg));
             }
           }
         }
@@ -157,7 +157,7 @@ pub async fn edit_other_files(
           e
         );
         error!("{msg}");
-        return Err(ErrorCode::Message(msg.into()));
+        return Err(AnyError::with_message(msg));
       }
     }
   }
