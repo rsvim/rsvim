@@ -7,6 +7,8 @@ use std::env;
 use std::path::Path;
 use std::rc::Rc;
 
+use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader, CORE_MODULES};
+
 // pub mod transpiler;
 
 #[derive(Debug, Clone)]
@@ -171,16 +173,11 @@ pub fn resolve_import(
   // Look the params and choose a loader.
   let loader: Box<dyn ModuleLoader> = {
     let is_core_module_import = CORE_MODULES.contains_key(specifier.as_str());
-    let is_url_import = URL_REGEX.is_match(&specifier)
-      || match base {
-        Some(base) => URL_REGEX.is_match(base),
-        None => false,
-      };
 
-    match (is_core_module_import, is_url_import) {
-      (true, _) if !ignore_core_modules => Box::new(CoreModuleLoader),
-      (_, true) => Box::<UrlModuleLoader>::default(),
-      _ => Box::new(FsModuleLoader),
+    if is_core_module_import && !ignore_core_modules {
+      Box::new(CoreModuleLoader)
+    } else {
+      Box::new(FsModuleLoader)
     }
   };
 
