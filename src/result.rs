@@ -1,6 +1,5 @@
 //! Results and errors.
 
-use std::borrow::Cow;
 use std::fmt::{Debug, Display};
 
 #[derive(Debug)]
@@ -13,7 +12,7 @@ pub enum AnyErrorKind {
 /// Common error.
 pub struct AnyError {
   kind: AnyErrorKind,
-  message: Cow<String>,
+  message: String,
 }
 
 impl AnyError {
@@ -35,8 +34,8 @@ impl AnyError {
     self.kind
   }
 
-  pub fn message(&self) -> Cow<'static, str> {
-    self.message
+  pub fn message(&self) -> &String {
+    &self.message
   }
 }
 

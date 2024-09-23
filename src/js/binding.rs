@@ -1,5 +1,9 @@
 //! Js runtime bindings.
 
+use std::io::{Error as IoError, ErrorKind};
+
+use crate::result::{AnyError, AnyErrorKind};
+
 /// Adds a read-only property with the given name and value, into the given object.
 pub fn set_constant_to(
   scope: &mut v8::HandleScope<'_>,
@@ -65,20 +69,23 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
 pub fn set_exception_code(
   scope: &mut v8::HandleScope<'_>,
   exception: v8::Local<v8::Value>,
-  error: &Error,
+  error: &anyhow::Error,
 ) {
   let exception = exception.to_object(scope).unwrap();
   if let Some(error) = error.downcast_ref::<IoError>() {
-    if let Some(code) = extract_error_code(error) {
-      let key = v8::String::new(scope, "code").unwrap();
-      let value = v8::String::new(scope, &format!("ERR_{code}")).unwrap();
-      exception.set(scope, key.into(), value.into());
-    }
+    let key = v8::String::new(scope, "io_error").unwrap();
+    let value = v8::String::new(scope, &format!("{:?}:{}", error.kind(), error)).unwrap();
+    exception.set(scope, key.into(), value.into());
+  }
+  if let Some(error) = error.downcast_ref::<AnyError>() {
+    let key = v8::String::new(scope, "any_error").unwrap();
+    let value = v8::String::new(scope, &format!("{error}")).unwrap();
+    exception.set(scope, key.into(), value.into());
   }
 }
 
 /// Useful utility to throw v8 exceptions.
-pub fn throw_exception(scope: &mut v8::HandleScope, error: &Error) {
+pub fn throw_exception(scope: &mut v8::HandleScope, error: &anyhow::Error) {
   let message = error.to_string().to_owned();
   let message = v8::String::new(scope, &message).unwrap();
   let exception = v8::Exception::error(scope, message);
