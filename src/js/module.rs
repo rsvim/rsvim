@@ -69,6 +69,7 @@ pub enum ModuleStatus {
 }
 
 #[derive(Debug)]
+/// ECMAScript module standard, i.e. the `import` module.
 pub struct EsModule {
   pub path: ModulePath,
   pub status: ModuleStatus,
@@ -125,6 +126,7 @@ impl EsModule {
 }
 
 #[derive(Debug)]
+/// Module graph.
 pub struct ModuleGraph {
   pub kind: ImportKind,
   pub root_rc: Rc<RefCell<EsModule>>,
@@ -172,6 +174,7 @@ impl ModuleGraph {
 pub type ModulePath = String;
 pub type ModuleSource = String;
 
+/// Module map from the `main` module to all its dependencies.
 pub struct ModuleMap {
   pub main: Option<ModulePath>,
   pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
