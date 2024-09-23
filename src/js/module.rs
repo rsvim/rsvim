@@ -6,8 +6,37 @@ use std::collections::LinkedList;
 use std::env;
 use std::path::Path;
 use std::rc::Rc;
+use std::sync::OnceLock;
 
-use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader, CORE_MODULES};
+use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
+
+#[allow(non_snake_case)]
+pub fn CORE_MODULES() -> &HashMap<&'static str, &'static str> {
+  static VALUE: OnceLock<HashMap<&'static str, &'static str>> = OnceLock::new();
+  VALUE.get_or_init(|| {
+    let modules = vec![
+      // ("console", include_str!("./js/console.js")),
+      // ("events", include_str!("./js/events.js")),
+      // ("process", include_str!("./js/process.js")),
+      // ("timers", include_str!("./js/timers.js")),
+      // ("assert", include_str!("./js/assert.js")),
+      // ("util", include_str!("./js/util.js")),
+      ("fs", include_str!("./module/fs.js")),
+      // ("perf_hooks", include_str!("./js/perf-hooks.js")),
+      // ("colors", include_str!("./js/colors.js")),
+      // ("dns", include_str!("./js/dns.js")),
+      // ("net", include_str!("./js/net.js")),
+      // ("test", include_str!("./js/test.js")),
+      // ("stream", include_str!("./js/stream.js")),
+      // ("http", include_str!("./js/http.js")),
+      // ("@web/abort", include_str!("./js/abort-controller.js")),
+      // ("@web/text_encoding", include_str!("./js/text-encoding.js")),
+      // ("@web/clone", include_str!("./js/structured-clone.js")),
+      // ("@web/fetch", include_str!("./js/fetch.js")),
+    ];
+    HashMap::from_iter(modules.into_iter())
+  })
+}
 
 // pub mod transpiler;
 
@@ -172,7 +201,7 @@ pub fn resolve_import(
 
   // Look the params and choose a loader.
   let loader: Box<dyn ModuleLoader> = {
-    let is_core_module_import = CORE_MODULES.contains_key(specifier.as_str());
+    let is_core_module_import = CORE_MODULES().contains_key(specifier.as_str());
 
     if is_core_module_import && !ignore_core_modules {
       Box::new(CoreModuleLoader)

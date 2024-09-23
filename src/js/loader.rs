@@ -244,7 +244,7 @@ pub struct CoreModuleLoader;
 
 impl ModuleLoader for CoreModuleLoader {
   fn resolve(&self, _: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
-    match CORE_MODULES.get(specifier) {
+    match CORE_MODULES().get(specifier) {
       Some(_) => Ok(specifier.to_string()),
       None => bail!(format!("Module not found \"{specifier}\"")),
     }
@@ -252,7 +252,7 @@ impl ModuleLoader for CoreModuleLoader {
   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Since any errors will be caught at the resolve stage, we can
     // go ahead an unwrap the value with no worries.
-    Ok(CORE_MODULES.get(specifier).unwrap().to_string())
+    Ok(CORE_MODULES().get(specifier).unwrap().to_string())
   }
 }
 
