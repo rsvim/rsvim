@@ -52,6 +52,13 @@ Some guidelines about contributing to RSVIM can be found in below files:
 
 Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc), please submit your ideas and feature requests there if they need fairly large effort.
 
+## Credits
+
+- Asynchronize runtime by [tokio](https://tokio.rs/).
+- Terminal driver by [crossterm](https://github.com/crossterm-rs/crossterm).
+- Javascript engine by [V8](https://v8.dev/) from [@google](https://github.com/google), and [rusty_v8](https://github.com/denoland/rusty_v8) binding from [@denoland](https://github.com/denoland).
+- Tiny js runtime example by [dune](https://github.com/aalykiot/dune).
+
 ## Supporting the Project
 
 If you like RSVIM, please consider sponsoring it. Your support encourages contributors and maintainers of this project, and other fees or efforts spent on it.
