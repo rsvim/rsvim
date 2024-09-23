@@ -43,6 +43,7 @@ pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
 // pub mod transpiler;
 
 #[derive(Debug, Clone)]
+/// Import kind.
 pub enum ImportKind {
   // Loading static imports.
   Static,
@@ -51,6 +52,11 @@ pub enum ImportKind {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Module import status.
+///
+/// NOTE: All modules (plugins/packages) will be local files on user's operating system, no
+/// network/https will be fetching during import external modules. Thus there is actually no
+/// `Resolving` status, and all resolving is sync file reading on editor's startup.
 pub enum ModuleStatus {
   // Indicates the module is being fetched.
   Fetching,
