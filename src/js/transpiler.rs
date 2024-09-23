@@ -1,107 +1,200 @@
-//! Js extension transpiler.
+//! Js module transpiler.
 
-use deno_ast::MediaType;
-use deno_ast::ParseParams;
-use deno_ast::SourceTextInfo;
-use deno_core::anyhow;
-use deno_core::error::AnyError;
-use deno_core::FastString;
-use deno_core::ModuleSpecifier;
-use deno_core::SourceMapData;
-use std::borrow::Cow;
-use std::env::current_dir;
-use std::path::Path;
+use anyhow::bail;
+use anyhow::Result;
+use regex::Regex;
+use std::sync::OnceLock;
+use swc_common::comments::SingleThreadedComments;
+use swc_common::errors::ColorConfig;
+use swc_common::errors::Handler;
+use swc_common::sync::Lrc;
+use swc_common::FileName;
+use swc_common::Globals;
+use swc_common::Mark;
+use swc_common::SourceMap;
+use swc_common::GLOBALS;
+use swc_ecma_codegen::text_writer::JsWriter;
+use swc_ecma_codegen::Emitter;
+use swc_ecma_parser::lexer::Lexer;
+use swc_ecma_parser::Parser;
+use swc_ecma_parser::StringInput;
+use swc_ecma_parser::Syntax;
+use swc_ecma_parser::TsSyntax;
+use swc_ecma_transforms_base::fixer::fixer;
+use swc_ecma_transforms_base::hygiene::hygiene;
+use swc_ecma_transforms_base::resolver;
+use swc_ecma_transforms_react::react;
+use swc_ecma_transforms_react::Options;
+use swc_ecma_transforms_typescript::strip;
+use swc_ecma_visit::FoldWith;
 
-pub type ModuleContents = (String, Option<SourceMapData>);
+static PRAGMA_REGEX: OnceLock<Regex> = OnceLock::new();
 
-fn should_transpile(media_type: MediaType) -> bool {
-  matches!(
-    media_type,
-    MediaType::Jsx
-      | MediaType::TypeScript
-      | MediaType::Mts
-      | MediaType::Cts
-      | MediaType::Dts
-      | MediaType::Dmts
-      | MediaType::Dcts
-      | MediaType::Tsx
-  )
+fn init_pragma_regex() -> Regex {
+  Regex::new(r"@jsx\s+([^\s]+)").unwrap()
 }
 
-/// Transpiles source code from TS to JS without typechecking
-pub fn transpile(
-  module_specifier: &ModuleSpecifier,
-  code: &str,
-) -> Result<ModuleContents, anyhow::Error> {
-  let media_type = MediaType::from_specifier(module_specifier);
-  let should_transpile = should_transpile(media_type);
+pub struct TypeScript;
 
-  let code = if should_transpile {
-    let sti = SourceTextInfo::from_string(code.to_string());
-    let text = sti.text();
-    let parsed = deno_ast::parse_module(ParseParams {
-      specifier: module_specifier.clone(),
-      text,
-      media_type,
-      capture_tokens: false,
-      scope_analysis: false,
-      maybe_syntax: None,
-    })?;
+impl TypeScript {
+  /// Compiles TypeScript code into JavaScript.
+  pub fn compile(filename: Option<&str>, source: &str) -> Result<String> {
+    let globals = Globals::default();
+    let cm: Lrc<SourceMap> = Default::default();
+    let handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(cm.clone()));
 
-    let transpile_options = deno_ast::TranspileOptions::default();
-    let emit_options = deno_ast::EmitOptions {
-      remove_comments: false,
-      source_map: deno_ast::SourceMapOption::Separate,
-      inline_sources: false,
-      ..Default::default()
+    let filename = match filename {
+      Some(filename) => FileName::Custom(filename.into()),
+      None => FileName::Anon,
     };
-    let res = parsed
-      .transpile(&transpile_options, &emit_options)?
-      .into_source();
 
-    let text = res.source;
-    // Convert utf8 bytes to a string
-    let text = String::from_utf8(text)?;
-    let source_map: Option<SourceMapData> = res.source_map.map(Into::into);
-    (text, source_map)
-  } else {
-    (code.to_string(), None)
-  };
+    let fm = cm.new_source_file(filename.into(), source.into());
 
-  Ok(code)
+    // Initialize the TypeScript lexer.
+    let lexer = Lexer::new(
+      Syntax::Typescript(TsSyntax {
+        tsx: true,
+        decorators: true,
+        no_early_errors: true,
+        ..Default::default()
+      }),
+      Default::default(),
+      StringInput::from(&*fm),
+      None,
+    );
+
+    let mut parser = Parser::new_from(lexer);
+
+    let program = match parser
+      .parse_program()
+      .map_err(|e| e.into_diagnostic(&handler).emit())
+    {
+      Ok(module) => module,
+      Err(_) => bail!("TypeScript compilation failed."),
+    };
+
+    // This is where we're gonna store the JavaScript output.
+    let mut buffer = vec![];
+
+    GLOBALS.set(&globals, || {
+      // Apply the rest SWC transforms to generated code.
+      let program = program
+        .fold_with(&mut resolver(Mark::new(), Mark::new(), true))
+        .fold_with(&mut strip(Mark::new(), Mark::new()))
+        .fold_with(&mut hygiene())
+        .fold_with(&mut fixer(None));
+
+      {
+        let mut emitter = Emitter {
+          cfg: swc_ecma_codegen::Config::default(),
+          cm: cm.clone(),
+          comments: None,
+          wr: JsWriter::new(cm, "\n", &mut buffer, None),
+        };
+
+        emitter.emit_program(&program).unwrap();
+      }
+    });
+
+    Ok(String::from_utf8_lossy(&buffer).to_string())
+  }
 }
 
-fn resolve_path(
-  path_str: impl AsRef<Path>,
-  current_dir: &Path,
-) -> Result<ModuleSpecifier, deno_core::ModuleResolutionError> {
-  let path = current_dir.join(path_str);
-  let path = deno_core::normalize_path(path);
-  deno_core::url::Url::from_file_path(&path)
-    .map_err(|()| deno_core::ModuleResolutionError::InvalidPath(path))
+pub struct Jsx;
+
+impl Jsx {
+  /// Compiles JSX code into JavaScript.
+  pub fn compile(filename: Option<&str>, source: &str) -> Result<String> {
+    let globals = Globals::default();
+    let cm: Lrc<SourceMap> = Default::default();
+    let handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(cm.clone()));
+
+    let filename = match filename {
+      Some(filename) => FileName::Custom(filename.into()),
+      None => FileName::Anon,
+    };
+
+    let fm = cm.new_source_file(filename.into(), source.into());
+
+    // NOTE: We're using a TypeScript lexer to parse JSX because it's a super-set
+    // of JavaScript and we also want to support .tsx files.
+
+    let lexer = Lexer::new(
+      Syntax::Typescript(TsSyntax {
+        tsx: true,
+        decorators: true,
+        no_early_errors: true,
+        ..Default::default()
+      }),
+      Default::default(),
+      StringInput::from(&*fm),
+      None,
+    );
+
+    let mut parser = Parser::new_from(lexer);
+
+    let module = match parser
+      .parse_module()
+      .map_err(|e| e.into_diagnostic(&handler).emit())
+    {
+      Ok(module) => module,
+      Err(_) => bail!("JSX compilation failed."),
+    };
+
+    // This is where we're gonna store the JavaScript output.
+    let mut buffer = vec![];
+
+    // Look for the JSX pragma in the source code.
+    // https://www.gatsbyjs.com/blog/2019-08-02-what-is-jsx-pragma/
+
+    let pragma = PRAGMA_REGEX
+      .get_or_init(init_pragma_regex)
+      .find_iter(source)
+      .next()
+      .map(|m| m.as_str().to_string().replace("@jsx ", ""));
+
+    GLOBALS.set(&globals, || {
+      // Apply SWC transforms to given code.
+      let module = module.fold_with(&mut react::<SingleThreadedComments>(
+        cm.clone(),
+        None,
+        Options {
+          pragma,
+          ..Default::default()
+        },
+        Mark::new(),
+        Mark::new(),
+      ));
+
+      {
+        let mut emitter = Emitter {
+          cfg: swc_ecma_codegen::Config::default(),
+          cm: cm.clone(),
+          comments: None,
+          wr: JsWriter::new(cm, "\n", &mut buffer, None),
+        };
+
+        emitter.emit_module(&module).unwrap();
+      }
+    });
+
+    Ok(String::from_utf8_lossy(&buffer).to_string())
+  }
 }
 
-fn to_module_specifier(s: &str, base: Option<&Path>) -> Result<ModuleSpecifier, anyhow::Error> {
-  let path = match base {
-    Some(base) => resolve_path(s, base),
-    None => resolve_path(s, &current_dir()?),
-  }?;
-  Ok(path)
-}
+pub struct Wasm;
 
-/// Transpile an extension
-#[allow(clippy::type_complexity)]
-pub fn transpile_extension(
-  specifier: &FastString,
-  code: &FastString,
-) -> Result<(FastString, Option<Cow<'static, [u8]>>), AnyError> {
-  // Get the ModuleSpecifier from the FastString
-  let specifier = specifier.as_str();
-  let specifier = to_module_specifier(specifier, None)?;
-  let code = code.as_str();
-
-  let (code, source_map) = transpile(&specifier, code)?;
-  let code = FastString::from(code);
-
-  Ok((code, source_map))
+impl Wasm {
+  // Converts a wasm binary into an ES module template.
+  pub fn parse(source: &str) -> String {
+    format!(
+      "
+        const wasmCode = new Uint8Array({:?});
+        const wasmModule = new WebAssembly.Module(wasmCode);
+        const wasmInstance = new WebAssembly.Instance(wasmModule);
+        export default wasmInstance.exports;
+        ",
+      source.as_bytes()
+    )
+  }
 }

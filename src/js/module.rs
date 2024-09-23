@@ -1,4 +1,4 @@
-//! Js modules.
+//! Js module.
 
 use std::cell::RefCell;
 use std::collections::HashMap;
