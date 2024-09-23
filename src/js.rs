@@ -21,7 +21,9 @@ use crate::result::{ErrorCode, VoidResult};
 
 pub mod binding;
 pub mod hook;
+pub mod loader;
 pub mod module;
+pub mod transpiler;
 
 // pub async fn start(data_access: JsDataAccess) -> VoidResult {
 //   if let Some(config_entry) = glovar::CONFIG_FILE_PATH() {

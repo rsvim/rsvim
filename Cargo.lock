@@ -1644,6 +1644,7 @@ dependencies = [
  "num-traits",
  "parking_lot",
  "ropey",
+ "serde_json",
  "tempfile",
  "time",
  "tokio",
