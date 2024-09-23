@@ -26,7 +26,7 @@ pub trait ModuleLoader {
   fn resolve(&self, base: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath>;
 }
 
-static FILE_NAME_EXT: &[&str] = &["js", "jsx", "ts", "tsx", "json", "wasm"];
+static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "wasm"];
 
 #[derive(Default)]
 pub struct FsModuleLoader;
@@ -70,7 +70,7 @@ impl FsModuleLoader {
 
     // 2. Check if we need to add an extension.
     if path.extension().is_none() {
-      for ext in FILE_NAME_EXT {
+      for ext in FILE_EXTENSIONS {
         let path = &path.with_extension(ext);
         if path.is_file() {
           return self.load_source(path);
@@ -84,7 +84,7 @@ impl FsModuleLoader {
 
   /// Loads import as directory using the 'index.[ext]' convention.
   fn load_as_directory(&self, path: &Path) -> anyhow::Result<ModuleSource> {
-    for ext in FILE_NAME_EXT {
+    for ext in FILE_EXTENSIONS {
       let path = &path.join(format!("index.{ext}"));
       if path.is_file() {
         return self.load_source(path);
