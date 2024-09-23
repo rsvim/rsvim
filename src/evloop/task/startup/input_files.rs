@@ -71,7 +71,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
               e
             );
             error!("{msg}");
-            return Err(ErrorCode::Message(msg));
+            return Err(ErrorCode::Message(msg.into()));
           }
         }
       }
@@ -83,7 +83,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
         e
       );
       error!("{msg}");
-      return Err(ErrorCode::Message(msg));
+      return Err(ErrorCode::Message(msg.into()));
     }
   }
 
@@ -144,7 +144,7 @@ pub async fn edit_other_files(
                 e
               );
               error!("{msg}");
-              return Err(ErrorCode::Message(msg));
+              return Err(ErrorCode::Message(msg.into()));
             }
           }
         }
@@ -157,7 +157,7 @@ pub async fn edit_other_files(
           e
         );
         error!("{msg}");
-        return Err(ErrorCode::Message(msg));
+        return Err(ErrorCode::Message(msg.into()));
       }
     }
   }
