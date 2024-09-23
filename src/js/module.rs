@@ -7,7 +7,9 @@ use std::env;
 use std::path::Path;
 use std::rc::Rc;
 use std::sync::OnceLock;
+use url::Url;
 
+use crate::js::constants::{URL_REGEX, WINDOWS_REGEX};
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 
 #[allow(non_snake_case)]
@@ -212,4 +214,28 @@ pub fn resolve_import(
 
   // Resolve module.
   loader.resolve(base, &specifier)
+}
+
+/// Loads an import using the appropriate loader.
+pub fn load_import(specifier: &str, skip_cache: bool) -> anyhow::Result<ModuleSource> {
+  // // Look the params and choose a loader.
+  // let loader: Box<dyn ModuleLoader> = match (
+  //   CORE_MODULES().contains_key(specifier),
+  //   WINDOWS_REGEX().is_match(specifier),
+  //   Url::parse(specifier).is_ok(),
+  // ) {
+  //   (true, _, _) => Box::new(CoreModuleLoader),
+  //   (_, true, _) => Box::new(FsModuleLoader),
+  //   (_, _, true) => Box::new(UrlModuleLoader { skip_cache }),
+  //   _ => Box::new(FsModuleLoader),
+  // };
+  //
+  // // Load module.
+  // loader.load(specifier)
+
+  if CORE_MODULES().contains_key(specifier) {
+    CoreModuleLoader {}.load(specifier)
+  } else {
+    FsModuleLoader {}.load(specifier)
+  }
 }

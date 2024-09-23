@@ -67,6 +67,7 @@ swc_bundler = "0.240.0"
 swc_ecma_ast = "0.120.0"
 swc_ecma_loader = "0.51.0"
 swc_atoms = "0.7.0"
+url = "2.5.2"
 
 [dev-dependencies]
 tempfile = "3"

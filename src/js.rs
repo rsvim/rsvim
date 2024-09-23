@@ -20,6 +20,7 @@ use crate::js::module::{ImportMap, ModuleMap};
 // use crate::ui::tree::TreeArc;
 
 pub mod binding;
+pub mod constants;
 pub mod hook;
 pub mod loader;
 pub mod module;

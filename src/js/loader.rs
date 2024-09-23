@@ -1,5 +1,6 @@
 //! Js module loader.
 
+use crate::js::constants::WINDOWS_REGEX;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::js::module::CORE_MODULES;
@@ -96,15 +97,8 @@ impl FsModuleLoader {
 
 impl ModuleLoader for FsModuleLoader {
   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
-    // Windows platform full path regex.
-    static WINDOWS_REGEX: OnceLock<Regex> = OnceLock::new();
-
     // Resolve absolute import.
-    if specifier.starts_with('/')
-      || WINDOWS_REGEX
-        .get_or_init(|| Regex::new(r"^[a-zA-Z]:\\").unwrap())
-        .is_match(specifier)
-    {
+    if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
       return Ok(self.transform(std::path::absolute(Path::new(specifier))?));
     }
 

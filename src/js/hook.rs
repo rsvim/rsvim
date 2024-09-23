@@ -3,9 +3,8 @@
 use crate::js::binding::{set_exception_code, throw_type_error};
 // use crate::errors::unwrap_or_exit;
 // use crate::modules::load_import;
-use crate::js::module::resolve_import;
+use crate::js::module::{resolve_import, ModuleGraph, ModuleStatus};
 // use crate::modules::EsModuleFuture;
-// use crate::modules::ModuleGraph;
 // use crate::modules::ModuleStatus;
 use crate::js::JsRuntime;
 // use dune_event_loop::LoopHandle;
