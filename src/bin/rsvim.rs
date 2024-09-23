@@ -18,40 +18,40 @@ use tokio::sync::mpsc::{channel, Receiver, Sender};
 // use heed::{byteorder, Database, EnvOpenOptions};
 use tracing::{debug, error};
 
-/// Initialize TUI.
-pub fn init_tui() -> VoidIoResult {
-  if !terminal::is_raw_mode_enabled()? {
-    terminal::enable_raw_mode()?;
-  }
-
-  let mut out = std::io::stdout();
-  execute!(
-    out,
-    terminal::EnterAlternateScreen,
-    terminal::Clear(terminal::ClearType::All),
-    EnableMouseCapture,
-    EnableFocusChange,
-  )?;
-
-  Ok(())
-}
-
-/// Shutdown TUI.
-pub fn shutdown_tui() -> VoidIoResult {
-  let mut out = std::io::stdout();
-  execute!(
-    out,
-    DisableMouseCapture,
-    DisableFocusChange,
-    terminal::LeaveAlternateScreen,
-  )?;
-
-  if terminal::is_raw_mode_enabled()? {
-    terminal::disable_raw_mode()?;
-  }
-
-  Ok(())
-}
+// /// Initialize TUI.
+// pub fn init_tui() -> VoidIoResult {
+//   if !terminal::is_raw_mode_enabled()? {
+//     terminal::enable_raw_mode()?;
+//   }
+//
+//   let mut out = std::io::stdout();
+//   execute!(
+//     out,
+//     terminal::EnterAlternateScreen,
+//     terminal::Clear(terminal::ClearType::All),
+//     EnableMouseCapture,
+//     EnableFocusChange,
+//   )?;
+//
+//   Ok(())
+// }
+//
+// /// Shutdown TUI.
+// pub fn shutdown_tui() -> VoidIoResult {
+//   let mut out = std::io::stdout();
+//   execute!(
+//     out,
+//     DisableMouseCapture,
+//     DisableFocusChange,
+//     terminal::LeaveAlternateScreen,
+//   )?;
+//
+//   if terminal::is_raw_mode_enabled()? {
+//     terminal::disable_raw_mode()?;
+//   }
+//
+//   Ok(())
+// }
 
 fn main() -> VoidIoResult {
   log::init();
@@ -74,57 +74,58 @@ fn main() -> VoidIoResult {
   // wtxn.commit().unwrap();
 
   // Two sender/receiver to send messages between js runtime and event loop in bidirections.
-  let (js_send_to_evloop, evloop_recv_from_js) = channel(glovar::CHANNEL_BUF_SIZE());
-  let (evloop_send_to_js, js_recv_from_evloop) = channel(glovar::CHANNEL_BUF_SIZE());
+  // let (js_send_to_evloop, evloop_recv_from_js) = channel(glovar::CHANNEL_BUF_SIZE());
+  // let (evloop_send_to_js, js_recv_from_evloop) = channel(glovar::CHANNEL_BUF_SIZE());
 
   // Initialize EventLoop.
-  let mut event_loop = EventLoop::new(cli_opt, evloop_send_to_js, evloop_recv_from_js)?;
+  let mut event_loop = EventLoop::new(cli_opt)?;
 
-  let data_access = JsDataAccess::new(
-    js_send_to_evloop,
-    js_recv_from_evloop,
-    event_loop.state.clone(),
-    event_loop.tree.clone(),
-    event_loop.buffers.clone(),
-  );
-  let js_runtime_join_handle = std::thread::spawn(move || {
-    let js_tokio_runtime = tokio::runtime::Builder::new_current_thread()
-      .enable_all()
-      .build()
-      .unwrap();
-    js_tokio_runtime.block_on(async move {
-      // Basically, this thread is simply running a single js/ts file, there are several tasks need
-      // to complete:
-      // 1. Resolve all the modules marked by `import` and `require` keywords, and recursively
-      //    resolve the nested modules inside them.
-      // 2. Update editor configurations and settings via the OPs.
-      // 3. Bind callbacks (most interactives are triggered by callbacks) on the related Vim events,
-      //    and schedule timeout/delay background jobs.
-      let _ = js_start(data_access).await;
-
-      // After loading user config is done, this thread is waiting for Event Loop to notify it to
-      // exit. If the editor is quit before loading is done, then we need to insert some checks to
-      // manually break config loading and exit this thread.
-    });
-  });
+  // let data_access = JsDataAccess::new(
+  //   js_send_to_evloop,
+  //   js_recv_from_evloop,
+  //   event_loop.state.clone(),
+  //   event_loop.tree.clone(),
+  //   event_loop.buffers.clone(),
+  // );
+  // let js_runtime_join_handle = std::thread::spawn(move || {
+  //   let js_tokio_runtime = tokio::runtime::Builder::new_current_thread()
+  //     .enable_all()
+  //     .build()
+  //     .unwrap();
+  //   js_tokio_runtime.block_on(async move {
+  //     // Basically, this thread is simply running a single js/ts file, there are several tasks need
+  //     // to complete:
+  //     // 1. Resolve all the modules marked by `import` and `require` keywords, and recursively
+  //     //    resolve the nested modules inside them.
+  //     // 2. Update editor configurations and settings via the OPs.
+  //     // 3. Bind callbacks (most interactives are triggered by callbacks) on the related Vim events,
+  //     //    and schedule timeout/delay background jobs.
+  //     let _ = js_start(data_access).await;
+  //
+  //     // After loading user config is done, this thread is waiting for Event Loop to notify it to
+  //     // exit. If the editor is quit before loading is done, then we need to insert some checks to
+  //     // manually break config loading and exit this thread.
+  //   });
+  // });
 
   // Explicitly create tokio runtime for the EventLoop.
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
-  let event_loop_result = evloop_tokio_runtime.block_on(async {
-    init_tui()?;
+  evloop_tokio_runtime.block_on(async {
+    // Initialize
+    event_loop.init_tui()?;
+    event_loop.init_input_files()?;
 
-    // Move
-    event_loop.init()?;
-
+    // Running loop
     event_loop.run().await?;
 
-    shutdown_tui()
-  });
+    // Shutdown
+    event_loop.shutdown_tui()
+  })
 
-  match js_runtime_join_handle.join() {
-    Ok(_) => { /* Skip */ }
-    Err(e) => error!("Failed to join Js runtime thread: {:?}", e),
-  }
+  // match js_runtime_join_handle.join() {
+  //   Ok(_) => { /* Skip */ }
+  //   Err(e) => error!("Failed to join Js runtime thread: {:?}", e),
+  // }
 
-  event_loop_result
+  // event_loop_result
 }

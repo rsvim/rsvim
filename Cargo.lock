@@ -1632,6 +1632,7 @@ dependencies = [
 name = "rsvim"
 version = "0.1.1-alpha.5"
 dependencies = [
+ "anyhow",
  "clap",
  "compact_str",
  "crossterm",
@@ -1652,6 +1653,7 @@ dependencies = [
  "tracing-subscriber",
  "tz-rs",
  "tzdb",
+ "v8",
 ]
 
 [[package]]

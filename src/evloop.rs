@@ -2,9 +2,13 @@
 
 #![allow(dead_code)]
 
-use crossterm::event::{Event, EventStream};
-use crossterm::{self, queue};
+use crossterm::event::{
+  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
+  EventStream,
+};
+use crossterm::{self, execute, queue};
 use futures::StreamExt;
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;
 use std::io::Write;
 use std::io::{BufWriter, Stdout};
@@ -21,7 +25,8 @@ use crate::cli::CliOpt;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
-use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::JsRuntime;
+// use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::result::{IoResult, VoidIoResult};
 use crate::state::fsm::StatefulValue;
 use crate::state::{State, StateArc};
@@ -33,7 +38,7 @@ use crate::ui::widget::{Cursor, Window};
 pub mod msg;
 pub mod task;
 
-#[derive(Debug)]
+// #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop will spawn them in
 /// tokio's async tasks and let them sync back data once they are done. The event loop controls all
 /// the tasks with [`CancellationToken`] and [`TaskTracker`].
@@ -45,6 +50,11 @@ pub mod task;
 ///
 /// Js runtime and this event loop communicate via another two pairs of channels.
 pub struct EventLoop {
+  /// Indicates the start time of the process.
+  pub startup_moment: Instant,
+  /// Specifies the timestamp which the current process began in Unix time.
+  pub startup_unix_epoch: u128,
+
   /// Command line options.
   pub cli_opt: CliOpt,
 
@@ -71,18 +81,20 @@ pub struct EventLoop {
   /// Channel receiver: master receive messages from workers.
   pub master_recv_from_worker: Receiver<WorkerToMasterMessage>,
 
-  /// Channel sender: event loop send messages to js runtime.
-  pub evloop_send_to_js: Sender<EventLoopToJsRuntimeMessage>,
-  /// Channel receiver: event loop receive messages from js runtime.
-  pub evloop_recv_from_js: Receiver<JsRuntimeToEventLoopMessage>,
+  /// Js runtime.
+  pub js_runtime: JsRuntime,
+  // /// Channel sender: master send messages to js worker.
+  // pub master_send_to_js_worker: Sender<EventLoopToJsRuntimeMessage>,
+  // /// Channel receiver: master receive messages from js worker.
+  // pub evloop_recv_from_js_worker: Receiver<JsRuntimeToEventLoopMessage>,
 }
 
 impl EventLoop {
   /// Make new event loop.
   pub fn new(
     cli_opt: CliOpt,
-    evloop_send_to_js: Sender<EventLoopToJsRuntimeMessage>,
-    evloop_recv_from_js: Receiver<JsRuntimeToEventLoopMessage>,
+    // evloop_send_to_js: Sender<EventLoopToJsRuntimeMessage>,
+    // evloop_recv_from_js: Receiver<JsRuntimeToEventLoopMessage>,
   ) -> IoResult<Self> {
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
@@ -121,6 +133,11 @@ impl EventLoop {
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
 
     Ok(EventLoop {
+      startup_moment: Instant::now(),
+      startup_unix_epoch: SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis(),
       cli_opt,
       canvas,
       tree: Tree::to_arc(tree),
@@ -131,13 +148,31 @@ impl EventLoop {
       task_tracker: TaskTracker::new(),
       worker_send_to_master,
       master_recv_from_worker,
-      evloop_send_to_js,
-      evloop_recv_from_js,
+      // master_send_to_js_worker: evloop_send_to_js,
+      // evloop_recv_from_js_worker: evloop_recv_from_js,
     })
   }
 
+  /// Initialize TUI.
+  pub fn init_tui(&self) -> VoidIoResult {
+    if !crossterm::terminal::is_raw_mode_enabled()? {
+      crossterm::terminal::enable_raw_mode()?;
+    }
+
+    let mut out = std::io::stdout();
+    execute!(
+      out,
+      crossterm::terminal::EnterAlternateScreen,
+      crossterm::terminal::Clear(crossterm::terminal::ClearType::All),
+      EnableMouseCapture,
+      EnableFocusChange,
+    )?;
+
+    Ok(())
+  }
+
   /// Initialize start up tasks such as input files, etc.
-  pub fn init(&mut self) -> VoidIoResult {
+  pub fn init_input_files(&mut self) -> VoidIoResult {
     self.queue_cursor()?;
     self.writer.flush()?;
 
@@ -217,13 +252,8 @@ impl EventLoop {
     }
   }
 
-  async fn process_notify(
-    &mut self,
-    received_notifications: &mut Vec<WorkerToMasterMessage>,
-    received_count: usize,
-  ) {
-    debug!("Received {:?} notifications from workers", received_count);
-    received_notifications.clear();
+  async fn process_worker_notify(&mut self, msg: Option<WorkerToMasterMessage>) {
+    debug!("Received {:?} message from workers", msg);
   }
 
   /// Running the loop, it repeatedly do following steps:
@@ -236,8 +266,6 @@ impl EventLoop {
   /// 3. Render the terminal.
   pub async fn run(&mut self) -> VoidIoResult {
     let mut reader = EventStream::new();
-    let mut received_messages: Vec<WorkerToMasterMessage> =
-      Vec::with_capacity(glovar::CHANNEL_BUF_SIZE());
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
@@ -245,14 +273,14 @@ impl EventLoop {
             self.process_event(next_event).await;
         }
         // Receive notification from workers
-        received_count = self.master_recv_from_worker.recv_many(&mut received_messages, glovar::CHANNEL_BUF_SIZE()) => {
-            self.process_notify(&mut received_messages, received_count).await;
+        worker_msg = self.master_recv_from_worker.recv() => {
+            self.process_worker_notify(worker_msg).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
             debug!("Receive cancellation token, exit loop");
             self.task_tracker.close();
-            let _ = self.evloop_send_to_js.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
+            // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
             break;
         }
       }
@@ -370,6 +398,23 @@ impl EventLoop {
       self.writer,
       crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
     )?;
+
+    Ok(())
+  }
+
+  /// Shutdown TUI.
+  pub fn shutdown_tui(&self) -> VoidIoResult {
+    let mut out = std::io::stdout();
+    execute!(
+      out,
+      DisableMouseCapture,
+      DisableFocusChange,
+      crossterm::terminal::LeaveAlternateScreen,
+    )?;
+
+    if crossterm::terminal::is_raw_mode_enabled()? {
+      crossterm::terminal::disable_raw_mode()?;
+    }
 
     Ok(())
   }
