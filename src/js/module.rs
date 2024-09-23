@@ -302,19 +302,13 @@ pub fn resolve_import(
     None => specifier.into(),
   };
 
-  // Look the params and choose a loader.
-  let loader: Box<dyn ModuleLoader> = {
-    let is_core_module_import = CORE_MODULES().contains_key(specifier.as_str());
-
-    if is_core_module_import && !ignore_core_modules {
-      Box::new(CoreModuleLoader)
-    } else {
-      Box::new(FsModuleLoader)
-    }
-  };
-
-  // Resolve module.
-  loader.resolve(base, &specifier)
+  // Look the params and choose a loader, then resolve module.
+  let is_core_module_import = CORE_MODULES().contains_key(specifier.as_str());
+  if is_core_module_import && !ignore_core_modules {
+    CoreModuleLoader {}.resolve(base, &specifier)
+  } else {
+    FsModuleLoader {}.resolve(base, &specifier)
+  }
 }
 
 /// Loads an import using the appropriate loader.
