@@ -113,7 +113,10 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
   let undefined = v8::undefined(scope).into();
   let event = message.get_event();
 
-  use v8::PromiseRejectEvent::*;
+  use v8::PromiseRejectEvent::{
+    PromiseHandlerAddedAfterReject, PromiseRejectAfterResolved, PromiseRejectWithNoHandler,
+    PromiseResolveAfterResolved,
+  };
 
   let reason = match event {
     PromiseHandlerAddedAfterReject | PromiseRejectAfterResolved | PromiseResolveAfterResolved => {
