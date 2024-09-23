@@ -2,7 +2,7 @@
 
 use std::fmt::{Debug, Display};
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 /// Error kind.
 pub enum AnyErrorKind {
   DUMMY,
