@@ -178,7 +178,12 @@ impl JsRuntime {
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
   ) -> JsRuntime {
     // Configuration flags for V8.
-    let mut flags = String::from(concat!(" --no-validate-asm", " --js-float16array",));
+    let mut flags = String::from(concat!(
+      " --no-validate-asm",
+      " --turbo_fast_api_calls",
+      " --harmony-temporal",
+      " --js-float16array",
+    ));
 
     v8::V8::set_flags_from_string(&flags);
 
