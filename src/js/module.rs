@@ -12,6 +12,7 @@ use url::Url;
 use crate::js::constant::{URL_REGEX, WINDOWS_REGEX};
 use crate::js::loader::{FsModuleLoader, ModuleLoader};
 use crate::js::{report_and_exit, JsRuntime};
+use crate::result::AnyError;
 
 /// Creates v8 script origins.
 pub fn create_origin<'s>(
@@ -333,6 +334,7 @@ impl ImportMap {
 }
 
 /// Resolves an import using the appropriate loader.
+/// Returns full path on local file system.
 pub fn resolve_import(
   base: Option<&str>,
   specifier: &str,
@@ -398,7 +400,7 @@ pub fn fetch_module_tree<'a>(
   // Find appropriate loader if source is empty.
   let source = match source {
     Some(source) => source.into(),
-    None => unwrap_or_exit(load_import(filename, true)),
+    None => load_import(filename, true).unwrap(),
   };
   let source = v8::String::new(scope, &source).unwrap();
   let mut source = v8::script_compiler::Source::new(source, Some(&origin));
@@ -421,7 +423,7 @@ pub fn fetch_module_tree<'a>(
 
     // Transform v8's ModuleRequest into Rust string.
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
-    let specifier = unwrap_or_exit(resolve_import(Some(filename), &specifier, false, None));
+    let specifier = resolve_import(Some(filename), &specifier, false, None).unwrap();
 
     // Resolve subtree of modules.
     if !state.borrow().module_map.index.contains_key(&specifier) {

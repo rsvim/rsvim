@@ -16,13 +16,16 @@ use tracing::{debug, error};
 
 // use crate::buf::BuffersArc;
 // use crate::glovar;
-use crate::js::module::{create_origin, ImportMap, ModuleGraph, ModuleMap, ModuleStatus};
+use crate::js::module::{
+  create_origin, fetch_module_tree, ImportKind, ImportMap, ModuleGraph, ModuleMap, ModuleStatus,
+};
 // use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::result::AnyError;
 // use crate::state::StateArc;
 // use crate::ui::tree::TreeArc;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
+use crate::js::hook::module_resolve_cb;
 
 pub mod binding;
 pub mod constant;
@@ -117,10 +120,15 @@ pub struct JsRuntimeOptions {
   // pub inspect: Option<(SocketAddrV4, bool)>,
   // // Exposes v8's garbage collector.
   // pub expose_gc: bool,
-  // Task tracker of tokio runtime.
-  pub task_tracker: TaskTracker,
-  /// Runtime path for resolving modules on local file system.
-  pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+}
+
+/// A vector with JS callbacks and parameters.
+type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
+
+/// An abstract interface for something that should run in respond to an
+/// async task, scheduled previously and is now completed.
+pub trait JsFuture {
+  fn run(&mut self, scope: &mut v8::HandleScope);
 }
 
 pub struct JsRuntimeState {
@@ -162,12 +170,12 @@ pub struct JsRuntime {
 }
 
 impl JsRuntime {
-  pub fn new() -> Self {
-    Self::with_options(JsRuntimeOptions::default())
-  }
-
   /// Creates a new JsRuntime based on provided options.
-  pub fn with_options(options: JsRuntimeOptions) -> JsRuntime {
+  pub fn new(
+    options: JsRuntimeOptions,
+    task_tracker: TaskTracker,
+    runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+  ) -> JsRuntime {
     // Configuration flags for V8.
     let mut flags = String::from(concat!(" --no-validate-asm", " --js-float16array",));
 
@@ -234,8 +242,8 @@ impl JsRuntime {
       exceptions: exception::ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      task_tracker: options.task_tracker,
-      runtime_path: options.runtime_path,
+      task_tracker,
+      runtime_path,
     }));
 
     isolate.set_slot(state.clone());
@@ -272,6 +280,7 @@ impl JsRuntime {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        error!("{exception:?}");
         eprintln!("{exception:?}");
         std::process::exit(1);
       }
@@ -295,8 +304,8 @@ impl JsRuntime {
       report_and_exit(exception);
     }
 
-    // Initialize process static values.
-    process::refresh(tc_scope);
+    // // Initialize process static values.
+    // process::refresh(tc_scope);
   }
 
   /// Executes traditional JavaScript code (traditional = not ES modules).
@@ -415,75 +424,75 @@ impl JsRuntime {
   pub fn tick_event_loop(&mut self) {
     run_next_tick_callbacks(&mut self.handle_scope());
     self.fast_forward_imports();
-    self.event_loop.tick();
-    self.run_pending_futures();
+    // self.event_loop.tick();
+    // self.run_pending_futures();
   }
 
-  /// Polls the inspector for new devtools messages.
-  pub fn poll_inspect_session(&mut self) {
-    if let Some(inspector) = self.inspector.as_mut() {
-      inspector.borrow_mut().poll_session();
-    }
-  }
+  // /// Polls the inspector for new devtools messages.
+  // pub fn poll_inspect_session(&mut self) {
+  //   if let Some(inspector) = self.inspector.as_mut() {
+  //     inspector.borrow_mut().poll_session();
+  //   }
+  // }
 
-  /// Runs the event-loop until no more pending events exists.
-  pub fn run_event_loop(&mut self) {
-    // Check for pending devtools messages.
-    self.poll_inspect_session();
-    // Run callbacks/promises from next-tick and micro-task queues.
-    run_next_tick_callbacks(&mut self.handle_scope());
+  // /// Runs the event-loop until no more pending events exists.
+  // pub fn run_event_loop(&mut self) {
+  //   // Check for pending devtools messages.
+  //   self.poll_inspect_session();
+  //   // Run callbacks/promises from next-tick and micro-task queues.
+  //   run_next_tick_callbacks(&mut self.handle_scope());
+  //
+  //   while self.event_loop.has_pending_events()
+  //     || self.has_promise_rejections()
+  //     || self.isolate.has_pending_background_tasks()
+  //     || self.has_pending_imports()
+  //     || self.has_next_tick_callbacks()
+  //   {
+  //     // Check for pending devtools messages.
+  //     self.poll_inspect_session();
+  //     // Tick the event-loop one cycle.
+  //     self.tick_event_loop();
+  //
+  //     // Report any unhandled promise rejections.
+  //     if let Some(error) = check_exceptions(&mut self.handle_scope()) {
+  //       report_and_exit(error);
+  //     }
+  //   }
+  //
+  //   // We can now notify debugger that the program has finished running
+  //   // and we're ready to exit the process.
+  //   if let Some(inspector) = self.inspector() {
+  //     let context = self.context();
+  //     let scope = &mut self.handle_scope();
+  //     inspector.borrow_mut().context_destroyed(scope, context);
+  //   }
+  // }
 
-    while self.event_loop.has_pending_events()
-      || self.has_promise_rejections()
-      || self.isolate.has_pending_background_tasks()
-      || self.has_pending_imports()
-      || self.has_next_tick_callbacks()
-    {
-      // Check for pending devtools messages.
-      self.poll_inspect_session();
-      // Tick the event-loop one cycle.
-      self.tick_event_loop();
-
-      // Report any unhandled promise rejections.
-      if let Some(error) = check_exceptions(&mut self.handle_scope()) {
-        report_and_exit(error);
-      }
-    }
-
-    // We can now notify debugger that the program has finished running
-    // and we're ready to exit the process.
-    if let Some(inspector) = self.inspector() {
-      let context = self.context();
-      let scope = &mut self.handle_scope();
-      inspector.borrow_mut().context_destroyed(scope, context);
-    }
-  }
-
-  /// Runs all the pending javascript tasks.
-  fn run_pending_futures(&mut self) {
-    // Get a handle-scope and a reference to the runtime's state.
-    let scope = &mut self.handle_scope();
-    let state_rc = Self::state(scope);
-
-    // NOTE: The reason we move all the js futures to a separate vec is because
-    // we need to drop the `state` borrow before we start iterating through all
-    // of them to avoid borrowing panics at runtime.
-
-    let futures: Vec<Box<dyn JsFuture>> = state_rc.borrow_mut().pending_futures.drain(..).collect();
-
-    // NOTE: After every future executes (aka v8's call stack gets empty) we will drain
-    // the MicroTask and NextTick Queue.
-
-    for mut fut in futures {
-      fut.run(scope);
-      if let Some(error) = check_exceptions(scope) {
-        report_and_exit(error);
-      }
-      run_next_tick_callbacks(scope);
-    }
-
-    state_rc.borrow_mut().wake_event_queued = false;
-  }
+  // /// Runs all the pending javascript tasks.
+  // fn run_pending_futures(&mut self) {
+  //   // Get a handle-scope and a reference to the runtime's state.
+  //   let scope = &mut self.handle_scope();
+  //   let state_rc = Self::state(scope);
+  //
+  //   // NOTE: The reason we move all the js futures to a separate vec is because
+  //   // we need to drop the `state` borrow before we start iterating through all
+  //   // of them to avoid borrowing panics at runtime.
+  //
+  //   let futures: Vec<Box<dyn JsFuture>> = state_rc.borrow_mut().pending_futures.drain(..).collect();
+  //
+  //   // NOTE: After every future executes (aka v8's call stack gets empty) we will drain
+  //   // the MicroTask and NextTick Queue.
+  //
+  //   for mut fut in futures {
+  //     fut.run(scope);
+  //     if let Some(error) = check_exceptions(scope) {
+  //       report_and_exit(error);
+  //     }
+  //     run_next_tick_callbacks(scope);
+  //   }
+  //
+  //   state_rc.borrow_mut().wake_event_queued = false;
+  // }
 
   /// Checks for imports (static/dynamic) ready for execution.
   fn fast_forward_imports(&mut self) {
@@ -654,36 +663,36 @@ impl JsRuntime {
 /// Runs callbacks stored in the next-tick queue.
 fn run_next_tick_callbacks(scope: &mut v8::HandleScope) {
   let state_rc = JsRuntime::state(scope);
-  let callbacks: NextTickQueue = state_rc.borrow_mut().next_tick_queue.drain(..).collect();
+  // let callbacks: NextTickQueue = state_rc.borrow_mut().next_tick_queue.drain(..).collect();
 
   let undefined = v8::undefined(scope);
   let tc_scope = &mut v8::TryCatch::new(scope);
-
-  for (cb, params) in callbacks {
-    // Create a local handle for the callback and its parameters.
-    let cb = v8::Local::new(tc_scope, cb);
-    let args: Vec<v8::Local<v8::Value>> = params
-      .iter()
-      .map(|arg| v8::Local::new(tc_scope, arg))
-      .collect();
-
-    cb.call(tc_scope, undefined.into(), &args);
-
-    // On exception, report it and handle the error.
-    if tc_scope.has_caught() {
-      let exception = tc_scope.exception().unwrap();
-      let exception = v8::Global::new(tc_scope, exception);
-      let mut state = state_rc.borrow_mut();
-      state.exceptions.capture_exception(exception);
-
-      drop(state);
-
-      // Check for uncaught errors (capture callbacks might be in place).
-      if let Some(error) = check_exceptions(tc_scope) {
-        report_and_exit(error);
-      }
-    }
-  }
+  //
+  // for (cb, params) in callbacks {
+  //   // Create a local handle for the callback and its parameters.
+  //   let cb = v8::Local::new(tc_scope, cb);
+  //   let args: Vec<v8::Local<v8::Value>> = params
+  //     .iter()
+  //     .map(|arg| v8::Local::new(tc_scope, arg))
+  //     .collect();
+  //
+  //   cb.call(tc_scope, undefined.into(), &args);
+  //
+  //   // On exception, report it and handle the error.
+  //   if tc_scope.has_caught() {
+  //     let exception = tc_scope.exception().unwrap();
+  //     let exception = v8::Global::new(tc_scope, exception);
+  //     let mut state = state_rc.borrow_mut();
+  //     state.exceptions.capture_exception(exception);
+  //
+  //     drop(state);
+  //
+  //     // Check for uncaught errors (capture callbacks might be in place).
+  //     if let Some(error) = check_exceptions(tc_scope) {
+  //       report_and_exit(error);
+  //     }
+  //   }
+  // }
 
   tc_scope.perform_microtask_checkpoint();
 }
@@ -795,4 +804,5 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
 pub fn report_and_exit(e: JsError) {
   error!("{:?}", e);
   eprintln!("{:?}", e);
+  std::process::exit(1);
 }

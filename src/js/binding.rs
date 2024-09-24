@@ -5,6 +5,7 @@ use std::io::{Error as IoError, ErrorKind};
 // use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::ffi::c_void;
+use tracing::error;
 
 use crate::result::{AnyError, AnyErrorKind};
 
@@ -12,7 +13,7 @@ use crate::result::{AnyError, AnyErrorKind};
 // use crate::exceptions;
 // use crate::file;
 // use crate::http_parser;
-use crate::js::report_and_exit;
+// use crate::js::report_and_exit;
 // use crate::net;
 // use crate::perf_hooks;
 // use crate::process;
@@ -88,7 +89,11 @@ fn global_report_error(
   drop(state);
 
   if let Some(error) = check_exceptions(scope) {
-    report_and_exit(error);
+    /// FIXME: We cannot simply exit the process like other js runtimes, because js runtime inside the
+    /// editor is a configuration layer. The only thing we should do is popup an error message to
+    /// command line, and let js runtime continue running.
+    error!("{:?}", error);
+    eprintln!("{:?}", error);
   }
 }
 
