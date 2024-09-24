@@ -220,7 +220,7 @@ impl ModuleMap {
   // Inserts a compiled ES module to the map.
   pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
     // No main module has been set, so let's update the value.
-    if self.main.is_none() && (fs::metadata(path).is_ok() || path.starts_with("http")) {
+    if self.main.is_none() && std::fs::metadata(path).is_ok() {
       self.main = Some(path.into());
     }
     self.index.insert(path.into(), module);
