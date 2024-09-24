@@ -99,9 +99,13 @@ pub enum ModuleStatus {
 #[derive(Debug)]
 /// ECMAScript module, i.e. the `import` module.
 pub struct EsModule {
+  /// Module path on local file system.
   pub path: ModulePath,
+  /// Module import status.
   pub status: ModuleStatus,
+  /// Maps the module itself to all its dependencies.
   pub dependencies: Vec<Rc<RefCell<EsModule>>>,
+  /// Exceptions when import.
   pub exception: Rc<RefCell<Option<String>>>,
   pub is_dynamic_import: bool,
 }
@@ -199,7 +203,7 @@ impl ModuleGraph {
   }
 }
 
-/// Module map from the `main` module to all its dependencies.
+/// Module map.
 pub struct ModuleMap {
   pub main: Option<ModulePath>,
   pub index: HashMap<ModulePath, v8::Global<v8::Module>>,

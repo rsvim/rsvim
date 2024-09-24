@@ -173,7 +173,7 @@ pub fn host_import_module_dynamically_cb<'s>(
     Ok(specifier) => specifier,
     Err(e) => {
       drop(state);
-      let exception = v8::String::new(scope, &e.to_string()[18..]).unwrap();
+      let exception = v8::String::new(scope, &e.to_string()).unwrap();
       let exception = v8::Exception::error(scope, exception);
       set_exception_code(scope, exception, &e);
       promise_resolver.reject(scope, exception);
