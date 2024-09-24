@@ -64,7 +64,11 @@ pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
   })
 }
 
-// pub mod transpiler;
+/// Module path on local file system.
+pub type ModulePath = String;
+
+/// Module source code.
+pub type ModuleSource = String;
 
 #[derive(Debug, Clone)]
 /// Import kind.
@@ -194,9 +198,6 @@ impl ModuleGraph {
     }
   }
 }
-
-pub type ModulePath = String;
-pub type ModuleSource = String;
 
 /// Module map from the `main` module to all its dependencies.
 pub struct ModuleMap {
