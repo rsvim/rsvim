@@ -11,6 +11,7 @@ use url::Url;
 
 use crate::js::constant::{URL_REGEX, WINDOWS_REGEX};
 use crate::js::loader::{FsModuleLoader, ModuleLoader};
+use crate::js::{report_and_exit, JsRuntime};
 
 /// Creates v8 script origins.
 pub fn create_origin<'s>(
@@ -381,4 +382,52 @@ pub fn load_import(specifier: &str, skip_cache: bool) -> anyhow::Result<ModuleSo
 
   // We don't actually have core modules
   FsModuleLoader {}.load(specifier)
+}
+
+/// Resolves module imports synchronously.
+/// https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741
+pub fn fetch_module_tree<'a>(
+  scope: &mut v8::HandleScope<'a>,
+  filename: &str,
+  source: Option<&str>,
+) -> Option<v8::Local<'a, v8::Module>> {
+  // Create a script origin.
+  let origin = create_origin(scope, filename, true);
+  let state = JsRuntime::state(scope);
+
+  // Find appropriate loader if source is empty.
+  let source = match source {
+    Some(source) => source.into(),
+    None => unwrap_or_exit(load_import(filename, true)),
+  };
+  let source = v8::String::new(scope, &source).unwrap();
+  let mut source = v8::script_compiler::Source::new(source, Some(&origin));
+
+  let module = match v8::script_compiler::compile_module(scope, &mut source) {
+    Some(module) => module,
+    None => return None,
+  };
+
+  // Subscribe module to the module-map.
+  let module_ref = v8::Global::new(scope, module);
+  state.borrow_mut().module_map.insert(filename, module_ref);
+
+  let requests = module.get_module_requests();
+
+  for i in 0..requests.length() {
+    // Get import request from the `module_requests` array.
+    let request = requests.get(scope, i).unwrap();
+    let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
+
+    // Transform v8's ModuleRequest into Rust string.
+    let specifier = request.get_specifier().to_rust_string_lossy(scope);
+    let specifier = unwrap_or_exit(resolve_import(Some(filename), &specifier, false, None));
+
+    // Resolve subtree of modules.
+    if !state.borrow().module_map.index.contains_key(&specifier) {
+      fetch_module_tree(scope, &specifier, None)?;
+    }
+  }
+
+  Some(module)
 }

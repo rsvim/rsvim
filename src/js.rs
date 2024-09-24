@@ -16,9 +16,9 @@ use tracing::{debug, error};
 
 // use crate::buf::BuffersArc;
 // use crate::glovar;
-use crate::js::module::{ImportMap, ModuleMap};
+use crate::js::module::{create_origin, ImportMap, ModuleGraph, ModuleMap, ModuleStatus};
 // use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-// use crate::result::VoidResult;
+use crate::result::AnyError;
 // use crate::state::StateArc;
 // use crate::ui::tree::TreeArc;
 use crate::js::err::JsError;
@@ -261,7 +261,7 @@ impl JsRuntime {
   /// Initializes synchronously the core environment (see lib/main.js).
   fn load_main_environment(&mut self) {
     let name = "rsvim:environment/main";
-    let source = include_str!("./module/main.js");
+    let source = include_str!("./js/module/runtime.js");
 
     let scope = &mut self.handle_scope();
     let tc_scope = &mut v8::TryCatch::new(scope);
@@ -304,7 +304,7 @@ impl JsRuntime {
     &mut self,
     filename: &str,
     source: &str,
-  ) -> Result<Option<v8::Global<v8::Value>>, Error> {
+  ) -> Result<Option<v8::Global<v8::Value>>, anyhow::Error> {
     // Get the handle-scope.
     let scope = &mut self.handle_scope();
     let state_rc = JsRuntime::state(scope);
@@ -314,7 +314,7 @@ impl JsRuntime {
 
     // The `TryCatch` scope allows us to catch runtime errors rather than panicking.
     let tc_scope = &mut v8::TryCatch::new(scope);
-    type ExecuteScriptResult = Result<Option<v8::Global<v8::Value>>, Error>;
+    type ExecuteScriptResult = Result<Option<v8::Global<v8::Value>>, anyhow::Error>;
 
     let handle_exception =
       |scope: &mut v8::TryCatch<'_, v8::HandleScope<'_>>| -> ExecuteScriptResult {
@@ -328,7 +328,7 @@ impl JsRuntime {
         drop(state);
         // Force an exception check.
         if let Some(error) = check_exceptions(scope) {
-          bail!(error)
+          anyhow::bail!(error)
         }
         Ok(None)
       };
@@ -345,7 +345,14 @@ impl JsRuntime {
   }
 
   /// Executes JavaScript code as ES module.
-  pub fn execute_module(&mut self, filename: &str, source: Option<&str>) -> Result<(), Error> {
+  ///
+  /// NOTE: This function actually load the provided filename and source as an ES module, wait for
+  /// the main js script to import.
+  pub fn execute_module(
+    &mut self,
+    filename: &str,
+    source: Option<&str>,
+  ) -> Result<(), anyhow::Error> {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
     let state_rc = JsRuntime::state(scope);
@@ -353,10 +360,10 @@ impl JsRuntime {
 
     // The following code allows the runtime to execute code with no valid
     // location passed as parameter as an ES module.
-    let path = match source.is_some() {
-      true => filename.to_string(),
-      false => unwrap_or_exit(resolve_import(None, filename, false, None)),
-    };
+    if source.is_none() {
+      return Err(AnyError::with_message("No source is provided".to_string()).into());
+    }
+    let path = filename.to_string();
 
     // Create static import module graph.
     let graph = ModuleGraph::static_import(&path);
