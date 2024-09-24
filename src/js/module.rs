@@ -93,7 +93,7 @@ pub enum ModuleStatus {
 }
 
 #[derive(Debug)]
-/// ECMAScript module standard, i.e. the `import` module.
+/// ECMAScript module, i.e. the `import` module.
 pub struct EsModule {
   pub path: ModulePath,
   pub status: ModuleStatus,
