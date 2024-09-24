@@ -1,7 +1,10 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
 use crate::js::binding::{set_exception_code, throw_type_error};
-use crate::js::module::{load_import, resolve_import, ModuleGraph, ModuleStatus};
+use crate::js::err::JsError;
+use crate::js::module::{
+  create_origin, load_import, resolve_import, EsModule, ModuleGraph, ModuleSource, ModuleStatus,
+};
 // use crate::modules::EsModuleFuture;
 // use crate::modules::ModuleStatus;
 use crate::js::JsRuntime;
@@ -130,7 +133,7 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
     PromiseRejectWithNoHandler => {
       let reason = v8::Global::new(scope, reason);
       state.exceptions.capture_promise_rejection(promise, reason);
-      state.interrupt_handle.interrupt();
+      // state.interrupt_handle.interrupt();
     }
     PromiseHandlerAddedAfterReject => {
       state.exceptions.remove_promise_rejection(&promise);
@@ -138,6 +141,10 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
     PromiseRejectAfterResolved | PromiseResolveAfterResolved => {}
   }
 }
+
+fn handle_dynamically_import_task_error() {}
+
+fn handle_dynamically_import_task() {}
 
 // Called when we require the embedder to load a module.
 // https://docs.rs/v8/0.56.1/v8/trait.HostImportModuleDynamicallyCallback.html
@@ -217,30 +224,121 @@ pub fn host_import_module_dynamically_cb<'s>(
   state.module_map.pending.push(Rc::clone(&graph_rc));
   state.module_map.seen.insert(specifier.clone(), status);
 
-  /*  Use the event-loop to asynchronously load the requested module. */
+  let handle_task_err = |e: anyhow::Error| {
+    let module = Rc::clone(&graph_rc.borrow().root_rc);
+    if module.is_dynamic_import {
+      module.exception.borrow_mut().replace(e.to_string());
+    }
+  };
 
-  let task = {
+  let task = |source: ModuleSource| {
+    let tc_scope = &mut v8::TryCatch::new(scope);
+    let origin = create_origin(tc_scope, &specifier, true);
+    let root_module_rc = Rc::clone(&graph_rc.borrow().root_rc);
+
+    // Compile source and get it's dependencies.
+    let source = v8::String::new(tc_scope, &source).unwrap();
+    let mut source = v8::script_compiler::Source::new(source, Some(&origin));
+
+    let module = match v8::script_compiler::compile_module(tc_scope, &mut source) {
+      Some(module) => module,
+      None => {
+        assert!(tc_scope.has_caught());
+        let exception = tc_scope.exception().unwrap();
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        let exception = format!("{} ({})", exception.message, exception.resource_name);
+
+        handle_task_err(anyhow::Error::msg(exception));
+        return;
+      }
+    };
+
+    let new_status = ModuleStatus::Resolving;
+    let module_ref = v8::Global::new(tc_scope, module);
+
+    state.module_map.insert(specifier.as_str(), module_ref);
+    state.module_map.seen.insert(specifier.clone(), new_status);
+
+    let import_map = state.options.import_map.clone();
+
+    let skip_cache = match root_module_rc.borrow().is_dynamic_import {
+      true => !state.options.test_mode || state.options.reload,
+      false => state.options.reload,
+    };
+
+    let mut dependencies = vec![];
+
+    let requests = module.get_module_requests();
+    let base = specifier.clone();
+
+    for i in 0..requests.length() {
+      // Get import request from the `module_requests` array.
+      let request = requests.get(tc_scope, i).unwrap();
+      let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
+
+      // Transform v8's ModuleRequest into Rust string.
+      let base = Some(base.as_str());
+      let specifier = request.get_specifier().to_rust_string_lossy(tc_scope);
+      let specifier = match resolve_import(base, &specifier, false, import_map.clone()) {
+        Ok(specifier) => specifier,
+        Err(e) => {
+          handle_task_err(anyhow::Error::msg(e.to_string()));
+          return;
+        }
+      };
+
+      // Check if requested module has been seen already.
+      let seen_module = state.module_map.seen.get(&specifier);
+      let status = match seen_module {
+        Some(ModuleStatus::Ready) => continue,
+        Some(_) => ModuleStatus::Duplicate,
+        None => ModuleStatus::Fetching,
+      };
+
+      // Create a new ES module instance.
+      let es_module = Rc::new(RefCell::new(EsModule {
+        path: specifier.clone(),
+        status,
+        dependencies: vec![],
+        exception: Rc::clone(&root_module_rc.borrow().exception),
+        is_dynamic_import: root_module_rc.borrow().is_dynamic_import,
+      }));
+
+      dependencies.push(Rc::clone(&es_module));
+
+      // If the module is newly seen, use the event-loop to load
+      // the requested module.
+      if seen_module.is_none() {
+        // Recursively going down.
+        state.module_map.seen.insert(specifier, status);
+        state.task_tracker.spawn_local(async move {
+          let specifier = specifier.clone();
+          move || match load_import(&specifier, skip_cache) {
+            Ok(source) => state.task_tracker.spawn_local(async move { task(source) }),
+            Err(e) => handle_task_err(e),
+          }
+        })
+      }
+    }
+
+    root_module_rc.borrow_mut().status = ModuleStatus::Resolving;
+    root_module_rc.borrow_mut().dependencies = dependencies;
+  };
+
+  /*  Use the event-loop to asynchronously load the requested module. */
+  state.task_tracker.spawn_local(async move {
     let specifier = specifier.clone();
     move || match load_import(&specifier, true) {
-      anyhow::Result::Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
-      Err(e) => Some(Result::Err(e)),
+      anyhow::Result::Ok(source) => {
+        // Successful load module source
+        task(source)
+      }
+      Err(e) => {
+        // Failed to load module source
+        handle_task_err(e)
+      }
     }
-  };
-
-  let task_cb = {
-    let state_rc = state_rc.clone();
-    move |_: LoopHandle, maybe_result: TaskResult| {
-      let mut state = state_rc.borrow_mut();
-      let future = EsModuleFuture {
-        path: specifier,
-        module: Rc::clone(&graph_rc.borrow().root_rc),
-        maybe_result,
-      };
-      state.pending_futures.push(Box::new(future));
-    }
-  };
-
-  state.handle.spawn(task, Some(task_cb));
+  });
 
   Some(promise)
 }

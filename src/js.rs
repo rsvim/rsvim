@@ -22,6 +22,7 @@ use crate::js::module::{ImportMap, ModuleMap};
 
 pub mod binding;
 pub mod constant;
+pub mod err;
 pub mod hook;
 pub mod loader;
 pub mod module;

@@ -12,6 +12,30 @@ use url::Url;
 use crate::js::constant::{URL_REGEX, WINDOWS_REGEX};
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 
+/// Creates v8 script origins.
+pub fn create_origin<'s>(
+  scope: &mut v8::HandleScope<'s, ()>,
+  name: &str,
+  is_module: bool,
+) -> v8::ScriptOrigin<'s> {
+  let name = v8::String::new(scope, name).unwrap();
+  let source_map = v8::undefined(scope);
+
+  v8::ScriptOrigin::new(
+    scope,
+    name.into(),
+    0,
+    0,
+    false,
+    0,
+    Some(source_map.into()),
+    false,
+    false,
+    is_module,
+    None,
+  )
+}
+
 #[allow(non_snake_case)]
 pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
   static VALUE: OnceLock<HashMap<&'static str, &'static str>> = OnceLock::new();
