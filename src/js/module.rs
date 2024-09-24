@@ -83,8 +83,8 @@ pub enum ImportKind {
 /// Module import status.
 ///
 /// NOTE: All modules (plugins/packages) will be local files on user's operating system, no
-/// network/https will be fetching during import external modules. Thus there is actually no
-/// `Resolving` status, and all resolving is sync file reading on editor's startup.
+/// network/http modules will be fetching. The only one use case of `Resolving` status should be
+/// dynamically import and its `Promise`.
 pub enum ModuleStatus {
   // Indicates the module is being fetched.
   Fetching,
