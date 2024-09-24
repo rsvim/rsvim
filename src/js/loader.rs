@@ -3,7 +3,7 @@
 use crate::js::constant::WINDOWS_REGEX;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
-use crate::js::module::CORE_MODULES;
+// use crate::js::module::CORE_MODULES;
 use crate::js::transpiler::TypeScript;
 use crate::js::transpiler::Wasm;
 use crate::result::AnyError;
@@ -95,6 +95,7 @@ impl FsModuleLoader {
 }
 
 impl ModuleLoader for FsModuleLoader {
+  /// Resolve specifier path on local file system.
   fn resolve(&self, base: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
     // Resolve absolute import.
     if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
@@ -102,6 +103,8 @@ impl ModuleLoader for FsModuleLoader {
     }
 
     // Resolve relative import.
+    // FIXME: Here we should not use current working directory as a parent path to resolve modules.
+    // CWD is for runtimes just like node/deno project, not for RSVIM editor.
     let cwd = &env::current_dir().unwrap();
     let base = base.map(|v| Path::new(v).parent().unwrap()).unwrap_or(cwd);
 
@@ -232,22 +235,22 @@ impl ModuleLoader for FsModuleLoader {
 //   }
 // }
 
-#[derive(Default)]
-pub struct CoreModuleLoader;
-
-impl ModuleLoader for CoreModuleLoader {
-  fn resolve(&self, _: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
-    match CORE_MODULES().get(specifier) {
-      Some(_) => Ok(specifier.to_string()),
-      None => bail!(format!("Module not found \"{specifier}\"")),
-    }
-  }
-  fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource> {
-    // Since any errors will be caught at the resolve stage, we can
-    // go ahead an unwrap the value with no worries.
-    Ok(CORE_MODULES().get(specifier).unwrap().to_string())
-  }
-}
+// #[derive(Default)]
+// pub struct CoreModuleLoader;
+//
+// impl ModuleLoader for CoreModuleLoader {
+//   fn resolve(&self, _: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
+//     match CORE_MODULES().get(specifier) {
+//       Some(_) => Ok(specifier.to_string()),
+//       None => bail!(format!("Module not found \"{specifier}\"")),
+//     }
+//   }
+//   fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource> {
+//     // Since any errors will be caught at the resolve stage, we can
+//     // go ahead an unwrap the value with no worries.
+//     Ok(CORE_MODULES().get(specifier).unwrap().to_string())
+//   }
+// }
 
 #[cfg(test)]
 mod tests {

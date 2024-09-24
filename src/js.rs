@@ -2,9 +2,11 @@
 
 #![allow(dead_code, unused)]
 
+use parking_lot::RwLock;
 use std::cell::RefCell;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
+use std::sync::Arc;
 use std::sync::Once;
 use std::time::Duration;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
@@ -114,6 +116,8 @@ pub struct JsRuntimeOptions {
   // pub expose_gc: bool,
   // Task tracker of tokio runtime.
   pub task_tracker: TaskTracker,
+  /// Runtime path for resolving modules on local file system.
+  pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
 }
 
 pub struct JsRuntimeState {
@@ -141,6 +145,8 @@ pub struct JsRuntimeState {
   // pub wake_event_queued: bool,
   /// Task tracker of tokio runtime.
   pub task_tracker: TaskTracker,
+  /// Runtime path for resolving modules on local file system.
+  pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
 }
 
 pub struct JsRuntime {
@@ -226,6 +232,7 @@ impl JsRuntime {
       options,
       // wake_event_queued: false,
       task_tracker: options.task_tracker,
+      runtime_path: options.runtime_path,
     }));
 
     isolate.set_slot(state.clone());
