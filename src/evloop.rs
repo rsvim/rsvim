@@ -132,6 +132,8 @@ impl EventLoop {
     // Sender/receiver
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
 
+    let js_runtime = JsRuntime::new();
+
     Ok(EventLoop {
       startup_moment: Instant::now(),
       startup_unix_epoch: SystemTime::now()
@@ -150,6 +152,7 @@ impl EventLoop {
       master_recv_from_worker,
       // master_send_to_js_worker: evloop_send_to_js,
       // evloop_recv_from_js_worker: evloop_recv_from_js,
+      js_runtime,
     })
   }
 
