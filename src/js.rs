@@ -293,7 +293,9 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      report_and_exit(exception);
+      error!("{exception:?}");
+      eprintln!("{exception:?}");
+      std::process::exit(1);
     }
 
     let _ = module.evaluate(tc_scope);
@@ -301,7 +303,9 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      report_and_exit(exception);
+      error!("{exception:?}");
+      eprintln!("{exception:?}");
+      std::process::exit(1);
     }
 
     // // Initialize process static values.
@@ -565,7 +569,10 @@ impl JsRuntime {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        report_and_exit(exception);
+        // FIXME: Cannot simply report error and exit process, because this is inside the editor.
+        error!("{exception:?}");
+        eprintln!("{exception:?}");
+        continue;
       }
 
       let _ = module.evaluate(tc_scope);
@@ -585,7 +592,10 @@ impl JsRuntime {
         drop(state);
 
         if let Some(error) = check_exceptions(tc_scope) {
-          report_and_exit(error);
+          // FIXME: Cannot simply report error and exit process, because this is inside the editor.
+          error!("{error:?}");
+          eprintln!("{error:?}");
+          continue;
         }
       }
 
@@ -796,13 +806,9 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
   None
 }
 
-/// Report unhandled exceptions and clear it.
-///
-/// NOTE: We cannot simply exit the process like other js runtimes, because js runtime inside the
-/// editor is a configuration layer. The only thing we should do is popup an error message to
-/// command line, and let js runtime continue running.
-pub fn report_and_exit(e: JsError) {
-  error!("{:?}", e);
-  eprintln!("{:?}", e);
-  std::process::exit(1);
-}
+// /// Report unhandled exceptions and clear it.
+// pub fn report_and_exit(e: JsError) {
+//   error!("{:?}", e);
+//   eprintln!("{:?}", e);
+//   std::process::exit(1);
+// }

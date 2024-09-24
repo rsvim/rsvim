@@ -11,7 +11,7 @@ use url::Url;
 
 use crate::js::constant::{URL_REGEX, WINDOWS_REGEX};
 use crate::js::loader::{FsModuleLoader, ModuleLoader};
-use crate::js::{report_and_exit, JsRuntime};
+use crate::js::JsRuntime;
 use crate::result::AnyError;
 
 /// Creates v8 script origins.
