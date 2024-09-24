@@ -17,7 +17,8 @@ use tracing::{debug, error};
 // use crate::buf::BuffersArc;
 // use crate::glovar;
 use crate::js::module::{
-  create_origin, fetch_module_tree, ImportKind, ImportMap, ModuleGraph, ModuleMap, ModuleStatus,
+  create_origin, fetch_module_tree, load_import, ImportKind, ImportMap, ModuleGraph, ModuleMap,
+  ModuleStatus,
 };
 // use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::result::AnyError;
@@ -122,14 +123,14 @@ pub struct JsRuntimeOptions {
   // pub expose_gc: bool,
 }
 
-/// A vector with JS callbacks and parameters.
-type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
-
-/// An abstract interface for something that should run in respond to an
-/// async task, scheduled previously and is now completed.
-pub trait JsFuture {
-  fn run(&mut self, scope: &mut v8::HandleScope);
-}
+// /// A vector with JS callbacks and parameters.
+// type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
+//
+// /// An abstract interface for something that should run in respond to an
+// /// async task, scheduled previously and is now completed.
+// pub trait JsFuture {
+//   fn run(&mut self, scope: &mut v8::HandleScope);
+// }
 
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
@@ -741,67 +742,67 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
     return Some(error);
   }
 
-  let promise_rejections: Vec<PromiseRejectionEntry> = state_rc
-    .borrow_mut()
-    .exceptions
-    .promise_rejections
-    .drain(..)
-    .collect();
-
-  // Then, check for unhandled rejections.
-  for (promise, exception) in promise_rejections.iter() {
-    let state = state_rc.borrow_mut();
-    let promise = v8::Local::new(scope, promise);
-    let exception = v8::Local::new(scope, exception);
-
-    // If the `unhandled_rejection_cb` is set, invoke it to handle the promise rejection.
-    if let Some(callback) = state.exceptions.unhandled_rejection_cb.as_ref() {
-      let callback = v8::Local::new(scope, callback);
-      let undefined = v8::undefined(scope).into();
-      let tc_scope = &mut v8::TryCatch::new(scope);
-      drop(state);
-
-      callback.call(tc_scope, undefined, &[exception, promise.into()]);
-
-      // Note: To avoid infinite recursion with these hooks, if this
-      // function throws, return it as error.
-      if tc_scope.has_caught() {
-        let exception = tc_scope.exception().unwrap();
-        let exception = v8::Local::new(tc_scope, exception);
-        let error = JsError::from_v8_exception(tc_scope, exception, None);
-        return Some(error);
-      }
-
-      continue;
-    }
-
-    // If the `uncaught_exception_cb` is set, invoke it to handle the promise rejection.
-    if let Some(callback) = state.exceptions.uncaught_exception_cb.as_ref() {
-      let callback = v8::Local::new(scope, callback);
-      let undefined = v8::undefined(scope).into();
-      let origin = v8::String::new(scope, "unhandledRejection").unwrap();
-      let tc_scope = &mut v8::TryCatch::new(scope);
-      drop(state);
-
-      callback.call(tc_scope, undefined, &[exception, origin.into()]);
-
-      // Note: To avoid infinite recursion with these hooks, if this
-      // function throws, return it as error.
-      if tc_scope.has_caught() {
-        let exception = tc_scope.exception().unwrap();
-        let exception = v8::Local::new(tc_scope, exception);
-        let error = JsError::from_v8_exception(tc_scope, exception, None);
-        return Some(error);
-      }
-
-      continue;
-    }
-
-    let prefix = Some("(in promise) ");
-    let error = JsError::from_v8_exception(scope, exception, prefix);
-
-    return Some(error);
-  }
+  // let promise_rejections: Vec<PromiseRejectionEntry> = state_rc
+  //   .borrow_mut()
+  //   .exceptions
+  //   .promise_rejections
+  //   .drain(..)
+  //   .collect();
+  //
+  // // Then, check for unhandled rejections.
+  // for (promise, exception) in promise_rejections.iter() {
+  //   let state = state_rc.borrow_mut();
+  //   let promise = v8::Local::new(scope, promise);
+  //   let exception = v8::Local::new(scope, exception);
+  //
+  //   // If the `unhandled_rejection_cb` is set, invoke it to handle the promise rejection.
+  //   if let Some(callback) = state.exceptions.unhandled_rejection_cb.as_ref() {
+  //     let callback = v8::Local::new(scope, callback);
+  //     let undefined = v8::undefined(scope).into();
+  //     let tc_scope = &mut v8::TryCatch::new(scope);
+  //     drop(state);
+  //
+  //     callback.call(tc_scope, undefined, &[exception, promise.into()]);
+  //
+  //     // Note: To avoid infinite recursion with these hooks, if this
+  //     // function throws, return it as error.
+  //     if tc_scope.has_caught() {
+  //       let exception = tc_scope.exception().unwrap();
+  //       let exception = v8::Local::new(tc_scope, exception);
+  //       let error = JsError::from_v8_exception(tc_scope, exception, None);
+  //       return Some(error);
+  //     }
+  //
+  //     continue;
+  //   }
+  //
+  //   // If the `uncaught_exception_cb` is set, invoke it to handle the promise rejection.
+  //   if let Some(callback) = state.exceptions.uncaught_exception_cb.as_ref() {
+  //     let callback = v8::Local::new(scope, callback);
+  //     let undefined = v8::undefined(scope).into();
+  //     let origin = v8::String::new(scope, "unhandledRejection").unwrap();
+  //     let tc_scope = &mut v8::TryCatch::new(scope);
+  //     drop(state);
+  //
+  //     callback.call(tc_scope, undefined, &[exception, origin.into()]);
+  //
+  //     // Note: To avoid infinite recursion with these hooks, if this
+  //     // function throws, return it as error.
+  //     if tc_scope.has_caught() {
+  //       let exception = tc_scope.exception().unwrap();
+  //       let exception = v8::Local::new(tc_scope, exception);
+  //       let error = JsError::from_v8_exception(tc_scope, exception, None);
+  //       return Some(error);
+  //     }
+  //
+  //     continue;
+  //   }
+  //
+  //   let prefix = Some("(in promise) ");
+  //   let error = JsError::from_v8_exception(scope, exception, prefix);
+  //
+  //   return Some(error);
+  // }
 
   None
 }
