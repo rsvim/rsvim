@@ -106,8 +106,8 @@ pub struct JsRuntimeOptions {
   pub import_map: Option<ImportMap>,
   // // The numbers of threads used by the thread-pool.
   // pub num_threads: Option<usize>,
-  // // Indicates if we're running JavaScript tests.
-  // pub test_mode: bool,
+  // Indicates if we're running JavaScript tests.
+  pub test_mode: bool,
   // // Defines the inspector listening options.
   // pub inspect: Option<(SocketAddrV4, bool)>,
   // // Exposes v8's garbage collector.

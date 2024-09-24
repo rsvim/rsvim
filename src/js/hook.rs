@@ -262,8 +262,8 @@ pub fn host_import_module_dynamically_cb<'s>(
     let import_map = state.options.import_map.clone();
 
     let skip_cache = match root_module_rc.borrow().is_dynamic_import {
-      true => !state.options.test_mode || state.options.reload,
-      false => state.options.reload,
+      true => !state.options.test_mode,
+      false => false,
     };
 
     let mut dependencies = vec![];
@@ -313,7 +313,7 @@ pub fn host_import_module_dynamically_cb<'s>(
         state.module_map.seen.insert(specifier, status);
         state.task_tracker.spawn_local(async move {
           let specifier = specifier.clone();
-          move || match load_import(&specifier, skip_cache) {
+          move || match load_import(&specifier, false) {
             Ok(source) => state.task_tracker.spawn_local(async move { task(source) }),
             Err(e) => handle_task_err(e),
           }
