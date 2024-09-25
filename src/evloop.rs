@@ -86,16 +86,16 @@ pub struct EventLoop {
   /// Task tracker for all spawned tasks.
   pub task_tracker: TaskTracker,
 
-  /// Channel sender: workers send messages to master.
+  /// Channel sender: workers => master.
   pub worker_send_to_master: Sender<WorkerToMasterMessage>,
-  /// Channel receiver: master receive messages from workers.
+  /// Channel receiver: master <= workers.
   pub master_recv_from_worker: Receiver<WorkerToMasterMessage>,
 
   /// Js runtime.
   pub js_runtime: JsRuntime,
-  /// Channel sender: master send messages to js worker.
+  /// Channel sender: master => js worker.
   pub master_send_to_js_worker: Sender<EventLoopToJsRuntimeMessage>,
-  /// Channel receiver: master receive messages from js worker.
+  /// Channel receiver: master <= js worker.
   pub master_recv_from_js_worker: Receiver<JsRuntimeToEventLoopMessage>,
 }
 
@@ -155,8 +155,8 @@ impl EventLoop {
     // Js Runtime
     let js_runtime = JsRuntime::new(
       JsRuntimeOptions::default(),
-      task_tracker.close(),
       runtime_path.clone(),
+      task_tracker.close(),
     );
 
     Ok(EventLoop {

@@ -27,6 +27,7 @@ use crate::result::AnyError;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
+use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 
 pub mod binding;
 pub mod constant;
@@ -97,6 +98,10 @@ pub struct JsRuntimeState {
   pub task_tracker: TaskTracker,
   /// Runtime path for resolving modules on local file system.
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+  /// Js runtime receive from Master (EventLoop).
+  pub js_worker_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+  /// Js runtime send to Master (EventLoop).
+  pub js_worker_send_to_master: Sender<EventLoopToJsRuntimeMessage>,
 }
 
 pub struct JsRuntime {
@@ -112,8 +117,8 @@ impl JsRuntime {
   /// Creates a new JsRuntime based on provided options.
   pub fn new(
     options: JsRuntimeOptions,
-    task_tracker: TaskTracker,
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+    task_tracker: TaskTracker,
   ) -> Self {
     // Configuration flags for V8.
     // let mut flags = String::from(concat!(
