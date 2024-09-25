@@ -23,6 +23,6 @@
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
     "useUnknownInCatchVariables": false,
-    "outDir": "src"
+    "outDir": "src/js/module"
   }
 }
