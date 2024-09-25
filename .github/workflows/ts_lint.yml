@@ -1,0 +1,34 @@
+name: TS Lint
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+jobs:
+  ts_lint:
+    name: Typescript Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - run: |
+          npm install -g typescript@5.5
+          tsc --version
+          echo "show PWD/CWD"
+          echo $PWD
+          echo "ls -la"
+          ls -la
+          echo "tsc"
+          tsc
+      - uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+      - run: |
+          deno check script/ops.ts
