@@ -47,15 +47,33 @@ ropey = "1.6.1"
 geo = { version = "0.28.0", features = ["serde"] }
 num-traits = "0.2.19"
 parking_lot = "0.12.3"
-# v8 = "0.106.0"
-deno_core = "0.310.0"
-deno_ast = { version = "0.42.0", features = ["transpiling"] }
+v8 = "0.106.0"
+# deno_core = "0.310.0"
+# deno_ast = { version = "0.42.0", features = ["transpiling"] }
 # async-trait = "0.1.82"
 # bincode = "2.0.0-rc.3"
 directories = "5.0.1"
+anyhow = "1.0.89"
+thiserror = "1.0.64"
+serde_json = "1.0.128"
+regex = "1.10.6"
+swc_common = { version = "0.39.0", features = ["tty-emitter"] }
+swc_ecma_codegen = "0.157.0"
+swc_ecma_parser = "0.151.0"
+swc_ecma_transforms_base = "0.148.0"
+swc_ecma_transforms_typescript = "0.201.0"
+swc_ecma_transforms_react = "0.194.0"
+swc_ecma_visit = "0.106.0"
+swc_bundler = "0.240.0"
+swc_ecma_ast = "0.120.0"
+swc_ecma_loader = "0.51.0"
+swc_atoms = "0.7.0"
+url = "2.5.2"
+path-absolutize = "3.1.1"
 
 [dev-dependencies]
 tempfile = "3"
+assert_fs = "1.1.2"
 
 [profile.release]
 lto = true

@@ -9,6 +9,7 @@ use tracing::debug;
 pub struct PathConfig {
   config_file: Option<PathBuf>,
   cache_dir: PathBuf,
+  data_dir: PathBuf,
 }
 
 #[cfg(not(target_os = "macos"))]
@@ -67,15 +68,21 @@ fn get_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
   base_dirs.cache_dir().join("rsvim").to_path_buf()
 }
 
+fn get_data_dir(base_dirs: &BaseDirs) -> PathBuf {
+  base_dirs.data_local_dir().join("rsvim").to_path_buf()
+}
+
 impl PathConfig {
   /// Make new path config.
   pub fn new() -> Self {
     let base_dirs = BaseDirs::new().unwrap();
     let config_file = get_config_file(&base_dirs);
     let cache_dir = get_cache_dir(&base_dirs);
+    let data_dir = get_data_dir(&base_dirs);
     PathConfig {
       config_file,
       cache_dir,
+      data_dir,
     }
   }
 
@@ -87,6 +94,11 @@ impl PathConfig {
   /// Get the cache directory.
   pub fn cache_dir(&self) -> &PathBuf {
     &self.cache_dir
+  }
+
+  /// Get the data directory.
+  pub fn data_dir(&self) -> &PathBuf {
+    &self.data_dir
   }
 }
 

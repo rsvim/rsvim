@@ -102,7 +102,7 @@ To develop code, please run with:
 
 ### Check
 
-To check code, please run with `deno check ./src/runtime.ts`.
+To check code, please run with `deno check ./src/js/module/runtime.ts`.
 
 ### Transpile (Compile)
 
