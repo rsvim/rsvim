@@ -299,10 +299,8 @@ impl JsRuntime {
     }
   }
 
-  /// Executes JavaScript code as ES module.
-  ///
-  /// NOTE: This function actually load the provided filename and source as an ES module, wait for
-  /// the main js script to import.
+  /// Executes JavaScript code as ES module, i.e. it uses the provided filename and source as ES
+  /// module, load into js runtime and (maybe) for other scripts to import.
   pub fn execute_module(
     &mut self,
     filename: &str,
