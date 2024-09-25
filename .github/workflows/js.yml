@@ -1,4 +1,4 @@
-name: JavaScript
+name: JavaScript CI
 on:
   pull_request:
     branches:
