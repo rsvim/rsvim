@@ -37,71 +37,6 @@ pub mod loader;
 pub mod module;
 pub mod transpiler;
 
-// pub async fn start(data_access: JsDataAccess) -> VoidResult {
-//   if let Some(config_entry) = glovar::CONFIG_FILE_PATH() {
-//     debug!("Read config entry: {:?}", config_entry);
-//     let cwd = std::env::current_dir().unwrap();
-//     let main_module = deno_core::resolve_path(config_entry, cwd.as_path()).unwrap();
-//     let mut deno_runtime = deno_core::JsRuntime::new(deno_core::RuntimeOptions {
-//       module_loader: Some(Rc::new(deno_core::FsModuleLoader)),
-//       extension_transpiler: Some(Rc::new(|specifier, code| {
-//         transpile_extension(&specifier, &code)
-//       })),
-//       ..Default::default()
-//     });
-//     deno_runtime
-//       .execute_script("[vim:runtime.js]", include_str!("./runtime.js"))
-//       .unwrap();
-//
-//     let main_module_id = deno_runtime
-//       .load_main_es_module(&main_module)
-//       .await
-//       .unwrap();
-//     debug!("Load main module id: {:?}", main_module_id);
-//     let evaluate_result = deno_runtime.mod_evaluate(main_module_id);
-//     let run_evloop_result = deno_runtime
-//       .run_event_loop(deno_core::PollEventLoopOptions::default())
-//       .await;
-//     debug!(
-//       "Run event loop on main module result: {:?}",
-//       run_evloop_result
-//     );
-//     let result = evaluate_result.await;
-//     debug!("Evaluate main module result: {:?}", result);
-//   }
-//
-//   Ok(())
-// }
-
-// #[derive(Debug)]
-// /// The mutable data passed to each state handler, and allow them access the editor.
-// pub struct JsDataAccess {
-//   pub js_send_to_evloop: Sender<JsRuntimeToEventLoopMessage>,
-//   pub js_recv_from_evloop: Receiver<EventLoopToJsRuntimeMessage>,
-//
-//   pub state: StateArc,
-//   pub tree: TreeArc,
-//   pub buffers: BuffersArc,
-// }
-//
-// impl JsDataAccess {
-//   pub fn new(
-//     js_send_to_evloop: Sender<JsRuntimeToEventLoopMessage>,
-//     js_recv_from_evloop: Receiver<EventLoopToJsRuntimeMessage>,
-//     state: StateArc,
-//     tree: TreeArc,
-//     buffers: BuffersArc,
-//   ) -> Self {
-//     JsDataAccess {
-//       js_send_to_evloop,
-//       js_recv_from_evloop,
-//       state,
-//       tree,
-//       buffers,
-//     }
-//   }
-// }
-
 #[derive(Debug, Default, Clone)]
 #[allow(dead_code)]
 pub struct JsRuntimeOptions {
@@ -178,12 +113,13 @@ impl JsRuntime {
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
   ) -> JsRuntime {
     // Configuration flags for V8.
-    let mut flags = String::from(concat!(
-      " --no-validate-asm",
-      " --turbo_fast_api_calls",
-      " --harmony-temporal",
-      " --js-float16array",
-    ));
+    // let mut flags = String::from(concat!(
+    //   " --no-validate-asm",
+    //   " --turbo_fast_api_calls",
+    //   " --harmony-temporal",
+    //   " --js-float16array",
+    // ));
+    let flags = "".to_string();
 
     v8::V8::set_flags_from_string(&flags);
 
