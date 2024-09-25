@@ -159,7 +159,7 @@ impl EventLoop {
     let js_runtime = JsRuntime::new(
       JsRuntimeOptions::default(),
       runtime_path.clone(),
-      task_tracker.close(),
+      task_tracker.clone(),
       js_worker_send_to_master,
     );
 
