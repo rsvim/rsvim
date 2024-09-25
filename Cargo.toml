@@ -27,7 +27,7 @@ tracing-appender = { version = "0.2", features = ["parking_lot"] }
 tokio = { version = "1", features = ["full"] }
 tokio-util = { version = "0.7.12", features = ["full"] }
 # tokio-stream = { version = "0.1.16", features = ["full"] }
-clap = { version = "4.5.17", features = ["derive", "unicode"] }
+clap = { version = "4.5.18", features = ["derive", "unicode"] }
 futures = "0.3"
 time = { version = "0.3.36", features = [
   "macros",
