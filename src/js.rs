@@ -57,6 +57,8 @@ pub struct JsRuntimeOptions {
   // pub inspect: Option<(SocketAddrV4, bool)>,
   // // Exposes v8's garbage collector.
   // pub expose_gc: bool,
+  /// V8 flags.
+  pub v8_flags: Vec<String>,
 }
 
 // /// A vector with JS callbacks and parameters.
@@ -112,7 +114,7 @@ impl JsRuntime {
     options: JsRuntimeOptions,
     task_tracker: TaskTracker,
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
-  ) -> JsRuntime {
+  ) -> Self {
     // Configuration flags for V8.
     // let mut flags = String::from(concat!(
     //   " --no-validate-asm",
@@ -120,8 +122,7 @@ impl JsRuntime {
     //   " --harmony-temporal",
     //   " --js-float16array",
     // ));
-    let flags = "".to_string();
-
+    let flags = options.v8_flags.join(" ");
     v8::V8::set_flags_from_string(&flags);
 
     // Fire up the v8 engine.

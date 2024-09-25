@@ -28,7 +28,7 @@ use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::js::JsRuntime;
+use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::result::{IoResult, VoidIoResult};
 use crate::state::fsm::StatefulValue;
 use crate::state::{State, StateArc};
@@ -153,7 +153,11 @@ impl EventLoop {
     let task_tracker = TaskTracker::new();
 
     // Js Runtime
-    let js_runtime = JsRuntime::new(task_tracker.close(), runtime_path.clone());
+    let js_runtime = JsRuntime::new(
+      JsRuntimeOptions::default(),
+      task_tracker.close(),
+      runtime_path.clone(),
+    );
 
     Ok(EventLoop {
       startup_moment: Instant::now(),
