@@ -142,7 +142,18 @@ impl EventLoop {
     let (js_worker_send_to_master, master_recv_from_js_worker) =
       channel(glovar::CHANNEL_BUF_SIZE());
 
-    let js_runtime = JsRuntime::new();
+    // Runtime Path
+    let mut runtime_path = vec![glovar::DATA_DIR_PATH()];
+    if glovar::CONFIG_FILE_PATH().is_some() {
+      runtime_path.push(glovar::CONFIG_FILE_PATH().unwrap());
+    }
+    let runtime_path = Arc::new(RwLock::new(runtime_path));
+
+    // Task Tracker
+    let task_tracker = TaskTracker::new();
+
+    // Js Runtime
+    let js_runtime = JsRuntime::new(task_tracker.close(), runtime_path.clone());
 
     Ok(EventLoop {
       startup_moment: Instant::now(),
@@ -151,13 +162,14 @@ impl EventLoop {
         .unwrap()
         .as_millis(),
       cli_opt,
+      runtime_path,
       canvas,
       tree: Tree::to_arc(tree),
       state: State::to_arc(state),
       buffers: Buffers::to_arc(buffers),
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
-      task_tracker: TaskTracker::new(),
+      task_tracker,
       worker_send_to_master,
       master_recv_from_worker,
       master_send_to_js_worker,
