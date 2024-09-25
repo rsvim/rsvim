@@ -217,7 +217,7 @@ impl JsRuntime {
   /// Initializes synchronously the core environment (see lib/main.js).
   fn load_main_environment(&mut self) {
     let name = "rsvim:environment/main";
-    let source = include_str!("./js/module/runtime.js");
+    let source = include_str!("./js/runtime/main.js");
 
     let scope = &mut self.handle_scope();
     let tc_scope = &mut v8::TryCatch::new(scope);

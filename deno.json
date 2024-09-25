@@ -23,6 +23,6 @@
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
     "useUnknownInCatchVariables": false,
-    "outDir": "src/js/module"
+    "outDir": "src/js/runtime"
   }
 }
