@@ -17,8 +17,8 @@ use tracing::{debug, error};
 // use crate::buf::BuffersArc;
 // use crate::glovar;
 use crate::js::module::{
-  create_origin, fetch_module_tree, load_import, ImportKind, ImportMap, ModuleGraph, ModuleMap,
-  ModuleStatus,
+  create_origin, fetch_module_tree, load_import, resolve_import, ImportKind, ImportMap,
+  ModuleGraph, ModuleMap, ModuleStatus,
 };
 use crate::result::AnyError;
 // use crate::state::StateArc;
@@ -305,8 +305,10 @@ impl JsRuntime {
     }
   }
 
-  /// Executes JavaScript code as ES module, i.e. it uses the provided filename and source as ES
-  /// module, load into js runtime and (maybe) for other scripts to import.
+  /// Executes JavaScript code as ES module.
+  ///
+  /// NOTE: This is the entry function that loading editor's user config file, i.e. the
+  /// `.rsvim.{ts,js}` file.
   pub fn execute_module(
     &mut self,
     filename: &str,
@@ -319,10 +321,13 @@ impl JsRuntime {
 
     // The following code allows the runtime to execute code with no valid
     // location passed as parameter as an ES module.
-    if source.is_none() {
-      return Err(AnyError::with_message("No source is provided".to_string()).into());
-    }
-    let path = filename.to_string();
+    let path = match source.is_some() {
+      true => filename.to_string(),
+      false => match resolve_import(None, filename, false, None) {
+        Ok(specifier) => specifier,
+        Err(e) => return Err(e),
+      },
+    };
 
     // Create static import module graph.
     let graph = ModuleGraph::static_import(&path);

@@ -4,15 +4,18 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::LinkedList;
 use std::env;
+use std::future::Future;
 use std::path::Path;
 use std::rc::Rc;
 use std::sync::OnceLock;
+use tokio::sync::mpsc::{Receiver, Sender};
 // use url::Url;
 
 use crate::js::constant::{URL_REGEX, WINDOWS_REGEX};
 use crate::js::loader::{FsModuleLoader, ModuleLoader};
+use crate::js::msg::JsRuntimeToEventLoopMessage;
 use crate::js::JsRuntime;
-use crate::result::AnyError;
+use crate::result::{AnyError, VoidResult};
 
 /// Creates v8 script origins.
 pub fn create_origin<'s>(
@@ -258,6 +261,13 @@ impl ModuleMap {
   pub fn main(&self) -> Option<ModulePath> {
     self.main.clone()
   }
+}
+
+pub async fn resolve_es_module(
+  path: ModulePath,
+  module: Rc<RefCell<EsModule>>,
+  js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+) {
 }
 
 /// A single import mapping (specifier, target).
