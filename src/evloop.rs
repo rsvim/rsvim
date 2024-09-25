@@ -8,6 +8,8 @@ use crossterm::event::{
 };
 use crossterm::{self, execute, queue};
 use futures::StreamExt;
+use parking_lot::RwLock;
+use std::path::PathBuf;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;
 use std::io::Write;
@@ -25,8 +27,8 @@ use crate::cli::CliOpt;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
+use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::JsRuntime;
-// use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::result::{IoResult, VoidIoResult};
 use crate::state::fsm::StatefulValue;
 use crate::state::{State, StateArc};
@@ -58,6 +60,8 @@ pub struct EventLoop {
   /// Command line options.
   pub cli_opt: CliOpt,
 
+  pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+
   /// Canvas for UI.
   pub canvas: CanvasArc,
   /// Widget tree for UI.
@@ -83,19 +87,15 @@ pub struct EventLoop {
 
   /// Js runtime.
   pub js_runtime: JsRuntime,
-  // /// Channel sender: master send messages to js worker.
-  // pub master_send_to_js_worker: Sender<EventLoopToJsRuntimeMessage>,
-  // /// Channel receiver: master receive messages from js worker.
-  // pub evloop_recv_from_js_worker: Receiver<JsRuntimeToEventLoopMessage>,
+  /// Channel sender: master send messages to js worker.
+  pub master_send_to_js_worker: Sender<EventLoopToJsRuntimeMessage>,
+  /// Channel receiver: master receive messages from js worker.
+  pub master_recv_from_js_worker: Receiver<JsRuntimeToEventLoopMessage>,
 }
 
 impl EventLoop {
   /// Make new event loop.
-  pub fn new(
-    cli_opt: CliOpt,
-    // evloop_send_to_js: Sender<EventLoopToJsRuntimeMessage>,
-    // evloop_recv_from_js: Receiver<JsRuntimeToEventLoopMessage>,
-  ) -> IoResult<Self> {
+  pub fn new(cli_opt: CliOpt) -> IoResult<Self> {
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
@@ -131,6 +131,10 @@ impl EventLoop {
 
     // Sender/receiver
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
+    let (master_send_to_js_worker, js_worker_recv_from_master) =
+      channel(glovar::CHANNEL_BUF_SIZE());
+    let (js_worker_send_to_master, master_recv_from_js_worker) =
+      channel(glovar::CHANNEL_BUF_SIZE());
 
     let js_runtime = JsRuntime::new();
 
@@ -150,8 +154,8 @@ impl EventLoop {
       task_tracker: TaskTracker::new(),
       worker_send_to_master,
       master_recv_from_worker,
-      // master_send_to_js_worker: evloop_send_to_js,
-      // evloop_recv_from_js_worker: evloop_recv_from_js,
+      master_send_to_js_worker,
+      master_recv_from_js_worker,
       js_runtime,
     })
   }

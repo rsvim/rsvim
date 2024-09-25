@@ -35,6 +35,7 @@ pub mod exception;
 pub mod hook;
 pub mod loader;
 pub mod module;
+pub mod msg;
 pub mod transpiler;
 
 #[derive(Debug, Default, Clone)]
