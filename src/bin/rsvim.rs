@@ -80,34 +80,6 @@ fn main() -> VoidIoResult {
   // Initialize EventLoop.
   let mut event_loop = EventLoop::new(cli_opt)?;
 
-  // let data_access = JsDataAccess::new(
-  //   js_send_to_evloop,
-  //   js_recv_from_evloop,
-  //   event_loop.state.clone(),
-  //   event_loop.tree.clone(),
-  //   event_loop.buffers.clone(),
-  // );
-  // let js_runtime_join_handle = std::thread::spawn(move || {
-  //   let js_tokio_runtime = tokio::runtime::Builder::new_current_thread()
-  //     .enable_all()
-  //     .build()
-  //     .unwrap();
-  //   js_tokio_runtime.block_on(async move {
-  //     // Basically, this thread is simply running a single js/ts file, there are several tasks need
-  //     // to complete:
-  //     // 1. Resolve all the modules marked by `import` and `require` keywords, and recursively
-  //     //    resolve the nested modules inside them.
-  //     // 2. Update editor configurations and settings via the OPs.
-  //     // 3. Bind callbacks (most interactives are triggered by callbacks) on the related Vim events,
-  //     //    and schedule timeout/delay background jobs.
-  //     let _ = js_start(data_access).await;
-  //
-  //     // After loading user config is done, this thread is waiting for Event Loop to notify it to
-  //     // exit. If the editor is quit before loading is done, then we need to insert some checks to
-  //     // manually break config loading and exit this thread.
-  //   });
-  // });
-
   // Explicitly create tokio runtime for the EventLoop.
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
@@ -121,11 +93,4 @@ fn main() -> VoidIoResult {
     // Shutdown
     event_loop.shutdown_tui()
   })
-
-  // match js_runtime_join_handle.join() {
-  //   Ok(_) => { /* Skip */ }
-  //   Err(e) => error!("Failed to join Js runtime thread: {:?}", e),
-  // }
-
-  // event_loop_result
 }
