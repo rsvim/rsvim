@@ -117,6 +117,8 @@ impl JsRuntime {
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
     task_tracker: TaskTracker,
     js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    startup_moment: Instant,
+    time_origin: u128,
   ) -> Self {
     // Configuration flags for V8.
     // let mut flags = String::from(concat!(
@@ -158,11 +160,6 @@ impl JsRuntime {
     //   None => EventLoop::default(),
     // };
 
-    let time_origin = SystemTime::now()
-      .duration_since(UNIX_EPOCH)
-      .unwrap()
-      .as_millis();
-
     // Initialize the v8 inspector.
     // let address = options.inspect.map(|(address, _)| (address));
     // let inspector = options.inspect.map(|(_, waiting_for_session)| {
@@ -183,7 +180,7 @@ impl JsRuntime {
       // handle: event_loop.handle(),
       // interrupt_handle: event_loop.interrupt_handle(),
       // pending_futures: Vec::new(),
-      startup_moment: Instant::now(),
+      startup_moment,
       time_origin,
       // next_tick_queue: Vec::new(),
       exceptions: exception::ExceptionState::new(),

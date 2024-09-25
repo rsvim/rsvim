@@ -154,6 +154,11 @@ impl EventLoop {
 
     // Task Tracker
     let task_tracker = TaskTracker::new();
+    let startup_moment = Instant::now();
+    let startup_unix_epoch = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_millis();
 
     // Js Runtime
     let js_runtime = JsRuntime::new(
@@ -161,14 +166,13 @@ impl EventLoop {
       runtime_path.clone(),
       task_tracker.clone(),
       js_worker_send_to_master,
+      startup_moment,
+      startup_unix_epoch,
     );
 
     Ok(EventLoop {
-      startup_moment: Instant::now(),
-      startup_unix_epoch: SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_millis(),
+      startup_moment,
+      startup_unix_epoch,
       cli_opt,
       runtime_path,
       canvas,
