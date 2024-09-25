@@ -87,6 +87,9 @@ pub struct EventLoop {
   pub task_tracker: TaskTracker,
 
   /// Sender: workers => master.
+  ///
+  /// NOTE: This sender stores here is mostly just for clone to all the other tasks spawned during
+  /// running the editor. The master itself doesn't actually use it.
   pub worker_send_to_master: Sender<WorkerToMasterMessage>,
   /// Receiver: master <= workers.
   pub master_recv_from_worker: Receiver<WorkerToMasterMessage>,
