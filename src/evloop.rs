@@ -60,7 +60,12 @@ pub struct EventLoop {
   /// Command line options.
   pub cli_opt: CliOpt,
 
-  /// Runtime path.
+  /// Runtime path (directories). It initializes with following directories:
+  ///
+  /// 1. [`CONFIG_FILE_PATH`](crate::gloval::CONFIG_FILE_PATH)
+  /// 2. [`DATA_DIR_PATH`](crate::gloval::DATA_DIR_PATH)
+  ///
+  /// NOTE: All the external plugins are been searched under runtime path.
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
 
   /// Canvas for UI.

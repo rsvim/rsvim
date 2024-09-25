@@ -96,11 +96,11 @@ pub fn CACHE_DIR_PATH() -> PathBuf {
     .clone()
 }
 
-/// Data directory path, i.e. `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share`.
+/// Data directory path, i.e. `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`.
 pub fn DATA_DIR_PATH() -> PathBuf {
   PATH_CONFIG_VALUE
     .get_or_init(PathConfig::new)
-    .cache_dir()
+    .data_dir()
     .clone()
 }
 

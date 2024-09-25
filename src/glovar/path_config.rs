@@ -98,7 +98,7 @@ impl PathConfig {
 
   /// Get the data directory.
   pub fn data_dir(&self) -> &PathBuf {
-    &self.cache_dir
+    &self.data_dir
   }
 }
 
