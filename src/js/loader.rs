@@ -13,6 +13,7 @@ use regex::Regex;
 // use sha::sha1::Sha1;
 // use sha::utils::Digest;
 // use sha::utils::DigestExt;
+use path_absolutize::Absolutize;
 use std::env;
 use std::fs;
 use std::path::Path;
@@ -99,7 +100,7 @@ impl ModuleLoader for FsModuleLoader {
   fn resolve(&self, base: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
     // Resolve absolute import.
     if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
-      return Ok(self.transform(std::path::absolute(Path::new(specifier))?));
+      return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
     }
 
     // Resolve relative import.
@@ -109,7 +110,7 @@ impl ModuleLoader for FsModuleLoader {
     let base = base.map(|v| Path::new(v).parent().unwrap()).unwrap_or(cwd);
 
     if specifier.starts_with("./") || specifier.starts_with("../") {
-      return Ok(self.transform(std::path::absolute(base.join(specifier))?));
+      return Ok(self.transform(base.join(specifier).absolutize()?.to_path_buf()));
     }
 
     bail!(format!("Module not found \"{specifier}\""));
@@ -289,12 +290,7 @@ mod tests {
     for (base, specifier, expected) in tests {
       let path = loader.resolve(base, specifier).unwrap();
       let expected = if cfg!(target_os = "windows") {
-        String::from(
-          std::path::absolute(Path::new(expected))
-            .unwrap()
-            .to_str()
-            .unwrap(),
-        )
+        String::from(Path::new(expected).absolutize().unwrap().to_str().unwrap())
       } else {
         expected.into()
       };
