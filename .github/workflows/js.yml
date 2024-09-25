@@ -1,4 +1,4 @@
-name: TS Lint
+name: JavaScript
 on:
   pull_request:
     branches:
