@@ -60,6 +60,7 @@ pub struct EventLoop {
   /// Command line options.
   pub cli_opt: CliOpt,
 
+  /// Runtime path.
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
 
   /// Canvas for UI.
