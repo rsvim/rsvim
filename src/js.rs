@@ -20,14 +20,13 @@ use crate::js::module::{
   create_origin, fetch_module_tree, load_import, ImportKind, ImportMap, ModuleGraph, ModuleMap,
   ModuleStatus,
 };
-// use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::result::AnyError;
 // use crate::state::StateArc;
 // use crate::ui::tree::TreeArc;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
-use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::msg::JsRuntimeToEventLoopMessage;
 
 pub mod binding;
 pub mod constant;
@@ -98,10 +97,8 @@ pub struct JsRuntimeState {
   pub task_tracker: TaskTracker,
   /// Runtime path for resolving modules on local file system.
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
-  /// Js runtime receive from Master (EventLoop).
-  pub js_worker_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
-  /// Js runtime send to Master (EventLoop).
-  pub js_worker_send_to_master: Sender<EventLoopToJsRuntimeMessage>,
+  /// Js worker => master.
+  pub js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
 }
 
 pub struct JsRuntime {
@@ -119,6 +116,7 @@ impl JsRuntime {
     options: JsRuntimeOptions,
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
     task_tracker: TaskTracker,
+    js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
   ) -> Self {
     // Configuration flags for V8.
     // let mut flags = String::from(concat!(
@@ -193,6 +191,7 @@ impl JsRuntime {
       // wake_event_queued: false,
       task_tracker,
       runtime_path,
+      js_worker_send_to_master,
     }));
 
     isolate.set_slot(state.clone());

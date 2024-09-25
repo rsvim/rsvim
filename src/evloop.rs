@@ -86,16 +86,14 @@ pub struct EventLoop {
   /// Task tracker for all spawned tasks.
   pub task_tracker: TaskTracker,
 
-  /// Channel sender: workers => master.
+  /// Sender: workers => master.
   pub worker_send_to_master: Sender<WorkerToMasterMessage>,
-  /// Channel receiver: master <= workers.
+  /// Receiver: master <= workers.
   pub master_recv_from_worker: Receiver<WorkerToMasterMessage>,
 
   /// Js runtime.
   pub js_runtime: JsRuntime,
-  /// Channel sender: master => js worker.
-  pub master_send_to_js_worker: Sender<EventLoopToJsRuntimeMessage>,
-  /// Channel receiver: master <= js worker.
+  /// Receiver: master <= js worker.
   pub master_recv_from_js_worker: Receiver<JsRuntimeToEventLoopMessage>,
 }
 
@@ -135,10 +133,12 @@ impl EventLoop {
     // State
     let state = State::default();
 
-    // Sender/receiver
+    // Worker => master
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
-    let (master_send_to_js_worker, js_worker_recv_from_master) =
-      channel(glovar::CHANNEL_BUF_SIZE());
+    // // Master => js worker
+    // let (master_send_to_js_worker, js_worker_recv_from_master) =
+    //   channel(glovar::CHANNEL_BUF_SIZE());
+    // Js worker => master
     let (js_worker_send_to_master, master_recv_from_js_worker) =
       channel(glovar::CHANNEL_BUF_SIZE());
 
@@ -157,6 +157,7 @@ impl EventLoop {
       JsRuntimeOptions::default(),
       runtime_path.clone(),
       task_tracker.close(),
+      js_worker_send_to_master,
     );
 
     Ok(EventLoop {
@@ -176,9 +177,8 @@ impl EventLoop {
       task_tracker,
       worker_send_to_master,
       master_recv_from_worker,
-      master_send_to_js_worker,
-      master_recv_from_js_worker,
       js_runtime,
+      master_recv_from_js_worker,
     })
   }
 
