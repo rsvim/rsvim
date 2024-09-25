@@ -263,6 +263,12 @@ impl ModuleMap {
   }
 }
 
+impl Default for ModuleMap {
+  fn default() -> Self {
+    ModuleMap::new()
+  }
+}
+
 pub async fn resolve_es_module(
   path: ModulePath,
   module: Rc<RefCell<EsModule>>,

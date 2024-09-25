@@ -27,7 +27,7 @@ use crate::cli::CliOpt;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
-use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::msg::JsRuntimeToEventLoopMessage;
 use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::result::{IoResult, VoidIoResult};
 use crate::state::fsm::StatefulValue;

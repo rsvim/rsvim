@@ -88,8 +88,8 @@ impl Display for JsError {
     let column = self.start_column.unwrap_or_default();
     write!(
       f,
-      "{} {} ({}:{}:{})",
-      "Uncaught", self.message, self.resource_name, line, column
+      "Uncaught {} ({}:{}:{})",
+      self.message, self.resource_name, line, column
     )
   }
 }
@@ -98,7 +98,7 @@ impl Debug for JsError {
   /// Displays a full version of the error with stack-trace.
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     // Output exception information.
-    write!(f, "{} {}", "Uncaught", self.message)?;
+    write!(f, "Uncaught {}", self.message)?;
 
     // Output source-line if exists.
     match self.source_line.as_ref() {

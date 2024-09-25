@@ -4,7 +4,7 @@
 
 use rsvim::evloop::EventLoop;
 use rsvim::glovar;
-use rsvim::js::{start as js_start, JsDataAccess};
+// use rsvim::js::{start as js_start, JsDataAccess};
 use rsvim::result::VoidIoResult;
 use rsvim::{cli, log};
 

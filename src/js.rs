@@ -325,7 +325,10 @@ impl JsRuntime {
       true => filename.to_string(),
       false => match resolve_import(None, filename, false, None) {
         Ok(specifier) => specifier,
-        Err(e) => return Err(e),
+        Err(e) => {
+          // Returns the error directly.
+          return Err(e);
+        }
       },
     };
 
@@ -337,40 +340,40 @@ impl JsRuntime {
     state.module_map.pending.push(Rc::clone(&graph_rc));
     state.module_map.seen.insert(path.clone(), status);
 
-    // If we have a source, create the es-module future.
-    if let Some(source) = source {
-      state.pending_futures.push(Box::new(EsModuleFuture {
-        path,
-        module: Rc::clone(&graph_rc.borrow().root_rc),
-        maybe_result: Some(Ok(bincode::serialize(&source).unwrap())),
-      }));
-      return Ok(());
-    }
-
-    /*  Use the event-loop to asynchronously load the requested module. */
-
-    let task = {
-      let specifier = path.clone();
-      move || match load_import(&specifier, true) {
-        anyhow::Result::Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
-        Err(e) => Some(Result::Err(e)),
-      }
-    };
-
-    let task_cb = {
-      let state_rc = state_rc.clone();
-      move |_: LoopHandle, maybe_result: TaskResult| {
-        let mut state = state_rc.borrow_mut();
-        let future = EsModuleFuture {
-          path,
-          module: Rc::clone(&graph_rc.borrow().root_rc),
-          maybe_result,
-        };
-        state.pending_futures.push(Box::new(future));
-      }
-    };
-
-    state.handle.spawn(task, Some(task_cb));
+    // // If we have a source, create the es-module future.
+    // if let Some(source) = source {
+    //   state.pending_futures.push(Box::new(EsModuleFuture {
+    //     path,
+    //     module: Rc::clone(&graph_rc.borrow().root_rc),
+    //     maybe_result: Some(Ok(bincode::serialize(&source).unwrap())),
+    //   }));
+    //   return Ok(());
+    // }
+    //
+    // /*  Use the event-loop to asynchronously load the requested module. */
+    //
+    // let task = {
+    //   let specifier = path.clone();
+    //   move || match load_import(&specifier, true) {
+    //     anyhow::Result::Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
+    //     Err(e) => Some(Result::Err(e)),
+    //   }
+    // };
+    //
+    // let task_cb = {
+    //   let state_rc = state_rc.clone();
+    //   move |_: LoopHandle, maybe_result: TaskResult| {
+    //     let mut state = state_rc.borrow_mut();
+    //     let future = EsModuleFuture {
+    //       path,
+    //       module: Rc::clone(&graph_rc.borrow().root_rc),
+    //       maybe_result,
+    //     };
+    //     state.pending_futures.push(Box::new(future));
+    //   }
+    // };
+    //
+    // state.handle.spawn(task, Some(task_cb));
 
     Ok(())
   }

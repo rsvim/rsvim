@@ -70,6 +70,12 @@ impl ExceptionState {
   }
 }
 
+impl Default for ExceptionState {
+  fn default() -> Self {
+    ExceptionState::new()
+  }
+}
+
 pub fn initialize(scope: &mut v8::HandleScope) -> v8::Global<v8::Object> {
   // Create local JS object.
   let target = v8::Object::new(scope);
