@@ -7,7 +7,7 @@ use std::env;
 use std::path::Path;
 use std::rc::Rc;
 use std::sync::OnceLock;
-use url::Url;
+// use url::Url;
 
 use crate::js::constant::{URL_REGEX, WINDOWS_REGEX};
 use crate::js::loader::{FsModuleLoader, ModuleLoader};

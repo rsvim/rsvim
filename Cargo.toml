@@ -54,6 +54,7 @@ v8 = "0.106.0"
 # bincode = "2.0.0-rc.3"
 directories = "5.0.1"
 anyhow = "1.0.89"
+thiserror = "1.0.64"
 serde_json = "1.0.128"
 regex = "1.10.6"
 swc_common = { version = "0.39.0", features = ["tty-emitter"] }
