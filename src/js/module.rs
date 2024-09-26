@@ -2,7 +2,6 @@
 
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::collections::LinkedList;
 use std::env;
 use std::future::Future;
 use std::path::Path;
@@ -167,7 +166,7 @@ impl EsModule {
 pub struct ModuleGraph {
   pub kind: ImportKind,
   pub root_rc: Rc<RefCell<EsModule>>,
-  pub same_origin: LinkedList<v8::Global<v8::PromiseResolver>>,
+  pub same_origin: Vec<v8::Global<v8::PromiseResolver>>,
 }
 
 impl ModuleGraph {
@@ -185,7 +184,7 @@ impl ModuleGraph {
     Self {
       kind: ImportKind::Static,
       root_rc: module,
-      same_origin: LinkedList::new(),
+      same_origin: Vec::new(),
     }
   }
 
@@ -203,7 +202,7 @@ impl ModuleGraph {
     Self {
       kind: ImportKind::Dynamic(promise),
       root_rc: module,
-      same_origin: LinkedList::new(),
+      same_origin: Vec::new(),
     }
   }
 }
