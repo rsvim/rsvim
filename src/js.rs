@@ -215,8 +215,8 @@ impl JsRuntime {
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
   fn load_main_environment(&mut self) {
-    let name = "vim:runtime/global.js";
-    let source = include_str!("./js/runtime/global.js");
+    let name = "vim:runtime/00_global.js";
+    let source = include_str!("./js/runtime/00_global.js");
 
     let scope = &mut self.handle_scope();
     let tc_scope = &mut v8::TryCatch::new(scope);
