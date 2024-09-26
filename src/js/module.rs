@@ -280,7 +280,7 @@ pub async fn resolve_es_module(
 type ImportMapEntry = (String, String);
 
 /// Key-Value entries representing WICG import-maps.
-/// https://github.com/WICG/import-maps
+/// See: <https://github.com/WICG/import-maps>.
 ///
 /// NOTE: This is just a mock-up which is actually not supported.
 #[derive(Debug, Clone)]
@@ -403,7 +403,7 @@ pub fn load_import(specifier: &str, skip_cache: bool) -> anyhow::Result<ModuleSo
 }
 
 /// Resolves module imports synchronously.
-/// https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741
+/// See: <https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741>.
 pub fn fetch_module_tree<'a>(
   scope: &mut v8::HandleScope<'a>,
   filename: &str,

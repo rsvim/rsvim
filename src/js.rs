@@ -140,6 +140,8 @@ impl JsRuntime {
 
     let mut isolate = v8::Isolate::new(v8::CreateParams::default());
 
+    // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
+    // See: [`run_next_tick_callbacks`].
     isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
@@ -639,14 +641,14 @@ impl JsRuntime {
   }
 
   /// Returns a v8 handle scope for the runtime.
-  /// https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html.
+  /// See: <https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html>.
   pub fn handle_scope(&mut self) -> v8::HandleScope {
     let context = self.context();
     v8::HandleScope::with_context(&mut self.isolate, context)
   }
 
   /// Returns a context created for the runtime.
-  /// https://v8docs.nodesource.com/node-0.8/df/d69/classv8_1_1_context.html
+  /// See: <https://v8docs.nodesource.com/node-0.8/df/d69/classv8_1_1_context.html>.
   pub fn context(&mut self) -> v8::Global<v8::Context> {
     let state = self.get_state();
     let state = state.borrow();
