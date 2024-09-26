@@ -195,22 +195,22 @@ impl JsRuntime {
 
     isolate.set_slot(state.clone());
 
-    let mut runtime = JsRuntime {
+    JsRuntime {
       isolate,
       // event_loop,
       state,
       // inspector,
-    };
+    }
 
     // runtime.load_main_environment();
-
+    //
     // // Start inspector agent is requested.
     // if let Some(inspector) = runtime.inspector().as_mut() {
     //   let address = address.unwrap();
     //   inspector.borrow_mut().start_agent(address);
     // }
-
-    runtime
+    //
+    // runtime
   }
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
