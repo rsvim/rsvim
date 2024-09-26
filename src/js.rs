@@ -328,7 +328,8 @@ impl JsRuntime {
 
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    // NOTE: Here we also use static module fetching.
+    // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
+    // local file system, no network/http downloading will be involved.
     let module = match fetch_module_tree(tc_scope, filename, None) {
       Some(module) => module,
       None => {
