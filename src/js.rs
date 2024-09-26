@@ -314,8 +314,8 @@ impl JsRuntime {
   ) -> Result<(), anyhow::Error> {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
-    let state_rc = JsRuntime::state(scope);
-    let mut state = state_rc.borrow_mut();
+    // let state_rc = JsRuntime::state(scope);
+    // let mut state = state_rc.borrow_mut();
 
     // The following code allows the runtime to execute code with no valid
     // location passed as parameter as an ES module.
