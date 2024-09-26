@@ -91,13 +91,13 @@ pub enum ImportKind {
 /// network/http modules will be fetching. The only one use case of `Resolving` status should be
 /// dynamically import and its `Promise`.
 pub enum ModuleStatus {
-  // Indicates the module is being fetched.
+  // Indicates the module **itself** is being fetched.
   Fetching,
-  // Indicates the dependencies are being fetched.
+  // Indicates the module dependencies are being fetched.
   Resolving,
   // Indicates the module has ben seen before.
   Duplicate,
-  // Indicates the modules is resolved.
+  // Indicates the module (include its dependencies) is resolved.
   Ready,
 }
 
