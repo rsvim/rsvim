@@ -271,12 +271,141 @@ impl Default for ModuleMap {
 }
 
 // /// Resolve ES module import in async way.
-// pub async fn resolve_import_es_module(
-//   scope: &mut v8::HandleScope,
+// pub async fn resolve_import_es_module<'a>(
+//   scope: &mut v8::HandleScope<'a>,
 //   path: ModulePath,
 //   module: Rc<RefCell<EsModule>>,
-//   js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
 // ) {
+//   let specifier = path.clone();
+//   match load_import(&specifier, true) {
+//     anyhow::Result::Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
+//     Err(e) => Some(Result::Err(e)),
+//   };
+//
+//   let state_rc = JsRuntime::state(scope);
+//   let mut state = state_rc.borrow_mut();
+//
+//   // If the graph has exceptions, stop resolving the current sub-tree (dynamic imports).
+//   if module.borrow().exception.borrow().is_some() {
+//     state.module_map.seen.remove(&path);
+//     return;
+//   }
+//
+//   // Extract module's source code.
+//   let source = self.maybe_result.take().unwrap();
+//   let source = match source {
+//     Ok(source) => bincode::deserialize::<String>(&source).unwrap(),
+//     Err(e) => {
+//       self.handle_failure(Error::msg(e.to_string()));
+//       return;
+//     }
+//   };
+//
+//   let tc_scope = &mut v8::TryCatch::new(scope);
+//   let origin = create_origin(tc_scope, &self.path, true);
+//
+//   // Compile source and get it's dependencies.
+//   let source = v8::String::new(tc_scope, &source).unwrap();
+//   let mut source = v8::script_compiler::Source::new(source, Some(&origin));
+//
+//   let module = match v8::script_compiler::compile_module(tc_scope, &mut source) {
+//     Some(module) => module,
+//     None => {
+//       assert!(tc_scope.has_caught());
+//       let exception = tc_scope.exception().unwrap();
+//       let exception = JsError::from_v8_exception(tc_scope, exception, None);
+//       let exception = format!("{} ({})", exception.message, exception.resource_name);
+//
+//       self.handle_failure(Error::msg(exception));
+//       return;
+//     }
+//   };
+//
+//   let new_status = ModuleStatus::Resolving;
+//   let module_ref = v8::Global::new(tc_scope, module);
+//
+//   state.module_map.insert(self.path.as_str(), module_ref);
+//   state.module_map.seen.insert(self.path.clone(), new_status);
+//
+//   let import_map = state.options.import_map.clone();
+//
+//   let skip_cache = match self.module.borrow().is_dynamic_import {
+//     true => !state.options.test_mode || state.options.reload,
+//     false => state.options.reload,
+//   };
+//
+//   let mut dependencies = vec![];
+//
+//   let requests = module.get_module_requests();
+//   let base = self.path.clone();
+//
+//   for i in 0..requests.length() {
+//     // Get import request from the `module_requests` array.
+//     let request = requests.get(tc_scope, i).unwrap();
+//     let request = v8::Local::<v8::ModuleRequest>::try_from(request).unwrap();
+//
+//     // Transform v8's ModuleRequest into Rust string.
+//     let base = Some(base.as_str());
+//     let specifier = request.get_specifier().to_rust_string_lossy(tc_scope);
+//     let specifier = match resolve_import(base, &specifier, false, import_map.clone()) {
+//       Ok(specifier) => specifier,
+//       Err(e) => {
+//         self.handle_failure(Error::msg(e.to_string()));
+//         return;
+//       }
+//     };
+//
+//     // Check if requested module has been seen already.
+//     let seen_module = state.module_map.seen.get(&specifier);
+//     let status = match seen_module {
+//       Some(ModuleStatus::Ready) => continue,
+//       Some(_) => ModuleStatus::Duplicate,
+//       None => ModuleStatus::Fetching,
+//     };
+//
+//     // Create a new ES module instance.
+//     let module = Rc::new(RefCell::new(EsModule {
+//       path: specifier.clone(),
+//       status,
+//       dependencies: vec![],
+//       exception: Rc::clone(&self.module.borrow().exception),
+//       is_dynamic_import: self.module.borrow().is_dynamic_import,
+//     }));
+//
+//     dependencies.push(Rc::clone(&module));
+//
+//     // If the module is newly seen, use the event-loop to load
+//     // the requested module.
+//     if seen_module.is_none() {
+//       let task = {
+//         let specifier = specifier.clone();
+//         move || match load_import(&specifier, skip_cache) {
+//           Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
+//           Err(e) => Some(Result::Err(e)),
+//         }
+//       };
+//
+//       let task_cb = {
+//         let specifier = specifier.clone();
+//         let state_rc = state_rc.clone();
+//         move |_: LoopHandle, maybe_result: TaskResult| {
+//           let mut state = state_rc.borrow_mut();
+//           let future = EsModuleFuture {
+//             path: specifier,
+//             module: Rc::clone(&module),
+//             maybe_result,
+//           };
+//           state.pending_futures.push(Box::new(future));
+//         }
+//       };
+//
+//       state.module_map.seen.insert(specifier, status);
+//       state.handle.spawn(task, Some(task_cb));
+//     }
+//   }
+//
+//   self.module.borrow_mut().status = ModuleStatus::Resolving;
+//   self.module.borrow_mut().dependencies = dependencies;
 // }
 
 /// A single import mapping (specifier, target).
