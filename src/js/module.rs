@@ -270,12 +270,14 @@ impl Default for ModuleMap {
   }
 }
 
-pub async fn resolve_es_module(
-  path: ModulePath,
-  module: Rc<RefCell<EsModule>>,
-  js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
-) {
-}
+// /// Resolve ES module import in async way.
+// pub async fn resolve_import_es_module(
+//   scope: &mut v8::HandleScope,
+//   path: ModulePath,
+//   module: Rc<RefCell<EsModule>>,
+//   js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+// ) {
+// }
 
 /// A single import mapping (specifier, target).
 type ImportMapEntry = (String, String);
