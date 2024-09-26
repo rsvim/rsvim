@@ -225,8 +225,8 @@ impl JsRuntime {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        error!("{exception:?}");
-        eprintln!("{exception:?}");
+        error!("Failed to import builtin modules: {exception:?}");
+        eprintln!("Failed to import builtin modules: {exception:?}");
         std::process::exit(1);
       }
     };
@@ -238,8 +238,8 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("{exception:?}");
-      eprintln!("{exception:?}");
+      error!("Failed to instantiate builtin modules: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {exception:?}");
       std::process::exit(1);
     }
 
@@ -248,8 +248,8 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("{exception:?}");
-      eprintln!("{exception:?}");
+      error!("Failed to evaluate builtin modules: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {exception:?}");
       std::process::exit(1);
     }
 

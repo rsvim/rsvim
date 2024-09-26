@@ -248,7 +248,7 @@ impl ModuleMap {
     self.index.get(key).cloned()
   }
 
-  // Returns a specifier given a v8 module.
+  // Returns a specifier by a v8 module.
   pub fn get_path(&self, module: v8::Global<v8::Module>) -> Option<ModulePath> {
     self
       .index
