@@ -84,6 +84,7 @@ fn main() -> VoidIoResult {
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
     // Initialize
+    event_loop.init_js_runtime()?;
     event_loop.init_tui()?;
     event_loop.init_input_files()?;
 

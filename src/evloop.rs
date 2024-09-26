@@ -207,6 +207,17 @@ impl EventLoop {
     Ok(())
   }
 
+  /// Initialize js runtime.
+  pub fn init_js_runtime(&mut self) -> VoidIoResult {
+    if let Some(config_file) = glovar::CONFIG_FILE_PATH() {
+      self
+        .js_runtime
+        .execute_module(config_file.to_str().unwrap(), None)
+        .unwrap();
+    }
+    Ok(())
+  }
+
   /// Initialize start up tasks such as input files, etc.
   pub fn init_input_files(&mut self) -> VoidIoResult {
     self.queue_cursor()?;
