@@ -211,10 +211,10 @@ impl JsRuntime {
     runtime
   }
 
-  /// Initializes synchronously the core environment (see js/runtime/main.js).
+  /// Initializes synchronously the core environment (see js/runtime/global.js).
   fn load_main_environment(&mut self) {
     let name = "rsvim:environment/main";
-    let source = include_str!("./js/runtime/main.js");
+    let source = include_str!("./js/runtime/global.js");
 
     let scope = &mut self.handle_scope();
     let tc_scope = &mut v8::TryCatch::new(scope);
@@ -303,9 +303,6 @@ impl JsRuntime {
   }
 
   /// Executes JavaScript code as ES module.
-  ///
-  /// NOTE: This is the entry function that loading editor's user config file, i.e. the
-  /// `.rsvim.{ts,js}` file.
   pub fn execute_module(
     &mut self,
     filename: &str,
