@@ -41,7 +41,7 @@ pub fn module_resolve_cb<'a>(
 }
 
 /// Called the first time import.meta is accessed for a module.
-/// https://docs.rs/v8/0.49.0/v8/type.HostInitializeImportMetaObjectCallback.html
+/// See: <https://docs.rs/v8/0.49.0/v8/type.HostInitializeImportMetaObjectCallback.html>.
 pub extern "C" fn host_initialize_import_meta_object_cb(
   context: v8::Local<v8::Context>,
   module: v8::Local<v8::Module>,
