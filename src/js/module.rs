@@ -431,7 +431,9 @@ pub fn fetch_module_tree<'a>(
 
   // Subscribe module to the module-map.
   let module_ref = v8::Global::new(scope, module);
-  state.borrow_mut().module_map.insert(filename, module_ref);
+  {
+    state.borrow_mut().module_map.insert(filename, module_ref);
+  }
 
   let requests = module.get_module_requests();
 

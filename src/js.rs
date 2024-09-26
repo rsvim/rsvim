@@ -202,7 +202,7 @@ impl JsRuntime {
       // inspector,
     };
 
-    runtime.load_main_environment();
+    // runtime.load_main_environment();
 
     // // Start inspector agent is requested.
     // if let Some(inspector) = runtime.inspector().as_mut() {
@@ -214,7 +214,7 @@ impl JsRuntime {
   }
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
-  fn load_main_environment(&mut self) {
+  pub fn load_main_environment(&mut self) {
     let name = "vim:runtime/00_global.js";
     let source = include_str!("./js/runtime/00_global.js");
 
@@ -260,7 +260,9 @@ impl JsRuntime {
   }
 
   /// Executes traditional JavaScript code (traditional = not ES modules).
-  pub fn execute_script(
+  ///
+  /// NOTE: We don't use it.
+  pub fn __execute_script(
     &mut self,
     filename: &str,
     source: &str,
