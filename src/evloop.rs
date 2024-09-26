@@ -209,7 +209,7 @@ impl EventLoop {
 
   /// Initialize js runtime.
   pub fn init_js_runtime(&mut self) -> VoidIoResult {
-    self.js_runtime.load_main_environment();
+    self.js_runtime.init_environment();
     if let Some(config_file) = glovar::CONFIG_FILE_PATH() {
       self
         .js_runtime
