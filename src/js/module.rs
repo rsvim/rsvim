@@ -534,6 +534,10 @@ pub fn load_import(specifier: &str, skip_cache: bool) -> anyhow::Result<ModuleSo
   FsModuleLoader {}.load(specifier)
 }
 
+pub async fn load_import_async(specifier: &str, skip_cache: bool) -> anyhow::Result<ModuleSource> {
+  load_import(specifier, skip_cache)
+}
+
 /// Resolves module imports synchronously.
 /// See: <https://source.chromium.org/chromium/v8/v8.git/+/51e736ca62bd5c7bfd82488a5587fed31dbf45d5:src/d8.cc;l=741>.
 pub fn fetch_module_tree<'a>(
