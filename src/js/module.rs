@@ -112,6 +112,7 @@ pub struct EsModule {
   pub dependencies: Vec<Rc<RefCell<EsModule>>>,
   /// Exceptions when import.
   pub exception: Rc<RefCell<Option<String>>>,
+  /// Whether this module is dynamically import.
   pub is_dynamic_import: bool,
 }
 
