@@ -314,8 +314,6 @@ impl JsRuntime {
   ) -> Result<(), anyhow::Error> {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
-    // let state_rc = JsRuntime::state(scope);
-    // let mut state = state_rc.borrow_mut();
 
     // The following code allows the runtime to execute code with no valid
     // location passed as parameter as an ES module.
@@ -330,89 +328,116 @@ impl JsRuntime {
       },
     };
 
-    let tc_scope = &mut v8::TryCatch::new(scope);
-
-    // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
-    // local file system, no network/http downloading will be involved.
-    let module = match fetch_module_tree(tc_scope, filename, None) {
-      Some(module) => module,
-      None => {
-        assert!(tc_scope.has_caught());
-        let exception = tc_scope.exception().unwrap();
-        let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        let err_msg = format!("User config not found: {filename:?}");
-        error!(err_msg);
-        eprintln!("{err_msg}");
-        return Err(AnyError::with_message(err_msg).into());
-      }
-    };
-
-    if module
-      .instantiate_module(tc_scope, module_resolve_cb)
-      .is_none()
-    {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let err_msg = format!("Failed to instantiate user config module {filename:?}: {exception:?}");
-      error!(err_msg);
-      eprintln!("{err_msg}");
-      return Err(AnyError::with_message(err_msg).into());
-    }
-
-    let _ = module.evaluate(tc_scope);
-
-    if module.get_status() == v8::ModuleStatus::Errored {
-      let exception = module.get_exception();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let err_msg = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
-      error!(err_msg);
-      eprintln!("{err_msg}");
-      return Err(AnyError::with_message(err_msg).into());
-    }
-
-    // // Create static import module graph.
-    // let graph = ModuleGraph::static_import(&path);
-    // let graph_rc = Rc::new(RefCell::new(graph));
-    // let status = ModuleStatus::Fetching;
+    // {
+    //   // This is the 1st solution, i.e. pure static module import.
+    //   //
+    //   // In this way, all the modules are resolved statically, without any async or futures. It can
+    //   // be simple, but lose the ability to async resolve a module.
+    //   //
+    //   // Maybe, just maybe, one day we want to write something like the node/deno js runtime:
+    //   //
+    //   // ```javascript
+    //   // import fzfx from "https://cdn.npmjs.com/fzfx.rsvim";
+    //   // ```
+    //   //
+    //   // Then we will have to rewrite this whole part, because import a module can be async.
+    //   let tc_scope = &mut v8::TryCatch::new(scope);
     //
-    // state.module_map.pending.push(Rc::clone(&graph_rc));
-    // state.module_map.seen.insert(path.clone(), status);
-    //
-    // // If we have a source, create the es-module future.
-    // if let Some(source) = source {
-    //   state.pending_futures.push(Box::new(EsModuleFuture {
-    //     path,
-    //     module: Rc::clone(&graph_rc.borrow().root_rc),
-    //     maybe_result: Some(Ok(bincode::serialize(&source).unwrap())),
-    //   }));
-    // } else {
-    //   // If we don't have a source, load it from file path.
-    //
-    //   /*  Use the event-loop to asynchronously load the requested module. */
-    //   let task = {
-    //     let specifier = path.clone();
-    //     move || match load_import(&specifier, true) {
-    //       anyhow::Result::Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
-    //       Err(e) => Some(Result::Err(e)),
+    //   // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
+    //   // local file system, no network/http downloading will be involved.
+    //   let module = match fetch_module_tree(tc_scope, filename, None) {
+    //     Some(module) => module,
+    //     None => {
+    //       assert!(tc_scope.has_caught());
+    //       let exception = tc_scope.exception().unwrap();
+    //       let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    //       let err_msg = format!("User config not found: {filename:?}");
+    //       error!(err_msg);
+    //       eprintln!("{err_msg}");
+    //       return Err(AnyError::with_message(err_msg).into());
     //     }
     //   };
     //
-    //   let task_cb = {
-    //     let state_rc = state_rc.clone();
-    //     move |_: LoopHandle, maybe_result: TaskResult| {
-    //       let mut state = state_rc.borrow_mut();
-    //       let future = EsModuleFuture {
-    //         path,
-    //         module: Rc::clone(&graph_rc.borrow().root_rc),
-    //         maybe_result,
-    //       };
-    //       state.pending_futures.push(Box::new(future));
-    //     }
-    //   };
+    //   if module
+    //     .instantiate_module(tc_scope, module_resolve_cb)
+    //     .is_none()
+    //   {
+    //     assert!(tc_scope.has_caught());
+    //     let exception = tc_scope.exception().unwrap();
+    //     let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    //     let err_msg =
+    //       format!("Failed to instantiate user config module {filename:?}: {exception:?}");
+    //     error!(err_msg);
+    //     eprintln!("{err_msg}");
+    //     return Err(AnyError::with_message(err_msg).into());
+    //   }
     //
-    //   state.handle.spawn(task, Some(task_cb));
+    //   let _ = module.evaluate(tc_scope);
+    //
+    //   if module.get_status() == v8::ModuleStatus::Errored {
+    //     let exception = module.get_exception();
+    //     let exception = JsError::from_v8_exception(tc_scope, exception, None);
+    //     let err_msg = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
+    //     error!(err_msg);
+    //     eprintln!("{err_msg}");
+    //     return Err(AnyError::with_message(err_msg).into());
+    //   }
     // }
+
+    {
+      // This is the 2nd solution, i.e. the real js compatible behavior.
+      // It resolves each module in async way, thus it can support potential network and http
+      // downloading. This also has a potential issue: each `import` keyword will wait for next
+      // tick to complete, which could be an unexpected behavior for user, because user could have
+      // different configs after enter the TUI.
+
+      let state_rc = JsRuntime::state(scope);
+      let mut state = state_rc.borrow_mut();
+
+      // Create static import module graph.
+      let graph = ModuleGraph::static_import(&path);
+      let graph_rc = Rc::new(RefCell::new(graph));
+      let status = ModuleStatus::Fetching;
+
+      state.module_map.pending.push(Rc::clone(&graph_rc));
+      state.module_map.seen.insert(path.clone(), status);
+
+      // If we have a source, create the es-module future.
+      if let Some(source) = source {
+        state.pending_futures.push(Box::new(EsModuleFuture {
+          path,
+          module: Rc::clone(&graph_rc.borrow().root_rc),
+          maybe_result: Some(Ok(bincode::serialize(&source).unwrap())),
+        }));
+      } else {
+        // If we don't have a source, load it from file path.
+
+        /*  Use the event-loop to asynchronously load the requested module. */
+        let task = {
+          let specifier = path.clone();
+          move || match load_import(&specifier, true) {
+            anyhow::Result::Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
+            Err(e) => Some(Result::Err(e)),
+          }
+        };
+
+        let task_cb = {
+          let state_rc = state_rc.clone();
+          move |_: LoopHandle, maybe_result: TaskResult| {
+            let mut state = state_rc.borrow_mut();
+            let future = EsModuleFuture {
+              path,
+              module: Rc::clone(&graph_rc.borrow().root_rc),
+              maybe_result,
+            };
+            state.pending_futures.push(Box::new(future));
+          }
+        };
+
+        state.handle.spawn(task, Some(task_cb));
+      }
+    }
+
     Ok(())
   }
 
