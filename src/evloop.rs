@@ -68,10 +68,10 @@ pub struct EventLoop {
   /// NOTE: All the external plugins are been searched under runtime path.
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
 
-  /// Canvas for UI.
-  pub canvas: CanvasArc,
   /// Widget tree for UI.
   pub tree: TreeArc,
+  /// Canvas for UI.
+  pub canvas: CanvasArc,
   /// Stdout writer for UI.
   pub writer: BufWriter<Stdout>,
 
@@ -117,6 +117,7 @@ impl EventLoop {
     let mut buffers = Buffers::new();
     let buffer = Buffer::to_arc(Buffer::new());
     buffers.insert(buffer.clone());
+    let buffers_arc = Buffers::to_arc(buffers);
 
     let window_shape = IRect::new(
       (0, 0),
@@ -132,9 +133,11 @@ impl EventLoop {
     let cursor = Cursor::new(cursor_shape);
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
+    let tree_arc = Tree::to_arc(tree);
 
     // State
     let state = State::default();
+    let state_arc = State::to_arc(state);
 
     // Worker => master
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
@@ -163,11 +166,15 @@ impl EventLoop {
     // Js Runtime
     let js_runtime = JsRuntime::new(
       JsRuntimeOptions::default(),
-      runtime_path.clone(),
-      task_tracker.clone(),
-      js_worker_send_to_master,
       startup_moment,
       startup_unix_epoch,
+      task_tracker.clone(),
+      js_worker_send_to_master,
+      cli_opt.clone(),
+      runtime_path.clone(),
+      tree_arc.clone(),
+      buffers_arc.clone(),
+      state_arc.clone(),
     );
 
     Ok(EventLoop {
@@ -176,9 +183,9 @@ impl EventLoop {
       cli_opt,
       runtime_path,
       canvas,
-      tree: Tree::to_arc(tree),
-      state: State::to_arc(state),
-      buffers: Buffers::to_arc(buffers),
+      tree: tree_arc,
+      state: state_arc,
+      buffers: buffers_arc,
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
       task_tracker,

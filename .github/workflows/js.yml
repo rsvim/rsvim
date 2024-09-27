@@ -31,4 +31,4 @@ jobs:
         with:
           deno-version: v1.x
       - run: |
-          deno check script/ops.ts
+          deno check src/js/runtime/*.ts
