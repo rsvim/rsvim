@@ -121,11 +121,15 @@ impl JsRuntime {
   /// Creates a new JsRuntime based on provided options.
   pub fn new(
     options: JsRuntimeOptions,
-    runtime_path: Arc<RwLock<Vec<PathBuf>>>,
-    task_tracker: TaskTracker,
-    js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
     startup_moment: Instant,
     time_origin: u128,
+    task_tracker: TaskTracker,
+    js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    cli_opt: CliOpt,
+    runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+    tree: TreeArc,
+    buffers: BuffersArc,
+    editing_state: StateArc,
   ) -> Self {
     // Configuration flags for V8.
     // let mut flags = String::from(concat!(
