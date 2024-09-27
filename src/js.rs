@@ -119,6 +119,7 @@ pub struct JsRuntime {
 
 impl JsRuntime {
   /// Creates a new JsRuntime based on provided options.
+  #[allow(clippy::too_many_arguments)]
   pub fn new(
     options: JsRuntimeOptions,
     startup_moment: Instant,
@@ -200,8 +201,12 @@ impl JsRuntime {
       options,
       // wake_event_queued: false,
       task_tracker,
-      runtime_path,
       js_worker_send_to_master,
+      cli_opt,
+      runtime_path,
+      tree,
+      buffers,
+      editing_state,
     }));
 
     isolate.set_slot(state.clone());
