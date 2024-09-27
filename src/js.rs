@@ -117,6 +117,8 @@ impl JsRuntime {
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
     task_tracker: TaskTracker,
     js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    startup_moment: Instant,
+    time_origin: u128,
   ) -> Self {
     // Configuration flags for V8.
     // let mut flags = String::from(concat!(
@@ -138,6 +140,8 @@ impl JsRuntime {
 
     let mut isolate = v8::Isolate::new(v8::CreateParams::default());
 
+    // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
+    // See: [`run_next_tick_callbacks`].
     isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
@@ -157,11 +161,6 @@ impl JsRuntime {
     //   Some(n) => EventLoop::new(cmp::max(n, MIN_POOL_SIZE)),
     //   None => EventLoop::default(),
     // };
-
-    let time_origin = SystemTime::now()
-      .duration_since(UNIX_EPOCH)
-      .unwrap()
-      .as_millis();
 
     // Initialize the v8 inspector.
     // let address = options.inspect.map(|(address, _)| (address));
@@ -183,7 +182,7 @@ impl JsRuntime {
       // handle: event_loop.handle(),
       // interrupt_handle: event_loop.interrupt_handle(),
       // pending_futures: Vec::new(),
-      startup_moment: Instant::now(),
+      startup_moment,
       time_origin,
       // next_tick_queue: Vec::new(),
       exceptions: exception::ExceptionState::new(),
@@ -196,28 +195,28 @@ impl JsRuntime {
 
     isolate.set_slot(state.clone());
 
-    let mut runtime = JsRuntime {
+    JsRuntime {
       isolate,
       // event_loop,
       state,
       // inspector,
-    };
+    }
 
-    runtime.load_main_environment();
-
+    // runtime.load_main_environment();
+    //
     // // Start inspector agent is requested.
     // if let Some(inspector) = runtime.inspector().as_mut() {
     //   let address = address.unwrap();
     //   inspector.borrow_mut().start_agent(address);
     // }
-
-    runtime
+    //
+    // runtime
   }
 
-  /// Initializes synchronously the core environment (see lib/main.js).
-  fn load_main_environment(&mut self) {
-    let name = "rsvim:environment/main";
-    let source = include_str!("./js/runtime/main.js");
+  /// Initializes synchronously the core environment (see js/runtime/global.js).
+  pub fn init_environment(&mut self) {
+    let name = "vim:runtime/00_global.js";
+    let source = include_str!("./js/runtime/00_global.js");
 
     let scope = &mut self.handle_scope();
     let tc_scope = &mut v8::TryCatch::new(scope);
@@ -228,8 +227,8 @@ impl JsRuntime {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        error!("{exception:?}");
-        eprintln!("{exception:?}");
+        error!("Failed to import builtin modules: {exception:?}");
+        eprintln!("Failed to import builtin modules: {exception:?}");
         std::process::exit(1);
       }
     };
@@ -241,8 +240,8 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("{exception:?}");
-      eprintln!("{exception:?}");
+      error!("Failed to instantiate builtin modules: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {exception:?}");
       std::process::exit(1);
     }
 
@@ -251,8 +250,8 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("{exception:?}");
-      eprintln!("{exception:?}");
+      error!("Failed to evaluate builtin modules: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {exception:?}");
       std::process::exit(1);
     }
 
@@ -261,7 +260,9 @@ impl JsRuntime {
   }
 
   /// Executes traditional JavaScript code (traditional = not ES modules).
-  pub fn execute_script(
+  ///
+  /// NOTE: We don't use it.
+  pub fn __execute_script(
     &mut self,
     filename: &str,
     source: &str,
@@ -306,9 +307,6 @@ impl JsRuntime {
   }
 
   /// Executes JavaScript code as ES module.
-  ///
-  /// NOTE: This is the entry function that loading editor's user config file, i.e. the
-  /// `.rsvim.{ts,js}` file.
   pub fn execute_module(
     &mut self,
     filename: &str,
@@ -316,8 +314,6 @@ impl JsRuntime {
   ) -> Result<(), anyhow::Error> {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
-    let state_rc = JsRuntime::state(scope);
-    let mut state = state_rc.borrow_mut();
 
     // The following code allows the runtime to execute code with no valid
     // location passed as parameter as an ES module.
@@ -331,49 +327,117 @@ impl JsRuntime {
         }
       },
     };
+    debug!("Resolved main js module (path): {:?}", path);
 
-    // Create static import module graph.
-    let graph = ModuleGraph::static_import(&path);
-    let graph_rc = Rc::new(RefCell::new(graph));
-    let status = ModuleStatus::Fetching;
+    {
+      // This is the 1st solution, i.e. pure static module import.
+      //
+      // In this way, all the modules are resolved statically, without any async or futures. It can
+      // be simple, but lose the ability to async resolve a module.
+      //
+      // Maybe, just maybe, one day we want to write something like the node/deno js runtime:
+      //
+      // ```javascript
+      // import fzfx from "https://cdn.npmjs.com/fzfx.rsvim";
+      // ```
+      //
+      // Then we will have to rewrite this whole part, because import a module can be async.
+      let tc_scope = &mut v8::TryCatch::new(scope);
 
-    state.module_map.pending.push(Rc::clone(&graph_rc));
-    state.module_map.seen.insert(path.clone(), status);
+      // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
+      // local file system, no network/http downloading will be involved.
+      let module = match fetch_module_tree(tc_scope, filename, None) {
+        Some(module) => module,
+        None => {
+          assert!(tc_scope.has_caught());
+          let exception = tc_scope.exception().unwrap();
+          let exception = JsError::from_v8_exception(tc_scope, exception, None);
+          let err_msg = format!("User config not found: {filename:?}");
+          error!(err_msg);
+          eprintln!("{err_msg}");
+          return Err(AnyError::with_message(err_msg).into());
+        }
+      };
 
-    // // If we have a source, create the es-module future.
-    // if let Some(source) = source {
-    //   state.pending_futures.push(Box::new(EsModuleFuture {
-    //     path,
-    //     module: Rc::clone(&graph_rc.borrow().root_rc),
-    //     maybe_result: Some(Ok(bincode::serialize(&source).unwrap())),
-    //   }));
-    //   return Ok(());
-    // }
+      if module
+        .instantiate_module(tc_scope, module_resolve_cb)
+        .is_none()
+      {
+        assert!(tc_scope.has_caught());
+        let exception = tc_scope.exception().unwrap();
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        let err_msg =
+          format!("Failed to instantiate user config module {filename:?}: {exception:?}");
+        error!(err_msg);
+        eprintln!("{err_msg}");
+        return Err(AnyError::with_message(err_msg).into());
+      }
+
+      let _ = module.evaluate(tc_scope);
+
+      if module.get_status() == v8::ModuleStatus::Errored {
+        let exception = module.get_exception();
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        let err_msg = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
+        error!(err_msg);
+        eprintln!("{err_msg}");
+        return Err(AnyError::with_message(err_msg).into());
+      }
+    }
+
+    // {
+    //   // This is the 2nd solution, i.e. the real js compatible behavior.
+    //   // It resolves each module in async way, thus it can support potential network and http
+    //   // downloading. This also has a potential issue: each `import` keyword will wait for next
+    //   // tick to complete, which could be an unexpected behavior for user, because user could have
+    //   // different configs after enter the TUI.
     //
-    // /*  Use the event-loop to asynchronously load the requested module. */
+    //   let state_rc = JsRuntime::state(scope);
+    //   let mut state = state_rc.borrow_mut();
     //
-    // let task = {
-    //   let specifier = path.clone();
-    //   move || match load_import(&specifier, true) {
-    //     anyhow::Result::Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
-    //     Err(e) => Some(Result::Err(e)),
-    //   }
-    // };
+    //   // Create static import module graph.
+    //   let graph = ModuleGraph::static_import(&path);
+    //   let graph_rc = Rc::new(RefCell::new(graph));
+    //   let status = ModuleStatus::Fetching;
     //
-    // let task_cb = {
-    //   let state_rc = state_rc.clone();
-    //   move |_: LoopHandle, maybe_result: TaskResult| {
-    //     let mut state = state_rc.borrow_mut();
-    //     let future = EsModuleFuture {
+    //   state.module_map.pending.push(Rc::clone(&graph_rc));
+    //   state.module_map.seen.insert(path.clone(), status);
+    //
+    //   // If we have a source, create the es-module future.
+    //   if let Some(source) = source {
+    //     state.pending_futures.push(Box::new(EsModuleFuture {
     //       path,
     //       module: Rc::clone(&graph_rc.borrow().root_rc),
-    //       maybe_result,
-    //     };
-    //     state.pending_futures.push(Box::new(future));
-    //   }
-    // };
+    //       maybe_result: Some(Ok(bincode::serialize(&source).unwrap())),
+    //     }));
+    //   } else {
+    //     // If we don't have a source, load it from file path.
     //
-    // state.handle.spawn(task, Some(task_cb));
+    //     /*  Use the event-loop to asynchronously load the requested module. */
+    //     let task = {
+    //       let specifier = path.clone();
+    //       move || match load_import(&specifier, true) {
+    //         anyhow::Result::Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
+    //         Err(e) => Some(Result::Err(e)),
+    //       }
+    //     };
+    //
+    //     let task_cb = {
+    //       let state_rc = state_rc.clone();
+    //       move |_: LoopHandle, maybe_result: TaskResult| {
+    //         let mut state = state_rc.borrow_mut();
+    //         let future = EsModuleFuture {
+    //           path,
+    //           module: Rc::clone(&graph_rc.borrow().root_rc),
+    //           maybe_result,
+    //         };
+    //         state.pending_futures.push(Box::new(future));
+    //       }
+    //     };
+    //
+    //     state.handle.spawn(task, Some(task_cb));
+    //   }
+    // }
 
     Ok(())
   }
@@ -604,14 +668,14 @@ impl JsRuntime {
   }
 
   /// Returns a v8 handle scope for the runtime.
-  /// https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html.
+  /// See: <https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html>.
   pub fn handle_scope(&mut self) -> v8::HandleScope {
     let context = self.context();
     v8::HandleScope::with_context(&mut self.isolate, context)
   }
 
   /// Returns a context created for the runtime.
-  /// https://v8docs.nodesource.com/node-0.8/df/d69/classv8_1_1_context.html
+  /// See: <https://v8docs.nodesource.com/node-0.8/df/d69/classv8_1_1_context.html>.
   pub fn context(&mut self) -> v8::Global<v8::Context> {
     let state = self.get_state();
     let state = state.borrow();

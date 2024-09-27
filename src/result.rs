@@ -56,13 +56,13 @@ impl Display for AnyError {
 
 impl std::error::Error for AnyError {}
 
-/// Void value result, error uses [`ErrorCode`].
+/// Void value result.
 pub type VoidResult = Result<(), AnyError>;
 
-/// Boolean value result, error uses [`ErrorCode`].
+/// Boolean value result.
 pub type BoolResult = Result<bool, AnyError>;
 
-/// String value result, error uses [`ErrorCode`].
+/// String value result.
 pub type StrResult = Result<String, AnyError>;
 
 /// Void value result for [`std::io`].

@@ -14,7 +14,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Called during Module::instantiate_module.
-/// https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html
+/// See: <https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html>
 pub fn module_resolve_cb<'a>(
   context: v8::Local<'a, v8::Context>,
   specifier: v8::Local<'a, v8::String>,
@@ -41,7 +41,7 @@ pub fn module_resolve_cb<'a>(
 }
 
 /// Called the first time import.meta is accessed for a module.
-/// https://docs.rs/v8/0.49.0/v8/type.HostInitializeImportMetaObjectCallback.html
+/// See: <https://docs.rs/v8/0.49.0/v8/type.HostInitializeImportMetaObjectCallback.html>.
 pub extern "C" fn host_initialize_import_meta_object_cb(
   context: v8::Local<v8::Context>,
   module: v8::Local<v8::Module>,
@@ -101,8 +101,8 @@ fn import_meta_resolve(
 }
 
 /// Called when a promise rejects with no rejection handler specified.
-/// https://docs.rs/v8/0.49.0/v8/type.PromiseRejectCallback.html
-/// https://v8.dev/features/promise-combinators
+/// See: <https://docs.rs/v8/0.49.0/v8/type.PromiseRejectCallback.html>.
+/// See: <https://v8.dev/features/promise-combinators>.
 pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
   // Create a v8 callback-scope.
   let scope = &mut unsafe { v8::CallbackScope::new(&message) };

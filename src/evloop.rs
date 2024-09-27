@@ -62,8 +62,8 @@ pub struct EventLoop {
 
   /// Runtime path (directories). It initializes with following directories:
   ///
-  /// 1. [`CONFIG_FILE_PATH`](crate::gloval::CONFIG_FILE_PATH)
-  /// 2. [`DATA_DIR_PATH`](crate::gloval::DATA_DIR_PATH)
+  /// 1. [`CONFIG_FILE_PATH`](crate::glovar::CONFIG_FILE_PATH)
+  /// 2. [`DATA_DIR_PATH`](crate::glovar::DATA_DIR_PATH)
   ///
   /// NOTE: All the external plugins are been searched under runtime path.
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
@@ -154,6 +154,11 @@ impl EventLoop {
 
     // Task Tracker
     let task_tracker = TaskTracker::new();
+    let startup_moment = Instant::now();
+    let startup_unix_epoch = SystemTime::now()
+      .duration_since(UNIX_EPOCH)
+      .unwrap()
+      .as_millis();
 
     // Js Runtime
     let js_runtime = JsRuntime::new(
@@ -161,14 +166,13 @@ impl EventLoop {
       runtime_path.clone(),
       task_tracker.clone(),
       js_worker_send_to_master,
+      startup_moment,
+      startup_unix_epoch,
     );
 
     Ok(EventLoop {
-      startup_moment: Instant::now(),
-      startup_unix_epoch: SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_millis(),
+      startup_moment,
+      startup_unix_epoch,
       cli_opt,
       runtime_path,
       canvas,
@@ -200,6 +204,18 @@ impl EventLoop {
       EnableFocusChange,
     )?;
 
+    Ok(())
+  }
+
+  /// Initialize js runtime.
+  pub fn init_js_runtime(&mut self) -> VoidIoResult {
+    self.js_runtime.init_environment();
+    if let Some(config_file) = glovar::CONFIG_FILE_PATH() {
+      self
+        .js_runtime
+        .execute_module(config_file.to_str().unwrap(), None)
+        .unwrap();
+    }
     Ok(())
   }
 
