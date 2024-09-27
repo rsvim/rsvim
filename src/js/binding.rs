@@ -8,7 +8,6 @@ use std::ffi::c_void;
 use tracing::error;
 
 use crate::result::{AnyError, AnyErrorKind};
-
 // use crate::dns;
 // use crate::exceptions;
 // use crate::file;
@@ -23,9 +22,11 @@ use crate::js::{check_exceptions, JsRuntime};
 // use crate::stdio;
 // use crate::timers;
 
-/// Function pointer for the bindings initializers.
-type BindingInitFn = fn(&mut v8::HandleScope<'_>) -> v8::Global<v8::Object>;
+pub mod opt;
 
+// /// Function pointer for the bindings initializers.
+// type BindingInitFn = fn(&mut v8::HandleScope<'_>) -> v8::Global<v8::Object>;
+//
 // lazy_static! {
 //   pub static ref BINDINGS: HashMap<&'static str, BindingInitFn> = {
 //     let bindings: Vec<(&'static str, BindingInitFn)> = vec![
@@ -55,9 +56,19 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
   let global = context.global(scope);
   let scope = &mut v8::ContextScope::new(scope, context);
 
-  set_function_to(scope, global, "print", global_print);
-  set_function_to(scope, global, "reportError", global_report_error);
-  set_function_to(scope, global, "$$queueMicro", global_queue_micro);
+  // set_function_to(scope, global, "print", global_print);
+  // set_function_to(scope, global, "$$reportError", global_report_error);
+  // set_function_to(scope, global, "$$queueMicrotask", global_queue_micro);
+
+  // Register the `__InternalVimGlobalObject` global object.
+  let vim = create_object_under(scope, global, "__InternalVimGlobalObject");
+
+  // `__vim.opt`
+  {
+    let opt = create_object_under(scope, vim, "opt");
+    set_function_to(scope, opt, "line_wrap", opt::line_wrap);
+    set_function_to(scope, opt, "set_line_wrap", opt::set_line_wrap);
+  }
 
   // Expose low-level functions to JavaScript.
   // process::initialize(scope, global);

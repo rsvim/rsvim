@@ -68,10 +68,10 @@ pub struct EventLoop {
   /// NOTE: All the external plugins are been searched under runtime path.
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
 
-  /// Canvas for UI.
-  pub canvas: CanvasArc,
   /// Widget tree for UI.
   pub tree: TreeArc,
+  /// Canvas for UI.
+  pub canvas: CanvasArc,
   /// Stdout writer for UI.
   pub writer: BufWriter<Stdout>,
 

@@ -14,19 +14,20 @@ use tokio::sync::mpsc::{Receiver, Sender};
 use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
 
-// use crate::buf::BuffersArc;
+use crate::buf::BuffersArc;
+use crate::cli::CliOpt;
 // use crate::glovar;
+use crate::js::err::JsError;
+use crate::js::exception::ExceptionState;
+use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
   create_origin, fetch_module_tree, load_import, resolve_import, ImportKind, ImportMap,
   ModuleGraph, ModuleMap, ModuleStatus,
 };
-use crate::result::AnyError;
-// use crate::state::StateArc;
-// use crate::ui::tree::TreeArc;
-use crate::js::err::JsError;
-use crate::js::exception::ExceptionState;
-use crate::js::hook::module_resolve_cb;
 use crate::js::msg::JsRuntimeToEventLoopMessage;
+use crate::result::AnyError;
+use crate::state::StateArc;
+use crate::ui::tree::TreeArc;
 
 pub mod binding;
 pub mod constant;
@@ -93,12 +94,18 @@ pub struct JsRuntimeState {
   pub options: JsRuntimeOptions,
   // /// Tracks wake event for current loop iteration.
   // pub wake_event_queued: bool,
-  /// Task tracker of tokio runtime.
+
+  // Data Access for RSVIM {
   pub task_tracker: TaskTracker,
-  /// Runtime path for resolving modules on local file system.
-  pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
-  /// Js worker => master.
+  // Js worker => master.
   pub js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  pub cli_opt: CliOpt,
+  pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+  pub tree: TreeArc,
+  pub buffers: BuffersArc,
+  // Same as the `state` in EventLoop.
+  pub editing_state: StateArc,
+  // Data Access for RSVIM }
 }
 
 pub struct JsRuntime {
