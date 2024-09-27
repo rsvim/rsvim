@@ -9,6 +9,7 @@ use std::path::Path;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use tokio::sync::mpsc::{Receiver, Sender};
+use tracing::debug;
 // use url::Url;
 
 use crate::js::constant::{URL_REGEX, WINDOWS_REGEX};
@@ -554,6 +555,15 @@ pub fn fetch_module_tree<'a>(
     Some(source) => source.into(),
     None => load_import(filename, true).unwrap(),
   };
+  debug!(
+    "Loaded main js module filename: {:?}, source: {:?}",
+    filename,
+    if source.as_str().len() > 10 {
+      &source.as_str()[..10]
+    } else {
+      source.as_str()
+    }
+  );
   let source = v8::String::new(scope, &source).unwrap();
   let mut source = v8::script_compiler::Source::new(source, Some(&origin));
 
@@ -564,9 +574,7 @@ pub fn fetch_module_tree<'a>(
 
   // Subscribe module to the module-map.
   let module_ref = v8::Global::new(scope, module);
-  {
-    state.borrow_mut().module_map.insert(filename, module_ref);
-  }
+  state.borrow_mut().module_map.insert(filename, module_ref);
 
   let requests = module.get_module_requests();
 
@@ -578,6 +586,11 @@ pub fn fetch_module_tree<'a>(
     // Transform v8's ModuleRequest into Rust string.
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
     let specifier = resolve_import(Some(filename), &specifier, false, None).unwrap();
+    debug!(
+      "Resolved dependency js module base: {:?}, specifier: {:?}",
+      filename,
+      specifier.as_str(),
+    );
 
     // Resolve subtree of modules.
     if !state.borrow().module_map.index.contains_key(&specifier) {

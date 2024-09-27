@@ -327,6 +327,7 @@ impl JsRuntime {
         }
       },
     };
+    debug!("Resolved main js module (path): {:?}", path);
 
     {
       // This is the 1st solution, i.e. pure static module import.
