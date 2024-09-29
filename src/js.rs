@@ -411,22 +411,16 @@ impl JsRuntime {
 
   /// Runs a single tick of the event-loop.
   pub async fn tick_event_loop(&mut self) {
-    unsafe {
-      let self_ = self as *const JsRuntime;
-      debug!(
-        "Tick js runtime, isolate has pending tasks: {:?}",
-        ((*self_).isolate).has_pending_background_tasks()
-      );
+    let isolate_has_pending_tasks = self.isolate.has_pending_background_tasks();
+    debug!(
+      "Tick js runtime, isolate has pending tasks: {:?}",
+      isolate_has_pending_tasks
+    );
+    if isolate_has_pending_tasks {
+      run_next_tick_callbacks(&mut self.handle_scope());
+      self.fast_forward_imports();
     }
-    run_next_tick_callbacks(&mut self.handle_scope());
-    self.fast_forward_imports();
-    unsafe {
-      let self_ = self as *const JsRuntime;
-      debug!(
-        "Tick js runtime - done, isolate has pending tasks: {:?}",
-        ((*self_).isolate).has_pending_background_tasks()
-      );
-    }
+    debug!("Tick js runtime - done");
     // self.event_loop.tick();
     // self.run_pending_futures();
   }
