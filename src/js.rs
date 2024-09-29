@@ -154,7 +154,7 @@ impl JsRuntime {
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
-    isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
+    // isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
@@ -416,10 +416,8 @@ impl JsRuntime {
       "Tick js runtime, isolate has pending tasks: {:?}",
       isolate_has_pending_tasks
     );
-    if isolate_has_pending_tasks {
-      run_next_tick_callbacks(&mut self.handle_scope());
-      self.fast_forward_imports();
-    }
+    run_next_tick_callbacks(&mut self.handle_scope());
+    self.fast_forward_imports();
     debug!("Tick js runtime - done");
     // self.event_loop.tick();
     // self.run_pending_futures();
