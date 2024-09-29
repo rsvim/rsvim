@@ -1,5 +1,5 @@
 "use strict";
-//! Js runtime.
+//! Js runtimes for `Rsvim` namespace.
 (function (globalThis) {
     // const { $$queueMicrotask, reportError } = globalThis;
     //
@@ -20,4 +20,9 @@
     //     }
     //   });
     // }
+    // `Rsvim`
+    globalThis.Rsvim = {
+        // `Rsvim.opt`
+        opt: opt,
+    };
 })(globalThis);

@@ -1,5 +1,5 @@
 "use strict";
-//! Js runtime.
+//! Js runtimes for global object, i.e. `globalThis`.
 (function (globalThis) {
     // const { $$queueMicrotask, reportError } = globalThis;
     //

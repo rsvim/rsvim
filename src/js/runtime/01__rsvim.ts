@@ -1,4 +1,4 @@
-//! Js runtimes for `rsvim` namespace.
+//! Js runtimes for `Rsvim` namespace.
 
 ((globalThis) => {
   // const { $$queueMicrotask, reportError } = globalThis;
@@ -21,5 +21,19 @@
   //   });
   // }
 
-  const rsvim = __InternalRsvimGlobalObject;
+  // `Rsvim`
+  globalThis.Rsvim = {
+    // `Rsvim.opt`
+    opt = {
+      lineWrap: (): boolean => __InternalRsvimGlobalObject.line_wrap(),
+      setLineWrap: (value: boolean): void => {
+        if (typeof value !== "boolean") {
+          throw new Error(
+            `Value (${value}) must be boolean type, but found ${typeof value}`,
+          );
+        }
+        __InternalRsvimGlobalObject.set_line_wrap(value);
+      },
+    },
+  };
 })(globalThis);
