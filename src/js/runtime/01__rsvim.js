@@ -6,7 +6,7 @@
     // `Rsvim.opt`
     opt: {
       lineWrap: function () {
-        return __InternalRsvimGlobalObject.line_wrap;
+        return __InternalRsvimGlobalObject.line_wrap();
       },
       setLineWrap: function (value) {
         if (typeof value !== "boolean") {

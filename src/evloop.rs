@@ -339,7 +339,7 @@ impl EventLoop {
           break;
         }
         _ = self.js_runtime.tick_event_loop() => {
-          debug!("Tick js runtime - done");
+          // debug!("Tick js runtime - done");
         }
       }
 
