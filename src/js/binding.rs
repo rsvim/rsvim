@@ -60,14 +60,13 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
   // set_function_to(scope, global, "$$reportError", global_report_error);
   // set_function_to(scope, global, "$$queueMicrotask", global_queue_micro);
 
-  // Register the `__InternalVimGlobalObject` global object.
-  let vim = create_object_under(scope, global, "__InternalVimGlobalObject");
+  // Register the `__InternalRsvimGlobalObject` global object.
+  let vim = create_object_under(scope, global, "__InternalRsvimGlobalObject");
 
-  // `__vim.opt`
+  // `Rsvim.opt`
   {
-    let opt = create_object_under(scope, vim, "opt");
-    set_function_to(scope, opt, "line_wrap", opt::line_wrap);
-    set_function_to(scope, opt, "set_line_wrap", opt::set_line_wrap);
+    set_function_to(scope, vim, "opt_line_wrap", opt::line_wrap);
+    set_function_to(scope, vim, "opt_set_line_wrap", opt::set_line_wrap);
   }
 
   // Expose low-level functions to JavaScript.

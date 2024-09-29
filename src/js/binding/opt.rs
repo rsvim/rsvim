@@ -4,10 +4,9 @@ use crate::glovar;
 use crate::js::JsRuntime;
 
 use std::time::Duration;
+use tracing::debug;
 
 /// Get line wrap option.
-///
-/// Returns boolean value.
 pub fn line_wrap(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
@@ -20,7 +19,8 @@ pub fn line_wrap(
     .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
     .unwrap()
     .line_wrap();
-  rv.set_bool(true);
+  debug!("line_wrap: {:?}", value);
+  rv.set_bool(value);
 }
 
 /// Set line wrap option.
@@ -32,6 +32,7 @@ pub fn set_line_wrap(
   assert!(args.length() == 1);
   let value = args.get(0).to_boolean(scope).boolean_value(scope);
   let state_rc = JsRuntime::state(scope);
+  debug!("set_line_wrap: {:?}", value);
   state_rc
     .borrow()
     .tree

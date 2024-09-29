@@ -231,9 +231,20 @@ impl JsRuntime {
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
   pub fn init_environment(&mut self) {
-    let name = "vim:runtime/00_global.js";
-    let source = include_str!("./js/runtime/00_global.js");
+    let name = "rsvim:runtime/00__global.js";
+    let source = include_str!("./js/runtime/00__global.js");
+    self.init_builtin_module(name, source);
 
+    let name = "rsvim:runtime/01__rsvim.js";
+    let source = include_str!("./js/runtime/01__rsvim.js");
+    self.init_builtin_module(name, source);
+
+    // // Initialize process static values.
+    // process::refresh(tc_scope);
+  }
+
+  /// Synchronously load builtin module.
+  fn init_builtin_module(&mut self, name: &str, source: &str) {
     let scope = &mut self.handle_scope();
     let tc_scope = &mut v8::TryCatch::new(scope);
 
@@ -243,8 +254,8 @@ impl JsRuntime {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        error!("Failed to import builtin modules: {exception:?}");
-        eprintln!("Failed to import builtin modules: {exception:?}");
+        error!("Failed to import builtin modules: {name}, error: {exception:?}");
+        eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
         std::process::exit(1);
       }
     };
@@ -256,8 +267,8 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to instantiate builtin modules: {exception:?}");
-      eprintln!("Failed to instantiate builtin modules: {exception:?}");
+      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
       std::process::exit(1);
     }
 
@@ -266,8 +277,8 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to evaluate builtin modules: {exception:?}");
-      eprintln!("Failed to evaluate builtin modules: {exception:?}");
+      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
       std::process::exit(1);
     }
 
@@ -345,123 +356,71 @@ impl JsRuntime {
     };
     debug!("Resolved main js module (path): {:?}", path);
 
-    {
-      // This is the 1st solution, i.e. pure static module import.
-      //
-      // In this way, all the modules are resolved statically, without any async or futures. It can
-      // be simple, but lose the ability to async resolve a module.
-      //
-      // Maybe, just maybe, one day we want to write something like the node/deno js runtime:
-      //
-      // ```javascript
-      // import fzfx from "https://cdn.npmjs.com/fzfx.rsvim";
-      // ```
-      //
-      // Then we will have to rewrite this whole part, because import a module can be async.
-      let tc_scope = &mut v8::TryCatch::new(scope);
+    let tc_scope = &mut v8::TryCatch::new(scope);
 
-      // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
-      // local file system, no network/http downloading will be involved.
-      let module = match fetch_module_tree(tc_scope, filename, None) {
-        Some(module) => module,
-        None => {
-          assert!(tc_scope.has_caught());
-          let exception = tc_scope.exception().unwrap();
-          let exception = JsError::from_v8_exception(tc_scope, exception, None);
-          let err_msg = format!("User config not found: {filename:?}");
-          error!(err_msg);
-          eprintln!("{err_msg}");
-          return Err(AnyError::with_message(err_msg).into());
-        }
-      };
-
-      if module
-        .instantiate_module(tc_scope, module_resolve_cb)
-        .is_none()
-      {
+    // NOTE: Here we also use static module fetching, i.e. all the modules are already stored on
+    // local file system, no network/http downloading will be involved.
+    let module = match fetch_module_tree(tc_scope, filename, None) {
+      Some(module) => module,
+      None => {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        let err_msg =
-          format!("Failed to instantiate user config module {filename:?}: {exception:?}");
+        let err_msg = format!("User config not found: {filename:?}");
         error!(err_msg);
         eprintln!("{err_msg}");
         return Err(AnyError::with_message(err_msg).into());
       }
+    };
 
-      let _ = module.evaluate(tc_scope);
-
-      if module.get_status() == v8::ModuleStatus::Errored {
-        let exception = module.get_exception();
-        let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        let err_msg = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
-        error!(err_msg);
-        eprintln!("{err_msg}");
-        return Err(AnyError::with_message(err_msg).into());
-      }
+    if module
+      .instantiate_module(tc_scope, module_resolve_cb)
+      .is_none()
+    {
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      let err_msg = format!("Failed to instantiate user config module {filename:?}: {exception:?}");
+      error!(err_msg);
+      eprintln!("{err_msg}");
+      return Err(AnyError::with_message(err_msg).into());
     }
 
-    // {
-    //   // This is the 2nd solution, i.e. the real js compatible behavior.
-    //   // It resolves each module in async way, thus it can support potential network and http
-    //   // downloading. This also has a potential issue: each `import` keyword will wait for next
-    //   // tick to complete, which could be an unexpected behavior for user, because user could have
-    //   // different configs after enter the TUI.
-    //
-    //   let state_rc = JsRuntime::state(scope);
-    //   let mut state = state_rc.borrow_mut();
-    //
-    //   // Create static import module graph.
-    //   let graph = ModuleGraph::static_import(&path);
-    //   let graph_rc = Rc::new(RefCell::new(graph));
-    //   let status = ModuleStatus::Fetching;
-    //
-    //   state.module_map.pending.push(Rc::clone(&graph_rc));
-    //   state.module_map.seen.insert(path.clone(), status);
-    //
-    //   // If we have a source, create the es-module future.
-    //   if let Some(source) = source {
-    //     state.pending_futures.push(Box::new(EsModuleFuture {
-    //       path,
-    //       module: Rc::clone(&graph_rc.borrow().root_rc),
-    //       maybe_result: Some(Ok(bincode::serialize(&source).unwrap())),
-    //     }));
-    //   } else {
-    //     // If we don't have a source, load it from file path.
-    //
-    //     /*  Use the event-loop to asynchronously load the requested module. */
-    //     let task = {
-    //       let specifier = path.clone();
-    //       move || match load_import(&specifier, true) {
-    //         anyhow::Result::Ok(source) => Some(Ok(bincode::serialize(&source).unwrap())),
-    //         Err(e) => Some(Result::Err(e)),
-    //       }
-    //     };
-    //
-    //     let task_cb = {
-    //       let state_rc = state_rc.clone();
-    //       move |_: LoopHandle, maybe_result: TaskResult| {
-    //         let mut state = state_rc.borrow_mut();
-    //         let future = EsModuleFuture {
-    //           path,
-    //           module: Rc::clone(&graph_rc.borrow().root_rc),
-    //           maybe_result,
-    //         };
-    //         state.pending_futures.push(Box::new(future));
-    //       }
-    //     };
-    //
-    //     state.handle.spawn(task, Some(task_cb));
-    //   }
-    // }
+    match module.evaluate(tc_scope) {
+      Some(result) => {
+        debug!(
+          "Evaluated user config module result ({:?}): {:?}",
+          result.type_repr(),
+          result.to_rust_string_lossy(tc_scope),
+        );
+      }
+      None => debug!("Evaluated user config module result: None"),
+    }
+
+    if module.get_status() == v8::ModuleStatus::Errored {
+      let exception = module.get_exception();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      let err_msg = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
+      error!(err_msg);
+      eprintln!("{err_msg}");
+      return Err(AnyError::with_message(err_msg).into());
+    }
 
     Ok(())
   }
 
   /// Runs a single tick of the event-loop.
-  pub fn tick_event_loop(&mut self) {
-    run_next_tick_callbacks(&mut self.handle_scope());
-    self.fast_forward_imports();
+  pub async fn tick_event_loop(&mut self) {
+    let isolate_has_pending_tasks = self.isolate.has_pending_background_tasks();
+    debug!(
+      "Tick js runtime, isolate has pending tasks: {:?}",
+      isolate_has_pending_tasks
+    );
+    if isolate_has_pending_tasks {
+      run_next_tick_callbacks(&mut self.handle_scope());
+      self.fast_forward_imports();
+    }
+    debug!("Tick js runtime - done");
     // self.event_loop.tick();
     // self.run_pending_futures();
   }

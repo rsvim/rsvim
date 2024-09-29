@@ -558,10 +558,10 @@ pub fn fetch_module_tree<'a>(
   debug!(
     "Loaded main js module filename: {:?}, source: {:?}",
     filename,
-    if source.as_str().len() > 10 {
-      &source.as_str()[..10]
+    if source.as_str().len() > 20 {
+      String::from(&source.as_str()[..20]) + "..."
     } else {
-      source.as_str()
+      String::from(source.as_str())
     }
   );
   let source = v8::String::new(scope, &source).unwrap();
@@ -577,6 +577,7 @@ pub fn fetch_module_tree<'a>(
   state.borrow_mut().module_map.insert(filename, module_ref);
 
   let requests = module.get_module_requests();
+  debug!("Get {} module requests", requests.length());
 
   for i in 0..requests.length() {
     // Get import request from the `module_requests` array.

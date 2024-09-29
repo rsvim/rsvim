@@ -10,6 +10,7 @@ pub struct QuitStateful {}
 
 impl Stateful for QuitStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    unreachable!("Never handle QuitStateful");
+    // unreachable!("Never handle QuitStateful");
+    StatefulValue::QuitState(QuitStateful::default())
   }
 }
