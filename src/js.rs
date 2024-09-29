@@ -386,7 +386,16 @@ impl JsRuntime {
       return Err(AnyError::with_message(err_msg).into());
     }
 
-    let result = module.evaluate(tc_scope);
+    match module.evaluate(tc_scope) {
+      Some(result) => {
+        debug!(
+          "Evaluated user config module result ({:?}): {:?}",
+          result.type_repr(),
+          result.to_rust_string_lossy(tc_scope),
+        );
+      }
+      None => debug!("Evaluated user config module result: None"),
+    }
 
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
@@ -397,15 +406,15 @@ impl JsRuntime {
       return Err(AnyError::with_message(err_msg).into());
     }
 
-    debug!("Evaluated user config module: {:?}", result);
-
     Ok(())
   }
 
   /// Runs a single tick of the event-loop.
-  pub fn tick_event_loop(&mut self) {
+  pub async fn tick_event_loop(&mut self) {
+    debug!("Tick js runtime");
     run_next_tick_callbacks(&mut self.handle_scope());
     self.fast_forward_imports();
+    debug!("Tick js runtime - done");
     // self.event_loop.tick();
     // self.run_pending_futures();
   }

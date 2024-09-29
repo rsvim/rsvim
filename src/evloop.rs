@@ -325,18 +325,21 @@ impl EventLoop {
       tokio::select! {
         // Receive keyboard/mouse events
         next_event = reader.next() => {
-            self.process_event(next_event).await;
+          self.process_event(next_event).await;
         }
         // Receive notification from workers
         worker_msg = self.master_recv_from_worker.recv() => {
-            self.process_worker_notify(worker_msg).await;
+          self.process_worker_notify(worker_msg).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
-            debug!("Receive cancellation token, exit loop");
-            self.task_tracker.close();
-            // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
-            break;
+          debug!("Receive cancellation token, exit loop");
+          self.task_tracker.close();
+          // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
+          break;
+        }
+        _ = self.js_runtime.tick_event_loop() => {
+          debug!("Tick js runtime - done");
         }
       }
 
