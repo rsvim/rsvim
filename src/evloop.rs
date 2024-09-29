@@ -338,9 +338,9 @@ impl EventLoop {
           // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
           break;
         }
-        _ = self.js_runtime.tick_event_loop() => {
-          // debug!("Tick js runtime - done");
-        }
+        // _ = self.js_runtime.tick_event_loop() => {
+        //   // debug!("Tick js runtime - done");
+        // }
       }
 
       // Update terminal
