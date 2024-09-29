@@ -244,7 +244,7 @@ impl JsRuntime {
   }
 
   /// Synchronously load builtin module.
-  pub fn init_builtin_module(&mut self, name: &str, source: &str) {
+  fn init_builtin_module(&mut self, name: &str, source: &str) {
     let scope = &mut self.handle_scope();
     let tc_scope = &mut v8::TryCatch::new(scope);
 
