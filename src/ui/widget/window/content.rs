@@ -272,15 +272,15 @@ impl WindowContent {
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap();
 
-    if let Some(line) = buffer.rope().get_line(start_line) {
-      // debug!(
-      //   "buffer.get_line ({:?}):'{:?}'",
-      //   start_line,
-      //   rslice2line(&line),
-      // );
-    } else {
-      // debug!("buffer.get_line ({:?}):None", start_line);
-    }
+    // if let Some(line) = buffer.rope().get_line(start_line) {
+    //   debug!(
+    //     "buffer.get_line ({:?}):'{:?}'",
+    //     start_line,
+    //     rslice2line(&line),
+    //   );
+    // } else {
+    //   debug!("buffer.get_line ({:?}):None", start_line);
+    // }
 
     match buffer.rope().get_lines_at(start_line) {
       Some(mut buflines) => {
