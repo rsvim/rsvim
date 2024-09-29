@@ -386,7 +386,7 @@ impl JsRuntime {
       return Err(AnyError::with_message(err_msg).into());
     }
 
-    let _ = module.evaluate(tc_scope);
+    let result = module.evaluate(tc_scope);
 
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
@@ -396,6 +396,8 @@ impl JsRuntime {
       eprintln!("{err_msg}");
       return Err(AnyError::with_message(err_msg).into());
     }
+
+    debug!("Evaluated user config module: {:?}", result);
 
     Ok(())
   }
