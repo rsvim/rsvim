@@ -577,6 +577,7 @@ pub fn fetch_module_tree<'a>(
   state.borrow_mut().module_map.insert(filename, module_ref);
 
   let requests = module.get_module_requests();
+  debug!("Get {} module requests", requests.length());
 
   for i in 0..requests.length() {
     // Get import request from the `module_requests` array.

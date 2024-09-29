@@ -1,4 +1,4 @@
-//! Js runtime.
+//! Js runtimes for `rsvim` namespace.
 
 ((globalThis) => {
   // const { $$queueMicrotask, reportError } = globalThis;
@@ -20,4 +20,6 @@
   //     }
   //   });
   // }
+
+  const rsvim = __InternalRsvimGlobalObject;
 })(globalThis);

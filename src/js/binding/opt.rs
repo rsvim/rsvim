@@ -6,8 +6,6 @@ use crate::js::JsRuntime;
 use std::time::Duration;
 
 /// Get line wrap option.
-///
-/// Returns boolean value.
 pub fn line_wrap(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,

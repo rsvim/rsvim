@@ -231,9 +231,20 @@ impl JsRuntime {
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
   pub fn init_environment(&mut self) {
-    let name = "vim:runtime/00_global.js";
-    let source = include_str!("./js/runtime/00_global.js");
+    let name = "rsvim:runtime/00__global.js";
+    let source = include_str!("./js/runtime/00__global.js");
+    self.init_builtin_module(name, source);
 
+    let name = "rsvim:runtime/01__rsvim.js";
+    let source = include_str!("./js/runtime/01__rsvim.js");
+    self.init_builtin_module(name, source);
+
+    // // Initialize process static values.
+    // process::refresh(tc_scope);
+  }
+
+  /// Synchronously load builtin module.
+  pub fn init_builtin_module(&mut self, name: &str, source: &str) {
     let scope = &mut self.handle_scope();
     let tc_scope = &mut v8::TryCatch::new(scope);
 
@@ -243,8 +254,8 @@ impl JsRuntime {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        error!("Failed to import builtin modules: {exception:?}");
-        eprintln!("Failed to import builtin modules: {exception:?}");
+        error!("Failed to import builtin modules: {name}, error: {exception:?}");
+        eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
         std::process::exit(1);
       }
     };
@@ -256,8 +267,8 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to instantiate builtin modules: {exception:?}");
-      eprintln!("Failed to instantiate builtin modules: {exception:?}");
+      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
       std::process::exit(1);
     }
 
@@ -266,8 +277,8 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to evaluate builtin modules: {exception:?}");
-      eprintln!("Failed to evaluate builtin modules: {exception:?}");
+      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
       std::process::exit(1);
     }
 

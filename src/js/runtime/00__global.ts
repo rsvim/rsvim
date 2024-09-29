@@ -1,4 +1,4 @@
-//! Js runtime.
+//! Js runtimes for global object, i.e. `globalThis`.
 
 ((globalThis) => {
   // const { $$queueMicrotask, reportError } = globalThis;

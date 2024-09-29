@@ -60,8 +60,8 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
   // set_function_to(scope, global, "$$reportError", global_report_error);
   // set_function_to(scope, global, "$$queueMicrotask", global_queue_micro);
 
-  // Register the `__InternalVimGlobalObject` global object.
-  let vim = create_object_under(scope, global, "__InternalVimGlobalObject");
+  // Register the `__InternalRsvimGlobalObject` global object.
+  let vim = create_object_under(scope, global, "__InternalRsvimGlobalObject");
 
   // `__vim.opt`
   {
