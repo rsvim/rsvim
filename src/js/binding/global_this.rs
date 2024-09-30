@@ -3,8 +3,11 @@
 
 use crate::glovar;
 use crate::js::binding::set_function_to;
+use crate::js::msg::{Dummy, JsRuntimeToEventLoopMessage};
 use crate::js::JsRuntime;
+use crate::uuid;
 
+use std::ptr::NonNull;
 use std::rc::Rc;
 use std::time::Duration;
 use tracing::debug;
@@ -35,35 +38,42 @@ pub fn set_timeout(
     Err(_) => vec![],
   };
 
-  let state_rc = JsRuntime::state(scope);
-  let params = Rc::new(params);
+  unsafe {
+    let state_rc = JsRuntime::state(scope);
+    let params = Rc::new(params);
+    let mut raw_scope = NonNull::new(scope as *mut v8::HandleScope).unwrap();
+    let join_handle = state_rc.borrow().task_tracker.spawn_local(async move {
+      tokio::time::sleep(Duration::from_millis(millis)).await;
+      let undefined = v8::undefined(raw_scope.as_mut()).into();
+      let tc_scope = &mut v8::TryCatch::new(raw_scope.as_mut());
 
-  let timeout_cb = {
-    let state_rc = state_rc.clone();
-    move |_: LoopHandle| {
-      let mut state = state_rc.borrow_mut();
-      let future = TimeoutFuture {
-        cb: Rc::clone(&callback),
-        params: Rc::clone(&params),
-      };
-      state.pending_futures.push(Box::new(future));
+      let callback = v8::Local::new(scope, (*callback).clone());
+      let args: Vec<v8::Local<v8::Value>> = params
+        .iter()
+        .map(|arg| v8::Local::new(scope, arg))
+        .collect();
+      callback.call(tc_scope, undefined, &args);
 
-      // Note: It's important to send an interrupt signal to the event-loop to prevent the
-      // event-loop from idling in the poll phase, waiting for I/O, while the timer's JS
-      // future is ready in the runtime level.
-      if !state.wake_event_queued {
-        state.interrupt_handle.interrupt();
-        state.wake_event_queued = true;
+      // Report if callback threw an exception.
+      if tc_scope.has_caught() {
+        let exception = tc_scope.exception().unwrap();
+        let exception = v8::Global::new(tc_scope, exception);
+        let state = JsRuntime::state(tc_scope);
+        state.borrow_mut().exceptions.capture_exception(exception);
       }
-    }
-  };
 
-  // Schedule a new timer to the event-loop.
-  let state = state_rc.borrow();
-  let id = state.handle.timer(millis, repeatable, timeout_cb);
+      state_rc
+        .borrow()
+        .js_worker_send_to_master
+        .send(JsRuntimeToEventLoopMessage::Dummy(Dummy::default()))
+        .await;
+    });
+  }
+
+  let job_id = uuid::next();
 
   // Return timeout's internal id.
-  rv.set(v8::Number::new(scope, id as f64).into());
+  rv.set(v8::Number::new(scope, job_id as f64).into());
 }
 
 pub fn clear_timeout() {}
