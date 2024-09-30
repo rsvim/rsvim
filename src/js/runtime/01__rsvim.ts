@@ -12,9 +12,7 @@ interface RsvimType {
 }
 
 (function (globalThis: { Rsvim: RsvimType }) {
-  // `Rsvim`
   globalThis.Rsvim = {
-    // `Rsvim.opt`
     opt: {
       lineWrap: function () {
         // @ts-ignore
@@ -29,6 +27,6 @@ interface RsvimType {
         // @ts-ignore
         __InternalRsvimGlobalObject.opt_set_line_wrap(value);
       },
-    },
+    } as RsvimOptionType,
   } as RsvimType;
 })(globalThis as unknown as { Rsvim: RsvimType });
