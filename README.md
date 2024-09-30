@@ -56,6 +56,7 @@ Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc
 ## Credits
 
 - [dune](https://github.com/aalykiot/dune): A hobby runtime for JavaScript and TypeScript.
+- [deno](https://deno.com/): A modern runtime for JavaScript and TypeScript.
 
 ## Supporting the Project
 
