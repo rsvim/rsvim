@@ -14,11 +14,11 @@ interface RsvimType {
 (function (globalThis: { Rsvim: RsvimType }) {
   globalThis.Rsvim = {
     opt: {
-      lineWrap: function () {
+      lineWrap: function (): boolean {
         // @ts-ignore
         return __InternalRsvimGlobalObject.opt_line_wrap();
       },
-      setLineWrap: function (value) {
+      setLineWrap: function (value: boolean): void {
         if (typeof value !== "boolean") {
           throw new Error(
             `Value (${value}) must be boolean type, but found ${typeof value}`,
