@@ -1,4 +1,4 @@
-//! APIs for `__vim.opt` namespace.
+//! APIs for `Rsvim.opt` namespace.
 
 use crate::glovar;
 use crate::js::JsRuntime;
