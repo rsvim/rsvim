@@ -1,20 +1,12 @@
 //! Js runtime type declarations for `Rsvim` namespace.
 
-// `Rsvim.opt`
-declare type RsvimOption = {
-  // Get `line_wrap` option.
-  lineWrap: () => boolean;
-  // Set `line_wrap` option.
-  setLineWrap: (value: boolean) => void;
-};
+interface __InternalRsvimGlobalObjectType {
+  opt_line_wrap(): boolean;
+  opt_set_line_wrap(value: boolean): void;
+}
 
-// Declare `Rsvim`.
 declare global {
-  // `Rsvim`.
-  interface Rsvim {
-    // `Rsvim.opt`.
-    opt: RsvimOption;
-  }
+  const __InternalRsvimGlobalObject: __InternalRsvimGlobalObjectType;
 }
 
 export {};

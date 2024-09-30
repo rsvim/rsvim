@@ -5,7 +5,7 @@
     "allowUnusedLabels": false,
     "checkJs": true,
     "keyofStringsOnly": false,
-    "lib": ["es5"],
+    "lib": ["es6"],
     "noErrorTruncation": false,
     "noFallthroughCasesInSwitch": false,
     "noImplicitAny": true,
