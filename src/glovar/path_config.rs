@@ -73,7 +73,7 @@ fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
   base_dirs.config_local_dir().join("rsvim").to_path_buf()
 }
 
-#[cfg(not(target_os = "macos")]
+#[cfg(target_os = "macos")]
 fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
   base_dirs
     .home_dir()
