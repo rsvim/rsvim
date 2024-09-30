@@ -15,6 +15,7 @@ interface RsvimType {
     // `Rsvim.opt`
     opt: {
       lineWrap: function () {
+        // @ts-ignore
         return __InternalRsvimGlobalObject.opt_line_wrap();
       },
       setLineWrap: function (value) {
@@ -23,6 +24,7 @@ interface RsvimType {
             `Value (${value}) must be boolean type, but found ${typeof value}`,
           );
         }
+        // @ts-ignore
         __InternalRsvimGlobalObject.opt_set_line_wrap(value);
       },
     },
