@@ -22,7 +22,8 @@
     "strictNullChecks": true,
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "removeComments": true
   },
   "include": ["src/js/runtime/*.ts", "src/js/runtime/*.d.ts"]
 }

@@ -23,6 +23,7 @@
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
     "useUnknownInCatchVariables": false,
+    "removeComments": true,
     "outDir": "src/js/runtime"
   },
   "lint": {
