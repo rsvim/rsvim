@@ -1630,7 +1630,7 @@ dependencies = [
  "swc_common 0.39.0",
  "swc_ecma_ast 0.121.0",
  "swc_ecma_codegen",
- "swc_ecma_loader",
+ "swc_ecma_loader 0.52.0",
  "swc_ecma_parser",
  "swc_ecma_transforms_base",
  "swc_ecma_transforms_react",
@@ -2013,7 +2013,7 @@ dependencies = [
  "swc_common 0.39.0",
  "swc_ecma_ast 0.120.0",
  "swc_ecma_codegen",
- "swc_ecma_loader",
+ "swc_ecma_loader 0.51.0",
  "swc_ecma_parser",
  "swc_ecma_transforms_base",
  "swc_ecma_transforms_optimization",
@@ -2193,6 +2193,20 @@ dependencies = [
  "serde",
  "swc_atoms 0.7.0",
  "swc_common 0.39.0",
+ "tracing",
+]
+
+[[package]]
+name = "swc_ecma_loader"
+version = "0.52.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71a4a7d650e26ebf0d3b0a5a80c8d893f80a44a79cb5129c75841a9cb8b48805"
+dependencies = [
+ "anyhow",
+ "pathdiff",
+ "serde",
+ "swc_atoms 1.0.0",
+ "swc_common 0.40.0",
  "tracing",
 ]
 
