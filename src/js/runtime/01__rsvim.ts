@@ -1,10 +1,12 @@
 //! Js runtimes for `Rsvim` namespace.
 
+// `Rsvim.opt`
 interface RsvimOptionType {
   lineWrap(): boolean;
   setLineWrap(value: boolean): void;
 }
 
+// `Rsvim`
 interface RsvimType {
   opt: RsvimOptionType;
 }
