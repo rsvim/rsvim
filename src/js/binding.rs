@@ -22,7 +22,7 @@ use crate::js::{check_exceptions, JsRuntime};
 // use crate::stdio;
 // use crate::timers;
 
-pub mod global_this;
+pub mod global;
 pub mod opt;
 
 // /// Function pointer for the bindings initializers.

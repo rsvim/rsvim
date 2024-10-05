@@ -64,12 +64,13 @@ pub struct JsRuntimeOptions {
 
 // /// A vector with JS callbacks and parameters.
 // type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
-//
-// /// An abstract interface for something that should run in respond to an
-// /// async task, scheduled previously and is now completed.
-// pub trait JsFuture {
-//   fn run(&mut self, scope: &mut v8::HandleScope);
-// }
+
+/// An abstract interface for javascript `Promise` and `async`.
+/// since everything in V8 needs the `&mut v8::HandleScope` to operate with, we cannot simply put
+/// the async task into tokio `spawn` API, but to first
+pub trait JsFuture {
+  fn run(&mut self, scope: &mut v8::HandleScope);
+}
 
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
@@ -80,8 +81,8 @@ pub struct JsRuntimeState {
   // pub handle: LoopHandle,
   // /// A handle to the event-loop that can interrupt the poll-phase.
   // pub interrupt_handle: LoopInterruptHandle,
-  // /// Holds JS pending futures scheduled by the event-loop.
-  // pub pending_futures: Vec<Box<dyn JsFuture>>,
+  /// Holds JS pending futures scheduled by the event-loop.
+  pub pending_futures: Vec<Box<dyn JsFuture>>,
   /// Indicates the start time of the process.
   pub startup_moment: Instant,
   /// Specifies the timestamp which the current process began in Unix time.
@@ -193,7 +194,7 @@ impl JsRuntime {
       module_map: ModuleMap::new(),
       // handle: event_loop.handle(),
       // interrupt_handle: event_loop.interrupt_handle(),
-      // pending_futures: Vec::new(),
+      pending_futures: Vec::new(),
       startup_moment,
       time_origin,
       // next_tick_queue: Vec::new(),
@@ -420,7 +421,7 @@ impl JsRuntime {
     self.fast_forward_imports();
     debug!("Tick js runtime - done");
     // self.event_loop.tick();
-    // self.run_pending_futures();
+    self.run_pending_futures();
   }
 
   // /// Polls the inspector for new devtools messages.
@@ -463,31 +464,33 @@ impl JsRuntime {
   //   }
   // }
 
-  // /// Runs all the pending javascript tasks.
-  // fn run_pending_futures(&mut self) {
-  //   // Get a handle-scope and a reference to the runtime's state.
-  //   let scope = &mut self.handle_scope();
-  //   let state_rc = Self::state(scope);
-  //
-  //   // NOTE: The reason we move all the js futures to a separate vec is because
-  //   // we need to drop the `state` borrow before we start iterating through all
-  //   // of them to avoid borrowing panics at runtime.
-  //
-  //   let futures: Vec<Box<dyn JsFuture>> = state_rc.borrow_mut().pending_futures.drain(..).collect();
-  //
-  //   // NOTE: After every future executes (aka v8's call stack gets empty) we will drain
-  //   // the MicroTask and NextTick Queue.
-  //
-  //   for mut fut in futures {
-  //     fut.run(scope);
-  //     if let Some(error) = check_exceptions(scope) {
-  //       report_and_exit(error);
-  //     }
-  //     run_next_tick_callbacks(scope);
-  //   }
-  //
-  //   state_rc.borrow_mut().wake_event_queued = false;
-  // }
+  /// Runs all the pending javascript tasks.
+  fn run_pending_futures(&mut self) {
+    // Get a handle-scope and a reference to the runtime's state.
+    let scope = &mut self.handle_scope();
+    let state_rc = Self::state(scope);
+
+    // NOTE: The reason we move all the js futures to a separate vec is because
+    // we need to drop the `state` borrow before we start iterating through all
+    // of them to avoid borrowing panics at runtime.
+
+    let futures: Vec<Box<dyn JsFuture>> = state_rc.borrow_mut().pending_futures.drain(..).collect();
+
+    // NOTE: After every future executes (aka v8's call stack gets empty) we will drain
+    // the MicroTask and NextTick Queue.
+
+    for mut fut in futures {
+      fut.run(scope);
+      if let Some(error) = check_exceptions(scope) {
+        // FIXME: Cannot simply report error and exit process, because this is inside the editor.
+        error!("{error:?}");
+        eprintln!("{error:?}");
+      }
+      run_next_tick_callbacks(scope);
+    }
+
+    // state_rc.borrow_mut().wake_event_queued = false;
+  }
 
   /// Checks for imports (static/dynamic) ready for execution.
   fn fast_forward_imports(&mut self) {
