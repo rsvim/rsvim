@@ -311,6 +311,11 @@ impl EventLoop {
     debug!("Received {:?} message from workers", msg);
   }
 
+  async fn process_js_tick(&mut self, msg: Option<JsRuntimeToEventLoopMessage>) {
+    // debug!("Tick js runtime - done");
+    self.js_runtime.tick_event_loop();
+  }
+
   /// Running the loop, it repeatedly do following steps:
   ///
   /// 1. Receives several things:

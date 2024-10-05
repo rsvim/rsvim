@@ -3,13 +3,13 @@
 
 use crate::glovar;
 use crate::js::binding::set_function_to;
-use crate::js::msg::{Dummy, JsRuntimeToEventLoopMessage};
-use crate::js::{JsFuture, JsRuntime};
-use crate::uuid;
+use crate::js::msg::{Dummy, GlobalSetTimeout, JsRuntimeToEventLoopMessage};
+use crate::js::{self, JsFuture, JsRuntime};
 
 use std::ptr::NonNull;
 use std::rc::Rc;
 use std::time::Duration;
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tracing::debug;
 
 struct TimeoutFuture {
@@ -68,37 +68,35 @@ pub fn set_timeout(
   };
 
   let state_rc = JsRuntime::state(scope);
+  let state_rc2 = state_rc.clone();
   let params = Rc::new(params);
-  let join_handle = state_rc.borrow().task_tracker.spawn(async move {
+
+  state_rc.borrow().task_tracker.spawn_local(async move {
     tokio::time::sleep(Duration::from_millis(millis)).await;
-    let undefined = v8::undefined(raw_scope.as_mut()).into();
-    let tc_scope = &mut v8::TryCatch::new(raw_scope.as_mut());
-
-    let callback = v8::Local::new(scope, (*callback).clone());
-    let args: Vec<v8::Local<v8::Value>> = params
-      .iter()
-      .map(|arg| v8::Local::new(scope, arg))
-      .collect();
-    callback.call(tc_scope, undefined, &args);
-
-    // Report if callback threw an exception.
-    if tc_scope.has_caught() {
-      let exception = tc_scope.exception().unwrap();
-      let exception = v8::Global::new(tc_scope, exception);
-      let state = JsRuntime::state(tc_scope);
-      state.borrow_mut().exceptions.capture_exception(exception);
-    }
-
-    state_rc
-      .borrow()
-      .js_worker_send_to_master
-      .send(JsRuntimeToEventLoopMessage::Dummy(Dummy::default()))
-      .await;
+    state_rc2.borrow().js_worker_send_to_master.send(
+      JsRuntimeToEventLoopMessage::GlobalSetTimeout(GlobalSetTimeout::new(millis)),
+    );
   });
 
-  let job_id = uuid::next();
+  let timeout_cb = TimeoutFuture {
+    cb: Rc::clone(&callback),
+    params: Rc::clone(&params),
+  };
+  let expire_at = Instant::now()
+    .checked_add(Duration::from_millis(millis))
+    .unwrap();
+  let mut state = state_rc.borrow_mut();
+  if !state.timeout_queue.contains_key(&expire_at) {
+    state.timeout_queue.insert(expire_at, Vec::new());
+  }
+  state
+    .timeout_queue
+    .get_mut(&expire_at)
+    .unwrap()
+    .push(Box::new(timeout_cb));
 
   // Return timeout's internal id.
+  let job_id = js::next_global_id();
   rv.set(v8::Number::new(scope, job_id as f64).into());
 }
 

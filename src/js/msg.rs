@@ -7,7 +7,7 @@
 /// Message between [`EventLoop`](crate::evloop::EventLoop) and
 /// [`JsRuntime`](crate::js::JsRuntime).
 pub enum JsRuntimeToEventLoopMessage {
-  Dummy(Dummy),
+  GlobalSetTimeout(GlobalSetTimeout),
 }
 
 // The message JsRuntime send to EventLoop }
@@ -31,5 +31,16 @@ pub struct Dummy {}
 impl Dummy {
   pub fn new() -> Self {
     Dummy {}
+  }
+}
+
+#[derive(Debug, Default)]
+pub struct GlobalSetTimeout {
+  pub millis: u64,
+}
+
+impl GlobalSetTimeout {
+  pub fn new(millis: u64) -> Self {
+    GlobalSetTimeout { millis }
   }
 }
