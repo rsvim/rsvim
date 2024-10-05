@@ -2,9 +2,9 @@
 
 #![allow(dead_code, unused)]
 
-use std::collections::BTreeMap;
 use parking_lot::RwLock;
 use std::cell::RefCell;
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -83,10 +83,8 @@ pub struct JsRuntimeState {
   // pub handle: LoopHandle,
   // /// A handle to the event-loop that can interrupt the poll-phase.
   // pub interrupt_handle: LoopInterruptHandle,
-  // /// Holds JS pending futures scheduled by the event-loop.
-  // pub pending_futures: Vec<Box<dyn JsFuture>>,
-  /// Holds JS pending timeout futures scheduled by the event-loop.
-  pub timeout_queue: BTreeMap<Instant, Vec<Box<dyn JsFuture>>>,
+  /// Holds JS pending futures scheduled by the event-loop.
+  pub pending_futures: Vec<Box<dyn JsFuture>>,
   /// Indicates the start time of the process.
   pub startup_moment: Instant,
   /// Specifies the timestamp which the current process began in Unix time.
@@ -198,8 +196,8 @@ impl JsRuntime {
       module_map: ModuleMap::new(),
       // handle: event_loop.handle(),
       // interrupt_handle: event_loop.interrupt_handle(),
-      // pending_futures: Vec::new(),
-      timeout_queue: BTreeMap::new(),
+      pending_futures: Vec::new(),
+      // timeout_queue: BTreeMap::new(),
       startup_moment,
       time_origin,
       // next_tick_queue: Vec::new(),
@@ -416,7 +414,7 @@ impl JsRuntime {
   }
 
   /// Runs a single tick of the event-loop.
-  pub async fn tick_event_loop(&mut self) {
+  pub fn tick_event_loop(&mut self) {
     let isolate_has_pending_tasks = self.isolate.has_pending_background_tasks();
     debug!(
       "Tick js runtime, isolate has pending tasks: {:?}",
@@ -425,7 +423,7 @@ impl JsRuntime {
     run_next_tick_callbacks(&mut self.handle_scope());
     self.fast_forward_imports();
     // self.event_loop.tick();
-    // self.run_pending_futures();
+    self.run_pending_futures();
     debug!("Tick js runtime - done");
   }
 
@@ -469,42 +467,36 @@ impl JsRuntime {
   //   }
   // }
 
-  // /// Runs all the pending javascript tasks.
-  // fn run_pending_futures(&mut self) {
-  //   // Get a handle-scope and a reference to the runtime's state.
-  //   let scope = &mut self.handle_scope();
-  //
-  //   // NOTE: The reason we move all the js futures to a separate vec is because
-  //   // we need to drop the `state` borrow before we start iterating through all
-  //   // of them to avoid borrowing panics at runtime.
-  //   let futures: Vec<Box<dyn JsFuture>> = {
-  //     Self::state(scope)
-  //       .borrow_mut()
-  //       .pending_futures
-  //       .drain(..)
-  //       .collect()
-  //   };
-  //
-  //   // NOTE: After every future executes (aka v8's call stack gets empty) we will drain
-  //   // the MicroTask and NextTick Queue.
-  //
-  //   for mut fut in futures {
-  //     fut.run(scope);
-  //     if let Some(error) = check_exceptions(scope) {
-  //       // FIXME: Cannot simply report error and exit process, because this is inside the editor.
-  //       error!("{error:?}");
-  //       eprintln!("{error:?}");
-  //     }
-  //     run_next_tick_callbacks(scope);
-  //   }
-  //
-  //   // state_rc.borrow_mut().wake_event_queued = false;
-  // }
+  /// Runs all the pending javascript tasks.
+  fn run_pending_futures(&mut self) {
+    // Get a handle-scope and a reference to the runtime's state.
+    let scope = &mut self.handle_scope();
 
-  /// Runs all pending timeout tasks.
-  fn run_timers(&mut self) {
-      let expired_timers :Vec<Intant> = 
+    // NOTE: The reason we move all the js futures to a separate vec is because
+    // we need to drop the `state` borrow before we start iterating through all
+    // of them to avoid borrowing panics at runtime.
+    let futures: Vec<Box<dyn JsFuture>> = {
+      Self::state(scope)
+        .borrow_mut()
+        .pending_futures
+        .drain(..)
+        .collect()
+    };
 
+    // NOTE: After every future executes (aka v8's call stack gets empty) we will drain
+    // the MicroTask and NextTick Queue.
+
+    for mut fut in futures {
+      fut.run(scope);
+      if let Some(error) = check_exceptions(scope) {
+        // FIXME: Cannot simply report error and exit process, because this is inside the editor.
+        error!("{error:?}");
+        eprintln!("{error:?}");
+      }
+      run_next_tick_callbacks(scope);
+    }
+
+    // state_rc.borrow_mut().wake_event_queued = false;
   }
 
   /// Checks for imports (static/dynamic) ready for execution.

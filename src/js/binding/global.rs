@@ -73,27 +73,18 @@ pub fn set_timeout(
 
   state_rc.borrow().task_tracker.spawn_local(async move {
     tokio::time::sleep(Duration::from_millis(millis)).await;
+    let timeout_cb = TimeoutFuture {
+      cb: Rc::clone(&callback),
+      params: Rc::clone(&params),
+    };
+    state_rc2
+      .borrow_mut()
+      .pending_futures
+      .push(Box::new(timeout_cb));
     state_rc2.borrow().js_worker_send_to_master.send(
       JsRuntimeToEventLoopMessage::GlobalSetTimeout(GlobalSetTimeout::new(millis)),
     );
   });
-
-  let timeout_cb = TimeoutFuture {
-    cb: Rc::clone(&callback),
-    params: Rc::clone(&params),
-  };
-  let expire_at = Instant::now()
-    .checked_add(Duration::from_millis(millis))
-    .unwrap();
-  let mut state = state_rc.borrow_mut();
-  if !state.timeout_queue.contains_key(&expire_at) {
-    state.timeout_queue.insert(expire_at, Vec::new());
-  }
-  state
-    .timeout_queue
-    .get_mut(&expire_at)
-    .unwrap()
-    .push(Box::new(timeout_cb));
 
   // Return timeout's internal id.
   let job_id = js::next_global_id();

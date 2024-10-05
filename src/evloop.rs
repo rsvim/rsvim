@@ -311,7 +311,7 @@ impl EventLoop {
     debug!("Received {:?} message from workers", msg);
   }
 
-  async fn process_js_tick(&mut self, msg: Option<JsRuntimeToEventLoopMessage>) {
+  async fn process_js_tick(&mut self, _msg: Option<JsRuntimeToEventLoopMessage>) {
     // debug!("Tick js runtime - done");
     self.js_runtime.tick_event_loop();
   }
@@ -343,8 +343,8 @@ impl EventLoop {
           // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
           break;
         }
-        _ = self.js_runtime.tick_event_loop() => {
-          // debug!("Tick js runtime - done");
+        js_worker_msg = self.master_recv_from_js_worker.recv() => {
+            self.process_js_tick(js_worker_msg).await;
         }
       }
 
