@@ -370,6 +370,7 @@ impl EventLoop {
           });
         }
       }
+      self.js_runtime.tick_event_loop();
     }
   }
 
