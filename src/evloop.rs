@@ -146,8 +146,8 @@ impl EventLoop {
     // use tokio APIs along with V8 engine. We will have to first send task requests to master, let
     // it handles these tasks for js runtime, then send the task results back to js runtime.
     //
-    // These tasks are some common and low level tasks, serving as infrastructure for js world. For
-    // example:
+    // These tasks are very common and low level, serve as an infrastructure layer for js world.
+    // For example:
     // - File IO
     // - Timer
     // - Network
