@@ -475,7 +475,7 @@ impl JsRuntime {
   //   }
   // }
 
-  /// Runs all the pending javascript tasks.
+  /// Runs pending javascript tasks which have received results from master.
   fn run_pending_futures(&mut self) {
     // Get a handle-scope and a reference to the runtime's state.
     let scope = &mut self.handle_scope();
