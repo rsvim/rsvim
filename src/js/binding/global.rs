@@ -84,7 +84,7 @@ pub fn set_timeout(
 
   // Return timeout's internal id.
   let timer_id = js::next_global_id();
-  state_rc.borrow_mut().timer_ids.insert(timer_id);
+  state_rc.borrow_mut().timeout_handles.insert(timer_id);
   rv.set(v8::Number::new(scope, timer_id as f64).into());
 }
 
@@ -98,5 +98,5 @@ pub fn clear_timeout(
   let timer_id = args.get(0).int32_value(scope).unwrap();
   let state_rc = JsRuntime::state(scope);
 
-  state_rc.borrow_mut().timer_ids.remove(&timer_id);
+  state_rc.borrow_mut().timeout_handles.remove(&timer_id);
 }
