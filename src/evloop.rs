@@ -336,8 +336,8 @@ impl EventLoop {
   }
 
   async fn process_js_runtime_notify(&mut self, msg: Option<JsRuntimeToEventLoopMessage>) {
-    match msg {
-      Some(msg) => match msg {
+    if let Some(msg) = msg {
+      match msg {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           let master_send_to_js_worker = self.master_send_to_js_worker.clone();
           self.task_tracker.spawn(async move {
@@ -349,10 +349,6 @@ impl EventLoop {
               .await;
           });
         }
-      },
-      None => {
-        error!("Js runtime message is exhausted, exit loop");
-        self.cancellation_token.cancel();
       }
     }
   }
