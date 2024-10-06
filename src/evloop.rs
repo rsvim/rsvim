@@ -96,10 +96,10 @@ pub struct EventLoop {
 
   /// Js runtime.
   pub js_runtime: JsRuntime,
-  /// Receiver: master <= js worker.
-  pub master_recv_from_js_worker: Receiver<JsRuntimeToEventLoopMessage>,
-  /// Sender: master => js worker.
-  pub master_send_to_js_worker: Sender<EventLoopToJsRuntimeMessage>,
+  /// Receiver: master <= js runtime.
+  pub master_recv_from_js_runtime: Receiver<JsRuntimeToEventLoopMessage>,
+  /// Sender: master => js runtime.
+  pub master_send_to_js_runtime: Sender<EventLoopToJsRuntimeMessage>,
 }
 
 impl EventLoop {
@@ -144,9 +144,9 @@ impl EventLoop {
     // Worker => master
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
 
-    // Since js runtime has to interact with V8 engine, and there's many limitations that cannot
-    // use tokio APIs along with V8 engine. We will have to first send task requests to master, let
-    // it handles these tasks for js runtime, then send the task results back to js runtime.
+    // Since there are too many limitations that we cannot use tokio APIs along with V8 engine, we
+    // hae to first send task requests to master, let the master handles these tasks for us in the
+    // async way, then send the task results back to js runtime.
     //
     // These tasks are very common and low level, serve as an infrastructure layer for js world.
     // For example:
@@ -157,18 +157,18 @@ impl EventLoop {
     //
     // The basic workflow is:
     // 1. When js runtime needs to handles the `Promise` and `async` functions, it send requests to
-    //    master via `js_worker_send_to_master`.
-    // 2. Master receive requests via `master_recv_from_js_worker`, and handle these tasks in async
+    //    master via `js_runtime_send_to_master`.
+    // 2. Master receive requests via `master_recv_from_js_runtime`, and handle these tasks in async
     //    way.
     // 3. Master send the task results via `master_send_to_js_worker`.
     // 4. Js runtime receive these task results via `js_worker_recv_from_master`, then process
     //    pending futures.
 
-    // Js worker => master
-    let (js_worker_send_to_master, master_recv_from_js_worker) =
+    // Js runtime => master
+    let (js_runtime_send_to_master, master_recv_from_js_runtime) =
       channel(glovar::CHANNEL_BUF_SIZE());
-    // Master => js worker
-    let (master_send_to_js_worker, js_worker_recv_from_master) =
+    // Master => js runtime
+    let (master_send_to_js_runtime, js_runtime_recv_from_master) =
       channel(glovar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
@@ -191,8 +191,8 @@ impl EventLoop {
       JsRuntimeOptions::default(),
       startup_moment,
       startup_unix_epoch,
-      js_worker_send_to_master,
-      js_worker_recv_from_master,
+      js_runtime_send_to_master,
+      js_runtime_recv_from_master,
       cli_opt.clone(),
       runtime_path.clone(),
       tree_arc.clone(),
@@ -215,8 +215,8 @@ impl EventLoop {
       worker_send_to_master,
       master_recv_from_worker,
       js_runtime,
-      master_recv_from_js_worker,
-      master_send_to_js_worker,
+      master_recv_from_js_runtime,
+      master_send_to_js_runtime,
     })
   }
 
@@ -339,10 +339,10 @@ impl EventLoop {
     if let Some(msg) = msg {
       match msg {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
-          let master_send_to_js_worker = self.master_send_to_js_worker.clone();
+          let master_send_to_js_runtime = self.master_send_to_js_runtime.clone();
           self.task_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
-            let _ = master_send_to_js_worker
+            let _ = master_send_to_js_runtime
               .send(EventLoopToJsRuntimeMessage::TimeoutResp(
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
@@ -374,7 +374,7 @@ impl EventLoop {
           self.process_worker_notify(worker_msg).await;
         }
         // Receive notification from js runtime
-        js_worker_msg = self.master_recv_from_js_worker.recv() => {
+        js_worker_msg = self.master_recv_from_js_runtime.recv() => {
             self.process_js_runtime_notify(js_worker_msg).await;
         }
         // Receive cancellation notify

@@ -1,6 +1,6 @@
 //! Messages used inside [`EventLoop`](crate::evloop::EventLoop).
 
-// Message {
+// Worker to Master message {
 
 #[derive(Debug)]
 /// Message.
@@ -18,4 +18,4 @@ impl Dummy {
   }
 }
 
-// Message }
+// Worker to Master message }

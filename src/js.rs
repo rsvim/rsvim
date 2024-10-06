@@ -107,9 +107,11 @@ pub struct JsRuntimeState {
   // pub wake_event_queued: bool,
 
   // Data Access for RSVIM {
-  // Js worker => master.
-  pub js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
-  pub js_worker_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+
+  // Js runtime ==request==> master.
+  pub js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  // Js runtime <==response== master.
+  pub js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   pub cli_opt: CliOpt,
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
   pub tree: TreeArc,
@@ -135,8 +137,8 @@ impl JsRuntime {
     options: JsRuntimeOptions,
     startup_moment: Instant,
     time_origin: u128,
-    js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
-    js_worker_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+    js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
     tree: TreeArc,
@@ -212,8 +214,8 @@ impl JsRuntime {
       exceptions: exception::ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      js_worker_send_to_master,
-      js_worker_recv_from_master,
+      js_runtime_send_to_master,
+      js_runtime_recv_from_master,
       cli_opt,
       runtime_path,
       tree,
@@ -481,7 +483,7 @@ impl JsRuntime {
     let scope = &mut self.handle_scope();
     let state_rc = Self::state(scope);
     let mut state = state_rc.borrow_mut();
-    while let Ok(msg) = state.js_worker_recv_from_master.try_recv() {
+    while let Ok(msg) = state.js_runtime_recv_from_master.try_recv() {
       match msg {
         EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
           match state.pending_futures.remove(&resp.future_id) {
