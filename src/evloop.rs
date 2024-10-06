@@ -153,7 +153,7 @@ impl EventLoop {
     // - Network
     // - And more...
     //
-    // The workflow looks like:
+    // The basic workflow is:
     // 1. Master receive requests via `master_recv_from_js_worker`
     // 2. Master do some tasks in async way, then send task results via `master_send_to_js_worker`.
     // 3. Js runtime receive these task results via `js_worker_recv_from_master`, then process
