@@ -112,6 +112,7 @@ pub struct JsRuntimeState {
   pub js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
   // Js runtime <==response== master.
   pub js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+  pub task_tracker: TaskTracker,
   pub cli_opt: CliOpt,
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
   pub tree: TreeArc,
@@ -139,6 +140,7 @@ impl JsRuntime {
     time_origin: u128,
     js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
     js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+    task_tracker: TaskTracker,
     cli_opt: CliOpt,
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
     tree: TreeArc,
@@ -216,6 +218,7 @@ impl JsRuntime {
       // wake_event_queued: false,
       js_runtime_send_to_master,
       js_runtime_recv_from_master,
+      task_tracker,
       cli_opt,
       runtime_path,
       tree,

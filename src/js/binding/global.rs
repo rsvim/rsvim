@@ -66,23 +66,42 @@ pub fn set_timeout(
   };
 
   let state_rc = JsRuntime::state(scope);
-  let mut state = state_rc.borrow_mut();
+  // let mut state = state_rc.borrow_mut();
   let params = Rc::new(params);
 
   // Return timeout's internal id.
   let timer_id = js::next_future_id();
-  let _ = state
-    .js_runtime_send_to_master
-    .blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
-      jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
-    ));
-  let timeout_cb = TimeoutFuture {
-    future_id: timer_id,
-    cb: Rc::clone(&callback),
-    params: Rc::clone(&params),
-  };
-  state.pending_futures.insert(timer_id, Box::new(timeout_cb));
-  state.timeout_handles.insert(timer_id);
+
+  let state_rc2 = Rc::clone(&state_rc);
+  state_rc.borrow().task_tracker.spawn_local(async move {
+    tokio::time::sleep(Duration::from_millis(millis)).await;
+    let timeout_cb = TimeoutFuture {
+      future_id: timer_id,
+      cb: Rc::clone(&callback),
+      params: Rc::clone(&params),
+    };
+    let js_runtime_send_to_master = {
+      let mut state = state_rc2.borrow_mut();
+      state_rc2
+        .borrow_mut()
+        .pending_futures
+        .insert(timer_id, Box::new(timeout_cb));
+      state.timeout_handles.insert(timer_id);
+      state.js_runtime_send_to_master.clone()
+    };
+    let _ = js_runtime_send_to_master
+      .send(JsRuntimeToEventLoopMessage::TimeoutReq(
+        jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
+      ))
+      .await;
+  });
+  // let timeout_cb = TimeoutFuture {
+  //   future_id: timer_id,
+  //   cb: Rc::clone(&callback),
+  //   params: Rc::clone(&params),
+  // };
+  // state.pending_futures.insert(timer_id, Box::new(timeout_cb));
+  // state.timeout_handles.insert(timer_id);
   rv.set(v8::Number::new(scope, timer_id as f64).into());
   debug!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
 }
