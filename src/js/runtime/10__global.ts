@@ -53,7 +53,7 @@ interface GlobalThisType {
     const id = nextTimerId++;
 
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-    const timer = __InternalRsvimGlobalObject.set_timeout(() => {
+    const timer = __InternalRsvimGlobalObject.global_set_timeout(() => {
       callback(...args);
       activeTimers.delete(id);
     }, delay);
@@ -80,7 +80,7 @@ interface GlobalThisType {
 
     if (activeTimers.has(id)) {
       // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-      __InternalRsvimGlobalObject.clear_timeout(activeTimers.get(id));
+      __InternalRsvimGlobalObject.global_clear_timeout(activeTimers.get(id));
       activeTimers.delete(id);
     }
   }

@@ -1,7 +1,8 @@
 //! Js runtime type declarations for `Rsvim` namespace.
 
 interface __InternalRsvimGlobalObjectType {
-  set_timeout(callback: (...args: any[]) => void, delay: number): number;
+  global_set_timeout(callback: (...args: any[]) => void, delay: number): number;
+  global_clear_timeout(id: number): void;
 }
 
 declare global {

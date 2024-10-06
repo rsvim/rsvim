@@ -16,7 +16,7 @@ import infra from "rsvim:ext/infra";
             throw new Error("\"setTimeout\" callback must be function type, but found ".concat(infra.stringify(callback)));
         }
         var id = nextTimerId++;
-        var timer = __InternalRsvimGlobalObject.set_timeout(function () {
+        var timer = __InternalRsvimGlobalObject.global_set_timeout(function () {
             callback.apply(void 0, args);
             activeTimers.delete(id);
         }, delay);
@@ -28,7 +28,7 @@ import infra from "rsvim:ext/infra";
             throw new Error("\"clearTimeout\" id must be integer type, but found ".concat(infra.stringify(id)));
         }
         if (activeTimers.has(id)) {
-            __InternalRsvimGlobalObject.clear_timeout(activeTimers.get(id));
+            __InternalRsvimGlobalObject.global_clear_timeout(activeTimers.get(id));
             activeTimers.delete(id);
         }
     }

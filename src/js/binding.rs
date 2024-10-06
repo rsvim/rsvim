@@ -64,6 +64,12 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
   // Register the `__InternalRsvimGlobalObject` global object.
   let vim = create_object_under(scope, global, "__InternalRsvimGlobalObject");
 
+  // `globalThis`
+  {
+    set_function_to(scope, vim, "global_set_timeout", global::set_timeout);
+    set_function_to(scope, vim, "global_clear_timeout", global::clear_timeout);
+  }
+
   // `Rsvim.opt`
   {
     set_function_to(scope, vim, "opt_line_wrap", opt::line_wrap);
