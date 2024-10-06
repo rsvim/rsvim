@@ -235,12 +235,12 @@ impl JsRuntime {
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
   pub fn init_environment(&mut self) {
-    let name = "rsvim:runtime/00__global.js";
-    let source = include_str!("./js/runtime/00__global.js");
+    let name = "rsvim:runtime/10__global.js";
+    let source = include_str!("./js/runtime/10__global.js");
     self.init_builtin_module(name, source);
 
-    let name = "rsvim:runtime/01__rsvim.js";
-    let source = include_str!("./js/runtime/01__rsvim.js");
+    let name = "rsvim:runtime/50__rsvim.js";
+    let source = include_str!("./js/runtime/50__rsvim.js");
     self.init_builtin_module(name, source);
 
     // // Initialize process static values.
