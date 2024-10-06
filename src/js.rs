@@ -4,7 +4,7 @@
 
 use parking_lot::RwLock;
 use std::cell::RefCell;
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
@@ -26,7 +26,7 @@ use crate::js::module::{
   create_origin, fetch_module_tree, load_import, resolve_import, ImportKind, ImportMap,
   ModuleGraph, ModuleMap, ModuleStatus,
 };
-use crate::js::msg::JsRuntimeToEventLoopMessage;
+use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::result::AnyError;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
@@ -74,6 +74,14 @@ pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::HandleScope);
 }
 
+pub type JsFutureId = i32;
+
+/// Next global ID for js runtime.
+pub fn next_global_id() -> i32 {
+  static GLOBAL: AtomicI32 = AtomicI32::new(0);
+  GLOBAL.fetch_add(1, Ordering::Relaxed)
+}
+
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
   pub context: v8::Global<v8::Context>,
@@ -84,7 +92,7 @@ pub struct JsRuntimeState {
   // /// A handle to the event-loop that can interrupt the poll-phase.
   // pub interrupt_handle: LoopInterruptHandle,
   /// Holds JS pending futures scheduled by the event-loop.
-  pub pending_futures: Vec<Box<dyn JsFuture>>,
+  pub pending_futures: HashMap<JsFutureId, Box<dyn JsFuture>>,
   /// Indicates the start time of the process.
   pub startup_moment: Instant,
   /// Specifies the timestamp which the current process began in Unix time.
@@ -101,6 +109,7 @@ pub struct JsRuntimeState {
   // Data Access for RSVIM {
   // Js worker => master.
   pub js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  pub js_worker_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   pub cli_opt: CliOpt,
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
   pub tree: TreeArc,
@@ -127,6 +136,7 @@ impl JsRuntime {
     startup_moment: Instant,
     time_origin: u128,
     js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    js_worker_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
     tree: TreeArc,
@@ -194,7 +204,7 @@ impl JsRuntime {
       module_map: ModuleMap::new(),
       timeout_handles: HashSet::new(),
       // interrupt_handle: event_loop.interrupt_handle(),
-      pending_futures: Vec::new(),
+      pending_futures: HashMap::new(),
       // timeout_queue: BTreeMap::new(),
       startup_moment,
       time_origin,
@@ -203,6 +213,7 @@ impl JsRuntime {
       options,
       // wake_event_queued: false,
       js_worker_send_to_master,
+      js_worker_recv_from_master,
       cli_opt,
       runtime_path,
       tree,
@@ -810,9 +821,3 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
 //   eprintln!("{:?}", e);
 //   std::process::exit(1);
 // }
-
-/// Next global ID for js runtime.
-pub fn next_global_id() -> i32 {
-  static GLOBAL: AtomicI32 = AtomicI32::new(0);
-  GLOBAL.fetch_add(1, Ordering::Relaxed)
-}

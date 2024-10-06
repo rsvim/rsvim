@@ -3,7 +3,7 @@
 
 use crate::glovar;
 use crate::js::binding::set_function_to;
-use crate::js::msg::{Dummy, JsRuntimeToEventLoopMessage, TimeoutReq};
+use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
 use crate::js::{self, JsFuture, JsRuntime};
 
 use std::rc::Rc;
@@ -64,32 +64,24 @@ pub fn set_timeout(
   };
 
   let state_rc = JsRuntime::state(scope);
-  let state_rc2 = Rc::clone(&state_rc);
+  let mut state = state_rc.borrow_mut();
   let params = Rc::new(params);
-
-  state_rc.borrow().task_tracker.spawn_local(async move {
-    tokio::time::sleep(Duration::from_millis(millis)).await;
-    let timeout_cb = TimeoutFuture {
-      cb: Rc::clone(&callback),
-      params: Rc::clone(&params),
-    };
-    state_rc2
-      .borrow_mut()
-      .pending_futures
-      .push(Box::new(timeout_cb));
-    state_rc2
-      .borrow()
-      .js_worker_send_to_master
-      .send(JsRuntimeToEventLoopMessage::TimeoutReq(TimeoutReq::new(
-        millis,
-      )));
-  });
 
   // Return timeout's internal id.
   let timer_id = js::next_global_id();
-  state_rc.borrow_mut().timeout_handles.insert(timer_id);
+  state
+    .js_worker_send_to_master
+    .send(JsRuntimeToEventLoopMessage::TimeoutReq(
+      jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
+    ));
+  let timeout_cb = TimeoutFuture {
+    cb: Rc::clone(&callback),
+    params: Rc::clone(&params),
+  };
+  state.pending_futures.insert(timer_id, Box::new(timeout_cb));
+  state.timeout_handles.insert(timer_id);
   rv.set(v8::Number::new(scope, timer_id as f64).into());
-  debug!("set_timeout: {:?}ms", millis);
+  debug!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
 }
 
 /// Javascript `clearTimeout` API.

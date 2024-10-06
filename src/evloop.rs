@@ -27,7 +27,7 @@ use crate::cli::CliOpt;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
-use crate::js::msg::JsRuntimeToEventLoopMessage;
+use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::result::{IoResult, VoidIoResult};
 use crate::state::fsm::StatefulValue;
@@ -98,6 +98,8 @@ pub struct EventLoop {
   pub js_runtime: JsRuntime,
   /// Receiver: master <= js worker.
   pub master_recv_from_js_worker: Receiver<JsRuntimeToEventLoopMessage>,
+  /// Sender: master => js worker.
+  pub master_send_to_js_worker: Sender<EventLoopToJsRuntimeMessage>,
 }
 
 impl EventLoop {
@@ -190,6 +192,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       js_worker_send_to_master,
+      js_worker_recv_from_master,
       cli_opt.clone(),
       runtime_path.clone(),
       tree_arc.clone(),
@@ -213,6 +216,7 @@ impl EventLoop {
       master_recv_from_worker,
       js_runtime,
       master_recv_from_js_worker,
+      master_send_to_js_worker,
     })
   }
 
@@ -331,9 +335,24 @@ impl EventLoop {
     debug!("Received {:?} message from workers", msg);
   }
 
-  async fn process_js_runtime_request(&mut self, _msg: Option<JsRuntimeToEventLoopMessage>) {
-    // debug!("Tick js runtime - done");
-    self.js_runtime.tick_event_loop();
+  async fn process_js_runtime_notify(&mut self, msg: Option<JsRuntimeToEventLoopMessage>) {
+    match msg {
+      Some(msg) => match msg {
+        JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
+          let master_send_to_js_worker = self.master_send_to_js_worker.clone();
+          self.task_tracker.spawn(async move {
+            tokio::time::sleep(req.duration).await;
+            master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::TimeoutResp(
+              jsmsg::TimeoutResp::new(req.future_id, req.duration),
+            ));
+          });
+        }
+      },
+      None => {
+        error!("Js runtime message is exhausted, exit loop");
+        self.cancellation_token.cancel();
+      }
+    }
   }
 
   /// Running the loop, it repeatedly do following steps:
@@ -364,7 +383,7 @@ impl EventLoop {
           break;
         }
         js_worker_msg = self.master_recv_from_js_worker.recv() => {
-            self.process_js_runtime_request(js_worker_msg).await;
+            self.process_js_runtime_notify(js_worker_msg).await;
         }
       }
 
