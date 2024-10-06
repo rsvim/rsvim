@@ -70,7 +70,7 @@ pub fn set_timeout(
   // Return timeout's internal id.
   let timer_id = js::next_global_id();
   state
-    .js_worker_send_to_master
+    .js_runtime_send_to_master
     .send(JsRuntimeToEventLoopMessage::TimeoutReq(
       jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
     ));
