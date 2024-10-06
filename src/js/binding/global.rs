@@ -4,7 +4,7 @@
 use crate::glovar;
 use crate::js::binding::set_function_to;
 use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
-use crate::js::{self, JsFuture, JsRuntime};
+use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
 
 use std::rc::Rc;
 use std::time::Duration;
@@ -12,12 +12,14 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tracing::debug;
 
 struct TimeoutFuture {
+  future_id: JsFutureId,
   cb: Rc<v8::Global<v8::Function>>,
   params: Rc<Vec<v8::Global<v8::Value>>>,
 }
 
 impl JsFuture for TimeoutFuture {
   fn run(&mut self, scope: &mut v8::HandleScope) {
+    debug!("set_timeout callback:{:?}", self.future_id);
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
     let args: Vec<v8::Local<v8::Value>> = self
@@ -68,13 +70,14 @@ pub fn set_timeout(
   let params = Rc::new(params);
 
   // Return timeout's internal id.
-  let timer_id = js::next_global_id();
+  let timer_id = js::next_future_id();
   state
     .js_runtime_send_to_master
     .send(JsRuntimeToEventLoopMessage::TimeoutReq(
       jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
     ));
   let timeout_cb = TimeoutFuture {
+    future_id: timer_id,
     cb: Rc::clone(&callback),
     params: Rc::clone(&params),
   };

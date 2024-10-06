@@ -362,6 +362,7 @@ impl EventLoop {
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
+            debug!("process_js_runtime_request timeout_req:{:?}", req.future_id);
           });
         }
       }
@@ -370,6 +371,7 @@ impl EventLoop {
 
   async fn process_js_runtime_response(&mut self, msg: Option<EventLoopToJsRuntimeMessage>) {
     if let Some(msg) = msg {
+      debug!("process_js_runtime_response msg:{:?}", msg);
       let _ = self.master_send_to_js_runtime.send(msg).await;
       self.js_runtime.tick_event_loop();
     }
