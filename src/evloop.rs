@@ -100,6 +100,10 @@ pub struct EventLoop {
   pub master_recv_from_js_runtime: Receiver<JsRuntimeToEventLoopMessage>,
   /// Sender: master => js runtime.
   pub master_send_to_js_runtime: Sender<EventLoopToJsRuntimeMessage>,
+  /// An internal connected sender/receiver pair, it's simply for forward the task results
+  /// to the event loop again and bypass the limitation of V8 engine.
+  pub js_runtime_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
+  pub js_runtime_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
 }
 
 impl EventLoop {
@@ -160,9 +164,16 @@ impl EventLoop {
     //    master via `js_runtime_send_to_master`.
     // 2. Master receive requests via `master_recv_from_js_runtime`, and handle these tasks in async
     //    way.
-    // 3. Master send the task results via `master_send_to_js_worker`.
-    // 4. Js runtime receive these task results via `js_worker_recv_from_master`, then process
+    // 3. Master send the task results via `js_runtime_tick_dispatcher`.
+    // 4. Master receive the task results via `js_runtime_tick_queue`, and send the results (again)
+    //    via `master_send_to_js_runtime`.
+    // 5. Js runtime receive these task results via `js_runtime_recv_from_master`, then process
     //    pending futures.
+    //
+    // You must notice that, the 3rd and 4th steps (and the pair of `js_runtime_tick_dispatcher`
+    // and `js_runtime_tick_queue`) seem useless. Yes, they're simply for trigger the event loop
+    // to run the `JsRuntime::tick_event_loop` API in `tokio::select!` main loop, due to the
+    // limitation of V8 engine work along with tokio runtime.
 
     // Js runtime => master
     let (js_runtime_send_to_master, master_recv_from_js_runtime) =
@@ -170,6 +181,8 @@ impl EventLoop {
     // Master => js runtime
     let (master_send_to_js_runtime, js_runtime_recv_from_master) =
       channel(glovar::CHANNEL_BUF_SIZE());
+    // Master => master
+    let (js_runtime_tick_dispatcher, js_runtime_tick_queue) = channel(glovar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
     let mut runtime_path = vec![glovar::DATA_DIR_PATH()];
@@ -217,6 +230,8 @@ impl EventLoop {
       js_runtime,
       master_recv_from_js_runtime,
       master_send_to_js_runtime,
+      js_runtime_tick_dispatcher,
+      js_runtime_tick_queue,
     })
   }
 
@@ -335,14 +350,14 @@ impl EventLoop {
     debug!("Received {:?} message from workers", msg);
   }
 
-  async fn process_js_runtime_notify(&mut self, msg: Option<JsRuntimeToEventLoopMessage>) {
+  async fn process_js_runtime_request(&mut self, msg: Option<JsRuntimeToEventLoopMessage>) {
     if let Some(msg) = msg {
       match msg {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
-          let master_send_to_js_runtime = self.master_send_to_js_runtime.clone();
+          let js_runtime_tick_dispatcher = self.js_runtime_tick_dispatcher.clone();
           self.task_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
-            let _ = master_send_to_js_runtime
+            let _ = js_runtime_tick_dispatcher
               .send(EventLoopToJsRuntimeMessage::TimeoutResp(
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
@@ -350,6 +365,13 @@ impl EventLoop {
           });
         }
       }
+    }
+  }
+
+  async fn process_js_runtime_response(&mut self, msg: Option<EventLoopToJsRuntimeMessage>) {
+    if let Some(msg) = msg {
+      let _ = self.master_send_to_js_runtime.send(msg).await;
+      self.js_runtime.tick_event_loop();
     }
   }
 
@@ -374,8 +396,11 @@ impl EventLoop {
           self.process_worker_notify(worker_msg).await;
         }
         // Receive notification from js runtime
-        js_worker_msg = self.master_recv_from_js_runtime.recv() => {
-            self.process_js_runtime_notify(js_worker_msg).await;
+        js_req = self.master_recv_from_js_runtime.recv() => {
+            self.process_js_runtime_request(js_req).await;
+        }
+        js_resp = self.js_runtime_tick_queue.recv() => {
+            self.process_js_runtime_response(js_resp).await;
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
