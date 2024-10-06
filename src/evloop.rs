@@ -354,6 +354,7 @@ impl EventLoop {
     if let Some(msg) = msg {
       match msg {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
+          debug!("process_js_runtime_request timeout_req:{:?}", req.future_id);
           let js_runtime_tick_dispatcher = self.js_runtime_tick_dispatcher.clone();
           self.task_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
@@ -362,7 +363,10 @@ impl EventLoop {
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
-            debug!("process_js_runtime_request timeout_req:{:?}", req.future_id);
+            debug!(
+              "process_js_runtime_request timeout_req:{:?} - done",
+              req.future_id
+            );
           });
         }
       }

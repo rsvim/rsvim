@@ -71,9 +71,9 @@ pub fn set_timeout(
 
   // Return timeout's internal id.
   let timer_id = js::next_future_id();
-  state
+  let _ = state
     .js_runtime_send_to_master
-    .send(JsRuntimeToEventLoopMessage::TimeoutReq(
+    .blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
       jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
     ));
   let timeout_cb = TimeoutFuture {
