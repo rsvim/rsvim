@@ -64,7 +64,7 @@ pub fn set_timeout(
   };
 
   let state_rc = JsRuntime::state(scope);
-  let state_rc2 = state_rc.clone();
+  let state_rc2 = Rc::clone(&state_rc);
   let params = Rc::new(params);
 
   state_rc.borrow().task_tracker.spawn_local(async move {
