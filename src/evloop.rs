@@ -154,9 +154,12 @@ impl EventLoop {
     // - And more...
     //
     // The basic workflow is:
-    // 1. Master receive requests via `master_recv_from_js_worker`
-    // 2. Master do some tasks in async way, then send task results via `master_send_to_js_worker`.
-    // 3. Js runtime receive these task results via `js_worker_recv_from_master`, then process
+    // 1. When js runtime needs to handles the `Promise` and `async` functions, it send requests to
+    //    master via `js_worker_send_to_master`.
+    // 2. Master receive requests via `master_recv_from_js_worker`, and handle these tasks in async
+    //    way.
+    // 3. Master send the task results via `master_send_to_js_worker`.
+    // 4. Js runtime receive these task results via `js_worker_recv_from_master`, then process
     //    pending futures.
 
     // Js worker => master
