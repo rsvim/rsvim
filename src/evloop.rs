@@ -149,7 +149,7 @@ impl EventLoop {
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
 
     // Since there are too many limitations that we cannot use tokio APIs along with V8 engine, we
-    // hae to first send task requests to master, let the master handles these tasks for us in the
+    // have to first send task requests to master, let the master handles these tasks for us in the
     // async way, then send the task results back to js runtime.
     //
     // These tasks are very common and low level, serve as an infrastructure layer for js world.
