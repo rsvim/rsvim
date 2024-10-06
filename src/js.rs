@@ -4,10 +4,10 @@
 
 use parking_lot::RwLock;
 use std::cell::RefCell;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
 use std::sync::Once;
 use std::time::Duration;
@@ -79,8 +79,8 @@ pub struct JsRuntimeState {
   pub context: v8::Global<v8::Context>,
   /// Holds information about resolved ES modules.
   pub module_map: ModuleMap,
-  // /// A handle to the runtime's event-loop.
-  // pub handle: LoopHandle,
+  /// Timeout handles, i.e. timer IDs.
+  pub timeout_handles: HashSet<i32>,
   // /// A handle to the event-loop that can interrupt the poll-phase.
   // pub interrupt_handle: LoopInterruptHandle,
   /// Holds JS pending futures scheduled by the event-loop.
@@ -194,7 +194,7 @@ impl JsRuntime {
     let state = Rc::new(RefCell::new(JsRuntimeState {
       context,
       module_map: ModuleMap::new(),
-      // handle: event_loop.handle(),
+      timeout_handles: HashSet::new(),
       // interrupt_handle: event_loop.interrupt_handle(),
       pending_futures: Vec::new(),
       // timeout_queue: BTreeMap::new(),
@@ -815,7 +815,7 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
 // }
 
 /// Next global ID for js runtime.
-pub fn next_global_id() -> usize {
-  static GLOBAL: AtomicUsize = AtomicUsize::new(0_usize);
-  GLOBAL.fetch_add(1_usize, Ordering::Relaxed)
+pub fn next_global_id() -> i32 {
+  static GLOBAL: AtomicI32 = AtomicI32::new(0);
+  GLOBAL.fetch_add(1, Ordering::Relaxed)
 }

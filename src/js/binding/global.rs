@@ -83,9 +83,20 @@ pub fn set_timeout(
   });
 
   // Return timeout's internal id.
-  let job_id = js::next_global_id();
-  rv.set(v8::Number::new(scope, job_id as f64).into());
+  let timer_id = js::next_global_id();
+  state_rc.borrow_mut().timer_ids.insert(timer_id);
+  rv.set(v8::Number::new(scope, timer_id as f64).into());
 }
 
 /// Javascript `clearTimeout` API.
-pub fn clear_timeout() {}
+pub fn clear_timeout(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  _: v8::ReturnValue,
+) {
+  // Get timer ID, and remove it.
+  let timer_id = args.get(0).int32_value(scope).unwrap();
+  let state_rc = JsRuntime::state(scope);
+
+  state_rc.borrow_mut().timer_ids.remove(&timer_id);
+}

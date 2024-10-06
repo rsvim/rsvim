@@ -63,6 +63,27 @@ interface GlobalThisType {
     return id;
   }
 
+  /**
+   * The global clearTimeout() method cancels a timeout previously established
+   * by calling setTimeout().
+   *
+   * @param {Number} id - The ID which identifies the timer.
+   */
+  function clearTimeout(id: number): void {
+    // Check parameter's type.
+    if (!Number.isInteger(id)) {
+      throw new Error(
+        `"clearTimeout" id must be integer type, but found ${infra.stringify(id)}`,
+      );
+    }
+
+    if (activeTimers.has(id)) {
+      // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+      __InternalRsvimGlobalObject.clear_timeout(activeTimers.get(id));
+      activeTimers.delete(id);
+    }
+  }
+
   // Timer API }
 
   // const { $$queueMicrotask, reportError } = globalThis;
