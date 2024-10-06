@@ -68,11 +68,22 @@ fn get_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
   base_dirs.cache_dir().join("rsvim").to_path_buf()
 }
 
-#[cfg(not(target_os = "macos"))]
+/// For win
+#[cfg(target_os = "windows")]
+fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
+  base_dirs
+    .config_local_dir()
+    .join("rsvim-data")
+    .to_path_buf()
+}
+
+/// Not mac or win
+#[cfg(not(any(target_os = "macos", target_os = "windows")))]
 fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
   base_dirs.config_local_dir().join("rsvim").to_path_buf()
 }
 
+/// For mac
 #[cfg(target_os = "macos")]
 fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
   base_dirs
