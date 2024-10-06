@@ -141,11 +141,29 @@ impl EventLoop {
 
     // Worker => master
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
-    // // Master => js worker
-    // let (master_send_to_js_worker, js_worker_recv_from_master) =
-    //   channel(glovar::CHANNEL_BUF_SIZE());
+
+    // Since js runtime has to interact with V8 engine, and there's many limitations that cannot
+    // use tokio APIs along with V8 engine. We will have to first send task requests to master, let
+    // it handles these tasks for js runtime, then send the task results back to js runtime.
+    //
+    // These tasks are some common and low level tasks, serving as infrastructure for js world. For
+    // example:
+    // - File IO
+    // - Timer
+    // - Network
+    // - And more...
+    //
+    // The workflow looks like:
+    // 1. Master receive requests via `master_recv_from_js_worker`
+    // 2. Master do some tasks in async way, then send task results via `master_send_to_js_worker`.
+    // 3. Js runtime receive these task results via `js_worker_recv_from_master`, then process
+    //    pending futures.
+
     // Js worker => master
     let (js_worker_send_to_master, master_recv_from_js_worker) =
+      channel(glovar::CHANNEL_BUF_SIZE());
+    // Master => js worker
+    let (master_send_to_js_worker, js_worker_recv_from_master) =
       channel(glovar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
@@ -168,7 +186,6 @@ impl EventLoop {
       JsRuntimeOptions::default(),
       startup_moment,
       startup_unix_epoch,
-      task_tracker.clone(),
       js_worker_send_to_master,
       cli_opt.clone(),
       runtime_path.clone(),
@@ -311,7 +328,7 @@ impl EventLoop {
     debug!("Received {:?} message from workers", msg);
   }
 
-  async fn process_js_tick(&mut self, _msg: Option<JsRuntimeToEventLoopMessage>) {
+  async fn process_js_runtime_request(&mut self, _msg: Option<JsRuntimeToEventLoopMessage>) {
     // debug!("Tick js runtime - done");
     self.js_runtime.tick_event_loop();
   }
@@ -344,7 +361,7 @@ impl EventLoop {
           break;
         }
         js_worker_msg = self.master_recv_from_js_worker.recv() => {
-            self.process_js_tick(js_worker_msg).await;
+            self.process_js_runtime_request(js_worker_msg).await;
         }
       }
 

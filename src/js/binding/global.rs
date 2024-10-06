@@ -3,7 +3,7 @@
 
 use crate::glovar;
 use crate::js::binding::set_function_to;
-use crate::js::msg::{Dummy, GlobalSetTimeout, JsRuntimeToEventLoopMessage};
+use crate::js::msg::{Dummy, JsRuntimeToEventLoopMessage, TimeoutReq};
 use crate::js::{self, JsFuture, JsRuntime};
 
 use std::rc::Rc;
@@ -77,9 +77,12 @@ pub fn set_timeout(
       .borrow_mut()
       .pending_futures
       .push(Box::new(timeout_cb));
-    state_rc2.borrow().js_worker_send_to_master.send(
-      JsRuntimeToEventLoopMessage::GlobalSetTimeout(GlobalSetTimeout::new(millis)),
-    );
+    state_rc2
+      .borrow()
+      .js_worker_send_to_master
+      .send(JsRuntimeToEventLoopMessage::TimeoutReq(TimeoutReq::new(
+        millis,
+      )));
   });
 
   // Return timeout's internal id.

@@ -99,7 +99,6 @@ pub struct JsRuntimeState {
   // pub wake_event_queued: bool,
 
   // Data Access for RSVIM {
-  pub task_tracker: TaskTracker,
   // Js worker => master.
   pub js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
   pub cli_opt: CliOpt,
@@ -127,7 +126,6 @@ impl JsRuntime {
     options: JsRuntimeOptions,
     startup_moment: Instant,
     time_origin: u128,
-    task_tracker: TaskTracker,
     js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
     cli_opt: CliOpt,
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
@@ -204,7 +202,6 @@ impl JsRuntime {
       exceptions: exception::ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      task_tracker,
       js_worker_send_to_master,
       cli_opt,
       runtime_path,
