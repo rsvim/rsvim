@@ -10,9 +10,10 @@ interface GlobalThisType {
     delay: number,
     ...args: any[]
   ): void;
+  clearTimeout(id: number): void;
 }
 
-((globalThis) => {
+((globalThis: GlobalThisType) => {
   // Timer API {
 
   const TIMEOUT_MAX = Math.pow(2, 31) - 1;
@@ -107,4 +108,5 @@ interface GlobalThisType {
   // }
 
   globalThis.setTimeout = setTimeout;
+  globalThis.clearTimeout = clearTimeout;
 })(globalThis as unknown as GlobalThisType);

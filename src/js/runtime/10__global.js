@@ -25,5 +25,15 @@ var infra_1 = require("rsvim:ext/infra");
         activeTimers.set(id, timer);
         return id;
     }
+    function clearTimeout(id) {
+        if (!Number.isInteger(id)) {
+            throw new Error("\"clearTimeout\" id must be integer type, but found ".concat(infra_1.default.stringify(id)));
+        }
+        if (activeTimers.has(id)) {
+            __InternalRsvimGlobalObject.clear_timeout(activeTimers.get(id));
+            activeTimers.delete(id);
+        }
+    }
     globalThis.setTimeout = setTimeout;
+    globalThis.clearTimeout = clearTimeout;
 })(globalThis);
