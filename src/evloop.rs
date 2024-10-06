@@ -342,9 +342,11 @@ impl EventLoop {
           let master_send_to_js_worker = self.master_send_to_js_worker.clone();
           self.task_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
-            master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::TimeoutResp(
-              jsmsg::TimeoutResp::new(req.future_id, req.duration),
-            ));
+            let _ = master_send_to_js_worker
+              .send(EventLoopToJsRuntimeMessage::TimeoutResp(
+                jsmsg::TimeoutResp::new(req.future_id, req.duration),
+              ))
+              .await;
           });
         }
       },
@@ -375,15 +377,16 @@ impl EventLoop {
         worker_msg = self.master_recv_from_worker.recv() => {
           self.process_worker_notify(worker_msg).await;
         }
+        // Receive notification from js runtime
+        js_worker_msg = self.master_recv_from_js_worker.recv() => {
+            self.process_js_runtime_notify(js_worker_msg).await;
+        }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
           debug!("Receive cancellation token, exit loop");
           self.task_tracker.close();
           // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
           break;
-        }
-        js_worker_msg = self.master_recv_from_js_worker.recv() => {
-            self.process_js_runtime_notify(js_worker_msg).await;
         }
       }
 

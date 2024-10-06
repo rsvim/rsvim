@@ -479,32 +479,26 @@ impl JsRuntime {
   fn run_pending_futures(&mut self) {
     // Get a handle-scope and a reference to the runtime's state.
     let scope = &mut self.handle_scope();
-
-    // NOTE: The reason we move all the js futures to a separate vec is because
-    // we need to drop the `state` borrow before we start iterating through all
-    // of them to avoid borrowing panics at runtime.
-    let futures: Vec<Box<dyn JsFuture>> = {
-      Self::state(scope)
-        .borrow_mut()
-        .pending_futures
-        .drain(..)
-        .collect()
-    };
-
-    // NOTE: After every future executes (aka v8's call stack gets empty) we will drain
-    // the MicroTask and NextTick Queue.
-
-    for mut fut in futures {
-      fut.run(scope);
-      if let Some(error) = check_exceptions(scope) {
-        // FIXME: Cannot simply report error and exit process, because this is inside the editor.
-        error!("{error:?}");
-        eprintln!("{error:?}");
+    let state_rc = Self::state(scope);
+    let mut state = state_rc.borrow_mut();
+    while let Ok(msg) = state.js_worker_recv_from_master.try_recv() {
+      match msg {
+        EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
+          match state.pending_futures.remove(&resp.future_id) {
+            Some(mut timeout_cb) => {
+              timeout_cb.run(scope);
+              if let Some(error) = check_exceptions(scope) {
+                // FIXME: Cannot simply report error and exit process, because this is inside the editor.
+                error!("Js runtime timeout error:{error:?}");
+                eprintln!("Js runtime timeout error:{error:?}");
+              }
+            }
+            None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
+          }
+        }
       }
       run_next_tick_callbacks(scope);
     }
-
-    // state_rc.borrow_mut().wake_event_queued = false;
   }
 
   /// Checks for imports (static/dynamic) ready for execution.
