@@ -6,7 +6,6 @@ use crate::js::binding::set_function_to;
 use crate::js::msg::{Dummy, GlobalSetTimeout, JsRuntimeToEventLoopMessage};
 use crate::js::{self, JsFuture, JsRuntime};
 
-use std::ptr::NonNull;
 use std::rc::Rc;
 use std::time::Duration;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
@@ -54,9 +53,6 @@ pub fn set_timeout(
   // Get timer's expiration time in millis.
   let millis = args.get(1).int32_value(scope).unwrap() as u64;
 
-  // Decide if the timer is an interval.
-  let repeatable = args.get(2).to_rust_string_lossy(scope) == "true";
-
   // Convert params argument (Array<Local<Value>>) to Rust vector.
   let params = match v8::Local::<v8::Array>::try_from(args.get(3)) {
     Ok(params) => (0..params.length()).fold(Vec::<v8::Global<v8::Value>>::new(), |mut acc, i| {
@@ -91,4 +87,5 @@ pub fn set_timeout(
   rv.set(v8::Number::new(scope, job_id as f64).into());
 }
 
+/// Javascript `clearTimeout` API.
 pub fn clear_timeout() {}
