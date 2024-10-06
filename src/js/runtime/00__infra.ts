@@ -82,3 +82,5 @@ export function stringify(value: any): string {
 
   throw `Unhandled type ${typeof value}`;
 }
+
+export default { stringify };

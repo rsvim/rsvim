@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var infra_1 = require("rsvim:ext/infra");
+import infra from "rsvim:ext/infra";
 (function (globalThis) {
     var TIMEOUT_MAX = Math.pow(2, 31) - 1;
     var nextTimerId = 1;
@@ -15,7 +13,7 @@ var infra_1 = require("rsvim:ext/infra");
             delay = 1;
         }
         if (typeof callback !== "function") {
-            throw new Error("\"setTimeout\" callback must be function type, but found ".concat(infra_1.default.stringify(callback)));
+            throw new Error("\"setTimeout\" callback must be function type, but found ".concat(infra.stringify(callback)));
         }
         var id = nextTimerId++;
         var timer = __InternalRsvimGlobalObject.set_timeout(function () {
@@ -27,7 +25,7 @@ var infra_1 = require("rsvim:ext/infra");
     }
     function clearTimeout(id) {
         if (!Number.isInteger(id)) {
-            throw new Error("\"clearTimeout\" id must be integer type, but found ".concat(infra_1.default.stringify(id)));
+            throw new Error("\"clearTimeout\" id must be integer type, but found ".concat(infra.stringify(id)));
         }
         if (activeTimers.has(id)) {
             __InternalRsvimGlobalObject.clear_timeout(activeTimers.get(id));

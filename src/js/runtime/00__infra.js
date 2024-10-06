@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.stringify = stringify;
-function stringify(value) {
+export function stringify(value) {
     if (typeof value === "string") {
         return "string[\"".concat(value, "\"]");
     }
@@ -59,3 +56,4 @@ function stringify(value) {
     }
     throw "Unhandled type ".concat(typeof value);
 }
+export default { stringify: stringify };
