@@ -56,33 +56,27 @@ fn get_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
   base_dirs.cache_dir().join("rsvim").to_path_buf()
 }
 
-/// For win
+/// `$env:LocalAppData\rsvim-data`
 #[cfg(target_os = "windows")]
-fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs
-    .config_local_dir()
-    .join("rsvim-data")
-    .to_path_buf()
+fn _xdg_data_dir(base_dirs: &BaseDirs) -> PathBuf {
+  base_dirs.data_local_dir().join("rsvim-data").to_path_buf()
 }
 
-/// Not mac or win
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs.config_local_dir().join("rsvim").to_path_buf()
-}
-
-/// For mac
-#[cfg(target_os = "macos")]
-fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs
-    .home_dir()
-    .join(".local")
-    .join("share")
-    .join("rsvim")
+/// `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`
+#[cfg(not(target_os = "windows"))]
+fn _xdg_data_dir(base_dirs: &BaseDirs) -> PathBuf {
+  match std::env::var("XDG_DATA_HOME") {
+    Ok(data_path) => Path::new(&data_path).join("rsvim").to_path_buf(),
+    Err(_) => base_dirs
+      .home_dir()
+      .join(".local")
+      .join("share")
+      .join("rsvim"),
+  }
 }
 
 fn get_data_dir(base_dirs: &BaseDirs) -> PathBuf {
-  _xdg_data_dirs(base_dirs)
+  _xdg_data_dir(base_dirs)
 }
 
 impl PathConfig {
