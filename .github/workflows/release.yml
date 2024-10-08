@@ -67,8 +67,8 @@ jobs:
         with:
           target: ${{ matrix.target }}
         if: matrix.target == 'aarch64-unknown-linux-gnu'
-      - uses: taiki-e/install-action@cross
-        if: contains(matrix.target, '-musl')
+      # - uses: taiki-e/install-action@cross
+      #   if: contains(matrix.target, '-musl')
       - run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
         if: endsWith(matrix.target, 'windows-msvc')
       - uses: taiki-e/upload-rust-binary-action@v1
