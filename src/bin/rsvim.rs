@@ -1,8 +1,9 @@
 //! The VIM editor reinvented in Rust+TypeScript.
 
+use rsvim::cli::CliOpt;
 use rsvim::error::IoResult;
 use rsvim::evloop::EventLoop;
-use rsvim::{cli, log};
+use rsvim::log;
 
 use clap::Parser;
 // use heed::types as heed_types;
@@ -11,7 +12,7 @@ use tracing::debug;
 
 fn main() -> IoResult<()> {
   log::init();
-  let cli_opt = cli::CliOpt::parse();
+  let cli_opt = CliOpt::parse();
   debug!("cli_opt: {:?}", cli_opt);
   let cpu_cores = if let Ok(n) = std::thread::available_parallelism() {
     n.get()
