@@ -98,8 +98,10 @@ macro_rules! inode_generate_impl {
 }
 
 /// Next unique UI widget ID.
+///
+/// NOTE: Start from 10000 to be different from buffer ID.
 pub fn next_widget_id() -> i32 {
-  static VALUE: AtomicI32 = AtomicI32::new(0);
+  static VALUE: AtomicI32 = AtomicI32::new(10000);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
