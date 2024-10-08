@@ -4,29 +4,15 @@
 import infra from "rsvim:ext/infra";
 
 // `Rsvim.opt`
-interface RsvimOptionType {
-  lineWrap(): boolean;
-  setLineWrap(value: boolean): void;
-}
-
-// `Rsvim`
-interface GlobalThisType {
-  opt: RsvimOptionType;
-}
-
-(function (globalThis: { Rsvim: GlobalThisType }) {
-  // `Rsvim.opt` {
-
+class RsvimOption {
   // Get `line_wrap` option.
-  function optLineWrap(): boolean {
+  get lineWrap(): boolean {
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
     return __InternalRsvimGlobalObject.opt_line_wrap();
   }
 
-  // `Rsvim.opt.setLineWrap`
-  //
   // Set `line_wrap` option.
-  function optSetLineWrap(value: boolean): void {
+  set lineWrap(value: boolean) {
     if (typeof value !== "boolean") {
       throw new Error(
         `"Rsvim.opt.lineWrap" value must be boolean type, but found ${infra.stringify(value)}`,
@@ -35,13 +21,15 @@ interface GlobalThisType {
     // @ts-ignore Ignore __InternalRsvimGlobalObject warning
     __InternalRsvimGlobalObject.opt_set_line_wrap(value);
   }
+}
 
-  // `Rsvim.opt` }
+// `Rsvim`
+interface GlobalThisType {
+  opt: RsvimOption;
+}
 
+(function (globalThis: { Rsvim: GlobalThisType }) {
   globalThis.Rsvim = {
-    opt: {
-      lineWrap: optLineWrap,
-      setLineWrap: optSetLineWrap,
-    } as RsvimOptionType,
+    opt: new RsvimOption(),
   } as GlobalThisType;
 })(globalThis as unknown as { Rsvim: GlobalThisType });
