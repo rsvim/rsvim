@@ -1,21 +1,13 @@
 //! The VIM editor reinvented in Rust+TypeScript.
 
-#![allow(unused_imports)]
-
 use rsvim::error::IoResult;
 use rsvim::evloop::EventLoop;
-use rsvim::glovar;
 use rsvim::{cli, log};
 
 use clap::Parser;
-use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
-};
-use crossterm::{execute, terminal};
-use tokio::sync::mpsc::{channel, Receiver, Sender};
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
-use tracing::{debug, error};
+use tracing::debug;
 
 fn main() -> IoResult<()> {
   log::init();
