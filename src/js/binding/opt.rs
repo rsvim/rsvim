@@ -9,7 +9,7 @@ use tracing::debug;
 /// Get line wrap option.
 pub fn line_wrap(
   scope: &mut v8::HandleScope,
-  args: v8::FunctionCallbackArguments,
+  _args: v8::FunctionCallbackArguments,
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);

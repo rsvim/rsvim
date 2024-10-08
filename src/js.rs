@@ -1,35 +1,29 @@
 //! JavaScript runtime.
 
-#![allow(dead_code, unused)]
-
-use parking_lot::RwLock;
-use std::cell::RefCell;
-use std::collections::{BTreeMap, HashMap, HashSet};
-use std::path::{Path, PathBuf};
-use std::rc::Rc;
-use std::sync::atomic::{AtomicI32, Ordering};
-use std::sync::Arc;
-use std::sync::Once;
-use std::time::Duration;
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
-use tokio::sync::mpsc::{Receiver, Sender};
-use tokio_util::task::TaskTracker;
-use tracing::{debug, error};
-
 use crate::buf::BuffersArc;
 use crate::cli::CliOpt;
-// use crate::glovar;
+use crate::error::{AnyErr, TheErr};
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
-  create_origin, fetch_module_tree, load_import, resolve_import, ImportKind, ImportMap,
-  ModuleGraph, ModuleMap, ModuleStatus,
+  create_origin, fetch_module_tree, resolve_import, ImportKind, ImportMap, ModuleMap, ModuleStatus,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::result::AnyError;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
+
+use parking_lot::RwLock;
+use std::cell::RefCell;
+use std::collections::{HashMap, HashSet};
+use std::path::PathBuf;
+use std::rc::Rc;
+use std::sync::atomic::{AtomicI32, Ordering};
+use std::sync::Arc;
+use std::sync::Once;
+use std::time::Instant;
+use tokio::sync::mpsc::{Receiver, Sender};
+use tracing::{debug, error};
 
 pub mod binding;
 pub mod constant;
@@ -308,7 +302,7 @@ impl JsRuntime {
     &mut self,
     filename: &str,
     source: &str,
-  ) -> Result<Option<v8::Global<v8::Value>>, anyhow::Error> {
+  ) -> Result<Option<v8::Global<v8::Value>>, AnyErr> {
     // Get the handle-scope.
     let scope = &mut self.handle_scope();
     let state_rc = JsRuntime::state(scope);
@@ -318,7 +312,7 @@ impl JsRuntime {
 
     // The `TryCatch` scope allows us to catch runtime errors rather than panicking.
     let tc_scope = &mut v8::TryCatch::new(scope);
-    type ExecuteScriptResult = Result<Option<v8::Global<v8::Value>>, anyhow::Error>;
+    type ExecuteScriptResult = Result<Option<v8::Global<v8::Value>>, AnyErr>;
 
     let handle_exception =
       |scope: &mut v8::TryCatch<'_, v8::HandleScope<'_>>| -> ExecuteScriptResult {
@@ -349,11 +343,7 @@ impl JsRuntime {
   }
 
   /// Executes JavaScript code as ES module.
-  pub fn execute_module(
-    &mut self,
-    filename: &str,
-    source: Option<&str>,
-  ) -> Result<(), anyhow::Error> {
+  pub fn execute_module(&mut self, filename: &str, source: Option<&str>) -> Result<(), AnyErr> {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
 
@@ -380,11 +370,11 @@ impl JsRuntime {
       None => {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
-        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        let _exception = JsError::from_v8_exception(tc_scope, exception, None);
         let err_msg = format!("User config not found: {filename:?}");
         error!(err_msg);
         eprintln!("{err_msg}");
-        return Err(AnyError::with_message(err_msg).into());
+        return Err(TheErr::Message(err_msg).into());
       }
     };
 
@@ -398,7 +388,7 @@ impl JsRuntime {
       let err_msg = format!("Failed to instantiate user config module {filename:?}: {exception:?}");
       error!(err_msg);
       eprintln!("{err_msg}");
-      return Err(AnyError::with_message(err_msg).into());
+      return Err(TheErr::Message(err_msg).into());
     }
 
     match module.evaluate(tc_scope) {
@@ -418,7 +408,7 @@ impl JsRuntime {
       let err_msg = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
       error!(err_msg);
       eprintln!("{err_msg}");
-      return Err(AnyError::with_message(err_msg).into());
+      return Err(TheErr::Message(err_msg).into());
     }
 
     Ok(())
@@ -491,9 +481,7 @@ impl JsRuntime {
         match msg {
           EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
             match state.pending_futures.remove(&resp.future_id) {
-              Some(mut timeout_cb) => {
-                futures.push(timeout_cb);
-              }
+              Some(timeout_cb) => futures.push(timeout_cb),
               None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
             }
           }
@@ -688,10 +676,10 @@ impl JsRuntime {
 
 /// Runs callbacks stored in the next-tick queue.
 fn run_next_tick_callbacks(scope: &mut v8::HandleScope) {
-  let state_rc = JsRuntime::state(scope);
+  // let state_rc = JsRuntime::state(scope);
   // let callbacks: NextTickQueue = state_rc.borrow_mut().next_tick_queue.drain(..).collect();
 
-  let undefined = v8::undefined(scope);
+  // let undefined = v8::undefined(scope);
   let tc_scope = &mut v8::TryCatch::new(scope);
   //
   // for (cb, params) in callbacks {

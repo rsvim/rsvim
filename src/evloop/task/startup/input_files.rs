@@ -1,16 +1,16 @@
 //! Edit input files on start up.
 
+use crate::buf::Buffer;
+use crate::error::{AnyResult, TheErr};
+use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
+use crate::evloop::task::TaskableDataAccess;
+use crate::glovar;
+
 use ropey::{Rope, RopeBuilder};
 use std::time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
-
-use crate::buf::Buffer;
-use crate::evloop::msg::{Dummy, WorkerToMasterMessage};
-use crate::evloop::task::{TaskResult, TaskableDataAccess};
-use crate::glovar;
-use crate::result::AnyError;
 
 fn into_str(buf: &[u8], bufsize: usize) -> String {
   String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
@@ -25,7 +25,10 @@ fn into_rope(buf: &[u8], bufsize: usize) -> Rope {
 
 /// Edit default input file for the default buffer, i.e. the empty buffer created along with
 /// default window.
-pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: String) -> TaskResult {
+pub async fn edit_default_file(
+  data_access: TaskableDataAccess,
+  file_name: String,
+) -> AnyResult<()> {
   let buffers = data_access.buffers.clone();
   let worker_send_to_master = data_access.worker_send_to_master;
 
@@ -54,7 +57,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
             // terminal.
             debug!("Notify master after each block read");
             worker_send_to_master
-              .send(WorkerToMasterMessage::Dummy(Dummy::default()))
+              .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
               .await
               .unwrap();
 
@@ -71,7 +74,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
               e
             );
             error!("{msg}");
-            return Err(AnyError::with_message(msg));
+            return Err(TheErr::Message(msg).into());
           }
         }
       }
@@ -83,7 +86,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
         e
       );
       error!("{msg}");
-      return Err(AnyError::with_message(msg));
+      return Err(TheErr::Message(msg).into());
     }
   }
 
@@ -94,7 +97,7 @@ pub async fn edit_default_file(data_access: TaskableDataAccess, file_name: Strin
 pub async fn edit_other_files(
   data_access: TaskableDataAccess,
   file_names: Vec<String>,
-) -> TaskResult {
+) -> AnyResult<()> {
   let buffers = data_access.buffers.clone();
   let worker_sender = data_access.worker_send_to_master;
 
@@ -126,7 +129,7 @@ pub async fn edit_other_files(
               // terminal.
               debug!("Notify master after each block read");
               worker_sender
-                .send(WorkerToMasterMessage::Dummy(Dummy::default()))
+                .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
                 .await
                 .unwrap();
 
@@ -144,7 +147,7 @@ pub async fn edit_other_files(
                 e
               );
               error!("{msg}");
-              return Err(AnyError::with_message(msg));
+              return Err(TheErr::Message(msg).into());
             }
           }
         }
@@ -157,7 +160,7 @@ pub async fn edit_other_files(
           e
         );
         error!("{msg}");
-        return Err(AnyError::with_message(msg));
+        return Err(TheErr::Message(msg).into());
       }
     }
   }

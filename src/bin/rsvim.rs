@@ -1,61 +1,18 @@
 //! The VIM editor reinvented in Rust+TypeScript.
 
-#![allow(unused_imports, dead_code)]
-
+use rsvim::cli::CliOpt;
+use rsvim::error::IoResult;
 use rsvim::evloop::EventLoop;
-use rsvim::glovar;
-// use rsvim::js::{start as js_start, JsDataAccess};
-use rsvim::result::VoidIoResult;
-use rsvim::{cli, log};
+use rsvim::log;
 
 use clap::Parser;
-use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
-};
-use crossterm::{execute, terminal};
-use tokio::sync::mpsc::{channel, Receiver, Sender};
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
-use tracing::{debug, error};
+use tracing::debug;
 
-// /// Initialize TUI.
-// pub fn init_tui() -> VoidIoResult {
-//   if !terminal::is_raw_mode_enabled()? {
-//     terminal::enable_raw_mode()?;
-//   }
-//
-//   let mut out = std::io::stdout();
-//   execute!(
-//     out,
-//     terminal::EnterAlternateScreen,
-//     terminal::Clear(terminal::ClearType::All),
-//     EnableMouseCapture,
-//     EnableFocusChange,
-//   )?;
-//
-//   Ok(())
-// }
-//
-// /// Shutdown TUI.
-// pub fn shutdown_tui() -> VoidIoResult {
-//   let mut out = std::io::stdout();
-//   execute!(
-//     out,
-//     DisableMouseCapture,
-//     DisableFocusChange,
-//     terminal::LeaveAlternateScreen,
-//   )?;
-//
-//   if terminal::is_raw_mode_enabled()? {
-//     terminal::disable_raw_mode()?;
-//   }
-//
-//   Ok(())
-// }
-
-fn main() -> VoidIoResult {
+fn main() -> IoResult<()> {
   log::init();
-  let cli_opt = cli::CliOpt::parse();
+  let cli_opt = CliOpt::parse();
   debug!("cli_opt: {:?}", cli_opt);
   let cpu_cores = if let Ok(n) = std::thread::available_parallelism() {
     n.get()
@@ -80,17 +37,18 @@ fn main() -> VoidIoResult {
   // Explicitly create tokio runtime for the EventLoop.
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
-    // Create loop
+    // Create event loop.
     let mut event_loop = EventLoop::new(cli_opt)?;
-    // Initialize
+
+    // Initialize.
     event_loop.init_js_runtime()?;
     event_loop.init_tui()?;
     event_loop.init_input_files()?;
 
-    // Running loop
+    // Run loop.
     event_loop.run().await?;
 
-    // Shutdown
+    // Shutdown.
     event_loop.shutdown_tui()
   })
 }

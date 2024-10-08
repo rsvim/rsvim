@@ -1,6 +1,20 @@
 //! Main event loop.
 
-#![allow(dead_code)]
+use crate::buf::{Buffer, Buffers, BuffersArc};
+use crate::cart::{IRect, U16Size};
+use crate::cli::CliOpt;
+use crate::error::IoResult;
+use crate::evloop::msg::WorkerToMasterMessage;
+use crate::evloop::task::TaskableDataAccess;
+use crate::glovar;
+use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::{JsRuntime, JsRuntimeOptions};
+use crate::state::fsm::StatefulValue;
+use crate::state::{State, StateArc};
+use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
+use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::{Tree, TreeArc, TreeNode};
+use crate::ui::widget::{Cursor, Window};
 
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
@@ -20,22 +34,6 @@ use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
-
-use crate::buf::{Buffer, Buffers, BuffersArc};
-use crate::cart::{IRect, U16Size};
-use crate::cli::CliOpt;
-use crate::evloop::msg::WorkerToMasterMessage;
-use crate::evloop::task::TaskableDataAccess;
-use crate::glovar;
-use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::js::{JsRuntime, JsRuntimeOptions};
-use crate::result::{IoResult, VoidIoResult};
-use crate::state::fsm::StatefulValue;
-use crate::state::{State, StateArc};
-use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
-use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::{Cursor, Window};
 
 pub mod msg;
 pub mod task;
@@ -236,7 +234,7 @@ impl EventLoop {
   }
 
   /// Initialize TUI.
-  pub fn init_tui(&self) -> VoidIoResult {
+  pub fn init_tui(&self) -> IoResult<()> {
     if !crossterm::terminal::is_raw_mode_enabled()? {
       crossterm::terminal::enable_raw_mode()?;
     }
@@ -254,7 +252,7 @@ impl EventLoop {
   }
 
   /// Initialize js runtime.
-  pub fn init_js_runtime(&mut self) -> VoidIoResult {
+  pub fn init_js_runtime(&mut self) -> IoResult<()> {
     self.js_runtime.init_environment();
     if let Some(config_file) = glovar::CONFIG_FILE_PATH() {
       self
@@ -266,7 +264,7 @@ impl EventLoop {
   }
 
   /// Initialize start up tasks such as input files, etc.
-  pub fn init_input_files(&mut self) -> VoidIoResult {
+  pub fn init_input_files(&mut self) -> IoResult<()> {
     self.queue_cursor()?;
     self.writer.flush()?;
 
@@ -371,7 +369,7 @@ impl EventLoop {
   ///    3. Cancellation request (which tells this event loop to quit).
   /// 2. Use the editing state (FSM) to handle the event.
   /// 3. Render the terminal.
-  pub async fn run(&mut self) -> VoidIoResult {
+  pub async fn run(&mut self) -> IoResult<()> {
     let mut reader = EventStream::new();
     loop {
       tokio::select! {
@@ -407,7 +405,7 @@ impl EventLoop {
     Ok(())
   }
 
-  fn render(&mut self) -> VoidIoResult {
+  fn render(&mut self) -> IoResult<()> {
     {
       // Draw UI components to the canvas.
       self
@@ -434,7 +432,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas shader.
-  fn queue_shader(&mut self, shader: Shader) -> VoidIoResult {
+  fn queue_shader(&mut self, shader: Shader) -> IoResult<()> {
     for shader_command in shader.iter() {
       match shader_command {
         ShaderCommand::CursorSetCursorStyle(command) => queue!(self.writer, command)?,
@@ -488,7 +486,7 @@ impl EventLoop {
   }
 
   /// Put (render) canvas cursor.
-  fn queue_cursor(&mut self) -> VoidIoResult {
+  fn queue_cursor(&mut self) -> IoResult<()> {
     let cursor = *self
       .canvas
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
@@ -517,7 +515,7 @@ impl EventLoop {
   }
 
   /// Shutdown TUI.
-  pub fn shutdown_tui(&self) -> VoidIoResult {
+  pub fn shutdown_tui(&self) -> IoResult<()> {
     let mut out = std::io::stdout();
     execute!(
       out,
