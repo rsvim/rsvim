@@ -481,22 +481,29 @@ impl JsRuntime {
     // Get a handle-scope and a reference to the runtime's state.
     let scope = &mut self.handle_scope();
     let state_rc = Self::state(scope);
-    let mut state = state_rc.borrow_mut();
-    while let Ok(msg) = state.js_runtime_recv_from_master.try_recv() {
+    let mut futures: Vec<Box<dyn JsFuture>> = Vec::new();
+    while let Ok(msg) = state_rc.borrow_mut().js_runtime_recv_from_master.try_recv() {
       match msg {
         EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
-          match state.pending_futures.remove(&resp.future_id) {
+          match state_rc
+            .borrow_mut()
+            .pending_futures
+            .remove(&resp.future_id)
+          {
             Some(mut timeout_cb) => {
-              timeout_cb.run(scope);
-              if let Some(error) = check_exceptions(scope) {
-                // FIXME: Cannot simply report error and exit process, because this is inside the editor.
-                error!("Js runtime timeout error:{error:?}");
-                eprintln!("Js runtime timeout error:{error:?}");
-              }
+              futures.push(timeout_cb);
             }
             None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
           }
         }
+      }
+    }
+    for mut fut in futures {
+      fut.run(scope);
+      if let Some(error) = check_exceptions(scope) {
+        // FIXME: Cannot simply report error and exit process, because this is inside the editor.
+        error!("Js runtime timeout error:{error:?}");
+        eprintln!("Js runtime timeout error:{error:?}");
       }
       run_next_tick_callbacks(scope);
     }

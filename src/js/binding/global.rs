@@ -66,13 +66,12 @@ pub fn set_timeout(
   };
 
   let state_rc = JsRuntime::state(scope);
-  let state_rc2 = Rc::clone(&state_rc);
   let mut state = state_rc.borrow_mut();
   let params = Rc::new(params);
 
   // Return timeout's internal id.
   let timer_id = js::next_future_id();
-  let js_runtime_send_to_master = state_rc.borrow().js_runtime_send_to_master.clone();
+  let js_runtime_send_to_master = state.js_runtime_send_to_master.clone();
   let current_handle = tokio::runtime::Handle::current();
   current_handle.spawn_blocking(move || {
     let _ = js_runtime_send_to_master.blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
