@@ -77,12 +77,11 @@ fn main() -> VoidIoResult {
   // let (js_send_to_evloop, evloop_recv_from_js) = channel(glovar::CHANNEL_BUF_SIZE());
   // let (evloop_send_to_js, js_recv_from_evloop) = channel(glovar::CHANNEL_BUF_SIZE());
 
-  // Initialize EventLoop.
-  let mut event_loop = EventLoop::new(cli_opt)?;
-
   // Explicitly create tokio runtime for the EventLoop.
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
+    // Create loop
+    let mut event_loop = EventLoop::new(cli_opt)?;
     // Initialize
     event_loop.init_js_runtime()?;
     event_loop.init_tui()?;

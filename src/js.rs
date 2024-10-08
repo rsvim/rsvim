@@ -4,8 +4,10 @@
 
 use parking_lot::RwLock;
 use std::cell::RefCell;
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
+use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
 use std::sync::Once;
 use std::time::Duration;
@@ -24,7 +26,7 @@ use crate::js::module::{
   create_origin, fetch_module_tree, load_import, resolve_import, ImportKind, ImportMap,
   ModuleGraph, ModuleMap, ModuleStatus,
 };
-use crate::js::msg::JsRuntimeToEventLoopMessage;
+use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::result::AnyError;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
@@ -64,24 +66,33 @@ pub struct JsRuntimeOptions {
 
 // /// A vector with JS callbacks and parameters.
 // type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
-//
-// /// An abstract interface for something that should run in respond to an
-// /// async task, scheduled previously and is now completed.
-// pub trait JsFuture {
-//   fn run(&mut self, scope: &mut v8::HandleScope);
-// }
+
+/// An abstract interface for javascript `Promise` and `async`.
+/// since everything in V8 needs the `&mut v8::HandleScope` to operate with, we cannot simply put
+/// the async task into tokio `spawn` API, but to first
+pub trait JsFuture {
+  fn run(&mut self, scope: &mut v8::HandleScope);
+}
+
+pub type JsFutureId = i32;
+
+/// Next global ID for js runtime.
+pub fn next_future_id() -> JsFutureId {
+  static GLOBAL: AtomicI32 = AtomicI32::new(0);
+  GLOBAL.fetch_add(1, Ordering::Relaxed)
+}
 
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
   pub context: v8::Global<v8::Context>,
   /// Holds information about resolved ES modules.
   pub module_map: ModuleMap,
-  // /// A handle to the runtime's event-loop.
-  // pub handle: LoopHandle,
+  /// Timeout handles, i.e. timer IDs.
+  pub timeout_handles: HashSet<i32>,
   // /// A handle to the event-loop that can interrupt the poll-phase.
   // pub interrupt_handle: LoopInterruptHandle,
-  // /// Holds JS pending futures scheduled by the event-loop.
-  // pub pending_futures: Vec<Box<dyn JsFuture>>,
+  /// Holds JS pending futures scheduled by the event-loop.
+  pub pending_futures: HashMap<JsFutureId, Box<dyn JsFuture>>,
   /// Indicates the start time of the process.
   pub startup_moment: Instant,
   /// Specifies the timestamp which the current process began in Unix time.
@@ -96,9 +107,10 @@ pub struct JsRuntimeState {
   // pub wake_event_queued: bool,
 
   // Data Access for RSVIM {
-  pub task_tracker: TaskTracker,
-  // Js worker => master.
-  pub js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  // Js runtime ==request==> master.
+  pub js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+  // Js runtime <==response== master.
+  pub js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   pub cli_opt: CliOpt,
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
   pub tree: TreeArc,
@@ -124,8 +136,8 @@ impl JsRuntime {
     options: JsRuntimeOptions,
     startup_moment: Instant,
     time_origin: u128,
-    task_tracker: TaskTracker,
-    js_worker_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
     tree: TreeArc,
@@ -154,7 +166,7 @@ impl JsRuntime {
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
-    isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
+    // isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
@@ -191,17 +203,18 @@ impl JsRuntime {
     let state = Rc::new(RefCell::new(JsRuntimeState {
       context,
       module_map: ModuleMap::new(),
-      // handle: event_loop.handle(),
+      timeout_handles: HashSet::new(),
       // interrupt_handle: event_loop.interrupt_handle(),
-      // pending_futures: Vec::new(),
+      pending_futures: HashMap::new(),
+      // timeout_queue: BTreeMap::new(),
       startup_moment,
       time_origin,
       // next_tick_queue: Vec::new(),
       exceptions: exception::ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      task_tracker,
-      js_worker_send_to_master,
+      js_runtime_send_to_master,
+      js_runtime_recv_from_master,
       cli_opt,
       runtime_path,
       tree,
@@ -231,12 +244,12 @@ impl JsRuntime {
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
   pub fn init_environment(&mut self) {
-    let name = "rsvim:runtime/00__global.js";
-    let source = include_str!("./js/runtime/00__global.js");
+    let name = "rsvim:runtime/10__global.js";
+    let source = include_str!("./js/runtime/10__global.js");
     self.init_builtin_module(name, source);
 
-    let name = "rsvim:runtime/01__rsvim.js";
-    let source = include_str!("./js/runtime/01__rsvim.js");
+    let name = "rsvim:runtime/50__rsvim.js";
+    let source = include_str!("./js/runtime/50__rsvim.js");
     self.init_builtin_module(name, source);
 
     // // Initialize process static values.
@@ -410,19 +423,17 @@ impl JsRuntime {
   }
 
   /// Runs a single tick of the event-loop.
-  pub async fn tick_event_loop(&mut self) {
+  pub fn tick_event_loop(&mut self) {
     let isolate_has_pending_tasks = self.isolate.has_pending_background_tasks();
     debug!(
       "Tick js runtime, isolate has pending tasks: {:?}",
       isolate_has_pending_tasks
     );
-    if isolate_has_pending_tasks {
-      run_next_tick_callbacks(&mut self.handle_scope());
-      self.fast_forward_imports();
-    }
-    debug!("Tick js runtime - done");
+    run_next_tick_callbacks(&mut self.handle_scope());
+    self.fast_forward_imports();
     // self.event_loop.tick();
-    // self.run_pending_futures();
+    self.run_pending_futures();
+    debug!("Tick js runtime - done");
   }
 
   // /// Polls the inspector for new devtools messages.
@@ -465,31 +476,41 @@ impl JsRuntime {
   //   }
   // }
 
-  // /// Runs all the pending javascript tasks.
-  // fn run_pending_futures(&mut self) {
-  //   // Get a handle-scope and a reference to the runtime's state.
-  //   let scope = &mut self.handle_scope();
-  //   let state_rc = Self::state(scope);
-  //
-  //   // NOTE: The reason we move all the js futures to a separate vec is because
-  //   // we need to drop the `state` borrow before we start iterating through all
-  //   // of them to avoid borrowing panics at runtime.
-  //
-  //   let futures: Vec<Box<dyn JsFuture>> = state_rc.borrow_mut().pending_futures.drain(..).collect();
-  //
-  //   // NOTE: After every future executes (aka v8's call stack gets empty) we will drain
-  //   // the MicroTask and NextTick Queue.
-  //
-  //   for mut fut in futures {
-  //     fut.run(scope);
-  //     if let Some(error) = check_exceptions(scope) {
-  //       report_and_exit(error);
-  //     }
-  //     run_next_tick_callbacks(scope);
-  //   }
-  //
-  //   state_rc.borrow_mut().wake_event_queued = false;
-  // }
+  /// Runs pending javascript tasks which have received results from master.
+  fn run_pending_futures(&mut self) {
+    // Get a handle-scope and a reference to the runtime's state.
+    let scope = &mut self.handle_scope();
+    let mut futures: Vec<Box<dyn JsFuture>> = Vec::new();
+
+    {
+      let state_rc = Self::state(scope);
+      let mut state = state_rc.borrow_mut();
+      while let Ok(msg) = state.js_runtime_recv_from_master.try_recv() {
+        match msg {
+          EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
+            match state.pending_futures.remove(&resp.future_id) {
+              Some(mut timeout_cb) => {
+                futures.push(timeout_cb);
+              }
+              None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
+            }
+          }
+        }
+      }
+
+      // Drop borrowed `state_rc` or it will panics when running these futures.
+    }
+
+    for mut fut in futures {
+      fut.run(scope);
+      if let Some(error) = check_exceptions(scope) {
+        // FIXME: Cannot simply report error and exit process, because this is inside the editor.
+        error!("Js runtime timeout error:{error:?}");
+        eprintln!("Js runtime timeout error:{error:?}");
+      }
+      run_next_tick_callbacks(scope);
+    }
+  }
 
   /// Checks for imports (static/dynamic) ready for execution.
   fn fast_forward_imports(&mut self) {

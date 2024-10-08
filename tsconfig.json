@@ -5,7 +5,8 @@
     "allowUnusedLabels": false,
     "checkJs": true,
     "keyofStringsOnly": false,
-    "lib": ["es5"],
+    "lib": ["es2015"],
+    "module": "es2015",
     "noErrorTruncation": false,
     "noFallthroughCasesInSwitch": false,
     "noImplicitAny": true,
@@ -22,7 +23,8 @@
     "strictNullChecks": true,
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
-    "useUnknownInCatchVariables": false
+    "useUnknownInCatchVariables": false,
+    "removeComments": true
   },
-  "include": ["src/js/runtime/*.ts"]
+  "include": ["src/js/runtime/*.ts", "src/js/runtime/*.d.ts"]
 }

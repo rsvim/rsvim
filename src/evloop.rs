@@ -27,7 +27,7 @@ use crate::cli::CliOpt;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
-use crate::js::msg::JsRuntimeToEventLoopMessage;
+use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions};
 use crate::result::{IoResult, VoidIoResult};
 use crate::state::fsm::StatefulValue;
@@ -96,8 +96,14 @@ pub struct EventLoop {
 
   /// Js runtime.
   pub js_runtime: JsRuntime,
-  /// Receiver: master <= js worker.
-  pub master_recv_from_js_worker: Receiver<JsRuntimeToEventLoopMessage>,
+  /// Receiver: master <= js runtime.
+  pub master_recv_from_js_runtime: Receiver<JsRuntimeToEventLoopMessage>,
+  /// Sender: master => js runtime.
+  pub master_send_to_js_runtime: Sender<EventLoopToJsRuntimeMessage>,
+  /// An internal connected sender/receiver pair, it's simply for forward the task results
+  /// to the event loop again and bypass the limitation of V8 engine.
+  pub js_runtime_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
+  pub js_runtime_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
 }
 
 impl EventLoop {
@@ -141,12 +147,42 @@ impl EventLoop {
 
     // Worker => master
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
-    // // Master => js worker
-    // let (master_send_to_js_worker, js_worker_recv_from_master) =
-    //   channel(glovar::CHANNEL_BUF_SIZE());
-    // Js worker => master
-    let (js_worker_send_to_master, master_recv_from_js_worker) =
+
+    // Since there are too many limitations that we cannot use tokio APIs along with V8 engine, we
+    // have to first send task requests to master, let the master handles these tasks for us in the
+    // async way, then send the task results back to js runtime.
+    //
+    // These tasks are very common and low level, serve as an infrastructure layer for js world.
+    // For example:
+    // - File IO
+    // - Timer
+    // - Network
+    // - And more...
+    //
+    // The basic workflow is:
+    // 1. When js runtime needs to handles the `Promise` and `async` functions, it send requests to
+    //    master via `js_runtime_send_to_master`.
+    // 2. Master receive requests via `master_recv_from_js_runtime`, and handle these tasks in async
+    //    way.
+    // 3. Master send the task results via `js_runtime_tick_dispatcher`.
+    // 4. Master receive the task results via `js_runtime_tick_queue`, and send the results (again)
+    //    via `master_send_to_js_runtime`.
+    // 5. Js runtime receive these task results via `js_runtime_recv_from_master`, then process
+    //    pending futures.
+    //
+    // You must notice that, the 3rd and 4th steps (and the pair of `js_runtime_tick_dispatcher`
+    // and `js_runtime_tick_queue`) seem useless. Yes, they're simply for trigger the event loop
+    // to run the `JsRuntime::tick_event_loop` API in `tokio::select!` main loop, due to the
+    // limitation of V8 engine work along with tokio runtime.
+
+    // Js runtime => master
+    let (js_runtime_send_to_master, master_recv_from_js_runtime) =
       channel(glovar::CHANNEL_BUF_SIZE());
+    // Master => js runtime
+    let (master_send_to_js_runtime, js_runtime_recv_from_master) =
+      channel(glovar::CHANNEL_BUF_SIZE());
+    // Master => master
+    let (js_runtime_tick_dispatcher, js_runtime_tick_queue) = channel(glovar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
     let mut runtime_path = vec![glovar::DATA_DIR_PATH()];
@@ -168,8 +204,8 @@ impl EventLoop {
       JsRuntimeOptions::default(),
       startup_moment,
       startup_unix_epoch,
-      task_tracker.clone(),
-      js_worker_send_to_master,
+      js_runtime_send_to_master,
+      js_runtime_recv_from_master,
       cli_opt.clone(),
       runtime_path.clone(),
       tree_arc.clone(),
@@ -192,7 +228,10 @@ impl EventLoop {
       worker_send_to_master,
       master_recv_from_worker,
       js_runtime,
-      master_recv_from_js_worker,
+      master_recv_from_js_runtime,
+      master_send_to_js_runtime,
+      js_runtime_tick_dispatcher,
+      js_runtime_tick_queue,
     })
   }
 
@@ -311,6 +350,37 @@ impl EventLoop {
     debug!("Received {:?} message from workers", msg);
   }
 
+  async fn process_js_runtime_request(&mut self, msg: Option<JsRuntimeToEventLoopMessage>) {
+    if let Some(msg) = msg {
+      match msg {
+        JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
+          debug!("process_js_runtime_request timeout_req:{:?}", req.future_id);
+          let js_runtime_tick_dispatcher = self.js_runtime_tick_dispatcher.clone();
+          self.task_tracker.spawn(async move {
+            tokio::time::sleep(req.duration).await;
+            let _ = js_runtime_tick_dispatcher
+              .send(EventLoopToJsRuntimeMessage::TimeoutResp(
+                jsmsg::TimeoutResp::new(req.future_id, req.duration),
+              ))
+              .await;
+            debug!(
+              "process_js_runtime_request timeout_req:{:?} - done",
+              req.future_id
+            );
+          });
+        }
+      }
+    }
+  }
+
+  async fn process_js_runtime_response(&mut self, msg: Option<EventLoopToJsRuntimeMessage>) {
+    if let Some(msg) = msg {
+      debug!("process_js_runtime_response msg:{:?}", msg);
+      let _ = self.master_send_to_js_runtime.send(msg).await;
+      self.js_runtime.tick_event_loop();
+    }
+  }
+
   /// Running the loop, it repeatedly do following steps:
   ///
   /// 1. Receives several things:
@@ -331,15 +401,19 @@ impl EventLoop {
         worker_msg = self.master_recv_from_worker.recv() => {
           self.process_worker_notify(worker_msg).await;
         }
+        // Receive notification from js runtime
+        js_req = self.master_recv_from_js_runtime.recv() => {
+            self.process_js_runtime_request(js_req).await;
+        }
+        js_resp = self.js_runtime_tick_queue.recv() => {
+            self.process_js_runtime_response(js_resp).await;
+        }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
           debug!("Receive cancellation token, exit loop");
           self.task_tracker.close();
           // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
           break;
-        }
-        _ = self.js_runtime.tick_event_loop() => {
-          // debug!("Tick js runtime - done");
         }
       }
 

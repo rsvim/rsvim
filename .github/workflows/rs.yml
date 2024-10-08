@@ -14,7 +14,7 @@ env:
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   CARGO_NET_RETRY: 3
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-Dwarnings --cfg tokio_unstable"
+  RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
   rs_lint:

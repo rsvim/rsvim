@@ -1,4 +1,4 @@
-//! APIs for `__vim.opt` namespace.
+//! APIs for `Rsvim.opt` namespace.
 
 use crate::glovar;
 use crate::js::JsRuntime;
@@ -34,7 +34,7 @@ pub fn set_line_wrap(
   let state_rc = JsRuntime::state(scope);
   debug!("set_line_wrap: {:?}", value);
   state_rc
-    .borrow()
+    .borrow_mut()
     .tree
     .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
     .unwrap()

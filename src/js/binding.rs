@@ -22,6 +22,7 @@ use crate::js::{check_exceptions, JsRuntime};
 // use crate::stdio;
 // use crate::timers;
 
+pub mod global;
 pub mod opt;
 
 // /// Function pointer for the bindings initializers.
@@ -62,6 +63,12 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
 
   // Register the `__InternalRsvimGlobalObject` global object.
   let vim = create_object_under(scope, global, "__InternalRsvimGlobalObject");
+
+  // `globalThis`
+  {
+    set_function_to(scope, vim, "global_set_timeout", global::set_timeout);
+    set_function_to(scope, vim, "global_clear_timeout", global::clear_timeout);
+  }
 
   // `Rsvim.opt`
   {

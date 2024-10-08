@@ -99,11 +99,8 @@ Please setup your development environment with:
 To develop code, please run with:
 
 - Format code with [prettier](https://prettier.io/).
-
-### Check
-
-To check code, please run with `deno check ./src/js/module/runtime.ts`.
+- Check code with [typescript-language-server](https://github.com/typescript-language-server/typescript-language-server).
 
 ### Transpile (Compile)
 
-To transpile ts code to js code (in `src` folder), please run with `tsc`.
+To transpile ts code to js code (in `src` folder), please run with `tsc` (it also check the code).

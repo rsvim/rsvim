@@ -27,8 +27,3 @@ jobs:
           ls -la
           echo "tsc"
           tsc
-      - uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-      - run: |
-          deno check src/js/runtime/*.ts
