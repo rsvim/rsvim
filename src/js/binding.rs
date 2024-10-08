@@ -10,13 +10,13 @@ use crate::error::{AnyErr, IoError};
 // use crate::perf_hooks;
 // use crate::process;
 // use crate::promise;
-use crate::js::{check_exceptions, JsRuntime};
+// use crate::js::{check_exceptions, JsRuntime};
 // use crate::signals;
 // use crate::stdio;
 // use crate::timers;
 
 use std::ffi::c_void;
-use tracing::error;
+// use tracing::error;
 
 pub mod global;
 pub mod opt;
@@ -87,52 +87,52 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
   scope.escape(context)
 }
 
-// Simple print function bound to Rust's println! macro.
-fn global_print(
-  scope: &mut v8::HandleScope,
-  args: v8::FunctionCallbackArguments,
-  _: v8::ReturnValue,
-) {
-  let value = args.get(0).to_rust_string_lossy(scope);
-  println!("{value}");
-}
+// // Simple print function bound to Rust's println! macro.
+// fn global_print(
+//   scope: &mut v8::HandleScope,
+//   args: v8::FunctionCallbackArguments,
+//   _: v8::ReturnValue,
+// ) {
+//   let value = args.get(0).to_rust_string_lossy(scope);
+//   println!("{value}");
+// }
 
-// This method may be used to report errors to global event handlers.
-// https://html.spec.whatwg.org/multipage/webappapis.html#report-the-exception
-fn global_report_error(
-  scope: &mut v8::HandleScope,
-  args: v8::FunctionCallbackArguments,
-  _: v8::ReturnValue,
-) {
-  let exception = v8::Global::new(scope, args.get(0));
-  let state_rc = JsRuntime::state(scope);
-  let mut state = state_rc.borrow_mut();
+// // This method may be used to report errors to global event handlers.
+// // https://html.spec.whatwg.org/multipage/webappapis.html#report-the-exception
+// fn global_report_error(
+//   scope: &mut v8::HandleScope,
+//   args: v8::FunctionCallbackArguments,
+//   _: v8::ReturnValue,
+// ) {
+//   let exception = v8::Global::new(scope, args.get(0));
+//   let state_rc = JsRuntime::state(scope);
+//   let mut state = state_rc.borrow_mut();
+//
+//   state.exceptions.capture_exception(exception);
+//   drop(state);
+//
+//   if let Some(error) = check_exceptions(scope) {
+//     // FIXME: We cannot simply exit the process like other js runtimes, because js runtime inside the
+//     // editor is a configuration layer. The only thing we should do is popup an error message to
+//     // command line, and let js runtime continue running.
+//     error!("{:?}", error);
+//     eprintln!("{:?}", error);
+//   }
+// }
 
-  state.exceptions.capture_exception(exception);
-  drop(state);
-
-  if let Some(error) = check_exceptions(scope) {
-    // FIXME: We cannot simply exit the process like other js runtimes, because js runtime inside the
-    // editor is a configuration layer. The only thing we should do is popup an error message to
-    // command line, and let js runtime continue running.
-    error!("{:?}", error);
-    eprintln!("{:?}", error);
-  }
-}
-
-// This method queues a microtask to invoke callback.
-fn global_queue_micro(
-  scope: &mut v8::HandleScope,
-  args: v8::FunctionCallbackArguments,
-  _: v8::ReturnValue,
-) {
-  let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
-  let state_rc = JsRuntime::state(scope);
-  let state = state_rc.borrow();
-  let ctx = state.context.open(scope);
-
-  ctx.get_microtask_queue().enqueue_microtask(scope, callback);
-}
+// // This method queues a microtask to invoke callback.
+// fn global_queue_micro(
+//   scope: &mut v8::HandleScope,
+//   args: v8::FunctionCallbackArguments,
+//   _: v8::ReturnValue,
+// ) {
+//   let callback = v8::Local::<v8::Function>::try_from(args.get(0)).unwrap();
+//   let state_rc = JsRuntime::state(scope);
+//   let state = state_rc.borrow();
+//   let ctx = state.context.open(scope);
+//
+//   ctx.get_microtask_queue().enqueue_microtask(scope, callback);
+// }
 
 /// Adds a property with the given name and value, into the given object.
 pub fn set_property_to(

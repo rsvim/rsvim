@@ -1,15 +1,8 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
-use crate::error::AnyResult;
-use crate::js::binding::{set_exception_code, throw_type_error};
-use crate::js::err::JsError;
-use crate::js::module::{
-  create_origin, load_import, resolve_import, EsModule, ModuleGraph, ModuleSource, ModuleStatus,
-};
+use crate::js::binding::throw_type_error;
+use crate::js::module::resolve_import;
 use crate::js::JsRuntime;
-
-use std::cell::RefCell;
-use std::rc::Rc;
 
 /// Called during Module::instantiate_module.
 /// See: <https://docs.rs/rusty_v8/latest/rusty_v8/type.ResolveModuleCallback.html>

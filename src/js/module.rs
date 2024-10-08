@@ -1,20 +1,14 @@
 //! Js module.
 
 use crate::error::AnyResult;
-use crate::js::constant::{URL_REGEX, WINDOWS_REGEX};
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
-use crate::js::msg::JsRuntimeToEventLoopMessage;
 use crate::js::JsRuntime;
 
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::collections::LinkedList;
-use std::env;
-use std::future::Future;
-use std::path::Path;
 use std::rc::Rc;
 use std::sync::OnceLock;
-use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::debug;
 // use url::Url;
 
@@ -280,16 +274,17 @@ type ImportMapEntry = (String, String);
 ///
 /// NOTE: This is just a mock-up which is actually not supported.
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct ImportMap {
   map: Vec<ImportMapEntry>,
 }
 
 impl ImportMap {
-  pub fn parse_from_json(text: &str) -> AnyResult<ImportMap> {
+  pub fn parse_from_json(_text: &str) -> AnyResult<ImportMap> {
     Ok(ImportMap { map: Vec::new() })
   }
 
-  pub fn lookup(&self, specifier: &str) -> Option<String> {
+  pub fn lookup(&self, _specifier: &str) -> Option<String> {
     None
   }
 
@@ -369,7 +364,7 @@ pub fn resolve_import(
 }
 
 /// Loads an import using the appropriate loader.
-pub fn load_import(specifier: &str, skip_cache: bool) -> AnyResult<ModuleSource> {
+pub fn load_import(specifier: &str, _skip_cache: bool) -> AnyResult<ModuleSource> {
   // // Look the params and choose a loader.
   // let loader: Box<dyn ModuleLoader> = match (
   //   CORE_MODULES().contains_key(specifier),

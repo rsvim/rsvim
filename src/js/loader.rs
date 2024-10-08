@@ -5,11 +5,12 @@ use crate::js::constant::WINDOWS_REGEX;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::js::module::CORE_MODULES;
+use crate::js::transpiler::Jsx;
 use crate::js::transpiler::TypeScript;
 use crate::js::transpiler::Wasm;
 
 use anyhow::bail;
-use regex::Regex;
+// use regex::Regex;
 // use sha::sha1::Sha1;
 // use sha::utils::Digest;
 // use sha::utils::DigestExt;
@@ -18,7 +19,6 @@ use std::env;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
-use std::sync::OnceLock;
 // use url::Url;
 
 /// Defines the interface of a module loader.
@@ -143,10 +143,10 @@ impl ModuleLoader for FsModuleLoader {
       "ts" => {
         TypeScript::compile(fname, &source).map_err(|e| TheErr::Message(e.to_string()).into())
       }
-      // "jsx" => Jsx::compile(fname, &source).map_err(|e| generic_error(e.to_string())),
-      // "tsx" => Jsx::compile(fname, &source)
-      //   .and_then(|output| TypeScript::compile(fname, &output))
-      //   .map_err(|e| generic_error(e.to_string())),
+      "jsx" => Jsx::compile(fname, &source).map_err(|e| TheErr::Message(e.to_string()).into()),
+      "tsx" => Jsx::compile(fname, &source)
+        .and_then(|output| TypeScript::compile(fname, &output))
+        .map_err(|e| TheErr::Message(e.to_string()).into()),
       _ => Ok(source),
     }
   }

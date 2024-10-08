@@ -370,7 +370,7 @@ impl JsRuntime {
       None => {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
-        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        let _exception = JsError::from_v8_exception(tc_scope, exception, None);
         let err_msg = format!("User config not found: {filename:?}");
         error!(err_msg);
         eprintln!("{err_msg}");
@@ -481,9 +481,7 @@ impl JsRuntime {
         match msg {
           EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
             match state.pending_futures.remove(&resp.future_id) {
-              Some(mut timeout_cb) => {
-                futures.push(timeout_cb);
-              }
+              Some(timeout_cb) => futures.push(timeout_cb),
               None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
             }
           }
@@ -678,10 +676,10 @@ impl JsRuntime {
 
 /// Runs callbacks stored in the next-tick queue.
 fn run_next_tick_callbacks(scope: &mut v8::HandleScope) {
-  let state_rc = JsRuntime::state(scope);
+  // let state_rc = JsRuntime::state(scope);
   // let callbacks: NextTickQueue = state_rc.borrow_mut().next_tick_queue.drain(..).collect();
 
-  let undefined = v8::undefined(scope);
+  // let undefined = v8::undefined(scope);
   let tc_scope = &mut v8::TryCatch::new(scope);
   //
   // for (cb, params) in callbacks {
