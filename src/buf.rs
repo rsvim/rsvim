@@ -14,8 +14,10 @@ use std::time::Duration;
 pub type BufferId = i32;
 
 /// Next unique buffer ID.
+///
+/// NOTE: Start form 1.
 pub fn next_buffer_id() -> BufferId {
-  static VALUE: AtomicI32 = AtomicI32::new(0);
+  static VALUE: AtomicI32 = AtomicI32::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
@@ -192,5 +194,10 @@ mod tests {
     let buf1: Buffer = builder1.into();
     let tmp1 = tempfile().unwrap();
     buf1.rope.write_to(tmp1).unwrap();
+  }
+
+  #[test]
+  fn next_buffer_id1() {
+    assert!(next_buffer_id() > 0);
   }
 }

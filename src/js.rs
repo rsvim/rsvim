@@ -77,8 +77,10 @@ pub trait JsFuture {
 pub type JsFutureId = i32;
 
 /// Next future/task ID for js runtime.
+///
+/// NOTE: Start form 1.
 pub fn next_future_id() -> JsFutureId {
-  static GLOBAL: AtomicI32 = AtomicI32::new(0);
+  static GLOBAL: AtomicI32 = AtomicI32::new(1);
   GLOBAL.fetch_add(1, Ordering::Relaxed)
 }
 

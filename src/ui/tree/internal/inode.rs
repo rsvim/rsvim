@@ -99,9 +99,9 @@ macro_rules! inode_generate_impl {
 
 /// Next unique UI widget ID.
 ///
-/// NOTE: Start from 10000 to be different from buffer ID.
-pub fn next_widget_id() -> InodeId {
-  static VALUE: AtomicI32 = AtomicI32::new(10000);
+/// NOTE: Start from 1000001, so be different from buffer ID.
+pub fn next_node_id() -> InodeId {
+  static VALUE: AtomicI32 = AtomicI32::new(1000001);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
@@ -121,7 +121,7 @@ impl InodeBase {
   pub fn new(shape: IRect) -> Self {
     let actual_shape = geo_rect_as!(shape, u16);
     InodeBase {
-      id: next_widget_id(),
+      id: next_node_id(),
       depth: 0,
       shape,
       actual_shape,
