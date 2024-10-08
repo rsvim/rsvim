@@ -480,24 +480,27 @@ impl JsRuntime {
   fn run_pending_futures(&mut self) {
     // Get a handle-scope and a reference to the runtime's state.
     let scope = &mut self.handle_scope();
-    let state_rc = Self::state(scope);
     let mut futures: Vec<Box<dyn JsFuture>> = Vec::new();
-    while let Ok(msg) = state_rc.borrow_mut().js_runtime_recv_from_master.try_recv() {
-      match msg {
-        EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
-          match state_rc
-            .borrow_mut()
-            .pending_futures
-            .remove(&resp.future_id)
-          {
-            Some(mut timeout_cb) => {
-              futures.push(timeout_cb);
+
+    {
+      let state_rc = Self::state(scope);
+      let mut state = state_rc.borrow_mut();
+      while let Ok(msg) = state.js_runtime_recv_from_master.try_recv() {
+        match msg {
+          EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
+            match state.pending_futures.remove(&resp.future_id) {
+              Some(mut timeout_cb) => {
+                futures.push(timeout_cb);
+              }
+              None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
             }
-            None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
           }
         }
       }
+
+      // Drop borrowed `state_rc` or it will panics when running these futures.
     }
+
     for mut fut in futures {
       fut.run(scope);
       if let Some(error) = check_exceptions(scope) {
