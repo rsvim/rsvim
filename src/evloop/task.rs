@@ -4,13 +4,10 @@ use tokio::sync::mpsc::Sender;
 
 use crate::buf::BuffersArc;
 use crate::evloop::msg::WorkerToMasterMessage;
-use crate::result::VoidResult;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
 pub mod startup;
-
-pub type TaskResult = VoidResult;
 
 #[derive(Debug, Clone)]
 /// The mutable data passed to task, and allow them access the editor.

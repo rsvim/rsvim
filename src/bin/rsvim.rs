@@ -1,6 +1,6 @@
 //! The VIM editor reinvented in Rust+TypeScript.
 
-#![allow(unused_imports, dead_code)]
+#![allow(unused_imports)]
 
 use rsvim::evloop::EventLoop;
 use rsvim::glovar;
