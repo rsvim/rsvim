@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "docs": "typedoc"
+    "typedoc": "typedoc"
   },
   "devDependencies": {
     "typedoc": "^0.26.8",
