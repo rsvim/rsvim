@@ -1,8 +1,7 @@
 //! File path configs.
 
 use directories::BaseDirs;
-use std::path::{Path, PathBuf};
-use tracing::debug;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 /// The configs for editor's config file, i.e. the `.rsvim.js` or `.rsvim.ts`.
@@ -12,89 +11,92 @@ pub struct PathConfig {
   data_dir: PathBuf,
 }
 
-#[cfg(not(target_os = "macos"))]
-fn _xdg_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
-  vec![base_dirs.config_local_dir().join("rsvim").to_path_buf()]
-}
-
-#[cfg(target_os = "macos")]
-fn _xdg_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
-  vec![
-    base_dirs.config_local_dir().join("rsvim").to_path_buf(),
-    base_dirs.home_dir().join(".config").join("rsvim"),
-  ]
-}
-
-fn _home_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
-  vec![base_dirs.home_dir().join(".rsvim")]
-}
-
-fn _ts_config_file(config_dir: &Path) -> PathBuf {
-  config_dir.join("rsvim.ts")
-}
-
-fn _js_config_file(config_dir: &Path) -> PathBuf {
-  config_dir.join("rsvim.js")
-}
-
-fn get_config_file(base_dirs: &BaseDirs) -> Option<PathBuf> {
-  let mut xdg_dirs = _xdg_config_dirs(base_dirs);
-  debug!("xdg config dirs:{:?}", xdg_dirs);
-
-  let mut home_dirs = _home_config_dirs(base_dirs);
-  debug!("home config dirs:{:?}", home_dirs);
-
-  xdg_dirs.append(&mut home_dirs);
-
-  for xdg_dir in xdg_dirs.iter() {
-    let xdg_ts_path = _ts_config_file(xdg_dir);
-    if xdg_ts_path.as_path().exists() {
-      return Some(xdg_ts_path);
-    }
-    let xdg_js_path = _js_config_file(xdg_dir);
-    if xdg_js_path.as_path().exists() {
-      return Some(xdg_js_path);
-    }
-  }
-
-  let home_paths = vec![
-    base_dirs.home_dir().join(".rsvim.ts").to_path_buf(),
-    base_dirs.home_dir().join(".rsvim.js").to_path_buf(),
-  ];
-  home_paths.into_iter().find(|p| p.exists())
-}
-
-fn get_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs.cache_dir().join("rsvim").to_path_buf()
-}
-
-/// For win
+// `$env:LocalAppData\rsvim`
 #[cfg(target_os = "windows")]
-fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs
-    .config_local_dir()
-    .join("rsvim-data")
-    .to_path_buf()
-}
-
-/// Not mac or win
-#[cfg(not(any(target_os = "macos", target_os = "windows")))]
-fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
+fn _xdg_config_dir(base_dirs: &BaseDirs) -> PathBuf {
   base_dirs.config_local_dir().join("rsvim").to_path_buf()
 }
 
-/// For mac
-#[cfg(target_os = "macos")]
-fn _xdg_data_dirs(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs
-    .home_dir()
-    .join(".local")
-    .join("share")
-    .join("rsvim")
+// `$XDG_CONFIG_HOME/rsvim` or `$HOME/.config/rsvim`
+#[cfg(not(target_os = "windows"))]
+fn _xdg_config_dir(base_dirs: &BaseDirs) -> PathBuf {
+  match std::env::var("XDG_CONFIG_HOME") {
+    Ok(config_path) => std::path::Path::new(&config_path)
+      .join("rsvim")
+      .to_path_buf(),
+    Err(_) => base_dirs.home_dir().join(".config").join("rsvim"),
+  }
+}
+
+// `$HOME/.rsvim`
+fn _home_config_dir(base_dirs: &BaseDirs) -> PathBuf {
+  base_dirs.home_dir().join(".rsvim")
+}
+
+fn get_config_file(base_dirs: &BaseDirs) -> Option<PathBuf> {
+  for config_dir in [_xdg_config_dir(base_dirs), _home_config_dir(base_dirs)].iter() {
+    let ts_config = config_dir.join("rsvim.ts");
+    if ts_config.as_path().exists() {
+      return Some(ts_config);
+    }
+    let js_config = config_dir.join("rsvim.js");
+    if js_config.as_path().exists() {
+      return Some(js_config);
+    }
+  }
+
+  // `$HOME/.rsvim.js` or `$HOME/.rsvim.ts`
+  vec![
+    base_dirs.home_dir().join(".rsvim.ts").to_path_buf(),
+    base_dirs.home_dir().join(".rsvim.js").to_path_buf(),
+  ]
+  .into_iter()
+  .find(|p| p.exists())
+}
+
+// `$env:LocalAppData\rsvim-cache`
+#[cfg(target_os = "windows")]
+fn _xdg_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
+  base_dirs.cache_dir().join("rsvim-cache").to_path_buf()
+}
+
+// `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`
+#[cfg(not(target_os = "windows"))]
+fn _xdg_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
+  match std::env::var("XDG_CACHE_HOME") {
+    Ok(cache_path) => std::path::Path::new(&cache_path)
+      .join("rsvim")
+      .to_path_buf(),
+    Err(_) => base_dirs.home_dir().join(".cache").join("rsvim"),
+  }
+}
+
+// For windows: `$env:`
+fn get_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
+  _xdg_cache_dir(base_dirs)
+}
+
+// `$env:LocalAppData\rsvim-data`
+#[cfg(target_os = "windows")]
+fn _xdg_data_dir(base_dirs: &BaseDirs) -> PathBuf {
+  base_dirs.data_local_dir().join("rsvim-data").to_path_buf()
+}
+
+// `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`
+#[cfg(not(target_os = "windows"))]
+fn _xdg_data_dir(base_dirs: &BaseDirs) -> PathBuf {
+  match std::env::var("XDG_DATA_HOME") {
+    Ok(data_path) => std::path::Path::new(&data_path).join("rsvim").to_path_buf(),
+    Err(_) => base_dirs
+      .home_dir()
+      .join(".local")
+      .join("share")
+      .join("rsvim"),
+  }
 }
 
 fn get_data_dir(base_dirs: &BaseDirs) -> PathBuf {
-  _xdg_data_dirs(base_dirs)
+  _xdg_data_dir(base_dirs)
 }
 
 impl PathConfig {
@@ -130,5 +132,50 @@ impl PathConfig {
 impl Default for PathConfig {
   fn default() -> Self {
     PathConfig::new()
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  // use crate::test::log::init as test_log_init;
+
+  // use std::sync::Once;
+  use tracing::info;
+
+  // static INIT: Once = Once::new();
+
+  #[cfg(target_os = "windows")]
+  #[test]
+  fn config_file_windows() {
+    // INIT.call_once(test_log_init);
+    let cfg = PathConfig::default();
+    match cfg.config_file().as_ref() {
+      Some(actual) => {
+        info!("config_file (windows): ${:?}", actual);
+        assert!(
+          actual.to_str().unwrap().ends_with(".rsvim.js")
+            || actual.to_str().unwrap().ends_with(".rsvim.ts")
+        );
+      }
+      None => { /* Skip */ }
+    }
+  }
+
+  #[cfg(not(target_os = "windows"))]
+  #[test]
+  fn config_file_unix() {
+    // INIT.call_once(test_log_init);
+    let cfg = PathConfig::default();
+    match cfg.config_file().as_ref() {
+      Some(actual) => {
+        info!("config_file (unix): ${:?}", actual);
+        assert!(
+          actual.to_str().unwrap().ends_with(".rsvim.js")
+            || actual.to_str().unwrap().ends_with(".rsvim.ts")
+        );
+      }
+      None => { /* Skip */ }
+    }
   }
 }

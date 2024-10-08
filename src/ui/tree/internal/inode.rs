@@ -1,12 +1,13 @@
 //! The node structure of the internal tree.
 
+use crate::cart::{IRect, U16Rect};
+use crate::geo_rect_as;
+
 use geo;
 use std::fmt::Debug;
+use std::sync::atomic::{AtomicI32, Ordering};
 
-use crate::cart::{IRect, U16Rect};
-use crate::{geo_rect_as, uuid};
-
-pub type InodeId = usize;
+pub type InodeId = i32;
 
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> InodeId;
@@ -96,6 +97,14 @@ macro_rules! inode_generate_impl {
   };
 }
 
+/// Next unique UI widget ID.
+///
+/// NOTE: Start from 1000001, so be different from buffer ID.
+pub fn next_node_id() -> InodeId {
+  static VALUE: AtomicI32 = AtomicI32::new(1000001);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
+
 #[derive(Debug, Clone, Copy)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
@@ -112,7 +121,7 @@ impl InodeBase {
   pub fn new(shape: IRect) -> Self {
     let actual_shape = geo_rect_as!(shape, u16);
     InodeBase {
-      id: uuid::next(),
+      id: next_node_id(),
       depth: 0,
       shape,
       actual_shape,
@@ -227,5 +236,10 @@ mod tests {
 
     assert_eq!(*n1.borrow().shape(), IRect::new((0, 0), (0, 0)));
     assert_eq!(*n2.borrow().shape(), IRect::new((1, 2), (3, 4)));
+  }
+
+  #[test]
+  fn next_node_id1() {
+    assert!(next_node_id() > 0);
   }
 }

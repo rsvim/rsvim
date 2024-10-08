@@ -11,4 +11,3 @@ pub mod result;
 pub mod state;
 pub mod test;
 pub mod ui;
-pub mod uuid;

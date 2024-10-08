@@ -76,9 +76,11 @@ pub trait JsFuture {
 
 pub type JsFutureId = i32;
 
-/// Next global ID for js runtime.
+/// Next future/task ID for js runtime.
+///
+/// NOTE: Start form 1.
 pub fn next_future_id() -> JsFutureId {
-  static GLOBAL: AtomicI32 = AtomicI32::new(0);
+  static GLOBAL: AtomicI32 = AtomicI32::new(1);
   GLOBAL.fetch_add(1, Ordering::Relaxed)
 }
 
@@ -826,3 +828,13 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
 //   eprintln!("{:?}", e);
 //   std::process::exit(1);
 // }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn next_future_id1() {
+    assert!(next_future_id() > 0);
+  }
+}
