@@ -14,7 +14,7 @@ use std::time::Duration;
 pub type BufferId = i32;
 
 /// Next unique buffer ID.
-pub fn next_buffer_id() -> i32 {
+pub fn next_buffer_id() -> BufferId {
   static VALUE: AtomicI32 = AtomicI32::new(0);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
