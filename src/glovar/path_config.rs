@@ -12,17 +12,26 @@ pub struct PathConfig {
   data_dir: PathBuf,
 }
 
-#[cfg(not(target_os = "macos"))]
-fn _xdg_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
-  vec![base_dirs.config_local_dir().join("rsvim").to_path_buf()]
-}
-
-#[cfg(target_os = "macos")]
+#[cfg(target_os = "windows")]
 fn _xdg_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
   vec![
+    // $env:LocalAppData\rsvim
     base_dirs.config_local_dir().join("rsvim").to_path_buf(),
-    base_dirs.home_dir().join(".config").join("rsvim"),
   ]
+}
+
+#[cfg(not(target_os = "windows"))]
+fn _xdg_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
+  match std::env::var("XDG_CONFIG_HOME") {
+    Ok(config_path) => vec![
+      // $XDG_CONFIG_HOME/rsvim
+      Path::new(&config_path).join("rsvim").to_path_buf(),
+    ],
+    Err(_) => vec![
+      // $HOME/.config/rsvim
+      base_dirs.home_dir().join(".config").join("rsvim"),
+    ],
+  }
 }
 
 fn _home_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
