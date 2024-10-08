@@ -1,12 +1,6 @@
 //! Js runtime bindings.
 
-use std::io::{Error as IoError, ErrorKind};
-// use lazy_static::lazy_static;
-use std::collections::HashMap;
-use std::ffi::c_void;
-use tracing::error;
-
-use crate::error::AnyErr;
+use crate::error::{AnyErr, IoError};
 // use crate::dns;
 // use crate::exceptions;
 // use crate::file;
@@ -20,6 +14,9 @@ use crate::js::{check_exceptions, JsRuntime};
 // use crate::signals;
 // use crate::stdio;
 // use crate::timers;
+
+use std::ffi::c_void;
+use tracing::error;
 
 pub mod global;
 pub mod opt;
@@ -65,8 +62,18 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
 
   // `globalThis`
   {
-    set_function_to(scope, vim, "global_set_timeout", global::set_timeout);
-    set_function_to(scope, vim, "global_clear_timeout", global::clear_timeout);
+    set_function_to(
+      scope,
+      vim,
+      "global_set_timeout",
+      global::timeout::set_timeout,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_clear_timeout",
+      global::timeout::clear_timeout,
+    );
   }
 
   // `Rsvim.opt`
@@ -105,9 +112,9 @@ fn global_report_error(
   drop(state);
 
   if let Some(error) = check_exceptions(scope) {
-    /// FIXME: We cannot simply exit the process like other js runtimes, because js runtime inside the
-    /// editor is a configuration layer. The only thing we should do is popup an error message to
-    /// command line, and let js runtime continue running.
+    // FIXME: We cannot simply exit the process like other js runtimes, because js runtime inside the
+    // editor is a configuration layer. The only thing we should do is popup an error message to
+    // command line, and let js runtime continue running.
     error!("{:?}", error);
     eprintln!("{:?}", error);
   }
