@@ -1,7 +1,7 @@
 //! File path configs.
 
 use directories::BaseDirs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 /// The configs for editor's config file, i.e. the `.rsvim.js` or `.rsvim.ts`.
@@ -21,7 +21,9 @@ fn _xdg_config_dir(base_dirs: &BaseDirs) -> PathBuf {
 #[cfg(not(target_os = "windows"))]
 fn _xdg_config_dir(base_dirs: &BaseDirs) -> PathBuf {
   match std::env::var("XDG_CONFIG_HOME") {
-    Ok(config_path) => Path::new(&config_path).join("rsvim").to_path_buf(),
+    Ok(config_path) => std::path::Path::new(&config_path)
+      .join("rsvim")
+      .to_path_buf(),
     Err(_) => base_dirs.home_dir().join(".config").join("rsvim"),
   }
 }
@@ -62,7 +64,9 @@ fn _xdg_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
 #[cfg(not(target_os = "windows"))]
 fn _xdg_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
   match std::env::var("XDG_CACHE_HOME") {
-    Ok(cache_path) => Path::new(&cache_path).join("rsvim").to_path_buf(),
+    Ok(cache_path) => std::path::Path::new(&cache_path)
+      .join("rsvim")
+      .to_path_buf(),
     Err(_) => base_dirs.home_dir().join(".cache").join("rsvim"),
   }
 }
@@ -82,7 +86,7 @@ fn _xdg_data_dir(base_dirs: &BaseDirs) -> PathBuf {
 #[cfg(not(target_os = "windows"))]
 fn _xdg_data_dir(base_dirs: &BaseDirs) -> PathBuf {
   match std::env::var("XDG_DATA_HOME") {
-    Ok(data_path) => Path::new(&data_path).join("rsvim").to_path_buf(),
+    Ok(data_path) => std::path::Path::new(&data_path).join("rsvim").to_path_buf(),
     Err(_) => base_dirs
       .home_dir()
       .join(".local")
