@@ -72,10 +72,8 @@ pub fn set_timeout(
 
   // Return timeout's internal id.
   let timer_id = js::next_future_id();
-  let current_thread_rt = tokio::runtime::Builder::new_current_thread()
-    .build()
-    .unwrap();
-  state.task_local_set.block_on(&current_thread_rt, async {
+  let current_handle = tokio::runtime::Handle::current();
+  current_handle.block_on(async {
     let js_runtime_send_to_master = state_rc2.borrow().js_runtime_send_to_master.clone();
     let _ = js_runtime_send_to_master
       .send(JsRuntimeToEventLoopMessage::TimeoutReq(
