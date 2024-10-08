@@ -237,4 +237,9 @@ mod tests {
     assert_eq!(*n1.borrow().shape(), IRect::new((0, 0), (0, 0)));
     assert_eq!(*n2.borrow().shape(), IRect::new((1, 2), (3, 4)));
   }
+
+  #[test]
+  fn next_node_id1() {
+    assert!(next_node_id() > 0);
+  }
 }

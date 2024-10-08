@@ -828,3 +828,13 @@ pub fn check_exceptions(scope: &mut v8::HandleScope) -> Option<JsError> {
 //   eprintln!("{:?}", e);
 //   std::process::exit(1);
 // }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn next_future_id1() {
+    assert!(next_future_id() > 0);
+  }
+}
