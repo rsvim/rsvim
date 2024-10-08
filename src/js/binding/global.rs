@@ -71,11 +71,15 @@ pub fn set_timeout(
 
   // Return timeout's internal id.
   let timer_id = js::next_future_id();
-  let _ = state
-    .js_runtime_send_to_master
-    .blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
-      jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
-    ));
+  let tokio_runtime_handle = tokio::runtime::Handle::current();
+  tokio_runtime_handle.block_on(async {
+    let _ = state
+      .js_runtime_send_to_master
+      .send(JsRuntimeToEventLoopMessage::TimeoutReq(
+        jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
+      ))
+      .await;
+  });
   let timeout_cb = TimeoutFuture {
     future_id: timer_id,
     cb: Rc::clone(&callback),

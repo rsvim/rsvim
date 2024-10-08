@@ -108,6 +108,8 @@ pub struct JsRuntimeState {
 
   // Data Access for RSVIM {
 
+  // Task local set.
+  pub task_local_set: tokio::task::LocalSet,
   // Js runtime ==request==> master.
   pub js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
   // Js runtime <==response== master.
@@ -137,6 +139,7 @@ impl JsRuntime {
     options: JsRuntimeOptions,
     startup_moment: Instant,
     time_origin: u128,
+    task_local_set: tokio::task::LocalSet,
     js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
     js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
@@ -214,6 +217,7 @@ impl JsRuntime {
       exceptions: exception::ExceptionState::new(),
       options,
       // wake_event_queued: false,
+      task_local_set,
       js_runtime_send_to_master,
       js_runtime_recv_from_master,
       cli_opt,
