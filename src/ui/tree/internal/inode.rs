@@ -211,7 +211,7 @@ mod tests {
     let n1 = RefCell::new(n1);
     let n2 = RefCell::new(n2);
 
-    assert!(n1.borrow().id() > n2.borrow().id());
+    assert!(n1.borrow().id() < n2.borrow().id());
     assert_eq!(n1.borrow().value, 1);
     assert_eq!(n2.borrow().value, 2);
 
