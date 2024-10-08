@@ -141,7 +141,7 @@ mod tests {
 
   static INIT: Once = Once::new();
 
-  // #[cfg(target_os = "windows")]
+  #[cfg(target_os = "windows")]
   #[test]
   fn config_file_windows() {
     INIT.call_once(test_log_init);
