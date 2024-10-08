@@ -1,12 +1,12 @@
 //! Js module loader.
 
+use crate::error::{AnyResult, TheErr};
 use crate::js::constant::WINDOWS_REGEX;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
 use crate::js::module::CORE_MODULES;
 use crate::js::transpiler::TypeScript;
 use crate::js::transpiler::Wasm;
-use crate::result::AnyError;
 
 use anyhow::bail;
 use regex::Regex;
@@ -23,8 +23,8 @@ use std::sync::OnceLock;
 
 /// Defines the interface of a module loader.
 pub trait ModuleLoader {
-  fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource>;
-  fn resolve(&self, base: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath>;
+  fn load(&self, specifier: &str) -> AnyResult<ModuleSource>;
+  fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath>;
 }
 
 static FILE_EXTENSIONS: &[&str] = &["js", "jsx", "ts", "tsx", "json", "wasm"];
@@ -52,7 +52,7 @@ impl FsModuleLoader {
   }
 
   /// Loads contents from a file.
-  fn load_source(&self, path: &Path) -> anyhow::Result<ModuleSource> {
+  fn load_source(&self, path: &Path) -> AnyResult<ModuleSource> {
     let source = fs::read_to_string(path)?;
     let source = match self.is_json_import(path) {
       true => self.wrap_json(source.as_str()),
@@ -63,7 +63,7 @@ impl FsModuleLoader {
   }
 
   /// Loads import as file.
-  fn load_as_file(&self, path: &Path) -> anyhow::Result<ModuleSource> {
+  fn load_as_file(&self, path: &Path) -> AnyResult<ModuleSource> {
     // 1. Check if path is already a valid file.
     if path.is_file() {
       return self.load_source(path);
@@ -84,7 +84,7 @@ impl FsModuleLoader {
   }
 
   /// Loads import as directory using the 'index.[ext]' convention.
-  fn load_as_directory(&self, path: &Path) -> anyhow::Result<ModuleSource> {
+  fn load_as_directory(&self, path: &Path) -> AnyResult<ModuleSource> {
     for ext in FILE_EXTENSIONS {
       let path = &path.join(format!("index.{ext}"));
       if path.is_file() {
@@ -97,7 +97,7 @@ impl FsModuleLoader {
 
 impl ModuleLoader for FsModuleLoader {
   /// Resolve specifier path on local file system.
-  fn resolve(&self, base: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
+  fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
     // Resolve absolute import.
     if specifier.starts_with('/') || WINDOWS_REGEX().is_match(specifier) {
       return Ok(self.transform(Path::new(specifier).absolutize()?.to_path_buf()));
@@ -116,7 +116,7 @@ impl ModuleLoader for FsModuleLoader {
     bail!(format!("Module not found \"{specifier}\""));
   }
 
-  fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource> {
+  fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Load source.
     let path = Path::new(specifier);
     let maybe_source = self
@@ -140,8 +140,9 @@ impl ModuleLoader for FsModuleLoader {
     // Use a preprocessor if necessary.
     match path_extension {
       "wasm" => Ok(Wasm::parse(&source)),
-      "ts" => TypeScript::compile(fname, &source)
-        .map_err(|e| AnyError::with_message(e.to_string()).into()),
+      "ts" => {
+        TypeScript::compile(fname, &source).map_err(|e| TheErr::Message(e.to_string()).into())
+      }
       // "jsx" => Jsx::compile(fname, &source).map_err(|e| generic_error(e.to_string())),
       // "tsx" => Jsx::compile(fname, &source)
       //   .and_then(|output| TypeScript::compile(fname, &output))
@@ -168,7 +169,7 @@ impl ModuleLoader for FsModuleLoader {
 // }
 //
 // impl ModuleLoader for UrlModuleLoader {
-//   fn resolve(&self, base: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
+//   fn resolve(&self, base: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
 //     // 1. Check if specifier is a valid URL.
 //     if let Ok(url) = Url::parse(specifier) {
 //       return Ok(url.into());
@@ -189,7 +190,7 @@ impl ModuleLoader for FsModuleLoader {
 //     bail!("Base is not a valid URL");
 //   }
 //
-//   fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource> {
+//   fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
 //     // Create the cache directory.
 //     if fs::create_dir_all(CACHE_DIR.as_path()).is_err() {
 //       bail!("Failed to create module caching directory");
@@ -240,11 +241,11 @@ impl ModuleLoader for FsModuleLoader {
 pub struct CoreModuleLoader;
 
 impl ModuleLoader for CoreModuleLoader {
-  fn resolve(&self, _: Option<&str>, specifier: &str) -> anyhow::Result<ModulePath> {
+  fn resolve(&self, _: Option<&str>, specifier: &str) -> AnyResult<ModulePath> {
     assert!(CORE_MODULES().contains_key(specifier));
     Ok(specifier.to_string())
   }
-  fn load(&self, specifier: &str) -> anyhow::Result<ModuleSource> {
+  fn load(&self, specifier: &str) -> AnyResult<ModuleSource> {
     // Since any errors will be caught at the resolve stage, we can
     // go ahead an unwrap the value with no worries.
     Ok(CORE_MODULES().get(specifier).unwrap().to_string())

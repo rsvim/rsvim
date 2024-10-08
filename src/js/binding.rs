@@ -1,13 +1,12 @@
 //! Js runtime bindings.
 
 use std::io::{Error as IoError, ErrorKind};
-// use anyhow::Error;
 // use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::ffi::c_void;
 use tracing::error;
 
-use crate::result::{AnyError, AnyErrorKind};
+use crate::error::AnyErr;
 // use crate::dns;
 // use crate::exceptions;
 // use crate::file;
@@ -209,7 +208,7 @@ pub fn get_internal_ref<'s, T>(
 pub fn set_exception_code(
   scope: &mut v8::HandleScope<'_>,
   exception: v8::Local<v8::Value>,
-  error: &anyhow::Error,
+  error: &AnyErr,
 ) {
   let exception = exception.to_object(scope).unwrap();
   if let Some(error) = error.downcast_ref::<IoError>() {
@@ -220,7 +219,7 @@ pub fn set_exception_code(
 }
 
 /// Useful utility to throw v8 exceptions.
-pub fn throw_exception(scope: &mut v8::HandleScope, error: &anyhow::Error) {
+pub fn throw_exception(scope: &mut v8::HandleScope, error: &AnyErr) {
   let message = error.to_string().to_owned();
   let message = v8::String::new(scope, &message).unwrap();
   let exception = v8::Exception::error(scope, message);

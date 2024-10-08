@@ -19,6 +19,7 @@ use tracing::{debug, error};
 use crate::buf::BuffersArc;
 use crate::cli::CliOpt;
 // use crate::glovar;
+use crate::error::{AnyErr, TheErr};
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
@@ -27,7 +28,6 @@ use crate::js::module::{
   ModuleGraph, ModuleMap, ModuleStatus,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::result::AnyError;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
@@ -308,7 +308,7 @@ impl JsRuntime {
     &mut self,
     filename: &str,
     source: &str,
-  ) -> Result<Option<v8::Global<v8::Value>>, anyhow::Error> {
+  ) -> Result<Option<v8::Global<v8::Value>>, AnyErr> {
     // Get the handle-scope.
     let scope = &mut self.handle_scope();
     let state_rc = JsRuntime::state(scope);
@@ -318,7 +318,7 @@ impl JsRuntime {
 
     // The `TryCatch` scope allows us to catch runtime errors rather than panicking.
     let tc_scope = &mut v8::TryCatch::new(scope);
-    type ExecuteScriptResult = Result<Option<v8::Global<v8::Value>>, anyhow::Error>;
+    type ExecuteScriptResult = Result<Option<v8::Global<v8::Value>>, AnyErr>;
 
     let handle_exception =
       |scope: &mut v8::TryCatch<'_, v8::HandleScope<'_>>| -> ExecuteScriptResult {
@@ -349,11 +349,7 @@ impl JsRuntime {
   }
 
   /// Executes JavaScript code as ES module.
-  pub fn execute_module(
-    &mut self,
-    filename: &str,
-    source: Option<&str>,
-  ) -> Result<(), anyhow::Error> {
+  pub fn execute_module(&mut self, filename: &str, source: Option<&str>) -> Result<(), AnyErr> {
     // Get a reference to v8's scope.
     let scope = &mut self.handle_scope();
 
@@ -384,7 +380,7 @@ impl JsRuntime {
         let err_msg = format!("User config not found: {filename:?}");
         error!(err_msg);
         eprintln!("{err_msg}");
-        return Err(AnyError::with_message(err_msg).into());
+        return Err(TheErr::Message(err_msg).into());
       }
     };
 
@@ -398,7 +394,7 @@ impl JsRuntime {
       let err_msg = format!("Failed to instantiate user config module {filename:?}: {exception:?}");
       error!(err_msg);
       eprintln!("{err_msg}");
-      return Err(AnyError::with_message(err_msg).into());
+      return Err(TheErr::Message(err_msg).into());
     }
 
     match module.evaluate(tc_scope) {
@@ -418,7 +414,7 @@ impl JsRuntime {
       let err_msg = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
       error!(err_msg);
       eprintln!("{err_msg}");
-      return Err(AnyError::with_message(err_msg).into());
+      return Err(TheErr::Message(err_msg).into());
     }
 
     Ok(())

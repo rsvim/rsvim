@@ -2,10 +2,9 @@
 
 #![allow(unused_imports)]
 
+use rsvim::error::IoResult;
 use rsvim::evloop::EventLoop;
 use rsvim::glovar;
-// use rsvim::js::{start as js_start, JsDataAccess};
-use rsvim::result::VoidIoResult;
 use rsvim::{cli, log};
 
 use clap::Parser;
@@ -18,42 +17,7 @@ use tokio::sync::mpsc::{channel, Receiver, Sender};
 // use heed::{byteorder, Database, EnvOpenOptions};
 use tracing::{debug, error};
 
-// /// Initialize TUI.
-// pub fn init_tui() -> VoidIoResult {
-//   if !terminal::is_raw_mode_enabled()? {
-//     terminal::enable_raw_mode()?;
-//   }
-//
-//   let mut out = std::io::stdout();
-//   execute!(
-//     out,
-//     terminal::EnterAlternateScreen,
-//     terminal::Clear(terminal::ClearType::All),
-//     EnableMouseCapture,
-//     EnableFocusChange,
-//   )?;
-//
-//   Ok(())
-// }
-//
-// /// Shutdown TUI.
-// pub fn shutdown_tui() -> VoidIoResult {
-//   let mut out = std::io::stdout();
-//   execute!(
-//     out,
-//     DisableMouseCapture,
-//     DisableFocusChange,
-//     terminal::LeaveAlternateScreen,
-//   )?;
-//
-//   if terminal::is_raw_mode_enabled()? {
-//     terminal::disable_raw_mode()?;
-//   }
-//
-//   Ok(())
-// }
-
-fn main() -> VoidIoResult {
+fn main() -> IoResult<()> {
   log::init();
   let cli_opt = cli::CliOpt::parse();
   debug!("cli_opt: {:?}", cli_opt);

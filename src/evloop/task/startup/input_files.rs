@@ -1,7 +1,7 @@
 //! Edit input files on start up.
 
 use crate::buf::Buffer;
-use crate::error::{TheErr, TheResult};
+use crate::error::{AnyResult, TheErr};
 use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
 use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
@@ -28,7 +28,7 @@ fn into_rope(buf: &[u8], bufsize: usize) -> Rope {
 pub async fn edit_default_file(
   data_access: TaskableDataAccess,
   file_name: String,
-) -> TheResult<()> {
+) -> AnyResult<()> {
   let buffers = data_access.buffers.clone();
   let worker_send_to_master = data_access.worker_send_to_master;
 
@@ -97,7 +97,7 @@ pub async fn edit_default_file(
 pub async fn edit_other_files(
   data_access: TaskableDataAccess,
   file_names: Vec<String>,
-) -> TheResult<()> {
+) -> AnyResult<()> {
   let buffers = data_access.buffers.clone();
   let worker_sender = data_access.worker_send_to_master;
 
@@ -147,7 +147,7 @@ pub async fn edit_other_files(
                 e
               );
               error!("{msg}");
-              return Err(TheErr::Message(msg));
+              return Err(TheErr::Message(msg).into());
             }
           }
         }
@@ -160,7 +160,7 @@ pub async fn edit_other_files(
           e
         );
         error!("{msg}");
-        return Err(TheErr::Message(msg));
+        return Err(TheErr::Message(msg).into());
       }
     }
   }

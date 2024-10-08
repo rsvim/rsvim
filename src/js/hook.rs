@@ -1,15 +1,13 @@
 //! Js runtime hooks: promise, import and import.meta, etc.
 
+use crate::error::AnyResult;
 use crate::js::binding::{set_exception_code, throw_type_error};
 use crate::js::err::JsError;
 use crate::js::module::{
   create_origin, load_import, resolve_import, EsModule, ModuleGraph, ModuleSource, ModuleStatus,
 };
-// use crate::modules::EsModuleFuture;
-// use crate::modules::ModuleStatus;
 use crate::js::JsRuntime;
-// use dune_event_loop::LoopHandle;
-// use dune_event_loop::TaskResult;
+
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -326,7 +324,7 @@ pub extern "C" fn promise_reject_cb(message: v8::PromiseRejectMessage) {
 //   state.task_tracker.spawn_local(async move {
 //     let specifier = specifier.clone();
 //     move || match load_import(&specifier, true) {
-//       anyhow::Result::Ok(source) => {
+//       AnyResult::Ok(source) => {
 //         // Successful load module source
 //         task(source)
 //       }

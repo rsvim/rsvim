@@ -2,14 +2,17 @@
 
 use thiserror::Error as ThisError;
 
-/// [`anyhow::Error`](anyhow::Error)
+/// [`anyhow::Error`]
 pub type AnyErr = anyhow::Error;
 
-/// [`Result`](std::result::Result) with `T` if ok, [`AnyErr`] if error.
-pub type AnyResult<T> = std::result::Result<T, AnyErr>;
+/// [`anyhow::Result`] with `T` if ok, [`AnyErr`]([`anyhow::Error`]) if error.
+pub type AnyResult<T> = anyhow::Result<T>;
 
-/// [`std::io::Error`](std::io::Error)
+/// [`std::io::Error`]
 pub type IoError = std::io::Error;
+
+/// [`std::io::ErrorKind`]
+pub type IoErrorKind = std::io::ErrorKind;
 
 /// [`std::io::Result`](std::io::Result) with `T` if ok.
 pub type IoResult<T> = std::io::Result<T>;

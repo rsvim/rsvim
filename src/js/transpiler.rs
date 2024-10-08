@@ -1,7 +1,8 @@
 //! Js module transpiler.
 
+use crate::error::AnyResult;
+
 use anyhow::bail;
-use anyhow::Result;
 use regex::Regex;
 use std::sync::OnceLock;
 use swc_common::comments::SingleThreadedComments;
@@ -38,7 +39,7 @@ pub struct TypeScript;
 
 impl TypeScript {
   /// Compiles TypeScript code into JavaScript.
-  pub fn compile(filename: Option<&str>, source: &str) -> Result<String> {
+  pub fn compile(filename: Option<&str>, source: &str) -> AnyResult<String> {
     let globals = Globals::default();
     let cm: Lrc<SourceMap> = Default::default();
     let handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(cm.clone()));
@@ -104,7 +105,7 @@ impl TypeScript {
 //
 // impl Jsx {
 //   /// Compiles JSX code into JavaScript.
-//   pub fn compile(filename: Option<&str>, source: &str) -> Result<String> {
+//   pub fn compile(filename: Option<&str>, source: &str) -> AnyResult<String> {
 //     let globals = Globals::default();
 //     let cm: Lrc<SourceMap> = Default::default();
 //     let handler = Handler::with_tty_emitter(ColorConfig::Auto, true, false, Some(cm.clone()));
