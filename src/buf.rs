@@ -1,17 +1,23 @@
 //! VIM buffers.
 
-#![allow(dead_code)]
+use crate::glovar;
 
 use parking_lot::RwLock;
 use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
 use std::convert::From;
+use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Duration;
 
-use crate::{glovar, uuid};
+/// Buffer ID.
+pub type BufferId = i32;
 
-pub type BufferId = usize;
+/// Next unique buffer ID.
+pub fn next_buffer_id() -> i32 {
+  static VALUE: AtomicI32 = AtomicI32::new(0);
+  VALUE.fetch_add(1, Ordering::Relaxed)
+}
 
 #[derive(Clone, Debug)]
 /// The VIM buffer.
@@ -26,7 +32,7 @@ pub type BufferWk = Weak<RwLock<Buffer>>;
 impl Buffer {
   pub fn new() -> Self {
     Buffer {
-      id: uuid::next(),
+      id: next_buffer_id(),
       rope: Rope::new(),
     }
   }
@@ -57,7 +63,7 @@ impl Default for Buffer {
 impl From<Rope> for Buffer {
   fn from(rope: Rope) -> Self {
     Buffer {
-      id: uuid::next(),
+      id: next_buffer_id(),
       rope,
     }
   }
@@ -66,7 +72,7 @@ impl From<Rope> for Buffer {
 impl From<RopeBuilder> for Buffer {
   fn from(builder: RopeBuilder) -> Self {
     Buffer {
-      id: uuid::next(),
+      id: next_buffer_id(),
       rope: builder.finish(),
     }
   }

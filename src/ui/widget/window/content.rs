@@ -1,7 +1,5 @@
 //! VIM window's text content widget.
 
-#![allow(unused_imports, dead_code)]
-
 use crossterm::style::{Attributes, Color};
 use geo::point;
 use ropey::RopeSlice;
@@ -17,7 +15,6 @@ use crate::inode_generate_impl;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::Widgetable;
-use crate::uuid;
 
 #[derive(Debug, Copy, Clone, Default)]
 /// The view of a buffer. The range is left-inclusive right-exclusive, or top-inclusive

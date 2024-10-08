@@ -55,21 +55,6 @@ pub fn CHANNEL_BUF_SIZE() -> usize {
   })
 }
 
-/// Fixed rate update intervals (in milliseconds), defaults to 10 (i.e. 100/second).
-///
-/// NOTE: This constant can be configured through `RSVIM_FIXED_RATE_UPDATE_MILLIS` environment variable.
-pub fn FIXED_RATE_UPDATE_MILLIS() -> u64 {
-  static VALUE: OnceLock<u64> = OnceLock::new();
-
-  *VALUE.get_or_init(|| match env::var("RSVIM_FIXED_RATE_UPDATE_MILLIS") {
-    Ok(v1) => match v1.parse::<u64>() {
-      Ok(v2) => v2,
-      _ => 10_u64,
-    },
-    _ => 10_u64,
-  })
-}
-
 static PATH_CONFIG_VALUE: OnceLock<PathConfig> = OnceLock::new();
 
 /// User config file path, it is detected with following orders:
