@@ -134,17 +134,17 @@ impl Default for PathConfig {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::test::log::init as test_log_init;
+  // use crate::test::log::init as test_log_init;
 
-  use std::sync::Once;
+  // use std::sync::Once;
   use tracing::info;
 
-  static INIT: Once = Once::new();
+  // static INIT: Once = Once::new();
 
   #[cfg(target_os = "windows")]
   #[test]
   fn config_file_windows() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
     let cfg = PathConfig::default();
     match cfg.config_file().as_ref() {
       Some(actual) => {
@@ -161,7 +161,7 @@ mod tests {
   #[cfg(not(target_os = "windows"))]
   #[test]
   fn config_file_unix() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
     let cfg = PathConfig::default();
     match cfg.config_file().as_ref() {
       Some(actual) => {
