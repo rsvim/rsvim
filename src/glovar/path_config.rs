@@ -2,7 +2,6 @@
 
 use directories::BaseDirs;
 use std::path::{Path, PathBuf};
-use tracing::debug;
 
 #[derive(Debug, Clone)]
 /// The configs for editor's config file, i.e. the `.rsvim.js` or `.rsvim.ts`.
@@ -12,65 +11,45 @@ pub struct PathConfig {
   data_dir: PathBuf,
 }
 
+// `$env:LocalAppData\rsvim`
 #[cfg(target_os = "windows")]
-fn _xdg_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
-  vec![
-    // $env:LocalAppData\rsvim
-    base_dirs.config_local_dir().join("rsvim").to_path_buf(),
-  ]
+fn _xdg_config_dir(base_dirs: &BaseDirs) -> PathBuf {
+  base_dirs.config_local_dir().join("rsvim").to_path_buf()
 }
 
+// `$XDG_CONFIG_HOME/rsvim` or `$HOME/.config/rsvim`
 #[cfg(not(target_os = "windows"))]
-fn _xdg_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
+fn _xdg_config_dir(base_dirs: &BaseDirs) -> PathBuf {
   match std::env::var("XDG_CONFIG_HOME") {
-    Ok(config_path) => vec![
-      // $XDG_CONFIG_HOME/rsvim
-      Path::new(&config_path).join("rsvim").to_path_buf(),
-    ],
-    Err(_) => vec![
-      // $HOME/.config/rsvim
-      base_dirs.home_dir().join(".config").join("rsvim"),
-    ],
+    Ok(config_path) => Path::new(&config_path).join("rsvim").to_path_buf(),
+    Err(_) => base_dirs.home_dir().join(".config").join("rsvim"),
   }
 }
 
-fn _home_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
-  vec![base_dirs.home_dir().join(".rsvim")]
-}
-
-fn _ts_config_file(config_dir: &Path) -> PathBuf {
-  config_dir.join("rsvim.ts")
-}
-
-fn _js_config_file(config_dir: &Path) -> PathBuf {
-  config_dir.join("rsvim.js")
+// `$HOME/.rsvim`
+fn _home_config_dir(base_dirs: &BaseDirs) -> PathBuf {
+  base_dirs.home_dir().join(".rsvim")
 }
 
 fn get_config_file(base_dirs: &BaseDirs) -> Option<PathBuf> {
-  let mut xdg_dirs = _xdg_config_dirs(base_dirs);
-  debug!("xdg config dirs:{:?}", xdg_dirs);
-
-  let mut home_dirs = _home_config_dirs(base_dirs);
-  debug!("home config dirs:{:?}", home_dirs);
-
-  xdg_dirs.append(&mut home_dirs);
-
-  for xdg_dir in xdg_dirs.iter() {
-    let xdg_ts_path = _ts_config_file(xdg_dir);
-    if xdg_ts_path.as_path().exists() {
-      return Some(xdg_ts_path);
+  for config_dir in [_xdg_config_dir(base_dirs), _home_config_dir(base_dirs)].iter() {
+    let ts_config = config_dir.join("rsvim.ts");
+    if ts_config.as_path().exists() {
+      return Some(ts_config);
     }
-    let xdg_js_path = _js_config_file(xdg_dir);
-    if xdg_js_path.as_path().exists() {
-      return Some(xdg_js_path);
+    let js_config = config_dir.join("rsvim.js");
+    if js_config.as_path().exists() {
+      return Some(js_config);
     }
   }
 
-  let home_paths = vec![
+  // `$HOME/.rsvim.js` or `$HOME/.rsvim.ts`
+  vec![
     base_dirs.home_dir().join(".rsvim.ts").to_path_buf(),
     base_dirs.home_dir().join(".rsvim.js").to_path_buf(),
-  ];
-  home_paths.into_iter().find(|p| p.exists())
+  ]
+  .into_iter()
+  .find(|p| p.exists())
 }
 
 fn get_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
