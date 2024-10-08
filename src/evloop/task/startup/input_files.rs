@@ -2,7 +2,7 @@
 
 use crate::buf::Buffer;
 use crate::error::{TheErr, TheResult};
-use crate::evloop::msg::{Dummy, WorkerToMasterMessage};
+use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
 use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
 
@@ -57,7 +57,7 @@ pub async fn edit_default_file(
             // terminal.
             debug!("Notify master after each block read");
             worker_send_to_master
-              .send(WorkerToMasterMessage::Dummy(Dummy::default()))
+              .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
               .await
               .unwrap();
 
@@ -74,7 +74,7 @@ pub async fn edit_default_file(
               e
             );
             error!("{msg}");
-            return Err(TheErr::MESSAGE(msg).into());
+            return Err(TheErr::Message(msg).into());
           }
         }
       }
@@ -86,7 +86,7 @@ pub async fn edit_default_file(
         e
       );
       error!("{msg}");
-      return Err(TheErr::MESSAGE(msg).into());
+      return Err(TheErr::Message(msg).into());
     }
   }
 
@@ -129,7 +129,7 @@ pub async fn edit_other_files(
               // terminal.
               debug!("Notify master after each block read");
               worker_sender
-                .send(WorkerToMasterMessage::Dummy(Dummy::default()))
+                .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
                 .await
                 .unwrap();
 
@@ -147,7 +147,7 @@ pub async fn edit_other_files(
                 e
               );
               error!("{msg}");
-              return Err(TheErr::MESSAGE(msg));
+              return Err(TheErr::Message(msg));
             }
           }
         }
@@ -160,7 +160,7 @@ pub async fn edit_other_files(
           e
         );
         error!("{msg}");
-        return Err(TheErr::MESSAGE(msg));
+        return Err(TheErr::Message(msg));
       }
     }
   }

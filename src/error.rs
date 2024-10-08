@@ -18,7 +18,7 @@ pub type IoResult<T> = std::io::Result<T>;
 /// Error code implemented by [`thiserror::Error`](thiserror::Error).
 pub enum TheErr {
   #[error("message error: {0}")]
-  MESSAGE(String),
+  Message(String),
 }
 
 /// [`Result`](std::result::Result) with `T` if ok, [`TheErr`] if error.
