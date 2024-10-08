@@ -194,7 +194,6 @@ impl EventLoop {
 
     // Task Tracker
     let task_tracker = TaskTracker::new();
-    let task_local_set = LocalSet::new();
     let startup_moment = Instant::now();
     let startup_unix_epoch = SystemTime::now()
       .duration_since(UNIX_EPOCH)
@@ -206,7 +205,6 @@ impl EventLoop {
       JsRuntimeOptions::default(),
       startup_moment,
       startup_unix_epoch,
-      task_local_set,
       js_runtime_send_to_master,
       js_runtime_recv_from_master,
       cli_opt.clone(),
