@@ -1,6 +1,20 @@
 //! Main event loop.
 
-#![allow(dead_code)]
+use crate::buf::{Buffer, Buffers, BuffersArc};
+use crate::cart::{IRect, U16Size};
+use crate::cli::CliOpt;
+use crate::error::IoResult;
+use crate::evloop::msg::WorkerToMasterMessage;
+use crate::evloop::task::TaskableDataAccess;
+use crate::glovar;
+use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::js::{JsRuntime, JsRuntimeOptions};
+use crate::state::fsm::StatefulValue;
+use crate::state::{State, StateArc};
+use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
+use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::{Tree, TreeArc, TreeNode};
+use crate::ui::widget::{Cursor, Window};
 
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
@@ -20,22 +34,6 @@ use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use tracing::{debug, error};
-
-use crate::buf::{Buffer, Buffers, BuffersArc};
-use crate::cart::{IRect, U16Size};
-use crate::cli::CliOpt;
-use crate::evloop::msg::WorkerToMasterMessage;
-use crate::evloop::task::TaskableDataAccess;
-use crate::glovar;
-use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::js::{JsRuntime, JsRuntimeOptions};
-use crate::result::{IoResult, VoidIoResult};
-use crate::state::fsm::StatefulValue;
-use crate::state::{State, StateArc};
-use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
-use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::{Cursor, Window};
 
 pub mod msg;
 pub mod task;
@@ -236,7 +234,7 @@ impl EventLoop {
   }
 
   /// Initialize TUI.
-  pub fn init_tui(&self) -> VoidIoResult {
+  pub fn init_tui(&self) -> IoResult<()> {
     if !crossterm::terminal::is_raw_mode_enabled()? {
       crossterm::terminal::enable_raw_mode()?;
     }

@@ -80,17 +80,18 @@ fn main() -> VoidIoResult {
   // Explicitly create tokio runtime for the EventLoop.
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
-    // Create loop
+    // Create event loop.
     let mut event_loop = EventLoop::new(cli_opt)?;
-    // Initialize
+
+    // Initialize.
     event_loop.init_js_runtime()?;
     event_loop.init_tui()?;
     event_loop.init_input_files()?;
 
-    // Running loop
+    // Run loop.
     event_loop.run().await?;
 
-    // Shutdown
+    // Shutdown.
     event_loop.shutdown_tui()
   })
 }
