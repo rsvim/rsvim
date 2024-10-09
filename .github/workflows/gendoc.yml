@@ -37,6 +37,8 @@ jobs:
           echo "mv generated-typedocs to $HOME/.generated-typedocs"
           mv generated-typedocs $HOME/.generated-typedocs
       - name: Send PR to rsvim.github.io
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           echo "show PWD"
           echo $PWD
@@ -46,7 +48,7 @@ jobs:
           REPOSITORY="rsvim/rsvim.github.io"
           FOLDER="$HOME/.repo/$REPOSITORY"
           COMMIT_ID="${GITHUB_SHA::7}"
-          BRANCH_NAME="gen_api_${COMMIT_ID}"
+          BRANCH_NAME="generate_typedoc"
           GENERATED_FOLDER="$HOME/.generated-typedocs"
           TOKEN="$HOME/.token.txt"
           echo "var REPOSITORY"
@@ -61,13 +63,12 @@ jobs:
           echo $GENERATED_FOLDER
 
           echo "gh login"
-          echo "${{ secrets.GENDOC_TOKEN }}" > $TOKEN
-          gh auth login --with-token < $TOKEN
           echo "gh repo clone"
-          git clone --depth=1 --branch=main https://linrongbin16:${{ secrets.GENDOC_TOKEN }}@github.com/$REPOSITORY $FOLDER
+          git clone --depth=1 --branch=main https://github.com/$REPOSITORY $FOLDER
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
           cd $FOLDER
-          git config user.email "linrongbin16@outlook.com"
-          git config user.name "linrongbin16"
+          git config user.email "rsvim-auto-bot@users.noreply.github.com"
+          git config user.name "Rsvim AutoBot"
 
           echo "git checkout -b ${BRANCH_NAME}"
           git checkout -b $BRANCH_NAME
