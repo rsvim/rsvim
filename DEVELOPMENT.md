@@ -10,6 +10,8 @@
   - [Toolchain](#toolchain)
   - [Check](#check)
   - [Transpile (Compile)](#transpile-compile)
+  - [API Docs](#api-docs)
+- [Markdown Document](#markdown-document)
 
 ## Rust
 
@@ -116,6 +118,8 @@ To transpile ts code to js code (in `src` folder), please run with `tsc` (it als
 Please follow [typedoc](https://typedoc.org/) standards when writing docs for typescript APIs, they will be converted to markdown documents and published on RSVIM's doc site: <https://rsvim.github.io/>.
 
 To generate markdown documents, please run with `npm run typedoc`.
+
+To automatically generate both js code and APIs docs in above two steps, please install `./git-hooks/pre-commit` script in your local `./git/hooks/pre-commit`, it will run these commands when submitting PRs.
 
 ## Markdown Document
 
