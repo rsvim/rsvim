@@ -60,8 +60,8 @@ jobs:
           echo "gh repo clone"
           gh repo clone https://github.com/$REPOSITORY $FOLDER -- --depth=1 --branch=main 
           cd $FOLDER
-          git config user.email "auto-gen-apis@users.noreply.github.com"
-          git config user.name "gen-apis"
+          git config user.email "linrongbin16@outlook.com"
+          git config user.name "linrongbin16"
 
           echo "git checkout -b ${BRANCH_NAME}"
           git checkout -b $BRANCH_NAME
