@@ -5,9 +5,14 @@
 
 version: 2
 updates:
-  - package-ecosystem: "cargo" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "cargo" # For rust development
+    directory: "/"
     schedule:
       interval: "weekly"
     ignore:
       - dependency-name: "swc*" # Ignore swc deps
+
+  - package-ecosystem: "npm" # For typescript document
+    directory: "/"
+    schedule:
+      interval: "weekly"
