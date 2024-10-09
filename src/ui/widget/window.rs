@@ -1,7 +1,5 @@
 //! The VIM window.
 
-use tracing::debug;
-
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Rect};
 use crate::ui::canvas::Canvas;
@@ -9,6 +7,8 @@ use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
+
+use tracing::debug;
 
 pub mod content;
 pub mod root;

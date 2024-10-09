@@ -1,5 +1,4 @@
-//! Timeout APIs for `globalThis` namespace.
-//! See WinterCG standard: <https://github.com/wintercg/proposal-common-minimum-api>
+//! Timeout APIs.
 
 use crate::js::msg::{self as jsmsg, JsRuntimeToEventLoopMessage};
 use crate::js::{self, JsFuture, JsFutureId, JsRuntime};

@@ -18,8 +18,8 @@ use crate::error::{AnyErr, IoError};
 use std::ffi::c_void;
 // use tracing::error;
 
-pub mod global;
-pub mod opt;
+pub mod global_rsvim;
+pub mod global_this;
 
 // /// Function pointer for the bindings initializers.
 // type BindingInitFn = fn(&mut v8::HandleScope<'_>) -> v8::Global<v8::Object>;
@@ -66,20 +66,32 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
       scope,
       vim,
       "global_set_timeout",
-      global::timeout::set_timeout,
+      global_this::timeout::set_timeout,
     );
     set_function_to(
       scope,
       vim,
       "global_clear_timeout",
-      global::timeout::clear_timeout,
+      global_this::timeout::clear_timeout,
     );
   }
 
   // `Rsvim.opt`
   {
-    set_function_to(scope, vim, "opt_line_wrap", opt::line_wrap);
-    set_function_to(scope, vim, "opt_set_line_wrap", opt::set_line_wrap);
+    set_function_to(scope, vim, "opt_line_wrap", global_rsvim::opt::line_wrap);
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_line_wrap",
+      global_rsvim::opt::set_line_wrap,
+    );
+    set_function_to(scope, vim, "opt_word_wrap", global_rsvim::opt::word_wrap);
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_word_wrap",
+      global_rsvim::opt::set_word_wrap,
+    );
   }
 
   // Expose low-level functions to JavaScript.
