@@ -33,8 +33,6 @@ jobs:
           echo "mv generated-typedocs to $HOME/.generated-typedocs"
           mv generated-typedocs $HOME/.generated-typedocs
       - name: Send PR to rsvim.github.io
-        env:
-          GH_TOKEN: ${{ secrets.GENDOC_TOKEN }}
         run: |
           echo "show PWD"
           echo $PWD
@@ -59,7 +57,8 @@ jobs:
           echo $GENERATED_FOLDER
 
           echo "gh login"
-          gh auth login
+          echo "${{ secrets.GENDOC_TOKEN }}" > $TOKEN
+          gh auth login --with-token < $TOKEN
           echo "gh repo clone"
           gh repo clone https://github.com/$REPOSITORY $FOLDER -- --depth=1 --branch=main 
           cd $FOLDER
