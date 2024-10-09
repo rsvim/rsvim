@@ -34,8 +34,8 @@ jobs:
           npm run typedoc
           echo "tree generated-typedocs"
           tree generated-typedocs
-          echo "mv generated-typedocs to $HOME/.generated-typedocs"
-          mv generated-typedocs $HOME/.generated-typedocs
+          echo "cp -rf generated-typedocs to $HOME/.generated-typedocs"
+          cp -rf generated-typedocs $HOME/.generated-typedocs
       - name: Send PR to rsvim.github.io
         run: |
           echo "show PWD"
@@ -74,9 +74,9 @@ jobs:
           rm -rf ./docs/api_references/10__global
           rm -rf ./docs/api_references/50__rsvim
 
-          echo "move 10_global, 50__rsvim to rsvim.github.io"
-          mv $GENERATED_FOLDER/10__global ./docs/api_references/10__global
-          mv $GENERATED_FOLDER/50__rsvim ./docs/api_references/50__rsvim
+          echo "cp 10_global, 50__rsvim to rsvim.github.io"
+          cp -rf $GENERATED_FOLDER/10__global ./docs/api_references/10__global
+          cp -rf $GENERATED_FOLDER/50__rsvim ./docs/api_references/50__rsvim
 
           git add -A --verbose
           git commit -m "chore: Auto generate APIs on ${COMMIT_ID}"
