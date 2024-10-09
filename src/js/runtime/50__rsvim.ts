@@ -4,9 +4,7 @@
 import infra from "rsvim:ext/infra";
 
 /**
- * The type definition for global object `Rsvim`.
- *
- * It contains multiple sub fields:
+ * The `Rsvim` global object, it contains multiple sub fields:
  *
  * - `Rsvim.opt`: Global editor options, also see {@link RsvimOpt}.
  */
@@ -15,7 +13,7 @@ export interface Rsvim {
 }
 
 /**
- * The type definition for global object `Rsvim.opt`. Also see {@link Rsvim}.
+ * The `Rsvim.opt` global object, also see {@link Rsvim}.
  */
 export interface RsvimOpt {
   /**
