@@ -32,11 +32,7 @@ jobs:
           tree generated-typedocs
           echo "mv generated-typedocs to $HOME/.generated-typedocs"
           mv generated-typedocs $HOME/.generated-typedocs
-      - name: Checkout rsvim.github.io Repo
-        uses: actions/checkout@v4
-        with:
-          repository: "rsvim/rsvim.github.io"
-      - name: Submit PR
+      - name: Send PR to rsvim.github.io
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -44,16 +40,44 @@ jobs:
           echo $PWD
           echo "ls -la"
           ls -la
-          echo "git checkout -b gen_apis_${GITHUB_SHA}"
+
+          REPOSITORY="rsvim/rsvim.github.io"
+          FOLDER="$HOME/.repo/$REPOSITORY"
+          COMMIT_ID="${GITHUB_SHA::7}"
+          BRANCH_NAME="gen_api_${COMMIT_ID}"
+          GENERATED_FOLDER="$HOME/.generated-typedocs"
+          echo "var REPOSITORY"
+          echo $REPOSITORY
+          echo "var FOLDER"
+          echo $FOLDER
+          echo "var COMMIT_ID"
+          echo $COMMIT_ID
+          echo "var BRANCH_NAME"
+          echo $BRANCH_NAME
+          echo "var GENERATED_FOLDER"
+          echo $GENERATED_FOLDER
+
+          echo "gh repo clone"
+          gh repo clone https://github.com/$REPOSITORY $FOLDER -- --depth=1 --branch=main 
+          cd $FOLDER
           git config user.email "auto-gen-apis@users.noreply.github.com"
           git config user.name "gen-apis"
-          git checkout -b "gen_apis_${GITHUB_SHA}"
+
+          echo "git checkout -b ${BRANCH_NAME}"
+          git checkout -b $BRANCH_NAME
+
           echo "remove 10__global, 50__rsvim"
           rm -rf ./docs/api_references/10__global
           rm -rf ./docs/api_references/50__rsvim
-          echo "move 10_global, 50__rsvim from rsvim to rsvim.github.io"
-          mv $HOME/.generated-typedocs/10__global ./docs/api_references/10__global
-          mv $HOME/.generated-typedocs/50__rsvim ./docs/api_references/50__rsvim
+
+          echo "move 10_global, 50__rsvim to rsvim.github.io"
+          mv $GENERATED_FOLDER/10__global ./docs/api_references/10__global
+          mv $GENERATED_FOLDER/50__rsvim ./docs/api_references/50__rsvim
+
           git add -A --verbose
-          git commit -m "Auto generate APIs on ${GITHUB_SHA}"
-          gh pr create -B main -l "gen-apis" -f -t "docs(api): Auto generate APIs on ${GITHUB_SHA}" -b "Auto generate APIs on ${GITHUB_SHA}" -H "gen_apis_${GITHUB_SHA}"
+          git commit -m "chore: Auto generate APIs on ${COMMIT_ID}"
+          echo "git push origin ${BRANCH_NAME}"
+          git push origin $BRANCH_NAME
+
+          echo "gh pr create"
+          gh pr create --label "generate api" --title "chore(api): Generate APIs on ${COMMIT_ID}" --body "" --head "${BRANCH_NAME}" --base "main"
