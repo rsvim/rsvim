@@ -1,0 +1,29 @@
+name: API Docs
+on:
+  push:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: false
+jobs:
+  typedoc:
+    name: Generate Typedoc
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - name: Typedoc
+        run: |
+          echo "show PWD/CWD"
+          echo $PWD
+          echo "ls -la"
+          ls -la
+          echo "npm install"
+          npm install
+          echo "npm run typedoc"
+          npm run typedoc
+          echo "tree generated-typedocs"
+          tree generated-typedocs
