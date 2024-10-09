@@ -32,7 +32,6 @@ export interface RsvimOpt {
    * Set the _line-wrap_ option.
    *
    * @param {boolean} value - The _line-wrap_ option.
-   * @returns {undefined} Nothing.
    * @throws {@link !Error} if value is not a boolean value.
    */
   setLineWrap(value: boolean): void;
