@@ -11,16 +11,16 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
   typedoc:
-    name: Generate Typedoc
+    name: Typedoc
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: latest
-      - name: Typedoc
+      - name: Generate Docs
         run: |
-          echo "show PWD/CWD"
+          echo "show PWD"
           echo $PWD
           echo "ls -la"
           ls -la
@@ -30,3 +30,19 @@ jobs:
           npm run typedoc
           echo "tree generated-typedocs"
           tree generated-typedocs
+      - name: Checkout rsvim.github.io Repo
+        uses: actions/checkout@v4
+        with:
+          repository: "rsvim/rsvim.github.io"
+      - name: Submit PR
+        run: |
+          echo "show PWD"
+          echo $PWD
+          echo "remove 10__global, 50__rsvim"
+          rm -rf ./docs/api_references/10__global
+          rm -rf ./docs/api_references/50__rsvim
+          echo "move 10_global, 50__rsvim from rsvim to rsvim.github.io"
+          mv $HOME/runner/work/rsvim/rsvim/generated-typedocs/10__global ./docs/api_references/
+          mv $HOME/runner/work/rsvim/rsvim/generated-typedocs/50__rsvim ./docs/api_references/
+          git checkout -b "gen_apis_${GITHUB_SHA}"
+          gh pr create -B main -l "gen-apis" -f -t "docs(api): Auto generate APIs on ${GITHUB_SHA}" -b "Auto generate APIs on ${GITHUB_SHA}"
