@@ -6,6 +6,10 @@ on:
   push:
     branches:
       - main
+permissions:
+  contents: write
+  packages: write
+  id-token: write
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
