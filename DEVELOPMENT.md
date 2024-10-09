@@ -10,6 +10,8 @@
   - [Toolchain](#toolchain)
   - [Check](#check)
   - [Transpile (Compile)](#transpile-compile)
+  - [API Docs](#api-docs)
+- [Markdown Document](#markdown-document)
 
 ## Rust
 
@@ -82,25 +84,46 @@ To debug code, please run with:
    - All the logs over `debug` level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
    - The backtrace when panics.
 
+### Docs
+
+To write docs, please setup with:
+
+- [cargo-watch](https://github.com/watchexec/cargo-watch): Watch project file changes.
+- [browser-sync](https://browsersync.io/): Reload generated docs and sync to browser, setup with:
+
+  1. Install with `npm install -g browser-sync`.
+  2. Start service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
+  3. Open browser with `http://localhost:3000/rsvim`.
+
 ## TypeScript/JavaScript
 
 ### Toolchain
 
 Please setup your development environment with:
 
-- Latest stable [deno](https://deno.com/).
-- [Typescript](https://www.typescriptlang.org/) compiler that is compatible with the tsc/swc included with `deno`. Please install with following steps:
-  1. Use `deno --version` to find out the typescript compiler version, say `typescript 5.5.2`.
-  2. Install typescript compiler with the compatible version:
-     - For deno, please install with `deno install -g npm:typescript@5.5`.
-     - For npm, please install with `npm install -g typescript@5.5`.
-  3. Run `tsc --version` and see if it's successful.
+- [Node.js](https://nodejs.org/) &ge; v18.x.
+- Latest stable [Typescript](https://www.typescriptlang.org/) compiler. Please install with `npm install -g typescript`, run `tsc --version` see if the installation is successful.
+- Install [typedoc](https://typedoc.org/) for API documentation, please install with `npm install`.
 
-To develop code, please run with:
+To develop code, please setup with:
 
-- Format code with [prettier](https://prettier.io/).
-- Check code with [typescript-language-server](https://github.com/typescript-language-server/typescript-language-server).
+- [prettier](https://prettier.io/): Code formatter.
 
 ### Transpile (Compile)
 
 To transpile ts code to js code (in `src` folder), please run with `tsc` (it also check the code).
+
+### API Docs
+
+Please follow [typedoc](https://typedoc.org/) standards when writing docs for typescript APIs, they will be converted to markdown documents and published on RSVIM's doc site: <https://rsvim.github.io/>.
+
+To generate API documents, please run with `npm run typedoc`, the documents will be generated at `./generated-typedocs` directory. You will need to manually move them to the `./docs/api_references` directory inside the [rsvim.github.io](https://github.com/rsvim/rsvim.github.io) repository, it serves as the doc site.
+
+To automatically generate both js code and APIs docs in above two steps, please copy `./git-hooks/pre-commit` to `./git/hooks/pre-commit` in your local git repository, it will run these commands when submitting PRs.
+
+## Markdown Document
+
+To write markdown docs, please setup with:
+
+- [markdownlint](https://github.com/DavidAnson/markdownlint): Markdown linter.
+- [prettier](https://prettier.io/): Markdown formatter.
