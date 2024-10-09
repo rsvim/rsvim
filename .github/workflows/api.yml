@@ -1,11 +1,14 @@
 name: API Docs
 on:
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - main
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 jobs:
   typedoc:
     name: Generate Typedoc
