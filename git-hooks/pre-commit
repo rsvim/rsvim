@@ -9,10 +9,9 @@ RSVIM="$PWD/../rsvim.github.io/docs/api_references/50__rsvim"
 
 if [ -d $GLOBAL ]; then
 	rm -rf $GLOBAL
+	cp -rf ./generated-typedocs/10__global $REFS
 fi
 if [ -d $RSVIM ]; then
 	rm -rf $RSVIM
+	cp -rf ./generated-typedocs/50__rsvim $REFS
 fi
-
-mv ./generated-typedocs/10__global $REFS
-mv ./generated-typedocs/50__rsvim $REFS
