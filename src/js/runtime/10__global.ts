@@ -15,21 +15,22 @@ export interface GlobalThis {
    * Sets a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
    *
    * @param {Function} callback - A function to be executed after the timer expires.
-   * @param {Number} delay - The milliseconds that the timer should wait before the function is executed.
+   * @param {number} delay - The milliseconds that the timer should wait before the function is executed.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
-   * @returns {Number} The ID (integer) which identifies the timer created.
+   * @returns {number} The ID (integer) which identifies the timer created.
    * @throws {@link !Error} if callback is not a function value.
    */
   setTimeout(
     callback: (...args: any[]) => void,
     delay: number,
     ...args: any[]
-  ): void;
+  ): number;
 
   /**
    * Cancels a timeout previously established by calling {@link setTimeout}.
    *
-   * @param {Number} id - The ID which identifies the timer.
+   * @param {number} id - The ID (integer) which identifies the timer.
+   * @returns {undefined} Nothing.
    * @throws {@link !Error} if ID is not an integer value.
    */
   clearTimeout(id: number): void;
