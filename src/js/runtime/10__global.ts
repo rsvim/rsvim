@@ -18,7 +18,7 @@ export interface GlobalThis {
    * @param {Number} delay - The milliseconds that the timer should wait before the function is executed.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {Number} The ID (integer) which identifies the timer created.
-   * @throws Error if callback is not a function value.
+   * @throws {@link !Error} if callback is not a function value.
    */
   setTimeout(
     callback: (...args: any[]) => void,
@@ -30,7 +30,7 @@ export interface GlobalThis {
    * Cancels a timeout previously established by calling {@link setTimeout}.
    *
    * @param {Number} id - The ID which identifies the timer.
-   * @throws Error if ID is not an integer value.
+   * @throws {@link !Error} if ID is not an integer value.
    */
   clearTimeout(id: number): void;
 }
