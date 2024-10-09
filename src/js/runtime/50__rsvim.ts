@@ -1,4 +1,8 @@
-// Js runtimes for `Rsvim` namespace.
+/**
+ * The global namespace for `Rsvim` specific, non-standard WinterCG APIs.
+ *
+ * @packageDocumentation
+ */
 
 // @ts-ignore Ignore internal import warning
 import infra from "rsvim:ext/infra";
@@ -19,8 +23,7 @@ export interface RsvimOpt {
   /**
    * Get the _line-wrap_ option.
    *
-   * @returns The _line-wrap_ option.
-   *
+   * @returns {boolean} The _line-wrap_ option.
    * @defaultValue `false`.
    */
   lineWrap(): boolean;
@@ -28,9 +31,9 @@ export interface RsvimOpt {
   /**
    * Set the _line-wrap_ option.
    *
-   * @param value - The _line-wrap_ option.
-   *
-   * @throws Error if value is not a boolean value.
+   * @param {boolean} value - The _line-wrap_ option.
+   * @returns {undefined} Nothing.
+   * @throws {@link !Error} if value is not a boolean value.
    */
   setLineWrap(value: boolean): void;
 }
