@@ -17,18 +17,18 @@ export interface Rsvim {
  */
 export interface RsvimOpt {
   /**
-   * Get **line-wrap** option.
+   * Get the _line-wrap_ option.
    *
-   * @returns The **line-wrap** option.
+   * @returns The _line-wrap_ option.
    *
    * @defaultValue `false`.
    */
   lineWrap(): boolean;
 
   /**
-   * Set **line-wrap** option.
+   * Set the _line-wrap_ option.
    *
-   * @param value - The **line-wrap** option.
+   * @param value - The _line-wrap_ option.
    *
    * @throws Error if value is not a boolean value.
    */
