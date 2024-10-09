@@ -45,6 +45,8 @@ jobs:
           echo "ls -la"
           ls -la
           echo "git checkout -b gen_apis_${GITHUB_SHA}"
+          git config user.email "auto-gen-apis@users.noreply.github.com"
+          git config user.name "gen-apis"
           git checkout -b "gen_apis_${GITHUB_SHA}"
           echo "remove 10__global, 50__rsvim"
           rm -rf ./docs/api_references/10__global
