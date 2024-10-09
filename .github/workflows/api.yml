@@ -30,6 +30,8 @@ jobs:
           npm run typedoc
           echo "tree generated-typedocs"
           tree generated-typedocs
+          echo "mv generated-typedocs to $HOME/.generated-typedocs"
+          mv generated-typedocs $HOME/.generated-typedocs
       - name: Checkout rsvim.github.io Repo
         uses: actions/checkout@v4
         with:
@@ -38,6 +40,8 @@ jobs:
         run: |
           echo "show PWD"
           echo $PWD
+          echo "ls -la"
+          ls -la
           echo "remove 10__global, 50__rsvim"
           rm -rf ./docs/api_references/10__global
           rm -rf ./docs/api_references/50__rsvim
