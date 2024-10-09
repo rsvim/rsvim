@@ -1,7 +1,7 @@
 /**
  * The global namespace for `Rsvim` specific, non-standard WinterCG APIs.
  *
- * :::warning
+ * :::danger
  *
  * Rsvim editor exposes the `__InternalRsvimGlobalObject` global object as the rust bindings, which you should never use directly.
  * :::

@@ -1,6 +1,11 @@
 /**
  * The standard, [WinterCG](https://common-min-api.proposal.wintercg.org/) compatible web platform APIs.
  *
+ * :::danger
+ *
+ * Rsvim editor exposes the `__InternalRsvimGlobalObject` global object as the rust bindings, which you should never use directly.
+ * :::
+ *
  * @packageDocumentation
  */
 
