@@ -1,34 +1,46 @@
-// Js runtimes for global web APIs.
+/**
+ * The standard, [WinterCG](https://common-min-api.proposal.wintercg.org/) compatible web platform APIs.
+ *
+ * @packageDocumentation
+ */
 
 // @ts-ignore Ignore internal import warning
 import infra from "rsvim:ext/infra";
 
-// `globalThis`
-interface GlobalThisType {
+/**
+ * The {@link !globalThis} global namespace.
+ */
+export interface GlobalThis {
+  /**
+   * Sets a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
+   *
+   * @param {Function} callback - A function to be executed after the timer expires.
+   * @param {Number} delay - The milliseconds that the timer should wait before the function is executed.
+   * @param {...any} [args] - Additional arguments which are passed through to the function.
+   * @returns {Number} The ID which identifies the timer created.
+   * @throws Error if callback is not a function value.
+   */
   setTimeout(
     callback: (...args: any[]) => void,
     delay: number,
     ...args: any[]
   ): void;
+
+  /**
+   * cancels a timeout previously established by calling {@link setTimeout()}.
+   *
+   * @param {Number} id - The ID which identifies the timer.
+   */
   clearTimeout(id: number): void;
 }
 
-((globalThis: GlobalThisType) => {
+((globalThis: GlobalThis) => {
   // Timer API {
 
   const TIMEOUT_MAX = Math.pow(2, 31) - 1;
   let nextTimerId = 1;
   const activeTimers = new Map();
 
-  /**
-   * Sets a timer which executes a function or specified piece of code once the
-   * timer expires.
-   *
-   * @param {Function} callback - A function to be executed after the timer expires.
-   * @param {Number} delay - The milliseconds that the timer should wait before the function is executed.
-   * @param {...any} [args] - Additional arguments which are passed through to the function.
-   * @returns {Number} The ID which identifies the timer created.
-   */
   function setTimeout(
     callback: (...args: any[]) => void,
     delay: number,
@@ -64,12 +76,6 @@ interface GlobalThisType {
     return id;
   }
 
-  /**
-   * The global clearTimeout() method cancels a timeout previously established
-   * by calling setTimeout().
-   *
-   * @param {Number} id - The ID which identifies the timer.
-   */
   function clearTimeout(id: number): void {
     // Check parameter's type.
     if (!Number.isInteger(id)) {
@@ -109,4 +115,4 @@ interface GlobalThisType {
 
   globalThis.setTimeout = setTimeout;
   globalThis.clearTimeout = clearTimeout;
-})(globalThis as unknown as GlobalThisType);
+})(globalThis as unknown as GlobalThis);
