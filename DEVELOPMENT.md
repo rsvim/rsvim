@@ -118,7 +118,9 @@ To transpile ts code to js code (in `./src/js/runtime` folder), please run with 
 
 Please follow [typedoc](https://typedoc.org/) standards when writing docs for typescript APIs, they will be converted to markdown documents and published on RSVIM's doc site: <https://rsvim.github.io/>.
 
-To generate API documents, please run with `npm run typedoc`, the documents will be generated at `./generated-typedocs` directory. You will need to manually move them to the `./docs/api_references` directory inside the [rsvim.github.io](https://github.com/rsvim/rsvim.github.io) repository, it serves as the doc site.
+To generate API documents, please run with `npm run typedoc`, the documents will be generated at `./generated-typedocs` directory.
+
+If you want to view the generated docs, please manually move them to the `./docs/api_references` directory inside the [rsvim.github.io](https://github.com/rsvim/rsvim.github.io) repository, it serves as the doc site.
 
 ### Auto Generate
 
@@ -126,26 +128,10 @@ To automatically generate both js code and API docs in above steps, please link 
 
 - `ln -s $PWD/git-hooks/pre-commit $PWD/.git/hooks/pre-commit`
 
-It will run following tasks when you submit git commit/PR:
+It will run following steps when you submit git commit/PR:
 
 1. Run command `tsc` to generate js code in `./src/js/runtime` directory (in `rsvim` repo).
 2. Run command `npm run typedoc` to generate API docs in `./generated-typedocs` directory (in `rsvim` repo).
-3. If you also have [rsvim.github.io](https://github.com/rsvim/rsvim.github.io) repo (the doc site), run below commands to copy generated API docs to it:
-
-   - `rm -rf ../rsvim.github.io/docs/api_references/10__global/`
-   - `rm -rf ../rsvim.github.io/docs/api_references/50__rsvim/`
-   - `cp -rf ./generated-typedocs/10__global ./rsvim.github.io/docs/api_references/`
-   - `cp -rf ./generated-typedocs/50__rsvim ./rsvim.github.io/docs/api_references/`
-
-> NOTE: The `rsvim.github.io` and `rsvim` (current repo) should be placed under the same directory:
->
-> ```text
->
-> ./
-> ├─ rsvim
-> └─ rsvim.github.io
->
-> ```
 
 ## Markdown Document
 
