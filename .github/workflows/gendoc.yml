@@ -65,7 +65,7 @@ jobs:
           echo "gh login"
           echo "gh repo clone"
           git clone --depth=1 --branch=main https://github.com/$REPOSITORY $FOLDER
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          git remote set-url origin https://x-access-token:${{ secrets.GENDOC_TOKEN }}@github.com/$GITHUB_REPOSITORY
           cd $FOLDER
           git config --global user.email "rsvim-auto-bot@users.noreply.github.com"
           git config --global user.name "Rsvim AutoBot"
