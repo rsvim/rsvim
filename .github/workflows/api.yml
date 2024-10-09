@@ -56,4 +56,4 @@ jobs:
           mv $HOME/.generated-typedocs/50__rsvim ./docs/api_references/50__rsvim
           git add -A --verbose
           git commit -m "Auto generate APIs on ${GITHUB_SHA}"
-          gh pr create -B main -l "gen-apis" -f -t "docs(api): Auto generate APIs on ${GITHUB_SHA}" -b "Auto generate APIs on ${GITHUB_SHA}"
+          gh pr create -B main -l "gen-apis" -f -t "docs(api): Auto generate APIs on ${GITHUB_SHA}" -b "Auto generate APIs on ${GITHUB_SHA}" -H
