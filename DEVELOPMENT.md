@@ -117,7 +117,7 @@ To transpile ts code to js code (in `src` folder), please run with `tsc` (it als
 
 Please follow [typedoc](https://typedoc.org/) standards when writing docs for typescript APIs, they will be converted to markdown documents and published on RSVIM's doc site: <https://rsvim.github.io/>.
 
-To generate markdown documents, please run with `npm run typedoc`.
+To generate API documents, please run with `npm run typedoc`, the documents will be generated at `./generated-typedocs` directory. You will need to manually move them to the `./docs/api_references` directory inside the [rsvim.github.io](https://github.com/rsvim/rsvim.github.io) repository, it serves as the doc site.
 
 To automatically generate both js code and APIs docs in above two steps, please install `./git-hooks/pre-commit` script in your local `./git/hooks/pre-commit`, it will run these commands when submitting PRs.
 
