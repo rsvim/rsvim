@@ -30,6 +30,7 @@
   "typedocOptions": {
     "entryPoints": ["src/js/runtime/*.ts"],
     "plugin": ["typedoc-plugin-markdown"],
+    "outputFileStrategy": "modules",
     "out": "ts-docs"
   }
 }
