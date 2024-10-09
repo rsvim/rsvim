@@ -11,6 +11,7 @@
   - [Check](#check)
   - [Transpile (Compile)](#transpile-compile)
   - [API Docs](#api-docs)
+  - [Auto Generate](#auto-generate)
 - [Markdown Document](#markdown-document)
 
 ## Rust
@@ -111,7 +112,7 @@ To develop code, please setup with:
 
 ### Transpile (Compile)
 
-To transpile ts code to js code (in `src` folder), please run with `tsc` (it also check the code).
+To transpile ts code to js code (in `./src/js/runtime` folder), please run with `tsc` (it also check the code).
 
 ### API Docs
 
@@ -119,7 +120,28 @@ Please follow [typedoc](https://typedoc.org/) standards when writing docs for ty
 
 To generate API documents, please run with `npm run typedoc`, the documents will be generated at `./generated-typedocs` directory. You will need to manually move them to the `./docs/api_references` directory inside the [rsvim.github.io](https://github.com/rsvim/rsvim.github.io) repository, it serves as the doc site.
 
-To automatically generate both js code and APIs docs in above two steps, please copy `./git-hooks/pre-commit` to `./git/hooks/pre-commit` in your local git repository, it will run these commands when submitting PRs.
+### Auto Generate
+
+To automatically generate both js code and API docs in above steps, please link (or copy) `./git-hooks/pre-commit` to `./git/hooks/pre-commit` in your local git repository. It will do following tasks when submit a git commit:
+
+1. Run command `tsc` to generate js code in `./src/js/runtime` directory (in `rsvim` repo).
+2. Run command `npm run typedoc` to generate API docs in `./generated-typedocs` directory (in `rsvim` repo).
+3. If you also have [rsvim.github.io](https://github.com/rsvim/rsvim.github.io) repo (the doc site), run below commands to copy generated API docs to it:
+
+   - `rm -rf ../rsvim.github.io/docs/api_references/10__global/`
+   - `rm -rf ../rsvim.github.io/docs/api_references/50__rsvim/`
+   - `mv ./generated-typedocs/10__global ./rsvim.github.io/docs/api_references/`
+   - `mv ./generated-typedocs/50__rsvim ./rsvim.github.io/docs/api_references/`
+
+   > Note: The `rsvim.github.io` and `rsvim` (current repo) should be placed under the same directory:
+   >
+   > ```text
+   >
+   > ./
+   >   |- rsvim
+   >   |- rsvim.github.io
+   >
+   > ```
 
 ## Markdown Document
 
