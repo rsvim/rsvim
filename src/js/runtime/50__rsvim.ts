@@ -3,7 +3,7 @@
  *
  * :::warning
  *
- * `Rsvim editor exposes the `__InternalRsvimGlobalObject` global object as the rust bindings, which you should never use directly.`
+ * Rsvim editor exposes the `__InternalRsvimGlobalObject` global object as the rust bindings, which you should never use directly.
  * :::
  *
  * @packageDocumentation
