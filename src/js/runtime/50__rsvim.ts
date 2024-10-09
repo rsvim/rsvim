@@ -1,20 +1,45 @@
-//! Js runtimes for `Rsvim` namespace.
+// Js runtimes for `Rsvim` namespace.
 
 // @ts-ignore Ignore internal import warning
 import infra from "rsvim:ext/infra";
 
-// `Rsvim.opt`
-interface RsvimOptionType {
+/**
+ * The type definition for global object `Rsvim`.
+ *
+ * It contains multiple sub fields:
+ *
+ * - `Rsvim.opt`: Global editor options, see {@link RsvimOpt}.
+ */
+export interface Rsvim {
+  opt: RsvimOpt;
+}
+
+/**
+ * The type definition for global object `Rsvim.opt`.
+ *
+ * See {@link Rsvim}.
+ */
+export interface RsvimOpt {
+  /**
+   * Get editor line-wrap option.
+   *
+   * @returns The line-wrap option value.
+   *
+   * @defaultValue `false`.
+   */
   lineWrap(): boolean;
+
+  /**
+   * Set editor line-wrap option.
+   *
+   * @param value - line-wrap value.
+   *
+   * @throws {@link Error} if {@link value} is not boolean.
+   */
   setLineWrap(value: boolean): void;
 }
 
-// `Rsvim`
-interface GlobalThisType {
-  opt: RsvimOptionType;
-}
-
-(function (globalThis: { Rsvim: GlobalThisType }) {
+(function (globalThis: { Rsvim: Rsvim }) {
   globalThis.Rsvim = {
     opt: {
       lineWrap: function (): boolean {
@@ -30,6 +55,6 @@ interface GlobalThisType {
         // @ts-ignore Ignore __InternalRsvimGlobalObject warning
         __InternalRsvimGlobalObject.opt_set_line_wrap(value);
       },
-    } as RsvimOptionType,
-  } as GlobalThisType;
-})(globalThis as unknown as { Rsvim: GlobalThisType });
+    } as RsvimOpt,
+  } as Rsvim;
+})(globalThis as unknown as { Rsvim: Rsvim });

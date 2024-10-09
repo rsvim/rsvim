@@ -29,8 +29,16 @@
   "include": ["src/js/runtime/*.ts", "src/js/runtime/*.d.ts"],
   "typedocOptions": {
     "entryPoints": ["src/js/runtime/*.ts"],
-    "plugin": ["typedoc-plugin-markdown"],
-    "outputFileStrategy": "modules",
+    "excludeInternal": false,
+    "excludePrivate": false,
+    "excludeProtected": false,
+    "excludeReferences": false,
+    "includeVersion": true,
+    "sort": ["source-order", "alphabetical", "visibility"],
+    // "plugin": ["typedoc-plugin-markdown"],
+    // "outputFileStrategy": "modules",
+    // "hidePageHeader": true,
+    // "hideBreadcrumbs": true,
     "out": "ts-docs"
   }
 }
