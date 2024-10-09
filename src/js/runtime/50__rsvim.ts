@@ -17,20 +17,20 @@ export interface Rsvim {
  */
 export interface RsvimOpt {
   /**
-   * Get editor line-wrap option.
+   * Get **line-wrap** option.
    *
-   * @returns The line-wrap value.
+   * @returns The **line-wrap** option.
    *
    * @defaultValue `false`.
    */
   lineWrap(): boolean;
 
   /**
-   * Set editor line-wrap option.
+   * Set **line-wrap** option.
    *
-   * @param value - The line-wrap value.
+   * @param value - The **line-wrap** option.
    *
-   * @throws Error if {@link value} is not boolean.
+   * @throws Error if value is not a boolean value.
    */
   setLineWrap(value: boolean): void;
 }
