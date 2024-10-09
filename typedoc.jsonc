@@ -1,0 +1,28 @@
+{
+  "name": "Rsvim",
+  "entryPoints": ["src/js/runtime/*global.ts", "src/js/runtime/*rsvim.ts"],
+  "excludeInternal": false,
+  "excludePrivate": false,
+  "excludeProtected": false,
+  "excludeReferences": false,
+  "includeVersion": true,
+  "sort": ["source-order", "alphabetical", "visibility"],
+  "out": "generated-typedocs",
+  // plugins.
+  "plugin": ["typedoc-plugin-markdown"],
+  // typedoc-plugin-markdown options.
+  "outputFileStrategy": "members",
+  "hidePageHeader": true,
+  "hideBreadcrumbs": true,
+  "hidePageTitle": true,
+  "indexFormat": "htmlTable",
+  "parametersFormat": "htmlTable",
+  "interfacePropertiesFormat": "htmlTable",
+  "classPropertiesFormat": "htmlTable",
+  "enumMembersFormat": "htmlTable",
+  "typeDeclarationFormat": "htmlTable",
+  "propertyMembersFormat": "htmlTable",
+  "useCodeBlocks": true,
+  "expandObjects": false,
+  "expandParameters": false,
+}

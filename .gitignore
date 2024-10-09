@@ -19,5 +19,5 @@ target/
 package-lock.json
 node_modules
 
-# Generated Typescript API Docs
-ts-docs
+# Generated Typedoc
+generated-typedocs

@@ -1,4 +1,4 @@
-//! Js runtimes for global object, i.e. `globalThis`.
+// Js runtimes for global web APIs.
 
 // @ts-ignore Ignore internal import warning
 import infra from "rsvim:ext/infra";

@@ -8,22 +8,20 @@ import infra from "rsvim:ext/infra";
  *
  * It contains multiple sub fields:
  *
- * - `Rsvim.opt`: Global editor options, see {@link RsvimOpt}.
+ * - `Rsvim.opt`: Global editor options, also see {@link RsvimOpt}.
  */
 export interface Rsvim {
   opt: RsvimOpt;
 }
 
 /**
- * The type definition for global object `Rsvim.opt`.
- *
- * See {@link Rsvim}.
+ * The type definition for global object `Rsvim.opt`. Also see {@link Rsvim}.
  */
 export interface RsvimOpt {
   /**
    * Get editor line-wrap option.
    *
-   * @returns The line-wrap option value.
+   * @returns The line-wrap value.
    *
    * @defaultValue `false`.
    */
@@ -32,9 +30,9 @@ export interface RsvimOpt {
   /**
    * Set editor line-wrap option.
    *
-   * @param value - line-wrap value.
+   * @param value - The line-wrap value.
    *
-   * @throws {@link Error} if {@link value} is not boolean.
+   * @throws Error if {@link value} is not boolean.
    */
   setLineWrap(value: boolean): void;
 }
