@@ -3,13 +3,16 @@
 tsc
 npm run typedoc
 
-if [ -d $PWD/../rsvim.github.io/docs/api_references/10__global ]; then
-	rm -rf $PWD/../rsvim.github.io/docs/api_references/10__global
+REFS="$PWD/../rsvim.github.io/docs/api_references"
+GLOBAL="$PWD/../rsvim.github.io/docs/api_references/10__global"
+RSVIM="$PWD/../rsvim.github.io/docs/api_references/50__rsvim"
+
+if [ -d $GLOBAL ]; then
+	rm -rf $GLOBAL
+fi
+if [ -d $RSVIM ]; then
+	rm -rf $RSVIM
 fi
 
-if [ -d $PWD/../rsvim.github.io/docs/api_references/50__rsvim ]; then
-	rm -rf $PWD/../rsvim.github.io/docs/api_references/50_rsvim
-fi
-
-mv ./generated-typedocs/10__global $PWD/../rsvim.github.io/docs/api_references/
-mv ./generated-typedocs/50__rsvim $PWD/../rsvim.github.io/docs/api_references/
+mv ./generated-typedocs/10__global $REFS
+mv ./generated-typedocs/50__rsvim $REFS
