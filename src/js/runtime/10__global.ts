@@ -1,9 +1,9 @@
 /**
- * The standard, [WinterCG](https://common-min-api.proposal.wintercg.org/) compatible web platform APIs.
- *
  * :::danger
  * Rsvim editor exposes the rust implemented APIs to the JavaScript world by binding it to the `__InternalRsvimGlobalObject` global object, which you should never use directly.
  * :::
+ *
+ * The standard, [WinterCG](https://common-min-api.proposal.wintercg.org/) compatible web platform APIs.
  *
  * @packageDocumentation
  */
