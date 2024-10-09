@@ -35,10 +35,19 @@
     "excludeReferences": false,
     "includeVersion": true,
     "sort": ["source-order", "alphabetical", "visibility"],
-    // "plugin": ["typedoc-plugin-markdown"],
-    // "outputFileStrategy": "modules",
-    // "hidePageHeader": true,
-    // "hideBreadcrumbs": true,
+    "plugin": ["typedoc-plugin-markdown"],
+    "outputFileStrategy": "modules",
+    "hidePageHeader": true,
+    "hideBreadcrumbs": true,
+    "indexFormat": "htmlTable",
+    "parametersFormat": "htmlTable",
+    "interfacePropertiesFormat": "htmlTable",
+    "classPropertiesFormat": "htmlTable",
+    "enumMembersFormat": "htmlTable",
+    "typeDeclarationFormat": "htmlTable",
+    "propertyMembersFormat": "htmlTable",
+    "expandObjects": true,
+    "expandParameters": true,
     "out": "ts-docs"
   }
 }
