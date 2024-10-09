@@ -60,7 +60,7 @@ jobs:
           echo "${{ secrets.GENDOC_TOKEN }}" > $TOKEN
           gh auth login --with-token < $TOKEN
           echo "gh repo clone"
-          gh repo clone https://github.com/$REPOSITORY $FOLDER -- --depth=1 --branch=main 
+          git clone --depth=1 --branch=main https://linrongbin16:${{ secrets.GENDOC_TOKEN }}@github.com/$REPOSITORY $FOLDER
           cd $FOLDER
           git config user.email "linrongbin16@outlook.com"
           git config user.name "linrongbin16"
