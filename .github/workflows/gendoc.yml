@@ -46,6 +46,7 @@ jobs:
           COMMIT_ID="${GITHUB_SHA::7}"
           BRANCH_NAME="gen_api_${COMMIT_ID}"
           GENERATED_FOLDER="$HOME/.generated-typedocs"
+          TOKEN="$HOME/.token.txt"
           echo "var REPOSITORY"
           echo $REPOSITORY
           echo "var FOLDER"
@@ -57,6 +58,9 @@ jobs:
           echo "var GENERATED_FOLDER"
           echo $GENERATED_FOLDER
 
+          echo "gh login"
+          echo "${{ secrets.GENDOC_TOKEN }}" > $TOKEN
+          gh auth login --with-token < $TOKEN
           echo "gh repo clone"
           gh repo clone https://github.com/$REPOSITORY $FOLDER -- --depth=1 --branch=main 
           cd $FOLDER
@@ -77,7 +81,7 @@ jobs:
           git add -A --verbose
           git commit -m "chore: Auto generate APIs on ${COMMIT_ID}"
           echo "git push origin ${BRANCH_NAME}"
-          git push origin $BRANCH_NAME
+          git push --force origin $BRANCH_NAME
 
           echo "gh pr create"
           gh pr create --label "generate api" --title "chore(api): Generate APIs on ${COMMIT_ID}" --body "" --head "${BRANCH_NAME}" --base "main"
