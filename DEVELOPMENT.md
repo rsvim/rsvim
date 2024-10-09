@@ -138,8 +138,8 @@ To automatically generate both js code and API docs in above steps, please link 
    > ```text
    >
    > ./
-   >   |- rsvim
-   >   |- rsvim.github.io
+   > ├─ rsvim
+   > └─ rsvim.github.io
    >
    > ```
 
