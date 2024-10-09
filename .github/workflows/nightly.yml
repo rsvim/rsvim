@@ -52,20 +52,20 @@ jobs:
         include:
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-22.04
-          # - target: aarch64-unknown-linux-musl
-          #   os: ubuntu-22.04
-          - target: aarch64-apple-darwin
-            os: macos-12
-          # - target: aarch64-pc-windows-msvc
-          #   os: windows-2022
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-22.04
+          # - target: aarch64-unknown-linux-musl
+          #   os: ubuntu-22.04
           # - target: x86_64-unknown-linux-musl
           #   os: ubuntu-22.04
+          - target: aarch64-apple-darwin
+            os: macos-14
           - target: x86_64-apple-darwin
-            os: macos-12
+            os: macos-13
           - target: x86_64-pc-windows-msvc
             os: windows-2022
+          # - target: aarch64-pc-windows-msvc
+          #   os: windows-2022
           # - target: x86_64-unknown-freebsd
           #   os: ubuntu-22.04
     timeout-minutes: 60
@@ -75,9 +75,9 @@ jobs:
       - uses: taiki-e/setup-cross-toolchain-action@v1
         with:
           target: ${{ matrix.target }}
-        if: startsWith(matrix.os, 'ubuntu')
-      - uses: taiki-e/install-action@cross
-        if: contains(matrix.target, '-musl')
+        if: matrix.target == 'aarch64-unknown-linux-gnu'
+      # - uses: taiki-e/install-action@cross
+      #   if: contains(matrix.target, '-musl')
       - run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
         if: endsWith(matrix.target, 'windows-msvc')
       - uses: taiki-e/upload-rust-binary-action@v1
