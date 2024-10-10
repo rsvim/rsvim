@@ -50,7 +50,7 @@ export interface RsvimOpt {
    *
    * @see [Wikipedia - line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
    * @see [Vim: options.txt - 'wrap'](https://vimhelp.org/options.txt.html#%27wrap%27)
-   * @returns {boolean} The _wrap_ option.
+   * @returns {boolean}
    * @defaultValue `true`.
    */
   getWrap(): boolean;
@@ -81,7 +81,7 @@ export interface RsvimOpt {
    * @see [Wikipedia - word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
    * @see [Vim: options.txt - 'linebreak'](https://vimhelp.org/options.txt.html#%27linebreak%27)
    *
-   * @returns {boolean} The _line-break_ option.
+   * @returns {boolean}
    * @defaultValue `false`.
    */
   getLineBreak(): boolean;
