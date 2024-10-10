@@ -1,11 +1,13 @@
 /**
- * :::danger
- * Rsvim editor exposes the rust implemented APIs to the JavaScript world by binding it to the `__InternalRsvimGlobalObject` global object, which you should never use directly.
- * :::
- *
  * The global namespace for `Rsvim` specific, non-standard WinterCG APIs.
  *
  * @packageDocumentation
+ *
+ * @categoryDescription Editor-related APIs
+ * These APIs are specific for Rsvim editors such as buffers, windows, statusline, etc.
+ *
+ * @categoryDescription General purpose APIs
+ * These APIs are general purpose for common JavaScript and TypeScript runtime, similar to node.js and deno.
  */
 
 // @ts-ignore Ignore internal import warning
@@ -21,7 +23,9 @@ export interface Rsvim {
 }
 
 /**
- * The `Rsvim.opt` global object, also see {@link Rsvim}.
+ * The `Rsvim.opt` global editor options, also see {@link Rsvim}.
+ *
+ * @category Editor-related APIs.
  */
 export interface RsvimOpt {
   /**
