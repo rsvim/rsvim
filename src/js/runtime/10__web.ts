@@ -8,7 +8,7 @@
 import infra from "rsvim:ext/infra";
 
 /**
- * The {@link !globalThis} global namespace.
+ * The {@link !globalThis} global object.
  */
 export interface GlobalThis {
   /**
