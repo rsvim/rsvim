@@ -158,6 +158,14 @@ impl Widgetable for Window {
 }
 
 impl Window {
+  pub fn local_options(&self) -> &WindowLocalOptions {
+    &self.local_options
+  }
+
+  pub fn local_options_mut(&mut self) -> &mut WindowLocalOptions {
+    &mut self.local_options
+  }
+
   pub fn wrap(&self) -> bool {
     self.local_options.wrap
   }
