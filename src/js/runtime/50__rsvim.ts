@@ -1,6 +1,10 @@
 /**
  * The global namespace for `Rsvim` specific, non-standard runtime APIs.
  *
+ * @see [Vim: help.txt](https://vimhelp.org/)
+ * @see [Neovim docs - Api](https://neovim.io/doc/user/api.html)
+ * @see [Deno APIs](https://docs.deno.com/api/deno/)
+ *
  * @packageDocumentation
  *
  * @categoryDescription Global Object
