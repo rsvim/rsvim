@@ -1,5 +1,8 @@
 /**
- * The [WinterCG](https://common-min-api.proposal.wintercg.org/) compatible web platform APIs.
+ * The [WinterCG](https://wintercg.org/) compatible web platform APIs.
+ *
+ * @see [Minimum Common Web Platform API](https://common-min-api.proposal.wintercg.org/)
+ * @see [MDN | Web APIs](https://developer.mozilla.org/en-US/docs/Web/API)
  *
  * @packageDocumentation
  */
