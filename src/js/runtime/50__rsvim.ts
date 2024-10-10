@@ -3,7 +3,7 @@
  *
  * @packageDocumentation
  *
- * @categoryDescription Global Namespace
+ * @categoryDescription Global Object
  * The global namespace.
  *
  * @categoryDescription Editor APIs
@@ -21,7 +21,7 @@ import infra from "rsvim:ext/infra";
  *
  * - `Rsvim.opt`: Global editor options.
  *
- * @category Global Namespace
+ * @category Global Object
  */
 export interface Rsvim {
   opt: RsvimOpt;
