@@ -1,5 +1,8 @@
 /**
- * The standard, [WinterCG](https://common-min-api.proposal.wintercg.org/) compatible web platform APIs.
+ * The [WinterCG](https://wintercg.org/) compatible web platform APIs.
+ *
+ * @see [Minimum Common Web Platform API](https://common-min-api.proposal.wintercg.org/)
+ * @see [MDN | Web APIs](https://developer.mozilla.org/en-US/docs/Web/API)
  *
  * @packageDocumentation
  */
@@ -8,7 +11,7 @@
 import infra from "rsvim:ext/infra";
 
 /**
- * The {@link !globalThis} global namespace.
+ * The {@link !globalThis} global object.
  */
 export interface GlobalThis {
   /**

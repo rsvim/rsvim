@@ -26,5 +26,5 @@
     "useUnknownInCatchVariables": false,
     "removeComments": true
   },
-  "include": ["src/js/runtime/*.ts", "src/js/runtime/*.d.ts"]
+  "include": ["./src/js/runtime/*.ts"]
 }

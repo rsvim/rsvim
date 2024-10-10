@@ -109,6 +109,27 @@ impl Widgetable for TreeNode {
   }
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+/// Global options for UI.
+pub struct GlobalOptions {
+  // The 'wrap' option, also known as 'line-wrap', default to `true`.
+  // See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
+  pub wrap: bool,
+
+  // The 'line-break' option, also known as 'word-wrap', default to `false`.
+  // See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
+  pub line_break: bool,
+}
+
+impl Default for GlobalOptions {
+  fn default() -> Self {
+    GlobalOptions {
+      wrap: true,
+      line_break: false,
+    }
+  }
+}
+
 #[derive(Debug, Clone)]
 /// The widget tree.
 ///
@@ -216,10 +237,8 @@ pub struct Tree {
   windows_ids: BTreeSet<TreeNodeId>,
   // Cursor and window state }
 
-  // Global options {
-  line_wrap: bool,
-  word_wrap: bool,
-  // Global options }
+  // Global options for UI.
+  global_options: GlobalOptions,
 }
 
 pub type TreeArc = Arc<RwLock<Tree>>;
@@ -227,18 +246,6 @@ pub type TreeWk = Weak<RwLock<Tree>>;
 pub type TreeNodeId = InodeId;
 pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
 pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
-
-// Defaults of global options {
-
-fn line_wrap_default() -> bool {
-  false
-}
-
-fn word_wrap_default() -> bool {
-  false
-}
-
-// Defaults of global options }
 
 impl Tree {
   /// Make a widget tree.
@@ -258,8 +265,7 @@ impl Tree {
       base: Itree::new(root_node),
       cursor_id: None,
       windows_ids: BTreeSet::new(),
-      line_wrap: line_wrap_default(),
-      word_wrap: word_wrap_default(),
+      global_options: GlobalOptions::default(),
     }
   }
 
@@ -432,20 +438,28 @@ impl Tree {
 
   // Global options {
 
-  pub fn line_wrap(&self) -> bool {
-    self.line_wrap
+  pub fn global_options(&self) -> &GlobalOptions {
+    &self.global_options
   }
 
-  pub fn set_line_wrap(&mut self, line_wrap: bool) {
-    self.line_wrap = line_wrap;
+  pub fn global_options_mut(&mut self) -> &mut GlobalOptions {
+    &mut self.global_options
   }
 
-  pub fn word_wrap(&self) -> bool {
-    self.word_wrap
+  pub fn wrap(&self) -> bool {
+    self.global_options.wrap
   }
 
-  pub fn set_word_wrap(&mut self, word_wrap: bool) {
-    self.word_wrap = word_wrap;
+  pub fn set_wrap(&mut self, value: bool) {
+    self.global_options.wrap = value;
+  }
+
+  pub fn line_break(&self) -> bool {
+    self.global_options.line_break
+  }
+
+  pub fn set_line_break(&mut self, value: bool) {
+    self.global_options.line_break = value;
   }
 
   // Global options }

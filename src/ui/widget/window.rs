@@ -1,17 +1,37 @@
 //! The VIM window.
 
-use tracing::debug;
-
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Rect};
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
+use crate::ui::tree::GlobalOptions;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
 
+use tracing::debug;
+
 pub mod content;
 pub mod root;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+/// Window local options.
+pub struct WindowLocalOptions {
+  // The 'wrap' option, inherited from global options of UI.
+  pub wrap: bool,
+
+  // The 'line-break' option, inherited from global options of UI.
+  pub line_break: bool,
+}
+
+impl From<&GlobalOptions> for WindowLocalOptions {
+  fn from(value: &GlobalOptions) -> Self {
+    WindowLocalOptions {
+      wrap: value.wrap,
+      line_break: value.line_break,
+    }
+  }
+}
 
 #[derive(Debug, Clone)]
 /// The VIM window, it manages all descendant widget nodes, i.e. all widgets in the
@@ -21,10 +41,14 @@ pub struct Window {
 
   // The Window content widget ID.
   content_id: InodeId,
+
+  // Local window options.
+  // By default these options will inherit from global options of UI.
+  local_options: WindowLocalOptions,
 }
 
 impl Window {
-  pub fn new(shape: IRect, buffer: BufferWk) -> Self {
+  pub fn new(shape: IRect, buffer: BufferWk, global_options: &GlobalOptions) -> Self {
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
@@ -40,6 +64,7 @@ impl Window {
     Window {
       base,
       content_id: window_content_id,
+      local_options: WindowLocalOptions::from(global_options),
     }
   }
 }
@@ -133,36 +158,28 @@ impl Widgetable for Window {
 }
 
 impl Window {
-  pub fn line_wrap(&self) -> bool {
-    if let WindowNode::WindowContent(c) = self.base.node(&self.content_id).unwrap() {
-      c.line_wrap()
-    } else {
-      unreachable!()
-    }
+  pub fn local_options(&self) -> &WindowLocalOptions {
+    &self.local_options
   }
 
-  pub fn set_line_wrap(&mut self, line_wrap: bool) {
-    if let WindowNode::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap() {
-      c.set_line_wrap(line_wrap);
-    } else {
-      unreachable!()
-    }
+  pub fn local_options_mut(&mut self) -> &mut WindowLocalOptions {
+    &mut self.local_options
   }
 
-  pub fn word_wrap(&self) -> bool {
-    if let WindowNode::WindowContent(c) = self.base.node(&self.content_id).unwrap() {
-      c.word_wrap()
-    } else {
-      unreachable!()
-    }
+  pub fn wrap(&self) -> bool {
+    self.local_options.wrap
   }
 
-  pub fn set_word_wrap(&mut self, word_wrap: bool) {
-    if let WindowNode::WindowContent(c) = self.base.node_mut(&self.content_id).unwrap() {
-      c.set_word_wrap(word_wrap);
-    } else {
-      unreachable!()
-    }
+  pub fn set_wrap(&mut self, value: bool) {
+    self.local_options.wrap = value;
+  }
+
+  pub fn line_break(&self) -> bool {
+    self.local_options.line_break
+  }
+
+  pub fn set_line_break(&mut self, value: bool) {
+    self.local_options.line_break = value;
   }
 }
 
