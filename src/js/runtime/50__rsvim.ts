@@ -3,6 +3,9 @@
  *
  * @packageDocumentation
  *
+ * @categoryDescription Global Namespace
+ * The global namespace.
+ *
  * @categoryDescription Editor Related
  * These APIs are specific for Rsvim editors such as buffers, windows, statusline, etc.
  *
@@ -17,6 +20,8 @@ import infra from "rsvim:ext/infra";
  * The `Rsvim` global namespace, it contains multiple sub fields:
  *
  * - `Rsvim.opt`: Global editor options.
+ *
+ * @category Global Namespace
  */
 export interface Rsvim {
   opt: RsvimOpt;
