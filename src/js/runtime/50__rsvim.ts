@@ -14,7 +14,7 @@
 import infra from "rsvim:ext/infra";
 
 /**
- * The `Rsvim` namespace, it contains multiple sub fields:
+ * The `Rsvim` global namespace, it contains multiple sub fields:
  *
  * - `Rsvim.opt`: Global editor options.
  */
