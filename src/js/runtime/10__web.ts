@@ -1,5 +1,5 @@
 /**
- * The standard, [WinterCG](https://common-min-api.proposal.wintercg.org/) compatible web platform APIs.
+ * The [WinterCG](https://common-min-api.proposal.wintercg.org/) compatible web platform APIs.
  *
  * @packageDocumentation
  */

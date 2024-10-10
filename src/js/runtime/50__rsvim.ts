@@ -1,5 +1,5 @@
 /**
- * The global namespace for `Rsvim` specific, non-standard WinterCG APIs.
+ * The global namespace for `Rsvim` specific, non-standard runtime APIs.
  *
  * @packageDocumentation
  *
@@ -9,8 +9,8 @@
  * @categoryDescription Editor Related
  * These APIs are specific for Rsvim editors such as buffers, windows, statusline, etc.
  *
- * @categoryDescription General Purpose
- * These APIs are general purpose for common JavaScript and TypeScript runtime, similar to node.js and deno.
+ * @categoryDescription General Purposed
+ * These APIs are general purpose for common JavaScript runtime, keeps the same with [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
 // @ts-ignore Ignore internal import warning
