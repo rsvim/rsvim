@@ -78,19 +78,19 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
 
   // `Rsvim.opt`
   {
-    set_function_to(scope, vim, "opt_line_wrap", global_rsvim::opt::line_wrap);
+    set_function_to(scope, vim, "opt_get_wrap", global_rsvim::opt::get_wrap);
+    set_function_to(scope, vim, "opt_set_wrap", global_rsvim::opt::set_wrap);
     set_function_to(
       scope,
       vim,
-      "opt_set_line_wrap",
-      global_rsvim::opt::set_line_wrap,
+      "opt_get_line_break",
+      global_rsvim::opt::get_line_break,
     );
-    set_function_to(scope, vim, "opt_word_wrap", global_rsvim::opt::word_wrap);
     set_function_to(
       scope,
       vim,
-      "opt_set_word_wrap",
-      global_rsvim::opt::set_word_wrap,
+      "opt_set_line_break",
+      global_rsvim::opt::set_line_break,
     );
   }
 

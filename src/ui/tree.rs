@@ -217,8 +217,10 @@ pub struct Tree {
   // Cursor and window state }
 
   // Global options {
-  line_wrap: bool,
-  word_wrap: bool,
+  // Also known as 'line-wrap'.
+  wrap: bool,
+  // Also known as 'word-wrap'.
+  line_break: bool,
   // Global options }
 }
 
@@ -230,11 +232,11 @@ pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
 // Defaults of global options {
 
-fn line_wrap_default() -> bool {
-  false
+fn wrap_default() -> bool {
+  true
 }
 
-fn word_wrap_default() -> bool {
+fn line_break_default() -> bool {
   false
 }
 
@@ -258,8 +260,8 @@ impl Tree {
       base: Itree::new(root_node),
       cursor_id: None,
       windows_ids: BTreeSet::new(),
-      line_wrap: line_wrap_default(),
-      word_wrap: word_wrap_default(),
+      wrap: wrap_default(),
+      line_break: line_break_default(),
     }
   }
 
@@ -432,20 +434,20 @@ impl Tree {
 
   // Global options {
 
-  pub fn line_wrap(&self) -> bool {
-    self.line_wrap
+  pub fn get_wrap(&self) -> bool {
+    self.wrap
   }
 
-  pub fn set_line_wrap(&mut self, line_wrap: bool) {
-    self.line_wrap = line_wrap;
+  pub fn set_wrap(&mut self, line_wrap: bool) {
+    self.wrap = line_wrap;
   }
 
-  pub fn word_wrap(&self) -> bool {
-    self.word_wrap
+  pub fn get_line_break(&self) -> bool {
+    self.line_break
   }
 
-  pub fn set_word_wrap(&mut self, word_wrap: bool) {
-    self.word_wrap = word_wrap;
+  pub fn set_line_break(&mut self, word_wrap: bool) {
+    self.line_break = word_wrap;
   }
 
   // Global options }
