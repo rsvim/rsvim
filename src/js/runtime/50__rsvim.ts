@@ -14,16 +14,16 @@
 import infra from "rsvim:ext/infra";
 
 /**
- * The `Rsvim` global object, it contains multiple sub fields:
+ * The `Rsvim` namespace, it contains multiple sub fields:
  *
- * - `Rsvim.opt`: Global editor options, also see {@link RsvimOpt}.
+ * - `Rsvim.opt`: Global editor options.
  */
 export interface Rsvim {
   opt: RsvimOpt;
 }
 
 /**
- * The `Rsvim.opt` global editor options, also see {@link Rsvim}.
+ * The `Rsvim.opt` namespace for global editor options.
  *
  * @category Editor Related
  */
