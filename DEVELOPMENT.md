@@ -130,22 +130,6 @@ It will run following tasks when you submit git commit/PR:
 
 1. Run command `tsc` to generate js code in `./src/js/runtime` directory (in `rsvim` repo).
 2. Run command `npm run typedoc` to generate API docs in `./generated-typedocs` directory (in `rsvim` repo).
-3. If you also have [rsvim.github.io](https://github.com/rsvim/rsvim.github.io) repo (the doc site), run below commands to copy generated API docs to it:
-
-   - `rm -rf ../rsvim.github.io/docs/api_references/10__global/`
-   - `rm -rf ../rsvim.github.io/docs/api_references/50__rsvim/`
-   - `cp -rf ./generated-typedocs/10__global ./rsvim.github.io/docs/api_references/`
-   - `cp -rf ./generated-typedocs/50__rsvim ./rsvim.github.io/docs/api_references/`
-
-> NOTE: The `rsvim.github.io` and `rsvim` (current repo) should be placed under the same directory:
->
-> ```text
->
-> ./
-> ├─ rsvim
-> └─ rsvim.github.io
->
-> ```
 
 ## Markdown Document
 

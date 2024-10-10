@@ -34,7 +34,6 @@ export interface GlobalThis {
    * Cancels a timeout previously established by calling {@link setTimeout}.
    *
    * @param {number} id - The ID (integer) which identifies the timer.
-   * @returns {undefined} Nothing.
    * @throws {@link !Error} if ID is not an integer value.
    */
   clearTimeout(id: number): void;
