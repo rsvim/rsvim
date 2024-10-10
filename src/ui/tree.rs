@@ -232,10 +232,12 @@ pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
 // Defaults of global options {
 
+// Default value for 'wrap' option: true.
 fn wrap_default() -> bool {
   true
 }
 
+// Default value for 'line-break' option: false.
 fn line_break_default() -> bool {
   false
 }
