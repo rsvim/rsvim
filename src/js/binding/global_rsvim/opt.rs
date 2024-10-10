@@ -26,8 +26,6 @@ pub fn get_wrap(
 }
 
 /// Set the _wrap_ option.
-/// See: <https://vimhelp.org/options.txt.html#%27wrap%27>
-/// Also known as _line-wrap_, see: <https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap>.
 pub fn set_wrap(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
@@ -45,7 +43,7 @@ pub fn set_wrap(
     .set_wrap(value);
 }
 
-/// Get the _linebreak_ option.
+/// Get the _line-break_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>
 /// Also known as _word-wrap_, see: <https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap>.
 pub fn get_line_break(
@@ -64,9 +62,7 @@ pub fn get_line_break(
   rv.set_bool(value);
 }
 
-/// Set the _linebreak_ option.
-/// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
-/// Also known as _word-wrap_, see: <https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap>.
+/// Set the _line-break_ option.
 pub fn set_line_break(
   scope: &mut v8::HandleScope,
   args: v8::FunctionCallbackArguments,
