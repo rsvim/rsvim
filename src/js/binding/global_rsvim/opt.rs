@@ -21,7 +21,7 @@ pub fn get_wrap(
     .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
     .unwrap()
     .wrap();
-  debug!("line_wrap: {:?}", value);
+  debug!("get_wrap: {:?}", value);
   rv.set_bool(value);
 }
 
@@ -34,7 +34,7 @@ pub fn set_wrap(
   assert!(args.length() == 1);
   let value = args.get(0).to_boolean(scope).boolean_value(scope);
   let state_rc = JsRuntime::state(scope);
-  debug!("set_line_wrap: {:?}", value);
+  debug!("set_wrap: {:?}", value);
   state_rc
     .borrow_mut()
     .tree
@@ -58,7 +58,7 @@ pub fn get_line_break(
     .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
     .unwrap()
     .line_break();
-  debug!("word_wrap: {:?}", value);
+  debug!("get_line_break: {:?}", value);
   rv.set_bool(value);
 }
 
@@ -71,7 +71,7 @@ pub fn set_line_break(
   assert!(args.length() == 1);
   let value = args.get(0).to_boolean(scope).boolean_value(scope);
   let state_rc = JsRuntime::state(scope);
-  debug!("set_word_wrap: {:?}", value);
+  debug!("set_line_break: {:?}", value);
   state_rc
     .borrow_mut()
     .tree
