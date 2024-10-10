@@ -20,7 +20,7 @@ pub fn get_wrap(
     .tree
     .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
     .unwrap()
-    .get_wrap();
+    .wrap();
   debug!("line_wrap: {:?}", value);
   rv.set_bool(value);
 }
@@ -59,7 +59,7 @@ pub fn get_line_break(
     .tree
     .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
     .unwrap()
-    .get_line_break();
+    .line_break();
   debug!("word_wrap: {:?}", value);
   rv.set_bool(value);
 }
