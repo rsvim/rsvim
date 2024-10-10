@@ -1,6 +1,6 @@
 {
   "name": "Rsvim",
-  "entryPoints": ["src/js/runtime/*global.ts", "src/js/runtime/*rsvim.ts"],
+  "entryPoints": ["src/js/runtime/*web.ts", "src/js/runtime/*rsvim.ts"],
   "excludeInternal": false,
   "excludePrivate": false,
   "excludeProtected": false,

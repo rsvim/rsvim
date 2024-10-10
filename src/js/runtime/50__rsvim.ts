@@ -6,10 +6,10 @@
  * @categoryDescription Global Namespace
  * The global namespace.
  *
- * @categoryDescription Editor Related
- * These APIs are specific for Rsvim editors such as buffers, windows, statusline, etc.
+ * @categoryDescription Editor APIs
+ * These APIs are specific for Rsvim editors such as buffers, windows, key mappings, etc.
  *
- * @categoryDescription General Purposed
+ * @categoryDescription General APIs
  * These APIs are general purpose for common JavaScript runtime, keeps the same with [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
@@ -30,7 +30,7 @@ export interface Rsvim {
 /**
  * The `Rsvim.opt` namespace for global editor options.
  *
- * @category Editor Related
+ * @category Editor APIs
  */
 export interface RsvimOpt {
   /**
