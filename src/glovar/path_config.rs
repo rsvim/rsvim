@@ -7,6 +7,7 @@ use std::path::PathBuf;
 /// The configs for editor's config file, i.e. the `.rsvim.js` or `.rsvim.ts`.
 pub struct PathConfig {
   config_file: Option<PathBuf>,
+  config_dirs: Vec<PathBuf>,
   cache_dir: PathBuf,
   data_dir: PathBuf,
 }
@@ -52,6 +53,13 @@ fn get_config_file(base_dirs: &BaseDirs) -> Option<PathBuf> {
   ]
   .into_iter()
   .find(|p| p.exists())
+}
+
+fn get_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
+  vec![_xdg_config_dir(base_dirs), _home_config_dir(base_dirs)]
+    .into_iter()
+    .filter(|p| p.exists())
+    .collect()
 }
 
 // `$env:LocalAppData\rsvim-cache`
@@ -104,10 +112,12 @@ impl PathConfig {
   pub fn new() -> Self {
     let base_dirs = BaseDirs::new().unwrap();
     let config_file = get_config_file(&base_dirs);
+    let config_dirs = get_config_dirs(&base_dirs);
     let cache_dir = get_cache_dir(&base_dirs);
     let data_dir = get_data_dir(&base_dirs);
     PathConfig {
       config_file,
+      config_dirs,
       cache_dir,
       data_dir,
     }
@@ -116,6 +126,11 @@ impl PathConfig {
   /// Get the config file.
   pub fn config_file(&self) -> &Option<PathBuf> {
     &self.config_file
+  }
+
+  /// Get the config dirs.
+  pub fn config_dirs(&self) -> &Vec<PathBuf> {
+    &self.config_dirs
   }
 
   /// Get the cache directory.
