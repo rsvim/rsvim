@@ -1,4 +1,4 @@
-//! Main event loop.
+//! Event loop.
 
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, U16Size};
@@ -47,6 +47,7 @@ pub mod task;
 ///
 /// * Master: The event loop itself.
 /// * Worker: A spawned task.
+/// * JsRuntime: The javascript runtime (including V8 engine).
 ///
 /// Js runtime and this event loop communicate via another two pairs of channels.
 pub struct EventLoop {
@@ -60,8 +61,10 @@ pub struct EventLoop {
 
   /// Runtime path (directories). It initializes with following directories:
   ///
-  /// 1. [`CONFIG_FILE_PATH`](crate::glovar::CONFIG_FILE_PATH)
-  /// 2. [`DATA_DIR_PATH`](crate::glovar::DATA_DIR_PATH)
+  /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
+  /// 2. `$HOME/.rsvim/`
+  ///
+  /// Also see [`CONFIG_DIRS_PATH`](crate::glovar::CONFIG_DIRS_PATH).
   ///
   /// NOTE: All the external plugins are been searched under runtime path.
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
@@ -81,8 +84,17 @@ pub struct EventLoop {
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
-  /// Task tracker for all spawned tasks.
-  pub task_tracker: TaskTracker,
+  /// Task tracker for spawned tasks, there are two trackers:
+  ///
+  /// 1. Cancellable/deteched tracker for those tasks that are safe to cancel.
+  /// 2. Block tracker are for dangerous tasks, user will have to wait for them complete before
+  ///    exit the editor.
+  ///
+  /// Most write file operations are spawned with block tracker to ensure they will be safely
+  /// complete to avoid damage user data files. While for most reading operations and pure CPU
+  /// calculations, they will be cancelled when editor exit.
+  pub detached_tracker: TaskTracker,
+  pub blocked_tracker: TaskTracker,
 
   /// Sender: workers => master.
   ///
@@ -183,14 +195,12 @@ impl EventLoop {
     let (js_runtime_tick_dispatcher, js_runtime_tick_queue) = channel(glovar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
-    let mut runtime_path = vec![glovar::DATA_DIR_PATH()];
-    if glovar::CONFIG_FILE_PATH().is_some() {
-      runtime_path.push(glovar::CONFIG_FILE_PATH().unwrap());
-    }
+    let runtime_path = glovar::CONFIG_DIRS_PATH();
     let runtime_path = Arc::new(RwLock::new(runtime_path));
 
     // Task Tracker
-    let task_tracker = TaskTracker::new();
+    let detached_tracker = TaskTracker::new();
+    let blocked_tracker = TaskTracker::new();
     let startup_moment = Instant::now();
     let startup_unix_epoch = SystemTime::now()
       .duration_since(UNIX_EPOCH)
@@ -222,7 +232,8 @@ impl EventLoop {
       buffers: buffers_arc,
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
-      task_tracker,
+      detached_tracker,
+      blocked_tracker,
       worker_send_to_master,
       master_recv_from_worker,
       js_runtime,
@@ -277,7 +288,7 @@ impl EventLoop {
         self.worker_send_to_master.clone(),
       );
       let input_files = self.cli_opt.file().to_vec();
-      self.task_tracker.spawn(async move {
+      self.detached_tracker.spawn(async move {
         let (default_input_file, other_input_files) = input_files.split_first().unwrap();
         let default_input_file = default_input_file.clone();
         if task::startup::input_files::edit_default_file(data_access.clone(), default_input_file)
@@ -336,7 +347,7 @@ impl EventLoop {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           debug!("process_js_runtime_request timeout_req:{:?}", req.future_id);
           let js_runtime_tick_dispatcher = self.js_runtime_tick_dispatcher.clone();
-          self.task_tracker.spawn(async move {
+          self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
             let _ = js_runtime_tick_dispatcher
               .send(EventLoopToJsRuntimeMessage::TimeoutResp(
@@ -359,6 +370,13 @@ impl EventLoop {
       let _ = self.master_send_to_js_runtime.send(msg).await;
       self.js_runtime.tick_event_loop();
     }
+  }
+
+  async fn process_cancellation_notify(&mut self) {
+    debug!("Receive cancellation token, exit loop");
+    self.detached_tracker.close();
+    self.blocked_tracker.close();
+    self.blocked_tracker.wait().await;
   }
 
   /// Running the loop, it repeatedly do following steps:
@@ -390,8 +408,7 @@ impl EventLoop {
         }
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
-          debug!("Receive cancellation token, exit loop");
-          self.task_tracker.close();
+          self.process_cancellation_notify().await;
           // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
           break;
         }
@@ -401,7 +418,6 @@ impl EventLoop {
       self.render()?;
     }
 
-    self.task_tracker.wait().await;
     Ok(())
   }
 

@@ -1,4 +1,4 @@
-//! VIM buffers.
+//! Vim buffers.
 
 use crate::glovar;
 

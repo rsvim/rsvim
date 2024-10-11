@@ -73,6 +73,17 @@ pub fn CONFIG_FILE_PATH() -> Option<PathBuf> {
     .clone()
 }
 
+/// User config directory paths, it contains following directories:
+///
+/// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
+/// 2. `$HOME/.rsvim/`
+pub fn CONFIG_DIRS_PATH() -> Vec<PathBuf> {
+  PATH_CONFIG_VALUE
+    .get_or_init(PathConfig::new)
+    .config_dirs()
+    .clone()
+}
+
 /// Cache directory path, i.e. `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`.
 pub fn CACHE_DIR_PATH() -> PathBuf {
   PATH_CONFIG_VALUE
