@@ -82,10 +82,16 @@ pub struct EventLoop {
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
   /// Task tracker for spawned tasks, there are two trackers:
+  ///
   /// 1. Cancellable tracker for those tasks that are safe to cancel.
-  /// 2. Block tracker for those tasks that are dangerous to cancel, user will have to wait
-  ///    for them complete before exit this editor process.
+  /// 2. Block tracker are for dangerous tasks, user will have to wait for them complete before
+  ///    exit the editor.
+  ///
+  /// Most write file operations are spawned with block tracker to ensure they will be safely
+  /// complete to avoid damage user data files. While for most reading operations and pure CPU
+  /// calculations, they will be cancelled when editor exit.
   pub cancellable_tracker: TaskTracker,
+  pub block_tracker: TaskTracker,
 
   /// Sender: workers => master.
   ///
