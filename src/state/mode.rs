@@ -1,4 +1,4 @@
-//! The VIM's editing mode.
+//! Vim editing mode.
 
 use std::collections::HashSet;
 use std::fmt::Display;
