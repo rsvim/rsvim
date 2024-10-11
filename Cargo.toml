@@ -57,6 +57,7 @@ serde_json = "1.0.128"
 regex = "1.11.0"
 url = "2.5.2"
 path-absolutize = "3.1.1"
+toml = "0.8.19"
 
 # NOTE: SWC upgrade are too buggy, so we manually manage the upgrade. {
 

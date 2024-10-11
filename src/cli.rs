@@ -30,7 +30,7 @@ use clap::Parser;
 
 #[derive(Parser, Debug, Clone)]
 #[command(
-  version,
+  disable_version_flag = true,
   about,
   long_about = "The VIM editor reinvented in Rust+TypeScript.\nPlease checkout https://rsvim.github.io/ for more documentation."
 )]
@@ -38,12 +38,20 @@ use clap::Parser;
 pub struct CliOpt {
   #[arg(help = "Edit file(s)")]
   file: Vec<String>,
+
+  #[arg(short = 'V', long = "version", help = "Print version")]
+  version: bool,
 }
 
 impl CliOpt {
   /// Input files.
   pub fn file(&self) -> &Vec<String> {
     &self.file
+  }
+
+  /// Version.
+  pub fn version(&self) -> bool {
+    self.version
   }
 
   // /// Commands should be execute before loading any config.
@@ -79,97 +87,37 @@ impl CliOpt {
 
 #[cfg(test)]
 mod tests {
-  // use super::*;
+  use super::*;
 
   #[test]
   fn cli_opt1() {
-    // let input = vec![
-    //   vec!["rsvim".to_string()],
-    //   vec![
-    //     "rsvim".to_string(),
-    //     "--version".to_string(),
-    //     "--headless".to_string(),
-    //     "--debug".to_string(),
-    //     "-d".to_string(),
-    //   ],
-    //   vec!["rsvim".to_string(), "README.md".to_string()],
-    //   vec![
-    //     "rsvim".to_string(),
-    //     "README.md".to_string(),
-    //     "LICENSE".to_string(),
-    //     "--headless".to_string(),
-    //     "-d".to_string(),
-    //   ],
-    //   vec![
-    //     "rsvim".to_string(),
-    //     "README.md".to_string(),
-    //     "LICENSE".to_string(),
-    //     "--cmd".to_string(),
-    //     "echo 1".to_string(),
-    //     "-c".to_string(),
-    //     "quit".to_string(),
-    //   ],
-    // ] as Vec<Vec<String>>;
-    // let expect = vec![
-    //   CliOpt {
-    //     file: vec![],
-    //     cmd_before: None,
-    //     cmd_after: None,
-    //     diff: false,
-    //     headless: false,
-    //     verbose: false,
-    //     debug: false,
-    //   },
-    //   CliOpt {
-    //     file: vec![],
-    //     cmd_before: None,
-    //     cmd_after: None,
-    //     diff: true,
-    //     headless: true,
-    //     verbose: false,
-    //     debug: true,
-    //   },
-    //   CliOpt {
-    //     file: vec!["README.md".to_string()],
-    //     cmd_before: None,
-    //     cmd_after: None,
-    //     diff: false,
-    //     headless: false,
-    //     verbose: false,
-    //     debug: false,
-    //   },
-    //   CliOpt {
-    //     file: vec!["README.md".to_string(), "LICENSE".to_string()],
-    //     cmd_before: None,
-    //     cmd_after: None,
-    //     diff: true,
-    //     headless: true,
-    //     verbose: false,
-    //     debug: false,
-    //   },
-    //   CliOpt {
-    //     file: vec!["README.md".to_string(), "LICENSE".to_string()],
-    //     cmd_before: Some(vec!["echo 1".to_string()]),
-    //     cmd_after: Some(vec!["quit".to_string()]),
-    //     diff: false,
-    //     headless: false,
-    //     verbose: false,
-    //     debug: false,
-    //   },
-    // ];
-    //
-    // assert_eq!(input.len(), expect.len());
-    // let n = input.len();
-    // for i in 0..n {
-    //   let actual = CliOpt::parse_from(&input[i]);
-    //   // println!("actual-{i}: {:?}", actual);
-    //   // println!("expect-{i}: {:?}", expect[i]);
-    //   assert_eq!(actual.file, expect[i].file);
-    //   assert_eq!(actual.cmd_before, expect[i].cmd_before);
-    //   assert_eq!(actual.cmd_after, expect[i].cmd_after);
-    //   assert_eq!(actual.diff, expect[i].diff);
-    //   assert_eq!(actual.headless, expect[i].headless);
-    //   assert_eq!(actual.debug, expect[i].debug);
-    // }
+    let input = [
+      vec!["rsvim".to_string()],
+      vec!["rsvim".to_string(), "--version".to_string()],
+      vec!["rsvim".to_string(), "README.md".to_string()],
+    ];
+
+    let expect = [
+      CliOpt {
+        file: vec![],
+        version: false,
+      },
+      CliOpt {
+        file: vec![],
+        version: true,
+      },
+      CliOpt {
+        file: vec!["README.md".to_string()],
+        version: false,
+      },
+    ];
+
+    assert_eq!(input.len(), expect.len());
+    let n = input.len();
+    for i in 0..n {
+      let actual = CliOpt::parse_from(&input[i]);
+      assert_eq!(actual.file, expect[i].file);
+      assert_eq!(actual.version(), expect[i].version());
+    }
   }
 }
