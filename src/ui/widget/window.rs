@@ -9,27 +9,56 @@ use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
 
+use regex::Regex;
 use tracing::debug;
 
 pub mod content;
 pub mod root;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-/// Window local options.
-pub struct WindowLocalOptions {
-  // The 'wrap' option, inherited from global options of UI.
+#[derive(Debug, Clone)]
+/// Window options.
+pub struct WindowOptions {
+  /// The 'wrap' option, also known as 'line-wrap', default to `true`.
+  /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub wrap: bool,
 
-  // The 'line-break' option, inherited from global options of UI.
+  /// The 'line-break' option, also known as 'word-wrap', default to `false`.
+  /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   pub line_break: bool,
+
+  /// The 'break-at' option, default to `" ^I!@*-+;:,./?"`.
+  /// See: <https://vimhelp.org/options.txt.html#%27breakat%27>.
+  /// NOTE: This option represents the regex pattern to break word for 'line-break'.
+  break_at: String,
+
+  // The build regex object for 'break_at'.
+  break_at_regex: Regex,
 }
 
-impl From<&GlobalOptions> for WindowLocalOptions {
-  fn from(value: &GlobalOptions) -> Self {
-    WindowLocalOptions {
-      wrap: value.wrap,
-      line_break: value.line_break,
+impl Default for WindowOptions {
+  fn default() -> Self {
+    let break_at = String::from(" ^I!@*-+;:,./?");
+    WindowOptions {
+      wrap: true,
+      line_break: false,
+      break_at: break_at.clone(),
+      break_at_regex: Regex::new(&break_at).unwrap(),
     }
+  }
+}
+
+impl WindowOptions {
+  pub fn break_at(&self) -> &String {
+    &self.break_at
+  }
+
+  pub fn set_break_at(&mut self, value: String) {
+    self.break_at = value.clone();
+    self.break_at_regex = Regex::new(&value).unwrap();
+  }
+
+  pub fn break_at_regex(&self) -> &Regex {
+    &self.break_at_regex
   }
 }
 
@@ -44,7 +73,7 @@ pub struct Window {
 
   // Local window options.
   // By default these options will inherit from global options of UI.
-  local_options: WindowLocalOptions,
+  options: WindowOptions,
 }
 
 impl Window {
@@ -64,7 +93,7 @@ impl Window {
     Window {
       base,
       content_id: window_content_id,
-      local_options: WindowLocalOptions::from(global_options),
+      options: global_options.window_options.clone(),
     }
   }
 }
@@ -158,28 +187,40 @@ impl Widgetable for Window {
 }
 
 impl Window {
-  pub fn local_options(&self) -> &WindowLocalOptions {
-    &self.local_options
+  pub fn options(&self) -> &WindowOptions {
+    &self.options
   }
 
-  pub fn local_options_mut(&mut self) -> &mut WindowLocalOptions {
-    &mut self.local_options
+  pub fn options_mut(&mut self) -> &mut WindowOptions {
+    &mut self.options
   }
 
   pub fn wrap(&self) -> bool {
-    self.local_options.wrap
+    self.options.wrap
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.local_options.wrap = value;
+    self.options.wrap = value;
   }
 
   pub fn line_break(&self) -> bool {
-    self.local_options.line_break
+    self.options.line_break
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.local_options.line_break = value;
+    self.options.line_break = value;
+  }
+
+  pub fn break_at(&self) -> &String {
+    self.options.break_at()
+  }
+
+  pub fn set_break_at(&mut self, value: String) {
+    self.options.set_break_at(value);
+  }
+
+  pub fn break_at_regex(&self) -> &Regex {
+    self.options.break_at_regex()
   }
 }
 
