@@ -135,7 +135,7 @@ export class RsvimOpt {
    * @returns {string}
    * @defaultValue `" ^I!@*-+;:,./?"`
    */
-  get breakAt(): boolean {
+  get breakAt(): string {
     // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_break_at();
   }
