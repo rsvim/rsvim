@@ -15,7 +15,7 @@ var RsvimOpt = (function () {
         },
         set: function (value) {
             if (typeof value !== "boolean") {
-                throw new Error("\"Rsvim.opt.setWrap\" value must be boolean type, but found ".concat(infra.stringify(value)));
+                throw new Error("\"Rsvim.opt.wrap\" value must be boolean type, but found ".concat(infra.stringify(value)));
             }
             __InternalRsvimGlobalObject.opt_set_wrap(value);
         },
@@ -28,9 +28,22 @@ var RsvimOpt = (function () {
         },
         set: function (value) {
             if (typeof value !== "boolean") {
-                throw new Error("\"Rsvim.opt.setLineBreak\" value must be boolean type, but found ".concat(infra.stringify(value)));
+                throw new Error("\"Rsvim.opt.lineBreak\" value must be boolean type, but found ".concat(infra.stringify(value)));
             }
             __InternalRsvimGlobalObject.opt_set_line_break(value);
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(RsvimOpt.prototype, "breakAt", {
+        get: function () {
+            return __InternalRsvimGlobalObject.opt_get_break_at();
+        },
+        set: function (value) {
+            if (typeof value !== "string") {
+                throw new Error("\"Rsvim.opt.breakAt\" value must be string type, but found ".concat(infra.stringify(value)));
+            }
+            __InternalRsvimGlobalObject.opt_set_break_at(value);
         },
         enumerable: false,
         configurable: true

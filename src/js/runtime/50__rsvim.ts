@@ -17,7 +17,7 @@
  * These APIs are general purpose for common JavaScript runtime, keeps the same with [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
-// @ts-ignore Ignore internal import warning
+// @ts-ignore Ignore warning
 import infra from "rsvim:ext/infra";
 
 /**
@@ -51,7 +51,7 @@ export class RsvimOpt {
    * and only part of long lines will be displayed. When the cursor is
    * moved to a part that is not shown, the screen will scroll horizontally.
    *
-   * The line will be broken in the middle of a word if necessary. See {@link getLineBreak | getLineBreak()}
+   * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
    * to get the break at a word boundary.
    *
    * @see [Wikipedia - line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
@@ -60,7 +60,7 @@ export class RsvimOpt {
    * @defaultValue `true`
    */
   get wrap(): boolean {
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_wrap();
   }
 
@@ -73,10 +73,10 @@ export class RsvimOpt {
   set wrap(value: boolean) {
     if (typeof value !== "boolean") {
       throw new Error(
-        `"Rsvim.opt.setWrap" value must be boolean type, but found ${infra.stringify(value)}`,
+        `"Rsvim.opt.wrap" value must be boolean type, but found ${infra.stringify(value)}`,
       );
     }
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_wrap(value);
   }
 
@@ -85,13 +85,13 @@ export class RsvimOpt {
    *
    * Local to {@link Window}.
    *
-   * If `true` (on), Vim will wrap long lines at a character in 'breakat' rather
+   * If `true` (on), Vim will wrap long lines at a character in {@link breakAt} rather
    * than at the last character that fits on the screen.
    *
    * It only affects the way the file is displayed, not its contents.
    * If 'breakindent' is set, line is visually indented. Then, the value
    * of 'showbreak' is used to put in front of wrapped lines. This option
-   * is not used when the {@link getWrap() | _wrap_} option is `false`.
+   * is not used when the {@link wrap} option is `false`.
    *
    * @see [Wikipedia - word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
    * @see [Vim: options.txt - 'linebreak'](https://vimhelp.org/options.txt.html#%27linebreak%27)
@@ -100,7 +100,7 @@ export class RsvimOpt {
    * @defaultValue `false`
    */
   get lineBreak(): boolean {
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     return __InternalRsvimGlobalObject.opt_get_line_break();
   }
 
@@ -113,11 +113,47 @@ export class RsvimOpt {
   set lineBreak(value: boolean) {
     if (typeof value !== "boolean") {
       throw new Error(
-        `"Rsvim.opt.setLineBreak" value must be boolean type, but found ${infra.stringify(value)}`,
+        `"Rsvim.opt.lineBreak" value must be boolean type, but found ${infra.stringify(value)}`,
       );
     }
-    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_line_break(value);
+  }
+
+  /**
+   * Get the _break-at_ option.
+   *
+   * Local to {@link Window}.
+   *
+   * This option lets you choose which characters might cause a line
+   * break if {@link lineBreak} is `true` (on). Only works for ASCII and also for 8-bit
+   * characters when {@link encoding} is an 8-bit encoding.
+   *
+   * @see {@link lineBreak}
+   * @see [Vim: options.txt - 'breakat'](https://vimhelp.org/options.txt.html#%27breakat%27)
+   *
+   * @returns {string}
+   * @defaultValue `" ^I!@*-+;:,./?"`
+   */
+  get breakAt(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_break_at();
+  }
+
+  /**
+   * Set the _break-at_ option.
+   *
+   * @param {string} value - The _break-at_ option.
+   * @throws {@link !Error} if value is not a string value.
+   */
+  set breakAt(value: string) {
+    if (typeof value !== "string") {
+      throw new Error(
+        `"Rsvim.opt.breakAt" value must be string type, but found ${infra.stringify(value)}`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_break_at(value);
   }
 }
 
