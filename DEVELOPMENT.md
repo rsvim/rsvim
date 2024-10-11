@@ -2,7 +2,7 @@
 
 - [Rust](#rust)
   - [Toolchain](#toolchain)
-  - [Global Control](#global-control)
+  - [Environment Variable](#environment-variable)
   - [Check](#check)
   - [Test](#test)
   - [Debug](#debug)
@@ -10,8 +10,6 @@
   - [Toolchain](#toolchain)
   - [Check](#check)
   - [Transpile (Compile)](#transpile-compile)
-  - [API Docs](#api-docs)
-  - [Auto Generate](#auto-generate)
 - [Markdown Document](#markdown-document)
 
 ## Rust
@@ -37,7 +35,7 @@ To develop code, please setup with:
 
 - Public methods named with `_` prefix are private, the public decorator is only for testing.
 
-### Global Control
+### Environment Variable
 
 This project uses environment variables to control some behaviors globally, i.e. you can run the `rsvim` command with prepending some env vars. For example:
 
@@ -51,9 +49,7 @@ To configure debugging/testing behaviors, please setup with:
 - `RUST_LOG`: Set logging level, by default it's `info`. To debug code, please set to `debug`.
 - `RUSTFLAGS`: Set extra flags to `rustc` compiler. To enable all warning messages, please set to `-Dwarnings`.
 
-To configure other internal behaviors, please setup with:
-
-- `RSVIM_MUTEX_TIMEOUT`: Set the threading locks timeout by seconds, by default it's [`u64::MAX`](https://doc.rust-lang.org/1.80.0/std/primitive.u64.html#associatedconstant.MAX) (forever).
+To configure other internal behaviors, please see variables listed in the `./src/glovar.rs` source file.
 
 ### Check
 
