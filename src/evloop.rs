@@ -47,6 +47,7 @@ pub mod task;
 ///
 /// * Master: The event loop itself.
 /// * Worker: A spawned task.
+/// * JsRuntime: The javascript runtime (including V8 engine).
 ///
 /// Js runtime and this event loop communicate via another two pairs of channels.
 pub struct EventLoop {
