@@ -79,3 +79,40 @@ pub fn set_line_break(
     .unwrap()
     .set_line_break(value);
 }
+
+/// Get the _break-at_ option.
+/// See: <https://vimhelp.org/options.txt.html#%27breakat%27>
+pub fn get_break_at(
+  scope: &mut v8::HandleScope,
+  _args: v8::FunctionCallbackArguments,
+  mut rv: v8::ReturnValue,
+) {
+  let state_rc = JsRuntime::state(scope);
+  let value = state_rc
+    .borrow()
+    .tree
+    .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+    .unwrap()
+    .breat_at()
+    .clone();
+  debug!("get_break_at: {:?}", value);
+  rv.set(v8::String::new(scope, &value).unwrap().into());
+}
+
+/// Set the _break-at_ option.
+pub fn set_break_at(
+  scope: &mut v8::HandleScope,
+  args: v8::FunctionCallbackArguments,
+  _: v8::ReturnValue,
+) {
+  assert!(args.length() == 1);
+  let value = args.get(0).to_rust_string_lossy(scope);
+  let state_rc = JsRuntime::state(scope);
+  debug!("set_break_at: {:?}", value);
+  state_rc
+    .borrow_mut()
+    .tree
+    .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+    .unwrap()
+    .set_break_at(value);
+}

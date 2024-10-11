@@ -2,17 +2,19 @@
 
 #![allow(dead_code)]
 
-use parking_lot::RwLock;
-use std::collections::BTreeSet;
-use std::sync::{Arc, Weak};
-use std::time::Duration;
-use tracing::debug;
-
 use crate::cart::{IRect, U16Rect, U16Size};
 use crate::glovar;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut};
+use crate::ui::widget::window::WindowOptions;
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
+
+use parking_lot::RwLock;
+use regex::Regex;
+use std::collections::BTreeSet;
+use std::sync::{Arc, Weak};
+use std::time::Duration;
+use tracing::debug;
 
 pub mod internal;
 
@@ -109,25 +111,11 @@ impl Widgetable for TreeNode {
   }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Default)]
 /// Global options for UI.
 pub struct GlobalOptions {
-  // The 'wrap' option, also known as 'line-wrap', default to `true`.
-  // See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
-  pub wrap: bool,
-
-  // The 'line-break' option, also known as 'word-wrap', default to `false`.
-  // See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
-  pub line_break: bool,
-}
-
-impl Default for GlobalOptions {
-  fn default() -> Self {
-    GlobalOptions {
-      wrap: true,
-      line_break: false,
-    }
-  }
+  /// Window options.
+  pub window_options: WindowOptions,
 }
 
 #[derive(Debug, Clone)]
@@ -238,7 +226,7 @@ pub struct Tree {
   // Cursor and window state }
 
   // Global options for UI.
-  global_options: GlobalOptions,
+  options: GlobalOptions,
 }
 
 pub type TreeArc = Arc<RwLock<Tree>>;
@@ -265,7 +253,7 @@ impl Tree {
       base: Itree::new(root_node),
       cursor_id: None,
       windows_ids: BTreeSet::new(),
-      global_options: GlobalOptions::default(),
+      options: GlobalOptions::default(),
     }
   }
 
@@ -439,27 +427,39 @@ impl Tree {
   // Global options {
 
   pub fn global_options(&self) -> &GlobalOptions {
-    &self.global_options
+    &self.options
   }
 
   pub fn global_options_mut(&mut self) -> &mut GlobalOptions {
-    &mut self.global_options
+    &mut self.options
   }
 
   pub fn wrap(&self) -> bool {
-    self.global_options.wrap
+    self.options.window_options.wrap
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.global_options.wrap = value;
+    self.options.window_options.wrap = value;
   }
 
   pub fn line_break(&self) -> bool {
-    self.global_options.line_break
+    self.options.window_options.line_break
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.global_options.line_break = value;
+    self.options.window_options.line_break = value;
+  }
+
+  pub fn breat_at(&self) -> &String {
+    self.options.window_options.break_at()
+  }
+
+  pub fn set_break_at(&mut self, value: String) {
+    self.options.window_options.set_break_at(value);
+  }
+
+  pub fn break_at_regex(&self) -> &Regex {
+    self.options.window_options.break_at_regex()
   }
 
   // Global options }

@@ -17,7 +17,7 @@
  * These APIs are general purpose for common JavaScript runtime, keeps the same with [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
-// @ts-ignore Ignore internal import warning
+// @ts-ignore Ignore warning
 import infra from "rsvim:ext/infra";
 
 /**
@@ -26,17 +26,19 @@ import infra from "rsvim:ext/infra";
  * - `Rsvim.opt`: Global editor options.
  *
  * @category Global Object
+ * @hideconstructor
  */
-export interface Rsvim {
-  opt: RsvimOpt;
+export class Rsvim {
+  readonly opt: RsvimOpt = new RsvimOpt();
 }
 
 /**
- * The `Rsvim.opt` namespace for global editor options.
+ * The `Rsvim.opt` object for global editor options.
  *
  * @category Editor APIs
+ * @hideconstructor
  */
-export interface RsvimOpt {
+export class RsvimOpt {
   /**
    * Get the _wrap_ option.
    *
@@ -49,87 +51,112 @@ export interface RsvimOpt {
    * and only part of long lines will be displayed. When the cursor is
    * moved to a part that is not shown, the screen will scroll horizontally.
    *
-   * The line will be broken in the middle of a word if necessary. See {@link getLineBreak | getLineBreak()}
+   * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
    * to get the break at a word boundary.
    *
    * @see [Wikipedia - line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
    * @see [Vim: options.txt - 'wrap'](https://vimhelp.org/options.txt.html#%27wrap%27)
    * @returns {boolean}
-   * @defaultValue `true`.
+   * @defaultValue `true`
    */
-  getWrap(): boolean;
+  get wrap(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_wrap();
+  }
 
   /**
    * Set the _wrap_ option.
    *
-   * @see {@link getWrap | getWrap()}
-   *
    * @param {boolean} value - The _wrap_ option.
    * @throws {@link !Error} if value is not a boolean value.
    */
-  setWrap(value: boolean): void;
+  set wrap(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.wrap" value must be boolean type, but found ${infra.stringify(value)}`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_wrap(value);
+  }
 
   /**
    * Get the _line-break_ option.
    *
    * Local to {@link Window}.
    *
-   * If `true` (on), Vim will wrap long lines at a character in 'breakat' rather
+   * If `true` (on), Vim will wrap long lines at a character in {@link breakAt} rather
    * than at the last character that fits on the screen.
    *
    * It only affects the way the file is displayed, not its contents.
    * If 'breakindent' is set, line is visually indented. Then, the value
    * of 'showbreak' is used to put in front of wrapped lines. This option
-   * is not used when the {@link getWrap() | _wrap_} option is `false`.
+   * is not used when the {@link wrap} option is `false`.
    *
    * @see [Wikipedia - word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
    * @see [Vim: options.txt - 'linebreak'](https://vimhelp.org/options.txt.html#%27linebreak%27)
    *
    * @returns {boolean}
-   * @defaultValue `false`.
+   * @defaultValue `false`
    */
-  getLineBreak(): boolean;
+  get lineBreak(): boolean {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_line_break();
+  }
 
   /**
    * Set the _line-break_ option.
    *
-   * @see {@link getLineBreak | getLineBreak()}
-   *
    * @param {boolean} value - The _line-break_ option.
    * @throws {@link !Error} if value is not a boolean value.
    */
-  setLineBreak(value: boolean): void;
+  set lineBreak(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.lineBreak" value must be boolean type, but found ${infra.stringify(value)}`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_line_break(value);
+  }
+
+  /**
+   * Get the _break-at_ option.
+   *
+   * Local to {@link Window}.
+   *
+   * This option lets you choose which characters might cause a line
+   * break if {@link lineBreak} is `true` (on). Only works for ASCII and also for 8-bit
+   * characters when {@link encoding} is an 8-bit encoding.
+   *
+   * @see {@link lineBreak}
+   * @see [Vim: options.txt - 'breakat'](https://vimhelp.org/options.txt.html#%27breakat%27)
+   *
+   * @returns {string}
+   * @defaultValue `" ^I!@*-+;:,./?"`
+   */
+  get breakAt(): string {
+    // @ts-ignore Ignore warning
+    return __InternalRsvimGlobalObject.opt_get_break_at();
+  }
+
+  /**
+   * Set the _break-at_ option.
+   *
+   * @param {string} value - The _break-at_ option.
+   * @throws {@link !Error} if value is not a string value.
+   */
+  set breakAt(value: string) {
+    if (typeof value !== "string") {
+      throw new Error(
+        `"Rsvim.opt.breakAt" value must be string type, but found ${infra.stringify(value)}`,
+      );
+    }
+    // @ts-ignore Ignore warning
+    __InternalRsvimGlobalObject.opt_set_break_at(value);
+  }
 }
 
 (function (globalThis: { Rsvim: Rsvim }) {
-  globalThis.Rsvim = {
-    opt: {
-      getWrap: function (): boolean {
-        // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-        return __InternalRsvimGlobalObject.opt_get_wrap();
-      },
-      setWrap: function (value: boolean): void {
-        if (typeof value !== "boolean") {
-          throw new Error(
-            `"Rsvim.opt.setWrap" value must be boolean type, but found ${infra.stringify(value)}`,
-          );
-        }
-        // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-        __InternalRsvimGlobalObject.opt_set_wrap(value);
-      },
-      getLineBreak: function (): boolean {
-        // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-        return __InternalRsvimGlobalObject.opt_get_line_break();
-      },
-      setLineBreak: function (value: boolean): void {
-        if (typeof value !== "boolean") {
-          throw new Error(
-            `"Rsvim.opt.setLineBreak" value must be boolean type, but found ${infra.stringify(value)}`,
-          );
-        }
-        // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-        __InternalRsvimGlobalObject.opt_set_line_break(value);
-      },
-    } as RsvimOpt,
-  } as Rsvim;
+  globalThis.Rsvim = new Rsvim();
 })(globalThis as unknown as { Rsvim: Rsvim });
