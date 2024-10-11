@@ -1,4 +1,3 @@
 #!/bin/bash
 
 tsc
-npm run typedoc
