@@ -1,4 +1,4 @@
-//! Editing mode.
+//! Vim editing mode and state.
 
 use crossterm::event::Event;
 use parking_lot::RwLock;
