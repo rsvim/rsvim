@@ -1,4 +1,4 @@
-//! Main event loop.
+//! Event loop.
 
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, U16Size};
