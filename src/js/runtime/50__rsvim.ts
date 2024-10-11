@@ -26,17 +26,19 @@ import infra from "rsvim:ext/infra";
  * - `Rsvim.opt`: Global editor options.
  *
  * @category Global Object
+ * @hideconstructor
  */
-export interface Rsvim {
-  opt: RsvimOpt;
+export class Rsvim {
+  readonly opt: RsvimOpt = new RsvimOpt();
 }
 
 /**
- * The `Rsvim.opt` namespace for global editor options.
+ * The `Rsvim.opt` object for global editor options.
  *
  * @category Editor APIs
+ * @hideconstructor
  */
-export interface RsvimOpt {
+export class RsvimOpt {
   /**
    * Get the _wrap_ option.
    *
@@ -55,19 +57,28 @@ export interface RsvimOpt {
    * @see [Wikipedia - line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
    * @see [Vim: options.txt - 'wrap'](https://vimhelp.org/options.txt.html#%27wrap%27)
    * @returns {boolean}
-   * @defaultValue `true`.
+   * @defaultValue `true`
    */
-  getWrap(): boolean;
+  get wrap(): boolean {
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    return __InternalRsvimGlobalObject.opt_get_wrap();
+  }
 
   /**
    * Set the _wrap_ option.
    *
-   * @see {@link getWrap | getWrap()}
-   *
    * @param {boolean} value - The _wrap_ option.
    * @throws {@link !Error} if value is not a boolean value.
    */
-  setWrap(value: boolean): void;
+  set wrap(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.setWrap" value must be boolean type, but found ${infra.stringify(value)}`,
+      );
+    }
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    __InternalRsvimGlobalObject.opt_set_wrap(value);
+  }
 
   /**
    * Get the _line-break_ option.
@@ -86,50 +97,30 @@ export interface RsvimOpt {
    * @see [Vim: options.txt - 'linebreak'](https://vimhelp.org/options.txt.html#%27linebreak%27)
    *
    * @returns {boolean}
-   * @defaultValue `false`.
+   * @defaultValue `false`
    */
-  getLineBreak(): boolean;
+  get lineBreak(): boolean {
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    return __InternalRsvimGlobalObject.opt_get_line_break();
+  }
 
   /**
    * Set the _line-break_ option.
    *
-   * @see {@link getLineBreak | getLineBreak()}
-   *
    * @param {boolean} value - The _line-break_ option.
    * @throws {@link !Error} if value is not a boolean value.
    */
-  setLineBreak(value: boolean): void;
+  set lineBreak(value: boolean) {
+    if (typeof value !== "boolean") {
+      throw new Error(
+        `"Rsvim.opt.setLineBreak" value must be boolean type, but found ${infra.stringify(value)}`,
+      );
+    }
+    // @ts-ignore Ignore __InternalRsvimGlobalObject warning
+    __InternalRsvimGlobalObject.opt_set_line_break(value);
+  }
 }
 
 (function (globalThis: { Rsvim: Rsvim }) {
-  globalThis.Rsvim = {
-    opt: {
-      getWrap: function (): boolean {
-        // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-        return __InternalRsvimGlobalObject.opt_get_wrap();
-      },
-      setWrap: function (value: boolean): void {
-        if (typeof value !== "boolean") {
-          throw new Error(
-            `"Rsvim.opt.setWrap" value must be boolean type, but found ${infra.stringify(value)}`,
-          );
-        }
-        // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-        __InternalRsvimGlobalObject.opt_set_wrap(value);
-      },
-      getLineBreak: function (): boolean {
-        // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-        return __InternalRsvimGlobalObject.opt_get_line_break();
-      },
-      setLineBreak: function (value: boolean): void {
-        if (typeof value !== "boolean") {
-          throw new Error(
-            `"Rsvim.opt.setLineBreak" value must be boolean type, but found ${infra.stringify(value)}`,
-          );
-        }
-        // @ts-ignore Ignore __InternalRsvimGlobalObject warning
-        __InternalRsvimGlobalObject.opt_set_line_break(value);
-      },
-    } as RsvimOpt,
-  } as Rsvim;
+  globalThis.Rsvim = new Rsvim();
 })(globalThis as unknown as { Rsvim: Rsvim });
