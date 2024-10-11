@@ -1,10 +1,1 @@
-{
-  "scripts": {
-    "typedoc": "typedoc"
-  },
-  "devDependencies": {
-    "typedoc": "^0.26.8",
-    "typedoc-plugin-markdown": "^4.2.9",
-    "typedoc-plugin-mdn-links": "^3.3.2"
-  }
-}
+{}
