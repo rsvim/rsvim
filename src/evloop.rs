@@ -81,8 +81,11 @@ pub struct EventLoop {
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
-  /// Task tracker for all spawned tasks.
-  pub task_tracker: TaskTracker,
+  /// Task tracker for spawned tasks, there are two trackers:
+  /// 1. Cancellable tracker for those tasks that are safe to cancel.
+  /// 2. Block tracker for those tasks that are dangerous to cancel, user will have to wait
+  ///    for them complete before exit this editor process.
+  pub cancellable_tracker: TaskTracker,
 
   /// Sender: workers => master.
   ///
@@ -222,7 +225,7 @@ impl EventLoop {
       buffers: buffers_arc,
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
-      task_tracker,
+      cancellable_tracker: task_tracker,
       worker_send_to_master,
       master_recv_from_worker,
       js_runtime,
@@ -277,7 +280,7 @@ impl EventLoop {
         self.worker_send_to_master.clone(),
       );
       let input_files = self.cli_opt.file().to_vec();
-      self.task_tracker.spawn(async move {
+      self.cancellable_tracker.spawn(async move {
         let (default_input_file, other_input_files) = input_files.split_first().unwrap();
         let default_input_file = default_input_file.clone();
         if task::startup::input_files::edit_default_file(data_access.clone(), default_input_file)
@@ -336,7 +339,7 @@ impl EventLoop {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           debug!("process_js_runtime_request timeout_req:{:?}", req.future_id);
           let js_runtime_tick_dispatcher = self.js_runtime_tick_dispatcher.clone();
-          self.task_tracker.spawn(async move {
+          self.cancellable_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
             let _ = js_runtime_tick_dispatcher
               .send(EventLoopToJsRuntimeMessage::TimeoutResp(
@@ -391,7 +394,7 @@ impl EventLoop {
         // Receive cancellation notify
         _ = self.cancellation_token.cancelled() => {
           debug!("Receive cancellation token, exit loop");
-          self.task_tracker.close();
+          self.cancellable_tracker.close();
           // let _ = self.master_send_to_js_worker.send(EventLoopToJsRuntimeMessage::Shutdown(jsmsg::Dummy::default())).await;
           break;
         }
@@ -401,7 +404,7 @@ impl EventLoop {
       self.render()?;
     }
 
-    self.task_tracker.wait().await;
+    self.cancellable_tracker.wait().await;
     Ok(())
   }
 
