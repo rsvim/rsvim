@@ -28,12 +28,3 @@ jobs:
           ls -la
           echo "tsc"
           tsc
-      - name: Typedoc
-        run: |
-          npm install
-          echo "show PWD/CWD"
-          echo $PWD
-          echo "ls -la"
-          ls -la
-          echo "npm run typedoc"
-          npm run typedoc
