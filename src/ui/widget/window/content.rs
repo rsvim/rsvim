@@ -791,7 +791,7 @@ mod tests {
 
   #[test]
   fn _draw_from_top_for_wrap_nolinebreak1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -854,7 +854,7 @@ mod tests {
 
   #[test]
   fn _draw_from_top_for_wrap_nolinebreak2() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -865,6 +865,24 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
+    let expect = vec![
+      "This is a quite simple and ",
+      "small test lines.          ",
+      "But still it contains sever",
+      "al things we want to test: ",
+      "  1. When the line is small",
+      " enough to completely put i",
+      "nside a row of the window c",
+      "ontent widget, then the lin",
+      "e-wrap and word-wrap doesn'",
+      "t affect the rendering.    ",
+      "  2. When the line is too l",
+      "ong to be completely put in",
+      " a row of the window conten",
+      "t widget, there're multiple",
+      " cases:                    ",
+    ];
+
     let window_options = WindowOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (27, 15));
     let mut window_content = WindowContent::new(
@@ -883,21 +901,13 @@ mod tests {
       .map(|cs| cs.join(""))
       .collect::<Vec<_>>();
     info!("actual:{:?}", actual);
-    let expect = buffer
-      .read()
-      .rope()
-      .lines()
-      .skip(1)
-      .take(15)
-      .map(|l| l.as_str().unwrap().chars().take(27).collect::<String>())
-      .collect::<Vec<_>>();
     info!("expect:{:?}", expect);
     assert_eq!(actual.len(), 15);
     assert!(expect.len() <= 15);
     for (i, a) in actual.into_iter().enumerate() {
       assert!(a.len() == 27);
       if i < expect.len() {
-        let e = expect[i].clone();
+        let e = expect[i];
         info!("{:?} a:{:?}, e:{:?}", i, a, e);
         assert!(a.len() == e.len() || e.is_empty());
         if a.len() == e.len() {

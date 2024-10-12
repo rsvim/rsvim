@@ -2,6 +2,7 @@
 extend-ignore-words-re = [
   # Valid words
   "visibles",
+  "conten",
 ]
 
 [files]

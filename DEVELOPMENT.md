@@ -68,6 +68,7 @@ To run the unit tests, please run with:
 
    1. First list all test cases with `cargo test -- --list`.
    2. Run the specific test with `cargo test {TEST_NAME}`, the `TEST_NAME` is the output test names in above step.
+   3. In case you want to add/print logs in test cases, please call the `crate::test::log::init` API before running a test case.
 
 > Recommend to use [cargo-nextest](https://github.com/nextest-rs/nextest) instead of `cargo test` for better testing experiences.
 
