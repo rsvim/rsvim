@@ -78,13 +78,15 @@ pub struct Window {
 
 impl Window {
   pub fn new(shape: IRect, buffer: BufferWk, global_options: &GlobalOptions) -> Self {
+    let options = global_options.window_options.clone();
+
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
 
     let mut base = Itree::new(window_root_node);
 
-    let window_content = WindowContent::new(shape, buffer);
+    let window_content = WindowContent::new(shape, buffer, &options);
     let window_content_id = window_content.id();
     let window_content_node = WindowNode::WindowContent(window_content);
 
@@ -93,7 +95,7 @@ impl Window {
     Window {
       base,
       content_id: window_content_id,
-      options: global_options.window_options.clone(),
+      options,
     }
   }
 }
@@ -191,8 +193,9 @@ impl Window {
     &self.options
   }
 
-  pub fn options_mut(&mut self) -> &mut WindowOptions {
-    &mut self.options
+  pub fn set_options(&mut self, options: &WindowOptions) {
+    self.options = options.clone();
+    self.update_window_content_options();
   }
 
   pub fn wrap(&self) -> bool {
@@ -201,6 +204,7 @@ impl Window {
 
   pub fn set_wrap(&mut self, value: bool) {
     self.options.wrap = value;
+    self.update_window_content_options();
   }
 
   pub fn line_break(&self) -> bool {
@@ -209,6 +213,7 @@ impl Window {
 
   pub fn set_line_break(&mut self, value: bool) {
     self.options.line_break = value;
+    self.update_window_content_options();
   }
 
   pub fn break_at(&self) -> &String {
@@ -217,10 +222,18 @@ impl Window {
 
   pub fn set_break_at(&mut self, value: String) {
     self.options.set_break_at(value);
+    self.update_window_content_options();
   }
 
   pub fn break_at_regex(&self) -> &Regex {
     self.options.break_at_regex()
+  }
+
+  fn update_window_content_options(&mut self) {
+    match self.base.node_mut(&self.content_id).unwrap() {
+      WindowNode::WindowContent(content) => content.set_options(&self.options),
+      _ => unreachable!("Cannot find window_content node"),
+    }
   }
 }
 

@@ -1,20 +1,22 @@
 //! VIM window's text content widget.
 
-use crossterm::style::{Attributes, Color};
-use geo::point;
-use ropey::RopeSlice;
-use std::collections::{BTreeSet, VecDeque};
-use std::convert::From;
-use std::time::Duration;
-use tracing::{debug, error};
-
 use crate::buf::{Buffer, BufferWk};
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::glovar;
 use crate::inode_generate_impl;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
+use crate::ui::widget::window::WindowOptions;
 use crate::ui::widget::Widgetable;
+
+use crossterm::style::{Attributes, Color};
+use geo::point;
+use regex::Regex;
+use ropey::RopeSlice;
+use std::collections::{BTreeSet, VecDeque};
+use std::convert::From;
+use std::time::Duration;
+use tracing::{debug, error};
 
 #[derive(Debug, Copy, Clone, Default)]
 /// The view of a buffer. The range is left-inclusive right-exclusive, or top-inclusive
@@ -95,47 +97,53 @@ pub struct WindowContent {
   first_modified_line: Option<usize>,
 
   // Options
-  line_wrap: bool,
-  word_wrap: bool,
+  options: WindowOptions,
 }
+
+// Options {
+impl WindowContent {
+  pub fn options(&self) -> &WindowOptions {
+    &self.options
+  }
+
+  pub fn set_options(&mut self, options: &WindowOptions) {
+    self.options = options.clone();
+  }
+
+  /// Get 'wrap' option.
+  pub fn wrap(&self) -> bool {
+    self.options.wrap
+  }
+
+  /// Get 'line-break' option.
+  pub fn link_break(&self) -> bool {
+    self.options.line_break
+  }
+
+  /// Get 'break-at' option.
+  pub fn break_at(&self) -> &String {
+    self.options.break_at()
+  }
+
+  /// Get 'break-at' option in regex.
+  pub fn break_at_regex(&self) -> &Regex {
+    self.options.break_at_regex()
+  }
+}
+// Options }
 
 impl WindowContent {
   /// Make window content from buffer. The view starts from the first line.
-  pub fn new(shape: IRect, buffer: BufferWk) -> Self {
+  pub fn new(shape: IRect, buffer: BufferWk, window_options: &WindowOptions) -> Self {
     let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
     WindowContent {
       base: InodeBase::new(shape),
       buffer,
       view,
       first_modified_line: Some(0),
-      line_wrap: false,
-      word_wrap: false,
+      options: window_options.clone(),
     }
   }
-
-  // Options {
-
-  /// Get line-wrap option.
-  pub fn line_wrap(&self) -> bool {
-    self.line_wrap
-  }
-
-  /// Set line-wrap option.
-  pub fn set_line_wrap(&mut self, line_wrap: bool) {
-    self.line_wrap = line_wrap;
-  }
-
-  /// Get word-wrap option.
-  pub fn word_wrap(&self) -> bool {
-    self.word_wrap
-  }
-
-  /// Set word-wrap option.
-  pub fn set_word_wrap(&mut self, word_wrap: bool) {
-    self.word_wrap = word_wrap;
-  }
-
-  // Options }
 
   // Buffer/View {
 
@@ -455,8 +463,13 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
+    let window_options = WindowOptions::default();
     let window_content_shape = IRect::new((0, 0), (10, 10));
-    let mut window_content = WindowContent::new(window_content_shape, Arc::downgrade(&buffer));
+    let mut window_content = WindowContent::new(
+      window_content_shape,
+      Arc::downgrade(&buffer),
+      &window_options,
+    );
     let canvas_size = U16Size::new(10, 10);
     let mut canvas = Canvas::new(canvas_size);
 
