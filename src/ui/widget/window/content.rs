@@ -268,7 +268,10 @@ impl WindowContent {
     }
   }
 
-  /// Draw buffer from `start_line`
+  /// Implement the [`_draw_from_top`] with below window options:
+  /// - [`warp`](WindowOptions::wrap) is `true`.
+  /// - [`line_break`](WindowOptions::line_break) is `false`
+  /// - [`break_at`](WindowOptions::break_at) will not be used since 'line-break' is `false`.
   pub fn _draw_from_top_for_wrap_nolinebreak(
     &mut self,
     canvas: &mut Canvas,
@@ -324,11 +327,19 @@ impl WindowContent {
 
               for chunk in line.chunks() {
                 if col >= width {
-                  break;
+                  row += 1;
+                  col = 0_u16;
+                  if row >= height {
+                    break;
+                  }
                 }
                 for ch in chunk.chars() {
                   if col >= width {
-                    break;
+                    row += 1;
+                    col = 0_u16;
+                    if row >= height {
+                      break;
+                    }
                   }
                   if ch != '\n' {
                     let cell = Cell::from(ch);
@@ -402,7 +413,10 @@ impl WindowContent {
     }
   }
 
-  /// Draw buffer from `start_line`
+  /// Implement the [`_draw_from_top`] with below options:
+  /// - [`warp`](WindowOptions::wrap) is `false`.
+  /// - [`line_break`](WindowOptions::line_break) and [`break_at`](WindowOptions::break_at) will
+  ///   not be used since 'wrap' is `false`.
   pub fn _draw_from_top_for_nowrap(
     &mut self,
     canvas: &mut Canvas,
@@ -627,7 +641,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
-    let window_options = WindowOptions::default();
+    let window_options = WindowOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (10, 10));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -637,7 +651,7 @@ mod tests {
     let canvas_size = U16Size::new(10, 10);
     let mut canvas = Canvas::new(canvas_size);
 
-    window_content._draw_from_top(&mut canvas, 0, 0, 10);
+    window_content._draw_from_top_for_nowrap(&mut canvas, 0, 0, 10);
     let actual = canvas
       .frame()
       .raw_symbols_with_placeholder(" ".to_compact_string())
@@ -684,7 +698,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
-    let window_options = WindowOptions::default();
+    let window_options = WindowOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (27, 15));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -694,7 +708,7 @@ mod tests {
     let canvas_size = U16Size::new(27, 15);
     let mut canvas = Canvas::new(canvas_size);
 
-    window_content._draw_from_top(&mut canvas, 1, 0, 0);
+    window_content._draw_from_top_for_nowrap(&mut canvas, 1, 0, 0);
     let actual = canvas
       .frame()
       .raw_symbols_with_placeholder(" ".to_compact_string())
@@ -734,7 +748,7 @@ mod tests {
     // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
-    let window_options = WindowOptions::default();
+    let window_options = WindowOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (20, 18));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -744,7 +758,7 @@ mod tests {
     let canvas_size = U16Size::new(20, 18);
     let mut canvas = Canvas::new(canvas_size);
 
-    window_content._draw_from_top(&mut canvas, 0, 0, 0);
+    window_content._draw_from_top_for_nowrap(&mut canvas, 0, 0, 0);
     let actual = canvas
       .frame()
       .raw_symbols_with_placeholder(" ".to_compact_string())

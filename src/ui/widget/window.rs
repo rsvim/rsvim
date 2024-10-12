@@ -24,19 +24,11 @@ pub struct WindowOptions {
   break_at_regex: Regex,
 }
 
-impl Default for WindowOptions {
-  fn default() -> Self {
-    let break_at = String::from(" ^I!@*-+;:,./?");
-    WindowOptions {
-      wrap: true,
-      line_break: false,
-      break_at: break_at.clone(),
-      break_at_regex: Regex::new(&break_at).unwrap(),
-    }
-  }
-}
-
 impl WindowOptions {
+  pub fn builder() -> WindowOptionsBuilder {
+    WindowOptionsBuilder::default()
+  }
+
   /// The 'wrap' option, also known as 'line-wrap', default to `true`.
   /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub fn wrap(&self) -> bool {
@@ -75,6 +67,7 @@ impl WindowOptions {
   }
 }
 
+/// The builder for [`WindowOptions`].
 pub struct WindowOptionsBuilder {
   wrap: bool,
   line_break: bool,
@@ -82,24 +75,35 @@ pub struct WindowOptionsBuilder {
 }
 
 impl WindowOptionsBuilder {
-  pub fn with_wrap(&mut self, value: bool) -> &mut Self {
+  pub fn wrap(&mut self, value: bool) -> &mut Self {
     self.wrap = value;
     self
   }
-  pub fn with_line_break(&mut self, value: bool) -> &mut Self {
+  pub fn line_break(&mut self, value: bool) -> &mut Self {
     self.line_break = value;
     self
   }
-  pub fn with_break_at(&mut self, value: &str) -> &mut Self {
+  pub fn break_at(&mut self, value: &str) -> &mut Self {
     self.break_at = String::from(value);
     self
   }
   pub fn build(&self) -> WindowOptions {
-    let mut opt = WindowOptions::default();
-    opt.set_wrap(self.wrap);
-    opt.set_line_break(self.line_break);
-    opt.set_break_at(&self.break_at);
-    opt
+    WindowOptions {
+      wrap: self.wrap,
+      line_break: self.line_break,
+      break_at: self.break_at.clone(),
+      break_at_regex: Regex::new(&self.break_at).unwrap(),
+    }
+  }
+}
+
+impl Default for WindowOptionsBuilder {
+  fn default() -> Self {
+    WindowOptionsBuilder {
+      wrap: true,
+      line_break: false,
+      break_at: String::from(" ^I!@*-+;:,./?"),
+    }
   }
 }
 
