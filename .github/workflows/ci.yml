@@ -1,4 +1,4 @@
-name: Rust CI
+name: CI
 on:
   pull_request:
     branches:
@@ -17,6 +17,23 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
+  ts_lint:
+    name: JavaScript Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
+      - name: Tsc
+        run: |
+          npm install -g typescript
+          tsc --version
+          echo "show PWD=${PWD}"
+          echo "ls -la"
+          ls -la
+          echo "tsc"
+          tsc
   rs_lint:
     name: Rust Lint
     runs-on: ubuntu-latest

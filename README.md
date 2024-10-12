@@ -10,8 +10,8 @@ The VIM editor reinvented in Rust+TypeScript.
   <a href="https://crates.io/crates/rsvim"><img alt="push.yml" src="https://img.shields.io/crates/v/rsvim" /></a>
   <a href="https://docs.rs/rsvim/latest/rsvim/"><img alt="push.yml" src="https://img.shields.io/docsrs/rsvim?label=docs.rs" /></a>
   <a href="https://github.com/rsvim/rsvim/actions/workflows/release.yml"><img alt="release.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml" /></a>
-  <a href="https://github.com/rsvim/rsvim/actions/workflows/rs.yml"><img alt="rs.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/rs.yml?branch=main&label=rs" /></a>
-  <a href="https://github.com/rsvim/rsvim/actions/workflows/js.yml"><img alt="js.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/js.yml?branch=main&label=js" /></a>
+  <a href="https://github.com/rsvim/rsvim/actions/workflows/ci.yml"><img alt="ci.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci" /></a>
+  <!-- <a href="https://github.com/rsvim/rsvim/actions/workflows/js.yml"><img alt="js.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/js.yml?branch=main&label=js" /></a> -->
   <a href="https://app.codecov.io/gh/rsvim/rsvim"><img alt="codecov" src="https://img.shields.io/codecov/c/github/rsvim/rsvim/main" /></a>
   <!-- <a href="https://app.codacy.com/gh/rsvim/rsvim/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade"><img alt="codacy" src="https://img.shields.io/codacy/grade/1c6a3d21352c4f8bb84ff6c7e3ef0399/main" /></a> -->
   <a href="https://discord.gg/5KtRUCAByB"><img alt="push.yml" src="https://img.shields.io/discord/1220171472329379870?label=discord" /></a>
@@ -62,6 +62,7 @@ Roadmap and high-level design can be found in [RFC](https://github.com/rsvim/rfc
 If you like RSVIM, please consider sponsoring it. Your support encourages contributors and maintainers of this project, and other fees or efforts spent on it.
 
 - [GitHub Sponsor](https://github.com/sponsors/rsvim)
+- [Open Collective](https://opencollective.com/rsvim)
 
 ## License
 

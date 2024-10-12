@@ -126,34 +126,13 @@ impl EventLoop {
     let canvas = Canvas::to_arc(canvas);
 
     // UI Tree
-    let mut tree = Tree::new(canvas_size);
-    debug!("new, screen size: {:?}", canvas_size);
+    let tree = Tree::to_arc(Tree::new(canvas_size));
 
     // Buffers
-    let mut buffers = Buffers::new();
-    let buffer = Buffer::to_arc(Buffer::new());
-    buffers.insert(buffer.clone());
-    let buffers_arc = Buffers::to_arc(buffers);
-
-    let window_shape = IRect::new(
-      (0, 0),
-      (canvas_size.width() as isize, canvas_size.height() as isize),
-    );
-    let window = Window::new(window_shape, Arc::downgrade(&buffer), tree.global_options());
-    let window_id = window.id();
-    let window_node = TreeNode::Window(window);
-    tree.bounded_insert(&tree.root_id(), window_node);
-    debug!("new, insert window container: {:?}", window_id);
-
-    let cursor_shape = IRect::new((0, 0), (1, 1));
-    let cursor = Cursor::new(cursor_shape);
-    let cursor_node = TreeNode::Cursor(cursor);
-    tree.bounded_insert(&window_id, cursor_node);
-    let tree_arc = Tree::to_arc(tree);
+    let buffers = Buffers::to_arc(Buffers::new());
 
     // State
-    let state = State::default();
-    let state_arc = State::to_arc(state);
+    let state = State::to_arc(State::default());
 
     // Worker => master
     let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
@@ -216,9 +195,9 @@ impl EventLoop {
       js_runtime_recv_from_master,
       cli_opt.clone(),
       runtime_path.clone(),
-      tree_arc.clone(),
-      buffers_arc.clone(),
-      state_arc.clone(),
+      tree.clone(),
+      buffers.clone(),
+      state.clone(),
     );
 
     Ok(EventLoop {
@@ -227,9 +206,9 @@ impl EventLoop {
       cli_opt,
       runtime_path,
       canvas,
-      tree: tree_arc,
-      state: state_arc,
-      buffers: buffers_arc,
+      tree,
+      state,
+      buffers,
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
       detached_tracker,
@@ -242,6 +221,43 @@ impl EventLoop {
       js_runtime_tick_dispatcher,
       js_runtime_tick_queue,
     })
+  }
+
+  /// Initialize editor default window and buffer.
+  pub fn init_editor(&self) -> IoResult<()> {
+    // Create default buffer.
+    let buffer = Buffer::to_arc(Buffer::new());
+    self
+      .buffers
+      .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .insert(buffer.clone());
+
+    // Create default window.
+    let canvas_size = self
+      .canvas
+      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap()
+      .size();
+    let mut tree = self
+      .tree
+      .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap();
+    let tree_root_id = tree.root_id();
+    let window_shape = IRect::new(
+      (0, 0),
+      (canvas_size.width() as isize, canvas_size.height() as isize),
+    );
+    let window = Window::new(window_shape, Arc::downgrade(&buffer), tree.global_options());
+    let window_id = window.id();
+    let window_node = TreeNode::Window(window);
+    tree.bounded_insert(&tree_root_id, window_node);
+
+    let cursor_shape = IRect::new((0, 0), (1, 1));
+    let cursor = Cursor::new(cursor_shape);
+    let cursor_node = TreeNode::Cursor(cursor);
+    tree.bounded_insert(&window_id, cursor_node);
+    Ok(())
   }
 
   /// Initialize TUI.

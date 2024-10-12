@@ -114,5 +114,5 @@ pub fn set_break_at(
     .tree
     .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
     .unwrap()
-    .set_break_at(value);
+    .set_break_at(&value);
 }

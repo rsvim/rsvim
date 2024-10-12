@@ -50,6 +50,7 @@ fn main() -> IoResult<()> {
 
     // Initialize.
     event_loop.init_js_runtime()?;
+    event_loop.init_editor()?;
     event_loop.init_tui()?;
     event_loop.init_input_files()?;
 

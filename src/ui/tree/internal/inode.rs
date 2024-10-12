@@ -97,6 +97,66 @@ macro_rules! inode_generate_impl {
   };
 }
 
+/// Generate getter/setter for Inode, with 1-lifetime.
+#[macro_export]
+macro_rules! inode_generate_impl_1 {
+  ($struct_name:ident < $lt1:tt > , $base_name:ident) => {
+    impl<$lt1> Inodeable for $struct_name<$lt1> {
+      fn id(&self) -> InodeId {
+        self.$base_name.id()
+      }
+
+      fn depth(&self) -> &usize {
+        self.$base_name.depth()
+      }
+
+      fn depth_mut(&mut self) -> &mut usize {
+        self.$base_name.depth_mut()
+      }
+
+      fn zindex(&self) -> &usize {
+        self.$base_name.zindex()
+      }
+
+      fn zindex_mut(&mut self) -> &mut usize {
+        self.$base_name.zindex_mut()
+      }
+
+      fn shape(&self) -> &IRect {
+        self.$base_name.shape()
+      }
+
+      fn shape_mut(&mut self) -> &mut IRect {
+        self.$base_name.shape_mut()
+      }
+
+      fn actual_shape(&self) -> &U16Rect {
+        self.$base_name.actual_shape()
+      }
+
+      fn actual_shape_mut(&mut self) -> &mut U16Rect {
+        self.$base_name.actual_shape_mut()
+      }
+
+      fn enabled(&self) -> &bool {
+        self.$base_name.enabled()
+      }
+
+      fn enabled_mut(&mut self) -> &mut bool {
+        self.$base_name.enabled_mut()
+      }
+
+      fn visible(&self) -> &bool {
+        self.$base_name.visible()
+      }
+
+      fn visible_mut(&mut self) -> &mut bool {
+        self.$base_name.visible_mut()
+      }
+    }
+  };
+}
+
 /// Next unique UI widget ID.
 ///
 /// NOTE: Start from 1000001, so be different from buffer ID.
