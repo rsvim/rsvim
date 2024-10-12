@@ -100,6 +100,20 @@ pub struct WindowContent {
   options: WindowOptions,
 }
 
+impl WindowContent {
+  /// Make window content from buffer. The view starts from the first line.
+  pub fn new(shape: IRect, buffer: BufferWk, window_options: &WindowOptions) -> Self {
+    let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
+    WindowContent {
+      base: InodeBase::new(shape),
+      buffer,
+      view,
+      first_modified_line: Some(0),
+      options: window_options.clone(),
+    }
+  }
+}
+
 // Options {
 impl WindowContent {
   pub fn options(&self) -> &WindowOptions {
@@ -132,21 +146,8 @@ impl WindowContent {
 }
 // Options }
 
+// Buffer/View {
 impl WindowContent {
-  /// Make window content from buffer. The view starts from the first line.
-  pub fn new(shape: IRect, buffer: BufferWk, window_options: &WindowOptions) -> Self {
-    let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
-    WindowContent {
-      base: InodeBase::new(shape),
-      buffer,
-      view,
-      first_modified_line: Some(0),
-      options: window_options.clone(),
-    }
-  }
-
-  // Buffer/View {
-
   /// Get buffer reference.
   pub fn buffer(&self) -> BufferWk {
     self.buffer.clone()
@@ -212,11 +213,11 @@ impl WindowContent {
     self.view.end_column = Some(cend);
     self.view.start_column = Some(cend - self.base.actual_shape().width() as usize);
   }
+}
+// Buffer/View }
 
-  // Buffer/View }
-
-  // Modified {
-
+// Draw {
+impl WindowContent {
   /// Get the first modified line.
   pub fn first_modified_line(&self) -> &Option<usize> {
     &self.first_modified_line
@@ -236,8 +237,6 @@ impl WindowContent {
     };
     self.first_modified_line = Some(smaller_line);
   }
-
-  // Modified }
 
   /// Draw buffer from `start_line`
   pub fn _draw_from_start_line(
@@ -384,6 +383,7 @@ impl WindowContent {
     unimplemented!()
   }
 }
+// Draw }
 
 inode_generate_impl!(WindowContent, base);
 
