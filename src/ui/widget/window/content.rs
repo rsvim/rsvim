@@ -239,7 +239,7 @@ impl WindowContent {
   }
 
   /// Draw buffer from `start_line`
-  pub fn _draw_from_start_line(
+  pub fn _draw_from_top(
     &mut self,
     canvas: &mut Canvas,
     start_line: usize,
@@ -373,7 +373,7 @@ impl WindowContent {
   }
 
   /// Draw buffer from `end_line` in reverse order.
-  pub fn _draw_from_end_line(
+  pub fn _draw_from_bottom(
     &mut self,
     _canvas: &mut Canvas,
     _end_line: usize,
@@ -395,13 +395,13 @@ impl Widgetable for WindowContent {
         end_line: _,
         start_column: Some(start_column),
         end_column: Some(end_column),
-      } => self._draw_from_start_line(canvas, start_line, start_column, end_column),
+      } => self._draw_from_top(canvas, start_line, start_column, end_column),
       BufferView {
         start_line: _,
         end_line: Some(end_line),
         start_column: Some(start_column),
         end_column: Some(end_column),
-      } => self._draw_from_end_line(canvas, end_line, start_column, end_column),
+      } => self._draw_from_bottom(canvas, end_line, start_column, end_column),
       _ => {
         error!("Invalid view: {:?}", self.view);
         unreachable!("Invalid view")
@@ -451,7 +451,7 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_start_line1() {
+  fn _draw_from_top_default_opts1() {
     // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
@@ -473,7 +473,7 @@ mod tests {
     let canvas_size = U16Size::new(10, 10);
     let mut canvas = Canvas::new(canvas_size);
 
-    window_content._draw_from_start_line(&mut canvas, 0, 0, 10);
+    window_content._draw_from_top(&mut canvas, 0, 0, 10);
     let actual = canvas
       .frame()
       .raw_symbols_with_placeholder(" ".to_compact_string())
@@ -508,7 +508,7 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_start_line2() {
+  fn _draw_from_top_default_opts2() {
     // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
@@ -530,7 +530,7 @@ mod tests {
     let canvas_size = U16Size::new(27, 15);
     let mut canvas = Canvas::new(canvas_size);
 
-    window_content._draw_from_start_line(&mut canvas, 1, 0, 0);
+    window_content._draw_from_top(&mut canvas, 1, 0, 0);
     let actual = canvas
       .frame()
       .raw_symbols_with_placeholder(" ".to_compact_string())
@@ -566,7 +566,7 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_start_line3() {
+  fn _draw_from_top_default_opts3() {
     // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
@@ -580,7 +580,7 @@ mod tests {
     let canvas_size = U16Size::new(20, 18);
     let mut canvas = Canvas::new(canvas_size);
 
-    window_content._draw_from_start_line(&mut canvas, 0, 0, 0);
+    window_content._draw_from_top(&mut canvas, 0, 0, 0);
     let actual = canvas
       .frame()
       .raw_symbols_with_placeholder(" ".to_compact_string())
