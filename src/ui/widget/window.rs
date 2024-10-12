@@ -328,21 +328,14 @@ mod tests {
   use super::*;
 
   #[test]
-  pub fn window_options_builder() {
-    let mut builder = WindowLocalOptionsBuilder::default();
-    let options = builder.wrap(true).line_break(true).break_at(" ").build();
-    assert!(options.wrap());
-    assert!(options.line_break());
-    assert_eq!(options.break_at(), " ");
-    assert_eq!(options.break_at_regex().as_str(), " ");
-  }
-
-  #[test]
-  pub fn window_options() {
+  pub fn window_local_options() {
     let options = WindowLocalOptions::builder().build();
     assert!(options.wrap());
     assert!(!options.line_break());
-    assert_eq!(options.break_at(), defaults::win::BREAK_AT);
-    assert_eq!(options.break_at_regex().as_str(), defaults::win::BREAK_AT);
+
+    let mut builder = WindowLocalOptionsBuilder::default();
+    let options = builder.wrap(true).line_break(true).build();
+    assert!(options.wrap());
+    assert!(options.line_break());
   }
 }
