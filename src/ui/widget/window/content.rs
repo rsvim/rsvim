@@ -273,7 +273,7 @@ impl WindowContent {
         line_break: true,
         break_at: _,
         break_at_regex: _,
-      } => { /*Skip*/ }
+      } => debug!("_draw_from_top - wrap:true, line_break:true"),
     }
   }
 
