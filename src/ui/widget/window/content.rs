@@ -264,7 +264,6 @@ impl WindowContent {
   /// Implement the [`_draw_from_top`] with below window options:
   /// - [`warp`](WindowOptions::wrap) is `true`.
   /// - [`line_break`](WindowOptions::line_break) is `false`
-  /// - [`break_at`](WindowOptions::break_at) will not be used since 'line-break' is `false`.
   pub fn _draw_from_top_for_wrap_nolinebreak(
     &mut self,
     canvas: &mut Canvas,
@@ -410,8 +409,7 @@ impl WindowContent {
 
   /// Implement the [`_draw_from_top`] with below options:
   /// - [`warp`](WindowOptions::wrap) is `false`.
-  /// - [`line_break`](WindowOptions::line_break) and [`break_at`](WindowOptions::break_at) will
-  ///   not be used since 'wrap' is `false`.
+  /// - [`line_break`](WindowOptions::line_break) will not be used since 'wrap' is `false`.
   pub fn _draw_from_top_for_nowrap(
     &mut self,
     canvas: &mut Canvas,
@@ -550,7 +548,6 @@ impl WindowContent {
   /// Implement the [`_draw_from_top`] with below window options:
   /// - [`warp`](WindowOptions::wrap) is `true`.
   /// - [`line_break`](WindowOptions::line_break) is `true`.
-  /// - [`break_at`](WindowOptions::break_at).
   pub fn _draw_from_top_for_wrap_linebreak(
     &mut self,
     canvas: &mut Canvas,
