@@ -435,26 +435,26 @@ impl Tree {
   }
 
   pub fn wrap(&self) -> bool {
-    self.options.window_options.wrap
+    self.options.window_options.wrap()
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.options.window_options.wrap = value;
+    self.options.window_options.set_wrap(value);
   }
 
   pub fn line_break(&self) -> bool {
-    self.options.window_options.line_break
+    self.options.window_options.line_break()
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.options.window_options.line_break = value;
+    self.options.window_options.set_line_break(value);
   }
 
   pub fn breat_at(&self) -> &String {
     self.options.window_options.break_at()
   }
 
-  pub fn set_break_at(&mut self, value: String) {
+  pub fn set_break_at(&mut self, value: &str) {
     self.options.window_options.set_break_at(value);
   }
 

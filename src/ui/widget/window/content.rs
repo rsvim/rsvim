@@ -615,7 +615,7 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_top_default_opts1() {
+  fn _draw_from_top_for_nowrap1() {
     // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
@@ -672,7 +672,7 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_top_default_opts2() {
+  fn _draw_from_top_for_nowrap2() {
     // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
@@ -730,7 +730,7 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_top_default_opts3() {
+  fn _draw_from_top_for_nowrap3() {
     // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();

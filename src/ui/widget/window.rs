@@ -18,20 +18,9 @@ pub mod root;
 #[derive(Debug, Clone)]
 /// Window options.
 pub struct WindowOptions {
-  /// The 'wrap' option, also known as 'line-wrap', default to `true`.
-  /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
-  pub wrap: bool,
-
-  /// The 'line-break' option, also known as 'word-wrap', default to `false`.
-  /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
-  pub line_break: bool,
-
-  /// The 'break-at' option, default to `" ^I!@*-+;:,./?"`.
-  /// See: <https://vimhelp.org/options.txt.html#%27breakat%27>.
-  /// NOTE: This option represents the regex pattern to break word for 'line-break'.
+  wrap: bool,
+  line_break: bool,
   break_at: String,
-
-  // The build regex object for 'break_at'.
   break_at_regex: Regex,
 }
 
@@ -48,17 +37,69 @@ impl Default for WindowOptions {
 }
 
 impl WindowOptions {
+  /// The 'wrap' option, also known as 'line-wrap', default to `true`.
+  /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
+  pub fn wrap(&self) -> bool {
+    self.wrap
+  }
+
+  pub fn set_wrap(&mut self, value: bool) {
+    self.wrap = value;
+  }
+
+  /// The 'line-break' option, also known as 'word-wrap', default to `false`.
+  /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
+  pub fn line_break(&self) -> bool {
+    self.line_break
+  }
+
+  pub fn set_line_break(&mut self, value: bool) {
+    self.line_break = value;
+  }
+
+  /// The 'break-at' option, default to `" ^I!@*-+;:,./?"`.
+  /// See: <https://vimhelp.org/options.txt.html#%27breakat%27>.
+  /// NOTE: This option represents the regex pattern to break word for 'line-break'.
   pub fn break_at(&self) -> &String {
     &self.break_at
   }
 
-  pub fn set_break_at(&mut self, value: String) {
-    self.break_at = value.clone();
-    self.break_at_regex = Regex::new(&value).unwrap();
+  pub fn set_break_at(&mut self, value: &str) {
+    self.break_at = String::from(value);
+    self.break_at_regex = Regex::new(value).unwrap();
   }
 
+  // The build regex object for [`break_at`].
   pub fn break_at_regex(&self) -> &Regex {
     &self.break_at_regex
+  }
+}
+
+pub struct WindowOptionsBuilder {
+  wrap: bool,
+  line_break: bool,
+  break_at: String,
+}
+
+impl WindowOptionsBuilder {
+  pub fn with_wrap(&mut self, value: bool) -> &mut Self {
+    self.wrap = value;
+    self
+  }
+  pub fn with_line_break(&mut self, value: bool) -> &mut Self {
+    self.line_break = value;
+    self
+  }
+  pub fn with_break_at(&mut self, value: &str) -> &mut Self {
+    self.break_at = String::from(value);
+    self
+  }
+  pub fn build(&self) -> WindowOptions {
+    let mut opt = WindowOptions::default();
+    opt.set_wrap(self.wrap);
+    opt.set_line_break(self.line_break);
+    opt.set_break_at(&self.break_at);
+    opt
   }
 }
 
@@ -220,7 +261,7 @@ impl Window {
     self.options.break_at()
   }
 
-  pub fn set_break_at(&mut self, value: String) {
+  pub fn set_break_at(&mut self, value: &str) {
     self.options.set_break_at(value);
     self.update_window_content_options();
   }
