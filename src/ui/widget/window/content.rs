@@ -267,7 +267,7 @@ impl WindowContent {
         line_break: false,
         break_at: _,
         break_at_regex: _,
-      } => { /*Skip*/ }
+      } => self._draw_from_top_for_wrap_nolinebreak(canvas, start_line, start_column, end_column),
       WindowOptions {
         wrap: true,
         line_break: true,
@@ -292,10 +292,12 @@ impl WindowContent {
     let upos: U16Pos = actual_shape.min().into();
     let height = actual_shape.height();
     let width = actual_shape.width();
-    debug!(
-      "actual_shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
-      actual_shape, upos, height, width,
-    );
+
+    debug!("_draw_from_top_for_wrap_nolinebreak");
+    // debug!(
+    //   "actual_shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
+    //   actual_shape, upos, height, width,
+    // );
 
     // If window is zero-sized.
     if height == 0 || width == 0 {
@@ -310,15 +312,15 @@ impl WindowContent {
       .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
       .unwrap();
 
-    if let Some(line) = buffer.rope().get_line(start_line) {
-      debug!(
-        "buffer.get_line ({:?}):'{:?}'",
-        start_line,
-        rpslice2line(&line),
-      );
-    } else {
-      debug!("buffer.get_line ({:?}):None", start_line);
-    }
+    // if let Some(line) = buffer.rope().get_line(start_line) {
+    //   debug!(
+    //     "buffer.get_line ({:?}):'{:?}'",
+    //     start_line,
+    //     rpslice2line(&line),
+    //   );
+    // } else {
+    //   debug!("buffer.get_line ({:?}):None", start_line);
+    // }
 
     match buffer.rope().get_lines_at(start_line) {
       Some(mut buflines) => {
@@ -353,10 +355,10 @@ impl WindowContent {
                   if ch != '\n' {
                     let cell = Cell::from(ch);
                     let cell_upos = point!(x: col + upos.x(), y: row + upos.y());
-                    debug!(
-                      "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
-                      row, col, ch, cell_upos
-                    );
+                    // debug!(
+                    //   "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
+                    //   row, col, ch, cell_upos
+                    // );
                     canvas.frame_mut().set_cell(cell_upos, cell);
                   }
                   col += 1;
@@ -368,10 +370,10 @@ impl WindowContent {
               if row < height && col < width - 1 {
                 let cells_upos = point!(x: col + upos.x(), y: row + upos.y());
                 let cells_len = (width - col) as usize;
-                debug!(
-                  "2-row:{:?}, col:{:?}, cells upos:{:?}, cells len:{:?}",
-                  row, col, cells_upos, cells_len,
-                );
+                // debug!(
+                //   "2-row:{:?}, col:{:?}, cells upos:{:?}, cells len:{:?}",
+                //   row, col, cells_upos, cells_len,
+                // );
                 canvas
                   .frame_mut()
                   .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
@@ -383,10 +385,10 @@ impl WindowContent {
               // left parts of the window.
               let cells_upos = point!(x: upos.x(), y: row + upos.y());
               let cells_len = width as usize;
-              debug!(
-                "3-row:{:?}, cells upos:{:?}, cells len:{:?}",
-                row, cells_upos, cells_len,
-              );
+              // debug!(
+              //   "3-row:{:?}, cells upos:{:?}, cells len:{:?}",
+              //   row, cells_upos, cells_len,
+              // );
               canvas
                 .frame_mut()
                 .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
@@ -408,10 +410,10 @@ impl WindowContent {
           // There's no lines in the buffer, simply set the whole line to empty.
           let cells_upos = point!(x: upos.x(), y: row + upos.y());
           let cells_len = width as usize;
-          debug!(
-            "4-row:{:?}, cells upos:{:?}, cells len:{:?}",
-            row, cells_upos, cells_len,
-          );
+          // debug!(
+          //   "4-row:{:?}, cells upos:{:?}, cells len:{:?}",
+          //   row, cells_upos, cells_len,
+          // );
           canvas
             .frame_mut()
             .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
@@ -437,6 +439,8 @@ impl WindowContent {
     let upos: U16Pos = actual_shape.min().into();
     let height = actual_shape.height();
     let width = actual_shape.width();
+
+    debug!("_draw_from_top_for_nowrap");
     // debug!(
     //   "actual shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
     //   actual_shape, upos, height, width,
