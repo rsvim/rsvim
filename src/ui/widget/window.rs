@@ -18,18 +18,14 @@ pub mod root;
 
 #[derive(Debug, Clone)]
 /// Window options.
-pub struct WindowOptions {
+pub struct WindowLocalOptions {
   wrap: bool,
   line_break: bool,
-  break_at: String,
-  break_at_regex: Regex,
 }
 
-static OPTION_BREAK_AT: &str = " ^I!@*-+;:,./?";
-
-impl WindowOptions {
-  pub fn builder() -> WindowOptionsBuilder {
-    WindowOptionsBuilder::default()
+impl WindowLocalOptions {
+  pub fn builder() -> WindowLocalOptionsBuilder {
+    WindowLocalOptionsBuilder::default()
   }
 
   /// The 'wrap' option, also known as 'line-wrap', default to `true`.
@@ -51,33 +47,15 @@ impl WindowOptions {
   pub fn set_line_break(&mut self, value: bool) {
     self.line_break = value;
   }
-
-  /// The 'break-at' option, default to `" ^I!@*-+;:,./?"`.
-  /// See: <https://vimhelp.org/options.txt.html#%27breakat%27>.
-  /// NOTE: This option represents the regex pattern to break word for 'line-break'.
-  pub fn break_at(&self) -> &String {
-    &self.break_at
-  }
-
-  pub fn set_break_at(&mut self, value: &str) {
-    self.break_at = String::from(value);
-    self.break_at_regex = Regex::new(value).unwrap();
-  }
-
-  // The build regex object for [`break_at`].
-  pub fn break_at_regex(&self) -> &Regex {
-    &self.break_at_regex
-  }
 }
 
-/// The builder for [`WindowOptions`].
-pub struct WindowOptionsBuilder {
+/// The builder for [`WindowLocalOptions`].
+pub struct WindowLocalOptionsBuilder {
   wrap: bool,
   line_break: bool,
-  break_at: String,
 }
 
-impl WindowOptionsBuilder {
+impl WindowLocalOptionsBuilder {
   pub fn wrap(&mut self, value: bool) -> &mut Self {
     self.wrap = value;
     self
@@ -86,26 +64,19 @@ impl WindowOptionsBuilder {
     self.line_break = value;
     self
   }
-  pub fn break_at(&mut self, value: &str) -> &mut Self {
-    self.break_at = String::from(value);
-    self
-  }
-  pub fn build(&self) -> WindowOptions {
-    WindowOptions {
+  pub fn build(&self) -> WindowLocalOptions {
+    WindowLocalOptions {
       wrap: self.wrap,
       line_break: self.line_break,
-      break_at: self.break_at.clone(),
-      break_at_regex: Regex::new(&self.break_at).unwrap(),
     }
   }
 }
 
-impl Default for WindowOptionsBuilder {
+impl Default for WindowLocalOptionsBuilder {
   fn default() -> Self {
-    WindowOptionsBuilder {
+    WindowLocalOptionsBuilder {
       wrap: defaults::win::WRAP,
       line_break: defaults::win::LINE_BREAK,
-      break_at: String::from(defaults::win::BREAK_AT),
     }
   }
 }
@@ -121,12 +92,12 @@ pub struct Window {
 
   // Local window options.
   // By default these options will inherit from global options of UI.
-  options: WindowOptions,
+  options: WindowLocalOptions,
 }
 
 impl Window {
   pub fn new(shape: IRect, buffer: BufferWk, global_options: &GlobalOptions) -> Self {
-    let options = global_options.window_options.clone();
+    let options = global_options.window_local_options.clone();
 
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
@@ -237,11 +208,11 @@ impl Widgetable for Window {
 }
 
 impl Window {
-  pub fn options(&self) -> &WindowOptions {
+  pub fn options(&self) -> &WindowLocalOptions {
     &self.options
   }
 
-  pub fn set_options(&mut self, options: &WindowOptions) {
+  pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = options.clone();
     self.update_window_content_options();
   }
@@ -262,19 +233,6 @@ impl Window {
   pub fn set_line_break(&mut self, value: bool) {
     self.options.line_break = value;
     self.update_window_content_options();
-  }
-
-  pub fn break_at(&self) -> &String {
-    self.options.break_at()
-  }
-
-  pub fn set_break_at(&mut self, value: &str) {
-    self.options.set_break_at(value);
-    self.update_window_content_options();
-  }
-
-  pub fn break_at_regex(&self) -> &Regex {
-    self.options.break_at_regex()
   }
 
   fn update_window_content_options(&mut self) {
@@ -371,7 +329,7 @@ mod tests {
 
   #[test]
   pub fn window_options_builder() {
-    let mut builder = WindowOptionsBuilder::default();
+    let mut builder = WindowLocalOptionsBuilder::default();
     let options = builder.wrap(true).line_break(true).break_at(" ").build();
     assert!(options.wrap());
     assert!(options.line_break());
@@ -381,10 +339,10 @@ mod tests {
 
   #[test]
   pub fn window_options() {
-    let options = WindowOptions::builder().build();
+    let options = WindowLocalOptions::builder().build();
     assert!(options.wrap());
     assert!(!options.line_break());
-    assert_eq!(options.break_at(), OPTION_BREAK_AT);
-    assert_eq!(options.break_at_regex().as_str(), OPTION_BREAK_AT);
+    assert_eq!(options.break_at(), defaults::win::BREAK_AT);
+    assert_eq!(options.break_at_regex().as_str(), defaults::win::BREAK_AT);
   }
 }

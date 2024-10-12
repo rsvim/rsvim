@@ -3,10 +3,11 @@
 #![allow(dead_code)]
 
 use crate::cart::{IRect, U16Rect, U16Size};
+use crate::defaults;
 use crate::glovar;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut};
-use crate::ui::widget::window::WindowOptions;
+use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
 use parking_lot::RwLock;
@@ -114,14 +115,72 @@ impl Widgetable for TreeNode {
 #[derive(Debug, Clone)]
 /// Global options for UI.
 pub struct GlobalOptions {
-  /// Window options.
-  pub window_options: WindowOptions,
+  /// Window local options.
+  pub window_local_options: WindowLocalOptions,
+  /// Window global options.
+  pub window_global_options: WindowGlobalOptions,
 }
 
 impl Default for GlobalOptions {
   fn default() -> Self {
-    let window_options = WindowOptions::builder().build();
-    GlobalOptions { window_options }
+    let window_local_options = WindowLocalOptions::builder().build();
+    let window_global_options = WindowGlobalOptions::builder().build();
+    GlobalOptions {
+      window_local_options,
+      window_global_options,
+    }
+  }
+}
+
+#[derive(Debug, Clone)]
+/// Global options for UI.
+pub struct WindowGlobalOptions {
+  break_at: String,
+  break_at_regex: Regex,
+}
+
+impl WindowGlobalOptions {
+  pub fn builder() -> WindowGlobalOptionsBuilder {
+    WindowGlobalOptionsBuilder::default()
+  }
+
+  pub fn break_at(&self) -> &String {
+    &self.break_at
+  }
+
+  pub fn set_break_at(&mut self, value: &str) {
+    self.break_at = String::from(value);
+    self.break_at_regex = Regex::new(value).unwrap();
+  }
+
+  // The build regex object for [`break_at`].
+  pub fn break_at_regex(&self) -> &Regex {
+    &self.break_at_regex
+  }
+}
+
+pub struct WindowGlobalOptionsBuilder {
+  break_at: String,
+}
+
+impl WindowGlobalOptionsBuilder {
+  pub fn break_at(&mut self, value: &str) -> &mut Self {
+    self.break_at = String::from(value);
+    self
+  }
+  pub fn build(&self) -> WindowGlobalOptions {
+    WindowGlobalOptions {
+      break_at: self.break_at.clone(),
+      break_at_regex: Regex::new(&self.break_at).unwrap(),
+    }
+  }
+}
+
+impl Default for WindowGlobalOptionsBuilder {
+  fn default() -> Self {
+    WindowGlobalOptionsBuilder {
+      break_at: String::from(defaults::win::BREAK_AT),
+    }
   }
 }
 
@@ -442,31 +501,31 @@ impl Tree {
   }
 
   pub fn wrap(&self) -> bool {
-    self.options.window_options.wrap()
+    self.options.window_local_options.wrap()
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.options.window_options.set_wrap(value);
+    self.options.window_local_options.set_wrap(value);
   }
 
   pub fn line_break(&self) -> bool {
-    self.options.window_options.line_break()
+    self.options.window_local_options.line_break()
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.options.window_options.set_line_break(value);
+    self.options.window_local_options.set_line_break(value);
   }
 
   pub fn breat_at(&self) -> &String {
-    self.options.window_options.break_at()
+    self.options.window_global_options.break_at()
   }
 
   pub fn set_break_at(&mut self, value: &str) {
-    self.options.window_options.set_break_at(value);
+    self.options.window_global_options.set_break_at(value);
   }
 
   pub fn break_at_regex(&self) -> &Regex {
-    self.options.window_options.break_at_regex()
+    self.options.window_global_options.break_at_regex()
   }
 
   // Global options }

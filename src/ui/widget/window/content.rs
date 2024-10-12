@@ -6,7 +6,7 @@ use crate::glovar;
 use crate::inode_generate_impl;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
-use crate::ui::widget::window::WindowOptions;
+use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::Widgetable;
 
 use crossterm::style::{Attributes, Color};
@@ -97,12 +97,12 @@ pub struct WindowContent {
   first_modified_line: Option<usize>,
 
   // Options
-  options: WindowOptions,
+  options: WindowLocalOptions,
 }
 
 impl WindowContent {
   /// Make window content from buffer. The view starts from the first line.
-  pub fn new(shape: IRect, buffer: BufferWk, window_options: &WindowOptions) -> Self {
+  pub fn new(shape: IRect, buffer: BufferWk, window_options: &WindowLocalOptions) -> Self {
     let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
     WindowContent {
       base: InodeBase::new(shape),
@@ -116,11 +116,11 @@ impl WindowContent {
 
 // Options {
 impl WindowContent {
-  pub fn options(&self) -> &WindowOptions {
+  pub fn options(&self) -> &WindowLocalOptions {
     &self.options
   }
 
-  pub fn set_options(&mut self, options: &WindowOptions) {
+  pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = options.clone();
   }
 
@@ -132,16 +132,6 @@ impl WindowContent {
   /// Get 'line-break' option.
   pub fn link_break(&self) -> bool {
     self.options.line_break
-  }
-
-  /// Get 'break-at' option.
-  pub fn break_at(&self) -> &String {
-    self.options.break_at()
-  }
-
-  /// Get 'break-at' option in regex.
-  pub fn break_at_regex(&self) -> &Regex {
-    self.options.break_at_regex()
   }
 }
 // Options }
@@ -256,23 +246,17 @@ impl WindowContent {
     end_column: usize,
   ) {
     match &self.options {
-      WindowOptions {
+      WindowLocalOptions {
         wrap: false,
         line_break: _,
-        break_at: _,
-        break_at_regex: _,
       } => self._draw_from_top_for_nowrap(canvas, start_line, start_column, end_column),
-      WindowOptions {
+      WindowLocalOptions {
         wrap: true,
         line_break: false,
-        break_at: _,
-        break_at_regex: _,
       } => self._draw_from_top_for_wrap_nolinebreak(canvas, start_line, start_column, end_column),
-      WindowOptions {
+      WindowLocalOptions {
         wrap: true,
         line_break: true,
-        break_at: _,
-        break_at_regex: _,
       } => self._draw_from_top_for_wrap_linebreak(canvas, start_line, start_column, end_column),
     }
   }
@@ -803,7 +787,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
-    let window_options = WindowOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (10, 10));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -860,7 +844,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
-    let window_options = WindowOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (27, 15));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -910,7 +894,7 @@ mod tests {
     // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
-    let window_options = WindowOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (20, 18));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -966,7 +950,7 @@ mod tests {
       "s several ",
     ];
 
-    let window_options = WindowOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (10, 10));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -1034,7 +1018,7 @@ mod tests {
       " cases:                    ",
     ];
 
-    let window_options = WindowOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (27, 15));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -1076,7 +1060,7 @@ mod tests {
     // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
-    let window_options = WindowOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (20, 18));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -1132,7 +1116,7 @@ mod tests {
       "s several ",
     ];
 
-    let window_options = WindowOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (10, 10));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -1200,7 +1184,7 @@ mod tests {
       " cases:                    ",
     ];
 
-    let window_options = WindowOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (27, 15));
     let mut window_content = WindowContent::new(
       window_content_shape,
@@ -1242,7 +1226,7 @@ mod tests {
     // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
-    let window_options = WindowOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
     let window_content_shape = IRect::new((0, 0), (20, 18));
     let mut window_content = WindowContent::new(
       window_content_shape,
