@@ -243,6 +243,170 @@ impl WindowContent {
     &mut self,
     canvas: &mut Canvas,
     start_line: usize,
+    start_column: usize,
+    end_column: usize,
+  ) {
+    match &self.options {
+      WindowOptions {
+        wrap: false,
+        line_break: _,
+        break_at: _,
+        break_at_regex: _,
+      } => self._draw_from_top_for_nowrap(canvas, start_line, start_column, end_column),
+      WindowOptions {
+        wrap: true,
+        line_break: false,
+        break_at: _,
+        break_at_regex: _,
+      } => { /*Skip*/ }
+      WindowOptions {
+        wrap: true,
+        line_break: true,
+        break_at: _,
+        break_at_regex: _,
+      } => { /*Skip*/ }
+    }
+  }
+
+  /// Draw buffer from `start_line`
+  pub fn _draw_from_top_for_wrap_nolinebreak(
+    &mut self,
+    canvas: &mut Canvas,
+    start_line: usize,
+    _start_column: usize,
+    _end_column: usize,
+  ) {
+    let actual_shape = self.actual_shape();
+    let upos: U16Pos = actual_shape.min().into();
+    let height = actual_shape.height();
+    let width = actual_shape.width();
+    // debug!(
+    //   "actual shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
+    //   actual_shape, upos, height, width,
+    // );
+
+    // If window is zero-sized.
+    if height == 0 || width == 0 {
+      return;
+    }
+
+    // Get buffer arc pointer
+    let buffer = self.buffer.upgrade().unwrap();
+
+    // Lock buffer for read
+    let buffer = buffer
+      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .unwrap();
+
+    // if let Some(line) = buffer.rope().get_line(start_line) {
+    //   debug!(
+    //     "buffer.get_line ({:?}):'{:?}'",
+    //     start_line,
+    //     rslice2line(&line),
+    //   );
+    // } else {
+    //   debug!("buffer.get_line ({:?}):None", start_line);
+    // }
+
+    match buffer.rope().get_lines_at(start_line) {
+      Some(mut buflines) => {
+        // The `start_line` is inside the buffer.
+        // Render the lines from `start_line` till the end of the buffer or the window widget.
+
+        // The first `row` (0) in the window maps to the `start_line` in the buffer.
+        let mut row = 0;
+
+        while row < height {
+          match buflines.next() {
+            Some(line) => {
+              // For the row in current window widget, if has the line in buffer.
+              let mut col = 0_u16;
+
+              for chunk in line.chunks() {
+                if col >= width {
+                  break;
+                }
+                for ch in chunk.chars() {
+                  if col >= width {
+                    break;
+                  }
+                  if ch != '\n' {
+                    let cell = Cell::from(ch);
+                    let cell_upos = point!(x: col + upos.x(), y: row + upos.y());
+                    // debug!(
+                    //   "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
+                    //   row, col, ch, cell_upos
+                    // );
+                    canvas.frame_mut().set_cell(cell_upos, cell);
+                  }
+                  col += 1;
+                }
+              }
+
+              // The line doesn't fill the whole row in current widget, fill left parts with empty
+              // cells.
+              if col < width - 1 {
+                let cells_upos = point!(x: col + upos.x(), y: row + upos.y());
+                let cells_len = (width - col) as usize;
+                // debug!(
+                //   "2-row:{:?}, col:{:?}, cells upos:{:?}, cells len:{:?}",
+                //   row, col, cells_upos, cells_len,
+                // );
+                canvas
+                  .frame_mut()
+                  .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
+                  .unwrap();
+              }
+            }
+            None => {
+              // If there's no more lines in the buffer, simply set the whole line to empty for
+              // left parts of the window.
+              let cells_upos = point!(x: upos.x(), y: row + upos.y());
+              let cells_len = width as usize;
+              // debug!(
+              //   "3-row:{:?}, cells upos:{:?}, cells len:{:?}",
+              //   row, cells_upos, cells_len,
+              // );
+              canvas
+                .frame_mut()
+                .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
+                .unwrap();
+            }
+          }
+          // Iterate to next row.
+          row += 1;
+        }
+      }
+      None => {
+        // The `start_line` is outside of the buffer.
+        // Render the whole window contents as empty cells.
+
+        // The first `row` (0) in the window maps to the `start_line` in the buffer.
+        let mut row = 0;
+
+        while row < height {
+          // There's no lines in the buffer, simply set the whole line to empty.
+          let cells_upos = point!(x: upos.x(), y: row + upos.y());
+          let cells_len = width as usize;
+          // debug!(
+          //   "4-row:{:?}, cells upos:{:?}, cells len:{:?}",
+          //   row, cells_upos, cells_len,
+          // );
+          canvas
+            .frame_mut()
+            .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
+            .unwrap();
+          row += 1;
+        }
+      }
+    }
+  }
+
+  /// Draw buffer from `start_line`
+  pub fn _draw_from_top_for_nowrap(
+    &mut self,
+    canvas: &mut Canvas,
+    start_line: usize,
     _start_column: usize,
     _end_column: usize,
   ) {
