@@ -100,7 +100,6 @@ Please setup your development environment with:
 
 - [Node.js](https://nodejs.org/) &ge; v18.x.
 - Latest stable [Typescript](https://www.typescriptlang.org/) compiler. Please install with `npm install -g typescript`, run `tsc --version` see if the installation is successful.
-- Install [typedoc](https://typedoc.org/) for API documentation, please install with `npm install`.
 
 To develop code, please setup with:
 
