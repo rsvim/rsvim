@@ -290,37 +290,37 @@ impl WindowContent {
           match buflines.next() {
             Some(line) => {
               // For the row in current window widget, if has the line in buffer.
-              let mut idx = 0_u16;
+              let mut col = 0_u16;
 
               for chunk in line.chunks() {
-                if idx >= width {
+                if col >= width {
                   break;
                 }
                 for ch in chunk.chars() {
-                  if idx >= width {
+                  if col >= width {
                     break;
                   }
                   if ch != '\n' {
                     let cell = Cell::from(ch);
-                    let cell_upos = point!(x: idx + upos.x(), y: row + upos.y());
+                    let cell_upos = point!(x: col + upos.x(), y: row + upos.y());
                     // debug!(
-                    //   "1-row:{:?}, idx:{:?}, ch:{:?}, cell upos:{:?}",
-                    //   row, idx, ch, cell_upos
+                    //   "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
+                    //   row, col, ch, cell_upos
                     // );
                     canvas.frame_mut().set_cell(cell_upos, cell);
                   }
-                  idx += 1;
+                  col += 1;
                 }
               }
 
               // The line doesn't fill the whole row in current widget, fill left parts with empty
               // cells.
-              if idx < width - 1 {
-                let cells_upos = point!(x: idx + upos.x(), y: row + upos.y());
-                let cells_len = (width - idx) as usize;
+              if col < width - 1 {
+                let cells_upos = point!(x: col + upos.x(), y: row + upos.y());
+                let cells_len = (width - col) as usize;
                 // debug!(
-                //   "2-row:{:?}, idx:{:?}, cells upos:{:?}, cells len:{:?}",
-                //   row, idx, cells_upos, cells_len,
+                //   "2-row:{:?}, col:{:?}, cells upos:{:?}, cells len:{:?}",
+                //   row, col, cells_upos, cells_len,
                 // );
                 canvas
                   .frame_mut()
