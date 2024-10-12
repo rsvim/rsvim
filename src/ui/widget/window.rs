@@ -24,6 +24,8 @@ pub struct WindowOptions {
   break_at_regex: Regex,
 }
 
+static OPTION_BREAK_AT: &str = " ^I!@*-+;:,./?";
+
 impl WindowOptions {
   pub fn builder() -> WindowOptionsBuilder {
     WindowOptionsBuilder::default()
@@ -100,9 +102,12 @@ impl WindowOptionsBuilder {
 impl Default for WindowOptionsBuilder {
   fn default() -> Self {
     WindowOptionsBuilder {
+      // Defaults to `true`.
       wrap: true,
+      // Defaults to `false`.
       line_break: false,
-      break_at: String::from(" ^I!@*-+;:,./?"),
+      // Defaults to `" ^I!@*-+;:,./?"`.
+      break_at: String::from(OPTION_BREAK_AT),
     }
   }
 }
@@ -359,5 +364,29 @@ impl Widgetable for WindowNode {
       WindowNode::WindowRootContainer(w) => w.draw(canvas),
       WindowNode::WindowContent(w) => w.draw(canvas),
     }
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  pub fn window_options_builder() {
+    let mut builder = WindowOptionsBuilder::default();
+    let options = builder.wrap(true).line_break(true).break_at(" ").build();
+    assert!(options.wrap());
+    assert!(options.line_break());
+    assert_eq!(options.break_at(), " ");
+    assert_eq!(options.break_at_regex().as_str(), " ");
+  }
+
+  #[test]
+  pub fn window_options() {
+    let options = WindowOptions::builder().build();
+    assert!(options.wrap());
+    assert!(!options.line_break());
+    assert_eq!(options.break_at(), OPTION_BREAK_AT);
+    assert_eq!(options.break_at_regex().as_str(), OPTION_BREAK_AT);
   }
 }
