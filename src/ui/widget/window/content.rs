@@ -520,8 +520,13 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
+    let window_options = WindowOptions::default();
     let window_content_shape = IRect::new((0, 0), (27, 15));
-    let mut window_content = WindowContent::new(window_content_shape, Arc::downgrade(&buffer));
+    let mut window_content = WindowContent::new(
+      window_content_shape,
+      Arc::downgrade(&buffer),
+      &window_options,
+    );
     let canvas_size = U16Size::new(27, 15);
     let mut canvas = Canvas::new(canvas_size);
 
@@ -565,8 +570,13 @@ mod tests {
     // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
+    let window_options = WindowOptions::default();
     let window_content_shape = IRect::new((0, 0), (20, 18));
-    let mut window_content = WindowContent::new(window_content_shape, Arc::downgrade(&buffer));
+    let mut window_content = WindowContent::new(
+      window_content_shape,
+      Arc::downgrade(&buffer),
+      &window_options,
+    );
     let canvas_size = U16Size::new(20, 18);
     let mut canvas = Canvas::new(canvas_size);
 
