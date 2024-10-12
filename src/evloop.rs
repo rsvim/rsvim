@@ -223,8 +223,8 @@ impl EventLoop {
     })
   }
 
-  /// Initialize vim default window and buffer.
-  pub fn init_defaults(&self) -> IoResult<()> {
+  /// Initialize editor default window and buffer.
+  pub fn init_editor(&self) -> IoResult<()> {
     // Create default buffer.
     let buffer = Buffer::to_arc(Buffer::new());
     self
