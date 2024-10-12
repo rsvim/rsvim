@@ -2,6 +2,7 @@
 
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Rect};
+use crate::defaults;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::tree::GlobalOptions;
@@ -102,12 +103,9 @@ impl WindowOptionsBuilder {
 impl Default for WindowOptionsBuilder {
   fn default() -> Self {
     WindowOptionsBuilder {
-      // Defaults to `true`.
-      wrap: true,
-      // Defaults to `false`.
-      line_break: false,
-      // Defaults to `" ^I!@*-+;:,./?"`.
-      break_at: String::from(OPTION_BREAK_AT),
+      wrap: defaults::win::WRAP,
+      line_break: defaults::win::LINE_BREAK,
+      break_at: String::from(defaults::win::BREAK_AT),
     }
   }
 }
