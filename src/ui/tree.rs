@@ -111,11 +111,18 @@ impl Widgetable for TreeNode {
   }
 }
 
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone)]
 /// Global options for UI.
 pub struct GlobalOptions {
   /// Window options.
   pub window_options: WindowOptions,
+}
+
+impl Default for GlobalOptions {
+  fn default() -> Self {
+    let window_options = WindowOptions::builder().build();
+    GlobalOptions { window_options }
+  }
 }
 
 #[derive(Debug, Clone)]
