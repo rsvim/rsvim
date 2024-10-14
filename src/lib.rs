@@ -3,6 +3,7 @@
 pub mod buf;
 pub mod cart;
 pub mod cli;
+pub mod defaults;
 pub mod error;
 pub mod evloop;
 pub mod glovar;
