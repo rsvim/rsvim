@@ -14,7 +14,6 @@ pub use crate::ui::tree::opt::{GlobalOptions, WindowGlobalOptions, WindowGlobalO
 use parking_lot::RwLock;
 use regex::Regex;
 use std::collections::BTreeSet;
-use std::ptr::NonNull;
 use std::sync::{Arc, Weak};
 // use tracing::debug;
 
@@ -465,13 +464,16 @@ impl Tree {
   /// Draw the widget tree to canvas.
   pub fn draw(&mut self, canvas: CanvasArc) {
     let mut canvas = canvas.try_write_for(glovar::MUTEX_TIMEOUT()).unwrap();
-    unsafe {
-      let mut raw_self = NonNull::new(self as *mut Tree).unwrap();
-      let global_options = raw_self.as_ref().global_options();
-      for node in raw_self.as_mut().base.iter_mut() {
-        // debug!("draw node:{:?}", node);
-        node.draw(&mut canvas, global_options);
-      }
+
+    // NOTE: Fix multiple `mut` references on `self`.
+    // See splitting borrows: https://doc.rust-lang.org/nomicon/borrow-splitting.html.
+
+    let self_ref = &mut *self;
+    let base_ref = &mut self_ref.base;
+    let global_options = &self_ref.options;
+    for node in base_ref.iter_mut() {
+      // debug!("draw node:{:?}", node);
+      node.draw(&mut canvas, global_options);
     }
   }
 
