@@ -20,6 +20,7 @@ pub use crate::ui::canvas::frame::cursor::{
 pub use crate::ui::canvas::frame::Frame;
 
 pub mod frame;
+pub mod internal;
 
 #[derive(Debug, Clone)]
 /// Logical canvas.
@@ -135,7 +136,7 @@ impl Canvas {
     // Save current frame.
     self.prev_frame = self.frame.clone();
     // Reset the `dirty` fields.
-    self.frame.reset_dirty();
+    self.frame.reset_dirty_rows();
   }
 
   /// Shade cursor and append results into shader vector.
