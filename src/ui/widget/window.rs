@@ -635,7 +635,42 @@ impl Window {
 
 impl Widgetable for Window {
   fn draw(&mut self, canvas: &mut Canvas) {
-    // Do nothing.
+    // Preprocessing {
+    unsafe {
+      let mut raw_self = NonNull::new(self as *mut Window).unwrap();
+      match raw_self
+        .as_mut()
+        .base
+        .node_mut(&raw_self.as_ref().content_id)
+        .unwrap()
+      {
+        WindowNode::WindowContent(ref mut content) => match self.view {
+          BufferView {
+            start_line: Some(start_line),
+            end_line: _,
+            start_column: Some(start_column),
+            end_column: Some(end_column),
+          } => raw_self
+            .as_mut()
+            ._draw_from_top(content, start_line, start_column, end_column),
+          BufferView {
+            start_line: _,
+            end_line: Some(end_line),
+            start_column: Some(start_column),
+            end_column: Some(end_column),
+          } => raw_self
+            .as_mut()
+            ._draw_from_bottom(content, end_line, start_column, end_column),
+          _ => {
+            error!("Invalid buffer view: {:?}", self.view);
+            unreachable!("Invalid buffer view")
+          }
+        },
+        _ => unreachable!("Failed to query window content node"),
+      }
+    }
+    // Preprocessing }
+
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
       node.draw(canvas);
