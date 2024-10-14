@@ -2,6 +2,7 @@
 
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Rect};
+use crate::defaults;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::tree::GlobalOptions;
@@ -23,8 +24,6 @@ pub struct WindowOptions {
   break_at: String,
   break_at_regex: Regex,
 }
-
-static OPTION_BREAK_AT: &str = " ^I!@*-+;:,./?";
 
 impl WindowOptions {
   pub fn builder() -> WindowOptionsBuilder {
@@ -103,11 +102,11 @@ impl Default for WindowOptionsBuilder {
   fn default() -> Self {
     WindowOptionsBuilder {
       // Defaults to `true`.
-      wrap: true,
+      wrap: defaults::win::WRAP,
       // Defaults to `false`.
-      line_break: false,
+      line_break: defaults::win::LINE_BREAK,
       // Defaults to `" ^I!@*-+;:,./?"`.
-      break_at: String::from(OPTION_BREAK_AT),
+      break_at: String::from(defaults::win::BREAK_AT),
     }
   }
 }
@@ -386,7 +385,7 @@ mod tests {
     let options = WindowOptions::builder().build();
     assert!(options.wrap());
     assert!(!options.line_break());
-    assert_eq!(options.break_at(), OPTION_BREAK_AT);
-    assert_eq!(options.break_at_regex().as_str(), OPTION_BREAK_AT);
+    assert_eq!(options.break_at(), defaults::win::BREAK_AT);
+    assert_eq!(options.break_at_regex().as_str(), defaults::win::BREAK_AT);
   }
 }
