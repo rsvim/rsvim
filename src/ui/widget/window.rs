@@ -10,6 +10,9 @@ use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
 use crate::{defaults, glovar};
 
+// Re-export
+pub use crate::ui::widget::window::opt::{WindowLocalOptions, WindowOptionsBuilder};
+
 use crossterm::style::{Attributes, Color};
 use geo::point;
 use regex::Regex;
@@ -21,6 +24,7 @@ use std::time::Duration;
 use tracing::{debug, error};
 
 pub mod content;
+pub mod opt;
 pub mod root;
 
 #[derive(Debug, Copy, Clone, Default)]
@@ -49,101 +53,6 @@ impl BufferView {
       end_line,
       start_column,
       end_column,
-    }
-  }
-}
-
-#[derive(Debug, Clone)]
-/// Window options.
-pub struct WindowLocalOptions {
-  wrap: bool,
-  line_break: bool,
-  break_at: String,
-  break_at_regex: Regex,
-}
-
-impl WindowLocalOptions {
-  pub fn builder() -> WindowOptionsBuilder {
-    WindowOptionsBuilder::default()
-  }
-
-  /// The 'wrap' option, also known as 'line-wrap', default to `true`.
-  /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
-  pub fn wrap(&self) -> bool {
-    self.wrap
-  }
-
-  pub fn set_wrap(&mut self, value: bool) {
-    self.wrap = value;
-  }
-
-  /// The 'line-break' option, also known as 'word-wrap', default to `false`.
-  /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
-  pub fn line_break(&self) -> bool {
-    self.line_break
-  }
-
-  pub fn set_line_break(&mut self, value: bool) {
-    self.line_break = value;
-  }
-
-  /// The 'break-at' option, default to `" ^I!@*-+;:,./?"`.
-  /// See: <https://vimhelp.org/options.txt.html#%27breakat%27>.
-  /// NOTE: This option represents the regex pattern to break word for 'line-break'.
-  pub fn break_at(&self) -> &String {
-    &self.break_at
-  }
-
-  pub fn set_break_at(&mut self, value: &str) {
-    self.break_at = String::from(value);
-    self.break_at_regex = Regex::new(value).unwrap();
-  }
-
-  // The build regex object for [`break_at`].
-  pub fn break_at_regex(&self) -> &Regex {
-    &self.break_at_regex
-  }
-}
-
-/// The builder for [`WindowOptions`].
-pub struct WindowOptionsBuilder {
-  wrap: bool,
-  line_break: bool,
-  break_at: String,
-}
-
-impl WindowOptionsBuilder {
-  pub fn wrap(&mut self, value: bool) -> &mut Self {
-    self.wrap = value;
-    self
-  }
-  pub fn line_break(&mut self, value: bool) -> &mut Self {
-    self.line_break = value;
-    self
-  }
-  pub fn break_at(&mut self, value: &str) -> &mut Self {
-    self.break_at = String::from(value);
-    self
-  }
-  pub fn build(&self) -> WindowLocalOptions {
-    WindowLocalOptions {
-      wrap: self.wrap,
-      line_break: self.line_break,
-      break_at: self.break_at.clone(),
-      break_at_regex: Regex::new(&self.break_at).unwrap(),
-    }
-  }
-}
-
-impl Default for WindowOptionsBuilder {
-  fn default() -> Self {
-    WindowOptionsBuilder {
-      // Defaults to `true`.
-      wrap: defaults::win::WRAP,
-      // Defaults to `false`.
-      line_break: defaults::win::LINE_BREAK,
-      // Defaults to `" ^I!@*-+;:,./?"`.
-      break_at: String::from(defaults::win::BREAK_AT),
     }
   }
 }
@@ -689,32 +598,24 @@ impl Window {
   }
 
   pub fn wrap(&self) -> bool {
-    self.options.wrap
+    self.options.wrap()
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.options.wrap = value;
+    self.options.set_wrap(value);
   }
 
   pub fn line_break(&self) -> bool {
-    self.options.line_break
+    self.options.line_break()
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.options.line_break = value;
+    self.options.set_line_break(value);
   }
 
-  pub fn break_at(&self) -> &String {
-    self.options.break_at()
-  }
-
-  pub fn set_break_at(&mut self, value: &str) {
-    self.options.set_break_at(value);
-  }
-
-  pub fn break_at_regex(&self) -> &Regex {
-    self.options.break_at_regex()
-  }
+  // pub fn break_at(&self) -> &String {}
+  //
+  // pub fn break_at_regex(&self) -> &Regex {}
 }
 // Options }
 
@@ -889,22 +790,6 @@ mod tests {
 
   #[allow(dead_code)]
   static INIT: Once = Once::new();
-
-  #[test]
-  pub fn window_local_options1() {
-    let mut builder = WindowOptionsBuilder::default();
-    let options = builder.wrap(true).line_break(true).break_at(" ").build();
-    assert!(options.wrap());
-    assert!(options.line_break());
-    assert_eq!(options.break_at(), " ");
-    assert_eq!(options.break_at_regex().as_str(), " ");
-
-    let options = WindowLocalOptions::builder().build();
-    assert!(options.wrap());
-    assert!(!options.line_break());
-    assert_eq!(options.break_at(), defaults::win::BREAK_AT);
-    assert_eq!(options.break_at_regex().as_str(), defaults::win::BREAK_AT);
-  }
 
   fn make_buffer_from_file(filename: String) -> BufferArc {
     let rop: Rope = Rope::from_reader(BufReader::new(File::open(filename).unwrap())).unwrap();

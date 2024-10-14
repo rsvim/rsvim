@@ -6,8 +6,10 @@ use crate::cart::{IRect, U16Rect, U16Size};
 use crate::glovar;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut};
-use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
+
+// Re-export
+pub use crate::ui::tree::opt::{GlobalOptions, WindowGlobalOptions, WindowGlobalOptionsBuilder};
 
 use parking_lot::RwLock;
 use regex::Regex;
@@ -16,6 +18,7 @@ use std::sync::{Arc, Weak};
 use tracing::debug;
 
 pub mod internal;
+pub mod opt;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
@@ -106,21 +109,6 @@ impl Widgetable for TreeNode {
       TreeNode::RootContainer(w) => w.draw(canvas),
       TreeNode::Window(w) => w.draw(canvas),
       TreeNode::Cursor(w) => w.draw(canvas),
-    }
-  }
-}
-
-#[derive(Debug, Clone)]
-/// Global options for UI.
-pub struct GlobalOptions {
-  /// Window local options.
-  pub window_local_options: WindowLocalOptions,
-}
-
-impl Default for GlobalOptions {
-  fn default() -> Self {
-    GlobalOptions {
-      window_local_options: WindowLocalOptions::builder().build(),
     }
   }
 }
@@ -458,15 +446,15 @@ impl Tree {
   }
 
   pub fn breat_at(&self) -> &String {
-    self.options.window_local_options.break_at()
+    self.options.window_global_options.break_at()
   }
 
   pub fn set_break_at(&mut self, value: &str) {
-    self.options.window_local_options.set_break_at(value);
+    self.options.window_global_options.set_break_at(value);
   }
 
   pub fn break_at_regex(&self) -> &Regex {
-    self.options.window_local_options.break_at_regex()
+    self.options.window_global_options.break_at_regex()
   }
 
   // Global options }
