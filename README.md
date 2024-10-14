@@ -6,7 +6,7 @@
 The VIM editor reinvented in Rust+TypeScript.
 </p>
 
-<p>
+<p align="center">
   <a href="https://crates.io/crates/rsvim"><img alt="push.yml" src="https://img.shields.io/crates/v/rsvim" /></a>
   <a href="https://docs.rs/rsvim/latest/rsvim/"><img alt="push.yml" src="https://img.shields.io/docsrs/rsvim?label=docs.rs" /></a>
   <a href="https://github.com/rsvim/rsvim/actions/workflows/release.yml"><img alt="release.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml" /></a>
