@@ -14,7 +14,6 @@ use parking_lot::RwLock;
 use regex::Regex;
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
-use std::time::Duration;
 use tracing::debug;
 
 pub mod internal;
@@ -534,9 +533,7 @@ impl Tree {
 
   /// Draw the widget tree to canvas.
   pub fn draw(&mut self, canvas: CanvasArc) {
-    let mut canvas = canvas
-      .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap();
+    let mut canvas = canvas.try_write_for(glovar::MUTEX_TIMEOUT()).unwrap();
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
       node.draw(&mut canvas);

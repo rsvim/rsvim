@@ -7,7 +7,6 @@ use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
 
 use ropey::{Rope, RopeBuilder};
-use std::time::Duration;
 use tokio::fs;
 use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
@@ -43,12 +42,12 @@ pub async fn edit_default_file(
 
             // For the first buffer, append to the **default** buffer.
             buffers
-              .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+              .try_read_for(glovar::MUTEX_TIMEOUT())
               .unwrap()
               .first_key_value()
               .unwrap()
               .1
-              .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+              .try_write_for(glovar::MUTEX_TIMEOUT())
               .unwrap()
               .rope_mut()
               .append(into_rope(&buf, n));
@@ -110,7 +109,7 @@ pub async fn edit_other_files(
         // Create new buffer
         let buffer = Buffer::to_arc(Buffer::from(Rope::new()));
         buffers
-          .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+          .try_write_for(glovar::MUTEX_TIMEOUT())
           .unwrap()
           .insert(buffer.clone());
 
@@ -120,7 +119,7 @@ pub async fn edit_other_files(
               debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
               buffer
-                .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+                .try_write_for(glovar::MUTEX_TIMEOUT())
                 .unwrap()
                 .rope_mut()
                 .append(into_rope(&buf, n));

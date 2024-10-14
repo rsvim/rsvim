@@ -5,24 +5,30 @@
 use std::env;
 use std::path::PathBuf;
 use std::sync::OnceLock;
+use std::time::Duration;
 
 use crate::glovar::path_config::PathConfig;
 
 pub mod path_config;
 
-/// Mutex locking timeout, by default is [`u64::MAX`].
+/// Mutex locking timeout in seconds, by default is [`u64::MAX`].
 ///
-/// NOTE: This constant can be configured through `RSVIM_MUTEX_TIMEOUT` environment variable.
-pub fn MUTEX_TIMEOUT() -> u64 {
+/// NOTE: This constant can be configured through `RSVIM_MUTEX_TIMEOUT_SECS` environment variable.
+pub fn MUTEX_TIMEOUT_SECS() -> u64 {
   static VALUE: OnceLock<u64> = OnceLock::new();
 
-  *VALUE.get_or_init(|| match env::var("RSVIM_MUTEX_TIMEOUT") {
+  *VALUE.get_or_init(|| match env::var("RSVIM_MUTEX_TIMEOUT_SECS") {
     Ok(v1) => match v1.parse::<u64>() {
       Ok(v2) => v2,
       _ => u64::MAX,
     },
     _ => u64::MAX,
   })
+}
+
+/// Mutex locking timeout in duration, see [`MUTEX_TIMEOUT_SECS`].
+pub fn MUTEX_TIMEOUT() -> Duration {
+  Duration::from_secs(MUTEX_TIMEOUT_SECS())
 }
 
 /// Buffer size for IO operations such as file, sockets, etc. By default is 8192.
@@ -105,10 +111,10 @@ mod tests {
   use super::*;
 
   #[test]
-  fn mutex_timeout1() {
+  fn mutex_timeout_secs1() {
     unsafe {
-      env::set_var("RSVIM_MUTEX_TIMEOUT", "128");
-      assert_eq!(MUTEX_TIMEOUT(), 128_u64);
+      env::set_var("RSVIM_MUTEX_TIMEOUT_SECS", "128");
+      assert_eq!(MUTEX_TIMEOUT_SECS(), 128_u64);
     }
   }
 
