@@ -20,7 +20,7 @@ use std::time::Duration;
 use tracing::{debug, error};
 
 #[derive(Debug, Clone)]
-/// The text contents of Vim window.
+/// The widget contains text contents for Vim window.
 pub struct WindowContent {
   base: InodeBase,
   frame: Iframe,

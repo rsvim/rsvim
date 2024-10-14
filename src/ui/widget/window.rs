@@ -149,7 +149,7 @@ impl Default for WindowOptionsBuilder {
 }
 
 #[derive(Debug, Clone)]
-/// Vim window, it manages all descendant widget nodes, i.e. all widgets in the
+/// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 ///
 /// For the window content, here introduce several terms and concepts:
