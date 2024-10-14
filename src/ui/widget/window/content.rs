@@ -308,9 +308,7 @@ impl WindowContent {
     let buffer = self.buffer.upgrade().unwrap();
 
     // Lock buffer for read
-    let buffer = buffer
-      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap();
+    let buffer = buffer.try_read_for(glovar::MUTEX_TIMEOUT()).unwrap();
 
     // if let Some(line) = buffer.rope().get_line(start_line) {
     //   debug!(
@@ -455,9 +453,7 @@ impl WindowContent {
     let buffer = self.buffer.upgrade().unwrap();
 
     // Lock buffer for read
-    let buffer = buffer
-      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap();
+    let buffer = buffer.try_read_for(glovar::MUTEX_TIMEOUT()).unwrap();
 
     // if let Some(line) = buffer.rope().get_line(start_line) {
     //   debug!(

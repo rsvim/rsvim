@@ -29,7 +29,6 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use std::io::Write;
 use std::io::{BufWriter, Stdout};
 use std::sync::Arc;
-use std::time::Duration;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
@@ -229,20 +228,17 @@ impl EventLoop {
     let buffer = Buffer::to_arc(Buffer::new());
     self
       .buffers
-      .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .try_write_for(glovar::MUTEX_TIMEOUT())
       .unwrap()
       .insert(buffer.clone());
 
     // Create default window.
     let canvas_size = self
       .canvas
-      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .try_read_for(glovar::MUTEX_TIMEOUT())
       .unwrap()
       .size();
-    let mut tree = self
-      .tree
-      .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap();
+    let mut tree = self.tree.try_write_for(glovar::MUTEX_TIMEOUT()).unwrap();
     let tree_root_id = tree.root_id();
     let window_shape = IRect::new(
       (0, 0),
@@ -332,7 +328,7 @@ impl EventLoop {
         let state_response = {
           self
             .state
-            .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+            .try_write_for(glovar::MUTEX_TIMEOUT())
             .unwrap()
             .handle(self.tree.clone(), self.buffers.clone(), event)
         };
@@ -442,7 +438,7 @@ impl EventLoop {
       // Draw UI components to the canvas.
       self
         .tree
-        .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .try_write_for(glovar::MUTEX_TIMEOUT())
         .unwrap()
         .draw(self.canvas.clone());
     }
@@ -451,7 +447,7 @@ impl EventLoop {
       // Compute the commands that need to output to the terminal device.
       self
         .canvas
-        .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+        .try_write_for(glovar::MUTEX_TIMEOUT())
         .unwrap()
         .shade()
     };
@@ -521,7 +517,7 @@ impl EventLoop {
   fn queue_cursor(&mut self) -> IoResult<()> {
     let cursor = *self
       .canvas
-      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+      .try_read_for(glovar::MUTEX_TIMEOUT())
       .unwrap()
       .frame()
       .cursor();
