@@ -14,8 +14,9 @@ pub use crate::ui::tree::opt::{GlobalOptions, WindowGlobalOptions, WindowGlobalO
 use parking_lot::RwLock;
 use regex::Regex;
 use std::collections::BTreeSet;
+use std::ptr::NonNull;
 use std::sync::{Arc, Weak};
-use tracing::debug;
+// use tracing::debug;
 
 pub mod internal;
 pub mod opt;
@@ -104,11 +105,11 @@ impl Inodeable for TreeNode {
 
 impl Widgetable for TreeNode {
   /// Draw widget on the canvas.
-  fn draw(&mut self, canvas: &mut Canvas) {
+  fn draw(&mut self, canvas: &mut Canvas, global_options: &GlobalOptions) {
     match self {
-      TreeNode::RootContainer(w) => w.draw(canvas),
-      TreeNode::Window(w) => w.draw(canvas),
-      TreeNode::Cursor(w) => w.draw(canvas),
+      TreeNode::RootContainer(w) => w.draw(canvas, global_options),
+      TreeNode::Window(w) => w.draw(canvas, global_options),
+      TreeNode::Cursor(w) => w.draw(canvas, global_options),
     }
   }
 }
@@ -464,9 +465,13 @@ impl Tree {
   /// Draw the widget tree to canvas.
   pub fn draw(&mut self, canvas: CanvasArc) {
     let mut canvas = canvas.try_write_for(glovar::MUTEX_TIMEOUT()).unwrap();
-    for node in self.base.iter_mut() {
-      debug!("draw node:{:?}", node);
-      node.draw(&mut canvas);
+    unsafe {
+      let mut raw_self = NonNull::new(self as *mut Tree).unwrap();
+      let global_options = raw_self.as_ref().global_options();
+      for node in raw_self.as_mut().base.iter_mut() {
+        // debug!("draw node:{:?}", node);
+        node.draw(&mut canvas, global_options);
+      }
     }
   }
 

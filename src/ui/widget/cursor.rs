@@ -1,13 +1,14 @@
 //! Cursor widget.
 
-use std::fmt::Debug;
-use tracing::debug;
-
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_generate_impl;
 use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
+use crate::ui::tree::GlobalOptions;
 use crate::ui::widget::Widgetable;
+
+use std::fmt::Debug;
+use tracing::debug;
 
 #[derive(Clone, Copy)]
 /// Cursor widget.
@@ -44,7 +45,7 @@ impl Debug for Cursor {
 inode_generate_impl!(Cursor, base);
 
 impl Widgetable for Cursor {
-  fn draw(&mut self, canvas: &mut Canvas) {
+  fn draw(&mut self, canvas: &mut Canvas, _global_options: &GlobalOptions) {
     let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();
     debug!(

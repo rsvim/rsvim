@@ -543,7 +543,7 @@ impl Window {
 // Draw }
 
 impl Widgetable for Window {
-  fn draw(&mut self, canvas: &mut Canvas) {
+  fn draw(&mut self, canvas: &mut Canvas, global_options: &GlobalOptions) {
     // Preprocessing {
     unsafe {
       let mut raw_self = NonNull::new(self as *mut Window).unwrap();
@@ -582,7 +582,7 @@ impl Widgetable for Window {
 
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
-      node.draw(canvas);
+      node.draw(canvas, global_options);
     }
   }
 }
@@ -763,10 +763,10 @@ impl Inodeable for WindowNode {
 
 impl Widgetable for WindowNode {
   /// Draw widget on the canvas.
-  fn draw(&mut self, canvas: &mut Canvas) {
+  fn draw(&mut self, canvas: &mut Canvas, global_options: &GlobalOptions) {
     match self {
-      WindowNode::WindowRootContainer(w) => w.draw(canvas),
-      WindowNode::WindowContent(w) => w.draw(canvas),
+      WindowNode::WindowRootContainer(w) => w.draw(canvas, global_options),
+      WindowNode::WindowContent(w) => w.draw(canvas, global_options),
     }
   }
 }

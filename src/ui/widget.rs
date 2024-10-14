@@ -5,6 +5,7 @@
 use tracing::debug;
 
 use crate::ui::canvas::Canvas;
+use crate::ui::tree::GlobalOptions;
 
 // Re-export
 pub use crate::ui::widget::cursor::Cursor;
@@ -18,7 +19,7 @@ pub mod window;
 /// Base trait for all UI widgets.
 pub trait Widgetable {
   /// Draw the widget to canvas, on the specific shape.
-  fn draw(&mut self, _canvas: &mut Canvas) {
+  fn draw(&mut self, _canvas: &mut Canvas, _global_options: &GlobalOptions) {
     // Do nothing.
     // debug!("draw canvas");
   }

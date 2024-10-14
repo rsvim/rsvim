@@ -7,6 +7,7 @@ use crate::inode_generate_impl;
 use crate::ui::canvas::internal::iframe::Iframe;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
+use crate::ui::tree::GlobalOptions;
 use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::Widgetable;
 
@@ -56,7 +57,7 @@ impl WindowContent {
 inode_generate_impl!(WindowContent, base);
 
 impl Widgetable for WindowContent {
-  fn draw(&mut self, canvas: &mut Canvas) {
+  fn draw(&mut self, canvas: &mut Canvas, _global_options: &GlobalOptions) {
     for row in 0..self.actual_shape().height() {
       for col in 0..self.actual_shape().width() {
         let pos = U16Pos::new(col, row);
