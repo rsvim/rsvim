@@ -136,7 +136,7 @@ impl Canvas {
     // Save current frame.
     self.prev_frame = self.frame.clone();
     // Reset the `dirty` fields.
-    self.frame.reset_dirty();
+    self.frame.reset_dirty_rows();
   }
 
   /// Shade cursor and append results into shader vector.
