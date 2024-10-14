@@ -8,7 +8,6 @@ use std::collections::BTreeMap;
 use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
-use std::time::Duration;
 
 /// Buffer ID.
 pub type BufferId = i32;
@@ -115,10 +114,7 @@ impl Buffers {
   }
 
   pub fn insert(&mut self, buffer: BufferArc) -> Option<BufferArc> {
-    let buffer_id = buffer
-      .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
-      .unwrap()
-      .id();
+    let buffer_id = buffer.try_read_for(glovar::MUTEX_TIMEOUT()).unwrap().id();
     self.buffers.insert(buffer_id, buffer)
   }
 

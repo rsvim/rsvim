@@ -3,7 +3,6 @@
 use crate::glovar;
 use crate::js::JsRuntime;
 
-use std::time::Duration;
 use tracing::debug;
 
 /// Get the _wrap_ option.
@@ -18,7 +17,7 @@ pub fn get_wrap(
   let value = state_rc
     .borrow()
     .tree
-    .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+    .try_read_for(glovar::MUTEX_TIMEOUT())
     .unwrap()
     .wrap();
   debug!("get_wrap: {:?}", value);
@@ -38,7 +37,7 @@ pub fn set_wrap(
   state_rc
     .borrow_mut()
     .tree
-    .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+    .try_write_for(glovar::MUTEX_TIMEOUT())
     .unwrap()
     .set_wrap(value);
 }
@@ -55,7 +54,7 @@ pub fn get_line_break(
   let value = state_rc
     .borrow()
     .tree
-    .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+    .try_read_for(glovar::MUTEX_TIMEOUT())
     .unwrap()
     .line_break();
   debug!("get_line_break: {:?}", value);
@@ -75,7 +74,7 @@ pub fn set_line_break(
   state_rc
     .borrow_mut()
     .tree
-    .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+    .try_write_for(glovar::MUTEX_TIMEOUT())
     .unwrap()
     .set_line_break(value);
 }
@@ -91,7 +90,7 @@ pub fn get_break_at(
   let value = state_rc
     .borrow()
     .tree
-    .try_read_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+    .try_read_for(glovar::MUTEX_TIMEOUT())
     .unwrap()
     .breat_at()
     .clone();
@@ -112,7 +111,7 @@ pub fn set_break_at(
   state_rc
     .borrow_mut()
     .tree
-    .try_write_for(Duration::from_secs(glovar::MUTEX_TIMEOUT()))
+    .try_write_for(glovar::MUTEX_TIMEOUT())
     .unwrap()
     .set_break_at(&value);
 }
