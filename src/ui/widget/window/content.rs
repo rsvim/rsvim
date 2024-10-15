@@ -7,6 +7,8 @@ use crate::inode_generate_impl;
 use crate::ui::canvas::internal::iframe::Iframe;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
+use crate::ui::tree::util::SafeTreeRef;
+use crate::ui::tree::{GlobalOptions, Tree};
 use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::Widgetable;
 
@@ -96,17 +98,22 @@ pub struct WindowContent {
   // Local window options.
   // By default these options will inherit from global options of UI.
   options: WindowLocalOptions,
+
+  // Tree ref.
+  tree_ref: SafeTreeRef,
 }
 
 impl WindowContent {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk, options: &WindowLocalOptions) -> Self {
+  pub fn new(shape: IRect, buffer: BufferWk, tree: &mut Tree) -> Self {
+    let options = tree.global_options().window_local_options.clone();
     let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
     WindowContent {
       base: InodeBase::new(shape),
       buffer,
       view,
-      options: options.clone(),
+      options,
+      tree_ref: SafeTreeRef::new(tree),
     }
   }
 }
@@ -140,14 +147,15 @@ impl WindowContent {
     self.options.set_line_break(value);
   }
 
-  // /// Get 'break-at' option.
-  // pub fn break_at(&self) -> &String {
-  //   self.options.break_at()
-  // }
-  // /// Get 'break-at' option in regex.
-  // pub fn break_at_regex(&self) -> &Regex {
-  //   self.options.break_at_regex()
-  // }
+  /// Get 'break-at' option.
+  pub fn break_at(&self) -> &String {
+    self.tree_ref.as_ref(&self.id()).breat_at()
+  }
+
+  /// Get 'break-at' option in regex.
+  pub fn break_at_regex(&self) -> &Regex {
+    self.tree_ref.as_ref(&self.id()).break_at_regex()
+  }
 }
 // Options }
 
@@ -612,13 +620,14 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
+
+    let terminal_size = U16Size::new(10, 10);
+    let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
+    tree.global_options_mut().window_local_options = window_options;
     let window_content_shape = IRect::new((0, 0), (10, 10));
-    let mut window_content = WindowContent::new(
-      window_content_shape,
-      Arc::downgrade(&buffer),
-      &window_options,
-    );
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
     let canvas_size = U16Size::new(10, 10);
     let mut canvas = Canvas::new(canvas_size);
     window_content._draw_from_top_for_nowrap(&mut canvas, 0, 0, 10);
@@ -667,13 +676,13 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
+    let terminal_size = U16Size::new(27, 15);
+    let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
+    tree.global_options_mut().window_local_options = window_options;
     let window_content_shape = IRect::new((0, 0), (27, 15));
-    let mut window_content = WindowContent::new(
-      window_content_shape,
-      Arc::downgrade(&buffer),
-      &window_options,
-    );
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
     let canvas_size = U16Size::new(27, 15);
     let mut canvas = Canvas::new(canvas_size);
     window_content._draw_from_top_for_nowrap(&mut canvas, 1, 0, 0);
@@ -715,13 +724,13 @@ mod tests {
   fn _draw_from_top_for_nowrap3() {
     // INIT.call_once(test_log_init);
     let buffer = make_empty_buffer();
+    let terminal_size = U16Size::new(20, 18);
+    let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
+    tree.global_options_mut().window_local_options = window_options;
     let window_content_shape = IRect::new((0, 0), (20, 18));
-    let mut window_content = WindowContent::new(
-      window_content_shape,
-      Arc::downgrade(&buffer),
-      &window_options,
-    );
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
     let canvas_size = U16Size::new(20, 18);
     let mut canvas = Canvas::new(canvas_size);
     window_content._draw_from_top_for_nowrap(&mut canvas, 0, 0, 0);
@@ -768,13 +777,14 @@ mod tests {
       "it contain",
       "s several ",
     ];
+
+    let terminal_size = U16Size::new(10, 10);
+    let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(true).build();
+    tree.global_options_mut().window_local_options = window_options;
     let window_content_shape = IRect::new((0, 0), (10, 10));
-    let mut window_content = WindowContent::new(
-      window_content_shape,
-      Arc::downgrade(&buffer),
-      &window_options,
-    );
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
     let canvas_size = U16Size::new(10, 10);
     let mut canvas = Canvas::new(canvas_size);
     window_content._draw_from_top_for_wrap_nolinebreak(&mut canvas, 0, 0, 10);
@@ -833,13 +843,13 @@ mod tests {
       "t widget, there're multiple",
       " cases:                    ",
     ];
+    let terminal_size = U16Size::new(27, 15);
+    let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(true).build();
+    tree.global_options_mut().window_local_options = window_options;
     let window_content_shape = IRect::new((0, 0), (27, 15));
-    let mut window_content = WindowContent::new(
-      window_content_shape,
-      Arc::downgrade(&buffer),
-      &window_options,
-    );
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
     let canvas_size = U16Size::new(27, 15);
     let mut canvas = Canvas::new(canvas_size);
     window_content._draw_from_top_for_wrap_nolinebreak(&mut canvas, 1, 0, 0);
@@ -873,13 +883,14 @@ mod tests {
   fn _draw_from_top_for_wrap_nolinebreak3() {
     // INIT.call_once(test_log_init);
     let buffer = make_empty_buffer();
+
+    let terminal_size = U16Size::new(20, 18);
+    let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(true).build();
+    tree.global_options_mut().window_local_options = window_options;
     let window_content_shape = IRect::new((0, 0), (20, 18));
-    let mut window_content = WindowContent::new(
-      window_content_shape,
-      Arc::downgrade(&buffer),
-      &window_options,
-    );
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
     let canvas_size = U16Size::new(20, 18);
     let mut canvas = Canvas::new(canvas_size);
     window_content._draw_from_top_for_wrap_nolinebreak(&mut canvas, 0, 0, 0);

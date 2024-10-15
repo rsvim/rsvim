@@ -244,7 +244,7 @@ impl EventLoop {
       (0, 0),
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
-    let window = Window::new(window_shape, Arc::downgrade(&buffer), tree.global_options());
+    let window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
     let window_id = window.id();
     let window_node = TreeNode::Window(window);
     tree.bounded_insert(&tree_root_id, window_node);
