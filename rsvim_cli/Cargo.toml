@@ -11,7 +11,7 @@ documentation.workspace = true
 license.workspace = true
 keywords.workspace = true
 categories.workspace = true
-description = "The VIM editor reinvented in Rust+TypeScript."
+description = "The command line(s) for the RSVIM editor."
 
 [dependencies]
 rsvim_core = { workspace = true }

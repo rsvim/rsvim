@@ -1,4 +1,6 @@
 //! The VIM editor reinvented in Rust+TypeScript.
+//!
+//! See [rsvim_core] for more details.
 
 use rsvim_core::cli::CliOpt;
 use rsvim_core::error::IoResult;
