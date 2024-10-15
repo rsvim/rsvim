@@ -1,10 +1,12 @@
-[package]
-name = "rsvim"
+[workspace]
+members = ["rsvim_core", "rsvim_cli"]
+resolver = "2"
+
+[workspace.package]
 version = "0.1.1-alpha.5"
 edition = "2021"
 rust-version = "1.81.0"
 authors = ["Lin Rongbin <linrongbin16@outlook.com>"]
-description = "The VIM editor reinvented in Rust+TypeScript."
 repository = "https://github.com/rsvim/rsvim"
 readme = "README.md"
 homepage = "https://rsvim.github.io/"
@@ -13,10 +15,8 @@ license = "Vim OR Apache-2.0"
 keywords = ["vim", "neovim", "text-editor", "editor", "terminal"]
 categories = ["text-editors"]
 
-[lib]
-doctest = false
-
-[dependencies]
+[workspace.dependencies]
+rsvim_core = { path = "./rsvim_core" }
 crossterm = { version = "0.28", features = ["event-stream", "serde"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = [
@@ -60,8 +60,10 @@ path-absolutize = "3.1.1"
 toml = "0.8.19"
 once_cell = { version = "1.20.2", features = ["parking_lot"] }
 textwrap = "0.16.1"
+tempfile = "3"
+assert_fs = "1.1.2"
 
-# NOTE: SWC upgrade are too buggy, so we manually manage the upgrade. {
+# NOTE: SWC upgrade are too buggy, we need to manually upgrade them. {
 
 swc_common = { version = "=0.39.0", features = [
   "tty-emitter",
@@ -79,9 +81,6 @@ swc_atoms = "=0.7.0" # https://github.com/swc-project/swc/blob/main/crates/swc_a
 
 # NOTE: SWC upgrade are too buggy. }
 
-[dev-dependencies]
-tempfile = "3"
-assert_fs = "1.1.2"
 
 [profile.release]
 lto = true

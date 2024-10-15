@@ -268,7 +268,7 @@ impl WindowContent {
   /// - [`warp`](WindowLocalOptions::wrap) is `true`.
   /// - [`line_break`](WindowLocalOptions::line_break) is `true`
   ///
-  /// NOTE: This method is implemented with [textwrap](textwrap) crate.
+  /// NOTE: This method is implemented with [`textwrap`] crate.
   pub fn _draw_from_top_for_wrap_linebreak(
     &mut self,
     canvas: &mut Canvas,

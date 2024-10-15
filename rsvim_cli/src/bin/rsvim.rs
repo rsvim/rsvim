@@ -1,9 +1,9 @@
 //! The VIM editor reinvented in Rust+TypeScript.
 
-use rsvim::cli::CliOpt;
-use rsvim::error::IoResult;
-use rsvim::evloop::EventLoop;
-use rsvim::log;
+use rsvim_core::cli::CliOpt;
+use rsvim_core::error::IoResult;
+use rsvim_core::evloop::EventLoop;
+use rsvim_core::log;
 
 use clap::Parser;
 // use heed::types as heed_types;

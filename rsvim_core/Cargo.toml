@@ -1,0 +1,78 @@
+[package]
+name = "rsvim_core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+readme.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+license.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "The core library for the RSVIM editor."
+
+[lib]
+doctest = false
+
+[dependencies]
+crossterm = { workspace = true, features = ["event-stream", "serde"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = [
+  "env-filter",
+  "parking_lot",
+] }
+tracing-appender = { workspace = true, features = ["parking_lot"] }
+tokio = { workspace = true, features = ["full"] }
+tokio-util = { workspace = true, features = ["full"] }
+clap = { workspace = true, features = ["derive", "unicode"] }
+futures = { workspace = true }
+time = { workspace = true, features = [
+  "macros",
+  "formatting",
+  "parsing",
+  "serde",
+  "serde-human-readable",
+  "rand",
+] }
+tz-rs = { workspace = true }
+tzdb = { workspace = true }
+compact_str = { workspace = true, features = ["serde", "bytes"] }
+ropey = { workspace = true }
+geo = { workspace = true, features = ["serde"] }
+num-traits = { workspace = true }
+parking_lot = { workspace = true }
+v8 = { workspace = true }
+# async-trait = "0.1.82"
+# bincode = "2.0.0-rc.3"
+directories = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde_json = { workspace = true }
+regex = { workspace = true }
+url = { workspace = true }
+path-absolutize = { workspace = true }
+toml = { workspace = true }
+once_cell = { workspace = true, features = ["parking_lot"] }
+textwrap = { workspace = true }
+
+# NOTE: SWC upgrade are too buggy, we need to manually manage the upgrade. {
+
+swc_common = { workspace = true, features = ["tty-emitter"] }
+swc_ecma_codegen = { workspace = true }
+swc_ecma_parser = { workspace = true }
+swc_ecma_transforms_base = { workspace = true }
+swc_ecma_transforms_typescript = { workspace = true }
+swc_ecma_transforms_react = { workspace = true }
+swc_ecma_visit = { workspace = true }
+swc_bundler = { workspace = true }
+swc_ecma_ast = { workspace = true }
+swc_ecma_loader = { workspace = true }
+swc_atoms = { workspace = true }
+
+# NOTE: SWC upgrade are too buggy. }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+assert_fs = { workspace = true }

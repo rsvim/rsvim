@@ -26,5 +26,5 @@
     "useUnknownInCatchVariables": false,
     "removeComments": true
   },
-  "include": ["./src/js/runtime/*.ts"]
+  "include": ["./rsvim_core/src/js/runtime/*.ts"]
 }
