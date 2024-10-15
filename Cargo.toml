@@ -59,6 +59,7 @@ url = "2.5.2"
 path-absolutize = "3.1.1"
 toml = "0.8.19"
 once_cell = { version = "1.20.2", features = ["parking_lot"] }
+textwrap = "0.16.1"
 
 # NOTE: SWC upgrade are too buggy, so we manually manage the upgrade. {
 
@@ -85,7 +86,7 @@ assert_fs = "1.1.2"
 [profile.release]
 lto = true
 strip = true
-# opt-level = "z"
+opt-level = "z"
 codegen-units = 1
 
 [profile.nightly]
