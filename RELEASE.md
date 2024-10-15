@@ -23,4 +23,4 @@ The `[LEVEL]` is a publish level:
 
 To skip the error when publishing the `rsvim` package (since it's been renamd from `rsvim_cli` to `rsvim`), please add `--no-verify` option:
 
-- Run with `./release.sh -p [PACKAGE] --no-verify [LEVEL]`
+- Run with `./release.sh -p [PACKAGE] [LEVEL] --no-verify (--execute)`
