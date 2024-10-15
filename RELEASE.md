@@ -20,3 +20,7 @@ The `[LEVEL]` is a publish level:
 
 - Pre-release: `alpha`, `beta`, `rc`
 - Release: `patch`, `minor`, `major`
+
+To skip the error when publishing the `rsvim` package (since it's been renamd from `rsvim_cli` to `rsvim`), please add `--no-verify` option:
+
+- Run with `./release.sh -p [PACKAGE] --no-verify [LEVEL]`
