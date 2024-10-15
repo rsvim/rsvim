@@ -8,5 +8,15 @@ Please setup release tools with:
 
 To release a new version, please run below script:
 
-- Dry run with `bash ./release.sh [LEVEL]`.
-- Release run with `bash ./release.sh [LEVEL] --execute`.
+- Dry run with `bash ./release.sh -p [PACKAGE] [LEVEL]`.
+- Release run with `bash ./release.sh -p [PACKAGE] [LEVEL] --execute`.
+
+The `[PACKAGE]` is a cargo package inside this workspace:
+
+- `rsvim` (`rsvim_cli`)
+- `rsvim_core`
+
+The `[LEVEL]` is a publish level:
+
+- Pre-release: `alpha`, `beta`, `rc`
+- Release: `patch`, `minor`, `major`
