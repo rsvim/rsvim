@@ -35,19 +35,6 @@ var RsvimOpt = (function () {
         enumerable: false,
         configurable: true
     });
-    Object.defineProperty(RsvimOpt.prototype, "breakAt", {
-        get: function () {
-            return __InternalRsvimGlobalObject.opt_get_break_at();
-        },
-        set: function (value) {
-            if (typeof value !== "string") {
-                throw new Error("\"Rsvim.opt.breakAt\" value must be string type, but found ".concat(infra.stringify(value)));
-            }
-            __InternalRsvimGlobalObject.opt_set_break_at(value);
-        },
-        enumerable: false,
-        configurable: true
-    });
     return RsvimOpt;
 }());
 export { RsvimOpt };
