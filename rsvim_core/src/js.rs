@@ -140,12 +140,6 @@ impl JsRuntimeForSnapshot {
     // process::refresh(tc_scope);
   }
 
-  pub fn make_snapshot(&mut self, output: &Path) {
-    let &mut isolate = &self.isolate;
-    let snapshot = isolate.create_blob(v8::FunctionCodeHandling::Keep).unwrap();
-    std::fs::write(output, snapshot).unwrap();
-  }
-
   /// Synchronously load builtin module.
   fn init_builtin_module(&mut self, name: &str, source: &str) {
     let scope = &mut self.handle_scope();
