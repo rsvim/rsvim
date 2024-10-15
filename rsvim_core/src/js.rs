@@ -16,7 +16,7 @@ use crate::ui::tree::TreeArc;
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
@@ -138,6 +138,12 @@ impl JsRuntimeForSnapshot {
 
     // // Initialize process static values.
     // process::refresh(tc_scope);
+  }
+
+  pub fn make_snapshot(&mut self, output: &Path) {
+    let &mut isolate = &self.isolate;
+    let snapshot = isolate.create_blob(v8::FunctionCodeHandling::Keep).unwrap();
+    std::fs::write(output, snapshot).unwrap();
   }
 
   /// Synchronously load builtin module.
