@@ -1,4 +1,4 @@
-//! The core library for the [Rsvim](https://github.com/rsvim/rsvim) editor.
+//! The core library for the [RSVIM](https://github.com/rsvim/rsvim) editor.
 
 pub mod buf;
 pub mod cart;

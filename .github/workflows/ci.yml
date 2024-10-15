@@ -60,10 +60,16 @@ jobs:
           cargo binstall --force --no-confirm cargo-msrv
           echo "Info: cargo msrv --version"
           cargo msrv --version
+          echo "Info: PWD=${PWD}"
+          SAVED_PWD="${PWD}"
+          echo "Info: cd rsvim_cli"
+          cd rsvim_cli
           echo "Info: cargo msrv list"
           cargo msrv list
           echo "Info: cargo msrv verify"
           cargo msrv verify
+          echo "Info: cd SAVED_PWD=${SAVED_PWD}"
+          cd "${SAVED_PWD}"
       - name: Docs
         run: |
           echo "Info: cargo doc --workspace"

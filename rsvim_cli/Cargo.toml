@@ -1,0 +1,26 @@
+[package]
+name = "rsvim"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+readme.workspace = true
+homepage.workspace = true
+documentation.workspace = true
+license.workspace = true
+keywords.workspace = true
+categories.workspace = true
+description = "The command line(s) for the RSVIM editor."
+
+[dependencies]
+rsvim_core = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = [
+  "env-filter",
+  "parking_lot",
+] }
+tracing-appender = { workspace = true, features = ["parking_lot"] }
+tokio = { workspace = true, features = ["full"] }
+clap = { workspace = true, features = ["derive", "unicode"] }
+toml = { workspace = true }

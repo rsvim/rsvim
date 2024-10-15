@@ -264,11 +264,11 @@ impl WindowContent {
     }
   }
 
-  /// Implement the [`_draw_from_top`] with below window options:
+  /// Implement the [`_draw_from_top`](WindowContent::_draw_from_top) with below options:
   /// - [`warp`](WindowLocalOptions::wrap) is `true`.
   /// - [`line_break`](WindowLocalOptions::line_break) is `true`
   ///
-  /// NOTE: This method is implemented with [textwrap](textwrap) crate.
+  /// NOTE: This method is implemented with [`textwrap`] crate.
   pub fn _draw_from_top_for_wrap_linebreak(
     &mut self,
     canvas: &mut Canvas,
@@ -398,7 +398,7 @@ impl WindowContent {
     }
   }
 
-  /// Implement the [`_draw_from_top`] with below window options:
+  /// Implement the [`_draw_from_top`](WindowContent::_draw_from_top) with below options:
   /// - [`warp`](WindowLocalOptions::wrap) is `true`.
   /// - [`line_break`](WindowLocalOptions::line_break) is `false`.
   pub fn _draw_from_top_for_wrap_nolinebreak(
@@ -542,7 +542,7 @@ impl WindowContent {
     }
   }
 
-  /// Implement the [`_draw_from_top`] with below options:
+  /// Implement the [`_draw_from_top`](WindowContent::_draw_from_top) with below options:
   /// - [`warp`](WindowLocalOptions::wrap) is `false`.
   /// - [`line_break`](WindowLocalOptions::line_break) is not be used.
   pub fn _draw_from_top_for_nowrap(

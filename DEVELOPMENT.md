@@ -33,11 +33,11 @@ To develop code, please setup with:
 
 ### Coding Style
 
-- Public methods named with `_` prefix are private, the public decorator is only for testing.
+- Public methods named with `_` prefix are private, the public decorator is only for testing or debugging.
 
 ### Environment Variable
 
-This project uses environment variables to control some behaviors globally, i.e. you can run the `rsvim` command with prepending some env vars. For example:
+This project uses environment variables to control some behaviors globally, i.e. you can prepend some environment variables before running the command line(s). For example:
 
 ```bash
 RUST_BACKTRACE=full RUST_LOG=debug cargo test
@@ -49,7 +49,7 @@ To configure debugging/testing behaviors, please setup with:
 - `RUST_LOG`: Set logging level, by default it's `info`. To debug code, please set to `debug`.
 - `RUSTFLAGS`: Set extra flags to `rustc` compiler. To enable all warning messages, please set to `-Dwarnings`.
 
-To configure other internal behaviors, please see variables listed in the `./src/glovar.rs` source file.
+To configure other internal behaviors, please see variables listed in the `./rsvim_core/src/glovar.rs` source file.
 
 ### Check
 
@@ -80,7 +80,7 @@ To debug code, please run with:
 2. Run with `RUST_BACKTRACE=full RUST_LOG=debug ./target/debug/rsvim`, it enables:
 
    - All the logs over `debug` level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
-   - The backtrace when panics.
+   - The backtrace if panics.
 
 ### Docs
 
@@ -100,7 +100,7 @@ To write docs, please setup with:
 Please setup your development environment with:
 
 - [Node.js](https://nodejs.org/) &ge; v18.x.
-- Latest stable [Typescript](https://www.typescriptlang.org/) compiler. Please install with `npm install -g typescript`, run `tsc --version` see if the installation is successful.
+- Latest stable [Typescript](https://www.typescriptlang.org/), please install with `npm install -g typescript`, and run `tsc --version` to verify the installation is successful.
 
 To develop code, please setup with:
 

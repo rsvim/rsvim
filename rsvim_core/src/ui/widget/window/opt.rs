@@ -35,7 +35,7 @@ impl WindowLocalOptions {
   }
 }
 
-/// The builder for [`WindowOptions`].
+/// The builder for [`WindowLocalOptions`].
 pub struct WindowOptionsBuilder {
   wrap: bool,
   line_break: bool,
