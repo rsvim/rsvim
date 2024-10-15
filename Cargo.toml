@@ -16,7 +16,7 @@ keywords = ["vim", "neovim", "text-editor", "editor", "terminal"]
 categories = ["text-editors"]
 
 [workspace.dependencies]
-rsvim_core = { path = "./rsvim_core" }
+rsvim_core = { version = "0.1.1-alpha.5", path = "./rsvim_core" }
 crossterm = { version = "0.28", features = ["event-stream", "serde"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = [
