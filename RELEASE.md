@@ -1,12 +1,12 @@
 # Release
 
-To release new version, please setup with:
+Please setup release tools with:
 
 - [git-cliff](https://github.com/orhun/git-cliff): Generate changelog from [conventional commits](https://www.conventionalcommits.org/).
+  > Install `git-cliff` with `cargo install git-cliff` (it enables the [GitHub integration](https://git-cliff.org/docs/integration/github)).
+- [cargo-release](https://github.com/crate-ci/cargo-release): Release new version and upload to [crates.io](https://crates.io/).
 
-  1. Install `git-cliff` with `cargo install git-cliff` (it enables the [GitHub integration](https://git-cliff.org/docs/integration/github)).
+To release a new version, please run below script:
 
-- [cargo-release](https://github.com/crate-ci/cargo-release): Release a new version, run below commands:
-
-  1. Dry run with `cargo release [LEVEL]`.
-  2. Run with `cargo release [LEVEL] --execute`.
+- Dry run with `bash ./release.sh [LEVEL]`.
+- Release run with `bash ./release.sh [LEVEL] --execute`.
