@@ -14,6 +14,7 @@ documentation = "https://rsvim.github.io/"
 license = "Vim OR Apache-2.0"
 keywords = ["vim", "neovim", "text-editor", "editor", "terminal"]
 categories = ["text-editors"]
+exclude = [".DS_Store"]
 
 [workspace.dependencies]
 rsvim_core = { version = "0.1.1-alpha.6", path = "./rsvim_core" }
