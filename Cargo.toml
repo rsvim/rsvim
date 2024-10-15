@@ -1,5 +1,5 @@
 [workspace]
-members = ["rsvim_core", "rsvim_cli"]
+members = ["rsvim_core", "rsvim"]
 resolver = "2"
 
 [workspace.package]
