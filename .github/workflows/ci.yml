@@ -62,8 +62,8 @@ jobs:
           cargo msrv --version
           echo "Info: PWD=${PWD}"
           SAVED_PWD="${PWD}"
-          echo "Info: cd rsvim_cli"
-          cd rsvim_cli
+          echo "Info: cd rsvim"
+          cd rsvim
           echo "Info: cargo msrv list"
           cargo msrv list
           echo "Info: cargo msrv verify"
