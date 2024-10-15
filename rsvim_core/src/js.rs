@@ -78,6 +78,134 @@ pub fn next_future_id() -> JsFutureId {
   GLOBAL.fetch_add(1, Ordering::Relaxed)
 }
 
+pub struct JsRuntimeStateForSnapshot {
+  /// A sand-boxed execution context with its own set of built-in objects and functions.
+  pub context: v8::Global<v8::Context>,
+  /// Runtime options.
+  pub options: JsRuntimeOptions,
+}
+
+/// Js runtime for creating V8 snapshot.
+pub struct JsRuntimeForSnapshot {
+  pub isolate: v8::OwnedIsolate,
+
+  #[allow(unused)]
+  pub state: Rc<RefCell<JsRuntimeStateForSnapshot>>,
+}
+
+impl JsRuntimeForSnapshot {
+  /// Creates a new JsRuntime based on provided options.
+  #[allow(clippy::too_many_arguments)]
+  pub fn new(options: JsRuntimeOptions) -> Self {
+    // Configuration flags for V8.
+    // let mut flags = String::from(concat!(
+    //   " --no-validate-asm",
+    //   " --turbo_fast_api_calls",
+    //   " --harmony-temporal",
+    //   " --js-float16array",
+    // ));
+    let flags = options.v8_flags.join(" ");
+    v8::V8::set_flags_from_string(&flags);
+
+    // Fire up the v8 engine.
+    init_v8_platform();
+
+    let mut isolate = v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+
+    let context = {
+      let scope = &mut v8::HandleScope::new(&mut *isolate);
+      let context = binding::create_new_context(scope);
+      scope.set_default_context(context);
+      v8::Global::new(scope, context)
+    };
+
+    let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot { context, options }));
+
+    isolate.set_slot(state.clone());
+
+    JsRuntimeForSnapshot { isolate, state }
+  }
+
+  /// Initializes synchronously the core environment (see js/runtime/global.js).
+  pub fn init_environment(&mut self) {
+    let name = "rsvim:runtime/10__web.js";
+    let source = include_str!("./js/runtime/10__web.js");
+    self.init_builtin_module(name, source);
+
+    let name = "rsvim:runtime/50__rsvim.js";
+    let source = include_str!("./js/runtime/50__rsvim.js");
+    self.init_builtin_module(name, source);
+
+    // // Initialize process static values.
+    // process::refresh(tc_scope);
+  }
+
+  /// Synchronously load builtin module.
+  fn init_builtin_module(&mut self, name: &str, source: &str) {
+    let scope = &mut self.handle_scope();
+    let tc_scope = &mut v8::TryCatch::new(scope);
+
+    let module = match fetch_module_tree(tc_scope, name, Some(source)) {
+      Some(module) => module,
+      None => {
+        assert!(tc_scope.has_caught());
+        let exception = tc_scope.exception().unwrap();
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        error!("Failed to import builtin modules: {name}, error: {exception:?}");
+        eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
+        std::process::exit(1);
+      }
+    };
+
+    if module
+      .instantiate_module(tc_scope, module_resolve_cb)
+      .is_none()
+    {
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
+
+    let _ = module.evaluate(tc_scope);
+
+    if module.get_status() == v8::ModuleStatus::Errored {
+      let exception = module.get_exception();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
+
+    // // Initialize process static values.
+    // process::refresh(tc_scope);
+  }
+
+  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
+    isolate
+      .get_slot::<Rc<RefCell<JsRuntimeStateForSnapshot>>>()
+      .unwrap()
+      .clone()
+  }
+
+  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
+    Self::state(&self.isolate)
+  }
+
+  pub fn handle_scope(&mut self) -> v8::HandleScope {
+    let context = self.context();
+    v8::HandleScope::with_context(&mut self.isolate, context)
+  }
+
+  pub fn context(&mut self) -> v8::Global<v8::Context> {
+    let state = self.get_state();
+    let state = state.borrow();
+    state.context.clone()
+  }
+}
+
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
   pub context: v8::Global<v8::Context>,
@@ -116,6 +244,16 @@ pub struct JsRuntimeState {
   // Data Access for RSVIM }
 }
 
+// Initialize V8 platform.
+pub fn init_v8_platform() {
+  static V8_INIT: Once = Once::new();
+  V8_INIT.call_once(move || {
+    let platform = v8::new_default_platform(0, false).make_shared();
+    v8::V8::initialize_platform(platform);
+    v8::V8::initialize();
+  });
+}
+
 pub struct JsRuntime {
   // V8 isolate.
   isolate: v8::OwnedIsolate,
@@ -151,12 +289,7 @@ impl JsRuntime {
     v8::V8::set_flags_from_string(&flags);
 
     // Fire up the v8 engine.
-    static V8_INIT: Once = Once::new();
-    V8_INIT.call_once(move || {
-      let platform = v8::new_default_platform(0, false).make_shared();
-      v8::V8::initialize_platform(platform);
-      v8::V8::initialize();
-    });
+    init_v8_platform();
 
     let mut isolate = v8::Isolate::new(v8::CreateParams::default());
 
