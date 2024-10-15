@@ -18,13 +18,17 @@ fn main() -> IoResult<()> {
   let cli_opt = CliOpt::parse();
   debug!("cli_opt: {:?}", cli_opt);
   if cli_opt.version() {
-    let cargo_toml_meta = include_str!("../../Cargo.toml");
+    let cargo_toml_meta = include_str!("../../../Cargo.toml");
     let cargo_toml_data = cargo_toml_meta.parse::<Table>().unwrap();
     println!(
       "rsvim {} (rusty_v8 {}, swc_ecma_parser {})",
-      cargo_toml_data["package"]["version"].as_str().unwrap(),
-      cargo_toml_data["dependencies"]["v8"].as_str().unwrap(),
-      cargo_toml_data["dependencies"]["swc_ecma_parser"]
+      cargo_toml_data["workspace"]["package"]["version"]
+        .as_str()
+        .unwrap(),
+      cargo_toml_data["workspace"]["dependencies"]["v8"]
+        .as_str()
+        .unwrap(),
+      cargo_toml_data["workspace"]["dependencies"]["swc_ecma_parser"]
         .as_str()
         .unwrap()
     );
