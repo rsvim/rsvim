@@ -88,7 +88,7 @@ jobs:
       - name: Run Tests
         run: |
           cargo llvm-cov clean --workspace
-          cargo llvm-cov --all-features --workspace --lcov --output-path lcov.info
+          cargo llvm-cov -p rsvim_core --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v4
         with:
           fail_ci_if_error: true
