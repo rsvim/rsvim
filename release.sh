@@ -2,9 +2,9 @@
 
 # set -x
 
-if [ $# -lt 1 ]; then
-	echo "usage: ./release.sh [LEVEL] (--execute)"
-	echo "error: missing [LEVEL] (alpha/beta/rc/patch/minor/major), exit..."
+if [ $# -lt 3 ]; then
+	echo "usage: ./release.sh -p [PACKAGE] [LEVEL] (--execute)"
+	echo "error: missing release arguments, exit..."
 	exit 1
 fi
 
