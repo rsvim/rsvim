@@ -7,8 +7,8 @@ The VIM editor reinvented in Rust+TypeScript.
 </p>
 
 <p align="center">
-  <a href="https://crates.io/crates/rsvim"><img alt="push.yml" src="https://img.shields.io/crates/v/rsvim" /></a>
-  <a href="https://docs.rs/rsvim/latest/rsvim/"><img alt="push.yml" src="https://img.shields.io/docsrs/rsvim?label=docs.rs" /></a>
+  <a href="https://crates.io/crates/rsvim"><img alt="rsvim" src="https://img.shields.io/crates/v/rsvim" /></a>
+  <a href="https://docs.rs/rsvim/latest/rsvim_core/"><img alt="rsvim_core" src="https://img.shields.io/docsrs/rsvim_core?label=docs.rs" /></a>
   <a href="https://github.com/rsvim/rsvim/actions/workflows/release.yml"><img alt="release.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/release.yml" /></a>
   <a href="https://github.com/rsvim/rsvim/actions/workflows/ci.yml"><img alt="ci.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/ci.yml?branch=main&label=ci" /></a>
   <!-- <a href="https://github.com/rsvim/rsvim/actions/workflows/js.yml"><img alt="js.yml" src="https://img.shields.io/github/actions/workflow/status/rsvim/rsvim/js.yml?branch=main&label=js" /></a> -->
