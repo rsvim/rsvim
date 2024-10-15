@@ -10,30 +10,30 @@ use rsvim_core::log;
 use clap::Parser;
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
-use toml::Table;
+// use toml::Table;
 use tracing::debug;
 
 fn main() -> IoResult<()> {
   log::init();
   let cli_opt = CliOpt::parse();
   debug!("cli_opt: {:?}", cli_opt);
-  if cli_opt.version() {
-    let cargo_toml_meta = include_str!("../../../Cargo.toml");
-    let cargo_toml_data = cargo_toml_meta.parse::<Table>().unwrap();
-    println!(
-      "rsvim {} (rusty_v8 {}, swc_ecma_parser {})",
-      cargo_toml_data["workspace"]["package"]["version"]
-        .as_str()
-        .unwrap(),
-      cargo_toml_data["workspace"]["dependencies"]["v8"]
-        .as_str()
-        .unwrap(),
-      cargo_toml_data["workspace"]["dependencies"]["swc_ecma_parser"]
-        .as_str()
-        .unwrap()
-    );
-    return Ok(());
-  }
+  // if cli_opt.version() {
+  //   let cargo_toml_meta = include_str!("../../../Cargo.toml");
+  //   let cargo_toml_data = cargo_toml_meta.parse::<Table>().unwrap();
+  //   println!(
+  //     "rsvim {} (rusty_v8 {}, swc_ecma_parser {})",
+  //     cargo_toml_data["workspace"]["package"]["version"]
+  //       .as_str()
+  //       .unwrap(),
+  //     cargo_toml_data["workspace"]["dependencies"]["v8"]
+  //       .as_str()
+  //       .unwrap(),
+  //     cargo_toml_data["workspace"]["dependencies"]["swc_ecma_parser"]
+  //       .as_str()
+  //       .unwrap()
+  //   );
+  //   return Ok(());
+  // }
 
   // let dir = tempfile::tempdir().unwrap();
   // debug!("tempdir:{:?}", dir);
