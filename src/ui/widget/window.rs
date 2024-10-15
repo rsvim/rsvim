@@ -1,4 +1,4 @@
-//! The Vim window.
+//! Vim window.
 
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Pos, U16Rect};
