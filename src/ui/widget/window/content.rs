@@ -246,7 +246,9 @@ impl WindowContent {
       (true, false) => {
         self._draw_from_top_for_wrap_nolinebreak(canvas, start_line, start_column, end_column)
       }
-      (true, true) => debug!("_draw_from_top - wrap:true, line_break:true"),
+      (true, true) => {
+        self._draw_from_top_for_wrap_nolinebreak(canvas, start_line, start_column, end_column)
+      }
     }
   }
 
