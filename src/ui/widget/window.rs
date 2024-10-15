@@ -58,7 +58,7 @@ impl Window {
 
     let mut base = Itree::new(window_root_node);
 
-    let window_content = WindowContent::new(shape, buffer.clone(), &options);
+    let window_content = WindowContent::new(shape, buffer.clone(), tree);
     let window_content_id = window_content.id();
     let window_content_node = WindowNode::WindowContent(window_content);
 
