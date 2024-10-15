@@ -115,6 +115,8 @@ export class RsvimOpt {
    * of 'showbreak' is used to put in front of wrapped lines. This option
    * is not used when the {@link wrap} option is `false`.
    *
+   * @experimental
+   *
    * @see [Wikipedia - word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
    * @see [Vim: options.txt - 'linebreak'](https://vimhelp.org/options.txt.html#%27linebreak%27)
    *
