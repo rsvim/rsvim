@@ -4,7 +4,8 @@ use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
-use crate::ui::tree::GlobalOptions;
+use crate::ui::tree::util::SafeTreeRef;
+use crate::ui::tree::{GlobalOptions, Tree};
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
@@ -42,11 +43,14 @@ pub struct Window {
   // Local window options.
   // By default these options will inherit from global options of UI.
   options: WindowLocalOptions,
+
+  // Tree ref.
+  tree_ref: SafeTreeRef,
 }
 
 impl Window {
-  pub fn new(shape: IRect, buffer: BufferWk, global_options: &GlobalOptions) -> Self {
-    let options = global_options.window_local_options.clone();
+  pub fn new(shape: IRect, buffer: BufferWk, tree: &mut Tree) -> Self {
+    let options = tree.global_options().window_local_options.clone();
 
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
@@ -65,6 +69,7 @@ impl Window {
       content_id: window_content_id,
       buffer,
       options,
+      tree_ref: SafeTreeRef::new(tree),
     }
   }
 }
@@ -185,9 +190,23 @@ impl Window {
     self.update_window_content_options();
   }
 
-  // pub fn break_at(&self) -> &String {}
-  //
-  // pub fn break_at_regex(&self) -> &Regex {}
+  pub fn break_at(&self) -> &String {
+    self
+      .tree_ref
+      .as_ref(&self.id())
+      .global_options()
+      .window_global_options
+      .break_at()
+  }
+
+  pub fn break_at_regex(&self) -> &Regex {
+    self
+      .tree_ref
+      .as_ref(&self.id())
+      .global_options()
+      .window_global_options
+      .break_at_regex()
+  }
 
   fn update_window_content_options(&mut self) {
     match self.base.node_mut(&self.content_id).unwrap() {
