@@ -1,4 +1,4 @@
-//! The VIM window.
+//! The Vim window.
 
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Pos, U16Rect};
@@ -258,7 +258,7 @@ impl Window {
     _start_column: usize,
     _end_column: usize,
   ) {
-    let actual_shape = self.actual_shape();
+    let actual_shape = content.actual_shape();
     let upos: U16Pos = actual_shape.min().into();
     let height = actual_shape.height();
     let width = actual_shape.width();
@@ -403,7 +403,7 @@ impl Window {
     _start_column: usize,
     _end_column: usize,
   ) {
-    let actual_shape = self.actual_shape();
+    let actual_shape = content.actual_shape();
     let upos: U16Pos = actual_shape.min().into();
     let height = actual_shape.height();
     let width = actual_shape.width();
