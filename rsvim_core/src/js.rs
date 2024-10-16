@@ -78,6 +78,10 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+pub fn v8_version() -> &'static str {
+  v8::VERSION_STRING
+}
+
 /// The state of js runtime.
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
