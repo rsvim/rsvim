@@ -4,6 +4,7 @@
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
     "checkJs": true,
+    "declaration": true,
     "keyofStringsOnly": false,
     "lib": ["es2022"],
     "module": "es2022",
