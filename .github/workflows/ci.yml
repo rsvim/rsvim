@@ -74,6 +74,10 @@ jobs:
         run: |
           echo "Info: cargo doc --workspace"
           cargo doc --workspace
+      - name: Security Audit
+        uses: rustsec/audit-check@v1.4.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
   unit_test:
     name: Unit Test
     strategy:
