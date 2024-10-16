@@ -16,7 +16,8 @@ use crate::ui::tree::TreeArc;
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::path::PathBuf;
+use std::mem::ManuallyDrop;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
@@ -76,6 +77,101 @@ pub type JsFutureId = i32;
 pub fn next_future_id() -> JsFutureId {
   static GLOBAL: AtomicI32 = AtomicI32::new(1);
   GLOBAL.fetch_add(1, Ordering::Relaxed)
+}
+
+pub fn init_v8_platform() {
+  static V8_INIT: Once = Once::new();
+  V8_INIT.call_once(move || {
+    let platform = v8::new_default_platform(0, false).make_shared();
+    v8::V8::initialize_platform(platform);
+    v8::V8::initialize();
+  });
+}
+
+/// Js runtime for creating V8 snapshot.
+pub struct JsRuntimeForSnapshot {
+  pub isolate: ManuallyDrop<v8::OwnedIsolate>,
+}
+
+impl JsRuntimeForSnapshot {
+  /// Creates a new JsRuntime for V8 snapshot.
+  #[allow(clippy::new_without_default)]
+  pub fn new() -> Self {
+    // Fire up the v8 engine.
+    init_v8_platform();
+
+    unsafe {
+      let mut isolate = v8::Isolate::snapshot_creator(None, None);
+      let isolate_ptr = &mut isolate as *mut v8::OwnedIsolate;
+
+      let scope = &mut v8::HandleScope::new(&mut *isolate_ptr);
+      let context = binding::create_new_context(scope);
+      scope.set_default_context(context);
+
+      // Load all runtime modules
+      JsRuntimeForSnapshot::init_environment(&mut *isolate_ptr, context);
+
+      JsRuntimeForSnapshot {
+        isolate: ManuallyDrop::new(isolate),
+      }
+    }
+  }
+
+  /// Initializes synchronously the core environment (see js/runtime/global.js).
+  fn init_environment(isolate: &mut v8::OwnedIsolate, context: v8::Local<v8::Context>) {
+    let mut scope = v8::HandleScope::with_context(isolate, context);
+
+    let name = "rsvim:runtime/10__web.js";
+    let source = include_str!("./js/runtime/10__web.js");
+    JsRuntimeForSnapshot::init_builtin_module(&mut scope, name, source);
+
+    let name = "rsvim:runtime/50__rsvim.js";
+    let source = include_str!("./js/runtime/50__rsvim.js");
+    JsRuntimeForSnapshot::init_builtin_module(&mut scope, name, source);
+  }
+
+  /// Synchronously load builtin module.
+  fn init_builtin_module(scope: &mut v8::HandleScope, name: &str, source: &str) {
+    let tc_scope = &mut v8::TryCatch::new(scope);
+
+    let module = match fetch_module_tree(tc_scope, name, Some(source)) {
+      Some(module) => module,
+      None => {
+        assert!(tc_scope.has_caught());
+        let exception = tc_scope.exception().unwrap();
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        error!("Failed to import builtin modules: {name}, error: {exception:?}");
+        eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
+        std::process::exit(1);
+      }
+    };
+
+    if module
+      .instantiate_module(tc_scope, module_resolve_cb)
+      .is_none()
+    {
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
+
+    let _ = module.evaluate(tc_scope);
+
+    if module.get_status() == v8::ModuleStatus::Errored {
+      let exception = module.get_exception();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
+  }
+}
+
+impl Drop for JsRuntimeForSnapshot {
+  fn drop(&mut self) {}
 }
 
 pub struct JsRuntimeState {
@@ -151,12 +247,7 @@ impl JsRuntime {
     v8::V8::set_flags_from_string(&flags);
 
     // Fire up the v8 engine.
-    static V8_INIT: Once = Once::new();
-    V8_INIT.call_once(move || {
-      let platform = v8::new_default_platform(0, false).make_shared();
-      v8::V8::initialize_platform(platform);
-      v8::V8::initialize();
-    });
+    init_v8_platform();
 
     let mut isolate = v8::Isolate::new(v8::CreateParams::default());
 
