@@ -161,52 +161,13 @@ pub struct JsRuntimeState {
   // Data Access for RSVIM }
 }
 
-pub struct JsRuntimeInner {
-  // This js runtime is created for snapshot.
-  is_for_snapshot: bool,
-
+pub struct JsRuntime {
   // V8 isolate.
-  pub isolate: ManuallyDrop<v8::OwnedIsolate>,
+  pub isolate: v8::OwnedIsolate,
 
   /// The state of the runtime.
   #[allow(unused)]
-  pub state: ManuallyDropRc<RefCell<JsRuntimeState>>,
-}
-
-impl JsRuntimeInner {
-  pub fn prepare_for_snapshot(mut self) -> v8::OwnedIsolate {
-    let (isolate, state) = unsafe {
-      (
-        ManuallyDrop::take(&mut self.isolate),
-        ManuallyDrop::take(&mut self.state.0),
-      )
-    };
-    std::mem::forget(self);
-    drop(state);
-    isolate
-  }
-}
-
-impl Drop for JsRuntimeInner {
-  fn drop(&mut self) {
-    // Only non-snapshot js runtime will call this method.
-    // assert!(!self.is_for_snapshot);
-    eprintln!(
-      "JsRuntimeInner dropped, is_for_snapshot:{}",
-      self.is_for_snapshot
-    );
-
-    // SAFETY: We gotta drop these
-    unsafe {
-      ManuallyDrop::drop(&mut self.state.0);
-      ManuallyDrop::drop(&mut self.isolate);
-    }
-  }
-}
-
-pub struct JsRuntime {
-  // Js runtime inner.
-  inner: JsRuntimeInner,
+  pub state: Rc<RefCell<JsRuntimeState>>,
 }
 
 impl JsRuntime {
@@ -300,13 +261,10 @@ impl JsRuntime {
     isolate.set_slot(state.clone());
 
     let mut runtime = JsRuntime {
-      inner: JsRuntimeInner {
-        is_for_snapshot: false,
-        isolate: ManuallyDrop::new(isolate),
-        // event_loop,
-        state: ManuallyDropRc(ManuallyDrop::new(state)),
-        // inspector,
-      },
+      isolate,
+      // event_loop,
+      state,
+      // inspector,
     };
 
     runtime.init_environment();
@@ -400,34 +358,31 @@ impl JsRuntime {
     let (_master_send_to_js_runtime, js_runtime_recv_from_master) = tokio::sync::mpsc::channel(10);
 
     let mut runtime = JsRuntime {
-      inner: JsRuntimeInner {
-        is_for_snapshot: true,
-        isolate: ManuallyDrop::new(snapshot_creator),
+      isolate: snapshot_creator,
 
-        // Just create mock data here.
-        state: ManuallyDropRc(ManuallyDrop::new(Rc::new(RefCell::new(JsRuntimeState {
-          context,
-          module_map: ModuleMap::new(),
-          timeout_handles: HashSet::new(),
-          pending_futures: HashMap::new(),
-          startup_moment: Instant::now(),
-          time_origin: SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis(),
-          exceptions: ExceptionState::new(),
-          options: JsRuntimeOptions::default(),
-          // wake_event_queued: false,
-          js_runtime_send_to_master,
-          js_runtime_recv_from_master,
-          cli_opt: CliOpt::default(),
-          runtime_path: Arc::new(RwLock::new(vec![])),
-          tree: Tree::to_arc(Tree::new(U16Size::new(0, 0))),
-          buffers: Buffers::to_arc(Buffers::new()),
-          editing_state: State::to_arc(State::new()),
-        })))),
-        // inspector,
-      },
+      // Just create mock data here.
+      state: Rc::new(RefCell::new(JsRuntimeState {
+        context,
+        module_map: ModuleMap::new(),
+        timeout_handles: HashSet::new(),
+        pending_futures: HashMap::new(),
+        startup_moment: Instant::now(),
+        time_origin: SystemTime::now()
+          .duration_since(UNIX_EPOCH)
+          .unwrap()
+          .as_millis(),
+        exceptions: ExceptionState::new(),
+        options: JsRuntimeOptions::default(),
+        // wake_event_queued: false,
+        js_runtime_send_to_master,
+        js_runtime_recv_from_master,
+        cli_opt: CliOpt::default(),
+        runtime_path: Arc::new(RwLock::new(vec![])),
+        tree: Tree::to_arc(Tree::new(U16Size::new(0, 0))),
+        buffers: Buffers::to_arc(Buffers::new()),
+        editing_state: State::to_arc(State::new()),
+      })),
+      // inspector,
     };
 
     runtime.init_environment();
@@ -455,8 +410,7 @@ impl JsRuntime {
 
   pub fn create_snapshot(mut self) -> v8::StartupData {
     self
-      .inner
-      .prepare_for_snapshot()
+      .isolate
       .create_blob(v8::FunctionCodeHandling::Keep)
       .unwrap()
   }
@@ -582,7 +536,7 @@ impl JsRuntime {
 
   /// Runs a single tick of the event-loop.
   pub fn tick_event_loop(&mut self) {
-    let isolate_has_pending_tasks = self.inner.isolate.has_pending_background_tasks();
+    let isolate_has_pending_tasks = self.isolate.has_pending_background_tasks();
     debug!(
       "Tick js runtime, isolate has pending tasks: {:?}",
       isolate_has_pending_tasks
@@ -816,14 +770,14 @@ impl JsRuntime {
 
   /// Returns the runtime's state.
   pub fn get_state(&self) -> Rc<RefCell<JsRuntimeState>> {
-    Self::state(&self.inner.isolate)
+    Self::state(&self.isolate)
   }
 
   /// Returns a v8 handle scope for the runtime.
   /// See: <https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html>.
   pub fn handle_scope(&mut self) -> v8::HandleScope {
     let context = self.context();
-    v8::HandleScope::with_context(self.inner.isolate.as_mut(), context)
+    v8::HandleScope::with_context(&mut self.isolate, context)
   }
 
   /// Returns a context created for the runtime.
