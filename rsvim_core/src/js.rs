@@ -19,8 +19,6 @@ use crate::ui::tree::{Tree, TreeArc};
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::mem::ManuallyDrop;
-use std::ops::{Deref, DerefMut};
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
@@ -94,32 +92,6 @@ pub fn init_v8_platform() {
     v8::V8::initialize_platform(platform);
     v8::V8::initialize();
   });
-}
-
-/// ManuallyDrop<Rc<...>> is clone, but it returns a ManuallyDrop<Rc<...>> which is a massive
-/// memory-leak footgun.
-///
-/// This ManuallyDropRc is to fix the memory-leak issue.
-pub struct ManuallyDropRc<T>(ManuallyDrop<Rc<T>>);
-
-impl<T> ManuallyDropRc<T> {
-  #[allow(clippy::should_implement_trait)]
-  pub fn clone(&self) -> Rc<T> {
-    self.0.deref().clone()
-  }
-}
-
-impl<T> Deref for ManuallyDropRc<T> {
-  type Target = Rc<T>;
-  fn deref(&self) -> &Self::Target {
-    self.0.deref()
-  }
-}
-
-impl<T> DerefMut for ManuallyDropRc<T> {
-  fn deref_mut(&mut self) -> &mut Self::Target {
-    self.0.deref_mut()
-  }
 }
 
 /// The state of js runtime.
