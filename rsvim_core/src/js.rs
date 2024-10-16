@@ -100,25 +100,25 @@ impl JsRuntimeForSnapshot {
     // Fire up the v8 engine.
     init_v8_platform();
 
-    let mut isolate = v8::Isolate::snapshot_creator(None, None);
+    unsafe {
+      let mut isolate = v8::Isolate::snapshot_creator(None, None);
+      let isolate_ptr = &mut isolate as *mut v8::OwnedIsolate;
 
-    let context = {
-      let scope = &mut v8::HandleScope::new(&mut *isolate);
+      let scope = &mut v8::HandleScope::new(&mut *isolate_ptr);
       let context = binding::create_new_context(scope);
       scope.set_default_context(context);
-      v8::Global::new(scope, context)
-    };
 
-    // Load all runtime modules
-    JsRuntimeForSnapshot::init_environment(&mut isolate, context);
+      // Load all runtime modules
+      JsRuntimeForSnapshot::init_environment(&mut *isolate_ptr, context);
 
-    JsRuntimeForSnapshot {
-      isolate: ManuallyDrop::new(isolate),
+      JsRuntimeForSnapshot {
+        isolate: ManuallyDrop::new(isolate),
+      }
     }
   }
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
-  fn init_environment(isolate: &mut v8::OwnedIsolate, context: v8::Global<v8::Context>) {
+  fn init_environment(isolate: &mut v8::OwnedIsolate, context: v8::Local<v8::Context>) {
     let mut scope = v8::HandleScope::with_context(isolate, context);
 
     let name = "rsvim:runtime/10__web.js";
@@ -168,6 +168,10 @@ impl JsRuntimeForSnapshot {
       std::process::exit(1);
     }
   }
+}
+
+impl Drop for JsRuntimeForSnapshot {
+  fn drop(&mut self) {}
 }
 
 pub struct JsRuntimeState {
