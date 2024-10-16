@@ -54,10 +54,16 @@ fn main() -> IoResult<()> {
     // Create event loop.
     let mut event_loop = EventLoop::new(cli_opt)?;
 
-    // Initialize.
-    event_loop.init_js_runtime()?;
+    // Initialize user config.
+    event_loop.init_config()?;
+
+    // Initialize vim editor, i.e. the default window and buffer.
     event_loop.init_editor()?;
+
+    // Initialize TUI.
     event_loop.init_tui()?;
+
+    // Initialize command line options, i.e. the input files (for editing).
     event_loop.init_input_files()?;
 
     // Run loop.
