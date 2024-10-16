@@ -16,7 +16,7 @@ use crate::ui::tree::TreeArc;
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
@@ -302,6 +302,43 @@ impl JsRuntime {
 
     // // Initialize process static values.
     // process::refresh(tc_scope);
+  }
+
+  /// Create snapshot blob for context and modules map.
+  pub fn create_snapshot(&mut self, output: &Path) {
+    let mut snapshot_creator =
+      v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+
+    // Set default context
+    {
+      let context = self.context();
+      let mut scope = self.handle_scope();
+      let local_context = v8::Local::new(&mut scope, context.clone());
+      snapshot_creator.set_default_context(local_context);
+    }
+
+    // Add module_map to context data
+    unsafe {
+      // Fix multiple mutable references on self.
+      let mut raw_self = std::ptr::NonNull::new(self as *mut JsRuntime).unwrap();
+
+      let context = raw_self.as_mut().context();
+      let mut scope = raw_self.as_mut().handle_scope();
+      let local_context = v8::Local::new(&mut scope, context.clone());
+      let state_rc = raw_self.as_ref().get_state();
+      let state = state_rc.borrow_mut();
+      for (filename, module) in state.module_map.index.iter() {
+        let filename_handle = v8::String::new(&mut scope, filename).unwrap();
+        scope.add_context_data(local_context, filename_handle);
+        let module_handle = v8::Local::new(&mut scope, module);
+        scope.add_context_data(local_context, module_handle);
+      }
+    }
+
+    let blob = snapshot_creator
+      .create_blob(v8::FunctionCodeHandling::Keep)
+      .unwrap();
+    std::fs::write(output, blob).unwrap();
   }
 
   /// Executes traditional JavaScript code (traditional = not ES modules).
