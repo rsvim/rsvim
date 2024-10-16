@@ -159,9 +159,9 @@ macro_rules! inode_generate_impl_1 {
 
 /// Next unique UI widget ID.
 ///
-/// NOTE: Start from 1000001, so be different from buffer ID.
+/// NOTE: Start from 100001, so be different from buffer ID.
 pub fn next_node_id() -> InodeId {
-  static VALUE: AtomicI32 = AtomicI32::new(1000001);
+  static VALUE: AtomicI32 = AtomicI32::new(100001);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
