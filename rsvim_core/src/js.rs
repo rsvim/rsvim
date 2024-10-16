@@ -78,6 +78,7 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+/// The state of js runtime.
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
   pub context: v8::Global<v8::Context>,
@@ -206,7 +207,7 @@ impl JsRuntime {
       startup_moment,
       time_origin,
       // next_tick_queue: Vec::new(),
-      exceptions: exception::ExceptionState::new(),
+      exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
       js_runtime_send_to_master,
@@ -220,26 +221,26 @@ impl JsRuntime {
 
     isolate.set_slot(state.clone());
 
-    JsRuntime {
+    let mut runtime = JsRuntime {
       isolate,
       // event_loop,
       state,
       // inspector,
-    }
+    };
 
-    // runtime.load_main_environment();
-    //
+    runtime.init_environment();
+
     // // Start inspector agent is requested.
     // if let Some(inspector) = runtime.inspector().as_mut() {
     //   let address = address.unwrap();
     //   inspector.borrow_mut().start_agent(address);
     // }
-    //
-    // runtime
+
+    runtime
   }
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
-  pub fn init_environment(&mut self) {
+  fn init_environment(&mut self) {
     let name = "rsvim:runtime/10__web.js";
     let source = include_str!("./js/runtime/10__web.js");
     self.init_builtin_module(name, source);
