@@ -79,11 +79,13 @@ pub fn next_future_id() -> JsFutureId {
   GLOBAL.fetch_add(1, Ordering::Relaxed)
 }
 
-pub struct JsRuntimeStateForSnapshot {
-  /// A sand-boxed execution context with its own set of built-in objects and functions.
-  pub context: v8::Global<v8::Context>,
-  /// Runtime options.
-  pub options: JsRuntimeOptions,
+pub fn init_v8_platform() {
+  static V8_INIT: Once = Once::new();
+  V8_INIT.call_once(move || {
+    let platform = v8::new_default_platform(0, false).make_shared();
+    v8::V8::initialize_platform(platform);
+    v8::V8::initialize();
+  });
 }
 
 /// Js runtime for creating V8 snapshot.
@@ -204,16 +206,6 @@ pub struct JsRuntimeState {
   // Same as the `state` in EventLoop.
   pub editing_state: StateArc,
   // Data Access for RSVIM }
-}
-
-// Initialize V8 platform.
-pub fn init_v8_platform() {
-  static V8_INIT: Once = Once::new();
-  V8_INIT.call_once(move || {
-    let platform = v8::new_default_platform(0, false).make_shared();
-    v8::V8::initialize_platform(platform);
-    v8::V8::initialize();
-  });
 }
 
 pub struct JsRuntime {
