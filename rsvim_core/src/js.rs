@@ -16,6 +16,7 @@ use crate::ui::tree::TreeArc;
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
+use std::mem::ManuallyDrop;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
@@ -34,6 +35,10 @@ pub mod loader;
 pub mod module;
 pub mod msg;
 pub mod transpiler;
+
+pub fn v8_version() -> &'static str {
+  v8::V8::get_version()
+}
 
 #[derive(Debug, Default, Clone)]
 #[allow(dead_code)]
@@ -87,30 +92,17 @@ pub struct JsRuntimeStateForSnapshot {
 
 /// Js runtime for creating V8 snapshot.
 pub struct JsRuntimeForSnapshot {
-  pub isolate: v8::OwnedIsolate,
-
-  #[allow(unused)]
-  pub state: Rc<RefCell<JsRuntimeStateForSnapshot>>,
+  pub isolate: ManuallyDrop<v8::OwnedIsolate>,
 }
 
 impl JsRuntimeForSnapshot {
-  /// Creates a new JsRuntime based on provided options.
-  #[allow(clippy::too_many_arguments)]
-  pub fn new(options: JsRuntimeOptions) -> Self {
-    // Configuration flags for V8.
-    // let mut flags = String::from(concat!(
-    //   " --no-validate-asm",
-    //   " --turbo_fast_api_calls",
-    //   " --harmony-temporal",
-    //   " --js-float16array",
-    // ));
-    let flags = options.v8_flags.join(" ");
-    v8::V8::set_flags_from_string(&flags);
-
+  /// Creates a new JsRuntime for V8 snapshot.
+  #[allow(clippy::new_without_default)]
+  pub fn new() -> Self {
     // Fire up the v8 engine.
     init_v8_platform();
 
-    let mut isolate = v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+    let mut isolate = v8::Isolate::snapshot_creator(None, None);
 
     let context = {
       let scope = &mut v8::HandleScope::new(&mut *isolate);
@@ -119,30 +111,29 @@ impl JsRuntimeForSnapshot {
       v8::Global::new(scope, context)
     };
 
-    let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot { context, options }));
+    // Load all runtime modules
+    JsRuntimeForSnapshot::init_environment(&mut isolate, context);
 
-    isolate.set_slot(state.clone());
-
-    JsRuntimeForSnapshot { isolate, state }
+    JsRuntimeForSnapshot {
+      isolate: ManuallyDrop::new(isolate),
+    }
   }
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
-  pub fn init_environment(&mut self) {
+  fn init_environment(isolate: &mut v8::OwnedIsolate, context: v8::Global<v8::Context>) {
+    let mut scope = v8::HandleScope::with_context(isolate, context);
+
     let name = "rsvim:runtime/10__web.js";
     let source = include_str!("./js/runtime/10__web.js");
-    self.init_builtin_module(name, source);
+    JsRuntimeForSnapshot::init_builtin_module(&mut scope, name, source);
 
     let name = "rsvim:runtime/50__rsvim.js";
     let source = include_str!("./js/runtime/50__rsvim.js");
-    self.init_builtin_module(name, source);
-
-    // // Initialize process static values.
-    // process::refresh(tc_scope);
+    JsRuntimeForSnapshot::init_builtin_module(&mut scope, name, source);
   }
 
   /// Synchronously load builtin module.
-  fn init_builtin_module(&mut self, name: &str, source: &str) {
-    let scope = &mut self.handle_scope();
+  fn init_builtin_module(scope: &mut v8::HandleScope, name: &str, source: &str) {
     let tc_scope = &mut v8::TryCatch::new(scope);
 
     let module = match fetch_module_tree(tc_scope, name, Some(source)) {
@@ -178,31 +169,6 @@ impl JsRuntimeForSnapshot {
       eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
       std::process::exit(1);
     }
-
-    // // Initialize process static values.
-    // process::refresh(tc_scope);
-  }
-
-  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
-    isolate
-      .get_slot::<Rc<RefCell<JsRuntimeStateForSnapshot>>>()
-      .unwrap()
-      .clone()
-  }
-
-  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
-    Self::state(&self.isolate)
-  }
-
-  pub fn handle_scope(&mut self) -> v8::HandleScope {
-    let context = self.context();
-    v8::HandleScope::with_context(&mut self.isolate, context)
-  }
-
-  pub fn context(&mut self) -> v8::Global<v8::Context> {
-    let state = self.get_state();
-    let state = state.borrow();
-    state.context.clone()
   }
 }
 
