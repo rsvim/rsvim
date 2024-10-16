@@ -62,8 +62,8 @@ pub struct JsRuntimeOptions {
 // type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
 
 /// An abstract interface for javascript `Promise` and `async`.
-/// since everything in V8 needs the `&mut v8::HandleScope` to operate with, we cannot simply put
-/// the async task into tokio `spawn` API, but to first
+/// Since everything in V8 needs the `&mut v8::HandleScope` to operate with, we cannot simply put
+/// the async task into tokio `spawn` API.
 pub trait JsFuture {
   fn run(&mut self, scope: &mut v8::HandleScope);
 }
@@ -74,8 +74,8 @@ pub type JsFutureId = i32;
 ///
 /// NOTE: Start form 1.
 pub fn next_future_id() -> JsFutureId {
-  static GLOBAL: AtomicI32 = AtomicI32::new(1);
-  GLOBAL.fetch_add(1, Ordering::Relaxed)
+  static VALUE: AtomicI32 = AtomicI32::new(1);
+  VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
 pub struct JsRuntimeState {
