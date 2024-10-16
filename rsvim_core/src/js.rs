@@ -82,6 +82,15 @@ pub fn v8_version() -> &'static str {
   v8::VERSION_STRING
 }
 
+pub fn init_v8_platform() {
+  static V8_INIT: Once = Once::new();
+  V8_INIT.call_once(move || {
+    let platform = v8::new_default_platform(0, false).make_shared();
+    v8::V8::initialize_platform(platform);
+    v8::V8::initialize();
+  });
+}
+
 /// The state of js runtime.
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
@@ -152,16 +161,11 @@ impl JsRuntime {
     //   " --harmony-temporal",
     //   " --js-float16array",
     // ));
-    let flags = options.v8_flags.join(" ");
-    v8::V8::set_flags_from_string(&flags);
+    // let flags = options.v8_flags.join(" ");
+    // v8::V8::set_flags_from_string(&flags);
 
     // Fire up the v8 engine.
-    static V8_INIT: Once = Once::new();
-    V8_INIT.call_once(move || {
-      let platform = v8::new_default_platform(0, false).make_shared();
-      v8::V8::initialize_platform(platform);
-      v8::V8::initialize();
-    });
+    init_v8_platform();
 
     let mut isolate = v8::Isolate::new(v8::CreateParams::default());
 
