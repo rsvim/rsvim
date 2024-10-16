@@ -36,10 +36,6 @@ pub mod module;
 pub mod msg;
 pub mod transpiler;
 
-pub fn v8_version() -> &'static str {
-  v8::V8::get_version()
-}
-
 #[derive(Debug, Default, Clone)]
 #[allow(dead_code)]
 pub struct JsRuntimeOptions {
