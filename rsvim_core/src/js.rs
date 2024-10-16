@@ -1,6 +1,9 @@
 //! JavaScript runtime.
 
-use crate::buf::BuffersArc;
+#![allow(dead_code)]
+
+use crate::buf::{Buffers, BuffersArc};
+use crate::cart::U16Size;
 use crate::cli::CliOpt;
 use crate::error::{AnyErr, TheErr};
 use crate::js::err::JsError;
@@ -10,18 +13,20 @@ use crate::js::module::{
   create_origin, fetch_module_tree, resolve_import, ImportKind, ImportMap, ModuleMap, ModuleStatus,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::state::StateArc;
-use crate::ui::tree::TreeArc;
+use crate::state::{State, StateArc};
+use crate::ui::tree::{Tree, TreeArc};
 
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::path::{Path, PathBuf};
+use std::mem::ManuallyDrop;
+use std::ops::{Deref, DerefMut};
+use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
 use std::sync::Once;
-use std::time::Instant;
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{debug, error};
 
@@ -91,6 +96,32 @@ pub fn init_v8_platform() {
   });
 }
 
+/// ManuallyDrop<Rc<...>> is clone, but it returns a ManuallyDrop<Rc<...>> which is a massive
+/// memory-leak footgun.
+///
+/// This ManuallyDropRc is to fix the memory-leak issue.
+pub struct ManuallyDropRc<T>(ManuallyDrop<Rc<T>>);
+
+impl<T> ManuallyDropRc<T> {
+  #[allow(clippy::should_implement_trait)]
+  pub fn clone(&self) -> Rc<T> {
+    self.0.deref().clone()
+  }
+}
+
+impl<T> Deref for ManuallyDropRc<T> {
+  type Target = Rc<T>;
+  fn deref(&self) -> &Self::Target {
+    self.0.deref()
+  }
+}
+
+impl<T> DerefMut for ManuallyDropRc<T> {
+  fn deref_mut(&mut self) -> &mut Self::Target {
+    self.0.deref_mut()
+  }
+}
+
 /// The state of js runtime.
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
@@ -130,13 +161,52 @@ pub struct JsRuntimeState {
   // Data Access for RSVIM }
 }
 
-pub struct JsRuntime {
+pub struct JsRuntimeInner {
+  // This js runtime is created for snapshot.
+  is_for_snapshot: bool,
+
   // V8 isolate.
-  isolate: v8::OwnedIsolate,
+  pub isolate: ManuallyDrop<v8::OwnedIsolate>,
 
   /// The state of the runtime.
   #[allow(unused)]
-  pub state: Rc<RefCell<JsRuntimeState>>,
+  pub state: ManuallyDropRc<RefCell<JsRuntimeState>>,
+}
+
+impl JsRuntimeInner {
+  pub fn prepare_for_snapshot(mut self) -> v8::OwnedIsolate {
+    let (isolate, state) = unsafe {
+      (
+        ManuallyDrop::take(&mut self.isolate),
+        ManuallyDrop::take(&mut self.state.0),
+      )
+    };
+    std::mem::forget(self);
+    drop(state);
+    isolate
+  }
+}
+
+impl Drop for JsRuntimeInner {
+  fn drop(&mut self) {
+    // Only non-snapshot js runtime will call this method.
+    // assert!(!self.is_for_snapshot);
+    eprintln!(
+      "JsRuntimeInner dropped, is_for_snapshot:{}",
+      self.is_for_snapshot
+    );
+
+    // SAFETY: We gotta drop these
+    unsafe {
+      ManuallyDrop::drop(&mut self.state.0);
+      ManuallyDrop::drop(&mut self.isolate);
+    }
+  }
+}
+
+pub struct JsRuntime {
+  // Js runtime inner.
+  inner: JsRuntimeInner,
 }
 
 impl JsRuntime {
@@ -230,10 +300,13 @@ impl JsRuntime {
     isolate.set_slot(state.clone());
 
     let mut runtime = JsRuntime {
-      isolate,
-      // event_loop,
-      state,
-      // inspector,
+      inner: JsRuntimeInner {
+        is_for_snapshot: false,
+        isolate: ManuallyDrop::new(isolate),
+        // event_loop,
+        state: ManuallyDropRc(ManuallyDrop::new(state)),
+        // inspector,
+      },
     };
 
     runtime.init_environment();
@@ -304,28 +377,70 @@ impl JsRuntime {
     // process::refresh(tc_scope);
   }
 
-  /// Create snapshot blob for context and modules map.
-  pub fn create_snapshot(&mut self, output: &Path) {
+  /// Creates a new js runtime for snapshot.
+  pub fn new_for_snapshot() -> Self {
+    init_v8_platform();
+
     let mut snapshot_creator =
       v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
 
-    // Set default context
-    {
-      let context = self.context();
-      let mut scope = self.handle_scope();
-      let local_context = v8::Local::new(&mut scope, context.clone());
-      snapshot_creator.set_default_context(local_context);
-    }
+    let context = {
+      let scope = &mut v8::HandleScope::new(&mut *snapshot_creator);
+      let context = binding::create_new_context(scope);
+      let global_context = v8::Global::new(scope, context);
+
+      // Set default context
+      let local_context = v8::Local::new(scope, global_context.clone());
+      scope.set_default_context(local_context);
+
+      global_context
+    };
+
+    let (js_runtime_send_to_master, _master_recv_from_js_runtime) = tokio::sync::mpsc::channel(10);
+    let (_master_send_to_js_runtime, js_runtime_recv_from_master) = tokio::sync::mpsc::channel(10);
+
+    let mut runtime = JsRuntime {
+      inner: JsRuntimeInner {
+        is_for_snapshot: true,
+        isolate: ManuallyDrop::new(snapshot_creator),
+
+        // Just create mock data here.
+        state: ManuallyDropRc(ManuallyDrop::new(Rc::new(RefCell::new(JsRuntimeState {
+          context,
+          module_map: ModuleMap::new(),
+          timeout_handles: HashSet::new(),
+          pending_futures: HashMap::new(),
+          startup_moment: Instant::now(),
+          time_origin: SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis(),
+          exceptions: ExceptionState::new(),
+          options: JsRuntimeOptions::default(),
+          // wake_event_queued: false,
+          js_runtime_send_to_master,
+          js_runtime_recv_from_master,
+          cli_opt: CliOpt::default(),
+          runtime_path: Arc::new(RwLock::new(vec![])),
+          tree: Tree::to_arc(Tree::new(U16Size::new(0, 0))),
+          buffers: Buffers::to_arc(Buffers::new()),
+          editing_state: State::to_arc(State::new()),
+        })))),
+        // inspector,
+      },
+    };
+
+    runtime.init_environment();
 
     // Add module_map to context data
     unsafe {
-      // Fix multiple mutable references on self.
-      let mut raw_self = std::ptr::NonNull::new(self as *mut JsRuntime).unwrap();
+      // Fix multiple mutable references on runtime.
+      let mut raw_runtime = std::ptr::NonNull::new(&mut runtime as *mut JsRuntime).unwrap();
 
-      let context = raw_self.as_mut().context();
-      let mut scope = raw_self.as_mut().handle_scope();
+      let context = raw_runtime.as_mut().context();
+      let mut scope = raw_runtime.as_mut().handle_scope();
       let local_context = v8::Local::new(&mut scope, context.clone());
-      let state_rc = raw_self.as_ref().get_state();
+      let state_rc = raw_runtime.as_ref().get_state();
       let state = state_rc.borrow_mut();
       for (filename, module) in state.module_map.index.iter() {
         let filename_handle = v8::String::new(&mut scope, filename).unwrap();
@@ -335,10 +450,15 @@ impl JsRuntime {
       }
     }
 
-    let blob = snapshot_creator
+    runtime
+  }
+
+  pub fn create_snapshot(mut self) -> v8::StartupData {
+    self
+      .inner
+      .prepare_for_snapshot()
       .create_blob(v8::FunctionCodeHandling::Keep)
-      .unwrap();
-    std::fs::write(output, blob).unwrap();
+      .unwrap()
   }
 
   /// Executes traditional JavaScript code (traditional = not ES modules).
@@ -462,7 +582,7 @@ impl JsRuntime {
 
   /// Runs a single tick of the event-loop.
   pub fn tick_event_loop(&mut self) {
-    let isolate_has_pending_tasks = self.isolate.has_pending_background_tasks();
+    let isolate_has_pending_tasks = self.inner.isolate.has_pending_background_tasks();
     debug!(
       "Tick js runtime, isolate has pending tasks: {:?}",
       isolate_has_pending_tasks
@@ -696,14 +816,14 @@ impl JsRuntime {
 
   /// Returns the runtime's state.
   pub fn get_state(&self) -> Rc<RefCell<JsRuntimeState>> {
-    Self::state(&self.isolate)
+    Self::state(&self.inner.isolate)
   }
 
   /// Returns a v8 handle scope for the runtime.
   /// See: <https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html>.
   pub fn handle_scope(&mut self) -> v8::HandleScope {
     let context = self.context();
-    v8::HandleScope::with_context(&mut self.isolate, context)
+    v8::HandleScope::with_context(self.inner.isolate.as_mut(), context)
   }
 
   /// Returns a context created for the runtime.
