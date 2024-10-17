@@ -94,6 +94,11 @@ pub fn init_v8_platform() {
   });
 }
 
+/// The runtime state for snapshot.
+pub struct JsRuntimeStateForSnapshot {
+  pub context: v8::Global<v8::Context>,
+}
+
 /// The state of js runtime.
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
@@ -375,22 +380,22 @@ impl JsRuntime {
     runtime.init_environment();
 
     // Add module_map to context data
-    unsafe {
-      // Fix multiple mutable references on runtime.
-      let mut raw_runtime = std::ptr::NonNull::new(&mut runtime as *mut JsRuntime).unwrap();
-
-      let context = raw_runtime.as_mut().context();
-      let mut scope = raw_runtime.as_mut().handle_scope();
-      let local_context = v8::Local::new(&mut scope, context.clone());
-      let state_rc = raw_runtime.as_ref().get_state();
-      let state = state_rc.borrow_mut();
-      for (filename, module) in state.module_map.index.iter() {
-        let filename_handle = v8::String::new(&mut scope, filename).unwrap();
-        scope.add_context_data(local_context, filename_handle);
-        let module_handle = v8::Local::new(&mut scope, module);
-        scope.add_context_data(local_context, module_handle);
-      }
-    }
+    // unsafe {
+    //   // Fix multiple mutable references on runtime.
+    //   let mut raw_runtime = std::ptr::NonNull::new(&mut runtime as *mut JsRuntime).unwrap();
+    //
+    //   let context = raw_runtime.as_mut().context();
+    //   let mut scope = raw_runtime.as_mut().handle_scope();
+    //   let local_context = v8::Local::new(&mut scope, context.clone());
+    //   let state_rc = raw_runtime.as_ref().get_state();
+    //   let state = state_rc.borrow_mut();
+    //   for (filename, module) in state.module_map.index.iter() {
+    //     // let filename_handle = v8::String::new(&mut scope, filename).unwrap();
+    //     // scope.add_context_data(local_context, filename_handle);
+    //     // let module_handle = v8::Local::new(&mut scope, module);
+    //     // scope.add_context_data(local_context, module_handle);
+    //   }
+    // }
 
     runtime
   }
