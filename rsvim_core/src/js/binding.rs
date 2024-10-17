@@ -111,6 +111,72 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
   scope.escape(context)
 }
 
+/// Populates a new JavaScript context with low-level Rust bindings.
+pub fn create_new_context_for_snapshot<'s>(
+  scope: &mut v8::HandleScope<'s, ()>,
+) -> v8::Local<'s, v8::Context> {
+  // Here we just keep the scope local, so V8 can serialize it when making snapshot.
+  // Create and enter a new JavaScript context.
+  let context = v8::Context::new(scope, Default::default());
+  let global = context.global(scope);
+  let scope = &mut v8::ContextScope::new(scope, context);
+
+  // set_function_to(scope, global, "print", global_print);
+  // set_function_to(scope, global, "$$reportError", global_report_error);
+  // set_function_to(scope, global, "$$queueMicrotask", global_queue_micro);
+
+  // Register the `__InternalRsvimGlobalObject` global object.
+  let vim = create_object_under(scope, global, "__InternalRsvimGlobalObject");
+
+  // `globalThis`
+  {
+    set_function_to(
+      scope,
+      vim,
+      "global_set_timeout",
+      global_this::timeout::set_timeout,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "global_clear_timeout",
+      global_this::timeout::clear_timeout,
+    );
+  }
+
+  // `Rsvim.opt`
+  {
+    set_function_to(scope, vim, "opt_get_wrap", global_rsvim::opt::get_wrap);
+    set_function_to(scope, vim, "opt_set_wrap", global_rsvim::opt::set_wrap);
+    set_function_to(
+      scope,
+      vim,
+      "opt_get_line_break",
+      global_rsvim::opt::get_line_break,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_line_break",
+      global_rsvim::opt::set_line_break,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_get_break_at",
+      global_rsvim::opt::get_break_at,
+    );
+    set_function_to(
+      scope,
+      vim,
+      "opt_set_break_at",
+      global_rsvim::opt::set_break_at,
+    );
+  }
+
+  context
+}
+
 // // Simple print function bound to Rust's println! macro.
 // fn global_print(
 //   scope: &mut v8::HandleScope,

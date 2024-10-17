@@ -1,6 +1,6 @@
 //! JavaScript runtime.
 
-#![allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 
 use crate::buf::{Buffers, BuffersArc};
 use crate::cart::U16Size;
@@ -10,7 +10,8 @@ use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
-  create_origin, fetch_module_tree, resolve_import, ImportKind, ImportMap, ModuleMap, ModuleStatus,
+  create_origin, fetch_module, fetch_module_tree, resolve_import, ImportKind, ImportMap, ModuleMap,
+  ModuleStatus,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::state::{State, StateArc};
@@ -94,9 +95,166 @@ pub fn init_v8_platform() {
   });
 }
 
-/// The runtime state for snapshot.
+/// The js runtime state for snapshot.
 pub struct JsRuntimeStateForSnapshot {
-  pub context: v8::Global<v8::Context>,
+  /// Holds information about resolved ES modules.
+  pub module_map: ModuleMap,
+}
+
+/// The js runtime for snapshot.
+pub struct JsRuntimeForSnapshot {
+  /// V8 isolate.
+  /// This is an `Option<v8::OwnedIsolate>` instead of just `v8::OwnedIsolate` is to workaround the
+  /// safety issue with snapshot_creator.
+  /// See: <https://github.com/denoland/deno/blob/d0efd040c79021958a1e83caa56572c0401ca1f2/core/runtime.rs?plain=1#L93>.
+  pub isolate: Option<v8::OwnedIsolate>,
+
+  /// The state of the runtime.
+  #[allow(unused)]
+  pub state: Rc<RefCell<JsRuntimeStateForSnapshot>>,
+}
+
+impl JsRuntimeForSnapshot {
+  /// Creates a new js runtime for snapshot.
+  #[allow(clippy::new_without_default)]
+  pub fn new() -> Self {
+    init_v8_platform();
+
+    let mut snapshot_creator =
+      v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+
+    {
+      // Create context, and set default
+      let scope = &mut v8::HandleScope::new(&mut *snapshot_creator);
+      let context = binding::create_new_context_for_snapshot(scope);
+      scope.set_default_context(context);
+    }
+
+    let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
+      module_map: ModuleMap::new(),
+    }));
+
+    snapshot_creator.set_slot(state.clone());
+
+    let mut runtime = JsRuntimeForSnapshot {
+      isolate: Some(snapshot_creator),
+      state,
+    };
+
+    runtime.init_environment();
+
+    // Add module_map to context data
+    unsafe {
+      // Fix multiple mutable references on runtime.
+      let mut raw_runtime =
+        std::ptr::NonNull::new(&mut runtime as *mut JsRuntimeForSnapshot).unwrap();
+
+      let context = raw_runtime.as_mut().context();
+      let mut scope = raw_runtime.as_mut().handle_scope();
+      let local_context = v8::Local::new(&mut scope, context.clone());
+      let state_rc = raw_runtime.as_ref().get_state();
+      let state = state_rc.borrow_mut();
+      for (_filename, module) in state.module_map.index.iter() {
+        // let filename_handle = v8::String::new(&mut scope, filename).unwrap();
+        // scope.add_context_data(local_context, filename_handle);
+        let module_handle = v8::Local::new(&mut scope, module);
+        scope.add_context_data(local_context, module_handle);
+      }
+    }
+
+    let _state: Rc<RefCell<JsRuntimeState>> =
+      runtime.isolate.as_mut().unwrap().remove_slot().unwrap();
+
+    runtime
+  }
+
+  pub fn create_snapshot(&mut self) -> v8::StartupData {
+    let snapshot_creator = self.isolate.take().unwrap();
+    snapshot_creator
+      .create_blob(v8::FunctionCodeHandling::Keep)
+      .unwrap()
+  }
+
+  /// Initializes synchronously the core environment (see js/runtime/global.js).
+  fn init_environment(&mut self) {
+    let name = "rsvim:runtime/10__web.js";
+    let source = include_str!("./js/runtime/10__web.js");
+    self.init_builtin_module(name, source);
+
+    let name = "rsvim:runtime/50__rsvim.js";
+    let source = include_str!("./js/runtime/50__rsvim.js");
+    self.init_builtin_module(name, source);
+
+    // // Initialize process static values.
+    // process::refresh(tc_scope);
+  }
+
+  /// Synchronously load builtin module.
+  fn init_builtin_module(&mut self, name: &str, source: &str) {
+    let scope = &mut self.handle_scope();
+    let tc_scope = &mut v8::TryCatch::new(scope);
+
+    let module = match fetch_module(tc_scope, name, Some(source)) {
+      Some(module) => module,
+      None => {
+        assert!(tc_scope.has_caught());
+        let exception = tc_scope.exception().unwrap();
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        error!("Failed to import builtin modules: {name}, error: {exception:?}");
+        eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
+        std::process::exit(1);
+      }
+    };
+
+    if module
+      .instantiate_module(tc_scope, module_resolve_cb)
+      .is_none()
+    {
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
+
+    let _ = module.evaluate(tc_scope);
+
+    if module.get_status() == v8::ModuleStatus::Errored {
+      let exception = module.get_exception();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
+
+    // // Initialize process static values.
+    // process::refresh(tc_scope);
+  }
+}
+
+impl JsRuntimeForSnapshot {
+  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeState>> {
+    isolate
+      .get_slot::<Rc<RefCell<JsRuntimeState>>>()
+      .unwrap()
+      .clone()
+  }
+
+  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeState>> {
+    Self::state(self.isolate.as_ref().unwrap())
+  }
+
+  pub fn handle_scope(&mut self) -> v8::HandleScope {
+    let context = self.context();
+    v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
+  }
+
+  pub fn context(&mut self) -> v8::Global<v8::Context> {
+    let state = self.get_state();
+    let state = state.borrow();
+    state.context.clone()
+  }
 }
 
 /// The state of js runtime.
@@ -322,89 +480,6 @@ impl JsRuntime {
 
     // // Initialize process static values.
     // process::refresh(tc_scope);
-  }
-
-  /// Creates a new js runtime for snapshot.
-  pub fn new_for_snapshot() -> Self {
-    init_v8_platform();
-
-    let mut snapshot_creator =
-      v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
-
-    let context = {
-      let scope = &mut v8::HandleScope::new(&mut *snapshot_creator);
-      let context = binding::create_new_context(scope);
-      let global_context = v8::Global::new(scope, context);
-
-      // Set default context
-      let local_context = v8::Local::new(scope, global_context.clone());
-      scope.set_default_context(local_context);
-
-      global_context
-    };
-
-    let (js_runtime_send_to_master, _master_recv_from_js_runtime) = tokio::sync::mpsc::channel(10);
-    let (_master_send_to_js_runtime, js_runtime_recv_from_master) = tokio::sync::mpsc::channel(10);
-
-    // Just create mock data here.
-    let state = Rc::new(RefCell::new(JsRuntimeState {
-      context,
-      module_map: ModuleMap::new(),
-      timeout_handles: HashSet::new(),
-      pending_futures: HashMap::new(),
-      startup_moment: Instant::now(),
-      time_origin: SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .unwrap()
-        .as_millis(),
-      exceptions: ExceptionState::new(),
-      options: JsRuntimeOptions::default(),
-      // wake_event_queued: false,
-      js_runtime_send_to_master,
-      js_runtime_recv_from_master,
-      cli_opt: CliOpt::default(),
-      runtime_path: Arc::new(RwLock::new(vec![])),
-      tree: Tree::to_arc(Tree::new(U16Size::new(0, 0))),
-      buffers: Buffers::to_arc(Buffers::new()),
-      editing_state: State::to_arc(State::new()),
-    }));
-
-    snapshot_creator.set_slot(state.clone());
-
-    let mut runtime = JsRuntime {
-      will_snapshot: true,
-      isolate: Some(snapshot_creator),
-      state,
-    };
-
-    runtime.init_environment();
-
-    // Add module_map to context data
-    // unsafe {
-    //   // Fix multiple mutable references on runtime.
-    //   let mut raw_runtime = std::ptr::NonNull::new(&mut runtime as *mut JsRuntime).unwrap();
-    //
-    //   let context = raw_runtime.as_mut().context();
-    //   let mut scope = raw_runtime.as_mut().handle_scope();
-    //   let local_context = v8::Local::new(&mut scope, context.clone());
-    //   let state_rc = raw_runtime.as_ref().get_state();
-    //   let state = state_rc.borrow_mut();
-    //   for (filename, module) in state.module_map.index.iter() {
-    //     // let filename_handle = v8::String::new(&mut scope, filename).unwrap();
-    //     // scope.add_context_data(local_context, filename_handle);
-    //     // let module_handle = v8::Local::new(&mut scope, module);
-    //     // scope.add_context_data(local_context, module_handle);
-    //   }
-    // }
-
-    runtime
-  }
-
-  pub fn create_snapshot(&mut self) -> v8::StartupData {
-    let snapshot_creator = self.isolate.take().unwrap();
-    snapshot_creator
-      .create_blob(v8::FunctionCodeHandling::Keep)
-      .unwrap()
   }
 
   /// Executes traditional JavaScript code (traditional = not ES modules).
