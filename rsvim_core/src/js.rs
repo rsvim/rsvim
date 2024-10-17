@@ -95,12 +95,6 @@ pub fn init_v8_platform() {
   });
 }
 
-/// The js runtime state for snapshot.
-pub struct JsRuntimeStateForSnapshot {
-  /// Holds information about resolved ES modules.
-  pub module_map: ModuleMap,
-}
-
 /// The js runtime for snapshot.
 pub struct JsRuntimeForSnapshot {
   /// V8 isolate.
@@ -108,10 +102,6 @@ pub struct JsRuntimeForSnapshot {
   /// safety issue with snapshot_creator.
   /// See: <https://github.com/denoland/deno/blob/d0efd040c79021958a1e83caa56572c0401ca1f2/core/runtime.rs?plain=1#L93>.
   pub isolate: Option<v8::OwnedIsolate>,
-
-  /// The state of the runtime.
-  #[allow(unused)]
-  pub state: Rc<RefCell<JsRuntimeStateForSnapshot>>,
 }
 
 impl JsRuntimeForSnapshot {
@@ -120,52 +110,37 @@ impl JsRuntimeForSnapshot {
   pub fn new() -> Self {
     init_v8_platform();
 
-    let mut snapshot_creator =
-      v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+    let mut isolate = v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
 
-    {
-      // Create context, and set default
-      let scope = &mut v8::HandleScope::new(&mut *snapshot_creator);
-      let context = binding::create_new_context_for_snapshot(scope);
-      scope.set_default_context(context);
-    }
-
-    let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
-      module_map: ModuleMap::new(),
-    }));
-
-    snapshot_creator.set_slot(state.clone());
-
-    let mut runtime = JsRuntimeForSnapshot {
-      isolate: Some(snapshot_creator),
-      state,
-    };
-
-    runtime.init_environment();
-
-    // Add module_map to context data
     unsafe {
-      // Fix multiple mutable references on runtime.
-      let mut raw_runtime =
-        std::ptr::NonNull::new(&mut runtime as *mut JsRuntimeForSnapshot).unwrap();
+      let mut raw_isolate = std::ptr::NonNull::new(&mut isolate as *mut v8::OwnedIsolate).unwrap();
 
-      let context = raw_runtime.as_mut().context();
-      let mut scope = raw_runtime.as_mut().handle_scope();
-      let local_context = v8::Local::new(&mut scope, context.clone());
-      let state_rc = raw_runtime.as_ref().get_state();
-      let state = state_rc.borrow_mut();
-      for (_filename, module) in state.module_map.index.iter() {
-        // let filename_handle = v8::String::new(&mut scope, filename).unwrap();
-        // scope.add_context_data(local_context, filename_handle);
-        let module_handle = v8::Local::new(&mut scope, module);
-        scope.add_context_data(local_context, module_handle);
+      // Create scope, default context
+      let mut scope = v8::HandleScope::new(raw_isolate.as_mut());
+      let context = v8::Context::new(&mut scope, Default::default());
+      scope.set_default_context(context);
+
+      let mut scope_with_context = v8::HandleScope::with_context(raw_isolate.as_mut(), context);
+      let name = "rsvim:runtime/10__web.js";
+      let source = include_str!("./js/runtime/10__web.js");
+      let web_module1 =
+        JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
+
+      let name = "rsvim:runtime/50__rsvim.js";
+      let source = include_str!("./js/runtime/50__rsvim.js");
+      let rsvim_module2 =
+        JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
+      let modules = [web_module1, rsvim_module2];
+
+      for (idx, module) in modules.iter().enumerate() {
+        let data_idx = scope.add_context_data(context, *module);
+        assert_eq!(idx, data_idx);
       }
     }
 
-    let _state: Rc<RefCell<JsRuntimeState>> =
-      runtime.isolate.as_mut().unwrap().remove_slot().unwrap();
-
-    runtime
+    JsRuntimeForSnapshot {
+      isolate: Some(isolate),
+    }
   }
 
   pub fn create_snapshot(&mut self) -> v8::StartupData {
@@ -175,26 +150,15 @@ impl JsRuntimeForSnapshot {
       .unwrap()
   }
 
-  /// Initializes synchronously the core environment (see js/runtime/global.js).
-  fn init_environment(&mut self) {
-    let name = "rsvim:runtime/10__web.js";
-    let source = include_str!("./js/runtime/10__web.js");
-    self.init_builtin_module(name, source);
-
-    let name = "rsvim:runtime/50__rsvim.js";
-    let source = include_str!("./js/runtime/50__rsvim.js");
-    self.init_builtin_module(name, source);
-
-    // // Initialize process static values.
-    // process::refresh(tc_scope);
-  }
-
   /// Synchronously load builtin module.
-  fn init_builtin_module(&mut self, name: &str, source: &str) {
-    let scope = &mut self.handle_scope();
+  fn init_builtin_module<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    name: &str,
+    source: &str,
+  ) -> v8::Local<'s, v8::Module> {
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    let module = match fetch_module(tc_scope, name, Some(source)) {
+    match fetch_module(tc_scope, name, Some(source)) {
       Some(module) => module,
       None => {
         assert!(tc_scope.has_caught());
@@ -204,32 +168,7 @@ impl JsRuntimeForSnapshot {
         eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
         std::process::exit(1);
       }
-    };
-
-    if module
-      .instantiate_module(tc_scope, module_resolve_cb)
-      .is_none()
-    {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
-      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
-      std::process::exit(1);
     }
-
-    let _ = module.evaluate(tc_scope);
-
-    if module.get_status() == v8::ModuleStatus::Errored {
-      let exception = module.get_exception();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
-      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
-      std::process::exit(1);
-    }
-
-    // // Initialize process static values.
-    // process::refresh(tc_scope);
   }
 }
 
