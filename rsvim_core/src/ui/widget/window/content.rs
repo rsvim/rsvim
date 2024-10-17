@@ -935,7 +935,7 @@ mod tests {
 
   #[test]
   fn _draw_from_top_for_nowrap4() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -1413,6 +1413,93 @@ mod tests {
         .filter(|c| *c != ' ')
         .collect::<Vec<_>>()
         .is_empty());
+    }
+  }
+
+  #[test]
+  fn _draw_from_top_for_wrap_linebreak4() {
+    // INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "This is a    ",
+      "quite simple ",
+      "and small    ",
+      "test lines.  ",
+      "But still it ",
+      "contains     ",
+      "several      ",
+      "things we    ",
+      "want to test:",
+      "             ",
+      "  1. When the",
+      " line is     ",
+      "small enough ",
+      "to completely",
+      " put inside a",
+      " row of the  ",
+      "window       ",
+      "content      ",
+      "widget, then ",
+      "the line-wrap",
+      " and word-   ",
+      "wrap doesn't ",
+      "affect the   ",
+      "rendering.   ",
+      "  2. When the",
+      " line is too ",
+      "long to be   ",
+      "completely   ",
+      "put in a row ",
+      "of the window",
+      " content     ",
+    ];
+    let width = 13;
+    let height = 31;
+    let terminal_size = U16Size::new(width, height);
+    let mut tree = Tree::new(terminal_size);
+    let window_options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    tree.global_options_mut().window_local_options = window_options;
+    let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
+    let canvas_size = U16Size::new(width, height);
+    let mut canvas = Canvas::new(canvas_size);
+    window_content._draw_from_top_for_wrap_linebreak(&mut canvas, 1, 0, 0);
+    let actual = canvas
+      .frame()
+      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{:?}", actual);
+    info!("expect:{:?}", expect);
+    assert_eq!(actual.len(), height as usize);
+    assert_eq!(actual.len(), expect.len());
+    for (i, a) in actual.into_iter().enumerate() {
+      assert!(a.len() == width as usize);
+      if i < expect.len() {
+        let e = expect[i];
+        info!("{:?} a:{:?}, e:{:?}", i, a, e);
+        assert!(a.len() == e.len() || e.is_empty());
+        if a.len() == e.len() {
+          assert_eq!(a, e);
+        }
+      } else {
+        info!("{:?} a:{:?}, e:empty", i, a);
+        assert_eq!(a, [" "; 27].join(""));
+      }
     }
   }
 }
