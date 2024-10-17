@@ -14,6 +14,7 @@ use crate::ui::widget::Widgetable;
 
 use crossterm::style::{Attributes, Color};
 use geo::point;
+use icu::segmenter::WordSegmenter;
 use regex::Regex;
 use ropey::RopeSlice;
 use std::collections::{BTreeSet, VecDeque};
@@ -267,8 +268,6 @@ impl WindowContent {
   /// Implement the [`_draw_from_top`](WindowContent::_draw_from_top) with below options:
   /// - [`warp`](WindowLocalOptions::wrap) is `true`.
   /// - [`line_break`](WindowLocalOptions::line_break) is `true`
-  ///
-  /// NOTE: This method is implemented with [`textwrap`] crate.
   pub fn _draw_from_top_for_wrap_linebreak(
     &mut self,
     canvas: &mut Canvas,
@@ -315,43 +314,78 @@ impl WindowContent {
 
         // The first `row` (0) in the window maps to the `start_line` in the buffer.
         let mut row = 0;
+        let segmenter = WordSegmenter::new_auto();
 
         while row < height {
           match buflines.next() {
             Some(line) => {
               // Chop the line into maximum chars to avoid super long lines for display.
               let truncated_line = truncate_line(&line, height as usize * width as usize);
-              let mut wrapped_lines = textwrap::wrap(
-                &truncated_line,
-                textwrap::Options::new(width as usize)
-                  .wrap_algorithm(textwrap::WrapAlgorithm::FirstFit),
+              let breakpoints: Vec<usize> = segmenter.segment_str(&truncated_line).collect();
+              debug!(
+                "1-truncated_line: {:?}, breakpoints: {:?}",
+                truncated_line, breakpoints
               );
-              if truncated_line.ends_with("\n")
-                && !wrapped_lines.is_empty()
-                && wrapped_lines[wrapped_lines.len() - 1].is_empty()
-              {
-                wrapped_lines.pop();
-              }
-              debug!("1-wrapped_lines: {:?}", wrapped_lines);
 
-              for wrapped_line in wrapped_lines.iter() {
+              let mut col = 0_u16;
+              for bp in 1..breakpoints.len() {
                 if row >= height {
                   break;
                 }
-                for (col, ch) in wrapped_line.chars().enumerate() {
-                  if row >= height {
-                    break;
-                  }
-                  let cell = Cell::from(ch);
-                  let cell_upos = point!(x: col as u16 + upos.x(), y: row + upos.y());
+                let word_start = breakpoints[bp - 1];
+                let word_end = breakpoints[bp];
+                let word = &truncated_line[word_start..word_end];
+                let word_len = word_end - word_start;
+                if word_len + col as usize <= width as usize {
+                  // Enough space to place this word in current row
+                  let cells = word.chars().map(Cell::from).collect::<Vec<_>>();
+                  let cells_upos = point!(x: col + upos.x(), y: row + upos.y());
                   debug!(
-                    "2-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
-                    row, col, ch, cell_upos
+                    "2-row:{:?}, col:{:?}, cells:{:?}, cells_upos:{:?}",
+                    row,
+                    col,
+                    cells
+                      .iter()
+                      .map(|ch| ch.symbol().to_string())
+                      .collect::<Vec<String>>()
+                      .join(""),
+                    cells_upos
                   );
-                  canvas.frame_mut().set_cell(cell_upos, cell);
-                }
+                  if word != "\n" {
+                    canvas.frame_mut().set_cells_at(cells_upos, cells);
+                    col += word_len as u16;
+                  }
+                } else {
+                  // Not enough space to place this word in current row.
+                  // There're two cases:
+                  // 1. The word can be placed in next empty row (since the column idx `col` will
+                  //    start from 0 in next row).
+                  // 2. The word is just too long to place in an entire row, so next row still
+                  //    cannot place it.
+                  // Anyway, we simply go to next row, and force render all of the word.
+                  row += 1;
+                  col = 0_u16;
 
-                row += 1;
+                  for ch in word.chars() {
+                    if col >= width {
+                      row += 1;
+                      col = 0_u16;
+                    }
+                    if row >= height {
+                      break;
+                    }
+                    let cell = Cell::from(ch);
+                    let cell_upos = point!(x: col + upos.x(), y: row + upos.y());
+                    debug!(
+                      "3-row:{:?}, col:{:?}, ch:{:?}, cell_upos:{:?}",
+                      row, col, ch, cell_upos
+                    );
+                    if word != "\n" {
+                      canvas.frame_mut().set_cell(cell_upos, cell);
+                      col += 1;
+                    }
+                  }
+                }
               }
             }
             None => {
@@ -360,17 +394,17 @@ impl WindowContent {
               let cells_upos = point!(x: upos.x(), y: row + upos.y());
               let cells_len = width as usize;
               debug!(
-                "3-row:{:?}, cells upos:{:?}, cells len:{:?}",
+                "4-row:{:?}, cells upos:{:?}, cells len:{:?}",
                 row, cells_upos, cells_len,
               );
               canvas
                 .frame_mut()
                 .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
                 .unwrap();
-
               row += 1;
             }
           }
+          row += 1;
         }
       }
       None => {
@@ -385,7 +419,7 @@ impl WindowContent {
           let cells_upos = point!(x: upos.x(), y: row + upos.y());
           let cells_len = width as usize;
           debug!(
-            "4-row:{:?}, cells upos:{:?}, cells len:{:?}",
+            "5-row:{:?}, cells upos:{:?}, cells len:{:?}",
             row, cells_upos, cells_len,
           );
           canvas
@@ -900,6 +934,79 @@ mod tests {
   }
 
   #[test]
+  fn _draw_from_top_for_nowrap4() {
+    // INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "This is a quite simple and smal",
+      "But still it contains several t",
+      "  1. When the line is small eno",
+      "  2. When the line is too long ",
+      "     * The extra parts are been",
+      "     * The extra parts are spli",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+    ];
+
+    let width = 31;
+    let height = 19;
+    let terminal_size = U16Size::new(width, height);
+    let mut tree = Tree::new(terminal_size);
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    tree.global_options_mut().window_local_options = window_options;
+    let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
+    let canvas_size = U16Size::new(width, height);
+    let mut canvas = Canvas::new(canvas_size);
+    window_content._draw_from_top_for_nowrap(&mut canvas, 1, 0, 0);
+    let actual = canvas
+      .frame()
+      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{:?}", actual);
+    info!("expect:{:?}", expect);
+    assert_eq!(actual.len(), height as usize);
+    assert_eq!(actual.len(), expect.len());
+    for (i, a) in actual.into_iter().enumerate() {
+      assert!(a.len() == width as usize);
+      if i < expect.len() {
+        let e = expect[i];
+        info!("{:?} a:{:?}, e:{:?}", i, a, e);
+        assert!(a.len() == e.len() || e.is_empty());
+        if a.len() == e.len() {
+          assert_eq!(a, e);
+        }
+      } else {
+        info!("{:?} a:{:?}, e:empty", i, a);
+        assert_eq!(a, [" "; 27].join(""));
+      }
+    }
+  }
+
+  #[test]
   fn _draw_from_top_for_wrap_nolinebreak1() {
     // INIT.call_once(test_log_init);
     let buffer = make_buffer_from_lines(vec![
@@ -1060,6 +1167,86 @@ mod tests {
   }
 
   #[test]
+  fn _draw_from_top_for_wrap_nolinebreak4() {
+    // INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "This is a quite sim",
+      "ple and small test ",
+      "lines.             ",
+      "But still it contai",
+      "ns several things w",
+      "e want to test:    ",
+      "  1. When the line ",
+      "is small enough to ",
+      "completely put insi",
+      "de a row of the win",
+      "dow content widget,",
+      " then the line-wrap",
+      " and word-wrap does",
+      "n't affect the rend",
+      "ering.             ",
+      "  2. When the line ",
+      "is too long to be c",
+      "ompletely put in a ",
+      "row of the window c",
+      "ontent widget, ther",
+      "e're multiple cases",
+      ":                  ",
+      "     * The extra pa",
+      "rts are been trunca",
+      "ted if both line-wr",
+      "ap and word-wrap op",
+    ];
+
+    let width = 19;
+    let height = 26;
+    let terminal_size = U16Size::new(width, height);
+    let mut tree = Tree::new(terminal_size);
+    let window_options = WindowLocalOptions::builder().wrap(true).build();
+    tree.global_options_mut().window_local_options = window_options;
+    let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
+    let canvas_size = U16Size::new(width, height);
+    let mut canvas = Canvas::new(canvas_size);
+    window_content._draw_from_top_for_wrap_nolinebreak(&mut canvas, 1, 0, 0);
+    let actual = canvas
+      .frame()
+      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{:?}", actual);
+    info!("expect:{:?}", expect);
+    assert_eq!(actual.len(), height as usize);
+    assert_eq!(actual.len(), expect.len());
+    for (i, a) in actual.into_iter().enumerate() {
+      assert!(a.len() == width as usize);
+      if i < expect.len() {
+        let e = expect[i];
+        info!("{:?} a:{:?}, e:{:?}", i, a, e);
+        assert!(a.len() == e.len() || e.is_empty());
+        if a.len() == e.len() {
+          assert_eq!(a, e);
+        }
+      } else {
+        info!("{:?} a:{:?}, e:empty", i, a);
+        assert_eq!(a, [" "; 27].join(""));
+      }
+    }
+  }
+
+  #[test]
   fn _draw_from_top_for_wrap_linebreak1() {
     // INIT.call_once(test_log_init);
 
@@ -1078,11 +1265,11 @@ mod tests {
       "This is a ",
       "quite     ",
       "simple and",
-      "small test",
-      "lines.    ",
+      " small    ",
+      "test lines",
+      ".         ",
       "But still ",
       "it        ",
-      "contains  ",
     ];
 
     let terminal_size = U16Size::new(10, 10);
@@ -1143,7 +1330,7 @@ mod tests {
       "several things we want to  ",
       "test:                      ",
       "  1. When the line is small",
-      "enough to completely put   ",
+      " enough to completely put  ",
       "inside a row of the window ",
       "content widget, then the   ",
       "line-wrap and word-wrap    ",
@@ -1226,6 +1413,93 @@ mod tests {
         .filter(|c| *c != ' ')
         .collect::<Vec<_>>()
         .is_empty());
+    }
+  }
+
+  #[test]
+  fn _draw_from_top_for_wrap_linebreak4() {
+    // INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "This is a    ",
+      "quite simple ",
+      "and small    ",
+      "test lines.  ",
+      "But still it ",
+      "contains     ",
+      "several      ",
+      "things we    ",
+      "want to test:",
+      "             ",
+      "  1. When the",
+      " line is     ",
+      "small enough ",
+      "to completely",
+      " put inside a",
+      " row of the  ",
+      "window       ",
+      "content      ",
+      "widget, then ",
+      "the line-wrap",
+      " and word-   ",
+      "wrap doesn't ",
+      "affect the   ",
+      "rendering.   ",
+      "  2. When the",
+      " line is too ",
+      "long to be   ",
+      "completely   ",
+      "put in a row ",
+      "of the window",
+      " content     ",
+    ];
+    let width = 13;
+    let height = 31;
+    let terminal_size = U16Size::new(width, height);
+    let mut tree = Tree::new(terminal_size);
+    let window_options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    tree.global_options_mut().window_local_options = window_options;
+    let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
+    let mut window_content =
+      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
+    let canvas_size = U16Size::new(width, height);
+    let mut canvas = Canvas::new(canvas_size);
+    window_content._draw_from_top_for_wrap_linebreak(&mut canvas, 1, 0, 0);
+    let actual = canvas
+      .frame()
+      .raw_symbols_with_placeholder(" ".to_compact_string())
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{:?}", actual);
+    info!("expect:{:?}", expect);
+    assert_eq!(actual.len(), height as usize);
+    assert_eq!(actual.len(), expect.len());
+    for (i, a) in actual.into_iter().enumerate() {
+      assert!(a.len() == width as usize);
+      if i < expect.len() {
+        let e = expect[i];
+        info!("{:?} a:{:?}, e:{:?}", i, a, e);
+        assert!(a.len() == e.len() || e.is_empty());
+        if a.len() == e.len() {
+          assert_eq!(a, e);
+        }
+      } else {
+        info!("{:?} a:{:?}, e:empty", i, a);
+        assert_eq!(a, [" "; 27].join(""));
+      }
     }
   }
 }
