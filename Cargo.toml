@@ -66,7 +66,7 @@ assert_fs = "1.1.2"
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
 # See: https://github.com/denoland/deno/blob/167f674c7cbb9632000c1feb0b747ba098b01c12/Cargo.lock#L7836-L7838
-v8 = "=129.0.0"
+v8 = "=0.106.0"
 # See: https://github.com/denoland/deno/blob/167f674c7cbb9632000c1feb0b747ba098b01c12/Cargo.lock#L6641-L6643
 swc_common = { version = "=0.37.5", features = ["tty-emitter"] }
 # See: https://github.com/denoland/deno/blob/167f674c7cbb9632000c1feb0b747ba098b01c12/Cargo.lock#L6712-L6714
