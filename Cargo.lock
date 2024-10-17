@@ -2083,12 +2083,14 @@ name = "rsvim"
 version = "0.1.1-alpha.6"
 dependencies = [
  "clap",
+ "parking_lot",
  "rsvim_core",
  "tokio",
  "toml",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
+ "v8",
 ]
 
 [[package]]
