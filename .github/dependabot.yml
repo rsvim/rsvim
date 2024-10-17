@@ -10,7 +10,8 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "swc*" # Ignore swc deps
+      - dependency-name: "swc*" # Ignore swc
+      - dependency-name: "v8*" # Ignore v8
 
   - package-ecosystem: "npm" # For typescript document
     directory: "/"
