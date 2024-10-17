@@ -14,6 +14,7 @@ use crate::ui::widget::Widgetable;
 
 use crossterm::style::{Attributes, Color};
 use geo::point;
+use icu::segmenter::WordSegmenter;
 use regex::Regex;
 use ropey::RopeSlice;
 use std::collections::{BTreeSet, VecDeque};
@@ -267,8 +268,6 @@ impl WindowContent {
   /// Implement the [`_draw_from_top`](WindowContent::_draw_from_top) with below options:
   /// - [`warp`](WindowLocalOptions::wrap) is `true`.
   /// - [`line_break`](WindowLocalOptions::line_break) is `true`
-  ///
-  /// NOTE: This method is implemented with [`textwrap`] crate.
   pub fn _draw_from_top_for_wrap_linebreak(
     &mut self,
     canvas: &mut Canvas,
@@ -315,43 +314,78 @@ impl WindowContent {
 
         // The first `row` (0) in the window maps to the `start_line` in the buffer.
         let mut row = 0;
+        let segmenter = WordSegmenter::new_auto();
 
         while row < height {
           match buflines.next() {
             Some(line) => {
               // Chop the line into maximum chars to avoid super long lines for display.
               let truncated_line = truncate_line(&line, height as usize * width as usize);
-              let mut wrapped_lines = textwrap::wrap(
-                &truncated_line,
-                textwrap::Options::new(width as usize)
-                  .wrap_algorithm(textwrap::WrapAlgorithm::FirstFit),
+              let breakpoints: Vec<usize> = segmenter.segment_str(&truncated_line).collect();
+              debug!(
+                "1-truncated_line: {:?}, breakpoints: {:?}",
+                truncated_line, breakpoints
               );
-              if truncated_line.ends_with("\n")
-                && !wrapped_lines.is_empty()
-                && wrapped_lines[wrapped_lines.len() - 1].is_empty()
-              {
-                wrapped_lines.pop();
-              }
-              debug!("1-wrapped_lines: {:?}", wrapped_lines);
 
-              for wrapped_line in wrapped_lines.iter() {
+              let mut col = 0_u16;
+              for bp in 1..breakpoints.len() {
                 if row >= height {
                   break;
                 }
-                for (col, ch) in wrapped_line.chars().enumerate() {
-                  if row >= height {
-                    break;
-                  }
-                  let cell = Cell::from(ch);
-                  let cell_upos = point!(x: col as u16 + upos.x(), y: row + upos.y());
+                let word_start = breakpoints[bp - 1];
+                let word_end = breakpoints[bp];
+                let word = &truncated_line[word_start..word_end];
+                let word_len = word_end - word_start;
+                if word_len + col as usize <= width as usize {
+                  // Enough space to place this word in current row
+                  let cells = word.chars().map(Cell::from).collect::<Vec<_>>();
+                  let cells_upos = point!(x: col + upos.x(), y: row + upos.y());
                   debug!(
-                    "2-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
-                    row, col, ch, cell_upos
+                    "2-row:{:?}, col:{:?}, cells:{:?}, cells_upos:{:?}",
+                    row,
+                    col,
+                    cells
+                      .iter()
+                      .map(|ch| ch.symbol().to_string())
+                      .collect::<Vec<String>>()
+                      .join(""),
+                    cells_upos
                   );
-                  canvas.frame_mut().set_cell(cell_upos, cell);
-                }
+                  if word != "\n" {
+                    canvas.frame_mut().set_cells_at(cells_upos, cells);
+                    col += word_len as u16;
+                  }
+                } else {
+                  // Not enough space to place this word in current row.
+                  // There're two cases:
+                  // 1. The word can be placed in next empty row (since the column idx `col` will
+                  //    start from 0 in next row).
+                  // 2. The word is just too long to place in an entire row, so next row still
+                  //    cannot place it.
+                  // Anyway, we simply go to next row, and force render all of the word.
+                  row += 1;
+                  col = 0_u16;
 
-                row += 1;
+                  for ch in word.chars() {
+                    if col >= width {
+                      row += 1;
+                      col = 0_u16;
+                    }
+                    if row >= height {
+                      break;
+                    }
+                    let cell = Cell::from(ch);
+                    let cell_upos = point!(x: col + upos.x(), y: row + upos.y());
+                    debug!(
+                      "3-row:{:?}, col:{:?}, ch:{:?}, cell_upos:{:?}",
+                      row, col, ch, cell_upos
+                    );
+                    if word != "\n" {
+                      canvas.frame_mut().set_cell(cell_upos, cell);
+                      col += 1;
+                    }
+                  }
+                }
               }
             }
             None => {
@@ -360,17 +394,17 @@ impl WindowContent {
               let cells_upos = point!(x: upos.x(), y: row + upos.y());
               let cells_len = width as usize;
               debug!(
-                "3-row:{:?}, cells upos:{:?}, cells len:{:?}",
+                "4-row:{:?}, cells upos:{:?}, cells len:{:?}",
                 row, cells_upos, cells_len,
               );
               canvas
                 .frame_mut()
                 .try_set_cells_at(cells_upos, vec![Cell::empty(); cells_len])
                 .unwrap();
-
               row += 1;
             }
           }
+          row += 1;
         }
       }
       None => {
@@ -385,7 +419,7 @@ impl WindowContent {
           let cells_upos = point!(x: upos.x(), y: row + upos.y());
           let cells_len = width as usize;
           debug!(
-            "4-row:{:?}, cells upos:{:?}, cells len:{:?}",
+            "5-row:{:?}, cells upos:{:?}, cells len:{:?}",
             row, cells_upos, cells_len,
           );
           canvas
@@ -1061,7 +1095,7 @@ mod tests {
 
   #[test]
   fn _draw_from_top_for_wrap_linebreak1() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -1078,11 +1112,11 @@ mod tests {
       "This is a ",
       "quite     ",
       "simple and",
-      "small test",
-      "lines.    ",
+      " small    ",
+      "test lines",
+      ".         ",
       "But still ",
       "it        ",
-      "contains  ",
     ];
 
     let terminal_size = U16Size::new(10, 10);
@@ -1143,7 +1177,7 @@ mod tests {
       "several things we want to  ",
       "test:                      ",
       "  1. When the line is small",
-      "enough to completely put   ",
+      " enough to completely put  ",
       "inside a row of the window ",
       "content widget, then the   ",
       "line-wrap and word-wrap    ",
