@@ -134,12 +134,23 @@ pub struct JsRuntimeState {
 }
 
 pub struct JsRuntime {
-  // V8 isolate.
-  pub isolate: v8::OwnedIsolate,
+  /// If this runtime is created for snapshot.
+  pub will_snapshot: bool,
+
+  /// V8 isolate. This is an `Option<v8::OwnedIsolate>` instead of just `v8::OwnedIsolate` is to
+  /// workaround the safety issue with snapshot_creator.
+  /// See: <https://github.com/denoland/deno/blob/d0efd040c79021958a1e83caa56572c0401ca1f2/core/runtime.rs?plain=1#L93>.
+  pub isolate: Option<v8::OwnedIsolate>,
 
   /// The state of the runtime.
   #[allow(unused)]
   pub state: Rc<RefCell<JsRuntimeState>>,
+}
+
+impl Drop for JsRuntime {
+  fn drop(&mut self) {
+    debug_assert_eq!(Rc::strong_count(&self.state), 1);
+  }
 }
 
 impl JsRuntime {
@@ -233,7 +244,8 @@ impl JsRuntime {
     isolate.set_slot(state.clone());
 
     let mut runtime = JsRuntime {
-      isolate,
+      will_snapshot: false,
+      isolate: Some(isolate),
       // event_loop,
       state,
       // inspector,
@@ -329,32 +341,35 @@ impl JsRuntime {
     let (js_runtime_send_to_master, _master_recv_from_js_runtime) = tokio::sync::mpsc::channel(10);
     let (_master_send_to_js_runtime, js_runtime_recv_from_master) = tokio::sync::mpsc::channel(10);
 
-    let mut runtime = JsRuntime {
-      isolate: snapshot_creator,
+    // Just create mock data here.
+    let state = Rc::new(RefCell::new(JsRuntimeState {
+      context,
+      module_map: ModuleMap::new(),
+      timeout_handles: HashSet::new(),
+      pending_futures: HashMap::new(),
+      startup_moment: Instant::now(),
+      time_origin: SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_millis(),
+      exceptions: ExceptionState::new(),
+      options: JsRuntimeOptions::default(),
+      // wake_event_queued: false,
+      js_runtime_send_to_master,
+      js_runtime_recv_from_master,
+      cli_opt: CliOpt::default(),
+      runtime_path: Arc::new(RwLock::new(vec![])),
+      tree: Tree::to_arc(Tree::new(U16Size::new(0, 0))),
+      buffers: Buffers::to_arc(Buffers::new()),
+      editing_state: State::to_arc(State::new()),
+    }));
 
-      // Just create mock data here.
-      state: Rc::new(RefCell::new(JsRuntimeState {
-        context,
-        module_map: ModuleMap::new(),
-        timeout_handles: HashSet::new(),
-        pending_futures: HashMap::new(),
-        startup_moment: Instant::now(),
-        time_origin: SystemTime::now()
-          .duration_since(UNIX_EPOCH)
-          .unwrap()
-          .as_millis(),
-        exceptions: ExceptionState::new(),
-        options: JsRuntimeOptions::default(),
-        // wake_event_queued: false,
-        js_runtime_send_to_master,
-        js_runtime_recv_from_master,
-        cli_opt: CliOpt::default(),
-        runtime_path: Arc::new(RwLock::new(vec![])),
-        tree: Tree::to_arc(Tree::new(U16Size::new(0, 0))),
-        buffers: Buffers::to_arc(Buffers::new()),
-        editing_state: State::to_arc(State::new()),
-      })),
-      // inspector,
+    snapshot_creator.set_slot(state.clone());
+
+    let mut runtime = JsRuntime {
+      will_snapshot: true,
+      isolate: Some(snapshot_creator),
+      state,
     };
 
     runtime.init_environment();
@@ -380,9 +395,9 @@ impl JsRuntime {
     runtime
   }
 
-  pub fn create_snapshot(mut self) -> v8::StartupData {
-    self
-      .isolate
+  pub fn create_snapshot(&mut self) -> v8::StartupData {
+    let snapshot_creator = self.isolate.take().unwrap();
+    snapshot_creator
       .create_blob(v8::FunctionCodeHandling::Keep)
       .unwrap()
   }
@@ -508,7 +523,11 @@ impl JsRuntime {
 
   /// Runs a single tick of the event-loop.
   pub fn tick_event_loop(&mut self) {
-    let isolate_has_pending_tasks = self.isolate.has_pending_background_tasks();
+    let isolate_has_pending_tasks = self
+      .isolate
+      .as_ref()
+      .unwrap()
+      .has_pending_background_tasks();
     debug!(
       "Tick js runtime, isolate has pending tasks: {:?}",
       isolate_has_pending_tasks
@@ -742,14 +761,14 @@ impl JsRuntime {
 
   /// Returns the runtime's state.
   pub fn get_state(&self) -> Rc<RefCell<JsRuntimeState>> {
-    Self::state(&self.isolate)
+    Self::state(self.isolate.as_ref().unwrap())
   }
 
   /// Returns a v8 handle scope for the runtime.
   /// See: <https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html>.
   pub fn handle_scope(&mut self) -> v8::HandleScope {
     let context = self.context();
-    v8::HandleScope::with_context(&mut self.isolate, context)
+    v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
   }
 
   /// Returns a context created for the runtime.
