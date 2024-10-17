@@ -78,6 +78,10 @@ jobs:
         uses: rustsec/audit-check@v1.4.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Security Advisory
+        uses: EmbarkStudios/cargo-deny-action@v1
+        with:
+          command: check advisories
   unit_test:
     name: Unit Test
     strategy:
