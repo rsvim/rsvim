@@ -25,6 +25,7 @@ tracing-appender = { workspace = true, features = ["parking_lot"] }
 tokio = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }
 toml = { workspace = true }
+once_cell = { workspace = true, features = ["parking_lot"] }
 
 [build-dependencies]
 rsvim_core = { workspace = true }

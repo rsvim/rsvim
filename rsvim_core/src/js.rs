@@ -17,10 +17,11 @@ use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::state::{State, StateArc};
 use crate::ui::tree::{Tree, TreeArc};
 
+use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
@@ -95,7 +96,10 @@ pub fn init_v8_platform() {
   });
 }
 
-pub const RSVIM_SNAPSHOT_BIN: &str = "RSVIM_SNAPSHOT.bin";
+/// Snapshot blob.
+pub struct SnapshotBlob {
+  pub value: &'static [u8],
+}
 
 pub struct JsRuntimeStateForSnapshot {
   pub context: Option<v8::Global<v8::Context>>,
@@ -344,6 +348,7 @@ impl JsRuntime {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     options: JsRuntimeOptions,
+    snapshot: SnapshotBlob,
     startup_moment: Instant,
     time_origin: u128,
     js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
@@ -368,7 +373,7 @@ impl JsRuntime {
     init_v8_platform();
 
     let create_params = v8::CreateParams::default();
-    create_params.snapshot_blob(include_bytes!(RSVIM_SNAPSHOT_BIN));
+    create_params.snapshot_blob(snapshot.value);
     let mut isolate = v8::Isolate::new(v8::CreateParams::default());
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
