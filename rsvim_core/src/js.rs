@@ -101,6 +101,12 @@ pub struct SnapshotBlob {
   pub value: &'static [u8],
 }
 
+impl SnapshotBlob {
+  pub fn new(value: &'static [u8]) -> Self {
+    SnapshotBlob { value }
+  }
+}
+
 pub struct JsRuntimeStateForSnapshot {
   pub context: Option<v8::Global<v8::Context>>,
 }
@@ -139,6 +145,8 @@ const _01__RSVIM: &str = "01__rsvim.js";
 static _00__WEB_STR: Lazy<&str> = Lazy::new(|| include_str!("./js/runtime/00__web.js"));
 #[allow(non_upper_case_globals)]
 static _01__RSVIM_STR: Lazy<&str> = Lazy::new(|| include_str!("./js/runtime/01__rsvim.js"));
+
+const BUILTIN_MODULES_LEN: usize = 2;
 
 fn get_module_name_by_filename(filename: &str) -> String {
   format!("rsvim:runtime/{}", filename)
@@ -188,18 +196,13 @@ impl JsRuntimeForSnapshot {
       // NOTE: Each scripts is named with a number index, it indicates the order when calling
       // `add_context_data` API.
 
-      let name = get_module_name_by_filename(_00__WEB);
-      let web_module0 = Self::init_builtin_module(scope, &name, &_00__WEB_STR);
-
-      let name = get_module_name_by_filename(_01__RSVIM);
-      let rsvim_module1 = Self::init_builtin_module(scope, &name, &_01__RSVIM_STR);
-
-      let offset0 = scope.add_context_data(context, web_module0);
-      debug_assert_eq!(offset0, 0);
-      debug_assert_eq!(get_data_index_from_filename(_00__WEB), 0);
-      let offset1 = scope.add_context_data(context, rsvim_module1);
-      debug_assert_eq!(offset1, 1);
-      debug_assert_eq!(get_data_index_from_filename(_01__RSVIM), 1);
+      for i in 0..BUILTIN_MODULES_LEN {
+        let name = get_filename_from_data_index(i);
+        let module = Self::init_builtin_module(scope, &name, &_00__WEB_STR);
+        let offset = scope.add_context_data(context, module);
+        debug_assert_eq!(offset, i);
+        debug_assert_eq!(get_data_index_from_filename(&name), i);
+      }
     }
 
     let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
@@ -394,7 +397,7 @@ impl JsRuntime {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     options: JsRuntimeOptions,
-    snapshot: SnapshotBlob,
+    snapshot: Option<SnapshotBlob>,
     startup_moment: Instant,
     time_origin: u128,
     js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
@@ -418,9 +421,15 @@ impl JsRuntime {
     // Fire up the v8 engine.
     init_v8_platform();
 
-    let create_params = v8::CreateParams::default();
-    let create_params = create_params.snapshot_blob(snapshot.value);
-    let mut isolate = v8::Isolate::new(create_params);
+    let has_snapshot = snapshot.is_some();
+    let mut isolate = match snapshot {
+      Some(snapshot) => {
+        let create_params = v8::CreateParams::default();
+        let create_params = create_params.snapshot_blob(snapshot.value);
+        v8::Isolate::new(create_params)
+      }
+      None => v8::Isolate::new(v8::CreateParams::default()),
+    };
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
@@ -430,12 +439,6 @@ impl JsRuntime {
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
     isolate
       .set_host_initialize_import_meta_object_callback(hook::host_initialize_import_meta_object_cb);
-
-    let context = {
-      let scope = &mut v8::HandleScope::new(&mut *isolate);
-      let context = binding::create_new_context(scope);
-      v8::Global::new(scope, context)
-    };
 
     // const MIN_POOL_SIZE: usize = 1;
 
@@ -456,11 +459,69 @@ impl JsRuntime {
     //   )
     // });
 
+    // Get snapshotted built-in modules data from context
+    fn get_context_data(
+      scope: &mut v8::HandleScope<()>,
+      context: v8::Local<v8::Context>,
+    ) -> Vec<v8::Global<v8::Module>> {
+      fn data_error_to_panic(err: v8::DataError) -> ! {
+        match err {
+          v8::DataError::BadType { actual, expected } => {
+            panic!("Invalid type for snapshot data: expected {expected}, got {actual}");
+          }
+          v8::DataError::NoData { expected } => {
+            panic!("No data for snapshot data: expected {expected}");
+          }
+        }
+      }
+
+      let mut scope = v8::ContextScope::new(scope, context);
+
+      let mut module_handles: Vec<v8::Global<v8::Module>> = vec![];
+      for i in 0..BUILTIN_MODULES_LEN {
+        match scope.get_context_data_from_snapshot_once::<v8::Module>(i as usize) {
+          Ok(val) => {
+            let module_global = v8::Global::new(&mut scope, val);
+            module_handles.push(module_global);
+          }
+          Err(err) => data_error_to_panic(err),
+        }
+      }
+
+      module_handles
+    }
+
+    let (context, module_handles): (v8::Global<v8::Context>, Option<Vec<v8::Global<v8::Module>>>) = {
+      let scope = &mut v8::HandleScope::new(&mut *isolate);
+      let context = binding::create_new_context(scope);
+
+      let module_handles = if has_snapshot {
+        Some(get_context_data(scope, context))
+      } else {
+        None
+      };
+
+      (v8::Global::new(scope, context), module_handles)
+    };
+
+    let module_map = if has_snapshot {
+      let mut module_map = ModuleMap::new();
+      module_map.index = module_handles
+        .unwrap()
+        .into_iter()
+        .enumerate()
+        .map(|(index, module)| (get_filename_from_data_index(index), module))
+        .collect::<HashMap<_, _>>();
+      module_map
+    } else {
+      ModuleMap::new()
+    };
+
     // Store state inside the v8 isolate slot.
     // https://v8docs.nodesource.com/node-4.8/d5/dda/classv8_1_1_isolate.html#a7acadfe7965997e9c386a05f098fbe36
     let state = Rc::new(RefCell::new(JsRuntimeState {
       context,
-      module_map: ModuleMap::new(),
+      module_map,
       timeout_handles: HashSet::new(),
       // interrupt_handle: event_loop.interrupt_handle(),
       pending_futures: HashMap::new(),
@@ -502,11 +563,11 @@ impl JsRuntime {
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
   fn init_environment(&mut self) {
-    let name = get_module_name_by_filename(_00__WEB);
-    self.init_builtin_module(&name, &_00__WEB_STR);
-
-    let name = get_module_name_by_filename(_01__RSVIM);
-    self.init_builtin_module(&name, &_01__RSVIM_STR);
+    for i in 0..BUILTIN_MODULES_LEN {
+      let filename = get_filename_from_data_index(i);
+      let name = get_module_name_by_filename(&filename);
+      self.init_builtin_module(&name, &_00__WEB_STR);
+    }
 
     // // Initialize process static values.
     // process::refresh(tc_scope);

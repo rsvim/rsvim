@@ -59,12 +59,7 @@ fn main() -> IoResult<()> {
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
     // Create event loop.
-    let mut event_loop = EventLoop::new(
-      cli_opt,
-      SnapshotBlob {
-        value: &RSVIM_SNAPSHOT,
-      },
-    )?;
+    let mut event_loop = EventLoop::new(cli_opt, Some(SnapshotBlob::new(&RSVIM_SNAPSHOT)))?;
 
     // Initialize user config.
     event_loop.init_config()?;

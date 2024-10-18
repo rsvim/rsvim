@@ -209,7 +209,7 @@ impl ModuleGraph {
 /// It maintains all the modules inside js runtime, including already resolved and pending
 /// fetching.
 pub struct ModuleMap {
-  pub main: Option<ModulePath>,
+  // pub main: Option<ModulePath>,
   pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
   pub seen: HashMap<ModulePath, ModuleStatus>,
   pub pending: Vec<Rc<RefCell<ModuleGraph>>>,
@@ -219,7 +219,7 @@ impl ModuleMap {
   // Creates a new module-map instance.
   pub fn new() -> ModuleMap {
     Self {
-      main: None,
+      // main: None,
       index: HashMap::new(),
       seen: HashMap::new(),
       pending: vec![],
@@ -228,10 +228,10 @@ impl ModuleMap {
 
   // Inserts a compiled ES module to the map.
   pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
-    // No main module has been set, so let's update the value.
-    if self.main.is_none() && std::fs::metadata(path).is_ok() {
-      self.main = Some(path.into());
-    }
+    // // No main module has been set, so let's update the value.
+    // if self.main.is_none() && std::fs::metadata(path).is_ok() {
+    //   self.main = Some(path.into());
+    // }
     self.index.insert(path.into(), module);
   }
 
@@ -254,10 +254,10 @@ impl ModuleMap {
       .map(|(p, _)| p.clone())
   }
 
-  // Returns the main entry point.
-  pub fn main(&self) -> Option<ModulePath> {
-    self.main.clone()
-  }
+  // // Returns the main entry point.
+  // pub fn main(&self) -> Option<ModulePath> {
+  //   self.main.clone()
+  // }
 }
 
 impl Default for ModuleMap {
@@ -402,34 +402,72 @@ pub fn fetch_module_tree<'a>(
   filename: &str,
   source: Option<&str>,
 ) -> Option<v8::Local<'a, v8::Module>> {
-  // Create a script origin.
-  let origin = create_origin(scope, filename, true);
+  // First try to detect if module_map already contains it
   let state = JsRuntime::state(scope);
 
-  // Find appropriate loader if source is empty.
-  let source = match source {
-    Some(source) => source.into(),
-    None => load_import(filename, true).unwrap(),
-  };
-  debug!(
-    "Loaded main js module filename: {:?}, source: {:?}",
-    filename,
-    if source.as_str().len() > 20 {
-      String::from(&source.as_str()[..20]) + "..."
-    } else {
-      String::from(source.as_str())
-    }
-  );
-  let source = v8::String::new(scope, &source).unwrap();
-  let mut source = v8::script_compiler::Source::new(source, Some(&origin));
+  let (module_ref, module): (v8::Global<v8::Module>, v8::Local<v8::Module>) =
+    match state.borrow().module_map.get(filename) {
+      Some(module) => {
+        // Directly get existed
+        (module.clone(), v8::Local::new(scope, module))
+      }
+      None => {
+        // Create a script origin.
+        let origin = create_origin(scope, filename, true);
 
-  let module = match v8::script_compiler::compile_module(scope, &mut source) {
-    Some(module) => module,
-    None => return None,
-  };
+        // Find appropriate loader if source is empty.
+        let source = match source {
+          Some(source) => source.into(),
+          None => load_import(filename, true).unwrap(),
+        };
+        debug!(
+          "Loaded js module filename: {:?}, source: {:?}",
+          filename,
+          if source.as_str().len() > 20 {
+            String::from(&source.as_str()[..20]) + "..."
+          } else {
+            String::from(source.as_str())
+          }
+        );
+        let source = v8::String::new(scope, &source).unwrap();
+        let mut source = v8::script_compiler::Source::new(source, Some(&origin));
 
-  // Subscribe module to the module-map.
-  let module_ref = v8::Global::new(scope, module);
+        let module = match v8::script_compiler::compile_module(scope, &mut source) {
+          Some(module) => module,
+          None => return None,
+        };
+        (v8::Global::new(scope, module), module)
+      }
+    };
+
+  // // Create a script origin.
+  // let origin = create_origin(scope, filename, true);
+  //
+  // // Find appropriate loader if source is empty.
+  // let source = match source {
+  //   Some(source) => source.into(),
+  //   None => load_import(filename, true).unwrap(),
+  // };
+  // debug!(
+  //   "Loaded js module filename: {:?}, source: {:?}",
+  //   filename,
+  //   if source.as_str().len() > 20 {
+  //     String::from(&source.as_str()[..20]) + "..."
+  //   } else {
+  //     String::from(source.as_str())
+  //   }
+  // );
+  // let source = v8::String::new(scope, &source).unwrap();
+  // let mut source = v8::script_compiler::Source::new(source, Some(&origin));
+  //
+  // let module = match v8::script_compiler::compile_module(scope, &mut source) {
+  //   Some(module) => module,
+  //   None => return None,
+  // };
+  //
+  // // Subscribe module to the module-map.
+  // let module_ref = v8::Global::new(scope, module);
+
   state.borrow_mut().module_map.insert(filename, module_ref);
 
   let requests = module.get_module_requests();

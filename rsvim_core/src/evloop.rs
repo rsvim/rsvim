@@ -117,7 +117,7 @@ pub struct EventLoop {
 
 impl EventLoop {
   /// Make new event loop.
-  pub fn new(cli_opt: CliOpt, snapshot: SnapshotBlob) -> IoResult<Self> {
+  pub fn new(cli_opt: CliOpt, snapshot: Option<SnapshotBlob>) -> IoResult<Self> {
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
