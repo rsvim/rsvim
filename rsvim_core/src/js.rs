@@ -123,19 +123,18 @@ impl JsRuntimeForSnapshot {
       let mut scope_with_context = v8::HandleScope::with_context(raw_isolate.as_mut(), context);
       let name = "rsvim:runtime/10__web.js";
       let source = include_str!("./js/runtime/10__web.js");
-      let web_module1 =
-        JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
+      JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
 
       let name = "rsvim:runtime/50__rsvim.js";
       let source = include_str!("./js/runtime/50__rsvim.js");
-      let rsvim_module2 =
-        JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
-      let modules = [web_module1, rsvim_module2];
+      JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
 
-      for (idx, module) in modules.iter().enumerate() {
-        let data_idx = scope.add_context_data(context, *module);
-        assert_eq!(idx, data_idx);
-      }
+      // for (idx, module) in modules.iter().enumerate() {
+      //   let data_idx = scope.add_context_data(context, *module);
+      //   assert_eq!(idx, data_idx);
+      // }
+
+      raw_isolate.as_mut().set_slot(context);
     }
 
     JsRuntimeForSnapshot {
@@ -151,14 +150,10 @@ impl JsRuntimeForSnapshot {
   }
 
   /// Synchronously load builtin module.
-  fn init_builtin_module<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    name: &str,
-    source: &str,
-  ) -> v8::Local<'s, v8::Module> {
+  fn init_builtin_module(scope: &mut v8::HandleScope, name: &str, source: &str) {
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    match fetch_module(tc_scope, name, Some(source)) {
+    let module = match fetch_module(tc_scope, name, Some(source)) {
       Some(module) => module,
       None => {
         assert!(tc_scope.has_caught());
@@ -168,31 +163,29 @@ impl JsRuntimeForSnapshot {
         eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
         std::process::exit(1);
       }
+    };
+
+    if module
+      .instantiate_module(tc_scope, module_resolve_cb)
+      .is_none()
+    {
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
     }
-  }
-}
 
-impl JsRuntimeForSnapshot {
-  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeState>> {
-    isolate
-      .get_slot::<Rc<RefCell<JsRuntimeState>>>()
-      .unwrap()
-      .clone()
-  }
+    let _ = module.evaluate(tc_scope);
 
-  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeState>> {
-    Self::state(self.isolate.as_ref().unwrap())
-  }
-
-  pub fn handle_scope(&mut self) -> v8::HandleScope {
-    let context = self.context();
-    v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
-  }
-
-  pub fn context(&mut self) -> v8::Global<v8::Context> {
-    let state = self.get_state();
-    let state = state.borrow();
-    state.context.clone()
+    if module.get_status() == v8::ModuleStatus::Errored {
+      let exception = module.get_exception();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
   }
 }
 
