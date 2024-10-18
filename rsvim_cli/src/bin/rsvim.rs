@@ -5,13 +5,20 @@
 use rsvim_core::cli::CliOpt;
 use rsvim_core::error::IoResult;
 use rsvim_core::evloop::EventLoop;
+use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 
 use clap::Parser;
+use once_cell::sync::Lazy;
 // use heed::types as heed_types;
 // use heed::{byteorder, Database, EnvOpenOptions};
 // use toml::Table;
 use tracing::debug;
+
+static RSVIM_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(|| {
+  static BYTES: &[u8] = include_bytes!("../../RSVIM_SNAPSHOT.BIN");
+  Box::from(BYTES)
+});
 
 fn main() -> IoResult<()> {
   log::init();
@@ -52,7 +59,7 @@ fn main() -> IoResult<()> {
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
     // Create event loop.
-    let mut event_loop = EventLoop::new(cli_opt)?;
+    let mut event_loop = EventLoop::new(cli_opt, SnapshotData::new(&RSVIM_SNAPSHOT))?;
 
     // Initialize user config.
     event_loop.init_config()?;
