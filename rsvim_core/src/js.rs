@@ -95,6 +95,8 @@ pub fn init_v8_platform() {
   });
 }
 
+pub const RSVIM_SNAPSHOT_BIN: &str = "RSVIM_SNAPSHOT.bin";
+
 pub struct JsRuntimeStateForSnapshot {
   pub context: Option<v8::Global<v8::Context>>,
 }
@@ -365,6 +367,8 @@ impl JsRuntime {
     // Fire up the v8 engine.
     init_v8_platform();
 
+    let create_params = v8::CreateParams::default();
+    create_params.snapshot_blob(include_bytes!(RSVIM_SNAPSHOT_BIN));
     let mut isolate = v8::Isolate::new(v8::CreateParams::default());
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
