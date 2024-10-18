@@ -2099,7 +2099,7 @@ dependencies = [
 
 [[package]]
 name = "rsvim"
-version = "0.1.1-alpha.6"
+version = "0.1.1-alpha.7"
 dependencies = [
  "clap",
  "once_cell",
@@ -2116,7 +2116,7 @@ dependencies = [
 
 [[package]]
 name = "rsvim_core"
-version = "0.1.1-alpha.6"
+version = "0.1.1-alpha.7"
 dependencies = [
  "anyhow",
  "assert_fs",

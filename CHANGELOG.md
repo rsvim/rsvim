@@ -1,6 +1,6 @@
-## [0.1.1-alpha.6](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.5..0.1.1-alpha.6) - 2024-10-15
+## [0.1.1-alpha.7](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.5..0.1.1-alpha.7) - 2024-10-18
 
-[6e6c03c7](https://github.com/rsvim/rsvim/commit/6e6c03c7f828a5acbfae029370d061b5e907dd1e)...[d550dbc4](https://github.com/rsvim/rsvim/commit/d550dbc4a98793e604724c4f935626ec7be8908f)
+[6e6c03c7](https://github.com/rsvim/rsvim/commit/6e6c03c7f828a5acbfae029370d061b5e907dd1e)...[cea42e7a](https://github.com/rsvim/rsvim/commit/cea42e7af0bc1205c4427918eaaf457e2e7d80b3)
 
 ### <!-- 0 -->Features
 
@@ -37,6 +37,17 @@
 
 - *(shutdown)* Detached and blocked tracker (#169) ([2b45cf74](https://github.com/rsvim/rsvim/commit/2b45cf740863b2994d6f0cdb4a0fa27bded8316e)) by @linrongbin16 ([#169](https://github.com/rsvim/rsvim/pull/169))
 
+- *(ui)* Fix missing whitespaces when "line-break" on (#197) ([0d1410e2](https://github.com/rsvim/rsvim/commit/0d1410e230780e64def866dc5968cd22c17cf57c)) by @linrongbin16 ([#197](https://github.com/rsvim/rsvim/pull/197))
+
+
+### <!-- 2 -->Performance Improvements
+
+- *(start)* Make snapshot v3 (#199) ([2f04e781](https://github.com/rsvim/rsvim/commit/2f04e7810b300937e1276f567764426a1c5eb69b)) by @linrongbin16 ([#199](https://github.com/rsvim/rsvim/pull/199))
+
+- *(start)* Initialize built-in modules with snapshot (#205) ([73a92c0c](https://github.com/rsvim/rsvim/commit/73a92c0c3d20ac7c66a184987ce4024ad4918c7c)) by @linrongbin16 ([#205](https://github.com/rsvim/rsvim/pull/205))
+
+- *(start)* Compress snapshot blob (#206) ([ac8420d1](https://github.com/rsvim/rsvim/commit/ac8420d17605aef8f975fdb5000774017a9f0384)) by @linrongbin16 ([#206](https://github.com/rsvim/rsvim/pull/206))
+
 
 ### <!-- 3 -->Code Refactoring
 
@@ -66,11 +77,19 @@
 
 - *(workspace)* Manage with workspace (#183) ([0da0e170](https://github.com/rsvim/rsvim/commit/0da0e17043b4bec3e6403839aba90661c59c4631)) by @linrongbin16 ([#183](https://github.com/rsvim/rsvim/pull/183))
 
-- *(cli)* Remove "Cargo.toml" from version detect (#186) ([d550dbc4](https://github.com/rsvim/rsvim/commit/d550dbc4a98793e604724c4f935626ec7be8908f))
+- *(cli)* Remove "Cargo.toml" from version detect (#186) ([d550dbc4](https://github.com/rsvim/rsvim/commit/d550dbc4a98793e604724c4f935626ec7be8908f)) by @linrongbin16 ([#186](https://github.com/rsvim/rsvim/pull/186))
 
-## [0.1.1-alpha.4](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.3..v0.1.1-alpha.4) - 2024-09-13
+- *(js)* Merge built-in modules init into constructor (#194) ([52b3b022](https://github.com/rsvim/rsvim/commit/52b3b022d75becb238530702897584f696e29165)) by @linrongbin16 ([#194](https://github.com/rsvim/rsvim/pull/194))
 
-[909f5f9f](https://github.com/rsvim/rsvim/commit/909f5f9f9ad6d4287d6a66371458c52a5a15b442)...[fcfb7e37](https://github.com/rsvim/rsvim/commit/fcfb7e37c76a918a8134588c905351e20d0f4da4)
+- *(js)* Add basic v8 methods (#195) ([c9bde990](https://github.com/rsvim/rsvim/commit/c9bde990c00472e5b7157d15559f0b43a1148ff8)) by @linrongbin16 ([#195](https://github.com/rsvim/rsvim/pull/195))
+
+- *(js)* Simplify built-in module as single file (#200) ([ec414499](https://github.com/rsvim/rsvim/commit/ec41449959907f7425e1aa6b5fcf67e83252634e)) by @linrongbin16 ([#200](https://github.com/rsvim/rsvim/pull/200))
+
+- *(js)* Refactor context data index (#202) ([b15e932d](https://github.com/rsvim/rsvim/commit/b15e932df295be606ffd6ed0428ea77b850effc8)) by @linrongbin16 ([#202](https://github.com/rsvim/rsvim/pull/202))
+
+## [0.1.1-alpha.5](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.3..v0.1.1-alpha.5) - 2024-09-13
+
+[909f5f9f](https://github.com/rsvim/rsvim/commit/909f5f9f9ad6d4287d6a66371458c52a5a15b442)...[6e6c03c7](https://github.com/rsvim/rsvim/commit/6e6c03c7f828a5acbfae029370d061b5e907dd1e)
 
 ### <!-- 0 -->Features
 
