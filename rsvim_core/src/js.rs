@@ -885,7 +885,7 @@ impl JsRuntime {
     v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
   }
 
-  /// Returns a context created for the runtime.
+  /// Returns a global context created for the runtime.
   /// See: <https://v8docs.nodesource.com/node-0.8/df/d69/classv8_1_1_context.html>.
   pub fn context(&mut self) -> v8::Global<v8::Context> {
     let state = self.get_state();
