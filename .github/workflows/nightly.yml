@@ -37,7 +37,7 @@ jobs:
           allowUpdates: true
           prerelease: true
           makeLatest: true
-          name: "Nightly Build"
+          name: nightly
           removeArtifacts: true
           tag: nightly
           commit: main
