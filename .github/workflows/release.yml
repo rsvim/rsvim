@@ -29,16 +29,8 @@ jobs:
           fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: Tag Name
-        run: |
-          echo "GITHUB_REF_NAME: $GITHUB_REF_NAME"
-          echo "github.ref_name: ${{ github.ref_name }}"
-          long_ref="${{ github.ref }}"
-          version_name=${long_ref#"refs/tags/rsvim-"}
-          echo "version_name=${version_name}" >> $GITHUB_ENV
       - uses: ncipollo/release-action@v1
         with:
-          name: ${{ env.version_name }}
           draft: true
           body: ""
           omitBody: true
