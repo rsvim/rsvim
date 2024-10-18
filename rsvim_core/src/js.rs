@@ -10,7 +10,7 @@ use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
-  create_origin, fetch_module, fetch_module_tree, resolve_import, ImportKind, ImportMap, ModuleMap,
+  create_origin, fetch_module_tree, load_import, resolve_import, ImportKind, ImportMap, ModuleMap,
   ModuleStatus,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
@@ -104,40 +104,72 @@ pub struct JsRuntimeForSnapshot {
   pub isolate: Option<v8::OwnedIsolate>,
 }
 
+impl Drop for JsRuntimeForSnapshot {
+  fn drop(&mut self) {
+    assert!(self.isolate.is_none());
+    eprintln!("dropped JsRuntimeForSnapshot");
+  }
+}
+
 impl JsRuntimeForSnapshot {
   /// Creates a new js runtime for snapshot.
   #[allow(clippy::new_without_default)]
   pub fn new() -> Self {
     init_v8_platform();
 
-    let mut isolate = v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+    let (mut isolate, global_context) = JsRuntimeForSnapshot::create_isolate();
 
-    unsafe {
-      let mut raw_isolate = std::ptr::NonNull::new(&mut isolate as *mut v8::OwnedIsolate).unwrap();
+    let mut context_scope = v8::HandleScope::with_context(&mut isolate, global_context.clone());
+    let scope = &mut context_scope;
+    let context = v8::Local::new(scope, global_context.clone());
 
-      // Create scope, default context
-      let mut scope = v8::HandleScope::new(raw_isolate.as_mut());
-      let context = v8::Context::new(&mut scope, Default::default());
-      scope.set_default_context(context);
+    // Initialize `__InternalRsvimGlobalObject` bindings to context.
+    binding::initialize_context(scope, context);
 
-      let mut scope_with_context = v8::HandleScope::with_context(raw_isolate.as_mut(), context);
-      let name = "rsvim:runtime/10__web.js";
-      let source = include_str!("./js/runtime/10__web.js");
-      JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
+    let mut module_map = ModuleMap::default();
 
-      let name = "rsvim:runtime/50__rsvim.js";
-      let source = include_str!("./js/runtime/50__rsvim.js");
-      JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
+    let name = "rsvim:runtime/10__web.js";
+    let source = include_str!("./js/runtime/10__web.js");
+    Self::init_builtin_module(scope, &mut module_map, name, source);
 
-      raw_isolate.as_mut().set_slot(context);
-    }
+    let name = "rsvim:runtime/50__rsvim.js";
+    let source = include_str!("./js/runtime/50__rsvim.js");
+    Self::init_builtin_module(scope, &mut module_map, name, source);
+
+    let module_map_rc = Rc::new(RefCell::new(module_map));
+    scope.set_data(
+      0,
+      Rc::into_raw(module_map_rc.clone()) as *mut std::ffi::c_void,
+    );
+    drop(context_scope);
 
     JsRuntimeForSnapshot {
       isolate: Some(isolate),
     }
   }
 
-  pub fn create_snapshot(&mut self) -> v8::StartupData {
+  fn create_isolate() -> (v8::OwnedIsolate, v8::Global<v8::Context>) {
+    let mut isolate = v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+
+    // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
+    // See: [`run_next_tick_callbacks`].
+    // isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
+    isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
+    isolate.set_promise_reject_callback(hook::promise_reject_cb);
+    // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
+    isolate
+      .set_host_initialize_import_meta_object_callback(hook::host_initialize_import_meta_object_cb);
+
+    let global_context = {
+      let scope = &mut v8::HandleScope::new(&mut isolate);
+      let context = v8::Context::new(scope, Default::default());
+      v8::Global::new(scope, context)
+    };
+
+    (isolate, global_context)
+  }
+
+  pub fn create_snapshot(mut self) -> v8::StartupData {
     let snapshot_creator = self.isolate.take().unwrap();
     snapshot_creator
       .create_blob(v8::FunctionCodeHandling::Keep)
@@ -145,11 +177,20 @@ impl JsRuntimeForSnapshot {
   }
 
   /// Synchronously load builtin module.
-  fn init_builtin_module(scope: &mut v8::HandleScope, name: &str, source: &str) {
+  fn init_builtin_module(
+    scope: &mut v8::HandleScope,
+    module_map: &mut ModuleMap,
+    name: &str,
+    source: &str,
+  ) {
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    let module = match fetch_module(tc_scope, name, Some(source)) {
-      Some(module) => module,
+    match Self::fetch_module(tc_scope, name, Some(source)) {
+      Some(module) => {
+        module_map
+          .index
+          .insert(name.to_string(), v8::Global::new(tc_scope, module));
+      }
       None => {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
@@ -158,29 +199,40 @@ impl JsRuntimeForSnapshot {
         eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
         std::process::exit(1);
       }
+    }
+  }
+
+  fn fetch_module<'a>(
+    scope: &mut v8::HandleScope<'a>,
+    filename: &str,
+    source: Option<&str>,
+  ) -> Option<v8::Local<'a, v8::Module>> {
+    // Create a script origin.
+    let origin = create_origin(scope, filename, true);
+
+    // Find appropriate loader if source is empty.
+    let source = match source {
+      Some(source) => source.into(),
+      None => load_import(filename, true).unwrap(),
+    };
+    debug!(
+      "Fetched module filename: {:?}, source: {:?}",
+      filename,
+      if source.as_str().len() > 20 {
+        String::from(&source.as_str()[..20]) + "..."
+      } else {
+        String::from(source.as_str())
+      }
+    );
+    let source = v8::String::new(scope, &source).unwrap();
+    let mut source = v8::script_compiler::Source::new(source, Some(&origin));
+
+    let module = match v8::script_compiler::compile_module(scope, &mut source) {
+      Some(module) => module,
+      None => return None,
     };
 
-    if module
-      .instantiate_module(tc_scope, module_resolve_cb)
-      .is_none()
-    {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
-      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
-      std::process::exit(1);
-    }
-
-    let _ = module.evaluate(tc_scope);
-
-    if module.get_status() == v8::ModuleStatus::Errored {
-      let exception = module.get_exception();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
-      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
-      std::process::exit(1);
-    }
+    Some(module)
   }
 }
 

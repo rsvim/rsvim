@@ -112,12 +112,12 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
 }
 
 /// Populates a new JavaScript context with low-level Rust bindings.
-pub fn create_new_context_for_snapshot<'s>(
+pub fn initialize_context<'s>(
   scope: &mut v8::HandleScope<'s, ()>,
-) -> v8::Local<'s, v8::Context> {
+  context: v8::Local<'s, v8::Context>,
+) {
   // Here we just keep the scope local, so V8 can serialize it when making snapshot.
   // Create and enter a new JavaScript context.
-  let context = v8::Context::new(scope, Default::default());
   let global = context.global(scope);
   let scope = &mut v8::ContextScope::new(scope, context);
 
@@ -173,8 +173,6 @@ pub fn create_new_context_for_snapshot<'s>(
       global_rsvim::opt::set_break_at,
     );
   }
-
-  context
 }
 
 // // Simple print function bound to Rust's println! macro.
