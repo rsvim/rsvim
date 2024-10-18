@@ -17,9 +17,6 @@
  * @see [Deno APIs](https://docs.deno.com/api/deno/)
  */
 
-// @ts-ignore Ignore warning
-import infra from "rsvim:ext/infra";
-
 /**
  * The `Rsvim` global object, it contains multiple sub fields:
  *
@@ -95,7 +92,7 @@ export class RsvimOpt {
   set wrap(value: boolean) {
     if (typeof value !== "boolean") {
       throw new Error(
-        `"Rsvim.opt.wrap" value must be boolean type, but found ${infra.stringify(value)}`,
+        `"Rsvim.opt.wrap" value must be boolean type, but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
@@ -145,7 +142,7 @@ export class RsvimOpt {
   set lineBreak(value: boolean) {
     if (typeof value !== "boolean") {
       throw new Error(
-        `"Rsvim.opt.lineBreak" value must be boolean type, but found ${infra.stringify(value)}`,
+        `"Rsvim.opt.lineBreak" value must be boolean type, but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
@@ -181,7 +178,7 @@ export class RsvimOpt {
   // set breakAt(value: string) {
   //   if (typeof value !== "string") {
   //     throw new Error(
-  //       `"Rsvim.opt.breakAt" value must be string type, but found ${infra.stringify(value)}`,
+  //       `"Rsvim.opt.breakAt" value must be string type, but found ${value} (${typeof value})`,
   //     );
   //   }
   //   // @ts-ignore Ignore warning

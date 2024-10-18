@@ -457,3 +457,38 @@ pub fn fetch_module_tree<'a>(
 
   Some(module)
 }
+
+/// Resolves module imports synchronously, without dependencies.
+/// WARNING: Only works for built-in runtime modules.
+pub fn fetch_module<'a>(
+  scope: &mut v8::HandleScope<'a>,
+  filename: &str,
+  source: Option<&str>,
+) -> Option<v8::Local<'a, v8::Module>> {
+  // Create a script origin.
+  let origin = create_origin(scope, filename, true);
+
+  // Find appropriate loader if source is empty.
+  let source = match source {
+    Some(source) => source.into(),
+    None => load_import(filename, true).unwrap(),
+  };
+  debug!(
+    "Loaded main js module filename: {:?}, source: {:?}",
+    filename,
+    if source.as_str().len() > 20 {
+      String::from(&source.as_str()[..20]) + "..."
+    } else {
+      String::from(source.as_str())
+    }
+  );
+  let source = v8::String::new(scope, &source).unwrap();
+  let mut source = v8::script_compiler::Source::new(source, Some(&origin));
+
+  let module = match v8::script_compiler::compile_module(scope, &mut source) {
+    Some(module) => module,
+    None => return None,
+  };
+
+  Some(module)
+}

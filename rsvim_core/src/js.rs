@@ -1,17 +1,21 @@
 //! JavaScript runtime.
 
-use crate::buf::BuffersArc;
+#![allow(dead_code, unused_imports)]
+
+use crate::buf::{Buffers, BuffersArc};
+use crate::cart::U16Size;
 use crate::cli::CliOpt;
 use crate::error::{AnyErr, TheErr};
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
-  create_origin, fetch_module_tree, resolve_import, ImportKind, ImportMap, ModuleMap, ModuleStatus,
+  create_origin, fetch_module, fetch_module_tree, resolve_import, ImportKind, ImportMap, ModuleMap,
+  ModuleStatus,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::state::StateArc;
-use crate::ui::tree::TreeArc;
+use crate::state::{State, StateArc};
+use crate::ui::tree::{Tree, TreeArc};
 
 use parking_lot::RwLock;
 use std::cell::RefCell;
@@ -21,7 +25,7 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
 use std::sync::Once;
-use std::time::Instant;
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{debug, error};
 
@@ -91,6 +95,95 @@ pub fn init_v8_platform() {
   });
 }
 
+/// The js runtime for snapshot.
+pub struct JsRuntimeForSnapshot {
+  /// V8 isolate.
+  /// This is an `Option<v8::OwnedIsolate>` instead of just `v8::OwnedIsolate` is to workaround the
+  /// safety issue with snapshot_creator.
+  /// See: <https://github.com/denoland/deno/blob/d0efd040c79021958a1e83caa56572c0401ca1f2/core/runtime.rs?plain=1#L93>.
+  pub isolate: Option<v8::OwnedIsolate>,
+}
+
+impl JsRuntimeForSnapshot {
+  /// Creates a new js runtime for snapshot.
+  #[allow(clippy::new_without_default)]
+  pub fn new() -> Self {
+    init_v8_platform();
+
+    let mut isolate = v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+
+    unsafe {
+      let mut raw_isolate = std::ptr::NonNull::new(&mut isolate as *mut v8::OwnedIsolate).unwrap();
+
+      // Create scope, default context
+      let mut scope = v8::HandleScope::new(raw_isolate.as_mut());
+      let context = v8::Context::new(&mut scope, Default::default());
+      scope.set_default_context(context);
+
+      let mut scope_with_context = v8::HandleScope::with_context(raw_isolate.as_mut(), context);
+      let name = "rsvim:runtime/10__web.js";
+      let source = include_str!("./js/runtime/10__web.js");
+      JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
+
+      let name = "rsvim:runtime/50__rsvim.js";
+      let source = include_str!("./js/runtime/50__rsvim.js");
+      JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
+
+      raw_isolate.as_mut().set_slot(context);
+    }
+
+    JsRuntimeForSnapshot {
+      isolate: Some(isolate),
+    }
+  }
+
+  pub fn create_snapshot(&mut self) -> v8::StartupData {
+    let snapshot_creator = self.isolate.take().unwrap();
+    snapshot_creator
+      .create_blob(v8::FunctionCodeHandling::Keep)
+      .unwrap()
+  }
+
+  /// Synchronously load builtin module.
+  fn init_builtin_module(scope: &mut v8::HandleScope, name: &str, source: &str) {
+    let tc_scope = &mut v8::TryCatch::new(scope);
+
+    let module = match fetch_module(tc_scope, name, Some(source)) {
+      Some(module) => module,
+      None => {
+        assert!(tc_scope.has_caught());
+        let exception = tc_scope.exception().unwrap();
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        error!("Failed to import builtin modules: {name}, error: {exception:?}");
+        eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
+        std::process::exit(1);
+      }
+    };
+
+    if module
+      .instantiate_module(tc_scope, module_resolve_cb)
+      .is_none()
+    {
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
+
+    let _ = module.evaluate(tc_scope);
+
+    if module.get_status() == v8::ModuleStatus::Errored {
+      let exception = module.get_exception();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
+  }
+}
+
 /// The state of js runtime.
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
@@ -131,12 +224,23 @@ pub struct JsRuntimeState {
 }
 
 pub struct JsRuntime {
-  // V8 isolate.
-  isolate: v8::OwnedIsolate,
+  /// If this runtime is created for snapshot.
+  pub will_snapshot: bool,
+
+  /// V8 isolate. This is an `Option<v8::OwnedIsolate>` instead of just `v8::OwnedIsolate` is to
+  /// workaround the safety issue with snapshot_creator.
+  /// See: <https://github.com/denoland/deno/blob/d0efd040c79021958a1e83caa56572c0401ca1f2/core/runtime.rs?plain=1#L93>.
+  pub isolate: Option<v8::OwnedIsolate>,
 
   /// The state of the runtime.
   #[allow(unused)]
   pub state: Rc<RefCell<JsRuntimeState>>,
+}
+
+impl Drop for JsRuntime {
+  fn drop(&mut self) {
+    debug_assert_eq!(Rc::strong_count(&self.state), 1);
+  }
 }
 
 impl JsRuntime {
@@ -230,7 +334,8 @@ impl JsRuntime {
     isolate.set_slot(state.clone());
 
     let mut runtime = JsRuntime {
-      isolate,
+      will_snapshot: false,
+      isolate: Some(isolate),
       // event_loop,
       state,
       // inspector,
@@ -425,7 +530,11 @@ impl JsRuntime {
 
   /// Runs a single tick of the event-loop.
   pub fn tick_event_loop(&mut self) {
-    let isolate_has_pending_tasks = self.isolate.has_pending_background_tasks();
+    let isolate_has_pending_tasks = self
+      .isolate
+      .as_ref()
+      .unwrap()
+      .has_pending_background_tasks();
     debug!(
       "Tick js runtime, isolate has pending tasks: {:?}",
       isolate_has_pending_tasks
@@ -659,14 +768,14 @@ impl JsRuntime {
 
   /// Returns the runtime's state.
   pub fn get_state(&self) -> Rc<RefCell<JsRuntimeState>> {
-    Self::state(&self.isolate)
+    Self::state(self.isolate.as_ref().unwrap())
   }
 
   /// Returns a v8 handle scope for the runtime.
   /// See: <https://v8docs.nodesource.com/node-0.8/d3/d95/classv8_1_1_handle_scope.html>.
   pub fn handle_scope(&mut self) -> v8::HandleScope {
     let context = self.context();
-    v8::HandleScope::with_context(&mut self.isolate, context)
+    v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
   }
 
   /// Returns a context created for the runtime.

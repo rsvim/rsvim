@@ -28,7 +28,7 @@ use clap::Parser;
 // #[arg(long, help = "Run in debug mode")]
 // debug: bool,
 
-#[derive(Parser, Debug, Clone)]
+#[derive(Parser, Debug, Clone, Default)]
 #[command(
   version,
   about,
