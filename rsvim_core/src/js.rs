@@ -107,7 +107,7 @@ pub struct JsRuntimeStateForSnapshot {
 /// So when creating snapshot, we are mainly serialize those built-in modules, i.e. compile the
 /// scripts into `v8::Module`.
 ///
-/// TODO: Can we also evaluate these built-in modules?
+/// TODO: Can we also evaluate these built-in modules (to further improve startup performance)?
 pub struct JsRuntimeForSnapshot {
   /// V8 isolate.
   /// This is an `Option<v8::OwnedIsolate>` instead of just `v8::OwnedIsolate` is to workaround the
