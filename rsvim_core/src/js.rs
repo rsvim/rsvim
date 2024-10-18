@@ -160,11 +160,9 @@ impl JsRuntimeForSnapshot {
     isolate
       .set_host_initialize_import_meta_object_callback(hook::host_initialize_import_meta_object_cb);
 
-    let global_context = unsafe {
-      let mut raw_isolate = std::ptr::NonNull::new(&mut isolate as *mut v8::OwnedIsolate).unwrap();
-      let scope = &mut v8::HandleScope::new(raw_isolate.as_mut());
+    let global_context = {
+      let scope = &mut v8::HandleScope::new(&mut isolate);
       let context = v8::Context::new(scope, Default::default());
-      raw_isolate.as_mut().set_default_context(context);
       v8::Global::new(scope, context)
     };
 
