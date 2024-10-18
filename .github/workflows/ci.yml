@@ -24,7 +24,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: 20
       - name: Tsc
         run: |
           npm install -g typescript
