@@ -104,7 +104,10 @@ pub struct JsRuntimeStateForSnapshot {
 /// WARNING: When creating snapshot, do remember that the `__InternalRsvimGlobalObject` bindings
 /// are not available, because most of the functions are related with outside of js runtime, i.e.
 /// the UI tree, the event loop, the tokio channels, etc. We cannot really make snapshot for them.
-/// So when creating snapshot, we are mainly focus on those built-in modules.
+/// So when creating snapshot, we are mainly serialize those built-in modules, i.e. compile the
+/// scripts into `v8::Module`.
+///
+/// TODO: Can we also evaluate these built-in modules?
 pub struct JsRuntimeForSnapshot {
   /// V8 isolate.
   /// This is an `Option<v8::OwnedIsolate>` instead of just `v8::OwnedIsolate` is to workaround the
@@ -191,24 +194,7 @@ impl JsRuntimeForSnapshot {
       scope.set_default_context(local_context);
     }
 
-    // // Set module map to snapshot data
-    // {
-    //   let global_context = self.global_context();
-    //   let mut scope = self.handle_scope();
-    //   let scope = &mut scope;
-    //   let local_context = v8::Local::new(scope, global_context);
-    //   let module_map = (&mut self).state.borrow_mut().module_map.clone();
-    //   for (filename, module) in module_map.borrow_mut().index.iter() {
-    //     let module_handle = v8::Local::new(scope, module);
-    //     let module_offset = scope.add_context_data(local_context, module_handle);
-    //     eprintln!(
-    //       "module_offset:{:?}, filename: {:?}",
-    //       module_offset, filename
-    //     );
-    //   }
-    // }
-
-    // Drop state
+    // Drop state (and the global context inside)
     {
       let state = self.get_state();
       state.borrow_mut().context.take();
