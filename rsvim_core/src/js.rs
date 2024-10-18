@@ -95,6 +95,11 @@ pub fn init_v8_platform() {
   });
 }
 
+pub struct JsRuntimeStateForSnapshot {
+  pub context: v8::Global<v8::Context>,
+  pub module_map: Rc<RefCell<ModuleMap>>,
+}
+
 /// The js runtime for snapshot.
 pub struct JsRuntimeForSnapshot {
   /// V8 isolate.
@@ -102,11 +107,15 @@ pub struct JsRuntimeForSnapshot {
   /// safety issue with snapshot_creator.
   /// See: <https://github.com/denoland/deno/blob/d0efd040c79021958a1e83caa56572c0401ca1f2/core/runtime.rs?plain=1#L93>.
   pub isolate: Option<v8::OwnedIsolate>,
+
+  /// State.
+  pub state: Rc<RefCell<JsRuntimeStateForSnapshot>>,
 }
 
 impl Drop for JsRuntimeForSnapshot {
   fn drop(&mut self) {
-    assert!(self.isolate.is_none());
+    // assert!(self.isolate.is_none());
+    assert_eq!(Rc::strong_count(&self.state), 1);
     eprintln!("dropped JsRuntimeForSnapshot");
   }
 }
@@ -137,14 +146,19 @@ impl JsRuntimeForSnapshot {
     Self::init_builtin_module(scope, &mut module_map, name, source);
 
     let module_map_rc = Rc::new(RefCell::new(module_map));
-    scope.set_data(
-      0,
-      Rc::into_raw(module_map_rc.clone()) as *mut std::ffi::c_void,
-    );
+
+    let state_rc = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
+      context: global_context,
+      module_map: module_map_rc,
+    }));
+
+    scope.set_slot(state_rc.clone());
+
     drop(context_scope);
 
     JsRuntimeForSnapshot {
       isolate: Some(isolate),
+      state: state_rc,
     }
   }
 
@@ -170,6 +184,37 @@ impl JsRuntimeForSnapshot {
   }
 
   pub fn create_snapshot(mut self) -> v8::StartupData {
+    // Set default context
+    {
+      let global_context = self.global_context();
+      let mut scope = self.handle_scope();
+      let local_context = v8::Local::new(&mut scope, global_context);
+      scope.set_default_context(local_context);
+    }
+
+    // // Set module map to snapshot data
+    // {
+    //   let global_context = self.global_context();
+    //   let mut scope = self.handle_scope();
+    //   let scope = &mut scope;
+    //   let local_context = v8::Local::new(scope, global_context);
+    //   let module_map = (&mut self).state.borrow_mut().module_map.clone();
+    //   for (filename, module) in module_map.borrow_mut().index.iter() {
+    //     let module_handle = v8::Local::new(scope, module);
+    //     let module_offset = scope.add_context_data(local_context, module_handle);
+    //     eprintln!(
+    //       "module_offset:{:?}, filename: {:?}",
+    //       module_offset, filename
+    //     );
+    //   }
+    // }
+
+    // // Drop state
+    // {
+    //   let isolate = self.isolate.as_mut().unwrap();
+    //   let _state: Rc<RefCell<JsRuntimeStateForSnapshot>> = isolate.remove_slot().unwrap();
+    // }
+
     let snapshot_creator = self.isolate.take().unwrap();
     snapshot_creator
       .create_blob(v8::FunctionCodeHandling::Keep)
@@ -233,6 +278,28 @@ impl JsRuntimeForSnapshot {
     };
 
     Some(module)
+  }
+}
+
+impl JsRuntimeForSnapshot {
+  pub fn global_context(&self) -> v8::Global<v8::Context> {
+    self.get_state().borrow().context.clone()
+  }
+
+  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeState>> {
+    isolate
+      .get_slot::<Rc<RefCell<JsRuntimeState>>>()
+      .unwrap()
+      .clone()
+  }
+
+  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeState>> {
+    Self::state(self.isolate.as_ref().unwrap())
+  }
+
+  pub fn handle_scope(&mut self) -> v8::HandleScope {
+    let context = self.global_context();
+    v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
   }
 }
 
