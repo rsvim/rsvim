@@ -25,7 +25,7 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
-use std::sync::Once;
+use std::sync::{Once, OnceLock};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{debug, error};
@@ -131,6 +131,46 @@ impl Drop for JsRuntimeForSnapshot {
   }
 }
 
+#[allow(non_upper_case_globals)]
+const _00__WEB: &str = "00__web.js";
+#[allow(non_upper_case_globals)]
+const _01__RSVIM: &str = "01__rsvim.js";
+#[allow(non_upper_case_globals)]
+static _00__WEB_STR: Lazy<&str> = Lazy::new(|| include_str!("./js/runtime/00__web.js"));
+#[allow(non_upper_case_globals)]
+static _01__RSVIM_STR: Lazy<&str> = Lazy::new(|| include_str!("./js/runtime/01__rsvim.js"));
+
+fn get_module_name_by_filename(filename: &str) -> String {
+  format!("rsvim:runtime/{}", filename)
+}
+
+fn get_data_index_from_filename(filename: &str) -> usize {
+  static VALUE: OnceLock<HashMap<&str, usize>> = OnceLock::new();
+
+  *VALUE
+    .get_or_init(|| {
+      vec![(_00__WEB, 0), (_01__RSVIM, 1)]
+        .into_iter()
+        .collect::<HashMap<_, _>>()
+    })
+    .get(filename)
+    .unwrap()
+}
+
+fn get_filename_from_data_index(index: usize) -> String {
+  static VALUE: OnceLock<HashMap<usize, &str>> = OnceLock::new();
+
+  VALUE
+    .get_or_init(|| {
+      vec![(0, _00__WEB), (1, _01__RSVIM)]
+        .into_iter()
+        .collect::<HashMap<_, _>>()
+    })
+    .get(&index)
+    .unwrap()
+    .to_string()
+}
+
 impl JsRuntimeForSnapshot {
   /// Creates a new js runtime for snapshot.
   #[allow(clippy::new_without_default)]
@@ -143,18 +183,24 @@ impl JsRuntimeForSnapshot {
     let scope = &mut context_scope;
     let context = v8::Local::new(scope, global_context.clone());
 
-    let name = "rsvim:runtime/10__web.js";
-    let source = include_str!("./js/runtime/10__web.js");
-    let web_module0 = Self::init_builtin_module(scope, name, source);
+    {
+      // Load and compile built-in javascript scripts into modules.
+      // NOTE: Each scripts is named with a number index, it indicates the order when calling
+      // `add_context_data` API.
 
-    let name = "rsvim:runtime/50__rsvim.js";
-    let source = include_str!("./js/runtime/50__rsvim.js");
-    let rsvim_module1 = Self::init_builtin_module(scope, name, source);
+      let name = get_module_name_by_filename(_00__WEB);
+      let web_module0 = Self::init_builtin_module(scope, &name, &_00__WEB_STR);
 
-    let offset0 = scope.add_context_data(context, web_module0);
-    debug_assert_eq!(offset0, 0);
-    let offset1 = scope.add_context_data(context, rsvim_module1);
-    debug_assert_eq!(offset1, 1);
+      let name = get_module_name_by_filename(_01__RSVIM);
+      let rsvim_module1 = Self::init_builtin_module(scope, &name, &_01__RSVIM_STR);
+
+      let offset0 = scope.add_context_data(context, web_module0);
+      debug_assert_eq!(offset0, 0);
+      debug_assert_eq!(get_data_index_from_filename(_00__WEB), 0);
+      let offset1 = scope.add_context_data(context, rsvim_module1);
+      debug_assert_eq!(offset1, 1);
+      debug_assert_eq!(get_data_index_from_filename(_01__RSVIM), 1);
+    }
 
     let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
       context: Some(global_context),
@@ -373,8 +419,8 @@ impl JsRuntime {
     init_v8_platform();
 
     let create_params = v8::CreateParams::default();
-    create_params.snapshot_blob(snapshot.value);
-    let mut isolate = v8::Isolate::new(v8::CreateParams::default());
+    let create_params = create_params.snapshot_blob(snapshot.value);
+    let mut isolate = v8::Isolate::new(create_params);
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
@@ -456,13 +502,11 @@ impl JsRuntime {
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
   fn init_environment(&mut self) {
-    let name = "rsvim:runtime/10__web.js";
-    let source = include_str!("./js/runtime/10__web.js");
-    self.init_builtin_module(name, source);
+    let name = get_module_name_by_filename(_00__WEB);
+    self.init_builtin_module(&name, &_00__WEB_STR);
 
-    let name = "rsvim:runtime/50__rsvim.js";
-    let source = include_str!("./js/runtime/50__rsvim.js");
-    self.init_builtin_module(name, source);
+    let name = get_module_name_by_filename(_01__RSVIM);
+    self.init_builtin_module(&name, &_01__RSVIM_STR);
 
     // // Initialize process static values.
     // process::refresh(tc_scope);
