@@ -26,9 +26,11 @@ tokio = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }
 toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
+zstd = { workspace = true }
 
 [build-dependencies]
 rsvim_core = { workspace = true }
 v8 = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 parking_lot = { workspace = true }
+zstd = { workspace = true }

@@ -56,6 +56,7 @@ path-absolutize = { workspace = true }
 toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 icu = { workspace = true, features = ["compiled_data", "serde", "std"] }
+zstd = { workspace = true }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 

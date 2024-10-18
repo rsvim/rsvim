@@ -16,8 +16,14 @@ use once_cell::sync::Lazy;
 use tracing::debug;
 
 static RSVIM_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(|| {
-  static BYTES: &[u8] = include_bytes!("../../RSVIM_SNAPSHOT.BIN");
-  Box::from(BYTES)
+  static COMPRESSED_BYTES: &[u8] =
+    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_SNAPSHOT.BIN"));
+  zstd::bulk::decompress(
+    &COMPRESSED_BYTES[4..],
+    u32::from_le_bytes(COMPRESSED_BYTES[0..4].try_into().unwrap()) as usize,
+  )
+  .unwrap()
+  .into_boxed_slice()
 });
 
 fn main() -> IoResult<()> {
