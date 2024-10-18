@@ -1,17 +1,21 @@
 //! JavaScript runtime.
 
-use crate::buf::BuffersArc;
+#![allow(dead_code, unused_imports)]
+
+use crate::buf::{Buffers, BuffersArc};
+use crate::cart::U16Size;
 use crate::cli::CliOpt;
 use crate::error::{AnyErr, TheErr};
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
-  create_origin, fetch_module_tree, resolve_import, ImportKind, ImportMap, ModuleMap, ModuleStatus,
+  create_origin, fetch_module_tree, load_import, resolve_import, ImportKind, ImportMap, ModuleMap,
+  ModuleStatus,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::state::StateArc;
-use crate::ui::tree::TreeArc;
+use crate::state::{State, StateArc};
+use crate::ui::tree::{Tree, TreeArc};
 
 use parking_lot::RwLock;
 use std::cell::RefCell;
@@ -21,7 +25,7 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
 use std::sync::Once;
-use std::time::Instant;
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{debug, error};
 
@@ -91,6 +95,194 @@ pub fn init_v8_platform() {
   });
 }
 
+pub struct JsRuntimeStateForSnapshot {
+  pub context: Option<v8::Global<v8::Context>>,
+}
+
+/// The js runtime for snapshot.
+///
+/// WARNING: When creating snapshot, do remember that the `__InternalRsvimGlobalObject` bindings
+/// are not available, because most of the functions are related with outside of js runtime, i.e.
+/// the UI tree, the event loop, the tokio channels, etc. We cannot really make snapshot for them.
+/// So when creating snapshot, we are mainly serialize those built-in modules, i.e. compile the
+/// scripts into `v8::Module`.
+///
+/// TODO: Can we also evaluate these built-in modules (to further improve startup performance)?
+pub struct JsRuntimeForSnapshot {
+  /// V8 isolate.
+  /// This is an `Option<v8::OwnedIsolate>` instead of just `v8::OwnedIsolate` is to workaround the
+  /// safety issue with snapshot_creator.
+  /// See: <https://github.com/denoland/deno/blob/d0efd040c79021958a1e83caa56572c0401ca1f2/core/runtime.rs?plain=1#L93>.
+  pub isolate: Option<v8::OwnedIsolate>,
+
+  /// State.
+  pub state: Rc<RefCell<JsRuntimeStateForSnapshot>>,
+}
+
+impl Drop for JsRuntimeForSnapshot {
+  fn drop(&mut self) {
+    debug_assert_eq!(Rc::strong_count(&self.state), 1);
+  }
+}
+
+impl JsRuntimeForSnapshot {
+  /// Creates a new js runtime for snapshot.
+  #[allow(clippy::new_without_default)]
+  pub fn new() -> Self {
+    init_v8_platform();
+
+    let (mut isolate, global_context) = Self::create_isolate();
+
+    let mut context_scope = v8::HandleScope::with_context(&mut isolate, global_context.clone());
+    let scope = &mut context_scope;
+    let context = v8::Local::new(scope, global_context.clone());
+
+    let name = "rsvim:runtime/10__web.js";
+    let source = include_str!("./js/runtime/10__web.js");
+    let web_module0 = Self::init_builtin_module(scope, name, source);
+
+    let name = "rsvim:runtime/50__rsvim.js";
+    let source = include_str!("./js/runtime/50__rsvim.js");
+    let rsvim_module1 = Self::init_builtin_module(scope, name, source);
+
+    let offset0 = scope.add_context_data(context, web_module0);
+    debug_assert_eq!(offset0, 0);
+    let offset1 = scope.add_context_data(context, rsvim_module1);
+    debug_assert_eq!(offset1, 1);
+
+    let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
+      context: Some(global_context),
+    }));
+
+    scope.set_slot(state.clone());
+
+    drop(context_scope);
+
+    JsRuntimeForSnapshot {
+      isolate: Some(isolate),
+      state,
+    }
+  }
+
+  fn create_isolate() -> (v8::OwnedIsolate, v8::Global<v8::Context>) {
+    let mut isolate = v8::Isolate::snapshot_creator(None, Some(v8::CreateParams::default()));
+
+    // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
+    // See: [`run_next_tick_callbacks`].
+    // isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
+    isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
+    isolate.set_promise_reject_callback(hook::promise_reject_cb);
+    // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
+    isolate
+      .set_host_initialize_import_meta_object_callback(hook::host_initialize_import_meta_object_cb);
+
+    let global_context = {
+      let scope = &mut v8::HandleScope::new(&mut isolate);
+      let context = v8::Context::new(scope, Default::default());
+      v8::Global::new(scope, context)
+    };
+
+    (isolate, global_context)
+  }
+
+  pub fn create_snapshot(mut self) -> v8::StartupData {
+    // Set default context
+    {
+      let global_context = self.global_context();
+      let mut scope = self.handle_scope();
+      let local_context = v8::Local::new(&mut scope, global_context);
+      scope.set_default_context(local_context);
+    }
+
+    // Drop state (and the global context inside)
+    {
+      let state = self.get_state();
+      state.borrow_mut().context.take();
+    }
+
+    let snapshot_creator = self.isolate.take().unwrap();
+    snapshot_creator
+      .create_blob(v8::FunctionCodeHandling::Keep)
+      .unwrap()
+  }
+
+  /// Synchronously load builtin module.
+  fn init_builtin_module<'s>(
+    scope: &mut v8::HandleScope<'s>,
+    name: &str,
+    source: &str,
+  ) -> v8::Local<'s, v8::Module> {
+    let tc_scope = &mut v8::TryCatch::new(scope);
+
+    match Self::fetch_module(tc_scope, name, Some(source)) {
+      Some(module) => module,
+      None => {
+        assert!(tc_scope.has_caught());
+        let exception = tc_scope.exception().unwrap();
+        let exception = JsError::from_v8_exception(tc_scope, exception, None);
+        error!("Failed to import builtin modules: {name}, error: {exception:?}");
+        eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
+        std::process::exit(1);
+      }
+    }
+  }
+
+  fn fetch_module<'a>(
+    scope: &mut v8::HandleScope<'a>,
+    filename: &str,
+    source: Option<&str>,
+  ) -> Option<v8::Local<'a, v8::Module>> {
+    // Create a script origin.
+    let origin = create_origin(scope, filename, true);
+
+    // Find appropriate loader if source is empty.
+    let source = match source {
+      Some(source) => source.into(),
+      None => load_import(filename, true).unwrap(),
+    };
+    debug!(
+      "Fetched module filename: {:?}, source: {:?}",
+      filename,
+      if source.as_str().len() > 20 {
+        String::from(&source.as_str()[..20]) + "..."
+      } else {
+        String::from(source.as_str())
+      }
+    );
+    let source = v8::String::new(scope, &source).unwrap();
+    let mut source = v8::script_compiler::Source::new(source, Some(&origin));
+
+    let module = match v8::script_compiler::compile_module(scope, &mut source) {
+      Some(module) => module,
+      None => return None,
+    };
+
+    Some(module)
+  }
+}
+
+impl JsRuntimeForSnapshot {
+  pub fn global_context(&self) -> v8::Global<v8::Context> {
+    self.get_state().borrow().context.as_ref().unwrap().clone()
+  }
+
+  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
+    isolate
+      .get_slot::<Rc<RefCell<JsRuntimeStateForSnapshot>>>()
+      .unwrap()
+      .clone()
+  }
+
+  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
+    Self::state(self.isolate.as_ref().unwrap())
+  }
+
+  pub fn handle_scope(&mut self) -> v8::HandleScope {
+    let context = self.global_context();
+    v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
+  }
+}
+
 /// The state of js runtime.
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
@@ -131,12 +323,18 @@ pub struct JsRuntimeState {
 }
 
 pub struct JsRuntime {
-  // V8 isolate.
-  isolate: v8::OwnedIsolate,
+  /// V8 isolate.
+  pub isolate: v8::OwnedIsolate,
 
   /// The state of the runtime.
   #[allow(unused)]
   pub state: Rc<RefCell<JsRuntimeState>>,
+}
+
+impl Drop for JsRuntime {
+  fn drop(&mut self) {
+    debug_assert_eq!(Rc::strong_count(&self.state), 1);
+  }
 }
 
 impl JsRuntime {
