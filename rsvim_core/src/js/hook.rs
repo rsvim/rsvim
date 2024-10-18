@@ -49,7 +49,7 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
   let module = v8::Global::new(scope, module);
 
   let url = state.module_map.get_path(module).unwrap();
-  // let is_main = state.module_map.main() == Some(url.to_owned());
+  let is_main = state.module_map.main() == Some(url.to_owned());
 
   // Setup import.url property.
   let key = v8::String::new(scope, "url").unwrap();
@@ -58,8 +58,7 @@ pub extern "C" fn host_initialize_import_meta_object_cb(
 
   // Setup import.main property.
   let key = v8::String::new(scope, "main").unwrap();
-  // let value = v8::Boolean::new(scope, is_main);
-  let value = v8::Boolean::new(scope, false);
+  let value = v8::Boolean::new(scope, is_main);
   meta.create_data_property(scope, key.into(), value.into());
 
   let url = v8::String::new(scope, &url).unwrap();
