@@ -129,11 +129,6 @@ impl JsRuntimeForSnapshot {
       let source = include_str!("./js/runtime/50__rsvim.js");
       JsRuntimeForSnapshot::init_builtin_module(&mut scope_with_context, name, source);
 
-      // for (idx, module) in modules.iter().enumerate() {
-      //   let data_idx = scope.add_context_data(context, *module);
-      //   assert_eq!(idx, data_idx);
-      // }
-
       raw_isolate.as_mut().set_slot(context);
     }
 
