@@ -104,6 +104,7 @@ pub struct JsRuntimeStateForSnapshot {
 /// WARNING: When creating snapshot, do remember that the `__InternalRsvimGlobalObject` bindings
 /// are not available, because most of the functions are related with outside of js runtime, i.e.
 /// the UI tree, the event loop, the tokio channels, etc. We cannot really make snapshot for them.
+/// So when creating snapshot, we are mainly focus on those built-in modules.
 pub struct JsRuntimeForSnapshot {
   /// V8 isolate.
   /// This is an `Option<v8::OwnedIsolate>` instead of just `v8::OwnedIsolate` is to workaround the
@@ -141,8 +142,10 @@ impl JsRuntimeForSnapshot {
     let source = include_str!("./js/runtime/50__rsvim.js");
     let rsvim_module1 = Self::init_builtin_module(scope, name, source);
 
-    scope.add_context_data(context, web_module0);
-    scope.add_context_data(context, rsvim_module1);
+    let offset0 = scope.add_context_data(context, web_module0);
+    debug_assert_eq!(offset0, 0);
+    let offset1 = scope.add_context_data(context, rsvim_module1);
+    debug_assert_eq!(offset1, 1);
 
     let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
       context: Some(global_context),
