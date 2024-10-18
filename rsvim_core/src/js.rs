@@ -383,6 +383,18 @@ pub struct JsRuntimeState {
   // Data Access for RSVIM }
 }
 
+/// Snapshot data for startup.
+pub struct SnapshotData {
+  pub value: &'static [u8],
+}
+
+impl SnapshotData {
+  pub fn new(value: &'static [u8]) -> Self {
+    SnapshotData { value }
+  }
+}
+
+/// Javascript runtime.
 pub struct JsRuntime {
   /// V8 isolate.
   pub isolate: v8::OwnedIsolate,
@@ -397,6 +409,7 @@ impl JsRuntime {
   #[allow(clippy::too_many_arguments)]
   pub fn new(
     options: JsRuntimeOptions,
+    snapshot: SnapshotData,
     startup_moment: Instant,
     time_origin: u128,
     js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
@@ -420,7 +433,11 @@ impl JsRuntime {
     // Fire up the v8 engine.
     init_v8_platform();
 
-    let mut isolate = v8::Isolate::new(v8::CreateParams::default());
+    let mut isolate = {
+      let create_params = v8::CreateParams::default();
+      let create_params = create_params.snapshot_blob(snapshot.value);
+      v8::Isolate::new(create_params)
+    };
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
@@ -430,12 +447,6 @@ impl JsRuntime {
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
     isolate
       .set_host_initialize_import_meta_object_callback(hook::host_initialize_import_meta_object_cb);
-
-    let context = {
-      let scope = &mut v8::HandleScope::new(&mut *isolate);
-      let context = binding::create_new_context(scope);
-      v8::Global::new(scope, context)
-    };
 
     // const MIN_POOL_SIZE: usize = 1;
 
@@ -455,6 +466,46 @@ impl JsRuntime {
     //     options.root.clone(),
     //   )
     // });
+
+    // Get snapshotted built-in modules data from context
+    fn get_context_data(
+      scope: &mut v8::HandleScope<()>,
+      context: v8::Local<v8::Context>,
+    ) -> Vec<v8::Global<v8::Module>> {
+      fn data_error_to_panic(err: v8::DataError) -> ! {
+        match err {
+          v8::DataError::BadType { actual, expected } => {
+            panic!("Invalid type for snapshot data: expected {expected}, got {actual}");
+          }
+          v8::DataError::NoData { expected } => {
+            panic!("No data for snapshot data: expected {expected}");
+          }
+        }
+      }
+
+      let mut scope = v8::ContextScope::new(scope, context);
+
+      let mut module_handles: Vec<v8::Global<v8::Module>> = vec![];
+      for i in 0..BUILTIN_MODULES_LEN {
+        match scope.get_context_data_from_snapshot_once::<v8::Module>(i as usize) {
+          Ok(val) => {
+            let module_global = v8::Global::new(&mut scope, val);
+            module_handles.push(module_global);
+          }
+          Err(err) => data_error_to_panic(err),
+        }
+      }
+
+      module_handles
+    }
+
+    let (context, module_handles): (v8::Global<v8::Context>, Vec<v8::Global<v8::Module>>) = {
+      let scope = &mut v8::HandleScope::new(&mut *isolate);
+      let context = binding::create_new_context(scope);
+
+      let module_handles = get_context_data(scope, context);
+      (v8::Global::new(scope, context), module_handles)
+    };
 
     // Store state inside the v8 isolate slot.
     // https://v8docs.nodesource.com/node-4.8/d5/dda/classv8_1_1_isolate.html#a7acadfe7965997e9c386a05f098fbe36
@@ -489,7 +540,7 @@ impl JsRuntime {
       // inspector,
     };
 
-    runtime.init_environment();
+    runtime.init_environment(module_handles);
 
     // // Start inspector agent is requested.
     // if let Some(inspector) = runtime.inspector().as_mut() {
@@ -501,12 +552,14 @@ impl JsRuntime {
   }
 
   /// Initializes synchronously the core environment (see js/runtime/global.js).
-  fn init_environment(&mut self) {
+  fn init_environment(&mut self, module_handles: Vec<v8::Global<v8::Module>>) {
+    debug_assert!(module_handles.len() == BUILTIN_MODULES_LEN);
     for i in 0..BUILTIN_MODULES_LEN {
       let filename = get_filename_from_context_data_index(i);
       let source = get_source_from_context_data_index(i);
       let name = get_builtin_module_name_by_filename(filename);
-      self.init_builtin_module(&name, source);
+      let module_handle = module_handles[i].clone();
+      self.init_builtin_module(&name, source, module_handle);
     }
 
     // // Initialize process static values.
@@ -514,21 +567,11 @@ impl JsRuntime {
   }
 
   /// Synchronously load builtin module.
-  fn init_builtin_module(&mut self, name: &str, source: &str) {
+  fn init_builtin_module(&mut self, name: &str, _source: &str, module: v8::Global<v8::Module>) {
     let scope = &mut self.handle_scope();
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    let module = match fetch_module_tree(tc_scope, name, Some(source)) {
-      Some(module) => module,
-      None => {
-        assert!(tc_scope.has_caught());
-        let exception = tc_scope.exception().unwrap();
-        let exception = JsError::from_v8_exception(tc_scope, exception, None);
-        error!("Failed to import builtin modules: {name}, error: {exception:?}");
-        eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
-        std::process::exit(1);
-      }
-    };
+    let module = v8::Local::new(tc_scope, module);
 
     if module
       .instantiate_module(tc_scope, module_resolve_cb)

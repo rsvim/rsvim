@@ -209,7 +209,7 @@ impl ModuleGraph {
 /// It maintains all the modules inside js runtime, including already resolved and pending
 /// fetching.
 pub struct ModuleMap {
-  pub main: Option<ModulePath>,
+  // pub main: Option<ModulePath>,
   pub index: HashMap<ModulePath, v8::Global<v8::Module>>,
   pub seen: HashMap<ModulePath, ModuleStatus>,
   pub pending: Vec<Rc<RefCell<ModuleGraph>>>,
@@ -219,7 +219,7 @@ impl ModuleMap {
   // Creates a new module-map instance.
   pub fn new() -> ModuleMap {
     Self {
-      main: None,
+      // main: None,
       index: HashMap::new(),
       seen: HashMap::new(),
       pending: vec![],
@@ -228,10 +228,10 @@ impl ModuleMap {
 
   // Inserts a compiled ES module to the map.
   pub fn insert(&mut self, path: &str, module: v8::Global<v8::Module>) {
-    // No main module has been set, so let's update the value.
-    if self.main.is_none() && std::fs::metadata(path).is_ok() {
-      self.main = Some(path.into());
-    }
+    // // No main module has been set, so let's update the value.
+    // if self.main.is_none() && std::fs::metadata(path).is_ok() {
+    //   self.main = Some(path.into());
+    // }
     self.index.insert(path.into(), module);
   }
 
@@ -254,10 +254,10 @@ impl ModuleMap {
       .map(|(p, _)| p.clone())
   }
 
-  // Returns the main entry point.
-  pub fn main(&self) -> Option<ModulePath> {
-    self.main.clone()
-  }
+  // // Returns the main entry point.
+  // pub fn main(&self) -> Option<ModulePath> {
+  //   self.main.clone()
+  // }
 }
 
 impl Default for ModuleMap {

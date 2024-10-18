@@ -8,7 +8,7 @@ use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
 use crate::glovar;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::js::{JsRuntime, JsRuntimeOptions};
+use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::state::fsm::StatefulValue;
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
@@ -117,7 +117,7 @@ pub struct EventLoop {
 
 impl EventLoop {
   /// Make new event loop.
-  pub fn new(cli_opt: CliOpt) -> IoResult<Self> {
+  pub fn new(cli_opt: CliOpt, snapshot: SnapshotData) -> IoResult<Self> {
     // Canvas
     let (cols, rows) = crossterm::terminal::size()?;
     let canvas_size = U16Size::new(cols, rows);
@@ -188,6 +188,7 @@ impl EventLoop {
     // Js Runtime
     let js_runtime = JsRuntime::new(
       JsRuntimeOptions::default(),
+      snapshot,
       startup_moment,
       startup_unix_epoch,
       js_runtime_send_to_master,
