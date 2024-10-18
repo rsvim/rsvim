@@ -100,6 +100,10 @@ pub struct JsRuntimeStateForSnapshot {
 }
 
 /// The js runtime for snapshot.
+///
+/// WARNING: When creating snapshot, do remember that the `__InternalRsvimGlobalObject` bindings
+/// are not available, because most of the functions are related with outside of js runtime, i.e.
+/// the UI tree, the event loop, the tokio channels, etc. We cannot really make snapshot for them.
 pub struct JsRuntimeForSnapshot {
   /// V8 isolate.
   /// This is an `Option<v8::OwnedIsolate>` instead of just `v8::OwnedIsolate` is to workaround the
@@ -107,13 +111,12 @@ pub struct JsRuntimeForSnapshot {
   /// See: <https://github.com/denoland/deno/blob/d0efd040c79021958a1e83caa56572c0401ca1f2/core/runtime.rs?plain=1#L93>.
   pub isolate: Option<v8::OwnedIsolate>,
 
+  /// State.
   pub state: Rc<RefCell<JsRuntimeStateForSnapshot>>,
 }
 
 impl Drop for JsRuntimeForSnapshot {
   fn drop(&mut self) {
-    // assert!(self.isolate.is_none());
-    eprintln!("dropped JsRuntimeForSnapshot");
     debug_assert_eq!(Rc::strong_count(&self.state), 1);
   }
 }
