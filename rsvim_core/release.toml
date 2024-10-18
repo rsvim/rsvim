@@ -1,10 +1,10 @@
 allow-branch = ["main"]
 shared-version = true
-tag = true
+tag = false
 pre-release-hook = [
   "git-cliff",
   "-o",
-  "RSVIM_CHANGELOG.md",
+  "RSVIM_CORE_CHANGELOG.md",
   "--tag",
   "{{version}}",
 ]
