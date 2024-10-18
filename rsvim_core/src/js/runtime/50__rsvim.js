@@ -1,4 +1,3 @@
-import infra from "rsvim:ext/infra";
 var Rsvim = (function () {
     function Rsvim() {
         this.opt = new RsvimOpt();
@@ -15,7 +14,7 @@ var RsvimOpt = (function () {
         },
         set: function (value) {
             if (typeof value !== "boolean") {
-                throw new Error("\"Rsvim.opt.wrap\" value must be boolean type, but found ".concat(infra.stringify(value)));
+                throw new Error("\"Rsvim.opt.wrap\" value must be boolean type, but found ".concat(value, " (").concat(typeof value, ")"));
             }
             __InternalRsvimGlobalObject.opt_set_wrap(value);
         },
@@ -28,7 +27,7 @@ var RsvimOpt = (function () {
         },
         set: function (value) {
             if (typeof value !== "boolean") {
-                throw new Error("\"Rsvim.opt.lineBreak\" value must be boolean type, but found ".concat(infra.stringify(value)));
+                throw new Error("\"Rsvim.opt.lineBreak\" value must be boolean type, but found ".concat(value, " (").concat(typeof value, ")"));
             }
             __InternalRsvimGlobalObject.opt_set_line_break(value);
         },
