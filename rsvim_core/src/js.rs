@@ -1,9 +1,6 @@
 //! JavaScript runtime.
 
-#![allow(dead_code, unused_imports)]
-
-use crate::buf::{Buffers, BuffersArc};
-use crate::cart::U16Size;
+use crate::buf::BuffersArc;
 use crate::cli::CliOpt;
 use crate::error::{AnyErr, TheErr};
 use crate::js::err::JsError;
@@ -14,10 +11,9 @@ use crate::js::module::{
   ModuleStatus,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
-use crate::state::{State, StateArc};
-use crate::ui::tree::{Tree, TreeArc};
+use crate::state::StateArc;
+use crate::ui::tree::TreeArc;
 
-use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -26,7 +22,7 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
 use std::sync::{Once, OnceLock};
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{debug, error};
 
@@ -487,7 +483,7 @@ impl JsRuntime {
 
       let mut module_handles: Vec<v8::Global<v8::Module>> = vec![];
       for i in 0..BUILTIN_MODULES_LEN {
-        match scope.get_context_data_from_snapshot_once::<v8::Module>(i as usize) {
+        match scope.get_context_data_from_snapshot_once::<v8::Module>(i) {
           Ok(val) => {
             let module_global = v8::Global::new(&mut scope, val);
             module_handles.push(module_global);
@@ -554,12 +550,11 @@ impl JsRuntime {
   /// Initializes synchronously the core environment (see js/runtime/global.js).
   fn init_environment(&mut self, module_handles: Vec<v8::Global<v8::Module>>) {
     debug_assert!(module_handles.len() == BUILTIN_MODULES_LEN);
-    for i in 0..BUILTIN_MODULES_LEN {
+    for (i, module_handle) in module_handles.iter().enumerate() {
       let filename = get_filename_from_context_data_index(i);
       let source = get_source_from_context_data_index(i);
       let name = get_builtin_module_name_by_filename(filename);
-      let module_handle = module_handles[i].clone();
-      self.init_builtin_module(&name, source, module_handle);
+      self.init_builtin_module(&name, source, module_handle.clone());
     }
 
     // // Initialize process static values.
