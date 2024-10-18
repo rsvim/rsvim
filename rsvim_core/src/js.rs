@@ -96,8 +96,7 @@ pub fn init_v8_platform() {
 }
 
 pub struct JsRuntimeStateForSnapshot {
-  pub context: v8::Global<v8::Context>,
-  pub module_map: Rc<RefCell<ModuleMap>>,
+  pub context: Option<v8::Global<v8::Context>>,
 }
 
 /// The js runtime for snapshot.
@@ -108,15 +107,14 @@ pub struct JsRuntimeForSnapshot {
   /// See: <https://github.com/denoland/deno/blob/d0efd040c79021958a1e83caa56572c0401ca1f2/core/runtime.rs?plain=1#L93>.
   pub isolate: Option<v8::OwnedIsolate>,
 
-  /// State.
   pub state: Rc<RefCell<JsRuntimeStateForSnapshot>>,
 }
 
 impl Drop for JsRuntimeForSnapshot {
   fn drop(&mut self) {
     // assert!(self.isolate.is_none());
-    assert_eq!(Rc::strong_count(&self.state), 1);
     eprintln!("dropped JsRuntimeForSnapshot");
+    debug_assert_eq!(Rc::strong_count(&self.state), 1);
   }
 }
 
@@ -126,39 +124,34 @@ impl JsRuntimeForSnapshot {
   pub fn new() -> Self {
     init_v8_platform();
 
-    let (mut isolate, global_context) = JsRuntimeForSnapshot::create_isolate();
+    let (mut isolate, global_context) = Self::create_isolate();
 
     let mut context_scope = v8::HandleScope::with_context(&mut isolate, global_context.clone());
     let scope = &mut context_scope;
     let context = v8::Local::new(scope, global_context.clone());
 
-    // Initialize `__InternalRsvimGlobalObject` bindings to context.
-    binding::initialize_context(scope, context);
-
-    let mut module_map = ModuleMap::default();
-
     let name = "rsvim:runtime/10__web.js";
     let source = include_str!("./js/runtime/10__web.js");
-    Self::init_builtin_module(scope, &mut module_map, name, source);
+    let web_module0 = Self::init_builtin_module(scope, name, source);
 
     let name = "rsvim:runtime/50__rsvim.js";
     let source = include_str!("./js/runtime/50__rsvim.js");
-    Self::init_builtin_module(scope, &mut module_map, name, source);
+    let rsvim_module1 = Self::init_builtin_module(scope, name, source);
 
-    let module_map_rc = Rc::new(RefCell::new(module_map));
+    scope.add_context_data(context, web_module0);
+    scope.add_context_data(context, rsvim_module1);
 
-    let state_rc = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
-      context: global_context,
-      module_map: module_map_rc,
+    let state = Rc::new(RefCell::new(JsRuntimeStateForSnapshot {
+      context: Some(global_context),
     }));
 
-    scope.set_slot(state_rc.clone());
+    scope.set_slot(state.clone());
 
     drop(context_scope);
 
     JsRuntimeForSnapshot {
       isolate: Some(isolate),
-      state: state_rc,
+      state,
     }
   }
 
@@ -209,11 +202,11 @@ impl JsRuntimeForSnapshot {
     //   }
     // }
 
-    // // Drop state
-    // {
-    //   let isolate = self.isolate.as_mut().unwrap();
-    //   let _state: Rc<RefCell<JsRuntimeStateForSnapshot>> = isolate.remove_slot().unwrap();
-    // }
+    // Drop state
+    {
+      let state = self.get_state();
+      state.borrow_mut().context.take();
+    }
 
     let snapshot_creator = self.isolate.take().unwrap();
     snapshot_creator
@@ -222,20 +215,15 @@ impl JsRuntimeForSnapshot {
   }
 
   /// Synchronously load builtin module.
-  fn init_builtin_module(
-    scope: &mut v8::HandleScope,
-    module_map: &mut ModuleMap,
+  fn init_builtin_module<'s>(
+    scope: &mut v8::HandleScope<'s>,
     name: &str,
     source: &str,
-  ) {
+  ) -> v8::Local<'s, v8::Module> {
     let tc_scope = &mut v8::TryCatch::new(scope);
 
     match Self::fetch_module(tc_scope, name, Some(source)) {
-      Some(module) => {
-        module_map
-          .index
-          .insert(name.to_string(), v8::Global::new(tc_scope, module));
-      }
+      Some(module) => module,
       None => {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
@@ -283,17 +271,17 @@ impl JsRuntimeForSnapshot {
 
 impl JsRuntimeForSnapshot {
   pub fn global_context(&self) -> v8::Global<v8::Context> {
-    self.get_state().borrow().context.clone()
+    self.get_state().borrow().context.as_ref().unwrap().clone()
   }
 
-  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeState>> {
+  pub fn state(isolate: &v8::Isolate) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
     isolate
-      .get_slot::<Rc<RefCell<JsRuntimeState>>>()
+      .get_slot::<Rc<RefCell<JsRuntimeStateForSnapshot>>>()
       .unwrap()
       .clone()
   }
 
-  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeState>> {
+  pub fn get_state(&self) -> Rc<RefCell<JsRuntimeStateForSnapshot>> {
     Self::state(self.isolate.as_ref().unwrap())
   }
 

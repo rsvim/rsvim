@@ -24,3 +24,6 @@ generated-typedocs
 
 # Mac
 .DS_Store
+
+# Snapshot
+*snapshot.bin
