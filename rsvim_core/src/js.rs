@@ -14,6 +14,7 @@ use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
+use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet};
@@ -21,7 +22,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
-use std::sync::{Once, OnceLock};
+use std::sync::Once;
 use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{debug, error};
@@ -94,58 +95,65 @@ pub fn init_v8_platform() {
 
 // Built-in modules {
 
-#[allow(non_upper_case_globals)]
-const _00__WEB: &str = "00__web.js";
-#[allow(non_upper_case_globals)]
-const _01__RSVIM: &str = "01__rsvim.js";
+static BUILTIN_RUNTIME_MODULES: Lazy<Vec<(&str, &str)>> = Lazy::new(|| {
+  vec![
+    ("00__web.js", include_str!("./js/runtime/00__web.js")),
+    ("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
+  ]
+});
 
-const BUILTIN_MODULES_LEN: usize = 2;
-
-fn get_builtin_module_name_by_filename(filename: &str) -> String {
-  format!("rsvim:runtime/{}", filename)
-}
-
-fn get_context_data_index_from_filename(filename: &str) -> usize {
-  static VALUE: OnceLock<HashMap<&str, usize>> = OnceLock::new();
-
-  *VALUE
-    .get_or_init(|| {
-      vec![(_00__WEB, 0), (_01__RSVIM, 1)]
-        .into_iter()
-        .collect::<HashMap<_, _>>()
-    })
-    .get(filename)
-    .unwrap()
-}
-
-fn get_filename_from_context_data_index(index: usize) -> &'static str {
-  static VALUE: OnceLock<HashMap<usize, &str>> = OnceLock::new();
-
-  VALUE
-    .get_or_init(|| {
-      vec![(0, _00__WEB), (1, _01__RSVIM)]
-        .into_iter()
-        .collect::<HashMap<_, _>>()
-    })
-    .get(&index)
-    .unwrap()
-}
-
-fn get_source_from_context_data_index(index: usize) -> &'static str {
-  static VALUE: OnceLock<HashMap<usize, &str>> = OnceLock::new();
-
-  VALUE
-    .get_or_init(|| {
-      vec![
-        (0, include_str!("./js/runtime/00__web.js")),
-        (1, include_str!("./js/runtime/01__rsvim.js")),
-      ]
-      .into_iter()
-      .collect::<HashMap<_, _>>()
-    })
-    .get(&index)
-    .unwrap()
-}
+// #[allow(non_upper_case_globals)]
+// const _00__WEB: &str = "00__web.js";
+// #[allow(non_upper_case_globals)]
+// const _01__RSVIM: &str = "01__rsvim.js";
+//
+// const BUILTIN_MODULES_LEN: usize = 2;
+//
+// fn get_builtin_module_name_by_filename(filename: &str) -> String {
+//   format!("rsvim:runtime/{}", filename)
+// }
+//
+// fn get_context_data_index_from_filename(filename: &str) -> usize {
+//   static VALUE: OnceLock<HashMap<&str, usize>> = OnceLock::new();
+//
+//   *VALUE
+//     .get_or_init(|| {
+//       vec![(_00__WEB, 0), (_01__RSVIM, 1)]
+//         .into_iter()
+//         .collect::<HashMap<_, _>>()
+//     })
+//     .get(filename)
+//     .unwrap()
+// }
+//
+// fn get_filename_from_context_data_index(index: usize) -> &'static str {
+//   static VALUE: OnceLock<HashMap<usize, &str>> = OnceLock::new();
+//
+//   VALUE
+//     .get_or_init(|| {
+//       vec![(0, _00__WEB), (1, _01__RSVIM)]
+//         .into_iter()
+//         .collect::<HashMap<_, _>>()
+//     })
+//     .get(&index)
+//     .unwrap()
+// }
+//
+// fn get_source_from_context_data_index(index: usize) -> &'static str {
+//   static VALUE: OnceLock<HashMap<usize, &str>> = OnceLock::new();
+//
+//   VALUE
+//     .get_or_init(|| {
+//       vec![
+//         (0, include_str!("./js/runtime/00__web.js")),
+//         (1, include_str!("./js/runtime/01__rsvim.js")),
+//       ]
+//       .into_iter()
+//       .collect::<HashMap<_, _>>()
+//     })
+//     .get(&index)
+//     .unwrap()
+// }
 
 // Built-in modules }
 
@@ -190,20 +198,17 @@ impl JsRuntimeForSnapshot {
 
     let mut context_scope = v8::HandleScope::with_context(&mut isolate, global_context.clone());
     let scope = &mut context_scope;
-    let context = v8::Local::new(scope, global_context.clone());
+    let _context = v8::Local::new(scope, global_context.clone());
 
     {
       // Load and compile built-in modules.
       // NOTE: Each scripts is named with an index prefix, it indicates the order of calling the
       // `add_context_data` API.
 
-      for i in 0..BUILTIN_MODULES_LEN {
-        let filename = get_filename_from_context_data_index(i);
-        let source = get_source_from_context_data_index(i);
-        let module = Self::init_builtin_module(scope, filename, source);
-        let offset = scope.add_context_data(context, module);
-        assert_eq!(offset, i);
-        assert_eq!(get_context_data_index_from_filename(filename), i);
+      for module_src in BUILTIN_RUNTIME_MODULES.iter() {
+        let filename = module_src.0;
+        let source = module_src.1;
+        Self::init_builtin_module(scope, filename, source);
       }
     }
 
@@ -264,14 +269,10 @@ impl JsRuntimeForSnapshot {
   }
 
   /// Synchronously load builtin module.
-  fn init_builtin_module<'s>(
-    scope: &mut v8::HandleScope<'s>,
-    name: &str,
-    source: &str,
-  ) -> v8::Local<'s, v8::Module> {
+  fn init_builtin_module(scope: &mut v8::HandleScope<'_>, name: &str, source: &str) {
     let tc_scope = &mut v8::TryCatch::new(scope);
 
-    match Self::fetch_module(tc_scope, name, Some(source)) {
+    let module = match Self::fetch_module(tc_scope, name, Some(source)) {
       Some(module) => module,
       None => {
         assert!(tc_scope.has_caught());
@@ -281,6 +282,28 @@ impl JsRuntimeForSnapshot {
         eprintln!("Failed to import builtin modules: {name}, error: {exception:?}");
         std::process::exit(1);
       }
+    };
+
+    if module
+      .instantiate_module(tc_scope, module_resolve_cb)
+      .is_none()
+    {
+      assert!(tc_scope.has_caught());
+      let exception = tc_scope.exception().unwrap();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
+    }
+
+    let _ = module.evaluate(tc_scope);
+
+    if module.get_status() == v8::ModuleStatus::Errored {
+      let exception = module.get_exception();
+      let exception = JsError::from_v8_exception(tc_scope, exception, None);
+      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+      std::process::exit(1);
     }
   }
 
@@ -463,44 +486,44 @@ impl JsRuntime {
     //   )
     // });
 
-    // Get snapshotted built-in modules data from context
-    fn get_context_data(
-      scope: &mut v8::HandleScope<()>,
-      context: v8::Local<v8::Context>,
-    ) -> Vec<v8::Global<v8::Module>> {
-      fn data_error_to_panic(err: v8::DataError) -> ! {
-        match err {
-          v8::DataError::BadType { actual, expected } => {
-            panic!("Invalid type for snapshot data: expected {expected}, got {actual}");
-          }
-          v8::DataError::NoData { expected } => {
-            panic!("No data for snapshot data: expected {expected}");
-          }
-        }
-      }
+    // // Get snapshotted built-in modules data from context
+    // fn get_context_data(
+    //   scope: &mut v8::HandleScope<()>,
+    //   context: v8::Local<v8::Context>,
+    // ) -> Vec<v8::Global<v8::Module>> {
+    //   fn data_error_to_panic(err: v8::DataError) -> ! {
+    //     match err {
+    //       v8::DataError::BadType { actual, expected } => {
+    //         panic!("Invalid type for snapshot data: expected {expected}, got {actual}");
+    //       }
+    //       v8::DataError::NoData { expected } => {
+    //         panic!("No data for snapshot data: expected {expected}");
+    //       }
+    //     }
+    //   }
+    //
+    //   let mut scope = v8::ContextScope::new(scope, context);
+    //
+    //   let mut module_handles: Vec<v8::Global<v8::Module>> = vec![];
+    //   for i in 0..BUILTIN_MODULES_LEN {
+    //     match scope.get_context_data_from_snapshot_once::<v8::Module>(i) {
+    //       Ok(val) => {
+    //         let module_global = v8::Global::new(&mut scope, val);
+    //         module_handles.push(module_global);
+    //       }
+    //       Err(err) => data_error_to_panic(err),
+    //     }
+    //   }
+    //
+    //   module_handles
+    // }
 
-      let mut scope = v8::ContextScope::new(scope, context);
-
-      let mut module_handles: Vec<v8::Global<v8::Module>> = vec![];
-      for i in 0..BUILTIN_MODULES_LEN {
-        match scope.get_context_data_from_snapshot_once::<v8::Module>(i) {
-          Ok(val) => {
-            let module_global = v8::Global::new(&mut scope, val);
-            module_handles.push(module_global);
-          }
-          Err(err) => data_error_to_panic(err),
-        }
-      }
-
-      module_handles
-    }
-
-    let (context, module_handles): (v8::Global<v8::Context>, Vec<v8::Global<v8::Module>>) = {
+    let context: v8::Global<v8::Context> = {
       let scope = &mut v8::HandleScope::new(&mut *isolate);
       let context = binding::create_new_context(scope);
 
-      let module_handles = get_context_data(scope, context);
-      (v8::Global::new(scope, context), module_handles)
+      // let module_handles = get_context_data(scope, context);
+      v8::Global::new(scope, context)
     };
 
     // Store state inside the v8 isolate slot.
@@ -529,14 +552,15 @@ impl JsRuntime {
 
     isolate.set_slot(state.clone());
 
-    let mut runtime = JsRuntime {
+    JsRuntime {
       isolate,
       // event_loop,
       state,
       // inspector,
-    };
+    }
 
-    runtime.init_environment(module_handles);
+    // With snapshot, we no longer need to initialize builtin runtime modules any more.
+    // runtime.init_environment(module_handles);
 
     // // Start inspector agent is requested.
     // if let Some(inspector) = runtime.inspector().as_mut() {
@@ -544,55 +568,55 @@ impl JsRuntime {
     //   inspector.borrow_mut().start_agent(address);
     // }
 
-    runtime
+    // runtime
   }
 
-  /// Initializes synchronously the core environment (see js/runtime/global.js).
-  fn init_environment(&mut self, module_handles: Vec<v8::Global<v8::Module>>) {
-    debug_assert!(module_handles.len() == BUILTIN_MODULES_LEN);
-    for (i, module_handle) in module_handles.iter().enumerate() {
-      let filename = get_filename_from_context_data_index(i);
-      let source = get_source_from_context_data_index(i);
-      let name = get_builtin_module_name_by_filename(filename);
-      self.init_builtin_module(&name, source, module_handle.clone());
-    }
-
-    // // Initialize process static values.
-    // process::refresh(tc_scope);
-  }
-
-  /// Synchronously load builtin module.
-  fn init_builtin_module(&mut self, name: &str, _source: &str, module: v8::Global<v8::Module>) {
-    let scope = &mut self.handle_scope();
-    let tc_scope = &mut v8::TryCatch::new(scope);
-
-    let module = v8::Local::new(tc_scope, module);
-
-    if module
-      .instantiate_module(tc_scope, module_resolve_cb)
-      .is_none()
-    {
-      assert!(tc_scope.has_caught());
-      let exception = tc_scope.exception().unwrap();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
-      eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
-      std::process::exit(1);
-    }
-
-    let _ = module.evaluate(tc_scope);
-
-    if module.get_status() == v8::ModuleStatus::Errored {
-      let exception = module.get_exception();
-      let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
-      eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
-      std::process::exit(1);
-    }
-
-    // // Initialize process static values.
-    // process::refresh(tc_scope);
-  }
+  // /// Initializes synchronously the core environment (see js/runtime/global.js).
+  // fn init_environment(&mut self, module_handles: Vec<v8::Global<v8::Module>>) {
+  //   debug_assert!(module_handles.len() == BUILTIN_MODULES_LEN);
+  //   for (i, module_handle) in module_handles.iter().enumerate() {
+  //     let filename = get_filename_from_context_data_index(i);
+  //     let source = get_source_from_context_data_index(i);
+  //     let name = get_builtin_module_name_by_filename(filename);
+  //     self.init_builtin_module(&name, source, module_handle.clone());
+  //   }
+  //
+  //   // // Initialize process static values.
+  //   // process::refresh(tc_scope);
+  // }
+  //
+  // /// Synchronously load builtin module.
+  // fn init_builtin_module(&mut self, name: &str, _source: &str, module: v8::Global<v8::Module>) {
+  //   let scope = &mut self.handle_scope();
+  //   let tc_scope = &mut v8::TryCatch::new(scope);
+  //
+  //   let module = v8::Local::new(tc_scope, module);
+  //
+  //   if module
+  //     .instantiate_module(tc_scope, module_resolve_cb)
+  //     .is_none()
+  //   {
+  //     assert!(tc_scope.has_caught());
+  //     let exception = tc_scope.exception().unwrap();
+  //     let exception = JsError::from_v8_exception(tc_scope, exception, None);
+  //     error!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+  //     eprintln!("Failed to instantiate builtin modules: {name}, error: {exception:?}");
+  //     std::process::exit(1);
+  //   }
+  //
+  //   let _ = module.evaluate(tc_scope);
+  //
+  //   if module.get_status() == v8::ModuleStatus::Errored {
+  //     let exception = module.get_exception();
+  //     let exception = JsError::from_v8_exception(tc_scope, exception, None);
+  //     error!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+  //     eprintln!("Failed to evaluate builtin modules: {name}, error: {exception:?}");
+  //     std::process::exit(1);
+  //   }
+  //
+  //   // // Initialize process static values.
+  //   // process::refresh(tc_scope);
+  // }
 
   /// Executes traditional JavaScript code (traditional = not ES modules).
   ///
