@@ -5,7 +5,7 @@
 use rsvim_core::cli::CliOpt;
 use rsvim_core::error::IoResult;
 use rsvim_core::evloop::EventLoop;
-use rsvim_core::js::SnapshotData;
+use rsvim_core::js::{v8_version, SnapshotData};
 use rsvim_core::log;
 
 use clap::Parser;
@@ -26,27 +26,29 @@ static RSVIM_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(|| {
   .into_boxed_slice()
 });
 
+static CLI_VERSION: Lazy<String> = Lazy::new(|| {
+  let cargo_toml_src = include_str!("../../../Cargo.toml");
+  let cargo_toml_meta = cargo_toml_src.parse::<toml::Table>().unwrap();
+  format!(
+    "rsvim {} (v8 {})",
+    cargo_toml_meta["workspace"]["package"]["version"]
+      .as_str()
+      .unwrap(),
+    v8_version(),
+  )
+  .to_string()
+});
+
 fn main() -> IoResult<()> {
   log::init();
   let cli_opt = CliOpt::parse();
   debug!("cli_opt: {:?}", cli_opt);
-  // if cli_opt.version() {
-  //   let cargo_toml_meta = include_str!("../../../Cargo.toml");
-  //   let cargo_toml_data = cargo_toml_meta.parse::<Table>().unwrap();
-  //   println!(
-  //     "rsvim {} (rusty_v8 {}, swc_ecma_parser {})",
-  //     cargo_toml_data["workspace"]["package"]["version"]
-  //       .as_str()
-  //       .unwrap(),
-  //     cargo_toml_data["workspace"]["dependencies"]["v8"]
-  //       .as_str()
-  //       .unwrap(),
-  //     cargo_toml_data["workspace"]["dependencies"]["swc_ecma_parser"]
-  //       .as_str()
-  //       .unwrap()
-  //   );
-  //   return Ok(());
-  // }
+
+  // Print version and exit
+  if cli_opt.version() {
+    println!("{}", CLI_VERSION.as_str());
+    return Ok(());
+  }
 
   // let dir = tempfile::tempdir().unwrap();
   // debug!("tempdir:{:?}", dir);

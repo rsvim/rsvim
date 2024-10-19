@@ -30,7 +30,7 @@ use clap::Parser;
 
 #[derive(Parser, Debug, Clone, Default)]
 #[command(
-  version,
+  disable_version_flag = true,
   about,
   long_about = "The VIM editor reinvented in Rust+TypeScript.\nPlease checkout https://rsvim.github.io/ for more documentation."
 )]
@@ -38,8 +38,9 @@ use clap::Parser;
 pub struct CliOpt {
   #[arg(help = "Edit file(s)")]
   file: Vec<String>,
-  // #[arg(short = 'V', long = "version", help = "Print version")]
-  // version: bool,
+
+  #[arg(short = 'V', long = "version", help = "Print version")]
+  version: bool,
 }
 
 impl CliOpt {
@@ -48,10 +49,10 @@ impl CliOpt {
     &self.file
   }
 
-  // /// Version.
-  // pub fn version(&self) -> bool {
-  //   self.version
-  // }
+  /// Version.
+  pub fn version(&self) -> bool {
+    self.version
+  }
 
   // /// Commands should be execute before loading any config.
   // pub fn cmd_before(&self) -> &Option<Vec<String>> {
@@ -99,15 +100,15 @@ mod tests {
     let expect = [
       CliOpt {
         file: vec![],
-        // version: false,
+        version: false,
       },
       CliOpt {
         file: vec![],
-        // version: true,
+        version: true,
       },
       CliOpt {
         file: vec!["README.md".to_string()],
-        // version: false,
+        version: false,
       },
     ];
 
@@ -116,7 +117,7 @@ mod tests {
     for i in 0..n {
       let actual = CliOpt::parse_from(&input[i]);
       assert_eq!(actual.file, expect[i].file);
-      // assert_eq!(actual.version(), expect[i].version());
+      assert_eq!(actual.version(), expect[i].version());
     }
   }
 }
