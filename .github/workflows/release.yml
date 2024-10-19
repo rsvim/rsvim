@@ -4,7 +4,7 @@ permissions:
 on:
   push:
     tags:
-      - "rsvim-v[0-9]+.[0-9]+.[0-9]+*" # Only release for `rsvim`, ignore rsvim-core
+      - "*"
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: false
