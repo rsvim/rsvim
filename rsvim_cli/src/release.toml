@@ -1,0 +1,11 @@
+allow-branch = ["main"]
+shared-version = true
+tag = false
+pre-release-hook = [
+  "git-cliff",
+  "-o",
+  "RSVIM_CLI_CHANGELOG.md",
+  "--tag",
+  "{{version}}",
+]
+tag-message = "chore(release): {{version}}"
