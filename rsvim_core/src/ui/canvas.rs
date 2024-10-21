@@ -20,6 +20,7 @@ pub use crate::ui::canvas::frame::cursor::{
 pub use crate::ui::canvas::frame::Frame;
 
 pub mod frame;
+pub mod grapheme;
 pub mod internal;
 
 #[derive(Debug, Clone)]

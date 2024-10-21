@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 
 use crate::cart::{IRect, U16Rect, U16Size};
-use crate::glovar;
+use crate::env;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut};
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
@@ -464,7 +464,7 @@ impl Tree {
 
   /// Draw the widget tree to canvas.
   pub fn draw(&mut self, canvas: CanvasArc) {
-    let mut canvas = canvas.try_write_for(glovar::MUTEX_TIMEOUT()).unwrap();
+    let mut canvas = canvas.try_write_for(env::MUTEX_TIMEOUT()).unwrap();
     for node in self.base.iter_mut() {
       debug!("draw node:{:?}", node);
       node.draw(&mut canvas);
