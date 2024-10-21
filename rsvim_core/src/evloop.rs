@@ -223,6 +223,35 @@ impl EventLoop {
     })
   }
 
+  /// Initialize user config file.
+  pub fn init_config(&mut self) -> IoResult<()> {
+    if let Some(config_file) = glovar::CONFIG_FILE_PATH() {
+      self
+        .js_runtime
+        .execute_module(config_file.to_str().unwrap(), None)
+        .unwrap();
+    }
+    Ok(())
+  }
+
+  /// Initialize TUI.
+  pub fn init_tui(&self) -> IoResult<()> {
+    if !crossterm::terminal::is_raw_mode_enabled()? {
+      crossterm::terminal::enable_raw_mode()?;
+    }
+
+    let mut out = std::io::stdout();
+    execute!(
+      out,
+      crossterm::terminal::EnterAlternateScreen,
+      crossterm::terminal::Clear(crossterm::terminal::ClearType::All),
+      EnableMouseCapture,
+      EnableFocusChange,
+    )?;
+
+    Ok(())
+  }
+
   /// Initialize editor default window and buffer.
   pub fn init_editor(&self) -> IoResult<()> {
     // Create default buffer.
@@ -254,35 +283,6 @@ impl EventLoop {
     let cursor = Cursor::new(cursor_shape);
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
-    Ok(())
-  }
-
-  /// Initialize TUI.
-  pub fn init_tui(&self) -> IoResult<()> {
-    if !crossterm::terminal::is_raw_mode_enabled()? {
-      crossterm::terminal::enable_raw_mode()?;
-    }
-
-    let mut out = std::io::stdout();
-    execute!(
-      out,
-      crossterm::terminal::EnterAlternateScreen,
-      crossterm::terminal::Clear(crossterm::terminal::ClearType::All),
-      EnableMouseCapture,
-      EnableFocusChange,
-    )?;
-
-    Ok(())
-  }
-
-  /// Initialize user config file.
-  pub fn init_config(&mut self) -> IoResult<()> {
-    if let Some(config_file) = glovar::CONFIG_FILE_PATH() {
-      self
-        .js_runtime
-        .execute_module(config_file.to_str().unwrap(), None)
-        .unwrap();
-    }
     Ok(())
   }
 

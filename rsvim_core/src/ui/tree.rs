@@ -19,7 +19,7 @@ use tracing::debug;
 
 pub mod internal;
 pub mod opt;
-pub mod util;
+pub mod ptr;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
