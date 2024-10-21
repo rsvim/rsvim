@@ -8,7 +8,7 @@ updates:
   - package-ecosystem: "cargo" # For rust development
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     ignore:
       - dependency-name: "swc*" # Ignore swc
       - dependency-name: "v8*" # Ignore v8
@@ -16,4 +16,4 @@ updates:
   - package-ecosystem: "npm" # For typescript document
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
