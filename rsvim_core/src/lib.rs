@@ -8,6 +8,7 @@ pub mod envar;
 pub mod error;
 pub mod evloop;
 pub mod js;
+pub mod locks;
 pub mod log;
 pub mod state;
 pub mod test;

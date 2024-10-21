@@ -9,6 +9,7 @@ use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
+use crate::rlock;
 use crate::state::fsm::StatefulValue;
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
@@ -263,11 +264,7 @@ impl EventLoop {
       .insert(buffer.clone());
 
     // Create default window.
-    let canvas_size = self
-      .canvas
-      .try_read_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .size();
+    let canvas_size = rlock!(self.canvas).size();
     let mut tree = self.tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
     let tree_root_id = tree.root_id();
     let window_shape = IRect::new(
