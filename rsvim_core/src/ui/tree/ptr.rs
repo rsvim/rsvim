@@ -1,16 +1,18 @@
-//! Utils for UI tree.
+//! Pointers for UI tree.
+//!
+//! WARNING: These pointers are only allowed to be used inside the UI tree and widgets. The
+//! scenario is: when some widgets want to access the data located in the tree or other nodes, the
+//! widgets will have to contains a pointer/reference to the tree.
+//! This is actually safe because all the widget nodes are managed by the tree. The only dangerous
+//! case is: a widget is been removed from the tree, thus the tree pointer/reference held by this
+//! widget is no longer valid.
 
 use crate::ui::tree::{Tree, TreeNodeId};
 
 use std::ptr::NonNull;
 
 #[derive(Debug, Clone)]
-/// Safe wrapper on `NonNull<Tree>`.
-///
-/// WARNING: Use it only inside the UI tree, when we need to access the `Tree` structure to get
-/// some global variables. All UI widgets or tree nodes are managed inside the UI tree, and the UI
-/// tree itself is wrapped with the `Arc<RwLock<>>` so it's safe to do so.
-/// But once any widget/node is been removed from the UI tree, this reference is no longer safe.
+/// Safe wrapper on [`NonNull<Tree>`](Tree).
 pub struct SafeTreeRef(NonNull<Tree>);
 
 unsafe impl Send for SafeTreeRef {}

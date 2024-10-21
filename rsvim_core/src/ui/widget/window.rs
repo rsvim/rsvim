@@ -4,7 +4,7 @@ use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
-use crate::ui::tree::util::SafeTreeRef;
+use crate::ui::tree::ptr::SafeTreeRef;
 use crate::ui::tree::{GlobalOptions, Tree};
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;

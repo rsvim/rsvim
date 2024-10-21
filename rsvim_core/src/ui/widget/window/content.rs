@@ -7,7 +7,7 @@ use crate::inode_generate_impl;
 use crate::ui::canvas::internal::iframe::Iframe;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
-use crate::ui::tree::util::SafeTreeRef;
+use crate::ui::tree::ptr::SafeTreeRef;
 use crate::ui::tree::{GlobalOptions, Tree};
 use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::Widgetable;
