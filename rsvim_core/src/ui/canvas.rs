@@ -1,7 +1,6 @@
 //! Canvas.
 
 use crate::cart::{U16Pos, U16Size};
-use crate::envar;
 
 // Re-export
 pub use crate::ui::canvas::frame::cell::Cell;
@@ -13,7 +12,7 @@ pub use crate::ui::canvas::frame::Frame;
 use compact_str::ToCompactString;
 use crossterm;
 use geo::point;
-use parking_lot::{RwLock, RwLockReadGuard};
+use parking_lot::RwLock;
 use std::fmt;
 use std::fmt::Debug;
 use std::slice::Iter;
