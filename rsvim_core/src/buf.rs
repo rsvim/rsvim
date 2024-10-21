@@ -1,6 +1,6 @@
 //! Vim buffers.
 
-use crate::glovar;
+use crate::envar;
 
 use parking_lot::RwLock;
 use ropey::{Rope, RopeBuilder};
@@ -114,7 +114,7 @@ impl Buffers {
   }
 
   pub fn insert(&mut self, buffer: BufferArc) -> Option<BufferArc> {
-    let buffer_id = buffer.try_read_for(glovar::MUTEX_TIMEOUT()).unwrap().id();
+    let buffer_id = buffer.try_read_for(envar::MUTEX_TIMEOUT()).unwrap().id();
     self.buffers.insert(buffer_id, buffer)
   }
 

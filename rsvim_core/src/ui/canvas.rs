@@ -1,5 +1,14 @@
 //! Canvas.
 
+use crate::cart::{U16Pos, U16Size};
+
+// Re-export
+pub use crate::ui::canvas::frame::cell::Cell;
+pub use crate::ui::canvas::frame::cursor::{
+  cursor_style_eq, Cursor, CursorStyle, CursorStyleFormatter,
+};
+pub use crate::ui::canvas::frame::Frame;
+
 use compact_str::ToCompactString;
 use crossterm;
 use geo::point;
@@ -10,16 +19,8 @@ use std::slice::Iter;
 use std::sync::Arc;
 use tracing::debug;
 
-use crate::cart::{U16Pos, U16Size};
-
-// Re-export
-pub use crate::ui::canvas::frame::cell::Cell;
-pub use crate::ui::canvas::frame::cursor::{
-  cursor_style_eq, Cursor, CursorStyle, CursorStyleFormatter,
-};
-pub use crate::ui::canvas::frame::Frame;
-
 pub mod frame;
+pub mod grapheme;
 pub mod internal;
 
 #[derive(Debug, Clone)]

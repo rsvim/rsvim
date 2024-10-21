@@ -3,12 +3,13 @@
 use crate::buf::{Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
+use crate::envar;
 use crate::error::IoResult;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
-use crate::glovar;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
+use crate::rlock;
 use crate::state::fsm::StatefulValue;
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
@@ -63,7 +64,7 @@ pub struct EventLoop {
   /// 1. `$XDG_CONFIG_HOME/rsvim/` or `$HOME/.config/rsvim/`.
   /// 2. `$HOME/.rsvim/`
   ///
-  /// Also see [`CONFIG_DIRS_PATH`](crate::glovar::CONFIG_DIRS_PATH).
+  /// Also see [`CONFIG_DIRS_PATH`](crate::envar::CONFIG_DIRS_PATH).
   ///
   /// NOTE: All the external plugins are been searched under runtime path.
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
@@ -134,7 +135,7 @@ impl EventLoop {
     let state = State::to_arc(State::default());
 
     // Worker => master
-    let (worker_send_to_master, master_recv_from_worker) = channel(glovar::CHANNEL_BUF_SIZE());
+    let (worker_send_to_master, master_recv_from_worker) = channel(envar::CHANNEL_BUF_SIZE());
 
     // Since there are too many limitations that we cannot use tokio APIs along with V8 engine, we
     // have to first send task requests to master, let the master handles these tasks for us in the
@@ -165,15 +166,15 @@ impl EventLoop {
 
     // Js runtime => master
     let (js_runtime_send_to_master, master_recv_from_js_runtime) =
-      channel(glovar::CHANNEL_BUF_SIZE());
+      channel(envar::CHANNEL_BUF_SIZE());
     // Master => js runtime
     let (master_send_to_js_runtime, js_runtime_recv_from_master) =
-      channel(glovar::CHANNEL_BUF_SIZE());
+      channel(envar::CHANNEL_BUF_SIZE());
     // Master => master
-    let (js_runtime_tick_dispatcher, js_runtime_tick_queue) = channel(glovar::CHANNEL_BUF_SIZE());
+    let (js_runtime_tick_dispatcher, js_runtime_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
-    let runtime_path = glovar::CONFIG_DIRS_PATH();
+    let runtime_path = envar::CONFIG_DIRS_PATH();
     let runtime_path = Arc::new(RwLock::new(runtime_path));
 
     // Task Tracker
@@ -225,7 +226,7 @@ impl EventLoop {
 
   /// Initialize user config file.
   pub fn init_config(&mut self) -> IoResult<()> {
-    if let Some(config_file) = glovar::CONFIG_FILE_PATH() {
+    if let Some(config_file) = envar::CONFIG_FILE_PATH() {
       self
         .js_runtime
         .execute_module(config_file.to_str().unwrap(), None)
@@ -258,17 +259,13 @@ impl EventLoop {
     let buffer = Buffer::to_arc(Buffer::new());
     self
       .buffers
-      .try_write_for(glovar::MUTEX_TIMEOUT())
+      .try_write_for(envar::MUTEX_TIMEOUT())
       .unwrap()
       .insert(buffer.clone());
 
     // Create default window.
-    let canvas_size = self
-      .canvas
-      .try_read_for(glovar::MUTEX_TIMEOUT())
-      .unwrap()
-      .size();
-    let mut tree = self.tree.try_write_for(glovar::MUTEX_TIMEOUT()).unwrap();
+    let canvas_size = rlock!(self.canvas).size();
+    let mut tree = self.tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
     let tree_root_id = tree.root_id();
     let window_shape = IRect::new(
       (0, 0),
@@ -328,7 +325,7 @@ impl EventLoop {
         let state_response = {
           self
             .state
-            .try_write_for(glovar::MUTEX_TIMEOUT())
+            .try_write_for(envar::MUTEX_TIMEOUT())
             .unwrap()
             .handle(self.tree.clone(), self.buffers.clone(), event)
         };
@@ -438,7 +435,7 @@ impl EventLoop {
       // Draw UI components to the canvas.
       self
         .tree
-        .try_write_for(glovar::MUTEX_TIMEOUT())
+        .try_write_for(envar::MUTEX_TIMEOUT())
         .unwrap()
         .draw(self.canvas.clone());
     }
@@ -447,7 +444,7 @@ impl EventLoop {
       // Compute the commands that need to output to the terminal device.
       self
         .canvas
-        .try_write_for(glovar::MUTEX_TIMEOUT())
+        .try_write_for(envar::MUTEX_TIMEOUT())
         .unwrap()
         .shade()
     };
@@ -517,7 +514,7 @@ impl EventLoop {
   fn queue_cursor(&mut self) -> IoResult<()> {
     let cursor = *self
       .canvas
-      .try_read_for(glovar::MUTEX_TIMEOUT())
+      .try_read_for(envar::MUTEX_TIMEOUT())
       .unwrap()
       .frame()
       .cursor();

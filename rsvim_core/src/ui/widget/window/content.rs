@@ -2,7 +2,7 @@
 
 use crate::buf::{Buffer, BufferWk};
 use crate::cart::{IRect, U16Pos, U16Rect, U16Size};
-use crate::glovar;
+use crate::envar;
 use crate::inode_generate_impl;
 use crate::ui::canvas::internal::iframe::Iframe;
 use crate::ui::canvas::{Canvas, Cell};
@@ -295,7 +295,7 @@ impl WindowContent {
     let buffer = self.buffer.upgrade().unwrap();
 
     // Lock buffer for read
-    let buffer = buffer.try_read_for(glovar::MUTEX_TIMEOUT()).unwrap();
+    let buffer = buffer.try_read_for(envar::MUTEX_TIMEOUT()).unwrap();
 
     if let Some(line) = buffer.rope().get_line(start_line) {
       debug!(
@@ -462,7 +462,7 @@ impl WindowContent {
     let buffer = self.buffer.upgrade().unwrap();
 
     // Lock buffer for read
-    let buffer = buffer.try_read_for(glovar::MUTEX_TIMEOUT()).unwrap();
+    let buffer = buffer.try_read_for(envar::MUTEX_TIMEOUT()).unwrap();
 
     // if let Some(line) = buffer.rope().get_line(start_line) {
     //   debug!(
@@ -606,7 +606,7 @@ impl WindowContent {
     let buffer = self.buffer.upgrade().unwrap();
 
     // Lock buffer for read
-    let buffer = buffer.try_read_for(glovar::MUTEX_TIMEOUT()).unwrap();
+    let buffer = buffer.try_read_for(envar::MUTEX_TIMEOUT()).unwrap();
 
     // if let Some(line) = buffer.rope().get_line(start_line) {
     //   debug!(

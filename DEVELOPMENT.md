@@ -49,8 +49,6 @@ To configure debugging/testing behaviors, please setup with:
 - `RUST_LOG`: Set logging level, by default it's `info`. To debug code, please set to `debug`.
 - `RUSTFLAGS`: Set extra flags to `rustc` compiler. To enable all warning messages, please set to `-Dwarnings`.
 
-To configure other internal behaviors, please see variables listed in the `./rsvim_core/src/glovar.rs` source file.
-
 ### Check
 
 To check code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-features --all-targets`, it enables all warnings.
