@@ -7,8 +7,8 @@ use crate::inode_generate_impl;
 use crate::ui::canvas::internal::iframe::Iframe;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
-use crate::ui::tree::ptr::SafeTreeRef;
 use crate::ui::tree::{GlobalOptions, Tree};
+use crate::ui::util::ptr::SafeTreeRef;
 use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::Widgetable;
 
@@ -183,10 +183,12 @@ impl WindowContent {
     self.view.start_line = Some(line);
     self.view.end_line = None;
   }
+
   /// Get end line, index start from 0.
   pub fn end_line(&self) -> Option<usize> {
     self.view.end_line
   }
+
   /// Set end line.
   ///
   /// This operation will unset the start line. Because with different line-wrap/word-wrap options,
@@ -196,10 +198,12 @@ impl WindowContent {
     self.view.end_line = Some(lend);
     self.view.start_line = None;
   }
+
   /// Get start column, index start from 0.
   pub fn start_column(&self) -> Option<usize> {
     self.view.start_column
   }
+
   /// Set start column.
   ///
   /// This operation also calculates the end column based on widget's width, and set it as well.
@@ -211,6 +215,7 @@ impl WindowContent {
   pub fn end_column(&self) -> Option<usize> {
     self.view.end_column
   }
+
   /// Set end column.
   ///
   /// This operation also calculates the start column based on widget's width, and set it as well.

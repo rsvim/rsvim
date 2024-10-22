@@ -5,8 +5,8 @@ use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::defaults;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
-use crate::ui::tree::ptr::SafeTreeRef;
 use crate::ui::tree::{GlobalOptions, Tree};
+use crate::ui::util::ptr::SafeTreeRef;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
@@ -216,6 +216,12 @@ impl Window {
   }
 }
 // Options }
+
+impl Window {
+  pub fn buffer(&self) -> BufferWk {
+    self.buffer.clone()
+  }
+}
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.

@@ -11,7 +11,9 @@ pub use crate::ui::widget::cursor::Cursor;
 pub use crate::ui::widget::root::RootContainer;
 pub use crate::ui::widget::window::Window;
 
+pub mod bufview;
 pub mod cursor;
+pub mod ptr;
 pub mod root;
 pub mod window;
 
