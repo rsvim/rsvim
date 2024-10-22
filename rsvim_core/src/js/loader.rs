@@ -15,7 +15,6 @@ use anyhow::bail;
 // use sha::utils::Digest;
 // use sha::utils::DigestExt;
 use path_absolutize::Absolutize;
-use std::env;
 use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
@@ -106,7 +105,7 @@ impl ModuleLoader for FsModuleLoader {
     // Resolve relative import.
     // FIXME: Here we should not use current working directory as a parent path to resolve modules.
     // CWD is for runtimes just like node/deno project, not for RSVIM editor.
-    let cwd = &env::current_dir().unwrap();
+    let cwd = &std::env::current_dir().unwrap();
     let base = base.map(|v| Path::new(v).parent().unwrap()).unwrap_or(cwd);
 
     if specifier.starts_with("./") || specifier.starts_with("../") {

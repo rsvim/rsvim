@@ -1,13 +1,12 @@
-//! Global constants and (environment) variables.
+//! Environment variables.
 
 #![allow(non_snake_case)]
 
-use std::env;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 use std::time::Duration;
 
-use crate::glovar::path_config::PathConfig;
+use crate::envar::path_config::PathConfig;
 
 pub mod path_config;
 
@@ -17,7 +16,7 @@ pub mod path_config;
 pub fn MUTEX_TIMEOUT_SECS() -> u64 {
   static VALUE: OnceLock<u64> = OnceLock::new();
 
-  *VALUE.get_or_init(|| match env::var("RSVIM_MUTEX_TIMEOUT_SECS") {
+  *VALUE.get_or_init(|| match std::env::var("RSVIM_MUTEX_TIMEOUT_SECS") {
     Ok(v1) => match v1.parse::<u64>() {
       Ok(v2) => v2,
       _ => u64::MAX,
@@ -37,7 +36,7 @@ pub fn MUTEX_TIMEOUT() -> Duration {
 pub fn IO_BUF_SIZE() -> usize {
   static VALUE: OnceLock<usize> = OnceLock::new();
 
-  *VALUE.get_or_init(|| match env::var("RSVIM_IO_BUF_SIZE") {
+  *VALUE.get_or_init(|| match std::env::var("RSVIM_IO_BUF_SIZE") {
     Ok(v1) => match v1.parse::<usize>() {
       Ok(v2) => v2,
       _ => 8192_usize,
@@ -52,7 +51,7 @@ pub fn IO_BUF_SIZE() -> usize {
 pub fn CHANNEL_BUF_SIZE() -> usize {
   static VALUE: OnceLock<usize> = OnceLock::new();
 
-  *VALUE.get_or_init(|| match env::var("RSVIM_CHANNEL_BUF_SIZE") {
+  *VALUE.get_or_init(|| match std::env::var("RSVIM_CHANNEL_BUF_SIZE") {
     Ok(v1) => match v1.parse::<usize>() {
       Ok(v2) => v2,
       _ => 1000_usize,
@@ -113,7 +112,7 @@ mod tests {
   #[test]
   fn mutex_timeout1() {
     unsafe {
-      env::set_var("RSVIM_MUTEX_TIMEOUT_SECS", "128");
+      std::env::set_var("RSVIM_MUTEX_TIMEOUT_SECS", "128");
       assert_eq!(MUTEX_TIMEOUT_SECS(), 128_u64);
     }
   }

@@ -1,6 +1,6 @@
 //! Window local options.
 
-use crate::{defaults, glovar};
+use crate::defaults;
 
 #[derive(Debug, Clone)]
 /// Window options.

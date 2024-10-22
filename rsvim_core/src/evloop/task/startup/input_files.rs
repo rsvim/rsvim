@@ -1,10 +1,10 @@
 //! Edit input files on start up.
 
 use crate::buf::Buffer;
+use crate::envar;
 use crate::error::{AnyResult, TheErr};
 use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
 use crate::evloop::task::TaskableDataAccess;
-use crate::glovar;
 
 use ropey::{Rope, RopeBuilder};
 use tokio::fs;
@@ -34,7 +34,7 @@ pub async fn edit_default_file(
   debug!("Read the default input file: {:?}", file_name.as_str());
   match fs::File::open(file_name.as_str()).await {
     Ok(mut fp) => {
-      let mut buf: Vec<u8> = vec![0_u8; glovar::IO_BUF_SIZE()];
+      let mut buf: Vec<u8> = vec![0_u8; envar::IO_BUF_SIZE()];
       loop {
         match fp.read(&mut buf).await {
           Ok(n) => {
@@ -42,12 +42,12 @@ pub async fn edit_default_file(
 
             // For the first buffer, append to the **default** buffer.
             buffers
-              .try_read_for(glovar::MUTEX_TIMEOUT())
+              .try_read_for(envar::MUTEX_TIMEOUT())
               .unwrap()
               .first_key_value()
               .unwrap()
               .1
-              .try_write_for(glovar::MUTEX_TIMEOUT())
+              .try_write_for(envar::MUTEX_TIMEOUT())
               .unwrap()
               .rope_mut()
               .append(into_rope(&buf, n));
@@ -104,12 +104,12 @@ pub async fn edit_other_files(
     debug!("Read the {} input file: {:?}", i, file_name.as_str());
     match fs::File::open(file_name.as_str()).await {
       Ok(mut fp) => {
-        let mut buf: Vec<u8> = vec![0_u8; glovar::IO_BUF_SIZE()];
+        let mut buf: Vec<u8> = vec![0_u8; envar::IO_BUF_SIZE()];
 
         // Create new buffer
         let buffer = Buffer::to_arc(Buffer::from(Rope::new()));
         buffers
-          .try_write_for(glovar::MUTEX_TIMEOUT())
+          .try_write_for(envar::MUTEX_TIMEOUT())
           .unwrap()
           .insert(buffer.clone());
 
@@ -119,7 +119,7 @@ pub async fn edit_other_files(
               debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
               buffer
-                .try_write_for(glovar::MUTEX_TIMEOUT())
+                .try_write_for(envar::MUTEX_TIMEOUT())
                 .unwrap()
                 .rope_mut()
                 .append(into_rope(&buf, n));

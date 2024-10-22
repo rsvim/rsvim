@@ -59,10 +59,6 @@ fn main() -> IoResult<()> {
   // db.put(&mut wtxn, "seven", &7).unwrap();
   // wtxn.commit().unwrap();
 
-  // Two sender/receiver to send messages between js runtime and event loop in bidirections.
-  // let (js_send_to_evloop, evloop_recv_from_js) = channel(glovar::CHANNEL_BUF_SIZE());
-  // let (evloop_send_to_js, js_recv_from_evloop) = channel(glovar::CHANNEL_BUF_SIZE());
-
   // Explicitly create tokio runtime for the EventLoop.
   let evloop_tokio_runtime = tokio::runtime::Runtime::new()?;
   evloop_tokio_runtime.block_on(async {
