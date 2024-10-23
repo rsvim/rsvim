@@ -3,19 +3,19 @@
 use crate::defaults;
 
 #[derive(Debug, Clone)]
-pub struct BufferGlobalOptions {
+pub struct BufferLocalOptions {
   tab_stop: u16,
 }
 
-impl Default for BufferGlobalOptions {
+impl Default for BufferLocalOptions {
   fn default() -> Self {
     Self::builder().build()
   }
 }
 
-impl BufferGlobalOptions {
-  pub fn builder() -> BufferGlobalOptionsBuilder {
-    BufferGlobalOptionsBuilder::default()
+impl BufferLocalOptions {
+  pub fn builder() -> BufferLocalOptionsBuilder {
+    BufferLocalOptionsBuilder::default()
   }
 
   pub fn tab_stop(&self) -> u16 {
@@ -29,26 +29,26 @@ impl BufferGlobalOptions {
 
 #[derive(Debug, Clone)]
 /// Global window options builder.
-pub struct BufferGlobalOptionsBuilder {
+pub struct BufferLocalOptionsBuilder {
   tab_stop: u16,
 }
 
-impl BufferGlobalOptionsBuilder {
+impl BufferLocalOptionsBuilder {
   pub fn tab_stop(&mut self, value: u16) -> &mut Self {
     self.tab_stop = value;
     self
   }
 
-  pub fn build(&self) -> BufferGlobalOptions {
-    BufferGlobalOptions {
+  pub fn build(&self) -> BufferLocalOptions {
+    BufferLocalOptions {
       tab_stop: self.tab_stop,
     }
   }
 }
 
-impl Default for BufferGlobalOptionsBuilder {
+impl Default for BufferLocalOptionsBuilder {
   fn default() -> Self {
-    BufferGlobalOptionsBuilder {
+    BufferLocalOptionsBuilder {
       tab_stop: defaults::buf::TAB_STOP,
     }
   }

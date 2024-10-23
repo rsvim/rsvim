@@ -5,6 +5,7 @@ use crate::envar;
 use crate::error::{AnyResult, TheErr};
 use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
 use crate::evloop::task::TaskableDataAccess;
+use crate::rlock;
 
 use ropey::{Rope, RopeBuilder};
 use tokio::fs;
@@ -107,7 +108,10 @@ pub async fn edit_other_files(
         let mut buf: Vec<u8> = vec![0_u8; envar::IO_BUF_SIZE()];
 
         // Create new buffer
-        let buffer = Buffer::to_arc(Buffer::from(Rope::new()));
+        let buffer = Buffer::to_arc(Buffer::from_rope(
+          &rlock!(buffers).local_options(),
+          Rope::new(),
+        ));
         buffers
           .try_write_for(envar::MUTEX_TIMEOUT())
           .unwrap()

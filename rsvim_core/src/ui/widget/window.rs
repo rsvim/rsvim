@@ -13,6 +13,7 @@ use crate::ui::widget::Widgetable;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{WindowLocalOptions, WindowOptionsBuilder};
+pub use crate::ui::widget::window::viewport::{LineViewport, LineViewportSection, Viewport};
 
 use crossterm::style::{Attributes, Color};
 use geo::point;
@@ -27,6 +28,7 @@ use tracing::{debug, error};
 pub mod content;
 pub mod opt;
 pub mod root;
+pub mod viewport;
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the

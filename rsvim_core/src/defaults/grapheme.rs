@@ -54,10 +54,10 @@ impl std::fmt::Display for AsciiControlCode {
       AsciiControlCode::Bel => write!(f, "^G"),
       AsciiControlCode::Bs => write!(f, "^H"),
       AsciiControlCode::Ht => write!(f, "\t"), // \t
-      AsciiControlCode::Lf => write!(f, "\n"), // \n
+      AsciiControlCode::Lf => writeln!(f),     // \n
       AsciiControlCode::Vt => write!(f, "^K"),
       AsciiControlCode::Ff => write!(f, "^L"),
-      AsciiControlCode::Cr => write!(f, "\r"), // \r
+      AsciiControlCode::Cr => write!(f, "^M"), // \r
       AsciiControlCode::So => write!(f, "^N"),
       AsciiControlCode::Si => write!(f, "^0"),
       AsciiControlCode::Dle => write!(f, "^P"),
