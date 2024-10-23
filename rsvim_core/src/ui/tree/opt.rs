@@ -22,19 +22,13 @@ impl WindowGlobalOptions {
   }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 /// Global window options builder.
 pub struct WindowGlobalOptionsBuilder {}
 
 impl WindowGlobalOptionsBuilder {
   pub fn build(&self) -> WindowGlobalOptions {
     WindowGlobalOptions {}
-  }
-}
-
-impl Default for WindowGlobalOptionsBuilder {
-  fn default() -> Self {
-    WindowGlobalOptionsBuilder {}
   }
 }
 
