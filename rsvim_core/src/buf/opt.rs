@@ -53,3 +53,15 @@ impl Default for BufferLocalOptionsBuilder {
     }
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn default1() {
+    let opt1 = BufferLocalOptions::default();
+    let opt2 = BufferLocalOptionsBuilder::default().build();
+    assert_eq!(opt1.tab_stop(), opt2.tab_stop());
+  }
+}
