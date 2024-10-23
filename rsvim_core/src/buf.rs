@@ -1,7 +1,6 @@
 //! Vim buffers.
 
 use crate::buf::opt::BufferLocalOptions;
-use crate::envar;
 
 use parking_lot::RwLock;
 use ropey::{Rope, RopeBuilder};
@@ -35,7 +34,7 @@ pub type BufferArc = Arc<RwLock<Buffer>>;
 pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
-  /// Make buffer with [`BufferLocalOptions`].
+  /// Make buffer with default [`BufferLocalOptions`].
   pub fn new() -> Self {
     Buffer {
       id: next_buffer_id(),
@@ -58,6 +57,12 @@ impl Buffer {
 
   pub fn rope_mut(&mut self) -> &mut Rope {
     &mut self.rope
+  }
+}
+
+impl Default for Buffer {
+  fn default() -> Self {
+    Buffer::new()
   }
 }
 

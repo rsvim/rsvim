@@ -1,6 +1,5 @@
 //! Edit input files on start up.
 
-use crate::buf::Buffer;
 use crate::envar;
 use crate::error::{AnyResult, TheErr};
 use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
@@ -42,9 +41,7 @@ pub async fn edit_default_file(
             debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
             // For the first buffer, append to the **default** buffer.
-            buffers
-              .try_read_for(envar::MUTEX_TIMEOUT())
-              .unwrap()
+            rlock!(buffers)
               .first_key_value()
               .unwrap()
               .1
@@ -116,11 +113,7 @@ pub async fn edit_other_files(
             Ok(n) => {
               debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
-              buffer
-                .try_write_for(envar::MUTEX_TIMEOUT())
-                .unwrap()
-                .rope_mut()
-                .append(into_rope(&buf, n));
+              wlock!(buffer).rope_mut().append(into_rope(&buf, n));
 
               // After read each block, immediately notify main thread so UI tree can render it on
               // terminal.

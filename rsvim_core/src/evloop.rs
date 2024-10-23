@@ -1,6 +1,6 @@
 //! Event loop.
 
-use crate::buf::{Buffer, Buffers, BuffersArc};
+use crate::buf::{Buffers, BuffersArc};
 use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
 use crate::envar;
