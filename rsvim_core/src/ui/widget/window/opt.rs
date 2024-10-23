@@ -9,6 +9,12 @@ pub struct WindowLocalOptions {
   line_break: bool,
 }
 
+impl Default for WindowLocalOptions {
+  fn default() -> Self {
+    Self::builder().build()
+  }
+}
+
 impl WindowLocalOptions {
   pub fn builder() -> WindowOptionsBuilder {
     WindowOptionsBuilder::default()
@@ -61,9 +67,7 @@ impl WindowOptionsBuilder {
 impl Default for WindowOptionsBuilder {
   fn default() -> Self {
     WindowOptionsBuilder {
-      // Defaults to `true`.
       wrap: defaults::win::WRAP,
-      // Defaults to `false`.
       line_break: defaults::win::LINE_BREAK,
     }
   }

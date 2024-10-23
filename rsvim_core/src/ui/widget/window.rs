@@ -5,7 +5,7 @@ use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::defaults;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
-use crate::ui::tree::{GlobalOptions, Tree};
+use crate::ui::tree::Tree;
 use crate::ui::util::ptr::SafeTreeRef;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
@@ -50,7 +50,7 @@ pub struct Window {
 
 impl Window {
   pub fn new(shape: IRect, buffer: BufferWk, tree: &mut Tree) -> Self {
-    let options = tree.global_options().window_local_options.clone();
+    let options = tree.local_options().clone();
 
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
@@ -191,12 +191,7 @@ impl Window {
   }
 
   pub fn break_at(&self) -> &String {
-    self
-      .tree_ref
-      .as_ref(&self.id())
-      .global_options()
-      .window_global_options
-      .break_at()
+    self.tree_ref.as_ref(&self.id()).global_options().break_at()
   }
 
   pub fn break_at_regex(&self) -> &Regex {
@@ -204,7 +199,6 @@ impl Window {
       .tree_ref
       .as_ref(&self.id())
       .global_options()
-      .window_global_options
       .break_at_regex()
   }
 

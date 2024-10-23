@@ -1,5 +1,6 @@
 //! Vim buffers.
 
+use crate::buf::opt::BufferGlobalOptions;
 use crate::envar;
 
 use parking_lot::RwLock;
@@ -8,6 +9,8 @@ use std::collections::BTreeMap;
 use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
+
+pub mod opt;
 
 /// Buffer ID.
 pub type BufferId = i32;
@@ -92,19 +95,26 @@ impl Eq for Buffer {}
 pub struct Buffers {
   // Buffers collection
   buffers: BTreeMap<BufferId, BufferArc>,
+
+  // Global options for buffers.
+  global_options: BufferGlobalOptions,
 }
 
 impl Buffers {
   pub fn new() -> Self {
     Buffers {
       buffers: BTreeMap::new(),
+      global_options: BufferGlobalOptions::default(),
     }
   }
 
   pub fn to_arc(b: Buffers) -> BuffersArc {
     Arc::new(RwLock::new(b))
   }
+}
 
+// BTreeMap {
+impl Buffers {
   pub fn is_empty(&self) -> bool {
     self.buffers.is_empty()
   }
@@ -150,12 +160,25 @@ impl Buffers {
     self.buffers.last_key_value()
   }
 }
+// BTreeMap }
 
 impl Default for Buffers {
   fn default() -> Self {
     Buffers::new()
   }
 }
+
+// Options {
+impl Buffers {
+  pub fn global_options(&self) -> &BufferGlobalOptions {
+    &self.global_options
+  }
+
+  pub fn set_global_options(&mut self, options: &BufferGlobalOptions) {
+    self.global_options = options.clone();
+  }
+}
+// Options }
 
 pub type BuffersArc = Arc<RwLock<Buffers>>;
 pub type BuffersWk = Weak<RwLock<Buffers>>;

@@ -1,7 +1,6 @@
-//! Global options for UI tree.
+//! Global options for Vim windows.
 
 use crate::defaults;
-use crate::ui::widget::window::WindowLocalOptions;
 
 use regex::Regex;
 
@@ -12,8 +11,14 @@ pub struct WindowGlobalOptions {
   break_at_regex: Regex,
 }
 
+impl Default for WindowGlobalOptions {
+  fn default() -> Self {
+    Self::builder().build()
+  }
+}
+
 impl WindowGlobalOptions {
-  fn builder() -> WindowGlobalOptionsBuilder {
+  pub fn builder() -> WindowGlobalOptionsBuilder {
     WindowGlobalOptionsBuilder::default()
   }
 
@@ -58,27 +63,7 @@ impl WindowGlobalOptionsBuilder {
 impl Default for WindowGlobalOptionsBuilder {
   fn default() -> Self {
     WindowGlobalOptionsBuilder {
-      // Defaults to `" ^I!@*-+;:,./?"`.
       break_at: String::from(defaults::win::BREAK_AT),
-    }
-  }
-}
-
-#[derive(Debug, Clone)]
-/// Global options for UI tree.
-pub struct GlobalOptions {
-  /// Window local options.
-  pub window_local_options: WindowLocalOptions,
-
-  /// Window global options.
-  pub window_global_options: WindowGlobalOptions,
-}
-
-impl Default for GlobalOptions {
-  fn default() -> Self {
-    GlobalOptions {
-      window_local_options: WindowLocalOptions::builder().build(),
-      window_global_options: WindowGlobalOptions::builder().build(),
     }
   }
 }

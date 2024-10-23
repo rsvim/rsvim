@@ -1,5 +1,9 @@
 //! The core library for the [RSVIM](https://github.com/rsvim/rsvim) editor.
 
+extern crate num;
+#[macro_use]
+extern crate num_derive;
+
 pub mod buf;
 pub mod cart;
 pub mod cli;

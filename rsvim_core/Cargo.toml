@@ -27,6 +27,9 @@ tracing-subscriber = { workspace = true, features = [
 tracing-appender = { workspace = true, features = ["parking_lot"] }
 tokio = { workspace = true, features = ["full"] }
 tokio-util = { workspace = true, features = ["full"] }
+unicode-width = { workspace = true }
+unicode-normalization = { workspace = true }
+unicode-segmentation = { workspace = true }
 clap = { workspace = true, features = ["derive", "unicode"] }
 futures = { workspace = true }
 time = { workspace = true, features = [
@@ -42,7 +45,9 @@ tzdb = { workspace = true }
 compact_str = { workspace = true, features = ["serde", "bytes"] }
 ropey = { workspace = true }
 geo = { workspace = true, features = ["serde"] }
+num = { workspace = true }
 num-traits = { workspace = true }
+num-derive = { workspace = true }
 parking_lot = { workspace = true }
 # async-trait = "0.1.82"
 # bincode = "2.0.0-rc.3"
@@ -55,8 +60,8 @@ url = { workspace = true }
 path-absolutize = { workspace = true }
 toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
-icu = { workspace = true, features = ["compiled_data", "serde", "std"] }
 zstd = { workspace = true }
+icu = { workspace = true }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 

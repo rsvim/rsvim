@@ -1,6 +1,6 @@
 //! Event loop.
 
-use crate::buf::{Buffer, Buffers, BuffersArc};
+use crate::buf::{buffers_to_arc, Buffer, Buffers, BuffersArc};
 use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
 use crate::envar;
@@ -129,7 +129,7 @@ impl EventLoop {
     let tree = Tree::to_arc(Tree::new(canvas_size));
 
     // Buffers
-    let buffers = Buffers::to_arc(Buffers::new());
+    let buffers = buffers_to_arc(Buffers::new());
 
     // State
     let state = State::to_arc(State::default());

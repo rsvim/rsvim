@@ -2,7 +2,7 @@
 
 use crate::error::AnyErr;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, FromPrimitive, ToPrimitive)]
 /// ASCII control code.
 /// See: <https://en.wikipedia.org/wiki/ASCII>.
 /// See: <https://en.wikipedia.org/wiki/C0_and_C1_control_codes>.
@@ -80,18 +80,65 @@ impl std::fmt::Display for AsciiControlCode {
   }
 }
 
-impl std::convert::TryFrom<u8> for AsciiControlCode {
+macro_rules! ascii_control_code_converter_impl {
+  ($plain_type:ty, $method_name:tt) => {
+    impl std::convert::TryFrom<$plain_type> for AsciiControlCode {
+      type Error = AnyErr;
+
+      fn try_from(value: $plain_type) -> Result<Self, Self::Error> {
+        match num::FromPrimitive::$method_name(value) {
+          Some(code) => Ok(code),
+          None => anyhow::bail!(
+            "Cannot convert {} to AsciiControlCode ({}-{})",
+            value,
+            Self::min() as $plain_type,
+            Self::max() as $plain_type
+          ),
+        }
+      }
+    }
+
+    impl std::convert::Into<$plain_type> for AsciiControlCode {
+      fn into(self) -> $plain_type {
+        self as $plain_type
+      }
+    }
+  };
+}
+
+ascii_control_code_converter_impl!(i8, from_i8);
+ascii_control_code_converter_impl!(u8, from_u8);
+ascii_control_code_converter_impl!(i16, from_i16);
+ascii_control_code_converter_impl!(u16, from_u16);
+ascii_control_code_converter_impl!(i32, from_i32);
+ascii_control_code_converter_impl!(u32, from_u32);
+ascii_control_code_converter_impl!(i128, from_i128);
+ascii_control_code_converter_impl!(u128, from_u128);
+ascii_control_code_converter_impl!(isize, from_isize);
+ascii_control_code_converter_impl!(usize, from_usize);
+
+impl std::convert::TryFrom<char> for AsciiControlCode {
   type Error = AnyErr;
 
-  fn try_from(value: u8) -> Result<Self, Self::Error> {
-    Ok(AsciiControlCode::Bs)
+  fn try_from(value: char) -> Result<Self, Self::Error> {
+    Self::try_from(value as u32)
   }
 }
 
-impl std::convert::TryInto<u8> for AsciiControlCode {
-  type Error = AnyErr;
+impl std::convert::Into<char> for AsciiControlCode {
+  fn into(self) -> char {
+    self as u8 as char
+  }
+}
 
-  fn try_into(self) -> Result<u8, Self::Error> {
-    Ok(0)
+impl AsciiControlCode {
+  /// Maximum code
+  pub fn max() -> AsciiControlCode {
+    AsciiControlCode::Us
+  }
+
+  /// Minimum code
+  pub fn min() -> AsciiControlCode {
+    AsciiControlCode::Nul
   }
 }

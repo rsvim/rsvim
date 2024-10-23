@@ -2,6 +2,7 @@
 
 use crate::buf::BufferWk;
 use crate::cart::{U16Pos, U16Size, URect};
+use crate::defaults::grapheme::AsciiControlCode;
 use crate::envar;
 use crate::rlock;
 use crate::ui::util::ptr::SafeWindowRef;
@@ -9,6 +10,7 @@ use crate::ui::widget::window::Window;
 
 use std::collections::BTreeMap;
 use tracing::debug;
+use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
 #[derive(Debug, Copy, Clone)]
 /// The section information of a buffer line. One section is exactly one row in a window.
@@ -61,7 +63,23 @@ pub struct Viewport {
 
 #[derive(Debug, Copy, Clone)]
 // Tuple of start_row, end_row, start_column, end_column.
-struct RowAndColumnResult(usize, usize, usize, usize);
+struct ViewportRect {
+  pub start_row: usize,
+  pub end_row: usize,
+  pub start_col: usize,
+  pub end_col: usize,
+}
+
+impl Default for ViewportRect {
+  fn default() -> Self {
+    ViewportRect {
+      start_row: 0,
+      end_row: 0,
+      start_col: 0,
+      end_col: 0,
+    }
+  }
+}
 
 // Given the buffer and window size, collect information from start line and column, i.e. from the
 // top-left corner.
@@ -69,7 +87,7 @@ fn collect_from_top_left(
   window: &Window,
   start_row: usize,
   start_col: usize,
-) -> (RowAndColumnResult, BTreeMap<usize, LineViewport>) {
+) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
   match (window.wrap(), window.line_break()) {
     (false, _) => _collect_from_top_left_for_nowrap(window, start_row, start_col),
     (true, false) => _collect_from_top_left_for_wrap_nolinebreak(window, start_row, start_col),
@@ -82,7 +100,7 @@ fn _collect_from_top_left_for_nowrap(
   window: &Window,
   start_row: usize,
   start_col: usize,
-) -> (RowAndColumnResult, BTreeMap<usize, LineViewport>) {
+) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
   let actual_shape = window.actual_shape();
   let upos: U16Pos = actual_shape.min().into();
   let height = actual_shape.height();
@@ -96,7 +114,7 @@ fn _collect_from_top_left_for_nowrap(
 
   // If window is zero-sized.
   if height == 0 || width == 0 {
-    return (RowAndColumnResult(0, 0, 0, 0), BTreeMap::new());
+    return (ViewportRect::default(), BTreeMap::new());
   }
 
   // Get buffer arc pointer
@@ -115,7 +133,7 @@ fn _collect_from_top_left_for_nowrap(
   //   debug!("buffer.get_line ({:?}):None", start_row);
   // }
 
-  let mut row_and_col = RowAndColumnResult(0, 0, 0, 0);
+  let mut row_and_col = ViewportRect::default();
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
   match buffer.rope().get_lines_at(start_row) {
@@ -131,12 +149,19 @@ fn _collect_from_top_left_for_nowrap(
           Some(line) => {
             // If there's 1 more line in the buffer.
             let mut col = 0_u16;
+            let mut sections: Vec<LineSection> = vec![];
+            let mut displayed_width = 0_u16;
 
             // Go through each char in the line.
-            for ch in line.chars() {
+            for (i, ch) in line.chars().enumerate() {
               if col >= width {
                 break;
               }
+              let width = if ch.is_ascii_control() {
+                let control_code = AsciiControlCode::from(ch);
+              } else {
+                UnicodeWidthChar::width_cjk(ch).unwrap();
+              };
               if ch != '\n' {
                 let cell = Cell::from(ch);
                 let cell_upos = point!(x: col + upos.x(), y: row + upos.y());
@@ -207,7 +232,7 @@ fn _collect_from_top_left_for_nowrap(
     }
   }
 
-  (RowAndColumnResult(0, 0, 0, 0), BTreeMap::new())
+  (ViewportRect(0, 0, 0, 0), BTreeMap::new())
 }
 
 // Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=false`.
@@ -215,8 +240,8 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
   window: &Window,
   start_row: usize,
   start_col: usize,
-) -> (RowAndColumnResult, BTreeMap<usize, LineViewport>) {
-  (RowAndColumnResult(0, 0, 0, 0), BTreeMap::new())
+) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
+  (ViewportRect(0, 0, 0, 0), BTreeMap::new())
 }
 
 // Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=true`.
@@ -224,8 +249,8 @@ fn _collect_from_top_left_for_wrap_linebreak(
   window: &Window,
   start_row: usize,
   start_col: usize,
-) -> (RowAndColumnResult, BTreeMap<usize, LineViewport>) {
-  (RowAndColumnResult(0, 0, 0, 0), BTreeMap::new())
+) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
+  (ViewportRect(0, 0, 0, 0), BTreeMap::new())
 }
 
 impl Viewport {
