@@ -13,7 +13,6 @@ use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 pub use crate::ui::tree::opt::WindowGlobalOptions;
 
 use parking_lot::RwLock;
-use regex::Regex;
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 use tracing::debug;
