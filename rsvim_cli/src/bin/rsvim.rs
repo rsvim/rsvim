@@ -3,10 +3,10 @@
 //! See [rsvim_core] for more details.
 
 use rsvim_core::cli::CliOpt;
-use rsvim_core::error::IoResult;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::{v8_version, SnapshotData};
 use rsvim_core::log;
+use rsvim_core::res::IoResult;
 
 use clap::Parser;
 use once_cell::sync::Lazy;

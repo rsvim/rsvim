@@ -1,6 +1,6 @@
 //! Grapheme cluster and unicode.
 
-use crate::error::AnyErr;
+use crate::res::AnyErr;
 
 #[derive(Debug, Copy, Clone, FromPrimitive, ToPrimitive)]
 /// ASCII control code.

@@ -1,9 +1,9 @@
 //! Edit input files on start up.
 
 use crate::envar;
-use crate::error::{AnyResult, TheErr};
 use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
 use crate::evloop::task::TaskableDataAccess;
+use crate::res::AnyResult;
 use crate::{rlock, wlock};
 
 use ropey::{Rope, RopeBuilder};
@@ -65,25 +65,25 @@ pub async fn edit_default_file(
           }
           Err(e) => {
             // Unexpected error
-            let msg = format!(
+            let e = format!(
               "Failed to read default input file {:?} with error {:?}",
               file_name.as_str(),
               e
             );
-            error!("{msg}");
-            return Err(TheErr::Message(msg).into());
+            error!("{e}");
+            anyhow::bail!(e);
           }
         }
       }
     }
     Err(e) => {
-      let msg = format!(
+      let e = format!(
         "Failed to open default input file {:?} with error {:?}",
         file_name.as_str(),
         e
       );
-      error!("{msg}");
-      return Err(TheErr::Message(msg).into());
+      error!("{e}");
+      anyhow::bail!(e);
     }
   }
 
@@ -130,27 +130,27 @@ pub async fn edit_other_files(
             }
             Err(e) => {
               // Unexpected error
-              let msg = format!(
+              let e = format!(
                 "Failed to read the {:?} other file {:?} with error {:?}",
                 i,
                 file_name.as_str(),
                 e
               );
-              error!("{msg}");
-              return Err(TheErr::Message(msg).into());
+              error!("{e}");
+              anyhow::bail!(e);
             }
           }
         }
       }
       Err(e) => {
-        let msg = format!(
+        let e = format!(
           "Failed to open the {:?} other file {:?} with error {:?}",
           i,
           file_name.as_str(),
           e
         );
-        error!("{msg}");
-        return Err(TheErr::Message(msg).into());
+        error!("{e}");
+        anyhow::bail!(e);
       }
     }
   }

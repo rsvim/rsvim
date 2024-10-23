@@ -2,7 +2,6 @@
 
 use crate::buf::BuffersArc;
 use crate::cli::CliOpt;
-use crate::error::{AnyErr, TheErr};
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
@@ -11,6 +10,7 @@ use crate::js::module::{
   ModuleStatus,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
+use crate::res::AnyErr;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
@@ -594,10 +594,10 @@ impl JsRuntime {
         assert!(tc_scope.has_caught());
         let exception = tc_scope.exception().unwrap();
         let _exception = JsError::from_v8_exception(tc_scope, exception, None);
-        let err_msg = format!("User config not found: {filename:?}");
-        error!(err_msg);
-        eprintln!("{err_msg}");
-        return Err(TheErr::Message(err_msg).into());
+        let e = format!("User config not found: {filename:?}");
+        error!(e);
+        eprintln!("{e}");
+        anyhow::bail!(e);
       }
     };
 
@@ -608,10 +608,10 @@ impl JsRuntime {
       assert!(tc_scope.has_caught());
       let exception = tc_scope.exception().unwrap();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let err_msg = format!("Failed to instantiate user config module {filename:?}: {exception:?}");
-      error!(err_msg);
-      eprintln!("{err_msg}");
-      return Err(TheErr::Message(err_msg).into());
+      let e = format!("Failed to instantiate user config module {filename:?}: {exception:?}");
+      error!(e);
+      eprintln!("{e}");
+      anyhow::bail!(e);
     }
 
     match module.evaluate(tc_scope) {
@@ -628,10 +628,10 @@ impl JsRuntime {
     if module.get_status() == v8::ModuleStatus::Errored {
       let exception = module.get_exception();
       let exception = JsError::from_v8_exception(tc_scope, exception, None);
-      let err_msg = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
-      error!(err_msg);
-      eprintln!("{err_msg}");
-      return Err(TheErr::Message(err_msg).into());
+      let e = format!("Failed to evaluate user config module {filename:?}: {exception:?}");
+      error!(e);
+      eprintln!("{e}");
+      anyhow::bail!(e);
     }
 
     Ok(())

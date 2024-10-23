@@ -1,6 +1,6 @@
 //! Js module transpiler.
 
-use crate::error::AnyResult;
+use crate::res::AnyResult;
 
 use anyhow::bail;
 use regex::Regex;

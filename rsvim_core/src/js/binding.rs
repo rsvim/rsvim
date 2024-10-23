@@ -1,6 +1,6 @@
 //! Js runtime bindings.
 
-use crate::error::{AnyErr, IoError};
+use crate::res::{AnyErr, IoError};
 // use crate::dns;
 // use crate::exceptions;
 // use crate::file;

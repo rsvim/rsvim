@@ -1,8 +1,8 @@
 //! Js module.
 
-use crate::error::AnyResult;
 use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::js::JsRuntime;
+use crate::res::AnyResult;
 
 use std::cell::RefCell;
 use std::collections::HashMap;

@@ -1,6 +1,5 @@
 //! Js module loader.
 
-use crate::error::{AnyResult, TheErr};
 use crate::js::constant::WINDOWS_REGEX;
 use crate::js::module::ModulePath;
 use crate::js::module::ModuleSource;
@@ -8,6 +7,7 @@ use crate::js::module::CORE_MODULES;
 use crate::js::transpiler::Jsx;
 use crate::js::transpiler::TypeScript;
 use crate::js::transpiler::Wasm;
+use crate::res::{AnyResult, TheErr};
 
 use anyhow::bail;
 // use regex::Regex;
