@@ -149,16 +149,6 @@ impl WindowContent {
   pub fn set_line_break(&mut self, value: bool) {
     self.options.set_line_break(value);
   }
-
-  /// Get 'break-at' option.
-  pub fn break_at(&self) -> &String {
-    self.tree_ref.as_ref().breat_at()
-  }
-
-  /// Get 'break-at' option in regex.
-  pub fn break_at_regex(&self) -> &Regex {
-    self.tree_ref.as_ref().break_at_regex()
-  }
 }
 // Options }
 

@@ -458,18 +458,6 @@ impl Tree {
     self.local_options.set_line_break(value);
   }
 
-  pub fn breat_at(&self) -> &String {
-    self.global_options.break_at()
-  }
-
-  pub fn set_break_at(&mut self, value: &str) {
-    self.global_options.set_break_at(value);
-  }
-
-  pub fn break_at_regex(&self) -> &Regex {
-    self.global_options.break_at_regex()
-  }
-
   // Global options }
 
   // Draw {

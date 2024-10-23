@@ -193,14 +193,6 @@ impl Window {
     self.update_window_content_options();
   }
 
-  pub fn break_at(&self) -> &String {
-    self.tree_ref.as_ref().global_options().break_at()
-  }
-
-  pub fn break_at_regex(&self) -> &Regex {
-    self.tree_ref.as_ref().global_options().break_at_regex()
-  }
-
   fn update_window_content_options(&mut self) {
     match self.base.node_mut(&self.content_id).unwrap() {
       WindowNode::WindowContent(content) => content.set_options(&self.options),

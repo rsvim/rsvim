@@ -7,7 +7,3 @@ pub const WRAP: bool = true;
 /// Window 'line-break' option, also known as 'word-wrap', default to `false`.
 /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
 pub const LINE_BREAK: bool = false;
-
-/// The 'break-at' option, default to `" ^I!@*-+;:,./?"`.
-/// See: <https://vimhelp.org/options.txt.html#%27breakat%27>.
-pub const BREAK_AT: &str = " ^I!@*-+;:,./?";
