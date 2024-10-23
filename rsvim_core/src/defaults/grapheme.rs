@@ -166,4 +166,11 @@ mod tests {
       assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
     }
   }
+
+  #[test]
+  fn display() {
+    for i in (AsciiControlCode::min() as u32)..(AsciiControlCode::max() as u32 + 1) {
+      println!("{}", AsciiControlCode::try_from(i).unwrap());
+    }
+  }
 }
