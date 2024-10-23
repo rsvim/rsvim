@@ -104,8 +104,7 @@ export class RsvimOpt {
    *
    * Local to Window.
    *
-   * If `true` (on), Vim will wrap long lines at a character in {@link breakAt} rather
-   * than at the last character that fits on the screen.
+   * If `true` (on), Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
    *
    * It only affects the way the file is displayed, not its contents.
    * If 'breakindent' is set, line is visually indented. Then, the value
@@ -148,42 +147,6 @@ export class RsvimOpt {
     // @ts-ignore Ignore warning
     __InternalRsvimGlobalObject.opt_set_line_break(value);
   }
-
-  // /**
-  //  * Get the _break-at_ option.
-  //  *
-  //  * Local to Window.
-  //  *
-  //  * This option lets you choose which characters might cause a line
-  //  * break if {@link lineBreak} is `true` (on). Only works for ASCII and also for 8-bit
-  //  * characters when {@link encoding} is an 8-bit encoding.
-  //  *
-  //  * @see {@link lineBreak}
-  //  * @see [Vim: options.txt - 'breakat'](https://vimhelp.org/options.txt.html#%27breakat%27)
-  //  *
-  //  * @returns {string}
-  //  * @defaultValue `" ^I!@*-+;:,./?"`
-  //  */
-  // get breakAt(): string {
-  //   // @ts-ignore Ignore warning
-  //   return __InternalRsvimGlobalObject.opt_get_break_at();
-  // }
-  //
-  // /**
-  //  * Set the _break-at_ option.
-  //  *
-  //  * @param {string} value - The _break-at_ option.
-  //  * @throws {@link !Error} if value is not a string value.
-  //  */
-  // set breakAt(value: string) {
-  //   if (typeof value !== "string") {
-  //     throw new Error(
-  //       `"Rsvim.opt.breakAt" value must be string type, but found ${value} (${typeof value})`,
-  //     );
-  //   }
-  //   // @ts-ignore Ignore warning
-  //   __InternalRsvimGlobalObject.opt_set_break_at(value);
-  // }
 }
 
 (function (globalThis: { Rsvim: Rsvim }) {

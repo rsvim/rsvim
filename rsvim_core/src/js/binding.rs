@@ -1,6 +1,6 @@
 //! Js runtime bindings.
 
-use crate::error::{AnyErr, IoError};
+use crate::res::{AnyErr, IoError};
 // use crate::dns;
 // use crate::exceptions;
 // use crate::file;
@@ -91,18 +91,6 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
       vim,
       "opt_set_line_break",
       global_rsvim::opt::set_line_break,
-    );
-    set_function_to(
-      scope,
-      vim,
-      "opt_get_break_at",
-      global_rsvim::opt::get_break_at,
-    );
-    set_function_to(
-      scope,
-      vim,
-      "opt_set_break_at",
-      global_rsvim::opt::set_break_at,
     );
   }
 

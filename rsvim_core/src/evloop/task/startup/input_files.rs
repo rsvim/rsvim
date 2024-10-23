@@ -1,10 +1,10 @@
 //! Edit input files on start up.
 
-use crate::buf::Buffer;
 use crate::envar;
-use crate::error::{AnyResult, TheErr};
 use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
 use crate::evloop::task::TaskableDataAccess;
+use crate::res::AnyResult;
+use crate::{rlock, wlock};
 
 use ropey::{Rope, RopeBuilder};
 use tokio::fs;
@@ -41,9 +41,7 @@ pub async fn edit_default_file(
             debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
             // For the first buffer, append to the **default** buffer.
-            buffers
-              .try_read_for(envar::MUTEX_TIMEOUT())
-              .unwrap()
+            rlock!(buffers)
               .first_key_value()
               .unwrap()
               .1
@@ -67,25 +65,25 @@ pub async fn edit_default_file(
           }
           Err(e) => {
             // Unexpected error
-            let msg = format!(
+            let e = format!(
               "Failed to read default input file {:?} with error {:?}",
               file_name.as_str(),
               e
             );
-            error!("{msg}");
-            return Err(TheErr::Message(msg).into());
+            error!("{e}");
+            anyhow::bail!(e);
           }
         }
       }
     }
     Err(e) => {
-      let msg = format!(
+      let e = format!(
         "Failed to open default input file {:?} with error {:?}",
         file_name.as_str(),
         e
       );
-      error!("{msg}");
-      return Err(TheErr::Message(msg).into());
+      error!("{e}");
+      anyhow::bail!(e);
     }
   }
 
@@ -107,22 +105,15 @@ pub async fn edit_other_files(
         let mut buf: Vec<u8> = vec![0_u8; envar::IO_BUF_SIZE()];
 
         // Create new buffer
-        let buffer = Buffer::to_arc(Buffer::from(Rope::new()));
-        buffers
-          .try_write_for(envar::MUTEX_TIMEOUT())
-          .unwrap()
-          .insert(buffer.clone());
+        let buf_id = wlock!(buffers).new_buffer();
+        let buffer = rlock!(buffers).get(&buf_id).unwrap().clone();
 
         loop {
           match fp.read_buf(&mut buf).await {
             Ok(n) => {
               debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
-              buffer
-                .try_write_for(envar::MUTEX_TIMEOUT())
-                .unwrap()
-                .rope_mut()
-                .append(into_rope(&buf, n));
+              wlock!(buffer).rope_mut().append(into_rope(&buf, n));
 
               // After read each block, immediately notify main thread so UI tree can render it on
               // terminal.
@@ -139,27 +130,27 @@ pub async fn edit_other_files(
             }
             Err(e) => {
               // Unexpected error
-              let msg = format!(
+              let e = format!(
                 "Failed to read the {:?} other file {:?} with error {:?}",
                 i,
                 file_name.as_str(),
                 e
               );
-              error!("{msg}");
-              return Err(TheErr::Message(msg).into());
+              error!("{e}");
+              anyhow::bail!(e);
             }
           }
         }
       }
       Err(e) => {
-        let msg = format!(
+        let e = format!(
           "Failed to open the {:?} other file {:?} with error {:?}",
           i,
           file_name.as_str(),
           e
         );
-        error!("{msg}");
-        return Err(TheErr::Message(msg).into());
+        error!("{e}");
+        anyhow::bail!(e);
       }
     }
   }

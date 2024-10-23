@@ -5,14 +5,15 @@ use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::defaults;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
-use crate::ui::tree::ptr::SafeTreeRef;
-use crate::ui::tree::{GlobalOptions, Tree};
+use crate::ui::tree::Tree;
+use crate::ui::util::ptr::SafeTreeRef;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{WindowLocalOptions, WindowOptionsBuilder};
+pub use crate::ui::widget::window::viewport::{LineViewport, LineViewportSection, Viewport};
 
 use crossterm::style::{Attributes, Color};
 use geo::point;
@@ -27,6 +28,7 @@ use tracing::{debug, error};
 pub mod content;
 pub mod opt;
 pub mod root;
+pub mod viewport;
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
@@ -50,13 +52,14 @@ pub struct Window {
 
 impl Window {
   pub fn new(shape: IRect, buffer: BufferWk, tree: &mut Tree) -> Self {
-    let options = tree.global_options().window_local_options.clone();
+    let options = tree.local_options().clone();
 
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
 
     let mut base = Itree::new(window_root_node);
+    let root_id = base.root_id();
 
     let window_content = WindowContent::new(shape, buffer.clone(), tree);
     let window_content_id = window_content.id();
@@ -69,7 +72,7 @@ impl Window {
       content_id: window_content_id,
       buffer,
       options,
-      tree_ref: SafeTreeRef::new(tree),
+      tree_ref: SafeTreeRef::new(tree, root_id),
     }
   }
 }
@@ -190,24 +193,6 @@ impl Window {
     self.update_window_content_options();
   }
 
-  pub fn break_at(&self) -> &String {
-    self
-      .tree_ref
-      .as_ref(&self.id())
-      .global_options()
-      .window_global_options
-      .break_at()
-  }
-
-  pub fn break_at_regex(&self) -> &Regex {
-    self
-      .tree_ref
-      .as_ref(&self.id())
-      .global_options()
-      .window_global_options
-      .break_at_regex()
-  }
-
   fn update_window_content_options(&mut self) {
     match self.base.node_mut(&self.content_id).unwrap() {
       WindowNode::WindowContent(content) => content.set_options(&self.options),
@@ -216,6 +201,12 @@ impl Window {
   }
 }
 // Options }
+
+impl Window {
+  pub fn buffer(&self) -> BufferWk {
+    self.buffer.clone()
+  }
+}
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.

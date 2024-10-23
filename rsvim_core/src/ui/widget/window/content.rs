@@ -7,8 +7,8 @@ use crate::inode_generate_impl;
 use crate::ui::canvas::internal::iframe::Iframe;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
-use crate::ui::tree::ptr::SafeTreeRef;
-use crate::ui::tree::{GlobalOptions, Tree};
+use crate::ui::tree::Tree;
+use crate::ui::util::ptr::SafeTreeRef;
 use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::Widgetable;
 
@@ -107,14 +107,16 @@ pub struct WindowContent {
 impl WindowContent {
   /// Make window content.
   pub fn new(shape: IRect, buffer: BufferWk, tree: &mut Tree) -> Self {
-    let options = tree.global_options().window_local_options.clone();
+    let options = tree.local_options().clone();
     let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
+    let base = InodeBase::new(shape);
+    let node_id = base.id();
     WindowContent {
-      base: InodeBase::new(shape),
+      base,
       buffer,
       view,
       options,
-      tree_ref: SafeTreeRef::new(tree),
+      tree_ref: SafeTreeRef::new(tree, node_id),
     }
   }
 }
@@ -147,16 +149,6 @@ impl WindowContent {
   pub fn set_line_break(&mut self, value: bool) {
     self.options.set_line_break(value);
   }
-
-  /// Get 'break-at' option.
-  pub fn break_at(&self) -> &String {
-    self.tree_ref.as_ref(&self.id()).breat_at()
-  }
-
-  /// Get 'break-at' option in regex.
-  pub fn break_at_regex(&self) -> &Regex {
-    self.tree_ref.as_ref(&self.id()).break_at_regex()
-  }
 }
 // Options }
 
@@ -183,10 +175,12 @@ impl WindowContent {
     self.view.start_line = Some(line);
     self.view.end_line = None;
   }
+
   /// Get end line, index start from 0.
   pub fn end_line(&self) -> Option<usize> {
     self.view.end_line
   }
+
   /// Set end line.
   ///
   /// This operation will unset the start line. Because with different line-wrap/word-wrap options,
@@ -196,10 +190,12 @@ impl WindowContent {
     self.view.end_line = Some(lend);
     self.view.start_line = None;
   }
+
   /// Get start column, index start from 0.
   pub fn start_column(&self) -> Option<usize> {
     self.view.start_column
   }
+
   /// Set start column.
   ///
   /// This operation also calculates the end column based on widget's width, and set it as well.
@@ -211,6 +207,7 @@ impl WindowContent {
   pub fn end_column(&self) -> Option<usize> {
     self.view.end_column
   }
+
   /// Set end column.
   ///
   /// This operation also calculates the start column based on widget's width, and set it as well.
@@ -804,7 +801,7 @@ mod tests {
     let terminal_size = U16Size::new(10, 10);
     let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (10, 10));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -859,7 +856,7 @@ mod tests {
     let terminal_size = U16Size::new(27, 15);
     let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (27, 15));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -907,7 +904,7 @@ mod tests {
     let terminal_size = U16Size::new(20, 18);
     let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (20, 18));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -973,7 +970,7 @@ mod tests {
     let terminal_size = U16Size::new(width, height);
     let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -1034,7 +1031,7 @@ mod tests {
     let terminal_size = U16Size::new(10, 10);
     let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(true).build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (10, 10));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -1099,7 +1096,7 @@ mod tests {
     let terminal_size = U16Size::new(27, 15);
     let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(true).build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (27, 15));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -1140,7 +1137,7 @@ mod tests {
     let terminal_size = U16Size::new(20, 18);
     let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(true).build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (20, 18));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -1213,7 +1210,7 @@ mod tests {
     let terminal_size = U16Size::new(width, height);
     let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(true).build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -1278,7 +1275,7 @@ mod tests {
       .wrap(true)
       .line_break(true)
       .build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (10, 10));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -1346,7 +1343,7 @@ mod tests {
       .wrap(true)
       .line_break(true)
       .build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (27, 15));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -1390,7 +1387,7 @@ mod tests {
       .wrap(true)
       .line_break(true)
       .build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (20, 18));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
@@ -1470,7 +1467,7 @@ mod tests {
       .wrap(true)
       .line_break(true)
       .build();
-    tree.global_options_mut().window_local_options = window_options;
+    tree.set_local_options(&window_options);
     let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
     let mut window_content =
       WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);

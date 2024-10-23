@@ -1,6 +1,6 @@
 //! Vim buffers.
 
-use crate::envar;
+use crate::buf::opt::BufferLocalOptions;
 
 use parking_lot::RwLock;
 use ropey::{Rope, RopeBuilder};
@@ -8,6 +8,8 @@ use std::collections::BTreeMap;
 use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
+
+pub mod opt;
 
 /// Buffer ID.
 pub type BufferId = i32;
@@ -25,16 +27,19 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
+  options: BufferLocalOptions,
 }
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
 pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
+  /// Make buffer with default [`BufferLocalOptions`].
   pub fn new() -> Self {
     Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
+      options: BufferLocalOptions::default(),
     }
   }
 
@@ -61,20 +66,44 @@ impl Default for Buffer {
   }
 }
 
+// Options {
+impl Buffer {
+  pub fn options(&self) -> &BufferLocalOptions {
+    &self.options
+  }
+
+  pub fn set_options(&mut self, options: &BufferLocalOptions) {
+    self.options = options.clone();
+  }
+
+  pub fn tab_stop(&self) -> u16 {
+    self.options.tab_stop()
+  }
+
+  pub fn set_tab_stop(&mut self, value: u16) {
+    self.options.set_tab_stop(value);
+  }
+}
+// Options }
+
 impl From<Rope> for Buffer {
+  /// Make buffer from [`Rope`].
   fn from(rope: Rope) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope,
+      options: BufferLocalOptions::default(),
     }
   }
 }
 
 impl From<RopeBuilder> for Buffer {
+  /// Make buffer from [`RopeBuilder`].
   fn from(builder: RopeBuilder) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope: builder.finish(),
+      options: BufferLocalOptions::default(),
     }
   }
 }
@@ -92,12 +121,16 @@ impl Eq for Buffer {}
 pub struct Buffers {
   // Buffers collection
   buffers: BTreeMap<BufferId, BufferArc>,
+
+  // Local options for buffers.
+  local_options: BufferLocalOptions,
 }
 
 impl Buffers {
   pub fn new() -> Self {
     Buffers {
       buffers: BTreeMap::new(),
+      local_options: BufferLocalOptions::default(),
     }
   }
 
@@ -105,17 +138,39 @@ impl Buffers {
     Arc::new(RwLock::new(b))
   }
 
+  pub fn new_buffer(&mut self) -> BufferId {
+    let mut buf = Buffer::new();
+    buf.set_options(self.local_options());
+    let buf_id = buf.id();
+    self.buffers.insert(buf_id, Buffer::to_arc(buf));
+    buf_id
+  }
+
+  pub fn new_buffer_from_rope(&mut self, rope: Rope) -> BufferId {
+    let mut buf = Buffer::from(rope);
+    buf.set_options(self.local_options());
+    let buf_id = buf.id();
+    self.buffers.insert(buf_id, Buffer::to_arc(buf));
+    buf_id
+  }
+
+  pub fn new_buffer_from_rope_builder(&mut self, rope_builder: RopeBuilder) -> BufferId {
+    let mut buf = Buffer::from(rope_builder);
+    buf.set_options(self.local_options());
+    let buf_id = buf.id();
+    self.buffers.insert(buf_id, Buffer::to_arc(buf));
+    buf_id
+  }
+}
+
+// BTreeMap {
+impl Buffers {
   pub fn is_empty(&self) -> bool {
     self.buffers.is_empty()
   }
 
   pub fn len(&self) -> usize {
     self.buffers.len()
-  }
-
-  pub fn insert(&mut self, buffer: BufferArc) -> Option<BufferArc> {
-    let buffer_id = buffer.try_read_for(envar::MUTEX_TIMEOUT()).unwrap().id();
-    self.buffers.insert(buffer_id, buffer)
   }
 
   pub fn remove(&mut self, id: &BufferId) -> Option<BufferArc> {
@@ -150,12 +205,25 @@ impl Buffers {
     self.buffers.last_key_value()
   }
 }
+// BTreeMap }
 
 impl Default for Buffers {
   fn default() -> Self {
     Buffers::new()
   }
 }
+
+// Options {
+impl Buffers {
+  pub fn local_options(&self) -> &BufferLocalOptions {
+    &self.local_options
+  }
+
+  pub fn set_local_options(&mut self, options: &BufferLocalOptions) {
+    self.local_options = options.clone();
+  }
+}
+// Options }
 
 pub type BuffersArc = Arc<RwLock<Buffers>>;
 pub type BuffersWk = Weak<RwLock<Buffers>>;
@@ -171,15 +239,15 @@ mod tests {
 
   #[test]
   fn buffer_from1() {
-    let rop1 = Rope::from_str("Hello");
-    let buf1: Buffer = rop1.into();
+    let r1 = Rope::from_str("Hello");
+    let buf1 = Buffer::from(r1);
     let tmp1 = tempfile().unwrap();
-    buf1.rope.write_to(tmp1).unwrap();
+    buf1.rope().write_to(tmp1).unwrap();
 
-    let rop2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
-    let buf2 = Buffer::from(rop2);
+    let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
+    let buf2 = Buffer::from(r2);
     let tmp2 = tempfile().unwrap();
-    buf2.rope.write_to(tmp2).unwrap();
+    buf2.rope().write_to(tmp2).unwrap();
   }
 
   #[test]
@@ -187,9 +255,9 @@ mod tests {
     let mut builder1 = RopeBuilder::new();
     builder1.append("Hello");
     builder1.append("World");
-    let buf1: Buffer = builder1.into();
+    let buf1 = Buffer::from(builder1);
     let tmp1 = tempfile().unwrap();
-    buf1.rope.write_to(tmp1).unwrap();
+    buf1.rope().write_to(tmp1).unwrap();
   }
 
   #[test]

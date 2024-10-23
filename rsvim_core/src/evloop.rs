@@ -1,21 +1,21 @@
 //! Event loop.
 
-use crate::buf::{Buffer, Buffers, BuffersArc};
+use crate::buf::{Buffers, BuffersArc};
 use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
 use crate::envar;
-use crate::error::IoResult;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::evloop::task::TaskableDataAccess;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
-use crate::rlock;
+use crate::res::IoResult;
 use crate::state::fsm::StatefulValue;
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{Cursor, Window};
+use crate::{rlock, wlock};
 
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
@@ -256,12 +256,8 @@ impl EventLoop {
   /// Initialize editor default window and buffer.
   pub fn init_editor(&self) -> IoResult<()> {
     // Create default buffer.
-    let buffer = Buffer::to_arc(Buffer::new());
-    self
-      .buffers
-      .try_write_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .insert(buffer.clone());
+    let buf_id = wlock!(self.buffers).new_buffer();
+    let buffer = rlock!(self.buffers).get(&buf_id).unwrap().clone();
 
     // Create default window.
     let canvas_size = rlock!(self.canvas).size();

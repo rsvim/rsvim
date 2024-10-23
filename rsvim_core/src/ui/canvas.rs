@@ -20,7 +20,6 @@ use std::sync::Arc;
 use tracing::debug;
 
 pub mod frame;
-pub mod grapheme;
 pub mod internal;
 
 #[derive(Debug, Clone)]
