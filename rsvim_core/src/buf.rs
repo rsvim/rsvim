@@ -6,6 +6,7 @@ use crate::envar;
 use parking_lot::RwLock;
 use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
+use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 
@@ -35,11 +36,11 @@ pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
   /// Make buffer with [`BufferLocalOptions`].
-  pub fn new(local_options: &BufferLocalOptions) -> Self {
+  pub fn new() -> Self {
     Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
-      options: local_options.clone(),
+      options: BufferLocalOptions::default(),
     }
   }
 
@@ -80,22 +81,24 @@ impl Buffer {
 }
 // Options }
 
-impl Buffer {
+impl From<Rope> for Buffer {
   /// Make buffer from [`Rope`].
-  pub fn from_rope(local_options: &BufferLocalOptions, rope: Rope) -> Self {
+  fn from(rope: Rope) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope,
-      options: local_options.clone(),
+      options: BufferLocalOptions::default(),
     }
   }
+}
 
+impl From<RopeBuilder> for Buffer {
   /// Make buffer from [`RopeBuilder`].
-  pub fn from_rope_builder(local_options: &BufferLocalOptions, builder: RopeBuilder) -> Self {
+  fn from(builder: RopeBuilder) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope: builder.finish(),
-      options: local_options.clone(),
+      options: BufferLocalOptions::default(),
     }
   }
 }
@@ -129,6 +132,30 @@ impl Buffers {
   pub fn to_arc(b: Buffers) -> BuffersArc {
     Arc::new(RwLock::new(b))
   }
+
+  pub fn new_buffer(&mut self) -> BufferId {
+    let mut buf = Buffer::new();
+    buf.set_options(self.local_options());
+    let buf_id = buf.id();
+    self.buffers.insert(buf_id, Buffer::to_arc(buf));
+    buf_id
+  }
+
+  pub fn new_buffer_from_rope(&mut self, rope: Rope) -> BufferId {
+    let mut buf = Buffer::from(rope);
+    buf.set_options(self.local_options());
+    let buf_id = buf.id();
+    self.buffers.insert(buf_id, Buffer::to_arc(buf));
+    buf_id
+  }
+
+  pub fn new_buffer_from_rope_builder(&mut self, rope_builder: RopeBuilder) -> BufferId {
+    let mut buf = Buffer::from(rope_builder);
+    buf.set_options(self.local_options());
+    let buf_id = buf.id();
+    self.buffers.insert(buf_id, Buffer::to_arc(buf));
+    buf_id
+  }
 }
 
 // BTreeMap {
@@ -139,11 +166,6 @@ impl Buffers {
 
   pub fn len(&self) -> usize {
     self.buffers.len()
-  }
-
-  pub fn insert(&mut self, buffer: BufferArc) -> Option<BufferArc> {
-    let buffer_id = buffer.try_read_for(envar::MUTEX_TIMEOUT()).unwrap().id();
-    self.buffers.insert(buffer_id, buffer)
   }
 
   pub fn remove(&mut self, id: &BufferId) -> Option<BufferArc> {

@@ -256,8 +256,8 @@ impl EventLoop {
   /// Initialize editor default window and buffer.
   pub fn init_editor(&self) -> IoResult<()> {
     // Create default buffer.
-    let buffer = Buffer::to_arc(Buffer::new(rlock!(self.buffers).local_options()));
-    wlock!(self.buffers).insert(buffer.clone());
+    let buf_id = wlock!(self.buffers).new_buffer();
+    let buffer = rlock!(self.buffers).get(&buf_id).unwrap().clone();
 
     // Create default window.
     let canvas_size = rlock!(self.canvas).size();
