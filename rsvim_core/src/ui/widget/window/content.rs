@@ -109,12 +109,14 @@ impl WindowContent {
   pub fn new(shape: IRect, buffer: BufferWk, tree: &mut Tree) -> Self {
     let options = tree.local_options().clone();
     let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
+    let base = InodeBase::new(shape);
+    let node_id = base.id();
     WindowContent {
-      base: InodeBase::new(shape),
+      base,
       buffer,
       view,
       options,
-      tree_ref: SafeTreeRef::new(tree),
+      tree_ref: SafeTreeRef::new(tree, node_id),
     }
   }
 }
@@ -150,12 +152,12 @@ impl WindowContent {
 
   /// Get 'break-at' option.
   pub fn break_at(&self) -> &String {
-    self.tree_ref.as_ref(&self.id()).breat_at()
+    self.tree_ref.as_ref().breat_at()
   }
 
   /// Get 'break-at' option in regex.
   pub fn break_at_regex(&self) -> &Regex {
-    self.tree_ref.as_ref(&self.id()).break_at_regex()
+    self.tree_ref.as_ref().break_at_regex()
   }
 }
 // Options }

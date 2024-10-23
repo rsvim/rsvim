@@ -10,19 +10,20 @@
 use crate::ui::tree::{Tree, TreeNodeId};
 use crate::ui::widget::window::Window;
 
+use std::convert::{AsMut, AsRef};
 use std::ptr::NonNull;
 
 #[derive(Debug, Clone)]
 /// Safe wrapper on [`NonNull<Tree>`](Tree).
-pub struct SafeTreeRef(NonNull<Tree>);
+pub struct SafeTreeRef(NonNull<Tree>, TreeNodeId);
 
 unsafe impl Send for SafeTreeRef {}
 
 unsafe impl Sync for SafeTreeRef {}
 
 impl SafeTreeRef {
-  pub fn new(tree: &mut Tree) -> Self {
-    SafeTreeRef(NonNull::new(tree as *mut Tree).unwrap())
+  pub fn new(tree: &mut Tree, self_id: TreeNodeId) -> Self {
+    SafeTreeRef(NonNull::new(tree as *mut Tree).unwrap(), self_id)
   }
 
   /// Ensure the tree reference (held by **the** struct) still contains **the** node.
@@ -34,19 +35,21 @@ impl SafeTreeRef {
   unsafe fn ensure_has_node(&self, id: &TreeNodeId) {
     self.0.as_ref().node(id).unwrap();
   }
+}
 
-  /// Get `Tree` immutable reference.
-  pub fn as_ref(&self, id: &TreeNodeId) -> &Tree {
+impl AsRef<Tree> for SafeTreeRef {
+  fn as_ref(&self) -> &Tree {
     unsafe {
-      self.ensure_has_node(id);
+      self.ensure_has_node(&self.1);
       self.0.as_ref()
     }
   }
+}
 
-  /// Get `Tree` mutable reference.
-  pub fn as_mut(&mut self, id: &TreeNodeId) -> &mut Tree {
+impl AsMut<Tree> for SafeTreeRef {
+  fn as_mut(&mut self) -> &mut Tree {
     unsafe {
-      self.ensure_has_node(id);
+      self.ensure_has_node(&self.1);
       self.0.as_mut()
     }
   }
@@ -64,14 +67,16 @@ impl SafeWindowRef {
   pub fn new(window: &mut Window) -> Self {
     SafeWindowRef(NonNull::new(window as *mut Window).unwrap())
   }
+}
 
-  /// Get `Window` immutable reference.
-  pub fn as_ref(&self) -> &Window {
+impl AsRef<Window> for SafeWindowRef {
+  fn as_ref(&self) -> &Window {
     unsafe { self.0.as_ref() }
   }
+}
 
-  /// Get `Window` mutable reference.
-  pub fn as_mut(&mut self) -> &mut Window {
+impl AsMut<Window> for SafeWindowRef {
+  fn as_mut(&mut self) -> &mut Window {
     unsafe { self.0.as_mut() }
   }
 }

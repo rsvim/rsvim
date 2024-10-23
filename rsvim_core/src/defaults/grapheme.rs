@@ -98,6 +98,7 @@ macro_rules! ascii_control_code_converter_impl {
       }
     }
 
+    #[allow(clippy::from_over_into)]
     impl std::convert::Into<$plain_type> for AsciiControlCode {
       fn into(self) -> $plain_type {
         self as $plain_type
@@ -125,6 +126,7 @@ impl std::convert::TryFrom<char> for AsciiControlCode {
   }
 }
 
+#[allow(clippy::from_over_into)]
 impl std::convert::Into<char> for AsciiControlCode {
   fn into(self) -> char {
     self as u8 as char
@@ -140,5 +142,33 @@ impl AsciiControlCode {
   /// Minimum code
   pub fn min() -> AsciiControlCode {
     AsciiControlCode::Nul
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn convert1() {
+    let chars = (0..128)
+      .into_iter()
+      .map(|i| i as u8 as char)
+      .collect::<Vec<_>>();
+
+    for (i, c) in chars.iter().enumerate() {
+      let code = AsciiControlCode::try_from(i as u8);
+      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      let code = AsciiControlCode::try_from(i as i8);
+      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      let code = AsciiControlCode::try_from(i as u16);
+      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      let code = AsciiControlCode::try_from(i as i16);
+      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      let code = AsciiControlCode::try_from(i as u32);
+      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      let code = AsciiControlCode::try_from(i as i32);
+      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+    }
   }
 }

@@ -59,6 +59,7 @@ impl Window {
     let window_root_node = WindowNode::WindowRootContainer(window_root);
 
     let mut base = Itree::new(window_root_node);
+    let root_id = base.root_id();
 
     let window_content = WindowContent::new(shape, buffer.clone(), tree);
     let window_content_id = window_content.id();
@@ -71,7 +72,7 @@ impl Window {
       content_id: window_content_id,
       buffer,
       options,
-      tree_ref: SafeTreeRef::new(tree),
+      tree_ref: SafeTreeRef::new(tree, root_id),
     }
   }
 }
@@ -193,15 +194,11 @@ impl Window {
   }
 
   pub fn break_at(&self) -> &String {
-    self.tree_ref.as_ref(&self.id()).global_options().break_at()
+    self.tree_ref.as_ref().global_options().break_at()
   }
 
   pub fn break_at_regex(&self) -> &Regex {
-    self
-      .tree_ref
-      .as_ref(&self.id())
-      .global_options()
-      .break_at_regex()
+    self.tree_ref.as_ref().global_options().break_at_regex()
   }
 
   fn update_window_content_options(&mut self) {

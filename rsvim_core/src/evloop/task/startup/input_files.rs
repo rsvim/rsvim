@@ -109,7 +109,7 @@ pub async fn edit_other_files(
 
         // Create new buffer
         let buffer = Buffer::to_arc(Buffer::from_rope(
-          &rlock!(buffers).local_options(),
+          rlock!(buffers).local_options(),
           Rope::new(),
         ));
         buffers
