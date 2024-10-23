@@ -80,12 +80,12 @@ mod tests {
   #[test]
   pub fn options1() {
     let mut builder = WindowOptionsBuilder::default();
-    let options = builder.wrap(true).line_break(true).build();
-    assert!(options.wrap());
-    assert!(options.line_break());
+    let opt1 = builder.wrap(true).line_break(true).build();
+    assert!(opt1.wrap());
+    assert!(opt1.line_break());
 
-    let options = WindowLocalOptions::builder().build();
-    assert!(options.wrap());
-    assert!(!options.line_break());
+    let opt2 = WindowLocalOptions::builder().build();
+    assert!(opt2.wrap());
+    assert!(!opt2.line_break());
   }
 }

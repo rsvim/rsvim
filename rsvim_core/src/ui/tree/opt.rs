@@ -39,5 +39,6 @@ mod tests {
   #[test]
   fn default1() {
     let _opt1 = WindowGlobalOptions::builder().build();
+    let _opt2 = WindowGlobalOptionsBuilder::default().build();
   }
 }
