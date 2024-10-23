@@ -10,7 +10,7 @@ use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
 // Re-export
-pub use crate::ui::tree::opt::WindowGlobalOptions;
+pub use crate::ui::tree::opt::{WindowGlobalOptions, WindowGlobalOptionsBuilder};
 
 use parking_lot::RwLock;
 use std::collections::BTreeSet;
