@@ -239,13 +239,13 @@ mod tests {
 
   #[test]
   fn buffer_from1() {
-    let rop1 = Rope::from_str("Hello");
-    let buf1 = Buffer::from_rope(&BufferLocalOptions::default(), rop1);
+    let r1 = Rope::from_str("Hello");
+    let buf1 = Buffer::from(r1);
     let tmp1 = tempfile().unwrap();
     buf1.rope().write_to(tmp1).unwrap();
 
-    let rop2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
-    let buf2 = Buffer::from_rope(&BufferLocalOptions::default(), rop2);
+    let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
+    let buf2 = Buffer::from(r2);
     let tmp2 = tempfile().unwrap();
     buf2.rope().write_to(tmp2).unwrap();
   }
@@ -255,7 +255,7 @@ mod tests {
     let mut builder1 = RopeBuilder::new();
     builder1.append("Hello");
     builder1.append("World");
-    let buf1 = Buffer::from_rope_builder(&BufferLocalOptions::default(), builder1);
+    let buf1 = Buffer::from(builder1);
     let tmp1 = tempfile().unwrap();
     buf1.rope().write_to(tmp1).unwrap();
   }

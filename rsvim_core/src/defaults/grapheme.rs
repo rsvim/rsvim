@@ -151,12 +151,7 @@ mod tests {
 
   #[test]
   fn convert1() {
-    let chars = (0..128)
-      .into_iter()
-      .map(|i| i as u8 as char)
-      .collect::<Vec<_>>();
-
-    for (i, c) in chars.iter().enumerate() {
+    for i in 0..128 {
       let code = AsciiControlCode::try_from(i as u8);
       assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
       let code = AsciiControlCode::try_from(i as i8);
