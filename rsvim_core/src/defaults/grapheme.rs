@@ -151,19 +151,39 @@ mod tests {
 
   #[test]
   fn convert1() {
-    for i in 0..128 {
+    for i in 0..32 {
+      let code = AsciiControlCode::try_from(i as u8).unwrap();
+      let code: u8 = code.into();
+      assert!(code == i as u8);
+      let code = AsciiControlCode::try_from(i as i8).unwrap();
+      let code: i8 = code.into();
+      assert!(code == i as i8);
+      let code = AsciiControlCode::try_from(i as u16).unwrap();
+      let code: u16 = code.into();
+      assert!(code == i as u16);
+      let code = AsciiControlCode::try_from(i as i16).unwrap();
+      let code: i16 = code.into();
+      assert!(code == i as i16);
+      let code = AsciiControlCode::try_from(i as u32).unwrap();
+      let code: u32 = code.into();
+      assert!(code == i as u32);
+      let code = AsciiControlCode::try_from(i).unwrap();
+      let code: i32 = code.into();
+      assert!(code == i);
+    }
+    for i in 32..128 {
       let code = AsciiControlCode::try_from(i as u8);
-      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      assert!(code.is_err());
       let code = AsciiControlCode::try_from(i as i8);
-      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      assert!(code.is_err());
       let code = AsciiControlCode::try_from(i as u16);
-      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      assert!(code.is_err());
       let code = AsciiControlCode::try_from(i as i16);
-      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      assert!(code.is_err());
       let code = AsciiControlCode::try_from(i as u32);
-      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
-      let code = AsciiControlCode::try_from(i as i32);
-      assert!(code.is_ok() == (i <= AsciiControlCode::max() as usize));
+      assert!(code.is_err());
+      let code = AsciiControlCode::try_from(i);
+      assert!(code.is_err());
     }
   }
 
