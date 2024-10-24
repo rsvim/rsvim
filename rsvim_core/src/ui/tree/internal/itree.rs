@@ -6,7 +6,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::{collections::VecDeque, iter::Iterator};
-use tracing::debug;
+// use tracing::debug;
 
 use crate::cart::{IPos, IRect, U16Rect};
 use crate::ui::tree::internal::shapes;
@@ -231,7 +231,7 @@ where
     // Iterate all descendants, and update their attributes.
     while let Some(child_and_parent) = que.pop_front() {
       let cnode = child_and_parent.0;
-      let pnode_id = child_and_parent.1;
+      let _pnode_id = child_and_parent.1;
       let pnode_depth = child_and_parent.2;
       let pnode_actual_shape = child_and_parent.3;
 
@@ -241,7 +241,7 @@ where
       let cnode_shape = *cnode.shape();
       let cnode_actual_shape = shapes::make_actual_shape(cnode_shape, pnode_actual_shape);
 
-      debug!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+      // debug!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
 
       *cnode.depth_mut() = cnode_depth;
       *cnode.actual_shape_mut() = cnode_actual_shape;
@@ -290,12 +290,12 @@ where
   ///
   /// If `parent_id` doesn't exist.
   pub fn insert(&mut self, parent_id: &InodeId, mut child_node: T) -> Option<T> {
-    debug!(
-      "parent_id:{:?}, node_ids:{:?}, children_ids:{:?}",
-      parent_id,
-      self.node_ids(),
-      self.children_ids
-    );
+    // debug!(
+    //   "parent_id:{:?}, node_ids:{:?}, children_ids:{:?}",
+    //   parent_id,
+    //   self.node_ids(),
+    //   self.children_ids
+    // );
 
     // Panics if `parent_id` not exists.
     assert!(self.nodes.contains_key(parent_id));

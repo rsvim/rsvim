@@ -89,6 +89,15 @@ fn collect_from_top_left(
   }
 }
 
+#[allow(dead_code)]
+fn rpslice2line(s: &RopeSlice) -> String {
+  let mut builder: String = String::new();
+  for chunk in s.chunks() {
+    builder.push_str(chunk);
+  }
+  builder
+}
+
 // Implement [`collect_from_top_left`] with option `wrap=false`.
 fn _collect_from_top_left_for_nowrap(
   window: &Window,
@@ -120,7 +129,7 @@ fn _collect_from_top_left_for_nowrap(
   //   debug!(
   //     "buffer.get_line ({:?}):'{:?}'",
   //     start_line,
-  //     rslice2line(&line),
+  //     rpslice2line(&line),
   //   );
   // } else {
   //   debug!("buffer.get_line ({:?}):None", start_line);
@@ -140,6 +149,7 @@ fn _collect_from_top_left_for_nowrap(
       while row < height {
         match buflines.next() {
           Some(line) => {
+            debug!("0-line:'{:?}'", rpslice2line(&line),);
             // If there's 1 more line in the buffer.
             let mut sections: Vec<LineViewportSection> = vec![];
 
@@ -174,14 +184,23 @@ fn _collect_from_top_left_for_nowrap(
               display_length,
             });
             line_viewports.insert(current_line, LineViewport { sections });
+            debug!(
+              "2-current_line:{:?}, row:{:?}, char_length:{:?}, display_length:{:?}",
+              current_line, row, char_length, display_length
+            );
             current_line += 1;
           }
-          None => { /* There's no more lines in the buffer. */ }
+          None => {
+            /* There's no more lines in the buffer. */
+            debug!("3-current_line:{:?}, row:{:?}", current_line, row);
+            break;
+          }
         }
         // Go to next row.
         row += 1;
       }
 
+      debug!("4-current_line:{:?}, row:{:?}", current_line, row);
       (
         ViewportRect {
           start_line,
@@ -193,6 +212,7 @@ fn _collect_from_top_left_for_nowrap(
     }
     None => {
       // The `start_line` is outside of the buffer.
+      debug!("5-current_line:{:?}", current_line);
       (ViewportRect::default(), BTreeMap::new())
     }
   }
@@ -307,7 +327,10 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
             line_viewports.insert(current_line, LineViewport { sections });
             current_line += 1;
           }
-          None => { /* There's no more lines in the buffer. */ }
+          None => {
+            /* There's no more lines in the buffer. */
+            break;
+          }
         }
         // Iterate to next row.
         row += 1;
@@ -481,7 +504,10 @@ fn _collect_from_top_left_for_wrap_linebreak(
             line_viewports.insert(current_line, LineViewport { sections });
             current_line += 1;
           }
-          None => { /* There's no more lines in the buffer. */ }
+          None => {
+            /* There's no more lines in the buffer. */
+            break;
+          }
         }
         row += 1;
       }
@@ -582,6 +608,7 @@ mod tests {
       "  2. When ",
       "     * The",
       "     * The",
+      "",
     ];
 
     let terminal_size = U16Size::new(10, 10);
@@ -595,7 +622,7 @@ mod tests {
     info!("expect:{:?}", expect);
 
     assert_eq!(actual.start_line(), 0);
-    assert_eq!(actual.end_line(), expect.len() + 1);
+    assert_eq!(actual.end_line(), expect.len());
     assert_eq!(actual.start_column(), 0);
     assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
     assert_eq!(
