@@ -623,7 +623,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_nowrap1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -649,7 +649,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_nowrap2() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -676,7 +676,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_nowrap3() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -703,7 +703,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_nowrap4() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
     let expect = vec![""];
