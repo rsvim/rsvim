@@ -1,6 +1,5 @@
 //! Buffer viewport on a window.
 
-#![allow(unused_variables)]
 use crate::buf::BufferWk;
 use crate::cart::{U16Pos, U16Size, URect};
 use crate::defaults::grapheme::AsciiControlCode;
@@ -12,9 +11,11 @@ use crate::ui::util::{ptr::SafeWindowRef, strings};
 use crate::ui::widget::window::Window;
 
 use geo::point;
+use icu::segmenter::WordSegmenter;
+use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use tracing::debug;
-use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
+use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Copy, Clone)]
 /// The section information of a buffer line. One section is exactly one row in a window.
@@ -37,7 +38,8 @@ pub struct LineViewport {
 /// The buffer viewport on a window.
 ///
 /// When a buffer displays on a window, it starts from a specific line and column, ends at a
-/// specific line and column. Here it calls `start_line`, `start_column`, `end_line`, `end_column`.
+/// specific line and column. Here it calls `start_line`, `start_column`, `end_line`, and there's
+/// no `end_column`.
 /// The range is start-inclusive end-exclusive, i.e. `[start_line, end_line)` or
 /// `[start_column, end_column)`. All lines, rows and columns index are start from 0.
 ///
@@ -62,19 +64,16 @@ pub struct Viewport {
   end_line: usize,
   // Start column number.
   start_column: usize,
-  // End column number.
-  end_column: usize,
   // Maps from buffer's line number to its displayed information in the window.
   lines: BTreeMap<usize, LineViewport>,
 }
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
-// Tuple of start_line, end_line, start_column, end_column.
+// Tuple of start_line, end_line, start_column.
 pub struct ViewportRect {
   pub start_line: usize,
   pub end_line: usize,
   pub start_column: usize,
-  pub end_column: usize,
 }
 
 // Given the buffer and window size, collect information from start line and column, i.e. from the
@@ -143,28 +142,31 @@ fn _collect_from_top_left_for_nowrap(
         match buflines.next() {
           Some(line) => {
             // If there's 1 more line in the buffer.
-            let mut col = 0_u16;
             let mut sections: Vec<LineViewportSection> = vec![];
+
+            let mut col = 0_u16;
             let mut char_length = 0_usize;
             let mut display_length = 0_u16;
 
             // Go through each char in the line.
-            for c in line.chars() {
-              if (col as usize) < start_column {
-                col += 1;
+            for (i, c) in line.chars().enumerate() {
+              if i < start_column {
                 continue;
               }
-              if col as usize >= (width as usize + start_column) {
+              if col >= width {
                 break;
               }
-              let width = strings::char_width(c, &buffer);
-              display_length += width;
+              let char_width = strings::char_width(c, &buffer);
+              if col + char_width >= width {
+                break;
+              }
+              display_length += char_width;
               char_length += 1;
               // debug!(
               //   "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
               //   row, col, ch, cell_upos
               // );
-              col += 1;
+              col += char_width;
             }
 
             sections.push(LineViewportSection {
@@ -185,8 +187,7 @@ fn _collect_from_top_left_for_nowrap(
         ViewportRect {
           start_line,
           end_line: current_line,
-          start_column: 0,
-          end_column: 0,
+          start_column,
         },
         line_viewports,
       )
@@ -204,7 +205,141 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
   start_line: usize,
   start_column: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
-  (ViewportRect::default(), BTreeMap::new())
+  let actual_shape = window.actual_shape();
+  let height = actual_shape.height();
+  let width = actual_shape.width();
+
+  debug!("_collect_from_top_left_for_wrap_nolinebreak");
+  // debug!(
+  //   "actual_shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
+  //   actual_shape, upos, height, width,
+  // );
+
+  // If window is zero-sized.
+  if height == 0 || width == 0 {
+    return (ViewportRect::default(), BTreeMap::new());
+  }
+
+  // Get buffer arc pointer
+  let buffer = window.buffer.upgrade().unwrap();
+
+  // Lock buffer for read
+  let buffer = rlock!(buffer);
+
+  // if let Some(line) = buffer.rope().get_line(start_line) {
+  //   debug!(
+  //     "buffer.get_line ({:?}):'{:?}'",
+  //     start_line,
+  //     rpslice2line(&line),
+  //   );
+  // } else {
+  //   debug!("buffer.get_line ({:?}):None", start_line);
+  // }
+
+  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut current_line = start_line;
+
+  match buffer.rope().get_lines_at(start_line) {
+    Some(mut buflines) => {
+      // The `start_line` is inside the buffer.
+
+      // The first `row` in the window maps to the `start_line` in the buffer.
+      let mut row = 0;
+
+      while row < height {
+        match buflines.next() {
+          Some(line) => {
+            // If there's 1 more line in the buffer.
+            let mut sections: Vec<LineViewportSection> = vec![];
+
+            let mut col = 0_u16;
+            let mut char_length = 0_usize;
+            let mut display_length = 0_u16;
+
+            for (i, c) in line.chars().enumerate() {
+              if i < start_column {
+                continue;
+              }
+              if col >= width {
+                sections.push(LineViewportSection {
+                  row,
+                  char_length,
+                  display_length,
+                });
+                row += 1;
+                col = 0_u16;
+                char_length = 0_usize;
+                display_length = 0_u16;
+                if row >= height {
+                  break;
+                }
+              }
+
+              let char_width = strings::char_width(c, &buffer);
+              if col + char_width >= width {
+                row += 1;
+                sections.push(LineViewportSection {
+                  row,
+                  char_length,
+                  display_length,
+                });
+                col = 0_u16;
+                char_length = 0_usize;
+                display_length = 0_u16;
+                if row >= height {
+                  break;
+                }
+              }
+              display_length += char_width;
+              char_length += 1;
+
+              // debug!(
+              //   "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
+              //   row, col, ch, cell_upos
+              // );
+              col += char_width;
+            }
+
+            sections.push(LineViewportSection {
+              row,
+              char_length,
+              display_length,
+            });
+            line_viewports.insert(current_line, LineViewport { sections });
+            current_line += 1;
+          }
+          None => { /* There's no more lines in the buffer. */ }
+        }
+        // Iterate to next row.
+        row += 1;
+      }
+
+      (
+        ViewportRect {
+          start_line,
+          end_line: current_line,
+          start_column,
+        },
+        line_viewports,
+      )
+    }
+    None => {
+      // The `start_line` is outside of the buffer.
+      (ViewportRect::default(), BTreeMap::new())
+    }
+  }
+}
+
+fn truncate_line(line: &RopeSlice, max_bytes: usize) -> String {
+  let mut builder = String::new();
+  builder.reserve(max_bytes);
+  for chunk in line.chunks() {
+    if builder.len() > max_bytes {
+      return builder;
+    }
+    builder.push_str(chunk);
+  }
+  builder
 }
 
 // Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=true`.
@@ -213,7 +348,159 @@ fn _collect_from_top_left_for_wrap_linebreak(
   start_line: usize,
   start_column: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
-  (ViewportRect::default(), BTreeMap::new())
+  let actual_shape = window.actual_shape();
+  let height = actual_shape.height();
+  let width = actual_shape.width();
+
+  debug!("_collect_from_top_left_for_wrap_linebreak");
+  // debug!(
+  //   "actual_shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
+  //   actual_shape, upos, height, width,
+  // );
+
+  // If window is zero-sized.
+  if height == 0 || width == 0 {
+    return (ViewportRect::default(), BTreeMap::new());
+  }
+
+  // Get buffer arc pointer
+  let buffer = window.buffer.upgrade().unwrap();
+
+  // Lock buffer for read
+  let buffer = rlock!(buffer);
+
+  // if let Some(line) = buffer.rope().get_line(start_line) {
+  //   debug!(
+  //     "buffer.get_line ({:?}):'{:?}'",
+  //     start_line,
+  //     rpslice2line(&line),
+  //   );
+  // } else {
+  //   debug!("buffer.get_line ({:?}):None", start_line);
+  // }
+
+  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut current_line = start_line;
+
+  match buffer.rope().get_lines_at(start_line) {
+    Some(mut buflines) => {
+      // The `start_line` is inside the buffer.
+
+      // The first `row` in the window maps to the `start_line` in the buffer.
+      let mut row = 0;
+
+      while row < height {
+        match buflines.next() {
+          Some(line) => {
+            // If there's 1 more line in the buffer.
+            let mut sections: Vec<LineViewportSection> = vec![];
+
+            let mut col = 0_u16;
+            let mut char_length = 0_usize;
+            let mut display_length = 0_u16;
+
+            // Chop the line into maximum chars can hold by current window, thus avoid those super
+            // long lines for iteration performance.
+            // NOTE: Use `height * width * 4`, 4 is for at most 4 bytes can hold a grapheme
+            // cluster.
+            let truncated_line = truncate_line(&line, height as usize * width as usize * 4);
+            let word_boundaries: Vec<&str> = truncated_line.split_word_bounds().collect();
+            debug!(
+              "1-truncated_line: {:?}, word_boundaries: {:?}",
+              truncated_line, word_boundaries
+            );
+
+            #[allow(unused_variables)]
+            for (i, wd) in word_boundaries.iter().enumerate() {
+              if row >= height {
+                break;
+              }
+              let wd_width = wd
+                .chars()
+                .map(|c| strings::char_width(c, &buffer) as usize)
+                .sum::<usize>();
+
+              if wd_width + col as usize <= width as usize {
+                // Enough space to place this word in current row
+                char_length += wd.chars().count();
+                display_length += wd_width as u16;
+                col += wd_width as u16;
+              } else {
+                // Not enough space to place this word in current row.
+                // There're two cases:
+                // 1. The word can be placed in next empty row (since the column idx `col` will
+                //    start from 0 in next row).
+                // 2. The word is still too long to place in an entire row, so next row still
+                //    cannot place it.
+                // Anyway, we simply go to next row, and force render all of the word.
+                sections.push(LineViewportSection {
+                  row,
+                  char_length,
+                  display_length,
+                });
+                row += 1;
+                col = 0_u16;
+                char_length = 0_usize;
+                display_length = 0_u16;
+                if row >= height {
+                  break;
+                }
+
+                for (j, c) in wd.chars().enumerate() {
+                  if j < start_column {
+                    continue;
+                  }
+                  if col >= width {
+                    sections.push(LineViewportSection {
+                      row,
+                      char_length,
+                      display_length,
+                    });
+                    row += 1;
+                    col = 0_u16;
+                    char_length = 0_usize;
+                    display_length = 0_u16;
+                    if row >= height {
+                      break;
+                    }
+                  }
+                  let char_width = strings::char_width(c, &buffer);
+                  if col + char_width >= width {
+                    break;
+                  }
+                  display_length += char_width;
+                  char_length += 1;
+                  // debug!(
+                  //   "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
+                  //   row, col, ch, cell_upos
+                  // );
+                  col += char_width;
+                }
+              }
+            }
+
+            line_viewports.insert(current_line, LineViewport { sections });
+            current_line += 1;
+          }
+          None => { /* There's no more lines in the buffer. */ }
+        }
+        row += 1;
+      }
+
+      (
+        ViewportRect {
+          start_line,
+          end_line: current_line,
+          start_column,
+        },
+        line_viewports,
+      )
+    }
+    None => {
+      // The `start_line` is outside of the buffer.
+      (ViewportRect::default(), BTreeMap::new())
+    }
+  }
 }
 
 impl Viewport {
@@ -227,7 +514,6 @@ impl Viewport {
       start_line: row_and_col.start_line,
       end_line: row_and_col.end_line,
       start_column: row_and_col.start_column,
-      end_column: row_and_col.end_column,
       lines,
     }
   }
