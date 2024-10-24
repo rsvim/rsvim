@@ -11,7 +11,6 @@ use crate::ui::util::{ptr::SafeWindowRef, strings};
 use crate::ui::widget::window::Window;
 
 use geo::point;
-use icu::segmenter::WordSegmenter;
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use tracing::debug;
