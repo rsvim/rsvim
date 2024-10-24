@@ -36,6 +36,8 @@ pub struct LineViewport {
 #[derive(Debug, Clone)]
 /// The buffer viewport on a window.
 ///
+/// When a buffer displays on a window, it starts from a specific line and column, ends at a
+/// specific line and column. Here it calls `start_line`, `start_column`, `end_line`, `end_column`.
 /// The range is start-inclusive end-exclusive, i.e. `[start_line, end_line)` or
 /// `[start_column, end_column)`. All lines, rows and columns index are start from 0.
 ///
@@ -229,4 +231,10 @@ impl Viewport {
       lines,
     }
   }
+}
+
+#[cfg(test)]
+mod tests {
+  #[test]
+  fn collect_from_top_left_for_nowrap1() {}
 }
