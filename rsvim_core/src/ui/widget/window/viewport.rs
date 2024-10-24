@@ -573,7 +573,7 @@ mod tests {
 
   use crate::buf::BufferArc;
   use crate::cart::{IRect, U16Size};
-  use crate::test::buf::{make_buffer_from_file, make_buffer_from_lines};
+  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
@@ -699,5 +699,15 @@ mod tests {
     ];
 
     _test_collect_from_top_left_for_nowrap(U16Size::new(31, 19), buffer, &expect);
+  }
+
+  #[test]
+  fn collect_from_top_left_for_nowrap4() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_empty_buffer();
+    let expect = vec![""];
+
+    _test_collect_from_top_left_for_nowrap(U16Size::new(20, 20), buffer, &expect);
   }
 }
