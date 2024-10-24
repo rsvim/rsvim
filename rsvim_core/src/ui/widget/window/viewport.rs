@@ -68,9 +68,9 @@ pub struct Viewport {
   lines: BTreeMap<usize, LineViewport>,
 }
 
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 // Tuple of start_line, end_line, start_column, end_column.
-struct ViewportRect {
+pub struct ViewportRect {
   pub start_line: usize,
   pub end_line: usize,
   pub start_column: usize,
