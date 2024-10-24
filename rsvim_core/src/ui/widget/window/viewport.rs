@@ -166,6 +166,9 @@ fn _collect_from_top_left_for_nowrap(
                 break;
               }
               let char_width = strings::char_width(c, &buffer);
+              if char_width == 0 && i + 1 == line.len_chars() {
+                break;
+              }
               if col + char_width > width {
                 break;
               }
@@ -587,35 +590,11 @@ mod tests {
   #[allow(dead_code)]
   static INIT: Once = Once::new();
 
-  #[test]
-  fn collect_from_top_left_for_nowrap1() {
-    INIT.call_once(test_log_init);
-
-    let buffer = make_buffer_from_lines(vec![
-      "Hello, RSVIM!\n",
-      "This is a quite simple and small test lines.\n",
-      "But still it contains several things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-    ]);
-    let expect = vec![
-      "Hello, RSV",
-      "This is a ",
-      "But still ",
-      "  1. When ",
-      "  2. When ",
-      "     * The",
-      "     * The",
-      "",
-    ];
-
-    let terminal_size = U16Size::new(10, 10);
-    let mut tree = Tree::new(terminal_size);
+  fn _test_collect_from_top_left_for_nowrap(size: U16Size, buffer: BufferArc, expect: &Vec<&str>) {
+    let mut tree = Tree::new(size);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
     tree.set_local_options(&window_options);
-    let window_shape = IRect::new((0, 0), (10, 10));
+    let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
     let mut window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
     let actual = Viewport::new(&mut window);
     info!("actual:{:?}", actual);
@@ -640,5 +619,58 @@ mod tests {
       assert_eq!(section.char_length, expect[i].chars().count());
       assert_eq!(section.display_length, expect[i].chars().count() as u16);
     }
+  }
+
+  #[test]
+  fn collect_from_top_left_for_nowrap1() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+      "",
+    ];
+    _test_collect_from_top_left_for_nowrap(U16Size::new(10, 10), buffer, &expect);
+  }
+
+  #[test]
+  fn collect_from_top_left_for_nowrap2() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!",
+      "This is a quite simple and ",
+      "But still it contains sever",
+      "  1. When the line is small",
+      "  2. When the line is too l",
+      "     * The extra parts are ",
+      "     * The extra parts are ",
+      "",
+    ];
+
+    _test_collect_from_top_left_for_nowrap(U16Size::new(27, 15), buffer, &expect);
   }
 }
