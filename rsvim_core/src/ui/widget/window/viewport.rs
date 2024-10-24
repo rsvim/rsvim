@@ -156,15 +156,15 @@ fn _collect_from_top_left_for_nowrap(
                 break;
               }
               let char_width = strings::char_width(c, &buffer);
-              if col + char_width >= width {
+              if col + char_width > width {
                 break;
               }
               display_length += char_width;
               char_length += 1;
-              // debug!(
-              //   "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
-              //   row, col, ch, cell_upos
-              // );
+              debug!(
+                "1-row:{:?}, col:{:?}, c:{:?}, char_width:{:?}, char_length:{:?}, display_length:{:?}",
+                row, col, c, char_width, char_length, display_length
+              );
               col += char_width;
             }
 
@@ -275,7 +275,7 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
               }
 
               let char_width = strings::char_width(c, &buffer);
-              if col + char_width >= width {
+              if col + char_width > width {
                 row += 1;
                 sections.push(LineViewportSection {
                   row,
@@ -464,7 +464,7 @@ fn _collect_from_top_left_for_wrap_linebreak(
                     }
                   }
                   let char_width = strings::char_width(c, &buffer);
-                  if col + char_width >= width {
+                  if col + char_width > width {
                     break;
                   }
                   display_length += char_width;
@@ -516,10 +516,102 @@ impl Viewport {
       lines,
     }
   }
+
+  /// Get start line, index start from 0.
+  pub fn start_line(&self) -> usize {
+    self.start_line
+  }
+
+  /// Get start column, index start from 0.
+  pub fn start_column(&self) -> usize {
+    self.start_column
+  }
+
+  /// Get end line, index start from 0.
+  pub fn end_line(&self) -> usize {
+    self.end_line
+  }
+
+  /// Get lines viewport
+  pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
+    &self.lines
+  }
 }
 
 #[cfg(test)]
 mod tests {
+  use super::*;
+
+  use crate::buf::BufferArc;
+  use crate::cart::{IRect, U16Size};
+  use crate::test::buf::{make_buffer_from_file, make_buffer_from_lines};
+  #[allow(dead_code)]
+  use crate::test::log::init as test_log_init;
+  use crate::ui::tree::Tree;
+  use crate::ui::widget::window::WindowLocalOptions;
+
+  use compact_str::ToCompactString;
+  use ropey::{Rope, RopeBuilder};
+  use std::fs::File;
+  use std::io::{BufReader, BufWriter};
+  use std::sync::Arc;
+  use std::sync::Once;
+  use tracing::info;
+
+  #[allow(dead_code)]
+  static INIT: Once = Once::new();
+
   #[test]
-  fn collect_from_top_left_for_nowrap1() {}
+  fn collect_from_top_left_for_nowrap1() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+    ];
+
+    let terminal_size = U16Size::new(10, 10);
+    let mut tree = Tree::new(terminal_size);
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    tree.set_local_options(&window_options);
+    let window_shape = IRect::new((0, 0), (10, 10));
+    let mut window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
+    let actual = Viewport::new(&mut window);
+    info!("actual:{:?}", actual);
+    info!("expect:{:?}", expect);
+
+    assert_eq!(actual.start_line(), 0);
+    assert_eq!(actual.end_line(), expect.len() + 1);
+    assert_eq!(actual.start_column(), 0);
+    assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
+    assert_eq!(
+      *actual.lines().last_key_value().unwrap().0,
+      actual.end_line() - 1
+    );
+
+    for (i, l) in (actual.start_line()..actual.end_line()).enumerate() {
+      assert!(actual.lines().contains_key(&l));
+      let line = actual.lines().get(&l).unwrap();
+      info!("{:?} actual line:{:?}, expect:{:?}", l, line, expect[i]);
+      assert_eq!(line.sections.len(), 1);
+      let section = line.sections[0];
+      assert_eq!(section.row, i as u16);
+      assert_eq!(section.char_length, expect[i].chars().count());
+      assert_eq!(section.display_length, expect[i].chars().count() as u16);
+    }
+  }
 }
