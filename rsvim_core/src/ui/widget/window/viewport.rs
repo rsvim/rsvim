@@ -19,11 +19,16 @@ use unicode_segmentation::UnicodeSegmentation;
 #[derive(Debug, Copy, Clone)]
 /// The section information of a buffer line. One section is exactly one row in a window.
 pub struct LineViewportSection {
-  // Row index in the window.
+  /// Row index in the window.
+  ///
+  /// NOTE: The row index is based on the window widget, i.e. the top row of the window widget is
+  /// 0.
   pub row: u16,
-  // Chars length/count.
+
+  /// Chars length/count.
   pub chars_length: usize,
-  // Chars display length (a unicode char can occupy 1~2 terminal cells width).
+
+  /// Chars display length (a unicode char can occupy 1~2 terminal cells width).
   pub chars_width: u16,
 }
 
@@ -633,7 +638,7 @@ mod tests {
     window_options: &WindowLocalOptions,
   ) -> Viewport {
     let mut tree = Tree::new(size);
-    tree.set_local_options(&window_options);
+    tree.set_local_options(window_options);
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
     let mut window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
     Viewport::new(&mut window)
@@ -809,6 +814,7 @@ mod tests {
       actual.end_line() - 1
     );
 
+    let mut last_row = u16::MAX;
     for (i, l) in (actual.start_line()..actual.end_line()).enumerate() {
       let buffer = buffer.read();
       let bufline = buffer.rope().get_line(i).unwrap();
@@ -822,13 +828,21 @@ mod tests {
         assert!(line.sections.len() <= sections_count);
       }
       for (j, section) in line.sections.iter().enumerate() {
+        info!("j-{:?} actual line:{:?}, section:{:?}", j, line, section);
+        if i != 0 || j != 0 {
+          assert_eq!(section.row, last_row + 1);
+        }
+        last_row = section.row;
+        let expect_index = last_row as usize;
         info!(
-          "j-{:?} actual line:{:?}, section:{:?}, expect:{:?}",
-          j, line, section, expect[i]
+          "j-{:?} last_row:{:?}, actual line:{:?}, section:{:?}, expect[{:?}]:{:?}",
+          j, last_row, line, section, expect_index, expect[expect_index]
         );
-        assert_eq!(section.row as usize, j);
-        assert_eq!(section.chars_length, expect[i + j].chars().count());
-        assert_eq!(section.chars_width, expect[i + j].chars().count() as u16);
+        assert_eq!(section.chars_length, expect[expect_index].chars().count());
+        assert_eq!(
+          section.chars_width,
+          expect[expect_index].chars().count() as u16
+        );
       }
     }
   }
@@ -857,6 +871,7 @@ mod tests {
       "But still ",
       "it contain",
       "s several ",
+      "",
     ];
 
     _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(10, 10), buffer, &expect);
