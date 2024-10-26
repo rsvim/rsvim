@@ -251,10 +251,10 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
   let width = actual_shape.width();
 
   debug!("_collect_from_top_left_for_wrap_nolinebreak");
-  // debug!(
-  //   "actual_shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
-  //   actual_shape, upos, height, width,
-  // );
+  debug!(
+    "actual_shape:{:?}, height/width:{:?}/{:?}",
+    actual_shape, height, width,
+  );
 
   // If window is zero-sized.
   if height == 0 || width == 0 {
@@ -267,15 +267,15 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
   // Lock buffer for read
   let buffer = rlock!(buffer);
 
-  // if let Some(line) = buffer.rope().get_line(start_line) {
-  //   debug!(
-  //     "buffer.get_line ({:?}):'{:?}'",
-  //     start_line,
-  //     rpslice2line(&line),
-  //   );
-  // } else {
-  //   debug!("buffer.get_line ({:?}):None", start_line);
-  // }
+  if let Some(line) = buffer.rope().get_line(start_line) {
+    debug!(
+      "buffer.get_line ({:?}):'{:?}'",
+      start_line,
+      rpslice2line(&line),
+    );
+  } else {
+    debug!("buffer.get_line ({:?}):None", start_line);
+  }
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
   let mut current_line = start_line;
@@ -303,6 +303,10 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
                 continue;
               }
               if col >= width {
+                debug!(
+                  "1-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?}",
+                  row, col, chars_length, chars_width
+                );
                 max_column = std::cmp::max(chars_length + start_column, max_column);
                 sections.push(LineViewportSection {
                   row,
@@ -314,15 +318,27 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
                 chars_length = 0_usize;
                 chars_width = 0_u16;
                 if row >= height {
+                  debug!(
+                    "2-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?} height/width:{:?}/{:?}",
+                    row, col, chars_length, chars_width, height, width
+                  );
                   break;
                 }
               }
 
               let char_width = strings::char_width(c, &buffer);
               if char_width == 0 && i + 1 == line.len_chars() {
+                debug!(
+                    "3-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?} i:{}, line.len_chars:{}",
+                    row, col, chars_length, chars_width, i, line.len_chars()
+                  );
                 break;
               }
               if col + char_width > width {
+                debug!(
+                    "4-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?} col({})+char_width({}) > width({})",
+                    row, col, chars_length, chars_width, col, char_width, width
+                  );
                 max_column = std::cmp::max(chars_length + start_column, max_column);
                 sections.push(LineViewportSection {
                   row,
@@ -334,19 +350,26 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
                 chars_length = 0_usize;
                 chars_width = 0_u16;
                 if row >= height {
+                  debug!(
+                    "5-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?} height/width:{}/{}",
+                    row, col, chars_length, chars_width, height, width
+                  );
                   break;
                 }
               }
               chars_width += char_width;
               chars_length += 1;
-
-              // debug!(
-              //   "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
-              //   row, col, ch, cell_upos
-              // );
               col += char_width;
+              debug!(
+                "6-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?}",
+                row, col, chars_length, chars_width
+              );
             }
 
+            debug!(
+              "7-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?}, current_line:{}",
+              row, col, chars_length, chars_width, current_line
+            );
             max_column = std::cmp::max(chars_length + start_column, max_column);
             sections.push(LineViewportSection {
               row,
@@ -358,9 +381,11 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
           }
           None => {
             /* There's no more lines in the buffer. */
+            debug!("8-row:{:?}, current_line:{}", row, current_line);
             break;
           }
         }
+        debug!("9-row:{}, current_line:{}", row, current_line);
         // Iterate to next row.
         row += 1;
       }
@@ -377,6 +402,7 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
     }
     None => {
       // The `start_line` is outside of the buffer.
+      debug!("10-current_line:{}", current_line);
       (ViewportRect::default(), BTreeMap::new())
     }
   }
