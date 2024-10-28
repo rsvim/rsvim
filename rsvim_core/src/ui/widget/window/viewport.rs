@@ -152,76 +152,74 @@ fn _collect_from_top_left_for_nowrap(
   // }
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  let mut current_line = start_line;
   let mut max_column = start_column;
 
   match buffer.rope().get_lines_at(start_line) {
-    Some(mut buflines) => {
+    Some(buflines) => {
       // The `start_line` is inside the buffer.
       // Parse the lines from `start_line` until the end of the buffer or the window.
 
       // The first `row` in the window maps to the `start_line` in the buffer.
       let mut row = 0;
+      let mut current_line = start_line;
 
-      while row < height {
-        match buflines.next() {
-          Some(line) => {
-            debug!("0-line:'{:?}'", rpslice2line(&line),);
-            // If there's 1 more line in the buffer.
-            let mut sections: Vec<LineViewportSection> = vec![];
+      for (l, line) in buflines.enumerate() {
+        if row >= height {
+          break;
+        }
+        debug!(
+          "0-l:{:?}, line:'{:?}', current_line:{:?}",
+          l,
+          rpslice2line(&line),
+          current_line
+        );
 
-            let mut col = 0_u16;
-            let mut chars_length = 0_usize;
-            let mut chars_width = 0_u16;
+        let mut sections: Vec<LineViewportSection> = vec![];
+        let mut col = 0_u16;
+        let mut chars_length = 0_usize;
+        let mut chars_width = 0_u16;
 
-            // Go through each char in the line.
-            for (i, c) in line.chars().enumerate() {
-              if i < start_column {
-                continue;
-              }
-              if col >= width {
-                break;
-              }
-              let char_width = strings::char_width(c, &buffer);
-              if char_width == 0 && i + 1 == line.len_chars() {
-                break;
-              }
-              if col + char_width > width {
-                break;
-              }
-              chars_width += char_width;
-              chars_length += 1;
-              debug!(
-                "1-row:{:?}, col:{:?}, c:{:?}, char_width:{:?}, chars_length:{:?}, chars_width:{:?}",
-                row, col, c, char_width, chars_length, chars_width
-              );
-              col += char_width;
-              max_column = std::cmp::max(start_column + chars_length, max_column);
-            }
-
-            sections.push(LineViewportSection {
-              row,
-              chars_length,
-              chars_width,
-            });
-            line_viewports.insert(current_line, LineViewport { sections });
-            debug!(
-              "2-current_line:{:?}, row:{:?}, chars_length:{:?}, chars_width:{:?}",
-              current_line, row, chars_length, chars_width
-            );
-            current_line += 1;
+        // Go through each char in the line.
+        for (i, c) in line.chars().enumerate() {
+          if i < start_column {
+            continue;
           }
-          None => {
-            /* There's no more lines in the buffer. */
-            debug!("3-current_line:{:?}, row:{:?}", current_line, row);
+          if col >= width {
             break;
           }
+          let char_width = strings::char_width(c, &buffer);
+          if char_width == 0 && i + 1 == line.len_chars() {
+            break;
+          }
+          if col + char_width > width {
+            break;
+          }
+          chars_width += char_width;
+          chars_length += 1;
+          debug!(
+            "1-row:{:?}, col:{:?}, c:{:?}, char_width:{:?}, chars_length:{:?}, chars_width:{:?}",
+            row, col, c, char_width, chars_length, chars_width
+          );
+          col += char_width;
+          max_column = std::cmp::max(start_column + chars_length, max_column);
         }
-        // Go to next row.
+
+        sections.push(LineViewportSection {
+          row,
+          chars_length,
+          chars_width,
+        });
+        line_viewports.insert(current_line, LineViewport { sections });
+        debug!(
+          "2-current_line:{:?}, row:{:?}, chars_length:{:?}, chars_width:{:?}",
+          current_line, row, chars_length, chars_width
+        );
+        // Go to next row and line
+        current_line += 1;
         row += 1;
       }
 
-      debug!("4-current_line:{:?}, row:{:?}", current_line, row);
+      debug!("3-current_line:{:?}, row:{:?}", current_line, row);
       (
         ViewportRect {
           start_line,
@@ -234,7 +232,7 @@ fn _collect_from_top_left_for_nowrap(
     }
     None => {
       // The `start_line` is outside of the buffer.
-      debug!("5-current_line:{:?}", current_line);
+      debug!("4-no start_line");
       (ViewportRect::default(), BTreeMap::new())
     }
   }
@@ -679,6 +677,7 @@ mod tests {
   }
 
   fn _test_collect_from_top_left_for_nowrap(size: U16Size, buffer: BufferArc, expect: &Vec<&str>) {
+    INIT.call_once(test_log_init);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer, &options);
     info!("actual:{:?}", actual);
@@ -708,8 +707,6 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_nowrap1() {
-    // INIT.call_once(test_log_init);
-
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -734,8 +731,6 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_nowrap2() {
-    // INIT.call_once(test_log_init);
-
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -761,8 +756,6 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_nowrap3() {
-    // INIT.call_once(test_log_init);
-
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -788,7 +781,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_nowrap4() {
-    // INIT.call_once(test_log_init);
+    INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
     let expect = vec![""];
