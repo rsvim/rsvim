@@ -667,7 +667,13 @@ mod tests {
     Viewport::new(&mut window)
   }
 
-  fn _test_collect_from_top_left_for_nowrap(size: U16Size, buffer: BufferArc, expect: &Vec<&str>) {
+  fn _test_collect_from_top_left_for_nowrap(
+    size: U16Size,
+    buffer: BufferArc,
+    expect: &Vec<&str>,
+    expect_end_line: usize,
+    expect_end_column: usize,
+  ) {
     // INIT.call_once(test_log_init);
 
     let options = WindowLocalOptions::builder().wrap(false).build();
