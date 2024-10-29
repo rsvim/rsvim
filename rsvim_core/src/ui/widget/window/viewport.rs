@@ -668,7 +668,8 @@ mod tests {
   }
 
   fn _test_collect_from_top_left_for_nowrap(size: U16Size, buffer: BufferArc, expect: &Vec<&str>) {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
+
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer, &options);
     info!("actual:{:?}", actual);
@@ -801,7 +802,7 @@ mod tests {
     expect_end_line: usize,
     expect_end_column: usize,
   ) {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let options = WindowLocalOptions::builder()
       .wrap(true)
