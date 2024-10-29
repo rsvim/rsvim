@@ -201,7 +201,7 @@ fn _collect_from_top_left_for_nowrap(
             row, col, c, char_width, chars_length, chars_width
           );
           col += char_width;
-          max_column = std::cmp::max(start_column + chars_length, max_column);
+          max_column = std::cmp::max(i, max_column);
         }
 
         sections.push(LineViewportSection {
@@ -225,7 +225,7 @@ fn _collect_from_top_left_for_nowrap(
           start_line,
           end_line: current_line,
           start_column,
-          end_column: max_column,
+          end_column: max_column + 1,
         },
         line_viewports,
       )
@@ -312,6 +312,7 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
               "1-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?}",
               row, col, c, chars_length, chars_width
             );
+            max_column = std::cmp::max(i, max_column);
             sections.push(LineViewportSection {
               row,
               chars_length,
@@ -321,7 +322,6 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
             col = 0_u16;
             chars_length = 0_usize;
             chars_width = 0_u16;
-            max_column = std::cmp::max(chars_length + start_column, max_column);
             if row >= height {
               debug!(
                     "2-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} height/width:{:?}/{:?}",
@@ -345,7 +345,7 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
                     "4-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} col({})+char_width({}) > width({})",
                     row, col, c, chars_length, chars_width, col, char_width, width
                   );
-            max_column = std::cmp::max(chars_length + start_column, max_column);
+            max_column = std::cmp::max(i, max_column);
             sections.push(LineViewportSection {
               row,
               chars_length,
@@ -367,6 +367,7 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
           chars_width += char_width;
           chars_length += 1;
           col += char_width;
+          max_column = std::cmp::max(i, max_column);
           debug!(
             "6-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?}",
             row, col, c, chars_length, chars_width
@@ -377,7 +378,6 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
           "7-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?}, current_line:{}",
           row, col, chars_length, chars_width, current_line
         );
-        max_column = std::cmp::max(chars_length + start_column, max_column);
         sections.push(LineViewportSection {
           row,
           chars_length,
@@ -400,7 +400,7 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
               0
             },
           start_column,
-          end_column: max_column,
+          end_column: max_column + 1,
         },
         line_viewports,
       )
@@ -806,7 +806,11 @@ mod tests {
     size: U16Size,
     buffer: BufferArc,
     expect: &Vec<&str>,
+    expect_end_line: usize,
+    expect_end_column: usize,
   ) {
+    INIT.call_once(test_log_init);
+
     let options = WindowLocalOptions::builder()
       .wrap(true)
       .line_break(false)
@@ -815,25 +819,10 @@ mod tests {
     info!("actual:{:?}", actual);
     info!("expect:{:?}", expect);
 
-    let mut end_line = 0_usize;
-    let mut chars_length = 0_usize;
-    let mut max_column = 0_usize;
-    for line in buffer.read().rope().lines() {
-      chars_length += line.len_chars();
-      max_column = std::cmp::min(
-        std::cmp::max(line.len_chars(), max_column),
-        size.width() as usize,
-      );
-      if chars_length >= size.height() as usize * size.width() as usize {
-        break;
-      }
-      end_line += 1;
-    }
-
     assert_eq!(actual.start_line(), 0);
-    assert_eq!(actual.end_line(), end_line + 1);
+    assert_eq!(actual.end_line(), expect_end_line);
     assert_eq!(actual.start_column(), 0);
-    assert_eq!(actual.end_column(), max_column);
+    assert_eq!(actual.end_column(), expect_end_column);
     assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
     assert_eq!(
       *actual.lines().last_key_value().unwrap().0,
@@ -876,8 +865,6 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_nolinebreak1() {
-    // INIT.call_once(test_log_init);
-
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -901,13 +888,11 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(10, 10), buffer, &expect);
+    _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(10, 10), buffer, &expect, 4, 44);
   }
 
   #[test]
   fn collect_from_top_left_for_wrap_nolinebreak2() {
-    INIT.call_once(test_log_init);
-
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -936,6 +921,6 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(27, 15), buffer, &expect);
+    _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(27, 15), buffer, &expect, 5, 158);
   }
 }
