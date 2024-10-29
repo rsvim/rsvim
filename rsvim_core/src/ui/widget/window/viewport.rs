@@ -285,7 +285,6 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
       // The first `row` in the window maps to the `start_line` in the buffer.
       let mut row = 0;
       let mut current_line = start_line;
-      let mut current_line_not_fully_consumed = false;
 
       for (l, line) in buflines.enumerate() {
         if row >= height {
@@ -327,7 +326,6 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
                     "2-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} height/width:{:?}/{:?}",
                     row, col, c, chars_length, chars_width, height, width
                   );
-              current_line_not_fully_consumed = true;
               break;
             }
           }
@@ -360,7 +358,6 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
                     "5-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} height/width:{}/{}",
                     row, col, c, chars_length, chars_width, height, width
                   );
-              current_line_not_fully_consumed = true;
               break;
             }
           }
