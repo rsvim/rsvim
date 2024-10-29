@@ -393,12 +393,7 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
       (
         ViewportRect {
           start_line,
-          end_line: current_line
-            + if current_line_not_fully_consumed {
-              1
-            } else {
-              0
-            },
+          end_line: current_line,
           start_column,
           end_column: max_column + 1,
         },
@@ -888,7 +883,7 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(10, 10), buffer, &expect, 4, 44);
+    _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(10, 10), buffer, &expect, 3, 44);
   }
 
   #[test]
