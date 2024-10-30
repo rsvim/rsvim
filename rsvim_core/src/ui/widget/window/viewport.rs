@@ -667,19 +667,53 @@ mod tests {
     Viewport::new(&mut window)
   }
 
-  fn _test_collect_from_top_left_for_nowrap(
+  fn _test_collect_from_top_left(
     size: U16Size,
     buffer: BufferArc,
+    actual: &Viewport,
     expect: &Vec<&str>,
     expect_end_line: usize,
     expect_end_column: usize,
   ) {
-    // INIT.call_once(test_log_init);
-
-    let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer, &options);
-    info!("actual:{:?}", actual);
+    info!(
+      "actual start_line/end_line:{:?}/{:?}, start_column/end_column:{:?}/{:?}",
+      actual.start_line(),
+      actual.end_line(),
+      actual.start_column(),
+      actual.end_column()
+    );
+    for (k, v) in actual.lines().iter() {
+      info!("actual {:?}: {:?}", k, v);
+    }
     info!("expect:{:?}", expect);
+
+    let buffer = buffer.read();
+    let buflines = buffer.rope().get_lines_at(actual.start_line()).unwrap();
+
+    let mut row = 0_usize;
+    for (l, line) in buflines.enumerate() {
+      if row >= size.height() as usize {
+        break;
+      }
+      info!("l-{:?}", l);
+      let line_viewport = actual.lines().get(&l).unwrap();
+      let sections = line_viewport.sections.clone();
+      info!("l-{:?}, line_viewport:{:?}", l, line_viewport);
+      let mut line_chars = line.chars();
+      for (j, sec) in sections.iter().enumerate() {
+        assert_eq!(sec.row, row as u16);
+        let mut payload = String::new();
+        for _k in 0..sec.chars_length {
+          payload.push(line_chars.next().unwrap());
+        }
+        info!(
+          "j-{:?}, payload:{:?}, expect[row-{:?}]:{:?}",
+          j, payload, row, expect[row]
+        );
+        assert_eq!(payload, expect[row]);
+        row += 1;
+      }
+    }
 
     assert_eq!(actual.start_line(), 0);
     assert_eq!(actual.end_line(), expect_end_line);
@@ -690,17 +724,6 @@ mod tests {
       *actual.lines().last_key_value().unwrap().0,
       actual.end_line() - 1
     );
-
-    for (i, l) in (actual.start_line()..actual.end_line()).enumerate() {
-      assert!(actual.lines().contains_key(&l));
-      let line = actual.lines().get(&l).unwrap();
-      info!("i-{:?} actual line:{:?}, expect:{:?}", i, line, expect[i]);
-      assert_eq!(line.sections.len(), 1);
-      let section = line.sections[0];
-      assert_eq!(section.row, i as u16);
-      assert_eq!(section.chars_length, expect[i].chars().count());
-      assert_eq!(section.chars_width, expect[i].chars().count() as u16);
-    }
   }
 
   #[test]
@@ -724,7 +747,11 @@ mod tests {
       "     * The",
       "",
     ];
-    _test_collect_from_top_left_for_nowrap(U16Size::new(10, 10), buffer, &expect, 8, 10);
+
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 8, 10);
   }
 
   #[test]
@@ -749,7 +776,10 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_nowrap(U16Size::new(27, 15), buffer, &expect, 8, 27);
+    let size = U16Size::new(27, 15);
+    let options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 8, 27);
   }
 
   #[test]
@@ -774,7 +804,10 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_nowrap(U16Size::new(31, 19), buffer, &expect, 8, 31);
+    let size = U16Size::new(31, 11);
+    let options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 8, 31);
   }
 
   #[test]
@@ -801,69 +834,10 @@ mod tests {
     );
   }
 
-  fn _test_collect_from_top_left_for_wrap_nolinebreak(
-    size: U16Size,
-    buffer: BufferArc,
-    expect: &Vec<&str>,
-    expect_end_line: usize,
-    expect_end_column: usize,
-  ) {
-    INIT.call_once(test_log_init);
-
-    let options = WindowLocalOptions::builder()
-      .wrap(true)
-      .line_break(false)
-      .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    info!("actual:{:?}", actual);
-    info!("expect:{:?}", expect);
-
-    assert_eq!(actual.start_line(), 0);
-    assert_eq!(actual.end_line(), expect_end_line);
-    assert_eq!(actual.start_column(), 0);
-    assert_eq!(actual.end_column(), expect_end_column);
-    assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
-    assert_eq!(
-      *actual.lines().last_key_value().unwrap().0,
-      actual.end_line() - 1
-    );
-
-    let mut last_row = u16::MAX;
-    for (i, l) in (actual.start_line()..actual.end_line()).enumerate() {
-      let buffer = buffer.read();
-      let bufline = buffer.rope().get_line(i).unwrap();
-      info!("i-{:?} l-{} bufline:{:?}", i, l, rpslice2line(&bufline),);
-      assert!(actual.lines().contains_key(&l));
-      let line = actual.lines().get(&l).unwrap();
-      info!("i-{:?} actual line:{:?}, expect:{:?}", i, line, expect[i]);
-      let sections_count = (bufline.len_chars() as f32 / size.width() as f32).ceil() as usize;
-      if i < actual.end_line() - 1 {
-        assert_eq!(line.sections.len(), sections_count);
-      } else {
-        assert!(line.sections.len() <= sections_count);
-      }
-      for (j, section) in line.sections.iter().enumerate() {
-        info!("j-{:?} actual line:{:?}, section:{:?}", j, line, section);
-        if i != 0 || j != 0 {
-          assert_eq!(section.row, last_row + 1);
-        }
-        last_row = section.row;
-        let expect_index = last_row as usize;
-        info!(
-          "j-{:?} last_row:{:?}, actual line:{:?}, section:{:?}, expect[{:?}]:{:?}",
-          j, last_row, line, section, expect_index, expect[expect_index]
-        );
-        assert_eq!(section.chars_length, expect[expect_index].chars().count());
-        assert_eq!(
-          section.chars_width,
-          expect[expect_index].chars().count() as u16
-        );
-      }
-    }
-  }
-
   #[test]
   fn collect_from_top_left_for_wrap_nolinebreak1() {
+    INIT.call_once(test_log_init);
+
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -887,7 +861,13 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(10, 10), buffer, &expect, 3, 44);
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(false)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 3, 44);
   }
 
   #[test]
@@ -920,7 +900,13 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(27, 15), buffer, &expect, 5, 158);
+    let size = U16Size::new(27, 15);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(false)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 5, 158);
   }
 
   #[test]
@@ -949,6 +935,12 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_wrap_nolinebreak(U16Size::new(31, 11), buffer, &expect, 5, 158);
+    let size = U16Size::new(31, 11);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(false)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 5, 158);
   }
 }
