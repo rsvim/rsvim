@@ -556,7 +556,7 @@ fn _collect_from_top_left_for_wrap_linebreak(
               break;
             }
 
-            for (_j, c) in wd.chars().enumerate() {
+            for c in wd.chars() {
               if col >= width {
                 sections.push(LineViewportSection {
                   row,
