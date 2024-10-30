@@ -682,9 +682,9 @@ mod tests {
     info!("expect:{:?}", expect);
 
     assert_eq!(actual.start_line(), 0);
-    assert_eq!(actual.end_line(), expect.len());
+    assert_eq!(actual.end_line(), expect_end_line);
     assert_eq!(actual.start_column(), 0);
-    assert_eq!(actual.end_column(), size.width() as usize);
+    assert_eq!(actual.end_column(), expect_end_column);
     assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
     assert_eq!(
       *actual.lines().last_key_value().unwrap().0,
@@ -724,7 +724,7 @@ mod tests {
       "     * The",
       "",
     ];
-    _test_collect_from_top_left_for_nowrap(U16Size::new(10, 10), buffer, &expect);
+    _test_collect_from_top_left_for_nowrap(U16Size::new(10, 10), buffer, &expect, 8, 10);
   }
 
   #[test]
@@ -749,7 +749,7 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_nowrap(U16Size::new(27, 15), buffer, &expect);
+    _test_collect_from_top_left_for_nowrap(U16Size::new(27, 15), buffer, &expect, 8, 27);
   }
 
   #[test]
@@ -774,7 +774,7 @@ mod tests {
       "",
     ];
 
-    _test_collect_from_top_left_for_nowrap(U16Size::new(31, 19), buffer, &expect);
+    _test_collect_from_top_left_for_nowrap(U16Size::new(31, 19), buffer, &expect, 8, 31);
   }
 
   #[test]
@@ -793,7 +793,7 @@ mod tests {
     assert_eq!(actual.start_line(), 0);
     assert_eq!(actual.end_line(), expect.len());
     assert_eq!(actual.start_column(), 0);
-    assert_eq!(actual.end_column(), 0);
+    assert_eq!(actual.end_column(), 1);
     assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
     assert_eq!(
       *actual.lines().last_key_value().unwrap().0,
