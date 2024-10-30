@@ -382,7 +382,6 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
         });
         line_viewports.insert(current_line, LineViewport { sections });
         current_line += 1;
-
         row += 1;
       }
 
@@ -405,14 +404,17 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
   }
 }
 
-fn truncate_line(line: &RopeSlice, max_bytes: usize) -> String {
+fn truncate_line(line: &RopeSlice, start_column: usize, max_bytes: usize) -> String {
   let mut builder = String::new();
   builder.reserve(max_bytes);
-  for chunk in line.chunks() {
+  for (i, c) in line.chars().enumerate() {
+    if i < start_column {
+      continue;
+    }
     if builder.len() > max_bytes {
       return builder;
     }
-    builder.push_str(chunk);
+    builder.push(c);
   }
   builder
 }
@@ -428,10 +430,10 @@ fn _collect_from_top_left_for_wrap_linebreak(
   let width = actual_shape.width();
 
   debug!("_collect_from_top_left_for_wrap_linebreak");
-  // debug!(
-  //   "actual_shape:{:?}, upos:{:?}, height/width:{:?}/{:?}",
-  //   actual_shape, upos, height, width,
-  // );
+  debug!(
+    "actual_shape:{:?}, height/width:{:?}/{:?}",
+    actual_shape, height, width,
+  );
 
   // If window is zero-sized.
   if height == 0 || width == 0 {
@@ -444,77 +446,118 @@ fn _collect_from_top_left_for_wrap_linebreak(
   // Lock buffer for read
   let buffer = rlock!(buffer);
 
-  // if let Some(line) = buffer.rope().get_line(start_line) {
-  //   debug!(
-  //     "buffer.get_line ({:?}):'{:?}'",
-  //     start_line,
-  //     rpslice2line(&line),
-  //   );
-  // } else {
-  //   debug!("buffer.get_line ({:?}):None", start_line);
-  // }
+  if let Some(line) = buffer.rope().get_line(start_line) {
+    debug!(
+      "buffer.get_line ({:?}):'{:?}'",
+      start_line,
+      rpslice2line(&line),
+    );
+  } else {
+    debug!("buffer.get_line ({:?}):None", start_line);
+  }
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  let mut current_line = start_line;
   let mut max_column = start_column;
 
   match buffer.rope().get_lines_at(start_line) {
-    Some(mut buflines) => {
+    Some(buflines) => {
       // The `start_line` is inside the buffer.
 
       // The first `row` in the window maps to the `start_line` in the buffer.
       let mut row = 0;
+      let mut current_line = start_line;
 
-      while row < height {
-        match buflines.next() {
-          Some(line) => {
-            // If there's 1 more line in the buffer.
-            let mut sections: Vec<LineViewportSection> = vec![];
+      for (l, line) in buflines.enumerate() {
+        if row >= height {
+          break;
+        }
+        let mut sections: Vec<LineViewportSection> = vec![];
 
-            let mut col = 0_u16;
-            let mut chars_length = 0_usize;
-            let mut chars_width = 0_u16;
+        let mut col = 0_u16;
+        let mut chars_length = 0_usize;
+        let mut chars_width = 0_u16;
+        let mut wd_length = 0_usize;
 
-            // Chop the line into maximum chars can hold by current window, thus avoid those super
-            // long lines for iteration performance.
-            // NOTE: Use `height * width * 4`, 4 is for at most 4 bytes can hold a grapheme
-            // cluster.
-            let truncated_line = truncate_line(&line, height as usize * width as usize * 4);
-            let word_boundaries: Vec<&str> = truncated_line.split_word_bounds().collect();
-            debug!(
-              "1-truncated_line: {:?}, word_boundaries: {:?}",
-              truncated_line, word_boundaries
+        // Chop the line into maximum chars can hold by current window, thus avoid those super
+        // long lines for iteration performance.
+        // NOTE: Use `height * width * 4`, 4 is for at most 4 bytes can hold a grapheme
+        // cluster.
+        let truncated_line =
+          truncate_line(&line, start_column, height as usize * width as usize * 4);
+        let word_boundaries: Vec<&str> = truncated_line.split_word_bounds().collect();
+        debug!(
+          "0-truncated_line: {:?}, word_boundaries: {:?}",
+          truncated_line, word_boundaries
+        );
+
+        for (i, wd) in word_boundaries.iter().enumerate() {
+          if row >= height {
+            break;
+          }
+          debug!(
+            "1-l:{:?}, line:'{:?}', current_line:{:?}, max_column:{:?}",
+            l,
+            rpslice2line(&line),
+            current_line,
+            max_column
+          );
+
+          let (wd_chars, wd_width) = wd
+            .chars()
+            .map(|c| (1_usize, strings::char_width(c, &buffer) as usize))
+            .fold(
+              (0_usize, 0_usize),
+              |(acc_chars, acc_width), (c_count, c_width)| {
+                (acc_chars + c_count, acc_width + c_width)
+              },
             );
 
-            #[allow(unused_variables)]
-            for (i, wd) in word_boundaries.iter().enumerate() {
-              if row >= height {
-                break;
-              }
-              let (wd_chars, wd_width) = wd
-                .chars()
-                .map(|c| (1_usize, strings::char_width(c, &buffer) as usize))
-                .fold(
-                  (0_usize, 0_usize),
-                  |(acc_chars, acc_width), (c_count, c_width)| {
-                    (acc_chars + c_count, acc_width + c_width)
-                  },
-                );
+          if wd_width == 0 && i + 1 == word_boundaries.len() {
+            debug!(
+              "2-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+              row, col, wd_chars, wd_width, chars_length,  chars_width, max_column
+            );
+            break;
+          }
 
-              if wd_width + col as usize <= width as usize {
-                // Enough space to place this word in current row
-                chars_length += wd_chars;
-                chars_width += wd_width as u16;
-                col += wd_width as u16;
-              } else {
-                // Not enough space to place this word in current row.
-                // There're two cases:
-                // 1. The word can be placed in next empty row (since the column idx `col` will
-                //    start from 0 in next row).
-                // 2. The word is still too long to place in an entire row, so next row still
-                //    cannot place it.
-                // Anyway, we simply go to next row, and force render all of the word.
-                max_column = std::cmp::max(chars_length + start_column, max_column);
+          if wd_width + col as usize <= width as usize {
+            // Enough space to place this word in current row
+            chars_length += wd_chars;
+            chars_width += wd_width as u16;
+            col += wd_width as u16;
+            wd_length += wd_width;
+            debug!(
+              "3-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+              row, col, wd_chars, wd_width, chars_length, chars_width, max_column
+            );
+          } else {
+            // Not enough space to place this word in current row.
+            // There're two cases:
+            // 1. The word can be placed in next empty row (since the column idx `col` will
+            //    start from 0 in next row).
+            // 2. The word is still too long to place in an entire row, so next row still
+            //    cannot place it.
+            // Anyway, we simply go to next row, and force render all of the word.
+            sections.push(LineViewportSection {
+              row,
+              chars_length,
+              chars_width,
+            });
+            row += 1;
+            col = 0_u16;
+            chars_length = 0_usize;
+            chars_width = 0_u16;
+
+            if row >= height {
+              debug!(
+                  "4-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+                  row, col, wd_chars, wd_width, chars_length, chars_width, max_column
+                );
+              break;
+            }
+
+            for (_j, c) in wd.chars().enumerate() {
+              if col >= width {
                 sections.push(LineViewportSection {
                   row,
                   chars_length,
@@ -525,54 +568,51 @@ fn _collect_from_top_left_for_wrap_linebreak(
                 chars_length = 0_usize;
                 chars_width = 0_u16;
                 if row >= height {
+                  debug!(
+                      "5-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+                        row, col, wd_chars, wd_width, chars_length, chars_width, max_column
+                    );
                   break;
                 }
-
-                for (j, c) in wd.chars().enumerate() {
-                  if j < start_column {
-                    continue;
-                  }
-                  if col >= width {
-                    max_column = std::cmp::max(chars_length + start_column, max_column);
-                    sections.push(LineViewportSection {
-                      row,
-                      chars_length,
-                      chars_width,
-                    });
-                    row += 1;
-                    col = 0_u16;
-                    chars_length = 0_usize;
-                    chars_width = 0_u16;
-                    if row >= height {
-                      break;
-                    }
-                  }
-                  let char_width = strings::char_width(c, &buffer);
-                  if col + char_width > width {
-                    break;
-                  }
-                  chars_width += char_width;
-                  chars_length += 1;
-                  // debug!(
-                  //   "1-row:{:?}, col:{:?}, ch:{:?}, cell upos:{:?}",
-                  //   row, col, ch, cell_upos
-                  // );
-                  col += char_width;
-                }
               }
+              let char_width = strings::char_width(c, &buffer);
+              if col + char_width > width {
+                debug!( "6-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+                    row, col, wd_chars, wd_width, chars_length, chars_width, max_column
+                  );
+                break;
+              }
+              chars_width += char_width;
+              chars_length += 1;
+              col += char_width;
+              wd_length += char_width as usize;
+              debug!(
+              "7-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+              row, col, wd_chars, wd_width, chars_length, chars_width, max_column
+            );
             }
-
-            line_viewports.insert(current_line, LineViewport { sections });
-            current_line += 1;
-          }
-          None => {
-            /* There's no more lines in the buffer. */
-            break;
           }
         }
+
+        max_column = std::cmp::max(max_column, start_column + wd_length);
+        debug!(
+          "8-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+          row, col, chars_length, chars_width, max_column
+        );
+        sections.push(LineViewportSection {
+          row,
+          chars_length,
+          chars_width,
+        });
+        line_viewports.insert(current_line, LineViewport { sections });
+        current_line += 1;
         row += 1;
       }
 
+      debug!(
+        "9-row:{}, current_line:{}, max_column:{}",
+        row, current_line, max_column
+      );
       (
         ViewportRect {
           start_line,
@@ -836,7 +876,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_nolinebreak1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -953,6 +993,130 @@ mod tests {
     let options = WindowLocalOptions::builder()
       .wrap(true)
       .line_break(false)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 1, 1);
+  }
+
+  #[test]
+  fn collect_from_top_left_for_wrap_linebreak1() {
+    INIT.call_once(test_log_init);
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, ",
+      "RSVIM!",
+      "This is a ",
+      "quite ",
+      "simple and",
+      " small ",
+      "test lines",
+      ".",
+      "But still ",
+      "it ",
+      "",
+    ];
+
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 3, 44);
+  }
+
+  #[test]
+  fn collect_from_top_left_for_wrap_linebreak2() {
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!",
+      "This is a quite simple and ",
+      "small test lines.",
+      "But still it contains sever",
+      "al things we want to test:",
+      "  1. When the line is small",
+      " enough to completely put i",
+      "nside a row of the window c",
+      "ontent widget, then the lin",
+      "e-wrap and word-wrap doesn'",
+      "t affect the rendering.",
+      "  2. When the line is too l",
+      "ong to be completely put in",
+      " a row of the window conten",
+      "t widget, there're multiple",
+      "",
+    ];
+
+    let size = U16Size::new(27, 15);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 5, 158);
+  }
+
+  #[test]
+  fn collect_from_top_left_for_wrap_linebreak3() {
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!",
+      "This is a quite simple and smal",
+      "l test lines.",
+      "But still it contains several t",
+      "hings we want to test:",
+      "  1. When the line is small eno",
+      "ugh to completely put inside a ",
+      "row of the window content widge",
+      "t, then the line-wrap and word-",
+      "wrap doesn't affect the renderi",
+      "ng.",
+      "",
+    ];
+
+    let size = U16Size::new(31, 11);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 4, 158);
+  }
+
+  #[test]
+  fn collect_from_top_left_for_wrap_linebreak4() {
+    let buffer = make_empty_buffer();
+    let expect = vec![""];
+
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     _test_collect_from_top_left(size, buffer, &actual, &expect, 1, 1);
