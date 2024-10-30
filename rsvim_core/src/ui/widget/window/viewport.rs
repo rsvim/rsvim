@@ -943,4 +943,18 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     _test_collect_from_top_left(size, buffer, &actual, &expect, 4, 158);
   }
+
+  #[test]
+  fn collect_from_top_left_for_wrap_nolinebreak4() {
+    let buffer = make_empty_buffer();
+    let expect = vec![""];
+
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(false)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 1, 1);
+  }
 }
