@@ -927,11 +927,11 @@ mod tests {
       "But still it contains several t",
       "hings we want to test:",
       "  1. When the line is small eno",
+      "ugh to completely put inside a ",
       "row of the window content widge",
       "t, then the line-wrap and word-",
       "wrap doesn't affect the renderi",
       "ng.",
-      "  2. When the line is too long ",
       "",
     ];
 
@@ -941,6 +941,6 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 5, 158);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 4, 158);
   }
 }
