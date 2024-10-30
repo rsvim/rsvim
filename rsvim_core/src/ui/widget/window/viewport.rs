@@ -1112,7 +1112,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_linebreak4() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();
     let expect = vec![""];
