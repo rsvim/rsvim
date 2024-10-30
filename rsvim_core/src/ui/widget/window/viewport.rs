@@ -1000,7 +1000,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_linebreak1() {
-    INIT.call_once(test_log_init);
+    // INIT.call_once(test_log_init);
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -1036,6 +1036,8 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_linebreak2() {
+    // INIT.call_once(test_log_init);
+
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -1049,18 +1051,18 @@ mod tests {
       "Hello, RSVIM!",
       "This is a quite simple and ",
       "small test lines.",
-      "But still it contains sever",
-      "al things we want to test:",
+      "But still it contains ",
+      "several things we want to ",
+      "test:",
       "  1. When the line is small",
-      " enough to completely put i",
-      "nside a row of the window c",
-      "ontent widget, then the lin",
-      "e-wrap and word-wrap doesn'",
-      "t affect the rendering.",
-      "  2. When the line is too l",
-      "ong to be completely put in",
-      " a row of the window conten",
-      "t widget, there're multiple",
+      " enough to completely put ",
+      "inside a row of the window ",
+      "content widget, then the ",
+      "line-wrap and word-wrap ",
+      "doesn't affect the ",
+      "rendering.",
+      "  2. When the line is too ",
+      "long to be completely put ",
       "",
     ];
 
@@ -1086,16 +1088,16 @@ mod tests {
     ]);
     let expect = vec![
       "Hello, RSVIM!",
-      "This is a quite simple and smal",
-      "l test lines.",
-      "But still it contains several t",
-      "hings we want to test:",
-      "  1. When the line is small eno",
-      "ugh to completely put inside a ",
-      "row of the window content widge",
-      "t, then the line-wrap and word-",
-      "wrap doesn't affect the renderi",
-      "ng.",
+      "This is a quite simple and ",
+      "small test lines.",
+      "But still it contains several ",
+      "things we want to test:",
+      "  1. When the line is small ",
+      "enough to completely put inside",
+      " a row of the window content ",
+      "widget, then the line-wrap and ",
+      "word-wrap doesn't affect the ",
+      "rendering.",
       "",
     ];
 
@@ -1110,6 +1112,8 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_linebreak4() {
+    INIT.call_once(test_log_init);
+
     let buffer = make_empty_buffer();
     let expect = vec![""];
 
@@ -1119,6 +1123,6 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 1, 1);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 1, 0);
   }
 }
