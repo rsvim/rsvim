@@ -57,7 +57,7 @@ pub struct LineViewport {
   ///
   /// NOTE: The first section's `start_column` must be equal to this `start_column`. And the last
   /// section's `end_column` must be equal to this `end_column`.
-  pub sections: BTreeMap<u16, Vec<LineViewportSection>>,
+  pub sections: BTreeMap<u16, LineViewportSection>,
 }
 
 #[derive(Debug, Clone)]
@@ -171,8 +171,15 @@ fn collect(
   start_line: usize,
   start_column: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
+  // If window is zero-sized.
+  let height = actual_shape.height();
+  let width = actual_shape.width();
+  if height == 0 || width == 0 {
+    return (ViewportRect::default(), BTreeMap::new());
+  }
+
   let b = buffer.upgrade().unwrap();
-  let max_cells_len = actual_shape.height() as usize * actual_shape.width() as usize;
+  let max_cells_len = height as usize * width as usize;
   let maybe_first_line = rlock!(b).try_line_to_string(start_line, Some(max_cells_len * 4 + 16));
 
   match maybe_first_line {
@@ -189,9 +196,9 @@ fn collect(
         // In this case, the `start_column` is always 0.
 
         match (options.wrap, options.line_break) {
-          (false, _) => big_collect_with_nowrap(buffer.clone(), actual_shape, start_line, 1),
-          (true, false) => big_collect_with_wrap_nolinebreak(buffer, actual_shape, start_line, 1),
-          (true, true) => big_collect_with_wrap_linebreak(buffer, actual_shape, start_line, 1),
+          (false, _) => big_collect_with_nowrap(buffer.clone(), actual_shape, start_line),
+          (true, false) => big_collect_with_wrap_nolinebreak(buffer, actual_shape, start_line),
+          (true, true) => big_collect_with_wrap_linebreak(buffer, actual_shape, start_line),
         }
       }
     }
@@ -217,11 +224,6 @@ fn big_collect_with_nowrap(
   //   actual_shape, upos, height, width,
   // );
 
-  // If window is zero-sized.
-  if height == 0 || width == 0 {
-    return (ViewportRect::default(), BTreeMap::new());
-  }
-
   // Get buffer arc pointer
   let buffer = buffer.upgrade().unwrap();
 
@@ -241,8 +243,9 @@ fn big_collect_with_nowrap(
   // The `start_line` must be inside the buffer, `start_column` must be 0.
   let buflines = buffer.rope().get_lines_at(start_line).unwrap();
 
+  let start_column = 0_usize;
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  let mut max_column = 0;
+  let mut max_char_idx = 0;
 
   // The first `row` in the window maps to the `start_line` in the buffer.
   let mut row = 0;
@@ -261,8 +264,7 @@ fn big_collect_with_nowrap(
 
     let mut sections: BTreeMap<u16, LineViewportSection> = BTreeMap::new();
     let mut col = 0_u16;
-    let mut start_char_idx = 0_usize;
-    let mut end_char_idx = 0_usize;
+    let mut last_char_idx = 0_usize;
     let mut chars_length = 0_usize;
     let mut chars_width = 0_u16;
 
@@ -285,14 +287,15 @@ fn big_collect_with_nowrap(
         row, col, c, char_width, chars_length, chars_width
       );
       col += char_width;
-      max_column = std::cmp::max(i, max_column);
+      max_char_idx = std::cmp::max(i, max_char_idx);
+      last_char_idx = i;
     }
 
     sections.insert(
       row,
       LineViewportSection {
-        start_column: start_char_idx,
-        end_column: end_char_idx,
+        start_column,
+        end_column: last_char_idx + 1,
         chars_length,
         chars_width,
       },
@@ -300,11 +303,12 @@ fn big_collect_with_nowrap(
     line_viewports.insert(
       current_line,
       LineViewport {
-        start_column: 1,
-        end_column: end_char_idx,
+        start_column,
+        end_column: last_char_idx + 1,
         sections,
       },
     );
+
     debug!(
       "2-current_line:{:?}, row:{:?}, chars_length:{:?}, chars_width:{:?}",
       current_line, row, chars_length, chars_width
@@ -320,7 +324,7 @@ fn big_collect_with_nowrap(
       start_line,
       end_line: current_line,
       start_column,
-      end_column: max_column + 1,
+      end_column: max_char_idx + 1,
     },
     line_viewports,
   )
@@ -341,11 +345,6 @@ fn big_collect_with_wrap_nolinebreak(
     actual_shape, height, width,
   );
 
-  // If window is zero-sized.
-  if height == 0 || width == 0 {
-    return (ViewportRect::default(), BTreeMap::new());
-  }
-
   // Get buffer arc pointer
   let buffer = buffer.upgrade().unwrap();
 
@@ -362,8 +361,9 @@ fn big_collect_with_wrap_nolinebreak(
     debug!("buffer.get_line ({:?}):None", start_line);
   }
 
+  let start_column = 0_usize;
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  let mut max_column = start_column;
+  let mut max_char_idx = 0;
 
   match buffer.rope().get_lines_at(start_line) {
     Some(buflines) => {
@@ -384,7 +384,7 @@ fn big_collect_with_wrap_nolinebreak(
           current_line
         );
 
-        let mut sections: Vec<LineViewportSection> = vec![];
+        let mut sections: BTreeMap<u16, LineViewportSection> = BTreeMap::new();
         let mut col = 0_u16;
         let mut chars_length = 0_usize;
         let mut chars_width = 0_u16;
@@ -398,7 +398,7 @@ fn big_collect_with_wrap_nolinebreak(
               "1-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?}",
               row, col, c, chars_length, chars_width
             );
-            max_column = std::cmp::max(i, max_column);
+            max_char_idx = std::cmp::max(i, max_char_idx);
             sections.push(LineViewportSection {
               row,
               chars_length,
@@ -417,7 +417,7 @@ fn big_collect_with_wrap_nolinebreak(
             }
           }
 
-          let char_width = strings::char_width(c, &buffer);
+          let char_width = strings::char_width(c, strings::CharWidthOptions::from(&buffer));
           if char_width == 0 && i + 1 == line.len_chars() {
             debug!(
                     "3-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} i:{}, line.len_chars:{}",
@@ -430,7 +430,7 @@ fn big_collect_with_wrap_nolinebreak(
                     "4-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} col({})+char_width({}) > width({})",
                     row, col, c, chars_length, chars_width, col, char_width, width
                   );
-            max_column = std::cmp::max(i, max_column);
+            max_char_idx = std::cmp::max(i, max_char_idx);
             sections.push(LineViewportSection {
               row,
               chars_length,
@@ -520,11 +520,6 @@ fn big_collect_with_wrap_linebreak(
     "actual_shape:{:?}, height/width:{:?}/{:?}",
     actual_shape, height, width,
   );
-
-  // If window is zero-sized.
-  if height == 0 || width == 0 {
-    return (ViewportRect::default(), BTreeMap::new());
-  }
 
   // Get buffer arc pointer
   let buffer = buffer.upgrade().unwrap();
