@@ -58,6 +58,33 @@ impl Buffer {
   pub fn rope_mut(&mut self) -> &mut Rope {
     &mut self.rope
   }
+
+  /// Convert a specific line to string.
+  ///
+  /// Panics
+  ///
+  /// If the line doesn't exist in buffer.
+  pub fn line_to_string(&self, line_idx: usize, max_len: Option<usize>) -> String {
+    self.try_line_to_string(line_idx, max_len).unwrap()
+  }
+
+  /// Try to convert a specific line to string, non-panic version of
+  /// [`line_to_string`](Buffer::line_to_string).
+  pub fn try_line_to_string(&self, line_idx: usize, max_len: Option<usize>) -> Option<String> {
+    match self.rope.get_line(line_idx) {
+      Some(line) => {
+        let mut builder = String::new();
+        for (i, c) in line.chars().enumerate() {
+          if max_len.is_some() && i >= max_len.unwrap() {
+            return Some(builder);
+          }
+          builder.push(c);
+        }
+        Some(builder)
+      }
+      None => None,
+    }
+  }
 }
 
 impl Default for Buffer {

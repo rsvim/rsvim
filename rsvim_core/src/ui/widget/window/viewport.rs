@@ -14,7 +14,7 @@ use geo::point;
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use tracing::debug;
-use unicode_segmentation::UnicodeSegmentation;
+use unicode_width::UnicodeWidthStr;
 
 #[derive(Debug, Copy, Clone)]
 /// The section (row) information of a buffer line.
@@ -28,7 +28,7 @@ pub struct LineViewportSection {
   /// Chars length/count.
   pub chars_length: usize,
 
-  /// Chars display length (a unicode char can occupy 1~2 terminal cells width).
+  /// Chars display length (a unicode char can occupy 1 or more terminal cells width).
   pub chars_width: u16,
 }
 
@@ -117,6 +117,10 @@ pub struct Viewport {
   // Options.
   options: ViewportOptions,
 
+  buffer: BufferWk,
+
+  actual_shape: U16Rect,
+
   // Start line number.
   start_line: usize,
 
@@ -151,36 +155,6 @@ pub struct ViewportRect {
   pub end_column: usize,
 }
 
-// Given the buffer and window size, collect information from start line and column, i.e. from the
-// top-left corner.
-fn collect_from_top_left(
-  options: &ViewportOptions,
-  start_line: usize,
-  start_column: usize,
-) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
-  match (options.wrap, options.line_break) {
-    (false, _) => _collect_from_top_left_for_nowrap(
-      options.buffer.clone(),
-      &options.actual_shape,
-      start_line,
-      start_column,
-    ),
-    (true, false) => _collect_from_top_left_for_wrap_nolinebreak(
-      options.buffer.clone(),
-      &options.actual_shape,
-      start_line,
-      start_column,
-    ),
-    (true, true) => _collect_from_top_left_for_wrap_linebreak(
-      options.buffer.clone(),
-      &options.actual_shape,
-      start_line,
-      start_column,
-    ),
-  }
-}
-
-#[allow(dead_code)]
 fn rpslice2line(s: &RopeSlice) -> String {
   let mut builder = String::new();
   for chunk in s.chunks() {
@@ -189,12 +163,50 @@ fn rpslice2line(s: &RopeSlice) -> String {
   builder
 }
 
-// Implement [`collect_from_top_left`] with option `wrap=false`.
-fn _collect_from_top_left_for_nowrap(
+// Given the buffer and window size, collect information from start line.
+fn collect(
+  options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
+) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
+  let b = buffer.upgrade().unwrap();
+  let max_cells_len = actual_shape.height() as usize * actual_shape.width() as usize;
+  let maybe_first_line = rlock!(b).try_line_to_string(start_line, Some(max_cells_len * 4 + 16));
+
+  match maybe_first_line {
+    Some(first_line) => {
+      let first_line_width = UnicodeWidthStr::width_cjk(first_line.as_str());
+
+      if first_line_width > max_cells_len {
+        // If the line display width is greater than viewport cells, i.e. the viewport cannot
+        // contain the whole start line.
+      } else {
+        // If the line display width is less or equal than viewport cells, i.e. the viewport can
+        // contain the whole start line.
+        //
+        // In this case, the `start_column` is always 0.
+
+        match (options.wrap, options.line_break) {
+          (false, _) => big_collect_with_nowrap(buffer.clone(), actual_shape, start_line, 1),
+          (true, false) => big_collect_with_wrap_nolinebreak(buffer, actual_shape, start_line, 1),
+          (true, true) => big_collect_with_wrap_linebreak(buffer, actual_shape, start_line, 1),
+        }
+      }
+    }
+    None => {
+      // The `start_line` doesn't exist in buffer.
+      (ViewportRect::default(), BTreeMap::new())
+    }
+  }
+}
+
+// Implement big [`collect`] with `wrap=false`.
+fn big_collect_with_nowrap(
+  buffer: BufferWk,
+  actual_shape: &U16Rect,
+  start_line: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -226,99 +238,99 @@ fn _collect_from_top_left_for_nowrap(
   //   debug!("buffer.get_line ({:?}):None", start_line);
   // }
 
+  // The `start_line` must be inside the buffer, `start_column` must be 0.
+  let buflines = buffer.rope().get_lines_at(start_line).unwrap();
+
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  let mut max_column = start_column;
+  let mut max_column = 0;
 
-  match buffer.rope().get_lines_at(start_line) {
-    Some(buflines) => {
-      // The `start_line` is inside the buffer.
-      // Parse the lines from `start_line` until the end of the buffer or the window.
+  // The first `row` in the window maps to the `start_line` in the buffer.
+  let mut row = 0;
+  let mut current_line = start_line;
 
-      // The first `row` in the window maps to the `start_line` in the buffer.
-      let mut row = 0;
-      let mut current_line = start_line;
+  for (l, line) in buflines.enumerate() {
+    if row >= height {
+      break;
+    }
+    debug!(
+      "0-l:{:?}, line:'{:?}', current_line:{:?}",
+      l,
+      rpslice2line(&line),
+      current_line
+    );
 
-      for (l, line) in buflines.enumerate() {
-        if row >= height {
-          break;
-        }
-        debug!(
-          "0-l:{:?}, line:'{:?}', current_line:{:?}",
-          l,
-          rpslice2line(&line),
-          current_line
-        );
+    let mut sections: BTreeMap<u16, LineViewportSection> = BTreeMap::new();
+    let mut col = 0_u16;
+    let mut start_char_idx = 0_usize;
+    let mut end_char_idx = 0_usize;
+    let mut chars_length = 0_usize;
+    let mut chars_width = 0_u16;
 
-        let mut sections: Vec<LineViewportSection> = vec![];
-        let mut col = 0_u16;
-        let mut chars_length = 0_usize;
-        let mut chars_width = 0_u16;
-
-        // Go through each char in the line.
-        for (i, c) in line.chars().enumerate() {
-          if i < start_column {
-            continue;
-          }
-          if col >= width {
-            break;
-          }
-          let char_width = strings::char_width(c, &buffer);
-          if char_width == 0 && i + 1 == line.len_chars() {
-            break;
-          }
-          if col + char_width > width {
-            break;
-          }
-          chars_width += char_width;
-          chars_length += 1;
-          debug!(
-            "1-row:{:?}, col:{:?}, c:{:?}, char_width:{:?}, chars_length:{:?}, chars_width:{:?}",
-            row, col, c, char_width, chars_length, chars_width
-          );
-          col += char_width;
-          max_column = std::cmp::max(i, max_column);
-        }
-
-        sections.push(LineViewportSection {
-          row,
-          chars_length,
-          chars_width,
-        });
-        line_viewports.insert(current_line, LineViewport { sections });
-        debug!(
-          "2-current_line:{:?}, row:{:?}, chars_length:{:?}, chars_width:{:?}",
-          current_line, row, chars_length, chars_width
-        );
-        // Go to next row and line
-        current_line += 1;
-        row += 1;
+    // Go through each char in the line.
+    for (i, c) in line.chars().enumerate() {
+      if col >= width {
+        break;
       }
+      let char_width = strings::char_width(c, &strings::CharWidthOptions::from(&buffer));
+      if char_width == 0 && i + 1 == line.len_chars() {
+        break;
+      }
+      if col + char_width > width {
+        break;
+      }
+      chars_width += char_width;
+      chars_length += 1;
+      debug!(
+        "1-row:{:?}, col:{:?}, c:{:?}, char_width:{:?}, chars_length:{:?}, chars_width:{:?}",
+        row, col, c, char_width, chars_length, chars_width
+      );
+      col += char_width;
+      max_column = std::cmp::max(i, max_column);
+    }
 
-      debug!("3-current_line:{:?}, row:{:?}", current_line, row);
-      (
-        ViewportRect {
-          start_line,
-          end_line: current_line,
-          start_column,
-          end_column: max_column + 1,
-        },
-        line_viewports,
-      )
-    }
-    None => {
-      // The `start_line` is outside of the buffer.
-      debug!("4-no start_line");
-      (ViewportRect::default(), BTreeMap::new())
-    }
+    sections.insert(
+      row,
+      LineViewportSection {
+        start_column: start_char_idx,
+        end_column: end_char_idx,
+        chars_length,
+        chars_width,
+      },
+    );
+    line_viewports.insert(
+      current_line,
+      LineViewport {
+        start_column: 1,
+        end_column: end_char_idx,
+        sections,
+      },
+    );
+    debug!(
+      "2-current_line:{:?}, row:{:?}, chars_length:{:?}, chars_width:{:?}",
+      current_line, row, chars_length, chars_width
+    );
+    // Go to next row and line
+    current_line += 1;
+    row += 1;
   }
+
+  debug!("3-current_line:{:?}, row:{:?}", current_line, row);
+  (
+    ViewportRect {
+      start_line,
+      end_line: current_line,
+      start_column,
+      end_column: max_column + 1,
+    },
+    line_viewports,
+  )
 }
 
-// Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=false`.
-fn _collect_from_top_left_for_wrap_nolinebreak(
+// Implement big [`collect`] with `wrap=true` and `line-break=false`.
+fn big_collect_with_wrap_nolinebreak(
   buffer: BufferWk,
   actual_shape: &U16Rect,
   start_line: usize,
-  start_column: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -494,12 +506,11 @@ fn truncate_line(line: &RopeSlice, start_column: usize, max_bytes: usize) -> Str
   builder
 }
 
-// Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=true`.
-fn _collect_from_top_left_for_wrap_linebreak(
+// Implement big [`collect`] with `wrap=true` and `line-break=true`.
+fn big_collect_with_wrap_linebreak(
   buffer: BufferWk,
   actual_shape: &U16Rect,
   start_line: usize,
-  start_column: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -708,20 +719,30 @@ fn _collect_from_top_left_for_wrap_linebreak(
 #[derive(Debug, Clone)]
 /// Options for constructing the viewport.
 pub struct ViewportOptions {
-  pub buffer: BufferWk,
-  pub actual_shape: U16Rect,
   pub wrap: bool,
   pub line_break: bool,
 }
 
 impl Viewport {
-  pub fn with_start_line(options: ViewportOptions, start_line: usize, start_column: usize) -> Self {
-    // By default the viewport start from the first line, i.e. start from 0.
-    // See: <https://docs.rs/ropey/latest/ropey/struct.Rope.html#method.byte_to_line>
-    let (rectangle, lines) = collect_from_top_left(&options, start_line, start_column);
+  pub fn with_start_line(
+    options: ViewportOptions,
+    buffer: BufferWk,
+    actual_shape: &U16Rect,
+    start_line: usize,
+    start_column: usize,
+  ) -> Self {
+    let (rectangle, lines) = collect(
+      &options,
+      buffer.clone(),
+      actual_shape,
+      start_line,
+      start_column,
+    );
 
     Viewport {
       options,
+      buffer,
+      actual_shape: *actual_shape,
       start_line: rectangle.start_line,
       end_line: rectangle.end_line,
       start_column: rectangle.start_column,
