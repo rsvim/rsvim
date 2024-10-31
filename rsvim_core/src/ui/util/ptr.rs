@@ -8,7 +8,7 @@
 //! widget is no longer valid.
 
 use crate::ui::tree::{Tree, TreeNodeId};
-use crate::ui::widget::window::Window;
+use crate::ui::widget::window::{Viewport, Window};
 
 use std::convert::{AsMut, AsRef};
 use std::ptr::NonNull;
@@ -77,6 +77,32 @@ impl AsRef<Window> for SafeWindowRef {
 
 impl AsMut<Window> for SafeWindowRef {
   fn as_mut(&mut self) -> &mut Window {
+    unsafe { self.0.as_mut() }
+  }
+}
+
+#[derive(Debug, Clone)]
+/// Safe wrapper on [`NonNull<Viewport>`](Viewport).
+pub struct SafeViewportRef(NonNull<Viewport>);
+
+unsafe impl Send for SafeViewportRef {}
+
+unsafe impl Sync for SafeViewportRef {}
+
+impl SafeViewportRef {
+  pub fn new(viewport: &mut Viewport) -> Self {
+    SafeViewportRef(NonNull::new(viewport as *mut Viewport).unwrap())
+  }
+}
+
+impl AsRef<Viewport> for SafeViewportRef {
+  fn as_ref(&self) -> &Viewport {
+    unsafe { self.0.as_ref() }
+  }
+}
+
+impl AsMut<Viewport> for SafeViewportRef {
+  fn as_mut(&mut self) -> &mut Viewport {
     unsafe { self.0.as_mut() }
   }
 }

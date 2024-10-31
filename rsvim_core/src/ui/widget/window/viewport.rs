@@ -1,7 +1,7 @@
 //! Buffer viewport on a window.
 
 use crate::buf::BufferWk;
-use crate::cart::{U16Pos, U16Size, URect};
+use crate::cart::{U16Pos, U16Rect, U16Size, URect};
 use crate::defaults::grapheme::AsciiControlCode;
 use crate::envar;
 use crate::rlock;
@@ -17,13 +17,13 @@ use tracing::debug;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Copy, Clone)]
-/// The section information of a buffer line. One section is exactly one row in a window.
+/// The section (row) information of a buffer line.
 pub struct LineViewportSection {
-  /// Row index in the window.
-  ///
-  /// NOTE: The row index is based on the window widget, i.e. the top row of the window widget is
-  /// 0.
-  pub row: u16,
+  /// Start char index for current section.
+  pub start_column: usize,
+
+  /// End char index for current section.
+  pub end_column: usize,
 
   /// Chars length/count.
   pub chars_length: usize,
@@ -35,23 +35,48 @@ pub struct LineViewportSection {
 #[derive(Debug, Clone)]
 /// All the sections of a buffer line. Since one line could occupy multiple rows in a window.
 pub struct LineViewport {
-  pub sections: Vec<LineViewportSection>,
+  /// Start char index for current line.
+  ///
+  // 1. When the viewport is big, this value is always 0, i.e. the line always starts from the
+  //    first character.
+  // 1. When the viewport is small, this value can be other integers, i.e. the line can start from
+  //    other characters rather than the first character.
+  pub start_column: usize,
+
+  /// End char index for current line.
+  ///
+  // 1. When the viewport is big, this value is the maximal character index for all the lines been
+  //    rendered in the viewport (actually not so useful).
+  // 1. When the viewport is small, this value is the end of the last char index for the line.
+  pub end_column: usize,
+
+  /// Detailed information for each rows on a window (a row is a section).
+  ///
+  /// It maps from row number on the window, to the rows information. The row index is based on the
+  /// viewport, i.e. the top row index is 0.
+  ///
+  /// NOTE: The first section's `start_column` must be equal to this `start_column`. And the last
+  /// section's `end_column` must be equal to this `end_column`.
+  pub sections: BTreeMap<u16, Vec<LineViewportSection>>,
 }
 
 #[derive(Debug, Clone)]
 /// The buffer viewport on a window.
 ///
-/// When a buffer displays on a window, it starts from a specific line and column, ends at a
-/// specific line and column. Here it calls `start_line`, `start_column`, `end_line`, `end_column`.
-/// The range is start-inclusive end-exclusive, i.e. `[start_line, end_line)` or
-/// `[start_column, end_column)`. All lines, rows and columns index are start from 0.
+/// Here introduce some terms about buffer:
+/// * Line: One line of text content in a buffer.
+/// * Char(column): A unicode character in a buffer. For printable ASCII chars such as alphabets
+///   and numbers, it takes 1 byte length in memory and uses 1 cell width on terminal. For
+///   non-printable ASCII chars such as control codes, it takes 1 byte length in memory and uses 1
+///   or more cells width on terminal.
+/// * Row and column: The width and height of a window.
 ///
 /// The viewport will handle some calculating task when rendering a buffer to terminal.
 ///
-/// With some display options (such as ['wrap'](crate::defaults::win::WRAP) and
+/// With different display options (such as ['wrap'](crate::defaults::win::WRAP) and
 /// ['line-break'](crate::defaults::win::LINE_BREAK)), unicode/i18n settings or other factors, each
-/// char could occupy different cell width on terminal, and each line could occupy more than 1 row
-/// on a window.
+/// char could occupy different cell width on terminal, and each line could occupy more than one
+/// row on a window.
 ///
 /// To ensure these detailed positions/sizes, it will have to go through all the text contents
 /// inside the window, even more. Suppose the window is a MxN (M rows, N columns) size, each go
@@ -59,7 +84,11 @@ pub struct LineViewport {
 /// through task to about 1~2 times, or at least a constant number that doesn't increase with the
 /// increase of the buffer.
 ///
-/// NOTE:
+/// When a buffer displays in a window, it starts from a specific line and column, ends at a
+/// specific line and column. Here it calls `start_line`, `start_column`, `end_line`, `end_column`.
+/// The range is left-inclusive right-exclusive, i.e. `[start_line, end_line)` and
+/// `[start_column, end_column)`. All lines and columns index start from 0.
+///
 /// 1. `start_line` indicates the first line of the buffer shows in the window.
 /// 2. `end_line` indicates the last line's index + 1 of the buffer shows in the window. Since
 ///    we're using the start-inclusive, end-exclusive to manage the index ranges.
@@ -67,18 +96,49 @@ pub struct LineViewport {
 /// 4. `end_column` indicates the most right side char index of the buffer shows in the window.
 ///    Since different lines of the buffer may contain different chars, this field only specifies
 ///    the biggest/longest one.
+///
+/// The viewport actually uses a very simple algorithm:
+///
+/// 1. A viewport always starts from a specific line (i.e. the `start_line`) in the buffer, from a
+///    specific character (i.e. the `start_column`) in the line. For most cases, it starts from the
+///    first character, i.e. the `start_column` is 0.
+/// 2. When the viewport is big enough to contains the `start_line`, i.e. the rendered line needs N
+///    rows, which is less or equal than viewport height. Then `start_column` is always 0, i.e. the
+///    `start_line` always starts from the first character. For the other lines, especially for the
+///    last line, it can be truncated if the viewport cannot contain all of it.
+/// 3. When the viewport is too small to contain the whole `start_line` (as an opposite situation),
+///    i.e. the rendered line needs N rows, which is greater than viewport height. Then
+///    `start_column` can start from some other characters rather than the first character, and
+///    other parts will be truncated.
+///
+/// In the following comments, we will simply use _**big**_ to indicate the 2nd scenario, use
+/// _**small**_ to indicate the 3rd scenario.
 pub struct Viewport {
-  // Window reference.
-  window: SafeWindowRef,
+  // Options.
+  options: ViewportOptions,
+
   // Start line number.
   start_line: usize,
+
   // End line number.
   end_line: usize,
-  // Start column number.
+
+  // Start char index.
+  //
+  // 1. When the viewport is big, this value is always 0, i.e. the line always starts from the
+  //    first character.
+  // 1. When the viewport is small, this value can be other integers, i.e. the line can start from
+  //    other characters rather than the first character.
   start_column: usize,
-  // End column number.
+
+  // End char index.
+  //
+  // 1. When the viewport is big, this value is the maximal character index for all the lines been
+  //    rendered in the viewport (actually not so useful).
+  // 1. When the viewport is small, this value is the end of the last char index for the line.
   end_column: usize,
-  // Maps from buffer's line number to its displayed information in the window.
+
+  // Maps from buffer's line number to its displayed rows information in the window.
   lines: BTreeMap<usize, LineViewport>,
 }
 
@@ -94,14 +154,29 @@ pub struct ViewportRect {
 // Given the buffer and window size, collect information from start line and column, i.e. from the
 // top-left corner.
 fn collect_from_top_left(
-  window: &Window,
+  options: &ViewportOptions,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
-  match (window.wrap(), window.line_break()) {
-    (false, _) => _collect_from_top_left_for_nowrap(window, start_line, start_column),
-    (true, false) => _collect_from_top_left_for_wrap_nolinebreak(window, start_line, start_column),
-    (true, true) => _collect_from_top_left_for_wrap_linebreak(window, start_line, start_column),
+  match (options.wrap, options.line_break) {
+    (false, _) => _collect_from_top_left_for_nowrap(
+      options.buffer.clone(),
+      &options.actual_shape,
+      start_line,
+      start_column,
+    ),
+    (true, false) => _collect_from_top_left_for_wrap_nolinebreak(
+      options.buffer.clone(),
+      &options.actual_shape,
+      start_line,
+      start_column,
+    ),
+    (true, true) => _collect_from_top_left_for_wrap_linebreak(
+      options.buffer.clone(),
+      &options.actual_shape,
+      start_line,
+      start_column,
+    ),
   }
 }
 
@@ -116,11 +191,11 @@ fn rpslice2line(s: &RopeSlice) -> String {
 
 // Implement [`collect_from_top_left`] with option `wrap=false`.
 fn _collect_from_top_left_for_nowrap(
-  window: &Window,
+  buffer: BufferWk,
+  actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
-  let actual_shape = window.actual_shape();
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -136,7 +211,7 @@ fn _collect_from_top_left_for_nowrap(
   }
 
   // Get buffer arc pointer
-  let buffer = window.buffer().upgrade().unwrap();
+  let buffer = buffer.upgrade().unwrap();
 
   // Lock buffer for read
   let buffer = rlock!(buffer);
@@ -240,11 +315,11 @@ fn _collect_from_top_left_for_nowrap(
 
 // Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=false`.
 fn _collect_from_top_left_for_wrap_nolinebreak(
-  window: &Window,
+  buffer: BufferWk,
+  actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
-  let actual_shape = window.actual_shape();
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -260,7 +335,7 @@ fn _collect_from_top_left_for_wrap_nolinebreak(
   }
 
   // Get buffer arc pointer
-  let buffer = window.buffer.upgrade().unwrap();
+  let buffer = buffer.upgrade().unwrap();
 
   // Lock buffer for read
   let buffer = rlock!(buffer);
@@ -421,11 +496,11 @@ fn truncate_line(line: &RopeSlice, start_column: usize, max_bytes: usize) -> Str
 
 // Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=true`.
 fn _collect_from_top_left_for_wrap_linebreak(
-  window: &Window,
+  buffer: BufferWk,
+  actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
-  let actual_shape = window.actual_shape();
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -441,7 +516,7 @@ fn _collect_from_top_left_for_wrap_linebreak(
   }
 
   // Get buffer arc pointer
-  let buffer = window.buffer.upgrade().unwrap();
+  let buffer = buffer.upgrade().unwrap();
 
   // Lock buffer for read
   let buffer = rlock!(buffer);
@@ -630,14 +705,23 @@ fn _collect_from_top_left_for_wrap_linebreak(
   }
 }
 
+#[derive(Debug, Clone)]
+/// Options for constructing the viewport.
+pub struct ViewportOptions {
+  pub buffer: BufferWk,
+  pub actual_shape: U16Rect,
+  pub wrap: bool,
+  pub line_break: bool,
+}
+
 impl Viewport {
-  pub fn new(window: &mut Window) -> Self {
+  pub fn with_start_line(options: ViewportOptions, start_line: usize, start_column: usize) -> Self {
     // By default the viewport start from the first line, i.e. start from 0.
     // See: <https://docs.rs/ropey/latest/ropey/struct.Rope.html#method.byte_to_line>
-    let (rectangle, lines) = collect_from_top_left(window, 0, 0);
+    let (rectangle, lines) = collect_from_top_left(&options, start_line, start_column);
 
     Viewport {
-      window: SafeWindowRef::new(window),
+      options,
       start_line: rectangle.start_line,
       end_line: rectangle.end_line,
       start_column: rectangle.start_column,
@@ -666,7 +750,7 @@ impl Viewport {
     self.end_column
   }
 
-  /// Get lines viewport
+  /// Get lines viewport.
   pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
     &self.lines
   }
