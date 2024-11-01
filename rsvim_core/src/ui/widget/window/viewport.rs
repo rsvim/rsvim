@@ -166,13 +166,13 @@ pub struct LineViewport {
 /// buffer to ensure how it display. The going through can start from 4 anchors:
 ///
 /// 1. Start from top left corner, i.e. the start line (`start_line_idx`) and start display column
-///    (`start_column_idx`).
+///    (`start_display_idx`).
 /// 2. Start from top right corner, i.e. the start line (`start_line_idx`) and end display column
-///    (`end_column_idx`).
+///    (`end_display_idx`).
 /// 3. Start from bottom left corner, i.e. the end line (`end_line_idx`) and start display column
-///    (`start_column_idx`).
+///    (`start_display_idx`).
 /// 4. Start from bottom right corner, i.e. the end line (`end_line_idx`) and end display column
-///    (`end_column_idx`).
+///    (`end_display_idx`).
 pub struct Viewport {
   // Window reference.
   window: SafeWindowRef,
