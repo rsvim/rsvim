@@ -65,9 +65,9 @@ pub struct LineViewport {
 /// Example-2
 ///
 /// ```text
-///                                            |--------------------------------------|
-/// This is the beginning of the very lon|g lin|e, which only shows the begining part.|
-///                                            |--------------------------------------|
+///                                           |--------------------------------------|
+/// This is the beginning of the very long lin|e, which only shows the begining part.|
+///                                           |--------------------------------------|
 /// ```
 ///
 /// Example-1 only shows the begining of the line, and example-2 only shows the ending of the line.
