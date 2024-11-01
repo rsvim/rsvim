@@ -58,19 +58,20 @@ pub struct LineViewport {
 ///
 /// ```text
 /// |-------------------------------------|
-/// |This is the beginning of the very lon|g line, which only shows the begining part.
+/// |This is the beginning of the very lon|g line, which only shows the beginning part.
 /// |-------------------------------------|
 /// ```
 ///
 /// Example-2
 ///
 /// ```text
-///                                           |--------------------------------------|
-/// This is the beginning of the very long lin|e, which only shows the begining part.|
-///                                           |--------------------------------------|
+///                                           |---------------------------------------|
+/// This is the beginning of the very long lin|e, which only shows the beginning part.|
+///                                           |---------------------------------------|
 /// ```
 ///
-/// Example-1 only shows the begining of the line, and example-2 only shows the ending of the line.
+/// Example-1 only shows the beginning of the line, and example-2 only shows the ending of the
+/// line.
 ///
 /// When 'wrap' option is `true`, the long line will take multiple rows and try to use the whole
 /// window to render all of it, while still been truncated if it's just too long to show within the
@@ -81,8 +82,8 @@ pub struct LineViewport {
 /// ```text
 /// |-------------------------------------|
 /// |This is the beginning of the very lon|
-/// |g line, which only shows the begining|
-/// | part.                               |
+/// |g line, which only shows the beginnin|
+/// |g part.                              |
 /// |-------------------------------------|
 /// ```
 ///
@@ -91,11 +92,11 @@ pub struct LineViewport {
 /// ```text
 ///  This is the beginning of the very lon
 /// |-------------------------------------|
-/// |g line, which only shows the begining|
-/// | part? No, even it sets `wrap=true`, |
-/// |it is still been truncated because th|
+/// |g line, which only shows the beginnin|
+/// |g part? No, even it sets `wrap=true`,|
+/// | it is still been truncated because t|
 /// |-------------------------------------|
-///  e whole window cannot render it.
+///  he whole window cannot render it.
 /// ```
 ///
 /// Example-3 shows `wrap=true` can help a window renders the very long line if the window itself
@@ -131,7 +132,7 @@ pub struct LineViewport {
 /// important several anchors are:
 ///
 /// - The start line of the buffer, which shows at the top row of the viewport (inclusive).
-/// - The start display column of the buffer, which shows at the begining cell of the viewport
+/// - The start display column of the buffer, which shows at the beginning cell of the viewport
 ///   (inclusive).
 /// - The end line of the buffer, which is next to the bottom row of the viewport (exclusive).
 /// - The end display column of the buffer, which is next to the last cell of the viewport
@@ -151,9 +152,9 @@ pub struct LineViewport {
 ///     |---------------------|
 /// ```
 ///
-/// Example-7 shows a corner case, at the begining of the viewport, the horizontal tab (`<--HT-->`,
-/// use 8 cells width) is been truncated. And at the end of the viewport, the Chinese character
-/// (`它`, use 2 cells width) is also been truncated.
+/// Example-7 shows a corner case, at the beginning of the viewport, the horizontal tab
+/// (`<--HT-->`, use 8 cells width) is been truncated. And at the end of the viewport, the Chinese
+/// character (`它`, use 2 cells width) is also been truncated.
 ///
 /// Thus for the Y-axis in the viewport, here use the _**display column**_ term, based on the
 /// display width of the buffer, not the character index. In example-7, the start display column is
