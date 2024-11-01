@@ -49,8 +49,6 @@ pub struct LineViewport {
 ///    in the window.
 /// 2. ASCII control codes and unicode, they decide how does a character renders in the window.
 ///
-/// # Scenarios
-///
 /// ## Case-1: Line-wrap and word-wrap
 ///
 /// When 'wrap' option is `false`, and there's one very long line which is longer than the width
