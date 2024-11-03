@@ -39,10 +39,9 @@ pub struct LineViewport {
 }
 
 #[derive(Debug, Clone)]
-/// The buffer viewport on a window.
+/// The viewport for a buffer.
 ///
-/// Let's take a look at some scenarios before introducing concepts and algorithms. There are
-/// several factors affecting the final display effects when a window showing a buffer:
+/// There are several factors affecting the final display effects when a window showing a buffer:
 ///
 /// 1. Window (display) options (such as ['wrap'](crate::defaults::win),
 ///    ['line-break'](crate::defaults::win)), they decide how does the line in the buffer renders
@@ -138,40 +137,50 @@ pub struct LineViewport {
 /// - The end display column of the buffer, which is next to the last cell of the viewport
 ///   (exclusive).
 ///
-/// NOTE: The _**start display column**_ is neither the character index of the buffer, nor the
-/// column of the window. When character using multiple cells width meet the wrap options and
-/// truncated line, this becomes a little bit complicated. For example:
+/// NOTE: The _**display column**_ is neither the character index of the buffer, nor the column of
+/// the window. When character using multiple cells width meet the wrap options and truncated line,
+/// this becomes a little bit complicated. For example:
 ///
 /// Example-7
 ///
 /// ```text
+///                                  31(LF)
+/// 0  3 4                   24    30|
+/// |  | |                   |      ||
 ///     |---------------------|
 /// <--H|T-->This is the first| line.
 /// This| is the second line. |
-/// This| is the third line, 它有一点点长。
+/// This| is the third line, 它 有一点点长。
 ///     |---------------------|
+/// |  |                     | |          |||
+/// 0  3                     24|         36||
+///                            25         37|
+///                                         38(LF)
 /// ```
 ///
-/// Example-7 shows a corner case, at the beginning of the viewport, the horizontal tab
+/// Example-7 shows a use case, at the beginning of the viewport, the horizontal tab
 /// (`<--HT-->`, use 8 cells width) is been truncated. And at the end of the viewport, the Chinese
 /// character (`它`, use 2 cells width) is also been truncated.
 ///
-/// Thus for the Y-axis in the viewport, here use the _**display column**_ term, based on the
-/// display width of the buffer, not the character index. In example-7, the start display column is
-/// 4 (the `T` in the `<--HT-->`, inclusive), the end display column is 26 (the right half part in
-/// the `它` character, exclusive).
+/// For the X-axis in the viewport, here use the term _**display column**_, it's based on the
+/// display width of the character, not the index in the buffer. In example-7, the start display
+/// column is 4 (the `T` in the `<--HT-->`, inclusive), the end display column is 26 (the right half
+/// part in the `它` character, exclusive).
+///
+/// To distinguish the display column (in the buffer) from the cell column (in the
+/// window/terminal) in the source code, it's named `dcolumn` (short for `display_column`).
 ///
 /// When rendering a buffer, viewport will need to go through each lines and characters in the
 /// buffer to ensure how it display. The going through can start from 4 anchors:
 ///
 /// 1. Start from top left corner, i.e. the start line (`start_line_idx`) and start display column
-///    (`start_display_idx`).
+///    (`start_dcolumn_idx`).
 /// 2. Start from top right corner, i.e. the start line (`start_line_idx`) and end display column
-///    (`end_display_idx`).
+///    (`end_dcolumn_idx`).
 /// 3. Start from bottom left corner, i.e. the end line (`end_line_idx`) and start display column
-///    (`start_display_idx`).
+///    (`start_dcolumn_idx`).
 /// 4. Start from bottom right corner, i.e. the end line (`end_line_idx`) and end display column
-///    (`end_display_idx`).
+///    (`end_dcolumn_idx`).
 pub struct Viewport {
   // Window reference.
   window: SafeWindowRef,
@@ -188,7 +197,7 @@ pub struct Viewport {
 }
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
-/// Tuple of `start_line`, `end_line`, `start_column`, `end_column`.
+/// Rectangle of `start_line`, `end_line`, `start_column`, `end_column`.
 pub struct ViewportRect {
   pub start_line: usize,
   pub end_line: usize,
