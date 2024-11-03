@@ -5,6 +5,7 @@ extend-ignore-words-re = [
   "conten",
   "ther",
   "smal",
+  "beginnin",
 ]
 
 [files]

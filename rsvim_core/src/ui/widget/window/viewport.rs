@@ -39,34 +39,148 @@ pub struct LineViewport {
 }
 
 #[derive(Debug, Clone)]
-/// The buffer viewport on a window.
+/// The viewport for a buffer.
 ///
-/// When a buffer displays on a window, it starts from a specific line and column, ends at a
-/// specific line and column. Here it calls `start_line`, `start_column`, `end_line`, `end_column`.
-/// The range is start-inclusive end-exclusive, i.e. `[start_line, end_line)` or
-/// `[start_column, end_column)`. All lines, rows and columns index are start from 0.
+/// There are several factors affecting the final display effects when a window showing a buffer:
 ///
-/// The viewport will handle some calculating task when rendering a buffer to terminal.
+/// 1. Window (display) options (such as ['wrap'](crate::defaults::win),
+///    ['line-break'](crate::defaults::win)), they decide how does the line in the buffer renders
+///    in the window.
+/// 2. ASCII control codes and unicode, they decide how does a character renders in the window.
 ///
-/// With some display options (such as ['wrap'](crate::defaults::win::WRAP) and
-/// ['line-break'](crate::defaults::win::LINE_BREAK)), unicode/i18n settings or other factors, each
-/// char could occupy different cell width on terminal, and each line could occupy more than 1 row
-/// on a window.
+/// ## Case-1: Line-wrap and word-wrap
 ///
-/// To ensure these detailed positions/sizes, it will have to go through all the text contents
-/// inside the window, even more. Suppose the window is a MxN (M rows, N columns) size, each go
-/// through time complexity is O(MxN). We would like to keep the number of such kind of going
-/// through task to about 1~2 times, or at least a constant number that doesn't increase with the
-/// increase of the buffer.
+/// When 'wrap' option is `false`, and there's one very long line which is longer than the width
+/// of the window. The viewport has to truncate the line, and only shows part of it. For example:
 ///
-/// NOTE:
-/// 1. `start_line` indicates the first line of the buffer shows in the window.
-/// 2. `end_line` indicates the last line's index + 1 of the buffer shows in the window. Since
-///    we're using the start-inclusive, end-exclusive to manage the index ranges.
-/// 3. `start_column` indicates the first char index of the buffer shows in the window.
-/// 4. `end_column` indicates the most right side char index of the buffer shows in the window.
-///    Since different lines of the buffer may contain different chars, this field only specifies
-///    the biggest/longest one.
+/// Example-1
+///
+/// ```text
+/// |-------------------------------------|
+/// |This is the beginning of the very lon|g line, which only shows the beginning part.
+/// |-------------------------------------|
+/// ```
+///
+/// Example-2
+///
+/// ```text
+///                                           |---------------------------------------|
+/// This is the beginning of the very long lin|e, which only shows the beginning part.|
+///                                           |---------------------------------------|
+/// ```
+///
+/// Example-1 only shows the beginning of the line, and example-2 only shows the ending of the
+/// line.
+///
+/// When 'wrap' option is `true`, the long line will take multiple rows and try to use the whole
+/// window to render all of it, while still been truncated if it's just too long to show within the
+/// whole window. For example:
+///
+/// Example-3
+///
+/// ```text
+/// |-------------------------------------|
+/// |This is the beginning of the very lon|
+/// |g line, which only shows the beginnin|
+/// |g part.                              |
+/// |-------------------------------------|
+/// ```
+///
+/// Example-4
+///
+/// ```text
+///  This is the beginning of the very lon
+/// |-------------------------------------|
+/// |g line, which only shows the beginnin|
+/// |g part? No, even it sets `wrap=true`,|
+/// | it is still been truncated because t|
+/// |-------------------------------------|
+///  he whole window cannot render it.
+/// ```
+///
+/// Example-3 shows `wrap=true` can help a window renders the very long line if the window itself
+/// is big enough. And example-4 shows the very long line will still be truncated if it's too long.
+///
+/// ## Case-2: ASCII control codes and unicodes
+///
+/// Most characters use 1 cell width in the terminal, such as alphabets (A-Z), numbers (0-9) and
+/// punctuations. But ASCII control codes can use 2 or more cells width. For example:
+///
+/// Example-5
+///
+/// ```text
+/// ^@^A^B^C^D^E^F^G^H<--HT-->
+/// ^K^L^M^N^O^P^Q^R^S^T^U^V^W^X^Y^Z^[^\^]^^^_
+/// ```
+///
+/// Example-5 shows how ASCII control codes render in Vim. Most of them use 2 cells width, except
+/// horizontal tab (HT, 9) renders as 8 spaces (shows as `<--HT-->` in the example), and line feed
+/// (LF, 10) renders as empty, i.e. 0 cell width, it just starts a new line.
+///
+/// Some unicode, especially Chinese/Japanese/Korean, can use 2 cells width as well. For example:
+///
+/// Example-6
+///
+/// ```text
+/// 你好，Vim！
+/// こんにちは、Vim！
+/// 안녕 Vim!
+/// ```
+///
+/// Taking all above scenarios into consideration, when rendering a buffer in a viewport, the most
+/// important several anchors are:
+///
+/// - The start line of the buffer, which shows at the top row of the viewport (inclusive).
+/// - The start display column of the buffer, which shows at the beginning cell of the viewport
+///   (inclusive).
+/// - The end line of the buffer, which is next to the bottom row of the viewport (exclusive).
+/// - The end display column of the buffer, which is next to the last cell of the viewport
+///   (exclusive).
+///
+/// NOTE: The _**display column**_ is neither the character index of the buffer, nor the column of
+/// the window. When character using multiple cells width meet the wrap options and truncated line,
+/// this becomes a little bit complicated. For example:
+///
+/// Example-7
+///
+/// ```text
+///                                  31(LF)
+/// 0  3 4                   24    30|
+/// |  | |                   |      ||
+///     |---------------------|
+/// <--H|T-->This is the first| line.
+/// This| is the second line. |
+/// This| is the third line, 它 有一点点长。
+///     |---------------------|
+/// |  |                     | |          |||
+/// 0  3                     24|         36||
+///                            25         37|
+///                                         38(LF)
+/// ```
+///
+/// Example-7 shows a use case, at the beginning of the viewport, the horizontal tab
+/// (`<--HT-->`, use 8 cells width) is been truncated. And at the end of the viewport, the Chinese
+/// character (`它`, use 2 cells width) is also been truncated.
+///
+/// For the X-axis in the viewport, here use the term _**display column**_, it's based on the
+/// display width of the character, not the index in the buffer. In example-7, the start display
+/// column is 4 (the `T` in the `<--HT-->`, inclusive), the end display column is 26 (the right half
+/// part in the `它` character, exclusive).
+///
+/// To distinguish the display column (in the buffer) from the cell column (in the
+/// window/terminal) in the source code, it's named `dcolumn` (short for `display_column`).
+///
+/// When rendering a buffer, viewport will need to go through each lines and characters in the
+/// buffer to ensure how it display. The going through can start from 4 anchors:
+///
+/// 1. Start from top left corner, i.e. the start line (`start_line_idx`) and start display column
+///    (`start_dcolumn_idx`).
+/// 2. Start from top right corner, i.e. the start line (`start_line_idx`) and end display column
+///    (`end_dcolumn_idx`).
+/// 3. Start from bottom left corner, i.e. the end line (`end_line_idx`) and start display column
+///    (`start_dcolumn_idx`).
+/// 4. Start from bottom right corner, i.e. the end line (`end_line_idx`) and end display column
+///    (`end_dcolumn_idx`).
 pub struct Viewport {
   // Window reference.
   window: SafeWindowRef,
@@ -83,7 +197,7 @@ pub struct Viewport {
 }
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
-/// Tuple of `start_line`, `end_line`, `start_column`, `end_column`.
+/// Rectangle of `start_line`, `end_line`, `start_column`, `end_column`.
 pub struct ViewportRect {
   pub start_line: usize,
   pub end_line: usize,
