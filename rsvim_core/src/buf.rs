@@ -24,6 +24,63 @@ pub fn next_buffer_id() -> BufferId {
 }
 
 #[derive(Clone, Debug)]
+/// The index maps from the char index to its display width and the opposite side.
+/// For example:
+///
+/// ```text
+/// ^@^A^B^C^D^E^F^G^H<--HT-->
+/// ^K^L^M^N^O^P^Q^R^S^T^U^V^W^X^Y^Z^[^\^]^^^_
+/// 你好，Vim！
+/// こんにちは、Vim！
+/// 안녕 Vim!
+/// ```
+///
+/// The above example shows that a unicode character could uses more than 1 cells width to display
+/// in the terminal.
+///
+/// For example the 1~2 lines are ASCII control codes (0~31), the tab (`HT`, renders as
+/// `<--HT-->`) uses 8 empty cells by default, the new line (`LF`) uses no cells but simply starts
+/// another new line.
+///
+/// Another example is unicode such as Chinese/Japanese/Korean characters use 2 cells width to
+/// display in terminal.
+///
+/// This struct maintains the mapping that can query the the display width until a specific char
+/// index, and query the char index at a specific display width, without going through and
+/// accumulates all the characters unicode width from the start of the line in the buffer.
+pub struct WidthIndex {
+  // Maps from char index to display width.
+  char2width: BTreeMap<usize, usize>,
+  // Maps from display width to the last char index.
+  column2char: BTreeMap<usize, usize>,
+}
+
+impl WidthIndex {
+  pub fn new() -> Self {
+    Self {
+      char2width: BTreeMap::new(),
+      column2char: BTreeMap::new(),
+    }
+  }
+
+  /// Get the display width until the specific char index, i.e. the provide `char_idx` is the last
+  /// char.
+  ///
+  /// Returns
+  ///
+  /// 1. `None` if the char not exist in the buffer line.
+  /// 2. Display width if the char exists in the buffer line.
+  pub fn get_width_until_char_idx(&self, char_idx: usize) -> Option<usize> {
+    match self.char2width.get(&char_idx) {
+      Some(width) => Some(*width),
+      None => None,
+    }
+  }
+
+  pub fn get_char_idx_until_width(&self, width: usize) -> Option<usize> {}
+}
+
+#[derive(Clone, Debug)]
 /// The Vim buffer.
 pub struct Buffer {
   id: BufferId,
@@ -65,6 +122,10 @@ impl Buffer {
 
   pub fn lines(&self) -> Lines {
     self.rope.lines()
+  }
+
+  pub fn write_to<T: std::io::Write>(&self, writer: T) -> std::io::Result<()> {
+    self.rope.write_to(writer)
   }
 
   pub fn append(&mut self, other: Rope) -> &mut Self {
@@ -256,12 +317,12 @@ mod tests {
     let r1 = Rope::from_str("Hello");
     let buf1 = Buffer::from(r1);
     let tmp1 = tempfile().unwrap();
-    buf1.rope().write_to(tmp1).unwrap();
+    buf1.write_to(tmp1).unwrap();
 
     let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
     let buf2 = Buffer::from(r2);
     let tmp2 = tempfile().unwrap();
-    buf2.rope().write_to(tmp2).unwrap();
+    buf2.write_to(tmp2).unwrap();
   }
 
   #[test]
@@ -271,7 +332,7 @@ mod tests {
     builder1.append("World");
     let buf1 = Buffer::from(builder1);
     let tmp1 = tempfile().unwrap();
-    buf1.rope().write_to(tmp1).unwrap();
+    buf1.write_to(tmp1).unwrap();
   }
 
   #[test]

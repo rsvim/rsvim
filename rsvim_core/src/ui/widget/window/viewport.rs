@@ -334,7 +334,7 @@ fn _collect_from_top_left_with_nowrap(
           current_line
         );
 
-        let mut sections: Vec<LineViewportRow> = vec![];
+        let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
         let mut col = 0_u16;
         let mut chars_length = 0_usize;
         let mut chars_width = 0_u16;
@@ -364,12 +364,12 @@ fn _collect_from_top_left_with_nowrap(
           max_column = std::cmp::max(i, max_column);
         }
 
-        sections.push(LineViewportRow {
+        rows.push(LineViewportRow {
           row_idx: row,
           chars_length,
           chars_width,
         });
-        line_viewports.insert(current_line, LineViewport { rows: sections });
+        line_viewports.insert(current_line, LineViewport { rows });
         debug!(
           "2-current_line:{:?}, row:{:?}, chars_length:{:?}, chars_width:{:?}",
           current_line, row, chars_length, chars_width
