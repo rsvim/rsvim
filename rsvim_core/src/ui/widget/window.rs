@@ -13,7 +13,7 @@ use crate::ui::widget::Widgetable;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{WindowLocalOptions, WindowOptionsBuilder};
-pub use crate::ui::widget::window::viewport::{LineViewport, LineViewportSection, Viewport};
+pub use crate::ui::widget::window::viewport::{LineViewport, LineViewportRow, Viewport};
 
 use crossterm::style::{Attributes, Color};
 use geo::point;

@@ -3,7 +3,8 @@
 use crate::buf::opt::BufferLocalOptions;
 
 use parking_lot::RwLock;
-use ropey::{Rope, RopeBuilder};
+use ropey::iter::Lines;
+use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
 use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
@@ -23,7 +24,7 @@ pub fn next_buffer_id() -> BufferId {
 }
 
 #[derive(Clone, Debug)]
-/// The VIM buffer.
+/// The Vim buffer.
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
@@ -57,6 +58,16 @@ impl Buffer {
 
   pub fn rope_mut(&mut self) -> &mut Rope {
     &mut self.rope
+  }
+}
+
+impl Buffer {
+  pub fn get_line(&self, line_idx: usize) -> Option<RopeSlice> {
+    self.rope.get_line(line_idx)
+  }
+
+  pub fn get_lines_at(&self, line_idx: usize) -> Option<Lines> {
+    self.rope.get_lines_at(line_idx)
   }
 }
 
