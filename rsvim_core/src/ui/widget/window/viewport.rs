@@ -40,7 +40,7 @@ pub struct LineViewport {
   pub rows: BTreeMap<u16, LineViewportRow>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub struct ViewportOptions {
   pub wrap: bool,
   pub line_break: bool,
@@ -780,13 +780,14 @@ fn _collect_from_top_left_with_wrap_linebreak(
 }
 
 impl Viewport {
-  pub fn new(window: &mut Window) -> Self {
-    // By default the viewport start from the first line, i.e. start from 0.
-    // See: <https://docs.rs/ropey/latest/ropey/struct.Rope.html#method.byte_to_line>
-    let (rectangle, lines) = collect_from_top_left(window, 0, 0);
+  pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
+    // By default the viewport start from the first line, i.e. starts from 0.
+    let (rectangle, lines) = collect_from_top_left(options, buffer.clone(), actual_shape, 0, 0);
 
     Viewport {
-      window: SafeWindowRef::new(window),
+      options: *options,
+      buffer,
+      actual_shape: *actual_shape,
       start_line_idx: rectangle.start_line_idx,
       end_line_idx: rectangle.end_line_idx,
       start_dcolumn_idx: rectangle.start_dcolumn_idx,
@@ -811,11 +812,15 @@ impl Viewport {
   }
 
   /// Get end display column index in the buffer.
+  ///
+  /// NOTE: The `end_dcolumn_idx` indicates the maximum display column index of all the buffer
+  /// lines displayed in the window. This is useful when the lines are been truncated and cannot
+  /// display all of them in the window.
   pub fn end_dcolumn_idx(&self) -> usize {
     self.end_dcolumn_idx
   }
 
-  /// Get lines viewport information.
+  /// Get viewport information by lines.
   pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
     &self.lines
   }
