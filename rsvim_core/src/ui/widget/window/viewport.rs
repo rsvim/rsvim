@@ -795,27 +795,27 @@ impl Viewport {
     }
   }
 
-  /// Get start line, index start from 0.
-  pub fn start_line(&self) -> usize {
+  /// Get start line index in the buffer, starts from 0.
+  pub fn start_line_idx(&self) -> usize {
     self.start_line_idx
   }
 
-  /// Get start column, index start from 0.
-  pub fn start_column(&self) -> usize {
-    self.start_dcolumn_idx
-  }
-
-  /// Get end line, index start from 0.
-  pub fn end_line(&self) -> usize {
+  /// Get end line index in the buffer.
+  pub fn end_line_idx(&self) -> usize {
     self.end_line_idx
   }
 
-  /// Get end column, index start from 0.
-  pub fn end_column(&self) -> usize {
+  /// Get start display column index in the buffer, starts from 0.
+  pub fn start_dcolumn_idx(&self) -> usize {
+    self.start_dcolumn_idx
+  }
+
+  /// Get end display column index in the buffer.
+  pub fn end_dcolumn_idx(&self) -> usize {
     self.end_dcolumn_idx
   }
 
-  /// Get lines viewport
+  /// Get lines viewport information.
   pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
     &self.lines
   }
@@ -866,10 +866,10 @@ mod tests {
   ) {
     info!(
       "actual start_line/end_line:{:?}/{:?}, start_column/end_column:{:?}/{:?}",
-      actual.start_line(),
-      actual.end_line(),
-      actual.start_column(),
-      actual.end_column()
+      actual.start_line_idx(),
+      actual.end_line_idx(),
+      actual.start_dcolumn_idx(),
+      actual.end_dcolumn_idx()
     );
     for (k, v) in actual.lines().iter() {
       info!("actual {:?}: {:?}", k, v);
@@ -877,7 +877,7 @@ mod tests {
     info!("expect:{:?}", expect);
 
     let buffer = buffer.read();
-    let buflines = buffer.get_lines_at(actual.start_line()).unwrap();
+    let buflines = buffer.get_lines_at(actual.start_line_idx()).unwrap();
 
     let mut row = 0_usize;
     for (l, line) in buflines.enumerate() {
@@ -904,14 +904,14 @@ mod tests {
       }
     }
 
-    assert_eq!(actual.start_line(), 0);
-    assert_eq!(actual.end_line(), expect_end_line);
-    assert_eq!(actual.start_column(), 0);
-    assert_eq!(actual.end_column(), expect_end_column);
+    assert_eq!(actual.start_line_idx(), 0);
+    assert_eq!(actual.end_line_idx(), expect_end_line);
+    assert_eq!(actual.start_dcolumn_idx(), 0);
+    assert_eq!(actual.end_dcolumn_idx(), expect_end_column);
     assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
     assert_eq!(
       *actual.lines().last_key_value().unwrap().0,
-      actual.end_line() - 1
+      actual.end_line_idx() - 1
     );
   }
 
@@ -1012,14 +1012,14 @@ mod tests {
     info!("actual:{:?}", actual);
     info!("expect:{:?}", expect);
 
-    assert_eq!(actual.start_line(), 0);
-    assert_eq!(actual.end_line(), expect.len());
-    assert_eq!(actual.start_column(), 0);
-    assert_eq!(actual.end_column(), 1);
+    assert_eq!(actual.start_line_idx(), 0);
+    assert_eq!(actual.end_line_idx(), expect.len());
+    assert_eq!(actual.start_dcolumn_idx(), 0);
+    assert_eq!(actual.end_dcolumn_idx(), 1);
     assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
     assert_eq!(
       *actual.lines().last_key_value().unwrap().0,
-      actual.end_line() - 1
+      actual.end_line_idx() - 1
     );
   }
 
