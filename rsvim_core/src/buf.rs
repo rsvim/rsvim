@@ -51,16 +51,9 @@ impl Buffer {
   pub fn id(&self) -> BufferId {
     self.id
   }
-
-  pub fn rope(&self) -> &Rope {
-    &self.rope
-  }
-
-  pub fn rope_mut(&mut self) -> &mut Rope {
-    &mut self.rope
-  }
 }
 
+// Rope {
 impl Buffer {
   pub fn get_line(&self, line_idx: usize) -> Option<RopeSlice> {
     self.rope.get_line(line_idx)
@@ -69,7 +62,17 @@ impl Buffer {
   pub fn get_lines_at(&self, line_idx: usize) -> Option<Lines> {
     self.rope.get_lines_at(line_idx)
   }
+
+  pub fn lines(&self) -> Lines {
+    self.rope.lines()
+  }
+
+  pub fn append(&mut self, other: Rope) -> &mut Self {
+    self.rope.append(other);
+    self
+  }
 }
+// Rope }
 
 impl Default for Buffer {
   fn default() -> Self {

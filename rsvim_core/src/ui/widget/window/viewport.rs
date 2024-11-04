@@ -301,7 +301,7 @@ fn _collect_from_top_left_with_nowrap(
   let buffer = buffer.upgrade().unwrap();
   let buffer = rlock!(buffer);
 
-  if let Some(line) = buffer.rope().get_line(start_line_idx) {
+  if let Some(line) = buffer.get_line(start_line_idx) {
     debug!(
       "buffer.get_line ({:?}):'{:?}'",
       start_line_idx,
@@ -314,7 +314,7 @@ fn _collect_from_top_left_with_nowrap(
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
   let mut max_column = start_dcolumn_idx;
 
-  match buffer.rope().get_lines_at(start_line_idx) {
+  match buffer.get_lines_at(start_line_idx) {
     Some(buflines) => {
       // The `start_line` is inside the buffer.
       // Parse the lines from `start_line` until the end of the buffer or the window.
@@ -418,7 +418,7 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
   let buffer = buffer.upgrade().unwrap();
   let buffer = rlock!(buffer);
 
-  if let Some(line) = buffer.rope().get_line(start_line_idx) {
+  if let Some(line) = buffer.get_line(start_line_idx) {
     debug!(
       "buffer.get_line ({:?}):'{:?}'",
       start_line_idx,
@@ -431,7 +431,7 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
   let mut max_column = start_dcolumn_idx;
 
-  match buffer.rope().get_lines_at(start_line_idx) {
+  match buffer.get_lines_at(start_line_idx) {
     Some(buflines) => {
       // The `start_line` is inside the buffer.
 
@@ -592,7 +592,7 @@ fn _collect_from_top_left_with_wrap_linebreak(
   let buffer = buffer.upgrade().unwrap();
   let buffer = rlock!(buffer);
 
-  if let Some(line) = buffer.rope().get_line(start_line_idx) {
+  if let Some(line) = buffer.get_line(start_line_idx) {
     debug!(
       "buffer.get_line ({:?}):'{:?}'",
       start_line_idx,
@@ -605,7 +605,7 @@ fn _collect_from_top_left_with_wrap_linebreak(
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
   let mut max_column = start_dcolumn_idx;
 
-  match buffer.rope().get_lines_at(start_line_idx) {
+  match buffer.get_lines_at(start_line_idx) {
     Some(buflines) => {
       // The `start_line` is inside the buffer.
 
@@ -877,7 +877,7 @@ mod tests {
     info!("expect:{:?}", expect);
 
     let buffer = buffer.read();
-    let buflines = buffer.rope().get_lines_at(actual.start_line()).unwrap();
+    let buflines = buffer.get_lines_at(actual.start_line()).unwrap();
 
     let mut row = 0_usize;
     for (l, line) in buflines.enumerate() {
