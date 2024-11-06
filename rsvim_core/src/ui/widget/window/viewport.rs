@@ -333,7 +333,7 @@ fn _collect_from_top_left_with_nowrap(
 
         let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
         let mut col = 0_u16;
-        let mut start_dcolumn_idx = 0_usize;
+        let mut start_dcol = 0_usize;
         let mut end_dcolumn_idx = 0_u16;
 
         let mut buffer_column_index = buffer.get_column_index(current_line_idx).unwrap();
@@ -354,10 +354,10 @@ fn _collect_from_top_left_with_nowrap(
             break;
           }
           end_dcolumn_idx += display_width;
-          start_dcolumn_idx += 1;
+          start_dcol += 1;
           debug!(
             "1-row:{:?}, col:{:?}, c:{:?}, char_width:{:?}, chars_length:{:?}, chars_width:{:?}",
-            row, col, c, display_width, start_dcolumn_idx, end_dcolumn_idx
+            row, col, c, display_width, start_dcol, end_dcolumn_idx
           );
           col += display_width;
           max_dcolumn_idx = std::cmp::max(i, max_dcolumn_idx);
@@ -365,13 +365,13 @@ fn _collect_from_top_left_with_nowrap(
 
         rows.push(LineViewportRow {
           row_idx: row,
-          chars_length: start_dcolumn_idx,
+          start_dcolumn_idx: start_dcol,
           chars_width: end_dcolumn_idx,
         });
         line_viewports.insert(current_line_idx, LineViewport { rows });
         debug!(
           "2-current_line:{:?}, row:{:?}, chars_length:{:?}, chars_width:{:?}",
-          current_line_idx, row, start_dcolumn_idx, end_dcolumn_idx
+          current_line_idx, row, start_dcol, end_dcolumn_idx
         );
         // Go to next row and line
         current_line_idx += 1;
@@ -383,7 +383,7 @@ fn _collect_from_top_left_with_nowrap(
         ViewportRect {
           start_line_idx,
           end_line_idx: current_line_idx,
-          start_dcolumn_idx,
+          start_dcolumn_idx: start_line_idx,
           end_dcolumn_idx: max_dcolumn_idx + 1,
         },
         line_viewports,
