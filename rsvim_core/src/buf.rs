@@ -386,8 +386,8 @@ impl Buffer {
   pub fn append(&mut self, other: Rope) -> &mut Self {
     // Append operation can affected the last 1~2 lines index.
     let last_line_idx = self.rope.len_lines();
-    let start_line_idx = if last_line_idx > 0 {
-      last_line_idx - 1
+    let start_line_idx = if last_line_idx > 2 {
+      last_line_idx - 2
     } else {
       0
     };
