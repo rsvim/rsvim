@@ -336,28 +336,30 @@ fn _collect_from_top_left_with_nowrap(
         let mut start_dcolumn_idx = 0_usize;
         let mut end_dcolumn_idx = 0_u16;
 
+        let mut buffer_column_index = buffer.get_column_index(current_line_idx).unwrap();
+
         // Go through each char in the line.
         for (i, c) in line.chars().enumerate() {
-          let c_width = buffer.get_line_width_until_char(current_line_idx, i);
-          if i < start_dcolumn_idx {
+          let display_width = buffer_column_index.get_width_until_char(i).unwrap();
+          if display_width < start_dcolumn_idx {
             continue;
           }
           if col >= width {
             break;
           }
-          if c_width == 0 && i + 1 == line.len_chars() {
+          if display_width == 0 && i + 1 == line.len_chars() {
             break;
           }
-          if col + c_width > width {
+          if col + display_width > width {
             break;
           }
-          end_dcolumn_idx += c_width;
+          end_dcolumn_idx += display_width;
           start_dcolumn_idx += 1;
           debug!(
             "1-row:{:?}, col:{:?}, c:{:?}, char_width:{:?}, chars_length:{:?}, chars_width:{:?}",
-            row, col, c, c_width, start_dcolumn_idx, end_dcolumn_idx
+            row, col, c, display_width, start_dcolumn_idx, end_dcolumn_idx
           );
-          col += c_width;
+          col += display_width;
           max_dcolumn_idx = std::cmp::max(i, max_dcolumn_idx);
         }
 
