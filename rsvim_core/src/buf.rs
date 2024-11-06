@@ -9,6 +9,7 @@ use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
 use std::convert::From;
+use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
@@ -92,34 +93,16 @@ impl ColumnIndex {
     self.char2column.insert(char_idx, width);
     self.column2char.insert(width, char_idx);
   }
-
-  /// Find the first neighbor char on the left of the specific char.
-  pub fn find_left_neighbor_by_char(&self, char_idx: usize) -> Option<usize> {
-    for i in (0..char_idx).rev() {
-      if self.char2column.contains_key(&i) {
-        return Some(i);
-      }
-    }
-    None
-  }
-
-  /// Find the first neighbor char on the left of the last char of the specific line width.
-  pub fn find_left_neighbor_by_width(&self, width: usize) -> Option<usize> {
-    for w in (0..(width + 1)).rev() {
-      if self.column2char.contains_key(&w) {
-        return Some(w);
-      }
-    }
-    None
-  }
 }
+
+type LinesIndex = BTreeMap<usize, ColumnIndex>;
 
 #[derive(Clone, Debug)]
 /// The Vim buffer.
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
-  column_indexes: BTreeMap<usize, ColumnIndex>,
+  lines_index: LinesIndex,
   options: BufferLocalOptions,
 }
 
@@ -132,7 +115,7 @@ impl Buffer {
     Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
-      column_indexes: BTreeMap::new(),
+      lines_index: BTreeMap::new(),
       options: BufferLocalOptions::default(),
     }
   }
@@ -182,70 +165,73 @@ impl Buffer {
 }
 // Unicode }
 
-// Column index {
-impl Buffer {
+pub struct BufferColumnIndexMut<'s> {
+  buffer: NonNull<Buffer>,
+  buffer_phantom: PhantomData<&'s mut Buffer>,
+  column_index: NonNull<ColumnIndex>,
+  column_index_phantom: PhantomData<&'s mut ColumnIndex>,
+  line_slice: RopeSlice<'s>,
+}
+
+impl<'s> BufferColumnIndexMut<'s> {
+  pub fn new(
+    buffer: NonNull<Buffer>,
+    column_index: NonNull<ColumnIndex>,
+    line_slice: RopeSlice<'s>,
+  ) -> Self {
+    Self {
+      buffer,
+      buffer_phantom: PhantomData,
+      column_index,
+      column_index_phantom: PhantomData,
+      line_slice,
+    }
+  }
+
   /// Get the line width (on the specific line index) from the first char index (i.e. 0) until the
   /// specific char index (i.e. the last char index).
   ///
   /// Returns
   ///
-  /// 1. The display width (based on cells on the terminal) from first char index 0 to last char
-  ///    index.
-  /// 2. `None` if the line or char index doesn't exist in the buffer.
-  pub fn get_line_width_until_char(&mut self, line_idx: usize, char_idx: usize) -> Option<usize> {
+  /// The display width (based on cells on the terminal) from first char index 0 to last char
+  /// index.
+  pub fn get_width_until_char(&mut self, char_idx: usize) -> Option<usize> {
     unsafe {
-      let mut raw_column_indexes =
-        NonNull::new(&mut self.column_indexes as *mut BTreeMap<usize, ColumnIndex>).unwrap();
+      let mut column_index = self.column_index;
+      let line_slice = self.line_slice;
+      let buffer = self.buffer;
 
-      match raw_column_indexes.as_ref().get(&line_idx) {
-        Some(column_index) => {
-          // Found the cached column index of the line.
-          match column_index.get_width_until_char(char_idx) {
-            Some(width) => {
-              // Found cached result, directly return it.
-              return Some(width);
-            }
-            None => { /* No cached value in column index */ }
+      // If found the cached result for the line.
+      match column_index.as_ref().get_width_until_char(char_idx) {
+        Some(width) => {
+          // Found cached result, directly return it.
+          return Some(width);
+        }
+        None => { /* No cached value in column index */ }
+      }
+
+      // If not found the cached result, we need to go through the line and calculate the result,
+      // also cache the results for future query.
+      let mut line_width = 0_usize;
+      for (i, c) in line_slice.chars().enumerate() {
+        let c_width = match column_index.as_ref().get_width_until_char(i) {
+          Some(c_width) => {
+            // If the char index `i` is already cached.
+            c_width
           }
-        }
-        None => { /* No cached value */ }
+          None => {
+            // If the char index `i` is not cached.
+            let c_width = buffer.as_ref().char_width(c);
+            for w in (line_width + 1)..(line_width + c_width + 1) {
+              column_index.as_mut().set_width_until_char(i, w);
+            }
+            c_width
+          }
+        };
+        line_width += c_width;
       }
 
-      // We need to go through the line and calculate the result, also cache the results for future
-      // query.
-      let line_slice = match self.rope.get_line(line_idx) {
-        Some(line_slice) => line_slice,
-        None => {
-          // The line doesn't exist in rope, directly returns none.
-          return None;
-        }
-      };
-
-      // Here go through the line in reverse order, i.e. from the `char_idx` to 0.
-      // This helps us probably faster to hit the cache, because mostly people will move cursor
-      // linearly on the line (from left to the right, or from right to left), instead of jumping.
-      let column_index = raw_column_indexes.as_mut().get_mut(&line_idx).unwrap();
-
-      let (start_idx, mut start_width) = match column_index.find_left_neighbor_by_char(char_idx) {
-        Some(start_idx) => {
-          let start_width = column_index.get_width_until_char(start_idx).unwrap();
-          (start_idx, start_width)
-        }
-        None => (0_usize, 0_usize),
-      };
-
-      let mut chars_iter = line_slice.chars().take(start_idx);
-
-      for idx in start_idx..(char_idx + 1) {
-        let c = chars_iter.next().unwrap();
-        let width = self.char_width(c);
-        for w in (start_width + 1)..(start_width + width + 1) {
-          column_index.set_width_until_char(idx, w);
-        }
-        start_width += width;
-      }
-
-      Some(start_width)
+      Some(line_width)
     }
   }
 
@@ -259,7 +245,7 @@ impl Buffer {
   ///  0                                33       34
   ///  |                                |        |
   /// |--------------------------------------|
-  /// |This is the beginning of the very <--H|T--> long line, which only shows the beginning part.
+  /// |This is the beginning of the very <--H|T--> long line.
   /// |--------------------------------------|
   ///  |                                    |
   ///  0                                    37
@@ -274,32 +260,69 @@ impl Buffer {
   /// 1. The display width (based on cells on the terminal) from first char index 0 to last char
   ///    index.
   /// 2. `None` if the line or char index doesn't exist in the buffer.
-  pub fn get_last_char_by_line_width(
-    &mut self,
-    line_idx: usize,
-    line_width: usize,
-  ) -> Option<usize> {
+  pub fn get_last_char_by_width(&mut self, width: usize) -> Option<usize> {
     unsafe {
-      let mut raw_column_indexes =
-        NonNull::new(&mut self.column_indexes as *mut BTreeMap<usize, ColumnIndex>).unwrap();
+      let mut column_index = self.column_index;
+      let line_slice = self.line_slice;
+      let buffer = self.buffer;
 
-      match raw_column_indexes.as_ref().get(&line_idx) {
-        Some(column_index) => {
-          // Found the cached column index of the line.
-          match column_index.get_char_until_width(line_width) {
-            Some(char_idx) => {
-              // Found cached result, directly return it.
-              return Some(char_idx);
-            }
-            None => { /* No cached value in column index */ }
-          }
+      // If found the cached result for the width.
+      match column_index.as_ref().get_char_until_width(width) {
+        Some(char_idx) => {
+          // Found cached result, directly return it.
+          return Some(char_idx);
         }
-        None => { /* No cached value */ }
+        None => { /* No cached value in column index */ }
       }
 
       // We need to go through the line and calculate the result, also cache the results for future
       // query.
-      let line_slice = match self.rope.get_line(line_idx) {
+      let mut line_width = 0_usize;
+      for (i, c) in line_slice.chars().enumerate() {
+        let c_width = match column_index.as_ref().get_width_until_char(i) {
+          Some(c_width) => {
+            // If the char index `i` is already cached.
+            c_width
+          }
+          None => {
+            // If the char index `i` is not cached.
+            let c_width = buffer.as_ref().char_width(c);
+            for w in (line_width + 1)..(line_width + c_width + 1) {
+              column_index.as_mut().set_width_until_char(i, w);
+            }
+            c_width
+          }
+        };
+
+        if line_width + c_width > width {
+          return Some(i);
+        }
+
+        line_width += c_width;
+      }
+
+      // Cannot find `width` in current line.
+      None
+    }
+  }
+}
+
+// Column index {
+impl Buffer {
+  /// Get column index on a specific line.
+  ///
+  /// This is a special index that helps query each character and its display width on the line of
+  /// the buffer, since a unicode char can vary the display width in terminal cells.
+  ///
+  /// Returns
+  ///
+  /// 1. The column index iterator on the line.
+  /// 2. `None` if the line doesn't exist in the buffer.
+  pub fn get_column_index(&mut self, line_idx: usize) -> Option<BufferColumnIndexMut> {
+    unsafe {
+      let mut raw_self = NonNull::new(self as *mut Buffer).unwrap();
+
+      let line_slice = match raw_self.as_ref().rope.get_line(line_idx) {
         Some(line_slice) => line_slice,
         None => {
           // The line doesn't exist in rope, directly returns none.
@@ -307,39 +330,37 @@ impl Buffer {
         }
       };
 
-      // Here go through the line in reverse order, i.e. from the `line_width` to 0.
-      let column_index = raw_column_indexes.as_mut().get_mut(&line_idx).unwrap();
+      let mut raw_lines_index =
+        NonNull::new(&mut raw_self.as_mut().lines_index as *mut LinesIndex).unwrap();
 
-      let (mut start_idx, mut start_width) =
-        match column_index.find_left_neighbor_by_width(line_width) {
-          Some(start_idx) => {
-            let start_width = column_index.get_width_until_char(start_idx).unwrap();
-            (start_idx, start_width)
-          }
-          None => (0_usize, 0_usize),
-        };
-
-      let mut chars_iter = line_slice.chars().take(start_idx);
-
-      while start_width < line_width {
-        match chars_iter.next() {
-          Some(c) => {
-            let width = self.char_width(c);
-            for w in (start_width + 1)..(start_width + width + 1) {
-              column_index.set_width_until_char(start_idx, w);
-            }
-            start_width += width;
-            start_idx += 1;
-          }
-          None => {
-            // No more chars in this line, directly returns none.
-            return None;
-          }
+      match raw_lines_index.as_mut().get_mut(&line_idx) {
+        Some(_) => { /* Nothing */ }
+        None => {
+          // Initialize column index if not exist
+          raw_lines_index
+            .as_mut()
+            .insert(line_idx, ColumnIndex::default());
         }
       }
 
-      Some(start_idx)
+      let column_index = raw_lines_index.as_mut().get_mut(&line_idx).unwrap();
+      let column_index = NonNull::new(column_index as *mut ColumnIndex).unwrap();
+      Some(BufferColumnIndexMut::new(
+        raw_self,
+        column_index,
+        line_slice,
+      ))
     }
+  }
+
+  /// Clear column indexes from specific line.
+  ///
+  /// Once the buffer is been truncated/modified on some lines, this method should be use to reset
+  /// the caches on column indexes.
+  pub fn clear_column_index(&mut self, start_line_idx: usize) {
+    self
+      .lines_index
+      .retain(|&line_idx, _| line_idx < start_line_idx);
   }
 }
 // Column index }
@@ -363,6 +384,14 @@ impl Buffer {
   }
 
   pub fn append(&mut self, other: Rope) -> &mut Self {
+    // Append operation can affected the last 1~2 lines index.
+    let last_line_idx = self.rope.len_lines();
+    let start_line_idx = if last_line_idx > 0 {
+      last_line_idx - 1
+    } else {
+      0
+    };
+    self.clear_column_index(start_line_idx);
     self.rope.append(other);
     self
   }
@@ -402,7 +431,7 @@ impl From<Rope> for Buffer {
       id: next_buffer_id(),
       rope,
       options: BufferLocalOptions::default(),
-      column_indexes: BTreeMap::new(),
+      lines_index: BTreeMap::new(),
     }
   }
 }
@@ -414,7 +443,7 @@ impl From<RopeBuilder> for Buffer {
       id: next_buffer_id(),
       rope: builder.finish(),
       options: BufferLocalOptions::default(),
-      column_indexes: BTreeMap::new(),
+      lines_index: BTreeMap::new(),
     }
   }
 }
