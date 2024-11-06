@@ -301,27 +301,24 @@ fn _collect_from_top_left_with_nowrap(
   let buffer = buffer.upgrade().unwrap();
   let buffer = rlock!(buffer);
 
-  if let Some(line) = buffer.get_line(start_line_idx) {
-    debug!(
-      "buffer.get_line ({:?}):'{:?}'",
-      start_line_idx,
-      rpslice2line(&line),
-    );
-  } else {
-    debug!("buffer.get_line ({:?}):None", start_line_idx);
-  }
+  debug!(
+    "buffer.get_line ({:?}):{:?}",
+    start_line_idx,
+    match buffer.get_line(start_line_idx) {
+      Some(line) => rpslice2line(&line),
+      None => "None".to_string(),
+    }
+  );
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  let mut max_column = start_dcolumn_idx;
+  let mut max_dcolumn_idx = start_dcolumn_idx;
 
   match buffer.get_lines_at(start_line_idx) {
+    // The `start_line_idx` is in the buffer.
     Some(buflines) => {
-      // The `start_line` is inside the buffer.
-      // Parse the lines from `start_line` until the end of the buffer or the window.
-
-      // The first `row` in the window maps to the `start_line` in the buffer.
+      // The first `row` in the window maps to the `start_line_idx` in the buffer.
       let mut row = 0;
-      let mut current_line = start_line_idx;
+      let mut current_line_idx = start_line_idx;
 
       for (l, line) in buflines.enumerate() {
         if row >= height {
@@ -331,7 +328,7 @@ fn _collect_from_top_left_with_nowrap(
           "0-l:{:?}, line:'{:?}', current_line:{:?}",
           l,
           rpslice2line(&line),
-          current_line
+          current_line_idx
         );
 
         let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
@@ -361,7 +358,7 @@ fn _collect_from_top_left_with_nowrap(
             row, col, c, char_width, chars_length, chars_width
           );
           col += char_width;
-          max_column = std::cmp::max(i, max_column);
+          max_dcolumn_idx = std::cmp::max(i, max_dcolumn_idx);
         }
 
         rows.push(LineViewportRow {
@@ -369,23 +366,23 @@ fn _collect_from_top_left_with_nowrap(
           chars_length,
           chars_width,
         });
-        line_viewports.insert(current_line, LineViewport { rows });
+        line_viewports.insert(current_line_idx, LineViewport { rows });
         debug!(
           "2-current_line:{:?}, row:{:?}, chars_length:{:?}, chars_width:{:?}",
-          current_line, row, chars_length, chars_width
+          current_line_idx, row, chars_length, chars_width
         );
         // Go to next row and line
-        current_line += 1;
+        current_line_idx += 1;
         row += 1;
       }
 
-      debug!("3-current_line:{:?}, row:{:?}", current_line, row);
+      debug!("3-current_line:{:?}, row:{:?}", current_line_idx, row);
       (
         ViewportRect {
           start_line_idx,
-          end_line_idx: current_line,
+          end_line_idx: current_line_idx,
           start_dcolumn_idx,
-          end_dcolumn_idx: max_column + 1,
+          end_dcolumn_idx: max_dcolumn_idx + 1,
         },
         line_viewports,
       )

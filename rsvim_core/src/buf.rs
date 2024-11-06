@@ -1,14 +1,18 @@
 //! Vim buffers.
 
 use crate::buf::opt::BufferLocalOptions;
+use crate::defaults::grapheme::AsciiControlCode;
 
+use compact_str::CompactString;
 use parking_lot::RwLock;
 use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
 use std::convert::From;
+use std::ptr::NonNull;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
+use unicode_width::UnicodeWidthChar;
 
 pub mod opt;
 
@@ -23,7 +27,7 @@ pub fn next_buffer_id() -> BufferId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 /// The index maps from the char index to its display width and the opposite side.
 /// For example:
 ///
@@ -48,36 +52,66 @@ pub fn next_buffer_id() -> BufferId {
 /// This struct maintains the mapping that can query the the display width until a specific char
 /// index, and query the char index at a specific display width, without going through and
 /// accumulates all the characters unicode width from the start of the line in the buffer.
-pub struct WidthIndex {
+struct ColumnIndex {
   // Maps from char index to display width.
-  char2width: BTreeMap<usize, usize>,
+  char2column: BTreeMap<usize, usize>,
   // Maps from display width to the last char index.
   column2char: BTreeMap<usize, usize>,
 }
 
-impl WidthIndex {
-  pub fn new() -> Self {
-    Self {
-      char2width: BTreeMap::new(),
-      column2char: BTreeMap::new(),
-    }
-  }
-
-  /// Get the display width until the specific char index, i.e. the provide `char_idx` is the last
-  /// char.
+impl ColumnIndex {
+  /// Get the display width from the first char until the specific char by the index.
   ///
   /// Returns
   ///
   /// 1. `None` if the char not exist in the buffer line.
   /// 2. Display width if the char exists in the buffer line.
-  pub fn get_width_until_char_idx(&self, char_idx: usize) -> Option<usize> {
-    match self.char2width.get(&char_idx) {
+  pub fn get_width_until_char(&self, char_idx: usize) -> Option<usize> {
+    match self.char2column.get(&char_idx) {
       Some(width) => Some(*width),
       None => None,
     }
   }
 
-  pub fn get_char_idx_until_width(&self, width: usize) -> Option<usize> {}
+  /// Get the (last) char index by the display width from the first char.
+  ///
+  /// Returns
+  ///
+  /// 1. `None` if the buffer line is shroter than the width.
+  /// 2. Last char index if the width exists in the buffer line.
+  pub fn get_char_until_width(&self, width: usize) -> Option<usize> {
+    match self.column2char.get(&width) {
+      Some(char_idx) => Some(*char_idx),
+      None => None,
+    }
+  }
+
+  /// Set the display width until a specific char index, i.e. starts from the first char in the
+  /// buffer, until the specific char.
+  pub fn set_width_until_char(&mut self, char_idx: usize, width: usize) {
+    self.char2column.insert(char_idx, width);
+    self.column2char.insert(width, char_idx);
+  }
+
+  /// Find the first neighbor char on the left of the specific char.
+  pub fn find_left_neighbor_by_char(&self, char_idx: usize) -> Option<usize> {
+    for i in (0..char_idx).rev() {
+      if self.char2column.contains_key(&i) {
+        return Some(i);
+      }
+    }
+    None
+  }
+
+  /// Find the first neighbor char on the left of the last char of the specific line width.
+  pub fn find_left_neighbor_by_width(&self, width: usize) -> Option<usize> {
+    for w in (0..(width + 1)).rev() {
+      if self.column2char.contains_key(&w) {
+        return Some(w);
+      }
+    }
+    None
+  }
 }
 
 #[derive(Clone, Debug)]
@@ -85,6 +119,7 @@ impl WidthIndex {
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
+  column_indexes: BTreeMap<usize, ColumnIndex>,
   options: BufferLocalOptions,
 }
 
@@ -97,6 +132,7 @@ impl Buffer {
     Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
+      column_indexes: BTreeMap::new(),
       options: BufferLocalOptions::default(),
     }
   }
@@ -109,6 +145,204 @@ impl Buffer {
     self.id
   }
 }
+
+// Unicode {
+impl Buffer {
+  /// Get the display width for a unicode `char`.
+  pub fn char_width(&self, c: char) -> usize {
+    if c.is_ascii_control() {
+      let cc = AsciiControlCode::try_from(c).unwrap();
+      match cc {
+        AsciiControlCode::Ht => self.tab_stop() as usize,
+        AsciiControlCode::Lf => 0,
+        _ => format!("{}", cc).len(),
+      }
+    } else {
+      UnicodeWidthChar::width_cjk(c).unwrap()
+    }
+  }
+
+  /// Get the printable cell symbol and its display width.
+  pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
+    let width = self.char_width(c);
+    if c.is_ascii_control() {
+      let cc = AsciiControlCode::try_from(c).unwrap();
+      match cc {
+        AsciiControlCode::Ht => (
+          CompactString::from(" ".repeat(self.tab_stop() as usize)),
+          width,
+        ),
+        AsciiControlCode::Lf => (CompactString::new(""), width),
+        _ => (CompactString::from(format!("{}", cc)), width),
+      }
+    } else {
+      (CompactString::from(c.to_string()), width)
+    }
+  }
+}
+// Unicode }
+
+// Column index {
+impl Buffer {
+  /// Get the line width (on the specific line index) from the first char index (i.e. 0) until the
+  /// specific char index (i.e. the last char index).
+  ///
+  /// Returns
+  ///
+  /// 1. The display width (based on cells on the terminal) from first char index 0 to last char
+  ///    index.
+  /// 2. `None` if the line or char index doesn't exist in the buffer.
+  pub fn get_line_width_until_char(&mut self, line_idx: usize, char_idx: usize) -> Option<usize> {
+    unsafe {
+      let mut raw_column_indexes =
+        NonNull::new(&mut self.column_indexes as *mut BTreeMap<usize, ColumnIndex>).unwrap();
+
+      match raw_column_indexes.as_ref().get(&line_idx) {
+        Some(column_index) => {
+          // Found the cached column index of the line.
+          match column_index.get_width_until_char(char_idx) {
+            Some(width) => {
+              // Found cached result, directly return it.
+              return Some(width);
+            }
+            None => { /* No cached value in column index */ }
+          }
+        }
+        None => { /* No cached value */ }
+      }
+
+      // We need to go through the line and calculate the result, also cache the results for future
+      // query.
+      let line_slice = match self.rope.get_line(line_idx) {
+        Some(line_slice) => line_slice,
+        None => {
+          // The line doesn't exist in rope, directly returns none.
+          return None;
+        }
+      };
+
+      // Here go through the line in reverse order, i.e. from the `char_idx` to 0.
+      // This helps us probably faster to hit the cache, because mostly people will move cursor
+      // linearly on the line (from left to the right, or from right to left), instead of jumping.
+      let column_index = raw_column_indexes.as_mut().get_mut(&line_idx).unwrap();
+
+      let (start_idx, mut start_width) = match column_index.find_left_neighbor_by_char(char_idx) {
+        Some(start_idx) => {
+          let start_width = column_index.get_width_until_char(start_idx).unwrap();
+          (start_idx, start_width)
+        }
+        None => (0_usize, 0_usize),
+      };
+
+      let mut chars_iter = line_slice.chars().take(start_idx);
+
+      for idx in start_idx..(char_idx + 1) {
+        let c = chars_iter.next().unwrap();
+        let width = self.char_width(c);
+        for w in (start_width + 1)..(start_width + width + 1) {
+          column_index.set_width_until_char(idx, w);
+        }
+        start_width += width;
+      }
+
+      Some(start_width)
+    }
+  }
+
+  /// Get the last char index (on the specific line index) indicate by the line width.
+  ///
+  /// NOTE: The last char need to be completely accommodated in this line. An edge case is: if the
+  /// last char takes more than 1 cells width on the terminal, and the line width is not exactly on
+  /// the end of the char. For example:
+  ///
+  /// ```text
+  ///  0                                33       34
+  ///  |                                |        |
+  /// |--------------------------------------|
+  /// |This is the beginning of the very <--H|T--> long line, which only shows the beginning part.
+  /// |--------------------------------------|
+  ///  |                                    |
+  ///  0                                    37
+  /// ```
+  ///
+  /// The example shows for the line, when display width is 37, the last char index that is
+  /// completely accommodated inside it is 33. The 34 (tab, `<--HT-->`) uses 8 spaces and the right
+  /// part of it goes out of the line width.
+  ///
+  /// Returns
+  ///
+  /// 1. The display width (based on cells on the terminal) from first char index 0 to last char
+  ///    index.
+  /// 2. `None` if the line or char index doesn't exist in the buffer.
+  pub fn get_last_char_by_line_width(
+    &mut self,
+    line_idx: usize,
+    line_width: usize,
+  ) -> Option<usize> {
+    unsafe {
+      let mut raw_column_indexes =
+        NonNull::new(&mut self.column_indexes as *mut BTreeMap<usize, ColumnIndex>).unwrap();
+
+      match raw_column_indexes.as_ref().get(&line_idx) {
+        Some(column_index) => {
+          // Found the cached column index of the line.
+          match column_index.get_char_until_width(line_width) {
+            Some(char_idx) => {
+              // Found cached result, directly return it.
+              return Some(char_idx);
+            }
+            None => { /* No cached value in column index */ }
+          }
+        }
+        None => { /* No cached value */ }
+      }
+
+      // We need to go through the line and calculate the result, also cache the results for future
+      // query.
+      let line_slice = match self.rope.get_line(line_idx) {
+        Some(line_slice) => line_slice,
+        None => {
+          // The line doesn't exist in rope, directly returns none.
+          return None;
+        }
+      };
+
+      // Here go through the line in reverse order, i.e. from the `line_width` to 0.
+      let column_index = raw_column_indexes.as_mut().get_mut(&line_idx).unwrap();
+
+      let (mut start_idx, mut start_width) =
+        match column_index.find_left_neighbor_by_width(line_width) {
+          Some(start_idx) => {
+            let start_width = column_index.get_width_until_char(start_idx).unwrap();
+            (start_idx, start_width)
+          }
+          None => (0_usize, 0_usize),
+        };
+
+      let mut chars_iter = line_slice.chars().take(start_idx);
+
+      while start_width < line_width {
+        match chars_iter.next() {
+          Some(c) => {
+            let width = self.char_width(c);
+            for w in (start_width + 1)..(start_width + width + 1) {
+              column_index.set_width_until_char(start_idx, w);
+            }
+            start_width += width;
+            start_idx += 1;
+          }
+          None => {
+            // No more chars in this line, directly returns none.
+            return None;
+          }
+        }
+      }
+
+      Some(start_idx)
+    }
+  }
+}
+// Column index }
 
 // Rope {
 impl Buffer {
@@ -168,6 +402,7 @@ impl From<Rope> for Buffer {
       id: next_buffer_id(),
       rope,
       options: BufferLocalOptions::default(),
+      column_indexes: BTreeMap::new(),
     }
   }
 }
@@ -179,6 +414,7 @@ impl From<RopeBuilder> for Buffer {
       id: next_buffer_id(),
       rope: builder.finish(),
       options: BufferLocalOptions::default(),
+      column_indexes: BTreeMap::new(),
     }
   }
 }
