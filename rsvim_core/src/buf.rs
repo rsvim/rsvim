@@ -48,10 +48,6 @@ pub fn next_buffer_id() -> BufferId {
 ///    line.
 /// 2. For the other lines, they are Chinese/Japanese/Korean characters, use 2 cells width to
 ///    display in terminal.
-///
-/// This struct maintains the mapping that can query the the display width until a specific char
-/// index, and query the char index at a specific display width, without going through and
-/// accumulates all the characters unicode width from the start of the line in the buffer.
 struct ColumnIndex {
   // Maps from char index to display width.
   char2column: BTreeMap<usize, usize>,
