@@ -74,6 +74,8 @@ pub struct ViewportOptions {
 /// ```text
 ///                                           |---------------------------------------|
 /// This is the beginning of the very long lin|e, which only shows the beginning part.|
+/// This is the short line, it's not shown.   |                                       |
+/// This is the second very long line, which s|till shows in the viewport.            |
 ///                                           |---------------------------------------|
 /// ```
 ///
@@ -295,7 +297,7 @@ fn rpslice2line(s: &RopeSlice) -> String {
 
 // Implement [`collect_from_top_left`] with option `wrap=false`.
 fn _collect_from_top_left_with_nowrap(
-  options: &ViewportOptions,
+  _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
   start_line_idx: usize,
@@ -345,45 +347,56 @@ fn _collect_from_top_left_with_nowrap(
 
         let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
         let mut col = 0_u16;
-        let mut start_dcol = 0_usize;
-        let mut end_dcolumn_idx = 0_u16;
-
-        let mut buffer_column_index = buffer.get_column_index(current_line_idx).unwrap();
+        let mut end_dcol = 0_usize;
 
         // Go through each char in the line.
         for (i, c) in line.chars().enumerate() {
-          let display_width = buffer_column_index.get_width_until_char(i).unwrap();
-          if display_width < start_dcolumn_idx {
+          let c_width = buffer.char_width(c);
+
+          // Prefix width is still before `start_dcolumn_idx`.
+          if end_dcol + c_width < start_dcolumn_idx {
+            end_dcol += c_width;
             continue;
           }
+
+          // New line.
+          if c_width == 0 && i + 1 == line.len_chars() {
+            break;
+          }
+
+          // Column with next char will goes out of the row.
+          if col + c_width as u16 > width {
+            end_dcol += col as usize + c_width - width as usize;
+            max_dcolumn_idx = std::cmp::max(end_dcol, max_dcolumn_idx);
+            break;
+          }
+
+          end_dcol += c_width;
+          col += c_width as u16;
+          max_dcolumn_idx = std::cmp::max(end_dcol, max_dcolumn_idx);
+          debug!(
+            "1-row:{:?}, col:{:?}, c:{:?}, c_width:{:?}, end_dcol:{:?}",
+            row, col, c, c_width, end_dcol
+          );
+
+          // Column goes out of the row.
           if col >= width {
             break;
           }
-          if display_width == 0 && i + 1 == line.len_chars() {
-            break;
-          }
-          if col + display_width > width {
-            break;
-          }
-          end_dcolumn_idx += display_width;
-          start_dcol += 1;
-          debug!(
-            "1-row:{:?}, col:{:?}, c:{:?}, char_width:{:?}, chars_length:{:?}, chars_width:{:?}",
-            row, col, c, display_width, start_dcol, end_dcolumn_idx
-          );
-          col += display_width;
-          max_dcolumn_idx = std::cmp::max(i, max_dcolumn_idx);
         }
 
-        rows.push(LineViewportRow {
-          row_idx: row,
-          start_dcolumn_idx: start_dcol,
-          chars_width: end_dcolumn_idx,
-        });
+        rows.insert(
+          row,
+          LineViewportRow {
+            start_dcolumn_idx,
+            end_dcolumn_idx: end_dcol + 1,
+          },
+        );
+
         line_viewports.insert(current_line_idx, LineViewport { rows });
         debug!(
-          "2-current_line:{:?}, row:{:?}, chars_length:{:?}, chars_width:{:?}",
-          current_line_idx, row, start_dcol, end_dcolumn_idx
+          "2-current_line:{:?}, row:{:?}, end_dcol:{:?}",
+          current_line_idx, row, end_dcol
         );
         // Go to next row and line
         current_line_idx += 1;
@@ -395,7 +408,7 @@ fn _collect_from_top_left_with_nowrap(
         ViewportRect {
           start_line_idx,
           end_line_idx: current_line_idx,
-          start_dcolumn_idx: start_line_idx,
+          start_dcolumn_idx,
           end_dcolumn_idx: max_dcolumn_idx + 1,
         },
         line_viewports,
@@ -411,7 +424,7 @@ fn _collect_from_top_left_with_nowrap(
 
 // Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=false`.
 fn _collect_from_top_left_with_wrap_nolinebreak(
-  options: &ViewportOptions,
+  _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
   start_line_idx: usize,
@@ -429,26 +442,25 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
   let buffer = buffer.upgrade().unwrap();
   let buffer = rlock!(buffer);
 
-  if let Some(line) = buffer.get_line(start_line_idx) {
-    debug!(
-      "buffer.get_line ({:?}):'{:?}'",
-      start_line_idx,
-      rpslice2line(&line),
-    );
-  } else {
-    debug!("buffer.get_line ({:?}):None", start_line_idx);
-  }
+  debug!(
+    "buffer.get_line ({:?}):'{:?}'",
+    start_line_idx,
+    match buffer.get_line(start_line_idx) {
+      Some(line) => rpslice2line(&line),
+      None => "None".to_string(),
+    }
+  );
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  let mut max_column = start_dcolumn_idx;
+  let mut max_dcolumn_idx = start_dcolumn_idx;
 
   match buffer.get_lines_at(start_line_idx) {
     Some(buflines) => {
-      // The `start_line` is inside the buffer.
+      // The `start_line_idx` is inside the buffer.
 
-      // The first `row` in the window maps to the `start_line` in the buffer.
+      // The first `row` in the window maps to the `start_line_idx` in the buffer.
       let mut row = 0;
-      let mut current_line = start_line_idx;
+      let mut current_line_idx = start_line_idx;
 
       for (l, line) in buflines.enumerate() {
         if row >= height {
@@ -458,104 +470,115 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
           "0-l:{:?}, line:'{:?}', current_line:{:?}",
           l,
           rpslice2line(&line),
-          current_line
+          current_line_idx
         );
 
-        let mut sections: Vec<LineViewportRow> = vec![];
+        let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
         let mut col = 0_u16;
-        let mut chars_length = 0_usize;
-        let mut chars_width = 0_u16;
+        let mut start_dcol = start_dcolumn_idx;
+        let mut end_dcol = 0_usize;
 
         for (i, c) in line.chars().enumerate() {
-          if i < start_dcolumn_idx {
+          let c_width = buffer.char_width(c);
+
+          // Prefix width is still before `start_dcolumn_idx`.
+          if end_dcol + c_width < start_dcolumn_idx {
+            end_dcol += c_width;
             continue;
           }
-          if col >= width {
+
+          // New line.
+          if c_width == 0 && i + 1 == line.len_chars() {
             debug!(
-              "1-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?}",
-              row, col, c, chars_length, chars_width
+              "1-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}",
+              row, col, c, start_dcol, end_dcol
             );
-            max_column = std::cmp::max(i, max_column);
-            sections.push(LineViewportRow {
-              row_idx: row,
-              chars_length,
-              chars_width,
-            });
+            break;
+          }
+
+          // Column with next char will goes out of the row.
+          if col + c_width as u16 > width {
+            end_dcol += col as usize + c_width - width as usize;
+            max_dcolumn_idx = std::cmp::max(end_dcol, max_dcolumn_idx);
+            debug!(
+                    "2-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}, col({})+c_width({}) > width({})",
+                    row, col, c, start_dcol, end_dcol, col, c_width, width
+                  );
+            rows.insert(
+              row,
+              LineViewportRow {
+                start_dcolumn_idx: start_dcol,
+                end_dcolumn_idx: end_dcol,
+              },
+            );
             row += 1;
             col = 0_u16;
-            chars_length = 0_usize;
-            chars_width = 0_u16;
+            start_dcol = end_dcol;
             if row >= height {
               debug!(
-                    "2-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} height/width:{:?}/{:?}",
-                    row, col, c, chars_length, chars_width, height, width
-                  );
+                "3-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}, height/width:{}/{}",
+                row, col, c, start_dcol, end_dcol, height, width
+              );
               break;
             }
           }
 
-          let char_width = strings::char_width(c, &buffer);
-          if char_width == 0 && i + 1 == line.len_chars() {
+          end_dcol += c_width;
+          col += c_width as u16;
+          max_dcolumn_idx = std::cmp::max(end_dcol, max_dcolumn_idx);
+
+          debug!(
+            "4-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}",
+            row, col, c, start_dcol, end_dcol
+          );
+
+          // Column goes out of current row.
+          if col >= width {
             debug!(
-                    "3-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} i:{}, line.len_chars:{}",
-                    row, col, c, chars_length, chars_width, i, line.len_chars()
-                  );
-            break;
-          }
-          if col + char_width > width {
-            debug!(
-                    "4-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} col({})+char_width({}) > width({})",
-                    row, col, c, chars_length, chars_width, col, char_width, width
-                  );
-            max_column = std::cmp::max(i, max_column);
-            sections.push(LineViewportRow {
-              row_idx: row,
-              chars_length,
-              chars_width,
-            });
+              "5-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}",
+              row, col, c, start_dcol, end_dcol
+            );
+            rows.insert(
+              row,
+              LineViewportRow {
+                start_dcolumn_idx: start_dcol,
+                end_dcolumn_idx: end_dcol,
+              },
+            );
             row += 1;
             col = 0_u16;
-            chars_length = 0_usize;
-            chars_width = 0_u16;
+            start_dcol = end_dcol;
             if row >= height {
               debug!(
-                    "5-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?} height/width:{}/{}",
-                    row, col, c, chars_length, chars_width, height, width
+                    "6-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}, height/width:{:?}/{:?}",
+                    row, col, c, start_dcol, end_dcol, height, width
                   );
               break;
             }
           }
-          chars_width += char_width;
-          chars_length += 1;
-          col += char_width;
-          max_column = std::cmp::max(i, max_column);
-          debug!(
-            "6-row:{:?}, col:{:?}, c:{:?}, chars_length:{:?}, chars_width:{:?}",
-            row, col, c, chars_length, chars_width
-          );
         }
 
         debug!(
-          "7-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?}, current_line:{}",
-          row, col, chars_length, chars_width, current_line
+          "7-row:{:?}, col:{:?}, start_dcol:{:?}, end_dcol:{:?}, current_line:{}",
+          row, col, start_dcol, end_dcol, current_line_idx
         );
-        sections.push(LineViewportRow {
+        rows.push(LineViewportRow {
           row_idx: row,
           chars_length,
           chars_width,
         });
-        line_viewports.insert(current_line, LineViewport { rows: sections });
-        current_line += 1;
+        line_viewports.insert(current_line_idx, LineViewport { rows });
+        current_line_idx += 1;
         row += 1;
       }
 
-      debug!("9-row:{}, current_line:{}", row, current_line);
+      debug!("9-row:{}, current_line:{}", row, current_line_idx);
       (
         ViewportRect {
           start_line_idx,
-          end_line_idx: current_line,
+          end_line_idx: current_line_idx,
           start_dcolumn_idx,
-          end_dcolumn_idx: max_column + 1,
+          end_dcolumn_idx: max_dcolumn_idx + 1,
         },
         line_viewports,
       )
