@@ -12,7 +12,7 @@ use crate::ui::widget::window::Window;
 
 use geo::point;
 use ropey::RopeSlice;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use tracing::debug;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -213,6 +213,20 @@ pub struct Viewport {
 
   // Maps from buffer line index to its displayed rows in the window.
   lines: BTreeMap<usize, LineViewport>,
+
+  // Cache display width and the char idx on the line, to improve performance when the viewport
+  // moves and the `start_dcolumn_idx` is not 0.
+  //
+  // For example when the line is very long, and cursor keeps moving to the right side on the line,
+  // viewport will have to always sum up the display width of all the chars before the
+  // `start_dcolumn_idx`, which is `O(N)` (`N` is the chars count before the `start_dcolumn_idx`,
+  // or more generally speaking, `N` is the length of the line).
+  //
+  // The structure is 2-level hash map. First level maps from the line index to its cache, second
+  // level maps from the char index to its prefix display width.
+  //
+  // Once a line is been modified, the related cache for the line should be reset.
+  prefix_sums: HashMap<usize, HashMap<usize, usize>>,
 }
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
