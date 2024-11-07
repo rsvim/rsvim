@@ -214,7 +214,7 @@ pub struct Viewport {
   // Maps from buffer line index to its displayed rows in the window.
   lines: BTreeMap<usize, LineViewport>,
 
-  // Cache display width and the char idx on the line, to improve performance when the viewport
+  // Cached char idx and its display width on the line, to improve performance when the viewport
   // moves and the `start_dcolumn_idx` is not 0.
   //
   // For example when the line is very long, and cursor keeps moving to the right side on the line,
@@ -222,11 +222,9 @@ pub struct Viewport {
   // `start_dcolumn_idx`, which is `O(N)` (`N` is the chars count before the `start_dcolumn_idx`,
   // or more generally speaking, `N` is the length of the line).
   //
-  // The structure is 2-level hash map. First level maps from the line index to its cache, second
-  // level maps from the char index to its prefix display width.
-  //
-  // Once a line is been modified, the related cache for the line should be reset.
-  prefix_sums: HashMap<usize, HashMap<usize, usize>>,
+  // The structure maps from the line index to the (char_idx, display width) pair. Once a line is
+  // been modified, the related cache for the line should be reset.
+  prev_display_width: HashMap<usize, (usize, usize)>,
 }
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
