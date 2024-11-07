@@ -36,19 +36,26 @@ pub fn next_buffer_id() -> BufferId {
 /// [`Viewport`](crate::ui::widget::window::viewport::Viewport) renders a buffer, especially not
 /// from the first char of the line.
 ///
-/// When rendering without a cache, we will have to go through all the
-/// chars (to sum up the display width of them) before the real first displayed char/column in the
-/// line. Thus can ensure the correct display column of the first char.
+/// When rendering without a cache, it will have to go through all the chars (to sum up all the
+/// display width) before the real first displayed char/column in the line, thus ensure the correct
+/// display column for the first char.
 ///
-/// For most cases, people move their cursor within a linear changed position, i.e. cursor usually
-/// goes left/right/up/down, completely randomly movement is a rare use case.
+/// In most cases, cursor moves in successive positions, i.e. cursor moves left/right/up/down,
+/// while completely randomly move is a rare use case.
 ///
-/// And we also need to consider the editing behavior, i.e. the chars in a line can be
-/// added/removed and changed, and the display width of them change as well. For most third party
-/// prefix-sum tree implementations I've found, they are fixed length. This leads to a performance
-/// issue, that if user keeps adding new chars at the end of the line, then this struct will need
-/// `O(N)` time complexity on adding a single char (where the `N` is the length of the line), which
-/// is quite slow.
+/// And editing a line is a common use case, i.e. chars can be added/removed and changed, and the
+/// display width change as well. Most third party prefix-sum implementations are fixed length,
+/// which leads to a performance issue. If user keeps adding new chars at the end of the line,
+/// third party prefix-sum will use `O(N)` to add a single char (where the `N` is the length of the
+/// line), which can be slow.
+///
+/// On the contrary, this struct always uses `O(M * log_N)` (where the `M` is the distance between
+/// current start display column and previous one, the `N` is the length of the line):
+///
+/// 1. Add/remove chars successively in a line (`M` is 1).
+/// 2. Cursor moves in successive positions (`M` is 1).
+/// 3. Cursor moves to a random position (`M` is the length of the movement).
+/// 4. Bulk delete chars in a line (`M` is the chars count of the bulk delete).
 ///
 /// For example:
 ///
@@ -71,47 +78,67 @@ pub fn next_buffer_id() -> BufferId {
 ///
 struct PrefixWidth {
   // Maps from char index to display width.
-  char2column: BTreeMap<usize, usize>,
+  char2width: BTreeMap<usize, usize>,
   // Maps from display width to the last char index.
-  column2char: BTreeMap<usize, usize>,
+  width2char: BTreeMap<usize, usize>,
 }
 
 impl PrefixWidth {
-  /// Get the display width from the first char until the specific char by the index.
+  /// Get the display width by the specific char.
   ///
   /// Returns
   ///
   /// 1. `None` if the char not exist in the buffer line.
   /// 2. Display width if the char exists in the buffer line.
-  pub fn get_width_until_char(&self, char_idx: usize) -> Option<usize> {
-    match self.char2column.get(&char_idx) {
+  pub fn get_width(&self, char_idx: usize) -> Option<usize> {
+    match self.char2width.get(&char_idx) {
       Some(width) => Some(*width),
       None => None,
     }
   }
 
-  /// Get the (last) char index by the display width from the first char.
+  /// Get the (last) char index by the display width.
   ///
   /// Returns
   ///
   /// 1. `None` if the buffer line is shroter than the width.
   /// 2. Last char index if the width exists in the buffer line.
-  pub fn get_char_until_width(&self, width: usize) -> Option<usize> {
-    match self.column2char.get(&width) {
+  pub fn get_char(&self, width: usize) -> Option<usize> {
+    match self.width2char.get(&width) {
       Some(char_idx) => Some(*char_idx),
       None => None,
     }
   }
 
-  /// Set the display width until a specific char index, i.e. starts from the first char in the
-  /// buffer, until the specific char.
-  pub fn set_width_until_char(&mut self, char_idx: usize, width: usize) {
-    self.char2column.insert(char_idx, width);
-    self.column2char.insert(width, char_idx);
+  /// Set the display width on a specific char.
+  pub fn set_width(&mut self, char_idx: usize, width: usize) {
+    self.char2width.insert(char_idx, width);
+    self.width2char.insert(width, char_idx);
   }
 
-  pub fn clear_by_char(&mut self, start_char_idx: usize) {}
+  /// Clear data from the specific char.
+  ///
+  /// This is usually because the char is been modified/removed from the line.
+  pub fn clear_by_char(&mut self, start_char_idx: usize) {
+    if start_char_idx == 0 {
+      self.char2width.clear();
+      self.width2char.clear();
+    } else {
+      self
+        .char2width
+        .retain(|&char_idx, _| char_idx < start_char_idx);
+      match self.char2width.last_key_value() {
+        Some((_, &last_width)) => {
+          self.width2char.retain(|&width, _| width <= last_width);
+        }
+        None => {
+          self.width2char.clear();
+        }
+      }
+    }
+  }
 
+  /// Clear data from the specific width.
   pub fn clear_by_width(&mut self, start_width: usize) {}
 }
 
@@ -222,7 +249,7 @@ impl<'s> BufferColumnIndexMut<'s> {
       let buffer = self.buffer;
 
       // If found the cached result for the line.
-      match column_index.as_ref().get_width_until_char(char_idx) {
+      match column_index.as_ref().get_width(char_idx) {
         Some(width) => {
           // Found cached result, directly return it.
           return Some(width);
@@ -234,7 +261,7 @@ impl<'s> BufferColumnIndexMut<'s> {
       // also cache the results for future query.
       let mut line_width = 0_usize;
       for (i, c) in line_slice.chars().enumerate() {
-        let c_width = match column_index.as_ref().get_width_until_char(i) {
+        let c_width = match column_index.as_ref().get_width(i) {
           Some(c_width) => {
             // If the char index `i` is already cached.
             c_width
@@ -243,7 +270,7 @@ impl<'s> BufferColumnIndexMut<'s> {
             // If the char index `i` is not cached.
             let c_width = buffer.as_ref().char_width(c);
             for w in (line_width + 1)..(line_width + c_width + 1) {
-              column_index.as_mut().set_width_until_char(i, w);
+              column_index.as_mut().set_width(i, w);
             }
             c_width
           }
@@ -287,7 +314,7 @@ impl<'s> BufferColumnIndexMut<'s> {
       let buffer = self.buffer;
 
       // If found the cached result for the width.
-      match column_index.as_ref().get_char_until_width(width) {
+      match column_index.as_ref().get_char(width) {
         Some(char_idx) => {
           // Found cached result, directly return it.
           return Some(char_idx);
@@ -299,7 +326,7 @@ impl<'s> BufferColumnIndexMut<'s> {
       // query.
       let mut line_width = 0_usize;
       for (i, c) in line_slice.chars().enumerate() {
-        let c_width = match column_index.as_ref().get_width_until_char(i) {
+        let c_width = match column_index.as_ref().get_width(i) {
           Some(c_width) => {
             // If the char index `i` is already cached.
             c_width
@@ -308,7 +335,7 @@ impl<'s> BufferColumnIndexMut<'s> {
             // If the char index `i` is not cached.
             let c_width = buffer.as_ref().char_width(c);
             for w in (line_width + 1)..(line_width + c_width + 1) {
-              column_index.as_mut().set_width_until_char(i, w);
+              column_index.as_mut().set_width(i, w);
             }
             c_width
           }
