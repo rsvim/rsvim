@@ -49,7 +49,7 @@ pub fn next_buffer_id() -> BufferId {
 /// third party prefix-sum will use `O(N)` to add a single char (where the `N` is the length of the
 /// line), which can be slow.
 ///
-/// On the contrary, this struct always uses `O(M * log_N)` (where the `M` is the distance between
+/// On the contrary, this struct always uses `O(M * log N)` (where the `M` is the distance between
 /// current start display column and previous one, the `N` is the length of the line):
 ///
 /// 1. Add/remove chars successively in a line (`M` is 1).
