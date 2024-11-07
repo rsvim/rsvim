@@ -75,7 +75,6 @@ pub fn next_buffer_id() -> BufferId {
 ///    line.
 /// 2. For the other lines, they are Chinese/Japanese/Korean characters, use 2 cells width to
 ///    display in terminal.
-///
 struct PrefixWidth {
   // Maps from char index to display width.
   char2width: BTreeMap<usize, usize>,
