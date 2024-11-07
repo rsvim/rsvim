@@ -9,8 +9,6 @@ use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
 use std::convert::From;
-use std::marker::PhantomData;
-use std::ptr::NonNull;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use unicode_width::UnicodeWidthChar;
