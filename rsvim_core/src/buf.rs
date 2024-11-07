@@ -29,7 +29,27 @@ pub fn next_buffer_id() -> BufferId {
 }
 
 #[derive(Clone, Debug, Default)]
-/// The index maps from the char index to its display width and the opposite side.
+/// The prefix-sum like tree structure.
+///
+/// It maps from the last char index and its display width, and the opposite direction (from the
+/// display width to the last char index). And it is only a cache that when
+/// [`Viewport`](crate::ui::widget::window::viewport::Viewport) renders a buffer, especially not
+/// from the first char of the line.
+///
+/// When rendering without a cache, we will have to go through all the
+/// chars (to sum up the display width of them) before the real first displayed char/column in the
+/// line. Thus can ensure the correct display column of the first char.
+///
+/// For most cases, people move their cursor within a linear changed position, i.e. cursor usually
+/// goes left/right/up/down, completely randomly movement is a rare use case.
+///
+/// And we also need to consider the editing behavior, i.e. the chars in a line can be
+/// added/removed and changed, and the display width of them change as well. For most third party
+/// prefix-sum tree implementations I've found, they are fixed length. This leads to a performance
+/// issue, that if user keeps adding new chars at the end of the line, then this struct will need
+/// `O(N)` time complexity on adding a single char (where the `N` is the length of the line), which
+/// is quite slow.
+///
 /// For example:
 ///
 /// ```text
@@ -48,14 +68,15 @@ pub fn next_buffer_id() -> BufferId {
 ///    line.
 /// 2. For the other lines, they are Chinese/Japanese/Korean characters, use 2 cells width to
 ///    display in terminal.
-struct ColumnIndex {
+///
+struct PrefixWidth {
   // Maps from char index to display width.
   char2column: BTreeMap<usize, usize>,
   // Maps from display width to the last char index.
   column2char: BTreeMap<usize, usize>,
 }
 
-impl ColumnIndex {
+impl PrefixWidth {
   /// Get the display width from the first char until the specific char by the index.
   ///
   /// Returns
@@ -88,9 +109,13 @@ impl ColumnIndex {
     self.char2column.insert(char_idx, width);
     self.column2char.insert(width, char_idx);
   }
+
+  pub fn clear_by_char(&mut self, start_char_idx: usize) {}
+
+  pub fn clear_by_width(&mut self, start_width: usize) {}
 }
 
-type LinesIndex = BTreeMap<usize, ColumnIndex>;
+type LinesIndex = BTreeMap<usize, PrefixWidth>;
 
 #[derive(Clone, Debug)]
 /// The Vim buffer.
@@ -163,15 +188,15 @@ impl Buffer {
 pub struct BufferColumnIndexMut<'s> {
   buffer: NonNull<Buffer>,
   buffer_phantom: PhantomData<&'s mut Buffer>,
-  column_index: NonNull<ColumnIndex>,
-  column_index_phantom: PhantomData<&'s mut ColumnIndex>,
+  column_index: NonNull<PrefixWidth>,
+  column_index_phantom: PhantomData<&'s mut PrefixWidth>,
   line_slice: RopeSlice<'s>,
 }
 
 impl<'s> BufferColumnIndexMut<'s> {
   pub fn new(
     buffer: NonNull<Buffer>,
-    column_index: NonNull<ColumnIndex>,
+    column_index: NonNull<PrefixWidth>,
     line_slice: RopeSlice<'s>,
   ) -> Self {
     Self {
@@ -334,12 +359,12 @@ impl Buffer {
           // Initialize column index if not exist
           raw_lines_index
             .as_mut()
-            .insert(line_idx, ColumnIndex::default());
+            .insert(line_idx, PrefixWidth::default());
         }
       }
 
       let column_index = raw_lines_index.as_mut().get_mut(&line_idx).unwrap();
-      let column_index = NonNull::new(column_index as *mut ColumnIndex).unwrap();
+      let column_index = NonNull::new(column_index as *mut PrefixWidth).unwrap();
       Some(BufferColumnIndexMut::new(
         raw_self,
         column_index,
