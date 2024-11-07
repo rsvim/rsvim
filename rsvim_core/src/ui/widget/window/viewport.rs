@@ -562,11 +562,14 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
           "7-row:{:?}, col:{:?}, start_dcol:{:?}, end_dcol:{:?}, current_line:{}",
           row, col, start_dcol, end_dcol, current_line_idx
         );
-        rows.push(LineViewportRow {
-          row_idx: row,
-          chars_length,
-          chars_width,
-        });
+        rows.insert(
+          row,
+          LineViewportRow {
+            start_dcolumn_idx: start_dcol,
+            end_dcolumn_idx: end_dcol,
+          },
+        );
+
         line_viewports.insert(current_line_idx, LineViewport { rows });
         current_line_idx += 1;
         row += 1;
