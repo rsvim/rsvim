@@ -41,14 +41,13 @@ pub fn next_buffer_id() -> BufferId {
 /// ```
 ///
 /// The above example shows that a unicode character could uses more than 1 cells width to display
-/// in the terminal.
+/// in the terminal:
 ///
-/// For example the 1~2 lines are ASCII control codes (0~31), the tab (`HT`, renders as
-/// `<--HT-->`) uses 8 empty cells by default, the new line (`LF`) uses no cells but simply starts
-/// another new line.
-///
-/// Another example is unicode such as Chinese/Japanese/Korean characters use 2 cells width to
-/// display in terminal.
+/// 1. For the 1~2 lines are ASCII control codes (0~31), the tab (`HT`, renders as `<--HT-->`) uses
+///    8 empty cells by default, the new line (`LF`) uses no cells but simply starts another new
+///    line.
+/// 2. For the other lines, they are Chinese/Japanese/Korean characters, use 2 cells width to
+///    display in terminal.
 ///
 /// This struct maintains the mapping that can query the the display width until a specific char
 /// index, and query the char index at a specific display width, without going through and
