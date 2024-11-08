@@ -475,10 +475,10 @@ fn _collect_from_top_left_with_nowrap(
         // Go through each char in the line.
         for (i, c) in line.chars().enumerate() {
           let c_width = buffer.char_width(c);
-          bcol += c_width;
 
           // Prefix width is still before `start_bcolumn`.
-          if bcol < start_bcolumn {
+          if bcol + c_width < start_bcolumn {
+            bcol += c_width;
             end_bcol = bcol;
             end_c_idx = i;
             debug!(
@@ -499,7 +499,7 @@ fn _collect_from_top_left_with_nowrap(
             );
           }
 
-          // Column with next char will goes out of the row.
+          // Row column with next char will goes out of the row.
           if wcol + c_width as u16 > width {
             end_fills = wcol as usize + c_width - width as usize;
             debug!(
@@ -519,6 +519,7 @@ fn _collect_from_top_left_with_nowrap(
             break;
           }
 
+          bcol += c_width;
           end_bcol = bcol;
           end_c_idx = i;
           wcol += c_width as u16;
@@ -537,7 +538,7 @@ fn _collect_from_top_left_with_nowrap(
             end_fills
           );
 
-          // Column goes out of the row.
+          // Row column goes out of the row.
           if wcol >= width {
             debug!(
               "6-row:{}, col:{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
@@ -562,11 +563,10 @@ fn _collect_from_top_left_with_nowrap(
           LineViewportRow {
             start_bcolumn: start_bcol,
             start_char_idx: start_c_idx,
-            end_bcolumn: end_bcol + 1,
+            end_bcolumn: end_bcol,
             end_char_idx: end_c_idx + 1,
           },
         );
-
         line_viewports.insert(
           current_line,
           LineViewport {
@@ -682,10 +682,10 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
 
         for (i, c) in line.chars().enumerate() {
           let c_width = buffer.char_width(c);
-          bcol += c_width;
 
           // Prefix width is still before `start_dcolumn_idx`.
           if bcol < start_bcolumn {
+            bcol += c_width;
             end_bcol = bcol;
             end_c_idx = i;
             debug!(
@@ -716,67 +716,96 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
             );
           }
 
-          // New line.
-          if c_width == 0 && i + 1 == line.len_chars() {
-            debug!(
-              "3-row/col:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
-              wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
-            );
-            rows.insert(
-              wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                start_filled_columns: start_fills,
-                end_bcolumn: end_bcol + 1,
-                end_char_idx: end_c_idx + 1,
-                end_filled_columns: end_fills,
-              },
-            );
-            break;
-          }
-
           // Column with next char will goes out of the row.
           if wcol + c_width as u16 > width {
-            end_fills = wcol as usize + c_width - width as usize;
-            end_bcol += end_fills;
-            end_c_idx = i;
             debug!(
-              "3-row/col:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
-              wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
+              "3-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
+              wrow,
+              wcol,
+              c,
+              c_width,
+              bcol,
+              start_bcol,
+              end_bcol,
+              start_c_idx,
+              end_c_idx,
+              start_fills,
+              end_fills,
+              width
             );
             rows.insert(
               wrow,
               LineViewportRow {
                 start_bcolumn: start_bcol,
                 start_char_idx: start_c_idx,
-                start_filled_columns: start_fills,
                 end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-                end_filled_columns: end_fills,
+                end_char_idx: end_c_idx + 1,
               },
             );
             wrow += 1;
             wcol = 0_u16;
-            start_bcol = end_bcol;
-            start_fills = c_width - end_fills;
+            start_bcol = end_bcol + 1;
+            start_c_idx = i;
             if wrow >= height {
+              end_fills = wcol as usize + c_width - width as usize;
               debug!(
-                "3-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}, height/width:{}/{}",
-                wrow, wcol, c, start_bcol, end_bcol, height, width
+                "4-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
+                wrow,
+                wcol,
+                c,
+                c_width,
+                bcol,
+                start_bcol,
+                end_bcol,
+                start_c_idx,
+                end_c_idx,
+                start_fills,
+                end_fills,
+                width
               );
               break;
             }
           }
 
-          end_bcol += c_width;
+          bcol += c_width;
+          end_bcol = bcol;
+          end_c_idx = i;
           wcol += c_width as u16;
-          max_dcolumn_idx = std::cmp::max(end_bcol, max_dcolumn_idx);
+          // max_dcolumn_idx = std::cmp::max(end_bcol, max_dcolumn_idx);
 
           debug!(
-            "4-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}",
-            wrow, wcol, c, start_bcol, end_bcol
+            "5-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
+            wrow,
+            wcol,
+            c,
+            c_width,
+            bcol,
+            start_bcol,
+            end_bcol,
+            start_c_idx,
+            end_c_idx,
+            start_fills,
+            end_fills,
+            width
           );
+
+          // End of the line.
+          if i + 1 == line.len_chars() {
+            debug!(
+              "3-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
+              wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
+            );
+            rows.insert(
+              wrow,
+              LineViewportRow {
+                start_bcolumn: start_bcol,
+                start_char_idx: start_c_idx,
+                end_bcolumn: end_bcol + 1,
+                end_char_idx: end_c_idx + 1,
+              },
+            );
+            break;
+          }
 
           // Column goes out of current row.
           if wcol >= width {
