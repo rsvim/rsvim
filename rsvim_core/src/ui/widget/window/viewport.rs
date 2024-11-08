@@ -161,6 +161,8 @@ pub struct ViewportOptions {
 /// Most characters use 1 cell width in the terminal, such as alphabets (A-Z), numbers (0-9) and
 /// punctuations. But ASCII control codes can use 2 or more cells width. For example:
 ///
+/// ### Case-2.1: ASCII control codes
+///
 /// Example-5
 ///
 /// ```text
@@ -181,6 +183,8 @@ pub struct ViewportOptions {
 /// こんにちは、Vim！
 /// 안녕 Vim!
 /// ```
+///
+/// ### Case-2.2: Unicode and CJK
 ///
 /// ## Case-3: All together
 ///
@@ -224,7 +228,6 @@ pub struct ViewportOptions {
 /// 2. When 'wrap' option is `true`, there will be at most 1 line start from non-zero columns, or
 ///    end at non-ending position of the line in the buffer. For example:
 ///
-///
 /// Example-8
 ///
 /// ```text
@@ -233,11 +236,11 @@ pub struct ViewportOptions {
 ///     |---------------------|
 /// <--H|T-->This is the first|
 ///     | line. It is quite lo|
-///     |ng and even cannot be| fully rendered in viewport.
+///     |ng and even cannot <-|-HT--> be fully rendered in viewport.
 ///     |---------------------|
-///      |                   | |
-///      46                  66|   <- Column index in the line of the buffer.
-///                            67
+///      |                 ||
+///      46               64|   <- Column index in the line of the buffer.
+///                         65
 /// ```
 ///
 /// The example-8 shows a very long line that cannot be fully rendered in the viewport, both start
@@ -247,34 +250,37 @@ pub struct ViewportOptions {
 /// least for the first line, it can be fully rendered in the viewport, and it must starts from the
 /// first char of the line (as 'wrap' option requires this rendering behavior).
 ///
-/// Some most important anchors are:
+/// Finally, some most important anchors (in a viewport) are:
 ///
-/// - The start line of the buffer, which shows at the top row of the viewport (inclusive).
-/// - The start display column of the buffer, which shows at the beginning cell of the viewport
-///   (inclusive).
-/// - The end line of the buffer, which is next to the bottom row of the viewport (exclusive).
-/// - The end display column of the buffer, which is next to the last cell of the viewport
-///   (exclusive).
+/// - `start_line`: The start line (inclusive) of the buffer, it is the first line shows at the top
+///   row of the viewport.
+/// - `start_bcolumn`: The start display column (inclusive) of the buffer, it is the the first cell
+///   at the top row of the viewport.
+/// - `start_filled_columns`: The filled columns at the beginning of the viewport, it is only
+///   useful when the first char is not shown at the first column in the top row of the viewport,
+///   exactly in the example-8, the first char (`T`, column index is 4 in the buffer) doesn't show
+///   in the first column in the top row. For this case, the filled columns is 4 (`T-->` uses 4
+///   cells width).
+/// - `end_line`: The end line (exclusive) of the buffer, it is next to the last line at the bottom
+///   row of the viewport.
+/// - `end_bcolumn`: The end display column (exclusive) of the buffer, it is next to the last cell
+///   at the bottom row of the viewport.
+/// - `end_filled_columns`: The filled columns at the end of the viewport, it is only useful when
+///   the last char is not shown at the last column at the bottom row of the viewport, exactly in
+///   the example-8, the last char (` `, column index is 64 in the buffer) doesn't show in the last
+///   column in the bottom row. For this case, the filled columns is 2 (`<-` uses 2 cells width).
 ///
-/// NOTE: The _**display column**_ is neither the character index of the buffer, nor the column of
-/// the window. When character using multiple cells width meet the wrap options and truncated line,
-/// this becomes a little bit complicated. For example:
-///
-///
-/// To distinguish the display column (in the buffer) from the cell column (in the
-/// window/terminal) in the source code, it's named `bcolumn` (short for `buffer_column`).
+/// NOTE: The _**display column**_ in the buffer is the characters displayed column index, not the
+/// char index of the buffer, not the cell column of the viewport/window. It's named `bcolumn`
+/// (short for `buffer_column`).
 ///
 /// When rendering a buffer, viewport will need to go through each lines and characters in the
-/// buffer to ensure how it display. The going through can start from 4 anchors:
+/// buffer to ensure how it display. It can starts from 4 corners:
 ///
-/// 1. Start from top left corner, i.e. the start line (`start_line`) and start display column
-///    (`start_bcolumn`).
-/// 2. Start from top right corner, i.e. the start line (`start_line`) and end display column
-///    (`end_bcolumn`).
-/// 3. Start from bottom left corner, i.e. the end line (`end_line`) and start display column
-///    (`start_bcolumn`).
-/// 4. Start from bottom right corner, i.e. the end line (`end_line`) and end display column
-///    (`end_bcolumn`).
+/// 1. Start from top left corner.
+/// 2. Start from top right corner.
+/// 3. Start from bottom left corner.
+/// 4. Start from bottom right corner.
 pub struct Viewport {
   // Options.
   options: ViewportOptions,
