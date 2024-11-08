@@ -606,7 +606,7 @@ fn _collect_from_top_left_with_nowrap(
     }
     None => {
       // The `start_line` is outside of the buffer.
-      debug!("9-no start_line");
+      debug!("9-start_line:{}", start_line);
       (ViewportRect::default(), BTreeMap::new())
     }
   }
@@ -749,7 +749,7 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
             if wrow >= height {
               end_fills = wcol as usize + c_width - width as usize;
               debug!(
-                "4-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
+                "4-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
                 wrow,
                 wcol,
                 c,
@@ -761,7 +761,7 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
                 end_c_idx,
                 start_fills,
                 end_fills,
-                width
+                height
               );
               break;
             }
@@ -774,7 +774,7 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
           // max_dcolumn_idx = std::cmp::max(end_bcol, max_dcolumn_idx);
 
           debug!(
-            "5-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
+            "5-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
             wrow,
             wcol,
             c,
@@ -785,15 +785,24 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
             start_c_idx,
             end_c_idx,
             start_fills,
-            end_fills,
-            width
+            end_fills
           );
 
           // End of the line.
           if i + 1 == line.len_chars() {
             debug!(
-              "3-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
-              wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
+              "6-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+              wrow,
+              wcol,
+              c,
+              c_width,
+              bcol,
+              start_bcol,
+              end_bcol,
+              start_c_idx,
+              end_c_idx,
+              start_fills,
+              end_fills
             );
             rows.insert(
               wrow,
@@ -810,60 +819,94 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
           // Column goes out of current row.
           if wcol >= width {
             debug!(
-              "5-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}",
-              wrow, wcol, c, start_bcol, end_bcol
+              "7-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
+              wrow,
+              wcol,
+              c,
+              c_width,
+              bcol,
+              start_bcol,
+              end_bcol,
+              start_c_idx,
+              end_c_idx,
+              start_fills,
+              end_fills,
+              width
             );
             rows.insert(
               wrow,
               LineViewportRow {
                 start_bcolumn: start_bcol,
+                start_char_idx: start_c_idx,
                 end_bcolumn: end_bcol,
+                end_char_idx: end_c_idx + 1,
               },
             );
             wrow += 1;
             wcol = 0_u16;
-            start_bcol = end_bcol;
+            start_bcol = end_bcol + 1;
+            start_c_idx = i;
             if wrow >= height {
+              end_fills = wcol as usize + c_width - width as usize;
               debug!(
-                    "6-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}, height/width:{:?}/{:?}",
-                    wrow, wcol, c, start_bcol, end_bcol, height, width
-                  );
+                "8-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
+                wrow,
+                wcol,
+                c,
+                c_width,
+                bcol,
+                start_bcol,
+                end_bcol,
+                start_c_idx,
+                end_c_idx,
+                start_fills,
+                end_fills,
+                height
+              );
               break;
             }
           }
         }
 
-        debug!(
-          "7-row:{:?}, col:{:?}, start_dcol:{:?}, end_dcol:{:?}, current_line:{}",
-          wrow, wcol, start_bcol, end_bcol, current_line
-        );
-        rows.insert(
-          wrow,
-          LineViewportRow {
-            start_bcolumn: start_bcol,
-            end_bcolumn: end_bcol,
+        line_viewports.insert(
+          current_line,
+          LineViewport {
+            rows,
+            start_filled_columns: start_fills,
+            end_filled_columns: end_fills,
           },
         );
-
-        line_viewports.insert(current_line, LineViewport { rows });
+        debug!(
+          "9-current_line:{}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+          current_line,
+          wrow,
+          wcol,
+          bcol,
+          start_bcol,
+          end_bcol,
+          start_c_idx,
+          end_c_idx,
+          start_fills,
+          end_fills
+        );
         current_line += 1;
         wrow += 1;
       }
 
-      debug!("9-row:{}, current_line:{}", wrow, current_line);
+      debug!("10-current_line:{}, wrow:{}", current_line, wrow);
       (
         ViewportRect {
           start_line,
           end_line: current_line,
-          start_bcolumn,
-          end_bcolumn: max_dcolumn_idx + 1,
+          // start_bcolumn,
+          // end_bcolumn: max_dcolumn_idx + 1,
         },
         line_viewports,
       )
     }
     None => {
       // The `start_line` is outside of the buffer.
-      debug!("10-no start_line:{}", start_line);
+      debug!("11-start_line:{}", start_line);
       (ViewportRect::default(), BTreeMap::new())
     }
   }
