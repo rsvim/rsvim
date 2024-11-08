@@ -19,18 +19,59 @@ use unicode_segmentation::UnicodeSegmentation;
 #[derive(Debug, Copy, Clone)]
 /// The row information of a buffer line.
 pub struct LineViewportRow {
-  /// Start display column index for current row, starts from 0.
+  /// Start display column index (in the buffer) for current row, starts from 0.
   ///
   /// NOTE: For the term _**display column**_, please see [`Viewport`].
-  pub start_dcolumn_idx: usize,
+  pub start_bcolumn: usize,
 
-  /// End display column index for current row.
+  /// First (fully displayed) char index in current row.
+  /// NOTE: The char index is based on the line of the buffer, not based on the whole buffer.
+  pub start_char_idx: usize,
+
+  /// Extra filled columns at the beginning of the row.
   ///
-  /// With start/end display column index, we could get several info:
-  /// - The start/end char index for current row.
-  /// - The total characters count.
-  /// - The total character display width.
-  pub end_dcolumn_idx: usize,
+  /// For most cases, this value should be zero. But when the first char (indicate by
+  /// `start_char_idx`) doesn't show at the first column of the row, and meanwhile the cells width
+  /// is not enough for the previous character.
+  ///
+  /// For example:
+  ///
+  /// ```text
+  ///              Column index in viewport -> 0   3
+  ///                                          |   |
+  /// 0         10        20        30    36   40  |  <- Column index in the buffer
+  /// |         |         |         |     |    |   |
+  /// 0         10        20        30    36   |   37  <- Char index in the buffer
+  /// |         |         |         |     |    |   |
+  ///                                         |---------------------|
+  /// This is the beginning of the buffer.<--H|T-->But it begins to |show at here.
+  /// The second line is really short!        |                     |
+  /// Too short to show in viewport, luckily t|he third line is ok. |
+  ///                                         |---------------------|
+  /// ```
+  ///
+  /// The example shows the first char `B` starts at column index 3 in the viewport, and its
+  /// previous char `<--HT-->` uses 8 cells width so cannot fully shows in the viewport.
+  ///
+  /// In this case, the variable `start_filled_columns` is 4, `start_bcolumn` is 40,
+  /// `start_char_idx` is 37.
+  pub start_filled_columns: usize,
+
+  /// End display column index (in the buffer) for current row.
+  ///
+  /// NOTE: The start and end indexes are left-inclusive and right-exclusive.
+  pub end_bcolumn: usize,
+
+  /// End (next to the fully displayed) char index in current row.
+  ///
+  /// NOTE:
+  /// The char index is based on the line of the buffer, not based on the whole buffer.
+  /// The start and end indexes are left-inclusive and right-exclusive.
+  pub end_char_idx: usize,
+
+  /// Extra filled columns at the end of the row, see:
+  /// [`start_filled_columns`](LineViewportRow::start_filled_columns).
+  pub end_filled_columns: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -178,19 +219,19 @@ pub struct ViewportOptions {
 /// part in the `它` character, exclusive).
 ///
 /// To distinguish the display column (in the buffer) from the cell column (in the
-/// window/terminal) in the source code, it's named `dcolumn` (short for `display_column`).
+/// window/terminal) in the source code, it's named `bcolumn` (short for `buffer_column`).
 ///
 /// When rendering a buffer, viewport will need to go through each lines and characters in the
 /// buffer to ensure how it display. The going through can start from 4 anchors:
 ///
-/// 1. Start from top left corner, i.e. the start line (`start_line_idx`) and start display column
-///    (`start_dcolumn_idx`).
-/// 2. Start from top right corner, i.e. the start line (`start_line_idx`) and end display column
-///    (`end_dcolumn_idx`).
-/// 3. Start from bottom left corner, i.e. the end line (`end_line_idx`) and start display column
-///    (`start_dcolumn_idx`).
-/// 4. Start from bottom right corner, i.e. the end line (`end_line_idx`) and end display column
-///    (`end_dcolumn_idx`).
+/// 1. Start from top left corner, i.e. the start line (`start_line`) and start display column
+///    (`start_bcolumn`).
+/// 2. Start from top right corner, i.e. the start line (`start_line`) and end display column
+///    (`end_bcolumn`).
+/// 3. Start from bottom left corner, i.e. the end line (`end_line`) and start display column
+///    (`start_bcolumn`).
+/// 4. Start from bottom right corner, i.e. the end line (`end_line`) and end display column
+///    (`end_bcolumn`).
 pub struct Viewport {
   // Options.
   options: ViewportOptions,
@@ -202,31 +243,19 @@ pub struct Viewport {
   actual_shape: U16Rect,
 
   // Start line index in the buffer, starts from 0.
-  start_line_idx: usize,
+  start_line: usize,
 
   // End line index in the buffer.
-  end_line_idx: usize,
+  end_line: usize,
 
   // Start display column index in the buffer, starts from 0.
-  start_dcolumn_idx: usize,
+  start_bcolumn: usize,
 
   // End display column index in the buffer.
-  end_dcolumn_idx: usize,
+  end_bcolumn: usize,
 
   // Maps from buffer line index to its displayed rows in the window.
   lines: BTreeMap<usize, LineViewport>,
-
-  // Cached char idx and its display width on the line, to improve performance when the viewport
-  // moves and the `start_dcolumn_idx` is not 0.
-  //
-  // For example when the line is very long, and cursor keeps moving to the right side on the line,
-  // viewport will have to always sum up the display width of all the chars before the
-  // `start_dcolumn_idx`, which is `O(N)` (`N` is the chars count before the `start_dcolumn_idx`,
-  // or more generally speaking, `N` is the length of the line).
-  //
-  // The structure maps from the line index to the (char_idx, display width) pair. Once a line is
-  // been modified, the related cache for the line should be reset.
-  prev_display_width: HashMap<usize, (usize, usize)>,
 }
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
@@ -388,8 +417,8 @@ fn _collect_from_top_left_with_nowrap(
         rows.insert(
           row,
           LineViewportRow {
-            start_dcolumn_idx,
-            end_dcolumn_idx: end_dcol + 1,
+            start_bcolumn: start_dcolumn_idx,
+            end_bcolumn: end_dcol + 1,
           },
         );
 
@@ -489,6 +518,19 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
 
           // New line.
           if c_width == 0 && i + 1 == line.len_chars() {
+            end_dcol += col as usize + c_width - width as usize;
+            max_dcolumn_idx = std::cmp::max(end_dcol, max_dcolumn_idx);
+            debug!(
+                    "2-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}, col({})+c_width({}) > width({})",
+                    row, col, c, start_dcol, end_dcol, col, c_width, width
+                  );
+            rows.insert(
+              row,
+              LineViewportRow {
+                start_bcolumn: start_dcol,
+                end_bcolumn: end_dcol,
+              },
+            );
             debug!(
               "1-row:{:?}, col:{:?}, c:{:?}, start_dcol:{:?}, end_dcol:{:?}",
               row, col, c, start_dcol, end_dcol
@@ -507,8 +549,8 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
             rows.insert(
               row,
               LineViewportRow {
-                start_dcolumn_idx: start_dcol,
-                end_dcolumn_idx: end_dcol,
+                start_bcolumn: start_dcol,
+                end_bcolumn: end_dcol,
               },
             );
             row += 1;
@@ -541,8 +583,8 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
             rows.insert(
               row,
               LineViewportRow {
-                start_dcolumn_idx: start_dcol,
-                end_dcolumn_idx: end_dcol,
+                start_bcolumn: start_dcol,
+                end_bcolumn: end_dcol,
               },
             );
             row += 1;
@@ -565,8 +607,8 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
         rows.insert(
           row,
           LineViewportRow {
-            start_dcolumn_idx: start_dcol,
-            end_dcolumn_idx: end_dcol,
+            start_bcolumn: start_dcol,
+            end_bcolumn: end_dcol,
           },
         );
 
@@ -825,27 +867,27 @@ impl Viewport {
       options: *options,
       buffer,
       actual_shape: *actual_shape,
-      start_line_idx: rectangle.start_line_idx,
-      end_line_idx: rectangle.end_line_idx,
-      start_dcolumn_idx: rectangle.start_dcolumn_idx,
-      end_dcolumn_idx: rectangle.end_dcolumn_idx,
+      start_line: rectangle.start_line_idx,
+      end_line: rectangle.end_line_idx,
+      start_bcolumn: rectangle.start_dcolumn_idx,
+      end_bcolumn: rectangle.end_dcolumn_idx,
       lines,
     }
   }
 
   /// Get start line index in the buffer, starts from 0.
   pub fn start_line_idx(&self) -> usize {
-    self.start_line_idx
+    self.start_line
   }
 
   /// Get end line index in the buffer.
   pub fn end_line_idx(&self) -> usize {
-    self.end_line_idx
+    self.end_line
   }
 
   /// Get start display column index in the buffer, starts from 0.
   pub fn start_dcolumn_idx(&self) -> usize {
-    self.start_dcolumn_idx
+    self.start_bcolumn
   }
 
   /// Get end display column index in the buffer.
@@ -854,7 +896,7 @@ impl Viewport {
   /// lines displayed in the window. This is useful when the lines are been truncated and cannot
   /// display all of them in the window.
   pub fn end_dcolumn_idx(&self) -> usize {
-    self.end_dcolumn_idx
+    self.end_bcolumn
   }
 
   /// Get viewport information by lines.
