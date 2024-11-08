@@ -99,6 +99,8 @@ pub struct ViewportOptions {
 ///
 /// ## Case-1: Line-wrap and word-wrap
 ///
+/// ### Case-1.1: Wrap is disabled
+///
 /// When 'wrap' option is `false`, and there's one very long line which is longer than the width
 /// of the window. The viewport has to truncate the line, and only shows part of it. For example:
 ///
@@ -121,7 +123,9 @@ pub struct ViewportOptions {
 /// ```
 ///
 /// Example-1 only shows the beginning of the line, and example-2 only shows the ending of the
-/// line.
+/// line (with 'wrap' option is `false`, the second line is too short to show in viewport).
+///
+/// ### Case-1.2: Wrap is enabled
 ///
 /// When 'wrap' option is `true`, the long line will take multiple rows and try to use the whole
 /// window to render all of it, while still been truncated if it's just too long to show within the
@@ -178,8 +182,72 @@ pub struct ViewportOptions {
 /// 안녕 Vim!
 /// ```
 ///
-/// Taking all above scenarios into consideration, when rendering a buffer in a viewport, the most
-/// important several anchors are:
+/// ## Case-3: All together
+///
+/// Taking all above scenarios into consideration, when rendering a buffer in a viewport, some edge
+/// cases are:
+///
+/// Example-7
+///
+/// ```text
+///                                  31(LF)
+/// 0  3 4                   24    30|
+/// |  | |                   |      ||
+///     |---------------------|
+/// <--H|T-->This is the first| line.                 <- Line-1
+/// This| is the second line. |                       <- Line-2
+/// This| is the third line, 它 有一点点长。          <- Line-3
+///     |---------------------|
+/// |  |                     | |          |||
+/// 0  3                     24|         36||
+///                            25         37|
+///                                         38(LF)
+/// ```
+///
+/// Example-7 shows a use case with 'wrap' option is `false`, at the beginning of the first line in
+/// the viewport, the horizontal tab (`<--HT-->`, use 8 cells width) cannot been fully rendered in
+/// viewport. And at the end of the last line in the viewport, the Chinese character (`它`, use 2
+/// cells width) also cannot been fully rendered in viewport.
+///
+/// For the _**display column**_ in the buffer, it's based on the display width of the unicode
+/// character, not the char index in the buffer. In example-7, line-1, the start display column is
+/// 4 (the `T` in the `<--HT-->`, inclusive), the end display column is 25 (the ` ` whitespace
+/// after the `t`, exclusive). In line-3, the start display column is 4 (the ` ` whitespace after
+/// the `s`, inclusive), the end display column is 25 (the right half part in the `它` character,
+/// exclusive).
+///
+/// Another hidden rule is:
+/// 1. When 'wrap' option is `false`, there can be multiple lines start from non-zero columns in
+///    the buffer, or end at non-ending position of the line. Just like example-7, there are 3
+///    lines and they all start from column 4, and for line-1 and line-3 they don't end at their
+///    ending position of the line.
+/// 2. When 'wrap' option is `true`, there will be at most 1 line start from non-zero columns, or
+///    end at non-ending position of the line in the buffer. For example:
+///
+///
+/// Example-8
+///
+/// ```text
+/// 0  3 4  <- Column index in the line of the buffer.
+/// |  | |
+///     |---------------------|
+/// <--H|T-->This is the first|
+///     | line. It is quite lo|
+///     |ng and even cannot be| fully rendered in viewport.
+///     |---------------------|
+///      |                   | |
+///      46                  66|   <- Column index in the line of the buffer.
+///                            67
+/// ```
+///
+/// The example-8 shows a very long line that cannot be fully rendered in the viewport, both start
+/// and ending parts are been truncated. But there will not be 2 lines that are both truncated,
+/// because with 'wrap' options is `true`, if one line is too long to render, only the one line
+/// will show in the viewport. If one line is not too lone and there could be another line, then at
+/// least for the first line, it can be fully rendered in the viewport, and it must starts from the
+/// first char of the line (as 'wrap' option requires this rendering behavior).
+///
+/// Some most important anchors are:
 ///
 /// - The start line of the buffer, which shows at the top row of the viewport (inclusive).
 /// - The start display column of the buffer, which shows at the beginning cell of the viewport
@@ -192,31 +260,6 @@ pub struct ViewportOptions {
 /// the window. When character using multiple cells width meet the wrap options and truncated line,
 /// this becomes a little bit complicated. For example:
 ///
-/// Example-7
-///
-/// ```text
-///                                  31(LF)
-/// 0  3 4                   24    30|
-/// |  | |                   |      ||
-///     |---------------------|
-/// <--H|T-->This is the first| line.
-/// This| is the second line. |
-/// This| is the third line, 它 有一点点长。
-///     |---------------------|
-/// |  |                     | |          |||
-/// 0  3                     24|         36||
-///                            25         37|
-///                                         38(LF)
-/// ```
-///
-/// Example-7 shows a use case, at the beginning of the viewport, the horizontal tab
-/// (`<--HT-->`, use 8 cells width) is been truncated. And at the end of the viewport, the Chinese
-/// character (`它`, use 2 cells width) is also been truncated.
-///
-/// For the X-axis in the viewport, here use the term _**display column**_, it's based on the
-/// display width of the character, not the index in the buffer. In example-7, the start display
-/// column is 4 (the `T` in the `<--HT-->`, inclusive), the end display column is 26 (the right half
-/// part in the `它` character, exclusive).
 ///
 /// To distinguish the display column (in the buffer) from the cell column (in the
 /// window/terminal) in the source code, it's named `bcolumn` (short for `buffer_column`).
@@ -280,8 +323,8 @@ fn collect_from_top_left(
   options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
-  start_line_idx: usize,
-  start_dcolumn_idx: usize,
+  start_line: usize,
+  start_bcolumn: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
   // If window is zero-sized.
   let height = actual_shape.height();
@@ -291,26 +334,22 @@ fn collect_from_top_left(
   }
 
   match (options.wrap, options.line_break) {
-    (false, _) => _collect_from_top_left_with_nowrap(
-      options,
-      buffer,
-      actual_shape,
-      start_line_idx,
-      start_dcolumn_idx,
-    ),
+    (false, _) => {
+      _collect_from_top_left_with_nowrap(options, buffer, actual_shape, start_line, start_bcolumn)
+    }
     (true, false) => _collect_from_top_left_with_wrap_nolinebreak(
       options,
       buffer,
       actual_shape,
-      start_line_idx,
-      start_dcolumn_idx,
+      start_line,
+      start_bcolumn,
     ),
     (true, true) => _collect_from_top_left_with_wrap_linebreak(
       options,
       buffer,
       actual_shape,
-      start_line_idx,
-      start_dcolumn_idx,
+      start_line,
+      start_bcolumn,
     ),
   }
 }
@@ -329,8 +368,8 @@ fn _collect_from_top_left_with_nowrap(
   _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
-  start_line_idx: usize,
-  start_dcolumn_idx: usize,
+  start_line: usize,
+  start_bcolumn: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -346,45 +385,47 @@ fn _collect_from_top_left_with_nowrap(
 
   debug!(
     "buffer.get_line ({:?}):{:?}",
-    start_line_idx,
-    match buffer.get_line(start_line_idx) {
+    start_line,
+    match buffer.get_line(start_line) {
       Some(line) => rpslice2line(&line),
       None => "None".to_string(),
     }
   );
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  let mut max_dcolumn_idx = start_dcolumn_idx;
+  let mut max_bcolumn = start_bcolumn;
 
-  match buffer.get_lines_at(start_line_idx) {
-    // The `start_line_idx` is in the buffer.
+  match buffer.get_lines_at(start_line) {
+    // The `start_line` is in the buffer.
     Some(buflines) => {
-      // The first `row` in the window maps to the `start_line_idx` in the buffer.
+      // The first `row` in the window maps to the `start_line` in the buffer.
       let mut row = 0;
-      let mut current_line_idx = start_line_idx;
+      let mut current_line = start_line;
 
       for (l, line) in buflines.enumerate() {
+        // Current row goes out of viewport.
         if row >= height {
           break;
         }
+
         debug!(
           "0-l:{:?}, line:'{:?}', current_line:{:?}",
           l,
           rpslice2line(&line),
-          current_line_idx
+          current_line
         );
 
         let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
         let mut col = 0_u16;
-        let mut end_dcol = 0_usize;
+        let mut end_bcol = 0_usize;
 
         // Go through each char in the line.
         for (i, c) in line.chars().enumerate() {
           let c_width = buffer.char_width(c);
 
-          // Prefix width is still before `start_dcolumn_idx`.
-          if end_dcol + c_width < start_dcolumn_idx {
-            end_dcol += c_width;
+          // Prefix width is still before `start_bcolumn`.
+          if end_bcol + c_width < start_bcolumn {
+            end_bcol += c_width;
             continue;
           }
 
@@ -395,17 +436,17 @@ fn _collect_from_top_left_with_nowrap(
 
           // Column with next char will goes out of the row.
           if col + c_width as u16 > width {
-            end_dcol += col as usize + c_width - width as usize;
-            max_dcolumn_idx = std::cmp::max(end_dcol, max_dcolumn_idx);
+            end_bcol += col as usize + c_width - width as usize;
+            max_bcolumn = std::cmp::max(end_bcol, max_bcolumn);
             break;
           }
 
-          end_dcol += c_width;
+          end_bcol += c_width;
           col += c_width as u16;
-          max_dcolumn_idx = std::cmp::max(end_dcol, max_dcolumn_idx);
+          max_bcolumn = std::cmp::max(end_bcol, max_bcolumn);
           debug!(
             "1-row:{:?}, col:{:?}, c:{:?}, c_width:{:?}, end_dcol:{:?}",
-            row, col, c, c_width, end_dcol
+            row, col, c, c_width, end_bcol
           );
 
           // Column goes out of the row.
@@ -417,28 +458,28 @@ fn _collect_from_top_left_with_nowrap(
         rows.insert(
           row,
           LineViewportRow {
-            start_bcolumn: start_dcolumn_idx,
-            end_bcolumn: end_dcol + 1,
+            start_bcolumn,
+            end_bcolumn: end_bcol + 1,
           },
         );
 
-        line_viewports.insert(current_line_idx, LineViewport { rows });
+        line_viewports.insert(current_line, LineViewport { rows });
         debug!(
           "2-current_line:{:?}, row:{:?}, end_dcol:{:?}",
-          current_line_idx, row, end_dcol
+          current_line, row, end_bcol
         );
         // Go to next row and line
-        current_line_idx += 1;
+        current_line += 1;
         row += 1;
       }
 
-      debug!("3-current_line:{:?}, row:{:?}", current_line_idx, row);
+      debug!("3-current_line:{:?}, row:{:?}", current_line, row);
       (
         ViewportRect {
-          start_line: start_line_idx,
-          end_line: current_line_idx,
-          start_bcolumn: start_dcolumn_idx,
-          end_bcolumn: max_dcolumn_idx + 1,
+          start_line,
+          end_line: current_line,
+          start_bcolumn,
+          end_bcolumn: max_bcolumn + 1,
         },
         line_viewports,
       )
