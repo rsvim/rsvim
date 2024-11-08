@@ -259,19 +259,19 @@ pub struct Viewport {
 }
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
-/// Rectangle of line/dcolumn index inside [`Viewport`].
+/// Rectangle of line/bcolumn index inside [`Viewport`].
 pub struct ViewportRect {
   // Start line index in the buffer, starts from 0.
-  pub start_line_idx: usize,
+  pub start_line: usize,
 
   // End line index in the buffer.
-  pub end_line_idx: usize,
+  pub end_line: usize,
 
   // Start display column index in the buffer, starts from 0.
-  pub start_dcolumn_idx: usize,
+  pub start_bcolumn: usize,
 
   // End display column index in the buffer.
-  pub end_dcolumn_idx: usize,
+  pub end_bcolumn: usize,
 }
 
 // Given the buffer and window size, collect information from start line and column, i.e. from the
@@ -435,10 +435,10 @@ fn _collect_from_top_left_with_nowrap(
       debug!("3-current_line:{:?}, row:{:?}", current_line_idx, row);
       (
         ViewportRect {
-          start_line_idx,
-          end_line_idx: current_line_idx,
-          start_dcolumn_idx,
-          end_dcolumn_idx: max_dcolumn_idx + 1,
+          start_line: start_line_idx,
+          end_line: current_line_idx,
+          start_bcolumn: start_dcolumn_idx,
+          end_bcolumn: max_dcolumn_idx + 1,
         },
         line_viewports,
       )
@@ -620,10 +620,10 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
       debug!("9-row:{}, current_line:{}", row, current_line_idx);
       (
         ViewportRect {
-          start_line_idx,
-          end_line_idx: current_line_idx,
-          start_dcolumn_idx,
-          end_dcolumn_idx: max_dcolumn_idx + 1,
+          start_line: start_line_idx,
+          end_line: current_line_idx,
+          start_bcolumn: start_dcolumn_idx,
+          end_bcolumn: max_dcolumn_idx + 1,
         },
         line_viewports,
       )
@@ -843,10 +843,10 @@ fn _collect_from_top_left_with_wrap_linebreak(
       );
       (
         ViewportRect {
-          start_line_idx,
-          end_line_idx: current_line,
-          start_dcolumn_idx,
-          end_dcolumn_idx: max_column,
+          start_line: start_line_idx,
+          end_line: current_line,
+          start_bcolumn: start_dcolumn_idx,
+          end_bcolumn: max_column,
         },
         line_viewports,
       )
@@ -867,10 +867,10 @@ impl Viewport {
       options: *options,
       buffer,
       actual_shape: *actual_shape,
-      start_line: rectangle.start_line_idx,
-      end_line: rectangle.end_line_idx,
-      start_bcolumn: rectangle.start_dcolumn_idx,
-      end_bcolumn: rectangle.end_dcolumn_idx,
+      start_line: rectangle.start_line,
+      end_line: rectangle.end_line,
+      start_bcolumn: rectangle.start_bcolumn,
+      end_bcolumn: rectangle.end_bcolumn,
       lines,
     }
   }
