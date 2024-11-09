@@ -7,7 +7,7 @@ use crate::envar;
 use crate::rlock;
 use crate::ui::canvas::Cell;
 use crate::ui::tree::internal::Inodeable;
-use crate::ui::util::{ptr::SafeWindowRef, strings};
+use crate::ui::util::ptr::SafeWindowRef;
 use crate::ui::widget::window::Window;
 
 use geo::point;
@@ -500,7 +500,7 @@ fn _collect_from_top_left_with_nowrap(
           }
 
           // Row column with next char will goes out of the row.
-          if wcol + c_width as u16 > width {
+          if wcol as usize + c_width > width as usize {
             end_fills = wcol as usize + c_width - width as usize;
             debug!(
               "4-row:{}, col:{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
@@ -684,7 +684,7 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
           let c_width = buffer.char_width(c);
 
           // Prefix width is still before `start_dcolumn_idx`.
-          if bcol < start_bcolumn {
+          if bcol + c_width < start_bcolumn {
             bcol += c_width;
             end_bcol = bcol;
             end_c_idx = i;
@@ -717,7 +717,7 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
           }
 
           // Column with next char will goes out of the row.
-          if wcol + c_width as u16 > width {
+          if wcol as usize + c_width > width as usize {
             debug!(
               "3-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
               wrow,
@@ -929,11 +929,11 @@ fn truncate_line(line: &RopeSlice, start_column: usize, max_bytes: usize) -> Str
 
 // Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=true`.
 fn _collect_from_top_left_with_wrap_linebreak(
-  options: &ViewportOptions,
+  _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
-  start_line_idx: usize,
-  start_dcolumn_idx: usize,
+  start_line: usize,
+  start_bcolumn: usize,
 ) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -947,134 +947,211 @@ fn _collect_from_top_left_with_wrap_linebreak(
   let buffer = buffer.upgrade().unwrap();
   let buffer = rlock!(buffer);
 
-  if let Some(line) = buffer.get_line(start_line_idx) {
-    debug!(
-      "buffer.get_line ({:?}):'{:?}'",
-      start_line_idx,
-      rpslice2line(&line),
-    );
-  } else {
-    debug!("buffer.get_line ({:?}):None", start_line_idx);
-  }
+  debug!(
+    "buffer.get_line ({:?}):'{:?}'",
+    start_line,
+    match buffer.get_line(start_line) {
+      Some(line) => rpslice2line(&line),
+      None => "None".to_string(),
+    }
+  );
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  let mut max_column = start_dcolumn_idx;
+  // let mut max_column = start_bcolumn;
 
-  match buffer.get_lines_at(start_line_idx) {
+  match buffer.get_lines_at(start_line) {
     Some(buflines) => {
       // The `start_line` is inside the buffer.
 
-      // The first `row` in the window maps to the `start_line` in the buffer.
-      let mut row = 0;
-      let mut current_line = start_line_idx;
+      // The first `wrow` in the window maps to the `start_line` in the buffer.
+      let mut wrow = 0;
+      let mut current_line = start_line;
 
       for (l, line) in buflines.enumerate() {
-        if row >= height {
+        if wrow >= height {
           break;
         }
-        let mut sections: Vec<LineViewportRow> = vec![];
+        let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
 
-        let mut col = 0_u16;
-        let mut chars_length = 0_usize;
-        let mut chars_width = 0_u16;
-        let mut wd_length = 0_usize;
+        let mut wcol = 0_u16;
+
+        let mut bchars = 0_usize;
+        let mut bcol = 0_usize;
+        let mut start_bcol = 0_usize;
+        let mut end_bcol = 0_usize;
+
+        let mut start_c_idx = 0_usize;
+        let mut end_c_idx = 0_usize;
+        let mut start_c_idx_init = false;
+        let mut _end_c_idx_init = false;
+
+        let mut start_fills = 0_usize;
+        let mut end_fills = 0_usize;
 
         // Chop the line into maximum chars can hold by current window, thus avoid those super
         // long lines for iteration performance.
-        // NOTE: Use `height * width * 4`, 4 is for at most 4 bytes can hold a grapheme
-        // cluster.
-        let truncated_line = truncate_line(
-          &line,
-          start_dcolumn_idx,
-          height as usize * width as usize * 4,
-        );
+        // NOTE: Use `height * width * 4` simply for a much bigger size for the total characters in
+        // a viewport.
+        let truncated_line =
+          truncate_line(&line, start_bcolumn, height as usize * width as usize * 4);
         let word_boundaries: Vec<&str> = truncated_line.split_word_bounds().collect();
         debug!(
-          "0-truncated_line: {:?}, word_boundaries: {:?}",
-          truncated_line, word_boundaries
+          "0-truncated_line: {:?}, word_boundaries: {:?}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+          truncated_line, word_boundaries, wrow, wcol, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills
         );
 
         for (i, wd) in word_boundaries.iter().enumerate() {
-          if row >= height {
-            break;
-          }
+          // if wrow >= height {
+          //   break;
+          // }
           debug!(
-            "1-l:{:?}, line:'{:?}', current_line:{:?}, max_column:{:?}",
+            "1-l:{:?}, line:'{:?}', current_line:{:?}, i:{}, wd:{:?}",
             l,
             rpslice2line(&line),
             current_line,
-            max_column
+            i,
+            wd
           );
 
-          let (wd_chars, wd_width) = wd
-            .chars()
-            .map(|c| (1_usize, strings::char_width(c, &buffer) as usize))
-            .fold(
-              (0_usize, 0_usize),
-              |(acc_chars, acc_width), (c_count, c_width)| {
-                (acc_chars + c_count, acc_width + c_width)
-              },
-            );
+          let (wd_chars, wd_width) = wd.chars().map(|c| (1_usize, buffer.char_width(c))).fold(
+            (0_usize, 0_usize),
+            |(init_chars, init_width), (c_count, c_width)| {
+              (init_chars + c_count, init_width + c_width)
+            },
+          );
 
-          if wd_width == 0 && i + 1 == word_boundaries.len() {
+          // Prefix width is still before `start_dcolumn_idx`.
+          if bcol + wd_width < start_bcolumn {
+            bcol += wd_width;
+            bchars += wd_chars;
+            end_bcol = bcol;
+            end_c_idx = bchars;
             debug!(
-              "2-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-              row, col, wd_chars, wd_width, chars_length,  chars_width, max_column
+              "2-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, start_bcolumn:{}",
+              wrow,
+              wcol,
+              bcol,
+              start_bcol,
+              end_bcol,
+              bchars,
+              start_c_idx,
+              end_c_idx,
+              start_fills,
+              end_fills,
+              wd_chars,
+              wd_width,
+              start_bcolumn
             );
-            break;
+            continue;
           }
 
-          if wd_width + col as usize <= width as usize {
-            // Enough space to place this word in current row
-            chars_length += wd_chars;
-            chars_width += wd_width as u16;
-            col += wd_width as u16;
-            wd_length += wd_width;
+          if !start_c_idx_init {
+            start_c_idx_init = true;
+            start_bcol = bcol;
+            start_c_idx = bchars;
+            start_fills = bcol - start_bcolumn;
             debug!(
-              "3-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-              row, col, wd_chars, wd_width, chars_length, chars_width, max_column
+              "3-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
+              wrow,
+              wcol,
+              bcol,
+              start_bcol,
+              end_bcol,
+              bchars,
+              start_c_idx,
+              end_c_idx,
+              start_fills,
+              end_fills,
+              wd_chars,
+              wd_width
             );
-          } else {
-            // Not enough space to place this word in current row.
-            // There're two cases:
-            // 1. The word can be placed in next empty row (since the column idx `col` will
-            //    start from 0 in next row).
-            // 2. The word is still too long to place in an entire row, so next row still
-            //    cannot place it.
-            // Anyway, we simply go to next row, and force render all of the word.
-            sections.push(LineViewportRow {
-              row_idx: row,
-              chars_length,
-              chars_width,
-            });
-            row += 1;
-            col = 0_u16;
-            chars_length = 0_usize;
-            chars_width = 0_u16;
+          }
 
-            if row >= height {
+          // if wd_width == 0 && i + 1 == word_boundaries.len() {
+          //   debug!(
+          //     "2-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+          //     wrow, col, wd_chars, wd_width, chars_length,  chars_width, max_column
+          //   );
+          //   break;
+          // }
+
+          // Row column with next char will goes out of the row, i.e. there's not enough space to
+          // place this word in current row.
+          // There're two cases:
+          // 1. The word can be placed in next empty row, i.e. the word length is less or equal to
+          //    the row length of the viewport.
+          // 2. The word is too long to place in an entire row, i.e. the word length is greater
+          //    than the row length of the viewport.
+          // Anyway, we simply go to next row and force render all of the word. If the word is too
+          // long to place in an entire row, it fallbacks back to the same behavior with
+          // 'line-break' option is `false`.
+          if wcol as usize + wd_width > width as usize {
+            debug!(
+              "4-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+              wrow,
+              wcol,
+              bcol,
+              start_bcol,
+              end_bcol,
+              bchars,
+              start_c_idx,
+              end_c_idx,
+              start_fills,
+              end_fills,
+              wd_chars,
+              wd_width,
+              width
+            );
+            rows.insert(
+              wrow,
+              LineViewportRow {
+                start_bcolumn: start_bcol,
+                start_char_idx: start_c_idx,
+                end_bcolumn: end_bcol,
+                end_char_idx: end_c_idx + 1,
+              },
+            );
+            wrow += 1;
+            wcol = 0_u16;
+            start_bcol = end_bcol + 1;
+            start_c_idx = bchars;
+
+            if wrow >= height {
+              end_fills = wcol as usize + wd_width - width as usize;
               debug!(
-                  "4-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-                  row, col, wd_chars, wd_width, chars_length, chars_width, max_column
-                );
+                "5-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
+                wrow,
+                wcol,
+                bcol,
+                start_bcol,
+                end_bcol,
+                bchars,
+                start_c_idx,
+                end_c_idx,
+                start_fills,
+                end_fills,
+                wd_chars,
+                wd_width,
+                height
+              );
               break;
             }
 
             for c in wd.chars() {
-              if col >= width {
-                sections.push(LineViewportRow {
-                  row_idx: row,
+              if wcol >= width {
+                rows.push(LineViewportRow {
+                  row_idx: wrow,
                   chars_length,
                   chars_width,
                 });
-                row += 1;
+                wrow += 1;
                 col = 0_u16;
                 chars_length = 0_usize;
                 chars_width = 0_u16;
-                if row >= height {
+                if wrow >= height {
                   debug!(
                       "5-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-                        row, col, wd_chars, wd_width, chars_length, chars_width, max_column
+                        wrow, col, wd_chars, wd_width, chars_length, chars_width, max_column
                     );
                   break;
                 }
@@ -1082,7 +1159,7 @@ fn _collect_from_top_left_with_wrap_linebreak(
               let char_width = strings::char_width(c, &buffer);
               if col + char_width > width {
                 debug!( "6-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-                    row, col, wd_chars, wd_width, chars_length, chars_width, max_column
+                    wrow, col, wd_chars, wd_width, chars_length, chars_width, max_column
                   );
                 break;
               }
@@ -1091,37 +1168,47 @@ fn _collect_from_top_left_with_wrap_linebreak(
               col += char_width;
               wd_length += char_width as usize;
               debug!(
-              "7-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-              row, col, wd_chars, wd_width, chars_length, chars_width, max_column
-            );
+                "7-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+                wrow, col, wd_chars, wd_width, chars_length, chars_width, max_column
+              );
             }
           }
+
+          // Enough space to place this word in current row
+          chars_length += wd_chars;
+          chars_width += wd_width as u16;
+          col += wd_width as u16;
+          wd_length += wd_width;
+          debug!(
+              "3-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
+              wrow, col, wd_chars, wd_width, chars_length, chars_width, max_column
+          );
         }
 
-        max_column = std::cmp::max(max_column, start_dcolumn_idx + wd_length);
+        // max_column = std::cmp::max(max_column, start_bcolumn + wd_length);
         debug!(
           "8-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-          row, col, chars_length, chars_width, max_column
+          wrow, col, chars_length, chars_width, max_column
         );
-        sections.push(LineViewportRow {
-          row_idx: row,
+        rows.push(LineViewportRow {
+          row_idx: wrow,
           chars_length,
           chars_width,
         });
-        line_viewports.insert(current_line, LineViewport { rows: sections });
+        line_viewports.insert(current_line, LineViewport { rows });
         current_line += 1;
-        row += 1;
+        wrow += 1;
       }
 
       debug!(
         "9-row:{}, current_line:{}, max_column:{}",
-        row, current_line, max_column
+        wrow, current_line, max_column
       );
       (
         ViewportRect {
-          start_line: start_line_idx,
+          start_line,
           end_line: current_line,
-          start_bcolumn: start_dcolumn_idx,
+          start_bcolumn,
           end_bcolumn: max_column,
         },
         line_viewports,
