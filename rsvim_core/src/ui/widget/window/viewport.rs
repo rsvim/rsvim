@@ -13,6 +13,7 @@ use crate::ui::widget::window::Window;
 use geo::point;
 use ropey::RopeSlice;
 use std::collections::{BTreeMap, HashMap};
+use swc_ecma_transforms_base::perf::Items;
 use tracing::debug;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -39,6 +40,18 @@ pub struct LineViewportRow {
   /// The char index is based on the line of the buffer, not based on the whole buffer.
   /// The start and end indexes are left-inclusive and right-exclusive.
   pub end_char_idx: usize,
+}
+
+impl LineViewportRow {
+  /// Get the chars length (count) on the row of the line.
+  pub fn chars_length(&self) -> usize {
+    self.end_char_idx - self.start_char_idx
+  }
+
+  /// Get the chars display width on the row of the line.
+  pub fn chars_width(&self) -> usize {
+    self.end_bcolumn - self.start_bcolumn
+  }
 }
 
 #[derive(Debug, Clone)]
@@ -1137,85 +1150,294 @@ fn _collect_from_top_left_with_wrap_linebreak(
               break;
             }
 
-            for c in wd.chars() {
-              if wcol >= width {
-                rows.push(LineViewportRow {
-                  row_idx: wrow,
-                  chars_length,
-                  chars_width,
-                });
+            for (j, c) in wd.chars().enumerate() {
+              let c_width = buffer.char_width(c);
+
+              // Column with next char will goes out of the row.
+              if wcol as usize + c_width > width as usize {
+                debug!(
+                  "6-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+                  wrow,
+                  wcol,
+                  bcol,
+                  start_bcol,
+                  end_bcol,
+                  bchars,
+                  j,
+                  c,
+                  start_c_idx,
+                  end_c_idx,
+                  start_fills,
+                  end_fills,
+                  wd_chars,
+                  wd_width,
+                  width
+                );
+                rows.insert(
+                  wrow,
+                  LineViewportRow {
+                    start_bcolumn: start_bcol,
+                    start_char_idx: start_c_idx,
+                    end_bcolumn: end_bcol,
+                    end_char_idx: end_c_idx,
+                  },
+                );
                 wrow += 1;
-                col = 0_u16;
-                chars_length = 0_usize;
-                chars_width = 0_u16;
+                wcol = 0_u16;
+                start_bcol = end_bcol + 1;
+                start_c_idx = bchars;
                 if wrow >= height {
+                  end_fills = wcol as usize + c_width - width as usize;
                   debug!(
-                      "5-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-                        wrow, col, wd_chars, wd_width, chars_length, chars_width, max_column
-                    );
+                    "7-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
+                    wrow,
+                    wcol,
+                    bcol,
+                    start_bcol,
+                    end_bcol,
+                    bchars,
+                    j,
+                    c,
+                    start_c_idx,
+                    end_c_idx,
+                    start_fills,
+                    end_fills,
+                    wd_chars,
+                    wd_width,
+                    height
+                  );
                   break;
                 }
               }
-              let char_width = strings::char_width(c, &buffer);
-              if col + char_width > width {
-                debug!( "6-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-                    wrow, col, wd_chars, wd_width, chars_length, chars_width, max_column
-                  );
-                break;
-              }
-              chars_width += char_width;
-              chars_length += 1;
-              col += char_width;
-              wd_length += char_width as usize;
+
+              bcol += c_width;
+              bchars += 1;
+              end_bcol = bcol;
+              end_c_idx = bchars;
+              wcol += c_width as u16;
+
               debug!(
-                "7-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-                wrow, col, wd_chars, wd_width, chars_length, chars_width, max_column
+                "8-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
+                wrow,
+                wcol,
+                bcol,
+                start_bcol,
+                end_bcol,
+                bchars,
+                j,
+                c,
+                start_c_idx,
+                end_c_idx,
+                start_fills,
+                end_fills,
+                wd_chars,
+                wd_width
               );
+
+              // Column goes out of current row.
+              if wcol >= width {
+                debug!(
+                  "9-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+                  wrow,
+                  wcol,
+                  bcol,
+                  start_bcol,
+                  end_bcol,
+                  bchars,
+                  j,
+                  c,
+                  start_c_idx,
+                  end_c_idx,
+                  start_fills,
+                  end_fills,
+                  wd_chars,
+                  wd_width,
+                  width
+                );
+                rows.insert(
+                  wrow,
+                  LineViewportRow {
+                    start_bcolumn: start_bcol,
+                    start_char_idx: start_c_idx,
+                    end_bcolumn: end_bcol,
+                    end_char_idx: end_c_idx + 1,
+                  },
+                );
+                wrow += 1;
+                wcol = 0_u16;
+                start_bcol = end_bcol + 1;
+                start_c_idx = end_c_idx;
+
+                if wrow >= height {
+                  debug!(
+                    "10-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
+                    wrow,
+                    wcol,
+                    bcol,
+                    start_bcol,
+                    end_bcol,
+                    bchars,
+                    j,
+                    c,
+                    start_c_idx,
+                    end_c_idx,
+                    start_fills,
+                    end_fills,
+                    wd_chars,
+                    wd_width,
+                    height
+                  );
+                  break;
+                }
+              }
             }
-          }
+          } // Row column with next char will goes out of the row.
 
           // Enough space to place this word in current row
-          chars_length += wd_chars;
-          chars_width += wd_width as u16;
-          col += wd_width as u16;
-          wd_length += wd_width;
+          bcol += wd_width;
+          bchars += wd_chars;
+          end_bcol = bcol;
+          end_c_idx = bchars;
+          wcol += wd_width as u16;
+
           debug!(
-              "3-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-              wrow, col, wd_chars, wd_width, chars_length, chars_width, max_column
+            "9-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
+            wrow,
+            wcol,
+            bcol,
+            start_bcol,
+            end_bcol,
+            bchars,
+            start_c_idx,
+            end_c_idx,
+            start_fills,
+            end_fills,
+            wd_chars,
+            wd_width
           );
+
+          // End of the line.
+          if i + 1 == word_boundaries.len() {
+            debug!(
+              "10-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
+              wrow,
+              wcol,
+              bcol,
+              start_bcol,
+              end_bcol,
+              bchars,
+              start_c_idx,
+              end_c_idx,
+              start_fills,
+              end_fills,
+              wd_chars,
+              wd_width
+            );
+            rows.insert(
+              wrow,
+              LineViewportRow {
+                start_bcolumn: start_bcol,
+                start_char_idx: start_c_idx,
+                end_bcolumn: end_bcol,
+                end_char_idx: end_c_idx,
+              },
+            );
+            break;
+          }
+
+          // Column goes out of current row.
+          if wcol >= width {
+            debug!(
+              "11-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+              wrow,
+              wcol,
+              bcol,
+              start_bcol,
+              end_bcol,
+              bchars,
+              start_c_idx,
+              end_c_idx,
+              start_fills,
+              end_fills,
+              wd_chars,
+              wd_width,
+              width
+            );
+            rows.insert(
+              wrow,
+              LineViewportRow {
+                start_bcolumn: start_bcol,
+                start_char_idx: start_c_idx,
+                end_bcolumn: end_bcol,
+                end_char_idx: end_c_idx + 1,
+              },
+            );
+            wrow += 1;
+            wcol = 0_u16;
+            start_bcol = end_bcol + 1;
+            start_c_idx = end_c_idx;
+
+            if wrow >= height {
+              debug!(
+                "12-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
+                wrow,
+                wcol,
+                bcol,
+                start_bcol,
+                end_bcol,
+                bchars,
+                start_c_idx,
+                end_c_idx,
+                start_fills,
+                end_fills,
+                wd_chars,
+                wd_width,
+                height
+              );
+              break;
+            }
+          }
         }
 
-        // max_column = std::cmp::max(max_column, start_bcolumn + wd_length);
-        debug!(
-          "8-row:{:?}, col:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-          wrow, col, chars_length, chars_width, max_column
+        line_viewports.insert(
+          current_line,
+          LineViewport {
+            rows,
+            start_filled_columns: start_fills,
+            end_filled_columns: end_fills,
+          },
         );
-        rows.push(LineViewportRow {
-          row_idx: wrow,
-          chars_length,
-          chars_width,
-        });
-        line_viewports.insert(current_line, LineViewport { rows });
+        debug!(
+          "13-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}",
+          wrow,
+          wcol,
+          bcol,
+          start_bcol,
+          end_bcol,
+          bchars,
+          start_c_idx,
+          end_c_idx,
+          start_fills,
+          end_fills
+        );
         current_line += 1;
         wrow += 1;
       }
 
-      debug!(
-        "9-row:{}, current_line:{}, max_column:{}",
-        wrow, current_line, max_column
-      );
+      debug!("14-wrow:{}, current_line:{}", wrow, current_line);
       (
         ViewportRect {
           start_line,
           end_line: current_line,
-          start_bcolumn,
-          end_bcolumn: max_column,
+          // start_bcolumn,
+          // end_bcolumn: max_column,
         },
         line_viewports,
       )
     }
     None => {
       // The `start_line` is outside of the buffer.
+      debug!("15-start_line:{}", start_line);
       (ViewportRect::default(), BTreeMap::new())
     }
   }
@@ -1232,34 +1454,20 @@ impl Viewport {
       actual_shape: *actual_shape,
       start_line: rectangle.start_line,
       end_line: rectangle.end_line,
-      start_bcolumn: rectangle.start_bcolumn,
-      end_bcolumn: rectangle.end_bcolumn,
+      // start_bcolumn: rectangle.start_bcolumn,
+      // end_bcolumn: rectangle.end_bcolumn,
       lines,
     }
   }
 
   /// Get start line index in the buffer, starts from 0.
-  pub fn start_line_idx(&self) -> usize {
+  pub fn start_line(&self) -> usize {
     self.start_line
   }
 
   /// Get end line index in the buffer.
-  pub fn end_line_idx(&self) -> usize {
+  pub fn end_line(&self) -> usize {
     self.end_line
-  }
-
-  /// Get start display column index in the buffer, starts from 0.
-  pub fn start_dcolumn_idx(&self) -> usize {
-    self.start_bcolumn
-  }
-
-  /// Get end display column index in the buffer.
-  ///
-  /// NOTE: The `end_dcolumn_idx` indicates the maximum display column index of all the buffer
-  /// lines displayed in the window. This is useful when the lines are been truncated and cannot
-  /// display all of them in the window.
-  pub fn end_dcolumn_idx(&self) -> usize {
-    self.end_bcolumn
   }
 
   /// Get viewport information by lines.
@@ -1299,8 +1507,12 @@ mod tests {
     let mut tree = Tree::new(size);
     tree.set_local_options(window_options);
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
-    let mut window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
-    Viewport::new(&mut window)
+    let window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
+    let options = ViewportOptions {
+      wrap: window.options().wrap(),
+      line_break: window.options().line_break(),
+    };
+    Viewport::new(&options, window.buffer(), window.actual_shape())
   }
 
   fn _test_collect_from_top_left(
@@ -1312,11 +1524,9 @@ mod tests {
     expect_end_column: usize,
   ) {
     info!(
-      "actual start_line/end_line:{:?}/{:?}, start_column/end_column:{:?}/{:?}",
-      actual.start_line_idx(),
-      actual.end_line_idx(),
-      actual.start_dcolumn_idx(),
-      actual.end_dcolumn_idx()
+      "actual start_line/end_line:{:?}/{:?}",
+      actual.start_line(),
+      actual.end_line()
     );
     for (k, v) in actual.lines().iter() {
       info!("actual {:?}: {:?}", k, v);
@@ -1324,7 +1534,7 @@ mod tests {
     info!("expect:{:?}", expect);
 
     let buffer = buffer.read();
-    let buflines = buffer.get_lines_at(actual.start_line_idx()).unwrap();
+    let buflines = buffer.get_lines_at(actual.start_line()).unwrap();
 
     let mut row = 0_usize;
     for (l, line) in buflines.enumerate() {
@@ -1333,32 +1543,29 @@ mod tests {
       }
       info!("l-{:?}", l);
       let line_viewport = actual.lines().get(&l).unwrap();
-      let sections = line_viewport.rows.clone();
+      let rows = &line_viewport.rows;
       info!("l-{:?}, line_viewport:{:?}", l, line_viewport);
       let mut line_chars = line.chars();
-      for (j, sec) in sections.iter().enumerate() {
-        assert_eq!(sec.row_idx, row as u16);
+      for (row_idx, r) in rows.iter() {
         let mut payload = String::new();
-        for _k in 0..sec.chars_length {
+        for _k in 0..r.chars_length() {
           payload.push(line_chars.next().unwrap());
         }
         info!(
-          "j-{:?}, payload:{:?}, expect[row-{:?}]:{:?}",
-          j, payload, row, expect[row]
+          "-{:?}, payload:{:?}, expect[row-{:?}]:{:?}",
+          row_idx, payload, row_idx, expect[*row_idx as usize]
         );
-        assert_eq!(payload, expect[row]);
-        row += 1;
+        assert_eq!(payload, expect[*row_idx as usize]);
       }
+      row += 1;
     }
 
-    assert_eq!(actual.start_line_idx(), 0);
-    assert_eq!(actual.end_line_idx(), expect_end_line);
-    assert_eq!(actual.start_dcolumn_idx(), 0);
-    assert_eq!(actual.end_dcolumn_idx(), expect_end_column);
+    assert_eq!(actual.start_line(), 0);
+    assert_eq!(actual.end_line(), expect_end_line);
     assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
     assert_eq!(
       *actual.lines().last_key_value().unwrap().0,
-      actual.end_line_idx() - 1
+      actual.end_line() - 1
     );
   }
 
@@ -1459,14 +1666,14 @@ mod tests {
     info!("actual:{:?}", actual);
     info!("expect:{:?}", expect);
 
-    assert_eq!(actual.start_line_idx(), 0);
-    assert_eq!(actual.end_line_idx(), expect.len());
+    assert_eq!(actual.start_line(), 0);
+    assert_eq!(actual.end_line(), expect.len());
     assert_eq!(actual.start_dcolumn_idx(), 0);
     assert_eq!(actual.end_dcolumn_idx(), 1);
     assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
     assert_eq!(
       *actual.lines().last_key_value().unwrap().0,
-      actual.end_line_idx() - 1
+      actual.end_line() - 1
     );
   }
 
