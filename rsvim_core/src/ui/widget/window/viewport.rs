@@ -1642,7 +1642,7 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
-      "Hello, RSVIM!",
+      "Hello, RSVIM!\n",
       "This is a quite simple and ",
       "But still it contains sever",
       "  1. When the line is small",
