@@ -551,10 +551,38 @@ fn _collect_from_top_left_with_nowrap(
             end_fills
           );
 
+          // End of the line.
+          if i + 1 == line.len_chars() {
+            debug!(
+              "6-row:{}, col:{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+              wrow,
+              wcol,
+              c,
+              c_width,
+              bcol,
+              start_bcol,
+              end_bcol,
+              start_c_idx,
+              end_c_idx,
+              start_fills,
+              end_fills
+            );
+            rows.insert(
+              wrow,
+              LineViewportRow {
+                start_bcolumn: start_bcol,
+                start_char_idx: start_c_idx,
+                end_bcolumn: end_bcol + 1,
+                end_char_idx: end_c_idx + 1,
+              },
+            );
+            break;
+          }
+
           // Row column goes out of the row.
           if wcol >= width {
             debug!(
-              "6-row:{}, col:{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+              "7-row:{}, col:{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
               wrow,
               wcol,
               c,
@@ -571,15 +599,6 @@ fn _collect_from_top_left_with_nowrap(
           }
         }
 
-        rows.insert(
-          wrow,
-          LineViewportRow {
-            start_bcolumn: start_bcol,
-            start_char_idx: start_c_idx,
-            end_bcolumn: end_bcol,
-            end_char_idx: end_c_idx + 1,
-          },
-        );
         line_viewports.insert(
           current_line,
           LineViewport {
@@ -589,7 +608,7 @@ fn _collect_from_top_left_with_nowrap(
           },
         );
         debug!(
-          "7-current_line:{}, row:{}, col:{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+          "8-current_line:{}, row:{}, col:{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
           current_line,
           wrow,
           wcol,
@@ -606,7 +625,7 @@ fn _collect_from_top_left_with_nowrap(
         wrow += 1;
       }
 
-      debug!("8-current_line:{}, row:{}", current_line, wrow,);
+      debug!("9-current_line:{}, row:{}", current_line, wrow,);
       (
         ViewportRect {
           start_line,
@@ -619,7 +638,7 @@ fn _collect_from_top_left_with_nowrap(
     }
     None => {
       // The `start_line` is outside of the buffer.
-      debug!("9-start_line:{}", start_line);
+      debug!("10-start_line:{}", start_line);
       (ViewportRect::default(), BTreeMap::new())
     }
   }
