@@ -1563,13 +1563,13 @@ mod tests {
 
     assert_eq!(actual.start_line(), expect_start_line);
     assert_eq!(actual.end_line(), expect_end_line);
-    if actual.lines().len() > 0 {
-      let first_actual_line = actual.lines().first_key_value().unwrap();
-      let last_actual_line = actual.lines().last_key_value().unwrap();
-      assert_eq!(first_actual_line.1.start_filled_columns, expect_start_fills);
-      assert_eq!(last_actual_line.1.end_filled_columns, expect_end_fills);
-      assert_eq!(*first_actual_line.0, 0);
-      assert_eq!(*last_actual_line.0, actual.end_line() - 1);
+    if !actual.lines().is_empty() {
+      let (first_line_idx, first_line_viewport) = actual.lines().first_key_value().unwrap();
+      let (last_line_idx, last_line_viewport) = actual.lines().last_key_value().unwrap();
+      assert_eq!(first_line_viewport.start_filled_columns, expect_start_fills);
+      assert_eq!(last_line_viewport.end_filled_columns, expect_end_fills);
+      assert_eq!(*first_line_idx, actual.start_line());
+      assert_eq!(*last_line_idx, actual.end_line() - 1);
     }
 
     let buffer = buffer.read();
