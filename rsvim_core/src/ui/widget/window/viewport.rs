@@ -1496,9 +1496,6 @@ mod tests {
   use std::sync::Once;
   use tracing::info;
 
-  #[allow(dead_code)]
-  static INIT: Once = Once::new();
-
   fn make_viewport_from_size(
     size: U16Size,
     buffer: BufferArc,
@@ -1536,9 +1533,8 @@ mod tests {
     let buffer = buffer.read();
     let buflines = buffer.get_lines_at(actual.start_line()).unwrap();
 
-    let mut row = 0_usize;
     for (l, line) in buflines.enumerate() {
-      if row >= size.height() as usize {
+      if l >= size.height() as usize {
         break;
       }
       info!("l-{:?}", l);
@@ -1557,7 +1553,6 @@ mod tests {
         );
         assert_eq!(payload, expect[*row_idx as usize]);
       }
-      row += 1;
     }
 
     assert_eq!(actual.start_line(), 0);
@@ -1571,6 +1566,8 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_with_nowrap1() {
+    test_log_init();
+
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -1629,7 +1626,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_with_nowrap2() {
-    // INIT.call_once(test_log_init);
+    test_log_init();
 
     let buffer = make_empty_buffer();
     let expect = vec![""];
@@ -1651,7 +1648,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_nolinebreak1() {
-    // INIT.call_once(test_log_init);
+    test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -1775,7 +1772,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_linebreak1() {
-    // INIT.call_once(test_log_init);
+    test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -1811,7 +1808,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_linebreak2() {
-    // INIT.call_once(test_log_init);
+    test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -1887,7 +1884,7 @@ mod tests {
 
   #[test]
   fn collect_from_top_left_for_wrap_linebreak4() {
-    // INIT.call_once(test_log_init);
+    test_log_init();
 
     let buffer = make_empty_buffer();
     let expect = vec![""];
