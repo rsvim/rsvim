@@ -512,9 +512,9 @@ fn _collect_from_top_left_with_nowrap(
             );
           }
 
-          // Row column with next char will goes out of the row.
+          // Row column with next char will go out of the row.
           if wcol as usize + c_width > width as usize {
-            end_fills = wcol as usize + c_width - width as usize;
+            end_fills = width as usize - wcol as usize;
             debug!(
               "4-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
               wrow,
@@ -528,6 +528,15 @@ fn _collect_from_top_left_with_nowrap(
               end_c_idx,
               start_fills,
               end_fills
+            );
+            rows.insert(
+              wrow,
+              LineViewportRow {
+                start_bcolumn: start_bcol,
+                start_char_idx: start_c_idx,
+                end_bcolumn: end_bcol,
+                end_char_idx: end_c_idx,
+              },
             );
             break;
           }
