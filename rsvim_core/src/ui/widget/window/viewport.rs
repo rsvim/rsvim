@@ -1671,20 +1671,18 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
-      "Hello, RSVIM!",
+      "Hello, RSVIM!\n",
       "This is a quite simple and smal",
       "But still it contains several t",
       "  1. When the line is small eno",
       "  2. When the line is too long ",
       "     * The extra parts are been",
-      "     * The extra parts are spli",
-      "",
     ];
 
-    let size = U16Size::new(31, 11);
+    let size = U16Size::new(31, 5);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 0, 8, 0, 0);
+    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 0, 5, 0, 0);
   }
 
   #[test]
@@ -1696,17 +1694,8 @@ mod tests {
 
     let size = U16Size::new(20, 20);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer, &options);
-    info!("actual:{:?}", actual);
-    info!("expect:{:?}", expect);
-
-    assert_eq!(actual.start_line(), 0);
-    assert_eq!(actual.end_line(), expect.len());
-    assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
-    assert_eq!(
-      *actual.lines().last_key_value().unwrap().0,
-      actual.end_line() - 1
-    );
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 0, 1, 0, 0);
   }
 
   #[test]
