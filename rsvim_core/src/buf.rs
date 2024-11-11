@@ -150,7 +150,6 @@ impl From<Rope> for Buffer {
       id: next_buffer_id(),
       rope,
       options: BufferLocalOptions::default(),
-      lines_index: BTreeMap::new(),
     }
   }
 }
@@ -162,7 +161,6 @@ impl From<RopeBuilder> for Buffer {
       id: next_buffer_id(),
       rope: builder.finish(),
       options: BufferLocalOptions::default(),
-      lines_index: BTreeMap::new(),
     }
   }
 }

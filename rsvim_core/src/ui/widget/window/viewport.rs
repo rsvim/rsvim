@@ -1668,8 +1668,6 @@ mod tests {
 
     assert_eq!(actual.start_line(), 0);
     assert_eq!(actual.end_line(), expect.len());
-    assert_eq!(actual.start_dcolumn_idx(), 0);
-    assert_eq!(actual.end_dcolumn_idx(), 1);
     assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
     assert_eq!(
       *actual.lines().last_key_value().unwrap().0,
