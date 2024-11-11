@@ -1521,7 +1521,7 @@ mod tests {
     actual: &Viewport,
     expect: &Vec<&str>,
     expect_end_line: usize,
-    expect_end_column: usize,
+    _expect_end_column: usize,
   ) {
     info!(
       "actual start_line/end_line:{:?}/{:?}",
@@ -1570,7 +1570,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_nowrap1() {
+  fn collect_from_top_left_with_nowrap1() {
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -1580,6 +1580,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
+
     let expect = vec![
       "Hello, RSV",
       "This is a ",
@@ -1590,24 +1591,11 @@ mod tests {
       "     * The",
       "",
     ];
-
     let size = U16Size::new(10, 10);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 8, 10);
-  }
+    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 8, 10);
 
-  #[test]
-  fn collect_from_top_left_for_nowrap2() {
-    let buffer = make_buffer_from_lines(vec![
-      "Hello, RSVIM!\n",
-      "This is a quite simple and small test lines.\n",
-      "But still it contains several things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-    ]);
     let expect = vec![
       "Hello, RSVIM!",
       "This is a quite simple and ",
@@ -1618,24 +1606,11 @@ mod tests {
       "     * The extra parts are ",
       "",
     ];
-
     let size = U16Size::new(27, 15);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 8, 27);
-  }
+    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 8, 27);
 
-  #[test]
-  fn collect_from_top_left_for_nowrap3() {
-    let buffer = make_buffer_from_lines(vec![
-      "Hello, RSVIM!\n",
-      "This is a quite simple and small test lines.\n",
-      "But still it contains several things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-    ]);
     let expect = vec![
       "Hello, RSVIM!",
       "This is a quite simple and smal",
@@ -1646,15 +1621,14 @@ mod tests {
       "     * The extra parts are spli",
       "",
     ];
-
     let size = U16Size::new(31, 11);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 8, 31);
+    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 8, 31);
   }
 
   #[test]
-  fn collect_from_top_left_for_nowrap4() {
+  fn collect_from_top_left_with_nowrap2() {
     // INIT.call_once(test_log_init);
 
     let buffer = make_empty_buffer();

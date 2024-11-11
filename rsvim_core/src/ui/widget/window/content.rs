@@ -871,7 +871,6 @@ mod tests {
     info!("actual:{:?}", actual);
     let expect = buffer
       .read()
-      .rope()
       .lines()
       .skip(1)
       .take(15)
