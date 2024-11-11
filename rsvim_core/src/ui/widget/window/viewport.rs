@@ -516,7 +516,7 @@ fn _collect_from_top_left_with_nowrap(
           if wcol as usize + c_width > width as usize {
             end_fills = wcol as usize + c_width - width as usize;
             debug!(
-              "4-row:{}, col:{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+              "4-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
               wrow,
               wcol,
               c,
@@ -534,10 +534,10 @@ fn _collect_from_top_left_with_nowrap(
 
           bcol += c_width;
           end_bcol = bcol;
-          end_c_idx = i;
+          end_c_idx = i + 1;
           wcol += c_width as u16;
           debug!(
-            "5-row:{}, col:{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+            "5-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
             wrow,
             wcol,
             c,
@@ -554,7 +554,7 @@ fn _collect_from_top_left_with_nowrap(
           // End of the line.
           if i + 1 == line.len_chars() {
             debug!(
-              "6-row:{}, col:{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+              "6-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
               wrow,
               wcol,
               c,
@@ -572,8 +572,8 @@ fn _collect_from_top_left_with_nowrap(
               LineViewportRow {
                 start_bcolumn: start_bcol,
                 start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol + 1,
-                end_char_idx: end_c_idx + 1,
+                end_bcolumn: end_bcol,
+                end_char_idx: end_c_idx,
               },
             );
             break;
@@ -582,7 +582,7 @@ fn _collect_from_top_left_with_nowrap(
           // Row column goes out of the row.
           if wcol >= width {
             debug!(
-              "7-row:{}, col:{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+              "7-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
               wrow,
               wcol,
               c,
@@ -594,6 +594,15 @@ fn _collect_from_top_left_with_nowrap(
               end_c_idx,
               start_fills,
               end_fills
+            );
+            rows.insert(
+              wrow,
+              LineViewportRow {
+                start_bcolumn: start_bcol,
+                start_char_idx: start_c_idx,
+                end_bcolumn: end_bcol,
+                end_char_idx: end_c_idx,
+              },
             );
             break;
           }
@@ -608,7 +617,7 @@ fn _collect_from_top_left_with_nowrap(
           },
         );
         debug!(
-          "8-current_line:{}, row:{}, col:{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+          "8-current_line:{}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
           current_line,
           wrow,
           wcol,
@@ -1536,8 +1545,10 @@ mod tests {
     buffer: BufferArc,
     actual: &Viewport,
     expect: &Vec<&str>,
+    expect_start_line: usize,
     expect_end_line: usize,
-    _expect_end_column: usize,
+    expect_start_fills: usize,
+    expect_end_fills: usize,
   ) {
     info!(
       "actual start_line/end_line:{:?}/{:?}",
@@ -1545,9 +1556,20 @@ mod tests {
       actual.end_line()
     );
     for (k, v) in actual.lines().iter() {
-      info!("actual {:?}: {:?}", k, v);
+      info!("actual-{:?}: {:?}", k, v);
     }
     info!("expect:{:?}", expect);
+
+    assert_eq!(actual.start_line(), expect_start_line);
+    assert_eq!(actual.end_line(), expect_end_line);
+    if actual.lines().len() > 0 {
+      let first_actual_line = actual.lines().first_key_value().unwrap();
+      let last_actual_line = actual.lines().last_key_value().unwrap();
+      assert_eq!(first_actual_line.1.start_filled_columns, expect_start_fills);
+      assert_eq!(last_actual_line.1.end_filled_columns, expect_end_fills);
+      assert_eq!(*first_actual_line.0, 0);
+      assert_eq!(*last_actual_line.0, actual.end_line() - 1);
+    }
 
     let buffer = buffer.read();
     let buflines = buffer.get_lines_at(actual.start_line()).unwrap();
@@ -1557,7 +1579,8 @@ mod tests {
         break;
       }
       info!("l-{:?}", l);
-      let line_viewport = actual.lines().get(&l).unwrap();
+      let actual_line_idx = l + expect_start_line;
+      let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
       let rows = &line_viewport.rows;
       info!("l-{:?}, line_viewport:{:?}", l, line_viewport);
       let mut line_chars = line.chars();
@@ -1573,14 +1596,6 @@ mod tests {
         assert_eq!(payload, expect[*row_idx as usize]);
       }
     }
-
-    assert_eq!(actual.start_line(), 0);
-    assert_eq!(actual.end_line(), expect_end_line);
-    assert_eq!(*actual.lines().first_key_value().unwrap().0, 0);
-    assert_eq!(
-      *actual.lines().last_key_value().unwrap().0,
-      actual.end_line() - 1
-    );
   }
 
   #[test]
@@ -1610,7 +1625,7 @@ mod tests {
     let size = U16Size::new(10, 10);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 8, 10);
+    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 0, 9, 0, 0);
 
     let expect = vec![
       "Hello, RSVIM!",
@@ -1625,7 +1640,7 @@ mod tests {
     let size = U16Size::new(27, 15);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 8, 27);
+    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 0, 8, 0, 0);
 
     let expect = vec![
       "Hello, RSVIM!",
@@ -1640,7 +1655,7 @@ mod tests {
     let size = U16Size::new(31, 11);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 8, 31);
+    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 0, 8, 0, 0);
   }
 
   #[test]
@@ -1698,7 +1713,7 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 3, 44);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 3, 0, 0);
   }
 
   #[test]
@@ -1737,7 +1752,7 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 5, 158);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 5, 0, 0);
   }
 
   #[test]
@@ -1772,7 +1787,7 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 4, 158);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 4, 0, 0);
   }
 
   #[test]
@@ -1786,7 +1801,7 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 1, 1);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 1, 0, 0);
   }
 
   #[test]
@@ -1822,7 +1837,7 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 3, 44);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 3, 0, 0);
   }
 
   #[test]
@@ -1863,7 +1878,7 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 5, 158);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 5, 0, 0);
   }
 
   #[test]
@@ -1898,7 +1913,7 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 4, 158);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 4, 0, 0);
   }
 
   #[test]
@@ -1914,6 +1929,6 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 1, 0);
+    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 1, 0, 0);
   }
 }
