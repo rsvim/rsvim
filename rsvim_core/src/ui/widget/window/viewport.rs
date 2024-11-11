@@ -1583,17 +1583,17 @@ mod tests {
       let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
       let rows = &line_viewport.rows;
       info!("l-{:?}, line_viewport:{:?}", l, line_viewport);
-      let mut line_chars = line.chars();
-      for (row_idx, r) in rows.iter() {
+      let mut chars_iter = line.chars();
+      for (r, row) in rows.iter() {
         let mut payload = String::new();
-        for _k in 0..r.chars_length() {
-          payload.push(line_chars.next().unwrap());
+        for _k in 0..row.chars_length() {
+          payload.push(chars_iter.next().unwrap());
         }
         info!(
-          "-{:?}, actual:{:?}, expect[row-{:?}]:{:?}",
-          row_idx, payload, row_idx, expect[*row_idx as usize]
+          "row-{:?}, actual:{:?}, expect:{:?}",
+          r, payload, expect[*r as usize]
         );
-        assert_eq!(payload, expect[*row_idx as usize]);
+        assert_eq!(payload, expect[*r as usize]);
       }
     }
   }
