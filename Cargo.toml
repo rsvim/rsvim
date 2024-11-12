@@ -21,8 +21,8 @@ rsvim_core = { version = "0.1.1-alpha.8", path = "./rsvim_core" }
 crossterm = { version = "0.28", features = ["event-stream", "serde"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = [
-  "env-filter",
-  "parking_lot",
+    "env-filter",
+    "parking_lot",
 ] }
 tracing-appender = { version = "0.2", features = ["parking_lot"] }
 tokio = { version = "1", features = ["full"] }
@@ -34,12 +34,12 @@ unicode-segmentation = "1.12.0"
 clap = { version = "4.5.19", features = ["derive", "unicode"] }
 futures = "0.3"
 time = { version = "0.3.36", features = [
-  "macros",
-  "formatting",
-  "parsing",
-  "serde",
-  "serde-human-readable",
-  "rand",
+    "macros",
+    "formatting",
+    "parsing",
+    "serde",
+    "serde-human-readable",
+    "rand",
 ] }
 tz-rs = "0.7.0"
 tzdb = "0.7.2"
@@ -68,6 +68,7 @@ tempfile = "3"
 assert_fs = "1.1.2"
 zstd = "0.13.2"
 icu = { version = "1.5.0", features = ["compiled_data", "serde"] }
+ascii = "1.1.0"
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 

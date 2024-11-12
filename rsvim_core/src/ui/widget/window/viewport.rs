@@ -2,7 +2,6 @@
 
 use crate::buf::BufferWk;
 use crate::cart::{U16Pos, U16Rect, U16Size, URect};
-use crate::defaults::grapheme::AsciiControlCode;
 use crate::envar;
 use crate::rlock;
 use crate::ui::canvas::Cell;
@@ -1713,7 +1712,8 @@ mod tests {
 
     let buffer = make_buffer_from_lines(vec![
       "Hello,\tRSVIM!\n",
-      "This\ris a quite\tsimple and small test lines.\n",
+      "This\r",
+      "is a quite\tsimple and small test lines.\n",
       "But still\\it\rcontains\tseveral things we want to test:\n",
       "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
       "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
@@ -1722,7 +1722,8 @@ mod tests {
     ]);
     let expect = vec![
       "Hello, RSVIM!\n",
-      "This is a quite simple and smal",
+      "This\r",
+      "is a quite simple and smal",
       "But still it contains several t",
       "  1. When the line is small eno",
       "  2. When the line is too long ",

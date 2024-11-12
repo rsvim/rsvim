@@ -1,8 +1,9 @@
 //! Vim buffers.
 
 use crate::buf::opt::BufferLocalOptions;
-use crate::defaults::grapheme::AsciiControlCode;
+use crate::defaults::grapheme::AsciiControlCodeFormatter;
 
+use ascii::AsciiChar;
 use compact_str::CompactString;
 use parking_lot::RwLock;
 use ropey::iter::Lines;
@@ -61,11 +62,14 @@ impl Buffer {
   /// Get the display width for a unicode `char`.
   pub fn char_width(&self, c: char) -> usize {
     if c.is_ascii_control() {
-      let cc = AsciiControlCode::try_from(c).unwrap();
-      match cc {
-        AsciiControlCode::Ht => self.tab_stop() as usize,
-        AsciiControlCode::Lf => 0,
-        _ => format!("{}", cc).len(),
+      let ac = AsciiChar::from_ascii(c).unwrap();
+      match ac {
+        AsciiChar::Tab => self.tab_stop() as usize,
+        AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
+        _ => {
+          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+          format!("{}", ascii_formatter).len()
+        }
       }
     } else {
       UnicodeWidthChar::width_cjk(c).unwrap()
@@ -76,14 +80,17 @@ impl Buffer {
   pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
     let width = self.char_width(c);
     if c.is_ascii_control() {
-      let cc = AsciiControlCode::try_from(c).unwrap();
-      match cc {
-        AsciiControlCode::Ht => (
+      let ac = AsciiChar::from_ascii(c).unwrap();
+      match ac {
+        AsciiChar::Tab => (
           CompactString::from(" ".repeat(self.tab_stop() as usize)),
           width,
         ),
-        AsciiControlCode::Lf => (CompactString::new(""), width),
-        _ => (CompactString::from(format!("{}", cc)), width),
+        AsciiChar::LineFeed | AsciiChar::CarriageReturn => (CompactString::new(""), width),
+        _ => {
+          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+          (CompactString::from(format!("{}", ascii_formatter)), width)
+        }
       }
     } else {
       (CompactString::from(c.to_string()), width)
