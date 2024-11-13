@@ -1588,6 +1588,10 @@ mod tests {
       let actual_line_idx = l + expect_start_line;
       let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
 
+      info!(
+        "l-{:?}, line_viewport:{:?}, actual_line_idx:{}, expect_start_fills:{:?}, expect_end_fills:{:?}",
+        l, line_viewport, actual_line_idx, expect_start_fills, expect_end_fills
+      );
       assert_eq!(
         line_viewport.start_filled_columns,
         *expect_start_fills.get(&actual_line_idx).unwrap()
@@ -1598,7 +1602,6 @@ mod tests {
       );
 
       let rows = &line_viewport.rows;
-      info!("l-{:?}, line_viewport:{:?}", l, line_viewport);
       let mut chars_iter = line.chars();
       for (r, row) in rows.iter() {
         let mut payload = String::new();
@@ -1785,20 +1788,24 @@ mod tests {
       "Hello,\tRSVIM!\n",
       "This\r",
       "is a quite\tsimple and small test lines.\n",
-      "But still\\it\rcontains\tseveral things we want to test:\n",
+      "But still\\it\r",
+      "contains\tseveral things we want to test:\n",
       "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
       "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
       "\t\t* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
-      "Hello, RSVIM!\n",
+      "Hello,", // 4 fills for '\t'
       "This\r",
-      "is a quite simple and smal",
-      "But still it contains several t",
-      "  1. When the line is small eno",
-      "  2. When the line is too long ",
-      "     * The extra parts are been",
+      "is a quite",
+      "But still\\",
+      "contains", // 2 fills for '\t'
+      "\t1.",
+      "\t2.",
+      "\t", // 2 fills for '\t'
+      "\t", // 2 fills for '\t'
+      "",
     ];
 
     let size = U16Size::new(10, 10);
@@ -1814,19 +1821,21 @@ mod tests {
       (6, 0),
       (7, 0),
       (8, 0),
+      (9, 0),
     ]
     .into_iter()
     .collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
+      (0, 4),
       (1, 0),
       (2, 0),
       (3, 0),
-      (4, 0),
+      (4, 2),
       (5, 0),
       (6, 0),
-      (7, 0),
-      (8, 0),
+      (7, 2),
+      (8, 2),
+      (9, 0),
     ]
     .into_iter()
     .collect();
@@ -1836,7 +1845,7 @@ mod tests {
       &actual,
       &expect,
       0,
-      9,
+      10,
       &expect_start_fills,
       &expect_end_fills,
     );
