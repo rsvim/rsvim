@@ -1572,8 +1572,8 @@ mod tests {
     assert_eq!(actual.start_line(), expect_start_line);
     assert_eq!(actual.end_line(), expect_end_line);
     if !actual.lines().is_empty() {
-      let (first_line_idx, first_line_viewport) = actual.lines().first_key_value().unwrap();
-      let (last_line_idx, last_line_viewport) = actual.lines().last_key_value().unwrap();
+      let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
+      let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
       assert_eq!(*first_line_idx, actual.start_line());
       assert_eq!(*last_line_idx, actual.end_line() - 1);
     }
@@ -1734,13 +1734,24 @@ mod tests {
       "But still it contains several t",
       "  1. When the line is small eno",
       "  2. When the line is too long ",
-      "     * The extra parts are been",
     ];
 
     let size = U16Size::new(31, 5);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 0, 5, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer.clone(),
+      &actual,
+      &expect,
+      0,
+      5,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 
   #[test]
@@ -1753,7 +1764,17 @@ mod tests {
     let size = U16Size::new(20, 20);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 0, 1, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    _test_collect_from_top_left(
+      size,
+      buffer.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 
   #[test]
@@ -1783,7 +1804,42 @@ mod tests {
     let size = U16Size::new(10, 10);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer.clone(), &actual, &expect, 0, 9, 0, 0);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+    ]
+    .into_iter()
+    .collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer.clone(),
+      &actual,
+      &expect,
+      0,
+      9,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
   }
 
   #[test]
@@ -1819,7 +1875,30 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 3, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer,
+      &actual,
+      &expect,
+      0,
+      3,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 
   #[test]
@@ -1858,7 +1937,36 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 5, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+      (10, 0),
+      (11, 0),
+      (12, 0),
+      (13, 0),
+      (14, 0),
+      (15, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer,
+      &actual,
+      &expect,
+      0,
+      5,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 
   #[test]
@@ -1893,7 +2001,36 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 4, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+      (10, 0),
+      (11, 0),
+      (12, 0),
+      (13, 0),
+      (14, 0),
+      (15, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer,
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 
   #[test]
@@ -1907,7 +2044,36 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 1, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+      (10, 0),
+      (11, 0),
+      (12, 0),
+      (13, 0),
+      (14, 0),
+      (15, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer,
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 
   #[test]
@@ -1943,7 +2109,36 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 3, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+      (10, 0),
+      (11, 0),
+      (12, 0),
+      (13, 0),
+      (14, 0),
+      (15, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer,
+      &actual,
+      &expect,
+      0,
+      3,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 
   #[test]
@@ -1984,7 +2179,36 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 5, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+      (10, 0),
+      (11, 0),
+      (12, 0),
+      (13, 0),
+      (14, 0),
+      (15, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer,
+      &actual,
+      &expect,
+      0,
+      5,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 
   #[test]
@@ -2019,7 +2243,36 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 4, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+      (10, 0),
+      (11, 0),
+      (12, 0),
+      (13, 0),
+      (14, 0),
+      (15, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer,
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 
   #[test]
@@ -2035,6 +2288,35 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    _test_collect_from_top_left(size, buffer, &actual, &expect, 0, 1, 0, 0);
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+      (10, 0),
+      (11, 0),
+      (12, 0),
+      (13, 0),
+      (14, 0),
+      (15, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer,
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
   }
 }
