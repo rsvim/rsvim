@@ -1602,11 +1602,10 @@ mod tests {
       );
 
       let rows = &line_viewport.rows;
-      let mut chars_iter = line.chars();
       for (r, row) in rows.iter() {
         let mut payload = String::new();
-        for _k in 0..row.chars_length() {
-          payload.push(chars_iter.next().unwrap());
+        for c_idx in row.start_char_idx..row.end_char_idx {
+          payload.push(line.get_char(c_idx).unwrap());
         }
         info!(
           "row-{:?}, actual:{:?}, expect:{:?}",
@@ -1846,6 +1845,73 @@ mod tests {
       &expect,
       0,
       10,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn collect_from_top_left_with_nowrap6() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello,\tRSVIM!\n",
+      "This\tis a quite\tsimple and small test lines.\n",
+      "But still\\it\tcontains\tseveral things we want to test:\n",
+      "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "\t\t* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello,\tRSVIM!\n",
+      "This\tis a quite",
+      "But still\\it\tcontains\t", // 2 fills for '\t'
+      "\t1. When the line is small",
+      "\t2. When the line is too ",
+      "\t\t* The extra parts are", // 2 fills for '\t'
+      "\t\t* The extra parts are", // 2 fills for '\t'
+      "",
+    ];
+
+    let size = U16Size::new(27, 6);
+    let options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+    ]
+    .into_iter()
+    .collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 2),
+      (5, 0),
+      (6, 0),
+      (7, 2),
+      (8, 2),
+      (9, 0),
+    ]
+    .into_iter()
+    .collect();
+    _test_collect_from_top_left(
+      size,
+      buffer.clone(),
+      &actual,
+      &expect,
+      0,
+      6,
       &expect_start_fills,
       &expect_end_fills,
     );
