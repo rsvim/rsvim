@@ -1577,6 +1577,19 @@ mod tests {
       assert_eq!(*first_line_idx, actual.start_line());
       assert_eq!(*last_line_idx, actual.end_line() - 1);
     }
+    assert_eq!(actual.end_line() - actual.start_line(), expect.len());
+    assert_eq!(
+      actual.end_line() - actual.start_line(),
+      actual.lines().len()
+    );
+    assert_eq!(
+      actual.end_line() - actual.start_line(),
+      expect_start_fills.len()
+    );
+    assert_eq!(
+      actual.end_line() - actual.start_line(),
+      expect_end_fills.len()
+    );
 
     let buffer = buffer.read();
     let buflines = buffer.get_lines_at(actual.start_line()).unwrap();
@@ -1859,52 +1872,30 @@ mod tests {
       "This\tis a quite\tsimple and small test lines.\n",
       "But still\\it\tcontains\tseveral things we want to test:\n",
       "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "\t\t* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "\t* The extra\tparts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "  * The extra parts\tare split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
       "Hello,\tRSVIM!\n",
-      "This\tis a quite",
-      "But still\\it\tcontains\t", // 2 fills for '\t'
-      "\t1. When the line is small",
-      "\t2. When the line is too ",
-      "\t\t* The extra parts are", // 2 fills for '\t'
-      "\t\t* The extra parts are", // 2 fills for '\t'
-      "",
+      "This\tis a quite", // 5 fills for '\t'
+      "But still\\it\tcontain",
+      "\t1. When the line is",
+      "  2. When the line is too l",
+      "\t* The extra\t",
     ];
 
     let size = U16Size::new(27, 6);
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    let expect_start_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 0),
-      (5, 0),
-      (6, 0),
-      (7, 0),
-      (8, 0),
-      (9, 0),
-    ]
-    .into_iter()
-    .collect();
-    let expect_end_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 2),
-      (5, 0),
-      (6, 0),
-      (7, 2),
-      (8, 2),
-      (9, 0),
-    ]
-    .into_iter()
-    .collect();
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+        .into_iter()
+        .collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 5), (2, 0), (3, 0), (4, 0), (5, 0)]
+        .into_iter()
+        .collect();
     _test_collect_from_top_left(
       size,
       buffer.clone(),
