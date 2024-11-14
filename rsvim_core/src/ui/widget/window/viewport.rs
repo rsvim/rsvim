@@ -691,13 +691,12 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
   );
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-  // let mut max_dcolumn_idx = start_dcolumn_idx;
 
   match buffer.get_lines_at(start_line) {
     Some(buflines) => {
       // The `start_line` is inside the buffer.
 
-      // The first `wrow` in the window maps to the `start_line_idx` in the buffer.
+      // The first `wrow` in the window maps to the `start_line` in the buffer.
       let mut wrow = 0;
       let mut current_line = start_line;
 
@@ -732,7 +731,7 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
         for (i, c) in line.chars().enumerate() {
           let c_width = buffer.char_width(c);
 
-          // Prefix width is still before `start_dcolumn_idx`.
+          // Prefix width is still before `start_bcolumn`.
           if bcol + c_width < start_bcolumn {
             bcol += c_width;
             end_bcol = bcol;
@@ -818,9 +817,8 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
 
           bcol += c_width;
           end_bcol = bcol;
-          end_c_idx = i;
+          end_c_idx = i + 1;
           wcol += c_width as u16;
-          // max_dcolumn_idx = std::cmp::max(end_bcol, max_dcolumn_idx);
 
           debug!(
             "5-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
@@ -947,8 +945,6 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
         ViewportRect {
           start_line,
           end_line: current_line,
-          // start_bcolumn,
-          // end_bcolumn: max_dcolumn_idx + 1,
         },
         line_viewports,
       )
@@ -1069,7 +1065,7 @@ fn _collect_from_top_left_with_wrap_linebreak(
             },
           );
 
-          // Prefix width is still before `start_dcolumn_idx`.
+          // Prefix width is still before `start_bcolumn`.
           if bcol + wd_width < start_bcolumn {
             bcol += wd_width;
             bchars += wd_chars;
@@ -1868,20 +1864,20 @@ mod tests {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
-      "Hello,\tRSVIM!\n",
-      "This\tis a quite\tsimple and small test lines.\n",
-      "But still\\it\tcontains\tseveral things we want to test:\n",
-      "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "你好，\tRSVIM！\n",
+      "这是\ta quite 简单而且很小的测试文字内容行。\n",
+      "But still\\it\t包含了好几种我们想测试的情况：\n",
+      "\t1. 当那条线\tis small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line 特别长而无法完全 to put in a row of the window content widget, there're multiple cases:\n",
       "\t* The extra\tparts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "  * The extra parts\tare split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
-      "Hello,\tRSVIM!\n",
-      "This\tis a quite", // 5 fills for '\t'
-      "But still\\it\tcontain",
-      "\t1. When the line is",
-      "  2. When the line is too l",
+      "你好，\tRSVIM！\n",
+      "这是\ta quite 简单而",  // 1 fills for '且'
+      "But still\\it\t包含了", // 1 fills for '好'
+      "\t1. 当那条线\t",
+      "  2. When the line 特别长而",
       "\t* The extra\t",
     ];
 
@@ -1893,7 +1889,7 @@ mod tests {
         .into_iter()
         .collect();
     let expect_end_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 5), (2, 0), (3, 0), (4, 0), (5, 0)]
+      vec![(0, 0), (1, 1), (2, 1), (3, 0), (4, 0), (5, 0)]
         .into_iter()
         .collect();
     _test_collect_from_top_left(
@@ -1923,16 +1919,15 @@ mod tests {
     ]);
     let expect = vec![
       "Hello, RSV",
-      "IM!",
+      "IM!\n",
       "This is a ",
       "quite simp",
       "le and sma",
       "ll test li",
-      "nes.",
+      "nes.\n",
       "But still ",
       "it contain",
       "s several ",
-      "",
     ];
 
     let size = U16Size::new(10, 10);
