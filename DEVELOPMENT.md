@@ -31,6 +31,8 @@ To develop code, please setup with:
 
   > Recommend to use [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
 
+- [taplo](https://github.com/tamasfe/taplo): Toml code formatter, format with `taplo format [FILE]` or other ways you like.
+
 ### Coding Style
 
 - Public methods named with `_` prefix are private, the public decorator is only for testing or debugging.
