@@ -2178,6 +2178,42 @@ mod tests {
   }
 
   #[test]
+  fn collect_from_top_left_for_wrap_nolinebreak9() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "但它仍然contains several th\tings 我们想要测试的文字内容：\n",
+      "\t第一，当一行文字内容太小了，然后可以完全的放进窗口的一行之中，那么行wrap和词wrap两个选项并不会影响渲染的最终效果。\n",
+    ]);
+    let expect = vec![
+      "但它仍然contains several th",
+      "\tings 我们想要测试的文字",
+      "内容：\n",
+      "\t第一，当一行文字内容太",
+      "小了，然后可以完全的放进窗口的",
+      "一行之中，那么行wrap和词wrap两", // 1 fills
+    ];
+
+    let size = U16Size::new(31, 5);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(false)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
+    _test_collect_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      2,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
   fn collect_from_top_left_for_wrap_linebreak1() {
     test_log_init();
 
