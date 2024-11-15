@@ -432,6 +432,8 @@ fn _collect_from_top_left_with_nowrap(
   let height = actual_shape.height();
   let width = actual_shape.width();
 
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
   debug!(
     "_collect_from_top_left_with_nowrap, actual_shape:{:?}, height/width:{:?}/{:?}",
     actual_shape, height, width
@@ -461,10 +463,10 @@ fn _collect_from_top_left_with_nowrap(
       let mut current_line = start_line;
 
       for (l, line) in buflines.enumerate() {
-        // Current row goes out of viewport.
-        if wrow >= height {
-          break;
-        }
+        // // Current row goes out of viewport.
+        // if wrow >= height {
+        //   break;
+        // }
 
         debug!(
           "0-l:{:?}, line:'{:?}', current_line:{:?}",
@@ -676,6 +678,8 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
   let height = actual_shape.height();
   let width = actual_shape.width();
 
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
   debug!(
     "_collect_from_top_left_with_wrap_nolinebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
     actual_shape, height, width
@@ -705,10 +709,10 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
       let mut current_line = start_line;
 
       for (l, line) in buflines.enumerate() {
-        // Current row goes out of viewport.
-        if wrow >= height {
-          break;
-        }
+        // // Current row goes out of viewport.
+        // if wrow >= height {
+        //   break;
+        // }
 
         debug!(
           "0-l:{:?}, line:'{:?}', current_line:{:?}",
@@ -1018,11 +1022,11 @@ fn _collect_from_top_left_with_wrap_linebreak(
       let mut current_line = start_line;
 
       for (l, line) in buflines.enumerate() {
-        if wrow >= height {
-          break;
-        }
-        let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
+        // if wrow >= height {
+        //   break;
+        // }
 
+        let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
         let mut wcol = 0_u16;
 
         let mut bchars = 0_usize;
@@ -1054,6 +1058,14 @@ fn _collect_from_top_left_with_wrap_linebreak(
           // if wrow >= height {
           //   break;
           // }
+
+          let (wd_chars, wd_width) = wd.chars().map(|c| (1_usize, buffer.char_width(c))).fold(
+            (0_usize, 0_usize),
+            |(init_chars, init_width), (c_count, c_width)| {
+              (init_chars + c_count, init_width + c_width)
+            },
+          );
+
           debug!(
             "1-l:{:?}, line:'{:?}', current_line:{:?}, i:{}, wd:{:?}",
             l,
@@ -1061,13 +1073,6 @@ fn _collect_from_top_left_with_wrap_linebreak(
             current_line,
             i,
             wd
-          );
-
-          let (wd_chars, wd_width) = wd.chars().map(|c| (1_usize, buffer.char_width(c))).fold(
-            (0_usize, 0_usize),
-            |(init_chars, init_width), (c_count, c_width)| {
-              (init_chars + c_count, init_width + c_width)
-            },
           );
 
           // Prefix width is still before `start_bcolumn`.
@@ -2196,7 +2201,6 @@ mod tests {
       ".",
       "But still ",
       "it ",
-      "",
     ];
 
     let size = U16Size::new(10, 10);
