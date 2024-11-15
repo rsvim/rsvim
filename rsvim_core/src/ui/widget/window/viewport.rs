@@ -1047,8 +1047,11 @@ fn _collect_from_top_left_with_wrap_linebreak(
         // long lines for iteration performance.
         // NOTE: Use `height * width * 4` simply for a much bigger size for the total characters in
         // a viewport.
-        let truncated_line =
-          truncate_line(&line, start_bcolumn, height as usize * width as usize * 4);
+        let truncated_line = truncate_line(
+          &line,
+          start_bcolumn,
+          height as usize * width as usize * 2 + height as usize * 2 + 16,
+        );
         let word_boundaries: Vec<&str> = truncated_line.split_word_bounds().collect();
         debug!(
           "0-truncated_line: {:?}, word_boundaries: {:?}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
@@ -1056,10 +1059,6 @@ fn _collect_from_top_left_with_wrap_linebreak(
         );
 
         for (i, wd) in word_boundaries.iter().enumerate() {
-          // if wrow >= height {
-          //   break;
-          // }
-
           let (wd_chars, wd_width) = wd.chars().map(|c| (1_usize, buffer.char_width(c))).fold(
             (0_usize, 0_usize),
             |(init_chars, init_width), (c_count, c_width)| {
@@ -1123,14 +1122,6 @@ fn _collect_from_top_left_with_wrap_linebreak(
             );
           }
 
-          // if wd_width == 0 && i + 1 == word_boundaries.len() {
-          //   debug!(
-          //     "2-row:{:?}, col:{:?}, wd_chars:{:?}, wd_width:{:?}, chars_length:{:?}, chars_width:{:?}, max_column:{:?}",
-          //     wrow, col, wd_chars, wd_width, chars_length,  chars_width, max_column
-          //   );
-          //   break;
-          // }
-
           // Row column with next char will goes out of the row, i.e. there's not enough space to
           // place this word in current row.
           // There're two cases:
@@ -1164,16 +1155,17 @@ fn _collect_from_top_left_with_wrap_linebreak(
                 start_bcolumn: start_bcol,
                 start_char_idx: start_c_idx,
                 end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx + 1,
+                end_char_idx: end_c_idx,
               },
             );
+            let saved_end_fills = width as usize - wcol as usize;
             wrow += 1;
             wcol = 0_u16;
             start_bcol = end_bcol + 1;
             start_c_idx = bchars;
 
             if wrow >= height {
-              end_fills = wcol as usize + wd_width - width as usize;
+              end_fills = saved_end_fills;
               debug!(
                 "5-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
                 wrow,
@@ -1225,12 +1217,15 @@ fn _collect_from_top_left_with_wrap_linebreak(
                     end_char_idx: end_c_idx,
                   },
                 );
+
+                let saved_end_fills = width as usize - wcol as usize;
                 wrow += 1;
                 wcol = 0_u16;
-                start_bcol = end_bcol + 1;
+                start_bcol = end_bcol;
                 start_c_idx = bchars;
+
                 if wrow >= height {
-                  end_fills = wcol as usize + c_width - width as usize;
+                  end_fills = saved_end_fills;
                   debug!(
                     "7-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
                     wrow,
@@ -1303,12 +1298,13 @@ fn _collect_from_top_left_with_wrap_linebreak(
                     start_bcolumn: start_bcol,
                     start_char_idx: start_c_idx,
                     end_bcolumn: end_bcol,
-                    end_char_idx: end_c_idx + 1,
+                    end_char_idx: end_c_idx,
                   },
                 );
+                debug_assert_eq!(wcol, width);
                 wrow += 1;
                 wcol = 0_u16;
-                start_bcol = end_bcol + 1;
+                start_bcol = end_bcol;
                 start_c_idx = end_c_idx;
 
                 if wrow >= height {
@@ -1412,12 +1408,13 @@ fn _collect_from_top_left_with_wrap_linebreak(
                 start_bcolumn: start_bcol,
                 start_char_idx: start_c_idx,
                 end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx + 1,
+                end_char_idx: end_c_idx,
               },
             );
+            debug_assert_eq!(wcol, width);
             wrow += 1;
             wcol = 0_u16;
-            start_bcol = end_bcol + 1;
+            start_bcol = end_bcol;
             start_c_idx = end_c_idx;
 
             if wrow >= height {
