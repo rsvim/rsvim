@@ -463,10 +463,10 @@ fn _collect_from_top_left_with_nowrap(
       let mut current_line = start_line;
 
       for (l, line) in buflines.enumerate() {
-        // // Current row goes out of viewport.
-        // if wrow >= height {
-        //   break;
-        // }
+        // Current row goes out of viewport.
+        if wrow >= height {
+          break;
+        }
 
         debug!(
           "0-l:{:?}, line:'{:?}', current_line:{:?}",
@@ -709,10 +709,10 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
       let mut current_line = start_line;
 
       for (l, line) in buflines.enumerate() {
-        // // Current row goes out of viewport.
-        // if wrow >= height {
-        //   break;
-        // }
+        // Current row goes out of viewport.
+        if wrow >= height {
+          break;
+        }
 
         debug!(
           "0-l:{:?}, line:'{:?}', current_line:{:?}",
@@ -1022,9 +1022,10 @@ fn _collect_from_top_left_with_wrap_linebreak(
       let mut current_line = start_line;
 
       for (l, line) in buflines.enumerate() {
-        // if wrow >= height {
-        //   break;
-        // }
+        // Current row goes out of viewport.
+        if wrow >= height {
+          break;
+        }
 
         let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
         let mut wcol = 0_u16;
