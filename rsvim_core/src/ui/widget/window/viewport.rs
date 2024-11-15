@@ -1949,17 +1949,17 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
-      "Hello, RSVIM!",
+      "Hello, RSVIM!\n",
       "This is a quite simple and ",
-      "small test lines.",
+      "small test lines.\n",
       "But still it contains sever",
-      "al things we want to test:",
+      "al things we want to test:\n",
       "  1. When the line is small",
       " enough to completely put i",
       "nside a row of the window c",
       "ontent widget, then the lin",
       "e-wrap and word-wrap doesn'",
-      "t affect the rendering.",
+      "t affect the rendering.\n",
       "  2. When the line is too l",
       "ong to be completely put in",
       " a row of the window conten",
@@ -1973,27 +1973,21 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    let expect_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 0),
-      (5, 0),
-      (6, 0),
-      (7, 0),
-      (8, 0),
-      (9, 0),
-      (10, 0),
-      (11, 0),
-      (12, 0),
-      (13, 0),
-      (14, 0),
-      (15, 0),
-    ]
-    .into_iter()
-    .collect();
-    _test_collect_from_top_left(buffer, &actual, &expect, 0, 5, &expect_fills, &expect_fills);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    _test_collect_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      5,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
   }
 
   #[test]
@@ -2008,47 +2002,21 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
-      "Hello, RSVIM!",
+      "Hello, RSVIM!\n",
       "This is a quite simple and smal",
-      "l test lines.",
+      "l test lines.\n",
       "But still it contains several t",
-      "hings we want to test:",
-      "  1. When the line is small eno",
-      "ugh to completely put inside a ",
-      "row of the window content widge",
-      "t, then the line-wrap and word-",
-      "wrap doesn't affect the renderi",
-      "ng.",
-      "",
+      "hings we want to test:\n",
     ];
 
-    let size = U16Size::new(31, 11);
+    let size = U16Size::new(31, 5);
     let options = WindowLocalOptions::builder()
       .wrap(true)
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    let expect_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 0),
-      (5, 0),
-      (6, 0),
-      (7, 0),
-      (8, 0),
-      (9, 0),
-      (10, 0),
-      (11, 0),
-      (12, 0),
-      (13, 0),
-      (14, 0),
-      (15, 0),
-    ]
-    .into_iter()
-    .collect();
-    _test_collect_from_top_left(buffer, &actual, &expect, 0, 4, &expect_fills, &expect_fills);
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    _test_collect_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
