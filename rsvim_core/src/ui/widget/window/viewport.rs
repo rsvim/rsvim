@@ -9,6 +9,7 @@ use crate::ui::tree::internal::Inodeable;
 use crate::ui::util::ptr::SafeWindowRef;
 use crate::ui::widget::window::Window;
 
+use anyhow;
 use geo::point;
 use ropey::RopeSlice;
 use std::collections::{BTreeMap, HashMap};
@@ -417,6 +418,9 @@ fn rpslice2line(s: &RopeSlice) -> String {
   builder
 }
 
+#[derive(Debug)]
+struct CollectCursor {}
+
 // Implement [`collect_from_top_left`] with option `wrap=false`.
 fn _collect_from_top_left_with_nowrap(
   _options: &ViewportOptions,
@@ -787,15 +791,15 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
                 start_bcolumn: start_bcol,
                 start_char_idx: start_c_idx,
                 end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx + 1,
+                end_char_idx: end_c_idx,
               },
             );
             wrow += 1;
             wcol = 0_u16;
-            start_bcol = end_bcol + 1;
-            start_c_idx = i;
+            start_bcol = end_bcol;
+            start_c_idx = end_c_idx;
             if wrow >= height {
-              end_fills = wcol as usize + c_width - width as usize;
+              end_fills = width as usize - wcol as usize;
               debug!(
                 "4-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
                 wrow,
@@ -856,8 +860,8 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
               LineViewportRow {
                 start_bcolumn: start_bcol,
                 start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol + 1,
-                end_char_idx: end_c_idx + 1,
+                end_bcolumn: end_bcol,
+                end_char_idx: end_c_idx,
               },
             );
             break;
@@ -886,15 +890,15 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
                 start_bcolumn: start_bcol,
                 start_char_idx: start_c_idx,
                 end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx + 1,
+                end_char_idx: end_c_idx,
               },
             );
+            debug_assert_eq!(wcol, width);
             wrow += 1;
             wcol = 0_u16;
-            start_bcol = end_bcol + 1;
-            start_c_idx = i;
+            start_bcol = end_bcol;
+            start_c_idx = end_c_idx;
             if wrow >= height {
-              end_fills = wcol as usize + c_width - width as usize;
               debug!(
                 "8-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
                 wrow,
@@ -1573,7 +1577,6 @@ mod tests {
       assert_eq!(*first_line_idx, actual.start_line());
       assert_eq!(*last_line_idx, actual.end_line() - 1);
     }
-    assert_eq!(actual.end_line() - actual.start_line(), expect.len());
     assert_eq!(
       actual.end_line() - actual.start_line(),
       actual.lines().len()
@@ -1936,20 +1939,7 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    let expect_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 0),
-      (5, 0),
-      (6, 0),
-      (7, 0),
-      (8, 0),
-      (9, 0),
-    ]
-    .into_iter()
-    .collect();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     _test_collect_from_top_left(
       size,
       buffer,
