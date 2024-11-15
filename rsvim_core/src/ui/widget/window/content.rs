@@ -294,7 +294,7 @@ impl WindowContent {
     // Lock buffer for read
     let buffer = buffer.try_read_for(envar::MUTEX_TIMEOUT()).unwrap();
 
-    if let Some(line) = buffer.rope().get_line(start_line) {
+    if let Some(line) = buffer.get_line(start_line) {
       debug!(
         "buffer.get_line ({:?}):'{:?}'",
         start_line,
@@ -304,7 +304,7 @@ impl WindowContent {
       debug!("buffer.get_line ({:?}):None", start_line);
     }
 
-    match buffer.rope().get_lines_at(start_line) {
+    match buffer.get_lines_at(start_line) {
       Some(mut buflines) => {
         // The `start_line` is inside the buffer.
         // Render the lines from `start_line` till the end of the buffer or the window widget.
@@ -471,7 +471,7 @@ impl WindowContent {
     //   debug!("buffer.get_line ({:?}):None", start_line);
     // }
 
-    match buffer.rope().get_lines_at(start_line) {
+    match buffer.get_lines_at(start_line) {
       Some(mut buflines) => {
         // The `start_line` is inside the buffer.
         // Render the lines from `start_line` till the end of the buffer or the window widget.
@@ -615,7 +615,7 @@ impl WindowContent {
     //   debug!("buffer.get_line ({:?}):None", start_line);
     // }
 
-    match buffer.rope().get_lines_at(start_line) {
+    match buffer.get_lines_at(start_line) {
       Some(mut buflines) => {
         // The `start_line` is inside the buffer.
         // Render the lines from `start_line` till the end of the buffer or the window widget.
@@ -817,7 +817,6 @@ mod tests {
     info!("actual:{:?}", actual);
     let expect = buffer
       .read()
-      .rope()
       .lines()
       .take(10)
       .map(|l| l.as_str().unwrap().chars().take(10).collect::<String>())
@@ -872,7 +871,6 @@ mod tests {
     info!("actual:{:?}", actual);
     let expect = buffer
       .read()
-      .rope()
       .lines()
       .skip(1)
       .take(15)

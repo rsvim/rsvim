@@ -47,7 +47,6 @@ pub async fn edit_default_file(
               .1
               .try_write_for(envar::MUTEX_TIMEOUT())
               .unwrap()
-              .rope_mut()
               .append(into_rope(&buf, n));
 
             // After read each block, immediately notify main thread so UI tree can render it on
@@ -113,7 +112,7 @@ pub async fn edit_other_files(
             Ok(n) => {
               debug!("Read {} bytes: {:?}", n, into_str(&buf, n));
 
-              wlock!(buffer).rope_mut().append(into_rope(&buf, n));
+              wlock!(buffer).append(into_rope(&buf, n));
 
               // After read each block, immediately notify main thread so UI tree can render it on
               // terminal.

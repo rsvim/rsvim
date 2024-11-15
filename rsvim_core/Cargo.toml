@@ -62,6 +62,7 @@ toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
 icu = { workspace = true, features = ["compiled_data", "serde"] }
+ascii = { workspace = true }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 

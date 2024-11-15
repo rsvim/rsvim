@@ -6,6 +6,8 @@ extend-ignore-words-re = [
   "ther",
   "smal",
   "beginnin",
+  "nnot",
+  "eith",
 ]
 
 [files]

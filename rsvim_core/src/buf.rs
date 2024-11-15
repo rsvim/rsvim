@@ -1,13 +1,18 @@
 //! Vim buffers.
 
 use crate::buf::opt::BufferLocalOptions;
+use crate::defaults::grapheme::AsciiControlCodeFormatter;
 
+use ascii::AsciiChar;
+use compact_str::CompactString;
 use parking_lot::RwLock;
-use ropey::{Rope, RopeBuilder};
+use ropey::iter::Lines;
+use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
 use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
+use unicode_width::UnicodeWidthChar;
 
 pub mod opt;
 
@@ -23,7 +28,7 @@ pub fn next_buffer_id() -> BufferId {
 }
 
 #[derive(Clone, Debug)]
-/// The VIM buffer.
+/// The Vim buffer.
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
@@ -50,15 +55,74 @@ impl Buffer {
   pub fn id(&self) -> BufferId {
     self.id
   }
+}
 
-  pub fn rope(&self) -> &Rope {
-    &self.rope
+// Unicode {
+impl Buffer {
+  /// Get the display width for a unicode `char`.
+  pub fn char_width(&self, c: char) -> usize {
+    if c.is_ascii_control() {
+      let ac = AsciiChar::from_ascii(c).unwrap();
+      match ac {
+        AsciiChar::Tab => self.tab_stop() as usize,
+        AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
+        _ => {
+          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+          format!("{}", ascii_formatter).len()
+        }
+      }
+    } else {
+      UnicodeWidthChar::width_cjk(c).unwrap()
+    }
   }
 
-  pub fn rope_mut(&mut self) -> &mut Rope {
-    &mut self.rope
+  /// Get the printable cell symbol and its display width.
+  pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
+    let width = self.char_width(c);
+    if c.is_ascii_control() {
+      let ac = AsciiChar::from_ascii(c).unwrap();
+      match ac {
+        AsciiChar::Tab => (
+          CompactString::from(" ".repeat(self.tab_stop() as usize)),
+          width,
+        ),
+        AsciiChar::LineFeed | AsciiChar::CarriageReturn => (CompactString::new(""), width),
+        _ => {
+          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+          (CompactString::from(format!("{}", ascii_formatter)), width)
+        }
+      }
+    } else {
+      (CompactString::from(c.to_string()), width)
+    }
   }
 }
+// Unicode }
+
+// Rope {
+impl Buffer {
+  pub fn get_line(&self, line_idx: usize) -> Option<RopeSlice> {
+    self.rope.get_line(line_idx)
+  }
+
+  pub fn get_lines_at(&self, line_idx: usize) -> Option<Lines> {
+    self.rope.get_lines_at(line_idx)
+  }
+
+  pub fn lines(&self) -> Lines {
+    self.rope.lines()
+  }
+
+  pub fn write_to<T: std::io::Write>(&self, writer: T) -> std::io::Result<()> {
+    self.rope.write_to(writer)
+  }
+
+  pub fn append(&mut self, other: Rope) -> &mut Self {
+    self.rope.append(other);
+    self
+  }
+}
+// Rope }
 
 impl Default for Buffer {
   fn default() -> Self {
@@ -242,12 +306,12 @@ mod tests {
     let r1 = Rope::from_str("Hello");
     let buf1 = Buffer::from(r1);
     let tmp1 = tempfile().unwrap();
-    buf1.rope().write_to(tmp1).unwrap();
+    buf1.write_to(tmp1).unwrap();
 
     let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
     let buf2 = Buffer::from(r2);
     let tmp2 = tempfile().unwrap();
-    buf2.rope().write_to(tmp2).unwrap();
+    buf2.write_to(tmp2).unwrap();
   }
 
   #[test]
@@ -257,7 +321,7 @@ mod tests {
     builder1.append("World");
     let buf1 = Buffer::from(builder1);
     let tmp1 = tempfile().unwrap();
-    buf1.rope().write_to(tmp1).unwrap();
+    buf1.write_to(tmp1).unwrap();
   }
 
   #[test]
