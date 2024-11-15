@@ -21,8 +21,8 @@ doctest = false
 crossterm = { workspace = true, features = ["event-stream", "serde"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = [
-    "env-filter",
-    "parking_lot",
+  "env-filter",
+  "parking_lot",
 ] }
 tracing-appender = { workspace = true, features = ["parking_lot"] }
 tokio = { workspace = true, features = ["full"] }
@@ -33,12 +33,12 @@ unicode-segmentation = { workspace = true }
 clap = { workspace = true, features = ["derive", "unicode"] }
 futures = { workspace = true }
 time = { workspace = true, features = [
-    "macros",
-    "formatting",
-    "parsing",
-    "serde",
-    "serde-human-readable",
-    "rand",
+  "macros",
+  "formatting",
+  "parsing",
+  "serde",
+  "serde-human-readable",
+  "rand",
 ] }
 tz-rs = { workspace = true }
 tzdb = { workspace = true }
