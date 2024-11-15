@@ -1550,7 +1550,6 @@ mod tests {
 
   #[allow(clippy::too_many_arguments)]
   fn _test_collect_from_top_left(
-    size: U16Size,
     buffer: BufferArc,
     actual: &Viewport,
     expect: &Vec<&str>,
@@ -1592,9 +1591,10 @@ mod tests {
 
     let buffer = buffer.read();
     let buflines = buffer.get_lines_at(actual.start_line()).unwrap();
+    let total_lines = expect_end_line - expect_start_line;
 
     for (l, line) in buflines.enumerate() {
-      if l >= size.height() as usize {
+      if l >= total_lines {
         break;
       }
       let actual_line_idx = l + expect_start_line;
@@ -1668,7 +1668,6 @@ mod tests {
     .into_iter()
     .collect();
     _test_collect_from_top_left(
-      size,
       buffer.clone(),
       &actual,
       &expect,
@@ -1718,7 +1717,6 @@ mod tests {
     .into_iter()
     .collect();
     _test_collect_from_top_left(
-      size,
       buffer.clone(),
       &actual,
       &expect,
@@ -1757,7 +1755,6 @@ mod tests {
       .into_iter()
       .collect();
     _test_collect_from_top_left(
-      size,
       buffer.clone(),
       &actual,
       &expect,
@@ -1780,7 +1777,6 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     _test_collect_from_top_left(
-      size,
       buffer.clone(),
       &actual,
       &expect,
@@ -1851,7 +1847,6 @@ mod tests {
     .into_iter()
     .collect();
     _test_collect_from_top_left(
-      size,
       buffer.clone(),
       &actual,
       &expect,
@@ -1896,7 +1891,6 @@ mod tests {
         .into_iter()
         .collect();
     _test_collect_from_top_left(
-      size,
       buffer.clone(),
       &actual,
       &expect,
@@ -1940,16 +1934,7 @@ mod tests {
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    _test_collect_from_top_left(
-      size,
-      buffer,
-      &actual,
-      &expect,
-      0,
-      3,
-      &expect_fills,
-      &expect_fills,
-    );
+    _test_collect_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -2008,16 +1993,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
-      size,
-      buffer,
-      &actual,
-      &expect,
-      0,
-      5,
-      &expect_fills,
-      &expect_fills,
-    );
+    _test_collect_from_top_left(buffer, &actual, &expect, 0, 5, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -2072,16 +2048,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
-      size,
-      buffer,
-      &actual,
-      &expect,
-      0,
-      4,
-      &expect_fills,
-      &expect_fills,
-    );
+    _test_collect_from_top_left(buffer, &actual, &expect, 0, 4, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -2115,16 +2082,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
-      size,
-      buffer,
-      &actual,
-      &expect,
-      0,
-      1,
-      &expect_fills,
-      &expect_fills,
-    );
+    _test_collect_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -2180,16 +2138,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
-      size,
-      buffer,
-      &actual,
-      &expect,
-      0,
-      3,
-      &expect_fills,
-      &expect_fills,
-    );
+    _test_collect_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -2250,16 +2199,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
-      size,
-      buffer,
-      &actual,
-      &expect,
-      0,
-      5,
-      &expect_fills,
-      &expect_fills,
-    );
+    _test_collect_from_top_left(buffer, &actual, &expect, 0, 5, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -2314,16 +2254,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
-      size,
-      buffer,
-      &actual,
-      &expect,
-      0,
-      4,
-      &expect_fills,
-      &expect_fills,
-    );
+    _test_collect_from_top_left(buffer, &actual, &expect, 0, 4, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -2359,15 +2290,6 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
-      size,
-      buffer,
-      &actual,
-      &expect,
-      0,
-      1,
-      &expect_fills,
-      &expect_fills,
-    );
+    _test_collect_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 }
