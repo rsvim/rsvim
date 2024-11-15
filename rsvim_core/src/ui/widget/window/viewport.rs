@@ -794,12 +794,13 @@ fn _collect_from_top_left_with_wrap_nolinebreak(
                 end_char_idx: end_c_idx,
               },
             );
+            let saved_end_fills = width as usize - wcol as usize;
             wrow += 1;
             wcol = 0_u16;
             start_bcol = end_bcol;
             start_c_idx = end_c_idx;
             if wrow >= height {
-              end_fills = width as usize - wcol as usize;
+              end_fills = saved_end_fills;
               debug!(
                 "4-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
                 wrow,
@@ -2030,27 +2031,110 @@ mod tests {
       .line_break(false)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    let expect_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 0),
-      (5, 0),
-      (6, 0),
-      (7, 0),
-      (8, 0),
-      (9, 0),
-      (10, 0),
-      (11, 0),
-      (12, 0),
-      (13, 0),
-      (14, 0),
-      (15, 0),
-    ]
-    .into_iter()
-    .collect();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     _test_collect_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+  }
+
+  #[test]
+  fn collect_from_top_left_for_wrap_nolinebreak5() {
+    let buffer = make_buffer_from_lines(vec![
+      "\t\t* The extra parts are\tsplit into the next\trow,\tif either line-wrap or word-wrap options are been set. If the extra\tparts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "\t\t* The extra par",
+      "ts are\tsplit into the ne",
+      "xt\trow,\tif either",
+      " line-wrap or word-wrap options",
+      " are been set. If the extra",
+    ];
+
+    let size = U16Size::new(31, 5);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(false)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 4)].into_iter().collect();
+    _test_collect_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn collect_from_top_left_for_wrap_nolinebreak6() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "But still it contains several things we want to test:\n",
+      "\t\t1. When\tthe line\tis small\tenough to\tcompletely put\tinside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+    ]);
+    let expect = vec![
+      "But still it contains several t",
+      "hings we want to test:\n",
+      "\t\t1. When\t",
+      "the line\tis small",
+      "\tenough to\tcomple",
+    ];
+
+    let size = U16Size::new(31, 5);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(false)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+    _test_collect_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      2,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn collect_from_top_left_for_wrap_nolinebreak7() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "But still it contains several things we want to test:\n",
+      "\t\t1. When\tthe line\tis small\tenough\tto\tcompletely put\tinside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+    ]);
+    let expect = vec![
+      "But still it contains several t",
+      "hings we want to test:\n",
+      "\t\t1. When\t",
+      "the line\tis small",
+      "\tenough\tto", // 7 fills
+    ];
+
+    let size = U16Size::new(31, 5);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(false)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 7)].into_iter().collect();
+    _test_collect_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      2,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
   }
 
   #[test]
