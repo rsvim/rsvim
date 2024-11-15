@@ -1330,14 +1330,16 @@ fn _collect_from_top_left_with_wrap_linebreak(
                 }
               }
             }
-          } // Row column with next char will goes out of the row.
-
-          // Enough space to place this word in current row
-          bcol += wd_width;
-          bchars += wd_chars;
-          end_bcol = bcol;
-          end_c_idx = bchars;
-          wcol += wd_width as u16;
+          }
+          // Row column with next char will goes out of the row.
+          else {
+            // Enough space to place this word in current row
+            bcol += wd_width;
+            bchars += wd_chars;
+            end_bcol = bcol;
+            end_c_idx = bchars;
+            wcol += wd_width as u16;
+          }
 
           debug!(
             "9-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
@@ -2190,13 +2192,13 @@ mod tests {
     ]);
     let expect = vec![
       "Hello, ",
-      "RSVIM!",
+      "RSVIM!\n",
       "This is a ",
       "quite ",
       "simple and",
       " small ",
       "test lines",
-      ".",
+      ".\n",
       "But still ",
       "it ",
     ];
@@ -2207,27 +2209,19 @@ mod tests {
       .line_break(true)
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
-    let expect_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 0),
-      (5, 0),
-      (6, 0),
-      (7, 0),
-      (8, 0),
-      (9, 0),
-      (10, 0),
-      (11, 0),
-      (12, 0),
-      (13, 0),
-      (14, 0),
-      (15, 0),
-    ]
-    .into_iter()
-    .collect();
-    _test_collect_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 7)].into_iter().collect();
+    _test_collect_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      3,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
   }
 
   #[test]
