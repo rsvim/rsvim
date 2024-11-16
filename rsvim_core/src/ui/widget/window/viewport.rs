@@ -374,7 +374,7 @@ pub struct ViewportRect {
 
 // Given the buffer and window size, collect information from start line and column, i.e. from the
 // top-left corner.
-fn collect_from_top_left(
+fn _sync_from_top_left(
   options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
@@ -390,22 +390,14 @@ fn collect_from_top_left(
 
   match (options.wrap, options.line_break) {
     (false, _) => {
-      _collect_from_top_left_with_nowrap(options, buffer, actual_shape, start_line, start_bcolumn)
+      _sync_from_top_left_nowrap(options, buffer, actual_shape, start_line, start_bcolumn)
     }
-    (true, false) => _collect_from_top_left_with_wrap_nolinebreak(
-      options,
-      buffer,
-      actual_shape,
-      start_line,
-      start_bcolumn,
-    ),
-    (true, true) => _collect_from_top_left_with_wrap_linebreak(
-      options,
-      buffer,
-      actual_shape,
-      start_line,
-      start_bcolumn,
-    ),
+    (true, false) => {
+      _sync_from_top_left_wrap_nolinebreak(options, buffer, actual_shape, start_line, start_bcolumn)
+    }
+    (true, true) => {
+      _sync_from_top_left_wrap_linebreak(options, buffer, actual_shape, start_line, start_bcolumn)
+    }
   }
 }
 
@@ -418,8 +410,8 @@ fn rpslice2line(s: &RopeSlice) -> String {
   builder
 }
 
-// Implement [`collect_from_top_left`] with option `wrap=false`.
-fn _collect_from_top_left_with_nowrap(
+// Implement [`_sync_from_top_left`] with option `wrap=false`.
+fn _sync_from_top_left_nowrap(
   _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
@@ -664,8 +656,8 @@ fn _collect_from_top_left_with_nowrap(
   }
 }
 
-// Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=false`.
-fn _collect_from_top_left_with_wrap_nolinebreak(
+// Implement [`_sync_from_top_left`] with option `wrap=true` and `line-break=false`.
+fn _sync_from_top_left_wrap_nolinebreak(
   _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
@@ -978,8 +970,8 @@ fn truncate_line(line: &RopeSlice, start_column: usize, max_bytes: usize) -> Str
   builder
 }
 
-// Implement [`collect_from_top_left`] with option `wrap=true` and `line-break=true`.
-fn _collect_from_top_left_with_wrap_linebreak(
+// Implement [`_sync_from_top_left`] with option `wrap=true` and `line-break=true`.
+fn _sync_from_top_left_wrap_linebreak(
   _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
@@ -1485,7 +1477,7 @@ fn _collect_from_top_left_with_wrap_linebreak(
 impl Viewport {
   pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
     // By default the viewport start from the first line, i.e. starts from 0.
-    let (rectangle, lines) = collect_from_top_left(options, buffer.clone(), actual_shape, 0, 0);
+    let (rectangle, lines) = _sync_from_top_left(options, buffer.clone(), actual_shape, 0, 0);
 
     Viewport {
       options: *options,
@@ -1512,6 +1504,41 @@ impl Viewport {
   /// Get viewport information by lines.
   pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
     &self.lines
+  }
+
+  /// Sync from top-left corner, i.e. `start_line` and `start_bcolumn`.
+  pub fn sync_from_top_left(&mut self, start_line: usize, start_bcolumn: usize) {}
+}
+
+impl Viewport {
+  /// Get options.
+  pub fn options(&self) -> &ViewportOptions {
+    &self.options
+  }
+
+  /// Set options.
+  pub fn set_options(&mut self, options: &ViewportOptions) {
+    self.options = *options;
+  }
+
+  /// Get buffer.
+  pub fn buffer(&self) -> BufferWk {
+    self.buffer.clone()
+  }
+
+  /// Set buffer.
+  pub fn set_buffer(&mut self, buffer: BufferWk) {
+    self.buffer = buffer;
+  }
+
+  /// Get actual shape.
+  pub fn actual_shape(&self) -> &U16Rect {
+    &self.actual_shape
+  }
+
+  /// Set actual shape.
+  pub fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+    self.actual_shape = *actual_shape;
   }
 }
 
@@ -1552,7 +1579,7 @@ mod tests {
   }
 
   #[allow(clippy::too_many_arguments)]
-  fn _test_collect_from_top_left(
+  fn do_test_sync_from_top_left(
     buffer: BufferArc,
     actual: &Viewport,
     expect: &Vec<&str>,
@@ -1632,7 +1659,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_with_nowrap1() {
+  fn sync_from_top_left_nowrap1() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -1670,7 +1697,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1682,7 +1709,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_with_nowrap2() {
+  fn sync_from_top_left_nowrap2() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -1719,7 +1746,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1731,7 +1758,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_with_nowrap3() {
+  fn sync_from_top_left_nowrap3() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -1757,7 +1784,7 @@ mod tests {
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1769,7 +1796,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_with_nowrap4() {
+  fn sync_from_top_left_nowrap4() {
     test_log_init();
 
     let buffer = make_empty_buffer();
@@ -1779,7 +1806,7 @@ mod tests {
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1791,7 +1818,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_with_nowrap5() {
+  fn sync_from_top_left_nowrap5() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -1849,7 +1876,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1861,7 +1888,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_with_nowrap6() {
+  fn sync_from_top_left_nowrap6() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -1893,7 +1920,7 @@ mod tests {
       vec![(0, 0), (1, 1), (2, 1), (3, 0), (4, 0), (5, 0)]
         .into_iter()
         .collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1905,7 +1932,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_nolinebreak1() {
+  fn sync_from_top_left_wrap_nolinebreak1() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -1937,11 +1964,11 @@ mod tests {
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    _test_collect_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    do_test_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_nolinebreak2() {
+  fn sync_from_top_left_wrap_nolinebreak2() {
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -1982,7 +2009,7 @@ mod tests {
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -1994,7 +2021,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_nolinebreak3() {
+  fn sync_from_top_left_wrap_nolinebreak3() {
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -2019,11 +2046,11 @@ mod tests {
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    _test_collect_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    do_test_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_nolinebreak4() {
+  fn sync_from_top_left_wrap_nolinebreak4() {
     let buffer = make_empty_buffer();
     let expect = vec![""];
 
@@ -2034,11 +2061,11 @@ mod tests {
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    _test_collect_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+    do_test_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_nolinebreak5() {
+  fn sync_from_top_left_wrap_nolinebreak5() {
     let buffer = make_buffer_from_lines(vec![
       "\t\t* The extra parts are\tsplit into the next\trow,\tif either line-wrap or word-wrap options are been set. If the extra\tparts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
@@ -2058,7 +2085,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 4)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2070,7 +2097,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_nolinebreak6() {
+  fn sync_from_top_left_wrap_nolinebreak6() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -2093,7 +2120,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2105,7 +2132,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_nolinebreak7() {
+  fn sync_from_top_left_wrap_nolinebreak7() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -2128,7 +2155,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 7)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2140,7 +2167,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_nolinebreak8() {
+  fn sync_from_top_left_wrap_nolinebreak8() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -2163,7 +2190,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2175,7 +2202,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_nolinebreak9() {
+  fn sync_from_top_left_wrap_nolinebreak9() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -2199,7 +2226,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2211,7 +2238,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_linebreak1() {
+  fn sync_from_top_left_wrap_linebreak1() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -2246,7 +2273,7 @@ mod tests {
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 7)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2258,7 +2285,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_linebreak2() {
+  fn sync_from_top_left_wrap_linebreak2() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -2300,7 +2327,7 @@ mod tests {
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 6)]
       .into_iter()
       .collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2312,7 +2339,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_linebreak3() {
+  fn sync_from_top_left_wrap_linebreak3() {
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -2347,7 +2374,7 @@ mod tests {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2359,7 +2386,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_linebreak4() {
+  fn sync_from_top_left_wrap_linebreak4() {
     test_log_init();
 
     let buffer = make_empty_buffer();
@@ -2372,11 +2399,11 @@ mod tests {
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    _test_collect_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+    do_test_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_linebreak5() {
+  fn sync_from_top_left_wrap_linebreak5() {
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -2409,7 +2436,7 @@ mod tests {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 2)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2421,7 +2448,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_linebreak6() {
+  fn sync_from_top_left_wrap_linebreak6() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -2456,7 +2483,7 @@ mod tests {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -2468,7 +2495,7 @@ mod tests {
   }
 
   #[test]
-  fn collect_from_top_left_for_wrap_linebreak7() {
+  fn sync_from_top_left_wrap_linebreak7() {
     test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
@@ -2504,7 +2531,7 @@ mod tests {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    _test_collect_from_top_left(
+    do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
