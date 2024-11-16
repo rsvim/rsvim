@@ -1515,6 +1515,9 @@ impl Viewport {
       start_line,
       start_bcolumn,
     );
+    self.start_line = rectangle.start_line;
+    self.end_line = rectangle.end_line;
+    self.lines = lines;
   }
 }
 
