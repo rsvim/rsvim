@@ -418,9 +418,6 @@ fn rpslice2line(s: &RopeSlice) -> String {
   builder
 }
 
-#[derive(Debug)]
-struct CollectCursor {}
-
 // Implement [`collect_from_top_left`] with option `wrap=false`.
 fn _collect_from_top_left_with_nowrap(
   _options: &ViewportOptions,
