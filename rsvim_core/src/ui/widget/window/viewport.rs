@@ -1507,7 +1507,15 @@ impl Viewport {
   }
 
   /// Sync from top-left corner, i.e. `start_line` and `start_bcolumn`.
-  pub fn sync_from_top_left(&mut self, start_line: usize, start_bcolumn: usize) {}
+  pub fn sync_from_top_left(&mut self, start_line: usize, start_bcolumn: usize) {
+    let (rectangle, lines) = _sync_from_top_left(
+      &self.options,
+      self.buffer.clone(),
+      &self.actual_shape,
+      start_line,
+      start_bcolumn,
+    );
+  }
 }
 
 impl Viewport {
