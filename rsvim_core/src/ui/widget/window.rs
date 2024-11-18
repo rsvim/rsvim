@@ -62,31 +62,22 @@ impl Window {
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
-
-    let mut base = Itree::new(window_root_node);
-    let root_id = base.root_id();
-
-    let window_content = WindowContent::new(shape, buffer.clone());
-    let window_content_id = window_content.id();
-    let window_content_node = WindowNode::WindowContent(window_content);
-
-    base.bounded_insert(&window_root_id, window_content_node);
+    let window_root_actual_shape = *window_root_node.actual_shape();
 
     let viewport_options = ViewportOptions {
       wrap: options.wrap(),
       line_break: options.line_break(),
     };
-    let viewport_actual_shape = base.node(&window_content_id).unwrap().actual_shape();
-    let mut viewport = Viewport::new(&viewport_options, buffer.clone(), viewport_actual_shape);
+    let mut viewport = Viewport::new(&viewport_options, buffer.clone(), &window_root_actual_shape);
 
-    match base.node_mut(&window_content_id).unwrap() {
-      WindowNode::WindowContent(ref mut content) => {
-        content.set_viewport(&mut viewport);
-      }
-      _ => {
-        unreachable!("Failed to get window content node")
-      }
-    }
+    let mut base = Itree::new(window_root_node);
+    let root_id = base.root_id();
+
+    let window_content = WindowContent::new(shape, buffer.clone(), &mut viewport);
+    let window_content_id = window_content.id();
+    let window_content_node = WindowNode::WindowContent(window_content);
+
+    base.bounded_insert(&window_root_id, window_content_node);
 
     Window {
       base,

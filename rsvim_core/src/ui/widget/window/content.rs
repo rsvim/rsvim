@@ -30,22 +30,18 @@ pub struct WindowContent {
 
   buffer: BufferWk,
 
-  viewport: Option<SafeViewportRef>,
+  viewport: SafeViewportRef,
 }
 
 impl WindowContent {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk) -> Self {
+  pub fn new(shape: IRect, buffer: BufferWk, viewport: &mut Viewport) -> Self {
     let base = InodeBase::new(shape);
     WindowContent {
       base,
       buffer,
-      viewport: None,
+      viewport: SafeViewportRef::new(viewport),
     }
-  }
-
-  pub fn set_viewport(&mut self, viewport: &mut Viewport) {
-    self.viewport = Some(SafeViewportRef::new(viewport));
   }
 }
 
@@ -565,8 +561,7 @@ impl Widgetable for WindowContent {
       return;
     }
 
-    let viewport = self.viewport.clone().unwrap();
-    let viewport = viewport.as_ref();
+    let viewport = self.viewport.as_ref();
 
     // If viewport has no lines.
     if viewport.end_line() <= viewport.start_line() {
