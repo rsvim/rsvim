@@ -13,7 +13,9 @@ use crate::ui::widget::Widgetable;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{WindowLocalOptions, WindowOptionsBuilder};
-pub use crate::ui::widget::window::viewport::{LineViewport, LineViewportRow, Viewport};
+pub use crate::ui::widget::window::viewport::{
+  LineViewport, LineViewportRow, Viewport, ViewportOptions,
+};
 
 use crossterm::style::{Attributes, Color};
 use geo::point;
@@ -48,6 +50,9 @@ pub struct Window {
 
   // Tree ref.
   tree_ref: SafeTreeRef,
+
+  // Viewport.
+  viewport: Viewport,
 }
 
 impl Window {
@@ -67,12 +72,20 @@ impl Window {
 
     base.bounded_insert(&window_root_id, window_content_node);
 
+    let viewport_options = ViewportOptions {
+      wrap: options.wrap(),
+      line_break: options.line_break(),
+    };
+    let viewport_actual_shape = base.node(&window_content_id).unwrap().actual_shape();
+    let viewport = Viewport::new(&viewport_options, buffer.clone(), viewport_actual_shape);
+
     Window {
       base,
       content_id: window_content_id,
       buffer,
       options,
       tree_ref: SafeTreeRef::new(tree, root_id),
+      viewport,
     }
   }
 }
