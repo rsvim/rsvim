@@ -66,7 +66,7 @@ impl Window {
     let mut base = Itree::new(window_root_node);
     let root_id = base.root_id();
 
-    let window_content = WindowContent::new(shape, buffer.clone(), tree);
+    let window_content = WindowContent::new(shape, buffer.clone());
     let window_content_id = window_content.id();
     let window_content_node = WindowNode::WindowContent(window_content);
 
@@ -77,7 +77,16 @@ impl Window {
       line_break: options.line_break(),
     };
     let viewport_actual_shape = base.node(&window_content_id).unwrap().actual_shape();
-    let viewport = Viewport::new(&viewport_options, buffer.clone(), viewport_actual_shape);
+    let mut viewport = Viewport::new(&viewport_options, buffer.clone(), viewport_actual_shape);
+
+    match base.node_mut(&window_content_id).unwrap() {
+      WindowNode::WindowContent(ref mut content) => {
+        content.set_viewport(&mut viewport);
+      }
+      _ => {
+        unreachable!("Failed to get window content node")
+      }
+    }
 
     Window {
       base,
