@@ -8,8 +8,8 @@ use crate::ui::canvas::internal::iframe::Iframe;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::tree::Tree;
-use crate::ui::util::ptr::SafeTreeRef;
-use crate::ui::widget::window::WindowLocalOptions;
+use crate::ui::util::ptr::SafeWindowRef;
+use crate::ui::widget::window::{Window, WindowLocalOptions};
 use crate::ui::widget::Widgetable;
 
 use crossterm::style::{Attributes, Color};
@@ -22,224 +22,26 @@ use std::convert::From;
 use std::time::Duration;
 use tracing::{debug, error};
 
-#[derive(Debug, Copy, Clone, Default)]
-/// The view of a buffer. The range is left-inclusive right-exclusive, or top-inclusive
-/// bottom-exclusive, i.e. `[start_line, end_line)` or `[start_column, end_column)`.
-struct BufferView {
-  /// Start line number
-  pub start_line: Option<usize>,
-  /// End line number.
-  pub end_line: Option<usize>,
-  /// Start column.
-  pub start_column: Option<usize>,
-  /// End column.
-  pub end_column: Option<usize>,
-}
-
-impl BufferView {
-  pub fn new(
-    start_line: Option<usize>,
-    end_line: Option<usize>,
-    start_column: Option<usize>,
-    end_column: Option<usize>,
-  ) -> Self {
-    BufferView {
-      start_line,
-      end_line,
-      start_column,
-      end_column,
-    }
-  }
-}
-
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
-///
-/// Here introduce several terms and concepts:
-///
-/// * Line: One line of text content in a buffer.
-/// * Row/column: The width/height of a window.
-/// * View: A window only shows part of a buffer when the buffer is too big to put all the text
-///   contents in the window. When a buffer shows in a window, thus the window starts and ends at
-///   specific lines and columns of the buffer.
-///
-/// There are two options related to the view:
-/// [line-wrap and word-wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap), so we have 4
-/// kinds of views.
-///
-/// * Both line-wrap and word-wrap enabled.
-/// * Line-wrap enabled and word-wrap disabled.
-/// * Line-wrap disabled and word-wrap enabled.
-/// * Both Line-wrap and word-wrap disabled.
-///
-/// For the first 3 kinds of view, when a window that has `X` rows height, it may contains less
-/// than `X` lines of a buffer. Because very long lines or words can take extra spaces and trigger
-/// line breaks. The real lines the window can contain needs a specific algorithm to calculate.
-///
-/// For the last kind of view, it contains exactly `X` lines of a buffer at most, but the lines
-/// longer than the window's width are truncated by the window's boundary.
-///
-/// A view contains 4 fields:
-///
-/// * Start line.
-/// * End line.
-/// * Start column.
-/// * End column.
-///
-/// We can always calculates the two fields based on the other two fields on the diagonal corner,
-/// with window size, buffer's text contents, and the line-wrap/word-wrap options.
 pub struct WindowContent {
   base: InodeBase,
 
-  // Buffer
-  buffer: BufferWk,
-  // Buffer view
-  view: BufferView,
-
-  // Local window options.
-  // By default these options will inherit from global options of UI.
-  options: WindowLocalOptions,
-
-  // Tree ref.
-  tree_ref: SafeTreeRef,
+  window_ref: SafeWindowRef,
 }
 
 impl WindowContent {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk, tree: &mut Tree) -> Self {
-    let options = tree.local_options().clone();
-    let view = BufferView::new(Some(0), None, Some(0), Some(shape.width() as usize));
+  pub fn new(shape: IRect, window: &mut Window) -> Self {
     let base = InodeBase::new(shape);
-    let node_id = base.id();
     WindowContent {
       base,
-      buffer,
-      view,
-      options,
-      tree_ref: SafeTreeRef::new(tree, node_id),
+      window_ref: SafeWindowRef::new(window),
     }
   }
 }
-
-// Options {
-impl WindowContent {
-  pub fn options(&self) -> &WindowLocalOptions {
-    &self.options
-  }
-  pub fn set_options(&mut self, options: &WindowLocalOptions) {
-    self.options = options.clone();
-  }
-
-  /// Get 'wrap' option.
-  pub fn wrap(&self) -> bool {
-    self.options.wrap()
-  }
-
-  /// Get 'wrap' option.
-  pub fn set_wrap(&mut self, value: bool) {
-    self.options.set_wrap(value);
-  }
-
-  /// Get 'line-break' option.
-  pub fn line_break(&self) -> bool {
-    self.options.line_break()
-  }
-
-  /// Get 'line-break' option.
-  pub fn set_line_break(&mut self, value: bool) {
-    self.options.set_line_break(value);
-  }
-}
-// Options }
-
-// Buffer/View {
-impl WindowContent {
-  /// Get buffer reference.
-  pub fn buffer(&self) -> BufferWk {
-    self.buffer.clone()
-  }
-  /// Set buffer reference.
-  pub fn set_buffer(&mut self, buffer: BufferWk) {
-    self.buffer = buffer;
-  }
-  /// Get start line, index start from 0.
-  pub fn start_line(&self) -> Option<usize> {
-    self.view.start_line
-  }
-  /// Set start line.
-  ///
-  /// This operation will unset the end line. Because with different line-wrap/word-wrap options,
-  /// the window may contains less lines than its height. We cannot know the end line unless
-  /// iterating over the buffer from start line.
-  pub fn set_start_line(&mut self, line: usize) {
-    self.view.start_line = Some(line);
-    self.view.end_line = None;
-  }
-
-  /// Get end line, index start from 0.
-  pub fn end_line(&self) -> Option<usize> {
-    self.view.end_line
-  }
-
-  /// Set end line.
-  ///
-  /// This operation will unset the start line. Because with different line-wrap/word-wrap options,
-  /// the window may contains less lines than the height. We cannot know the start line unless
-  /// reversely iterating over the buffer from end line.
-  pub fn set_end_line(&mut self, lend: usize) {
-    self.view.end_line = Some(lend);
-    self.view.start_line = None;
-  }
-
-  /// Get start column, index start from 0.
-  pub fn start_column(&self) -> Option<usize> {
-    self.view.start_column
-  }
-
-  /// Set start column.
-  ///
-  /// This operation also calculates the end column based on widget's width, and set it as well.
-  pub fn set_start_column(&mut self, cstart: usize) {
-    self.view.start_column = Some(cstart);
-    self.view.end_column = Some(cstart + self.base.actual_shape().width() as usize);
-  }
-  /// Get end column, index start from 0.
-  pub fn end_column(&self) -> Option<usize> {
-    self.view.end_column
-  }
-
-  /// Set end column.
-  ///
-  /// This operation also calculates the start column based on widget's width, and set it as well.
-  pub fn set_end_column(&mut self, cend: usize) {
-    self.view.end_column = Some(cend);
-    self.view.start_column = Some(cend - self.base.actual_shape().width() as usize);
-  }
-}
-// Buffer/View }
 
 inode_generate_impl!(WindowContent, base);
-
-#[allow(dead_code)]
-fn rpslice2line(s: &RopeSlice) -> String {
-  let mut builder: String = String::new();
-  for chunk in s.chunks() {
-    builder.push_str(chunk);
-  }
-  builder
-}
-
-fn truncate_line(line: &RopeSlice, max_chars: usize) -> String {
-  let mut builder = String::new();
-  builder.reserve(max_chars);
-  for chunk in line.chunks() {
-    if builder.len() > max_chars {
-      return builder;
-    }
-    builder.push_str(chunk);
-  }
-  builder
-}
 
 // Draw {
 impl WindowContent {

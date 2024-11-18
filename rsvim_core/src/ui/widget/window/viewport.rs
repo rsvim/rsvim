@@ -6,8 +6,7 @@ use crate::envar;
 use crate::rlock;
 use crate::ui::canvas::Cell;
 use crate::ui::tree::internal::Inodeable;
-use crate::ui::util::ptr::SafeWindowRef;
-use crate::ui::widget::window::Window;
+use crate::ui::widget::window::{ViewportOptions, Window};
 
 use anyhow;
 use geo::point;
@@ -92,12 +91,6 @@ pub struct LineViewport {
   /// Extra filled columns at the end of the row, see:
   /// [`start_filled_columns`](LineViewport::start_filled_columns).
   pub end_filled_columns: usize,
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct ViewportOptions {
-  pub wrap: bool,
-  pub line_break: bool,
 }
 
 #[derive(Debug, Clone)]

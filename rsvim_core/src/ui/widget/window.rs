@@ -12,10 +12,10 @@ use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
 
 // Re-export
-pub use crate::ui::widget::window::opt::{WindowLocalOptions, WindowOptionsBuilder};
-pub use crate::ui::widget::window::viewport::{
-  LineViewport, LineViewportRow, Viewport, ViewportOptions,
+pub use crate::ui::widget::window::opt::{
+  ViewportOptions, WindowLocalOptions, WindowOptionsBuilder,
 };
+pub use crate::ui::widget::window::viewport::{LineViewport, LineViewportRow, Viewport};
 
 use crossterm::style::{Attributes, Color};
 use geo::point;
@@ -179,13 +179,16 @@ impl Widgetable for Window {
 
 // Options {
 impl Window {
+  /// Get window local options.
   pub fn options(&self) -> &WindowLocalOptions {
     &self.options
   }
 
+  /// Set window local options.
   pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = options.clone();
-    self.update_window_content_options();
+    let viewport_options = ViewportOptions::from(&self.options);
+    self.viewport.set_options(&viewport_options);
   }
 
   pub fn wrap(&self) -> bool {
@@ -194,7 +197,8 @@ impl Window {
 
   pub fn set_wrap(&mut self, value: bool) {
     self.options.set_wrap(value);
-    self.update_window_content_options();
+    let viewport_options = ViewportOptions::from(&self.options);
+    self.viewport.set_options(&viewport_options);
   }
 
   pub fn line_break(&self) -> bool {
@@ -203,23 +207,21 @@ impl Window {
 
   pub fn set_line_break(&mut self, value: bool) {
     self.options.set_line_break(value);
-    self.update_window_content_options();
+    let viewport_options = ViewportOptions::from(&self.options);
+    self.viewport.set_options(&viewport_options);
   }
 
-  fn update_window_content_options(&mut self) {
-    match self.base.node_mut(&self.content_id).unwrap() {
-      WindowNode::WindowContent(content) => content.set_options(&self.options),
-      _ => unreachable!("Cannot find window_content node"),
-    }
+  /// Get viewport.
+  pub fn viewport(&self) -> &Viewport {
+    &self.viewport
   }
-}
-// Options }
 
-impl Window {
+  /// Get buffer.
   pub fn buffer(&self) -> BufferWk {
     self.buffer.clone()
   }
 }
+// Options }
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
