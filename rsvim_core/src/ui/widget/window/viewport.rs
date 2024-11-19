@@ -1664,11 +1664,19 @@ mod tests {
         if r > rows.first_key_value().unwrap().0 {
           let prev_r = r - 1;
           let prev_row = rows.get(&prev_r).unwrap();
+          info!(
+            "row-{:?}, current row[{}]:{:?}, previous row[{}]:{:?}",
+            r, r, row, prev_r, prev_row
+          );
           assert_eq!(prev_row.end_bcolumn, row.start_bcolumn);
         }
         if r < rows.last_key_value().unwrap().0 {
           let next_r = r + 1;
           let next_row = rows.get(&next_r).unwrap();
+          info!(
+            "row-{:?}, current row[{}]:{:?}, next row[{}]:{:?}",
+            r, r, row, next_r, next_row
+          );
           assert_eq!(next_row.start_bcolumn, row.end_bcolumn);
         }
       }
