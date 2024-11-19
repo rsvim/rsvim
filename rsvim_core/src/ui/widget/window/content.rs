@@ -962,7 +962,7 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_top_for_wrap_nolinebreak3() {
+  fn draw_from_top_left_wrap_nolinebreak3() {
     test_log_init();
 
     let buffer = make_empty_buffer();
@@ -985,83 +985,104 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_top_for_wrap_nolinebreak4() {
-    // INIT.call_once(test_log_init);
+  fn draw_from_top_left_wrap_nolinebreak4() {
+    test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
-      "But still it contains several things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "But still it contains several things\t我们想要测试的：\n",
+      "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "\t\t* 如果行换行和单词换行这两个选项都没有选中，那么这些超出窗口的文本内容会被截断。\n",
+      "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
+      "Hello, RSVIM!      ",
       "This is a quite sim",
       "ple and small test ",
       "lines.             ",
       "But still it contai",
-      "ns several things w",
-      "e want to test:    ",
-      "  1. When the line ",
-      "is small enough to ",
-      "completely put insi",
-      "de a row of the win",
-      "dow content widget,",
-      " then the line-wrap",
-      " and word-wrap does",
-      "n't affect the rend",
-      "ering.             ",
-      "  2. When the line ",
-      "is too long to be c",
-      "ompletely put in a ",
-      "row of the window c",
-      "ontent widget, ther",
-      "e're multiple cases",
-      ":                  ",
-      "     * The extra pa",
-      "rts are been trunca",
-      "ted if both line-wr",
-      "ap and word-wrap op",
+      "ns several things  ",
+      "        我们想要测 ",
+      "试的：             ",
+      "        1. When the",
+      " line is small enou",
+      "gh to completely pu",
+      "t inside a row of t",
+      "he window content w",
+      "idget, then the lin",
+      "e-wrap and word-wra",
+      "p doesn't affect th",
+      "e rendering.       ",
+      "        2. When the",
+      " line is too long t",
+      "o be completely put",
+      " in a row of the wi",
+      "ndow content widget",
+      ", there're multiple",
+      " cases:            ",
+      "                *  ",
+      "如果行换行和单词换 ",
+      "行这两个选项都没有 ",
+      "选中，那么这些超出 ",
+      "窗口的文本内容会被 ",
+      "截断。             "
     ];
 
-    let width = 19;
-    let height = 26;
-    let terminal_size = U16Size::new(width, height);
-    let mut tree = Tree::new(terminal_size);
-    let window_options = WindowLocalOptions::builder().wrap(true).build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(width, height);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_wrap_nolinebreak(&mut canvas, 1, 0, 0);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), height as usize);
-    assert_eq!(actual.len(), expect.len());
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == width as usize);
-      if i < expect.len() {
-        let e = expect[i];
-        info!("{:?} a:{:?}, e:{:?}", i, a, e);
-        assert!(a.len() == e.len() || e.is_empty());
-        if a.len() == e.len() {
-          assert_eq!(a, e);
-        }
-      } else {
-        info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 27].join(""));
-      }
-    }
+    let terminal_size = U16Size::new(19, 30);
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
+  }
+
+  #[test]
+  fn draw_from_top_left_wrap_nolinebreak5() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things\t我们想要测试的：\n",
+      "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "\t\t* 如果行换行和单词换行这两个选项都没有选中，那么这些超出窗口的文本内容会被截断。\n",
+      "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!      ",
+      "This is a quite sim",
+      "ple and small test ",
+      "lines.             ",
+      "But still it contai",
+      "ns several things  ",
+      "        我们想要测 ",
+      "试的：             ",
+      "        1. When the",
+      " line is small enou",
+      "gh to completely pu",
+      "t inside a row of t",
+      "he window content w",
+      "idget, then the lin",
+      "e-wrap and word-wra",
+      "p doesn't affect th",
+      "e rendering.       ",
+      "        2. When the",
+      " line is too long t",
+      "o be completely put",
+      " in a row of the wi",
+      "ndow content widget",
+      ", there're multiple",
+      " cases:            ",
+      "                *  ",
+      "如果行换行和单词换 ",
+      "行这两个选项都没有<",
+    ];
+
+    let terminal_size = U16Size::new(19, 27);
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
