@@ -651,8 +651,8 @@ impl Widgetable for WindowContent {
               total_width += unicode_width;
             }
             debug!(
-              "2-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
-              line_idx, row_idx, col_idx, line_viewport, r
+              "2-line_idx:{}, row_idx:{}, col_idx:{}, total_width:{}, line_viewport:{:?}, r:{:?}",
+              line_idx, row_idx, col_idx, total_width, line_viewport, r
             );
             debug_assert_eq!(total_width, r.end_bcolumn - r.start_bcolumn);
           }
