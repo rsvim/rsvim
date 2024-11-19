@@ -660,16 +660,16 @@ impl Widgetable for WindowContent {
           // Render left empty parts.
           let occupied_length = (r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills;
           if width > occupied_length {
-            let left_parts_length = width - occupied_length;
-            let cells = std::iter::repeat_n(' ', left_parts_length as usize)
+            let left_length = width - occupied_length;
+            let cells = std::iter::repeat_n(' ', left_length as usize)
               .map(Cell::from)
               .collect::<Vec<_>>();
             let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
             canvas.frame_mut().set_cells_at(cells_upos, cells);
-            col_idx += left_parts_length;
+            col_idx += left_length;
             debug!(
               "3-line_idx:{}, row_idx:{}, col_idx:{}, left_parts_length:{}, line_viewport:{:?}, r:{:?}",
-              line_idx, row_idx, col_idx, left_parts_length, line_viewport, r
+              line_idx, row_idx, col_idx, left_length, line_viewport, r
             );
           }
 
