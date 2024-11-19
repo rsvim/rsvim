@@ -987,7 +987,7 @@ mod tests {
     let expect = vec![
       "                        * T",
       "he extra parts are split   ",
-      "        into the next row  ",
+      "        into the next row, ",
       "        if either line-wrap",
       "        or word-wrap option",
       "s are been set. If the extr",
