@@ -874,7 +874,7 @@ mod tests {
     test_log_init();
 
     let buffer = make_empty_buffer();
-    let expect = vec![];
+    let expect = vec![
       "                               ",
       "                               ",
       "                               ",
@@ -930,7 +930,7 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(true).build();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -956,7 +956,7 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(27, 10);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(true).build();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -979,7 +979,7 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(20, 9);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(true).build();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -1027,11 +1027,11 @@ mod tests {
       "行这两个选项都没有 ",
       "选中，那么这些超出 ",
       "窗口的文本内容会被 ",
-      "截断。             "
+      "截断。             ",
     ];
 
     let terminal_size = U16Size::new(19, 30);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(true).build();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -1080,7 +1080,7 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(19, 27);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder().wrap(true).build();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -1112,7 +1112,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -1149,7 +1152,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(27, 15);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -1160,25 +1166,28 @@ mod tests {
 
     let buffer = make_empty_buffer();
     let expect = vec![
-        "                    ",
-        "                    ",
-        "                    ",
-        "                    ",
-        "                    ",
-        "                    ",
-        "                    ",
-        "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
     ];
 
     let terminal_size = U16Size::new(20, 8);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn _draw_from_top_for_wrap_linebreak4() {
-    // INIT.call_once(test_log_init);
+  fn draw_from_top_left_wrap_linebreak4() {
+    test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -1190,6 +1199,7 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
+      "Hello, RSVIM!",
       "This is a    ",
       "quite simple ",
       "and small    ",
@@ -1222,44 +1232,13 @@ mod tests {
       "of the window",
       " content     ",
     ];
-    let width = 13;
-    let height = 31;
-    let terminal_size = U16Size::new(width, height);
-    let mut tree = Tree::new(terminal_size);
+
+    let terminal_size = U16Size::new(13, 31);
     let window_options = WindowLocalOptions::builder()
       .wrap(true)
       .line_break(true)
       .build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(width, height);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_wrap_linebreak(&mut canvas, 1, 0, 0);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), height as usize);
-    assert_eq!(actual.len(), expect.len());
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == width as usize);
-      if i < expect.len() {
-        let e = expect[i];
-        info!("{:?} a:{:?}, e:{:?}", i, a, e);
-        assert!(a.len() == e.len() || e.is_empty());
-        if a.len() == e.len() {
-          assert_eq!(a, e);
-        }
-      } else {
-        info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 27].join(""));
-      }
-    }
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 }
