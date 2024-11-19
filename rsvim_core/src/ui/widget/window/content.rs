@@ -650,17 +650,17 @@ impl Widgetable for WindowContent {
               char_idx += 1;
               total_width += unicode_width;
             }
-            debug_assert_eq!(total_width, r.end_bcolumn - r.start_bcolumn);
             debug!(
               "2-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
               line_idx, row_idx, col_idx, line_viewport, r
             );
+            debug_assert_eq!(total_width, r.end_bcolumn - r.start_bcolumn);
           }
 
           // Render left empty parts.
-          if width > (r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills {
-            let left_parts_length =
-              width - ((r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills);
+          let occupied_length = (r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills;
+          if width > occupied_length {
+            let left_parts_length = width - occupied_length;
             let cells = std::iter::repeat_n(' ', left_parts_length as usize)
               .map(Cell::from)
               .collect::<Vec<_>>();
