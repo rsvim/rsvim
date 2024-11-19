@@ -953,76 +953,35 @@ mod tests {
       "to        来放在下一个横行<",
       "内，一遍又一遍的重复这样的<",
       "操作。This operation also e",
-      "ats                        ",
     ];
+
     let terminal_size = U16Size::new(27, 10);
-    let mut tree = Tree::new(terminal_size);
-    let window_options = WindowLocalOptions::builder().wrap(true).build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (27, 15));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(27, 15);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_wrap_nolinebreak(&mut canvas, 1, 0, 0);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), 15);
-    assert!(expect.len() <= 15);
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 27);
-      if i < expect.len() {
-        let e = expect[i];
-        info!("{:?} a:{:?}, e:{:?}", i, a, e);
-        assert!(a.len() == e.len() || e.is_empty());
-        if a.len() == e.len() {
-          assert_eq!(a, e);
-        }
-      } else {
-        info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 27].join(""));
-      }
-    }
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
   fn _draw_from_top_for_wrap_nolinebreak3() {
-    // INIT.call_once(test_log_init);
-    let buffer = make_empty_buffer();
+    test_log_init();
 
-    let terminal_size = U16Size::new(20, 18);
-    let mut tree = Tree::new(terminal_size);
-    let window_options = WindowLocalOptions::builder().wrap(true).build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (20, 18));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(20, 18);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_wrap_nolinebreak(&mut canvas, 0, 0, 0);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    assert_eq!(actual.len(), 18);
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 20);
-      info!("{:?} a:{:?}", i, a);
-      assert!(a
-        .chars()
-        .filter(|c| *c != ' ')
-        .collect::<Vec<_>>()
-        .is_empty());
-    }
+    let buffer = make_empty_buffer();
+    let expect = vec![
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+      "                    ",
+    ];
+
+    let terminal_size = U16Size::new(20, 9);
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
