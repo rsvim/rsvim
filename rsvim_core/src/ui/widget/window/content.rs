@@ -576,11 +576,11 @@ impl Widgetable for WindowContent {
     let mut line_idx = viewport.start_line();
     let mut lines_slice = buffer.get_lines_at(line_idx).unwrap();
 
-    let mut start_fills_count = 0_usize;
-    let mut end_fills_count = 0_usize;
-
     while line_idx < viewport.end_line() {
       debug_assert!(row_idx < height);
+
+      let mut start_fills_count = 0_usize;
+      let mut end_fills_count = 0_usize;
 
       let line_slice = lines_slice.next().unwrap();
       let line_viewport = viewport.lines().get(&line_idx).unwrap();
@@ -612,7 +612,6 @@ impl Widgetable for WindowContent {
             0_u16
           };
           let end_fills = if row_idx == last_row_idx && line_viewport.end_filled_columns > 0 {
-            assert!(start_fills_count == 1);
             end_fills_count += 1;
             assert!(end_fills_count == 1);
             line_viewport.end_filled_columns as u16
@@ -749,7 +748,7 @@ mod tests {
   }
 
   #[allow(clippy::too_many_arguments)]
-  fn do_test_draw_from_top_left(actual: &Canvas, expect: &[_]) {
+  fn do_test_draw_from_top_left(actual: &Canvas, expect: &Vec<&str>) {
     let actual = actual
       .frame()
       .raw_symbols()
