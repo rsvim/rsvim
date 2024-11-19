@@ -647,7 +647,7 @@ impl Widgetable for WindowContent {
               let cell_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
               canvas.frame_mut().set_cell(cell_upos, cell);
 
-              col_idx += 1;
+              col_idx += unicode_width as u16;
               char_idx += 1;
               total_width += unicode_width;
             }
@@ -749,21 +749,27 @@ mod tests {
   }
 
   #[allow(clippy::too_many_arguments)]
-  fn do_test_draw_from_top_left(actual: &Canvas, expect: &Vec<&str>) {
+  fn do_test_draw_from_top_left(actual: &Canvas, expect: &[_]) {
     let actual = actual
       .frame()
       .raw_symbols()
       .iter()
       .map(|cs| cs.join(""))
       .collect::<Vec<_>>();
-    info!("actual:\n{:?}", actual);
-    info!("expect:\n{:?}", expect);
+    info!("actual:{}", actual.len());
+    for a in actual.iter() {
+      info!("{:?}", a);
+    }
+    info!("expect:{}", expect.len());
+    for e in expect.iter() {
+      info!("{:?}", e);
+    }
 
     assert_eq!(actual.len(), expect.len());
     for i in 0..actual.len() {
       let e = &expect[i];
       let a = &actual[i];
-      info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, a, i, e, i);
+      info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
       assert_eq!(e.len(), a.len());
       assert_eq!(e, a);
     }
