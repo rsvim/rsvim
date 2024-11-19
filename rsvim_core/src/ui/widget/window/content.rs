@@ -8,6 +8,7 @@ use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::tree::Tree;
 use crate::ui::util::ptr::SafeViewportRef;
+use crate::ui::widget::window::opt::ViewportOptions;
 use crate::ui::widget::window::viewport::Viewport;
 use crate::ui::widget::window::{Window, WindowLocalOptions};
 use crate::ui::widget::Widgetable;
@@ -47,26 +48,26 @@ impl WindowContent {
 
 inode_generate_impl!(WindowContent, base);
 
-#[allow(dead_code)]
-fn rpslice2line(s: &RopeSlice) -> String {
-  let mut builder: String = String::new();
-  for chunk in s.chunks() {
-    builder.push_str(chunk);
-  }
-  builder
-}
-
-fn truncate_line(line: &RopeSlice, max_chars: usize) -> String {
-  let mut builder = String::new();
-  builder.reserve(max_chars);
-  for chunk in line.chunks() {
-    if builder.len() > max_chars {
-      return builder;
-    }
-    builder.push_str(chunk);
-  }
-  builder
-}
+// #[allow(dead_code)]
+// fn rpslice2line(s: &RopeSlice) -> String {
+//   let mut builder: String = String::new();
+//   for chunk in s.chunks() {
+//     builder.push_str(chunk);
+//   }
+//   builder
+// }
+//
+// fn truncate_line(line: &RopeSlice, max_chars: usize) -> String {
+//   let mut builder = String::new();
+//   builder.reserve(max_chars);
+//   for chunk in line.chunks() {
+//     if builder.len() > max_chars {
+//       return builder;
+//     }
+//     builder.push_str(chunk);
+//   }
+//   builder
+// }
 
 // // Draw {
 // impl WindowContent {
@@ -677,7 +678,7 @@ mod tests {
 
   use crate::buf::BufferArc;
   use crate::cart::U16Size;
-  #[allow(dead_code)]
+  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
 
   use compact_str::ToCompactString;
@@ -685,35 +686,56 @@ mod tests {
   use std::fs::File;
   use std::io::{BufReader, BufWriter};
   use std::sync::Arc;
-  use std::sync::Once;
   use tracing::info;
 
-  #[allow(dead_code)]
-  static INIT: Once = Once::new();
-
-  fn make_buffer_from_file(filename: String) -> BufferArc {
-    let rop: Rope = Rope::from_reader(BufReader::new(File::open(filename).unwrap())).unwrap();
-    let buf: Buffer = Buffer::from(rop);
-    Buffer::to_arc(buf)
+  fn make_window_content_drawn_canvas(
+    terminal_size: U16Size,
+    window_options: WindowLocalOptions,
+    buffer: BufferArc,
+  ) -> Canvas {
+    let mut tree = Tree::new(terminal_size);
+    tree.set_local_options(&window_options);
+    let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
+    let viewport_options = ViewportOptions::from(&window_options);
+    let mut viewport = Viewport::new(&viewport_options, Arc::downgrade(&buffer), &actual_shape);
+    let shape = IRect::new(
+      (0, 0),
+      (
+        terminal_size.width() as isize,
+        terminal_size.height() as isize,
+      ),
+    );
+    let mut window_content = WindowContent::new(shape, Arc::downgrade(&buffer), &mut viewport);
+    let mut canvas = Canvas::new(terminal_size);
+    window_content.draw(&mut canvas);
+    canvas
   }
 
-  fn make_buffer_from_lines(lines: Vec<&str>) -> BufferArc {
-    let mut rop: RopeBuilder = RopeBuilder::new();
-    for line in lines.iter() {
-      rop.append(line);
+  #[allow(clippy::too_many_arguments)]
+  fn do_test_draw_from_top_left(actual: &Canvas, expect: &Vec<&str>) {
+    let actual = actual
+      .frame()
+      .raw_symbols()
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:\n{:?}", actual);
+    info!("expect:\n{:?}", expect);
+
+    assert_eq!(actual.len(), expect.len());
+    for i in 0..actual.len() {
+      let e = &expect[i];
+      let a = &actual[i];
+      info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, a, i, e, i);
+      assert_eq!(e.len(), a.len());
+      assert_eq!(e, a);
     }
-    let buf: Buffer = Buffer::from(rop);
-    Buffer::to_arc(buf)
-  }
-
-  fn make_empty_buffer() -> BufferArc {
-    let buf: Buffer = RopeBuilder::new().into();
-    Buffer::to_arc(buf)
   }
 
   #[test]
-  fn _draw_from_top_for_nowrap1() {
-    // INIT.call_once(test_log_init);
+  fn draw_from_top_left_nowrap1() {
+    test_log_init();
+
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -723,52 +745,29 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
+    let expect = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+      "          ",
+      "          ",
+      "          ",
+    ];
 
     let terminal_size = U16Size::new(10, 10);
-    let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (10, 10));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(10, 10);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_nowrap(&mut canvas, 0, 0, 10);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    let expect = buffer
-      .read()
-      .lines()
-      .take(10)
-      .map(|l| l.as_str().unwrap().chars().take(10).collect::<String>())
-      .collect::<Vec<_>>();
-    info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), 10);
-    assert!(expect.len() <= 10);
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 10);
-      if i < expect.len() {
-        let e = expect[i].clone();
-        info!("{:?} a:{:?}, e:{:?}", i, a, e);
-        assert!(a.len() == e.len() || e.is_empty());
-        if a.len() == e.len() {
-          assert_eq!(a, e);
-        }
-      } else {
-        info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 10].join(""));
-      }
-    }
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn _draw_from_top_for_nowrap2() {
-    // INIT.call_once(test_log_init);
+  fn draw_from_top_left_nowrap2() {
+    test_log_init();
+
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -778,80 +777,53 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
-    let terminal_size = U16Size::new(27, 15);
-    let mut tree = Tree::new(terminal_size);
+
+    let expect = vec![
+      "Hello, RSVIM!                      ",
+      "This is a quite simple and small te",
+      "But still it contains several thing",
+      "  1. When the line is small enough ",
+      "  2. When the line is too long to b",
+      "     * The extra parts are been tru",
+    ];
+
+    let terminal_size = U16Size::new(35, 6);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (27, 15));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(27, 15);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_nowrap(&mut canvas, 1, 0, 0);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    let expect = buffer
-      .read()
-      .lines()
-      .skip(1)
-      .take(15)
-      .map(|l| l.as_str().unwrap().chars().take(27).collect::<String>())
-      .collect::<Vec<_>>();
-    info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), 15);
-    assert!(expect.len() <= 15);
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 27);
-      if i < expect.len() {
-        let e = expect[i].clone();
-        info!("{:?} a:{:?}, e:{:?}", i, a, e);
-        assert!(a.len() == e.len() || e.is_empty());
-        if a.len() == e.len() {
-          assert_eq!(a, e);
-        }
-      } else {
-        info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 27].join(""));
-      }
-    }
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn _draw_from_top_for_nowrap3() {
-    // INIT.call_once(test_log_init);
-    let buffer = make_empty_buffer();
-    let terminal_size = U16Size::new(20, 18);
-    let mut tree = Tree::new(terminal_size);
+  fn draw_from_top_left_nowrap3() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello,  R\tS\tV\tI\tM!\n",
+      "这是一个非常简单而且非常短的测试例子，只包含几行文本内容。\n",
+      "But still\tit\tcontains\tseveral things we want to test:\n",
+      "  第一，当一行文本内容足够短，以至于能够被完全的放入一个窗口中时，then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+
+    let expect = vec![
+      "Hello,  R        S        V<<<<<<",
+      "这是一个非常简单而且非常短的测试<",
+      "But still        it        contai",
+      "  第一，当一行文本内容足够短，以<",
+      "  2. When the line is too long to",
+      "     * The extra parts are been t",
+      "     * The extra parts are split ",
+      "                                 ",
+      "                                 ",
+      "                                 ",
+    ];
+
+    let terminal_size = U16Size::new(33, 10);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (20, 18));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(20, 18);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_nowrap(&mut canvas, 0, 0, 0);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    assert_eq!(actual.len(), 18);
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 20);
-      info!("{:?} a:{:?}", i, a);
-      assert!(a
-        .chars()
-        .filter(|c| *c != ' ')
-        .collect::<Vec<_>>()
-        .is_empty());
-    }
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
