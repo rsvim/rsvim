@@ -827,8 +827,8 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_top_for_nowrap4() {
-    // INIT.call_once(test_log_init);
+  fn draw_from_top_left_nowrap4() {
+    test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -839,7 +839,9 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
+
     let expect = vec![
+      "Hello, RSVIM!                  ",
       "This is a quite simple and smal",
       "But still it contains several t",
       "  1. When the line is small eno",
@@ -861,47 +863,50 @@ mod tests {
       "                               ",
     ];
 
-    let width = 31;
-    let height = 19;
-    let terminal_size = U16Size::new(width, height);
-    let mut tree = Tree::new(terminal_size);
+    let terminal_size = U16Size::new(31, 20);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (width as isize, height as isize));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(width, height);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_nowrap(&mut canvas, 1, 0, 0);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), height as usize);
-    assert_eq!(actual.len(), expect.len());
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == width as usize);
-      if i < expect.len() {
-        let e = expect[i];
-        info!("{:?} a:{:?}, e:{:?}", i, a, e);
-        assert!(a.len() == e.len() || e.is_empty());
-        if a.len() == e.len() {
-          assert_eq!(a, e);
-        }
-      } else {
-        info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 27].join(""));
-      }
-    }
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn _draw_from_top_for_wrap_nolinebreak1() {
-    // INIT.call_once(test_log_init);
+  fn draw_from_top_left_nowrap5() {
+    test_log_init();
+
+    let buffer = make_empty_buffer();
+    let expect = vec![];
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+      "                               ",
+    ];
+
+    let terminal_size = U16Size::new(31, 20);
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
+  }
+
+  #[test]
+  fn draw_from_top_left_wrap_nolinebreak1() {
+    test_log_init();
+
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -925,71 +930,32 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let mut tree = Tree::new(terminal_size);
-    let window_options = WindowLocalOptions::builder().wrap(true).build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (10, 10));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(10, 10);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_wrap_nolinebreak(&mut canvas, 0, 0, 10);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), 10);
-    assert!(expect.len() <= 10);
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 10);
-      if i < expect.len() {
-        let e = expect[i];
-        info!("{:?} a:{:?}, e:{:?}", i, a, e);
-        assert!(a.len() == e.len() || e.is_empty());
-        if a.len() == e.len() {
-          assert_eq!(a, e);
-        }
-      } else {
-        info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 10].join(""));
-      }
-    }
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn _draw_from_top_for_wrap_nolinebreak2() {
-    // INIT.call_once(test_log_init);
+  fn draw_from_top_left_wrap_nolinebreak2() {
+    test_log_init();
+
     let buffer = make_buffer_from_lines(vec![
-      "Hello, RSVIM!\n",
-      "This is a quite simple and small test lines.\n",
-      "But still it contains several things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "\t\t\t* The extra parts are split\tinto the next row,\tif either line-wrap\tor word-wrap options are been set. If the extra parts are still too long to\t来放在下一个横行内，一遍又一遍的重复这样的操作。This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
-      "This is a quite simple and ",
-      "small test lines.          ",
-      "But still it contains sever",
-      "al things we want to test: ",
-      "  1. When the line is small",
-      " enough to completely put i",
-      "nside a row of the window c",
-      "ontent widget, then the lin",
-      "e-wrap and word-wrap doesn'",
-      "t affect the rendering.    ",
-      "  2. When the line is too l",
-      "ong to be completely put in",
-      " a row of the window conten",
-      "t widget, there're multiple",
-      " cases:                    ",
+      "                        * T",
+      "he extra parts are split   ",
+      "        into the next row  ",
+      "        if either line-wrap",
+      "        or word-wrap option",
+      "s are been set. If the extr",
+      "a parts are still too long ",
+      "to        来放在下一个横行<",
+      "内，一遍又一遍的重复这样的<",
+      "操作。This operation also e",
+      "ats                        ",
     ];
-    let terminal_size = U16Size::new(27, 15);
+    let terminal_size = U16Size::new(27, 10);
     let mut tree = Tree::new(terminal_size);
     let window_options = WindowLocalOptions::builder().wrap(true).build();
     tree.set_local_options(&window_options);
