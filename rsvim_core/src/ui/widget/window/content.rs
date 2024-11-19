@@ -992,8 +992,8 @@ mod tests {
       "        or word-wrap option",
       "s are been set. If the extr",
       "a parts are still too long ",
-      "to        来放在下一个横行<",
-      "内，一遍又一遍的重复这样的<",
+      "to        来放在下一个横行 ",
+      "内，一遍又一遍的重复这样的 ",
       "操作。This operation also e",
     ];
 
