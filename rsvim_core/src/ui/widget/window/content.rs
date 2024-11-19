@@ -1086,8 +1086,8 @@ mod tests {
   }
 
   #[test]
-  fn _draw_from_top_for_wrap_linebreak1() {
-    // INIT.call_once(test_log_init);
+  fn draw_from_top_left_wrap_linebreak1() {
+    test_log_init();
 
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
@@ -1112,47 +1112,15 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let mut tree = Tree::new(terminal_size);
-    let window_options = WindowLocalOptions::builder()
-      .wrap(true)
-      .line_break(true)
-      .build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (10, 10));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(10, 10);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_wrap_linebreak(&mut canvas, 0, 0, 10);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), 10);
-    assert!(expect.len() <= 10);
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 10);
-      if i < expect.len() {
-        let e = expect[i];
-        info!("{:?} a:{:?}, e:{:?}", i, a, e);
-        assert!(a.len() == e.len() || e.is_empty());
-        if a.len() == e.len() {
-          assert_eq!(a, e);
-        }
-      } else {
-        info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 10].join(""));
-      }
-    }
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn _draw_from_top_for_wrap_linebreak2() {
-    // INIT.call_once(test_log_init);
+  fn draw_from_top_left_wrap_linebreak2() {
+    test_log_init();
+
     let buffer = make_buffer_from_lines(vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -1179,80 +1147,33 @@ mod tests {
       "long to be completely put  ",
       "in a row of the window     ",
     ];
+
     let terminal_size = U16Size::new(27, 15);
-    let mut tree = Tree::new(terminal_size);
-    let window_options = WindowLocalOptions::builder()
-      .wrap(true)
-      .line_break(true)
-      .build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (27, 15));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(27, 15);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_wrap_linebreak(&mut canvas, 1, 0, 0);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    info!("expect:{:?}", expect);
-    assert_eq!(actual.len(), 15);
-    assert!(expect.len() <= 15);
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 27);
-      if i < expect.len() {
-        let e = expect[i];
-        info!("{:?} a:{:?}, e:{:?}", i, a, e);
-        assert!(a.len() == e.len() || e.is_empty());
-        if a.len() == e.len() {
-          assert_eq!(a, e);
-        }
-      } else {
-        info!("{:?} a:{:?}, e:empty", i, a);
-        assert_eq!(a, [" "; 27].join(""));
-      }
-    }
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn _draw_from_top_for_wrap_linebreak3() {
-    // INIT.call_once(test_log_init);
-    let buffer = make_empty_buffer();
+  fn draw_from_top_left_wrap_linebreak3() {
+    test_log_init();
 
-    let terminal_size = U16Size::new(20, 18);
-    let mut tree = Tree::new(terminal_size);
-    let window_options = WindowLocalOptions::builder()
-      .wrap(true)
-      .line_break(true)
-      .build();
-    tree.set_local_options(&window_options);
-    let window_content_shape = IRect::new((0, 0), (20, 18));
-    let mut window_content =
-      WindowContent::new(window_content_shape, Arc::downgrade(&buffer), &mut tree);
-    let canvas_size = U16Size::new(20, 18);
-    let mut canvas = Canvas::new(canvas_size);
-    window_content._draw_from_top_for_wrap_linebreak(&mut canvas, 0, 0, 0);
-    let actual = canvas
-      .frame()
-      .raw_symbols_with_placeholder(" ".to_compact_string())
-      .iter()
-      .map(|cs| cs.join(""))
-      .collect::<Vec<_>>();
-    info!("actual:{:?}", actual);
-    assert_eq!(actual.len(), 18);
-    for (i, a) in actual.into_iter().enumerate() {
-      assert!(a.len() == 20);
-      info!("{:?} a:{:?}", i, a);
-      assert!(a
-        .chars()
-        .filter(|c| *c != ' ')
-        .collect::<Vec<_>>()
-        .is_empty());
-    }
+    let buffer = make_empty_buffer();
+    let expect = vec![
+        "                    ",
+        "                    ",
+        "                    ",
+        "                    ",
+        "                    ",
+        "                    ",
+        "                    ",
+        "                    ",
+    ];
+
+    let terminal_size = U16Size::new(20, 8);
+    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
