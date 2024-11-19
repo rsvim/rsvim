@@ -1658,6 +1658,19 @@ mod tests {
           r, payload, expect[*r as usize]
         );
         assert_eq!(payload, expect[*r as usize]);
+        let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
+        assert_eq!(total_width, row.end_bcolumn - row.start_bcolumn);
+
+        if r > rows.first_key_value().unwrap().0 {
+          let prev_r = r - 1;
+          let prev_row = rows.get(&prev_r).unwrap();
+          assert_eq!(prev_row.end_bcolumn, row.start_bcolumn);
+        }
+        if r < rows.last_key_value().unwrap().0 {
+          let next_r = r + 1;
+          let next_row = rows.get(&next_r).unwrap();
+          assert_eq!(next_row.start_bcolumn, row.end_bcolumn);
+        }
       }
     }
   }
