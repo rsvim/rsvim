@@ -668,7 +668,7 @@ impl Widgetable for WindowContent {
             canvas.frame_mut().set_cells_at(cells_upos, cells);
             col_idx += left_length;
             debug!(
-              "3-line_idx:{}, row_idx:{}, col_idx:{}, left_parts_length:{}, line_viewport:{:?}, r:{:?}",
+              "3-line_idx:{}, row_idx:{}, col_idx:{}, left_length:{}, line_viewport:{:?}, r:{:?}",
               line_idx, row_idx, col_idx, left_length, line_viewport, r
             );
           }
