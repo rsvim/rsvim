@@ -748,7 +748,7 @@ mod tests {
   }
 
   #[allow(clippy::too_many_arguments)]
-  fn do_test_draw_from_top_left(actual: &Canvas, expect: &Vec<&str>) {
+  fn do_test_draw_from_top_left(actual: &Canvas, expect: &[&str]) {
     let actual = actual
       .frame()
       .raw_symbols()
