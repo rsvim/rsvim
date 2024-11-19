@@ -586,8 +586,8 @@ impl Widgetable for WindowContent {
       let line_viewport = viewport.lines().get(&line_idx).unwrap();
 
       debug!(
-        "row_idx:{}, line_idx:{}, line_viewport:{:?}",
-        row_idx, line_idx, line_viewport
+        "0-line_idx:{}, row_idx:{}, line_viewport:{:?}",
+        line_idx, row_idx, line_viewport
       );
 
       let row_viewport = &line_viewport.rows;
@@ -628,6 +628,10 @@ impl Widgetable for WindowContent {
             let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
             canvas.frame_mut().set_cells_at(cells_upos, cells);
             col_idx += line_viewport.start_filled_columns as u16;
+            debug!(
+              "1-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
+              line_idx, row_idx, col_idx, line_viewport, r
+            );
           }
 
           // Render line content.
@@ -648,18 +652,25 @@ impl Widgetable for WindowContent {
               total_width += unicode_width;
             }
             debug_assert_eq!(total_width, r.end_bcolumn - r.start_bcolumn);
+            debug!(
+              "2-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
+              line_idx, row_idx, col_idx, line_viewport, r
+            );
           }
 
           // Render left empty parts.
-          if width > (r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills {
-            let left_parts_length =
-              width - ((r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills);
+          if width > col_idx + start_fills + end_fills {
+            let left_parts_length = width - (col_idx + start_fills + end_fills);
             let cells = std::iter::repeat_n(' ', left_parts_length as usize)
               .map(Cell::from)
               .collect::<Vec<_>>();
             let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
             canvas.frame_mut().set_cells_at(cells_upos, cells);
             col_idx += left_parts_length;
+            debug!(
+              "3-line_idx:{}, row_idx:{}, col_idx:{}, left_parts_length:{}, line_viewport:{:?}, r:{:?}",
+              line_idx, row_idx, col_idx, left_parts_length, line_viewport, r
+            );
           }
 
           // Render end fills.
@@ -671,6 +682,10 @@ impl Widgetable for WindowContent {
             canvas.frame_mut().set_cells_at(cells_upos, cells);
 
             col_idx += line_viewport.end_filled_columns as u16;
+            debug!(
+              "4-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
+              line_idx, row_idx, col_idx, line_viewport, r
+            );
           }
           debug_assert_eq!(width, col_idx);
 
