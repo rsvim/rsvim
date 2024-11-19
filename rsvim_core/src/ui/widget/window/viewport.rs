@@ -395,7 +395,7 @@ fn _sync_from_top_left(
 }
 
 #[allow(dead_code)]
-fn rpslice2line(s: &RopeSlice) -> String {
+fn slice2line(s: &RopeSlice) -> String {
   let mut builder = String::new();
   for chunk in s.chunks() {
     builder.push_str(chunk);
@@ -429,7 +429,7 @@ fn _sync_from_top_left_nowrap(
     "buffer.get_line ({:?}):{:?}",
     start_line,
     match buffer.get_line(start_line) {
-      Some(line) => rpslice2line(&line),
+      Some(line) => slice2line(&line),
       None => "None".to_string(),
     }
   );
@@ -453,7 +453,7 @@ fn _sync_from_top_left_nowrap(
         debug!(
           "0-l:{:?}, line:'{:?}', current_line:{:?}",
           l,
-          rpslice2line(&line),
+          slice2line(&line),
           current_line
         );
 
@@ -675,7 +675,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
     "buffer.get_line ({:?}):'{:?}'",
     start_line,
     match buffer.get_line(start_line) {
-      Some(line) => rpslice2line(&line),
+      Some(line) => slice2line(&line),
       None => "None".to_string(),
     }
   );
@@ -699,7 +699,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
         debug!(
           "0-l:{:?}, line:'{:?}', current_line:{:?}",
           l,
-          rpslice2line(&line),
+          slice2line(&line),
           current_line
         );
 
@@ -987,7 +987,7 @@ fn _sync_from_top_left_wrap_linebreak(
     "buffer.get_line ({:?}):'{:?}'",
     start_line,
     match buffer.get_line(start_line) {
-      Some(line) => rpslice2line(&line),
+      Some(line) => slice2line(&line),
       None => "None".to_string(),
     }
   );
@@ -1051,7 +1051,7 @@ fn _sync_from_top_left_wrap_linebreak(
           debug!(
             "1-l:{:?}, line:'{:?}', current_line:{:?}, i:{}, wd:{:?}",
             l,
-            rpslice2line(&line),
+            slice2line(&line),
             current_line,
             i,
             wd
