@@ -29,8 +29,10 @@ use tracing::{debug, error};
 pub struct WindowContent {
   base: InodeBase,
 
+  // Buffer.
   buffer: BufferWk,
 
+  // Viewport.
   viewport: SafeViewportRef,
 }
 
