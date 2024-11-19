@@ -580,94 +580,115 @@ impl Widgetable for WindowContent {
     let mut end_fills_count = 0_usize;
 
     while line_idx < viewport.end_line() {
+      debug_assert!(row_idx < height);
+
       let line_slice = lines_slice.next().unwrap();
       let line_viewport = viewport.lines().get(&line_idx).unwrap();
 
+      debug!(
+        "row_idx:{}, line_idx:{}, line_viewport:{:?}",
+        row_idx, line_idx, line_viewport
+      );
+
       let row_viewport = &line_viewport.rows;
-      let first_row = row_viewport.first_key_value().unwrap();
-      let last_row = row_viewport.last_key_value().unwrap();
-      let first_row_idx = *first_row.0;
-      let last_row_idx = *last_row.0;
 
-      for (r_idx, r) in row_viewport.iter() {
-        debug_assert_eq!(*r_idx, row_idx);
+      if !row_viewport.is_empty() {
+        let first_row = row_viewport.first_key_value().unwrap();
+        let last_row = row_viewport.last_key_value().unwrap();
+        let first_row_idx = *first_row.0;
+        let last_row_idx = *last_row.0;
 
-        let mut col_idx = 0_u16;
+        for (r_idx, r) in row_viewport.iter() {
+          debug_assert_eq!(*r_idx, row_idx);
+          debug_assert!(row_idx < height);
 
-        let start_fills = if row_idx == first_row_idx && line_viewport.start_filled_columns > 0 {
-          start_fills_count += 1;
-          assert!(start_fills_count == 1);
-          line_viewport.start_filled_columns as u16
-        } else {
-          0_u16
-        };
-        let end_fills = if row_idx == last_row_idx && line_viewport.end_filled_columns > 0 {
-          assert!(start_fills_count == 1);
-          end_fills_count += 1;
-          assert!(end_fills_count == 1);
-          line_viewport.end_filled_columns as u16
-        } else {
-          0_u16
-        };
+          let mut col_idx = 0_u16;
 
-        // Render start fills.
-        if start_fills > 0 {
-          let cells = std::iter::repeat_n('>', line_viewport.start_filled_columns)
-            .map(Cell::from)
-            .collect::<Vec<_>>();
-          let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, cells);
-          col_idx += line_viewport.start_filled_columns as u16;
-        }
+          let start_fills = if row_idx == first_row_idx && line_viewport.start_filled_columns > 0 {
+            start_fills_count += 1;
+            assert!(start_fills_count == 1);
+            line_viewport.start_filled_columns as u16
+          } else {
+            0_u16
+          };
+          let end_fills = if row_idx == last_row_idx && line_viewport.end_filled_columns > 0 {
+            assert!(start_fills_count == 1);
+            end_fills_count += 1;
+            assert!(end_fills_count == 1);
+            line_viewport.end_filled_columns as u16
+          } else {
+            0_u16
+          };
 
-        // Render line content.
-        if r.end_char_idx > r.start_char_idx {
-          let mut total_width = 0_usize;
-          let mut char_idx = r.start_char_idx;
-          let mut chars_slice = line_slice.get_chars_at(r.start_char_idx).unwrap();
-          while char_idx < r.end_char_idx {
-            let c = chars_slice.next().unwrap();
-            let (unicode_symbol, unicode_width) = buffer.char_symbol(c);
-
-            let cell = Cell::with_symbol(unicode_symbol);
-            let cell_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-            canvas.frame_mut().set_cell(cell_upos, cell);
-
-            col_idx += 1;
-            char_idx += 1;
-            total_width += unicode_width;
+          // Render start fills.
+          if start_fills > 0 {
+            let cells = std::iter::repeat_n('>', line_viewport.start_filled_columns)
+              .map(Cell::from)
+              .collect::<Vec<_>>();
+            let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+            canvas.frame_mut().set_cells_at(cells_upos, cells);
+            col_idx += line_viewport.start_filled_columns as u16;
           }
-          debug_assert_eq!(total_width, r.end_bcolumn - r.start_bcolumn);
+
+          // Render line content.
+          if r.end_char_idx > r.start_char_idx {
+            let mut total_width = 0_usize;
+            let mut char_idx = r.start_char_idx;
+            let mut chars_slice = line_slice.get_chars_at(r.start_char_idx).unwrap();
+            while char_idx < r.end_char_idx {
+              let c = chars_slice.next().unwrap();
+              let (unicode_symbol, unicode_width) = buffer.char_symbol(c);
+
+              let cell = Cell::with_symbol(unicode_symbol);
+              let cell_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+              canvas.frame_mut().set_cell(cell_upos, cell);
+
+              col_idx += 1;
+              char_idx += 1;
+              total_width += unicode_width;
+            }
+            debug_assert_eq!(total_width, r.end_bcolumn - r.start_bcolumn);
+          }
+
+          // Render left empty parts.
+          if width > (r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills {
+            let left_parts_length =
+              width - ((r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills);
+            let cells = std::iter::repeat_n(' ', left_parts_length as usize)
+              .map(Cell::from)
+              .collect::<Vec<_>>();
+            let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+            canvas.frame_mut().set_cells_at(cells_upos, cells);
+            col_idx += left_parts_length;
+          }
+
+          // Render end fills.
+          if end_fills > 0 {
+            let cells = std::iter::repeat_n('<', line_viewport.end_filled_columns)
+              .map(Cell::from)
+              .collect::<Vec<_>>();
+            let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+            canvas.frame_mut().set_cells_at(cells_upos, cells);
+
+            col_idx += line_viewport.end_filled_columns as u16;
+          }
+          debug_assert_eq!(width, col_idx);
+
+          row_idx += 1;
         }
-
-        // Render left empty parts.
-        if width > (r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills {
-          let left_parts_length =
-            width - ((r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills);
-          let cells = std::iter::repeat_n(' ', left_parts_length as usize)
-            .map(Cell::from)
-            .collect::<Vec<_>>();
-          let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, cells);
-          col_idx += left_parts_length;
-        }
-
-        // Render end fills.
-        if end_fills > 0 {
-          let cells = std::iter::repeat_n('<', line_viewport.end_filled_columns)
-            .map(Cell::from)
-            .collect::<Vec<_>>();
-          let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-          canvas.frame_mut().set_cells_at(cells_upos, cells);
-
-          col_idx += line_viewport.end_filled_columns as u16;
-        }
-        debug_assert_eq!(width, col_idx);
-
-        row_idx += 1;
       }
 
       line_idx += 1;
+    }
+
+    // If buffer has no more lines, render empty spaces to left parts of the window content.
+    while row_idx < height {
+      let cells = std::iter::repeat_n(' ', width as usize)
+        .map(Cell::from)
+        .collect::<Vec<_>>();
+      let cells_upos = point!(x: upos.x(), y: row_idx + upos.y());
+      canvas.frame_mut().set_cells_at(cells_upos, cells);
+      row_idx += 1;
     }
   }
 }
