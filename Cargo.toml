@@ -73,7 +73,7 @@ ascii = "1.1.0"
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
 # See: https://github.com/denoland/deno/blob/main/Cargo.lock
-v8 = "=0.106.0"
+v8 = "=0.130.1"
 swc_common = { version = "=0.37.5", features = ["tty-emitter"] }
 swc_ecma_codegen = "=0.155.1"
 swc_ecma_parser = "=0.149.1"
