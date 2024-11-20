@@ -344,4 +344,16 @@ mod tests {
   fn next_buffer_id1() {
     assert!(next_buffer_id() > 0);
   }
+
+  #[test]
+  fn buffer_unicode_width1() {
+    let b1 = Buffer::from(RopeBuilder::new());
+    assert_eq!(b1.char_width('A'), 1);
+    assert_eq!(b1.char_symbol('A'), (CompactString::new("A"), 1));
+    assert_eq!(b1.str_width("ABCDEFG"), 7);
+    assert_eq!(
+      b1.str_symbols("ABCDEFG"),
+      (CompactString::new("ABCDEFG"), 7)
+    );
+  }
 }
