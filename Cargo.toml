@@ -94,17 +94,17 @@ swc_atoms = "=0.6.7"
 [profile.release]
 lto = true
 strip = true
-opt-level = "z"
+# opt-level = "z"
 codegen-units = 1
 
-[profile.release.package.tokio]
-opt-level = 3
-[profile.release.package.v8]
-opt-level = 3
-[profile.release.package.zstd]
-opt-level = 3
-[profile.release.package.zstd-sys]
-opt-level = 3
+# [profile.release.package.tokio]
+# opt-level = 3
+# [profile.release.package.v8]
+# opt-level = 3
+# [profile.release.package.zstd]
+# opt-level = 3
+# [profile.release.package.zstd-sys]
+# opt-level = 3
 
 # Nightly
 [profile.nightly]
