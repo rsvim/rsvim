@@ -1129,40 +1129,45 @@ fn _sync_from_top_left_wrap_linebreak(
               wd_width,
               width
             );
-            rows.insert(
-              wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-              },
-            );
 
-            // NOTE: The `end_fills` only indicates the cells at the end of the bottom row in the
-            // viewport cannot show the full unicode character for those ASCII control codes or
-            // other unicodes such as CJK languages.
-            // But for word-wrap rendering, i.e. `line-break` option is `true`, sometimes the whole
-            // word display length is out of the end of the row and it will not be displayed (and
-            // in such case, we don't set `end_fills` for it).
-            // So, here we need to detect the real end fills position for the word.
+            // If if happens this word starts from the beginning of the row, then we don't need to
+            // start from the next row. Because this is an empty of entire row.
+            // If this word starts in the middle of the row, then we will have to start a new row.
+            if wcol > 0 {
+              rows.insert(
+                wrow,
+                LineViewportRow {
+                  start_bcolumn: start_bcol,
+                  start_char_idx: start_c_idx,
+                  end_bcolumn: end_bcol,
+                  end_char_idx: end_c_idx,
+                },
+              );
 
-            let saved_end_fills = {
-              let mut tmp_wcol = wcol;
-              for c in wd.chars() {
-                let c_width = buffer.char_width(c);
+              // NOTE: The `end_fills` only indicates the cells at the end of the bottom row in the
+              // viewport cannot show the full unicode character for those ASCII control codes or
+              // other unicodes such as CJK languages.
+              // But for word-wrap rendering, i.e. `line-break` option is `true`, sometimes the whole
+              // word display length is out of the end of the row and it will not be displayed (and
+              // in such case, we don't set `end_fills` for it).
+              // So, here we need to detect the real end fills position for the word.
 
-                // Column with next char will goes out of the row.
-                if tmp_wcol as usize + c_width > width as usize {
-                  break;
+              let saved_end_fills = {
+                let mut tmp_wcol = wcol;
+                for c in wd.chars() {
+                  let c_width = buffer.char_width(c);
+
+                  // Column with next char will goes out of the row.
+                  if tmp_wcol as usize + c_width > width as usize {
+                    break;
+                  }
+                  tmp_wcol += c_width as u16;
+                  // Column already meets the end of the row.
+                  if tmp_wcol >= width {
+                    break;
+                  }
                 }
-                tmp_wcol += c_width as u16;
-                // Column already meets the end of the row.
-                if tmp_wcol >= width {
-                  break;
-                }
-              }
-              debug!(
+                debug!(
                 "4.2-wrow/wcol/tmp_wcol:{}/{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
                 wrow,
                 wcol,
@@ -1179,17 +1184,17 @@ fn _sync_from_top_left_wrap_linebreak(
                 wd_width,
                 width
               );
-              width - tmp_wcol
-            };
+                width - tmp_wcol
+              };
 
-            wrow += 1;
-            wcol = 0_u16;
-            start_bcol = end_bcol;
-            start_c_idx = bchars;
+              wrow += 1;
+              wcol = 0_u16;
+              start_bcol = end_bcol;
+              start_c_idx = bchars;
 
-            if wrow >= height {
-              end_fills = saved_end_fills as usize;
-              debug!(
+              if wrow >= height {
+                end_fills = saved_end_fills as usize;
+                debug!(
                 "5-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
                 wrow,
                 wcol,
@@ -1205,7 +1210,8 @@ fn _sync_from_top_left_wrap_linebreak(
                 wd_width,
                 height
               );
-              break;
+                break;
+              }
             }
 
             for (j, c) in wd.chars().enumerate() {
@@ -2787,15 +2793,16 @@ mod tests {
       "several ",
       "things we ",
       "want to test:",
+      "\n",
       "  1. When the",
       " line is ",
       "small enough ",
       "to completely",
       " put inside a",
-      " row of the  ",
+      " row of the ",
       "window ",
       "content ",
-      "widget, 那么 ",
+      "widget, 那么",
       "行换行和单词",
       "换行选项都不",
     ];
