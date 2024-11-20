@@ -1141,7 +1141,7 @@ fn _sync_from_top_left_wrap_linebreak(
             let saved_end_fills = width as usize - wcol as usize;
             wrow += 1;
             wcol = 0_u16;
-            start_bcol = end_bcol + 1;
+            start_bcol = end_bcol;
             start_c_idx = bchars;
 
             if wrow >= height {

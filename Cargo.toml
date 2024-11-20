@@ -67,7 +67,7 @@ once_cell = { version = "1.20.2", features = ["parking_lot"] }
 tempfile = "3"
 assert_fs = "1.1.2"
 zstd = "0.13.2"
-icu = { version = "1.5.0", features = ["compiled_data", "serde"] }
+# icu = { version = "1.5.0", features = ["compiled_data", "serde"] }
 ascii = "1.1.0"
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
