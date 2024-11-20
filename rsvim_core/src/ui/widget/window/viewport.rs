@@ -1182,7 +1182,7 @@ fn _sync_from_top_left_wrap_linebreak(
               width - tmp_wcol
             };
 
-            // wrow += 1;
+            wrow += 1;
             wcol = 0_u16;
             start_bcol = end_bcol;
             start_c_idx = bchars;
@@ -1242,7 +1242,9 @@ fn _sync_from_top_left_wrap_linebreak(
                 );
 
                 let saved_end_fills = width as usize - wcol as usize;
-                wrow += 1;
+                if j > 0 {
+                  wrow += 1;
+                }
                 wcol = 0_u16;
                 start_bcol = end_bcol;
                 start_c_idx = bchars;
@@ -2805,19 +2807,15 @@ mod tests {
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-        .into_iter()
-        .collect();
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 0), (3, 1), (4, 0), (5, 0)]
-        .into_iter()
-        .collect();
+      vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
     do_test_sync_from_top_left(
       buffer,
       &actual,
       &expect,
       0,
-      6,
+      4,
       &expect_start_fills,
       &expect_end_fills,
     );
