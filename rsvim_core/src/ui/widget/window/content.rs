@@ -741,6 +741,7 @@ mod tests {
     ]);
     let expect = vec![
       "Hello, RSVIM!",
+      "             ",
       "This is a    ",
       "quite simple ",
       "andsmalltestl",
@@ -769,8 +770,7 @@ mod tests {
       " row of the  ",
       "window       ",
       "content      ",
-      "widget, 那么 ",
-      "行换行和单词<",
+      "widget, 那么<",
     ];
 
     let terminal_size = U16Size::new(13, 31);
