@@ -49,12 +49,8 @@ tzdb = "0.7.2"
 compact_str = { version = "0.8.0", features = ["serde", "bytes"] }
 ropey = "1.6.1"
 geo = { version = "0.28.0", features = ["serde"] }
-num = "0.4.3"
 num-traits = "0.2.19"
-num-derive = "0.4.2"
 parking_lot = "0.12.3"
-# async-trait = "0.1.82"
-# bincode = "2.0.0-rc.3"
 directories = "5.0.1"
 anyhow = "1.0.92"
 thiserror = "1.0.66"
