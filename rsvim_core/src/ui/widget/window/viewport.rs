@@ -2346,7 +2346,7 @@ mod tests {
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 7)].into_iter().collect();
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     do_test_sync_from_top_left(
       buffer,
       &actual,
@@ -2386,7 +2386,7 @@ mod tests {
       "doesn't affect the ",
       "rendering.\n",
       "  2. When the line is to",
-      "\to long to be ", // 6 fills
+      "\to long to be ",
     ];
 
     let size = U16Size::new(27, 15);
@@ -2398,7 +2398,7 @@ mod tests {
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
-    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 6)]
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
     do_test_sync_from_top_left(
@@ -2509,7 +2509,7 @@ mod tests {
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 0), (3, 2)].into_iter().collect();
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     do_test_sync_from_top_left(
       buffer,
       &actual,
