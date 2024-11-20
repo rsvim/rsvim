@@ -27,13 +27,31 @@ pub fn next_buffer_id() -> BufferId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+#[derive(Clone, Copy, Debug)]
+/// The Vim buffer's status.
+pub enum BufferStatus {
+  INIT,    // After created.
+  LOADING, // Loading text content from disk file.
+  LOADED,  // File content loaded complete.
+  SAVING,  // Saving buffer content to disk file.
+  CHANGED, // Buffer content has been modified.
+}
+
 #[derive(Clone, Debug)]
-/// The Vim buffer.
+/// The Vim buffer, it is the memory mapping to a file on hardware disk, i.e. file system.
+///
+/// It contains several features:
+/// 1. It can be associated with a file, or detached with no file.
+/// 2. When associated with a file, it can be readed/loaded from the file, and saved to the file
+///    (after some modifications).
+/// 3. When detached with no file, it cannot be readed/loaded, or saved (because it doesn't have a
+///    physical storage backend).
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
   options: BufferLocalOptions,
-  dirty: bool,
+  filename: Option<String>,
+  status: BufferStatus,
 }
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
@@ -46,7 +64,8 @@ impl Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
       options: BufferLocalOptions::default(),
-      dirty: true,
+      filename: None,
+      status: BufferStatus::INIT,
     }
   }
 
@@ -141,13 +160,7 @@ impl Buffer {
 
   /// Alias to method [`Rope::append`](Rope::append).
   pub fn append(&mut self, other: Rope) {
-    self.dirty = true;
     self.rope.append(other)
-  }
-
-  /// Clear dirty status.
-  pub fn clear_dirty(&mut self) {
-    self.dirty = false;
   }
 }
 // Rope }
@@ -185,6 +198,8 @@ impl From<Rope> for Buffer {
       id: next_buffer_id(),
       rope,
       options: BufferLocalOptions::default(),
+      filename: None,
+      status: BufferStatus::INIT,
     }
   }
 }
@@ -196,6 +211,8 @@ impl From<RopeBuilder> for Buffer {
       id: next_buffer_id(),
       rope: builder.finish(),
       options: BufferLocalOptions::default(),
+      filename: None,
+      status: BufferStatus::INIT,
     }
   }
 }
