@@ -33,6 +33,7 @@ pub struct Buffer {
   id: BufferId,
   rope: Rope,
   options: BufferLocalOptions,
+  dirty: bool,
 }
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
@@ -45,6 +46,7 @@ impl Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
       options: BufferLocalOptions::default(),
+      dirty: true,
     }
   }
 
@@ -117,25 +119,29 @@ impl Buffer {
 
 // Rope {
 impl Buffer {
+  /// Alias to method [`Rope::get_line`](Rope::get_line).
   pub fn get_line(&self, line_idx: usize) -> Option<RopeSlice> {
     self.rope.get_line(line_idx)
   }
 
+  /// Alias to method [`Rope::get_lines_at`](Rope::get_lines_at).
   pub fn get_lines_at(&self, line_idx: usize) -> Option<Lines> {
     self.rope.get_lines_at(line_idx)
   }
 
+  /// Alias to method [`Rope::lines`](Rope::lines).
   pub fn lines(&self) -> Lines {
     self.rope.lines()
   }
 
+  /// Alias to method [`Rope::write_to`](Rope::write_to).
   pub fn write_to<T: std::io::Write>(&self, writer: T) -> std::io::Result<()> {
     self.rope.write_to(writer)
   }
 
-  pub fn append(&mut self, other: Rope) -> &mut Self {
-    self.rope.append(other);
-    self
+  /// Alias to method [`Rope::append`](Rope::append).
+  pub fn append(&mut self, other: Rope) {
+    self.rope.append(other)
   }
 }
 // Rope }
