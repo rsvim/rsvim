@@ -141,7 +141,13 @@ impl Buffer {
 
   /// Alias to method [`Rope::append`](Rope::append).
   pub fn append(&mut self, other: Rope) {
+    self.dirty = true;
     self.rope.append(other)
+  }
+
+  /// Clear dirty status.
+  pub fn clear_dirty(&mut self) {
+    self.dirty = false;
   }
 }
 // Rope }
