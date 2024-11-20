@@ -96,6 +96,22 @@ impl Buffer {
       (CompactString::from(c.to_string()), width)
     }
   }
+
+  /// Get the display width for a unicode `str`.
+  pub fn str_width(&self, s: &str) -> usize {
+    s.chars().map(|c| self.char_width(c)).sum()
+  }
+
+  /// Get the printable cell symbols and the display width for a unicode `str`.
+  pub fn str_symbols(&self, s: &str) -> (CompactString, usize) {
+    s.chars().map(|c| self.char_symbol(c)).fold(
+      (CompactString::with_capacity(s.len()), 0_usize),
+      |(mut init_symbol, init_width), (mut symbol, width)| {
+        init_symbol.push_str(symbol.as_mut_str());
+        (init_symbol, init_width + width)
+      },
+    )
+  }
 }
 // Unicode }
 

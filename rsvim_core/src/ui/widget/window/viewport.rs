@@ -1043,9 +1043,7 @@ fn _sync_from_top_left_wrap_linebreak(
         for (i, wd) in word_boundaries.iter().enumerate() {
           let (wd_chars, wd_width) = wd.chars().map(|c| (1_usize, buffer.char_width(c))).fold(
             (0_usize, 0_usize),
-            |(init_chars, init_width), (c_count, c_width)| {
-              (init_chars + c_count, init_width + c_width)
-            },
+            |(init_chars, init_width), (count, width)| (init_chars + count, init_width + width),
           );
 
           debug!(
