@@ -37,7 +37,7 @@ pub trait Inodeable: Sized + Clone + Debug {
   fn visible_mut(&mut self) -> &mut bool;
 }
 
-/// Generate getter/setter for Inode.
+/// Generate getter/setter for `Inode`.
 #[macro_export]
 macro_rules! inode_generate_impl {
   ($struct_name:ty,$base_name:ident) => {
@@ -97,7 +97,7 @@ macro_rules! inode_generate_impl {
   };
 }
 
-/// Generate getter/setter for Inode, with 1-lifetime.
+/// Generate getter/setter for `Inode`, with 1-lifetime.
 #[macro_export]
 macro_rules! inode_generate_impl_1 {
   ($struct_name:ident < $lt1:tt > , $base_name:ident) => {

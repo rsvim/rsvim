@@ -73,6 +73,22 @@ impl Default for WindowOptionsBuilder {
   }
 }
 
+#[derive(Debug, Copy, Clone)]
+// Viewport options.
+pub struct ViewportOptions {
+  pub wrap: bool,
+  pub line_break: bool,
+}
+
+impl From<&WindowLocalOptions> for ViewportOptions {
+  fn from(value: &WindowLocalOptions) -> Self {
+    Self {
+      wrap: value.wrap(),
+      line_break: value.line_break(),
+    }
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
