@@ -16,7 +16,6 @@ use crate::{inode_generate_impl, rlock};
 
 use crossterm::style::{Attributes, Color};
 use geo::point;
-use icu::segmenter::WordSegmenter;
 use regex::Regex;
 use ropey::RopeSlice;
 use std::collections::{BTreeSet, VecDeque};
@@ -650,7 +649,7 @@ mod tests {
       "test lines",
       ".         ",
       "But still ",
-      "it        ",
+      "it <<<<<<<",
     ];
 
     let terminal_size = U16Size::new(10, 10);

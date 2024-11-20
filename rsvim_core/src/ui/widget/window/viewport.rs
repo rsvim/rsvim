@@ -1114,7 +1114,7 @@ fn _sync_from_top_left_wrap_linebreak(
           // 'line-break' option is `false`.
           if wcol as usize + wd_width > width as usize {
             debug!(
-              "4-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+              "4.1-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
               wrow,
               wcol,
               bcol,
@@ -1138,14 +1138,57 @@ fn _sync_from_top_left_wrap_linebreak(
                 end_char_idx: end_c_idx,
               },
             );
-            let saved_end_fills = width as usize - wcol as usize;
+
+            // NOTE: The `end_fills` only indicates the cells at the end of the bottom row in the
+            // viewport cannot show the full unicode character for those ASCII control codes or
+            // other unicodes such as CJK languages.
+            // But for word-wrap rendering, i.e. `line-break` option is `true`, sometimes the whole
+            // word display length is out of the end of the row and it will not be displayed (and
+            // in such case, we don't set `end_fills` for it).
+            // So, here we need to detect the real end fills position for the word.
+
+            let saved_end_fills = {
+              let mut tmp_wcol = wcol;
+              for c in wd.chars() {
+                let c_width = buffer.char_width(c);
+
+                // Column with next char will goes out of the row.
+                if tmp_wcol as usize + c_width > width as usize {
+                  break;
+                }
+                tmp_wcol += c_width as u16;
+                // Column already meets the end of the row.
+                if tmp_wcol >= width {
+                  break;
+                }
+              }
+              debug!(
+                "4.2-wrow/wcol/tmp_wcol:{}/{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+                wrow,
+                wcol,
+                tmp_wcol,
+                bcol,
+                start_bcol,
+                end_bcol,
+                bchars,
+                start_c_idx,
+                end_c_idx,
+                start_fills,
+                end_fills,
+                wd_chars,
+                wd_width,
+                width
+              );
+              width - tmp_wcol
+            };
+
             wrow += 1;
             wcol = 0_u16;
             start_bcol = end_bcol;
             start_c_idx = bchars;
 
             if wrow >= height {
-              end_fills = saved_end_fills;
+              end_fills = saved_end_fills as usize;
               debug!(
                 "5-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
                 wrow,
@@ -2608,6 +2651,100 @@ mod tests {
       &expect,
       0,
       4,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak9() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, ",
+      "RSVIM!\n",
+      "This is a ",
+      "quite ",
+      "simple and",
+      " small ",
+      "test lines",
+      ".\n",
+      "But still ",
+      "it ",
+    ];
+
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    do_test_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      3,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak10() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contai\tseveral things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, ",
+      "RSVIM!\n",
+      "This is a ",
+      "quite ",
+      "simple and",
+      " small ",
+      "test lines",
+      ".\n",
+      "But still ",
+      "it contai",
+    ];
+
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 1)].into_iter().collect();
+    do_test_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      3,
       &expect_start_fills,
       &expect_end_fills,
     );
