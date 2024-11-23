@@ -32,8 +32,8 @@ pub fn next_buffer_id() -> BufferId {
 pub enum BufferStatus {
   INIT,    // After created.
   LOADING, // Loading text content from disk file.
-  LOADED,  // File content loaded complete.
   SAVING,  // Saving buffer content to disk file.
+  SYNCED,  // Synced content with file system.
   CHANGED, // Buffer content has been modified.
 }
 
@@ -75,6 +75,14 @@ impl Buffer {
 
   pub fn id(&self) -> BufferId {
     self.id
+  }
+
+  pub fn filename(&self) -> &Option<String> {
+    &self.filename
+  }
+
+  pub fn status(&self) -> BufferStatus {
+    self.status
   }
 }
 
