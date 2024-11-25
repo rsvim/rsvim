@@ -2,6 +2,7 @@
 
 use crate::buf::opt::BufferLocalOptions;
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
+use crate::evloop::msg::WorkerToMasterMessage;
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
@@ -12,6 +13,7 @@ use std::collections::BTreeMap;
 use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
+use tokio::sync::mpsc::Sender;
 use unicode_width::UnicodeWidthChar;
 
 pub mod opt;
@@ -52,6 +54,7 @@ pub struct Buffer {
   options: BufferLocalOptions,
   filename: Option<String>,
   status: BufferStatus,
+  worker_send_to_master: Sender<WorkerToMasterMessage>,
 }
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
@@ -59,13 +62,14 @@ pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
   /// Make buffer with default [`BufferLocalOptions`].
-  pub fn new() -> Self {
+  pub fn new(worker_send_to_master: Sender<WorkerToMasterMessage>) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
       options: BufferLocalOptions::default(),
       filename: None,
       status: BufferStatus::INIT,
+      worker_send_to_master,
     }
   }
 
@@ -173,12 +177,6 @@ impl Buffer {
 }
 // Rope }
 
-impl Default for Buffer {
-  fn default() -> Self {
-    Buffer::new()
-  }
-}
-
 // Options {
 impl Buffer {
   pub fn options(&self) -> &BufferLocalOptions {
@@ -201,26 +199,28 @@ impl Buffer {
 
 impl From<Rope> for Buffer {
   /// Make buffer from [`Rope`].
-  fn from(rope: Rope) -> Self {
+  fn from(worker_send_to_master: Sender<WorkerToMasterMessage>, rope: Rope) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope,
       options: BufferLocalOptions::default(),
       filename: None,
       status: BufferStatus::INIT,
+      worker_send_to_master
     }
   }
 }
 
 impl From<RopeBuilder> for Buffer {
   /// Make buffer from [`RopeBuilder`].
-  fn from(builder: RopeBuilder) -> Self {
+  fn from(worker_send_to_master: Sender<WorkerToMasterMessage>, builder: RopeBuilder) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope: builder.finish(),
       options: BufferLocalOptions::default(),
       filename: None,
       status: BufferStatus::INIT,
+      worker_send_to_master
     }
   }
 }
