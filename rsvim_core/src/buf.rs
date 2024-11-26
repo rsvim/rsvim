@@ -39,15 +39,13 @@ pub enum BufferStatus {
   CHANGED, // Buffer content has been modified.
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 /// The Vim buffer, it is the memory mapping to a file on hardware disk, i.e. file system.
 ///
 /// It contains several features:
 /// 1. It can be associated with a file, or detached with no file.
-/// 2. When associated with a file, it can be readed/loaded from the file, and saved to the file
-///    (after some modifications).
-/// 3. When detached with no file, it cannot be readed/loaded, or saved (because it doesn't have a
-///    physical storage backend).
+/// 2. When associated with a file, it can load from or save to the file. While detached with no
+///    file, it cannot.
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
@@ -174,6 +172,8 @@ impl Buffer {
   pub fn append(&mut self, other: Rope) {
     self.rope.append(other)
   }
+
+  pub async fn bind_and_load()
 }
 // Rope }
 
