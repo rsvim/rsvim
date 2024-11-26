@@ -206,7 +206,7 @@ impl From<Rope> for Buffer {
       options: BufferLocalOptions::default(),
       filename: None,
       status: BufferStatus::INIT,
-      worker_send_to_master
+      worker_send_to_master,
     }
   }
 }
@@ -220,7 +220,7 @@ impl From<RopeBuilder> for Buffer {
       options: BufferLocalOptions::default(),
       filename: None,
       status: BufferStatus::INIT,
-      worker_send_to_master
+      worker_send_to_master,
     }
   }
 }
