@@ -10,15 +10,15 @@ use ropey::{Rope, RopeBuilder};
 use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
 
+fn into_str(buf: &[u8], bufsize: usize) -> String {
+  String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
+}
+
 fn into_rope(buf: &[u8], bufsize: usize) -> Rope {
   let bufstr = into_str(buf, bufsize);
   let mut block = RopeBuilder::new();
   block.append(&bufstr.to_owned());
   block.finish()
-}
-
-fn into_str(buf: &[u8], bufsize: usize) -> String {
-  String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
 }
 
 /// Bind buffer to a file.
