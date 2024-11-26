@@ -136,7 +136,7 @@ async fn bind_buffer_async(buf: BufferArc, filename: &str) -> TheBufferResult<us
             // Rename buffer, or say, bind to new filename, change status to `CHANGED`.
             let mut wbuf = wlock!(buf);
             wbuf.set_filename(Some(filename.to_string()));
-            wbuf.set_status(BufferStatus::CHANGED);
+            wbuf.set_status(BufferStatus::SYNCED);
             return Ok(0_usize);
           }
           _ => {
