@@ -197,9 +197,9 @@ impl Buffer {
 }
 // Options }
 
-impl From<Rope> for Buffer {
+impl Buffer {
   /// Make buffer from [`Rope`].
-  fn from(worker_send_to_master: Sender<WorkerToMasterMessage>, rope: Rope) -> Self {
+  fn from_rope(worker_send_to_master: Sender<WorkerToMasterMessage>, rope: Rope) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope,
@@ -209,11 +209,12 @@ impl From<Rope> for Buffer {
       worker_send_to_master,
     }
   }
-}
 
-impl From<RopeBuilder> for Buffer {
   /// Make buffer from [`RopeBuilder`].
-  fn from(worker_send_to_master: Sender<WorkerToMasterMessage>, builder: RopeBuilder) -> Self {
+  fn from_rope_builder(
+    worker_send_to_master: Sender<WorkerToMasterMessage>,
+    builder: RopeBuilder,
+  ) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope: builder.finish(),
@@ -255,24 +256,32 @@ impl Buffers {
     Arc::new(RwLock::new(b))
   }
 
-  pub fn new_buffer(&mut self) -> BufferId {
-    let mut buf = Buffer::new();
+  pub fn new_buffer(&mut self, worker_send_to_master: Sender<WorkerToMasterMessage>) -> BufferId {
+    let mut buf = Buffer::new(worker_send_to_master);
     buf.set_options(self.local_options());
     let buf_id = buf.id();
     self.buffers.insert(buf_id, Buffer::to_arc(buf));
     buf_id
   }
 
-  pub fn new_buffer_from_rope(&mut self, rope: Rope) -> BufferId {
-    let mut buf = Buffer::from(rope);
+  pub fn new_buffer_from_rope(
+    &mut self,
+    worker_send_to_master: Sender<WorkerToMasterMessage>,
+    rope: Rope,
+  ) -> BufferId {
+    let mut buf = Buffer::from_rope(worker_send_to_master, rope);
     buf.set_options(self.local_options());
     let buf_id = buf.id();
     self.buffers.insert(buf_id, Buffer::to_arc(buf));
     buf_id
   }
 
-  pub fn new_buffer_from_rope_builder(&mut self, rope_builder: RopeBuilder) -> BufferId {
-    let mut buf = Buffer::from(rope_builder);
+  pub fn new_buffer_from_rope_builder(
+    &mut self,
+    worker_send_to_master: Sender<WorkerToMasterMessage>,
+    rope_builder: RopeBuilder,
+  ) -> BufferId {
+    let mut buf = Buffer::from_rope_builder(worker_send_to_master, rope_builder);
     buf.set_options(self.local_options());
     let buf_id = buf.id();
     self.buffers.insert(buf_id, Buffer::to_arc(buf));
@@ -354,25 +363,38 @@ mod tests {
   use std::fs::File;
   use tempfile::tempfile;
 
+  use tokio::sync::mpsc::Receiver;
+
+  fn make_channel() -> (
+    Sender<WorkerToMasterMessage>,
+    Receiver<WorkerToMasterMessage>,
+  ) {
+    tokio::sync::mpsc::channel(1)
+  }
+
   #[test]
   fn buffer_from1() {
+    let (sender, _) = make_channel();
+
     let r1 = Rope::from_str("Hello");
-    let buf1 = Buffer::from(r1);
+    let buf1 = Buffer::from_rope(sender.clone(), r1);
     let tmp1 = tempfile().unwrap();
     buf1.write_to(tmp1).unwrap();
 
     let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
-    let buf2 = Buffer::from(r2);
+    let buf2 = Buffer::from_rope(sender, r2);
     let tmp2 = tempfile().unwrap();
     buf2.write_to(tmp2).unwrap();
   }
 
   #[test]
   fn buffer_from2() {
+    let (sender, _) = make_channel();
+
     let mut builder1 = RopeBuilder::new();
     builder1.append("Hello");
     builder1.append("World");
-    let buf1 = Buffer::from(builder1);
+    let buf1 = Buffer::from_rope_builder(sender, builder1);
     let tmp1 = tempfile().unwrap();
     buf1.write_to(tmp1).unwrap();
   }
@@ -384,7 +406,9 @@ mod tests {
 
   #[test]
   fn buffer_unicode_width1() {
-    let b1 = Buffer::from(RopeBuilder::new());
+    let (sender, _) = make_channel();
+
+    let b1 = Buffer::from_rope_builder(sender, RopeBuilder::new());
     assert_eq!(b1.char_width('A'), 1);
     assert_eq!(b1.char_symbol('A'), (CompactString::new("A"), 1));
     assert_eq!(b1.str_width("ABCDEFG"), 7);
