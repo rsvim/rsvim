@@ -2,9 +2,7 @@
 
 use crate::buf::opt::BufferLocalOptions;
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
-use crate::envar;
-use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
-use crate::res::{TheBufferErr, TheBufferResult};
+use crate::evloop::msg::WorkerToMasterMessage;
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
@@ -16,7 +14,6 @@ use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use tokio::sync::mpsc::Sender;
-use tracing::{debug, error};
 use unicode_width::UnicodeWidthChar;
 
 pub mod async_read_ext;
