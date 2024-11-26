@@ -1,6 +1,6 @@
 //! The "file-encoding" option for Vim buffer.
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum FileEncoding {
   Utf8,
   Utf16,
