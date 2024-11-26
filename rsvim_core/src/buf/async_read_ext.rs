@@ -89,13 +89,9 @@ async fn bind_buffer_async(buf: BufferArc, filename: &str) -> TheBufferResult<us
               Ok(n) => {
                 debug!("Read {} bytes: {:?}", n, into_str(&iobuf, n));
 
-                // Load into buffer.
+                // Load into buffer, and notify master thread so UI tree could update renderings.
                 let mut wbuf = wlock!(buf);
                 wbuf.append(into_rope(&iobuf, n));
-
-                // After read each block, immediately notify main thread so UI tree can render
-                // it on terminal.
-                debug!("Notify master after each block read");
                 wbuf
                   .worker_send_to_master()
                   .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
