@@ -1,6 +1,6 @@
 //! Event loop.
 
-use crate::buf::{Buffers, BuffersArc};
+use crate::buf::{async_ops as buf_async_ops, Buffers, BuffersArc};
 use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
 use crate::envar;
@@ -256,7 +256,7 @@ impl EventLoop {
   /// Initialize editor default window and buffer.
   pub fn init_editor(&self) -> IoResult<()> {
     // Create default buffer.
-    let buf_id = wlock!(self.buffers).new_buffer();
+    let buf_id = wlock!(self.buffers).new_buffer(self.worker_send_to_master.clone());
     let buffer = rlock!(self.buffers).get(&buf_id).unwrap().clone();
 
     // Create default window.

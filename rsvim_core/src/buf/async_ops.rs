@@ -1,4 +1,8 @@
 //! Async operations for vim buffer.
+//!
+//! This module abstract common async read/write operations on Vim buffer, and provide a unified
+//! interface for upper level logic. Most operations will lock the buffer to read/write its
+//! internal data, but overall they don't block the editor main loop.
 
 use crate::buf::{BufferArc, BufferStatus};
 use crate::envar;
