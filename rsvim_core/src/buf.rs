@@ -15,11 +15,12 @@ use std::collections::BTreeMap;
 use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
-use tokio::io::AsyncReadExt;
 use tokio::sync::mpsc::Sender;
 use tracing::{debug, error};
 use unicode_width::UnicodeWidthChar;
 
+pub mod async_read_ext;
+pub mod async_write_ext;
 pub mod opt;
 
 /// Buffer ID.
@@ -87,8 +88,20 @@ impl Buffer {
     &self.filename
   }
 
+  pub fn set_filename(&mut self, filename: Option<String>) {
+    self.filename = filename;
+  }
+
   pub fn status(&self) -> BufferStatus {
     self.status
+  }
+
+  pub fn set_status(&mut self, status: BufferStatus) {
+    self.status = status;
+  }
+
+  pub fn worker_send_to_master(&self) -> &Sender<WorkerToMasterMessage> {
+    &self.worker_send_to_master
   }
 }
 
