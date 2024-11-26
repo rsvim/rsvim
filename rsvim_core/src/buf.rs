@@ -190,9 +190,14 @@ impl Buffer {
 
   /// Bind buffer to a file.
   ///
-  /// If current buffer is initialized, it will immediately start loading, and this method will
-  /// returns newest status and loaded bytes after reading complete (if successful).
-  /// Otherwise it will returns [`TheBufferErr`](crate::res::TheBufferErr).
+  /// If current buffer is initialized, it will immediately start loading
+  /// If current buffer is already associated, it will be renamed to new filename (only if the file
+  /// not exists).
+  ///
+  /// Returns
+  ///
+  /// - It returns the newest status and loaded bytes after reading complete (if successful).
+  /// - Otherwise it returns [`TheBufferErr`](crate::res::TheBufferErr) to indicate some errors.
   pub async fn bind(&mut self, filename: &str) -> TheBufferResult<(BufferStatus, usize)> {
     match &self.filename {
       Some(associated) => {
