@@ -1,4 +1,4 @@
-//! Async read extensions for vim buffer.
+//! Async operations for vim buffer.
 
 use crate::buf::{BufferArc, BufferStatus};
 use crate::envar;

@@ -16,8 +16,7 @@ use std::sync::{Arc, Weak};
 use tokio::sync::mpsc::Sender;
 use unicode_width::UnicodeWidthChar;
 
-pub mod async_read_ext;
-pub mod async_write_ext;
+pub mod async_ops;
 pub mod opt;
 
 /// Buffer ID.
