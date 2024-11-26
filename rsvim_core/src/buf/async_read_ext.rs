@@ -32,8 +32,10 @@ fn into_str(buf: &[u8], bufsize: usize) -> String {
 /// - It returns the reading bytes after file loaded (if successful).
 /// - Otherwise it returns [`TheBufferErr`](crate::res::TheBufferErr) to indicate some errors.
 async fn bind_buffer_async(buf: BufferArc, filename: &str) -> TheBufferResult<usize> {
-  let buf_status = rlock!(buf).status();
-  let buf_associated = rlock!(buf).filename().clone();
+  let (buf_status, buf_associated) = {
+    let rbuf = rlock!(buf);
+    (rbuf.status(), rbuf.filename().clone())
+  };
 
   match buf_associated {
     Some(associated) => {
