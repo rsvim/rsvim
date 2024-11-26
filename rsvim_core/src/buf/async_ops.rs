@@ -4,6 +4,7 @@
 //! interface for upper level logic. Most operations will lock the buffer to read/write its
 //! internal data, but overall they don't block the editor main loop.
 
+use crate::buf::opt::FileEncoding;
 use crate::buf::{BufferArc, BufferStatus};
 use crate::envar;
 use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
@@ -14,12 +15,14 @@ use ropey::{Rope, RopeBuilder};
 use tokio::io::AsyncReadExt;
 use tracing::{debug, error};
 
-fn into_str(buf: &[u8], bufsize: usize) -> String {
-  String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
+fn into_str(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> String {
+  match fencoding {
+    FileEncoding::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
+  }
 }
 
-fn into_rope(buf: &[u8], bufsize: usize) -> Rope {
-  let bufstr = into_str(buf, bufsize);
+fn into_rope(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> Rope {
+  let bufstr = into_str(buf, bufsize, fencoding);
   let mut block = RopeBuilder::new();
   block.append(&bufstr.to_owned());
   block.finish()
@@ -36,9 +39,13 @@ fn into_rope(buf: &[u8], bufsize: usize) -> Rope {
 /// - It returns the reading bytes after file loaded (if successful).
 /// - Otherwise it returns [`TheBufferErr`](crate::res::TheBufferErr) to indicate some errors.
 async fn bind_buffer_async(buf: BufferArc, filename: &str) -> TheBufferResult<usize> {
-  let (buf_status, buf_associated) = {
+  let (buf_status, buf_associated, buf_fencoding) = {
     let rbuf = rlock!(buf);
-    (rbuf.status(), rbuf.filename().clone())
+    (
+      rbuf.status(),
+      rbuf.filename().clone(),
+      rbuf.options().file_encoding(),
+    )
   };
 
   match buf_associated {
@@ -91,11 +98,11 @@ async fn bind_buffer_async(buf: BufferArc, filename: &str) -> TheBufferResult<us
           loop {
             match fp.read(&mut iobuf).await {
               Ok(n) => {
-                debug!("Read {} bytes: {:?}", n, into_str(&iobuf, n));
+                debug!("Read {} bytes: {:?}", n, into_str(&iobuf, n, buf_fencoding));
 
                 // Load into buffer, and notify master thread so UI tree could update renderings.
                 let mut wbuf = wlock!(buf);
-                wbuf.append(into_rope(&iobuf, n));
+                wbuf.append(into_rope(&iobuf, n, buf_fencoding));
                 wbuf
                   .worker_send_to_master()
                   .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
