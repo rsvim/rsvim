@@ -2,7 +2,9 @@
 
 use crate::buf::opt::BufferLocalOptions;
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
-use crate::evloop::msg::WorkerToMasterMessage;
+use crate::envar;
+use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
+use crate::res::{TheBufferErr, TheBufferResult};
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
@@ -13,7 +15,9 @@ use std::collections::BTreeMap;
 use std::convert::From;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
+use tokio::io::AsyncReadExt;
 use tokio::sync::mpsc::Sender;
+use tracing::{debug, error};
 use unicode_width::UnicodeWidthChar;
 
 pub mod opt;
@@ -29,7 +33,7 @@ pub fn next_buffer_id() -> BufferId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 /// The Vim buffer's status.
 pub enum BufferStatus {
   INIT,    // After created.
@@ -146,6 +150,17 @@ impl Buffer {
 }
 // Unicode }
 
+fn into_rope(buf: &[u8], bufsize: usize) -> Rope {
+  let bufstr = into_str(buf, bufsize);
+  let mut block = RopeBuilder::new();
+  block.append(&bufstr.to_owned());
+  block.finish()
+}
+
+fn into_str(buf: &[u8], bufsize: usize) -> String {
+  String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
+}
+
 // Rope {
 impl Buffer {
   /// Alias to method [`Rope::get_line`](Rope::get_line).
@@ -173,7 +188,106 @@ impl Buffer {
     self.rope.append(other)
   }
 
-  pub async fn bind_and_load()
+  /// Bind buffer to a file.
+  ///
+  /// If current buffer is initialized, it will immediately start loading, and this method will
+  /// returns newest status and loaded bytes after reading complete (if successful).
+  /// Otherwise it will returns [`TheBufferErr`](crate::res::TheBufferErr).
+  pub async fn bind(&mut self, filename: &str) -> TheBufferResult<(BufferStatus, usize)> {
+    match &self.filename {
+      Some(associated) => {
+        // Associated
+        assert!(
+          self.status == BufferStatus::SYNCED
+            || self.status == BufferStatus::LOADING
+            || self.status == BufferStatus::SAVING
+            || self.status == BufferStatus::CHANGED
+        );
+        if associated == filename {
+          // The same file
+          return Err(TheBufferErr::BufferAlreadyBinded(associated.to_string()));
+        }
+
+        let file_exists = match tokio::fs::try_exists(filename).await {
+          Ok(exists) => exists,
+          Err(e) => return Err(TheBufferErr::IoErr(e)),
+        };
+
+        if file_exists {
+          // File already exists
+          return Err(TheBufferErr::FileAlreadyExists(filename.to_string()));
+        } else {
+          // File not exists
+          // Rename buffer, or say, bind to new filename, change status to `CHANGED`.
+          self.filename = Some(filename.to_string());
+          self.status = BufferStatus::CHANGED;
+          return Ok((self.status, 0_usize));
+        }
+      }
+      None => {
+        // Detached
+        assert!(self.status == BufferStatus::INIT || self.status == BufferStatus::CHANGED);
+
+        match tokio::fs::File::open(filename).await {
+          Ok(mut fp) => {
+            // Rename buffer, or say, bind to new filename, start `LOADING`.
+            self.filename = Some(filename.to_string());
+            self.status = BufferStatus::LOADING;
+
+            let mut total_read_bytes = 0_usize;
+            let mut iobuf: Vec<u8> = vec![0_u8; envar::IO_BUF_SIZE()];
+
+            loop {
+              match fp.read(&mut iobuf).await {
+                Ok(n) => {
+                  debug!("Read {} bytes: {:?}", n, into_str(&iobuf, n));
+
+                  // Load into buffer.
+                  self.append(into_rope(&iobuf, n));
+
+                  // After read each block, immediately notify main thread so UI tree can render
+                  // it on terminal.
+                  debug!("Notify master after each block read");
+                  self
+                    .worker_send_to_master
+                    .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
+                    .await
+                    .unwrap();
+
+                  if n == 0 {
+                    // Finish reading, exit loop
+                    break;
+                  }
+                  total_read_bytes += n;
+                }
+                Err(e) => {
+                  // Unexpected error
+                  error!("Error reading file: {:?}:{:?}", e.kind(), e.to_string());
+                  return Err(TheBufferErr::IoErr(e));
+                }
+              }
+            }
+
+            self.status = BufferStatus::SYNCED;
+            return Ok((self.status, total_read_bytes));
+          }
+          Err(e) => match e.kind() {
+            std::io::ErrorKind::NotFound => {
+              // File not found
+              // Rename buffer, or say, bind to new filename, change status to `CHANGED`.
+              self.filename = Some(filename.to_string());
+              self.status = BufferStatus::CHANGED;
+              return Ok((self.status, 0_usize));
+            }
+            _ => {
+              error!("Error opening file: {:?}:{:?}", e.kind(), e.to_string());
+              return Err(TheBufferErr::IoErr(e));
+            }
+          },
+        };
+      }
+    }
+  }
 }
 // Rope }
 
