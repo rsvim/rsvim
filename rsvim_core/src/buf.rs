@@ -3,6 +3,7 @@
 use crate::buf::opt::BufferLocalOptions;
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
 use crate::evloop::msg::WorkerToMasterMessage;
+use crate::res::IoResult;
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
@@ -11,8 +12,10 @@ use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
 use std::convert::From;
+use std::fs::Metadata;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
+use std::time::Instant;
 use tokio::sync::mpsc::Sender;
 use unicode_width::UnicodeWidthChar;
 
@@ -52,6 +55,8 @@ pub struct Buffer {
   rope: Rope,
   options: BufferLocalOptions,
   filename: Option<String>,
+  metainfo: Option<Metadata>,
+  last_sync_time: Option<Instant>,
   status: BufferStatus,
   worker_send_to_master: Sender<WorkerToMasterMessage>,
 }
@@ -67,6 +72,8 @@ impl Buffer {
       rope: Rope::new(),
       options: BufferLocalOptions::default(),
       filename: None,
+      metainfo: None,
+      last_sync_time: None,
       status: BufferStatus::INIT,
       worker_send_to_master,
     }
@@ -227,6 +234,8 @@ impl Buffer {
       rope,
       options: BufferLocalOptions::default(),
       filename: None,
+      metainfo: None,
+      last_sync_time: None,
       status: BufferStatus::INIT,
       worker_send_to_master,
     }
@@ -242,6 +251,8 @@ impl Buffer {
       rope: builder.finish(),
       options: BufferLocalOptions::default(),
       filename: None,
+      metainfo: None,
+      last_sync_time: None,
       status: BufferStatus::INIT,
       worker_send_to_master,
     }

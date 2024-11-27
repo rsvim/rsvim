@@ -8,7 +8,7 @@ use crate::buf::opt::FileEncoding;
 use crate::buf::{BufferArc, BufferStatus};
 use crate::envar;
 use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
-use crate::res::{TheBufferErr, TheBufferResult};
+use crate::res::{IoError, IoResult};
 use crate::{rlock, wlock};
 
 use ropey::{Rope, RopeBuilder};
@@ -28,17 +28,17 @@ fn into_rope(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> Rope {
   block.finish()
 }
 
-/// Bind buffer to a file.
+/// Open file with buffer.
 ///
-/// If the buffer is initialized, it will immediately start loading
-/// If the buffer is already associated with file, it will be renamed to new filename (only if the
-/// file not exists).
+/// Also see <https://vimhelp.org/editing.txt.html#%3Aedit>.
+///
+/// If the file exists, it will immediately start loading.
 ///
 /// Returns
 ///
 /// - It returns the reading bytes after file loaded (if successful).
 /// - Otherwise it returns [`TheBufferErr`](crate::res::TheBufferErr) to indicate some errors.
-async fn bind_buffer_async(buf: BufferArc, filename: &str) -> TheBufferResult<usize> {
+async fn open_file_async(buf: BufferArc, filename: &str) -> IoResult<usize> {
   let (buf_status, buf_associated, buf_fencoding) = {
     let rbuf = rlock!(buf);
     (
