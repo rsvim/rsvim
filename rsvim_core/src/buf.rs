@@ -3,7 +3,6 @@
 use crate::buf::opt::BufferLocalOptions;
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
 use crate::evloop::msg::WorkerToMasterMessage;
-use crate::res::IoResult;
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
