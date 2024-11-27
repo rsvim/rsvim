@@ -44,14 +44,14 @@ pub type TheJsRuntimeResult<T> = std::result::Result<T, TheJsRuntimeErr>;
 #[derive(Debug, ThisError)]
 /// Vim buffer error code implemented by [`thiserror::Error`].
 pub enum TheBufferErr {
-  #[error("File already exists: {0}")]
-  FileAlreadyExists(String),
-
-  #[error("Buffer already binded: {0}")]
-  BufferAlreadyBinded(String),
-
-  #[error("Io error: {0}")]
-  IoErr(IoError),
+  // #[error("File already exists: {0}")]
+  // FileAlreadyExists(String),
+  //
+  // #[error("Buffer already binded: {0}")]
+  // BufferAlreadyBinded(String),
+  //
+  // #[error("Io error: {0}")]
+  // IoErr(IoError),
 }
 
 /// [`std::result::Result`] with `T` if ok, [`TheBufferErr`] if error.

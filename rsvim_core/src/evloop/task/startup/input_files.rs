@@ -1,7 +1,7 @@
 //! Edit input files on start up.
 
 use crate::envar;
-use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
+use crate::evloop::msg::{BufferLoadedBytes, WorkerToMasterMessage};
 use crate::evloop::task::TaskableDataAccess;
 use crate::res::AnyResult;
 use crate::{rlock, wlock};
@@ -53,7 +53,9 @@ pub async fn edit_default_file(
             // terminal.
             debug!("Notify master after each block read");
             worker_send_to_master
-              .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
+              .send(WorkerToMasterMessage::BufferLoadedBytes(
+                BufferLoadedBytes::new(n),
+              ))
               .await
               .unwrap();
 
@@ -118,7 +120,9 @@ pub async fn edit_other_files(
               // terminal.
               debug!("Notify master after each block read");
               worker_sender
-                .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
+                .send(WorkerToMasterMessage::BufferLoadedBytes(
+                  BufferLoadedBytes::new(n),
+                ))
                 .await
                 .unwrap();
 

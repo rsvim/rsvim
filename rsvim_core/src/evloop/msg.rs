@@ -5,18 +5,18 @@
 #[derive(Debug)]
 /// Message.
 pub enum WorkerToMasterMessage {
-  ReadBytes(ReadBytes),
+  BufferLoadedBytes(BufferLoadedBytes),
 }
 
 #[derive(Debug, Default)]
 /// Read bytes.
-pub struct ReadBytes {
+pub struct BufferLoadedBytes {
   pub bytes: usize,
 }
 
-impl ReadBytes {
+impl BufferLoadedBytes {
   pub fn new(bytes: usize) -> Self {
-    ReadBytes { bytes }
+    BufferLoadedBytes { bytes }
   }
 }
 

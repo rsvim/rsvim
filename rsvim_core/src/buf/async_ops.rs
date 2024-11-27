@@ -7,8 +7,8 @@
 use crate::buf::opt::FileEncoding;
 use crate::buf::{BufferArc, BufferStatus};
 use crate::envar;
-use crate::evloop::msg::{ReadBytes, WorkerToMasterMessage};
-use crate::res::{IoError, IoResult};
+use crate::evloop::msg::{BufferLoadedBytes, WorkerToMasterMessage};
+use crate::res::IoResult;
 use crate::{rlock, wlock};
 
 use ropey::{Rope, RopeBuilder};
@@ -37,114 +37,104 @@ fn into_rope(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> Rope {
 /// Returns
 ///
 /// - It returns the reading bytes after file loaded (if successful).
-/// - Otherwise it returns [`TheBufferErr`](crate::res::TheBufferErr) to indicate some errors.
+/// - Otherwise it returns [`IoError`](crate::res::IoError) to indicate some errors.
 async fn open_file_async(buf: BufferArc, filename: &str) -> IoResult<usize> {
-  let (buf_status, buf_associated, buf_fencoding) = {
+  let (buf_status, buf_not_associated, buf_options) = {
     let rbuf = rlock!(buf);
     (
       rbuf.status(),
-      rbuf.filename().clone(),
-      rbuf.options().file_encoding(),
+      rbuf.filename().is_none(),
+      rbuf.options().clone(),
     )
   };
 
-  match buf_associated {
-    Some(associated) => {
-      // Associated
-      assert!(
-        buf_status == BufferStatus::SYNCED
-          || buf_status == BufferStatus::LOADING
-          || buf_status == BufferStatus::SAVING
-          || buf_status == BufferStatus::CHANGED
-      );
-      if associated == filename {
-        // The same file
-        return Err(TheBufferErr::BufferAlreadyBinded(associated.to_string()));
+  // Buffer must be detached.
+  assert!(buf_not_associated);
+
+  // Detached
+  assert!(buf_status == BufferStatus::INIT || buf_status == BufferStatus::CHANGED);
+
+  match tokio::fs::File::open(filename).await {
+    Ok(mut fp) => {
+      // Rename buffer, or say, bind to new filename, start `LOADING`.
+      {
+        let mut wbuf = wlock!(buf);
+        wbuf.set_filename(Some(filename.to_string()));
+        wbuf.set_status(BufferStatus::LOADING);
       }
 
-      let file_exists = match tokio::fs::try_exists(filename).await {
-        Ok(exists) => exists,
-        Err(e) => return Err(TheBufferErr::IoErr(e)),
-      };
+      match fp.metadata().await {
+        Ok(metadata) => {
+          wlock!(buf).set_metadata(Some(metadata));
+        }
+        Err(e) => {
+          // Unexpected error
+          error!(
+            "Error fetching metainfo from file {:?}:{:?}",
+            e.kind(),
+            e.to_string()
+          );
+          return Err(e);
+        }
+      }
 
-      if file_exists {
-        // File already exists
-        return Err(TheBufferErr::FileAlreadyExists(filename.to_string()));
-      } else {
-        // File not exists
+      let mut read_bytes = 0_usize;
+      let mut read_buf: Vec<u8> = vec![0_u8; envar::IO_BUF_SIZE()];
+
+      loop {
+        match fp.read(&mut read_buf).await {
+          Ok(n) => {
+            debug!(
+              "Read {} bytes: {:?}",
+              n,
+              into_str(&read_buf, n, buf_options.file_encoding())
+            );
+
+            // Load into buffer, and notify master thread so UI tree could update renderings.
+            let mut wbuf = wlock!(buf);
+            wbuf.append(into_rope(&read_buf, n, buf_options.file_encoding()));
+            wbuf
+              .worker_send_to_master()
+              .send(WorkerToMasterMessage::BufferLoadedBytes(
+                BufferLoadedBytes::new(n),
+              ))
+              .await
+              .unwrap();
+
+            if n == 0 {
+              // Finish reading, exit loop
+              break;
+            }
+
+            read_bytes += n;
+          }
+          Err(e) => {
+            // Unexpected error
+            error!("Error reading file {:?}:{:?}", e.kind(), e.to_string());
+            return Err(e);
+          }
+        }
+      }
+
+      {
+        let mut wbuf = wlock!(buf);
+        wbuf.set_status(BufferStatus::SYNCED);
+      }
+      return Ok(read_bytes);
+    }
+    Err(e) => match e.kind() {
+      std::io::ErrorKind::NotFound => {
+        // File not found
         // Rename buffer, or say, bind to new filename, change status to `CHANGED`.
         let mut wbuf = wlock!(buf);
         wbuf.set_filename(Some(filename.to_string()));
-        wbuf.set_status(BufferStatus::CHANGED);
+        wbuf.set_status(BufferStatus::SYNCED);
         return Ok(0_usize);
       }
-    }
-    None => {
-      // Detached
-      assert!(buf_status == BufferStatus::INIT || buf_status == BufferStatus::CHANGED);
-
-      match tokio::fs::File::open(filename).await {
-        Ok(mut fp) => {
-          // Rename buffer, or say, bind to new filename, start `LOADING`.
-          {
-            let mut wbuf = wlock!(buf);
-            wbuf.set_filename(Some(filename.to_string()));
-            wbuf.set_status(BufferStatus::LOADING);
-          }
-
-          let mut total_read_bytes = 0_usize;
-          let mut iobuf: Vec<u8> = vec![0_u8; envar::IO_BUF_SIZE()];
-
-          loop {
-            match fp.read(&mut iobuf).await {
-              Ok(n) => {
-                debug!("Read {} bytes: {:?}", n, into_str(&iobuf, n, buf_fencoding));
-
-                // Load into buffer, and notify master thread so UI tree could update renderings.
-                let mut wbuf = wlock!(buf);
-                wbuf.append(into_rope(&iobuf, n, buf_fencoding));
-                wbuf
-                  .worker_send_to_master()
-                  .send(WorkerToMasterMessage::ReadBytes(ReadBytes::new(n)))
-                  .await
-                  .unwrap();
-
-                if n == 0 {
-                  // Finish reading, exit loop
-                  break;
-                }
-
-                total_read_bytes += n;
-              }
-              Err(e) => {
-                // Unexpected error
-                error!("Error reading file: {:?}:{:?}", e.kind(), e.to_string());
-                return Err(TheBufferErr::IoErr(e));
-              }
-            }
-          }
-
-          {
-            let mut wbuf = wlock!(buf);
-            wbuf.set_status(BufferStatus::SYNCED);
-          }
-          return Ok(total_read_bytes);
-        }
-        Err(e) => match e.kind() {
-          std::io::ErrorKind::NotFound => {
-            // File not found
-            // Rename buffer, or say, bind to new filename, change status to `CHANGED`.
-            let mut wbuf = wlock!(buf);
-            wbuf.set_filename(Some(filename.to_string()));
-            wbuf.set_status(BufferStatus::SYNCED);
-            return Ok(0_usize);
-          }
-          _ => {
-            error!("Error opening file: {:?}:{:?}", e.kind(), e.to_string());
-            return Err(TheBufferErr::IoErr(e));
-          }
-        },
-      };
-    }
+      _ => {
+        error!("Error opening file: {:?}:{:?}", e.kind(), e.to_string());
+        return Err(TheBufferErr::IoErr(e));
+      }
+    },
   }
 }

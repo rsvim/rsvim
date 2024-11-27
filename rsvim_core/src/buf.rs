@@ -54,7 +54,7 @@ pub struct Buffer {
   rope: Rope,
   options: BufferLocalOptions,
   filename: Option<String>,
-  metainfo: Option<Metadata>,
+  metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
   status: BufferStatus,
   worker_send_to_master: Sender<WorkerToMasterMessage>,
@@ -71,7 +71,7 @@ impl Buffer {
       rope: Rope::new(),
       options: BufferLocalOptions::default(),
       filename: None,
-      metainfo: None,
+      metadata: None,
       last_sync_time: None,
       status: BufferStatus::INIT,
       worker_send_to_master,
@@ -92,6 +92,22 @@ impl Buffer {
 
   pub fn set_filename(&mut self, filename: Option<String>) {
     self.filename = filename;
+  }
+
+  pub fn metadata(&self) -> &Option<Metadata> {
+    &self.metadata
+  }
+
+  pub fn set_metadata(&mut self, metadata: Option<Metadata>) {
+    self.metadata = metadata;
+  }
+
+  pub fn last_sync_time(&self) -> &Option<Instant> {
+    &self.last_sync_time
+  }
+
+  pub fn set_last_sync_time(&mut self, last_sync_time: Option<Instant>) {
+    self.last_sync_time = last_sync_time;
   }
 
   pub fn status(&self) -> BufferStatus {
@@ -233,7 +249,7 @@ impl Buffer {
       rope,
       options: BufferLocalOptions::default(),
       filename: None,
-      metainfo: None,
+      metadata: None,
       last_sync_time: None,
       status: BufferStatus::INIT,
       worker_send_to_master,
@@ -250,7 +266,7 @@ impl Buffer {
       rope: builder.finish(),
       options: BufferLocalOptions::default(),
       filename: None,
-      metainfo: None,
+      metadata: None,
       last_sync_time: None,
       status: BufferStatus::INIT,
       worker_send_to_master,
