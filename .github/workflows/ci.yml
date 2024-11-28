@@ -99,6 +99,26 @@ jobs:
           RUSTC_WRAPPER: "sccache"
         run: |
           cargo test --workspace
+  unit_test_with_miri:
+    name: Unit Test with Miri
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.6
+      - uses: actions/checkout@v4
+      - name: Run tests with Miri
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+        run: |
+          rustup toolchain install nightly --component miri
+          rustup override set nightly
+          cargo miri setup
+          cargo miri test --workspace
   code_coverage:
     name: Code Coverage
     strategy:
