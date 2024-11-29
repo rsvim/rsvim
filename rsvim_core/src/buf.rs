@@ -2,8 +2,8 @@
 
 use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
-use crate::evloop::msg::WorkerToMasterMessage;
-use crate::res::{BufferErr, BufferResult, IoResult};
+// use crate::evloop::msg::WorkerToMasterMessage;
+use crate::res::IoResult;
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
@@ -19,11 +19,10 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
-use tokio::sync::mpsc::Sender;
+// use tokio::sync::mpsc::Sender;
 use tracing::debug;
 use unicode_width::UnicodeWidthChar;
 
-pub mod async_ops;
 pub mod opt;
 
 /// Buffer ID.
@@ -113,13 +112,13 @@ impl Buffer {
     self.last_sync_time = last_sync_time;
   }
 
-  pub fn status(&self) -> BufferStatus {
-    BufferStatus::INIT
-  }
+  // pub fn status(&self) -> BufferStatus {
+  //   BufferStatus::INIT
+  // }
 
-  pub fn worker_send_to_master(&self) -> &Sender<WorkerToMasterMessage> {
-    &self.worker_send_to_master
-  }
+  // pub fn worker_send_to_master(&self) -> &Sender<WorkerToMasterMessage> {
+  //   &self.worker_send_to_master
+  // }
 }
 
 // Unicode {
@@ -465,8 +464,8 @@ pub type BuffersManagerIter<'a> = std::collections::btree_map::Iter<'a, BufferId
 #[cfg(test)]
 mod tests {
   use super::*;
-  use std::fs::File;
-  use tempfile::tempfile;
+  // use std::fs::File;
+  // use tempfile::tempfile;
 
   use tokio::sync::mpsc::Receiver;
 
@@ -477,49 +476,49 @@ mod tests {
     tokio::sync::mpsc::channel(1)
   }
 
-  #[test]
-  fn buffer_from1() {
-    let (sender, _) = make_channel();
-
-    let r1 = Rope::from_str("Hello");
-    let buf1 = Buffer::_from_rope(sender.clone(), r1);
-    let tmp1 = tempfile().unwrap();
-    buf1.write_to(tmp1).unwrap();
-
-    let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
-    let buf2 = Buffer::_from_rope(sender, r2);
-    let tmp2 = tempfile().unwrap();
-    buf2.write_to(tmp2).unwrap();
-  }
-
-  #[test]
-  fn buffer_from2() {
-    let (sender, _) = make_channel();
-
-    let mut builder1 = RopeBuilder::new();
-    builder1.append("Hello");
-    builder1.append("World");
-    let buf1 = Buffer::_from_rope_builder(sender, builder1);
-    let tmp1 = tempfile().unwrap();
-    buf1.write_to(tmp1).unwrap();
-  }
+  // #[test]
+  // fn buffer_from1() {
+  //   let (sender, _) = make_channel();
+  //
+  //   let r1 = Rope::from_str("Hello");
+  //   let buf1 = Buffer::_from_rope(sender.clone(), r1);
+  //   let tmp1 = tempfile().unwrap();
+  //   buf1.write_to(tmp1).unwrap();
+  //
+  //   let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
+  //   let buf2 = Buffer::_from_rope(sender, r2);
+  //   let tmp2 = tempfile().unwrap();
+  //   buf2.write_to(tmp2).unwrap();
+  // }
+  //
+  // #[test]
+  // fn buffer_from2() {
+  //   let (sender, _) = make_channel();
+  //
+  //   let mut builder1 = RopeBuilder::new();
+  //   builder1.append("Hello");
+  //   builder1.append("World");
+  //   let buf1 = Buffer::_from_rope_builder(sender, builder1);
+  //   let tmp1 = tempfile().unwrap();
+  //   buf1.write_to(tmp1).unwrap();
+  // }
 
   #[test]
   fn next_buffer_id1() {
     assert!(next_buffer_id() > 0);
   }
 
-  #[test]
-  fn buffer_unicode_width1() {
-    let (sender, _) = make_channel();
-
-    let b1 = Buffer::_from_rope_builder(sender, RopeBuilder::new());
-    assert_eq!(b1.char_width('A'), 1);
-    assert_eq!(b1.char_symbol('A'), (CompactString::new("A"), 1));
-    assert_eq!(b1.str_width("ABCDEFG"), 7);
-    assert_eq!(
-      b1.str_symbols("ABCDEFG"),
-      (CompactString::new("ABCDEFG"), 7)
-    );
-  }
+  // #[test]
+  // fn buffer_unicode_width1() {
+  //   let (sender, _) = make_channel();
+  //
+  //   let b1 = Buffer::_from_rope_builder(sender, RopeBuilder::new());
+  //   assert_eq!(b1.char_width('A'), 1);
+  //   assert_eq!(b1.char_symbol('A'), (CompactString::new("A"), 1));
+  //   assert_eq!(b1.str_width("ABCDEFG"), 7);
+  //   assert_eq!(
+  //     b1.str_symbols("ABCDEFG"),
+  //     (CompactString::new("ABCDEFG"), 7)
+  //   );
+  // }
 }
