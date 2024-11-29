@@ -1,8 +1,9 @@
 //! Vim buffers.
 
-use crate::buf::opt::BufferLocalOptions;
+use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
 use crate::evloop::msg::WorkerToMasterMessage;
+use crate::res::IoResult;
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
@@ -15,8 +16,10 @@ use std::fs::Metadata;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
+use std::io::Read;
 use tokio::sync::mpsc::Sender;
 use unicode_width::UnicodeWidthChar;
+use tracing::debug;
 
 pub mod async_ops;
 pub mod opt;
@@ -60,7 +63,6 @@ pub struct Buffer {
   filename: Option<String>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
-  status: BufferStatus,
   worker_send_to_master: Sender<WorkerToMasterMessage>,
 }
 
@@ -80,7 +82,6 @@ impl Buffer {
       filename: None,
       metadata: None,
       last_sync_time: None,
-      status: BufferStatus::INIT,
       worker_send_to_master,
     }
   }
@@ -118,11 +119,7 @@ impl Buffer {
   }
 
   pub fn status(&self) -> BufferStatus {
-    self.status
-  }
-
-  pub fn set_status(&mut self, status: BufferStatus) {
-    self.status = status;
+    BufferStatus::INIT
   }
 
   pub fn worker_send_to_master(&self) -> &Sender<WorkerToMasterMessage> {
@@ -188,17 +185,6 @@ impl Buffer {
 }
 // Unicode }
 
-fn into_rope(buf: &[u8], bufsize: usize) -> Rope {
-  let bufstr = into_str(buf, bufsize);
-  let mut block = RopeBuilder::new();
-  block.append(&bufstr.to_owned());
-  block.finish()
-}
-
-fn into_str(buf: &[u8], bufsize: usize) -> String {
-  String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
-}
-
 // Rope {
 impl Buffer {
   /// Alias to method [`Rope::get_line`](Rope::get_line).
@@ -228,20 +214,78 @@ impl Buffer {
 }
 // Rope }
 
+fn into_rope(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> Rope {
+  let bufstr = into_str(buf, bufsize, fencoding);
+  let mut block = RopeBuilder::new();
+  block.append(&bufstr.to_owned());
+  block.finish()
+}
+
+fn into_str(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> String {
+    match fencoding {
+      FileEncoding::Utf8 =>  String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
+    }
+}
+
 // Primitive APIs {
 impl Buffer {
   /// Open a file and load its metadata and contents into current buffer.
   ///
   /// The buffer must be a newly created buffer, i.e. it is never been modified.
   ///
+  /// Returns
+  ///
+  /// It returns the read bytes if the file exists and read successfully.
+  /// Otherwise it returns [`IoErr`](crate::res::IoErr) that indicates the error.
+  ///
   /// Panics
   ///
   /// If current buffer already has associated file name, or the contents are not empty, or it has
   /// any other file's metadata.
   ///
+  /// NOTE: This API should not been directly used by other modules, please create new buffer
+  /// through [BuffersManager::new_buffer](BuffersManager::new_buffer).
+  ///
   /// NOTE: This is a primitive API.
-  pub fn edit_file(&mut self, filename: &str) {
-    self.rope.append(other);
+  pub fn _edit_file(&mut self, filename: &str) -> IoResult<usize> {
+    // Ensure this buffer is newly created.
+    assert!(self.filename.is_none());
+    assert!(self.metadata.is_none());
+    assert!(self.rope.len_bytes() == 0);
+    assert!(self.last_sync_time.is_none());
+
+    match std::fs::File::open(filename) {
+      Ok(fp) => {
+        let metadata = match fp.metadata() {
+            Ok(metadata) => metadata,
+            Err(e) => {
+                debug!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
+                return Err(e);
+            }
+        }
+        let mut io_buf:Vec<u8> = Vec::new();
+        let mut reader = std::io::BufReader::new(fp);
+        let bytes = match reader.read_to_end(&mut io_buf) {
+            Ok(bytes) => bytes,
+            Err(e) => {
+                debug!("Failed to read file {:?}:{:?}", filename, e);
+                return Err(e);
+            }
+        }
+        assert!(bytes == io_buf.len());
+
+        self.filename = Some(filename.to_string());
+        self.metadata = Some(metadata);
+        self.rope.append(into_rope(&io_buf, io_buf.len(), self.options().file_encoding()));
+        self.last_sync_time = Some(Instant::now());
+
+        Ok(bytes)
+      }
+      Err(e) => {
+        debug!("Failed to open file {:?}:{:?}", filename, e);
+        Err(e)
+      }
+    }
   }
 }
 // Primitive APIs }
@@ -279,7 +323,6 @@ impl Buffer {
       filename: None,
       metadata: None,
       last_sync_time: None,
-      status: BufferStatus::INIT,
       worker_send_to_master,
     }
   }
@@ -300,7 +343,6 @@ impl Buffer {
       filename: None,
       metadata: None,
       last_sync_time: None,
-      status: BufferStatus::INIT,
       worker_send_to_master,
     }
   }
