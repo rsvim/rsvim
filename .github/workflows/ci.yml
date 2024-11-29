@@ -114,6 +114,7 @@ jobs:
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
+          MIRIFLAGS: "-Zmiri-disable-isolation"
         run: |
           rustup toolchain install nightly --component miri
           rustup override set nightly
