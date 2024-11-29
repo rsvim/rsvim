@@ -466,15 +466,14 @@ mod tests {
   use super::*;
   // use std::fs::File;
   // use tempfile::tempfile;
+  // use tokio::sync::mpsc::Receiver;
 
-  use tokio::sync::mpsc::Receiver;
-
-  fn make_channel() -> (
-    Sender<WorkerToMasterMessage>,
-    Receiver<WorkerToMasterMessage>,
-  ) {
-    tokio::sync::mpsc::channel(1)
-  }
+  // fn make_channel() -> (
+  //   Sender<WorkerToMasterMessage>,
+  //   Receiver<WorkerToMasterMessage>,
+  // ) {
+  //   tokio::sync::mpsc::channel(1)
+  // }
 
   // #[test]
   // fn buffer_from1() {
