@@ -106,7 +106,7 @@ pub async fn edit_other_files(
         let mut buf: Vec<u8> = vec![0_u8; envar::IO_BUF_SIZE()];
 
         // Create new buffer
-        let buf_id = wlock!(buffers).new_buffer();
+        let buf_id = wlock!(buffers).new_buffer_with_edit_file();
         let buffer = rlock!(buffers).get(&buf_id).unwrap().clone();
 
         loop {

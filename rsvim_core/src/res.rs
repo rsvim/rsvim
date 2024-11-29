@@ -1,5 +1,6 @@
 //! Results and errors.
 
+use std::path::PathBuf;
 use thiserror::Error as ThisError;
 
 // anyhow {
@@ -41,20 +42,17 @@ pub type JsRuntimeResult<T> = std::result::Result<T, JsRuntimeErr>;
 
 // Buffer {
 
-#[derive(Debug, ThisError)]
-/// Vim buffer error code implemented by [`thiserror::Error`].
-pub enum BufferErr {
-  // #[error("File already exists: {0}")]
-  // FileAlreadyExists(String),
-  //
-  // #[error("Buffer already binded: {0}")]
-  // BufferAlreadyBinded(String),
-  //
-  // #[error("Io error: {0}")]
-  // IoErr(IoError),
-}
-
-/// [`std::result::Result`] with `T` if ok, [`TheBufferErr`] if error.
-pub type BufferResult<T> = std::result::Result<T, BufferErr>;
+// #[derive(Debug, ThisError)]
+// /// Vim buffer error code implemented by [`thiserror::Error`].
+// pub enum BufferErr {
+//   #[error("File path already exists: {0}")]
+//   FilePathAlreadyExists(PathBuf),
+//
+//   #[error("Io error: {0}")]
+//   IoErr(IoErr),
+// }
+//
+// /// [`std::result::Result`] with `T` if ok, [`TheBufferErr`] if error.
+// pub type BufferResult<T> = std::result::Result<T, BufferErr>;
 
 // Buffer }

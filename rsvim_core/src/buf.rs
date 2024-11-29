@@ -3,17 +3,19 @@
 use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
 use crate::evloop::msg::WorkerToMasterMessage;
-use crate::res::IoResult;
+use crate::res::{BufferErr, BufferResult, IoResult};
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
 use parking_lot::RwLock;
+use path_absolutize::Absolutize;
 use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::convert::From;
 use std::fs::Metadata;
 use std::io::Read;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
@@ -60,32 +62,17 @@ pub struct Buffer {
   id: BufferId,
   rope: Rope,
   options: BufferLocalOptions,
-  filename: Option<String>,
+  filename: Option<PathBuf>,
+  absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
-  worker_send_to_master: Sender<WorkerToMasterMessage>,
+  // worker_send_to_master: Sender<WorkerToMasterMessage>,
 }
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
 pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
-  /// Make buffer with default [`BufferLocalOptions`].
-  ///
-  /// NOTE: This API should not been directly used by other modules, please create new buffer
-  /// through [BuffersManager::new_buffer](BuffersManager::new_buffer).
-  pub fn _new(worker_send_to_master: Sender<WorkerToMasterMessage>) -> Self {
-    Buffer {
-      id: next_buffer_id(),
-      rope: Rope::new(),
-      options: BufferLocalOptions::default(),
-      filename: None,
-      metadata: None,
-      last_sync_time: None,
-      worker_send_to_master,
-    }
-  }
-
   pub fn to_arc(b: Buffer) -> BufferArc {
     Arc::new(RwLock::new(b))
   }
@@ -94,12 +81,20 @@ impl Buffer {
     self.id
   }
 
-  pub fn filename(&self) -> &Option<String> {
+  pub fn filename(&self) -> &Option<PathBuf> {
     &self.filename
   }
 
-  pub fn set_filename(&mut self, filename: Option<String>) {
+  pub fn set_filename(&mut self, filename: Option<PathBuf>) {
     self.filename = filename;
+  }
+
+  pub fn absolute_filename(&self) -> &Option<PathBuf> {
+    &self.absolute_filename
+  }
+
+  pub fn set_absolute_filename(&mut self, absolute_filename: Option<PathBuf>) {
+    self.absolute_filename = absolute_filename;
   }
 
   pub fn metadata(&self) -> &Option<Metadata> {
@@ -214,84 +209,8 @@ impl Buffer {
 }
 // Rope }
 
-fn into_rope(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> Rope {
-  let bufstr = into_str(buf, bufsize, fencoding);
-  let mut block = RopeBuilder::new();
-  block.append(&bufstr.to_owned());
-  block.finish()
-}
-
-fn into_str(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> String {
-  match fencoding {
-    FileEncoding::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
-  }
-}
-
 // Primitive APIs {
-impl Buffer {
-  /// Open a file and load its metadata and contents into current buffer.
-  ///
-  /// The buffer must be a newly created buffer, i.e. it is never been modified.
-  ///
-  /// Returns
-  ///
-  /// It returns the read bytes if the file exists and read successfully.
-  /// Otherwise it returns [`IoErr`](crate::res::IoErr) that indicates the error.
-  ///
-  /// Panics
-  ///
-  /// If current buffer already has associated file name, or the contents are not empty, or it has
-  /// any other file's metadata.
-  ///
-  /// NOTE: This API should not been directly used by other modules, please create new buffer
-  /// through [BuffersManager::new_buffer](BuffersManager::new_buffer).
-  ///
-  /// NOTE: This is a primitive API.
-  pub fn _edit_file(&mut self, filename: &str) -> IoResult<usize> {
-    // Ensure this buffer is newly created.
-    assert!(self.filename.is_none());
-    assert!(self.metadata.is_none());
-    assert!(self.rope.len_bytes() == 0);
-    assert!(self.last_sync_time.is_none());
-
-    match std::fs::File::open(filename) {
-      Ok(fp) => {
-        let metadata = match fp.metadata() {
-          Ok(metadata) => metadata,
-          Err(e) => {
-            debug!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
-            return Err(e);
-          }
-        };
-        let mut io_buf: Vec<u8> = Vec::new();
-        let mut reader = std::io::BufReader::new(fp);
-        let bytes = match reader.read_to_end(&mut io_buf) {
-          Ok(bytes) => bytes,
-          Err(e) => {
-            debug!("Failed to read file {:?}:{:?}", filename, e);
-            return Err(e);
-          }
-        };
-        assert!(bytes == io_buf.len());
-
-        self.filename = Some(filename.to_string());
-        self.metadata = Some(metadata);
-        self.rope.append(into_rope(
-          &io_buf,
-          io_buf.len(),
-          self.options().file_encoding(),
-        ));
-        self.last_sync_time = Some(Instant::now());
-
-        Ok(bytes)
-      }
-      Err(e) => {
-        debug!("Failed to open file {:?}:{:?}", filename, e);
-        Err(e)
-      }
-    }
-  }
-}
+impl Buffer {}
 // Primitive APIs }
 
 // Options {
@@ -314,44 +233,6 @@ impl Buffer {
 }
 // Options }
 
-impl Buffer {
-  /// Make buffer from [`Rope`].
-  ///
-  /// NOTE: This API should not been directly used by other modules, please create new buffer
-  /// through [BuffersManager::new_buffer_from_rope](BuffersManager::new_buffer_from_rope).
-  fn _from_rope(worker_send_to_master: Sender<WorkerToMasterMessage>, rope: Rope) -> Self {
-    Buffer {
-      id: next_buffer_id(),
-      rope,
-      options: BufferLocalOptions::default(),
-      filename: None,
-      metadata: None,
-      last_sync_time: None,
-      worker_send_to_master,
-    }
-  }
-
-  /// Make buffer from [`RopeBuilder`].
-  ///
-  /// NOTE: This API should not been directly used by other modules, please create new buffer
-  /// through
-  /// [BuffersManager::new_buffer_from_rope_builder](BuffersManager::new_buffer_from_rope_builder).
-  fn _from_rope_builder(
-    worker_send_to_master: Sender<WorkerToMasterMessage>,
-    builder: RopeBuilder,
-  ) -> Self {
-    Buffer {
-      id: next_buffer_id(),
-      rope: builder.finish(),
-      options: BufferLocalOptions::default(),
-      filename: None,
-      metadata: None,
-      last_sync_time: None,
-      worker_send_to_master,
-    }
-  }
-}
-
 impl PartialEq for Buffer {
   fn eq(&self, other: &Self) -> bool {
     self.id == other.id
@@ -361,10 +242,15 @@ impl PartialEq for Buffer {
 impl Eq for Buffer {}
 
 #[derive(Debug, Clone)]
-/// The manager for all buffers.
+/// The manager for all normal (file) buffers.
+///
+/// NOTE: A buffer has its unique filepath (on filesystem), and there is at most 1 unnamed buffer.
 pub struct BuffersManager {
   // Buffers collection
   buffers: BTreeMap<BufferId, BufferArc>,
+
+  // Buffers maps by absolute file path.
+  buffers_by_path: HashMap<Option<PathBuf>, BufferArc>,
 
   // Local options for buffers.
   local_options: BufferLocalOptions,
@@ -374,6 +260,7 @@ impl BuffersManager {
   pub fn new() -> Self {
     BuffersManager {
       buffers: BTreeMap::new(),
+      buffers_by_path: HashMap::new(),
       local_options: BufferLocalOptions::default(),
     }
   }
@@ -382,38 +269,130 @@ impl BuffersManager {
     Arc::new(RwLock::new(b))
   }
 
-  pub fn new_buffer(&mut self, worker_send_to_master: Sender<WorkerToMasterMessage>) -> BufferId {
-    let mut buf = Buffer::_new(worker_send_to_master);
-    buf.set_options(self.local_options());
-    let buf_id = buf.id();
-    self.buffers.insert(buf_id, Buffer::to_arc(buf));
-    buf_id
-  }
+  /// Open a file with a newly created buffer.
+  ///
+  /// The file name must be unique and not existed, there are two use cases:
+  /// 1. If the file exists on filesystem, the buffer will read the file contents into buffer.
+  /// 2. If the file doesn't exist, the buffer will be empty but only set the file name.
+  ///
+  /// Returns
+  ///
+  /// It returns the buffer ID if the buffer created successfully, also the reading operations must
+  /// be successful if the file exists on filesystem.
+  /// Otherwise it returns [`BufferErr`](crate::res::BufferErr) that indicates the error.
+  ///
+  /// Panics
+  ///
+  /// If the file name already exists.
+  ///
+  /// NOTE: This API should not been directly used by other modules, please create new buffer
+  /// through [BuffersManager::new_buffer](BuffersManager::new_buffer).
+  ///
+  /// NOTE: This is a primitive API.
+  pub fn new_buffer_with_edit_file(&mut self, filename: &Path) -> IoResult<BufferId> {
+    let abs_filename = match filename.absolutize() {
+      Ok(abs_filename) => abs_filename.to_path_buf(),
+      Err(e) => {
+        debug!("Failed to absolutize filepath {:?}:{:?}", filename, e);
+        return Err(e);
+      }
+    };
 
-  pub fn new_buffer_from_rope(
-    &mut self,
-    worker_send_to_master: Sender<WorkerToMasterMessage>,
-    rope: Rope,
-  ) -> BufferId {
-    let mut buf = Buffer::_from_rope(worker_send_to_master, rope);
-    buf.set_options(self.local_options());
-    let buf_id = buf.id();
-    self.buffers.insert(buf_id, Buffer::to_arc(buf));
-    buf_id
-  }
+    assert!(!self
+      .buffers_by_path
+      .contains_key(&Some(abs_filename.clone())));
 
-  pub fn new_buffer_from_rope_builder(
-    &mut self,
-    worker_send_to_master: Sender<WorkerToMasterMessage>,
-    rope_builder: RopeBuilder,
-  ) -> BufferId {
-    let mut buf = Buffer::_from_rope_builder(worker_send_to_master, rope_builder);
-    buf.set_options(self.local_options());
+    let existed = match std::fs::exists(abs_filename.clone()) {
+      Ok(existed) => existed,
+      Err(e) => {
+        debug!("Failed to detect file {:?}:{:?}", filename, e);
+        return Err(e);
+      }
+    };
+
+    let buf = if existed {
+      match self.edit_file(filename, &abs_filename) {
+        Ok(buf) => buf,
+        Err(e) => {
+          return Err(e);
+        }
+      }
+    } else {
+      Buffer {
+        id: next_buffer_id(),
+        rope: Rope::new(),
+        options: self.local_options().clone(),
+        filename: Some(filename.to_path_buf()),
+        absolute_filename: Some(abs_filename),
+        metadata: None,
+        last_sync_time: None,
+      }
+    };
+
     let buf_id = buf.id();
     self.buffers.insert(buf_id, Buffer::to_arc(buf));
-    buf_id
+    Ok(buf_id)
   }
 }
+
+// Primitive APIs {
+
+impl BuffersManager {
+  fn into_rope(&self, buf: &[u8], bufsize: usize) -> Rope {
+    let bufstr = self.into_str(buf, bufsize);
+    let mut block = RopeBuilder::new();
+    block.append(&bufstr.to_owned());
+    block.finish()
+  }
+
+  fn into_str(&self, buf: &[u8], bufsize: usize) -> String {
+    let fencoding = self.local_options().file_encoding();
+    match fencoding {
+      FileEncoding::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
+    }
+  }
+
+  // Implementation for [new_buffer_edit_file](new_buffer_edit_file).
+  fn edit_file(&self, filename: &Path, absolute_filename: &Path) -> IoResult<Buffer> {
+    match std::fs::File::open(filename) {
+      Ok(fp) => {
+        let metadata = match fp.metadata() {
+          Ok(metadata) => metadata,
+          Err(e) => {
+            debug!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
+            return Err(e);
+          }
+        };
+        let mut buf: Vec<u8> = Vec::new();
+        let mut reader = std::io::BufReader::new(fp);
+        let bytes = match reader.read_to_end(&mut buf) {
+          Ok(bytes) => bytes,
+          Err(e) => {
+            debug!("Failed to read file {:?}:{:?}", filename, e);
+            return Err(e);
+          }
+        };
+        assert!(bytes == buf.len());
+
+        Ok(Buffer {
+          id: next_buffer_id(),
+          rope: self.into_rope(&buf, buf.len()),
+          options: self.local_options().clone(),
+          filename: Some(filename.to_path_buf()),
+          absolute_filename: Some(absolute_filename.to_path_buf()),
+          metadata: Some(metadata),
+          last_sync_time: Some(Instant::now()),
+        })
+      }
+      Err(e) => {
+        debug!("Failed to open file {:?}:{:?}", filename, e);
+        Err(e)
+      }
+    }
+  }
+}
+
+// Primitive APIs }
 
 // BTreeMap {
 impl BuffersManager {
