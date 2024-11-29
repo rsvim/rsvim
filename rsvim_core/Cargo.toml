@@ -48,7 +48,7 @@ time = { workspace = true, features = [
 tz-rs = { workspace = true }
 tzdb = { workspace = true }
 compact_str = { workspace = true, features = ["serde", "bytes"] }
-ropey = { workspace = true }
+ropey = { workspace = true, default-features = false }
 geo = { workspace = true, features = ["serde"] }
 num-traits = { workspace = true }
 parking_lot = { workspace = true }
