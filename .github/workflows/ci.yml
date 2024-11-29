@@ -119,7 +119,7 @@ jobs:
           rustup toolchain install nightly --component miri
           rustup override set nightly
           cargo miri setup
-          cargo miri test --workspace
+          cargo miri test --workspace --no-default-features
   code_coverage:
     name: Code Coverage
     strategy:

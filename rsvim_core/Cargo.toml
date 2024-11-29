@@ -17,6 +17,11 @@ description = "The core library for the RSVIM editor."
 [lib]
 doctest = false
 
+[features]
+default = ["simd"]
+# By default enable "default" features (it contains simd support and fails miri-ci) for "ropey".
+simd = ["ropey/default"]
+
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream", "serde"] }
 tracing = { workspace = true }
@@ -43,7 +48,7 @@ time = { workspace = true, features = [
 tz-rs = { workspace = true }
 tzdb = { workspace = true }
 compact_str = { workspace = true, features = ["serde", "bytes"] }
-ropey = { workspace = true }
+ropey = { workspace = true, default-features = false }
 geo = { workspace = true, features = ["serde"] }
 num-traits = { workspace = true }
 parking_lot = { workspace = true }
