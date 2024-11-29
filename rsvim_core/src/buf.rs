@@ -65,7 +65,10 @@ pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
   /// Make buffer with default [`BufferLocalOptions`].
-  pub fn new(worker_send_to_master: Sender<WorkerToMasterMessage>) -> Self {
+  ///
+  /// NOTE: This API should not been directly used by other modules, please create new buffer
+  /// through [BuffersManager::new_buffer](BuffersManager::new_buffer).
+  pub fn _new(worker_send_to_master: Sender<WorkerToMasterMessage>) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
@@ -243,7 +246,10 @@ impl Buffer {
 
 impl Buffer {
   /// Make buffer from [`Rope`].
-  fn from_rope(worker_send_to_master: Sender<WorkerToMasterMessage>, rope: Rope) -> Self {
+  ///
+  /// NOTE: This API should not been directly used by other modules, please create new buffer
+  /// through [BuffersManager::new_buffer_from_rope](BuffersManager::new_buffer_from_rope).
+  fn _from_rope(worker_send_to_master: Sender<WorkerToMasterMessage>, rope: Rope) -> Self {
     Buffer {
       id: next_buffer_id(),
       rope,
@@ -257,7 +263,11 @@ impl Buffer {
   }
 
   /// Make buffer from [`RopeBuilder`].
-  fn from_rope_builder(
+  ///
+  /// NOTE: This API should not been directly used by other modules, please create new buffer
+  /// through
+  /// [BuffersManager::new_buffer_from_rope_builder](BuffersManager::new_buffer_from_rope_builder).
+  fn _from_rope_builder(
     worker_send_to_master: Sender<WorkerToMasterMessage>,
     builder: RopeBuilder,
   ) -> Self {
@@ -305,7 +315,7 @@ impl BuffersManager {
   }
 
   pub fn new_buffer(&mut self, worker_send_to_master: Sender<WorkerToMasterMessage>) -> BufferId {
-    let mut buf = Buffer::new(worker_send_to_master);
+    let mut buf = Buffer::_new(worker_send_to_master);
     buf.set_options(self.local_options());
     let buf_id = buf.id();
     self.buffers.insert(buf_id, Buffer::to_arc(buf));
@@ -317,7 +327,7 @@ impl BuffersManager {
     worker_send_to_master: Sender<WorkerToMasterMessage>,
     rope: Rope,
   ) -> BufferId {
-    let mut buf = Buffer::from_rope(worker_send_to_master, rope);
+    let mut buf = Buffer::_from_rope(worker_send_to_master, rope);
     buf.set_options(self.local_options());
     let buf_id = buf.id();
     self.buffers.insert(buf_id, Buffer::to_arc(buf));
@@ -329,7 +339,7 @@ impl BuffersManager {
     worker_send_to_master: Sender<WorkerToMasterMessage>,
     rope_builder: RopeBuilder,
   ) -> BufferId {
-    let mut buf = Buffer::from_rope_builder(worker_send_to_master, rope_builder);
+    let mut buf = Buffer::_from_rope_builder(worker_send_to_master, rope_builder);
     buf.set_options(self.local_options());
     let buf_id = buf.id();
     self.buffers.insert(buf_id, Buffer::to_arc(buf));
@@ -425,12 +435,12 @@ mod tests {
     let (sender, _) = make_channel();
 
     let r1 = Rope::from_str("Hello");
-    let buf1 = Buffer::from_rope(sender.clone(), r1);
+    let buf1 = Buffer::_from_rope(sender.clone(), r1);
     let tmp1 = tempfile().unwrap();
     buf1.write_to(tmp1).unwrap();
 
     let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
-    let buf2 = Buffer::from_rope(sender, r2);
+    let buf2 = Buffer::_from_rope(sender, r2);
     let tmp2 = tempfile().unwrap();
     buf2.write_to(tmp2).unwrap();
   }
@@ -442,7 +452,7 @@ mod tests {
     let mut builder1 = RopeBuilder::new();
     builder1.append("Hello");
     builder1.append("World");
-    let buf1 = Buffer::from_rope_builder(sender, builder1);
+    let buf1 = Buffer::_from_rope_builder(sender, builder1);
     let tmp1 = tempfile().unwrap();
     buf1.write_to(tmp1).unwrap();
   }
@@ -456,7 +466,7 @@ mod tests {
   fn buffer_unicode_width1() {
     let (sender, _) = make_channel();
 
-    let b1 = Buffer::from_rope_builder(sender, RopeBuilder::new());
+    let b1 = Buffer::_from_rope_builder(sender, RopeBuilder::new());
     assert_eq!(b1.char_width('A'), 1);
     assert_eq!(b1.char_symbol('A'), (CompactString::new("A"), 1));
     assert_eq!(b1.str_width("ABCDEFG"), 7);
