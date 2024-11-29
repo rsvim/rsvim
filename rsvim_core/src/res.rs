@@ -15,10 +15,10 @@ pub type AnyResult<T> = anyhow::Result<T>;
 // std::io {
 
 /// [`std::io::Error`]
-pub type IoError = std::io::Error;
+pub type IoErr = std::io::Error;
 
 /// [`std::io::ErrorKind`]
-pub type IoErrorKind = std::io::ErrorKind;
+pub type IoErrKind = std::io::ErrorKind;
 
 /// [`std::io::Result`] with `T` if ok.
 pub type IoResult<T> = std::io::Result<T>;
@@ -29,13 +29,13 @@ pub type IoResult<T> = std::io::Result<T>;
 
 #[derive(Debug, Clone, ThisError)]
 /// Error code implemented by [`thiserror::Error`].
-pub enum TheJsRuntimeErr {
+pub enum JsRuntimeErr {
   #[error("Error: {0}")]
   Message(String),
 }
 
 /// [`std::result::Result`] with `T` if ok, [`TheJsRuntimeErr`] if error.
-pub type TheJsRuntimeResult<T> = std::result::Result<T, TheJsRuntimeErr>;
+pub type JsRuntimeResult<T> = std::result::Result<T, JsRuntimeErr>;
 
 // Js Runtime }
 
@@ -43,7 +43,7 @@ pub type TheJsRuntimeResult<T> = std::result::Result<T, TheJsRuntimeErr>;
 
 #[derive(Debug, ThisError)]
 /// Vim buffer error code implemented by [`thiserror::Error`].
-pub enum TheBufferErr {
+pub enum BufferErr {
   // #[error("File already exists: {0}")]
   // FileAlreadyExists(String),
   //
@@ -55,6 +55,6 @@ pub enum TheBufferErr {
 }
 
 /// [`std::result::Result`] with `T` if ok, [`TheBufferErr`] if error.
-pub type TheBufferResult<T> = std::result::Result<T, TheBufferErr>;
+pub type BufferResult<T> = std::result::Result<T, BufferErr>;
 
 // Buffer }

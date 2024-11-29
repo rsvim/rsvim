@@ -43,12 +43,16 @@ pub enum BufferStatus {
 }
 
 #[derive(Debug)]
-/// The Vim buffer, it is the memory mapping to a file on hardware disk, i.e. file system.
+/// The Vim buffer, it is the in-memory texts mapping to the filesystem.
 ///
-/// It contains several features:
-/// 1. It can be associated with a file, or detached with no file.
-/// 2. When associated with a file, it can load from or save to the file. While detached with no
-///    file, it cannot.
+/// It contains several internal data:
+/// 1. File name that associated with filesystem.
+/// 2. File contents.
+/// 3. File metadata.
+///
+/// To stable and avoid data racing issues, all file IO operations are made in pure blocking and
+/// single-threading manner. And buffer also provide a set of APIs that serves as middle-level
+/// primitives which can be used to implement high-level Vim ex commands, etc.
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
@@ -223,6 +227,24 @@ impl Buffer {
   }
 }
 // Rope }
+
+// Primitive APIs {
+impl Buffer {
+  /// Open a file and load its metadata and contents into current buffer.
+  ///
+  /// The buffer must be a newly created buffer, i.e. it is never been modified.
+  ///
+  /// Panics
+  ///
+  /// If current buffer already has associated file name, or the contents are not empty, or it has
+  /// any other file's metadata.
+  ///
+  /// NOTE: This is a primitive API.
+  pub fn edit_file(&mut self, filename: &str) {
+    self.rope.append(other);
+  }
+}
+// Primitive APIs }
 
 // Options {
 impl Buffer {
