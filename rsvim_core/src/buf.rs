@@ -284,7 +284,7 @@ impl Eq for Buffer {}
 
 #[derive(Debug, Clone)]
 /// The manager for all buffers.
-pub struct Buffers {
+pub struct BuffersManager {
   // Buffers collection
   buffers: BTreeMap<BufferId, BufferArc>,
 
@@ -292,15 +292,15 @@ pub struct Buffers {
   local_options: BufferLocalOptions,
 }
 
-impl Buffers {
+impl BuffersManager {
   pub fn new() -> Self {
-    Buffers {
+    BuffersManager {
       buffers: BTreeMap::new(),
       local_options: BufferLocalOptions::default(),
     }
   }
 
-  pub fn to_arc(b: Buffers) -> BuffersArc {
+  pub fn to_arc(b: BuffersManager) -> BuffersManagerArc {
     Arc::new(RwLock::new(b))
   }
 
@@ -338,7 +338,7 @@ impl Buffers {
 }
 
 // BTreeMap {
-impl Buffers {
+impl BuffersManager {
   pub fn is_empty(&self) -> bool {
     self.buffers.is_empty()
   }
@@ -359,15 +359,15 @@ impl Buffers {
     self.buffers.contains_key(id)
   }
 
-  pub fn keys(&self) -> BuffersKeys {
+  pub fn keys(&self) -> BuffersManagerKeys {
     self.buffers.keys()
   }
 
-  pub fn values(&self) -> BuffersValues {
+  pub fn values(&self) -> BuffersManagerValues {
     self.buffers.values()
   }
 
-  pub fn iter(&self) -> BuffersIter {
+  pub fn iter(&self) -> BuffersManagerIter {
     self.buffers.iter()
   }
 
@@ -381,14 +381,14 @@ impl Buffers {
 }
 // BTreeMap }
 
-impl Default for Buffers {
+impl Default for BuffersManager {
   fn default() -> Self {
-    Buffers::new()
+    BuffersManager::new()
   }
 }
 
 // Options {
-impl Buffers {
+impl BuffersManager {
   pub fn local_options(&self) -> &BufferLocalOptions {
     &self.local_options
   }
@@ -399,11 +399,11 @@ impl Buffers {
 }
 // Options }
 
-pub type BuffersArc = Arc<RwLock<Buffers>>;
-pub type BuffersWk = Weak<RwLock<Buffers>>;
-pub type BuffersKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
-pub type BuffersValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;
-pub type BuffersIter<'a> = std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
+pub type BuffersManagerArc = Arc<RwLock<BuffersManager>>;
+pub type BuffersManagerWk = Weak<RwLock<BuffersManager>>;
+pub type BuffersManagerKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
+pub type BuffersManagerValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;
+pub type BuffersManagerIter<'a> = std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
 
 #[cfg(test)]
 mod tests {

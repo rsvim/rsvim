@@ -1,6 +1,6 @@
 //! Event loop.
 
-use crate::buf::{async_ops as buf_async_ops, Buffers, BuffersArc};
+use crate::buf::{async_ops as buf_async_ops, BuffersManager, BuffersManagerArc};
 use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
 use crate::envar;
@@ -80,7 +80,7 @@ pub struct EventLoop {
   pub state: StateArc,
 
   /// Vim buffers.
-  pub buffers: BuffersArc,
+  pub buffers: BuffersManagerArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -129,7 +129,7 @@ impl EventLoop {
     let tree = Tree::to_arc(Tree::new(canvas_size));
 
     // Buffers
-    let buffers = Buffers::to_arc(Buffers::new());
+    let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
 
     // State
     let state = State::to_arc(State::default());
@@ -197,7 +197,7 @@ impl EventLoop {
       cli_opt.clone(),
       runtime_path.clone(),
       tree.clone(),
-      buffers.clone(),
+      buffers_manager.clone(),
       state.clone(),
     );
 
@@ -209,7 +209,7 @@ impl EventLoop {
       canvas,
       tree,
       state,
-      buffers,
+      buffers: buffers_manager,
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
       detached_tracker,

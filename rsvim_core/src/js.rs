@@ -1,6 +1,6 @@
 //! JavaScript runtime.
 
-use crate::buf::BuffersArc;
+use crate::buf::BuffersManagerArc;
 use crate::cli::CliOpt;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
@@ -343,7 +343,7 @@ pub struct JsRuntimeState {
   pub cli_opt: CliOpt,
   pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
   pub tree: TreeArc,
-  pub buffers: BuffersArc,
+  pub buffers: BuffersManagerArc,
   // Same as the `state` in EventLoop.
   pub editing_state: StateArc,
   // Data Access for RSVIM }
@@ -383,7 +383,7 @@ impl JsRuntime {
     cli_opt: CliOpt,
     runtime_path: Arc<RwLock<Vec<PathBuf>>>,
     tree: TreeArc,
-    buffers: BuffersArc,
+    buffers: BuffersManagerArc,
     editing_state: StateArc,
   ) -> Self {
     // Configuration flags for V8.

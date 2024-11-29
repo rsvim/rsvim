@@ -5,7 +5,7 @@ use parking_lot::RwLock;
 use std::sync::{Arc, Weak};
 use tracing::debug;
 
-use crate::buf::BuffersArc;
+use crate::buf::BuffersManagerArc;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
@@ -57,7 +57,7 @@ impl State {
   pub fn handle(
     &mut self,
     tree: TreeArc,
-    buffers: BuffersArc,
+    buffers: BuffersManagerArc,
     event: Event,
   ) -> StateHandleResponse {
     // Current stateful
