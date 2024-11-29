@@ -13,13 +13,13 @@ use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
 use std::convert::From;
 use std::fs::Metadata;
+use std::io::Read;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
-use std::io::Read;
 use tokio::sync::mpsc::Sender;
-use unicode_width::UnicodeWidthChar;
 use tracing::debug;
+use unicode_width::UnicodeWidthChar;
 
 pub mod async_ops;
 pub mod opt;
@@ -222,9 +222,9 @@ fn into_rope(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> Rope {
 }
 
 fn into_str(buf: &[u8], bufsize: usize, fencoding: FileEncoding) -> String {
-    match fencoding {
-      FileEncoding::Utf8 =>  String::from_utf8_lossy(&buf[0..bufsize]).into_owned()
-    }
+  match fencoding {
+    FileEncoding::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
+  }
 }
 
 // Primitive APIs {
@@ -257,26 +257,30 @@ impl Buffer {
     match std::fs::File::open(filename) {
       Ok(fp) => {
         let metadata = match fp.metadata() {
-            Ok(metadata) => metadata,
-            Err(e) => {
-                debug!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
-                return Err(e);
-            }
-        }
-        let mut io_buf:Vec<u8> = Vec::new();
+          Ok(metadata) => metadata,
+          Err(e) => {
+            debug!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
+            return Err(e);
+          }
+        };
+        let mut io_buf: Vec<u8> = Vec::new();
         let mut reader = std::io::BufReader::new(fp);
         let bytes = match reader.read_to_end(&mut io_buf) {
-            Ok(bytes) => bytes,
-            Err(e) => {
-                debug!("Failed to read file {:?}:{:?}", filename, e);
-                return Err(e);
-            }
-        }
+          Ok(bytes) => bytes,
+          Err(e) => {
+            debug!("Failed to read file {:?}:{:?}", filename, e);
+            return Err(e);
+          }
+        };
         assert!(bytes == io_buf.len());
 
         self.filename = Some(filename.to_string());
         self.metadata = Some(metadata);
-        self.rope.append(into_rope(&io_buf, io_buf.len(), self.options().file_encoding()));
+        self.rope.append(into_rope(
+          &io_buf,
+          io_buf.len(),
+          self.options().file_encoding(),
+        ));
         self.last_sync_time = Some(Instant::now());
 
         Ok(bytes)
