@@ -5,7 +5,6 @@ use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
 use crate::envar;
 use crate::evloop::msg::WorkerToMasterMessage;
-use crate::evloop::task::TaskableDataAccess;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::res::IoResult;
@@ -236,7 +235,7 @@ impl EventLoop {
   }
 
   /// Initialize TUI.
-  pub fn init_tui(&self) -> IoResult<()> {
+  pub fn init_terminal(&self) -> IoResult<()> {
     if !crossterm::terminal::is_raw_mode_enabled()? {
       crossterm::terminal::enable_raw_mode()?;
     }
@@ -253,8 +252,8 @@ impl EventLoop {
     Ok(())
   }
 
-  /// Processing arguments and initialize editor.
-  pub fn init_editor(&self) -> IoResult<()> {
+  /// Initialize buffers.
+  pub fn init_buffers(&mut self) -> IoResult<()> {
     // Initialize buffers.
     let input_files = self.cli_opt.file().to_vec();
     if !input_files.is_empty() {
@@ -274,6 +273,11 @@ impl EventLoop {
       debug!("Created empty buffer {:?}", buf_id);
     }
 
+    Ok(())
+  }
+
+  /// Initialize windows.
+  pub fn init_windows(&mut self) -> IoResult<()> {
     // Initialize default window.
     let canvas_size = rlock!(self.canvas).size();
     let mut tree = self.tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
@@ -283,7 +287,8 @@ impl EventLoop {
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
     let window = {
-      let (_, buf) = rlock!(self.buffers).first_key_value().unwrap();
+      let buffers = rlock!(self.buffers);
+      let (_, buf) = buffers.first_key_value().unwrap();
       Window::new(window_shape, Arc::downgrade(buf), &mut tree)
     };
     let window_id = window.id();
@@ -296,6 +301,11 @@ impl EventLoop {
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
 
+    Ok(())
+  }
+
+  /// First flush TUI to terminal.
+  pub fn finish_init_terminal(&mut self) -> IoResult<()> {
     self.queue_cursor()?;
     self.writer.flush()?;
 

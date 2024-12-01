@@ -68,11 +68,15 @@ fn main() -> IoResult<()> {
     // Initialize user config.
     event_loop.init_config()?;
 
-    // Initialize TUI.
-    event_loop.init_tui()?;
+    // Initialize terminal.
+    event_loop.init_terminal()?;
 
-    // Processing command line arguments and initialize editor.
-    event_loop.init_editor()?;
+    // Initialize buffers and windows.
+    event_loop.init_buffers()?;
+    event_loop.init_windows()?;
+
+    // Finish initialize terminal.
+    event_loop.finish_init_terminal()?;
 
     // Run loop.
     event_loop.run().await?;
