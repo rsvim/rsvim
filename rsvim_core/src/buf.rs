@@ -284,9 +284,6 @@ impl BuffersManager {
   ///
   /// If the file name already exists.
   ///
-  /// NOTE: This API should not been directly used by other modules, please create new buffer
-  /// through [BuffersManager::new_buffer](BuffersManager::new_buffer).
-  ///
   /// NOTE: This is a primitive API.
   pub fn new_buffer_with_edit_file(&mut self, filename: &Path) -> IoResult<BufferId> {
     let abs_filename = match filename.absolutize() {
@@ -329,8 +326,42 @@ impl BuffersManager {
     };
 
     let buf_id = buf.id();
-    self.buffers.insert(buf_id, Buffer::to_arc(buf));
+    let buf = Buffer::to_arc(buf);
+    self.buffers.insert(buf_id, buf.clone());
+    self.buffers_by_path.insert(Some(abs_filename), buf);
     Ok(buf_id)
+  }
+
+  /// Create new empty buffer without file name.
+  ///
+  /// The file name of this buffer is empty, i.e. the buffer is unnamed.
+  ///
+  /// Returns
+  ///
+  /// It returns the buffer ID if there is no other unnamed buffers.
+  ///
+  /// Panics
+  ///
+  /// If there is already other unnamed buffers.
+  ///
+  /// NOTE: This is a primitive API.
+  pub fn new_empty_buffer(&mut self) -> BufferId {
+    assert!(!self.buffers_by_path.contains_key(None));
+
+    let buf = Buffer {
+      id: next_buffer_id(),
+      rope: Rope::new(),
+      options: self.local_options().clone(),
+      filename: None,
+      absolute_filename: None,
+      metadata: None,
+      last_sync_time: None,
+    };
+    let buf_id = buf.id();
+    let buf = Buffer::to_arc(buf);
+    self.buffers.insert(buf_id, buf.clone());
+    self.buffers_by_path.insert(None, buf);
+    buf_id
   }
 }
 

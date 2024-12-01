@@ -24,7 +24,7 @@ use crossterm::event::{
 use crossterm::{self, execute, queue};
 use futures::StreamExt;
 use parking_lot::RwLock;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;
 use std::io::Write;
@@ -253,13 +253,29 @@ impl EventLoop {
     Ok(())
   }
 
-  /// Initialize editor default window and buffer.
+  /// Processing arguments and initialize editor.
   pub fn init_editor(&self) -> IoResult<()> {
-    // Create default buffer.
-    let buf_id = wlock!(self.buffers).new_buffer_with_edit_file(self.worker_send_to_master.clone());
-    let buffer = rlock!(self.buffers).get(&buf_id).unwrap().clone();
+    // Initialize buffers.
+    let input_files = self.cli_opt.file().to_vec();
+    if !input_files.is_empty() {
+      for input_file in input_files.iter() {
+        let maybe_buf_id = wlock!(self.buffers).new_buffer_with_edit_file(&Path::new(input_file));
+        match maybe_buf_id {
+          Ok(buf_id) => {
+            debug!(
+              "Created buffer for input file {:?}:{:?}",
+              input_file, buf_id
+            );
+          }
+          Err(e) => {
+            error!("Failed to open file {:?}:{:?}", input_file, e);
+          }
+        }
+      }
+    } else {
+    }
 
-    // Create default window.
+    // Initialize default window.
     let canvas_size = rlock!(self.canvas).size();
     let mut tree = self.tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
     let tree_root_id = tree.root_id();
@@ -272,18 +288,20 @@ impl EventLoop {
     let window_node = TreeNode::Window(window);
     tree.bounded_insert(&tree_root_id, window_node);
 
+    // Initialize cursor.
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor = Cursor::new(cursor_shape);
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
-    Ok(())
-  }
 
-  /// Initialize start up tasks such as input files, etc.
-  pub fn init_input_files(&mut self) -> IoResult<()> {
     self.queue_cursor()?;
     self.writer.flush()?;
 
+    Ok(())
+  }
+
+  /// Initialize input arguments, etc.
+  pub fn init_arguments(&mut self) -> IoResult<()> {
     // Has input files.
     if !self.cli_opt.file().is_empty() {
       let data_access = TaskableDataAccess::new(

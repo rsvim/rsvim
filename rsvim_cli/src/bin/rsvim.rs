@@ -71,11 +71,9 @@ fn main() -> IoResult<()> {
     // Initialize TUI.
     event_loop.init_tui()?;
 
-    // Initialize vim editor, i.e. the default window and buffer.
+    // Initialize vim editor, including command line arguments.
     event_loop.init_editor()?;
-
-    // Initialize command line options, i.e. the input files (for editing).
-    event_loop.init_input_files()?;
+    event_loop.init_arguments()?;
 
     // Run loop.
     event_loop.run().await?;
