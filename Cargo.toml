@@ -31,7 +31,7 @@ tokio-util = { version = "0.7.12", features = ["full"] }
 unicode-width = "0.2.0"
 unicode-normalization = "0.1.24"
 unicode-segmentation = "1.12.0"
-clap = { version = "4.5.19", features = ["derive", "unicode"] }
+clap = { version = "4.5.21", features = ["derive", "unicode"] }
 futures = "0.3"
 time = { version = "0.3.36", features = [
   "macros",
