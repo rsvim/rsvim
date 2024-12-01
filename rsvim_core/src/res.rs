@@ -1,6 +1,5 @@
 //! Results and errors.
 
-use std::path::PathBuf;
 use thiserror::Error as ThisError;
 
 // anyhow {

@@ -258,7 +258,7 @@ impl EventLoop {
     let input_files = self.cli_opt.file().to_vec();
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
-        let maybe_buf_id = wlock!(self.buffers).new_file_buffer(&Path::new(input_file));
+        let maybe_buf_id = wlock!(self.buffers).new_file_buffer(Path::new(input_file));
         match maybe_buf_id {
           Ok(buf_id) => {
             debug!("Created file buffer {:?}:{:?}", input_file, buf_id);

@@ -399,14 +399,14 @@ impl BuffersManager {
 // Primitive APIs {
 
 impl BuffersManager {
-  fn into_rope(&self, buf: &[u8], bufsize: usize) -> Rope {
-    let bufstr = self.into_str(buf, bufsize);
+  fn to_rope(&self, buf: &[u8], bufsize: usize) -> Rope {
+    let bufstr = self.to_str(buf, bufsize);
     let mut block = RopeBuilder::new();
     block.append(&bufstr.to_owned());
     block.finish()
   }
 
-  fn into_str(&self, buf: &[u8], bufsize: usize) -> String {
+  fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
     let fencoding = self.local_options().file_encoding();
     match fencoding {
       FileEncoding::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
@@ -436,7 +436,7 @@ impl BuffersManager {
         assert!(bytes == buf.len());
 
         Ok(Buffer::_new(
-          self.into_rope(&buf, buf.len()),
+          self.to_rope(&buf, buf.len()),
           self.local_options().clone(),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
