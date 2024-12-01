@@ -259,20 +259,19 @@ impl EventLoop {
     let input_files = self.cli_opt.file().to_vec();
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
-        let maybe_buf_id = wlock!(self.buffers).new_buffer_with_edit_file(&Path::new(input_file));
+        let maybe_buf_id = wlock!(self.buffers).new_file_buffer(&Path::new(input_file));
         match maybe_buf_id {
           Ok(buf_id) => {
-            debug!(
-              "Created buffer for input file {:?}:{:?}",
-              input_file, buf_id
-            );
+            debug!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
           Err(e) => {
-            error!("Failed to open file {:?}:{:?}", input_file, e);
+            error!("Failed to create file buffer {:?}:{:?}", input_file, e);
           }
         }
       }
     } else {
+      let buf_id = wlock!(self.buffers).new_empty_buffer();
+      debug!("Created empty buffer {:?}", buf_id);
     }
 
     // Initialize default window.
@@ -283,7 +282,10 @@ impl EventLoop {
       (0, 0),
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
-    let window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
+    let window = {
+      let (_, buf) = rlock!(self.buffers).first_key_value().unwrap();
+      Window::new(window_shape, Arc::downgrade(buf), &mut tree)
+    };
     let window_id = window.id();
     let window_node = TreeNode::Window(window);
     tree.bounded_insert(&tree_root_id, window_node);
@@ -296,36 +298,6 @@ impl EventLoop {
 
     self.queue_cursor()?;
     self.writer.flush()?;
-
-    Ok(())
-  }
-
-  /// Initialize input arguments, etc.
-  pub fn init_arguments(&mut self) -> IoResult<()> {
-    // Has input files.
-    if !self.cli_opt.file().is_empty() {
-      let data_access = TaskableDataAccess::new(
-        self.state.clone(),
-        self.tree.clone(),
-        self.buffers.clone(),
-        self.worker_send_to_master.clone(),
-      );
-      let input_files = self.cli_opt.file().to_vec();
-      self.detached_tracker.spawn(async move {
-        let (default_input_file, other_input_files) = input_files.split_first().unwrap();
-        let default_input_file = default_input_file.clone();
-        if task::startup::input_files::edit_default_file(data_access.clone(), default_input_file)
-          .await
-          .is_ok()
-          && !other_input_files.is_empty()
-        {
-          let other_input_files = other_input_files.to_vec();
-          let _ =
-            task::startup::input_files::edit_other_files(data_access.clone(), other_input_files)
-              .await;
-        }
-      });
-    }
 
     Ok(())
   }

@@ -1,9 +1,11 @@
 //! Vim buffers.
 
-use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
 // use crate::evloop::msg::WorkerToMasterMessage;
 use crate::res::IoResult;
+
+// Re-export
+pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
@@ -72,6 +74,41 @@ pub type BufferArc = Arc<RwLock<Buffer>>;
 pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
+  /// NOTE: This API should not be used to create new buffer, please use
+  /// [`BuffersManager`](BuffersManager) APIs to manage buffer instances.
+  pub fn _new(
+    rope: Rope,
+    options: BufferLocalOptions,
+    filename: Option<PathBuf>,
+    absolute_filename: Option<PathBuf>,
+    metadata: Option<Metadata>,
+    last_sync_time: Option<Instant>,
+  ) -> Self {
+    Self {
+      id: next_buffer_id(),
+      rope,
+      options,
+      filename,
+      absolute_filename,
+      metadata,
+      last_sync_time,
+    }
+  }
+
+  /// NOTE: This API should not be used to create new buffer, please use
+  /// [`BuffersManager`](BuffersManager) APIs to manage buffer instances.
+  pub fn _new_empty(options: BufferLocalOptions) -> Self {
+    Self {
+      id: next_buffer_id(),
+      rope: Rope::new(),
+      options,
+      filename: None,
+      absolute_filename: None,
+      metadata: None,
+      last_sync_time: None,
+    }
+  }
+
   pub fn to_arc(b: Buffer) -> BufferArc {
     Arc::new(RwLock::new(b))
   }
@@ -208,10 +245,6 @@ impl Buffer {
 }
 // Rope }
 
-// Primitive APIs {
-impl Buffer {}
-// Primitive APIs }
-
 // Options {
 impl Buffer {
   pub fn options(&self) -> &BufferLocalOptions {
@@ -285,7 +318,7 @@ impl BuffersManager {
   /// If the file name already exists.
   ///
   /// NOTE: This is a primitive API.
-  pub fn new_buffer_with_edit_file(&mut self, filename: &Path) -> IoResult<BufferId> {
+  pub fn new_file_buffer(&mut self, filename: &Path) -> IoResult<BufferId> {
     let abs_filename = match filename.absolutize() {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
@@ -314,15 +347,14 @@ impl BuffersManager {
         }
       }
     } else {
-      Buffer {
-        id: next_buffer_id(),
-        rope: Rope::new(),
-        options: self.local_options().clone(),
-        filename: Some(filename.to_path_buf()),
-        absolute_filename: Some(abs_filename),
-        metadata: None,
-        last_sync_time: None,
-      }
+      Buffer::_new(
+        Rope::new(),
+        self.local_options().clone(),
+        Some(filename.to_path_buf()),
+        Some(abs_filename.clone()),
+        None,
+        None,
+      )
     };
 
     let buf_id = buf.id();
@@ -346,17 +378,16 @@ impl BuffersManager {
   ///
   /// NOTE: This is a primitive API.
   pub fn new_empty_buffer(&mut self) -> BufferId {
-    assert!(!self.buffers_by_path.contains_key(None));
+    assert!(!self.buffers_by_path.contains_key(&None));
 
-    let buf = Buffer {
-      id: next_buffer_id(),
-      rope: Rope::new(),
-      options: self.local_options().clone(),
-      filename: None,
-      absolute_filename: None,
-      metadata: None,
-      last_sync_time: None,
-    };
+    let buf = Buffer::_new(
+      Rope::new(),
+      self.local_options().clone(),
+      None,
+      None,
+      None,
+      None,
+    );
     let buf_id = buf.id();
     let buf = Buffer::to_arc(buf);
     self.buffers.insert(buf_id, buf.clone());
@@ -404,15 +435,14 @@ impl BuffersManager {
         };
         assert!(bytes == buf.len());
 
-        Ok(Buffer {
-          id: next_buffer_id(),
-          rope: self.into_rope(&buf, buf.len()),
-          options: self.local_options().clone(),
-          filename: Some(filename.to_path_buf()),
-          absolute_filename: Some(absolute_filename.to_path_buf()),
-          metadata: Some(metadata),
-          last_sync_time: Some(Instant::now()),
-        })
+        Ok(Buffer::_new(
+          self.into_rope(&buf, buf.len()),
+          self.local_options().clone(),
+          Some(filename.to_path_buf()),
+          Some(absolute_filename.to_path_buf()),
+          Some(metadata),
+          Some(Instant::now()),
+        ))
       }
       Err(e) => {
         debug!("Failed to open file {:?}:{:?}", filename, e);

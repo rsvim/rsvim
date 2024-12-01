@@ -71,9 +71,8 @@ fn main() -> IoResult<()> {
     // Initialize TUI.
     event_loop.init_tui()?;
 
-    // Initialize vim editor, including command line arguments.
+    // Processing command line arguments and initialize editor.
     event_loop.init_editor()?;
-    event_loop.init_arguments()?;
 
     // Run loop.
     event_loop.run().await?;

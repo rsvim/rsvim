@@ -5,19 +5,7 @@
 #[derive(Debug)]
 /// Message.
 pub enum WorkerToMasterMessage {
-  BufferLoadedBytes(BufferLoadedBytes),
-}
-
-#[derive(Debug, Default)]
-/// Read bytes.
-pub struct BufferLoadedBytes {
-  pub bytes: usize,
-}
-
-impl BufferLoadedBytes {
-  pub fn new(bytes: usize) -> Self {
-    BufferLoadedBytes { bytes }
-  }
+  // BufferLoadedBytes(BufferLoadedBytes),
 }
 
 // Worker to Master message }
