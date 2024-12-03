@@ -1,27 +1,18 @@
 //! Vim window's text content widget.
 
-use crate::buf::{Buffer, BufferWk};
-use crate::cart::{IRect, U16Pos, U16Rect, U16Size};
+use crate::buf::BufferWk;
+use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::envar;
-use crate::ui::canvas::internal::iframe::Iframe;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
-use crate::ui::tree::Tree;
 use crate::ui::util::ptr::SafeViewportRef;
-use crate::ui::widget::window::opt::ViewportOptions;
 use crate::ui::widget::window::viewport::Viewport;
-use crate::ui::widget::window::{Window, WindowLocalOptions};
 use crate::ui::widget::Widgetable;
 use crate::{inode_generate_impl, rlock};
 
-use crossterm::style::{Attributes, Color};
 use geo::point;
-use regex::Regex;
-use ropey::RopeSlice;
-use std::collections::{BTreeSet, VecDeque};
 use std::convert::From;
-use std::time::Duration;
-use tracing::{debug, error};
+use tracing::trace;
 
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
@@ -84,9 +75,11 @@ impl Widgetable for WindowContent {
       let line_slice = lines_slice.next().unwrap();
       let line_viewport = viewport.lines().get(&line_idx).unwrap();
 
-      debug!(
+      trace!(
         "0-line_idx:{}, row_idx:{}, line_viewport:{:?}",
-        line_idx, row_idx, line_viewport
+        line_idx,
+        row_idx,
+        line_viewport
       );
 
       let row_viewport = &line_viewport.rows;
@@ -127,9 +120,13 @@ impl Widgetable for WindowContent {
             let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
             canvas.frame_mut().set_cells_at(cells_upos, cells);
             col_idx += start_fills;
-            debug!(
+            trace!(
               "1-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
-              line_idx, row_idx, col_idx, line_viewport, r
+              line_idx,
+              row_idx,
+              col_idx,
+              line_viewport,
+              r
             );
           }
 
@@ -150,9 +147,14 @@ impl Widgetable for WindowContent {
               char_idx += 1;
               total_width += unicode_width;
             }
-            debug!(
+            trace!(
               "2-line_idx:{}, row_idx:{}, col_idx:{}, total_width:{}, line_viewport:{:?}, r:{:?}",
-              line_idx, row_idx, col_idx, total_width, line_viewport, r
+              line_idx,
+              row_idx,
+              col_idx,
+              total_width,
+              line_viewport,
+              r
             );
             debug_assert_eq!(total_width, r.end_bcolumn - r.start_bcolumn);
           }
@@ -168,9 +170,14 @@ impl Widgetable for WindowContent {
             let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
             canvas.frame_mut().set_cells_at(cells_upos, cells);
             col_idx += left_length;
-            debug!(
+            trace!(
               "3-line_idx:{}, row_idx:{}, col_idx:{}, left_length:{}, line_viewport:{:?}, r:{:?}",
-              line_idx, row_idx, col_idx, left_length, line_viewport, r
+              line_idx,
+              row_idx,
+              col_idx,
+              left_length,
+              line_viewport,
+              r
             );
           }
 
@@ -184,9 +191,13 @@ impl Widgetable for WindowContent {
             canvas.frame_mut().set_cells_at(cells_upos, cells);
 
             col_idx += end_fills;
-            debug!(
+            trace!(
               "4-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
-              line_idx, row_idx, col_idx, line_viewport, r
+              line_idx,
+              row_idx,
+              col_idx,
+              line_viewport,
+              r
             );
           }
           debug_assert_eq!(width, col_idx);

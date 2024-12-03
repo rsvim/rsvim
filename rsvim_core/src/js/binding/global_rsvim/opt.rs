@@ -3,7 +3,7 @@
 use crate::envar;
 use crate::js::JsRuntime;
 
-use tracing::debug;
+use tracing::trace;
 
 /// Get the _wrap_ option.
 /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>
@@ -20,7 +20,7 @@ pub fn get_wrap(
     .try_read_for(envar::MUTEX_TIMEOUT())
     .unwrap()
     .wrap();
-  debug!("get_wrap: {:?}", value);
+  trace!("get_wrap: {:?}", value);
   rv.set_bool(value);
 }
 
@@ -33,7 +33,7 @@ pub fn set_wrap(
   assert!(args.length() == 1);
   let value = args.get(0).to_boolean(scope).boolean_value(scope);
   let state_rc = JsRuntime::state(scope);
-  debug!("set_wrap: {:?}", value);
+  trace!("set_wrap: {:?}", value);
   state_rc
     .borrow_mut()
     .tree
@@ -57,7 +57,7 @@ pub fn get_line_break(
     .try_read_for(envar::MUTEX_TIMEOUT())
     .unwrap()
     .line_break();
-  debug!("get_line_break: {:?}", value);
+  trace!("get_line_break: {:?}", value);
   rv.set_bool(value);
 }
 
@@ -70,7 +70,7 @@ pub fn set_line_break(
   assert!(args.length() == 1);
   let value = args.get(0).to_boolean(scope).boolean_value(scope);
   let state_rc = JsRuntime::state(scope);
-  debug!("set_line_break: {:?}", value);
+  trace!("set_line_break: {:?}", value);
   state_rc
     .borrow_mut()
     .tree

@@ -3,7 +3,7 @@
 use compact_str::CompactString;
 use geo::point;
 use std::ops::Range;
-// use tracing::debug;
+use tracing::trace;
 
 use crate::cart::{U16Pos, U16Size};
 use crate::ui::canvas::frame::cell::Cell;
@@ -131,13 +131,15 @@ impl Iframe {
     let index = self.pos2idx(pos);
     if self.contains_index(index) {
       let result = &self.cells[index];
-      // debug!(
-      //   "try get cell at pos:{:?}, index:{:?}, cell:{:?}",
-      //   pos, index, result
-      // );
+      trace!(
+        "try get cell at pos:{:?}, index:{:?}, cell:{:?}",
+        pos,
+        index,
+        result
+      );
       Some(result)
     } else {
-      // debug!("try get cell invalid at pos:{:?}, index:{:?}", pos, index);
+      trace!("try get cell invalid at pos:{:?}, index:{:?}", pos, index);
       None
     }
   }
@@ -158,15 +160,17 @@ impl Iframe {
     let index = self.pos2idx(pos);
     if self.contains_index(index) {
       let old_cell = self.cells[index].clone();
-      // debug!(
-      //   "try set cell at index:{:?}, new cell:{:?}, old cell:{:?}",
-      //   index, cell, old_cell
-      // );
+      trace!(
+        "try set cell at index:{:?}, new cell:{:?}, old cell:{:?}",
+        index,
+        cell,
+        old_cell
+      );
       self.cells[index] = cell;
       self.dirty_rows[pos.y() as usize] = true;
       Some(old_cell)
     } else {
-      // debug!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
+      trace!("try set cell invalid index:{:?}, cell:{:?}", index, cell);
       None
     }
   }
@@ -208,7 +212,7 @@ impl Iframe {
     if self.contains_range(&range) {
       Some(&self.cells[range])
     } else {
-      // debug!("try get cells at invalid range:{:?}", range);
+      trace!("try get cells at invalid range:{:?}", range);
       None
     }
   }
@@ -265,25 +269,25 @@ impl Iframe {
   /// [`set_cells_at`](Iframe::set_cells_at).
   pub fn try_set_cells_at(&mut self, pos: U16Pos, cells: Vec<Cell>) -> Option<Vec<Cell>> {
     let range = self.pos2range(pos, cells.len());
-    // debug!(
-    //   "try set cells at range:{:?}, cells len:{:?}",
-    //   range,
-    //   self.cells.len()
-    // );
+    trace!(
+      "try set cells at range:{:?}, cells len:{:?}",
+      range,
+      self.cells.len()
+    );
     if self.contains_range(&range) {
       let end_at = self.idx2pos(range.end);
-      // debug!("try set dirty rows for pos:{:?}, end_at:{:?}", pos, end_at);
+      trace!("try set dirty rows for pos:{:?}, end_at:{:?}", pos, end_at);
       for row in pos.y()..(end_at.y() + 1) {
-        // debug!("try set dirty rows at row:{:?}", row);
+        trace!("try set dirty rows at row:{:?}", row);
         if (row as usize) < self.dirty_rows.len() {
           self.dirty_rows[row as usize] = true;
         }
       }
-      // debug!(
-      //   "try set cells dirty at row range:{:?}-{:?}",
-      //   pos.y(),
-      //   end_at.y() + 1
-      // );
+      trace!(
+        "try set cells dirty at row range:{:?}-{:?}",
+        pos.y(),
+        end_at.y() + 1
+      );
       Some(self.cells.splice(range, cells).collect())
     } else {
       None
