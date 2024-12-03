@@ -1,7 +1,7 @@
 //! Cursor widget.
 
 use std::fmt::Debug;
-use tracing::debug;
+use tracing::trace;
 
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_generate_impl;
@@ -47,9 +47,10 @@ impl Widgetable for Cursor {
   fn draw(&mut self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();
-    debug!(
+    trace!(
       "draw, actual shape:{:?}, top-left pos:{:?}",
-      actual_shape, pos
+      actual_shape,
+      pos
     );
 
     canvas.frame_mut().set_cursor(canvas::Cursor::new(
