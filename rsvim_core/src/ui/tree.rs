@@ -15,7 +15,7 @@ pub use crate::ui::tree::opt::{WindowGlobalOptions, WindowGlobalOptionsBuilder};
 use parking_lot::RwLock;
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
-use tracing::debug;
+use tracing::trace;
 
 pub mod internal;
 pub mod opt;
@@ -465,7 +465,7 @@ impl Tree {
   pub fn draw(&mut self, canvas: CanvasArc) {
     let mut canvas = canvas.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
     for node in self.base.iter_mut() {
-      debug!("draw node:{:?}", node);
+      trace!("draw node:{:?}", node);
       node.draw(&mut canvas);
     }
   }

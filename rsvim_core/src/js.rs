@@ -25,7 +25,7 @@ use std::sync::Arc;
 use std::sync::Once;
 use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
-use tracing::{debug, error};
+use tracing::{error, trace};
 
 pub mod binding;
 pub mod constant;
@@ -267,7 +267,7 @@ impl JsRuntimeForSnapshot {
       Some(source) => source.into(),
       None => load_import(filename, true).unwrap(),
     };
-    debug!(
+    trace!(
       "Fetched module filename: {:?}, source: {:?}",
       filename,
       if source.as_str().len() > 20 {
@@ -582,7 +582,7 @@ impl JsRuntime {
         }
       },
     };
-    debug!("Resolved main js module (path): {:?}", path);
+    trace!("Resolved main js module (path): {:?}", path);
 
     let tc_scope = &mut v8::TryCatch::new(scope);
 
@@ -616,13 +616,13 @@ impl JsRuntime {
 
     match module.evaluate(tc_scope) {
       Some(result) => {
-        debug!(
+        trace!(
           "Evaluated user config module result ({:?}): {:?}",
           result.type_repr(),
           result.to_rust_string_lossy(tc_scope),
         );
       }
-      None => debug!("Evaluated user config module result: None"),
+      None => trace!("Evaluated user config module result: None"),
     }
 
     if module.get_status() == v8::ModuleStatus::Errored {
@@ -640,7 +640,7 @@ impl JsRuntime {
   /// Runs a single tick of the event-loop.
   pub fn tick_event_loop(&mut self) {
     let isolate_has_pending_tasks = self.isolate.has_pending_background_tasks();
-    debug!(
+    trace!(
       "Tick js runtime, isolate has pending tasks: {:?}",
       isolate_has_pending_tasks
     );
@@ -648,7 +648,7 @@ impl JsRuntime {
     self.fast_forward_imports();
     // self.event_loop.tick();
     self.run_pending_futures();
-    debug!("Tick js runtime - done");
+    trace!("Tick js runtime - done");
   }
 
   // /// Polls the inspector for new devtools messages.

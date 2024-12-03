@@ -10,10 +10,7 @@ use rsvim_core::res::IoResult;
 
 use clap::Parser;
 use once_cell::sync::Lazy;
-// use heed::types as heed_types;
-// use heed::{byteorder, Database, EnvOpenOptions};
-// use toml::Table;
-use tracing::debug;
+use tracing::trace;
 
 static RSVIM_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(|| {
   static COMPRESSED_BYTES: &[u8] =
@@ -42,7 +39,7 @@ static CLI_VERSION: Lazy<String> = Lazy::new(|| {
 fn main() -> IoResult<()> {
   log::init();
   let cli_opt = CliOpt::parse();
-  debug!("cli_opt: {:?}", cli_opt);
+  trace!("cli_opt: {:?}", cli_opt);
 
   // Print version and exit
   if cli_opt.version() {
@@ -51,7 +48,7 @@ fn main() -> IoResult<()> {
   }
 
   // let dir = tempfile::tempdir().unwrap();
-  // debug!("tempdir:{:?}", dir);
+  // trace!("tempdir:{:?}", dir);
   // let env = unsafe { EnvOpenOptions::new().open(dir.path()).unwrap() };
   // let mut wtxn = env.write_txn().unwrap();
   // let db: Database<heed_types::Str, heed_types::U32<byteorder::NativeEndian>> =

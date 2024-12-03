@@ -25,7 +25,7 @@ use std::collections::{BTreeSet, VecDeque};
 use std::convert::From;
 use std::ptr::NonNull;
 use std::time::Duration;
-use tracing::{debug, error};
+use tracing::{error, trace};
 
 pub mod content;
 pub mod opt;
@@ -171,7 +171,7 @@ impl Inodeable for Window {
 impl Widgetable for Window {
   fn draw(&mut self, canvas: &mut Canvas) {
     for node in self.base.iter_mut() {
-      debug!("draw node:{:?}", node);
+      trace!("draw node:{:?}", node);
       node.draw(canvas);
     }
   }

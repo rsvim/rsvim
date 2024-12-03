@@ -22,7 +22,7 @@ use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
 // use tokio::sync::mpsc::Sender;
-use tracing::debug;
+use tracing::trace;
 use unicode_width::UnicodeWidthChar;
 
 pub mod opt;
@@ -322,7 +322,7 @@ impl BuffersManager {
     let abs_filename = match filename.absolutize() {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
-        debug!("Failed to absolutize filepath {:?}:{:?}", filename, e);
+        trace!("Failed to absolutize filepath {:?}:{:?}", filename, e);
         return Err(e);
       }
     };
@@ -334,7 +334,7 @@ impl BuffersManager {
     let existed = match std::fs::exists(abs_filename.clone()) {
       Ok(existed) => existed,
       Err(e) => {
-        debug!("Failed to detect file {:?}:{:?}", filename, e);
+        trace!("Failed to detect file {:?}:{:?}", filename, e);
         return Err(e);
       }
     };
@@ -420,7 +420,7 @@ impl BuffersManager {
         let metadata = match fp.metadata() {
           Ok(metadata) => metadata,
           Err(e) => {
-            debug!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
+            trace!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
             return Err(e);
           }
         };
@@ -429,7 +429,7 @@ impl BuffersManager {
         let bytes = match reader.read_to_end(&mut buf) {
           Ok(bytes) => bytes,
           Err(e) => {
-            debug!("Failed to read file {:?}:{:?}", filename, e);
+            trace!("Failed to read file {:?}:{:?}", filename, e);
             return Err(e);
           }
         };
@@ -445,7 +445,7 @@ impl BuffersManager {
         ))
       }
       Err(e) => {
-        debug!("Failed to open file {:?}:{:?}", filename, e);
+        trace!("Failed to open file {:?}:{:?}", filename, e);
         Err(e)
       }
     }

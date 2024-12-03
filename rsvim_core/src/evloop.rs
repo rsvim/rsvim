@@ -32,7 +32,7 @@ use std::sync::Arc;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
-use tracing::{debug, error};
+use tracing::{error, trace};
 
 pub mod msg;
 pub mod task;
@@ -261,7 +261,7 @@ impl EventLoop {
         let maybe_buf_id = wlock!(self.buffers).new_file_buffer(Path::new(input_file));
         match maybe_buf_id {
           Ok(buf_id) => {
-            debug!("Created file buffer {:?}:{:?}", input_file, buf_id);
+            trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
           }
           Err(e) => {
             error!("Failed to create file buffer {:?}:{:?}", input_file, e);
@@ -270,7 +270,7 @@ impl EventLoop {
       }
     } else {
       let buf_id = wlock!(self.buffers).new_empty_buffer();
-      debug!("Created empty buffer {:?}", buf_id);
+      trace!("Created empty buffer {:?}", buf_id);
     }
 
     Ok(())
@@ -315,7 +315,7 @@ impl EventLoop {
   async fn process_event(&mut self, next_event: Option<IoResult<Event>>) {
     match next_event {
       Some(Ok(event)) => {
-        debug!("Polled_terminal event ok: {:?}", event);
+        trace!("Polled_terminal event ok: {:?}", event);
 
         // Handle by state machine
         let state_response = {
@@ -343,14 +343,14 @@ impl EventLoop {
   }
 
   async fn process_worker_notify(&mut self, msg: Option<WorkerToMasterMessage>) {
-    debug!("Received {:?} message from workers", msg);
+    trace!("Received {:?} message from workers", msg);
   }
 
   async fn process_js_runtime_request(&mut self, msg: Option<JsRuntimeToEventLoopMessage>) {
     if let Some(msg) = msg {
       match msg {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
-          debug!("process_js_runtime_request timeout_req:{:?}", req.future_id);
+          trace!("process_js_runtime_request timeout_req:{:?}", req.future_id);
           let js_runtime_tick_dispatcher = self.js_runtime_tick_dispatcher.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
@@ -359,7 +359,7 @@ impl EventLoop {
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
-            debug!(
+            trace!(
               "process_js_runtime_request timeout_req:{:?} - done",
               req.future_id
             );
@@ -371,14 +371,14 @@ impl EventLoop {
 
   async fn process_js_runtime_response(&mut self, msg: Option<EventLoopToJsRuntimeMessage>) {
     if let Some(msg) = msg {
-      debug!("process_js_runtime_response msg:{:?}", msg);
+      trace!("process_js_runtime_response msg:{:?}", msg);
       let _ = self.master_send_to_js_runtime.send(msg).await;
       self.js_runtime.tick_event_loop();
     }
   }
 
   async fn process_cancellation_notify(&mut self) {
-    debug!("Receive cancellation token, exit loop");
+    trace!("Receive cancellation token, exit loop");
     self.detached_tracker.close();
     self.blocked_tracker.close();
     self.blocked_tracker.wait().await;

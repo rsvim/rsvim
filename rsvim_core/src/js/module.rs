@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::collections::LinkedList;
 use std::rc::Rc;
 use std::sync::OnceLock;
-use tracing::debug;
+use tracing::trace;
 // use url::Url;
 
 /// Creates v8 script origins.
@@ -411,7 +411,7 @@ pub fn fetch_module_tree<'a>(
     Some(source) => source.into(),
     None => load_import(filename, true).unwrap(),
   };
-  debug!(
+  trace!(
     "Loaded main js module filename: {:?}, source: {:?}",
     filename,
     if source.as_str().len() > 20 {
@@ -433,7 +433,7 @@ pub fn fetch_module_tree<'a>(
   state.borrow_mut().module_map.insert(filename, module_ref);
 
   let requests = module.get_module_requests();
-  debug!("Get {} module requests", requests.length());
+  trace!("Get {} module requests", requests.length());
 
   for i in 0..requests.length() {
     // Get import request from the `module_requests` array.
@@ -443,7 +443,7 @@ pub fn fetch_module_tree<'a>(
     // Transform v8's ModuleRequest into Rust string.
     let specifier = request.get_specifier().to_rust_string_lossy(scope);
     let specifier = resolve_import(Some(filename), &specifier, false, None).unwrap();
-    debug!(
+    trace!(
       "Resolved dependency js module base: {:?}, specifier: {:?}",
       filename,
       specifier.as_str(),

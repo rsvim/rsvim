@@ -5,7 +5,7 @@ use crate::js::{self, JsFuture, JsFutureId, JsRuntime};
 
 use std::rc::Rc;
 use std::time::Duration;
-use tracing::debug;
+use tracing::trace;
 
 struct TimeoutFuture {
   future_id: JsFutureId,
@@ -15,7 +15,7 @@ struct TimeoutFuture {
 
 impl JsFuture for TimeoutFuture {
   fn run(&mut self, scope: &mut v8::HandleScope) {
-    debug!("set_timeout callback:{:?}", self.future_id);
+    trace!("set_timeout callback:{:?}", self.future_id);
     let undefined = v8::undefined(scope).into();
     let callback = v8::Local::new(scope, (*self.cb).clone());
     let args: Vec<v8::Local<v8::Value>> = self
@@ -82,7 +82,7 @@ pub fn set_timeout(
   state.pending_futures.insert(timer_id, Box::new(timeout_cb));
   state.timeout_handles.insert(timer_id);
   rv.set(v8::Number::new(scope, timer_id as f64).into());
-  debug!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
+  trace!("set_timeout:{:?}, millis:{:?}", timer_id, millis);
 }
 
 /// Javascript `clearTimeout` API.
@@ -96,5 +96,5 @@ pub fn clear_timeout(
   let state_rc = JsRuntime::state(scope);
 
   state_rc.borrow_mut().timeout_handles.remove(&timer_id);
-  debug!("clear_timeout: {:?}", timer_id);
+  trace!("clear_timeout: {:?}", timer_id);
 }
