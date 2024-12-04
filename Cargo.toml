@@ -78,17 +78,46 @@ swc_atoms = "=0.6.7"
 
 # Profiles
 
-# Release
-[profile.release]
-lto = true
-strip = true
-codegen-units = 1
+# Debug
+[profile.dev.package.v8]
+opt-level = 1
 
 # Nightly
 [profile.nightly]
 inherits = "release"
 debug = true
 
-# Debug
-[profile.dev.package.v8]
-opt-level = 1
+# Release {
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
+opt-level = 'z'   # Optimize for size
+
+## Crates that don't optimize for size
+[profile.release.package.base64-simd]
+opt-level = 3
+# [profile.release.package.brotli]
+# opt-level = 3
+# [profile.release.package.brotli-decompressor]
+# opt-level = 3
+[profile.release.package.bytes]
+opt-level = 3
+# [profile.release.package.rand]
+# opt-level = 3
+[profile.release.package.serde]
+opt-level = 3
+[profile.release.package.serde_v8]
+opt-level = 3
+[profile.release.package.tokio]
+opt-level = 3
+[profile.release.package.url]
+opt-level = 3
+[profile.release.package.v8]
+opt-level = 3
+[profile.release.package.zstd]
+opt-level = 3
+[profile.release.package.zstd-sys]
+opt-level = 3
+
+# Release }
