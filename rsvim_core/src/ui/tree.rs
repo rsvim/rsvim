@@ -15,7 +15,7 @@ pub use crate::ui::tree::opt::{WindowGlobalOptions, WindowGlobalOptionsBuilder};
 use parking_lot::RwLock;
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
-use tracing::trace;
+// use tracing::trace;
 
 pub mod internal;
 pub mod opt;
