@@ -222,6 +222,7 @@ impl Widgetable for WindowContent {
   }
 }
 
+#[allow(unused_imports)]
 #[cfg(test)]
 mod tests {
   use super::*;
