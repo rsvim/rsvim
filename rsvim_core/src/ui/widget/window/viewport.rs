@@ -1606,6 +1606,7 @@ mod tests {
 
   use crate::buf::BufferArc;
   use crate::cart::{IRect, U16Size};
+  use crate::rlock;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
@@ -1630,7 +1631,7 @@ mod tests {
     tree.set_local_options(window_options);
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
     let window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
-    window.viewport().clone()
+    rlock!(window.viewport()).clone()
   }
 
   #[allow(clippy::too_many_arguments)]

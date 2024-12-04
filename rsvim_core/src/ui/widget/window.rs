@@ -2,6 +2,7 @@
 
 use crate::buf::BufferWk;
 use crate::cart::{IRect, U16Rect};
+use crate::envar;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::tree::Tree;
@@ -9,6 +10,7 @@ use crate::ui::util::ptr::SafeTreeRef;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
+use crate::wlock;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{
@@ -16,7 +18,9 @@ pub use crate::ui::widget::window::opt::{
 };
 pub use crate::ui::widget::window::viewport::{LineViewport, LineViewportRow, Viewport};
 
+use parking_lot::RwLock;
 use std::convert::From;
+use std::sync::Arc;
 // use tracing::trace;
 
 pub mod content;
@@ -45,7 +49,7 @@ pub struct Window {
   tree_ref: SafeTreeRef,
 
   // Viewport.
-  viewport: Viewport,
+  viewport: Arc<RwLock<Viewport>>,
 }
 
 impl Window {
@@ -61,12 +65,13 @@ impl Window {
       wrap: options.wrap(),
       line_break: options.line_break(),
     };
-    let mut viewport = Viewport::new(&viewport_options, buffer.clone(), &window_root_actual_shape);
+    let viewport = Viewport::new(&viewport_options, buffer.clone(), &window_root_actual_shape);
+    let viewport = Arc::new(RwLock::new(viewport));
 
     let mut base = Itree::new(window_root_node);
     let root_id = base.root_id();
 
-    let window_content = WindowContent::new(shape, buffer.clone(), &mut viewport);
+    let window_content = WindowContent::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let window_content_id = window_content.id();
     let window_content_node = WindowNode::WindowContent(window_content);
 
@@ -181,7 +186,7 @@ impl Window {
   pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = options.clone();
     let viewport_options = ViewportOptions::from(&self.options);
-    self.viewport.set_options(&viewport_options);
+    wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn wrap(&self) -> bool {
@@ -191,7 +196,7 @@ impl Window {
   pub fn set_wrap(&mut self, value: bool) {
     self.options.set_wrap(value);
     let viewport_options = ViewportOptions::from(&self.options);
-    self.viewport.set_options(&viewport_options);
+    wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn line_break(&self) -> bool {
@@ -201,12 +206,12 @@ impl Window {
   pub fn set_line_break(&mut self, value: bool) {
     self.options.set_line_break(value);
     let viewport_options = ViewportOptions::from(&self.options);
-    self.viewport.set_options(&viewport_options);
+    wlock!(self.viewport).set_options(&viewport_options);
   }
 
   /// Get viewport.
-  pub fn viewport(&self) -> &Viewport {
-    &self.viewport
+  pub fn viewport(&self) -> Arc<RwLock<Viewport>> {
+    self.viewport.clone()
   }
 
   /// Get buffer.

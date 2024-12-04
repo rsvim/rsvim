@@ -5,13 +5,14 @@ use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::envar;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
-use crate::ui::util::ptr::SafeViewportRef;
 use crate::ui::widget::window::viewport::Viewport;
 use crate::ui::widget::Widgetable;
 use crate::{inode_generate_impl, rlock};
 
 use geo::point;
+use parking_lot::RwLock;
 use std::convert::From;
+use std::sync::Weak;
 use tracing::trace;
 
 #[derive(Debug, Clone)]
@@ -23,17 +24,17 @@ pub struct WindowContent {
   buffer: BufferWk,
 
   // Viewport.
-  viewport: SafeViewportRef,
+  viewport: Weak<RwLock<Viewport>>,
 }
 
 impl WindowContent {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk, viewport: &mut Viewport) -> Self {
+  pub fn new(shape: IRect, buffer: BufferWk, viewport: Weak<RwLock<Viewport>>) -> Self {
     let base = InodeBase::new(shape);
     WindowContent {
       base,
       buffer,
-      viewport: SafeViewportRef::new(viewport),
+      viewport,
     }
   }
 }
@@ -53,7 +54,8 @@ impl Widgetable for WindowContent {
       return;
     }
 
-    let viewport = self.viewport.as_ref();
+    let viewport = self.viewport.upgrade().unwrap();
+    let viewport = rlock!(viewport);
 
     // If viewport has no lines.
     if viewport.end_line() <= viewport.start_line() {
@@ -258,7 +260,8 @@ mod tests {
     tree.set_local_options(&window_options);
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let viewport_options = ViewportOptions::from(&window_options);
-    let mut viewport = Viewport::new(&viewport_options, Arc::downgrade(&buffer), &actual_shape);
+    let viewport = Viewport::new(&viewport_options, Arc::downgrade(&buffer), &actual_shape);
+    let viewport = Arc::new(RwLock::new(viewport));
     let shape = IRect::new(
       (0, 0),
       (
@@ -266,7 +269,8 @@ mod tests {
         terminal_size.height() as isize,
       ),
     );
-    let mut window_content = WindowContent::new(shape, Arc::downgrade(&buffer), &mut viewport);
+    let mut window_content =
+      WindowContent::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
     let mut canvas = Canvas::new(terminal_size);
     window_content.draw(&mut canvas);
     canvas
