@@ -6,7 +6,7 @@ use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::{collections::VecDeque, iter::Iterator};
-// use tracing::debug;
+// use tracing::trace;
 
 use crate::cart::{IPos, IRect, U16Rect};
 use crate::ui::tree::internal::shapes;
@@ -214,7 +214,7 @@ where
     // Avoid the multiple mutable references on `self.nodes.get_mut` when updating all descendants attributes.
     let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
 
-    // debug!("before create que");
+    // trace!("before create que");
     let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
     let pnode = raw_nodes.as_ref().get(&start_parent_id).unwrap();
     let pnode_id = pnode.id();
@@ -226,7 +226,7 @@ where
       pnode_depth,
       pnode_actual_shape,
     ));
-    // debug!("after create que");
+    // trace!("after create que");
 
     // Iterate all descendants, and update their attributes.
     while let Some(child_and_parent) = que.pop_front() {
@@ -235,33 +235,33 @@ where
       let pnode_depth = child_and_parent.2;
       let pnode_actual_shape = child_and_parent.3;
 
-      // debug!("before update cnode attr: {:?}", cnode);
+      // trace!("before update cnode attr: {:?}", cnode);
       let cnode_id = cnode.id();
       let cnode_depth = pnode_depth + 1;
       let cnode_shape = *cnode.shape();
       let cnode_actual_shape = shapes::make_actual_shape(cnode_shape, pnode_actual_shape);
 
-      // debug!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+      // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
 
       *cnode.depth_mut() = cnode_depth;
       *cnode.actual_shape_mut() = cnode_actual_shape;
-      // debug!("after update cnode attr: {:?}", cnode_id);
+      // trace!("after update cnode attr: {:?}", cnode_id);
 
-      // debug!(
+      // trace!(
       //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
       //   cnode_id, self.children_ids
       // );
       match self.children_ids.get(&cnode_id) {
         Some(descendant_ids) => {
           for dnode_id in descendant_ids.iter() {
-            // debug!("before push dnode: {:?}", dnode_id);
+            // trace!("before push dnode: {:?}", dnode_id);
             match raw_nodes.as_mut().get_mut(dnode_id) {
               Some(dnode) => {
                 que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
               }
               None => { /* Skip */ }
             }
-            // debug!("after push dnode: {:?}", dnode_id);
+            // trace!("after push dnode: {:?}", dnode_id);
           }
         }
         None => { /* Skip */ }
@@ -290,7 +290,7 @@ where
   ///
   /// If `parent_id` doesn't exist.
   pub fn insert(&mut self, parent_id: &InodeId, mut child_node: T) -> Option<T> {
-    // debug!(
+    // trace!(
     //   "parent_id:{:?}, node_ids:{:?}, children_ids:{:?}",
     //   parent_id,
     //   self.node_ids(),
