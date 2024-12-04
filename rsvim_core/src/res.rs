@@ -34,7 +34,7 @@ pub enum JsRuntimeErr {
   Message(String),
 }
 
-/// [`std::result::Result`] with `T` if ok, [`TheJsRuntimeErr`] if error.
+/// [`std::result::Result`] with `T` if ok, [`JsRuntimeErr`] if error.
 pub type JsRuntimeResult<T> = std::result::Result<T, JsRuntimeErr>;
 
 // Js Runtime }

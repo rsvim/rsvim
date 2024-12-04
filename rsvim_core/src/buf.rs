@@ -74,8 +74,8 @@ pub type BufferArc = Arc<RwLock<Buffer>>;
 pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
-  /// NOTE: This API should not be used to create new buffer, please use
-  /// [`BuffersManager`](BuffersManager) APIs to manage buffer instances.
+  /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
+  /// manage buffer instances.
   pub fn _new(
     rope: Rope,
     options: BufferLocalOptions,
@@ -95,8 +95,8 @@ impl Buffer {
     }
   }
 
-  /// NOTE: This API should not be used to create new buffer, please use
-  /// [`BuffersManager`](BuffersManager) APIs to manage buffer instances.
+  /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
+  /// manage buffer instances.
   pub fn _new_empty(options: BufferLocalOptions) -> Self {
     Self {
       id: next_buffer_id(),
@@ -316,7 +316,7 @@ impl BuffersManager {
   ///
   /// It returns the buffer ID if the buffer created successfully, also the reading operations must
   /// be successful if the file exists on filesystem.
-  /// Otherwise it returns [`BufferErr`](crate::res::BufferErr) that indicates the error.
+  /// Otherwise it returns the error.
   ///
   /// Panics
   ///
