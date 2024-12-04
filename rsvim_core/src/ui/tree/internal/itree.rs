@@ -1,16 +1,16 @@
 //! Internal tree structure that implements the widget tree.
 
+use crate::cart::{IPos, IRect, U16Rect};
+use crate::ui::tree::internal::shapes;
+use crate::ui::tree::internal::{InodeId, Inodeable};
+
+use ahash::AHashMap as HashMap;
 use geo::point;
-use std::collections::HashMap;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::{collections::VecDeque, iter::Iterator};
 // use tracing::trace;
-
-use crate::cart::{IPos, IRect, U16Rect};
-use crate::ui::tree::internal::shapes;
-use crate::ui::tree::internal::{InodeId, Inodeable};
 
 #[derive(Debug, Default, Clone)]
 pub struct Itree<T>
