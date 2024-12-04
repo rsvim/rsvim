@@ -115,28 +115,6 @@ opt-level = 3
 opt-level = 3
 [profile.release.package.v8]
 opt-level = 3
-[profile.release.package.swc_common]
-opt-level = 3
-[profile.release.package.swc_ecma_codegen]
-opt-level = 3
-[profile.release.package.swc_ecma_parser]
-opt-level = 3
-[profile.release.package.swc_ecma_transforms_base]
-opt-level = 3
-[profile.release.package.swc_ecma_transforms_typescript]
-opt-level = 3
-[profile.release.package.swc_ecma_transforms_react]
-opt-level = 3
-[profile.release.package.swc_ecma_visit]
-opt-level = 3
-[profile.release.package.swc_bundler]
-opt-level = 3
-[profile.release.package.swc_ecma_ast]
-opt-level = 3
-[profile.release.package.swc_ecma_loader]
-opt-level = 3
-[profile.release.package.swc_atoms]
-opt-level = 3
 [profile.release.package.zstd]
 opt-level = 3
 [profile.release.package.zstd-sys]
