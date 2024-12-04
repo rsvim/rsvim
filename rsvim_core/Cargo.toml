@@ -28,9 +28,6 @@ tracing-subscriber = { workspace = true, features = [
 tracing-appender = { workspace = true, features = ["parking_lot"] }
 tokio = { workspace = true, features = ["full"] }
 tokio-util = { workspace = true, features = ["full"] }
-unicode-width = { workspace = true }
-unicode-normalization = { workspace = true }
-unicode-segmentation = { workspace = true }
 clap = { workspace = true, features = ["derive", "unicode"] }
 futures = { workspace = true }
 compact_str = { workspace = true, features = ["serde", "bytes"] }
@@ -49,6 +46,9 @@ path-absolutize = { workspace = true }
 toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
+unicode-width = { workspace = true }
+unicode-normalization = { workspace = true }
+unicode-segmentation = { workspace = true }
 # icu = { workspace = true, features = ["compiled_data", "serde"] }
 ascii = { workspace = true }
 

@@ -22,7 +22,6 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
-// use tokio::sync::mpsc::Sender;
 use tracing::trace;
 use unicode_width::UnicodeWidthChar;
 
@@ -161,7 +160,12 @@ impl Buffer {
 
 // Unicode {
 impl Buffer {
-  /// Get the display width for a unicode `char`.
+  /// Get the display width for a `char`, supports both ASCI control codes and unicode.
+  ///
+  /// The char display width follows the
+  /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/), implemented with
+  /// [UnicodeWidthChar], there's another equivalent crate
+  /// [icu::properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
   pub fn char_width(&self, c: char) -> usize {
     if c.is_ascii_control() {
       let ac = AsciiChar::from_ascii(c).unwrap();
