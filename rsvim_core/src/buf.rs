@@ -312,13 +312,13 @@ impl BuffersManager {
   /// 1. If the file exists on filesystem, the buffer will read the file contents into buffer.
   /// 2. If the file doesn't exist, the buffer will be empty but only set the file name.
   ///
-  /// Returns
+  /// # Returns
   ///
   /// It returns the buffer ID if the buffer created successfully, also the reading operations must
   /// be successful if the file exists on filesystem.
   /// Otherwise it returns the error.
   ///
-  /// Panics
+  /// # Panics
   ///
   /// If the file name already exists.
   ///
@@ -373,11 +373,11 @@ impl BuffersManager {
   ///
   /// The file name of this buffer is empty, i.e. the buffer is unnamed.
   ///
-  /// Returns
+  /// # Returns
   ///
   /// It returns the buffer ID if there is no other unnamed buffers.
   ///
-  /// Panics
+  /// # Panics
   ///
   /// If there is already other unnamed buffers.
   ///

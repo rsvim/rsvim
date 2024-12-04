@@ -8,7 +8,9 @@ pub struct AsciiControlCodeFormatter {
   value: AsciiChar,
 }
 
-/// Panics
+/// Build the ASCII char formatter from it.
+///
+/// # Panics
 ///
 /// If the value is not a valid ASCII control code.
 impl From<AsciiChar> for AsciiControlCodeFormatter {
