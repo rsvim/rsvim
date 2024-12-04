@@ -235,7 +235,7 @@ impl EventLoop {
   }
 
   /// Initialize TUI.
-  pub fn init_terminal(&self) -> IoResult<()> {
+  pub fn init_tui(&self) -> IoResult<()> {
     if !crossterm::terminal::is_raw_mode_enabled()? {
       crossterm::terminal::enable_raw_mode()?;
     }
@@ -306,9 +306,33 @@ impl EventLoop {
   }
 
   /// First flush TUI to terminal.
-  pub fn finish_init_terminal(&mut self) -> IoResult<()> {
-    self.queue_cursor()?;
-    self.writer.flush()?;
+  pub fn init_tui_done(&mut self) -> IoResult<()> {
+    // Initialize cursor
+    let cursor = *self
+      .canvas
+      .try_read_for(envar::MUTEX_TIMEOUT())
+      .unwrap()
+      .frame()
+      .cursor();
+
+    if cursor.blinking() {
+      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
+    }
+    if cursor.hidden() {
+      queue!(self.writer, crossterm::cursor::Hide)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::Show)?;
+    }
+
+    queue!(self.writer, cursor.style())?;
+    queue!(
+      self.writer,
+      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
+    )?;
+
+    self.render()?;
 
     Ok(())
   }
@@ -503,35 +527,6 @@ impl EventLoop {
         ShaderCommand::TerminalSetSize(command) => queue!(self.writer, command)?,
       }
     }
-
-    Ok(())
-  }
-
-  /// Put (render) canvas cursor.
-  fn queue_cursor(&mut self) -> IoResult<()> {
-    let cursor = *self
-      .canvas
-      .try_read_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .frame()
-      .cursor();
-
-    if cursor.blinking() {
-      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
-    } else {
-      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
-    }
-    if cursor.hidden() {
-      queue!(self.writer, crossterm::cursor::Hide)?;
-    } else {
-      queue!(self.writer, crossterm::cursor::Show)?;
-    }
-
-    queue!(self.writer, cursor.style())?;
-    queue!(
-      self.writer,
-      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
-    )?;
 
     Ok(())
   }
