@@ -465,7 +465,7 @@ impl Tree {
   pub fn draw(&mut self, canvas: CanvasArc) {
     let mut canvas = canvas.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
     for node in self.base.iter_mut() {
-      trace!("draw node:{:?}", node);
+      // trace!("Draw tree:{:?}", node);
       node.draw(&mut canvas);
     }
   }

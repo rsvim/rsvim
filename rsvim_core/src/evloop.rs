@@ -288,7 +288,8 @@ impl EventLoop {
     );
     let window = {
       let buffers = rlock!(self.buffers);
-      let (_, buf) = buffers.first_key_value().unwrap();
+      let (buf_id, buf) = buffers.first_key_value().unwrap();
+      trace!("Bind first buffer to default window {:?}", buf_id);
       Window::new(window_shape, Arc::downgrade(buf), &mut tree)
     };
     let window_id = window.id();

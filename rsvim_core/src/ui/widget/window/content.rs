@@ -49,6 +49,7 @@ impl Widgetable for WindowContent {
 
     // If size is zero, exit.
     if height == 0 || width == 0 {
+      trace!("Draw window content, actual shape is zero");
       return;
     }
 
@@ -56,8 +57,15 @@ impl Widgetable for WindowContent {
 
     // If viewport has no lines.
     if viewport.end_line() <= viewport.start_line() {
+      trace!("Draw window content, viewport is empty");
       return;
     }
+
+    trace!(
+      "Draw window content, actual shape:{:?}, viewport:{:?}",
+      actual_shape,
+      viewport
+    );
 
     let buffer = self.buffer.upgrade().unwrap();
     let buffer = rlock!(buffer);

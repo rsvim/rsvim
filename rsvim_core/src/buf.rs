@@ -433,6 +433,12 @@ impl BuffersManager {
             return Err(e);
           }
         };
+        trace!(
+          "Read {} bytes (buf: {}) from file {:?}",
+          bytes,
+          buf.len(),
+          filename
+        );
         assert!(bytes == buf.len());
 
         Ok(Buffer::_new(
