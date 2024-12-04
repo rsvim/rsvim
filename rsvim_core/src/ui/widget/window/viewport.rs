@@ -1630,11 +1630,7 @@ mod tests {
     tree.set_local_options(window_options);
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
     let window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
-    let options = ViewportOptions {
-      wrap: window.options().wrap(),
-      line_break: window.options().line_break(),
-    };
-    Viewport::new(&options, window.buffer(), window.actual_shape())
+    window.viewport().clone()
   }
 
   #[allow(clippy::too_many_arguments)]
