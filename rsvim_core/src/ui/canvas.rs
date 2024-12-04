@@ -192,7 +192,7 @@ impl Canvas {
 
   /// Find next same cell in current row of frame. NOTE: row is y, col is x.
   ///
-  /// Returns
+  /// # Returns
   ///
   /// 1. The column number if found the same cell, column number started from 0.
   /// 2. The end column index on the row if not found, i.e. the width of current frame.

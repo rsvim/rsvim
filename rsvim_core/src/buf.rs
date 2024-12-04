@@ -22,7 +22,6 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
-// use tokio::sync::mpsc::Sender;
 use tracing::trace;
 use unicode_width::UnicodeWidthChar;
 
@@ -75,8 +74,8 @@ pub type BufferArc = Arc<RwLock<Buffer>>;
 pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
-  /// NOTE: This API should not be used to create new buffer, please use
-  /// [`BuffersManager`](BuffersManager) APIs to manage buffer instances.
+  /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
+  /// manage buffer instances.
   pub fn _new(
     rope: Rope,
     options: BufferLocalOptions,
@@ -96,8 +95,8 @@ impl Buffer {
     }
   }
 
-  /// NOTE: This API should not be used to create new buffer, please use
-  /// [`BuffersManager`](BuffersManager) APIs to manage buffer instances.
+  /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
+  /// manage buffer instances.
   pub fn _new_empty(options: BufferLocalOptions) -> Self {
     Self {
       id: next_buffer_id(),
@@ -161,7 +160,12 @@ impl Buffer {
 
 // Unicode {
 impl Buffer {
-  /// Get the display width for a unicode `char`.
+  /// Get the display width for a `char`, supports both ASCI control codes and unicode.
+  ///
+  /// The char display width follows the
+  /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/), implemented with
+  /// [UnicodeWidthChar], there's another equivalent crate
+  /// [icu::properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
   pub fn char_width(&self, c: char) -> usize {
     if c.is_ascii_control() {
       let ac = AsciiChar::from_ascii(c).unwrap();
@@ -308,13 +312,13 @@ impl BuffersManager {
   /// 1. If the file exists on filesystem, the buffer will read the file contents into buffer.
   /// 2. If the file doesn't exist, the buffer will be empty but only set the file name.
   ///
-  /// Returns
+  /// # Returns
   ///
   /// It returns the buffer ID if the buffer created successfully, also the reading operations must
   /// be successful if the file exists on filesystem.
-  /// Otherwise it returns [`BufferErr`](crate::res::BufferErr) that indicates the error.
+  /// Otherwise it returns the error.
   ///
-  /// Panics
+  /// # Panics
   ///
   /// If the file name already exists.
   ///
@@ -369,11 +373,11 @@ impl BuffersManager {
   ///
   /// The file name of this buffer is empty, i.e. the buffer is unnamed.
   ///
-  /// Returns
+  /// # Returns
   ///
   /// It returns the buffer ID if there is no other unnamed buffers.
   ///
-  /// Panics
+  /// # Panics
   ///
   /// If there is already other unnamed buffers.
   ///
