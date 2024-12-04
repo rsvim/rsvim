@@ -1,17 +1,13 @@
 //! Buffer viewport on a window.
 
 use crate::buf::BufferWk;
-use crate::cart::{U16Pos, U16Rect, U16Size, URect};
+use crate::cart::U16Rect;
 use crate::envar;
 use crate::rlock;
-use crate::ui::canvas::Cell;
-use crate::ui::tree::internal::Inodeable;
-use crate::ui::widget::window::{ViewportOptions, Window};
+use crate::ui::widget::window::ViewportOptions;
 
-use anyhow;
-use geo::point;
 use ropey::RopeSlice;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
 

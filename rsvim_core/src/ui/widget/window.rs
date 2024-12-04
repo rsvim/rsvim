@@ -1,9 +1,8 @@
 //! Vim window.
 
 use crate::buf::BufferWk;
-use crate::cart::{IRect, U16Pos, U16Rect};
-use crate::defaults;
-use crate::ui::canvas::{Canvas, Cell};
+use crate::cart::{IRect, U16Rect};
+use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::tree::Tree;
 use crate::ui::util::ptr::SafeTreeRef;
@@ -17,21 +16,15 @@ pub use crate::ui::widget::window::opt::{
 };
 pub use crate::ui::widget::window::viewport::{LineViewport, LineViewportRow, Viewport};
 
-use crossterm::style::{Attributes, Color};
-use geo::point;
-use regex::Regex;
-use ropey::RopeSlice;
-use std::collections::{BTreeSet, VecDeque};
 use std::convert::From;
-use std::ptr::NonNull;
-use std::time::Duration;
-use tracing::{error, trace};
+use tracing::trace;
 
 pub mod content;
 pub mod opt;
 pub mod root;
 pub mod viewport;
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
