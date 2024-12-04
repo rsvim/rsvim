@@ -107,7 +107,7 @@ opt-level = 3
 # opt-level = 3
 [profile.release.package.serde]
 opt-level = 3
-[profile.release.package.serde_v8]
+[profile.release.package.serde_json]
 opt-level = 3
 [profile.release.package.tokio]
 opt-level = 3
