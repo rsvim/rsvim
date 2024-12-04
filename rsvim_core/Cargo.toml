@@ -19,6 +19,7 @@ doctest = false
 
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream", "serde"] }
+jiff = { workspace = true, features = ["tzdb-bundle-always"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = [
   "env-filter",
@@ -32,16 +33,6 @@ unicode-normalization = { workspace = true }
 unicode-segmentation = { workspace = true }
 clap = { workspace = true, features = ["derive", "unicode"] }
 futures = { workspace = true }
-time = { workspace = true, features = [
-  "macros",
-  "formatting",
-  "parsing",
-  "serde",
-  "serde-human-readable",
-  "rand",
-] }
-tz-rs = { workspace = true }
-tzdb = { workspace = true }
 compact_str = { workspace = true, features = ["serde", "bytes"] }
 ropey = { workspace = true }
 geo = { workspace = true, features = ["serde"] }
