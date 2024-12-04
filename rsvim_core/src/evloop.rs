@@ -1,11 +1,10 @@
 //! Event loop.
 
-use crate::buf::{Buffers, BuffersArc};
+use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
 use crate::envar;
 use crate::evloop::msg::WorkerToMasterMessage;
-use crate::evloop::task::TaskableDataAccess;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::res::IoResult;
@@ -24,7 +23,7 @@ use crossterm::event::{
 use crossterm::{self, execute, queue};
 use futures::StreamExt;
 use parking_lot::RwLock;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;
 use std::io::Write;
@@ -33,7 +32,7 @@ use std::sync::Arc;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
-use tracing::{debug, error};
+use tracing::{error, trace};
 
 pub mod msg;
 pub mod task;
@@ -80,7 +79,7 @@ pub struct EventLoop {
   pub state: StateArc,
 
   /// Vim buffers.
-  pub buffers: BuffersArc,
+  pub buffers: BuffersManagerArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -129,7 +128,7 @@ impl EventLoop {
     let tree = Tree::to_arc(Tree::new(canvas_size));
 
     // Buffers
-    let buffers = Buffers::to_arc(Buffers::new());
+    let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
 
     // State
     let state = State::to_arc(State::default());
@@ -197,7 +196,7 @@ impl EventLoop {
       cli_opt.clone(),
       runtime_path.clone(),
       tree.clone(),
-      buffers.clone(),
+      buffers_manager.clone(),
       state.clone(),
     );
 
@@ -209,7 +208,7 @@ impl EventLoop {
       canvas,
       tree,
       state,
-      buffers,
+      buffers: buffers_manager,
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
       detached_tracker,
@@ -253,13 +252,33 @@ impl EventLoop {
     Ok(())
   }
 
-  /// Initialize editor default window and buffer.
-  pub fn init_editor(&self) -> IoResult<()> {
-    // Create default buffer.
-    let buf_id = wlock!(self.buffers).new_buffer();
-    let buffer = rlock!(self.buffers).get(&buf_id).unwrap().clone();
+  /// Initialize buffers.
+  pub fn init_buffers(&mut self) -> IoResult<()> {
+    // Initialize buffers.
+    let input_files = self.cli_opt.file().to_vec();
+    if !input_files.is_empty() {
+      for input_file in input_files.iter() {
+        let maybe_buf_id = wlock!(self.buffers).new_file_buffer(Path::new(input_file));
+        match maybe_buf_id {
+          Ok(buf_id) => {
+            trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
+          }
+          Err(e) => {
+            error!("Failed to create file buffer {:?}:{:?}", input_file, e);
+          }
+        }
+      }
+    } else {
+      let buf_id = wlock!(self.buffers).new_empty_buffer();
+      trace!("Created empty buffer {:?}", buf_id);
+    }
 
-    // Create default window.
+    Ok(())
+  }
+
+  /// Initialize windows.
+  pub fn init_windows(&mut self) -> IoResult<()> {
+    // Initialize default window.
     let canvas_size = rlock!(self.canvas).size();
     let mut tree = self.tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
     let tree_root_id = tree.root_id();
@@ -267,47 +286,53 @@ impl EventLoop {
       (0, 0),
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
-    let window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
+    let window = {
+      let buffers = rlock!(self.buffers);
+      let (buf_id, buf) = buffers.first_key_value().unwrap();
+      trace!("Bind first buffer to default window {:?}", buf_id);
+      Window::new(window_shape, Arc::downgrade(buf), &mut tree)
+    };
     let window_id = window.id();
     let window_node = TreeNode::Window(window);
     tree.bounded_insert(&tree_root_id, window_node);
 
+    // Initialize cursor.
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor = Cursor::new(cursor_shape);
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
+
     Ok(())
   }
 
-  /// Initialize start up tasks such as input files, etc.
-  pub fn init_input_files(&mut self) -> IoResult<()> {
-    self.queue_cursor()?;
-    self.writer.flush()?;
+  /// First flush TUI to terminal.
+  pub fn init_tui_done(&mut self) -> IoResult<()> {
+    // Initialize cursor
+    let cursor = *self
+      .canvas
+      .try_read_for(envar::MUTEX_TIMEOUT())
+      .unwrap()
+      .frame()
+      .cursor();
 
-    // Has input files.
-    if !self.cli_opt.file().is_empty() {
-      let data_access = TaskableDataAccess::new(
-        self.state.clone(),
-        self.tree.clone(),
-        self.buffers.clone(),
-        self.worker_send_to_master.clone(),
-      );
-      let input_files = self.cli_opt.file().to_vec();
-      self.detached_tracker.spawn(async move {
-        let (default_input_file, other_input_files) = input_files.split_first().unwrap();
-        let default_input_file = default_input_file.clone();
-        if task::startup::input_files::edit_default_file(data_access.clone(), default_input_file)
-          .await
-          .is_ok()
-          && !other_input_files.is_empty()
-        {
-          let other_input_files = other_input_files.to_vec();
-          let _ =
-            task::startup::input_files::edit_other_files(data_access.clone(), other_input_files)
-              .await;
-        }
-      });
+    if cursor.blinking() {
+      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
     }
+    if cursor.hidden() {
+      queue!(self.writer, crossterm::cursor::Hide)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::Show)?;
+    }
+
+    queue!(self.writer, cursor.style())?;
+    queue!(
+      self.writer,
+      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
+    )?;
+
+    self.render()?;
 
     Ok(())
   }
@@ -315,7 +340,7 @@ impl EventLoop {
   async fn process_event(&mut self, next_event: Option<IoResult<Event>>) {
     match next_event {
       Some(Ok(event)) => {
-        debug!("Polled_terminal event ok: {:?}", event);
+        trace!("Polled_terminal event ok: {:?}", event);
 
         // Handle by state machine
         let state_response = {
@@ -343,14 +368,14 @@ impl EventLoop {
   }
 
   async fn process_worker_notify(&mut self, msg: Option<WorkerToMasterMessage>) {
-    debug!("Received {:?} message from workers", msg);
+    trace!("Received {:?} message from workers", msg);
   }
 
   async fn process_js_runtime_request(&mut self, msg: Option<JsRuntimeToEventLoopMessage>) {
     if let Some(msg) = msg {
       match msg {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
-          debug!("process_js_runtime_request timeout_req:{:?}", req.future_id);
+          trace!("process_js_runtime_request timeout_req:{:?}", req.future_id);
           let js_runtime_tick_dispatcher = self.js_runtime_tick_dispatcher.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
@@ -359,7 +384,7 @@ impl EventLoop {
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
-            debug!(
+            trace!(
               "process_js_runtime_request timeout_req:{:?} - done",
               req.future_id
             );
@@ -371,14 +396,14 @@ impl EventLoop {
 
   async fn process_js_runtime_response(&mut self, msg: Option<EventLoopToJsRuntimeMessage>) {
     if let Some(msg) = msg {
-      debug!("process_js_runtime_response msg:{:?}", msg);
+      trace!("process_js_runtime_response msg:{:?}", msg);
       let _ = self.master_send_to_js_runtime.send(msg).await;
       self.js_runtime.tick_event_loop();
     }
   }
 
   async fn process_cancellation_notify(&mut self) {
-    debug!("Receive cancellation token, exit loop");
+    trace!("Receive cancellation token, exit loop");
     self.detached_tracker.close();
     self.blocked_tracker.close();
     self.blocked_tracker.wait().await;
@@ -502,35 +527,6 @@ impl EventLoop {
         ShaderCommand::TerminalSetSize(command) => queue!(self.writer, command)?,
       }
     }
-
-    Ok(())
-  }
-
-  /// Put (render) canvas cursor.
-  fn queue_cursor(&mut self) -> IoResult<()> {
-    let cursor = *self
-      .canvas
-      .try_read_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .frame()
-      .cursor();
-
-    if cursor.blinking() {
-      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
-    } else {
-      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
-    }
-    if cursor.hidden() {
-      queue!(self.writer, crossterm::cursor::Hide)?;
-    } else {
-      queue!(self.writer, crossterm::cursor::Show)?;
-    }
-
-    queue!(self.writer, cursor.style())?;
-    queue!(
-      self.writer,
-      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
-    )?;
 
     Ok(())
   }

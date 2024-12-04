@@ -1,10 +1,17 @@
-//! Both global and local options for buffers.
+//! Vim buffer options.
 
 use crate::defaults;
 
+// Re-export
+pub use file_encoding::FileEncoding;
+
+pub mod file_encoding;
+
 #[derive(Debug, Clone)]
+/// Local buffer options.
 pub struct BufferLocalOptions {
   tab_stop: u16,
+  file_encoding: FileEncoding,
 }
 
 impl Default for BufferLocalOptions {
@@ -25,12 +32,21 @@ impl BufferLocalOptions {
   pub fn set_tab_stop(&mut self, value: u16) {
     self.tab_stop = value;
   }
+
+  pub fn file_encoding(&self) -> FileEncoding {
+    self.file_encoding
+  }
+
+  pub fn set_file_encoding(&mut self, value: FileEncoding) {
+    self.file_encoding = value;
+  }
 }
 
 #[derive(Debug, Clone)]
-/// Global window options builder.
+/// Local buffer options builder.
 pub struct BufferLocalOptionsBuilder {
   tab_stop: u16,
+  file_encoding: FileEncoding,
 }
 
 impl BufferLocalOptionsBuilder {
@@ -39,9 +55,15 @@ impl BufferLocalOptionsBuilder {
     self
   }
 
+  pub fn file_encoding(&mut self, value: FileEncoding) -> &mut Self {
+    self.file_encoding = value;
+    self
+  }
+
   pub fn build(&self) -> BufferLocalOptions {
     BufferLocalOptions {
       tab_stop: self.tab_stop,
+      file_encoding: self.file_encoding,
     }
   }
 }
@@ -50,6 +72,7 @@ impl Default for BufferLocalOptionsBuilder {
   fn default() -> Self {
     BufferLocalOptionsBuilder {
       tab_stop: defaults::buf::TAB_STOP,
+      file_encoding: defaults::buf::FILE_ENCODING,
     }
   }
 }

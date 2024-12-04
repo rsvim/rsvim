@@ -19,6 +19,7 @@ exclude = [".DS_Store"]
 [workspace.dependencies]
 rsvim_core = { version = "0.1.1-alpha.8", path = "./rsvim_core" }
 crossterm = { version = "0.28", features = ["event-stream", "serde"] }
+jiff = { version = "0.1.15", features = ["tzdb-bundle-always"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = [
   "env-filter",
@@ -33,16 +34,6 @@ unicode-normalization = "0.1.24"
 unicode-segmentation = "1.12.0"
 clap = { version = "4.5.19", features = ["derive", "unicode"] }
 futures = "0.3"
-time = { version = "0.3.36", features = [
-  "macros",
-  "formatting",
-  "parsing",
-  "serde",
-  "serde-human-readable",
-  "rand",
-] }
-tz-rs = "0.7.0"
-tzdb = "0.7.2"
 # rand = "0.8.5"
 # heed = "0.20.5"
 # bytes = { version = "1", features = ["serde"] }

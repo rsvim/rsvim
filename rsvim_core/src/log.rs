@@ -1,10 +1,9 @@
 //! Logging utils.
 
-use time::{format_description, Date, Month, OffsetDateTime, Time, UtcOffset};
+use jiff::Zoned;
 use tracing;
 use tracing_appender;
 use tracing_subscriber::{self, EnvFilter};
-use tzdb;
 
 /// Initialize logging.
 ///
@@ -14,25 +13,20 @@ pub fn init() {
   let env_filter = EnvFilter::from_default_env();
 
   if env_filter.max_level_hint().is_some()
-    && env_filter.max_level_hint().unwrap() >= tracing::Level::DEBUG
+    && env_filter.max_level_hint().unwrap() >= tracing::Level::TRACE
   {
-    // If debug log is enabled, write logs into file.
-    let now = tzdb::now::local().unwrap();
-    let now = OffsetDateTime::new_in_offset(
-      Date::from_calendar_date(
-        now.year(),
-        Month::try_from(now.month()).unwrap(),
-        now.month_day(),
-      )
-      .unwrap(),
-      Time::from_hms_nano(now.hour(), now.minute(), now.second(), now.nanoseconds()).unwrap(),
-      UtcOffset::from_whole_seconds(now.local_time_type().ut_offset()).unwrap(),
+    // If trace/debug log is enabled, write logs into file.
+    let now = Zoned::now();
+    let log_name = format!(
+      "rsvim-{:0>4}{:0>2}{:0>2}-{:0>2}{:0>2}{:0>2}-{:0>3}.log",
+      now.date().year(),
+      now.date().month(),
+      now.date().day(),
+      now.time().hour(),
+      now.time().minute(),
+      now.time().second(),
+      now.time().millisecond(),
     );
-    let fmt = format_description::parse(
-      "rsvim-[year][month][day]-[hour][minute][second]-[subsecond digits:3].log",
-    )
-    .unwrap();
-    let log_name = now.format(&fmt).unwrap();
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
       .with_file(true)
       .with_line_number(true)
@@ -45,7 +39,7 @@ pub fn init() {
       .finish();
     tracing::subscriber::set_global_default(subscriber).unwrap();
   } else {
-    // If debug log is disabled, write logs into stderr.
+    // If trace/debug log is disabled, write logs into stderr.
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
       .with_file(true)
       .with_line_number(true)

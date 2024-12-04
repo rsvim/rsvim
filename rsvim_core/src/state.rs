@@ -3,9 +3,9 @@
 use crossterm::event::Event;
 use parking_lot::RwLock;
 use std::sync::{Arc, Weak};
-use tracing::debug;
+use tracing::trace;
 
-use crate::buf::BuffersArc;
+use crate::buf::BuffersManagerArc;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
@@ -57,7 +57,7 @@ impl State {
   pub fn handle(
     &mut self,
     tree: TreeArc,
-    buffers: BuffersArc,
+    buffers: BuffersManagerArc,
     event: Event,
   ) -> StateHandleResponse {
     // Current stateful
@@ -65,7 +65,7 @@ impl State {
 
     let data_access = StatefulDataAccess::new(self, tree, buffers, event);
     let next_stateful = stateful.handle(data_access);
-    debug!("Stateful now:{:?}, next:{:?}", stateful, next_stateful);
+    trace!("Stateful now:{:?}, next:{:?}", stateful, next_stateful);
 
     // Save current stateful
     self.last_stateful = stateful;

@@ -17,7 +17,7 @@ use std::fmt;
 use std::fmt::Debug;
 use std::slice::Iter;
 use std::sync::Arc;
-use tracing::debug;
+use tracing::trace;
 
 pub mod frame;
 pub mod internal;
@@ -252,7 +252,7 @@ impl Canvas {
     let size = self.size();
     let prev_frame = self.prev_frame();
     let _prev_size = self.prev_size();
-    debug!("brute force diff, size:{:?}", size);
+    trace!("brute force diff, size:{:?}", size);
 
     let mut shaders = vec![];
 
@@ -293,7 +293,7 @@ impl Canvas {
     let size = self.size();
     let prev_frame = self.prev_frame();
     let _prev_size = self.prev_size();
-    debug!("dirty marks diff, size:{:?}", size);
+    trace!("dirty marks diff, size:{:?}", size);
 
     let mut shaders = vec![];
 

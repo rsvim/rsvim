@@ -1,6 +1,6 @@
 //! Js runtime bindings.
 
-use crate::res::{AnyErr, IoError};
+use crate::res::{AnyErr, IoErr};
 // use crate::dns;
 // use crate::exceptions;
 // use crate::file;
@@ -230,7 +230,7 @@ pub fn set_exception_code(
   error: &AnyErr,
 ) {
   let exception = exception.to_object(scope).unwrap();
-  if let Some(error) = error.downcast_ref::<IoError>() {
+  if let Some(error) = error.downcast_ref::<IoErr>() {
     let key = v8::String::new(scope, "code").unwrap();
     let value = v8::String::new(scope, &format!("{:?}", error.kind())).unwrap();
     exception.set(scope, key.into(), value.into());

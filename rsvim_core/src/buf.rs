@@ -1,17 +1,28 @@
 //! Vim buffers.
 
-use crate::buf::opt::BufferLocalOptions;
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
+// use crate::evloop::msg::WorkerToMasterMessage;
+use crate::res::IoResult;
+
+// Re-export
+pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
 use parking_lot::RwLock;
+use path_absolutize::Absolutize;
 use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::convert::From;
+use std::fs::Metadata;
+use std::io::Read;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
+use std::time::Instant;
+// use tokio::sync::mpsc::Sender;
+use tracing::trace;
 use unicode_width::UnicodeWidthChar;
 
 pub mod opt;
@@ -27,24 +38,74 @@ pub fn next_buffer_id() -> BufferId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-#[derive(Clone, Debug)]
-/// The Vim buffer.
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+/// The Vim buffer's status.
+pub enum BufferStatus {
+  INIT,    // After created.
+  LOADING, // Loading text content from disk file.
+  SAVING,  // Saving buffer content to disk file.
+  SYNCED,  // Synced content with file system.
+  CHANGED, // Buffer content has been modified.
+}
+
+#[derive(Debug)]
+/// The Vim buffer, it is the in-memory texts mapping to the filesystem.
+///
+/// It contains several internal data:
+/// 1. File name that associated with filesystem.
+/// 2. File contents.
+/// 3. File metadata.
+///
+/// To stable and avoid data racing issues, all file IO operations are made in pure blocking and
+/// single-threading manner. And buffer also provide a set of APIs that serves as middle-level
+/// primitives which can be used to implement high-level Vim ex commands, etc.
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
   options: BufferLocalOptions,
+  filename: Option<PathBuf>,
+  absolute_filename: Option<PathBuf>,
+  metadata: Option<Metadata>,
+  last_sync_time: Option<Instant>,
+  // worker_send_to_master: Sender<WorkerToMasterMessage>,
 }
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
 pub type BufferWk = Weak<RwLock<Buffer>>;
 
 impl Buffer {
-  /// Make buffer with default [`BufferLocalOptions`].
-  pub fn new() -> Self {
-    Buffer {
+  /// NOTE: This API should not be used to create new buffer, please use
+  /// [`BuffersManager`](BuffersManager) APIs to manage buffer instances.
+  pub fn _new(
+    rope: Rope,
+    options: BufferLocalOptions,
+    filename: Option<PathBuf>,
+    absolute_filename: Option<PathBuf>,
+    metadata: Option<Metadata>,
+    last_sync_time: Option<Instant>,
+  ) -> Self {
+    Self {
+      id: next_buffer_id(),
+      rope,
+      options,
+      filename,
+      absolute_filename,
+      metadata,
+      last_sync_time,
+    }
+  }
+
+  /// NOTE: This API should not be used to create new buffer, please use
+  /// [`BuffersManager`](BuffersManager) APIs to manage buffer instances.
+  pub fn _new_empty(options: BufferLocalOptions) -> Self {
+    Self {
       id: next_buffer_id(),
       rope: Rope::new(),
-      options: BufferLocalOptions::default(),
+      options,
+      filename: None,
+      absolute_filename: None,
+      metadata: None,
+      last_sync_time: None,
     }
   }
 
@@ -55,6 +116,46 @@ impl Buffer {
   pub fn id(&self) -> BufferId {
     self.id
   }
+
+  pub fn filename(&self) -> &Option<PathBuf> {
+    &self.filename
+  }
+
+  pub fn set_filename(&mut self, filename: Option<PathBuf>) {
+    self.filename = filename;
+  }
+
+  pub fn absolute_filename(&self) -> &Option<PathBuf> {
+    &self.absolute_filename
+  }
+
+  pub fn set_absolute_filename(&mut self, absolute_filename: Option<PathBuf>) {
+    self.absolute_filename = absolute_filename;
+  }
+
+  pub fn metadata(&self) -> &Option<Metadata> {
+    &self.metadata
+  }
+
+  pub fn set_metadata(&mut self, metadata: Option<Metadata>) {
+    self.metadata = metadata;
+  }
+
+  pub fn last_sync_time(&self) -> &Option<Instant> {
+    &self.last_sync_time
+  }
+
+  pub fn set_last_sync_time(&mut self, last_sync_time: Option<Instant>) {
+    self.last_sync_time = last_sync_time;
+  }
+
+  // pub fn status(&self) -> BufferStatus {
+  //   BufferStatus::INIT
+  // }
+
+  // pub fn worker_send_to_master(&self) -> &Sender<WorkerToMasterMessage> {
+  //   &self.worker_send_to_master
+  // }
 }
 
 // Unicode {
@@ -117,34 +218,32 @@ impl Buffer {
 
 // Rope {
 impl Buffer {
+  /// Alias to method [`Rope::get_line`](Rope::get_line).
   pub fn get_line(&self, line_idx: usize) -> Option<RopeSlice> {
     self.rope.get_line(line_idx)
   }
 
+  /// Alias to method [`Rope::get_lines_at`](Rope::get_lines_at).
   pub fn get_lines_at(&self, line_idx: usize) -> Option<Lines> {
     self.rope.get_lines_at(line_idx)
   }
 
+  /// Alias to method [`Rope::lines`](Rope::lines).
   pub fn lines(&self) -> Lines {
     self.rope.lines()
   }
 
+  /// Alias to method [`Rope::write_to`](Rope::write_to).
   pub fn write_to<T: std::io::Write>(&self, writer: T) -> std::io::Result<()> {
     self.rope.write_to(writer)
   }
 
-  pub fn append(&mut self, other: Rope) -> &mut Self {
-    self.rope.append(other);
-    self
+  /// Alias to method [`Rope::append`](Rope::append).
+  pub fn append(&mut self, other: Rope) {
+    self.rope.append(other)
   }
 }
 // Rope }
-
-impl Default for Buffer {
-  fn default() -> Self {
-    Buffer::new()
-  }
-}
 
 // Options {
 impl Buffer {
@@ -166,28 +265,6 @@ impl Buffer {
 }
 // Options }
 
-impl From<Rope> for Buffer {
-  /// Make buffer from [`Rope`].
-  fn from(rope: Rope) -> Self {
-    Buffer {
-      id: next_buffer_id(),
-      rope,
-      options: BufferLocalOptions::default(),
-    }
-  }
-}
-
-impl From<RopeBuilder> for Buffer {
-  /// Make buffer from [`RopeBuilder`].
-  fn from(builder: RopeBuilder) -> Self {
-    Buffer {
-      id: next_buffer_id(),
-      rope: builder.finish(),
-      options: BufferLocalOptions::default(),
-    }
-  }
-}
-
 impl PartialEq for Buffer {
   fn eq(&self, other: &Self) -> bool {
     self.id == other.id
@@ -197,54 +274,194 @@ impl PartialEq for Buffer {
 impl Eq for Buffer {}
 
 #[derive(Debug, Clone)]
-/// The manager for all buffers.
-pub struct Buffers {
+/// The manager for all normal (file) buffers.
+///
+/// NOTE: A buffer has its unique filepath (on filesystem), and there is at most 1 unnamed buffer.
+pub struct BuffersManager {
   // Buffers collection
   buffers: BTreeMap<BufferId, BufferArc>,
+
+  // Buffers maps by absolute file path.
+  buffers_by_path: HashMap<Option<PathBuf>, BufferArc>,
 
   // Local options for buffers.
   local_options: BufferLocalOptions,
 }
 
-impl Buffers {
+impl BuffersManager {
   pub fn new() -> Self {
-    Buffers {
+    BuffersManager {
       buffers: BTreeMap::new(),
+      buffers_by_path: HashMap::new(),
       local_options: BufferLocalOptions::default(),
     }
   }
 
-  pub fn to_arc(b: Buffers) -> BuffersArc {
+  pub fn to_arc(b: BuffersManager) -> BuffersManagerArc {
     Arc::new(RwLock::new(b))
   }
 
-  pub fn new_buffer(&mut self) -> BufferId {
-    let mut buf = Buffer::new();
-    buf.set_options(self.local_options());
+  /// Open a file with a newly created buffer.
+  ///
+  /// The file name must be unique and not existed, there are two use cases:
+  /// 1. If the file exists on filesystem, the buffer will read the file contents into buffer.
+  /// 2. If the file doesn't exist, the buffer will be empty but only set the file name.
+  ///
+  /// Returns
+  ///
+  /// It returns the buffer ID if the buffer created successfully, also the reading operations must
+  /// be successful if the file exists on filesystem.
+  /// Otherwise it returns [`BufferErr`](crate::res::BufferErr) that indicates the error.
+  ///
+  /// Panics
+  ///
+  /// If the file name already exists.
+  ///
+  /// NOTE: This is a primitive API.
+  pub fn new_file_buffer(&mut self, filename: &Path) -> IoResult<BufferId> {
+    let abs_filename = match filename.absolutize() {
+      Ok(abs_filename) => abs_filename.to_path_buf(),
+      Err(e) => {
+        trace!("Failed to absolutize filepath {:?}:{:?}", filename, e);
+        return Err(e);
+      }
+    };
+
+    assert!(!self
+      .buffers_by_path
+      .contains_key(&Some(abs_filename.clone())));
+
+    let existed = match std::fs::exists(abs_filename.clone()) {
+      Ok(existed) => existed,
+      Err(e) => {
+        trace!("Failed to detect file {:?}:{:?}", filename, e);
+        return Err(e);
+      }
+    };
+
+    let buf = if existed {
+      match self.edit_file(filename, &abs_filename) {
+        Ok(buf) => buf,
+        Err(e) => {
+          return Err(e);
+        }
+      }
+    } else {
+      Buffer::_new(
+        Rope::new(),
+        self.local_options().clone(),
+        Some(filename.to_path_buf()),
+        Some(abs_filename.clone()),
+        None,
+        None,
+      )
+    };
+
     let buf_id = buf.id();
-    self.buffers.insert(buf_id, Buffer::to_arc(buf));
-    buf_id
+    let buf = Buffer::to_arc(buf);
+    self.buffers.insert(buf_id, buf.clone());
+    self.buffers_by_path.insert(Some(abs_filename), buf);
+    Ok(buf_id)
   }
 
-  pub fn new_buffer_from_rope(&mut self, rope: Rope) -> BufferId {
-    let mut buf = Buffer::from(rope);
-    buf.set_options(self.local_options());
-    let buf_id = buf.id();
-    self.buffers.insert(buf_id, Buffer::to_arc(buf));
-    buf_id
-  }
+  /// Create new empty buffer without file name.
+  ///
+  /// The file name of this buffer is empty, i.e. the buffer is unnamed.
+  ///
+  /// Returns
+  ///
+  /// It returns the buffer ID if there is no other unnamed buffers.
+  ///
+  /// Panics
+  ///
+  /// If there is already other unnamed buffers.
+  ///
+  /// NOTE: This is a primitive API.
+  pub fn new_empty_buffer(&mut self) -> BufferId {
+    assert!(!self.buffers_by_path.contains_key(&None));
 
-  pub fn new_buffer_from_rope_builder(&mut self, rope_builder: RopeBuilder) -> BufferId {
-    let mut buf = Buffer::from(rope_builder);
-    buf.set_options(self.local_options());
+    let buf = Buffer::_new(
+      Rope::new(),
+      self.local_options().clone(),
+      None,
+      None,
+      None,
+      None,
+    );
     let buf_id = buf.id();
-    self.buffers.insert(buf_id, Buffer::to_arc(buf));
+    let buf = Buffer::to_arc(buf);
+    self.buffers.insert(buf_id, buf.clone());
+    self.buffers_by_path.insert(None, buf);
     buf_id
   }
 }
 
+// Primitive APIs {
+
+impl BuffersManager {
+  fn to_rope(&self, buf: &[u8], bufsize: usize) -> Rope {
+    let bufstr = self.to_str(buf, bufsize);
+    let mut block = RopeBuilder::new();
+    block.append(&bufstr.to_owned());
+    block.finish()
+  }
+
+  fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
+    let fencoding = self.local_options().file_encoding();
+    match fencoding {
+      FileEncoding::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
+    }
+  }
+
+  // Implementation for [new_buffer_edit_file](new_buffer_edit_file).
+  fn edit_file(&self, filename: &Path, absolute_filename: &Path) -> IoResult<Buffer> {
+    match std::fs::File::open(filename) {
+      Ok(fp) => {
+        let metadata = match fp.metadata() {
+          Ok(metadata) => metadata,
+          Err(e) => {
+            trace!("Failed to fetch metadata from file {:?}:{:?}", filename, e);
+            return Err(e);
+          }
+        };
+        let mut buf: Vec<u8> = Vec::new();
+        let mut reader = std::io::BufReader::new(fp);
+        let bytes = match reader.read_to_end(&mut buf) {
+          Ok(bytes) => bytes,
+          Err(e) => {
+            trace!("Failed to read file {:?}:{:?}", filename, e);
+            return Err(e);
+          }
+        };
+        trace!(
+          "Read {} bytes (buf: {}) from file {:?}",
+          bytes,
+          buf.len(),
+          filename
+        );
+        assert!(bytes == buf.len());
+
+        Ok(Buffer::_new(
+          self.to_rope(&buf, buf.len()),
+          self.local_options().clone(),
+          Some(filename.to_path_buf()),
+          Some(absolute_filename.to_path_buf()),
+          Some(metadata),
+          Some(Instant::now()),
+        ))
+      }
+      Err(e) => {
+        trace!("Failed to open file {:?}:{:?}", filename, e);
+        Err(e)
+      }
+    }
+  }
+}
+
+// Primitive APIs }
+
 // BTreeMap {
-impl Buffers {
+impl BuffersManager {
   pub fn is_empty(&self) -> bool {
     self.buffers.is_empty()
   }
@@ -265,15 +482,15 @@ impl Buffers {
     self.buffers.contains_key(id)
   }
 
-  pub fn keys(&self) -> BuffersKeys {
+  pub fn keys(&self) -> BuffersManagerKeys {
     self.buffers.keys()
   }
 
-  pub fn values(&self) -> BuffersValues {
+  pub fn values(&self) -> BuffersManagerValues {
     self.buffers.values()
   }
 
-  pub fn iter(&self) -> BuffersIter {
+  pub fn iter(&self) -> BuffersManagerIter {
     self.buffers.iter()
   }
 
@@ -287,14 +504,14 @@ impl Buffers {
 }
 // BTreeMap }
 
-impl Default for Buffers {
+impl Default for BuffersManager {
   fn default() -> Self {
-    Buffers::new()
+    BuffersManager::new()
   }
 }
 
 // Options {
-impl Buffers {
+impl BuffersManager {
   pub fn local_options(&self) -> &BufferLocalOptions {
     &self.local_options
   }
@@ -305,43 +522,69 @@ impl Buffers {
 }
 // Options }
 
-pub type BuffersArc = Arc<RwLock<Buffers>>;
-pub type BuffersWk = Weak<RwLock<Buffers>>;
-pub type BuffersKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
-pub type BuffersValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;
-pub type BuffersIter<'a> = std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
+pub type BuffersManagerArc = Arc<RwLock<BuffersManager>>;
+pub type BuffersManagerWk = Weak<RwLock<BuffersManager>>;
+pub type BuffersManagerKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
+pub type BuffersManagerValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;
+pub type BuffersManagerIter<'a> = std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
 
 #[cfg(test)]
 mod tests {
   use super::*;
-  use std::fs::File;
-  use tempfile::tempfile;
+  // use std::fs::File;
+  // use tempfile::tempfile;
+  // use tokio::sync::mpsc::Receiver;
 
-  #[test]
-  fn buffer_from1() {
-    let r1 = Rope::from_str("Hello");
-    let buf1 = Buffer::from(r1);
-    let tmp1 = tempfile().unwrap();
-    buf1.write_to(tmp1).unwrap();
+  // fn make_channel() -> (
+  //   Sender<WorkerToMasterMessage>,
+  //   Receiver<WorkerToMasterMessage>,
+  // ) {
+  //   tokio::sync::mpsc::channel(1)
+  // }
 
-    let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
-    let buf2 = Buffer::from(r2);
-    let tmp2 = tempfile().unwrap();
-    buf2.write_to(tmp2).unwrap();
-  }
-
-  #[test]
-  fn buffer_from2() {
-    let mut builder1 = RopeBuilder::new();
-    builder1.append("Hello");
-    builder1.append("World");
-    let buf1 = Buffer::from(builder1);
-    let tmp1 = tempfile().unwrap();
-    buf1.write_to(tmp1).unwrap();
-  }
+  // #[test]
+  // fn buffer_from1() {
+  //   let (sender, _) = make_channel();
+  //
+  //   let r1 = Rope::from_str("Hello");
+  //   let buf1 = Buffer::_from_rope(sender.clone(), r1);
+  //   let tmp1 = tempfile().unwrap();
+  //   buf1.write_to(tmp1).unwrap();
+  //
+  //   let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
+  //   let buf2 = Buffer::_from_rope(sender, r2);
+  //   let tmp2 = tempfile().unwrap();
+  //   buf2.write_to(tmp2).unwrap();
+  // }
+  //
+  // #[test]
+  // fn buffer_from2() {
+  //   let (sender, _) = make_channel();
+  //
+  //   let mut builder1 = RopeBuilder::new();
+  //   builder1.append("Hello");
+  //   builder1.append("World");
+  //   let buf1 = Buffer::_from_rope_builder(sender, builder1);
+  //   let tmp1 = tempfile().unwrap();
+  //   buf1.write_to(tmp1).unwrap();
+  // }
 
   #[test]
   fn next_buffer_id1() {
     assert!(next_buffer_id() > 0);
   }
+
+  // #[test]
+  // fn buffer_unicode_width1() {
+  //   let (sender, _) = make_channel();
+  //
+  //   let b1 = Buffer::_from_rope_builder(sender, RopeBuilder::new());
+  //   assert_eq!(b1.char_width('A'), 1);
+  //   assert_eq!(b1.char_symbol('A'), (CompactString::new("A"), 1));
+  //   assert_eq!(b1.str_width("ABCDEFG"), 7);
+  //   assert_eq!(
+  //     b1.str_symbols("ABCDEFG"),
+  //     (CompactString::new("ABCDEFG"), 7)
+  //   );
+  // }
 }

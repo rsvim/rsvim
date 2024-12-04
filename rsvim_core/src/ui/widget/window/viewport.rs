@@ -1,19 +1,14 @@
 //! Buffer viewport on a window.
 
 use crate::buf::BufferWk;
-use crate::cart::{U16Pos, U16Rect, U16Size, URect};
+use crate::cart::U16Rect;
 use crate::envar;
 use crate::rlock;
-use crate::ui::canvas::Cell;
-use crate::ui::tree::internal::Inodeable;
-use crate::ui::widget::window::{ViewportOptions, Window};
+use crate::ui::widget::window::ViewportOptions;
 
-use anyhow;
-use geo::point;
 use ropey::RopeSlice;
-use std::collections::{BTreeMap, HashMap};
-use swc_ecma_transforms_base::perf::Items;
-use tracing::debug;
+use std::collections::BTreeMap;
+// use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Copy, Clone)]
@@ -403,6 +398,7 @@ fn slice2line(s: &RopeSlice) -> String {
   builder
 }
 
+#[allow(unused_variables)]
 // Implement [`_sync_from_top_left`] with option `wrap=false`.
 fn _sync_from_top_left_nowrap(
   _options: &ViewportOptions,
@@ -416,23 +412,25 @@ fn _sync_from_top_left_nowrap(
 
   debug_assert!(height > 0);
   debug_assert!(width > 0);
-  debug!(
-    "_collect_from_top_left_with_nowrap, actual_shape:{:?}, height/width:{:?}/{:?}",
-    actual_shape, height, width
-  );
+  // trace!(
+  //   "_collect_from_top_left_with_nowrap, actual_shape:{:?}, height/width:{:?}/{:?}",
+  //   actual_shape,
+  //   height,
+  //   width
+  // );
 
   // Get buffer arc pointer, and lock for read.
   let buffer = buffer.upgrade().unwrap();
   let buffer = rlock!(buffer);
 
-  debug!(
-    "buffer.get_line ({:?}):{:?}",
-    start_line,
-    match buffer.get_line(start_line) {
-      Some(line) => slice2line(&line),
-      None => "None".to_string(),
-    }
-  );
+  // trace!(
+  //   "buffer.get_line ({:?}):{:?}",
+  //   start_line,
+  //   match buffer.get_line(start_line) {
+  //     Some(line) => slice2line(&line),
+  //     None => "None".to_string(),
+  //   }
+  // );
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
   // let mut max_bcolumn = start_bcolumn;
@@ -450,12 +448,12 @@ fn _sync_from_top_left_nowrap(
           break;
         }
 
-        debug!(
-          "0-l:{:?}, line:'{:?}', current_line:{:?}",
-          l,
-          slice2line(&line),
-          current_line
-        );
+        // trace!(
+        //   "0-l:{:?}, line:'{:?}', current_line:{:?}",
+        //   l,
+        //   slice2line(&line),
+        //   current_line
+        // );
 
         let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
         let mut wcol = 0_u16;
@@ -481,10 +479,10 @@ fn _sync_from_top_left_nowrap(
             bcol += c_width;
             end_bcol = bcol;
             end_c_idx = i;
-            debug!(
-              "1-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
-              wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
-            );
+            // trace!(
+            //   "1-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
+            //   wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
+            // );
             continue;
           }
 
@@ -493,29 +491,29 @@ fn _sync_from_top_left_nowrap(
             start_bcol = bcol;
             start_c_idx = i;
             start_fills = bcol - start_bcolumn;
-            debug!(
-              "2-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
-              wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
-            );
+            // trace!(
+            //   "2-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
+            //   wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
+            // );
           }
 
           // Row column with next char will go out of the row.
           if wcol as usize + c_width > width as usize {
             end_fills = width as usize - wcol as usize;
-            debug!(
-              "4-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-              wrow,
-              wcol,
-              c,
-              c_width,
-              bcol,
-              start_bcol,
-              end_bcol,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills
-            );
+            // trace!(
+            //   "4-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+            //   wrow,
+            //   wcol,
+            //   c,
+            //   c_width,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills
+            // );
             rows.insert(
               wrow,
               LineViewportRow {
@@ -532,37 +530,37 @@ fn _sync_from_top_left_nowrap(
           end_bcol = bcol;
           end_c_idx = i + 1;
           wcol += c_width as u16;
-          debug!(
-            "5-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-            wrow,
-            wcol,
-            c,
-            c_width,
-            bcol,
-            start_bcol,
-            end_bcol,
-            start_c_idx,
-            end_c_idx,
-            start_fills,
-            end_fills
-          );
+          // trace!(
+          //   "5-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+          //   wrow,
+          //   wcol,
+          //   c,
+          //   c_width,
+          //   bcol,
+          //   start_bcol,
+          //   end_bcol,
+          //   start_c_idx,
+          //   end_c_idx,
+          //   start_fills,
+          //   end_fills
+          // );
 
           // End of the line.
           if i + 1 == line.len_chars() {
-            debug!(
-              "6-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-              wrow,
-              wcol,
-              c,
-              c_width,
-              bcol,
-              start_bcol,
-              end_bcol,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills
-            );
+            // trace!(
+            //   "6-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+            //   wrow,
+            //   wcol,
+            //   c,
+            //   c_width,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills
+            // );
             rows.insert(
               wrow,
               LineViewportRow {
@@ -577,20 +575,20 @@ fn _sync_from_top_left_nowrap(
 
           // Row column goes out of the row.
           if wcol >= width {
-            debug!(
-              "7-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-              wrow,
-              wcol,
-              c,
-              c_width,
-              bcol,
-              start_bcol,
-              end_bcol,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills
-            );
+            // trace!(
+            //   "7-wrow/wcol:{}/{}, c:{:?}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+            //   wrow,
+            //   wcol,
+            //   c,
+            //   c_width,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills
+            // );
             rows.insert(
               wrow,
               LineViewportRow {
@@ -612,25 +610,25 @@ fn _sync_from_top_left_nowrap(
             end_filled_columns: end_fills,
           },
         );
-        debug!(
-          "8-current_line:{}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-          current_line,
-          wrow,
-          wcol,
-          bcol,
-          start_bcol,
-          end_bcol,
-          start_c_idx,
-          end_c_idx,
-          start_fills,
-          end_fills
-        );
+        // trace!(
+        //   "8-current_line:{}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+        //   current_line,
+        //   wrow,
+        //   wcol,
+        //   bcol,
+        //   start_bcol,
+        //   end_bcol,
+        //   start_c_idx,
+        //   end_c_idx,
+        //   start_fills,
+        //   end_fills
+        // );
         // Go to next row and line
         current_line += 1;
         wrow += 1;
       }
 
-      debug!("9-current_line:{}, row:{}", current_line, wrow,);
+      // trace!("9-current_line:{}, row:{}", current_line, wrow,);
       (
         ViewportRect {
           start_line,
@@ -643,12 +641,13 @@ fn _sync_from_top_left_nowrap(
     }
     None => {
       // The `start_line` is outside of the buffer.
-      debug!("10-start_line:{}", start_line);
+      // trace!("10-start_line:{}", start_line);
       (ViewportRect::default(), BTreeMap::new())
     }
   }
 }
 
+#[allow(unused_variables)]
 // Implement [`_sync_from_top_left`] with option `wrap=true` and `line-break=false`.
 fn _sync_from_top_left_wrap_nolinebreak(
   _options: &ViewportOptions,
@@ -662,23 +661,25 @@ fn _sync_from_top_left_wrap_nolinebreak(
 
   debug_assert!(height > 0);
   debug_assert!(width > 0);
-  debug!(
-    "_collect_from_top_left_with_wrap_nolinebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
-    actual_shape, height, width
-  );
+  // trace!(
+  //   "_collect_from_top_left_with_wrap_nolinebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
+  //   actual_shape,
+  //   height,
+  //   width
+  // );
 
   // Get buffer arc pointer, and lock for read.
   let buffer = buffer.upgrade().unwrap();
   let buffer = rlock!(buffer);
 
-  debug!(
-    "buffer.get_line ({:?}):'{:?}'",
-    start_line,
-    match buffer.get_line(start_line) {
-      Some(line) => slice2line(&line),
-      None => "None".to_string(),
-    }
-  );
+  // trace!(
+  //   "buffer.get_line ({:?}):'{:?}'",
+  //   start_line,
+  //   match buffer.get_line(start_line) {
+  //     Some(line) => slice2line(&line),
+  //     None => "None".to_string(),
+  //   }
+  // );
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
@@ -696,12 +697,12 @@ fn _sync_from_top_left_wrap_nolinebreak(
           break;
         }
 
-        debug!(
-          "0-l:{:?}, line:'{:?}', current_line:{:?}",
-          l,
-          slice2line(&line),
-          current_line
-        );
+        // trace!(
+        //   "0-l:{:?}, line:'{:?}', current_line:{:?}",
+        //   l,
+        //   slice2line(&line),
+        //   current_line
+        // );
 
         let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
         let mut wcol = 0_u16;
@@ -726,10 +727,10 @@ fn _sync_from_top_left_wrap_nolinebreak(
             bcol += c_width;
             end_bcol = bcol;
             end_c_idx = i;
-            debug!(
-              "1-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
-              wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
-            );
+            // trace!(
+            //   "1-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_bcolumn:{}",
+            //   wrow, wcol, c, c_width, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills, start_bcolumn
+            // );
             continue;
           }
 
@@ -738,39 +739,39 @@ fn _sync_from_top_left_wrap_nolinebreak(
             start_bcol = bcol;
             start_c_idx = i;
             start_fills = bcol - start_bcolumn;
-            debug!(
-              "2-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-              wrow,
-              wcol,
-              c,
-              c_width,
-              bcol,
-              start_bcol,
-              end_bcol,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills,
-            );
+            // trace!(
+            //   "2-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+            //   wrow,
+            //   wcol,
+            //   c,
+            //   c_width,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills,
+            // );
           }
 
           // Column with next char will goes out of the row.
           if wcol as usize + c_width > width as usize {
-            debug!(
-              "3-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
-              wrow,
-              wcol,
-              c,
-              c_width,
-              bcol,
-              start_bcol,
-              end_bcol,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills,
-              width
-            );
+            // trace!(
+            //   "3-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
+            //   wrow,
+            //   wcol,
+            //   c,
+            //   c_width,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills,
+            //   width
+            // );
             rows.insert(
               wrow,
               LineViewportRow {
@@ -787,21 +788,21 @@ fn _sync_from_top_left_wrap_nolinebreak(
             start_c_idx = end_c_idx;
             if wrow >= height {
               end_fills = saved_end_fills;
-              debug!(
-                "4-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
-                wrow,
-                wcol,
-                c,
-                c_width,
-                bcol,
-                start_bcol,
-                end_bcol,
-                start_c_idx,
-                end_c_idx,
-                start_fills,
-                end_fills,
-                height
-              );
+              // trace!(
+              //   "4-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
+              //   wrow,
+              //   wcol,
+              //   c,
+              //   c_width,
+              //   bcol,
+              //   start_bcol,
+              //   end_bcol,
+              //   start_c_idx,
+              //   end_c_idx,
+              //   start_fills,
+              //   end_fills,
+              //   height
+              // );
               break;
             }
           }
@@ -811,37 +812,37 @@ fn _sync_from_top_left_wrap_nolinebreak(
           end_c_idx = i + 1;
           wcol += c_width as u16;
 
-          debug!(
-            "5-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-            wrow,
-            wcol,
-            c,
-            c_width,
-            bcol,
-            start_bcol,
-            end_bcol,
-            start_c_idx,
-            end_c_idx,
-            start_fills,
-            end_fills
-          );
+          // trace!(
+          //   "5-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+          //   wrow,
+          //   wcol,
+          //   c,
+          //   c_width,
+          //   bcol,
+          //   start_bcol,
+          //   end_bcol,
+          //   start_c_idx,
+          //   end_c_idx,
+          //   start_fills,
+          //   end_fills
+          // );
 
           // End of the line.
           if i + 1 == line.len_chars() {
-            debug!(
-              "6-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-              wrow,
-              wcol,
-              c,
-              c_width,
-              bcol,
-              start_bcol,
-              end_bcol,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills
-            );
+            // trace!(
+            //   "6-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+            //   wrow,
+            //   wcol,
+            //   c,
+            //   c_width,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills
+            // );
             rows.insert(
               wrow,
               LineViewportRow {
@@ -856,21 +857,21 @@ fn _sync_from_top_left_wrap_nolinebreak(
 
           // Column goes out of current row.
           if wcol >= width {
-            debug!(
-              "7-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
-              wrow,
-              wcol,
-              c,
-              c_width,
-              bcol,
-              start_bcol,
-              end_bcol,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills,
-              width
-            );
+            // trace!(
+            //   "7-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
+            //   wrow,
+            //   wcol,
+            //   c,
+            //   c_width,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills,
+            //   width
+            // );
             rows.insert(
               wrow,
               LineViewportRow {
@@ -886,21 +887,21 @@ fn _sync_from_top_left_wrap_nolinebreak(
             start_bcol = end_bcol;
             start_c_idx = end_c_idx;
             if wrow >= height {
-              debug!(
-                "8-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
-                wrow,
-                wcol,
-                c,
-                c_width,
-                bcol,
-                start_bcol,
-                end_bcol,
-                start_c_idx,
-                end_c_idx,
-                start_fills,
-                end_fills,
-                height
-              );
+              // trace!(
+              //   "8-wrow/wcol:{}/{}, c:{}/{:?}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
+              //   wrow,
+              //   wcol,
+              //   c,
+              //   c_width,
+              //   bcol,
+              //   start_bcol,
+              //   end_bcol,
+              //   start_c_idx,
+              //   end_c_idx,
+              //   start_fills,
+              //   end_fills,
+              //   height
+              // );
               break;
             }
           }
@@ -914,24 +915,24 @@ fn _sync_from_top_left_wrap_nolinebreak(
             end_filled_columns: end_fills,
           },
         );
-        debug!(
-          "9-current_line:{}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-          current_line,
-          wrow,
-          wcol,
-          bcol,
-          start_bcol,
-          end_bcol,
-          start_c_idx,
-          end_c_idx,
-          start_fills,
-          end_fills
-        );
+        // trace!(
+        //   "9-current_line:{}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+        //   current_line,
+        //   wrow,
+        //   wcol,
+        //   bcol,
+        //   start_bcol,
+        //   end_bcol,
+        //   start_c_idx,
+        //   end_c_idx,
+        //   start_fills,
+        //   end_fills
+        // );
         current_line += 1;
         wrow += 1;
       }
 
-      debug!("10-current_line:{}, wrow:{}", current_line, wrow);
+      // trace!("10-current_line:{}, wrow:{}", current_line, wrow);
       (
         ViewportRect {
           start_line,
@@ -942,7 +943,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
     }
     None => {
       // The `start_line` is outside of the buffer.
-      debug!("11-start_line:{}", start_line);
+      // trace!("11-start_line:{}", start_line);
       (ViewportRect::default(), BTreeMap::new())
     }
   }
@@ -963,6 +964,7 @@ fn truncate_line(line: &RopeSlice, start_column: usize, max_bytes: usize) -> Str
   builder
 }
 
+#[allow(unused_variables)]
 // Implement [`_sync_from_top_left`] with option `wrap=true` and `line-break=true`.
 fn _sync_from_top_left_wrap_linebreak(
   _options: &ViewportOptions,
@@ -974,23 +976,25 @@ fn _sync_from_top_left_wrap_linebreak(
   let height = actual_shape.height();
   let width = actual_shape.width();
 
-  debug!(
-    "_collect_from_top_left_with_wrap_linebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
-    actual_shape, height, width
-  );
+  // trace!(
+  //   "_collect_from_top_left_with_wrap_linebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
+  //   actual_shape,
+  //   height,
+  //   width
+  // );
 
   // Get buffer arc pointer, and lock for read.
   let buffer = buffer.upgrade().unwrap();
   let buffer = rlock!(buffer);
 
-  debug!(
-    "buffer.get_line ({:?}):'{:?}'",
-    start_line,
-    match buffer.get_line(start_line) {
-      Some(line) => slice2line(&line),
-      None => "None".to_string(),
-    }
-  );
+  // trace!(
+  //   "buffer.get_line ({:?}):'{:?}'",
+  //   start_line,
+  //   match buffer.get_line(start_line) {
+  //     Some(line) => slice2line(&line),
+  //     None => "None".to_string(),
+  //   }
+  // );
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
   // let mut max_column = start_bcolumn;
@@ -1035,10 +1039,10 @@ fn _sync_from_top_left_wrap_linebreak(
           height as usize * width as usize * 2 + height as usize * 2 + 16,
         );
         let word_boundaries: Vec<&str> = truncated_line.split_word_bounds().collect();
-        debug!(
-          "0-truncated_line: {:?}, word_boundaries: {:?}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-          truncated_line, word_boundaries, wrow, wcol, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills
-        );
+        // trace!(
+        //   "0-truncated_line: {:?}, word_boundaries: {:?}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
+        //   truncated_line, word_boundaries, wrow, wcol, bcol, start_bcol, end_bcol, start_c_idx, end_c_idx, start_fills, end_fills
+        // );
 
         for (i, wd) in word_boundaries.iter().enumerate() {
           let (wd_chars, wd_width) = wd.chars().map(|c| (1_usize, buffer.char_width(c))).fold(
@@ -1046,14 +1050,14 @@ fn _sync_from_top_left_wrap_linebreak(
             |(init_chars, init_width), (count, width)| (init_chars + count, init_width + width),
           );
 
-          debug!(
-            "1-l:{:?}, line:'{:?}', current_line:{:?}, i:{}, wd:{:?}",
-            l,
-            slice2line(&line),
-            current_line,
-            i,
-            wd
-          );
+          // trace!(
+          //   "1-l:{:?}, line:'{:?}', current_line:{:?}, i:{}, wd:{:?}",
+          //   l,
+          //   slice2line(&line),
+          //   current_line,
+          //   i,
+          //   wd
+          // );
 
           // Prefix width is still before `start_bcolumn`.
           if bcol + wd_width < start_bcolumn {
@@ -1061,22 +1065,22 @@ fn _sync_from_top_left_wrap_linebreak(
             bchars += wd_chars;
             end_bcol = bcol;
             end_c_idx = bchars;
-            debug!(
-              "2-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, start_bcolumn:{}",
-              wrow,
-              wcol,
-              bcol,
-              start_bcol,
-              end_bcol,
-              bchars,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills,
-              wd_chars,
-              wd_width,
-              start_bcolumn
-            );
+            // trace!(
+            //   "2-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, start_bcolumn:{}",
+            //   wrow,
+            //   wcol,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   bchars,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills,
+            //   wd_chars,
+            //   wd_width,
+            //   start_bcolumn
+            // );
             continue;
           }
 
@@ -1085,21 +1089,21 @@ fn _sync_from_top_left_wrap_linebreak(
             start_bcol = bcol;
             start_c_idx = bchars;
             start_fills = bcol - start_bcolumn;
-            debug!(
-              "3-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
-              wrow,
-              wcol,
-              bcol,
-              start_bcol,
-              end_bcol,
-              bchars,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills,
-              wd_chars,
-              wd_width
-            );
+            // trace!(
+            //   "3-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
+            //   wrow,
+            //   wcol,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   bchars,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills,
+            //   wd_chars,
+            //   wd_width
+            // );
           }
 
           // Row column with next char will goes out of the row, i.e. there's not enough space to
@@ -1113,22 +1117,22 @@ fn _sync_from_top_left_wrap_linebreak(
           // long to place in an entire row, it fallbacks back to the same behavior with
           // 'line-break' option is `false`.
           if wcol as usize + wd_width > width as usize {
-            debug!(
-              "4.1-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
-              wrow,
-              wcol,
-              bcol,
-              start_bcol,
-              end_bcol,
-              bchars,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills,
-              wd_chars,
-              wd_width,
-              width
-            );
+            // trace!(
+            //   "4.1-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+            //   wrow,
+            //   wcol,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   bchars,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills,
+            //   wd_chars,
+            //   wd_width,
+            //   width
+            // );
 
             // If if happens this word starts from the beginning of the row, then we don't need to
             // start from the next row. Because this is an empty of entire row.
@@ -1167,23 +1171,23 @@ fn _sync_from_top_left_wrap_linebreak(
                     break;
                   }
                 }
-                debug!(
-                "4.2-wrow/wcol/tmp_wcol:{}/{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
-                wrow,
-                wcol,
-                tmp_wcol,
-                bcol,
-                start_bcol,
-                end_bcol,
-                bchars,
-                start_c_idx,
-                end_c_idx,
-                start_fills,
-                end_fills,
-                wd_chars,
-                wd_width,
-                width
-              );
+                //   trace!(
+                //   "4.2-wrow/wcol/tmp_wcol:{}/{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+                //   wrow,
+                //   wcol,
+                //   tmp_wcol,
+                //   bcol,
+                //   start_bcol,
+                //   end_bcol,
+                //   bchars,
+                //   start_c_idx,
+                //   end_c_idx,
+                //   start_fills,
+                //   end_fills,
+                //   wd_chars,
+                //   wd_width,
+                //   width
+                // );
                 width - tmp_wcol
               };
 
@@ -1194,22 +1198,22 @@ fn _sync_from_top_left_wrap_linebreak(
 
               if wrow >= height {
                 end_fills = saved_end_fills as usize;
-                debug!(
-                "5-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
-                wrow,
-                wcol,
-                bcol,
-                start_bcol,
-                end_bcol,
-                bchars,
-                start_c_idx,
-                end_c_idx,
-                start_fills,
-                end_fills,
-                wd_chars,
-                wd_width,
-                height
-              );
+                //   trace!(
+                //   "5-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
+                //   wrow,
+                //   wcol,
+                //   bcol,
+                //   start_bcol,
+                //   end_bcol,
+                //   bchars,
+                //   start_c_idx,
+                //   end_c_idx,
+                //   start_fills,
+                //   end_fills,
+                //   wd_chars,
+                //   wd_width,
+                //   height
+                // );
                 break;
               }
             }
@@ -1219,24 +1223,24 @@ fn _sync_from_top_left_wrap_linebreak(
 
               // Column with next char will goes out of the row.
               if wcol as usize + c_width > width as usize {
-                debug!(
-                  "6-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
-                  wrow,
-                  wcol,
-                  bcol,
-                  start_bcol,
-                  end_bcol,
-                  bchars,
-                  j,
-                  c,
-                  start_c_idx,
-                  end_c_idx,
-                  start_fills,
-                  end_fills,
-                  wd_chars,
-                  wd_width,
-                  width
-                );
+                // trace!(
+                //   "6-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+                //   wrow,
+                //   wcol,
+                //   bcol,
+                //   start_bcol,
+                //   end_bcol,
+                //   bchars,
+                //   j,
+                //   c,
+                //   start_c_idx,
+                //   end_c_idx,
+                //   start_fills,
+                //   end_fills,
+                //   wd_chars,
+                //   wd_width,
+                //   width
+                // );
                 rows.insert(
                   wrow,
                   LineViewportRow {
@@ -1257,24 +1261,24 @@ fn _sync_from_top_left_wrap_linebreak(
 
                 if wrow >= height {
                   end_fills = saved_end_fills;
-                  debug!(
-                    "7-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
-                    wrow,
-                    wcol,
-                    bcol,
-                    start_bcol,
-                    end_bcol,
-                    bchars,
-                    j,
-                    c,
-                    start_c_idx,
-                    end_c_idx,
-                    start_fills,
-                    end_fills,
-                    wd_chars,
-                    wd_width,
-                    height
-                  );
+                  // trace!(
+                  //   "7-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
+                  //   wrow,
+                  //   wcol,
+                  //   bcol,
+                  //   start_bcol,
+                  //   end_bcol,
+                  //   bchars,
+                  //   j,
+                  //   c,
+                  //   start_c_idx,
+                  //   end_c_idx,
+                  //   start_fills,
+                  //   end_fills,
+                  //   wd_chars,
+                  //   wd_width,
+                  //   height
+                  // );
                   break;
                 }
               }
@@ -1285,44 +1289,44 @@ fn _sync_from_top_left_wrap_linebreak(
               end_c_idx = bchars;
               wcol += c_width as u16;
 
-              debug!(
-                "8-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
-                wrow,
-                wcol,
-                bcol,
-                start_bcol,
-                end_bcol,
-                bchars,
-                j,
-                c,
-                start_c_idx,
-                end_c_idx,
-                start_fills,
-                end_fills,
-                wd_chars,
-                wd_width
-              );
+              // trace!(
+              //   "8-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
+              //   wrow,
+              //   wcol,
+              //   bcol,
+              //   start_bcol,
+              //   end_bcol,
+              //   bchars,
+              //   j,
+              //   c,
+              //   start_c_idx,
+              //   end_c_idx,
+              //   start_fills,
+              //   end_fills,
+              //   wd_chars,
+              //   wd_width
+              // );
 
               // Column goes out of current row.
               if wcol >= width {
-                debug!(
-                  "9-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
-                  wrow,
-                  wcol,
-                  bcol,
-                  start_bcol,
-                  end_bcol,
-                  bchars,
-                  j,
-                  c,
-                  start_c_idx,
-                  end_c_idx,
-                  start_fills,
-                  end_fills,
-                  wd_chars,
-                  wd_width,
-                  width
-                );
+                // trace!(
+                //   "9-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+                //   wrow,
+                //   wcol,
+                //   bcol,
+                //   start_bcol,
+                //   end_bcol,
+                //   bchars,
+                //   j,
+                //   c,
+                //   start_c_idx,
+                //   end_c_idx,
+                //   start_fills,
+                //   end_fills,
+                //   wd_chars,
+                //   wd_width,
+                //   width
+                // );
                 rows.insert(
                   wrow,
                   LineViewportRow {
@@ -1339,24 +1343,24 @@ fn _sync_from_top_left_wrap_linebreak(
                 start_c_idx = end_c_idx;
 
                 if wrow >= height {
-                  debug!(
-                    "10-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
-                    wrow,
-                    wcol,
-                    bcol,
-                    start_bcol,
-                    end_bcol,
-                    bchars,
-                    j,
-                    c,
-                    start_c_idx,
-                    end_c_idx,
-                    start_fills,
-                    end_fills,
-                    wd_chars,
-                    wd_width,
-                    height
-                  );
+                  // trace!(
+                  //   "10-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
+                  //   wrow,
+                  //   wcol,
+                  //   bcol,
+                  //   start_bcol,
+                  //   end_bcol,
+                  //   bchars,
+                  //   j,
+                  //   c,
+                  //   start_c_idx,
+                  //   end_c_idx,
+                  //   start_fills,
+                  //   end_fills,
+                  //   wd_chars,
+                  //   wd_width,
+                  //   height
+                  // );
                   break;
                 }
               }
@@ -1372,39 +1376,39 @@ fn _sync_from_top_left_wrap_linebreak(
             wcol += wd_width as u16;
           }
 
-          debug!(
-            "9-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
-            wrow,
-            wcol,
-            bcol,
-            start_bcol,
-            end_bcol,
-            bchars,
-            start_c_idx,
-            end_c_idx,
-            start_fills,
-            end_fills,
-            wd_chars,
-            wd_width
-          );
+          // trace!(
+          //   "9-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
+          //   wrow,
+          //   wcol,
+          //   bcol,
+          //   start_bcol,
+          //   end_bcol,
+          //   bchars,
+          //   start_c_idx,
+          //   end_c_idx,
+          //   start_fills,
+          //   end_fills,
+          //   wd_chars,
+          //   wd_width
+          // );
 
           // End of the line.
           if i + 1 == word_boundaries.len() {
-            debug!(
-              "10-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
-              wrow,
-              wcol,
-              bcol,
-              start_bcol,
-              end_bcol,
-              bchars,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills,
-              wd_chars,
-              wd_width
-            );
+            // trace!(
+            //   "10-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
+            //   wrow,
+            //   wcol,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   bchars,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills,
+            //   wd_chars,
+            //   wd_width
+            // );
             rows.insert(
               wrow,
               LineViewportRow {
@@ -1419,22 +1423,22 @@ fn _sync_from_top_left_wrap_linebreak(
 
           // Column goes out of current row.
           if wcol >= width {
-            debug!(
-              "11-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
-              wrow,
-              wcol,
-              bcol,
-              start_bcol,
-              end_bcol,
-              bchars,
-              start_c_idx,
-              end_c_idx,
-              start_fills,
-              end_fills,
-              wd_chars,
-              wd_width,
-              width
-            );
+            // trace!(
+            //   "11-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, width:{}",
+            //   wrow,
+            //   wcol,
+            //   bcol,
+            //   start_bcol,
+            //   end_bcol,
+            //   bchars,
+            //   start_c_idx,
+            //   end_c_idx,
+            //   start_fills,
+            //   end_fills,
+            //   wd_chars,
+            //   wd_width,
+            //   width
+            // );
             rows.insert(
               wrow,
               LineViewportRow {
@@ -1451,22 +1455,22 @@ fn _sync_from_top_left_wrap_linebreak(
             start_c_idx = end_c_idx;
 
             if wrow >= height {
-              debug!(
-                "12-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
-                wrow,
-                wcol,
-                bcol,
-                start_bcol,
-                end_bcol,
-                bchars,
-                start_c_idx,
-                end_c_idx,
-                start_fills,
-                end_fills,
-                wd_chars,
-                wd_width,
-                height
-              );
+              // trace!(
+              //   "12-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}, height:{}",
+              //   wrow,
+              //   wcol,
+              //   bcol,
+              //   start_bcol,
+              //   end_bcol,
+              //   bchars,
+              //   start_c_idx,
+              //   end_c_idx,
+              //   start_fills,
+              //   end_fills,
+              //   wd_chars,
+              //   wd_width,
+              //   height
+              // );
               break;
             }
           }
@@ -1480,24 +1484,24 @@ fn _sync_from_top_left_wrap_linebreak(
             end_filled_columns: end_fills,
           },
         );
-        debug!(
-          "13-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}",
-          wrow,
-          wcol,
-          bcol,
-          start_bcol,
-          end_bcol,
-          bchars,
-          start_c_idx,
-          end_c_idx,
-          start_fills,
-          end_fills
-        );
+        // trace!(
+        //   "13-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}",
+        //   wrow,
+        //   wcol,
+        //   bcol,
+        //   start_bcol,
+        //   end_bcol,
+        //   bchars,
+        //   start_c_idx,
+        //   end_c_idx,
+        //   start_fills,
+        //   end_fills
+        // );
         current_line += 1;
         wrow += 1;
       }
 
-      debug!("14-wrow:{}, current_line:{}", wrow, current_line);
+      // trace!("14-wrow:{}, current_line:{}", wrow, current_line);
       (
         ViewportRect {
           start_line,
@@ -1510,7 +1514,7 @@ fn _sync_from_top_left_wrap_linebreak(
     }
     None => {
       // The `start_line` is outside of the buffer.
-      debug!("15-start_line:{}", start_line);
+      // trace!("15-start_line:{}", start_line);
       (ViewportRect::default(), BTreeMap::new())
     }
   }
@@ -1595,17 +1599,20 @@ impl Viewport {
   }
 }
 
+#[allow(unused_imports)]
 #[cfg(test)]
 mod tests {
   use super::*;
 
   use crate::buf::BufferArc;
   use crate::cart::{IRect, U16Size};
+  use crate::rlock;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
+  use crate::ui::tree::internal::Inodeable;
   use crate::ui::tree::Tree;
-  use crate::ui::widget::window::WindowLocalOptions;
+  use crate::ui::widget::window::{Window, WindowLocalOptions};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -1624,11 +1631,7 @@ mod tests {
     tree.set_local_options(window_options);
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
     let window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
-    let options = ViewportOptions {
-      wrap: window.options().wrap(),
-      line_break: window.options().line_break(),
-    };
-    Viewport::new(&options, window.buffer(), window.actual_shape())
+    rlock!(window.viewport()).clone()
   }
 
   #[allow(clippy::too_many_arguments)]
