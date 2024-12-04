@@ -4,8 +4,8 @@ use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::js::JsRuntime;
 use crate::res::AnyResult;
 
+use ahash::AHashMap as HashMap;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::collections::LinkedList;
 use std::rc::Rc;
 use std::sync::OnceLock;

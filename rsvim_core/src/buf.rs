@@ -7,13 +7,14 @@ use crate::res::IoResult;
 // Re-export
 pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 
+use ahash::AHashMap as HashMap;
 use ascii::AsciiChar;
 use compact_str::CompactString;
 use parking_lot::RwLock;
 use path_absolutize::Absolutize;
 use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
-use std::collections::{BTreeMap, HashMap};
+use std::collections::BTreeMap;
 use std::convert::From;
 use std::fs::Metadata;
 use std::io::Read;

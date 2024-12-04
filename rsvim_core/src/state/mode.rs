@@ -1,6 +1,6 @@
 //! Vim editing mode.
 
-use std::collections::HashSet;
+use ahash::AHashSet as HashSet;
 use std::fmt::Display;
 use std::str::FromStr;
 

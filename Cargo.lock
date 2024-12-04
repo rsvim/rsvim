@@ -1601,6 +1601,7 @@ dependencies = [
 name = "rsvim_core"
 version = "0.1.1-alpha.8"
 dependencies = [
+ "ahash",
  "anyhow",
  "ascii",
  "assert_fs",

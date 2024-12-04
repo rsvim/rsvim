@@ -14,10 +14,10 @@ use crate::res::AnyErr;
 use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
+use ahash::{AHashMap as HashMap, AHashSet as HashSet};
 use once_cell::sync::Lazy;
 use parking_lot::RwLock;
 use std::cell::RefCell;
-use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
