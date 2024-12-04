@@ -230,6 +230,8 @@ mod tests {
   use crate::cart::U16Size;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
+  use crate::ui::tree::Tree;
+  use crate::ui::widget::window::{ViewportOptions, WindowLocalOptions};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
