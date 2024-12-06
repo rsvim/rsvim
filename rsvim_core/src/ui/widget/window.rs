@@ -16,9 +16,10 @@ use crate::wlock;
 pub use crate::ui::widget::window::opt::{
   ViewportOptions, WindowLocalOptions, WindowOptionsBuilder,
 };
-pub use crate::ui::widget::window::viewport::{LineViewport, LineViewportRow, Viewport};
+pub use crate::ui::widget::window::viewport::{
+  LineViewport, LineViewportRow, Viewport, ViewportArc,
+};
 
-use parking_lot::RwLock;
 use std::convert::From;
 use std::sync::Arc;
 // use tracing::trace;
@@ -49,7 +50,7 @@ pub struct Window {
   tree_ref: SafeTreeRef,
 
   // Viewport.
-  viewport: Arc<RwLock<Viewport>>,
+  viewport: ViewportArc,
 }
 
 impl Window {
@@ -66,7 +67,7 @@ impl Window {
       line_break: options.line_break(),
     };
     let viewport = Viewport::new(&viewport_options, buffer.clone(), &window_root_actual_shape);
-    let viewport = Arc::new(RwLock::new(viewport));
+    let viewport = Viewport::to_arc(viewport);
 
     let mut base = Itree::new(window_root_node);
     let root_id = base.root_id();
@@ -210,7 +211,7 @@ impl Window {
   }
 
   /// Get viewport.
-  pub fn viewport(&self) -> Arc<RwLock<Viewport>> {
+  pub fn viewport(&self) -> ViewportArc {
     self.viewport.clone()
   }
 
