@@ -5,14 +5,12 @@ use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::envar;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
-use crate::ui::widget::window::viewport::Viewport;
+use crate::ui::widget::window::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
 use crate::{inode_generate_impl, rlock};
 
 use geo::point;
-use parking_lot::RwLock;
 use std::convert::From;
-use std::sync::Weak;
 use tracing::trace;
 
 #[derive(Debug, Clone)]
@@ -24,12 +22,12 @@ pub struct WindowContent {
   buffer: BufferWk,
 
   // Viewport.
-  viewport: Weak<RwLock<Viewport>>,
+  viewport: ViewportWk,
 }
 
 impl WindowContent {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk, viewport: Weak<RwLock<Viewport>>) -> Self {
+  pub fn new(shape: IRect, buffer: BufferWk, viewport: ViewportWk) -> Self {
     let base = InodeBase::new(shape);
     WindowContent {
       base,
@@ -261,7 +259,7 @@ mod tests {
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let viewport_options = ViewportOptions::from(&window_options);
     let viewport = Viewport::new(&viewport_options, Arc::downgrade(&buffer), &actual_shape);
-    let viewport = Arc::new(RwLock::new(viewport));
+    let viewport = Viewport::to_arc(viewport);
     let shape = IRect::new(
       (0, 0),
       (

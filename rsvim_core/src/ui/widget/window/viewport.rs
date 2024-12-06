@@ -6,8 +6,10 @@ use crate::envar;
 use crate::rlock;
 use crate::ui::widget::window::ViewportOptions;
 
+use parking_lot::RwLock;
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
+use std::sync::{Arc, Weak};
 // use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -344,6 +346,9 @@ pub struct Viewport {
   // Maps from buffer line index to its displayed rows in the window.
   lines: BTreeMap<usize, LineViewport>,
 }
+
+pub type ViewportArc = Arc<RwLock<Viewport>>;
+pub type ViewportWk = Weak<RwLock<Viewport>>;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 /// Lines index inside [`Viewport`].
@@ -1535,6 +1540,11 @@ impl Viewport {
       // end_bcolumn: rectangle.end_bcolumn,
       lines,
     }
+  }
+
+  /// Convert struct to Arc pointer.
+  pub fn to_arc(v: Viewport) -> ViewportArc {
+    Arc::new(RwLock::new(v))
   }
 
   /// Get start line index in the buffer, starts from 0.
