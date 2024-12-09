@@ -30,7 +30,4 @@ generated-typedocs
 *SNAPSHOT.BIN
 
 # Tests/Benchmarks
-/rsvim_cli/tests
-/rsvim_cli/benches
-/rsvim_core/tests
-/rsvim_core/benches
+/tests_and_benchmarks
