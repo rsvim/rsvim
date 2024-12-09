@@ -28,3 +28,9 @@ generated-typedocs
 # Snapshot
 *snapshot.bin
 *SNAPSHOT.BIN
+
+# Tests/Benchmarks
+/rsvim_cli/tests
+/rsvim_cli/benches
+/rsvim_core/tests
+/rsvim_core/benches
