@@ -40,7 +40,7 @@ impl WindowContent {
 inode_generate_impl!(WindowContent, base);
 
 impl Widgetable for WindowContent {
-  fn draw(&mut self, canvas: &mut Canvas) {
+  fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let upos: U16Pos = actual_shape.min().into();
     let height = actual_shape.height();
