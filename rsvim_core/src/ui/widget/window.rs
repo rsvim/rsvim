@@ -5,8 +5,6 @@ use crate::cart::{IRect, U16Rect};
 use crate::envar;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
-use crate::ui::tree::Tree;
-use crate::ui::util::ptr::SafeTreeRef;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::ui::widget::Widgetable;
@@ -46,16 +44,13 @@ pub struct Window {
   // By default these options will inherit from global options of UI.
   options: WindowLocalOptions,
 
-  // Tree ref.
-  tree_ref: SafeTreeRef,
-
   // Viewport.
   viewport: ViewportArc,
 }
 
 impl Window {
-  pub fn new(shape: IRect, buffer: BufferWk, tree: &mut Tree) -> Self {
-    let options = tree.local_options().clone();
+  pub fn new(shape: IRect, buffer: BufferWk, local_options: &WindowLocalOptions) -> Self {
+    let options = local_options.clone();
 
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
@@ -70,7 +65,6 @@ impl Window {
     let viewport = Viewport::to_arc(viewport);
 
     let mut base = Itree::new(window_root_node);
-    let root_id = base.root_id();
 
     let window_content = WindowContent::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let window_content_id = window_content.id();
@@ -83,7 +77,6 @@ impl Window {
       content_id: window_content_id,
       buffer,
       options,
-      tree_ref: SafeTreeRef::new(tree, root_id),
       viewport,
     }
   }
@@ -321,6 +314,7 @@ mod tests {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
+  use crate::ui::tree::Tree;
 
   fn make_window_from_size(
     size: U16Size,
@@ -330,7 +324,7 @@ mod tests {
     let mut tree = Tree::new(size);
     tree.set_local_options(window_options);
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
-    Window::new(window_shape, Arc::downgrade(&buffer), &mut tree)
+    Window::new(window_shape, Arc::downgrade(&buffer), tree.local_options())
   }
 
   fn do_test_draw(actual: &Canvas, expect: &[&str]) {
