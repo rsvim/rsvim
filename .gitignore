@@ -28,3 +28,6 @@ generated-typedocs
 # Snapshot
 *snapshot.bin
 *SNAPSHOT.BIN
+
+# Tests/Benchmarks
+/tests_and_benchmarks
