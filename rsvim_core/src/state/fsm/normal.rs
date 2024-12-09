@@ -2,13 +2,14 @@
 
 #![allow(unused_imports)]
 
-use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
-use std::time::Duration;
-
 use crate::envar;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
+use crate::wlock;
+
+use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
+use std::time::Duration;
 
 #[derive(Debug, Copy, Clone, Default)]
 /// The normal editing mode.
@@ -30,7 +31,7 @@ impl Stateful for NormalStateful {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
               // Up
-              let mut tree = tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
+              let mut tree = wlock!(tree);
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.bounded_move_up_by(cursor_id, 1);
@@ -40,7 +41,7 @@ impl Stateful for NormalStateful {
             }
             KeyCode::Down | KeyCode::Char('j') => {
               // Down
-              let mut tree = tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
+              let mut tree = wlock!(tree);
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.bounded_move_down_by(cursor_id, 1);
@@ -50,7 +51,7 @@ impl Stateful for NormalStateful {
             }
             KeyCode::Left | KeyCode::Char('h') => {
               // Left
-              let mut tree = tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
+              let mut tree = wlock!(tree);
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.bounded_move_left_by(cursor_id, 1);
@@ -60,7 +61,7 @@ impl Stateful for NormalStateful {
             }
             KeyCode::Right | KeyCode::Char('l') => {
               // Right
-              let mut tree = tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
+              let mut tree = wlock!(tree);
               match tree.cursor_id() {
                 Some(cursor_id) => {
                   tree.bounded_move_right_by(cursor_id, 1);
