@@ -1640,7 +1640,7 @@ mod tests {
     let mut tree = Tree::new(size);
     tree.set_local_options(window_options);
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
-    let window = Window::new(window_shape, Arc::downgrade(&buffer), &mut tree);
+    let window = Window::new(window_shape, Arc::downgrade(&buffer), tree.local_options());
     rlock!(window.viewport()).clone()
   }
 
