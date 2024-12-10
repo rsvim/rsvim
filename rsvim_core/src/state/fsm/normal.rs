@@ -17,11 +17,9 @@ pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    let state = data_access.state;
+    let _state = data_access.state;
     let tree = data_access.tree;
     let event = data_access.event;
-
-    state.set_mode(Mode::Normal);
 
     match event {
       Event::FocusGained => {}

@@ -337,10 +337,10 @@ impl EventLoop {
     Ok(())
   }
 
-  async fn process_event(&mut self, next_event: Option<IoResult<Event>>) {
-    match next_event {
+  async fn process_event(&mut self, event: Option<IoResult<Event>>) {
+    match event {
       Some(Ok(event)) => {
-        trace!("Polled_terminal event ok: {:?}", event);
+        trace!("Polled terminal event ok: {:?}", event);
 
         // Handle by state machine
         let state_response = self
@@ -420,8 +420,8 @@ impl EventLoop {
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
-        next_event = reader.next() => {
-          self.process_event(next_event).await;
+        event = reader.next() => {
+          self.process_event(event).await;
         }
         // Receive notification from workers
         worker_msg = self.master_recv_from_worker.recv() => {
