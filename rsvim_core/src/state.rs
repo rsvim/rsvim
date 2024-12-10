@@ -62,7 +62,13 @@ impl Default for State {
 }
 
 impl State {
-  fn update_mode(&mut self) {
+  pub fn handle(
+    &mut self,
+    tree: TreeArc,
+    buffers: BuffersManagerArc,
+    event: Event,
+  ) -> StateHandleResponse {
+    // Update current mode.
     let state_mode = match self.stateful {
       StatefulValue::NormalMode(_) => Some(Mode::Normal),
       StatefulValue::VisualMode(_) => Some(Mode::Visual),
@@ -76,15 +82,6 @@ impl State {
     if let Some(mode) = state_mode {
       self.mode = mode;
     }
-  }
-
-  pub fn handle(
-    &mut self,
-    tree: TreeArc,
-    buffers: BuffersManagerArc,
-    event: Event,
-  ) -> StateHandleResponse {
-    self.update_mode();
 
     // Current stateful
     let stateful = self.stateful;
