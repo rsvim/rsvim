@@ -5,7 +5,7 @@
 use crate::cart::{IRect, U16Rect, U16Size};
 use crate::envar;
 use crate::ui::canvas::{Canvas, CanvasArc};
-use crate::ui::tree::internal::{InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut};
+use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
