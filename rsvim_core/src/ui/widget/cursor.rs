@@ -44,7 +44,7 @@ impl Debug for Cursor {
 inode_generate_impl!(Cursor, base);
 
 impl Widgetable for Cursor {
-  fn draw(&mut self, canvas: &mut Canvas) {
+  fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();
     trace!(

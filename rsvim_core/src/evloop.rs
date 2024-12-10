@@ -337,19 +337,17 @@ impl EventLoop {
     Ok(())
   }
 
-  async fn process_event(&mut self, next_event: Option<IoResult<Event>>) {
-    match next_event {
+  async fn process_event(&mut self, event: Option<IoResult<Event>>) {
+    match event {
       Some(Ok(event)) => {
-        trace!("Polled_terminal event ok: {:?}", event);
+        trace!("Polled terminal event ok: {:?}", event);
 
         // Handle by state machine
-        let state_response = {
-          self
-            .state
-            .try_write_for(envar::MUTEX_TIMEOUT())
-            .unwrap()
-            .handle(self.tree.clone(), self.buffers.clone(), event)
-        };
+        let state_response = self
+          .state
+          .try_write_for(envar::MUTEX_TIMEOUT())
+          .unwrap()
+          .handle(self.tree.clone(), self.buffers.clone(), event);
 
         // Exit loop and quit.
         if let StatefulValue::QuitState(_) = state_response.next_stateful {
@@ -422,8 +420,8 @@ impl EventLoop {
     loop {
       tokio::select! {
         // Receive keyboard/mouse events
-        next_event = reader.next() => {
-          self.process_event(next_event).await;
+        event = reader.next() => {
+          self.process_event(event).await;
         }
         // Receive notification from workers
         worker_msg = self.master_recv_from_worker.recv() => {
@@ -452,26 +450,21 @@ impl EventLoop {
   }
 
   fn render(&mut self) -> IoResult<()> {
-    {
-      // Draw UI components to the canvas.
-      self
-        .tree
-        .try_write_for(envar::MUTEX_TIMEOUT())
-        .unwrap()
-        .draw(self.canvas.clone());
-    }
+    // Draw UI components to the canvas.
+    self
+      .tree
+      .try_write_for(envar::MUTEX_TIMEOUT())
+      .unwrap()
+      .draw(self.canvas.clone());
 
-    let shader = {
-      // Compute the commands that need to output to the terminal device.
-      self
-        .canvas
-        .try_write_for(envar::MUTEX_TIMEOUT())
-        .unwrap()
-        .shade()
-    };
+    // Compute the commands that need to output to the terminal device.
+    let shader = self
+      .canvas
+      .try_write_for(envar::MUTEX_TIMEOUT())
+      .unwrap()
+      .shade();
 
     self.queue_shader(shader)?;
-
     self.writer.flush()?;
 
     Ok(())

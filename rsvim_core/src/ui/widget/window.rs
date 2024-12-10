@@ -161,8 +161,8 @@ impl Inodeable for Window {
 }
 
 impl Widgetable for Window {
-  fn draw(&mut self, canvas: &mut Canvas) {
-    for node in self.base.iter_mut() {
+  fn draw(&self, canvas: &mut Canvas) {
+    for node in self.base.iter() {
       // trace!("Draw window:{:?}", node);
       node.draw(canvas);
     }
@@ -287,7 +287,7 @@ impl Inodeable for WindowNode {
 
 impl Widgetable for WindowNode {
   /// Draw widget on the canvas.
-  fn draw(&mut self, canvas: &mut Canvas) {
+  fn draw(&self, canvas: &mut Canvas) {
     match self {
       WindowNode::WindowRootContainer(w) => w.draw(canvas),
       WindowNode::WindowContent(w) => w.draw(canvas),
@@ -381,7 +381,7 @@ mod tests {
 
     let terminal_size = U16Size::new(10, 10);
     let window_local_options = WindowLocalOptions::builder().wrap(false).build();
-    let mut window = make_window_from_size(terminal_size, buffer.clone(), &window_local_options);
+    let window = make_window_from_size(terminal_size, buffer.clone(), &window_local_options);
     let mut actual = Canvas::new(terminal_size);
     window.draw(&mut actual);
     do_test_draw(&actual, &expect);

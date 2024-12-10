@@ -53,13 +53,36 @@ impl State {
   pub fn to_arc(s: State) -> StateArc {
     Arc::new(RwLock::new(s))
   }
+}
 
+impl Default for State {
+  fn default() -> Self {
+    State::new()
+  }
+}
+
+impl State {
   pub fn handle(
     &mut self,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     event: Event,
   ) -> StateHandleResponse {
+    // Update current mode.
+    let state_mode = match self.stateful {
+      StatefulValue::NormalMode(_) => Some(Mode::Normal),
+      StatefulValue::VisualMode(_) => Some(Mode::Visual),
+      StatefulValue::SelectMode(_) => Some(Mode::Select),
+      StatefulValue::OperatorPendingMode(_) => Some(Mode::OperatorPending),
+      StatefulValue::InsertMode(_) => Some(Mode::Insert),
+      StatefulValue::CommandLineMode(_) => Some(Mode::CommandLine),
+      StatefulValue::TerminalMode(_) => Some(Mode::Terminal),
+      _ => None,
+    };
+    if let Some(mode) = state_mode {
+      self.mode = mode;
+    }
+
     // Current stateful
     let stateful = self.stateful;
 
@@ -77,17 +100,5 @@ impl State {
 
   pub fn mode(&self) -> Mode {
     self.mode
-  }
-
-  pub fn set_mode(&mut self, mode: Mode) -> Mode {
-    let last_mod = self.mode;
-    self.mode = mode;
-    last_mod
-  }
-}
-
-impl Default for State {
-  fn default() -> Self {
-    State::new()
   }
 }

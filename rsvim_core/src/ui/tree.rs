@@ -104,7 +104,7 @@ impl Inodeable for TreeNode {
 
 impl Widgetable for TreeNode {
   /// Draw widget on the canvas.
-  fn draw(&mut self, canvas: &mut Canvas) {
+  fn draw(&self, canvas: &mut Canvas) {
     match self {
       TreeNode::RootContainer(w) => w.draw(canvas),
       TreeNode::Window(w) => w.draw(canvas),
@@ -462,9 +462,9 @@ impl Tree {
   // Draw {
 
   /// Draw the widget tree to canvas.
-  pub fn draw(&mut self, canvas: CanvasArc) {
+  pub fn draw(&self, canvas: CanvasArc) {
     let mut canvas = canvas.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
-    for node in self.base.iter_mut() {
+    for node in self.base.iter() {
       // trace!("Draw tree:{:?}", node);
       node.draw(&mut canvas);
     }
