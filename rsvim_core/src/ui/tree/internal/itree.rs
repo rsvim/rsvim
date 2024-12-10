@@ -503,8 +503,8 @@ where
   /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
   /// its parent, it simply stops moving.
   ///
-  /// NOTE: This operation also updates all descendants attributes such as
-  /// [`insert`](Itree::insert) method.
+  /// NOTE: This operation also updates all descendants attributes (same with the
+  /// [`insert`](Itree::insert) method).
   ///
   /// # Returns
   ///
