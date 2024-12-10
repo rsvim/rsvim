@@ -217,7 +217,7 @@ pub struct Tree {
   cursor_id: Option<TreeNodeId>,
 
   // All [`Window`](crate::ui::widget::Window) node IDs.
-  windows_ids: BTreeSet<TreeNodeId>,
+  window_ids: BTreeSet<TreeNodeId>,
   // Cursor and window state }
 
   // Global options for windows.
@@ -251,7 +251,7 @@ impl Tree {
     Tree {
       base: Itree::new(root_node),
       cursor_id: None,
-      windows_ids: BTreeSet::new(),
+      window_ids: BTreeSet::new(),
       global_options: WindowGlobalOptions::default(),
       local_options: WindowLocalOptions::default(),
     }
@@ -311,10 +311,41 @@ impl Tree {
   // pub fn iter_mut(&mut self) -> TreeIterMut {
   //   self.base.iter_mut()
   // }
+
+  /// Get current cursor node ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
+
+  /// Set current cursor node ID.
+  pub fn set_cursor_id(&mut self, cursor_id: Option<TreeNodeId>) {
+    self.cursor_id = cursor_id;
+  }
+
+  /// Get current window node ID.
+  /// NOTE: A window is called the current window because it has cursor inside it.
+  pub fn current_window_id(&self) -> Option<TreeNodeId> {
+    if let Some(cursor_id) = self.cursor_id {
+      let mut id = cursor_id;
+      while let Some(parent_id) = self.parent_id(&id) {
+        if let Some(TreeNode::Window(_w)) = self.node(parent_id) {
+          return Some(*parent_id);
+        }
+        id = *parent_id;
+      }
+    }
+
+    None
+  }
+
+  /// Get all the window widget IDs.
+  pub fn window_ids(&self) -> &BTreeSet<TreeNodeId> {
+    &self.window_ids
+  }
 }
 // Node {
 
-// Cursor and Window {
+// Insert/Remove {
 impl Tree {
   // This method handles some special requirements when insert a widget node:
   //
@@ -324,7 +355,7 @@ impl Tree {
     match node {
       TreeNode::Cursor(cursor) => {
         // Ensure the parent node is a window widget.
-        let parent_node = self.node(&parent_id).expect("Parent ID must exists");
+        let parent_node = self.node(parent_id).unwrap();
         match parent_node {
           TreeNode::Window(_) => { /* Skip */ }
           _ => unreachable!("Cursor widget must insert under the window widget parent"),
@@ -332,7 +363,7 @@ impl Tree {
         self.cursor_id = Some(cursor.id());
       }
       TreeNode::Window(window) => {
-        self.windows_ids.insert(window.id());
+        self.window_ids.insert(window.id());
       }
       _ => { /* Skip */ }
     }
@@ -347,7 +378,7 @@ impl Tree {
     if self.cursor_id == Some(*id) {
       self.cursor_id = None;
     }
-    self.windows_ids.remove(id);
+    self.window_ids.remove(id);
   }
 
   /// See [`Itree::insert`].
@@ -371,7 +402,11 @@ impl Tree {
     self.remove_guard(&id);
     self.base.remove(id)
   }
+}
+// Insert/Remove }
 
+// Movement {
+impl Tree {
   /// See [`Itree::bounded_move_by`].
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_by(id, x, y)
@@ -412,33 +447,8 @@ impl Tree {
   pub fn bounded_move_right_by(&mut self, id: InodeId, cols: usize) -> Option<IRect> {
     self.bounded_move_by(id, cols as isize, 0)
   }
-
-  /// Get current cursor node ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
-  /// Set current cursor node ID.
-  pub fn set_cursor_id(&mut self, cursor_id: Option<TreeNodeId>) {
-    self.cursor_id = cursor_id;
-  }
-
-  /// Get current window node ID. A window is current because the cursor is inside it.
-  pub fn current_window_id(&self) -> Option<TreeNodeId> {
-    if let Some(cursor_id) = self.cursor_id {
-      let mut id = cursor_id;
-      while let Some(parent_id) = self.parent_id(&id) {
-        if let Some(TreeNode::Window(_w)) = self.node(parent_id) {
-          return Some(*parent_id);
-        }
-        id = *parent_id;
-      }
-    }
-
-    None
-  }
 }
-// Cursor and Window }
+// Movement }
 
 // Global options {
 impl Tree {
