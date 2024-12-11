@@ -136,6 +136,7 @@ where
   }
 }
 
+// Attributes {
 impl<T> Itree<T>
 where
   T: Inodeable,
@@ -198,7 +199,14 @@ where
   pub fn iter_mut(&mut self) -> ItreeIterMut<T> {
     ItreeIterMut::new(self, Some(self.root_id))
   }
+}
+// Attributes }
 
+// Insert/Remove {
+impl<T> Itree<T>
+where
+  T: Inodeable,
+{
   /// Update the `start_id` node attributes, and all the descendants attributes of this node.
   ///
   /// Below attributes will be update:
@@ -455,7 +463,14 @@ where
       None => None,
     }
   }
+}
+// Insert/Remove }
 
+// Movement {
+impl<T> Itree<T>
+where
+  T: Inodeable,
+{
   /// Move node by `(x, y)`.
   ///
   /// * The node moves left when `x < 0`.
@@ -550,6 +565,7 @@ where
     }
   }
 }
+// Movement }
 
 #[cfg(test)]
 mod tests {
