@@ -473,7 +473,21 @@ where
 ///
 /// There're several kinds of use cases:
 ///
-/// 1. Single-side contact: The node is in contact with its parent on only 1 edge, which looks
+/// 1. No-side contact: The node is completely inside its parent without any edges contacted, which
+///    looks like:
+///
+///    ```text
+///    -----------------
+///    |               |
+///    |    --------   |
+///    |    |//////|   |
+///    |    |//////|   |
+///    |    --------   |
+///    |               |
+///    -----------------
+///    ```
+///
+/// 2. Single-side contact: The node is in contact with its parent on only 1 edge, which looks
 ///    like:
 ///
 ///    ```text
@@ -487,7 +501,7 @@ where
 ///    -----------------
 ///    ```
 ///
-/// 2. Double-sides contact: The node is in contact on 2 edges, which looks like:
+/// 3. Double-sides contact: The node is in contact on 2 edges, which looks like:
 ///
 ///    ```text
 ///    -----------------
@@ -500,7 +514,7 @@ where
 ///    -----------------
 ///    ```
 ///
-/// 3. Triple-sides contact: The node is in contact on 3 edges, which looks like:
+/// 4. Triple-sides contact: The node is in contact on 3 edges, which looks like:
 ///
 ///    ```text
 ///    -----------------
@@ -513,7 +527,7 @@ where
 ///    -----------------
 ///    ```
 ///
-/// 4. Completely overlapping: The node is in contact on 4 edges, i.e. the node is exactly the same
+/// 5. Completely overlapping: The node is in contact on 4 edges, i.e. the node is exactly the same
 ///    with (or even bigger than, and truncated by) its parent, which looks like:
 ///
 ///    ```text
@@ -528,7 +542,9 @@ where
 ///    ```
 ///
 pub enum InodeRelativeRelationship {
-  // 1-Side contact
+  /// 0-Side contact
+  Inside,
+  /// 1-Side contact
   Top,
   Bottom,
   Left,
@@ -544,7 +560,7 @@ pub enum InodeRelativeRelationship {
   LeftRightTop,
   LeftRightBottom,
   // 4-Sides contact
-  CompletelyOverlapping,
+  Overlapping,
 }
 
 impl<T> Itree<T>
@@ -654,11 +670,11 @@ where
   /// If the node doesn't have a parent inside the tree.
   pub fn at_parent_border(&self, id: InodeId) -> InodeRelativeRelationship {
     if id == self.root_id {
-      InodeRelativeRelationship::CompletelyOverlapping
+      InodeRelativeRelationship::Overlapping
     } else {
       let parent_id = self.parent_id(&id).unwrap();
       let parent = self.node(parent_id).unwrap();
-      InodeRelativeRelationship::CompletelyOverlapping
+      InodeRelativeRelationship::Overlapping
     }
   }
 }
