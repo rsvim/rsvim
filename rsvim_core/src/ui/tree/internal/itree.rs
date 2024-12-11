@@ -1,11 +1,14 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::cart::{IPos, IRect, U16Rect};
+use crate::geo_rect_as;
 use crate::ui::tree::internal::shapes;
 use crate::ui::tree::internal::{InodeId, Inodeable};
 
 use ahash::AHashMap as HashMap;
+use geo::algorithm::coordinate_position::{CoordPos, CoordinatePosition};
 use geo::point;
+use geo::GeoNum;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
@@ -468,13 +471,13 @@ where
 
 // Movement {
 
-/// The enum to describe the relative position relationship between a node and its parent node,
-/// based on the actual shape (after truncated).
+/// Describe the relative position of a node and its parent node, based on the actual shape (after
+/// truncated).
 ///
 /// There're several kinds of use cases:
 ///
-/// 1. No-side contact: The node is completely inside its parent without any edges contacted, which
-///    looks like:
+/// 1. No-edge contact (inside): The node is completely inside its parent without any edges
+///    contacted, which looks like:
 ///
 ///    ```text
 ///    -----------------
@@ -487,7 +490,7 @@ where
 ///    -----------------
 ///    ```
 ///
-/// 2. Single-side contact: The node is in contact with its parent on only 1 edge, which looks
+/// 2. Single-edge contact: The node is in contact with its parent on only 1 edge, which looks
 ///    like:
 ///
 ///    ```text
@@ -501,7 +504,7 @@ where
 ///    -----------------
 ///    ```
 ///
-/// 3. Double-sides contact: The node is in contact on 2 edges, which looks like:
+/// 3. Double-edges contact: The node is in contact on 2 edges, which looks like:
 ///
 ///    ```text
 ///    -----------------
@@ -514,7 +517,7 @@ where
 ///    -----------------
 ///    ```
 ///
-/// 4. Triple-sides contact: The node is in contact on 3 edges, which looks like:
+/// 4. Triple-edges contact: The node is in contact on 3 edges, which looks like:
 ///
 ///    ```text
 ///    -----------------
@@ -527,8 +530,8 @@ where
 ///    -----------------
 ///    ```
 ///
-/// 5. Completely overlapping: The node is in contact on 4 edges, i.e. the node is exactly the same
-///    with (or even bigger than, and truncated by) its parent, which looks like:
+/// 5. All-edges contact (overlapping): The node is in contact on 4 edges, i.e. the node is exactly
+///    the same with (or even bigger than, and truncated by) its parent, which looks like:
 ///
 ///    ```text
 ///    -----------------
@@ -541,25 +544,25 @@ where
 ///    -----------------
 ///    ```
 ///
-pub enum InodeRelativeRelationship {
-  /// 0-Side contact
+pub enum InodeRelativePosition {
+  /// 0-edge
   Inside,
-  /// 1-Side contact
+  /// 1-edge
   Top,
   Bottom,
   Left,
   Right,
-  // 2-Sides contact
+  // 2-edges
   TopLeft,
   TopRight,
   BottomLeft,
   BottomRight,
-  // 3-Sides contact
+  // 3-edges
   TopBottomLeft,
   TopBottomRight,
   LeftRightTop,
   LeftRightBottom,
-  // 4-Sides contact
+  // All-edges
   Overlapping,
 }
 
@@ -661,20 +664,43 @@ where
     }
   }
 
-  /// Get the relative relationship between a node and its parent.
+  /// Get the relative position of a node based on its parent.
   ///
-  /// It returns the relationship enum, see [`InodeRelativeRelationship`].
+  /// It returns the position enum, see [`InodeRelativePosition`].
+  ///
+  /// For root ID, since it doesn't have parent node, or say, its parent is the terminal device. So
+  /// it returns [`InodeRelativePosition::Overlapping`].
   ///
   /// # Panics
   ///
   /// If the node doesn't have a parent inside the tree.
-  pub fn at_parent_border(&self, id: InodeId) -> InodeRelativeRelationship {
+  pub fn relative_position(&self, id: InodeId) -> InodeRelativePosition {
     if id == self.root_id {
-      InodeRelativeRelationship::Overlapping
+      InodeRelativePosition::Overlapping
     } else {
       let parent_id = self.parent_id(&id).unwrap();
-      let parent = self.node(parent_id).unwrap();
-      InodeRelativeRelationship::Overlapping
+      let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
+      let child_actual_shape = self.node(&id).unwrap().actual_shape();
+
+      // Here we use `i32` instead of `u16`, since `CoordinatePosition` algorithm requires the
+      // argument `coord` must be
+      // [`&Coord<Self::Scalar>`](https://docs.rs/geo/latest/geo/algorithm/coordinate_position/trait.CoordinatePosition.html#associatedtype.Scalar),
+      // which is a [`GeoNum`](https://docs.rs/geo/latest/geo/trait.GeoNum.html) trait.
+
+      let parent_actual_shape = geo_rect_as!(parent_actual_shape, i32);
+      let child_actual_shape = geo_rect_as!(child_actual_shape, i32);
+
+      let top_left_pos = child_actual_shape.min();
+      let bottom_right_pos = child_actual_shape.max();
+
+      let top_left_coordpos = parent_actual_shape.coordinate_position(&top_left_pos);
+      let bottom_right_coordpos = parent_actual_shape.coordinate_position(&bottom_right_pos);
+      assert!(top_left_coordpos == CoordPos::Inside || top_left_coordpos == CoordPos::OnBoundary);
+      assert!(
+        bottom_right_coordpos == CoordPos::Inside || bottom_right_coordpos == CoordPos::OnBoundary
+      );
+
+      InodeRelativePosition::Overlapping
     }
   }
 }
