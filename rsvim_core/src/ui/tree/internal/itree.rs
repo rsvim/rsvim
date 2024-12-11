@@ -646,10 +646,19 @@ where
   }
 
   /// Get the relative relationship between a node and its parent.
+  ///
+  /// It returns the relationship enum, see [`InodeRelativeRelationship`].
+  ///
+  /// # Panics
+  ///
+  /// If the node doesn't have a parent inside the tree.
   pub fn at_parent_border(&self, id: InodeId) -> InodeRelativeRelationship {
     if id == self.root_id {
       InodeRelativeRelationship::CompletelyOverlapping
     } else {
+      let parent_id = self.parent_id(&id).unwrap();
+      let parent = self.node(parent_id).unwrap();
+      InodeRelativeRelationship::CompletelyOverlapping
     }
   }
 }
