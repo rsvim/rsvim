@@ -5,7 +5,7 @@
 use crate::cart::{IRect, U16Rect, U16Size};
 use crate::envar;
 use crate::ui::canvas::{Canvas, CanvasArc};
-use crate::ui::tree::internal::{InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut};
+use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 
@@ -217,7 +217,7 @@ pub struct Tree {
   cursor_id: Option<TreeNodeId>,
 
   // All [`Window`](crate::ui::widget::Window) node IDs.
-  windows_ids: BTreeSet<TreeNodeId>,
+  window_ids: BTreeSet<TreeNodeId>,
   // Cursor and window state }
 
   // Global options for windows.
@@ -230,9 +230,10 @@ pub struct Tree {
 pub type TreeArc = Arc<RwLock<Tree>>;
 pub type TreeWk = Weak<RwLock<Tree>>;
 pub type TreeNodeId = InodeId;
-pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
-pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
+// pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
+// pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
+// Node {
 impl Tree {
   /// Make a widget tree.
   ///
@@ -250,7 +251,7 @@ impl Tree {
     Tree {
       base: Itree::new(root_node),
       cursor_id: None,
-      windows_ids: BTreeSet::new(),
+      window_ids: BTreeSet::new(),
       global_options: WindowGlobalOptions::default(),
       local_options: WindowLocalOptions::default(),
     }
@@ -270,8 +271,6 @@ impl Tree {
   pub fn is_empty(&self) -> bool {
     self.base.is_empty()
   }
-
-  // Node {
 
   /// Root node ID.
   pub fn root_id(&self) -> TreeNodeId {
@@ -303,35 +302,88 @@ impl Tree {
     self.base.node_mut(id)
   }
 
-  /// See [`Itree::iter`].
-  pub fn iter(&self) -> TreeIter {
-    self.base.iter()
+  // /// See [`Itree::iter`].
+  // pub fn iter(&self) -> TreeIter {
+  //   self.base.iter()
+  // }
+  //
+  // /// See [`Itree::iter_mut`].
+  // pub fn iter_mut(&mut self) -> TreeIterMut {
+  //   self.base.iter_mut()
+  // }
+
+  /// Get current cursor node ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
   }
 
-  /// See [`Itree::iter_mut`].
-  pub fn iter_mut(&mut self) -> TreeIterMut {
-    self.base.iter_mut()
+  /// Set current cursor node ID.
+  pub fn set_cursor_id(&mut self, cursor_id: Option<TreeNodeId>) {
+    self.cursor_id = cursor_id;
   }
 
-  fn insert_widget_ids(&mut self, node: &TreeNode) {
-    match node {
-      TreeNode::Cursor(n) => {
-        self.cursor_id = Some(n.id());
+  /// Get current window node ID.
+  /// NOTE: A window is called the current window because it has cursor inside it.
+  pub fn current_window_id(&self) -> Option<TreeNodeId> {
+    if let Some(cursor_id) = self.cursor_id {
+      let mut id = cursor_id;
+      while let Some(parent_id) = self.parent_id(&id) {
+        if let Some(TreeNode::Window(_w)) = self.node(parent_id) {
+          return Some(*parent_id);
+        }
+        id = *parent_id;
       }
-      TreeNode::Window(n) => {
-        self.windows_ids.insert(n.id());
+    }
+
+    None
+  }
+
+  /// Get all the window widget IDs.
+  pub fn window_ids(&self) -> &BTreeSet<TreeNodeId> {
+    &self.window_ids
+  }
+}
+// Node {
+
+// Insert/Remove {
+impl Tree {
+  // This method handles some special requirements when insert a widget node:
+  //
+  // 1. When insert a cursor widget, it's parent widget must be a window widget.
+  // 2. Maintain the cursor widget ID and window widget IDs when insert.
+  fn insert_guard(&mut self, node: &TreeNode, parent_id: &TreeNodeId) {
+    match node {
+      TreeNode::Cursor(cursor) => {
+        // Ensure the parent node is a window widget.
+        let parent_node = self.node(parent_id).unwrap();
+        match parent_node {
+          TreeNode::Window(_) => { /* Skip */ }
+          _ => unreachable!("Cursor widget must insert under the window widget parent"),
+        }
+        self.cursor_id = Some(cursor.id());
+      }
+      TreeNode::Window(window) => {
+        self.window_ids.insert(window.id());
       }
       _ => { /* Skip */ }
     }
   }
 
-  fn remove_window_widget_ids(&mut self, id: &TreeNodeId) {
-    self.windows_ids.remove(id);
+  // This method handles some special requirements when remove a widget node:
+  //
+  // 1. When insert a cursor widget, it's parent widget must be a window widget.
+  // 2. Maintain the cursor widget ID and window widget IDs when remove.
+  fn remove_guard(&mut self, id: &TreeNodeId) {
+    // If the removed ID is cursor ID, remove it.
+    if self.cursor_id == Some(*id) {
+      self.cursor_id = None;
+    }
+    self.window_ids.remove(id);
   }
 
   /// See [`Itree::insert`].
   pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
-    self.insert_widget_ids(&child_node);
+    self.insert_guard(&child_node, parent_id);
     self.base.insert(parent_id, child_node)
   }
 
@@ -341,16 +393,20 @@ impl Tree {
     parent_id: &TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
-    self.insert_widget_ids(&child_node);
+    self.insert_guard(&child_node, parent_id);
     self.base.bounded_insert(parent_id, child_node)
   }
 
   /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
-    self.remove_window_widget_ids(&id);
+    self.remove_guard(&id);
     self.base.remove(id)
   }
+}
+// Insert/Remove }
 
+// Movement {
+impl Tree {
   /// See [`Itree::bounded_move_by`].
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_by(id, x, y)
@@ -391,40 +447,11 @@ impl Tree {
   pub fn bounded_move_right_by(&mut self, id: InodeId, cols: usize) -> Option<IRect> {
     self.bounded_move_by(id, cols as isize, 0)
   }
+}
+// Movement }
 
-  // Node }
-
-  // Cursor and Window {
-
-  /// Get current cursor node ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
-  /// Set current cursor node ID.
-  pub fn set_cursor_id(&mut self, cursor_id: Option<TreeNodeId>) {
-    self.cursor_id = cursor_id;
-  }
-
-  /// Get current window node ID. A window is current because the cursor is inside it.
-  pub fn current_window_id(&self) -> Option<TreeNodeId> {
-    if let Some(cursor_id) = self.cursor_id {
-      let mut id = cursor_id;
-      while let Some(parent_id) = self.parent_id(&id) {
-        if let Some(TreeNode::Window(_w)) = self.node(parent_id) {
-          return Some(*parent_id);
-        }
-        id = *parent_id;
-      }
-    }
-
-    None
-  }
-
-  // Cursor and Window }
-
-  // Global options {
-
+// Global options {
+impl Tree {
   pub fn global_options(&self) -> &WindowGlobalOptions {
     &self.global_options
   }
@@ -456,11 +483,11 @@ impl Tree {
   pub fn set_line_break(&mut self, value: bool) {
     self.local_options.set_line_break(value);
   }
+}
+// Global options }
 
-  // Global options }
-
-  // Draw {
-
+// Draw {
+impl Tree {
   /// Draw the widget tree to canvas.
   pub fn draw(&self, canvas: CanvasArc) {
     let mut canvas = canvas.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
@@ -469,9 +496,8 @@ impl Tree {
       node.draw(&mut canvas);
     }
   }
-
-  // Draw }
 }
+// Draw }
 
 #[cfg(test)]
 mod tests {

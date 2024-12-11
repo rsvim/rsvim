@@ -41,7 +41,6 @@
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
 use geo::{Point, Rect};
-use std::marker::Copy;
 
 // Positions {
 
