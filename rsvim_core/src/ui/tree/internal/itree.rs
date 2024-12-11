@@ -467,6 +467,86 @@ where
 // Insert/Remove }
 
 // Movement {
+
+/// The enum to describe the relative position relationship between a node and its parent node,
+/// based on the actual shape (after truncated).
+///
+/// There're several kinds of use cases:
+///
+/// 1. Single-side contact: The node is in contact with its parent on only 1 edge, which looks
+///    like:
+///
+///    ```text
+///    -----------------
+///    |               |
+///    |        -------|
+///    |        |//////|
+///    |        |//////|
+///    |        -------|
+///    |               |
+///    -----------------
+///    ```
+///
+/// 2. Double-sides contact: The node is in contact on 2 edges, which looks like:
+///
+///    ```text
+///    -----------------
+///    |        |//////|
+///    |        |//////|
+///    |        -------|
+///    |               |
+///    |               |
+///    |               |
+///    -----------------
+///    ```
+///
+/// 3. Triple-sides contact: The node is in contact on 3 edges, which looks like:
+///
+///    ```text
+///    -----------------
+///    |  |////////////|
+///    |  |////////////|
+///    |  |////////////|
+///    |  |////////////|
+///    |  |////////////|
+///    |  |////////////|
+///    -----------------
+///    ```
+///
+/// 4. Completely overlapping: The node is in contact on 4 edges, i.e. the node is exactly the same
+///    with (or even bigger than, and truncated by) its parent, which looks like:
+///
+///    ```text
+///    -----------------
+///    |///////////////|
+///    |///////////////|
+///    |///////////////|
+///    |///////////////|
+///    |///////////////|
+///    |///////////////|
+///    -----------------
+///    ```
+///
+pub enum InodeRelativeRelationship {
+  // 1-Side contact
+  Top,
+  Bottom,
+  Left,
+  Right,
+  // 2-Sides contact
+  TopLeft,
+  TopRight,
+  BottomLeft,
+  BottomRight,
+  // 3-Sides contact
+  TopBottomLeft,
+  TopBottomRight,
+  LeftRightTop,
+  LeftRightBottom,
+  // 4-Sides contact
+  CompletelyOverlapping,
+}
+
 impl<T> Itree<T>
 where
   T: Inodeable,
@@ -562,6 +642,14 @@ where
         }
       }
       None => None,
+    }
+  }
+
+  /// Get the relative relationship between a node and its parent.
+  pub fn at_parent_border(&self, id: InodeId) -> InodeRelativeRelationship {
+    if id == self.root_id {
+      InodeRelativeRelationship::CompletelyOverlapping
+    } else {
     }
   }
 }
