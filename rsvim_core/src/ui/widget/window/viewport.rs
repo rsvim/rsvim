@@ -348,32 +348,17 @@ pub struct Viewport {
 pub type ViewportArc = Arc<RwLock<Viewport>>;
 pub type ViewportWk = Weak<RwLock<Viewport>>;
 
-#[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
-/// Lines index inside [`Viewport`].
-pub struct ViewportRect {
-  // Start line index in the buffer, starts from 0.
-  pub start_line: usize,
-
-  // End line index in the buffer.
-  pub end_line: usize,
-  // // Start display column index in the buffer, starts from 0.
-  // pub start_bcolumn: usize,
-  //
-  // // End display column index in the buffer.
-  // pub end_bcolumn: usize,
-}
-
 impl Viewport {
   pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
     // By default the viewport start from the first line, i.e. starts from 0.
-    let (rectangle, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
+    let (line_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
 
     Viewport {
       options: *options,
       buffer,
       actual_shape: *actual_shape,
-      start_line: rectangle.start_line,
-      end_line: rectangle.end_line,
+      start_line: line_range.start_line,
+      end_line: line_range.end_line,
       // start_bcolumn: rectangle.start_bcolumn,
       // end_bcolumn: rectangle.end_bcolumn,
       lines,
@@ -402,15 +387,15 @@ impl Viewport {
 
   /// Sync from top-left corner, i.e. `start_line` and `start_bcolumn`.
   pub fn sync_from_top_left(&mut self, start_line: usize, start_bcolumn: usize) {
-    let (rectangle, lines) = sync::from_top_left(
+    let (line_range, lines) = sync::from_top_left(
       &self.options,
       self.buffer.clone(),
       &self.actual_shape,
       start_line,
       start_bcolumn,
     );
-    self.start_line = rectangle.start_line;
-    self.end_line = rectangle.end_line;
+    self.start_line = line_range.start_line;
+    self.end_line = line_range.end_line;
     self.lines = lines;
   }
 }

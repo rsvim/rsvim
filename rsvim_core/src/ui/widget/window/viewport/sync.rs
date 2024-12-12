@@ -4,13 +4,28 @@ use crate::buf::BufferWk;
 use crate::cart::U16Rect;
 use crate::envar;
 use crate::rlock;
-use crate::ui::widget::window::viewport::{LineViewportRow, ViewportRect};
+use crate::ui::widget::window::viewport::LineViewportRow;
 use crate::ui::widget::window::{LineViewport, ViewportOptions};
 
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 // use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
+
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
+/// Lines index inside [`Viewport`].
+pub struct ViewportRect {
+  // Start line index in the buffer, starts from 0.
+  pub start_line: usize,
+
+  // End line index in the buffer.
+  pub end_line: usize,
+  // // Start display column index in the buffer, starts from 0.
+  // pub start_bcolumn: usize,
+  //
+  // // End display column index in the buffer.
+  // pub end_bcolumn: usize,
+}
 
 // Given the buffer and window size, collect information from start line and column, i.e. from the
 // top-left corner.
