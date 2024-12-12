@@ -6,6 +6,7 @@ use crate::ui::widget::window::ViewportOptions;
 
 use parking_lot::RwLock;
 use std::collections::BTreeMap;
+use std::ops::Range;
 use std::sync::{Arc, Weak};
 // use tracing::trace;
 
@@ -37,6 +38,15 @@ pub struct LineViewportRow {
 }
 
 impl LineViewportRow {
+  pub fn new(bcolumn_range: Range<usize>, char_idx_range: Range<usize>) -> Self {
+    Self {
+      start_bcolumn: bcolumn_range.start,
+      end_bcolumn: bcolumn_range.end,
+      start_char_idx: char_idx_range.start,
+      end_char_idx: char_idx_range.end,
+    }
+  }
+
   /// Get the chars length (count) on the row of the line.
   pub fn chars_length(&self) -> usize {
     self.end_char_idx - self.start_char_idx

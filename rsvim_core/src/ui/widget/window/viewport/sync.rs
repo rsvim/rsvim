@@ -183,12 +183,7 @@ fn _sync_from_top_left_nowrap(
             // );
             rows.insert(
               wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-              },
+              LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
             );
             break;
           }
@@ -230,12 +225,7 @@ fn _sync_from_top_left_nowrap(
             // );
             rows.insert(
               wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-              },
+              LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
             );
             break;
           }
@@ -258,12 +248,7 @@ fn _sync_from_top_left_nowrap(
             // );
             rows.insert(
               wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-              },
+              LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
             );
             break;
           }
@@ -441,12 +426,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-              },
+              LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
             );
             let saved_end_fills = width as usize - wcol as usize;
             wrow += 1;
@@ -512,12 +492,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-              },
+              LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
             );
             break;
           }
@@ -541,12 +516,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-              },
+              LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
             );
             debug_assert_eq!(wcol, width);
             wrow += 1;
@@ -807,12 +777,7 @@ fn _sync_from_top_left_wrap_linebreak(
             if wcol > 0 {
               rows.insert(
                 wrow,
-                LineViewportRow {
-                  start_bcolumn: start_bcol,
-                  start_char_idx: start_c_idx,
-                  end_bcolumn: end_bcol,
-                  end_char_idx: end_c_idx,
-                },
+                LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
               );
 
               // NOTE: The `end_fills` only indicates the cells at the end of the bottom row in the
@@ -910,12 +875,7 @@ fn _sync_from_top_left_wrap_linebreak(
                 // );
                 rows.insert(
                   wrow,
-                  LineViewportRow {
-                    start_bcolumn: start_bcol,
-                    start_char_idx: start_c_idx,
-                    end_bcolumn: end_bcol,
-                    end_char_idx: end_c_idx,
-                  },
+                  LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
                 );
 
                 let saved_end_fills = width as usize - wcol as usize;
@@ -996,12 +956,7 @@ fn _sync_from_top_left_wrap_linebreak(
                 // );
                 rows.insert(
                   wrow,
-                  LineViewportRow {
-                    start_bcolumn: start_bcol,
-                    start_char_idx: start_c_idx,
-                    end_bcolumn: end_bcol,
-                    end_char_idx: end_c_idx,
-                  },
+                  LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
                 );
                 debug_assert_eq!(wcol, width);
                 wrow += 1;
@@ -1078,12 +1033,7 @@ fn _sync_from_top_left_wrap_linebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-              },
+              LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
             );
             break;
           }
@@ -1108,12 +1058,7 @@ fn _sync_from_top_left_wrap_linebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow {
-                start_bcolumn: start_bcol,
-                start_char_idx: start_c_idx,
-                end_bcolumn: end_bcol,
-                end_char_idx: end_c_idx,
-              },
+              LineViewportRow::new(start_bcol..end_bcol, start_c_idx..end_c_idx),
             );
             debug_assert_eq!(wcol, width);
             wrow += 1;
@@ -1184,5 +1129,25 @@ fn _sync_from_top_left_wrap_linebreak(
       // trace!("15-start_line:{}", start_line);
       (ViewportRect::default(), BTreeMap::new())
     }
+  }
+}
+
+#[allow(unused_imports)]
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  use crate::test::log::init as test_log_init;
+  use std::ops::Range;
+  use tracing::info;
+
+  #[test]
+  fn default_range() {
+    test_log_init();
+
+    let r1: Range<usize> = Range::default();
+    assert!(r1.is_empty());
+    info!("r1:{:?}", r1);
+    info!("r1.start:{:?}, r1.end:{:?}", r1.start, r1.end);
   }
 }
