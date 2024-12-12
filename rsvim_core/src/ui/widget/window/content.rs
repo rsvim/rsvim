@@ -164,12 +164,12 @@ impl Widgetable for WindowContent {
               line_viewport,
               r
             );
-            debug_assert_eq!(total_width, r.end_bcolumn() - r.start_bcolumn());
+            debug_assert_eq!(total_width, r.end_dcolumn() - r.start_dcolumn());
           }
 
           // Render left empty parts.
           let occupied_length =
-            (r.end_bcolumn() - r.start_bcolumn()) as u16 + start_fills + end_fills;
+            (r.end_dcolumn() - r.start_dcolumn()) as u16 + start_fills + end_fills;
           if width > occupied_length {
             let left_length = width - occupied_length;
             let cells = std::iter::repeat(' ')

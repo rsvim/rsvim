@@ -15,18 +15,18 @@ pub mod sync;
 #[derive(Debug, Copy, Clone)]
 /// The row information of a buffer line.
 pub struct LineViewportRow {
-  start_bcolumn: usize,
+  start_dcolumn: usize,
   start_char_idx: usize,
-  end_bcolumn: usize,
+  end_dcolumn: usize,
   end_char_idx: usize,
 }
 
 impl LineViewportRow {
   /// Make new [`LineViewportRow`].
-  pub fn new(bcolumn_range: Range<usize>, char_idx_range: Range<usize>) -> Self {
+  pub fn new(dcolumn_range: Range<usize>, char_idx_range: Range<usize>) -> Self {
     Self {
-      start_bcolumn: bcolumn_range.start,
-      end_bcolumn: bcolumn_range.end,
+      start_dcolumn: dcolumn_range.start,
+      end_dcolumn: dcolumn_range.end,
       start_char_idx: char_idx_range.start,
       end_char_idx: char_idx_range.end,
     }
@@ -39,21 +39,21 @@ impl LineViewportRow {
 
   /// Get the chars display width on the row of the line.
   pub fn chars_width(&self) -> usize {
-    self.end_bcolumn - self.start_bcolumn
+    self.end_dcolumn - self.start_dcolumn
   }
 
   /// Get start display column index (in the buffer) for current row,starts from 0.
   ///
   /// NOTE: For the term _**display column**_, please see [`Viewport`].
-  pub fn start_bcolumn(&self) -> usize {
-    self.start_bcolumn
+  pub fn start_dcolumn(&self) -> usize {
+    self.start_dcolumn
   }
 
   /// Get end display column index (in the buffer) for current row.
   ///
   /// NOTE: The start and end indexes are left-inclusive and right-exclusive.
-  pub fn end_bcolumn(&self) -> usize {
-    self.end_bcolumn
+  pub fn end_dcolumn(&self) -> usize {
+    self.end_dcolumn
   }
 
   /// First (fully displayed) char index in current row.
@@ -125,7 +125,7 @@ impl LineViewport {
   /// The example shows the first char `B` starts at column index 3 in the viewport, and its
   /// previous char `<--HT-->` uses 8 cells width so cannot fully shows in the viewport.
   ///
-  /// In this case, the variable `start_filled_columns` is 4, `start_bcolumn` is 40,
+  /// In this case, the variable `start_filled_columns` is 4, `start_dcolumn` is 40,
   /// `start_char_idx` is 37.
   pub fn start_filled_columns(&self) -> usize {
     self.start_filled_columns
@@ -345,22 +345,22 @@ impl LineViewport {
 ///
 /// - `start_line`: The start line (inclusive) of the buffer, it is the first line shows at the top
 ///   row of the viewport.
-/// - `start_bcolumn`: The start display column (inclusive) of the buffer, it is the the first cell
+/// - `start_dcolumn`: The start display column (inclusive) of the buffer, it is the the first cell
 ///   of a line displayed in the viewport.
 /// - `start_filled_columns`: The filled columns at the beginning of the row in the viewport, it is
 ///   only useful when the first char in a line doesn't show at the first column of the top row in
 ///   the viewport (because the previous char cannot be fully placed within these cells).
 /// - `end_line`: The end line (exclusive) of the buffer, it is next to the last line at the bottom
 ///   row of the viewport.
-/// - `end_bcolumn`: The end display column (exclusive) of the buffer, it is next to the last cell
+/// - `end_dcolumn`: The end display column (exclusive) of the buffer, it is next to the last cell
 ///   of a line displayed in the viewport.
 /// - `end_filled_columns`: The filled columns at the end of the row in the viewport, it is only
 ///   useful when the last char in a line doesn't show at the last column at the bottom row in the
 ///   viewport (because the following char cannot be fully placed within these cells).
 ///
 /// NOTE: The _**display column**_ in the buffer is the characters displayed column index, not the
-/// char index of the buffer, not the cell column of the viewport/window. It's named `bcolumn`
-/// (short for `buffer_column`).
+/// char index of the buffer, not the cell column of the viewport/window. It's named `dcolumn`
+/// (short for `displayed_column`).
 ///
 /// When rendering a buffer, viewport will need to go through each lines and characters in the
 /// buffer to ensure how it display. It can starts from 4 corners:
@@ -427,14 +427,14 @@ impl Viewport {
     &self.lines
   }
 
-  /// Sync from top-left corner, i.e. `start_line` and `start_bcolumn`.
-  pub fn sync_from_top_left(&mut self, start_line: usize, start_bcolumn: usize) {
+  /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.
+  pub fn sync_from_top_left(&mut self, start_line: usize, start_dcolumn: usize) {
     let (line_range, lines) = sync::from_top_left(
       &self.options,
       self.buffer.clone(),
       &self.actual_shape,
       start_line,
-      start_bcolumn,
+      start_dcolumn,
     );
     self.start_line = line_range.start_line;
     self.end_line = line_range.end_line;
@@ -587,7 +587,7 @@ mod tests {
         );
         assert_eq!(payload, expect[*r as usize]);
         let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
-        assert_eq!(total_width, row.end_bcolumn - row.start_bcolumn);
+        assert_eq!(total_width, row.end_dcolumn - row.start_dcolumn);
 
         if r > rows.first_key_value().unwrap().0 {
           let prev_r = r - 1;
@@ -596,7 +596,7 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, previous row[{}]:{:?}",
             r, r, row, prev_r, prev_row
           );
-          assert_eq!(prev_row.end_bcolumn, row.start_bcolumn);
+          assert_eq!(prev_row.end_dcolumn, row.start_dcolumn);
         }
         if r < rows.last_key_value().unwrap().0 {
           let next_r = r + 1;
@@ -605,7 +605,7 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, next row[{}]:{:?}",
             r, r, row, next_r, next_row
           );
-          assert_eq!(next_row.start_bcolumn, row.end_bcolumn);
+          assert_eq!(next_row.start_dcolumn, row.end_dcolumn);
         }
       }
     }
