@@ -385,12 +385,6 @@ pub struct Viewport {
   // End line index in the buffer.
   end_line: usize,
 
-  // // Start display column index in the buffer, starts from 0.
-  // start_bcolumn: usize,
-  //
-  // // End display column index in the buffer.
-  // end_bcolumn: usize,
-
   // Maps from buffer line index to its displayed rows in the window.
   lines: BTreeMap<usize, LineViewport>,
 }
@@ -409,8 +403,6 @@ impl Viewport {
       actual_shape: *actual_shape,
       start_line: line_range.start_line,
       end_line: line_range.end_line,
-      // start_bcolumn: rectangle.start_bcolumn,
-      // end_bcolumn: rectangle.end_bcolumn,
       lines,
     }
   }
