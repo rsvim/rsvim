@@ -302,6 +302,9 @@ impl EventLoop {
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
 
+    // Adjust cursor position for file buffers.
+    // Because cursor always stands on valid unicode chars or ASCII control codes.
+
     Ok(())
   }
 
