@@ -15,29 +15,14 @@ pub mod sync;
 #[derive(Debug, Copy, Clone)]
 /// The row information of a buffer line.
 pub struct LineViewportRow {
-  /// Start display column index (in the buffer) for current row, starts from 0.
-  ///
-  /// NOTE: For the term _**display column**_, please see [`Viewport`].
-  pub start_bcolumn: usize,
-
-  /// First (fully displayed) char index in current row.
-  /// NOTE: The char index is based on the line of the buffer, not based on the whole buffer.
-  pub start_char_idx: usize,
-
-  /// End display column index (in the buffer) for current row.
-  ///
-  /// NOTE: The start and end indexes are left-inclusive and right-exclusive.
-  pub end_bcolumn: usize,
-
-  /// End (next to the fully displayed) char index in current row.
-  ///
-  /// NOTE:
-  /// The char index is based on the line of the buffer, not based on the whole buffer.
-  /// The start and end indexes are left-inclusive and right-exclusive.
-  pub end_char_idx: usize,
+  start_bcolumn: usize,
+  start_char_idx: usize,
+  end_bcolumn: usize,
+  end_char_idx: usize,
 }
 
 impl LineViewportRow {
+  /// Make new [`LineViewportRow`].
   pub fn new(bcolumn_range: Range<usize>, char_idx_range: Range<usize>) -> Self {
     Self {
       start_bcolumn: bcolumn_range.start,
@@ -56,15 +41,66 @@ impl LineViewportRow {
   pub fn chars_width(&self) -> usize {
     self.end_bcolumn - self.start_bcolumn
   }
+
+  /// Get start display column index (in the buffer) for current row,starts from 0.
+  ///
+  /// NOTE: For the term _**display column**_, please see [`Viewport`].
+  pub fn start_bcolumn(&self) -> usize {
+    self.start_bcolumn
+  }
+
+  /// Get end display column index (in the buffer) for current row.
+  ///
+  /// NOTE: The start and end indexes are left-inclusive and right-exclusive.
+  pub fn end_bcolumn(&self) -> usize {
+    self.end_bcolumn
+  }
+
+  /// First (fully displayed) char index in current row.
+  ///
+  /// NOTE: The start and end indexes are left-inclusive and right-exclusive.
+  pub fn start_char_idx(&self) -> usize {
+    self.start_char_idx
+  }
+
+  /// Get end (next to the fully displayed) char index in current row.
+  ///
+  /// NOTE:
+  /// The char index is based on the line of the buffer, not based on the whole buffer.
+  /// The start and end indexes are left-inclusive and right-exclusive.
+  pub fn end_char_idx(&self) -> usize {
+    self.end_char_idx
+  }
 }
 
 #[derive(Debug, Clone)]
 /// All the displayed rows for a buffer line.
 pub struct LineViewport {
-  /// Maps from row index (based on the window) to a row in the buffer line, starts from 0.
   pub rows: BTreeMap<u16, LineViewportRow>,
+  pub start_filled_columns: usize,
+  pub end_filled_columns: usize,
+}
 
-  /// Extra filled columns at the beginning of the line.
+impl LineViewport {
+  /// Make new [`LineViewport`].
+  pub fn new(
+    rows: BTreeMap<u16, LineViewportRow>,
+    start_filled_columns: usize,
+    end_filled_columns: usize,
+  ) -> Self {
+    Self {
+      rows,
+      start_filled_columns,
+      end_filled_columns,
+    }
+  }
+
+  /// Maps from row index (based on the window) to a row in the buffer line, starts from 0.
+  pub fn rows(&self) -> &BTreeMap<u16, LineViewportRow> {
+    &self.rows
+  }
+
+  /// Get extra filled columns at the beginning of the line.
   ///
   /// For most cases, this value should be zero. But when the first char (indicate by
   /// `start_char_idx`) doesn't show at the first column of the row, and meanwhile the cells width
@@ -91,11 +127,15 @@ pub struct LineViewport {
   ///
   /// In this case, the variable `start_filled_columns` is 4, `start_bcolumn` is 40,
   /// `start_char_idx` is 37.
-  pub start_filled_columns: usize,
+  pub fn start_filled_columns(&self) -> usize {
+    self.start_filled_columns
+  }
 
-  /// Extra filled columns at the end of the row, see:
+  /// Get extra filled columns at the end of the row, see:
   /// [`start_filled_columns`](LineViewport::start_filled_columns).
-  pub end_filled_columns: usize,
+  pub fn end_filled_columns(&self) -> usize {
+    self.end_filled_columns
+  }
 }
 
 #[derive(Debug, Clone)]

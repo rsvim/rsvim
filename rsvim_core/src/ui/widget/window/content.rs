@@ -139,11 +139,11 @@ impl Widgetable for WindowContent {
           }
 
           // Render line content.
-          if r.end_char_idx > r.start_char_idx {
+          if r.end_char_idx() > r.start_char_idx() {
             let mut total_width = 0_usize;
-            let mut char_idx = r.start_char_idx;
-            let mut chars_slice = line_slice.get_chars_at(r.start_char_idx).unwrap();
-            while char_idx < r.end_char_idx {
+            let mut char_idx = r.start_char_idx();
+            let mut chars_slice = line_slice.get_chars_at(r.start_char_idx()).unwrap();
+            while char_idx < r.end_char_idx() {
               let c = chars_slice.next().unwrap();
               let (unicode_symbol, unicode_width) = buffer.char_symbol(c);
 
@@ -164,11 +164,12 @@ impl Widgetable for WindowContent {
               line_viewport,
               r
             );
-            debug_assert_eq!(total_width, r.end_bcolumn - r.start_bcolumn);
+            debug_assert_eq!(total_width, r.end_bcolumn() - r.start_bcolumn());
           }
 
           // Render left empty parts.
-          let occupied_length = (r.end_bcolumn - r.start_bcolumn) as u16 + start_fills + end_fills;
+          let occupied_length =
+            (r.end_bcolumn() - r.start_bcolumn()) as u16 + start_fills + end_fills;
           if width > occupied_length {
             let left_length = width - occupied_length;
             let cells = std::iter::repeat(' ')

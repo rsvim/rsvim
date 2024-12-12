@@ -256,11 +256,7 @@ fn _sync_from_top_left_nowrap(
 
         line_viewports.insert(
           current_line,
-          LineViewport {
-            rows,
-            start_filled_columns: start_fills,
-            end_filled_columns: end_fills,
-          },
+          LineViewport::new(rows, start_fills, end_fills),
         );
         // trace!(
         //   "8-current_line:{}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
@@ -546,11 +542,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
 
         line_viewports.insert(
           current_line,
-          LineViewport {
-            rows,
-            start_filled_columns: start_fills,
-            end_filled_columns: end_fills,
-          },
+          LineViewport::new(rows, start_fills, end_fills),
         );
         // trace!(
         //   "9-current_line:{}, wrow/wcol:{}/{}, bcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
@@ -1090,11 +1082,7 @@ fn _sync_from_top_left_wrap_linebreak(
 
         line_viewports.insert(
           current_line,
-          LineViewport {
-            rows,
-            start_filled_columns: start_fills,
-            end_filled_columns: end_fills,
-          },
+          LineViewport::new(rows, start_fills, end_fills),
         );
         // trace!(
         //   "13-wrow/wcol:{}/{}, bcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}",
