@@ -8,7 +8,6 @@ use crate::ui::tree::internal::{InodeId, Inodeable};
 use ahash::AHashMap as HashMap;
 use geo::algorithm::coordinate_position::{CoordPos, CoordinatePosition};
 use geo::point;
-use geo::GeoNum;
 use std::fmt::Debug;
 use std::marker::PhantomData;
 use std::ptr::NonNull;
