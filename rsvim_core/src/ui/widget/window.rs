@@ -216,8 +216,7 @@ impl Window {
 // Options }
 
 // Viewport {
-impl Window {
-}
+impl Window {}
 // Viewport }
 
 #[derive(Debug, Clone)]
