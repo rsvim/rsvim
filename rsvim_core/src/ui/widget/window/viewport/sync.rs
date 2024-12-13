@@ -97,8 +97,8 @@ fn _sync_from_top_left_nowrap(
   let height = actual_shape.height();
   let width = actual_shape.width();
 
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
+  assert!(height > 0);
+  assert!(width > 0);
   // trace!(
   //   "_collect_from_top_left_with_nowrap, actual_shape:{:?}, height/width:{:?}/{:?}",
   //   actual_shape,
@@ -324,8 +324,8 @@ fn _sync_from_top_left_wrap_nolinebreak(
   let height = actual_shape.height();
   let width = actual_shape.width();
 
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
+  assert!(height > 0);
+  assert!(width > 0);
   // trace!(
   //   "_collect_from_top_left_with_wrap_nolinebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
   //   actual_shape,
@@ -535,7 +535,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
               wrow,
               LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
-            debug_assert_eq!(wcol, width);
+            assert_eq!(wcol, width);
             wrow += 1;
             wcol = 0_u16;
             start_dcol = end_dcol;
@@ -673,6 +673,8 @@ fn _sync_from_top_left_wrap_linebreak(
         let mut start_c_idx_init = false;
         let mut _end_c_idx_init = false;
 
+        let mut ch2dcols: BTreeMap<usize, (usize, usize)> = BTreeMap::new();
+
         let mut start_fills = 0_usize;
         let mut end_fills = 0_usize;
 
@@ -753,8 +755,8 @@ fn _sync_from_top_left_wrap_linebreak(
             // );
           }
 
-          // Row column with next char will goes out of the row, i.e. there's not enough space to
-          // place this word in current row.
+          // Row column with next char will goes out of the row.
+          // i.e. there's not enough space to place this word in current row.
           // There're two cases:
           // 1. The word can be placed in next empty row, i.e. the word length is less or equal to
           //    the row length of the viewport.
@@ -787,11 +789,7 @@ fn _sync_from_top_left_wrap_linebreak(
             if wcol > 0 {
               rows.insert(
                 wrow,
-                LineViewportRow::new(
-                  start_dcol..end_dcol,
-                  start_c_idx..end_c_idx,
-                  BTreeMap::new(),
-                ),
+                LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
               );
 
               // NOTE: The `end_fills` only indicates the cells at the end of the bottom row in the
@@ -841,6 +839,7 @@ fn _sync_from_top_left_wrap_linebreak(
               wcol = 0_u16;
               start_dcol = end_dcol;
               start_c_idx = bchars;
+              ch2dcols.clear();
 
               if wrow >= height {
                 end_fills = saved_end_fills as usize;
@@ -889,11 +888,7 @@ fn _sync_from_top_left_wrap_linebreak(
                 // );
                 rows.insert(
                   wrow,
-                  LineViewportRow::new(
-                    start_dcol..end_dcol,
-                    start_c_idx..end_c_idx,
-                    BTreeMap::new(),
-                  ),
+                  LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
                 );
 
                 let saved_end_fills = width as usize - wcol as usize;
@@ -903,6 +898,7 @@ fn _sync_from_top_left_wrap_linebreak(
                 wcol = 0_u16;
                 start_dcol = end_dcol;
                 start_c_idx = bchars;
+                ch2dcols.clear();
 
                 if wrow >= height {
                   end_fills = saved_end_fills;
@@ -933,6 +929,7 @@ fn _sync_from_top_left_wrap_linebreak(
               end_dcol = dcol;
               end_c_idx = bchars;
               wcol += c_width as u16;
+              ch2dcols.insert(start_c_idx, (start_dcol, end_dcol));
 
               // trace!(
               //   "8-wrow/wcol:{}/{}, dcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
@@ -974,17 +971,14 @@ fn _sync_from_top_left_wrap_linebreak(
                 // );
                 rows.insert(
                   wrow,
-                  LineViewportRow::new(
-                    start_dcol..end_dcol,
-                    start_c_idx..end_c_idx,
-                    BTreeMap::new(),
-                  ),
+                  LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
                 );
-                debug_assert_eq!(wcol, width);
+                assert_eq!(wcol, width);
                 wrow += 1;
                 wcol = 0_u16;
                 start_dcol = end_dcol;
                 start_c_idx = end_c_idx;
+                ch2dcols.clear();
 
                 if wrow >= height {
                   // trace!(
@@ -1009,15 +1003,21 @@ fn _sync_from_top_left_wrap_linebreak(
                 }
               }
             }
-          }
-          // Row column with next char will goes out of the row.
-          else {
+          } else {
             // Enough space to place this word in current row
             dcol += wd_width;
             bchars += wd_chars;
             end_dcol = dcol;
             end_c_idx = bchars;
             wcol += wd_width as u16;
+
+            let mut tmp_start_dcol = start_dcol;
+            for (k, c) in wd.chars().enumerate() {
+              let c_width = buffer.char_width(c);
+              let tmp_end_dcol = tmp_start_dcol + c_width;
+              ch2dcols.insert(start_c_idx + k, (tmp_start_dcol, tmp_end_dcol));
+              tmp_start_dcol = tmp_end_dcol;
+            }
           }
 
           // trace!(
@@ -1055,11 +1055,7 @@ fn _sync_from_top_left_wrap_linebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(
-                start_dcol..end_dcol,
-                start_c_idx..end_c_idx,
-                BTreeMap::new(),
-              ),
+              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
             break;
           }
@@ -1084,17 +1080,14 @@ fn _sync_from_top_left_wrap_linebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(
-                start_dcol..end_dcol,
-                start_c_idx..end_c_idx,
-                BTreeMap::new(),
-              ),
+              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
-            debug_assert_eq!(wcol, width);
+            assert_eq!(wcol, width);
             wrow += 1;
             wcol = 0_u16;
             start_dcol = end_dcol;
             start_c_idx = end_c_idx;
+            ch2dcols.clear();
 
             if wrow >= height {
               // trace!(
