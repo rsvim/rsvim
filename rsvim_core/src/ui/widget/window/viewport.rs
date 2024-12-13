@@ -437,6 +437,7 @@ impl Viewport {
       start_line: line_range.start_line,
       end_line: line_range.end_line,
       lines,
+      cursor: CursorViewport::new(Range::default(), Range::default()),
     }
   }
 
