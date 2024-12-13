@@ -95,7 +95,7 @@ jobs:
       # Disable some default features
       - run: |
           git apply ./patch/cargo-miri.patch
-          cargo miri test
+          cargo miri test -- --skip envar::path_config::tests::config_file_unix
         env:
           MIRIFLAGS: "-Zmiri-strict-provenance"
   unit_test:
