@@ -27,14 +27,14 @@ impl LineViewportRow {
   pub fn new(
     dcolumn_range: Range<usize>,
     char_idx_range: Range<usize>,
-    char2dcolumns: BTreeMap<usize, (usize, usize)>,
+    char2dcolumns: &BTreeMap<usize, (usize, usize)>,
   ) -> Self {
     Self {
       start_dcolumn: dcolumn_range.start,
       end_dcolumn: dcolumn_range.end,
       start_char_idx: char_idx_range.start,
       end_char_idx: char_idx_range.end,
-      char2dcolumns,
+      char2dcolumns: char2dcolumns.clone(),
     }
   }
 
@@ -62,12 +62,6 @@ impl LineViewportRow {
     self.end_dcolumn
   }
 
-  /// Maps from each char index to its (start and end) display column indexes in current row,
-  /// starts from 0. The value's 0 slot is `start_dcolumn`, 1 slot is `end_dcolumn`.
-  pub fn char2dcolumns(&self) -> &BTreeMap<usize, (usize, usize)> {
-    &self.char2dcolumns
-  }
-
   /// First (fully displayed) char index in current row.
   ///
   /// NOTE: The start and end indexes are left-inclusive and right-exclusive.
@@ -82,6 +76,12 @@ impl LineViewportRow {
   /// The start and end indexes are left-inclusive and right-exclusive.
   pub fn end_char_idx(&self) -> usize {
     self.end_char_idx
+  }
+
+  /// Maps from each char index to its (start and end) display column indexes in current row,
+  /// starts from 0. The value's 0 slot is `start_dcolumn`, 1 slot is `end_dcolumn`.
+  pub fn char2dcolumns(&self) -> &BTreeMap<usize, (usize, usize)> {
+    &self.char2dcolumns
   }
 }
 
@@ -670,27 +670,34 @@ mod tests {
         l, line_viewport, actual_line_idx, expect_start_fills, expect_end_fills
       );
       assert_eq!(
-        line_viewport.start_filled_columns,
+        line_viewport.start_filled_columns(),
         *expect_start_fills.get(&actual_line_idx).unwrap()
       );
       assert_eq!(
-        line_viewport.end_filled_columns,
+        line_viewport.end_filled_columns(),
         *expect_end_fills.get(&actual_line_idx).unwrap()
       );
 
-      let rows = &line_viewport.rows;
+      let rows = &line_viewport.rows();
       for (r, row) in rows.iter() {
-        let mut payload = String::new();
-        for c_idx in row.start_char_idx..row.end_char_idx {
-          payload.push(line.get_char(c_idx).unwrap());
-        }
-        info!(
-          "row-{:?}, actual:{:?}, expect:{:?}",
-          r, payload, expect[*r as usize]
+        info!("r-{:?}, row:{:?}", r, row);
+        assert_eq!(row.chars_length(), row.char2dcolumns().len());
+        assert_eq!(
+          row.start_char_idx(),
+          *row.char2dcolumns().first_key_value().unwrap().0
         );
-        assert_eq!(payload, expect[*r as usize]);
-        let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
-        assert_eq!(total_width, row.end_dcolumn - row.start_dcolumn);
+        assert_eq!(
+          row.end_char_idx(),
+          *row.char2dcolumns().last_key_value().unwrap().0 + 1
+        );
+        assert_eq!(
+          row.start_dcolumn(),
+          row.char2dcolumns().first_key_value().unwrap().1 .0
+        );
+        assert_eq!(
+          row.end_dcolumn(),
+          row.char2dcolumns().last_key_value().unwrap().1 .1
+        );
 
         if r > rows.first_key_value().unwrap().0 {
           let prev_r = r - 1;
@@ -699,7 +706,7 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, previous row[{}]:{:?}",
             r, r, row, prev_r, prev_row
           );
-          assert_eq!(prev_row.end_dcolumn, row.start_dcolumn);
+          assert_eq!(prev_row.end_dcolumn(), row.start_dcolumn());
         }
         if r < rows.last_key_value().unwrap().0 {
           let next_r = r + 1;
@@ -708,8 +715,29 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, next row[{}]:{:?}",
             r, r, row, next_r, next_row
           );
-          assert_eq!(next_row.start_dcolumn, row.end_dcolumn);
+          assert_eq!(next_row.start_dcolumn(), row.end_dcolumn());
         }
+
+        let mut last_char_dcolumn: Option<usize> = None;
+        let mut payload = String::new();
+        for c_idx in row.start_char_idx()..row.end_char_idx() {
+          let c = line.get_char(c_idx).unwrap();
+          let c_width = buffer.char_width(c);
+          let c_dcols = row.char2dcolumns().get(&c_idx).unwrap();
+          assert_eq!(c_dcols.1 - c_dcols.0, c_width);
+          if let Some(last_char_docl) = last_char_dcolumn {
+            assert_eq!(last_char_docl, c_dcols.0);
+          }
+          payload.push(c);
+          last_char_dcolumn = Some(c_dcols.1);
+        }
+        info!(
+          "row-{:?}, actual:{:?}, expect:{:?}",
+          r, payload, expect[*r as usize]
+        );
+        assert_eq!(payload, expect[*r as usize]);
+        let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
+        assert_eq!(total_width, row.end_dcolumn() - row.start_dcolumn());
       }
     }
   }
