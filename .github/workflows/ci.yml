@@ -97,7 +97,7 @@ jobs:
           git apply ./patch/cargo-miri.patch
           cargo miri test -- --skip envar::path_config::tests::config_file_unix
         env:
-          MIRIFLAGS="-Zmiri-disable-isolation"
+          MIRIFLAGS: "-Zmiri-disable-isolation"
   unit_test:
     name: Unit Test
     strategy:
