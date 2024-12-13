@@ -680,17 +680,6 @@ mod tests {
 
       let rows = &line_viewport.rows();
       for (r, row) in rows.iter() {
-        let mut payload = String::new();
-        for c_idx in row.start_char_idx()..row.end_char_idx() {
-          payload.push(line.get_char(c_idx).unwrap());
-        }
-        info!(
-          "row-{:?}, actual:{:?}, expect:{:?}",
-          r, payload, expect[*r as usize]
-        );
-        assert_eq!(payload, expect[*r as usize]);
-        let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
-        assert_eq!(total_width, row.end_dcolumn() - row.start_dcolumn());
         assert_eq!(row.chars_length(), row.char2dcolumns().len());
         assert_eq!(
           row.start_char_idx(),
@@ -727,6 +716,27 @@ mod tests {
           );
           assert_eq!(next_row.start_dcolumn(), row.end_dcolumn());
         }
+
+        let mut last_char_dcolumn: Option<usize> = None;
+        let mut payload = String::new();
+        for c_idx in row.start_char_idx()..row.end_char_idx() {
+          let c = line.get_char(c_idx).unwrap();
+          let c_width = buffer.char_width(c);
+          let c_dcols = row.char2dcolumns().get(&c_idx).unwrap();
+          assert_eq!(c_dcols.1 - c_dcols.0, c_width);
+          if let Some(last_char_docl) = last_char_dcolumn {
+            assert_eq!(last_char_docl, c_dcols.0);
+          }
+          payload.push(c);
+          last_char_dcolumn = Some(c_dcols.1);
+        }
+        info!(
+          "row-{:?}, actual:{:?}, expect:{:?}",
+          r, payload, expect[*r as usize]
+        );
+        assert_eq!(payload, expect[*r as usize]);
+        let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
+        assert_eq!(total_width, row.end_dcolumn() - row.start_dcolumn());
       }
     }
   }
