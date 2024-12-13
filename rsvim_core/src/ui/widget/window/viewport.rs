@@ -27,14 +27,14 @@ impl LineViewportRow {
   pub fn new(
     dcolumn_range: Range<usize>,
     char_idx_range: Range<usize>,
-    char2dcolumns: BTreeMap<usize, (usize, usize)>,
+    char2dcolumns: &BTreeMap<usize, (usize, usize)>,
   ) -> Self {
     Self {
       start_dcolumn: dcolumn_range.start,
       end_dcolumn: dcolumn_range.end,
       start_char_idx: char_idx_range.start,
       end_char_idx: char_idx_range.end,
-      char2dcolumns,
+      char2dcolumns: char2dcolumns.clone(),
     }
   }
 
