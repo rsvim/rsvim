@@ -18,7 +18,7 @@ exclude = [".DS_Store"]
 
 [workspace.dependencies]
 rsvim_core = { version = "0.1.1-alpha.8", path = "./rsvim_core" }
-crossterm = { version = "0.28", features = ["event-stream", "serde"] }
+crossterm = { version = "0.28", features = ["event-stream"] }
 jiff = { version = "0.1.15", features = ["tzdb-bundle-always"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = [
@@ -33,16 +33,16 @@ clap = { version = "4.5.22", features = ["derive", "unicode"] }
 futures = "0.3"
 # rand = "0.8.5"
 # heed = "0.20.5"
-# bytes = { version = "1", features = ["serde"] }
-compact_str = { version = "0.8.0", features = ["serde", "bytes"] }
+# bytes = { version = "1" }
+# serde_json = "1.0.132"
+compact_str = { version = "0.8.0", features = ["bytes"] }
 ropey = "1.6.1"
-geo = { version = "0.28.0", features = ["serde"] }
+geo = { version = "0.28.0" }
 num-traits = "0.2.19"
 parking_lot = "0.12.3"
 directories = "5.0.1"
-anyhow = "1.0.92"
-thiserror = "1.0.66"
-serde_json = "1.0.132"
+anyhow = "1.0.94"
+thiserror = "2"
 regex = "1.11.1"
 url = "2.5.4"
 ahash = "0.8.11"
@@ -56,7 +56,7 @@ ascii = "1.1.0"
 unicode-width = "0.2.0"
 unicode-segmentation = "1.12.0"
 # unicode-normalization = "0.1.24"
-# icu = { version = "1.5.0", features = ["compiled_data", "serde"] }
+# icu = { version = "1.5.0", features = ["compiled_data"] }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
@@ -66,7 +66,7 @@ swc_atoms = "=0.6.7"
 swc_common = { version = "=0.37.5", features = ["tty-emitter"] }
 swc_config = "=0.1.15"
 swc_config_macro = "=0.1.4"
-swc_ecma_ast = { version = "=0.118.2", features = ["serde-impl"] }
+swc_ecma_ast = "=0.118.2"
 swc_ecma_codegen = "=0.155.1"
 swc_ecma_codegen_macros = "=0.7.7"
 swc_ecma_loader = "=0.49.1"
@@ -111,10 +111,10 @@ opt-level = 3
 opt-level = 3
 # [profile.release.package.rand]
 # opt-level = 3
-[profile.release.package.serde]
-opt-level = 3
-[profile.release.package.serde_json]
-opt-level = 3
+# [profile.release.package.serde]
+# opt-level = 3
+# [profile.release.package.serde_json]
+# opt-level = 3
 [profile.release.package.tokio]
 opt-level = 3
 [profile.release.package.url]
