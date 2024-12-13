@@ -76,6 +76,7 @@ swc_bundler = { workspace = true }
 swc_graph_analyzer = { workspace = true }
 swc_macros_common = { workspace = true }
 swc_visit = { workspace = true }
+sourcemap = { workspace = true }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot }
 

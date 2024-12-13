@@ -83,6 +83,7 @@ swc_bundler = "=0.237.0"
 swc_graph_analyzer = "=0.26.0"
 swc_macros_common = "=0.3.13"
 swc_visit = "=0.6.2"
+sourcemap = "9.0.0"
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot }
 

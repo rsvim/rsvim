@@ -1765,6 +1765,7 @@ dependencies = [
  "regex",
  "ropey",
  "serde_json",
+ "sourcemap",
  "swc_atoms",
  "swc_bundler",
  "swc_common",
