@@ -82,6 +82,22 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v1
         with:
           command: check advisories
+  miri:
+    name: Cargo Miri
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/checkout@v4
+      # Disable some default features
+      - run: |
+          git apply ./patch/cargo-miri.patch
+          cargo miri test
+        env:
+          MIRIFLAGS: "-Zmiri-strict-provenance"
   unit_test:
     name: Unit Test
     strategy:
