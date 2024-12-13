@@ -29,7 +29,7 @@ impl ViewportLineRange {
   }
 
   pub fn is_empty(&self) -> bool {
-    return self.end_line > self.start_line;
+    self.end_line > self.start_line
   }
 
   pub fn len(&self) -> usize {
