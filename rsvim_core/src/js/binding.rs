@@ -16,6 +16,7 @@ use crate::res::{AnyErr, IoErr};
 // use crate::timers;
 
 use std::ffi::c_void;
+// use ahash::AHashMap as HashMap;
 // use tracing::error;
 
 pub mod global_rsvim;
