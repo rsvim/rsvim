@@ -691,6 +691,23 @@ mod tests {
         assert_eq!(payload, expect[*r as usize]);
         let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
         assert_eq!(total_width, row.end_dcolumn() - row.start_dcolumn());
+        assert_eq!(row.chars_length(), row.char2dcolumns().len());
+        assert_eq!(
+          row.start_char_idx(),
+          *row.char2dcolumns().first_key_value().unwrap().0
+        );
+        assert_eq!(
+          row.end_char_idx(),
+          *row.char2dcolumns().last_key_value().unwrap().0 + 1
+        );
+        assert_eq!(
+          row.start_dcolumn(),
+          row.char2dcolumns().first_key_value().unwrap().1 .0
+        );
+        assert_eq!(
+          row.end_dcolumn(),
+          row.char2dcolumns().last_key_value().unwrap().1 .1
+        );
 
         if r > rows.first_key_value().unwrap().0 {
           let prev_r = r - 1;
