@@ -98,6 +98,7 @@ jobs:
           cargo miri test -- --skip envar::path_config::tests::config_file_unix
         env:
           MIRIFLAGS: "-Zmiri-disable-isolation"
+          RUST_LOG: "trace"
   unit_test:
     name: Unit Test
     strategy:
@@ -112,13 +113,13 @@ jobs:
           - os: windows-latest
             toolchain: stable
           - os: ubuntu-latest
-            toolchain: nightly
+            toolchain: beta
           - os: macos-latest
-            toolchain: nightly
+            toolchain: beta
           - os: macos-13
-            toolchain: nightly
+            toolchain: beta
           - os: windows-latest
-            toolchain: nightly
+            toolchain: beta
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@master
@@ -147,13 +148,13 @@ jobs:
           - os: windows-latest
             toolchain: stable
           - os: ubuntu-latest
-            toolchain: nightly
+            toolchain: beta
           - os: macos-latest
-            toolchain: nightly
+            toolchain: beta
           - os: macos-13
-            toolchain: nightly
+            toolchain: beta
           - os: windows-latest
-            toolchain: nightly
+            toolchain: beta
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@master
