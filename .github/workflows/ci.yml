@@ -83,22 +83,24 @@ jobs:
         with:
           command: check advisories
   miri:
-    name: Cargo Miri
+    name: (Experimental) Miri
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
         with:
-          components: miri
+          components: miri,rust-src
       - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.6
       - uses: actions/checkout@v4
       # Do some hacks here
       - run: |
           git apply ./patch/cargo-miri.patch
           cargo miri test -- --skip envar::path_config::tests::config_file_unix
         env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
           MIRIFLAGS: "-Zmiri-disable-isolation"
-          RUST_LOG: "trace"
   unit_test:
     name: Unit Test
     strategy:
