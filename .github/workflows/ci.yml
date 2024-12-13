@@ -92,7 +92,7 @@ jobs:
           components: miri
       - uses: Swatinem/rust-cache@v2
       - uses: actions/checkout@v4
-      # Disable some default features
+      # Do some hacks here
       - run: |
           git apply ./patch/cargo-miri.patch
           cargo miri test -- --skip envar::path_config::tests::config_file_unix
