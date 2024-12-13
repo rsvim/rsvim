@@ -431,6 +431,7 @@ impl CursorViewport {
 /// 2. Start from top right corner.
 /// 3. Start from bottom left corner.
 /// 4. Start from bottom right corner.
+#[allow(dead_code)]
 pub struct Viewport {
   // Options.
   options: ViewportOptions,
@@ -493,7 +494,7 @@ impl Viewport {
         CursorViewport::new(0..1, 0..1)
       } else {
         let first_row = first_line.rows().first_key_value().unwrap();
-        let first_row = first_row.1;
+        let _first_row = first_row.1;
         CursorViewport::new(0..1, 0..1)
       }
     };
