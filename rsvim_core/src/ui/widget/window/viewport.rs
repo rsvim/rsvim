@@ -139,17 +139,16 @@ impl LineViewport {
 }
 
 #[derive(Debug, Copy, Clone)]
-/// The viewport for the cursor.
-///
-/// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we need to
-/// maintain the position with taking consideration of both terminal cell based rows and columns,
-/// and buffer unicode char based lines and chars.
+/// The viewport to maintain the positions for the cursor.
 ///
 /// As explained in [`Viewport`], ASCII control codes and other unicode chars can use 0 or more
-/// cells when displayed in terminal, thus when cursor moves on the terminal, it needs to always
-/// stay on the left most cell of a unicode char.
+/// cells when displayed in terminal, thus when cursor moves on the window/buffer, it needs to
+/// always stay on the left most cell of a unicode char. Thus this viewport maintains the cursor
+/// positions by taking consideration of both terminal cell position and buffer unicode char
+/// position.
 ///
-/// This structure is to maintain the positions for the cursor.
+/// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we will
+/// always maintain this position information for it.
 pub struct CursorViewport {
   start_dcolumn: usize,
   start_char_idx: usize,
