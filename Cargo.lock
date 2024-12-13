@@ -1797,6 +1797,7 @@ dependencies = [
  "tracing-subscriber",
  "unicode-segmentation",
  "unicode-width 0.2.0",
+ "url",
  "v8",
  "zstd",
 ]
