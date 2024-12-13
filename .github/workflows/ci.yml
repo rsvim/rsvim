@@ -96,7 +96,7 @@ jobs:
       # Do some hacks here
       - run: |
           git apply ./patch/cargo-miri.patch
-          cargo miri test -- --skip envar::path_config::tests::config_file_unix
+          cargo miri test
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
