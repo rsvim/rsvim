@@ -215,6 +215,10 @@ impl Window {
 }
 // Options }
 
+// Viewport {
+impl Window {}
+// Viewport }
+
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum WindowNode {

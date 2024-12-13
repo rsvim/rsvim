@@ -1,10 +1,12 @@
 //! Internal tree structure that implements the widget tree.
 
 use crate::cart::{IPos, IRect, U16Rect};
+use crate::geo_rect_as;
 use crate::ui::tree::internal::shapes;
 use crate::ui::tree::internal::{InodeId, Inodeable};
 
 use ahash::AHashMap as HashMap;
+use geo::algorithm::coordinate_position::{CoordPos, CoordinatePosition};
 use geo::point;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -136,6 +138,7 @@ where
   }
 }
 
+// Attributes {
 impl<T> Itree<T>
 where
   T: Inodeable,
@@ -198,7 +201,14 @@ where
   pub fn iter_mut(&mut self) -> ItreeIterMut<T> {
     ItreeIterMut::new(self, Some(self.root_id))
   }
+}
+// Attributes }
 
+// Insert/Remove {
+impl<T> Itree<T>
+where
+  T: Inodeable,
+{
   /// Update the `start_id` node attributes, and all the descendants attributes of this node.
   ///
   /// Below attributes will be update:
@@ -455,7 +465,110 @@ where
       None => None,
     }
   }
+}
+// Insert/Remove }
 
+// Movement {
+
+/// Describe the relative position of a node and its parent node, based on the actual shape (after
+/// truncated).
+///
+/// There're several kinds of use cases:
+///
+/// 1. No-edge contact (inside): The node is completely inside its parent without any edges
+///    contacted, which looks like:
+///
+///    ```text
+///    -----------------
+///    |               |
+///    |    --------   |
+///    |    |//////|   |
+///    |    |//////|   |
+///    |    --------   |
+///    |               |
+///    -----------------
+///    ```
+///
+/// 2. Single-edge contact: The node is in contact with its parent on only 1 edge, which looks
+///    like:
+///
+///    ```text
+///    -----------------
+///    |               |
+///    |        -------|
+///    |        |//////|
+///    |        |//////|
+///    |        -------|
+///    |               |
+///    -----------------
+///    ```
+///
+/// 3. Double-edges contact: The node is in contact on 2 edges, which looks like:
+///
+///    ```text
+///    -----------------
+///    |        |//////|
+///    |        |//////|
+///    |        -------|
+///    |               |
+///    |               |
+///    |               |
+///    -----------------
+///    ```
+///
+/// 4. Triple-edges contact: The node is in contact on 3 edges, which looks like:
+///
+///    ```text
+///    -----------------
+///    |  |////////////|
+///    |  |////////////|
+///    |  |////////////|
+///    |  |////////////|
+///    |  |////////////|
+///    |  |////////////|
+///    -----------------
+///    ```
+///
+/// 5. All-edges contact (overlapping): The node is in contact on 4 edges, i.e. the node is exactly
+///    the same with (or even bigger than, and truncated by) its parent, which looks like:
+///
+///    ```text
+///    -----------------
+///    |///////////////|
+///    |///////////////|
+///    |///////////////|
+///    |///////////////|
+///    |///////////////|
+///    |///////////////|
+///    -----------------
+///    ```
+///
+pub enum InodeRelativePosition {
+  /// 0-edge
+  Inside,
+  /// 1-edge
+  Top,
+  Bottom,
+  Left,
+  Right,
+  // 2-edges
+  TopLeft,
+  TopRight,
+  BottomLeft,
+  BottomRight,
+  // 3-edges
+  TopBottomLeft,
+  TopBottomRight,
+  LeftRightTop,
+  LeftRightBottom,
+  // All-edges
+  Overlapping,
+}
+
+impl<T> Itree<T>
+where
+  T: Inodeable,
+{
   /// Move node by `(x, y)`.
   ///
   /// * The node moves left when `x < 0`.
@@ -503,8 +616,8 @@ where
   /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
   /// its parent, it simply stops moving.
   ///
-  /// NOTE: This operation also updates all descendants attributes such as
-  /// [`insert`](Itree::insert) method.
+  /// NOTE: This operation also updates all descendants attributes (same with the
+  /// [`insert`](Itree::insert) method).
   ///
   /// # Returns
   ///
@@ -549,7 +662,48 @@ where
       None => None,
     }
   }
+
+  /// Get the relative position of a node based on its parent.
+  ///
+  /// It returns the position enum, see [`InodeRelativePosition`].
+  ///
+  /// For root ID, since it doesn't have parent node, or say, its parent is the terminal device. So
+  /// it returns [`InodeRelativePosition::Overlapping`].
+  ///
+  /// # Panics
+  ///
+  /// If the node doesn't have a parent inside the tree.
+  pub fn relative_position(&self, id: InodeId) -> InodeRelativePosition {
+    if id == self.root_id {
+      InodeRelativePosition::Overlapping
+    } else {
+      let parent_id = self.parent_id(&id).unwrap();
+      let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
+      let child_actual_shape = self.node(&id).unwrap().actual_shape();
+
+      // Here we use `i32` instead of `u16`, since `CoordinatePosition` algorithm requires the
+      // argument `coord` must be
+      // [`&Coord<Self::Scalar>`](https://docs.rs/geo/latest/geo/algorithm/coordinate_position/trait.CoordinatePosition.html#associatedtype.Scalar),
+      // which is a [`GeoNum`](https://docs.rs/geo/latest/geo/trait.GeoNum.html) trait.
+
+      let parent_actual_shape = geo_rect_as!(parent_actual_shape, i32);
+      let child_actual_shape = geo_rect_as!(child_actual_shape, i32);
+
+      let top_left_pos = child_actual_shape.min();
+      let bottom_right_pos = child_actual_shape.max();
+
+      let top_left_coordpos = parent_actual_shape.coordinate_position(&top_left_pos);
+      let bottom_right_coordpos = parent_actual_shape.coordinate_position(&bottom_right_pos);
+      assert!(top_left_coordpos == CoordPos::Inside || top_left_coordpos == CoordPos::OnBoundary);
+      assert!(
+        bottom_right_coordpos == CoordPos::Inside || bottom_right_coordpos == CoordPos::OnBoundary
+      );
+
+      InodeRelativePosition::Overlapping
+    }
+  }
 }
+// Movement }
 
 #[cfg(test)]
 mod tests {
