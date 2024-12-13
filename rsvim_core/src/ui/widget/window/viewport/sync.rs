@@ -1017,6 +1017,9 @@ fn _sync_from_top_left_wrap_linebreak(
               }
             }
           } else {
+            let saved_c_idx = bchars;
+            let saved_start_dcol = dcol;
+
             // Enough space to place this word in current row
             dcol += wd_width;
             bchars += wd_chars;
@@ -1024,11 +1027,11 @@ fn _sync_from_top_left_wrap_linebreak(
             end_c_idx = bchars;
             wcol += wd_width as u16;
 
-            let mut tmp_start_dcol = start_dcol;
+            let mut tmp_start_dcol = saved_start_dcol;
             for (k, c) in wd.chars().enumerate() {
               let c_width = buffer.char_width(c);
               let tmp_end_dcol = tmp_start_dcol + c_width;
-              ch2dcols.insert(start_c_idx + k, (tmp_start_dcol, tmp_end_dcol));
+              ch2dcols.insert(saved_c_idx + k, (tmp_start_dcol, tmp_end_dcol));
               tmp_start_dcol = tmp_end_dcol;
             }
           }
