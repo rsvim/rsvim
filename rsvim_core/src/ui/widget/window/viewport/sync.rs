@@ -1017,10 +1017,10 @@ fn _sync_from_top_left_wrap_linebreak(
               }
             }
           } else {
+            // Enough space to place this word in current row
             let saved_c_idx = bchars;
             let saved_start_dcol = dcol;
 
-            // Enough space to place this word in current row
             dcol += wd_width;
             bchars += wd_chars;
             end_dcol = dcol;
