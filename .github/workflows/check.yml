@@ -38,6 +38,7 @@ jobs:
       - run: |
           sed -i 's/ropey\ =\ {/ropey\ =\ {default-features=false,/' Cargo.toml
           sed -i 's/ropey\ =\ {/ropey\ =\ {default-features=false,/' ./rsvim_core/Cargo.toml
+          git diff
           cargo miri test
         env:
           SCCACHE_GHA_ENABLED: "true"
