@@ -157,6 +157,7 @@ pub struct CursorViewport {
 }
 
 impl CursorViewport {
+  /// Make new [`CursorViewport`].
   pub fn new(dcolumn_range: Range<usize>, char_idx_range: Range<usize>) -> Self {
     Self {
       start_dcolumn: dcolumn_range.start,
@@ -164,6 +165,26 @@ impl CursorViewport {
       start_char_idx: char_idx_range.start,
       end_char_idx: char_idx_range.end,
     }
+  }
+
+  /// Get start display column index, starts from 0.
+  pub fn start_dcolumn(&self) -> usize {
+    self.start_dcolumn
+  }
+
+  /// Get end display column index, starts from 0.
+  pub fn end_dcolumn(&self) -> usize {
+    self.end_dcolumn
+  }
+
+  /// Get start char index, starts from 0.
+  pub fn start_char_idx(&self) -> usize {
+    self.start_char_idx
+  }
+
+  /// Get end char index, starts from 0.
+  pub fn end_char_idx(&self) -> usize {
+    self.end_char_idx
   }
 }
 
