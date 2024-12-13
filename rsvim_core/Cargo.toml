@@ -41,7 +41,7 @@ thiserror = { workspace = true }
 serde_json = { workspace = true }
 regex = { workspace = true }
 ahash = { workspace = true }
-url = { workspace = true }
+# url = { workspace = true }
 path-absolutize = { workspace = true }
 toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
@@ -55,17 +55,27 @@ ascii = { workspace = true }
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
 v8 = { workspace = true }
+swc_atoms = { workspace = true }
 swc_common = { workspace = true, features = ["tty-emitter"] }
+swc_config = { workspace = true }
+swc_config_macro = { workspace = true }
+swc_ecma_ast = { workspace = true, features = ["serde-impl"] }
 swc_ecma_codegen = { workspace = true }
+swc_ecma_codegen_macros = { workspace = true }
+swc_ecma_loader = { workspace = true }
 swc_ecma_parser = { workspace = true }
 swc_ecma_transforms_base = { workspace = true }
-swc_ecma_transforms_typescript = { workspace = true }
+swc_ecma_transforms_macros = { workspace = true }
+swc_ecma_transforms_optimization = { workspace = true }
 swc_ecma_transforms_react = { workspace = true }
+swc_ecma_transforms_typescript = { workspace = true }
+swc_ecma_utils = { workspace = true }
 swc_ecma_visit = { workspace = true }
+swc_eq_ignore_macros = { workspace = true }
 swc_bundler = { workspace = true }
-swc_ecma_ast = { workspace = true }
-swc_ecma_loader = { workspace = true }
-swc_atoms = { workspace = true }
+swc_graph_analyzer = { workspace = true }
+swc_macros_common = { workspace = true }
+swc_visit = { workspace = true }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot }
 
