@@ -1134,8 +1134,10 @@ mod tests {
     test_log_init();
 
     let r1: Range<usize> = Range::default();
-    assert!(r1.is_empty());
     info!("r1:{:?}", r1);
     info!("r1.start:{:?}, r1.end:{:?}", r1.start, r1.end);
+    assert!(r1.is_empty());
+    assert!(r1.start == 0);
+    assert!(r1.end == 0);
   }
 }

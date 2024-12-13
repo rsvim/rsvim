@@ -138,6 +138,36 @@ impl LineViewport {
   }
 }
 
+#[derive(Debug, Copy, Clone)]
+/// The viewport for the cursor.
+///
+/// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we need to
+/// maintain the position with taking consideration of both terminal cell based rows and columns,
+/// and buffer unicode char based lines and chars.
+///
+/// As explained in [`Viewport`], ASCII control codes and other unicode chars can use 0 or more
+/// cells when displayed in terminal, thus when cursor moves on the terminal, it needs to always
+/// stay on the left most cell of a unicode char.
+///
+/// This structure is to maintain the positions for the cursor.
+pub struct CursorViewport {
+  start_dcolumn: usize,
+  start_char_idx: usize,
+  end_dcolumn: usize,
+  end_char_idx: usize,
+}
+
+impl CursorViewport {
+  pub fn new(dcolumn_range: Range<usize>, char_idx_range: Range<usize>) -> Self {
+    Self {
+      start_dcolumn: dcolumn_range.start,
+      end_dcolumn: dcolumn_range.end,
+      start_char_idx: char_idx_range.start,
+      end_char_idx: char_idx_range.end,
+    }
+  }
+}
+
 #[derive(Debug, Clone)]
 /// The viewport for a buffer.
 ///
@@ -387,6 +417,9 @@ pub struct Viewport {
 
   // Maps from buffer line index to its displayed rows in the window.
   lines: BTreeMap<usize, LineViewport>,
+
+  // Cursor position (if has).
+  cursor: CursorViewport,
 }
 
 pub type ViewportArc = Arc<RwLock<Viewport>>;
