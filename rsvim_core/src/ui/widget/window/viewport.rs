@@ -670,18 +670,18 @@ mod tests {
         l, line_viewport, actual_line_idx, expect_start_fills, expect_end_fills
       );
       assert_eq!(
-        line_viewport.start_filled_columns,
+        line_viewport.start_filled_columns(),
         *expect_start_fills.get(&actual_line_idx).unwrap()
       );
       assert_eq!(
-        line_viewport.end_filled_columns,
+        line_viewport.end_filled_columns(),
         *expect_end_fills.get(&actual_line_idx).unwrap()
       );
 
-      let rows = &line_viewport.rows;
+      let rows = &line_viewport.rows();
       for (r, row) in rows.iter() {
         let mut payload = String::new();
-        for c_idx in row.start_char_idx..row.end_char_idx {
+        for c_idx in row.start_char_idx()..row.end_char_idx() {
           payload.push(line.get_char(c_idx).unwrap());
         }
         info!(
@@ -690,7 +690,7 @@ mod tests {
         );
         assert_eq!(payload, expect[*r as usize]);
         let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
-        assert_eq!(total_width, row.end_dcolumn - row.start_dcolumn);
+        assert_eq!(total_width, row.end_dcolumn() - row.start_dcolumn());
 
         if r > rows.first_key_value().unwrap().0 {
           let prev_r = r - 1;
@@ -699,7 +699,7 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, previous row[{}]:{:?}",
             r, r, row, prev_r, prev_row
           );
-          assert_eq!(prev_row.end_dcolumn, row.start_dcolumn);
+          assert_eq!(prev_row.end_dcolumn(), row.start_dcolumn());
         }
         if r < rows.last_key_value().unwrap().0 {
           let next_r = r + 1;
@@ -708,7 +708,7 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, next row[{}]:{:?}",
             r, r, row, next_r, next_row
           );
-          assert_eq!(next_row.start_dcolumn, row.end_dcolumn);
+          assert_eq!(next_row.start_dcolumn(), row.end_dcolumn());
         }
       }
     }
