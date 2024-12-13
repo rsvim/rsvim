@@ -8,7 +8,7 @@ use parking_lot::RwLock;
 use std::collections::BTreeMap;
 use std::ops::Range;
 use std::sync::{Arc, Weak};
-use tracing::trace;
+// use tracing::trace;
 
 pub mod sync;
 
@@ -454,25 +454,25 @@ impl Viewport {
       CursorViewport::new(0..1, 0..1)
     } else {
       assert!(!lines.is_empty());
-      trace!(
-        "lines.len:{:?} line_range.len:{:?}",
-        lines.len(),
-        line_range.len()
-      );
+      // trace!(
+      //   "lines.len:{:?} line_range.len:{:?}",
+      //   lines.len(),
+      //   line_range.len()
+      // );
       assert!(lines.len() == line_range.len());
       assert!(lines.first_key_value().is_some());
       assert!(lines.last_key_value().is_some());
-      trace!(
-        "lines.first_key_value:{:?} line_range.start_line:{:?}",
-        lines.first_key_value().unwrap(),
-        line_range.start_line()
-      );
+      // trace!(
+      //   "lines.first_key_value:{:?} line_range.start_line:{:?}",
+      //   lines.first_key_value().unwrap(),
+      //   line_range.start_line()
+      // );
       assert!(*lines.first_key_value().unwrap().0 == line_range.start_line());
-      trace!(
-        "lines.last_key_value:{:?} line_range.end_line:{:?}",
-        lines.last_key_value().unwrap(),
-        line_range.end_line()
-      );
+      // trace!(
+      //   "lines.last_key_value:{:?} line_range.end_line:{:?}",
+      //   lines.last_key_value().unwrap(),
+      //   line_range.end_line()
+      // );
       assert!(line_range.end_line() > 0);
       assert!(*lines.last_key_value().unwrap().0 == line_range.end_line() - 1);
       let first_line = lines.first_key_value().unwrap();
