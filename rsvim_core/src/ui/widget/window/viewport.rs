@@ -76,9 +76,9 @@ impl LineViewportRow {
 #[derive(Debug, Clone)]
 /// All the displayed rows for a buffer line.
 pub struct LineViewport {
-  pub rows: BTreeMap<u16, LineViewportRow>,
-  pub start_filled_columns: usize,
-  pub end_filled_columns: usize,
+  rows: BTreeMap<u16, LineViewportRow>,
+  start_filled_columns: usize,
+  end_filled_columns: usize,
 }
 
 impl LineViewport {
@@ -449,15 +449,32 @@ impl Viewport {
   pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
     // By default the viewport start from the first line, i.e. starts from 0.
     let (line_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
+    let cursor = if line_range.is_empty() {
+      assert!(lines.is_empty());
+      CursorViewport::new(0..1, 0..1)
+    } else {
+      assert!(!lines.is_empty());
+      assert!(lines.len() == line_range.len());
+      assert!(lines.first_key_value().is_some());
+      assert!(lines.last_key_value().is_some());
+      assert!(*lines.first_key_value().unwrap().0 == line_range.start_line());
+      assert!(*lines.last_key_value().unwrap().0 == line_range.end_line());
+      let first_line = lines.first_key_value().unwrap();
+      let first_line = first_line.1;
+      assert!(!first_line.rows().is_empty());
+      let first_row = first_line.rows().first_key_value().unwrap();
+      let first_row = first_row.1;
+      CursorViewport::new(0..1, 0..1)
+    };
 
     Viewport {
       options: *options,
       buffer,
       actual_shape: *actual_shape,
-      start_line: line_range.start_line,
-      end_line: line_range.end_line,
+      start_line: line_range.start_line(),
+      end_line: line_range.end_line(),
       lines,
-      cursor: CursorViewport::new(Range::default(), Range::default()),
+      cursor,
     }
   }
 
@@ -490,8 +507,8 @@ impl Viewport {
       start_line,
       start_dcolumn,
     );
-    self.start_line = line_range.start_line;
-    self.end_line = line_range.end_line;
+    self.start_line = line_range.start_line();
+    self.end_line = line_range.end_line();
     self.lines = lines;
   }
 }

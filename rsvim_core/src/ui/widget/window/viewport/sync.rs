@@ -9,17 +9,42 @@ use crate::ui::widget::window::{LineViewport, ViewportOptions};
 
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
+use std::ops::Range;
 // use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 /// Lines index inside [`Viewport`].
-pub struct ViewportRect {
-  // Start line index in the buffer, starts from 0.
-  pub start_line: usize,
+pub struct ViewportLineRange {
+  start_line: usize,
+  end_line: usize,
+}
 
-  // End line index in the buffer.
-  pub end_line: usize,
+impl ViewportLineRange {
+  pub fn new(line_range: Range<usize>) -> Self {
+    Self {
+      start_line: line_range.start,
+      end_line: line_range.end,
+    }
+  }
+
+  pub fn is_empty(&self) -> bool {
+    return self.end_line > self.start_line;
+  }
+
+  pub fn len(&self) -> usize {
+    self.end_line - self.start_line
+  }
+
+  // Get start line index in the buffer, starts from 0.
+  pub fn start_line(&self) -> usize {
+    self.start_line
+  }
+
+  // Get end line index in the buffer.
+  pub fn end_line(&self) -> usize {
+    self.end_line
+  }
 }
 
 // Given the buffer and window size, collect information from start line and column, i.e. from the
@@ -30,12 +55,12 @@ pub fn from_top_left(
   actual_shape: &U16Rect,
   start_line: usize,
   start_bcolumn: usize,
-) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   // If window is zero-sized.
   let height = actual_shape.height();
   let width = actual_shape.width();
   if height == 0 || width == 0 {
-    return (ViewportRect::default(), BTreeMap::new());
+    return (ViewportLineRange::default(), BTreeMap::new());
   }
 
   match (options.wrap, options.line_break) {
@@ -68,7 +93,7 @@ fn _sync_from_top_left_nowrap(
   actual_shape: &U16Rect,
   start_line: usize,
   start_bcolumn: usize,
-) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -273,19 +298,14 @@ fn _sync_from_top_left_nowrap(
 
       // trace!("9-current_line:{}, row:{}", current_line, wrow,);
       (
-        ViewportRect {
-          start_line,
-          end_line: current_line,
-          // start_bcolumn,
-          // end_bcolumn: max_bcolumn + 1,
-        },
+        ViewportLineRange::new(start_line..current_line),
         line_viewports,
       )
     }
     None => {
       // The `start_line` is outside of the buffer.
       // trace!("10-start_line:{}", start_line);
-      (ViewportRect::default(), BTreeMap::new())
+      (ViewportLineRange::default(), BTreeMap::new())
     }
   }
 }
@@ -298,7 +318,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
   actual_shape: &U16Rect,
   start_line: usize,
   start_bcolumn: usize,
-) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -558,17 +578,14 @@ fn _sync_from_top_left_wrap_nolinebreak(
 
       // trace!("10-current_line:{}, wrow:{}", current_line, wrow);
       (
-        ViewportRect {
-          start_line,
-          end_line: current_line,
-        },
+        ViewportLineRange::new(start_line..current_line),
         line_viewports,
       )
     }
     None => {
       // The `start_line` is outside of the buffer.
       // trace!("11-start_line:{}", start_line);
-      (ViewportRect::default(), BTreeMap::new())
+      (ViewportLineRange::default(), BTreeMap::new())
     }
   }
 }
@@ -596,7 +613,7 @@ fn _sync_from_top_left_wrap_linebreak(
   actual_shape: &U16Rect,
   start_line: usize,
   start_bcolumn: usize,
-) -> (ViewportRect, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -1098,19 +1115,14 @@ fn _sync_from_top_left_wrap_linebreak(
 
       // trace!("14-wrow:{}, current_line:{}", wrow, current_line);
       (
-        ViewportRect {
-          start_line,
-          end_line: current_line,
-          // start_bcolumn,
-          // end_bcolumn: max_column,
-        },
+        ViewportLineRange::new(start_line..current_line),
         line_viewports,
       )
     }
     None => {
       // The `start_line` is outside of the buffer.
       // trace!("15-start_line:{}", start_line);
-      (ViewportRect::default(), BTreeMap::new())
+      (ViewportLineRange::default(), BTreeMap::new())
     }
   }
 }
