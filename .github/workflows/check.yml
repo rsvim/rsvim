@@ -1,0 +1,46 @@
+name: Check
+on:
+  pull_request:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 3
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-Dwarnings"
+  RUST_BACKTRACE: "full"
+jobs:
+  commit:
+    name: Conventional Commits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: crate-ci/typos@master
+  miri:
+    name: (Experimental) Cargo Miri
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri,rust-src
+      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.6
+      - uses: actions/checkout@v4
+      # Do some hacks here
+      - run: |
+          sed -i 's/ropey\ =\ {/ropey\ =\ {default-features=false,/' Cargo.toml
+          sed -i 's/ropey\ =\ {/ropey\ =\ {default-features=false,/' ./rsvim_core/Cargo.toml
+          git diff --color=always
+          cargo miri test
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+          MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-permissive-provenance"

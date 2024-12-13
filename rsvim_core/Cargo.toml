@@ -18,7 +18,7 @@ description = "The core library for the RSVIM editor."
 doctest = false
 
 [dependencies]
-crossterm = { workspace = true, features = ["event-stream", "serde"] }
+crossterm = { workspace = true, features = ["event-stream"] }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = [
@@ -30,15 +30,14 @@ tokio = { workspace = true, features = ["full"] }
 tokio-util = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }
 futures = { workspace = true }
-compact_str = { workspace = true, features = ["serde", "bytes"] }
+compact_str = { workspace = true, features = ["bytes"] }
 ropey = { workspace = true }
-geo = { workspace = true, features = ["serde"] }
+geo = { workspace = true }
 num-traits = { workspace = true }
 parking_lot = { workspace = true }
 directories = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
-serde_json = { workspace = true }
 regex = { workspace = true }
 ahash = { workspace = true }
 url = { workspace = true }
@@ -49,7 +48,7 @@ zstd = { workspace = true }
 unicode-width = { workspace = true }
 unicode-segmentation = { workspace = true }
 # unicode-normalization = { workspace = true }
-# icu = { workspace = true, features = ["compiled_data", "serde"] }
+# icu = { workspace = true, features = ["compiled_data"] }
 ascii = { workspace = true }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
@@ -59,7 +58,7 @@ swc_atoms = { workspace = true }
 swc_common = { workspace = true, features = ["tty-emitter"] }
 swc_config = { workspace = true }
 swc_config_macro = { workspace = true }
-swc_ecma_ast = { workspace = true, features = ["serde-impl"] }
+swc_ecma_ast = { workspace = true }
 swc_ecma_codegen = { workspace = true }
 swc_ecma_codegen_macros = { workspace = true }
 swc_ecma_loader = { workspace = true }
