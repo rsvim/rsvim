@@ -680,6 +680,7 @@ mod tests {
 
       let rows = &line_viewport.rows();
       for (r, row) in rows.iter() {
+        info!("r-{:?}, row:{:?}", r, row);
         assert_eq!(row.chars_length(), row.char2dcolumns().len());
         assert_eq!(
           row.start_char_idx(),

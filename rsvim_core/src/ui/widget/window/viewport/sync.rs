@@ -792,7 +792,7 @@ fn _sync_from_top_left_wrap_linebreak(
             //   width
             // );
 
-            // If if happens this word starts from the beginning of the row, then we don't need to
+            // If it happens this word starts from the beginning of the row, then we don't need to
             // start from the next row. Because this is an empty of entire row.
             // If this word starts in the middle of the row, then we will have to start a new row.
             if wcol > 0 {
