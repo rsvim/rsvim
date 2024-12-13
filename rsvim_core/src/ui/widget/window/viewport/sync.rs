@@ -209,11 +209,15 @@ fn _sync_from_top_left_nowrap(
             break;
           }
 
+          let saved_start_dcol = dcol;
+          let saved_c_idx = i;
+
           dcol += c_width;
           end_dcol = dcol;
           end_c_idx = i + 1;
           wcol += c_width as u16;
-          ch2dcols.insert(start_c_idx, (start_dcol, end_dcol));
+
+          ch2dcols.insert(saved_c_idx, (saved_start_dcol, dcol));
           // trace!(
           //   "5-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
           //   wrow,
