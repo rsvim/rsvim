@@ -82,25 +82,6 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v1
         with:
           command: check advisories
-  miri:
-    name: (Experimental) Cargo Miri
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: miri,rust-src
-      - uses: Swatinem/rust-cache@v2
-      - uses: mozilla-actions/sccache-action@v0.0.6
-      - uses: actions/checkout@v4
-      # Do some hacks here
-      - run: |
-          git apply ./patch/cargo-miri.patch
-          cargo miri test
-        env:
-          SCCACHE_GHA_ENABLED: "true"
-          RUSTC_WRAPPER: "sccache"
-          MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-permissive-provenance"
   unit_test:
     name: Unit Test
     strategy:

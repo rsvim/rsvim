@@ -1,0 +1,38 @@
+name: Experimental CI
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+concurrency:
+  group: ${{ github.ref }}-${{ github.workflow }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_NET_GIT_FETCH_WITH_CLI: true
+  CARGO_NET_RETRY: 3
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-Dwarnings"
+  RUST_BACKTRACE: "full"
+jobs:
+  miri:
+    name: (Experimental) Cargo Miri
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri,rust-src
+      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.6
+      - uses: actions/checkout@v4
+      # Do some hacks here
+      - run: |
+          git apply ./patch/cargo-miri.patch
+          cargo miri test
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+          MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-permissive-provenance"
