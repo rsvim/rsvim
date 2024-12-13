@@ -20,11 +20,6 @@ pub struct ViewportRect {
 
   // End line index in the buffer.
   pub end_line: usize,
-  // // Start display column index in the buffer, starts from 0.
-  // pub start_bcolumn: usize,
-  //
-  // // End display column index in the buffer.
-  // pub end_bcolumn: usize,
 }
 
 // Given the buffer and window size, collect information from start line and column, i.e. from the
