@@ -933,12 +933,16 @@ fn _sync_from_top_left_wrap_linebreak(
                 }
               }
 
+              let saved_c_idx = bchars;
+              let saved_start_dcol = dcol;
+
               dcol += c_width;
               bchars += 1;
               end_dcol = dcol;
               end_c_idx = bchars;
               wcol += c_width as u16;
-              ch2dcols.insert(start_c_idx, (start_dcol, end_dcol));
+
+              ch2dcols.insert(saved_c_idx, (saved_start_dcol, end_dcol));
 
               // trace!(
               //   "8-wrow/wcol:{}/{}, dcol:{}/{}/{}, bchars:{}, j/c:{}/{:?}, c_idx:{}/{}, fills:{}/{}, wd:{}/{}",
