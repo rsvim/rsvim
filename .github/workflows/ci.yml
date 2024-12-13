@@ -102,10 +102,28 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
+        include:
+          - os: ubuntu-latest
+            toolchain: stable
+          - os: macos-latest
+            toolchain: stable
+          - os: macos-13
+            toolchain: stable
+          - os: windows-latest
+            toolchain: stable
+          - os: ubuntu-latest
+            toolchain: nightly
+          - os: macos-latest
+            toolchain: nightly
+          - os: macos-13
+            toolchain: nightly
+          - os: windows-latest
+            toolchain: nightly
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.6
       - uses: actions/checkout@v4
@@ -119,10 +137,28 @@ jobs:
     name: Code Coverage
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, macos-13, windows-latest]
+        include:
+          - os: ubuntu-latest
+            toolchain: stable
+          - os: macos-latest
+            toolchain: stable
+          - os: macos-13
+            toolchain: stable
+          - os: windows-latest
+            toolchain: stable
+          - os: ubuntu-latest
+            toolchain: nightly
+          - os: macos-latest
+            toolchain: nightly
+          - os: macos-13
+            toolchain: nightly
+          - os: windows-latest
+            toolchain: nightly
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.toolchain }}
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.6
       - uses: actions/checkout@v4
