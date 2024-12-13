@@ -54,13 +54,14 @@ assert_fs = "1.1.2"
 zstd = "0.13.2"
 ascii = "1.1.0"
 unicode-width = "0.2.0"
-unicode-normalization = "0.1.24"
 unicode-segmentation = "1.12.0"
+# unicode-normalization = "0.1.24"
 # icu = { version = "1.5.0", features = ["compiled_data", "serde"] }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
-# See: https://github.com/denoland/deno/blob/main/Cargo.lock
+# deno: https://github.com/denoland/deno/blob/main/Cargo.lock
+# deno_ast: https://github.com/denoland/deno_ast/blob/main/Cargo.toml
 v8 = "=130.0.1"
 swc_common = { version = "=0.37.5", features = ["tty-emitter"] }
 swc_ecma_codegen = "=0.155.1"
