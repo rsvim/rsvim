@@ -12,23 +12,29 @@ use std::sync::{Arc, Weak};
 
 pub mod sync;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 /// The row information of a buffer line.
 pub struct LineViewportRow {
   start_dcolumn: usize,
-  start_char_idx: usize,
   end_dcolumn: usize,
+  start_char_idx: usize,
   end_char_idx: usize,
+  char2dcolumns: BTreeMap<usize, (usize, usize)>,
 }
 
 impl LineViewportRow {
   /// Make new [`LineViewportRow`].
-  pub fn new(dcolumn_range: Range<usize>, char_idx_range: Range<usize>) -> Self {
+  pub fn new(
+    dcolumn_range: Range<usize>,
+    char_idx_range: Range<usize>,
+    char2dcolumns: BTreeMap<usize, (usize, usize)>,
+  ) -> Self {
     Self {
       start_dcolumn: dcolumn_range.start,
       end_dcolumn: dcolumn_range.end,
       start_char_idx: char_idx_range.start,
       end_char_idx: char_idx_range.end,
+      char2dcolumns,
     }
   }
 
@@ -42,7 +48,7 @@ impl LineViewportRow {
     self.end_dcolumn - self.start_dcolumn
   }
 
-  /// Get start display column index (in the buffer) for current row,starts from 0.
+  /// Get start display column index (in the buffer) for current row, starts from 0.
   ///
   /// NOTE: For the term _**display column**_, please see [`Viewport`].
   pub fn start_dcolumn(&self) -> usize {
@@ -54,6 +60,12 @@ impl LineViewportRow {
   /// NOTE: The start and end indexes are left-inclusive and right-exclusive.
   pub fn end_dcolumn(&self) -> usize {
     self.end_dcolumn
+  }
+
+  /// Maps from each char index to its (start and end) display column indexes in current row,
+  /// starts from 0. The value's 0 slot is `start_dcolumn`, 1 slot is `end_dcolumn`.
+  pub fn char2dcolumns(&self) -> &BTreeMap<usize, (usize, usize)> {
+    &self.char2dcolumns
   }
 
   /// First (fully displayed) char index in current row.
@@ -151,8 +163,8 @@ impl LineViewport {
 /// always maintain this position information for it.
 pub struct CursorViewport {
   start_dcolumn: usize,
-  start_char_idx: usize,
   end_dcolumn: usize,
+  start_char_idx: usize,
   end_char_idx: usize,
 }
 
