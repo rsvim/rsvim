@@ -12,6 +12,7 @@ updates:
     ignore:
       - dependency-name: "swc*" # Ignore swc
       - dependency-name: "v8*" # Ignore v8
+      - dependency-name: "sourcemap*" # Ignore sourcemap
 
   - package-ecosystem: "npm" # For typescript document
     directory: "/"
