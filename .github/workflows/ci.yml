@@ -83,7 +83,7 @@ jobs:
         with:
           command: check advisories
   miri:
-    name: (Experimental) Miri
+    name: (Experimental) Cargo Miri
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -100,7 +100,7 @@ jobs:
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
-          MIRIFLAGS: "-Zmiri-disable-isolation"
+          MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-permissive-provenance"
   unit_test:
     name: Unit Test
     strategy:
