@@ -1,0 +1,26 @@
+diff --git a/Cargo.toml b/Cargo.toml
+index d06081d..2e71159 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -35,7 +35,7 @@ futures = "0.3"
+ # heed = "0.20.5"
+ # bytes = { version = "1", features = ["serde"] }
+ compact_str = { version = "0.8.0", features = ["serde", "bytes"] }
+-ropey = "1.6.1"
++ropey = { version = "1.6.1", default-features = false }
+ geo = { version = "0.28.0", features = ["serde"] }
+ num-traits = "0.2.19"
+ parking_lot = "0.12.3"
+diff --git a/rsvim_core/Cargo.toml b/rsvim_core/Cargo.toml
+index b113a81..bb8ea6b 100644
+--- a/rsvim_core/Cargo.toml
++++ b/rsvim_core/Cargo.toml
+@@ -31,7 +31,7 @@ tokio-util = { workspace = true, features = ["full"] }
+ clap = { workspace = true, features = ["derive", "unicode"] }
+ futures = { workspace = true }
+ compact_str = { workspace = true, features = ["serde", "bytes"] }
+-ropey = { workspace = true }
++ropey = { workspace = true, default-features = false }
+ geo = { workspace = true, features = ["serde"] }
+ num-traits = { workspace = true }
+ parking_lot = { workspace = true }
