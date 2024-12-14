@@ -36,8 +36,8 @@ jobs:
       - uses: actions/checkout@v4
       # Do some hacks here
       - run: |
-          sed -i 's/ropey\ =\ {/ropey\ =\ {default-features=false,/' Cargo.toml
-          sed -i 's/ropey\ =\ {/ropey\ =\ {default-features=false,/' ./rsvim_core/Cargo.toml
+          sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' Cargo.toml
+          sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' ./rsvim_core/Cargo.toml
           git diff --color=always
           cargo miri test
         env:
