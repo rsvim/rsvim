@@ -3,7 +3,7 @@
 #![allow(unused_imports)]
 
 use crate::envar;
-use crate::state::command::CursorMovementCommand;
+use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
@@ -94,14 +94,17 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  fn handle_cursor_movement(
-    &self,
-    data_access: StatefulDataAccess,
-    command: CursorMovementCommand,
-  ) {
+  fn handle_cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
     let _state = data_access.state;
     let tree = data_access.tree;
     let event = data_access.event;
+
+    match command {
+      Command::CursorMoveUp(n) => {}
+      Command::CursorMoveDown(n) => {}
+      Command::CursorMoveLeft(n) => {}
+      Command::CursorMoveRight(n) => {}
+    }
   }
 
   fn quit(&self, data_access: StatefulDataAccess) {}

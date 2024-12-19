@@ -1,4 +1,4 @@
-//! Abstract layer between terminal events and editor operations.
+//! An abstract layer between terminal events and editor operations.
 //!
 //! The terminal keyboard/mouse events, for example, both h/j/k/l and left/up/down/right keys in
 //! vim editor (normal mode) means cursor move left/up/down/right. But they have different
