@@ -97,10 +97,18 @@ impl NormalStateful {
   fn handle_cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
     let _state = data_access.state;
     let tree = data_access.tree;
-    let event = data_access.event;
 
     match command {
-      Command::CursorMoveUp(n) => {}
+      Command::CursorMoveUp(n) => {
+        // Up
+        let mut tree = wlock!(tree);
+        match tree.cursor_id() {
+          Some(cursor_id) => {
+            tree.bounded_move_up_by(cursor_id, 1);
+          }
+          None => { /* Skip */ }
+        }
+      }
       Command::CursorMoveDown(n) => {}
       Command::CursorMoveLeft(n) => {}
       Command::CursorMoveRight(n) => {}
