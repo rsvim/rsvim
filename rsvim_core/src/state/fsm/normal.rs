@@ -3,6 +3,7 @@
 #![allow(unused_imports)]
 
 use crate::envar;
+use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
@@ -90,4 +91,29 @@ impl Stateful for NormalStateful {
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
+}
+
+impl NormalStateful {
+  fn handle_cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
+    let _state = data_access.state;
+    let tree = data_access.tree;
+
+    match command {
+      Command::CursorMoveUp(n) => {
+        // Up
+        let mut tree = wlock!(tree);
+        match tree.cursor_id() {
+          Some(cursor_id) => {
+            tree.bounded_move_up_by(cursor_id, 1);
+          }
+          None => { /* Skip */ }
+        }
+      }
+      Command::CursorMoveDown(n) => {}
+      Command::CursorMoveLeft(n) => {}
+      Command::CursorMoveRight(n) => {}
+    }
+  }
+
+  fn quit(&self, data_access: StatefulDataAccess) {}
 }
