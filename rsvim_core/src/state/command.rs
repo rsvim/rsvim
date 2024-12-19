@@ -9,7 +9,7 @@
 //! editor modes and internal core logics.
 
 #[derive(Debug, Copy, Clone)]
-// The editor operation commands.
+// Editor operation commands.
 pub enum Command {
   CursorMoveUp(u16),
   CursorMoveDown(u16),
