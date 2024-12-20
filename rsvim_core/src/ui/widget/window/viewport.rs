@@ -150,7 +150,7 @@ impl LineViewport {
   }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// The viewport to maintain the positions for the cursor.
 ///
 /// As explained in [`Viewport`], ASCII control codes and other unicode chars can use 0 or more
@@ -162,20 +162,25 @@ impl LineViewport {
 /// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we will
 /// always maintain this position information for it.
 pub struct CursorViewport {
+  // Dcolumn index and char index in `LineViewportRow`.
   start_dcolumn: usize,
   end_dcolumn: usize,
-  start_char_idx: usize,
-  end_char_idx: usize,
+  char_idx: usize,
+  // Index in `LineViewport::rows`.
+  row_idx: u16,
+  // Index in `Viewport::lines`.
+  line_idx: usize,
 }
 
 impl CursorViewport {
   /// Make new [`CursorViewport`].
-  pub fn new(dcolumn_range: Range<usize>, char_idx_range: Range<usize>) -> Self {
+  pub fn new(dcolumn_range: Range<usize>, char_idx: usize, row_idx: u16, line_idx: usize) -> Self {
     Self {
       start_dcolumn: dcolumn_range.start,
       end_dcolumn: dcolumn_range.end,
-      start_char_idx: char_idx_range.start,
-      end_char_idx: char_idx_range.end,
+      char_idx,
+      row_idx,
+      line_idx,
     }
   }
 
@@ -189,14 +194,17 @@ impl CursorViewport {
     self.end_dcolumn
   }
 
-  /// Get start char index, starts from 0.
-  pub fn start_char_idx(&self) -> usize {
-    self.start_char_idx
+  /// Get char index, starts from 0.
+  pub fn char_idx(&self) -> usize {
+    self.char_idx
   }
 
-  /// Get end char index, starts from 0.
-  pub fn end_char_idx(&self) -> usize {
-    self.end_char_idx
+  pub fn row_idx(&self) -> u16 {
+    self.row_idx
+  }
+
+  pub fn line_idx(&self) -> usize {
+    self.line_idx
   }
 }
 
@@ -464,7 +472,7 @@ impl Viewport {
     let (line_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
     let cursor = if line_range.is_empty() {
       assert!(lines.is_empty());
-      CursorViewport::new(0..1, 0..1)
+      CursorViewport::new(0..1, 0, 0, 0)
     } else {
       assert!(!lines.is_empty());
       // trace!(
@@ -489,18 +497,17 @@ impl Viewport {
       assert!(line_range.end_line() > 0);
       assert!(*lines.last_key_value().unwrap().0 == line_range.end_line() - 1);
       let first_line = lines.first_key_value().unwrap();
+      let line_idx = *first_line.0;
       let first_line = first_line.1;
       if first_line.rows().is_empty() {
-        CursorViewport::new(0..1, 0..1)
+        CursorViewport::new(0..1, 0, 0, 0)
       } else {
         let first_row = first_line.rows().first_key_value().unwrap();
+        let row_idx = *first_row.0;
         let first_row = first_row.1;
-        let start_char_idx = first_row.start_char_idx();
-        let (start_dcolumn, end_dcolumn) = first_row.char2dcolumns().get(&start_char_idx).unwrap();
-        CursorViewport::new(
-          *start_dcolumn..*end_dcolumn,
-          start_char_idx..(start_char_idx + 1),
-        )
+        let char_idx = first_row.start_char_idx();
+        let (start_dcolumn, end_dcolumn) = first_row.char2dcolumns().get(&char_idx).unwrap();
+        CursorViewport::new(*start_dcolumn..*end_dcolumn, char_idx, row_idx, line_idx)
       }
     };
 
@@ -538,6 +545,11 @@ impl Viewport {
   /// Get cursor viewport information.
   pub fn cursor(&self) -> &CursorViewport {
     &self.cursor
+  }
+
+  /// Set cursor viewport information.
+  pub fn set_cursor(&mut self, cursor: CursorViewport) {
+    self.cursor = cursor;
   }
 
   /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.
