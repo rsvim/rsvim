@@ -494,8 +494,13 @@ impl Viewport {
         CursorViewport::new(0..1, 0..1)
       } else {
         let first_row = first_line.rows().first_key_value().unwrap();
-        let _first_row = first_row.1;
-        CursorViewport::new(0..1, 0..1)
+        let first_row = first_row.1;
+        let start_char_idx = first_row.start_char_idx();
+        let (start_dcolumn, end_dcolumn) = first_row.char2dcolumns().get(&start_char_idx).unwrap();
+        CursorViewport::new(
+          *start_dcolumn..*end_dcolumn,
+          start_char_idx..(start_char_idx + 1),
+        )
       }
     };
 
@@ -528,6 +533,11 @@ impl Viewport {
   /// Get viewport information by lines.
   pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
     &self.lines
+  }
+
+  /// Get cursor viewport information.
+  pub fn cursor(&self) -> &CursorViewport {
+    &self.cursor
   }
 
   /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.

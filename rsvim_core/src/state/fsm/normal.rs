@@ -7,6 +7,7 @@ use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
+use crate::ui::tree::TreeNode;
 use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
@@ -102,6 +103,22 @@ impl NormalStateful {
       Command::CursorMoveUp(n) => {
         // Up
         let mut tree = wlock!(tree);
+        match tree.current_window_id() {
+          Some(current_window_id) => {
+            match tree.node_mut(&current_window_id) {
+              Some(current_window) => match current_window {
+                TreeNode::Window(cur_win) => {
+                  let viewport = cur_win.viewport();
+                  let viewport = wlock!(viewport);
+                  let cursor_viewport = viewport.cursor();
+                }
+                _ => unreachable!("Cursor widget parent must be window widget."),
+              },
+              None => { /* Skip */ }
+            }
+          }
+          None => { /* Skip */ }
+        }
         match tree.cursor_id() {
           Some(cursor_id) => {
             tree.bounded_move_up_by(cursor_id, 1);
