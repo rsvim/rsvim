@@ -5,7 +5,7 @@ use crate::cart::U16Rect;
 use crate::envar;
 use crate::rlock;
 use crate::ui::widget::window::viewport::LineViewportRow;
-use crate::ui::widget::window::{LineViewport, ViewportOptions};
+use crate::ui::widget::window::{ViewportLine, ViewportOptions};
 
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
@@ -55,7 +55,7 @@ pub fn from_top_left(
   actual_shape: &U16Rect,
   start_line: usize,
   start_dcolumn: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, BTreeMap<usize, ViewportLine>) {
   // If window is zero-sized.
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -93,7 +93,7 @@ fn _sync_from_top_left_nowrap(
   actual_shape: &U16Rect,
   start_line: usize,
   start_dcolumn: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, BTreeMap<usize, ViewportLine>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -119,7 +119,7 @@ fn _sync_from_top_left_nowrap(
   //   }
   // );
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut line_viewports: BTreeMap<usize, ViewportLine> = BTreeMap::new();
 
   match buffer.get_lines_at(start_line) {
     // The `start_line` is in the buffer.
@@ -283,7 +283,7 @@ fn _sync_from_top_left_nowrap(
 
         line_viewports.insert(
           current_line,
-          LineViewport::new(rows, start_fills, end_fills),
+          ViewportLine::new(rows, start_fills, end_fills),
         );
         // trace!(
         //   "8-current_line:{}, wrow/wcol:{}/{}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
@@ -325,7 +325,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
   actual_shape: &U16Rect,
   start_line: usize,
   start_dcolumn: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, BTreeMap<usize, ViewportLine>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -351,7 +351,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
   //   }
   // );
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut line_viewports: BTreeMap<usize, ViewportLine> = BTreeMap::new();
 
   match buffer.get_lines_at(start_line) {
     Some(buflines) => {
@@ -573,7 +573,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
 
         line_viewports.insert(
           current_line,
-          LineViewport::new(rows, start_fills, end_fills),
+          ViewportLine::new(rows, start_fills, end_fills),
         );
         // trace!(
         //   "9-current_line:{}, wrow/wcol:{}/{}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
@@ -629,7 +629,7 @@ fn _sync_from_top_left_wrap_linebreak(
   actual_shape: &U16Rect,
   start_line: usize,
   start_dcolumn: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, BTreeMap<usize, ViewportLine>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
 
@@ -653,7 +653,7 @@ fn _sync_from_top_left_wrap_linebreak(
   //   }
   // );
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut line_viewports: BTreeMap<usize, ViewportLine> = BTreeMap::new();
 
   match buffer.get_lines_at(start_line) {
     Some(buflines) => {
@@ -1129,7 +1129,7 @@ fn _sync_from_top_left_wrap_linebreak(
 
         line_viewports.insert(
           current_line,
-          LineViewport::new(rows, start_fills, end_fills),
+          ViewportLine::new(rows, start_fills, end_fills),
         );
         // trace!(
         //   "13-wrow/wcol:{}/{}, dcol:{}/{}/{}, bchars:{}, c_idx:{}/{}, fills:{}/{}",

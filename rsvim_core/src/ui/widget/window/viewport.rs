@@ -87,13 +87,13 @@ impl LineViewportRow {
 
 #[derive(Debug, Clone)]
 /// All the displayed rows for a buffer line.
-pub struct LineViewport {
+pub struct ViewportLine {
   rows: BTreeMap<u16, LineViewportRow>,
   start_filled_columns: usize,
   end_filled_columns: usize,
 }
 
-impl LineViewport {
+impl ViewportLine {
   /// Make new [`LineViewport`].
   pub fn new(
     rows: BTreeMap<u16, LineViewportRow>,
@@ -457,7 +457,7 @@ pub struct Viewport {
   end_line: usize,
 
   // Maps from buffer line index to its displayed rows in the window.
-  lines: BTreeMap<usize, LineViewport>,
+  lines: BTreeMap<usize, ViewportLine>,
 
   // Cursor position (if has).
   cursor: CursorViewport,
@@ -465,6 +465,13 @@ pub struct Viewport {
 
 pub type ViewportArc = Arc<RwLock<Viewport>>;
 pub type ViewportWk = Weak<RwLock<Viewport>>;
+
+pub enum CursorViewportDirection {
+  Up(u16),
+  Down(u16),
+  Left(u16),
+  Right(u16),
+}
 
 impl Viewport {
   pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
@@ -538,7 +545,7 @@ impl Viewport {
   }
 
   /// Get viewport information by lines.
-  pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
+  pub fn lines(&self) -> &BTreeMap<usize, ViewportLine> {
     &self.lines
   }
 
@@ -550,6 +557,11 @@ impl Viewport {
   /// Set cursor viewport information.
   pub fn set_cursor(&mut self, cursor: CursorViewport) {
     self.cursor = cursor;
+  }
+
+  /// Get relative location based on current cursor viewport.
+  pub fn cursor_relative_location(&self, direction: CursorViewportDirection) -> CursorViewport {
+    self.cursor
   }
 
   /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.
