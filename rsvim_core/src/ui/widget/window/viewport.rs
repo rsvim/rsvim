@@ -14,7 +14,7 @@ pub mod sync;
 
 #[derive(Debug, Clone)]
 /// The row information of a buffer line.
-pub struct ViewportLineRow {
+pub struct RowViewport {
   start_dcolumn: usize,
   end_dcolumn: usize,
   start_char_idx: usize,
@@ -22,8 +22,8 @@ pub struct ViewportLineRow {
   char2dcolumns: BTreeMap<usize, (usize, usize)>,
 }
 
-impl ViewportLineRow {
-  /// Make new [`ViewportLineRow`].
+impl RowViewport {
+  /// Make new [`RowViewport`].
   pub fn new(
     dcolumn_range: Range<usize>,
     char_idx_range: Range<usize>,
@@ -87,16 +87,16 @@ impl ViewportLineRow {
 
 #[derive(Debug, Clone)]
 /// All the displayed rows for a buffer line.
-pub struct ViewportLine {
-  rows: BTreeMap<u16, ViewportLineRow>,
+pub struct LineViewport {
+  rows: BTreeMap<u16, RowViewport>,
   start_filled_columns: usize,
   end_filled_columns: usize,
 }
 
-impl ViewportLine {
-  /// Make new [`ViewportLine`].
+impl LineViewport {
+  /// Make new [`LineViewport`].
   pub fn new(
-    rows: BTreeMap<u16, ViewportLineRow>,
+    rows: BTreeMap<u16, RowViewport>,
     start_filled_columns: usize,
     end_filled_columns: usize,
   ) -> Self {
@@ -108,7 +108,7 @@ impl ViewportLine {
   }
 
   /// Maps from row index (based on the window) to a row in the buffer line, starts from 0.
-  pub fn rows(&self) -> &BTreeMap<u16, ViewportLineRow> {
+  pub fn rows(&self) -> &BTreeMap<u16, RowViewport> {
     &self.rows
   }
 
@@ -144,7 +144,7 @@ impl ViewportLine {
   }
 
   /// Get extra filled columns at the end of the row, see:
-  /// [`start_filled_columns`](ViewportLine::start_filled_columns).
+  /// [`start_filled_columns`](LineViewport::start_filled_columns).
   pub fn end_filled_columns(&self) -> usize {
     self.end_filled_columns
   }
@@ -161,19 +161,19 @@ impl ViewportLine {
 ///
 /// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we will
 /// always maintain this position information for it.
-pub struct ViewportCursor {
-  // Dcolumn index and char index in `ViewportLineRow`.
+pub struct CursorViewport {
+  // Dcolumn index and char index in `RowViewport`.
   start_dcolumn: usize,
   end_dcolumn: usize,
   char_idx: usize,
-  // Index in `ViewportLine::rows`.
+  // Index in `LineViewport::rows`.
   row_idx: u16,
   // Index in `Viewport::lines`.
   line_idx: usize,
 }
 
-impl ViewportCursor {
-  /// Make new [`ViewportCursor`].
+impl CursorViewport {
+  /// Make new [`CursorViewport`].
   pub fn new(dcolumn_range: Range<usize>, char_idx: usize, row_idx: u16, line_idx: usize) -> Self {
     Self {
       start_dcolumn: dcolumn_range.start,
@@ -457,16 +457,18 @@ pub struct Viewport {
   end_line: usize,
 
   // Maps from buffer line index to its displayed rows in the window.
-  lines: BTreeMap<usize, ViewportLine>,
+  lines: BTreeMap<usize, LineViewport>,
 
   // Cursor position (if has).
-  cursor: ViewportCursor,
+  cursor: CursorViewport,
 }
 
 pub type ViewportArc = Arc<RwLock<Viewport>>;
 pub type ViewportWk = Weak<RwLock<Viewport>>;
 
-pub enum CursorViewportDirection {
+#[derive(Debug, Clone, Copy)]
+/// The movement direction of the relative location based on current cursor viewport.
+pub enum ViewportCursorMoveDirection {
   Up(u16),
   Down(u16),
   Left(u16),
@@ -479,7 +481,7 @@ impl Viewport {
     let (line_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
     let cursor = if line_range.is_empty() {
       assert!(lines.is_empty());
-      ViewportCursor::new(0..1, 0, 0, 0)
+      CursorViewport::new(0..1, 0, 0, 0)
     } else {
       assert!(!lines.is_empty());
       // trace!(
@@ -507,14 +509,14 @@ impl Viewport {
       let line_idx = *first_line.0;
       let first_line = first_line.1;
       if first_line.rows().is_empty() {
-        ViewportCursor::new(0..1, 0, 0, 0)
+        CursorViewport::new(0..1, 0, 0, 0)
       } else {
         let first_row = first_line.rows().first_key_value().unwrap();
         let row_idx = *first_row.0;
         let first_row = first_row.1;
         let char_idx = first_row.start_char_idx();
         let (start_dcolumn, end_dcolumn) = first_row.char2dcolumns().get(&char_idx).unwrap();
-        ViewportCursor::new(*start_dcolumn..*end_dcolumn, char_idx, row_idx, line_idx)
+        CursorViewport::new(*start_dcolumn..*end_dcolumn, char_idx, row_idx, line_idx)
       }
     };
 
@@ -545,22 +547,25 @@ impl Viewport {
   }
 
   /// Get viewport information by lines.
-  pub fn lines(&self) -> &BTreeMap<usize, ViewportLine> {
+  pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
     &self.lines
   }
 
   /// Get cursor viewport information.
-  pub fn cursor(&self) -> &ViewportCursor {
+  pub fn cursor(&self) -> &CursorViewport {
     &self.cursor
   }
 
   /// Set cursor viewport information.
-  pub fn set_cursor(&mut self, cursor: ViewportCursor) {
+  pub fn set_cursor(&mut self, cursor: CursorViewport) {
     self.cursor = cursor;
   }
 
   /// Get relative location based on current cursor viewport.
-  pub fn cursor_relative_location(&self, direction: CursorViewportDirection) -> ViewportCursor {
+  pub fn cursor_relative_location(
+    &self,
+    move_direction: ViewportCursorMoveDirection,
+  ) -> CursorViewport {
     self.cursor
   }
 
