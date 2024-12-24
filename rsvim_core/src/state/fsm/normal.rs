@@ -8,7 +8,7 @@ use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeNode;
-use crate::ui::widget::window::CursorViewport;
+use crate::ui::widget::window::ViewportCursor;
 use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
@@ -129,14 +129,14 @@ impl NormalStateful {
                     .char2dcolumns()
                     .get(&next_char_idx)
                     .unwrap();
-                  let next_cursor_viewport = CursorViewport::new(
+                  let next_cursor_viewport = ViewportCursor::new(
                     *next_start_dcolumn..*next_end_dcolumn,
                     next_char_idx,
                     row_idx,
                     line_idx,
                   );
 
-                  // If cursor is already 
+                  // If cursor is already
                   if cursor_viewport.char_idx() == 0 {
                     assert!(*cursor_viewport == next_cursor_viewport);
                   }
@@ -163,7 +163,7 @@ impl NormalStateful {
                       .char2dcolumns()
                       .get(&next_char_idx)
                       .unwrap();
-                    CursorViewport::new(
+                    ViewportCursor::new(
                       *next_start_dcolumn..*next_end_dcolumn,
                       next_char_idx,
                       row_idx,

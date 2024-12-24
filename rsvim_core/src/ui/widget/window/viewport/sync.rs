@@ -4,7 +4,7 @@ use crate::buf::BufferWk;
 use crate::cart::U16Rect;
 use crate::envar;
 use crate::rlock;
-use crate::ui::widget::window::viewport::LineViewportRow;
+use crate::ui::widget::window::viewport::ViewportLineRow;
 use crate::ui::widget::window::{ViewportLine, ViewportOptions};
 
 use ropey::RopeSlice;
@@ -141,7 +141,7 @@ fn _sync_from_top_left_nowrap(
         //   current_line
         // );
 
-        let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
+        let mut rows: BTreeMap<u16, ViewportLineRow> = BTreeMap::new();
         let mut wcol = 0_u16;
 
         let mut dcol = 0_usize;
@@ -204,7 +204,7 @@ fn _sync_from_top_left_nowrap(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+              ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
             break;
           }
@@ -252,7 +252,7 @@ fn _sync_from_top_left_nowrap(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+              ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
             break;
           }
@@ -275,7 +275,7 @@ fn _sync_from_top_left_nowrap(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+              ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
             break;
           }
@@ -374,7 +374,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
         //   current_line
         // );
 
-        let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
+        let mut rows: BTreeMap<u16, ViewportLineRow> = BTreeMap::new();
         let mut wcol = 0_u16;
 
         let mut dcol = 0_usize;
@@ -446,7 +446,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+              ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
             let saved_end_fills = width as usize - wcol as usize;
             wrow += 1;
@@ -518,7 +518,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+              ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
             break;
           }
@@ -542,7 +542,7 @@ fn _sync_from_top_left_wrap_nolinebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+              ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
             assert_eq!(wcol, width);
             wrow += 1;
@@ -669,7 +669,7 @@ fn _sync_from_top_left_wrap_linebreak(
           break;
         }
 
-        let mut rows: BTreeMap<u16, LineViewportRow> = BTreeMap::new();
+        let mut rows: BTreeMap<u16, ViewportLineRow> = BTreeMap::new();
         let mut wcol = 0_u16;
 
         let mut bchars = 0_usize;
@@ -798,7 +798,7 @@ fn _sync_from_top_left_wrap_linebreak(
             if wcol > 0 {
               rows.insert(
                 wrow,
-                LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+                ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
               );
 
               // NOTE: The `end_fills` only indicates the cells at the end of the bottom row in the
@@ -897,7 +897,7 @@ fn _sync_from_top_left_wrap_linebreak(
                 // );
                 rows.insert(
                   wrow,
-                  LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+                  ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
                 );
 
                 let saved_end_fills = width as usize - wcol as usize;
@@ -984,7 +984,7 @@ fn _sync_from_top_left_wrap_linebreak(
                 // );
                 rows.insert(
                   wrow,
-                  LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+                  ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
                 );
                 assert_eq!(wcol, width);
                 wrow += 1;
@@ -1071,7 +1071,7 @@ fn _sync_from_top_left_wrap_linebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+              ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
             break;
           }
@@ -1096,7 +1096,7 @@ fn _sync_from_top_left_wrap_linebreak(
             // );
             rows.insert(
               wrow,
-              LineViewportRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
+              ViewportLineRow::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
             );
             assert_eq!(wcol, width);
             wrow += 1;
