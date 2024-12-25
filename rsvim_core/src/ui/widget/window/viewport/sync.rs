@@ -16,34 +16,34 @@ use unicode_segmentation::UnicodeSegmentation;
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 /// Lines index inside [`Viewport`].
 pub struct ViewportLineRange {
-  start_line: usize,
-  end_line: usize,
+  start_line_idx: usize,
+  end_line_idx: usize,
 }
 
 impl ViewportLineRange {
-  pub fn new(line_range: Range<usize>) -> Self {
+  pub fn new(line_idx_range: Range<usize>) -> Self {
     Self {
-      start_line: line_range.start,
-      end_line: line_range.end,
+      start_line_idx: line_idx_range.start,
+      end_line_idx: line_idx_range.end,
     }
   }
 
   pub fn is_empty(&self) -> bool {
-    self.end_line <= self.start_line
+    self.end_line_idx <= self.start_line_idx
   }
 
   pub fn len(&self) -> usize {
-    self.end_line - self.start_line
+    self.end_line_idx - self.start_line_idx
   }
 
   // Get start line index in the buffer, starts from 0.
-  pub fn start_line(&self) -> usize {
-    self.start_line
+  pub fn start_line_idx(&self) -> usize {
+    self.start_line_idx
   }
 
   // Get end line index in the buffer.
-  pub fn end_line(&self) -> usize {
-    self.end_line
+  pub fn end_line_idx(&self) -> usize {
+    self.end_line_idx
   }
 }
 

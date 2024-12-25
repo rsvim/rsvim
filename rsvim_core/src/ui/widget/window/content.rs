@@ -56,7 +56,7 @@ impl Widgetable for WindowContent {
     let viewport = rlock!(viewport);
 
     // If viewport has no lines.
-    if viewport.end_line() <= viewport.start_line() {
+    if viewport.end_line_idx() <= viewport.start_line_idx() {
       trace!("Draw window content, viewport is empty");
       return;
     }
@@ -71,10 +71,10 @@ impl Widgetable for WindowContent {
     let buffer = rlock!(buffer);
 
     let mut row_idx = 0_u16;
-    let mut line_idx = viewport.start_line();
+    let mut line_idx = viewport.start_line_idx();
     let mut lines_slice = buffer.get_lines_at(line_idx).unwrap();
 
-    while line_idx < viewport.end_line() {
+    while line_idx < viewport.end_line_idx() {
       debug_assert!(row_idx < height);
 
       let mut start_fills_count = 0_usize;
@@ -165,12 +165,12 @@ impl Widgetable for WindowContent {
               line_viewport,
               r
             );
-            debug_assert_eq!(total_width, r.end_dcolumn() - r.start_dcolumn());
+            debug_assert_eq!(total_width, r.end_dcol_idx() - r.start_dcol_idx());
           }
 
           // Render left empty parts.
           let occupied_length =
-            (r.end_dcolumn() - r.start_dcolumn()) as u16 + start_fills + end_fills;
+            (r.end_dcol_idx() - r.start_dcol_idx()) as u16 + start_fills + end_fills;
           if width > occupied_length {
             let left_length = width - occupied_length;
             let cells = std::iter::repeat(' ')
