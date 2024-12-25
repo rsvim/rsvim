@@ -676,28 +676,125 @@ impl Viewport {
       return self.cursor;
     }
 
-    let cursor = &self.cursor;
+    let cur = &self.cursor;
     match offset {
       CursorViewportOffset::Up(n) => {
         let n = n as usize;
         // Inside.
-        if cursor.line_idx() >= self.start_line_idx() + n {
-          let line_idx = cursor.line_idx() - n;
+        if cur.line_idx() >= self.start_line_idx() + n {
+          let line_idx = cur.line_idx() - n;
+          self._cursor_vertical_relative_position(line_idx)
         } else {
           // Outside.
+          unimplemented!();
         }
       }
       CursorViewportOffset::Down(n) => {
         let n = n as usize;
+        // Inside.
+        if cur.line_idx() + n < self.end_line_idx() {
+          let line_idx = cur.line_idx() + n;
+          self._cursor_vertical_relative_position(line_idx)
+        } else {
+          // Outside.
+          unimplemented!();
+        }
       }
       CursorViewportOffset::Left(n) => {
         let n = n as usize;
+        // Inside.
+        if cur.line_idx() >= self.start_line_idx() + n {
+          let line_idx = cur.line_idx() - n;
+          let line_viewport = self.lines.get(&line_idx).unwrap();
+          for (row, row_viewport) in line_viewport.rows().iter() {
+            if row_viewport.start_char_idx() >= cur.char_idx()
+              && row_viewport.end_char_idx() < cur.char_idx()
+            {
+              let row_idx = *row;
+              let char_idx = cur.char_idx();
+              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+              let start_dcol_idx = dcol.0;
+              let end_dcol_idx = dcol.1;
+              return CursorViewport::new(
+                start_dcol_idx..end_dcol_idx,
+                char_idx,
+                row_idx,
+                line_idx,
+              );
+            }
+          }
+          unreachable!("Failed to find the char_idx for CursorViewport");
+        } else {
+          // Outside.
+          unimplemented!();
+        }
       }
       CursorViewportOffset::Right(n) => {
         let n = n as usize;
+        // Inside.
+        if cur.line_idx() >= self.start_line_idx() + n {
+          let line_idx = cur.line_idx() - n;
+          let line_viewport = self.lines.get(&line_idx).unwrap();
+          for (row, row_viewport) in line_viewport.rows().iter() {
+            if row_viewport.start_char_idx() >= cur.char_idx()
+              && row_viewport.end_char_idx() < cur.char_idx()
+            {
+              let row_idx = *row;
+              let char_idx = cur.char_idx();
+              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+              let start_dcol_idx = dcol.0;
+              let end_dcol_idx = dcol.1;
+              return CursorViewport::new(
+                start_dcol_idx..end_dcol_idx,
+                char_idx,
+                row_idx,
+                line_idx,
+              );
+            }
+          }
+          unreachable!("Failed to find the char_idx for CursorViewport");
+        } else {
+          // Outside.
+          unimplemented!();
+        }
       }
     }
-    self.cursor
+  }
+
+  fn _cursor_vertical_relative_position(&self, line_idx: usize) -> CursorViewport {
+    let cur = &self.cursor;
+    let line_viewport = self.lines.get(&line_idx).unwrap();
+    for (row, row_viewport) in line_viewport.rows().iter() {
+      if row_viewport.start_char_idx() >= cur.char_idx()
+        && row_viewport.end_char_idx() < cur.char_idx()
+      {
+        let row_idx = *row;
+        let char_idx = cur.char_idx();
+        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+        let start_dcol_idx = dcol.0;
+        let end_dcol_idx = dcol.1;
+        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
+      }
+    }
+    unreachable!("Failed to find vertical relative position for CursorViewport")
+  }
+
+  fn _cursor_horizontal_relative_position(&self, line_idx: usize) -> CursorViewport {
+    let cur = &self.cursor;
+    let line_viewport = self.lines.get(&line_idx).unwrap();
+    for (row, row_viewport) in line_viewport.rows().iter() {
+      if row_viewport.start_char_idx() >= cur.char_idx()
+        && row_viewport.end_char_idx() < cur.char_idx()
+      {
+        let row_idx = *row;
+        let char_idx = cur.char_idx();
+        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+        let start_dcol_idx = dcol.0;
+        let end_dcol_idx = dcol.1;
+        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
+      }
+    }
+    unreachable!("Failed to find vertical relative position for CursorViewport")
   }
 }
 // Cursor Movement }
