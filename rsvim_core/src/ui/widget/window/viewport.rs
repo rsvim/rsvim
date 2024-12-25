@@ -13,7 +13,7 @@ use std::sync::{Arc, Weak};
 pub mod sync;
 
 #[derive(Debug, Clone)]
-/// The row information of a buffer line.
+/// The row viewport in a buffer line.
 pub struct RowViewport {
   start_dcolumn: usize,
   end_dcolumn: usize,
@@ -23,7 +23,7 @@ pub struct RowViewport {
 }
 
 impl RowViewport {
-  /// Make new [`RowViewport`].
+  /// Make new instance.
   pub fn new(
     dcolumn_range: Range<usize>,
     char_idx_range: Range<usize>,
@@ -86,7 +86,7 @@ impl RowViewport {
 }
 
 #[derive(Debug, Clone)]
-/// All the displayed rows for a buffer line.
+/// The buffer line viewport in a buffer.
 pub struct LineViewport {
   rows: BTreeMap<u16, RowViewport>,
   start_filled_columns: usize,
@@ -94,7 +94,7 @@ pub struct LineViewport {
 }
 
 impl LineViewport {
-  /// Make new [`LineViewport`].
+  /// Make new instance.
   pub fn new(
     rows: BTreeMap<u16, RowViewport>,
     start_filled_columns: usize,
@@ -151,7 +151,7 @@ impl LineViewport {
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-/// The viewport to maintain the positions for the cursor.
+/// The cursor viewport to maintain the positions.
 ///
 /// As explained in [`Viewport`], ASCII control codes and other unicode chars can use 0 or more
 /// cells when displayed in terminal, thus when cursor moves on the window/buffer, it needs to
@@ -173,7 +173,7 @@ pub struct CursorViewport {
 }
 
 impl CursorViewport {
-  /// Make new [`CursorViewport`].
+  /// Make new instance.
   pub fn new(dcolumn_range: Range<usize>, char_idx: usize, row_idx: u16, line_idx: usize) -> Self {
     Self {
       start_dcolumn: dcolumn_range.start,
@@ -199,10 +199,12 @@ impl CursorViewport {
     self.char_idx
   }
 
+  /// Get the row index, starts from 0.
   pub fn row_idx(&self) -> u16 {
     self.row_idx
   }
 
+  /// Get the line index, starts from 0.
   pub fn line_idx(&self) -> usize {
     self.line_idx
   }
@@ -467,8 +469,8 @@ pub type ViewportArc = Arc<RwLock<Viewport>>;
 pub type ViewportWk = Weak<RwLock<Viewport>>;
 
 #[derive(Debug, Clone, Copy)]
-/// The movement direction of the relative location based on current cursor viewport.
-pub enum ViewportCursorMoveDirection {
+/// The the relative location offset based on cursor viewport.
+pub enum CursorViewportOffset {
   Up(u16),
   Down(u16),
   Left(u16),
@@ -476,6 +478,7 @@ pub enum ViewportCursorMoveDirection {
 }
 
 impl Viewport {
+  /// Make new instance.
   pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
     // By default the viewport start from the first line, i.e. starts from 0.
     let (line_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
@@ -562,10 +565,7 @@ impl Viewport {
   }
 
   /// Get relative location based on current cursor viewport.
-  pub fn cursor_relative_location(
-    &self,
-    move_direction: ViewportCursorMoveDirection,
-  ) -> CursorViewport {
+  pub fn cursor_relative_location(&self, offset: CursorViewportOffset) -> CursorViewport {
     self.cursor
   }
 
