@@ -565,7 +565,7 @@ impl Viewport {
   }
 
   /// Get relative location based on current cursor viewport.
-  pub fn cursor_relative_location(&self, offset: CursorViewportOffset) -> CursorViewport {
+  pub fn cursor_relative_position(&self, offset: CursorViewportOffset) -> CursorViewport {
     self.cursor
   }
 
