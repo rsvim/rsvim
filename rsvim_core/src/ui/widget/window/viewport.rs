@@ -653,8 +653,8 @@ impl Viewport {
 }
 
 #[derive(Debug, Clone, Copy)]
-/// The the relative location offset based on cursor viewport.
-pub enum CursorViewportOffset {
+/// The offset for viewport/cursor movement.
+pub enum ViewportOffset {
   Up(u16),
   Down(u16),
   Left(u16),
@@ -663,6 +663,27 @@ pub enum CursorViewportOffset {
 
 // Cursor Movement {
 impl Viewport {
+  /// Detect whether current viewport contains a specific position.
+  pub fn contains_position(&self, line_idx: usize, char_idx: usize) -> bool {}
+
+  /// Calculate how to move the viewport so that it can contain the specific position.
+  ///
+  /// # Returns
+  ///
+  /// It returns empty list if the position is already inside current viewport, i.e. the viewport
+  /// doesn't need to move.
+  ///
+  /// It returns a list contains at most two offsets, for the movement is always move up/down, then
+  /// move left/right (optionally).
+  pub fn get_displacement(&self, line_idx: usize, char_idx: usize) -> Vec<ViewportOffset> {
+    if self.contains_position(line_idx, char_idx) {
+      // If already contains this position, no need to move.
+      Vec::new()
+    } else {
+      // If doesn't contain this position, need to move.
+    }
+  }
+
   /// Get relative location based on current cursor viewport, this is useful when implementing
   /// cursor movement.
   ///
@@ -670,7 +691,7 @@ impl Viewport {
   /// - The cursor is still inside of current viewport after movement.
   /// - The cursor goes outside of current viewport after movement. Thus the viewport needs to be
   ///   adjusted as well, and cursor actually remains at the same position (based on terminal).
-  pub fn cursor_relative_position(&self, offset: CursorViewportOffset) -> CursorViewport {
+  pub fn cursor_relative_position(&self, offset: ViewportOffset) -> CursorViewport {
     // If current viewport is empty, don't move.
     if self.is_empty() {
       return self.cursor;
@@ -678,7 +699,7 @@ impl Viewport {
 
     let cur = &self.cursor;
     match offset {
-      CursorViewportOffset::Up(n) => {
+      ViewportOffset::Up(n) => {
         let n = n as usize;
         // Inside.
         if cur.line_idx() >= self.start_line_idx() + n {
@@ -689,7 +710,7 @@ impl Viewport {
           unimplemented!();
         }
       }
-      CursorViewportOffset::Down(n) => {
+      ViewportOffset::Down(n) => {
         let n = n as usize;
         // Inside.
         if cur.line_idx() + n < self.end_line_idx() {
@@ -700,7 +721,7 @@ impl Viewport {
           unimplemented!();
         }
       }
-      CursorViewportOffset::Left(n) => {
+      ViewportOffset::Left(n) => {
         let n = n as usize;
         // Inside.
         if cur.line_idx() >= self.start_line_idx() + n {
@@ -729,7 +750,7 @@ impl Viewport {
           unimplemented!();
         }
       }
-      CursorViewportOffset::Right(n) => {
+      ViewportOffset::Right(n) => {
         let n = n as usize;
         // Inside.
         if cur.line_idx() >= self.start_line_idx() + n {
