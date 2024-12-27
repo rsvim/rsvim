@@ -38,15 +38,15 @@ pub fn next_buffer_id() -> BufferId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-/// The Vim buffer's status.
-pub enum BufferStatus {
-  INIT,    // After created.
-  LOADING, // Loading text content from disk file.
-  SAVING,  // Saving buffer content to disk file.
-  SYNCED,  // Synced content with file system.
-  CHANGED, // Buffer content has been modified.
-}
+//#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
+///// The Vim buffer's status.
+//pub enum BufferStatus {
+//  INIT,    // After created.
+//  LOADING, // Loading text content from disk file.
+//  SAVING,  // Saving buffer content to disk file.
+//  SYNCED,  // Synced content with file system.
+//  CHANGED, // Buffer content has been modified.
+//}
 
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
@@ -223,20 +223,29 @@ impl Buffer {
 
 // Rope {
 impl Buffer {
-  /// Alias to method [`Rope::get_line`](Rope::get_line).
+  // lines {
+
+  /// Same with [`Rope::get_line`](Rope::get_line).
   pub fn get_line(&self, line_idx: usize) -> Option<RopeSlice> {
     self.rope.get_line(line_idx)
   }
 
-  /// Alias to method [`Rope::get_lines_at`](Rope::get_lines_at).
+  /// Same with [`Rope::get_lines_at`](Rope::get_lines_at).
   pub fn get_lines_at(&self, line_idx: usize) -> Option<Lines> {
     self.rope.get_lines_at(line_idx)
   }
 
-  /// Alias to method [`Rope::lines`](Rope::lines).
+  /// Same with [`Rope::lines`](Rope::lines).
   pub fn lines(&self) -> Lines {
     self.rope.lines()
   }
+
+  /// Same with [`Rope::len_lines`](Rope::len_lines).
+  pub fn len_lines(&self) -> usize {
+    self.rope.len_lines()
+  }
+
+  // lines }
 
   /// Alias to method [`Rope::write_to`](Rope::write_to).
   pub fn write_to<T: std::io::Write>(&self, writer: T) -> std::io::Result<()> {

@@ -2,6 +2,8 @@
 
 use crate::buf::BufferWk;
 use crate::cart::U16Rect;
+//use crate::envar;
+//use crate::rlock;
 use crate::ui::widget::window::ViewportOptions;
 
 use parking_lot::RwLock;
@@ -13,25 +15,25 @@ use std::sync::{Arc, Weak};
 pub mod sync;
 
 #[derive(Debug, Clone)]
-/// The row information of a buffer line.
-pub struct LineViewportRow {
-  start_dcolumn: usize,
-  end_dcolumn: usize,
+/// The row viewport in a buffer line.
+pub struct RowViewport {
+  start_dcol_idx: usize,
+  end_dcol_idx: usize,
   start_char_idx: usize,
   end_char_idx: usize,
   char2dcolumns: BTreeMap<usize, (usize, usize)>,
 }
 
-impl LineViewportRow {
-  /// Make new [`LineViewportRow`].
+impl RowViewport {
+  /// Make new instance.
   pub fn new(
-    dcolumn_range: Range<usize>,
+    dcol_idx_range: Range<usize>,
     char_idx_range: Range<usize>,
     char2dcolumns: &BTreeMap<usize, (usize, usize)>,
   ) -> Self {
     Self {
-      start_dcolumn: dcolumn_range.start,
-      end_dcolumn: dcolumn_range.end,
+      start_dcol_idx: dcol_idx_range.start,
+      end_dcol_idx: dcol_idx_range.end,
       start_char_idx: char_idx_range.start,
       end_char_idx: char_idx_range.end,
       char2dcolumns: char2dcolumns.clone(),
@@ -45,21 +47,21 @@ impl LineViewportRow {
 
   /// Get the chars display width on the row of the line.
   pub fn chars_width(&self) -> usize {
-    self.end_dcolumn - self.start_dcolumn
+    self.end_dcol_idx - self.start_dcol_idx
   }
 
   /// Get start display column index (in the buffer) for current row, starts from 0.
   ///
   /// NOTE: For the term _**display column**_, please see [`Viewport`].
-  pub fn start_dcolumn(&self) -> usize {
-    self.start_dcolumn
+  pub fn start_dcol_idx(&self) -> usize {
+    self.start_dcol_idx
   }
 
   /// Get end display column index (in the buffer) for current row.
   ///
   /// NOTE: The start and end indexes are left-inclusive and right-exclusive.
-  pub fn end_dcolumn(&self) -> usize {
-    self.end_dcolumn
+  pub fn end_dcol_idx(&self) -> usize {
+    self.end_dcol_idx
   }
 
   /// First (fully displayed) char index in current row.
@@ -86,17 +88,17 @@ impl LineViewportRow {
 }
 
 #[derive(Debug, Clone)]
-/// All the displayed rows for a buffer line.
+/// The buffer line viewport in a buffer.
 pub struct LineViewport {
-  rows: BTreeMap<u16, LineViewportRow>,
+  rows: BTreeMap<u16, RowViewport>,
   start_filled_columns: usize,
   end_filled_columns: usize,
 }
 
 impl LineViewport {
-  /// Make new [`LineViewport`].
+  /// Make new instance.
   pub fn new(
-    rows: BTreeMap<u16, LineViewportRow>,
+    rows: BTreeMap<u16, RowViewport>,
     start_filled_columns: usize,
     end_filled_columns: usize,
   ) -> Self {
@@ -108,7 +110,7 @@ impl LineViewport {
   }
 
   /// Maps from row index (based on the window) to a row in the buffer line, starts from 0.
-  pub fn rows(&self) -> &BTreeMap<u16, LineViewportRow> {
+  pub fn rows(&self) -> &BTreeMap<u16, RowViewport> {
     &self.rows
   }
 
@@ -150,8 +152,8 @@ impl LineViewport {
   }
 }
 
-#[derive(Debug, Copy, Clone)]
-/// The viewport to maintain the positions for the cursor.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+/// The cursor viewport to maintain the positions.
 ///
 /// As explained in [`Viewport`], ASCII control codes and other unicode chars can use 0 or more
 /// cells when displayed in terminal, thus when cursor moves on the window/buffer, it needs to
@@ -162,41 +164,52 @@ impl LineViewport {
 /// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we will
 /// always maintain this position information for it.
 pub struct CursorViewport {
-  start_dcolumn: usize,
-  end_dcolumn: usize,
-  start_char_idx: usize,
-  end_char_idx: usize,
+  // Display column index.
+  start_dcol_idx: usize,
+  end_dcol_idx: usize,
+  // Char index.
+  char_idx: usize,
+  // Row index.
+  row_idx: u16,
+  // Line index.
+  line_idx: usize,
 }
 
 impl CursorViewport {
-  /// Make new [`CursorViewport`].
-  pub fn new(dcolumn_range: Range<usize>, char_idx_range: Range<usize>) -> Self {
+  /// Make new instance.
+  pub fn new(dcol_idx_range: Range<usize>, char_idx: usize, row_idx: u16, line_idx: usize) -> Self {
     Self {
-      start_dcolumn: dcolumn_range.start,
-      end_dcolumn: dcolumn_range.end,
-      start_char_idx: char_idx_range.start,
-      end_char_idx: char_idx_range.end,
+      start_dcol_idx: dcol_idx_range.start,
+      end_dcol_idx: dcol_idx_range.end,
+      char_idx,
+      row_idx,
+      line_idx,
     }
   }
 
   /// Get start display column index, starts from 0.
-  pub fn start_dcolumn(&self) -> usize {
-    self.start_dcolumn
+  pub fn start_dcol_idx(&self) -> usize {
+    self.start_dcol_idx
   }
 
   /// Get end display column index, starts from 0.
-  pub fn end_dcolumn(&self) -> usize {
-    self.end_dcolumn
+  pub fn end_dcol_idx(&self) -> usize {
+    self.end_dcol_idx
   }
 
-  /// Get start char index, starts from 0.
-  pub fn start_char_idx(&self) -> usize {
-    self.start_char_idx
+  /// Get char index, starts from 0.
+  pub fn char_idx(&self) -> usize {
+    self.char_idx
   }
 
-  /// Get end char index, starts from 0.
-  pub fn end_char_idx(&self) -> usize {
-    self.end_char_idx
+  /// Get the row index, starts from 0.
+  pub fn row_idx(&self) -> u16 {
+    self.row_idx
+  }
+
+  /// Get the line index, starts from 0.
+  pub fn line_idx(&self) -> usize {
+    self.line_idx
   }
 }
 
@@ -443,10 +456,10 @@ pub struct Viewport {
   actual_shape: U16Rect,
 
   // Start line index in the buffer, starts from 0.
-  start_line: usize,
+  start_line_idx: usize,
 
   // End line index in the buffer.
-  end_line: usize,
+  end_line_idx: usize,
 
   // Maps from buffer line index to its displayed rows in the window.
   lines: BTreeMap<usize, LineViewport>,
@@ -459,12 +472,13 @@ pub type ViewportArc = Arc<RwLock<Viewport>>;
 pub type ViewportWk = Weak<RwLock<Viewport>>;
 
 impl Viewport {
+  /// Make new instance.
   pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
     // By default the viewport start from the first line, i.e. starts from 0.
-    let (line_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
-    let cursor = if line_range.is_empty() {
+    let (line_idx_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
+    let cursor = if line_idx_range.is_empty() {
       assert!(lines.is_empty());
-      CursorViewport::new(0..1, 0..1)
+      CursorViewport::new(0..1, 0, 0, 0)
     } else {
       assert!(!lines.is_empty());
       // trace!(
@@ -472,7 +486,7 @@ impl Viewport {
       //   lines.len(),
       //   line_range.len()
       // );
-      assert!(lines.len() == line_range.len());
+      assert!(lines.len() == line_idx_range.len());
       assert!(lines.first_key_value().is_some());
       assert!(lines.last_key_value().is_some());
       // trace!(
@@ -480,22 +494,26 @@ impl Viewport {
       //   lines.first_key_value().unwrap(),
       //   line_range.start_line()
       // );
-      assert!(*lines.first_key_value().unwrap().0 == line_range.start_line());
+      assert!(*lines.first_key_value().unwrap().0 == line_idx_range.start_line_idx());
       // trace!(
       //   "lines.last_key_value:{:?} line_range.end_line:{:?}",
       //   lines.last_key_value().unwrap(),
       //   line_range.end_line()
       // );
-      assert!(line_range.end_line() > 0);
-      assert!(*lines.last_key_value().unwrap().0 == line_range.end_line() - 1);
+      assert!(line_idx_range.end_line_idx() > 0);
+      assert!(*lines.last_key_value().unwrap().0 == line_idx_range.end_line_idx() - 1);
       let first_line = lines.first_key_value().unwrap();
+      let line_idx = *first_line.0;
       let first_line = first_line.1;
       if first_line.rows().is_empty() {
-        CursorViewport::new(0..1, 0..1)
+        CursorViewport::new(0..1, 0, 0, 0)
       } else {
         let first_row = first_line.rows().first_key_value().unwrap();
-        let _first_row = first_row.1;
-        CursorViewport::new(0..1, 0..1)
+        let row_idx = *first_row.0;
+        let first_row = first_row.1;
+        let char_idx = first_row.start_char_idx();
+        let (start_dcolumn, end_dcolumn) = first_row.char2dcolumns().get(&char_idx).unwrap();
+        CursorViewport::new(*start_dcolumn..*end_dcolumn, char_idx, row_idx, line_idx)
       }
     };
 
@@ -503,8 +521,8 @@ impl Viewport {
       options: *options,
       buffer,
       actual_shape: *actual_shape,
-      start_line: line_range.start_line(),
-      end_line: line_range.end_line(),
+      start_line_idx: line_idx_range.start_line_idx(),
+      end_line_idx: line_idx_range.end_line_idx(),
       lines,
       cursor,
     }
@@ -515,35 +533,355 @@ impl Viewport {
     Arc::new(RwLock::new(v))
   }
 
+  #[cfg(not(debug_assertions))]
+  fn _internal_check(&self) {}
+
+  #[cfg(debug_assertions)]
+  fn _internal_check(&self) {
+    assert_eq!(
+      self.end_line_idx <= self.start_line_idx,
+      self.lines.is_empty()
+    );
+    assert!(self.lines.first_key_value().is_some());
+    assert_eq!(
+      *self.lines.first_key_value().unwrap().0,
+      self.start_line_idx
+    );
+    assert!(self.lines.last_key_value().is_some());
+    assert_eq!(
+      *self.lines.last_key_value().unwrap().0,
+      self.end_line_idx - 1
+    );
+    let mut last_line_idx: Option<usize> = None;
+    let mut last_row_idx: Option<u16> = None;
+    for (line_idx, line_viewport) in self.lines.iter() {
+      match last_line_idx {
+        Some(last_line_idx1) => assert_eq!(last_line_idx1 + 1, *line_idx),
+        None => { /* Skip */ }
+      }
+      last_line_idx = Some(*line_idx);
+      let mut last_char_idx: Option<usize> = None;
+      let mut last_dcolumn_idx: Option<usize> = None;
+      for (row_idx, row_viewport) in line_viewport.rows() {
+        match last_row_idx {
+          Some(last_row_idx1) => assert_eq!(last_row_idx1 + 1, *row_idx),
+          None => { /* Skip */ }
+        }
+        last_row_idx = Some(*row_idx);
+        assert!(row_viewport.char2dcolumns().first_key_value().is_some());
+        assert_eq!(
+          *row_viewport.char2dcolumns().first_key_value().unwrap().0,
+          row_viewport.start_char_idx()
+        );
+        assert_eq!(
+          row_viewport.char2dcolumns().first_key_value().unwrap().1 .0,
+          row_viewport.start_dcol_idx()
+        );
+        assert!(row_viewport.char2dcolumns().last_key_value().is_some());
+        assert_eq!(
+          *row_viewport.char2dcolumns().last_key_value().unwrap().0,
+          row_viewport.end_char_idx() - 1
+        );
+        assert_eq!(
+          row_viewport.char2dcolumns().last_key_value().unwrap().1 .1,
+          row_viewport.end_dcol_idx()
+        );
+        for (char_idx, dcolumn_idx) in row_viewport.char2dcolumns().iter() {
+          match last_char_idx {
+            Some(last_char_idx1) => assert_eq!(last_char_idx1 + 1, *char_idx),
+            None => { /* Skip */ }
+          }
+          last_char_idx = Some(*char_idx);
+          match last_dcolumn_idx {
+            Some(last_dcolumn_idx1) => {
+              assert_eq!(dcolumn_idx.0, last_dcolumn_idx1);
+            }
+            None => { /* Skip */ }
+          }
+          last_dcolumn_idx = Some(dcolumn_idx.1);
+        }
+      }
+    }
+  }
+
   /// Get start line index in the buffer, starts from 0.
-  pub fn start_line(&self) -> usize {
-    self.start_line
+  pub fn start_line_idx(&self) -> usize {
+    self._internal_check();
+    self.start_line_idx
   }
 
   /// Get end line index in the buffer.
-  pub fn end_line(&self) -> usize {
-    self.end_line
+  pub fn end_line_idx(&self) -> usize {
+    self._internal_check();
+    self.end_line_idx
   }
 
   /// Get viewport information by lines.
   pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
+    self._internal_check();
     &self.lines
+  }
+
+  /// Whether viewport is empty.
+  pub fn is_empty(&self) -> bool {
+    self._internal_check();
+    self.lines.is_empty()
+  }
+
+  /// Get cursor viewport information.
+  pub fn cursor(&self) -> &CursorViewport {
+    self._internal_check();
+    &self.cursor
+  }
+
+  /// Set cursor viewport information.
+  pub fn set_cursor(&mut self, cursor: CursorViewport) {
+    self.cursor = cursor;
   }
 
   /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.
   pub fn sync_from_top_left(&mut self, start_line: usize, start_dcolumn: usize) {
-    let (line_range, lines) = sync::from_top_left(
+    let (line_idx_range, lines) = sync::from_top_left(
       &self.options,
       self.buffer.clone(),
       &self.actual_shape,
       start_line,
       start_dcolumn,
     );
-    self.start_line = line_range.start_line();
-    self.end_line = line_range.end_line();
+    self.start_line_idx = line_idx_range.start_line_idx();
+    self.end_line_idx = line_idx_range.end_line_idx();
     self.lines = lines;
   }
 }
+
+//#[derive(Debug, Clone, Copy)]
+// /// The vertical offset for viewport/cursor move up/down.
+//pub enum ViewportVerticalOffset {
+//  Up(usize),
+//  Down(usize),
+//}
+//
+//#[derive(Debug, Clone, Copy)]
+// /// The horizontal offset for viewport/cursor move left/right.
+//pub enum ViewportHorizontalOffset {
+//  Left(usize),
+//  Right(usize),
+//}
+//
+// // Cursor Movement {
+//impl Viewport {
+//  /// Detect whether current viewport contains a specific line (vertical).
+//  pub fn contains_line(&self, line_idx: usize) -> bool {
+//    if line_idx < self.start_line_idx() {
+//      false
+//    } else if line_idx >= self.end_line_idx() {
+//      false
+//    } else {
+//      true
+//    }
+//  }
+//
+//  /// Calculate how to move the viewport so that it can contain the specific line.
+//  ///
+//  /// It returns the start line index for the viewport, which indicates the viewport that starts
+//  /// from this line index can contain the specific line, and the movement of the viewport is
+//  /// minimized.
+//  ///
+//  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
+//  ///
+//  /// # Returns
+//  ///
+//  /// It returns `None` if the specific line is already inside current viewport, i.e. the viewport
+//  /// doesn't need to move.
+//  ///
+//  /// It returns the start line index which indicates the new viewport should start from.
+//  pub fn vertical_displacement(&self, line_idx: usize) -> Option<usize> {
+//    if line_idx < self.start_line_idx() {
+//      Some(line_idx)
+//    } else if line_idx >= self.end_line_idx() {
+//      let height = self.actual_shape.height() as usize;
+//      let buf_lines_len = rlock!(self.buffer.upgrade().unwrap()).len_lines();
+//      let line_idx = std::cmp::min(buf_lines_len, line_idx);
+//      if line_idx >= height {
+//        Some(line_idx - height)
+//      } else {
+//        Some(0_usize)
+//      }
+//    } else {
+//      None
+//    }
+//  }
+//
+//  /// Detect whether current viewport contains a specific char (horizontal).
+//  pub fn contains_char(&self, char_idx: usize) -> bool {
+//    if char_idx < self.start_line_idx() {
+//      false
+//    } else if char_idx >= self.end_line_idx() {
+//      false
+//    } else {
+//      true
+//    }
+//  }
+//
+//  /// Calculate how to move the viewport so that it can contain the specific line.
+//  ///
+//  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
+//  ///
+//  /// # Returns
+//  ///
+//  /// It returns None if the line is already inside current viewport, i.e. the viewport
+//  /// doesn't need to move.
+//  ///
+//  /// It returns a offset, which indicates the movement is either up or down.
+//  pub fn get_horizontal_displacement(&self, line_idx: usize) -> Option<ViewportHorizontalOffset> {
+//    if line_idx < self.start_line_idx() {
+//      Some(ViewportHorizontalOffset::Left(
+//        self.start_line_idx() - line_idx,
+//      ))
+//    } else if line_idx >= self.end_line_idx() {
+//      Some(ViewportHorizontalOffset::Right(
+//        line_idx - self.end_line_idx(),
+//      ))
+//    } else {
+//      None
+//    }
+//  }
+//
+//  /// Get relative location based on current cursor viewport, this is useful when implementing
+//  /// cursor movement.
+//  ///
+//  /// There are several scenarios when moving cursor:
+//  /// - The cursor is still inside of current viewport after movement.
+//  /// - The cursor goes outside of current viewport after movement. Thus the viewport needs to be
+//  ///   adjusted as well, and cursor actually remains at the same position (based on terminal).
+//  pub fn cursor_relative_position(&self, offset: ViewportVerticalOffset) -> CursorViewport {
+//    // If current viewport is empty, don't move.
+//    if self.is_empty() {
+//      return self.cursor;
+//    }
+//
+//    let cur = &self.cursor;
+//    match offset {
+//      ViewportVerticalOffset::Up(n) => {
+//        let n = n as usize;
+//        // Inside.
+//        if cur.line_idx() >= self.start_line_idx() + n {
+//          let line_idx = cur.line_idx() - n;
+//          self._cursor_vertical_relative_position(line_idx)
+//        } else {
+//          // Outside.
+//          unimplemented!();
+//        }
+//      }
+//      ViewportVerticalOffset::Down(n) => {
+//        let n = n as usize;
+//        // Inside.
+//        if cur.line_idx() + n < self.end_line_idx() {
+//          let line_idx = cur.line_idx() + n;
+//          self._cursor_vertical_relative_position(line_idx)
+//        } else {
+//          // Outside.
+//          unimplemented!();
+//        }
+//      }
+//      ViewportVerticalOffset::Left(n) => {
+//        let n = n as usize;
+//        // Inside.
+//        if cur.line_idx() >= self.start_line_idx() + n {
+//          let line_idx = cur.line_idx() - n;
+//          let line_viewport = self.lines.get(&line_idx).unwrap();
+//          for (row, row_viewport) in line_viewport.rows().iter() {
+//            if row_viewport.start_char_idx() >= cur.char_idx()
+//              && row_viewport.end_char_idx() < cur.char_idx()
+//            {
+//              let row_idx = *row;
+//              let char_idx = cur.char_idx();
+//              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+//              let start_dcol_idx = dcol.0;
+//              let end_dcol_idx = dcol.1;
+//              return CursorViewport::new(
+//                start_dcol_idx..end_dcol_idx,
+//                char_idx,
+//                row_idx,
+//                line_idx,
+//              );
+//            }
+//          }
+//          unreachable!("Failed to find the char_idx for CursorViewport");
+//        } else {
+//          // Outside.
+//          unimplemented!();
+//        }
+//      }
+//      ViewportVerticalOffset::Right(n) => {
+//        let n = n as usize;
+//        // Inside.
+//        if cur.line_idx() >= self.start_line_idx() + n {
+//          let line_idx = cur.line_idx() - n;
+//          let line_viewport = self.lines.get(&line_idx).unwrap();
+//          for (row, row_viewport) in line_viewport.rows().iter() {
+//            if row_viewport.start_char_idx() >= cur.char_idx()
+//              && row_viewport.end_char_idx() < cur.char_idx()
+//            {
+//              let row_idx = *row;
+//              let char_idx = cur.char_idx();
+//              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+//              let start_dcol_idx = dcol.0;
+//              let end_dcol_idx = dcol.1;
+//              return CursorViewport::new(
+//                start_dcol_idx..end_dcol_idx,
+//                char_idx,
+//                row_idx,
+//                line_idx,
+//              );
+//            }
+//          }
+//          unreachable!("Failed to find the char_idx for CursorViewport");
+//        } else {
+//          // Outside.
+//          unimplemented!();
+//        }
+//      }
+//    }
+//  }
+//
+//  fn _cursor_vertical_relative_position(&self, line_idx: usize) -> CursorViewport {
+//    let cur = &self.cursor;
+//    let line_viewport = self.lines.get(&line_idx).unwrap();
+//    for (row, row_viewport) in line_viewport.rows().iter() {
+//      if row_viewport.start_char_idx() >= cur.char_idx()
+//        && row_viewport.end_char_idx() < cur.char_idx()
+//      {
+//        let row_idx = *row;
+//        let char_idx = cur.char_idx();
+//        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+//        let start_dcol_idx = dcol.0;
+//        let end_dcol_idx = dcol.1;
+//        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
+//      }
+//    }
+//    unreachable!("Failed to find vertical relative position for CursorViewport")
+//  }
+//
+//  fn _cursor_horizontal_relative_position(&self, line_idx: usize) -> CursorViewport {
+//    let cur = &self.cursor;
+//    let line_viewport = self.lines.get(&line_idx).unwrap();
+//    for (row, row_viewport) in line_viewport.rows().iter() {
+//      if row_viewport.start_char_idx() >= cur.char_idx()
+//        && row_viewport.end_char_idx() < cur.char_idx()
+//      {
+//        let row_idx = *row;
+//        let char_idx = cur.char_idx();
+//        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+//        let start_dcol_idx = dcol.0;
+//        let end_dcol_idx = dcol.1;
+//        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
+//      }
+//    }
+//    unreachable!("Failed to find vertical relative position for CursorViewport")
+//  }
+//}
+// // Cursor Movement }
 
 impl Viewport {
   /// Get options.
@@ -625,37 +963,39 @@ mod tests {
   ) {
     info!(
       "actual start_line/end_line:{:?}/{:?}",
-      actual.start_line(),
-      actual.end_line()
+      actual.start_line_idx(),
+      actual.end_line_idx()
     );
     for (k, v) in actual.lines().iter() {
       info!("actual-{:?}: {:?}", k, v);
     }
     info!("expect:{:?}", expect);
 
-    assert_eq!(actual.start_line(), expect_start_line);
-    assert_eq!(actual.end_line(), expect_end_line);
-    if !actual.lines().is_empty() {
+    assert_eq!(actual.start_line_idx(), expect_start_line);
+    assert_eq!(actual.end_line_idx(), expect_end_line);
+    if actual.lines().is_empty() {
+      assert!(actual.end_line_idx() <= actual.start_line_idx());
+    } else {
       let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
       let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
-      assert_eq!(*first_line_idx, actual.start_line());
-      assert_eq!(*last_line_idx, actual.end_line() - 1);
+      assert_eq!(*first_line_idx, actual.start_line_idx());
+      assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
     }
     assert_eq!(
-      actual.end_line() - actual.start_line(),
+      actual.end_line_idx() - actual.start_line_idx(),
       actual.lines().len()
     );
     assert_eq!(
-      actual.end_line() - actual.start_line(),
+      actual.end_line_idx() - actual.start_line_idx(),
       expect_start_fills.len()
     );
     assert_eq!(
-      actual.end_line() - actual.start_line(),
+      actual.end_line_idx() - actual.start_line_idx(),
       expect_end_fills.len()
     );
 
     let buffer = buffer.read();
-    let buflines = buffer.get_lines_at(actual.start_line()).unwrap();
+    let buflines = buffer.get_lines_at(actual.start_line_idx()).unwrap();
     let total_lines = expect_end_line - expect_start_line;
 
     for (l, line) in buflines.enumerate() {
@@ -691,11 +1031,11 @@ mod tests {
           *row.char2dcolumns().last_key_value().unwrap().0 + 1
         );
         assert_eq!(
-          row.start_dcolumn(),
+          row.start_dcol_idx(),
           row.char2dcolumns().first_key_value().unwrap().1 .0
         );
         assert_eq!(
-          row.end_dcolumn(),
+          row.end_dcol_idx(),
           row.char2dcolumns().last_key_value().unwrap().1 .1
         );
 
@@ -706,7 +1046,7 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, previous row[{}]:{:?}",
             r, r, row, prev_r, prev_row
           );
-          assert_eq!(prev_row.end_dcolumn(), row.start_dcolumn());
+          assert_eq!(prev_row.end_dcol_idx(), row.start_dcol_idx());
         }
         if r < rows.last_key_value().unwrap().0 {
           let next_r = r + 1;
@@ -715,7 +1055,7 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, next row[{}]:{:?}",
             r, r, row, next_r, next_row
           );
-          assert_eq!(next_row.start_dcolumn(), row.end_dcolumn());
+          assert_eq!(next_row.start_dcol_idx(), row.end_dcol_idx());
         }
 
         let mut last_char_dcolumn: Option<usize> = None;
@@ -737,7 +1077,7 @@ mod tests {
         );
         assert_eq!(payload, expect[*r as usize]);
         let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
-        assert_eq!(total_width, row.end_dcolumn() - row.start_dcolumn());
+        assert_eq!(total_width, row.end_dcol_idx() - row.start_dcol_idx());
       }
     }
   }

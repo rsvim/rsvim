@@ -10,6 +10,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
 
+pub mod command;
 pub mod fsm;
 pub mod mode;
 

@@ -15,7 +15,7 @@ pub use crate::ui::widget::window::opt::{
   ViewportOptions, WindowLocalOptions, WindowOptionsBuilder,
 };
 pub use crate::ui::widget::window::viewport::{
-  LineViewport, LineViewportRow, Viewport, ViewportArc,
+  CursorViewport, LineViewport, RowViewport, Viewport, ViewportArc,
 };
 
 use std::convert::From;
