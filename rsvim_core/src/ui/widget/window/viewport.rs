@@ -10,7 +10,7 @@ use parking_lot::RwLock;
 use std::collections::BTreeMap;
 use std::ops::Range;
 use std::sync::{Arc, Weak};
-// use tracing::trace;
+use tracing::trace;
 
 pub mod sync;
 
@@ -538,6 +538,7 @@ impl Viewport {
 
   #[cfg(debug_assertions)]
   fn _internal_check(&self) {
+    trace!("run internal check");
     assert_eq!(
       self.end_line_idx <= self.start_line_idx,
       self.lines.is_empty()
