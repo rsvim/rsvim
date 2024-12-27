@@ -2,6 +2,8 @@
 
 use crate::buf::BufferWk;
 use crate::cart::U16Rect;
+use crate::envar;
+use crate::rlock;
 use crate::ui::widget::window::ViewportOptions;
 
 use parking_lot::RwLock;
@@ -653,34 +655,95 @@ impl Viewport {
 }
 
 #[derive(Debug, Clone, Copy)]
-/// The offset for viewport/cursor movement.
-pub enum ViewportOffset {
-  Up(u16),
-  Down(u16),
-  Left(u16),
-  Right(u16),
+/// The vertical offset for viewport/cursor move up/down.
+pub enum ViewportVerticalOffset {
+  Up(usize),
+  Down(usize),
+}
+
+#[derive(Debug, Clone, Copy)]
+/// The horizontal offset for viewport/cursor move left/right.
+pub enum ViewportHorizontalOffset {
+  Left(usize),
+  Right(usize),
 }
 
 // Cursor Movement {
 impl Viewport {
-  /// Detect whether current viewport contains a specific position.
-  pub fn contains_position(&self, line_idx: usize, char_idx: usize) -> bool {}
+  /// Detect whether current viewport contains a specific line (vertical).
+  pub fn contains_line(&self, line_idx: usize) -> bool {
+    if line_idx < self.start_line_idx() {
+      false
+    } else if line_idx >= self.end_line_idx() {
+      false
+    } else {
+      true
+    }
+  }
 
-  /// Calculate how to move the viewport so that it can contain the specific position.
+  /// Calculate how to move the viewport so that it can contain the specific line.
+  ///
+  /// It returns the start line index for the viewport, which indicates the viewport that starts
+  /// from this line index can contain the specific line, and the movement of the viewport is
+  /// minimized.
+  ///
+  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
   ///
   /// # Returns
   ///
-  /// It returns empty list if the position is already inside current viewport, i.e. the viewport
+  /// It returns `None` if the specific line is already inside current viewport, i.e. the viewport
   /// doesn't need to move.
   ///
-  /// It returns a list contains at most two offsets, for the movement is always move up/down, then
-  /// move left/right (optionally).
-  pub fn get_displacement(&self, line_idx: usize, char_idx: usize) -> Vec<ViewportOffset> {
-    if self.contains_position(line_idx, char_idx) {
-      // If already contains this position, no need to move.
-      Vec::new()
+  /// It returns the start line index which indicates the new viewport should start from.
+  pub fn vertical_displacement(&self, line_idx: usize) -> Option<usize> {
+    if line_idx < self.start_line_idx() {
+      Some(line_idx)
+    } else if line_idx >= self.end_line_idx() {
+      let height = self.actual_shape.height() as usize;
+      let buf_lines_len = rlock!(self.buffer.upgrade().unwrap()).len_lines();
+      let line_idx = std::cmp::min(buf_lines_len, line_idx);
+      if line_idx >= height {
+        Some(line_idx - height)
+      } else {
+        Some(0_usize)
+      }
     } else {
-      // If doesn't contain this position, need to move.
+      None
+    }
+  }
+
+  /// Detect whether current viewport contains a specific char (horizontal).
+  pub fn contains_char(&self, char_idx: usize) -> bool {
+    if char_idx < self.start_line_idx() {
+      false
+    } else if char_idx >= self.end_line_idx() {
+      false
+    } else {
+      true
+    }
+  }
+
+  /// Calculate how to move the viewport so that it can contain the specific line.
+  ///
+  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
+  ///
+  /// # Returns
+  ///
+  /// It returns None if the line is already inside current viewport, i.e. the viewport
+  /// doesn't need to move.
+  ///
+  /// It returns a offset, which indicates the movement is either up or down.
+  pub fn get_horizontal_displacement(&self, line_idx: usize) -> Option<ViewportHorizontalOffset> {
+    if line_idx < self.start_line_idx() {
+      Some(ViewportHorizontalOffset::Left(
+        self.start_line_idx() - line_idx,
+      ))
+    } else if line_idx >= self.end_line_idx() {
+      Some(ViewportHorizontalOffset::Right(
+        line_idx - self.end_line_idx(),
+      ))
+    } else {
+      None
     }
   }
 
@@ -691,7 +754,7 @@ impl Viewport {
   /// - The cursor is still inside of current viewport after movement.
   /// - The cursor goes outside of current viewport after movement. Thus the viewport needs to be
   ///   adjusted as well, and cursor actually remains at the same position (based on terminal).
-  pub fn cursor_relative_position(&self, offset: ViewportOffset) -> CursorViewport {
+  pub fn cursor_relative_position(&self, offset: ViewportVerticalOffset) -> CursorViewport {
     // If current viewport is empty, don't move.
     if self.is_empty() {
       return self.cursor;
@@ -699,7 +762,7 @@ impl Viewport {
 
     let cur = &self.cursor;
     match offset {
-      ViewportOffset::Up(n) => {
+      ViewportVerticalOffset::Up(n) => {
         let n = n as usize;
         // Inside.
         if cur.line_idx() >= self.start_line_idx() + n {
@@ -710,7 +773,7 @@ impl Viewport {
           unimplemented!();
         }
       }
-      ViewportOffset::Down(n) => {
+      ViewportVerticalOffset::Down(n) => {
         let n = n as usize;
         // Inside.
         if cur.line_idx() + n < self.end_line_idx() {
@@ -721,7 +784,7 @@ impl Viewport {
           unimplemented!();
         }
       }
-      ViewportOffset::Left(n) => {
+      ViewportVerticalOffset::Left(n) => {
         let n = n as usize;
         // Inside.
         if cur.line_idx() >= self.start_line_idx() + n {
@@ -750,7 +813,7 @@ impl Viewport {
           unimplemented!();
         }
       }
-      ViewportOffset::Right(n) => {
+      ViewportVerticalOffset::Right(n) => {
         let n = n as usize;
         // Inside.
         if cur.line_idx() >= self.start_line_idx() + n {
