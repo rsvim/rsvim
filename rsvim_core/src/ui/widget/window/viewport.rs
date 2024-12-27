@@ -654,20 +654,20 @@ impl Viewport {
   }
 }
 
-#[derive(Debug, Clone, Copy)]
-/// The vertical offset for viewport/cursor move up/down.
-pub enum ViewportVerticalOffset {
-  Up(usize),
-  Down(usize),
-}
-
-#[derive(Debug, Clone, Copy)]
-/// The horizontal offset for viewport/cursor move left/right.
-pub enum ViewportHorizontalOffset {
-  Left(usize),
-  Right(usize),
-}
-
+//#[derive(Debug, Clone, Copy)]
+///// The vertical offset for viewport/cursor move up/down.
+//pub enum ViewportVerticalOffset {
+//  Up(usize),
+//  Down(usize),
+//}
+//
+//#[derive(Debug, Clone, Copy)]
+///// The horizontal offset for viewport/cursor move left/right.
+//pub enum ViewportHorizontalOffset {
+//  Left(usize),
+//  Right(usize),
+//}
+//
 //// Cursor Movement {
 //impl Viewport {
 //  /// Detect whether current viewport contains a specific line (vertical).
