@@ -668,220 +668,220 @@ pub enum ViewportHorizontalOffset {
   Right(usize),
 }
 
-// Cursor Movement {
-impl Viewport {
-  /// Detect whether current viewport contains a specific line (vertical).
-  pub fn contains_line(&self, line_idx: usize) -> bool {
-    if line_idx < self.start_line_idx() {
-      false
-    } else if line_idx >= self.end_line_idx() {
-      false
-    } else {
-      true
-    }
-  }
-
-  /// Calculate how to move the viewport so that it can contain the specific line.
-  ///
-  /// It returns the start line index for the viewport, which indicates the viewport that starts
-  /// from this line index can contain the specific line, and the movement of the viewport is
-  /// minimized.
-  ///
-  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
-  ///
-  /// # Returns
-  ///
-  /// It returns `None` if the specific line is already inside current viewport, i.e. the viewport
-  /// doesn't need to move.
-  ///
-  /// It returns the start line index which indicates the new viewport should start from.
-  pub fn vertical_displacement(&self, line_idx: usize) -> Option<usize> {
-    if line_idx < self.start_line_idx() {
-      Some(line_idx)
-    } else if line_idx >= self.end_line_idx() {
-      let height = self.actual_shape.height() as usize;
-      let buf_lines_len = rlock!(self.buffer.upgrade().unwrap()).len_lines();
-      let line_idx = std::cmp::min(buf_lines_len, line_idx);
-      if line_idx >= height {
-        Some(line_idx - height)
-      } else {
-        Some(0_usize)
-      }
-    } else {
-      None
-    }
-  }
-
-  /// Detect whether current viewport contains a specific char (horizontal).
-  pub fn contains_char(&self, char_idx: usize) -> bool {
-    if char_idx < self.start_line_idx() {
-      false
-    } else if char_idx >= self.end_line_idx() {
-      false
-    } else {
-      true
-    }
-  }
-
-  /// Calculate how to move the viewport so that it can contain the specific line.
-  ///
-  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
-  ///
-  /// # Returns
-  ///
-  /// It returns None if the line is already inside current viewport, i.e. the viewport
-  /// doesn't need to move.
-  ///
-  /// It returns a offset, which indicates the movement is either up or down.
-  pub fn get_horizontal_displacement(&self, line_idx: usize) -> Option<ViewportHorizontalOffset> {
-    if line_idx < self.start_line_idx() {
-      Some(ViewportHorizontalOffset::Left(
-        self.start_line_idx() - line_idx,
-      ))
-    } else if line_idx >= self.end_line_idx() {
-      Some(ViewportHorizontalOffset::Right(
-        line_idx - self.end_line_idx(),
-      ))
-    } else {
-      None
-    }
-  }
-
-  /// Get relative location based on current cursor viewport, this is useful when implementing
-  /// cursor movement.
-  ///
-  /// There are several scenarios when moving cursor:
-  /// - The cursor is still inside of current viewport after movement.
-  /// - The cursor goes outside of current viewport after movement. Thus the viewport needs to be
-  ///   adjusted as well, and cursor actually remains at the same position (based on terminal).
-  pub fn cursor_relative_position(&self, offset: ViewportVerticalOffset) -> CursorViewport {
-    // If current viewport is empty, don't move.
-    if self.is_empty() {
-      return self.cursor;
-    }
-
-    let cur = &self.cursor;
-    match offset {
-      ViewportVerticalOffset::Up(n) => {
-        let n = n as usize;
-        // Inside.
-        if cur.line_idx() >= self.start_line_idx() + n {
-          let line_idx = cur.line_idx() - n;
-          self._cursor_vertical_relative_position(line_idx)
-        } else {
-          // Outside.
-          unimplemented!();
-        }
-      }
-      ViewportVerticalOffset::Down(n) => {
-        let n = n as usize;
-        // Inside.
-        if cur.line_idx() + n < self.end_line_idx() {
-          let line_idx = cur.line_idx() + n;
-          self._cursor_vertical_relative_position(line_idx)
-        } else {
-          // Outside.
-          unimplemented!();
-        }
-      }
-      ViewportVerticalOffset::Left(n) => {
-        let n = n as usize;
-        // Inside.
-        if cur.line_idx() >= self.start_line_idx() + n {
-          let line_idx = cur.line_idx() - n;
-          let line_viewport = self.lines.get(&line_idx).unwrap();
-          for (row, row_viewport) in line_viewport.rows().iter() {
-            if row_viewport.start_char_idx() >= cur.char_idx()
-              && row_viewport.end_char_idx() < cur.char_idx()
-            {
-              let row_idx = *row;
-              let char_idx = cur.char_idx();
-              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
-              let start_dcol_idx = dcol.0;
-              let end_dcol_idx = dcol.1;
-              return CursorViewport::new(
-                start_dcol_idx..end_dcol_idx,
-                char_idx,
-                row_idx,
-                line_idx,
-              );
-            }
-          }
-          unreachable!("Failed to find the char_idx for CursorViewport");
-        } else {
-          // Outside.
-          unimplemented!();
-        }
-      }
-      ViewportVerticalOffset::Right(n) => {
-        let n = n as usize;
-        // Inside.
-        if cur.line_idx() >= self.start_line_idx() + n {
-          let line_idx = cur.line_idx() - n;
-          let line_viewport = self.lines.get(&line_idx).unwrap();
-          for (row, row_viewport) in line_viewport.rows().iter() {
-            if row_viewport.start_char_idx() >= cur.char_idx()
-              && row_viewport.end_char_idx() < cur.char_idx()
-            {
-              let row_idx = *row;
-              let char_idx = cur.char_idx();
-              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
-              let start_dcol_idx = dcol.0;
-              let end_dcol_idx = dcol.1;
-              return CursorViewport::new(
-                start_dcol_idx..end_dcol_idx,
-                char_idx,
-                row_idx,
-                line_idx,
-              );
-            }
-          }
-          unreachable!("Failed to find the char_idx for CursorViewport");
-        } else {
-          // Outside.
-          unimplemented!();
-        }
-      }
-    }
-  }
-
-  fn _cursor_vertical_relative_position(&self, line_idx: usize) -> CursorViewport {
-    let cur = &self.cursor;
-    let line_viewport = self.lines.get(&line_idx).unwrap();
-    for (row, row_viewport) in line_viewport.rows().iter() {
-      if row_viewport.start_char_idx() >= cur.char_idx()
-        && row_viewport.end_char_idx() < cur.char_idx()
-      {
-        let row_idx = *row;
-        let char_idx = cur.char_idx();
-        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
-        let start_dcol_idx = dcol.0;
-        let end_dcol_idx = dcol.1;
-        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
-      }
-    }
-    unreachable!("Failed to find vertical relative position for CursorViewport")
-  }
-
-  fn _cursor_horizontal_relative_position(&self, line_idx: usize) -> CursorViewport {
-    let cur = &self.cursor;
-    let line_viewport = self.lines.get(&line_idx).unwrap();
-    for (row, row_viewport) in line_viewport.rows().iter() {
-      if row_viewport.start_char_idx() >= cur.char_idx()
-        && row_viewport.end_char_idx() < cur.char_idx()
-      {
-        let row_idx = *row;
-        let char_idx = cur.char_idx();
-        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
-        let start_dcol_idx = dcol.0;
-        let end_dcol_idx = dcol.1;
-        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
-      }
-    }
-    unreachable!("Failed to find vertical relative position for CursorViewport")
-  }
-}
-// Cursor Movement }
+//// Cursor Movement {
+//impl Viewport {
+//  /// Detect whether current viewport contains a specific line (vertical).
+//  pub fn contains_line(&self, line_idx: usize) -> bool {
+//    if line_idx < self.start_line_idx() {
+//      false
+//    } else if line_idx >= self.end_line_idx() {
+//      false
+//    } else {
+//      true
+//    }
+//  }
+//
+//  /// Calculate how to move the viewport so that it can contain the specific line.
+//  ///
+//  /// It returns the start line index for the viewport, which indicates the viewport that starts
+//  /// from this line index can contain the specific line, and the movement of the viewport is
+//  /// minimized.
+//  ///
+//  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
+//  ///
+//  /// # Returns
+//  ///
+//  /// It returns `None` if the specific line is already inside current viewport, i.e. the viewport
+//  /// doesn't need to move.
+//  ///
+//  /// It returns the start line index which indicates the new viewport should start from.
+//  pub fn vertical_displacement(&self, line_idx: usize) -> Option<usize> {
+//    if line_idx < self.start_line_idx() {
+//      Some(line_idx)
+//    } else if line_idx >= self.end_line_idx() {
+//      let height = self.actual_shape.height() as usize;
+//      let buf_lines_len = rlock!(self.buffer.upgrade().unwrap()).len_lines();
+//      let line_idx = std::cmp::min(buf_lines_len, line_idx);
+//      if line_idx >= height {
+//        Some(line_idx - height)
+//      } else {
+//        Some(0_usize)
+//      }
+//    } else {
+//      None
+//    }
+//  }
+//
+//  /// Detect whether current viewport contains a specific char (horizontal).
+//  pub fn contains_char(&self, char_idx: usize) -> bool {
+//    if char_idx < self.start_line_idx() {
+//      false
+//    } else if char_idx >= self.end_line_idx() {
+//      false
+//    } else {
+//      true
+//    }
+//  }
+//
+//  /// Calculate how to move the viewport so that it can contain the specific line.
+//  ///
+//  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
+//  ///
+//  /// # Returns
+//  ///
+//  /// It returns None if the line is already inside current viewport, i.e. the viewport
+//  /// doesn't need to move.
+//  ///
+//  /// It returns a offset, which indicates the movement is either up or down.
+//  pub fn get_horizontal_displacement(&self, line_idx: usize) -> Option<ViewportHorizontalOffset> {
+//    if line_idx < self.start_line_idx() {
+//      Some(ViewportHorizontalOffset::Left(
+//        self.start_line_idx() - line_idx,
+//      ))
+//    } else if line_idx >= self.end_line_idx() {
+//      Some(ViewportHorizontalOffset::Right(
+//        line_idx - self.end_line_idx(),
+//      ))
+//    } else {
+//      None
+//    }
+//  }
+//
+//  /// Get relative location based on current cursor viewport, this is useful when implementing
+//  /// cursor movement.
+//  ///
+//  /// There are several scenarios when moving cursor:
+//  /// - The cursor is still inside of current viewport after movement.
+//  /// - The cursor goes outside of current viewport after movement. Thus the viewport needs to be
+//  ///   adjusted as well, and cursor actually remains at the same position (based on terminal).
+//  pub fn cursor_relative_position(&self, offset: ViewportVerticalOffset) -> CursorViewport {
+//    // If current viewport is empty, don't move.
+//    if self.is_empty() {
+//      return self.cursor;
+//    }
+//
+//    let cur = &self.cursor;
+//    match offset {
+//      ViewportVerticalOffset::Up(n) => {
+//        let n = n as usize;
+//        // Inside.
+//        if cur.line_idx() >= self.start_line_idx() + n {
+//          let line_idx = cur.line_idx() - n;
+//          self._cursor_vertical_relative_position(line_idx)
+//        } else {
+//          // Outside.
+//          unimplemented!();
+//        }
+//      }
+//      ViewportVerticalOffset::Down(n) => {
+//        let n = n as usize;
+//        // Inside.
+//        if cur.line_idx() + n < self.end_line_idx() {
+//          let line_idx = cur.line_idx() + n;
+//          self._cursor_vertical_relative_position(line_idx)
+//        } else {
+//          // Outside.
+//          unimplemented!();
+//        }
+//      }
+//      ViewportVerticalOffset::Left(n) => {
+//        let n = n as usize;
+//        // Inside.
+//        if cur.line_idx() >= self.start_line_idx() + n {
+//          let line_idx = cur.line_idx() - n;
+//          let line_viewport = self.lines.get(&line_idx).unwrap();
+//          for (row, row_viewport) in line_viewport.rows().iter() {
+//            if row_viewport.start_char_idx() >= cur.char_idx()
+//              && row_viewport.end_char_idx() < cur.char_idx()
+//            {
+//              let row_idx = *row;
+//              let char_idx = cur.char_idx();
+//              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+//              let start_dcol_idx = dcol.0;
+//              let end_dcol_idx = dcol.1;
+//              return CursorViewport::new(
+//                start_dcol_idx..end_dcol_idx,
+//                char_idx,
+//                row_idx,
+//                line_idx,
+//              );
+//            }
+//          }
+//          unreachable!("Failed to find the char_idx for CursorViewport");
+//        } else {
+//          // Outside.
+//          unimplemented!();
+//        }
+//      }
+//      ViewportVerticalOffset::Right(n) => {
+//        let n = n as usize;
+//        // Inside.
+//        if cur.line_idx() >= self.start_line_idx() + n {
+//          let line_idx = cur.line_idx() - n;
+//          let line_viewport = self.lines.get(&line_idx).unwrap();
+//          for (row, row_viewport) in line_viewport.rows().iter() {
+//            if row_viewport.start_char_idx() >= cur.char_idx()
+//              && row_viewport.end_char_idx() < cur.char_idx()
+//            {
+//              let row_idx = *row;
+//              let char_idx = cur.char_idx();
+//              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+//              let start_dcol_idx = dcol.0;
+//              let end_dcol_idx = dcol.1;
+//              return CursorViewport::new(
+//                start_dcol_idx..end_dcol_idx,
+//                char_idx,
+//                row_idx,
+//                line_idx,
+//              );
+//            }
+//          }
+//          unreachable!("Failed to find the char_idx for CursorViewport");
+//        } else {
+//          // Outside.
+//          unimplemented!();
+//        }
+//      }
+//    }
+//  }
+//
+//  fn _cursor_vertical_relative_position(&self, line_idx: usize) -> CursorViewport {
+//    let cur = &self.cursor;
+//    let line_viewport = self.lines.get(&line_idx).unwrap();
+//    for (row, row_viewport) in line_viewport.rows().iter() {
+//      if row_viewport.start_char_idx() >= cur.char_idx()
+//        && row_viewport.end_char_idx() < cur.char_idx()
+//      {
+//        let row_idx = *row;
+//        let char_idx = cur.char_idx();
+//        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+//        let start_dcol_idx = dcol.0;
+//        let end_dcol_idx = dcol.1;
+//        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
+//      }
+//    }
+//    unreachable!("Failed to find vertical relative position for CursorViewport")
+//  }
+//
+//  fn _cursor_horizontal_relative_position(&self, line_idx: usize) -> CursorViewport {
+//    let cur = &self.cursor;
+//    let line_viewport = self.lines.get(&line_idx).unwrap();
+//    for (row, row_viewport) in line_viewport.rows().iter() {
+//      if row_viewport.start_char_idx() >= cur.char_idx()
+//        && row_viewport.end_char_idx() < cur.char_idx()
+//      {
+//        let row_idx = *row;
+//        let char_idx = cur.char_idx();
+//        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
+//        let start_dcol_idx = dcol.0;
+//        let end_dcol_idx = dcol.1;
+//        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
+//      }
+//    }
+//    unreachable!("Failed to find vertical relative position for CursorViewport")
+//  }
+//}
+//// Cursor Movement }
 
 impl Viewport {
   /// Get options.
