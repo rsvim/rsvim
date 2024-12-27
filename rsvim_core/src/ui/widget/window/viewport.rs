@@ -2,8 +2,8 @@
 
 use crate::buf::BufferWk;
 use crate::cart::U16Rect;
-use crate::envar;
-use crate::rlock;
+//use crate::envar;
+//use crate::rlock;
 use crate::ui::widget::window::ViewportOptions;
 
 use parking_lot::RwLock;
@@ -655,20 +655,20 @@ impl Viewport {
 }
 
 //#[derive(Debug, Clone, Copy)]
-///// The vertical offset for viewport/cursor move up/down.
+// /// The vertical offset for viewport/cursor move up/down.
 //pub enum ViewportVerticalOffset {
 //  Up(usize),
 //  Down(usize),
 //}
 //
 //#[derive(Debug, Clone, Copy)]
-///// The horizontal offset for viewport/cursor move left/right.
+// /// The horizontal offset for viewport/cursor move left/right.
 //pub enum ViewportHorizontalOffset {
 //  Left(usize),
 //  Right(usize),
 //}
 //
-//// Cursor Movement {
+// // Cursor Movement {
 //impl Viewport {
 //  /// Detect whether current viewport contains a specific line (vertical).
 //  pub fn contains_line(&self, line_idx: usize) -> bool {
@@ -881,7 +881,7 @@ impl Viewport {
 //    unreachable!("Failed to find vertical relative position for CursorViewport")
 //  }
 //}
-//// Cursor Movement }
+// // Cursor Movement }
 
 impl Viewport {
   /// Get options.
