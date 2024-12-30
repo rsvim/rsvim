@@ -70,15 +70,15 @@ impl BufWindex {
 
   /// Get the display width starts from the first char 0 until the specific char.
   ///
-  /// NOTE: This is equivalent to `width_in(0..=char_idx)`.
-  pub fn width(&self, char_idx: usize) -> usize {
+  /// NOTE: This is equivalent to `width_between(0..=char_idx)`.
+  pub fn width_until(&self, char_idx: usize) -> usize {
     self._internal_check();
     assert!(char_idx < self.char2width.len());
     self.char2width[char_idx]
   }
 
   /// Get the display width in the inclusive range, i.e. [a, b].
-  pub fn width_in(&self, char_idx_range: std::ops::RangeInclusive<usize>) -> usize {
+  pub fn width_between(&self, char_idx_range: std::ops::RangeInclusive<usize>) -> usize {
     self._internal_check();
     let c_start = *char_idx_range.start();
     let c_end = *char_idx_range.end();
