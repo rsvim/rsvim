@@ -129,16 +129,30 @@ impl BufWindex {
 
   /// Get the first char index which width is greater or equal than the specified width.
   ///
-  /// NOTE:
+  /// Here the *greater or equal than* indicates that:
   /// 1. If the width is exactly the width on a char index, it returns the char index.
   /// 2. Otherwise, it returns the first char which width is greater than it.
   ///
-  /// # Panics
+  /// # Return
   ///
-  /// It panics if the specified `width` is out of range.
-  pub fn char_at(&self, width: usize) -> usize {
+  /// It returns the first char index if the `width` is inside the index.
+  /// It returns `None` if the `width` is out of the index range.
+  pub fn char_at(&self, width: usize) -> Option<usize> {
     self._internal_check();
-    assert!(width <= );
+    if !self.is_empty() && width <= *self.width2char.last_key_value().unwrap().1 {
+      for w in width.. {
+        match self.width2char.get(&w) {
+          Some(c) => {
+            // Early returns.
+            return Some(*c);
+          }
+          None => { /* Skip */ }
+        }
+      }
+      unreachable!();
+    } else {
+      None
+    }
   }
 
   /// Set/update a specified char's width, and re-calculate all display width since this char.
