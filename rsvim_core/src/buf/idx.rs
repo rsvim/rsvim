@@ -1,8 +1,8 @@
 //! Indexing for vim buffer.
 
 // Re-export
-pub use crate::buf::idx::cidx::BufCindex;
 pub use crate::buf::idx::lidx::BufLindex;
+pub use crate::buf::idx::widx::BufWindex;
 
-pub mod cidx;
 pub mod lidx;
+pub mod widx;

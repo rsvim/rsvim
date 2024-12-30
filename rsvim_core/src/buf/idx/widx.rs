@@ -1,20 +1,22 @@
-//! Chars and display width index (line-wise) for vim buffer.
+//! Display width index (line-wise) for each unicode char in vim buffer.
 
 use crate::buf::unicode;
 use crate::buf::Buffer;
 //use ropey::{Rope, RopeBuilder, RopeSlice};
 
 #[derive(Debug, Clone)]
-/// Chars and display width index (line-wise) for vim buffer.
+/// Display width index (line-wise) for each unicode char in vim buffer. For each line, the
+/// char/column index starts from 0.
 ///
-/// NOTE: For each line, the char/column index starts from 0.
-pub struct BufCindex {
+/// NOTE: This structure is wrapped on a [`Vec`], all APIs follow the standard [`Vec`]'s API
+/// design.
+pub struct BufWindex {
   // Char index maps to its accumulate display width, i.e. from the first char/column (0) to
   // current char/column, not just the current char's display width.
   char2width: Vec<usize>,
 }
 
-impl BufCindex {
+impl BufWindex {
   /// Create and initialize index for the line.
   ///
   /// # Panics
@@ -64,14 +66,14 @@ impl BufCindex {
   /// Get the display width starts from the first char 0.
   ///
   /// NOTE: This is equivalent to `get_width_between(0..=char_idx)`.
-  pub fn get_width(&self, char_idx: usize) -> usize {
+  pub fn width(&self, char_idx: usize) -> usize {
     self._internal_check();
     assert!(char_idx < self.char2width.len());
     self.char2width[char_idx]
   }
 
   /// Get the display width between inclusive range, i.e. [a, b].
-  pub fn get_width_between(&self, char_idx_range: std::ops::RangeInclusive<usize>) -> usize {
+  pub fn width_between(&self, char_idx_range: std::ops::RangeInclusive<usize>) -> usize {
     self._internal_check();
     let c_start = *char_idx_range.start();
     let c_end = *char_idx_range.end();
@@ -80,4 +82,12 @@ impl BufCindex {
     assert!(self.char2width[c_start] <= self.char2width[c_end]);
     self.char2width[c_start] - self.char2width[c_end]
   }
+
+  pub fn update(&mut self) {}
+
+  pub fn update_between(&mut self) {}
+
+  pub fn splice(&mut self) {}
+
+  pub fn truncate(&self) {}
 }

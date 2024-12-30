@@ -1,11 +1,10 @@
 //! Vim buffers.
 
-use crate::buf::unicode;
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
 use crate::res::IoResult;
 
 // Re-export
-pub use crate::buf::idx::{BufCindex, BufLindex};
+pub use crate::buf::idx::{BufLindex, BufWindex};
 pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 
 use ahash::AHashMap as HashMap;
