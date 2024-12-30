@@ -5,6 +5,7 @@ use crate::defaults::grapheme::AsciiControlCodeFormatter;
 use crate::res::IoResult;
 
 // Re-export
+pub use crate::buf::idx::{BufCindex, BufLindex};
 pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 
 use ahash::AHashMap as HashMap;
@@ -25,6 +26,7 @@ use std::time::Instant;
 use tracing::trace;
 use unicode_width::UnicodeWidthChar;
 
+pub mod idx;
 pub mod opt;
 
 /// Buffer ID.
@@ -67,7 +69,6 @@ pub struct Buffer {
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
-  // worker_send_to_master: Sender<WorkerToMasterMessage>,
 }
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
