@@ -1,7 +1,6 @@
 //! Vim buffers.
 
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
-// use crate::evloop::msg::WorkerToMasterMessage;
 use crate::res::IoResult;
 
 // Re-export
@@ -39,16 +38,6 @@ pub fn next_buffer_id() -> BufferId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
-
-//#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-///// The Vim buffer's status.
-//pub enum BufferStatus {
-//  INIT,    // After created.
-//  LOADING, // Loading text content from disk file.
-//  SAVING,  // Saving buffer content to disk file.
-//  SYNCED,  // Synced content with file system.
-//  CHANGED, // Buffer content has been modified.
-//}
 
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
