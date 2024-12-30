@@ -1,5 +1,6 @@
 //! Vim buffers.
 
+use crate::buf::unicode;
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
 use crate::res::IoResult;
 
@@ -27,6 +28,7 @@ use unicode_width::UnicodeWidthChar;
 
 pub mod idx;
 pub mod opt;
+pub mod unicode;
 
 /// Buffer ID.
 pub type BufferId = i32;
@@ -157,56 +159,22 @@ impl Buffer {
   /// [UnicodeWidthChar], there's another equivalent crate
   /// [icu::properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
   pub fn char_width(&self, c: char) -> usize {
-    if c.is_ascii_control() {
-      let ac = AsciiChar::from_ascii(c).unwrap();
-      match ac {
-        AsciiChar::Tab => self.tab_stop() as usize,
-        AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
-        _ => {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          format!("{}", ascii_formatter).len()
-        }
-      }
-    } else {
-      UnicodeWidthChar::width_cjk(c).unwrap()
-    }
+    unicode::char_width(&self.options, c)
   }
 
   /// Get the printable cell symbol and its display width.
   pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
-    let width = self.char_width(c);
-    if c.is_ascii_control() {
-      let ac = AsciiChar::from_ascii(c).unwrap();
-      match ac {
-        AsciiChar::Tab => (
-          CompactString::from(" ".repeat(self.tab_stop() as usize)),
-          width,
-        ),
-        AsciiChar::LineFeed | AsciiChar::CarriageReturn => (CompactString::new(""), width),
-        _ => {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          (CompactString::from(format!("{}", ascii_formatter)), width)
-        }
-      }
-    } else {
-      (CompactString::from(c.to_string()), width)
-    }
+    unicode::char_symbol(&self.options, c)
   }
 
   /// Get the display width for a unicode `str`.
   pub fn str_width(&self, s: &str) -> usize {
-    s.chars().map(|c| self.char_width(c)).sum()
+    unicode::str_width(&self.options, s)
   }
 
   /// Get the printable cell symbols and the display width for a unicode `str`.
   pub fn str_symbols(&self, s: &str) -> (CompactString, usize) {
-    s.chars().map(|c| self.char_symbol(c)).fold(
-      (CompactString::with_capacity(s.len()), 0_usize),
-      |(mut init_symbol, init_width), (mut symbol, width)| {
-        init_symbol.push_str(symbol.as_mut_str());
-        (init_symbol, init_width + width)
-      },
-    )
+    unicode::str_symbols(&self.options, s)
   }
 }
 // Unicode }
