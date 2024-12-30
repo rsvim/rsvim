@@ -12,9 +12,14 @@ use std::collections::BTreeMap;
 ///
 /// This structure is mostly like a prefix-sum tree structure.
 pub struct BufWindex {
-  // Char index maps to its accumulate display width, i.e. from the first char/column (0) to
-  // current char/column, not just the current char's display width.
+  // Char index maps to its prefix display width, i.e. from the first char/column (0) to current
+  // char/column, not just the current char's display width.
   char2width: Vec<usize>,
+
+  // Prefix display width maps to its char index. This is the reversed mapping of `char2width`.
+  // NOTE: The keys, i.e. the widths could be non-continuous since one unicode char could use
+  // more than 1 cells.
+  width2char: BTreeMap<usize, usize>,
 }
 
 impl BufWindex {
@@ -24,7 +29,7 @@ impl BufWindex {
   ///
   /// It panics if the line doesn't exist in the rope.
   pub fn new(buf: &Buffer, line_idx: usize) -> Self {
-    let char2width = buf
+    let char2width: Vec<usize> = buf
       .rope
       .get_line(line_idx)
       .unwrap()
@@ -34,8 +39,16 @@ impl BufWindex {
         *acc = width;
         Some(width)
       })
-      .collect::<Vec<usize>>();
-    Self { char2width }
+      .collect();
+    let width2char: BTreeMap<usize, usize> = char2width
+      .iter()
+      .enumerate()
+      .map(|(i, w)| (*w, i))
+      .collect();
+    Self {
+      char2width,
+      width2char,
+    }
   }
 
   #[cfg(not(debug_assertions))]
@@ -43,18 +56,29 @@ impl BufWindex {
 
   #[cfg(debug_assertions)]
   pub fn _internal_check(&self) {
+    // Check length.
+    assert_eq!(self.char2width.is_empty(), self.width2char.is_empty());
+    assert_eq!(self.char2width.len(), self.width2char.len());
+
+    // Check char index continuous.
     let mut last_width: Option<usize> = None;
     for (i, w) in self.char2width.iter().enumerate() {
       if i == 0 {
         assert!(self.char2width[0] == 0);
       }
       match last_width {
-        Some(width_value) => {
-          assert!(*w >= width_value);
+        Some(last_width1) => {
+          assert!(*w >= last_width1);
         }
         None => { /* Skip */ }
       }
       last_width = Some(*w);
+    }
+
+    // Check mapping in both directions.
+    for (w, c) in self.width2char.iter() {
+      assert!(*c < self.char2width.len());
+      assert_eq!(*w, self.char2width[*c]);
     }
   }
 
@@ -68,30 +92,59 @@ impl BufWindex {
     self.char2width.len()
   }
 
-  /// Get the display width starts from the first char 0 until the specific char.
+  /// Get the prefix display width starts from the first char 0 until the specified char.
   ///
   /// NOTE: This is equivalent to `width_between(0..=char_idx)`.
-  pub fn width_until(&self, char_idx: usize) -> usize {
+  ///
+  /// # Return
+  ///
+  /// It returns the prefix display width if `char_idx` is inside the index.
+  /// It returns `None` if the `char_idx` is out of index range.
+  pub fn width_at(&self, char_idx: usize) -> Option<usize> {
     self._internal_check();
-    assert!(char_idx < self.char2width.len());
-    self.char2width[char_idx]
+    if char_idx < self.char2width.len() {
+      Some(self.char2width[char_idx])
+    } else {
+      None
+    }
   }
 
   /// Get the display width in the inclusive range, i.e. [a, b].
-  pub fn width_between(&self, char_idx_range: std::ops::RangeInclusive<usize>) -> usize {
+  ///
+  /// # Return
+  ///
+  /// It returns the display width of the `char_idx_range` if the range is inside the index.
+  /// It returns `None` if the `char_idx_range` is out of index range.
+  pub fn width_between(&self, char_idx_range: std::ops::RangeInclusive<usize>) -> Option<usize> {
     self._internal_check();
     let c_start = *char_idx_range.start();
     let c_end = *char_idx_range.end();
-    assert!(c_start < self.char2width.len());
-    assert!(c_end <= self.char2width.len());
-    assert!(self.char2width[c_start] <= self.char2width[c_end]);
-    self.char2width[c_start] - self.char2width[c_end]
+    if c_start < self.char2width.len() && c_end < self.char2width.len() {
+      assert!(self.char2width[c_start] <= self.char2width[c_end]);
+      Some(self.char2width[c_start] - self.char2width[c_end])
+    } else {
+      None
+    }
   }
 
-  /// Update a specific char's width, and re-calculate all display width since this char.
+  /// Get the first char index which width is greater or equal than the specified width.
+  ///
+  /// NOTE:
+  /// 1. If the width is exactly the width on a char index, it returns the char index.
+  /// 2. Otherwise, it returns the first char which width is greater than it.
+  ///
+  /// # Panics
+  ///
+  /// It panics if the specified `width` is out of range.
+  pub fn char_at(&self, width: usize) -> usize {
+    self._internal_check();
+    assert!(width <= );
+  }
+
+  /// Set/update a specified char's width, and re-calculate all display width since this char.
   ///
   /// NOTE: This operation is `O(N)`, where `N` is the chars count of current line.
-  pub fn update_at(&mut self, char_idx: usize, width: usize) {
+  pub fn set_width_at(&mut self, char_idx: usize, width: usize) {
     self._internal_check();
     assert!(char_idx < self.char2width.len());
     if width > self.char2width[char_idx] {
@@ -107,22 +160,70 @@ impl BufWindex {
     }
   }
 
-  /// Update a range of chars and their width, and re-calculate all display width since the first
+  /// Set/update a range of chars and their width, and re-calculate all display width since the first
   /// char in the range.
   ///
   /// NOTE: This operation is `O(N)`, where `N` is the chars count of current line.
-  pub fn update_between(&mut self, char2width: &BTreeMap<usize, usize>) {}
+  ///
+  /// # Panics
+  ///
+  /// It panics if the provided parameter `char2width` keys are not continuous, i.e. the chars
+  /// index must be continuous.
+  pub fn set_width_between(&mut self, widths: &BTreeMap<usize, usize>) {
+    if widths.is_empty() {
+      return;
+    }
 
-  /// Push (append) a specific char's width.
+    self._internal_check();
+
+    let (start_c, _start_w) = widths.first_key_value().unwrap();
+    let (last_c, _last_w) = widths.last_key_value().unwrap();
+    assert!(*start_c < self.char2width.len());
+    assert!(*last_c < self.char2width.len());
+    let mut last_key: Option<usize> = None;
+    for (k, _v) in widths.iter() {
+      match last_key {
+        Some(last_key1) => assert_eq!(last_key1 + 1, *k),
+        None => { /* Skip */ }
+      }
+      last_key = Some(*k);
+    }
+
+    let mut result: Vec<usize> = self.char2width.iter().take(*start_c).cloned().collect();
+    let init_width = if *start_c > 0 {
+      self.char2width[*start_c - 1]
+    } else {
+      0_usize
+    };
+    let result2: Vec<usize> = self
+      .char2width
+      .iter()
+      .enumerate()
+      .skip(*start_c)
+      .scan(init_width, |acc, (i, _w)| {
+        let width = *acc + widths.get(&i).unwrap();
+        *acc = width;
+        Some(width)
+      })
+      .collect();
+    result.extend(result2);
+    self.char2width = result;
+  }
+
+  /// Push/append a specified char's width.
   ///
   /// NOTE: This operation is `O(1)`.
-  pub fn push(&mut self, width: usize) {}
+  pub fn push(&mut self, _width: usize) {
+    unimplemented!();
+  }
 
-  /// Extend (append) multiple chars and their display width, and re-calculate all display width
+  /// Extend/append multiple chars and their display width, and re-calculate all display width
   /// for the extended chars.
   ///
   /// NOTE: This operation is `O(M)`, where `M` is the chars count of the extended chars.
-  pub fn extend(&mut self, char2width: &Vec<usize>) {}
+  pub fn extend(&mut self, _widths: &Vec<usize>) {
+    unimplemented!();
+  }
 
   /// Replace a range of chars and their display width, with a new range, and re-calculate all
   /// display width since the first char in the newly added range of chars.
@@ -131,14 +232,14 @@ impl BufWindex {
   /// chars count of the new range.
   pub fn splice(&mut self) {}
 
-  /// Shorten (remove/truncate) the chars since a specific char index. This operation doesn't need
+  /// Shorten (remove/truncate) the chars since a specified char index. This operation doesn't need
   /// to trigger re-calculation.
   ///
   /// NOTE: This operation is `O(1)`.
   pub fn truncate(&mut self) {}
 
-  /// Remove a specific range of chars, and re-calculate all display width since the start index in
-  /// the removed range.
+  /// Remove a specified range of chars, and re-calculate all display width since the start index
+  /// in the removed range.
   ///
   /// NOTE: This operation is `O(N)`, where `N` is the chars count of current line.
   pub fn drain(&mut self) {}
