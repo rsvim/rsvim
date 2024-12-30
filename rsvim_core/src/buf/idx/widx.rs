@@ -91,7 +91,7 @@ impl BufWindex {
   /// Update a specific char's width, and re-calculate all display width since this char.
   ///
   /// NOTE: This operation is `O(N)`, where `N` is the chars count of current line.
-  pub fn update(&mut self, char_idx: usize, width: usize) {
+  pub fn update_at(&mut self, char_idx: usize, width: usize) {
     self._internal_check();
     assert!(char_idx < self.char2width.len());
     if width > self.char2width[char_idx] {
