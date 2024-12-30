@@ -1,5 +1,6 @@
 //! Chars and display width index (line-wise) for vim buffer.
 
+use crate::buf::unicode;
 use crate::buf::Buffer;
 //use ropey::{Rope, RopeBuilder, RopeSlice};
 
@@ -21,24 +22,62 @@ impl BufCindex {
   /// It panics if the line doesn't exist in the rope.
   pub fn new(buf: &Buffer, line_idx: usize) -> Self {
     let rope_slice = buf.rope.get_line(line_idx).unwrap();
-    let mut char2width: Vec<usize> = Vec::new();
-    for (i, c) in rope_slice.chars().enumerate() {}
-    Self {
-      char2width: Vec::new(),
+    let mut char2width: Vec<usize> = Vec::with_capacity(rope_slice.len_chars());
+    let mut width = 0_usize;
+    for (_i, c) in rope_slice.chars().enumerate() {
+      char2width.push(width);
+      width += unicode::char_width(&buf.options, c);
     }
+    Self { char2width }
   }
 
   #[cfg(not(debug_assertions))]
   pub fn _internal_check(&self) {}
 
   #[cfg(debug_assertions)]
-  pub fn _internal_check(&self) {}
+  pub fn _internal_check(&self) {
+    let mut last_width: Option<usize> = None;
+    for (i, w) in self.char2width.iter().enumerate() {
+      if i == 0 {
+        assert!(self.char2width[0] == 0);
+      }
+      match last_width {
+        Some(width_value) => {
+          assert!(*w >= width_value);
+        }
+        None => { /* Skip */ }
+      }
+      last_width = Some(*w);
+    }
+  }
 
   pub fn is_empty(&self) -> bool {
+    self._internal_check();
     self.char2width.is_empty()
   }
 
   pub fn len(&self) -> usize {
+    self._internal_check();
     self.char2width.len()
+  }
+
+  /// Get the display width starts from the first char 0.
+  ///
+  /// NOTE: This is equivalent to `get_width_between(0..=char_idx)`.
+  pub fn get_width(&self, char_idx: usize) -> usize {
+    self._internal_check();
+    assert!(char_idx < self.char2width.len());
+    self.char2width[char_idx]
+  }
+
+  /// Get the display width between inclusive range, i.e. [a, b].
+  pub fn get_width_between(&self, char_idx_range: std::ops::RangeInclusive<usize>) -> usize {
+    self._internal_check();
+    let c_start = *char_idx_range.start();
+    let c_end = *char_idx_range.end();
+    assert!(c_start < self.char2width.len());
+    assert!(c_end <= self.char2width.len());
+    assert!(self.char2width[c_start] <= self.char2width[c_end]);
+    self.char2width[c_start] - self.char2width[c_end]
   }
 }
