@@ -24,8 +24,10 @@ impl BufWindex {
   ///
   /// It panics if the line doesn't exist in the rope.
   pub fn new(buf: &Buffer, line_idx: usize) -> Self {
-    let rope_slice = buf.rope.get_line(line_idx).unwrap();
-    let char2width = rope_slice
+    let char2width = buf
+      .rope
+      .get_line(line_idx)
+      .unwrap()
       .chars()
       .scan(0_usize, |acc, c| {
         let width = *acc + unicode::char_width(&buf.options, c);
