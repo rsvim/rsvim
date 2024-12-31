@@ -1,6 +1,6 @@
 [default]
 extend-ignore-re = [
-  # Ignore blocks with `# spellchecker:<on|off>`
+  # Ignore blocks with `// spellchecker:<on|off>`
   "(?s)(#|//)\\s*spellchecker:off.*?\\n\\s*(#|//)\\s*spellchecker:on",
 ]
 

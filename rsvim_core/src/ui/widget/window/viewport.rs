@@ -214,7 +214,7 @@ impl CursorViewport {
 }
 
 #[derive(Debug, Clone)]
-// # spellchecker:off
+// spellchecker:off
 /// The viewport for a buffer.
 ///
 /// There are several factors affecting the final display effects when a window showing a buffer:
@@ -445,7 +445,7 @@ impl CursorViewport {
 /// 2. Start from top right corner.
 /// 3. Start from bottom left corner.
 /// 4. Start from bottom right corner.
-// # spellchecker:on
+// spellchecker:on
 #[allow(dead_code)]
 pub struct Viewport {
   // Options.
@@ -917,7 +917,7 @@ impl Viewport {
   }
 }
 
-// # spellchecker:off
+// spellchecker:off
 #[allow(unused_imports)]
 #[cfg(test)]
 mod tests {
@@ -2181,4 +2181,4 @@ mod tests {
     );
   }
 }
-// # spellchecker:on
+// spellchecker:on
