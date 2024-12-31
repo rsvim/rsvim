@@ -1,8 +1,8 @@
 //! Display width index (line-wise) for each unicode char in vim buffer.
 
+use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
-use crate::buf::Buffer;
-//use ropey::{Rope, RopeBuilder, RopeSlice};
+use ropey::Rope;
 
 use std::collections::BTreeMap;
 
@@ -28,14 +28,13 @@ impl BufWindex {
   /// # Panics
   ///
   /// It panics if the line doesn't exist in the rope.
-  pub fn new(buf: &Buffer, line_idx: usize) -> Self {
-    let char2width: Vec<usize> = buf
-      .rope
+  pub fn new(options: &BufferLocalOptions, rope: &Rope, line_idx: usize) -> Self {
+    let char2width: Vec<usize> = rope
       .get_line(line_idx)
       .unwrap()
       .chars()
       .scan(0_usize, |acc, c| {
-        let width = *acc + unicode::char_width(&buf.options, c);
+        let width = *acc + unicode::char_width(&options, c);
         *acc = width;
         Some(width)
       })
@@ -244,17 +243,158 @@ impl BufWindex {
   ///
   /// NOTE: This operation is `O(N+M)`, where `N` is the chars count of current line, `M` is the
   /// chars count of the new range.
-  pub fn splice(&mut self) {}
+  pub fn splice(&mut self) {
+    unimplemented!();
+  }
 
   /// Shorten (remove/truncate) the chars since a specified char index. This operation doesn't need
   /// to trigger re-calculation.
   ///
   /// NOTE: This operation is `O(1)`.
-  pub fn truncate(&mut self) {}
+  pub fn truncate(&mut self) {
+    unimplemented!();
+  }
 
   /// Remove a specified range of chars, and re-calculate all display width since the start index
   /// in the removed range.
   ///
   /// NOTE: This operation is `O(N)`, where `N` is the chars count of current line.
-  pub fn drain(&mut self) {}
+  pub fn drain(&mut self) {
+    unimplemented!();
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  use crate::test::buf::make_rope_from_lines;
+  #[allow(dead_code)]
+  use crate::test::log::init as test_log_init;
+
+  fn ensure_width_at(actual: &BufWindex, expect: &Vec<Option<usize>>) {
+    for (i, e) in expect.iter().enumerate() {
+      let a = actual.width_at(i);
+      assert_eq!(a, e.clone());
+    }
+  }
+
+  #[test]
+  fn width_at1() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
+    let actual = BufWindex::new(&options, &rope, 0);
+    // 0-6, 14-19, 19
+    let expect: Vec<Option<usize>> = [
+      (0..=6).map(|i| Some(i)).collect(),
+      (14..=19).map(|i| Some(i)).collect(),
+      vec![Some(19), None, None, None],
+    ]
+    .concat();
+    ensure_width_at(&actual, &expect);
+  }
+
+  #[test]
+  fn width_at2() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
+    let actual = BufWindex::new(&options, &rope, 0);
+    // 0-43, 43
+    let expect: Vec<Option<usize>> = [
+      (0..=43).map(|i| Some(i)).collect(),
+      vec![Some(43), None, None, None],
+    ]
+    .concat();
+    ensure_width_at(&actual, &expect);
+  }
+
+  #[test]
+  fn width_at3() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
+    let actual = BufWindex::new(&options, &rope, 0);
+    // 0-8, 16-18, 19-33, 35-51, 51
+    let expect: Vec<Option<usize>> = [
+      (0..=8).map(|i| Some(i)).collect(),
+      (16..=18).map(|i| Some(i)).collect(),
+      (19..=26)
+        .scan(19, |state, i| {
+          let diff: usize = i - *state;
+          Some(Some(*state + 2 * diff))
+        })
+        .collect(),
+      (35..=51).map(|i| Some(i)).collect(),
+      vec![Some(51), None, None, None],
+    ]
+    .concat();
+    ensure_width_at(&actual, &expect);
+  }
+
+  #[test]
+  fn width_at4() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec!["  1. When the\r"]);
+    let actual = BufWindex::new(&options, &rope, 0);
+    // 0-12, 12
+    let expect: Vec<Option<usize>> = [
+      (0..=12).map(|i| Some(i)).collect(),
+      vec![Some(12), None, None, None],
+    ]
+    .concat();
+    ensure_width_at(&actual, &expect);
+  }
+
+  #[test]
+  fn width_at5() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec![
+      "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
+    ]);
+    let actual = BufWindex::new(&options, &rope, 0);
+    // 0-35, 36-45, 46, 48-57, 58-77, 77
+    let expect: Vec<Option<usize>> = [
+      (0..=17).map(|i| Some(i * 2)).collect(),
+      (36..=45).map(|i| Some(i)).collect(),
+      vec![Some(46)],
+      (48..=57).map(|i| Some(i)).collect(),
+      (58..=67)
+        .scan(58, |state, i| {
+          let diff: usize = i - *state;
+          Some(Some(*state + 2 * diff))
+        })
+        .collect(),
+      vec![Some(77), None, None, None],
+    ]
+    .concat();
+    ensure_width_at(&actual, &expect);
+  }
+
+  #[test]
+  fn width_at6() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec![
+      "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+    ]);
+    let actual = BufWindex::new(&options, &rope, 0);
+    // 0, 8, 16-129, 129
+    let expect: Vec<Option<usize>> = [
+      vec![Some(0), Some(8)],
+      (16..=129).map(|i| Some(i)).collect(),
+      vec![Some(129), None, None, None],
+    ]
+    .concat();
+    ensure_width_at(&actual, &expect);
+  }
 }
