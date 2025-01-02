@@ -32,7 +32,8 @@ pub struct BufWindex {
   // NOTE:
   // 1. Some unicodes could use more than 1 cells, thus the widths could be non-continuous.
   // 2. Some unicodes could use 0 cells (i.e. line-feed), multiple char index could have the same
-  //    width. In such case, the width point to the first char index.
+  //    width. In such case, the width point to the larger char index and try to cover wider char
+  //    index range.
   width2char: BTreeMap<usize, usize>,
 }
 
@@ -66,18 +67,8 @@ impl BufWindex {
       assert!(self.width2char.contains_key(w));
       let c = self.width2char[w];
       // trace!("char2width[{i}]:{w:?}, width2char[{w}]:{c:?}");
-      assert!(i >= c);
+      assert!(i <= c);
     }
-  }
-
-  pub fn is_empty(&self) -> bool {
-    self._internal_check();
-    self.char2width.is_empty()
-  }
-
-  pub fn len(&self) -> usize {
-    self._internal_check();
-    self.char2width.len()
   }
 
   /// Get the prefix display width starts from the first char 0 until the specified char. Note the
@@ -109,7 +100,20 @@ impl BufWindex {
         for _i in start_idx..=char_idx {
           let c = rope_chars.next().unwrap();
           prefix_width += unicode::char_width(options, c);
-          self.push(prefix_width);
+
+          // Update `char2width`
+          self.char2width.push(prefix_width);
+
+          // Update `width2char`
+          let w = prefix_width;
+          let c = self.char2width.len() - 1;
+          if self.width2char.contains_key(&w) {
+            if self.width2char[&w] < c {
+              self.width2char.insert(w, c);
+            }
+          } else {
+            self.width2char.insert(w, c);
+          }
         }
       }
     }
@@ -161,45 +165,15 @@ impl BufWindex {
   ///
   /// It returns the first char index if the `width` is inside the index.
   /// It returns `None` if the `width` is out of the index range.
-  pub fn char_at(&self, width: usize) -> Option<usize> {
-    self._internal_check();
-    if !self.is_empty() && width <= *self.width2char.last_key_value().unwrap().1 {
-      for w in width.. {
-        match self.width2char.get(&w) {
-          Some(c) => {
-            // Early returns.
-            return Some(*c);
-          }
-          None => { /* Skip */ }
-        }
-      }
-      unreachable!();
-    } else {
-      None
-    }
+  pub fn char_at(&self, _width: usize) -> Option<usize> {
+    unimplemented!();
   }
 
   /// Set/update a specified char's width, and re-calculate all display width since this char.
   ///
   /// NOTE: This operation is `O(N)`, where `N` is the chars count of current line.
-  pub fn set_width_at(&mut self, char_idx: usize, width: usize) {
-    self._internal_check();
-    assert!(char_idx < self.char2width.len());
-    match width.cmp(&self.char2width[char_idx]) {
-      std::cmp::Ordering::Less => {
-        let diff = self.char2width[char_idx] - width;
-        for w in self.char2width.iter_mut().skip(char_idx) {
-          *w -= diff;
-        }
-      }
-      std::cmp::Ordering::Greater => {
-        let diff = width - self.char2width[char_idx];
-        for w in self.char2width.iter_mut().skip(char_idx) {
-          *w += diff;
-        }
-      }
-      _ => { /* Do nothing */ }
-    }
+  pub fn set_width_at(&mut self, _char_idx: usize, _width: usize) {
+    unimplemented!();
   }
 
   /// Set/update a range of chars and their width, and re-calculate all display width since the first
@@ -211,84 +185,7 @@ impl BufWindex {
   ///
   /// It panics if the provided parameter `char2width` keys are not continuous, i.e. the chars
   /// index must be continuous.
-  pub fn set_width_between(&mut self, widths: &BTreeMap<usize, usize>) {
-    if widths.is_empty() {
-      return;
-    }
-
-    self._internal_check();
-
-    let (start_c, _start_w) = widths.first_key_value().unwrap();
-    let (last_c, _last_w) = widths.last_key_value().unwrap();
-    assert!(*start_c < self.char2width.len());
-    assert!(*last_c < self.char2width.len());
-    let mut last_key: Option<usize> = None;
-    for (k, _v) in widths.iter() {
-      match last_key {
-        Some(last_key1) => assert_eq!(last_key1 + 1, *k),
-        None => { /* Skip */ }
-      }
-      last_key = Some(*k);
-    }
-
-    let mut result: Vec<usize> = self.char2width.iter().take(*start_c).cloned().collect();
-    let init_width = if *start_c > 0 {
-      self.char2width[*start_c - 1]
-    } else {
-      0_usize
-    };
-    let result2: Vec<usize> = self
-      .char2width
-      .iter()
-      .enumerate()
-      .skip(*start_c)
-      .scan(init_width, |acc, (i, _w)| {
-        let width = *acc + widths.get(&i).unwrap();
-        *acc = width;
-        Some(width)
-      })
-      .collect();
-    result.extend(result2);
-    self.char2width = result;
-  }
-
-  /// Push/append a specified char's width.
-  ///
-  /// NOTE: This operation is `O(1)`.
-  pub fn push(&mut self, _width: usize) {
-    unimplemented!();
-  }
-
-  /// Extend/append multiple chars and their display width, and re-calculate all display width
-  /// for the extended chars.
-  ///
-  /// NOTE: This operation is `O(M)`, where `M` is the chars count of the extended chars.
-  pub fn extend(&mut self, _widths: &[usize]) {
-    unimplemented!();
-  }
-
-  /// Replace a range of chars and their display width, with a new range, and re-calculate all
-  /// display width since the first char in the newly added range of chars.
-  ///
-  /// NOTE: This operation is `O(N+M)`, where `N` is the chars count of current line, `M` is the
-  /// chars count of the new range.
-  pub fn splice(&mut self) {
-    unimplemented!();
-  }
-
-  /// Shorten (remove/truncate) the chars since a specified char index. This operation doesn't need
-  /// to trigger re-calculation.
-  ///
-  /// NOTE: This operation is `O(1)`.
-  pub fn truncate(&mut self) {
-    unimplemented!();
-  }
-
-  /// Remove a specified range of chars, and re-calculate all display width since the start index
-  /// in the removed range.
-  ///
-  /// NOTE: This operation is `O(N)`, where `N` is the chars count of current line.
-  pub fn drain(&mut self) {
+  pub fn set_width_between(&mut self, _widths: &BTreeMap<usize, usize>) {
     unimplemented!();
   }
 }
@@ -307,7 +204,7 @@ mod tests {
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
-    expect: &Vec<Option<usize>>,
+    expect: &Vec<(usize, Option<usize>)>,
   ) {
     for (i, e) in expect.iter().enumerate() {
       let a = actual.width_until(options, rope_line, i);
@@ -323,13 +220,22 @@ mod tests {
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let mut actual = BufWindex::new();
+
     // 1-6, 14-20, 20
-    let expect: Vec<Option<usize>> = [
-      (1..=6).map(|i| Some(i)).collect(),
-      (14..=20).map(|i| Some(i)).collect(),
-      vec![Some(20), None, None, None],
+    let expect: Vec<(usize, Option<usize>)> = [
+      (0..=5).map(|i| (i, Some(i + 1))).collect(),
+      (6..=12).map(|i| (i + 8, Some(i))).collect(),
+      vec![(13, Some(20)), (14, None), (15, None), (16, None)],
     ]
     .concat();
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+
+    let expect: Vec<(usize, Option<usize>)> = expect
+      .iter()
+      .filter(|e| e.1.is_some())
+      .rev()
+      .cloned()
+      .collect();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
@@ -340,12 +246,24 @@ mod tests {
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
     let mut actual = BufWindex::new();
+
+    assert_eq!(actual.width_until(&options, &rope.line(0), 43), Some(44));
+
     // 1-44
     let expect: Vec<Option<usize>> = [
       (1..=44).map(|i| Some(i)).collect(),
       vec![Some(44), None, None, None],
     ]
     .concat();
+
+    let expect1: Vec<Option<usize>> = expect
+      .iter()
+      .filter(|e| e.is_some())
+      .rev()
+      .cloned()
+      .collect();
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect1);
+
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
@@ -356,6 +274,7 @@ mod tests {
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
     let mut actual = BufWindex::new();
+
     // 0-8, 16-18, 19-33, 35-51, 51
     let expect: Vec<Option<usize>> = [
       (1..=9).map(|i| Some(i)).collect(),
@@ -371,6 +290,14 @@ mod tests {
     ]
     .concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+
+    let expect: Vec<Option<usize>> = expect
+      .iter()
+      .filter(|e| e.is_some())
+      .rev()
+      .cloned()
+      .collect();
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -380,12 +307,23 @@ mod tests {
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["  1. When the\r"]);
     let mut actual = BufWindex::new();
+
+    assert_eq!(actual.width_until(&options, &rope.line(0), 10), Some(11));
+
     // 0-12, 12
     let expect: Vec<Option<usize>> = [
       (0..=12).map(|i| Some(i)).collect(),
       vec![Some(12), None, None, None],
     ]
     .concat();
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+
+    let expect: Vec<Option<usize>> = expect
+      .iter()
+      .filter(|e| e.is_some())
+      .rev()
+      .cloned()
+      .collect();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
@@ -414,6 +352,14 @@ mod tests {
     ]
     .concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+
+    let expect: Vec<Option<usize>> = expect
+      .iter()
+      .filter(|e| e.is_some())
+      .rev()
+      .cloned()
+      .collect();
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -425,6 +371,9 @@ mod tests {
       "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
     ]);
     let mut actual = BufWindex::new();
+
+    assert_eq!(actual.width_until(&options, &rope.line(0), 2), Some(17));
+
     // 0, 8, 16-129, 129
     let expect: Vec<Option<usize>> = [
       vec![Some(0), Some(8)],
@@ -432,6 +381,15 @@ mod tests {
       vec![Some(129), None, None, None],
     ]
     .concat();
+
+    let expect1: Vec<Option<usize>> = expect
+      .iter()
+      .filter(|e| e.is_some())
+      .rev()
+      .cloned()
+      .collect();
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect1);
+
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 }
