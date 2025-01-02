@@ -34,8 +34,8 @@ impl BufWindex {
       .unwrap()
       .chars()
       .scan(0_usize, |acc, c| {
-        let width = *acc + unicode::char_width(options, c);
-        *acc = width;
+        let width = *acc;
+        *acc += unicode::char_width(options, c);
         Some(width)
       })
       .collect();
@@ -56,8 +56,7 @@ impl BufWindex {
   #[cfg(debug_assertions)]
   pub fn _internal_check(&self) {
     // Check length.
-    assert_eq!(self.char2width.is_empty(), self.width2char.is_empty());
-    assert_eq!(self.char2width.len(), self.width2char.len());
+    assert!(self.char2width.len() >= self.width2char.len());
 
     // Check char index continuous.
     let mut last_width: Option<usize> = None;
@@ -74,10 +73,10 @@ impl BufWindex {
       last_width = Some(*w);
     }
 
-    // Check mapping in both directions.
-    for (w, c) in self.width2char.iter() {
-      assert!(*c < self.char2width.len());
-      assert_eq!(*w, self.char2width[*c]);
+    // Check char index always exists in width index.
+    for (i, w) in self.char2width.iter().enumerate() {
+      assert!(self.width2char.contains_key(w));
+      assert_eq!(i, self.width2char[w]);
     }
   }
 
