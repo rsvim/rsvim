@@ -4,7 +4,6 @@ use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
 use ropey::{Rope, RopeSlice};
 
-use crossterm::style::Stylize;
 use std::collections::BTreeMap;
 // use tracing::trace;
 
@@ -127,7 +126,7 @@ impl BufWindex {
           self.char2width[start_idx - 1]
         };
         let mut rope_chars = rope_line.chars().skip(start_idx);
-        for i in start_idx..=char_idx {
+        for _i in start_idx..=char_idx {
           let c = rope_chars.next().unwrap();
           prefix_width += unicode::char_width(options, c);
           self.push(prefix_width);
