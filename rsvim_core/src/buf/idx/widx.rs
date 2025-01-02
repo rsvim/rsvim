@@ -275,9 +275,12 @@ mod tests {
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
 
+  use tracing::info;
+
   fn ensure_width_at(actual: &BufWindex, expect: &Vec<Option<usize>>) {
     for (i, e) in expect.iter().enumerate() {
       let a = actual.width_at(i);
+      info!("actual[{i}]:{a:?}, expect[{i}]:{e:?}");
       assert_eq!(a, e.clone());
     }
   }
@@ -289,11 +292,11 @@ mod tests {
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let actual = BufWindex::new(&options, &rope, 0);
-    // 0-6, 14-19, 19
+    // 0-6, 14-20
     let expect: Vec<Option<usize>> = [
       (0..=6).map(|i| Some(i)).collect(),
-      (14..=19).map(|i| Some(i)).collect(),
-      vec![Some(19), None, None, None],
+      (14..=20).map(|i| Some(i)).collect(),
+      vec![None, None, None],
     ]
     .concat();
     ensure_width_at(&actual, &expect);
