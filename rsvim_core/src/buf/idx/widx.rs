@@ -5,6 +5,7 @@ use crate::buf::unicode;
 use ropey::Rope;
 
 use std::collections::BTreeMap;
+// use tracing::trace;
 
 #[derive(Debug, Clone)]
 /// Display width index (line-wise) for each unicode char in vim buffer. For each line, the
