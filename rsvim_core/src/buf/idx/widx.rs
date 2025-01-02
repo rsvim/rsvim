@@ -2,8 +2,9 @@
 
 use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
-use ropey::Rope;
+use ropey::{Rope, RopeSlice};
 
+use crossterm::style::Stylize;
 use std::collections::BTreeMap;
 // use tracing::trace;
 
@@ -49,17 +50,14 @@ impl BufWindex {
         Some(*state)
       })
       .collect();
-    let mut width_and_char: Vec<(usize, usize)> = char2width
-      .iter()
-      .enumerate()
-      .map(|(i, w)| (*w, i))
-      .collect();
-    // Sort by width, from lower to higher.
-    width_and_char.sort_by(|a, b| a.0.cmp(&b.0));
     let mut width2char: BTreeMap<usize, usize> = BTreeMap::new();
-    for (w, i) in width_and_char.iter() {
-      if !width2char.contains_key(w) {
-        width2char.insert(*w, *i);
+    for (i, w) in char2width.iter().enumerate() {
+      if width2char.contains_key(w) {
+        if width2char[w] > i {
+          width2char.insert(*w, i);
+        }
+      } else {
+        width2char.insert(*w, i);
       }
     }
     Self {
@@ -112,11 +110,38 @@ impl BufWindex {
   ///
   /// It returns the prefix display width if `char_idx` is inside the index.
   /// It returns `None` if the `char_idx` is out of index range.
-  pub fn width_until(&self, char_idx: usize) -> Option<usize> {
+  pub fn width_until(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    char_idx: usize,
+  ) -> Option<usize> {
+    // If not cached.
+    if char_idx >= self.char2width.len() {
+      // If this char exists in the rope line, build the cache.
+      if char_idx < rope_line.len_chars() {
+        let start_idx = self.char2width.len();
+        let mut prefix_width: usize = if start_idx == 0 {
+          0_usize
+        } else {
+          self.char2width[start_idx - 1]
+        };
+        let mut rope_chars = rope_line.chars().skip(start_idx);
+        for i in start_idx..=char_idx {
+          let c = rope_chars.next().unwrap();
+          prefix_width += unicode::char_width(options, c);
+          self.push(prefix_width);
+        }
+      }
+    }
+
     self._internal_check();
+
     if char_idx < self.char2width.len() {
+      // Find width from the cache.
       Some(self.char2width[char_idx])
     } else {
+      // If this char index doesn't exist in the cache, it is just not existed.
       None
     }
   }
@@ -291,7 +316,12 @@ mod tests {
 
   use tracing::info;
 
-  fn ensure_width_until(actual: &BufWindex, expect: &Vec<Option<usize>>) {
+  fn ensure_width_until(
+    rope_line: &RopeSlice,
+    options: &BufferLocalOptions,
+    actual: &BufWindex,
+    expect: &Vec<Option<usize>>,
+  ) {
     for (i, e) in expect.iter().enumerate() {
       let a = actual.width_until(i);
       info!("actual[{i}]:{a:?}, expect[{i}]:{e:?}");
@@ -341,16 +371,16 @@ mod tests {
     let actual = BufWindex::new(&options, &rope, 0);
     // 0-8, 16-18, 19-33, 35-51, 51
     let expect: Vec<Option<usize>> = [
-      (0..=9).map(|i| Some(i)).collect(),
-      (17..=19).map(|i| Some(i)).collect(),
-      (20..=27)
-        .scan(20, |state, i| {
+      (1..=9).map(|i| Some(i)).collect(),
+      (17..=20).map(|i| Some(i)).collect(),
+      (22..=29)
+        .scan(22, |state, i| {
           let diff: usize = i - *state;
           Some(Some(*state + 2 * diff))
         })
         .collect(),
-      (36..=52).map(|i| Some(i)).collect(),
-      vec![None, None, None],
+      (37..=53).map(|i| Some(i)).collect(),
+      vec![Some(53), None, None, None],
     ]
     .concat();
     ensure_width_until(&actual, &expect);
