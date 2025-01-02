@@ -160,18 +160,20 @@ impl BufWindex {
   pub fn set_width_at(&mut self, char_idx: usize, width: usize) {
     self._internal_check();
     assert!(char_idx < self.char2width.len());
-    if width > self.char2width[char_idx] {
-      let diff = width - self.char2width[char_idx];
-      for (_i, w) in self.char2width.iter_mut().skip(char_idx).enumerate() {
-        *w += diff;
+    match width.cmp(&self.char2width[char_idx]) {
+      std::cmp::Ordering::Less => {
+        let diff = self.char2width[char_idx] - width;
+        for w in self.char2width.iter_mut().skip(char_idx) {
+          *w -= diff;
+        }
       }
-    } else if width < self.char2width[char_idx] {
-      let diff = self.char2width[char_idx] - width;
-      for (_i, w) in self.char2width.iter_mut().skip(char_idx).enumerate() {
-        *w -= diff;
+      std::cmp::Ordering::Greater => {
+        let diff = width - self.char2width[char_idx];
+        for w in self.char2width.iter_mut().skip(char_idx) {
+          *w += diff;
+        }
       }
-    } else {
-      // Do nothing
+      _ => { /* Do nothing */ }
     }
   }
 
@@ -236,7 +238,7 @@ impl BufWindex {
   /// for the extended chars.
   ///
   /// NOTE: This operation is `O(M)`, where `M` is the chars count of the extended chars.
-  pub fn extend(&mut self, _widths: &Vec<usize>) {
+  pub fn extend(&mut self, _widths: &[usize]) {
     unimplemented!();
   }
 
