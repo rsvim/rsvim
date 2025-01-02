@@ -1,6 +1,5 @@
 //! Vim buffers.
 
-use crate::defaults::grapheme::AsciiControlCodeFormatter;
 use crate::res::IoResult;
 
 // Re-export
@@ -8,14 +7,12 @@ pub use crate::buf::idx::{BufLindex, BufWindex};
 pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 
 use ahash::AHashMap as HashMap;
-use ascii::AsciiChar;
 use compact_str::CompactString;
 use parking_lot::RwLock;
 use path_absolutize::Absolutize;
 use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
-use std::convert::From;
 use std::fs::Metadata;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -23,7 +20,6 @@ use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
 use tracing::trace;
-use unicode_width::UnicodeWidthChar;
 
 pub mod idx;
 pub mod opt;

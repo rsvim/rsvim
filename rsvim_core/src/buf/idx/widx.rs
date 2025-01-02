@@ -34,7 +34,7 @@ impl BufWindex {
       .unwrap()
       .chars()
       .scan(0_usize, |acc, c| {
-        let width = *acc + unicode::char_width(&options, c);
+        let width = *acc + unicode::char_width(options, c);
         *acc = width;
         Some(width)
       })
@@ -170,6 +170,8 @@ impl BufWindex {
       for (_i, w) in self.char2width.iter_mut().skip(char_idx).enumerate() {
         *w -= diff;
       }
+    } else {
+      // Do nothing
     }
   }
 

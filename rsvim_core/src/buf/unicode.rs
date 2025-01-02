@@ -5,7 +5,7 @@ use crate::defaults::grapheme::AsciiControlCodeFormatter;
 
 use ascii::AsciiChar;
 use compact_str::CompactString;
-use tracing::trace;
+//use tracing::trace;
 use unicode_width::UnicodeWidthChar;
 
 /// Get the display width for a `char`, supports both ASCI control codes and unicode.
