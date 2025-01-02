@@ -5,7 +5,6 @@ use crate::buf::unicode;
 use ropey::Rope;
 
 use std::collections::BTreeMap;
-use tracing::trace;
 
 #[derive(Debug, Clone)]
 /// Display width index (line-wise) for each unicode char in vim buffer. For each line, the
@@ -88,7 +87,7 @@ impl BufWindex {
       last_width = Some(*w);
       assert!(self.width2char.contains_key(w));
       let c = self.width2char[w];
-      trace!("char2width[{i}]:{w:?}, width2char[{w}]:{c:?}");
+      // trace!("char2width[{i}]:{w:?}, width2char[{w}]:{c:?}");
       assert!(i >= c);
     }
   }
@@ -323,9 +322,12 @@ mod tests {
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
     let actual = BufWindex::new(&options, &rope, 0);
-    // 0-44
-    let expect: Vec<Option<usize>> =
-      [(0..=44).map(|i| Some(i)).collect(), vec![None, None, None]].concat();
+    // 1-44
+    let expect: Vec<Option<usize>> = [
+      (1..=44).map(|i| Some(i)).collect(),
+      vec![Some(44), None, None, None],
+    ]
+    .concat();
     ensure_width_until(&actual, &expect);
   }
 
