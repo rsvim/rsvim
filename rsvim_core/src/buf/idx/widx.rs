@@ -2,12 +2,12 @@
 
 use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
-use ropey::{Rope, RopeSlice};
+use ropey::RopeSlice;
 
 use std::collections::BTreeMap;
 // use tracing::trace;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 /// Display width index (line-wise) for each unicode char in vim buffer. For each line, the
 /// char/column index starts from 0.
 ///
@@ -27,41 +27,21 @@ pub struct BufWindex {
   // char/column, not just the current char's display width.
   char2width: Vec<usize>,
 
-  // Prefix display width maps to its char index. This is the reversed mapping of `char2width`.
-  // NOTE: The keys, i.e. the widths could be non-continuous since one unicode char could use
-  // more than 1 cells.
+  // Prefix display width maps to its char index, i.e. the reversed mapping of `char2width`.
+  //
+  // NOTE:
+  // 1. Some unicodes could use more than 1 cells, thus the widths could be non-continuous.
+  // 2. Some unicodes could use 0 cells (i.e. line-feed), multiple char index could have the same
+  //    width. In such case, the width point to the first char index.
   width2char: BTreeMap<usize, usize>,
 }
 
 impl BufWindex {
-  /// Create and initialize index for the line.
-  ///
-  /// # Panics
-  ///
-  /// It panics if the line doesn't exist in the rope.
-  pub fn new(options: &BufferLocalOptions, rope: &Rope, line_idx: usize) -> Self {
-    let char2width: Vec<usize> = rope
-      .get_line(line_idx)
-      .unwrap()
-      .chars()
-      .scan(0_usize, |state, c| {
-        *state += unicode::char_width(options, c);
-        Some(*state)
-      })
-      .collect();
-    let mut width2char: BTreeMap<usize, usize> = BTreeMap::new();
-    for (i, w) in char2width.iter().enumerate() {
-      if width2char.contains_key(w) {
-        if width2char[w] > i {
-          width2char.insert(*w, i);
-        }
-      } else {
-        width2char.insert(*w, i);
-      }
-    }
+  /// Create new index.
+  pub fn new() -> Self {
     Self {
-      char2width,
-      width2char,
+      char2width: Vec::new(),
+      width2char: BTreeMap::new(),
     }
   }
 
@@ -151,15 +131,23 @@ impl BufWindex {
   ///
   /// It returns the display width of the `char_idx_range` if the range is inside the index.
   /// It returns `None` if the `char_idx_range` is out of index range.
-  pub fn width_between(&self, char_idx_range: std::ops::RangeInclusive<usize>) -> Option<usize> {
+  pub fn width_between(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    char_idx_range: std::ops::RangeInclusive<usize>,
+  ) -> Option<usize> {
     self._internal_check();
     let c_start = *char_idx_range.start();
-    let c_end = *char_idx_range.end();
-    if c_start < self.char2width.len() && c_end < self.char2width.len() {
-      assert!(self.char2width[c_start] <= self.char2width[c_end]);
-      Some(self.char2width[c_start] - self.char2width[c_end])
-    } else {
-      None
+    let c_last = *char_idx_range.end();
+    let w_start = self.width_until(options, rope_line, c_start);
+    let w_last = self.width_until(options, rope_line, c_last);
+    match (w_start, w_last) {
+      (Some(start_width), Some(last_width)) => {
+        assert!(start_width <= last_width);
+        Some(last_width - start_width)
+      }
+      _ => None,
     }
   }
 
@@ -315,14 +303,14 @@ mod tests {
 
   use tracing::info;
 
-  fn ensure_width_until(
-    rope_line: &RopeSlice,
+  fn assert_width_until(
     options: &BufferLocalOptions,
-    actual: &BufWindex,
+    rope_line: &RopeSlice,
+    actual: &mut BufWindex,
     expect: &Vec<Option<usize>>,
   ) {
     for (i, e) in expect.iter().enumerate() {
-      let a = actual.width_until(i);
+      let a = actual.width_until(options, rope_line, i);
       info!("actual[{i}]:{a:?}, expect[{i}]:{e:?}");
       assert_eq!(a, e.clone());
     }
@@ -334,7 +322,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
-    let actual = BufWindex::new(&options, &rope, 0);
+    let mut actual = BufWindex::new();
     // 1-6, 14-20, 20
     let expect: Vec<Option<usize>> = [
       (1..=6).map(|i| Some(i)).collect(),
@@ -342,7 +330,7 @@ mod tests {
       vec![Some(20), None, None, None],
     ]
     .concat();
-    ensure_width_until(&actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -351,14 +339,14 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
-    let actual = BufWindex::new(&options, &rope, 0);
+    let mut actual = BufWindex::new();
     // 1-44
     let expect: Vec<Option<usize>> = [
       (1..=44).map(|i| Some(i)).collect(),
       vec![Some(44), None, None, None],
     ]
     .concat();
-    ensure_width_until(&actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -367,7 +355,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
-    let actual = BufWindex::new(&options, &rope, 0);
+    let mut actual = BufWindex::new();
     // 0-8, 16-18, 19-33, 35-51, 51
     let expect: Vec<Option<usize>> = [
       (1..=9).map(|i| Some(i)).collect(),
@@ -382,7 +370,7 @@ mod tests {
       vec![Some(53), None, None, None],
     ]
     .concat();
-    ensure_width_until(&actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -391,14 +379,14 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["  1. When the\r"]);
-    let actual = BufWindex::new(&options, &rope, 0);
+    let mut actual = BufWindex::new();
     // 0-12, 12
     let expect: Vec<Option<usize>> = [
       (0..=12).map(|i| Some(i)).collect(),
       vec![Some(12), None, None, None],
     ]
     .concat();
-    ensure_width_until(&actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -409,7 +397,7 @@ mod tests {
     let rope = make_rope_from_lines(vec![
       "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
     ]);
-    let actual = BufWindex::new(&options, &rope, 0);
+    let mut actual = BufWindex::new();
     // 0-35, 36-45, 46, 48-57, 58-77, 77
     let expect: Vec<Option<usize>> = [
       (0..=17).map(|i| Some(i * 2)).collect(),
@@ -425,7 +413,7 @@ mod tests {
       vec![Some(77), None, None, None],
     ]
     .concat();
-    ensure_width_until(&actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -436,7 +424,7 @@ mod tests {
     let rope = make_rope_from_lines(vec![
       "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
     ]);
-    let actual = BufWindex::new(&options, &rope, 0);
+    let mut actual = BufWindex::new();
     // 0, 8, 16-129, 129
     let expect: Vec<Option<usize>> = [
       vec![Some(0), Some(8)],
@@ -444,6 +432,6 @@ mod tests {
       vec![Some(129), None, None, None],
     ]
     .concat();
-    ensure_width_until(&actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 }
