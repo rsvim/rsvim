@@ -5,12 +5,23 @@ use crate::buf::unicode;
 use ropey::Rope;
 
 use std::collections::BTreeMap;
+use tracing::trace;
 
 #[derive(Debug, Clone)]
 /// Display width index (line-wise) for each unicode char in vim buffer. For each line, the
 /// char/column index starts from 0.
 ///
-/// This structure is mostly like a prefix-sum tree structure.
+/// This structure is mostly like a prefix-sum tree structure. For example now we have a line:
+///
+/// ```text
+/// This is an example.
+/// ```
+/// |                 |
+/// 0                 18
+///
+/// The first char index is 0, last char index is 18, the whole line length is 19. In this case,
+/// the first char's display width is 1, the whole line's display width is 19, the display width of
+/// range `[0,X]` is `X+1`, where the `X` is in range `[0,18]`.
 pub struct BufWindex {
   // Char index maps to its prefix display width, i.e. from the first char/column (0) to current
   // char/column, not just the current char's display width.
@@ -33,17 +44,24 @@ impl BufWindex {
       .get_line(line_idx)
       .unwrap()
       .chars()
-      .scan(0_usize, |acc, c| {
-        let width = *acc;
-        *acc += unicode::char_width(options, c);
-        Some(width)
+      .scan(0_usize, |state, c| {
+        *state += unicode::char_width(options, c);
+        Some(*state)
       })
       .collect();
-    let width2char: BTreeMap<usize, usize> = char2width
+    let mut width_and_char: Vec<(usize, usize)> = char2width
       .iter()
       .enumerate()
       .map(|(i, w)| (*w, i))
       .collect();
+    // Sort by width, from lower to higher.
+    width_and_char.sort_by(|a, b| a.0.cmp(&b.0));
+    let mut width2char: BTreeMap<usize, usize> = BTreeMap::new();
+    for (w, i) in width_and_char.iter() {
+      if !width2char.contains_key(w) {
+        width2char.insert(*w, *i);
+      }
+    }
     Self {
       char2width,
       width2char,
@@ -58,12 +76,9 @@ impl BufWindex {
     // Check length.
     assert!(self.char2width.len() >= self.width2char.len());
 
-    // Check char index continuous.
+    // Check indexing.
     let mut last_width: Option<usize> = None;
     for (i, w) in self.char2width.iter().enumerate() {
-      if i == 0 {
-        assert!(self.char2width[0] == 0);
-      }
       match last_width {
         Some(last_width1) => {
           assert!(*w >= last_width1);
@@ -71,12 +86,10 @@ impl BufWindex {
         None => { /* Skip */ }
       }
       last_width = Some(*w);
-    }
-
-    // Check char index always exists in width index.
-    for (i, w) in self.char2width.iter().enumerate() {
       assert!(self.width2char.contains_key(w));
-      assert_eq!(i, self.width2char[w]);
+      let c = self.width2char[w];
+      trace!("char2width[{i}]:{w:?}, width2char[{w}]:{c:?}");
+      assert!(i <= c);
     }
   }
 
@@ -90,7 +103,8 @@ impl BufWindex {
     self.char2width.len()
   }
 
-  /// Get the prefix display width starts from the first char 0 until the specified char.
+  /// Get the prefix display width starts from the first char 0 until the specified char. Note the
+  /// specified char's width is included.
   ///
   /// NOTE: This is equivalent to `width_between(0..=char_idx)`.
   ///
@@ -98,7 +112,7 @@ impl BufWindex {
   ///
   /// It returns the prefix display width if `char_idx` is inside the index.
   /// It returns `None` if the `char_idx` is out of index range.
-  pub fn width_at(&self, char_idx: usize) -> Option<usize> {
+  pub fn width_until(&self, char_idx: usize) -> Option<usize> {
     self._internal_check();
     if char_idx < self.char2width.len() {
       Some(self.char2width[char_idx])
@@ -107,7 +121,7 @@ impl BufWindex {
     }
   }
 
-  /// Get the display width in the inclusive range, i.e. [a, b].
+  /// Get the display width in the inclusive range, i.e. `[a, b]`.
   ///
   /// # Return
   ///
@@ -277,33 +291,33 @@ mod tests {
 
   use tracing::info;
 
-  fn ensure_width_at(actual: &BufWindex, expect: &Vec<Option<usize>>) {
+  fn ensure_width_until(actual: &BufWindex, expect: &Vec<Option<usize>>) {
     for (i, e) in expect.iter().enumerate() {
-      let a = actual.width_at(i);
+      let a = actual.width_until(i);
       info!("actual[{i}]:{a:?}, expect[{i}]:{e:?}");
       assert_eq!(a, e.clone());
     }
   }
 
   #[test]
-  fn width_at1() {
+  fn width_until1() {
     test_log_init();
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let actual = BufWindex::new(&options, &rope, 0);
-    // 0-6, 14-20
+    // 1-6, 14-20, 20
     let expect: Vec<Option<usize>> = [
-      (0..=6).map(|i| Some(i)).collect(),
+      (1..=6).map(|i| Some(i)).collect(),
       (14..=20).map(|i| Some(i)).collect(),
-      vec![None, None, None],
+      vec![Some(20), None, None, None],
     ]
     .concat();
-    ensure_width_at(&actual, &expect);
+    ensure_width_until(&actual, &expect);
   }
 
   #[test]
-  fn width_at2() {
+  fn width_until2() {
     test_log_init();
 
     let options = BufferLocalOptions::default();
@@ -312,11 +326,11 @@ mod tests {
     // 0-44
     let expect: Vec<Option<usize>> =
       [(0..=44).map(|i| Some(i)).collect(), vec![None, None, None]].concat();
-    ensure_width_at(&actual, &expect);
+    ensure_width_until(&actual, &expect);
   }
 
   #[test]
-  fn width_at3() {
+  fn width_until3() {
     test_log_init();
 
     let options = BufferLocalOptions::default();
@@ -336,11 +350,11 @@ mod tests {
       vec![None, None, None],
     ]
     .concat();
-    ensure_width_at(&actual, &expect);
+    ensure_width_until(&actual, &expect);
   }
 
   #[test]
-  fn width_at4() {
+  fn width_until4() {
     test_log_init();
 
     let options = BufferLocalOptions::default();
@@ -352,11 +366,11 @@ mod tests {
       vec![Some(12), None, None, None],
     ]
     .concat();
-    ensure_width_at(&actual, &expect);
+    ensure_width_until(&actual, &expect);
   }
 
   #[test]
-  fn width_at5() {
+  fn width_until5() {
     test_log_init();
 
     let options = BufferLocalOptions::default();
@@ -379,11 +393,11 @@ mod tests {
       vec![Some(77), None, None, None],
     ]
     .concat();
-    ensure_width_at(&actual, &expect);
+    ensure_width_until(&actual, &expect);
   }
 
   #[test]
-  fn width_at6() {
+  fn width_until6() {
     test_log_init();
 
     let options = BufferLocalOptions::default();
@@ -398,6 +412,6 @@ mod tests {
       vec![Some(129), None, None, None],
     ]
     .concat();
-    ensure_width_at(&actual, &expect);
+    ensure_width_until(&actual, &expect);
   }
 }
