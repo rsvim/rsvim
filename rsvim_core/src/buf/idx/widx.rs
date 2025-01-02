@@ -89,7 +89,7 @@ impl BufWindex {
       assert!(self.width2char.contains_key(w));
       let c = self.width2char[w];
       trace!("char2width[{i}]:{w:?}, width2char[{w}]:{c:?}");
-      assert!(i <= c);
+      assert!(i >= c);
     }
   }
 
