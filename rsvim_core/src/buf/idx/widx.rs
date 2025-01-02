@@ -309,12 +309,9 @@ mod tests {
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
     let actual = BufWindex::new(&options, &rope, 0);
-    // 0-43, 43
-    let expect: Vec<Option<usize>> = [
-      (0..=43).map(|i| Some(i)).collect(),
-      vec![Some(43), None, None, None],
-    ]
-    .concat();
+    // 0-44
+    let expect: Vec<Option<usize>> =
+      [(0..=44).map(|i| Some(i)).collect(), vec![None, None, None]].concat();
     ensure_width_at(&actual, &expect);
   }
 
@@ -327,16 +324,16 @@ mod tests {
     let actual = BufWindex::new(&options, &rope, 0);
     // 0-8, 16-18, 19-33, 35-51, 51
     let expect: Vec<Option<usize>> = [
-      (0..=8).map(|i| Some(i)).collect(),
-      (16..=18).map(|i| Some(i)).collect(),
-      (19..=26)
-        .scan(19, |state, i| {
+      (0..=9).map(|i| Some(i)).collect(),
+      (17..=19).map(|i| Some(i)).collect(),
+      (20..=27)
+        .scan(20, |state, i| {
           let diff: usize = i - *state;
           Some(Some(*state + 2 * diff))
         })
         .collect(),
-      (35..=51).map(|i| Some(i)).collect(),
-      vec![Some(51), None, None, None],
+      (36..=52).map(|i| Some(i)).collect(),
+      vec![None, None, None],
     ]
     .concat();
     ensure_width_at(&actual, &expect);
