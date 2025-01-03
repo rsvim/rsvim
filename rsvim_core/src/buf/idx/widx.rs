@@ -428,184 +428,110 @@ mod tests {
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
 
-  // #[test]
-  // fn width_between1() {
-  //   test_log_init();
-  //
-  //   let options = BufferLocalOptions::default();
-  //   let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
-  //   let mut actual = BufWindex::new();
-  //
-  //   let expect: Vec<Option<usize>> = [
-  //     (1..=6).map(|i| Some(i)).collect(),
-  //     (14..=20).map(|i| Some(i)).collect(),
-  //     vec![Some(20), None, None, None],
-  //   ]
-  //   .concat();
-  //   assert_width_until(&options, &rope.line(0), &mut actual, &expect);
-  //
-  //   let expect: Vec<(Option<usize>, usize)> = expect
-  //     .iter()
-  //     .enumerate()
-  //     .filter(|(_i, e)| e.is_some())
-  //     .map(|(i, e)| (e.clone(), i))
-  //     .rev()
-  //     .collect();
-  //   assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
-  // }
-  //
-  // #[test]
-  // fn width_until2() {
-  //   test_log_init();
-  //
-  //   let options = BufferLocalOptions::default();
-  //   let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
-  //   let mut actual = BufWindex::new();
-  //
-  //   assert_eq!(actual.width_until(&options, &rope.line(0), 43), Some(44));
-  //
-  //   let expect: Vec<Option<usize>> = [
-  //     (1..=44).map(|i| Some(i)).collect(),
-  //     vec![Some(44), None, None, None],
-  //   ]
-  //   .concat();
-  //
-  //   let expect1: Vec<(Option<usize>, usize)> = expect
-  //     .iter()
-  //     .enumerate()
-  //     .filter(|(_i, e)| e.is_some())
-  //     .map(|(i, e)| (e.clone(), i))
-  //     .rev()
-  //     .collect();
-  //   assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect1);
-  //
-  //   assert_width_until(&options, &rope.line(0), &mut actual, &expect);
-  // }
-  //
-  // #[test]
-  // fn width_until3() {
-  //   test_log_init();
-  //
-  //   let options = BufferLocalOptions::default();
-  //   let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
-  //   let mut actual = BufWindex::new();
-  //
-  //   let expect: Vec<Option<usize>> = [
-  //     (1..=9).map(|i| Some(i)).collect(),
-  //     (17..=20).map(|i| Some(i)).collect(),
-  //     (22..=29)
-  //       .scan(22, |state, i| {
-  //         let diff: usize = i - *state;
-  //         Some(Some(*state + 2 * diff))
-  //       })
-  //       .collect(),
-  //     (37..=52).map(|i| Some(i)).collect(),
-  //     vec![Some(52), None, None, None],
-  //   ]
-  //   .concat();
-  //   assert_width_until(&options, &rope.line(0), &mut actual, &expect);
-  //
-  //   let expect: Vec<(Option<usize>, usize)> = expect
-  //     .iter()
-  //     .enumerate()
-  //     .filter(|(_i, e)| e.is_some())
-  //     .map(|(i, e)| (e.clone(), i))
-  //     .rev()
-  //     .collect();
-  //   assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
-  // }
-  //
-  // #[test]
-  // fn width_until4() {
-  //   test_log_init();
-  //
-  //   let options = BufferLocalOptions::default();
-  //   let rope = make_rope_from_lines(vec!["  1. When the\r"]);
-  //   let mut actual = BufWindex::new();
-  //
-  //   assert_eq!(actual.width_until(&options, &rope.line(0), 10), Some(11));
-  //
-  //   let expect: Vec<Option<usize>> = [
-  //     (1..=13).map(|i| Some(i)).collect(),
-  //     vec![Some(13), None, None, None],
-  //   ]
-  //   .concat();
-  //   assert_width_until(&options, &rope.line(0), &mut actual, &expect);
-  //
-  //   let expect: Vec<(Option<usize>, usize)> = expect
-  //     .iter()
-  //     .enumerate()
-  //     .filter(|(_i, e)| e.is_some())
-  //     .map(|(i, e)| (e.clone(), i))
-  //     .rev()
-  //     .collect();
-  //   assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
-  // }
-  //
-  // #[test]
-  // fn width_until5() {
-  //   test_log_init();
-  //
-  //   let options = BufferLocalOptions::default();
-  //   let rope = make_rope_from_lines(vec![
-  //     "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
-  //   ]);
-  //   let mut actual = BufWindex::new();
-  //
-  //   let expect: Vec<Option<usize>> = [
-  //     (1..=18).map(|i| Some(i * 2)).collect(),
-  //     (37..=45).map(|i| Some(i)).collect(),
-  //     vec![Some(47)],
-  //     (48..=56).map(|i| Some(i)).collect(),
-  //     (58..=67)
-  //       .scan(58, |state, i| {
-  //         let diff: usize = i - *state;
-  //         Some(Some(*state + 2 * diff))
-  //       })
-  //       .collect(),
-  //     vec![Some(76), None, None, None],
-  //   ]
-  //   .concat();
-  //   assert_width_until(&options, &rope.line(0), &mut actual, &expect);
-  //
-  //   let expect: Vec<(Option<usize>, usize)> = expect
-  //     .iter()
-  //     .enumerate()
-  //     .filter(|(_i, e)| e.is_some())
-  //     .map(|(i, e)| (e.clone(), i))
-  //     .rev()
-  //     .collect();
-  //   assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
-  // }
-  //
-  // #[test]
-  // fn width_until6() {
-  //   test_log_init();
-  //
-  //   let options = BufferLocalOptions::default();
-  //   let rope = make_rope_from_lines(vec![
-  //     "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-  //   ]);
-  //   let mut actual = BufWindex::new();
-  //
-  //   assert_eq!(actual.width_until(&options, &rope.line(0), 2), Some(17));
-  //
-  //   let expect: Vec<Option<usize>> = [
-  //     vec![Some(8), Some(16)],
-  //     (17..=129).map(|i| Some(i)).collect(),
-  //     vec![Some(129), None, None, None],
-  //   ]
-  //   .concat();
-  //
-  //   let expect1: Vec<(Option<usize>, usize)> = expect
-  //     .iter()
-  //     .enumerate()
-  //     .filter(|(_i, e)| e.is_some())
-  //     .map(|(i, e)| (e.clone(), i))
-  //     .rev()
-  //     .collect();
-  //   assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect1);
-  //
-  //   assert_width_until(&options, &rope.line(0), &mut actual, &expect);
-  // }
+  #[test]
+  fn width_between1() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
+    let mut widx = BufWindex::new();
+
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=6),
+      widx.width_until(&options, &rope.line(0), 6)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=6),
+      Some(6 + 8)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 4..=8),
+      Some(4 + 8)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 13..=13),
+      Some(0)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 12..=13),
+      Some(1)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=13),
+      widx.width_until(&options, &rope.line(0), 13)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=13),
+      Some(12 + 8)
+    );
+  }
+
+  #[test]
+  fn width_between2() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
+    let mut widx = BufWindex::new();
+
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=43),
+      Some(44)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=43),
+      widx.width_until(&options, &rope.line(0), 43),
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=44),
+      Some(44)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=44),
+      widx.width_until(&options, &rope.line(0), 44),
+    );
+    assert_eq!(widx.width_between(&options, &rope.line(0), 7..=15), Some(9));
+  }
+
+  #[test]
+  fn width_between3() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
+    let mut widx = BufWindex::new();
+
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=15),
+      Some(12 + 8 + 6)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=15),
+      widx.width_until(&options, &rope.line(0), 15)
+    );
+  }
+
+  #[test]
+  fn width_between4() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec![
+      "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
+    ]);
+    let mut widx = BufWindex::new();
+
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 15..=27),
+      Some(8 + 9)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=27),
+      Some(19 * 2 + 9)
+    );
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..=27),
+      widx.width_until(&options, &rope.line(0), 27)
+    );
+  }
 }
