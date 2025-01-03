@@ -11,23 +11,34 @@ use std::collections::BTreeMap;
 /// Display width index (line-wise) for each unicode char in vim buffer. For each line, the
 /// char/column index starts from 0.
 ///
-/// This structure is mostly like a prefix-sum tree structure. For example now we have a line:
+/// This structure is actually a prefix-sum tree structure. For example now we have a line:
 ///
 /// ```text
-/// This is an example.
+///                           25
+/// 0      7       15       25|
+/// |      |       |         ||
+/// This is<--HT-->an example.\n
+/// |      |                 ||
+/// 0      7                18|
+///                           19
 /// ```
-/// |                 |
-/// 0                 18
 ///
-/// The first char index is 0, last char index is 18, the whole line length is 19. In this case,
-/// the first char's display width is 1, the whole line's display width is 19, the display width of
-/// range `[0,X]` is `X+1`, where the `X` is in range `[0,18]`.
+/// Here we have some facts:
+/// 1. The first char (`T`) index is 0, the display width of char range `[0,0]` is 1.
+/// 2. The char (`.`) before the last char index is 18, the display width of char range `[0,18]` is
+///    25, there's a tab char (`\t`) which display width is 8 cells.
+/// 3. The last char (`\n`) index is 19, the display width of char range `[0,19]` is also 25,
+///    because the last char display width is 0 cells.
+///
+/// Here we have below terms:
+/// - **Prefix (Display) Width**: the display width from the first char to current char, inclusive
+///   on both side.
 pub struct BufWindex {
-  // Char index maps to its prefix display width, i.e. from the first char/column (0) to current
-  // char/column, not just the current char's display width.
+  // Char index maps to its prefix display width.
   char2width: Vec<usize>,
 
-  // Prefix display width maps to its char index, i.e. the reversed mapping of `char2width`.
+  // Prefix display width maps to the right-most char index, i.e. the reversed mapping of
+  // `char2width`.
   //
   // NOTE:
   // 1. Some unicodes could use more than 1 cells, thus the widths could be non-continuous.
