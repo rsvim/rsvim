@@ -41,9 +41,9 @@ pub struct BufWindex {
   // `char2width`.
   //
   // NOTE:
-  // 1. Some unicodes could use more than 1 cells, thus the widths could be non-continuous.
-  // 2. Some unicodes could use 0 cells (i.e. line-feed), multiple char index could have the same
-  //    width. In such case, the width point to the larger char index and try to cover wider char
+  // 1. Some unicodes use more than 1 cells, thus the keys/widths could be non-continuous.
+  // 2. Some unicodes use 0 cells (such as LF, CR), thus multiple char index could have same width.
+  //    In such case, the width maps to the right-most char index, i.e. try to cover wider char
   //    index range.
   width2char: BTreeMap<usize, usize>,
 }
@@ -82,8 +82,7 @@ impl BufWindex {
     }
   }
 
-  /// Get the prefix display width starts from the first char 0 until the specified char. Note the
-  /// specified char's width is included.
+  /// Get the prefix display width in char range `[0,char_idx]`, both sides are inclusive.
   ///
   /// NOTE: This is equivalent to `width_between(0..=char_idx)`.
   ///
@@ -118,12 +117,15 @@ impl BufWindex {
           // Update `width2char`
           let w = prefix_width;
           let c = self.char2width.len() - 1;
-          if self.width2char.contains_key(&w) {
-            if self.width2char[&w] < c {
+          match self.width2char.get(&w) {
+            Some(c1) => {
+              if *c1 < c {
+                self.width2char.insert(w, c);
+              }
+            }
+            None => {
               self.width2char.insert(w, c);
             }
-          } else {
-            self.width2char.insert(w, c);
           }
         }
       }
