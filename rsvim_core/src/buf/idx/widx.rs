@@ -162,9 +162,9 @@ impl BufWindex {
     match (start_width, last_width) {
       (Some(start_width1), Some(last_width1)) => {
         assert!(start_width1 <= last_width1);
-        let start_c = rope_line.char(start_idx);
-        let start_c_width = unicode::char_width(options, start_c);
-        Some(last_width1 - start_width1 + start_c_width)
+        let c = rope_line.char(start_idx);
+        let w = unicode::char_width(options, c);
+        Some(last_width1 - start_width1 + w)
       }
       _ => None,
     }
