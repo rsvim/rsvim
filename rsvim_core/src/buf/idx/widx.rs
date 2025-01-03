@@ -315,8 +315,8 @@ mod tests {
           Some(Some(*state + 2 * diff))
         })
         .collect(),
-      (37..=53).map(|i| Some(i)).collect(),
-      vec![Some(53), None, None, None],
+      (37..=52).map(|i| Some(i)).collect(),
+      vec![Some(52), None, None, None],
     ]
     .concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
