@@ -1,21 +1,18 @@
 //! Vim buffers.
 
-use crate::defaults::grapheme::AsciiControlCodeFormatter;
-// use crate::evloop::msg::WorkerToMasterMessage;
 use crate::res::IoResult;
 
 // Re-export
+pub use crate::buf::idx::{BufLindex, BufWindex};
 pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 
 use ahash::AHashMap as HashMap;
-use ascii::AsciiChar;
 use compact_str::CompactString;
 use parking_lot::RwLock;
 use path_absolutize::Absolutize;
 use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
-use std::convert::From;
 use std::fs::Metadata;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -23,9 +20,10 @@ use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
 use tracing::trace;
-use unicode_width::UnicodeWidthChar;
 
+pub mod idx;
 pub mod opt;
+pub mod unicode;
 
 /// Buffer ID.
 pub type BufferId = i32;
@@ -37,16 +35,6 @@ pub fn next_buffer_id() -> BufferId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
-
-//#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-///// The Vim buffer's status.
-//pub enum BufferStatus {
-//  INIT,    // After created.
-//  LOADING, // Loading text content from disk file.
-//  SAVING,  // Saving buffer content to disk file.
-//  SYNCED,  // Synced content with file system.
-//  CHANGED, // Buffer content has been modified.
-//}
 
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
@@ -67,7 +55,6 @@ pub struct Buffer {
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
-  // worker_send_to_master: Sender<WorkerToMasterMessage>,
 }
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
@@ -167,56 +154,22 @@ impl Buffer {
   /// [UnicodeWidthChar], there's another equivalent crate
   /// [icu::properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
   pub fn char_width(&self, c: char) -> usize {
-    if c.is_ascii_control() {
-      let ac = AsciiChar::from_ascii(c).unwrap();
-      match ac {
-        AsciiChar::Tab => self.tab_stop() as usize,
-        AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
-        _ => {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          format!("{}", ascii_formatter).len()
-        }
-      }
-    } else {
-      UnicodeWidthChar::width_cjk(c).unwrap()
-    }
+    unicode::char_width(&self.options, c)
   }
 
   /// Get the printable cell symbol and its display width.
   pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
-    let width = self.char_width(c);
-    if c.is_ascii_control() {
-      let ac = AsciiChar::from_ascii(c).unwrap();
-      match ac {
-        AsciiChar::Tab => (
-          CompactString::from(" ".repeat(self.tab_stop() as usize)),
-          width,
-        ),
-        AsciiChar::LineFeed | AsciiChar::CarriageReturn => (CompactString::new(""), width),
-        _ => {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          (CompactString::from(format!("{}", ascii_formatter)), width)
-        }
-      }
-    } else {
-      (CompactString::from(c.to_string()), width)
-    }
+    unicode::char_symbol(&self.options, c)
   }
 
   /// Get the display width for a unicode `str`.
   pub fn str_width(&self, s: &str) -> usize {
-    s.chars().map(|c| self.char_width(c)).sum()
+    unicode::str_width(&self.options, s)
   }
 
   /// Get the printable cell symbols and the display width for a unicode `str`.
   pub fn str_symbols(&self, s: &str) -> (CompactString, usize) {
-    s.chars().map(|c| self.char_symbol(c)).fold(
-      (CompactString::with_capacity(s.len()), 0_usize),
-      |(mut init_symbol, init_width), (mut symbol, width)| {
-        init_symbol.push_str(symbol.as_mut_str());
-        (init_symbol, init_width + width)
-      },
-    )
+    unicode::str_symbols(&self.options, s)
   }
 }
 // Unicode }
