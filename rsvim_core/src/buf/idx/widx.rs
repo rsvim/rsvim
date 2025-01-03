@@ -249,7 +249,6 @@ mod tests {
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let mut actual = BufWindex::new();
 
-    // 1-6, 14-20, 20
     let expect: Vec<Option<usize>> = [
       (1..=6).map(|i| Some(i)).collect(),
       (14..=20).map(|i| Some(i)).collect(),
@@ -278,7 +277,6 @@ mod tests {
 
     assert_eq!(actual.width_until(&options, &rope.line(0), 43), Some(44));
 
-    // 1-44
     let expect: Vec<Option<usize>> = [
       (1..=44).map(|i| Some(i)).collect(),
       vec![Some(44), None, None, None],
@@ -305,7 +303,6 @@ mod tests {
     let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
     let mut actual = BufWindex::new();
 
-    // 0-8, 16-18, 19-33, 35-51, 51
     let expect: Vec<Option<usize>> = [
       (1..=9).map(|i| Some(i)).collect(),
       (17..=20).map(|i| Some(i)).collect(),
@@ -341,10 +338,9 @@ mod tests {
 
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), Some(11));
 
-    // 0-12, 12
     let expect: Vec<Option<usize>> = [
-      (0..=12).map(|i| Some(i)).collect(),
-      vec![Some(12), None, None, None],
+      (1..=13).map(|i| Some(i)).collect(),
+      vec![Some(13), None, None, None],
     ]
     .concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
@@ -368,19 +364,19 @@ mod tests {
       "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
     ]);
     let mut actual = BufWindex::new();
-    // 0-35, 36-45, 46, 48-57, 58-77, 77
+
     let expect: Vec<Option<usize>> = [
-      (0..=17).map(|i| Some(i * 2)).collect(),
-      (36..=45).map(|i| Some(i)).collect(),
-      vec![Some(46)],
-      (48..=57).map(|i| Some(i)).collect(),
+      (1..=18).map(|i| Some(i * 2)).collect(),
+      (37..=45).map(|i| Some(i)).collect(),
+      vec![Some(47)],
+      (48..=56).map(|i| Some(i)).collect(),
       (58..=67)
         .scan(58, |state, i| {
           let diff: usize = i - *state;
           Some(Some(*state + 2 * diff))
         })
         .collect(),
-      vec![Some(77), None, None, None],
+      vec![Some(76), None, None, None],
     ]
     .concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
@@ -407,10 +403,9 @@ mod tests {
 
     assert_eq!(actual.width_until(&options, &rope.line(0), 2), Some(17));
 
-    // 0, 8, 16-129, 129
     let expect: Vec<Option<usize>> = [
-      vec![Some(0), Some(8)],
-      (16..=129).map(|i| Some(i)).collect(),
+      vec![Some(8), Some(16)],
+      (17..=129).map(|i| Some(i)).collect(),
       vec![Some(129), None, None, None],
     ]
     .concat();
