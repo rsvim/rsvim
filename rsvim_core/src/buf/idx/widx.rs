@@ -155,14 +155,16 @@ impl BufWindex {
     char_idx_range: std::ops::RangeInclusive<usize>,
   ) -> Option<usize> {
     self._internal_check();
-    let c_start = *char_idx_range.start();
-    let c_last = *char_idx_range.end();
-    let w_start = self.width_until(options, rope_line, c_start);
-    let w_last = self.width_until(options, rope_line, c_last);
-    match (w_start, w_last) {
-      (Some(start_width), Some(last_width)) => {
-        assert!(start_width <= last_width);
-        Some(last_width - start_width)
+    let start_idx = *char_idx_range.start();
+    let last_idx = *char_idx_range.end();
+    let start_width = self.width_until(options, rope_line, start_idx);
+    let last_width = self.width_until(options, rope_line, last_idx);
+    match (start_width, last_width) {
+      (Some(start_width1), Some(last_width1)) => {
+        assert!(start_width1 <= last_width1);
+        let start_c = rope_line.char(start_idx);
+        let start_c_width = unicode::char_width(options, start_c);
+        Some(last_width1 - start_width1 + start_c_width)
       }
       _ => None,
     }
@@ -217,10 +219,23 @@ mod tests {
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
-    expect: &Vec<(usize, Option<usize>)>,
+    expect: &Vec<Option<usize>>,
   ) {
     for (i, e) in expect.iter().enumerate() {
       let a = actual.width_until(options, rope_line, i);
+      info!("actual[{i}]:{a:?}, expect[{i}]:{e:?}");
+      assert_eq!(a, e.clone());
+    }
+  }
+
+  fn assert_width_until_rev(
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    actual: &mut BufWindex,
+    expect: &Vec<(Option<usize>, usize)>,
+  ) {
+    for (e, i) in expect.iter() {
+      let a = actual.width_until(options, rope_line, *i);
       info!("actual[{i}]:{a:?}, expect[{i}]:{e:?}");
       assert_eq!(a, e.clone());
     }
@@ -235,21 +250,22 @@ mod tests {
     let mut actual = BufWindex::new();
 
     // 1-6, 14-20, 20
-    let expect: Vec<(usize, Option<usize>)> = [
-      (0..=5).map(|i| (i, Some(i + 1))).collect(),
-      (6..=12).map(|i| (i + 8, Some(i))).collect(),
-      vec![(13, Some(20)), (14, None), (15, None), (16, None)],
+    let expect: Vec<Option<usize>> = [
+      (1..=6).map(|i| Some(i)).collect(),
+      (14..=20).map(|i| Some(i)).collect(),
+      vec![Some(20), None, None, None],
     ]
     .concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
-    let expect: Vec<(usize, Option<usize>)> = expect
+    let expect: Vec<(Option<usize>, usize)> = expect
       .iter()
-      .filter(|e| e.1.is_some())
+      .enumerate()
+      .filter(|(_i, e)| e.is_some())
+      .map(|(i, e)| (e.clone(), i))
       .rev()
-      .cloned()
       .collect();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -269,13 +285,14 @@ mod tests {
     ]
     .concat();
 
-    let expect1: Vec<Option<usize>> = expect
+    let expect1: Vec<(Option<usize>, usize)> = expect
       .iter()
-      .filter(|e| e.is_some())
+      .enumerate()
+      .filter(|(_i, e)| e.is_some())
+      .map(|(i, e)| (e.clone(), i))
       .rev()
-      .cloned()
       .collect();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect1);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect1);
 
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
@@ -304,13 +321,14 @@ mod tests {
     .concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
-    let expect: Vec<Option<usize>> = expect
+    let expect: Vec<(Option<usize>, usize)> = expect
       .iter()
-      .filter(|e| e.is_some())
+      .enumerate()
+      .filter(|(_i, e)| e.is_some())
+      .map(|(i, e)| (e.clone(), i))
       .rev()
-      .cloned()
       .collect();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -331,13 +349,14 @@ mod tests {
     .concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
-    let expect: Vec<Option<usize>> = expect
+    let expect: Vec<(Option<usize>, usize)> = expect
       .iter()
-      .filter(|e| e.is_some())
+      .enumerate()
+      .filter(|(_i, e)| e.is_some())
+      .map(|(i, e)| (e.clone(), i))
       .rev()
-      .cloned()
       .collect();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -366,13 +385,14 @@ mod tests {
     .concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
-    let expect: Vec<Option<usize>> = expect
+    let expect: Vec<(Option<usize>, usize)> = expect
       .iter()
-      .filter(|e| e.is_some())
+      .enumerate()
+      .filter(|(_i, e)| e.is_some())
+      .map(|(i, e)| (e.clone(), i))
       .rev()
-      .cloned()
       .collect();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -395,13 +415,14 @@ mod tests {
     ]
     .concat();
 
-    let expect1: Vec<Option<usize>> = expect
+    let expect1: Vec<(Option<usize>, usize)> = expect
       .iter()
-      .filter(|e| e.is_some())
+      .enumerate()
+      .filter(|(_i, e)| e.is_some())
+      .map(|(i, e)| (e.clone(), i))
       .rev()
-      .cloned()
       .collect();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect1);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect1);
 
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
   }
