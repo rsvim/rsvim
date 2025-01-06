@@ -197,32 +197,56 @@ impl BufWindex {
     }
   }
 
-  /// Get the display width in the inclusive range, i.e. `[a, b]`.
+  /// Get the display width between char index range `[a, b)`, left-inclusive and right-exclusive.
+  ///
+  /// This is equivalent to `width(b)-width(a)`.
   ///
   /// # Return
   ///
-  /// It returns the display width of the `char_idx_range` if the range is inside the index.
-  /// It returns `None` if the `char_idx_range` is out of index range.
+  /// 1. It returns 0 if the line length is 0, i.e. the line itself is empty.
+  /// 2. It returns the prefix display width if the range is inside the line.
+  /// 3. It returns the truncated actual display width of the range is outside of the line.
   pub fn width_between(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
+    char_idx_range: std::ops::Range<usize>,
+  ) -> usize {
+    assert!(char_idx_range.end >= char_idx_range.start);
+    self._build_cache(options, rope_line, char_idx_range.end);
+    self._internal_check();
+    let start_idx = char_idx_range.start;
+    let last_idx = char_idx_range.end;
+    let start_width = self.width(options, rope_line, start_idx);
+    let last_width = self.width(options, rope_line, last_idx);
+    assert!(last_width >= start_width);
+    last_width - start_width
+  }
+
+  /// Get the display width between char index range `[a, b]`, both sides are inclusive.
+  ///
+  /// This is equivalent to `width_inclusive(b)-width(a)`.
+  ///
+  /// # Return
+  ///
+  /// 1. It returns 0 if the line length is 0, i.e. the line itself is empty.
+  /// 2. It returns the prefix display width if the range is inside the line.
+  /// 3. It returns the truncated actual display width of the range is outside of the line.
+  pub fn width_between_inclusive(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
     char_idx_range: std::ops::RangeInclusive<usize>,
-  ) -> Option<usize> {
+  ) -> usize {
+    assert!(char_idx_range.end() >= char_idx_range.start());
+    self._build_cache(options, rope_line, *char_idx_range.end());
     self._internal_check();
     let start_idx = *char_idx_range.start();
     let last_idx = *char_idx_range.end();
-    let start_width = self.width_until(options, rope_line, start_idx);
-    let last_width = self.width_until(options, rope_line, last_idx);
-    match (start_width, last_width) {
-      (Some(start_width1), Some(last_width1)) => {
-        assert!(start_width1 <= last_width1);
-        let c = rope_line.char(start_idx);
-        let w = unicode::char_width(options, c);
-        Some(last_width1 - start_width1 + w)
-      }
-      _ => None,
-    }
+    let start_width = self.width(options, rope_line, start_idx);
+    let last_width = self.width_inclusive(options, rope_line, last_idx);
+    assert!(last_width >= start_width);
+    last_width - start_width
   }
 
   /// Get the first char index which width is greater or equal than the specified width.
