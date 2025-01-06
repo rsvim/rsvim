@@ -147,7 +147,7 @@ impl BufWindex {
     self._internal_check();
 
     if char_idx == 0 || self.char2width.is_empty() {
-      assert!(rope_line.len_chars() == 0);
+      assert_eq!((rope_line.len_chars() == 0), self.char2width.is_empty());
       0
     } else {
       assert!(!self.char2width.is_empty());
