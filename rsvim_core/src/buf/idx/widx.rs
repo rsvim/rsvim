@@ -82,63 +82,118 @@ impl BufWindex {
     }
   }
 
-  /// Get the prefix display width in char range `[0,char_idx]`, both sides are inclusive.
-  ///
-  /// NOTE: This is equivalent to `width_between(0..=char_idx)`.
-  ///
-  /// # Return
-  ///
-  /// It returns the prefix display width if `char_idx` is inside the index.
-  /// It returns `None` if the `char_idx` is out of index range.
-  pub fn width_until(
-    &mut self,
-    options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
-    char_idx: usize,
-  ) -> Option<usize> {
+  // Build cache from char index 0 to `char_idx`.
+  fn _build_cache(&mut self, options: &BufferLocalOptions, rope_line: &RopeSlice, char_idx: usize) {
+    // Line is empty, no need to build.
+    if rope_line.len_chars() == 0 {
+      return;
+    }
+
     // If not cached.
     if char_idx >= self.char2width.len() {
-      // If this char exists in the rope line, build the cache.
-      if char_idx < rope_line.len_chars() {
-        let start_idx = self.char2width.len();
-        let mut prefix_width: usize = if start_idx == 0 {
-          0_usize
-        } else {
-          self.char2width[start_idx - 1]
-        };
-        let mut rope_chars = rope_line.chars().skip(start_idx);
-        for _i in start_idx..=char_idx {
-          let c = rope_chars.next().unwrap();
-          prefix_width += unicode::char_width(options, c);
+      // Build the cache until either `char_idx` or the end of the line.
+      let build_idx = std::cmp::min(char_idx, rope_line.len_chars() - 1);
 
-          // Update `char2width`
-          self.char2width.push(prefix_width);
+      let start_idx = self.char2width.len();
+      let mut prefix_width: usize = if start_idx == 0 {
+        0_usize
+      } else {
+        self.char2width[start_idx - 1]
+      };
 
-          // Update `width2char`
-          let w = prefix_width;
-          let c = self.char2width.len() - 1;
-          match self.width2char.get(&w) {
-            Some(c1) => {
-              if *c1 < c {
-                self.width2char.insert(w, c);
-              }
-            }
-            None => {
+      let mut rope_chars = rope_line.chars().skip(start_idx);
+      for _i in start_idx..=build_idx {
+        let c = rope_chars.next().unwrap();
+        prefix_width += unicode::char_width(options, c);
+
+        // Update `char2width`
+        self.char2width.push(prefix_width);
+
+        // Update `width2char`
+        let w = prefix_width;
+        let c = self.char2width.len() - 1;
+        match self.width2char.get(&w) {
+          Some(c1) => {
+            if *c1 < c {
               self.width2char.insert(w, c);
             }
+          }
+          None => {
+            self.width2char.insert(w, c);
           }
         }
       }
     }
+  }
 
+  /// Get the prefix display width in char index range `[0,char_idx)`, left-inclusive and
+  /// right-exclusive.
+  ///
+  /// NOTE: This is equivalent to `width_inclusive(char_idx-1)`.
+  ///
+  /// # Return
+  ///
+  /// 1. It returns 0 if `char_idx <= 0`.
+  /// 2. It returns the prefix display width if `char_idx` is inside the line.
+  /// 3. It returns the whole display width of the line if `char_idx` is greater than the line
+  ///    length.
+  pub fn width(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    char_idx: usize,
+  ) -> usize {
+    self._build_cache(options, rope_line, char_idx);
     self._internal_check();
 
-    if char_idx < self.char2width.len() {
-      // Find width from the cache.
-      Some(self.char2width[char_idx])
+    if char_idx == 0 || self.char2width.is_empty() {
+      assert!(rope_line.len_chars() == 0);
+      0
     } else {
-      // If this char index doesn't exist in the cache, it is just not existed.
-      None
+      assert!(!self.char2width.is_empty());
+      assert!(rope_line.len_chars() > 0);
+      if char_idx - 1 < self.char2width.len() {
+        // Find width from the cache.
+        self.char2width[char_idx - 1]
+      } else {
+        // If outside of the cache, returns the whole width.
+        self.char2width[self.char2width.len() - 1]
+      }
+    }
+  }
+
+  /// Get the prefix display width in char index range `[0,char_idx]`, both sides are inclusive.
+  ///
+  /// NOTE: This is equivalent to `width(char_idx+1)`.
+  ///
+  /// # Return
+  ///
+  /// 1. It returns 0 if the line length is 0, i.e. the line itself is empty.
+  /// 2. It returns the prefix display width if `char_idx` is inside the line.
+  /// 3. It returns the whole display width of the line if `char_idx` is greater than or equal to
+  ///    the line length.
+  pub fn width_inclusive(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    char_idx: usize,
+  ) -> usize {
+    self._build_cache(options, rope_line, char_idx);
+    self._internal_check();
+
+    if self.char2width.is_empty() {
+      assert!(rope_line.len_chars() == 0);
+      0
+    } else {
+      assert!(!self.char2width.is_empty());
+      assert!(rope_line.len_chars() > 0);
+      if char_idx < self.char2width.len() {
+        // Find width from the cache.
+        self.char2width[char_idx]
+      } else {
+        // If outside of the cache, returns the whole width.
+        self.char2width[self.char2width.len() - 1]
+      }
     }
   }
 
