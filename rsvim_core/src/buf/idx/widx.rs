@@ -398,7 +398,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
     let mut actual = BufWindex::new();
 
-    assert_eq!(actual.width(&options, &rope.line(0), 10), 9);
+    assert_eq!(actual.width(&options, &rope.line(0), 10), 10);
     assert_eq!(actual.width_inclusive(&options, &rope.line(0), 43), 44);
 
     let expect: Vec<usize> = [(1..=44).collect(), vec![44, 44, 44, 44]].concat();
