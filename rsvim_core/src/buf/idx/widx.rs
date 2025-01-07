@@ -326,6 +326,38 @@ mod tests {
     }
   }
 
+  fn assert_width(
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    actual: &mut BufWindex,
+    expect: &Vec<usize>,
+  ) {
+    for (i, e) in expect.iter().enumerate() {
+      let a = actual.width(options, rope_line, i);
+      info!("width:{i} actual:{a:?}, expect:{e:?}");
+      assert_eq!(a, *e);
+      let a = actual.width_between(options, rope_line, 0..i);
+      info!("width_between:[0,{i}] actual:{a:?}, expect:{e:?}");
+      assert_eq!(a, *e);
+    }
+  }
+
+  fn assert_width_rev(
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    actual: &mut BufWindex,
+    expect: &Vec<(usize, usize)>,
+  ) {
+    for (e, i) in expect.iter() {
+      let a = actual.width(options, rope_line, *i);
+      info!("width:{i}, actual:{a:?}, expect:{e:?}");
+      assert_eq!(a, *e);
+      let a = actual.width_between(options, rope_line, 0..*i);
+      info!("width_between:[0,{i}] actual:{a:?}, expect:{e:?}");
+      assert_eq!(a, *e);
+    }
+  }
+
   #[test]
   fn width1() {
     test_log_init();
@@ -345,6 +377,17 @@ mod tests {
       .rev()
       .collect();
     assert_width_inclusive_rev(&options, &rope.line(0), &mut actual, &expect);
+
+    let expect: Vec<usize> = [(0..=6).collect(), (14..=20).collect(), vec![20, 20, 20]].concat();
+    assert_width(&options, &rope.line(0), &mut actual, &expect);
+
+    let expect: Vec<(usize, usize)> = expect
+      .iter()
+      .enumerate()
+      .map(|(i, e)| (*e, i))
+      .rev()
+      .collect();
+    assert_width_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
