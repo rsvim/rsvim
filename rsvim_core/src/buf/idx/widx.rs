@@ -263,23 +263,8 @@ impl BufWindex {
     unimplemented!();
   }
 
-  /// Set/update a specified char's width, and re-calculate all display width since this char.
-  ///
-  /// NOTE: This operation is `O(N)`, where `N` is the chars count of current line.
-  pub fn set_width_at(&mut self, _char_idx: usize, _width: usize) {
-    unimplemented!();
-  }
-
-  /// Set/update a range of chars and their width, and re-calculate all display width since the first
-  /// char in the range.
-  ///
-  /// NOTE: This operation is `O(N)`, where `N` is the chars count of current line.
-  ///
-  /// # Panics
-  ///
-  /// It panics if the provided parameter `char2width` keys are not continuous, i.e. the chars
-  /// index must be continuous.
-  pub fn set_width_between(&mut self, _widths: &BTreeMap<usize, usize>) {
+  /// Truncate the width since specified char index.
+  pub fn truncate(&mut self, _char_idx: usize) {
     unimplemented!();
   }
 }
@@ -398,7 +383,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
     let mut actual = BufWindex::new();
 
-    assert_eq!(actual.width(&options, &rope.line(0), 10), 10);
+    assert_eq!(actual.width(&options, &rope.line(0), 5), 5);
     assert_eq!(actual.width_inclusive(&options, &rope.line(0), 43), 44);
 
     let expect: Vec<usize> = [(1..=44).collect(), vec![44, 44, 44, 44]].concat();
@@ -456,6 +441,29 @@ mod tests {
       .rev()
       .collect();
     assert_width_inclusive_rev(&options, &rope.line(0), &mut actual, &expect);
+
+    let expect: Vec<usize> = [
+      (0..=9).collect(),
+      (17..=20).collect(),
+      (22..=29)
+        .scan(22, |state, i| {
+          let diff: usize = i - *state;
+          Some(*state + 2 * diff)
+        })
+        .collect(),
+      (37..=52).collect(),
+      vec![52, 52, 52],
+    ]
+    .concat();
+    assert_width(&options, &rope.line(0), &mut actual, &expect);
+
+    let expect: Vec<(usize, usize)> = expect
+      .iter()
+      .enumerate()
+      .map(|(i, e)| (*e, i))
+      .rev()
+      .collect();
+    assert_width_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
