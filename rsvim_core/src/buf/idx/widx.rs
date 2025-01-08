@@ -662,6 +662,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
     let mut widx = BufWindex::new();
 
+    // inclusive {
     assert_eq!(
       widx.width_between_inclusive(&options, &rope.line(0), 0..=43),
       44
@@ -682,6 +683,9 @@ mod tests {
       widx.width_between_inclusive(&options, &rope.line(0), 7..=15),
       9
     );
+    // inclusive }
+    
+    // non-inclusive {
   }
 
   #[test]
