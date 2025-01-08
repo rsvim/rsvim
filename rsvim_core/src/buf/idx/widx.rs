@@ -283,7 +283,7 @@ mod tests {
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
-    expect: &Vec<usize>,
+    expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
       let a = actual.width_inclusive(options, rope_line, i);
@@ -299,7 +299,7 @@ mod tests {
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
-    expect: &Vec<(usize, usize)>,
+    expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
       let a = actual.width_inclusive(options, rope_line, *i);
@@ -315,7 +315,7 @@ mod tests {
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
-    expect: &Vec<usize>,
+    expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
       let a = actual.width(options, rope_line, i);
@@ -331,7 +331,7 @@ mod tests {
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
-    expect: &Vec<(usize, usize)>,
+    expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
       let a = actual.width(options, rope_line, *i);
@@ -606,6 +606,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let mut widx = BufWindex::new();
 
+    // inclusive {
     assert_eq!(
       widx.width_between_inclusive(&options, &rope.line(0), 0..=6),
       widx.width_inclusive(&options, &rope.line(0), 6)
@@ -634,7 +635,9 @@ mod tests {
       widx.width_between_inclusive(&options, &rope.line(0), 0..=13),
       12 + 8
     );
+    // inclusive }
 
+    // non-inclusive {
     assert_eq!(
       widx.width_between(&options, &rope.line(0), 0..6),
       widx.width(&options, &rope.line(0), 6)
@@ -648,6 +651,7 @@ mod tests {
       widx.width(&options, &rope.line(0), 13)
     );
     assert_eq!(widx.width_between(&options, &rope.line(0), 0..13), 12 + 8);
+    // non-inclusive }
   }
 
   #[test]
