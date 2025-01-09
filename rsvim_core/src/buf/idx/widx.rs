@@ -264,7 +264,8 @@ impl BufWindex {
   ///
   /// # Return
   ///
-  /// 1. It returns None if the line length is 0, i.e. the line itself is empty.
+  /// 1. It returns None if the line length is 0, i.e. the line itself is empty, or there's no such
+  ///    char.
   /// 2. It returns the right-most char index if `width` is inside the line.
   /// 3. It returns the last char index of the line if `width` is greater than or equal to
   ///    the line's whole display width.
