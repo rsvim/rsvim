@@ -3,8 +3,8 @@
 use crate::res::IoResult;
 
 // Re-export
-pub use crate::buf::idx::{BufLindex, BufWindex};
 pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
+pub use crate::buf::widx::{ColIndex, LineLindex};
 
 use ahash::AHashMap as HashMap;
 use compact_str::CompactString;
@@ -21,9 +21,9 @@ use std::sync::{Arc, Weak};
 use std::time::Instant;
 use tracing::trace;
 
-pub mod idx;
 pub mod opt;
 pub mod unicode;
+pub mod widx;
 
 /// Buffer ID.
 pub type BufferId = i32;

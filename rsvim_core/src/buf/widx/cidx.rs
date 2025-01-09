@@ -1,4 +1,4 @@
-//! Display width index (line-wise) for each unicode char in vim buffer.
+//! Display width index (char-wise) for each unicode char in vim buffer.
 
 use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 // use tracing::trace;
 
 #[derive(Debug, Default, Clone)]
-/// Display width index (line-wise) for each unicode char in vim buffer. For each line, the
+/// Display width index (char-wise) for each unicode char in vim buffer. For each line, the
 /// char/column index starts from 0.
 ///
 /// This structure is actually a prefix-sum tree structure. For example now we have a line:
@@ -33,7 +33,7 @@ use std::collections::BTreeMap;
 /// Here we have below terms:
 /// - **Prefix (Display) Width**: the display width from the first char to current char, inclusive
 ///   on both side.
-pub struct BufWindex {
+pub struct ColIndex {
   // Char index maps to its prefix display width.
   char2width: Vec<usize>,
 
@@ -48,7 +48,7 @@ pub struct BufWindex {
   width2char: BTreeMap<usize, usize>,
 }
 
-impl BufWindex {
+impl ColIndex {
   /// Create new index.
   pub fn new() -> Self {
     Self {
@@ -392,7 +392,7 @@ mod tests {
   fn assert_width_until(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
-    actual: &mut BufWindex,
+    actual: &mut ColIndex,
     expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
@@ -405,7 +405,7 @@ mod tests {
   fn assert_width_until_rev(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
-    actual: &mut BufWindex,
+    actual: &mut ColIndex,
     expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
@@ -418,7 +418,7 @@ mod tests {
   fn assert_width_before(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
-    actual: &mut BufWindex,
+    actual: &mut ColIndex,
     expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
@@ -431,7 +431,7 @@ mod tests {
   fn assert_width_before_rev(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
-    actual: &mut BufWindex,
+    actual: &mut ColIndex,
     expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
@@ -447,7 +447,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
-    let mut actual = BufWindex::new();
+    let mut actual = ColIndex::new();
 
     let expect: Vec<usize> =
       [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
@@ -479,7 +479,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
-    let mut actual = BufWindex::new();
+    let mut actual = ColIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 5), 5);
     assert_eq!(actual.width_until(&options, &rope.line(0), 43), 44);
@@ -515,7 +515,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
-    let mut actual = BufWindex::new();
+    let mut actual = ColIndex::new();
 
     let expect: Vec<usize> = [
       (1..=9).collect(),
@@ -570,7 +570,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["  1. When the\r"]);
-    let mut actual = BufWindex::new();
+    let mut actual = ColIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 11), 11);
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 11);
@@ -606,7 +606,7 @@ mod tests {
     let rope = make_rope_from_lines(vec![
       "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
     ]);
-    let mut actual = BufWindex::new();
+    let mut actual = ColIndex::new();
 
     let expect: Vec<usize> = [
       (1..=18).map(|i| i * 2).collect(),
@@ -665,7 +665,7 @@ mod tests {
     let rope = make_rope_from_lines(vec![
       "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
     ]);
-    let mut actual = BufWindex::new();
+    let mut actual = ColIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 8);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 16);
@@ -702,7 +702,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = Rope::new();
-    let mut actual = BufWindex::new();
+    let mut actual = ColIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
@@ -714,7 +714,7 @@ mod tests {
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
 
     let rope = make_rope_from_lines(vec![]);
-    let mut actual = BufWindex::new();
+    let mut actual = ColIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
@@ -726,7 +726,7 @@ mod tests {
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
 
     let rope = make_rope_from_lines(vec![""]);
-    let mut actual = BufWindex::new();
+    let mut actual = ColIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
@@ -741,7 +741,7 @@ mod tests {
   fn assert_char(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
-    widx: &mut BufWindex,
+    widx: &mut ColIndex,
     expect_before: &[(usize, Option<usize>)],
     expect_until: &[(usize, Option<usize>)],
   ) {
@@ -765,7 +765,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
-    let mut widx = BufWindex::new();
+    let mut widx = ColIndex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
       (0, None),
@@ -816,7 +816,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = Rope::new();
-    let mut widx = BufWindex::new();
+    let mut widx = ColIndex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> =
       vec![(0, None), (1, None), (5, None), (10, None)];
@@ -832,7 +832,7 @@ mod tests {
     );
 
     let rope = make_rope_from_lines(vec![]);
-    let mut widx = BufWindex::new();
+    let mut widx = ColIndex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> =
       vec![(0, None), (1, None), (5, None), (10, None)];
@@ -848,7 +848,7 @@ mod tests {
     );
 
     let rope = make_rope_from_lines(vec![""]);
-    let mut widx = BufWindex::new();
+    let mut widx = ColIndex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> =
       vec![(0, None), (1, None), (5, None), (10, None)];
@@ -864,7 +864,7 @@ mod tests {
     );
 
     let rope = make_rope_from_lines(vec!["\t"]);
-    let mut widx = BufWindex::new();
+    let mut widx = ColIndex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
       (0, None),
@@ -892,5 +892,75 @@ mod tests {
       &expect_before,
       &expect_until,
     );
+  }
+
+  #[test]
+  fn truncate1() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
+    let mut widx = ColIndex::new();
+
+    let expect: Vec<usize> =
+      [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
+    for (i, e) in expect.iter().enumerate() {
+      let actual = widx.width_until(&options, &rope.line(0), i);
+      assert_eq!(actual, *e);
+      widx.truncate_by_char(i);
+    }
+
+    let expect: Vec<usize> = [(0..=6).collect(), (14..=20).collect(), vec![20, 20, 20]].concat();
+    for (i, e) in expect.iter().enumerate() {
+      let a = widx.width_before(&options, &rope.line(0), i);
+      assert_eq!(a, *e);
+      widx.truncate_by_char(i);
+    }
+
+    let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
+    let mut widx = ColIndex::new();
+
+    let expect_before: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, None),
+      (5, Some(3)),
+      (10, Some(8)),
+      (15, Some(13)),
+      (16, Some(14)),
+      (17, Some(14)),
+      (22, Some(14)),
+      (23, Some(14)),
+      (24, Some(15)),
+      (25, Some(15)),
+      (26, Some(16)),
+      (27, Some(16)),
+      (28, Some(17)),
+    ];
+
+    let expect_until: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, Some(0)),
+      (5, Some(4)),
+      (10, Some(9)),
+      (15, Some(14)),
+      (16, Some(14)),
+      (17, Some(14)),
+      (22, Some(14)),
+      (23, Some(15)),
+      (24, Some(15)),
+      (25, Some(16)),
+      (26, Some(16)),
+      (27, Some(17)),
+      (28, Some(17)),
+      (29, Some(18)),
+    ];
+    for (w, i) in expect_before.iter() {
+      assert_eq!(widx.char_before(&options, &rope.line(0), *w), *i);
+      widx.truncate_by_width(*w);
+    }
+    for (w, i) in expect_until.iter() {
+      assert_eq!(widx.char_until(&options, &rope.line(0), *w), *i);
+      widx.truncate_by_width(*w);
+    }
   }
 }
