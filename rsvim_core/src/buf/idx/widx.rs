@@ -107,7 +107,7 @@ impl BufWindex {
       };
 
       let mut rope_chars = rope_line.chars().skip(start_idx);
-      for _i in start_idx..=n {
+      for i in start_idx..=n {
         let c = rope_chars.next().unwrap();
         prefix_width += unicode::char_width(options, c);
 
@@ -116,6 +116,7 @@ impl BufWindex {
 
         // Update `width2char`
         let c = self.char2width.len() - 1;
+        debug_assert_eq!(i, c);
         match self.width2char.get(&prefix_width) {
           Some(c1) => {
             if *c1 < c {
@@ -133,7 +134,7 @@ impl BufWindex {
   /// Get the prefix display width in char index range `[0,char_idx)`, left-inclusive and
   /// right-exclusive.
   ///
-  /// NOTE: This is equivalent to `width_until(char_idx-1)`.
+  /// NOTE: This is equivalent to `width_incl(char_idx-1)`.
   ///
   /// # Return
   ///
@@ -233,6 +234,7 @@ impl BufWindex {
 
         // Update `width2char`
         let c = self.char2width.len() - 1;
+        debug_assert_eq!(i, c);
         match self.width2char.get(&prefix_width) {
           Some(c1) => {
             if *c1 < c {
@@ -312,7 +314,7 @@ mod tests {
   ) {
     for (i, e) in expect.iter().enumerate() {
       let a = actual.width_incl(options, rope_line, i);
-      info!("width_until:{i} actual:{a:?}, expect:{e:?}");
+      info!("width_incl:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
@@ -325,7 +327,7 @@ mod tests {
   ) {
     for (e, i) in expect.iter() {
       let a = actual.width_incl(options, rope_line, *i);
-      info!("width_until:{i}, actual:{a:?}, expect:{e:?}");
+      info!("width_incl:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
@@ -338,7 +340,7 @@ mod tests {
   ) {
     for (i, e) in expect.iter().enumerate() {
       let a = actual.width_excl(options, rope_line, i);
-      info!("width:{i} actual:{a:?}, expect:{e:?}");
+      info!("width_excl:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
@@ -351,7 +353,7 @@ mod tests {
   ) {
     for (e, i) in expect.iter() {
       let a = actual.width_excl(options, rope_line, *i);
-      info!("width:{i}, actual:{a:?}, expect:{e:?}");
+      info!("width_excl:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
