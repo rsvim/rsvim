@@ -343,9 +343,38 @@ impl BufWindex {
     }
   }
 
-  /// Truncate the width since specified char index.
-  pub fn truncate(&mut self, _char_idx: usize) {
-    unimplemented!();
+  /// Truncate cache by char index.
+  pub fn truncate_by_char(&mut self, char_idx: usize) {
+    self._internal_check();
+
+    if self.char2width.is_empty() || self.width2char.is_empty() {
+      debug_assert_eq!(self.char2width.is_empty(), self.width2char.is_empty());
+    } else if char_idx < self.char2width.len() {
+      self.char2width.truncate(char_idx);
+      self.width2char.retain(|&_w, &mut c| c < char_idx);
+    }
+  }
+
+  /// Truncate cache by width.
+  pub fn truncate_by_width(&mut self, width: usize) {
+    self._internal_check();
+
+    if self.char2width.is_empty() || self.width2char.is_empty() {
+      debug_assert_eq!(self.char2width.is_empty(), self.width2char.is_empty());
+    } else {
+      let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
+      if width <= *last_width {
+        for w in (1..=width).rev() {
+          match self.width2char.get(&w) {
+            Some(c) => {
+              self.truncate_by_char(*c);
+              return;
+            }
+            None => { /* Skip */ }
+          }
+        }
+      }
+    }
   }
 }
 
