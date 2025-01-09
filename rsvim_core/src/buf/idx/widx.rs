@@ -768,6 +768,8 @@ mod tests {
     let mut widx = BufWindex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, None),
       (5, Some(3)),
       (10, Some(8)),
       (15, Some(13)),
@@ -783,6 +785,8 @@ mod tests {
     ];
 
     let expect_until: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, Some(0)),
       (5, Some(4)),
       (10, Some(9)),
       (15, Some(14)),
@@ -797,6 +801,60 @@ mod tests {
       (28, Some(17)),
       (29, Some(18)),
     ];
+    assert_char(
+      &options,
+      &rope.line(0),
+      &mut widx,
+      &expect_before,
+      &expect_until,
+    );
+  }
+
+  #[test]
+  fn char2() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = Rope::new();
+    let mut widx = BufWindex::new();
+
+    let expect_before: Vec<(usize, Option<usize>)> =
+      vec![(0, None), (1, None), (5, None), (10, None)];
+
+    let expect_until: Vec<(usize, Option<usize>)> =
+      vec![(0, None), (1, None), (5, None), (10, None)];
+    assert_char(
+      &options,
+      &rope.line(0),
+      &mut widx,
+      &expect_before,
+      &expect_until,
+    );
+
+    let rope = make_rope_from_lines(vec![]);
+    let mut widx = BufWindex::new();
+
+    let expect_before: Vec<(usize, Option<usize>)> =
+      vec![(0, None), (1, None), (5, None), (10, None)];
+
+    let expect_until: Vec<(usize, Option<usize>)> =
+      vec![(0, None), (1, None), (5, None), (10, None)];
+    assert_char(
+      &options,
+      &rope.line(0),
+      &mut widx,
+      &expect_before,
+      &expect_until,
+    );
+
+    let rope = make_rope_from_lines(vec![""]);
+    let mut widx = BufWindex::new();
+
+    let expect_before: Vec<(usize, Option<usize>)> =
+      vec![(0, None), (1, None), (5, None), (10, None)];
+
+    let expect_until: Vec<(usize, Option<usize>)> =
+      vec![(0, None), (1, None), (5, None), (10, None)];
     assert_char(
       &options,
       &rope.line(0),
