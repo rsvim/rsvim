@@ -862,5 +862,35 @@ mod tests {
       &expect_before,
       &expect_until,
     );
+
+    let rope = make_rope_from_lines(vec!["\t"]);
+    let mut widx = BufWindex::new();
+
+    let expect_before: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, None),
+      (5, None),
+      (7, None),
+      (8, None),
+      (9, Some(0)),
+      (10, Some(0)),
+    ];
+
+    let expect_until: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, None),
+      (5, None),
+      (7, None),
+      (8, Some(0)),
+      (9, Some(0)),
+      (10, Some(0)),
+    ];
+    assert_char(
+      &options,
+      &rope.line(0),
+      &mut widx,
+      &expect_before,
+      &expect_until,
+    );
   }
 }
