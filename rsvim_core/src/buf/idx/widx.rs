@@ -684,8 +684,22 @@ mod tests {
       9
     );
     // inclusive }
-    
+
     // non-inclusive {
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..43), 43);
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..43),
+      widx.width(&options, &rope.line(0), 43),
+    );
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..44), 44);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..45), 44);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..46), 44);
+    assert_eq!(
+      widx.width_between(&options, &rope.line(0), 0..44),
+      widx.width(&options, &rope.line(0), 44),
+    );
+    assert_eq!(widx.width_between(&options, &rope.line(0), 7..15), 8);
+    // non-inclusive }
   }
 
   #[test]
