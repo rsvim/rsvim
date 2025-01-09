@@ -82,6 +82,59 @@ impl BufWindex {
     }
   }
 
+  // Build cache beyond the bound by `char_idx` or `width`.
+  fn _build_cache(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    char_idx_bound: Option<usize>,
+    width_bound: Option<usize>,
+  ) {
+    let n = rope_line.len_chars();
+    debug_assert!(n > 0);
+
+    let start_idx = self.char2width.len();
+    let mut prefix: usize = if start_idx == 0 {
+      0_usize
+    } else {
+      self.char2width[start_idx - 1]
+    };
+
+    let mut rope_chars = rope_line.chars_at(start_idx);
+    for i in start_idx..n {
+      let c = rope_chars.next().unwrap();
+      prefix += unicode::char_width(options, c);
+
+      // Update `char2width`
+      self.char2width.push(prefix);
+
+      // Update `width2char`
+      let c = self.char2width.len() - 1;
+      debug_assert_eq!(i, c);
+      match self.width2char.get(&prefix) {
+        Some(c1) => {
+          if *c1 < c {
+            self.width2char.insert(prefix, c);
+          }
+        }
+        None => {
+          self.width2char.insert(prefix, c);
+        }
+      }
+
+      if let Some(char_idx) = char_idx_bound {
+        if i > char_idx {
+          return;
+        }
+      }
+      if let Some(width) = width_bound {
+        if prefix > width {
+          return;
+        }
+      }
+    }
+  }
+
   // Build cache until `char_idx`.
   fn _build_cache_until_char_idx(
     &mut self,
@@ -96,45 +149,14 @@ impl BufWindex {
 
     // If not cached.
     if char_idx >= self.char2width.len() {
-      // Build the cache until either `char_idx` or the end of the line.
-      let n = std::cmp::min(char_idx, rope_line.len_chars() - 1);
-
-      let start_idx = self.char2width.len();
-      let mut prefix_width: usize = if start_idx == 0 {
-        0_usize
-      } else {
-        self.char2width[start_idx - 1]
-      };
-
-      let mut rope_chars = rope_line.chars().skip(start_idx);
-      for i in start_idx..=n {
-        let c = rope_chars.next().unwrap();
-        prefix_width += unicode::char_width(options, c);
-
-        // Update `char2width`
-        self.char2width.push(prefix_width);
-
-        // Update `width2char`
-        let c = self.char2width.len() - 1;
-        debug_assert_eq!(i, c);
-        match self.width2char.get(&prefix_width) {
-          Some(c1) => {
-            if *c1 < c {
-              self.width2char.insert(prefix_width, c);
-            }
-          }
-          None => {
-            self.width2char.insert(prefix_width, c);
-          }
-        }
-      }
+      self._build_cache(options, rope_line, Some(char_idx), None);
     }
   }
 
   /// Get the prefix display width in char index range `[0,char_idx)`, left-inclusive and
   /// right-exclusive.
   ///
-  /// NOTE: This is equivalent to `width_incl(char_idx-1)`.
+  /// NOTE: This is equivalent to `width_until(char_idx-1)`.
   ///
   /// # Return
   ///
@@ -142,7 +164,7 @@ impl BufWindex {
   /// 2. It returns the prefix display width if `char_idx` is inside the line.
   /// 3. It returns the whole display width of the line if `char_idx` is greater than the line
   ///    length.
-  pub fn width_excl(
+  pub fn width_before(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
@@ -169,7 +191,7 @@ impl BufWindex {
 
   /// Get the prefix display width in char index range `[0,char_idx]`, both sides are inclusive.
   ///
-  /// NOTE: This is equivalent to `width_excl(char_idx+1)`.
+  /// NOTE: This is equivalent to `width_before(char_idx+1)`.
   ///
   /// # Return
   ///
@@ -177,7 +199,7 @@ impl BufWindex {
   /// 2. It returns the prefix display width if `char_idx` is inside the line.
   /// 3. It returns the whole display width of the line if `char_idx` is greater than or equal to
   ///    the line length.
-  pub fn width_incl(
+  pub fn width_until(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
@@ -215,51 +237,21 @@ impl BufWindex {
     }
 
     // If not cached.
-    if self.width2char.contains_key(&width) {
-      let n = rope_line.len_chars();
-      let start_idx = self.char2width.len();
-      let mut prefix_width: usize = if start_idx == 0 {
-        0_usize
-      } else {
-        self.char2width[start_idx - 1]
-      };
-
-      let mut rope_chars = rope_line.chars().skip(start_idx);
-      for i in start_idx..n {
-        let c = rope_chars.next().unwrap();
-        prefix_width += unicode::char_width(options, c);
-
-        // Update `char2width`
-        self.char2width.push(prefix_width);
-
-        // Update `width2char`
-        let c = self.char2width.len() - 1;
-        debug_assert_eq!(i, c);
-        match self.width2char.get(&prefix_width) {
-          Some(c1) => {
-            if *c1 < c {
-              self.width2char.insert(prefix_width, c);
-            }
-          }
-          None => {
-            self.width2char.insert(prefix_width, c);
-          }
-        }
-
-        // Build cache a little bit bigger than the needed `width`, since some chars can be
-        // zero-width and thus cause the mapped char index is not correct.
-        if prefix_width > width {
-          break;
+    match self.width2char.last_key_value() {
+      Some((last_width, _last_char_idx)) => {
+        if width > *last_width {
+          self._build_cache(options, rope_line, None, Some(width));
         }
       }
+      None => self._build_cache(options, rope_line, None, Some(width)),
     }
   }
 
   /// Get the right-most char index which the width is less than the specified width.
   ///
   /// Note:
-  /// 1. The specified width is excluded, i.e. the returned char index's width is always less than
-  ///    the specified width, it cannot be equal to or greater than it.
+  /// 1. The specified width is exclusive, i.e. the returned char index's width is always less than
+  ///    the specified width, but cannot be greater than or equal to it.
   /// 2. For all the char indexes which the width is less, it returns the right-most char index.
   ///
   /// # Return
@@ -269,7 +261,7 @@ impl BufWindex {
   /// 2. It returns the right-most char index if `width` is inside the line.
   /// 3. It returns the last char index of the line if `width` is greater than or equal to
   ///    the line's whole display width.
-  pub fn char_excl(
+  pub fn char_before(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
@@ -278,8 +270,57 @@ impl BufWindex {
     self._build_cache_until_width(options, rope_line, width);
     self._internal_check();
 
-    if width == 0 || self.char2width.is_empty() {
-      assert_eq!((rope_line.len_chars() == 0), self.char2width.is_empty());
+    if width == 0 || self.width2char.is_empty() {
+      assert_eq!((rope_line.len_chars() == 0), self.width2char.is_empty());
+      None
+    } else {
+      assert!(!self.width2char.is_empty());
+      assert!(rope_line.len_chars() > 0);
+      let (last_width, last_char_idx) = self.width2char.last_key_value().unwrap();
+      if width <= *last_width {
+        for w in (1..width).rev() {
+          match self.width2char.get(&w) {
+            Some(c) => {
+              return Some(*c);
+            }
+            None => { /* Skip */ }
+          }
+        }
+        // Not exist.
+        None
+      } else {
+        Some(*last_char_idx)
+      }
+    }
+  }
+
+  /// Get the right-most char index which the width is greater than or equal to the specified
+  /// width.
+  ///
+  /// Note:
+  /// 1. The specified width is inclusive, i.e. the returned char index's width is greater than or
+  ///    equal to the specified width, but cannot be less than it.
+  /// 2. For all the char indexes which the width is greater or equal, it returns the right-most
+  ///    char index.
+  ///
+  /// # Return
+  ///
+  /// 1. It returns None if the line length is 0, i.e. the line itself is empty, or there's no such
+  ///    char.
+  /// 2. It returns the right-most char index if `width` is inside the line.
+  /// 3. It returns the last char index of the line if `width` is greater than or equal to
+  ///    the line's whole display width.
+  pub fn char_until(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    width: usize,
+  ) -> Option<usize> {
+    self._build_cache_until_width(options, rope_line, width);
+    self._internal_check();
+
+    if width == 0 || self.width2char.is_empty() {
+      assert_eq!((rope_line.len_chars() == 0), self.width2char.is_empty());
       None
     } else {
       assert!(!self.width2char.is_empty());
@@ -318,54 +359,54 @@ mod tests {
 
   use tracing::info;
 
-  fn assert_width_incl(
+  fn assert_width_until(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
     expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
-      let a = actual.width_incl(options, rope_line, i);
-      info!("width_incl:{i} actual:{a:?}, expect:{e:?}");
+      let a = actual.width_until(options, rope_line, i);
+      info!("width_until:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
 
-  fn assert_width_incl_rev(
+  fn assert_width_until_rev(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
     expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
-      let a = actual.width_incl(options, rope_line, *i);
-      info!("width_incl:{i}, actual:{a:?}, expect:{e:?}");
+      let a = actual.width_until(options, rope_line, *i);
+      info!("width_until:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
 
-  fn assert_width_excl(
+  fn assert_width_before(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
     expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
-      let a = actual.width_excl(options, rope_line, i);
-      info!("width_excl:{i} actual:{a:?}, expect:{e:?}");
+      let a = actual.width_before(options, rope_line, i);
+      info!("width_before:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
 
-  fn assert_width_excl_rev(
+  fn assert_width_before_rev(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut BufWindex,
     expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
-      let a = actual.width_excl(options, rope_line, *i);
-      info!("width_excl:{i}, actual:{a:?}, expect:{e:?}");
+      let a = actual.width_before(options, rope_line, *i);
+      info!("width_before:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
@@ -380,7 +421,7 @@ mod tests {
 
     let expect: Vec<usize> =
       [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
-    assert_width_incl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -388,10 +429,10 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_incl_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [(0..=6).collect(), (14..=20).collect(), vec![20, 20, 20]].concat();
-    assert_width_excl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -399,7 +440,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_excl_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -410,8 +451,8 @@ mod tests {
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
     let mut actual = BufWindex::new();
 
-    assert_eq!(actual.width_excl(&options, &rope.line(0), 5), 5);
-    assert_eq!(actual.width_incl(&options, &rope.line(0), 43), 44);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 5), 5);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 43), 44);
 
     let expect: Vec<usize> = [(1..=44).collect(), vec![44, 44, 44, 44]].concat();
 
@@ -421,9 +462,9 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_incl_rev(&options, &rope.line(0), &mut actual, &expect1);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect1);
 
-    assert_width_incl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [(0..=44).collect(), vec![44, 44, 44]].concat();
 
@@ -433,9 +474,9 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_excl_rev(&options, &rope.line(0), &mut actual, &expect1);
+    assert_width_before_rev(&options, &rope.line(0), &mut actual, &expect1);
 
-    assert_width_excl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -459,7 +500,7 @@ mod tests {
       vec![52, 52, 52, 52],
     ]
     .concat();
-    assert_width_incl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -467,7 +508,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_incl_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [
       (0..=9).collect(),
@@ -482,7 +523,7 @@ mod tests {
       vec![52, 52, 52],
     ]
     .concat();
-    assert_width_excl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -490,7 +531,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_excl_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -501,11 +542,11 @@ mod tests {
     let rope = make_rope_from_lines(vec!["  1. When the\r"]);
     let mut actual = BufWindex::new();
 
-    assert_eq!(actual.width_excl(&options, &rope.line(0), 11), 11);
-    assert_eq!(actual.width_incl(&options, &rope.line(0), 10), 11);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 11), 11);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 11);
 
     let expect: Vec<usize> = [(1..=13).collect(), vec![13, 13, 13, 13]].concat();
-    assert_width_incl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -513,10 +554,10 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_incl_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [(0..=13).collect(), vec![13, 13, 13]].concat();
-    assert_width_excl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -524,7 +565,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_excl_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -551,7 +592,7 @@ mod tests {
       vec![76, 76, 76, 76],
     ]
     .concat();
-    assert_width_incl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -559,7 +600,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_incl_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [
       (0..=18).map(|i| i * 2).collect(),
@@ -575,7 +616,7 @@ mod tests {
       vec![76, 76, 76, 76],
     ]
     .concat();
-    assert_width_excl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -583,7 +624,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_excl_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before_rev(&options, &rope.line(0), &mut actual, &expect);
   }
 
   #[test]
@@ -596,9 +637,9 @@ mod tests {
     ]);
     let mut actual = BufWindex::new();
 
-    assert_eq!(actual.width_excl(&options, &rope.line(0), 1), 8);
-    assert_eq!(actual.width_excl(&options, &rope.line(0), 2), 16);
-    assert_eq!(actual.width_incl(&options, &rope.line(0), 2), 17);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 1), 8);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 2), 16);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 17);
 
     let expect: Vec<usize> = [vec![8, 16], (17..=129).collect(), vec![129, 129, 129, 129]].concat();
 
@@ -608,9 +649,9 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_incl_rev(&options, &rope.line(0), &mut actual, &expect1);
+    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect1);
 
-    assert_width_incl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [vec![0, 8, 16], (17..=129).collect(), vec![129, 129, 129]].concat();
 
@@ -620,8 +661,8 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_excl_rev(&options, &rope.line(0), &mut actual, &expect1);
+    assert_width_before_rev(&options, &rope.line(0), &mut actual, &expect1);
 
-    assert_width_excl(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_before(&options, &rope.line(0), &mut actual, &expect);
   }
 }
