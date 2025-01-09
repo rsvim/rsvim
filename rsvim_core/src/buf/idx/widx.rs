@@ -206,7 +206,7 @@ impl BufWindex {
   /// 1. It returns 0 if the line length is 0, i.e. the line itself is empty.
   /// 2. It returns the prefix display width if the range is inside the line.
   /// 3. It returns the truncated actual display width of the range is outside of the line.
-  pub fn range_width(
+  pub fn width_between(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
@@ -232,7 +232,7 @@ impl BufWindex {
   /// 1. It returns 0 if the line length is 0, i.e. the line itself is empty.
   /// 2. It returns the prefix display width if the range is inside the line.
   /// 3. It returns the truncated actual display width of the range is outside of the line.
-  pub fn range_width_until(
+  pub fn width_between_until(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
@@ -289,8 +289,8 @@ mod tests {
       let a = actual.width_until(options, rope_line, i);
       info!("width_until:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
-      let a = actual.range_width_until(options, rope_line, 0..=i);
-      info!("width_between_inclusive:[0,{i}] actual:{a:?}, expect:{e:?}");
+      let a = actual.width_between_until(options, rope_line, 0..=i);
+      info!("width_between_until:[0,{i}] actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
@@ -305,8 +305,8 @@ mod tests {
       let a = actual.width_until(options, rope_line, *i);
       info!("width_until:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
-      let a = actual.range_width_until(options, rope_line, 0..=*i);
-      info!("width_between_inclusive:[0,{i}] actual:{a:?}, expect:{e:?}");
+      let a = actual.width_between_until(options, rope_line, 0..=*i);
+      info!("width_between_until:[0,{i}] actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
@@ -321,7 +321,7 @@ mod tests {
       let a = actual.width(options, rope_line, i);
       info!("width:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
-      let a = actual.range_width(options, rope_line, 0..i);
+      let a = actual.width_between(options, rope_line, 0..i);
       info!("width_between:[0,{i}] actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -337,7 +337,7 @@ mod tests {
       let a = actual.width(options, rope_line, *i);
       info!("width:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
-      let a = actual.range_width(options, rope_line, 0..*i);
+      let a = actual.width_between(options, rope_line, 0..*i);
       info!("width_between:[0,{i}] actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -608,43 +608,49 @@ mod tests {
 
     // inclusive {
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=6),
+      widx.width_between_until(&options, &rope.line(0), 0..=6),
       widx.width_until(&options, &rope.line(0), 6)
     );
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=6),
+      widx.width_between_until(&options, &rope.line(0), 0..=6),
       6 + 8
     );
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 4..=8),
+      widx.width_between_until(&options, &rope.line(0), 4..=8),
       4 + 8
     );
-    assert_eq!(widx.range_width_until(&options, &rope.line(0), 13..=13), 0);
-    assert_eq!(widx.range_width_until(&options, &rope.line(0), 12..=13), 1);
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=13),
+      widx.width_between_until(&options, &rope.line(0), 13..=13),
+      0
+    );
+    assert_eq!(
+      widx.width_between_until(&options, &rope.line(0), 12..=13),
+      1
+    );
+    assert_eq!(
+      widx.width_between_until(&options, &rope.line(0), 0..=13),
       widx.width_until(&options, &rope.line(0), 13)
     );
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=13),
+      widx.width_between_until(&options, &rope.line(0), 0..=13),
       12 + 8
     );
     // inclusive }
 
     // non-inclusive {
     assert_eq!(
-      widx.range_width(&options, &rope.line(0), 0..6),
+      widx.width_between(&options, &rope.line(0), 0..6),
       widx.width(&options, &rope.line(0), 6)
     );
-    assert_eq!(widx.range_width(&options, &rope.line(0), 0..6), 6);
-    assert_eq!(widx.range_width(&options, &rope.line(0), 4..8), 3 + 8);
-    assert_eq!(widx.range_width(&options, &rope.line(0), 13..13), 0);
-    assert_eq!(widx.range_width(&options, &rope.line(0), 12..13), 1);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..6), 6);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 4..8), 3 + 8);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 13..13), 0);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 12..13), 1);
     assert_eq!(
-      widx.range_width(&options, &rope.line(0), 0..13),
+      widx.width_between(&options, &rope.line(0), 0..13),
       widx.width(&options, &rope.line(0), 13)
     );
-    assert_eq!(widx.range_width(&options, &rope.line(0), 0..13), 12 + 8);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..13), 12 + 8);
     // non-inclusive }
   }
 
@@ -657,33 +663,39 @@ mod tests {
     let mut widx = BufWindex::new();
 
     // inclusive {
-    assert_eq!(widx.range_width_until(&options, &rope.line(0), 0..=43), 44);
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=43),
+      widx.width_between_until(&options, &rope.line(0), 0..=43),
+      44
+    );
+    assert_eq!(
+      widx.width_between_until(&options, &rope.line(0), 0..=43),
       widx.width_until(&options, &rope.line(0), 43),
     );
-    assert_eq!(widx.range_width_until(&options, &rope.line(0), 0..=44), 44);
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=44),
+      widx.width_between_until(&options, &rope.line(0), 0..=44),
+      44
+    );
+    assert_eq!(
+      widx.width_between_until(&options, &rope.line(0), 0..=44),
       widx.width_until(&options, &rope.line(0), 44),
     );
-    assert_eq!(widx.range_width_until(&options, &rope.line(0), 7..=15), 9);
+    assert_eq!(widx.width_between_until(&options, &rope.line(0), 7..=15), 9);
     // inclusive }
 
     // non-inclusive {
-    assert_eq!(widx.range_width(&options, &rope.line(0), 0..43), 43);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..43), 43);
     assert_eq!(
-      widx.range_width(&options, &rope.line(0), 0..43),
+      widx.width_between(&options, &rope.line(0), 0..43),
       widx.width(&options, &rope.line(0), 43),
     );
-    assert_eq!(widx.range_width(&options, &rope.line(0), 0..44), 44);
-    assert_eq!(widx.range_width(&options, &rope.line(0), 0..45), 44);
-    assert_eq!(widx.range_width(&options, &rope.line(0), 0..46), 44);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..44), 44);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..45), 44);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 0..46), 44);
     assert_eq!(
-      widx.range_width(&options, &rope.line(0), 0..44),
+      widx.width_between(&options, &rope.line(0), 0..44),
       widx.width(&options, &rope.line(0), 44),
     );
-    assert_eq!(widx.range_width(&options, &rope.line(0), 7..15), 8);
+    assert_eq!(widx.width_between(&options, &rope.line(0), 7..15), 8);
     // non-inclusive }
   }
 
@@ -696,11 +708,11 @@ mod tests {
     let mut widx = BufWindex::new();
 
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=15),
+      widx.width_between_until(&options, &rope.line(0), 0..=15),
       12 + 8 + 6
     );
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=15),
+      widx.width_between_until(&options, &rope.line(0), 0..=15),
       widx.width_until(&options, &rope.line(0), 15)
     );
   }
@@ -716,15 +728,15 @@ mod tests {
     let mut widx = BufWindex::new();
 
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 15..=27),
+      widx.width_between_until(&options, &rope.line(0), 15..=27),
       8 + 9
     );
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=27),
+      widx.width_between_until(&options, &rope.line(0), 0..=27),
       19 * 2 + 9
     );
     assert_eq!(
-      widx.range_width_until(&options, &rope.line(0), 0..=27),
+      widx.width_between_until(&options, &rope.line(0), 0..=27),
       widx.width_until(&options, &rope.line(0), 27)
     );
   }
