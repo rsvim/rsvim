@@ -255,17 +255,20 @@ impl BufWindex {
     }
   }
 
-  /// Get the first char index which width is greater or equal than the specified width.
+  /// Get the right-most char index which the width is less than the specified width.
   ///
-  /// Here the *greater or equal than* indicates that:
-  /// 1. If the width is exactly the width on a char index, it returns the char index.
-  /// 2. Otherwise, it returns the first char which width is greater than it.
+  /// Note:
+  /// 1. The specified width is excluded, i.e. the returned char index's width is always less than
+  ///    the specified width, it cannot be equal to or greater than it.
+  /// 2. For all the char indexes which the width is less, it returns the right-most char index.
   ///
   /// # Return
   ///
-  /// It returns the first char index if the `width` is inside the index.
-  /// It returns `None` if the `width` is out of the index range.
-  pub fn char_at(
+  /// 1. It returns None if the line length is 0, i.e. the line itself is empty.
+  /// 2. It returns the right-most char index if `width` is inside the line.
+  /// 3. It returns the last char index of the line if `width` is greater than or equal to
+  ///    the line's whole display width.
+  pub fn char_excl(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
@@ -276,16 +279,24 @@ impl BufWindex {
 
     if width == 0 || self.char2width.is_empty() {
       assert_eq!((rope_line.len_chars() == 0), self.char2width.is_empty());
-      0
+      None
     } else {
-      assert!(!self.char2width.is_empty());
+      assert!(!self.width2char.is_empty());
       assert!(rope_line.len_chars() > 0);
-      if char_idx - 1 < self.char2width.len() {
-        // Find width from the cache.
-        self.char2width[char_idx - 1]
+      let (last_width, last_char_idx) = self.width2char.last_key_value().unwrap();
+      if width <= *last_width {
+        for w in (1..width).rev() {
+          match self.width2char.get(&w) {
+            Some(c) => {
+              return Some(*c);
+            }
+            None => { /* Skip */ }
+          }
+        }
+        // Not exist.
+        None
       } else {
-        // If outside of the cache, returns the whole width.
-        self.char2width[self.char2width.len() - 1]
+        Some(*last_char_idx)
       }
     }
   }
