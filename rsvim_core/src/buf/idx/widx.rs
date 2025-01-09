@@ -738,39 +738,71 @@ mod tests {
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
   }
 
+  fn assert_char(
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    widx: &mut BufWindex,
+    expect_before: &[(usize, Option<usize>)],
+    expect_until: &[(usize, Option<usize>)],
+  ) {
+    for (w, i) in expect_before.iter() {
+      assert_eq!(widx.char_before(options, rope_line, *w), *i);
+      if i.is_some() {
+        assert!(widx.width_until(options, rope_line, i.unwrap()) < *w);
+      }
+    }
+    for (w, i) in expect_until.iter() {
+      assert_eq!(widx.char_until(options, rope_line, *w), *i);
+      if i.is_some() {
+        assert!(widx.width_until(options, rope_line, i.unwrap()) <= *w);
+      }
+    }
+  }
+
   #[test]
   fn char1() {
     test_log_init();
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
-    let mut actual = BufWindex::new();
+    let mut widx = BufWindex::new();
 
-    assert_eq!(actual.char_before(&options, &rope.line(0), 5), Some(3));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 10), Some(8));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 15), Some(13));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 16), Some(14));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 17), Some(14));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 22), Some(14));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 23), Some(14));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 24), Some(15));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 25), Some(15));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 26), Some(16));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 27), Some(16));
-    assert_eq!(actual.char_before(&options, &rope.line(0), 28), Some(17));
+    let expect_before: Vec<(usize, Option<usize>)> = vec![
+      (5, Some(3)),
+      (10, Some(8)),
+      (15, Some(13)),
+      (16, Some(14)),
+      (17, Some(14)),
+      (22, Some(14)),
+      (23, Some(14)),
+      (24, Some(15)),
+      (25, Some(15)),
+      (26, Some(16)),
+      (27, Some(16)),
+      (28, Some(17)),
+    ];
 
-    assert_eq!(actual.char_until(&options, &rope.line(0), 5), Some(4));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 10), Some(9));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 15), Some(14));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 16), Some(14));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 17), Some(14));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 22), Some(14));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 23), Some(15));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 24), Some(15));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 25), Some(16));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 26), Some(16));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 27), Some(17));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 28), Some(17));
-    assert_eq!(actual.char_until(&options, &rope.line(0), 29), Some(18));
+    let expect_until: Vec<(usize, Option<usize>)> = vec![
+      (5, Some(4)),
+      (10, Some(9)),
+      (15, Some(14)),
+      (16, Some(14)),
+      (17, Some(14)),
+      (22, Some(14)),
+      (23, Some(15)),
+      (24, Some(15)),
+      (25, Some(16)),
+      (26, Some(16)),
+      (27, Some(17)),
+      (28, Some(17)),
+      (29, Some(18)),
+    ];
+    assert_char(
+      &options,
+      &rope.line(0),
+      &mut widx,
+      &expect_before,
+      &expect_until,
+    );
   }
 }
