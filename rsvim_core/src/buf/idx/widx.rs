@@ -747,6 +747,19 @@ mod tests {
     let mut actual = BufWindex::new();
 
     assert_eq!(actual.char_before(&options, &rope.line(0), 5), Some(3));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 10), Some(8));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 15), Some(13));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 16), Some(14));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 17), Some(14));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 22), Some(14));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 23), Some(14));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 24), Some(15));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 25), Some(15));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 26), Some(16));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 27), Some(16));
+    assert_eq!(actual.char_before(&options, &rope.line(0), 28), Some(17));
+
+    assert_eq!(actual.char_until(&options, &rope.line(0), 5), Some(4));
     assert_eq!(actual.char_until(&options, &rope.line(0), 10), Some(9));
   }
 }
