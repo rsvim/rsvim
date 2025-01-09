@@ -327,7 +327,7 @@ impl BufWindex {
       assert!(rope_line.len_chars() > 0);
       let (last_width, last_char_idx) = self.width2char.last_key_value().unwrap();
       if width <= *last_width {
-        for w in (1..width).rev() {
+        for w in (1..=width).rev() {
           match self.width2char.get(&w) {
             Some(c) => {
               return Some(*c);
