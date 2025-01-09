@@ -386,6 +386,7 @@ mod tests {
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
 
+  use ropey::Rope;
   use tracing::info;
 
   fn assert_width_until(
@@ -693,5 +694,59 @@ mod tests {
     assert_width_before_rev(&options, &rope.line(0), &mut actual, &expect1);
 
     assert_width_before(&options, &rope.line(0), &mut actual, &expect);
+  }
+
+  #[test]
+  fn width7() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = Rope::new();
+    let mut actual = BufWindex::new();
+
+    assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 10), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
+
+    let rope = make_rope_from_lines(vec![]);
+    let mut actual = BufWindex::new();
+
+    assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 10), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
+
+    let rope = make_rope_from_lines(vec![""]);
+    let mut actual = BufWindex::new();
+
+    assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_before(&options, &rope.line(0), 10), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
+  }
+
+  #[test]
+  fn char1() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+    let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
+    let mut actual = BufWindex::new();
+
+    assert_eq!(actual.char_before(&options, &rope.line(0), 5), Some(3));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 10), Some(9));
   }
 }
