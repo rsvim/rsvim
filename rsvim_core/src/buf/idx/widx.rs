@@ -761,5 +761,16 @@ mod tests {
 
     assert_eq!(actual.char_until(&options, &rope.line(0), 5), Some(4));
     assert_eq!(actual.char_until(&options, &rope.line(0), 10), Some(9));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 15), Some(14));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 16), Some(14));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 17), Some(14));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 22), Some(14));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 23), Some(15));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 24), Some(15));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 25), Some(16));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 26), Some(16));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 27), Some(17));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 28), Some(17));
+    assert_eq!(actual.char_until(&options, &rope.line(0), 29), Some(18));
   }
 }
