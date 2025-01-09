@@ -144,7 +144,7 @@ impl LineLindex {
   }
 
   /// Truncate cache on one line, start from specified char index.
-  pub fn truncate_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
+  pub fn truncate_line_by_char(&mut self, line_idx: usize, char_idx: usize) {
     match self.line2cidx.get_mut(&line_idx) {
       Some(cidx) => cidx.truncate_by_char(char_idx),
       None => { /* Do Nothing. */ }
@@ -152,7 +152,7 @@ impl LineLindex {
   }
 
   /// Truncate cache on one line, start from specified width.
-  pub fn truncate_line_since_width(&mut self, line_idx: usize, width: usize) {
+  pub fn truncate_line_by_width(&mut self, line_idx: usize, width: usize) {
     match self.line2cidx.get_mut(&line_idx) {
       Some(cidx) => cidx.truncate_by_width(width),
       None => { /* Do Nothing. */ }
