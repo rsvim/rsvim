@@ -40,9 +40,7 @@ impl LineLindex {
     line_idx: usize,
     char_idx: usize,
   ) -> usize {
-    if !self.line2cidx.contains_key(&line_idx) {
-      self.line2cidx.insert(line_idx, ColIndex::new());
-    }
+    self.line2cidx.entry(line_idx).or_default();
     self
       .line2cidx
       .get_mut(&line_idx)
@@ -68,9 +66,7 @@ impl LineLindex {
     line_idx: usize,
     char_idx: usize,
   ) -> usize {
-    if !self.line2cidx.contains_key(&line_idx) {
-      self.line2cidx.insert(line_idx, ColIndex::new());
-    }
+    self.line2cidx.entry(line_idx).or_default();
     self
       .line2cidx
       .get_mut(&line_idx)
@@ -100,9 +96,7 @@ impl LineLindex {
     line_idx: usize,
     width: usize,
   ) -> Option<usize> {
-    if !self.line2cidx.contains_key(&line_idx) {
-      self.line2cidx.insert(line_idx, ColIndex::new());
-    }
+    self.line2cidx.entry(line_idx).or_default();
     self
       .line2cidx
       .get_mut(&line_idx)
@@ -133,9 +127,7 @@ impl LineLindex {
     line_idx: usize,
     width: usize,
   ) -> Option<usize> {
-    if !self.line2cidx.contains_key(&line_idx) {
-      self.line2cidx.insert(line_idx, ColIndex::new());
-    }
+    self.line2cidx.entry(line_idx).or_default();
     self
       .line2cidx
       .get_mut(&line_idx)
