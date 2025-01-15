@@ -95,14 +95,6 @@ jobs:
             toolchain: stable
           - os: windows-latest
             toolchain: stable
-          - os: ubuntu-latest
-            toolchain: beta
-          - os: macos-latest
-            toolchain: beta
-          - os: macos-13
-            toolchain: beta
-          - os: windows-latest
-            toolchain: beta
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@master
@@ -130,14 +122,6 @@ jobs:
             toolchain: stable
           - os: windows-latest
             toolchain: stable
-          - os: ubuntu-latest
-            toolchain: beta
-          - os: macos-latest
-            toolchain: beta
-          - os: macos-13
-            toolchain: beta
-          - os: windows-latest
-            toolchain: beta
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@master
