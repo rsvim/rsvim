@@ -423,14 +423,7 @@ pub fn fetch_module_tree<'a>(
   let source = v8::String::new(scope, &source).unwrap();
   let mut source = v8::script_compiler::Source::new(source, Some(&origin));
 
-  #[allow(clippy::question_mark)]
-  let module = match v8::script_compiler::compile_module(scope, &mut source) {
-    Some(module) => module,
-    None => {
-      // Early return.
-      return None;
-    }
-  };
+  let module = v8::script_compiler::compile_module(scope, &mut source)?;
 
   // Subscribe module to the module-map.
   let module_ref = v8::Global::new(scope, module);
