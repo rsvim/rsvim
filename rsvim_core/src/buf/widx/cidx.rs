@@ -343,7 +343,7 @@ impl ColIndex {
     }
   }
 
-  /// Truncate cache by char index.
+  /// Truncate cache since char index.
   pub fn truncate_by_char(&mut self, char_idx: usize) {
     self._internal_check();
 
@@ -355,7 +355,7 @@ impl ColIndex {
     }
   }
 
-  /// Truncate cache by width.
+  /// Truncate cache since width.
   pub fn truncate_by_width(&mut self, width: usize) {
     self._internal_check();
 
