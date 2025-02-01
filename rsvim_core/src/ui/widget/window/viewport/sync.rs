@@ -64,14 +64,12 @@ pub fn from_top_left(
   }
 
   match (options.wrap, options.line_break) {
-    (false, _) => {
-      _sync_from_top_left_nowrap(options, buffer, actual_shape, start_line, start_dcolumn)
-    }
+    (false, _) => _from_top_left_nowrap(options, buffer, actual_shape, start_line, start_dcolumn),
     (true, false) => {
-      _sync_from_top_left_wrap_nolinebreak(options, buffer, actual_shape, start_line, start_dcolumn)
+      _from_top_left_wrap_nolinebreak(options, buffer, actual_shape, start_line, start_dcolumn)
     }
     (true, true) => {
-      _sync_from_top_left_wrap_linebreak(options, buffer, actual_shape, start_line, start_dcolumn)
+      _from_top_left_wrap_linebreak(options, buffer, actual_shape, start_line, start_dcolumn)
     }
   }
 }
@@ -87,7 +85,7 @@ fn slice2line(s: &RopeSlice) -> String {
 
 #[allow(unused_variables)]
 // Implement [`_sync_from_top_left`] with option `wrap=false`.
-fn _sync_from_top_left_nowrap(
+fn _from_top_left_nowrap(
   _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
@@ -319,7 +317,7 @@ fn _sync_from_top_left_nowrap(
 
 #[allow(unused_variables)]
 // Implement [`_sync_from_top_left`] with option `wrap=true` and `line-break=false`.
-fn _sync_from_top_left_wrap_nolinebreak(
+fn _from_top_left_wrap_nolinebreak(
   _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
@@ -623,7 +621,7 @@ fn truncate_line(line: &RopeSlice, start_column: usize, max_bytes: usize) -> Str
 
 #[allow(unused_variables)]
 // Implement [`_sync_from_top_left`] with option `wrap=true` and `line-break=true`.
-fn _sync_from_top_left_wrap_linebreak(
+fn _from_top_left_wrap_linebreak(
   _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,

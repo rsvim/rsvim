@@ -17,51 +17,22 @@ pub mod sync;
 #[derive(Debug, Clone)]
 /// The row viewport in a buffer line.
 pub struct RowViewport {
-  start_dcol_idx: usize,
-  end_dcol_idx: usize,
   start_char_idx: usize,
   end_char_idx: usize,
-  char2dcolumns: BTreeMap<usize, (usize, usize)>,
 }
 
 impl RowViewport {
   /// Make new instance.
-  pub fn new(
-    dcol_idx_range: Range<usize>,
-    char_idx_range: Range<usize>,
-    char2dcolumns: &BTreeMap<usize, (usize, usize)>,
-  ) -> Self {
+  pub fn new(char_idx_range: Range<usize>) -> Self {
     Self {
-      start_dcol_idx: dcol_idx_range.start,
-      end_dcol_idx: dcol_idx_range.end,
       start_char_idx: char_idx_range.start,
       end_char_idx: char_idx_range.end,
-      char2dcolumns: char2dcolumns.clone(),
     }
   }
 
   /// Get the chars length (count) on the row of the line.
   pub fn chars_length(&self) -> usize {
     self.end_char_idx - self.start_char_idx
-  }
-
-  /// Get the chars display width on the row of the line.
-  pub fn chars_width(&self) -> usize {
-    self.end_dcol_idx - self.start_dcol_idx
-  }
-
-  /// Get start display column index (in the buffer) for current row, starts from 0.
-  ///
-  /// NOTE: For the term _**display column**_, please see [`Viewport`].
-  pub fn start_dcol_idx(&self) -> usize {
-    self.start_dcol_idx
-  }
-
-  /// Get end display column index (in the buffer) for current row.
-  ///
-  /// NOTE: The start and end indexes are left-inclusive and right-exclusive.
-  pub fn end_dcol_idx(&self) -> usize {
-    self.end_dcol_idx
   }
 
   /// First (fully displayed) char index in current row.
@@ -78,12 +49,6 @@ impl RowViewport {
   /// The start and end indexes are left-inclusive and right-exclusive.
   pub fn end_char_idx(&self) -> usize {
     self.end_char_idx
-  }
-
-  /// Maps from each char index to its (start and end) display column indexes in current row,
-  /// starts from 0. The value's 0 slot is `start_dcolumn`, 1 slot is `end_dcolumn`.
-  pub fn char2dcolumns(&self) -> &BTreeMap<usize, (usize, usize)> {
-    &self.char2dcolumns
   }
 }
 
@@ -164,9 +129,6 @@ impl LineViewport {
 /// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we will
 /// always maintain this position information for it.
 pub struct CursorViewport {
-  // Display column index.
-  start_dcol_idx: usize,
-  end_dcol_idx: usize,
   // Char index.
   char_idx: usize,
   // Row index.
@@ -177,24 +139,12 @@ pub struct CursorViewport {
 
 impl CursorViewport {
   /// Make new instance.
-  pub fn new(dcol_idx_range: Range<usize>, char_idx: usize, row_idx: u16, line_idx: usize) -> Self {
+  pub fn new(char_idx: usize, row_idx: u16, line_idx: usize) -> Self {
     Self {
-      start_dcol_idx: dcol_idx_range.start,
-      end_dcol_idx: dcol_idx_range.end,
       char_idx,
       row_idx,
       line_idx,
     }
-  }
-
-  /// Get start display column index, starts from 0.
-  pub fn start_dcol_idx(&self) -> usize {
-    self.start_dcol_idx
-  }
-
-  /// Get end display column index, starts from 0.
-  pub fn end_dcol_idx(&self) -> usize {
-    self.end_dcol_idx
   }
 
   /// Get char index, starts from 0.
@@ -480,7 +430,7 @@ impl Viewport {
     let (line_idx_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
     let cursor = if line_idx_range.is_empty() {
       assert!(lines.is_empty());
-      CursorViewport::new(0..1, 0, 0, 0)
+      CursorViewport::new(0, 0, 0)
     } else {
       assert!(!lines.is_empty());
       // trace!(
@@ -508,14 +458,13 @@ impl Viewport {
       let line_idx = *first_line.0;
       let first_line = first_line.1;
       if first_line.rows().is_empty() {
-        CursorViewport::new(0..1, 0, 0, 0)
+        CursorViewport::new(0, 0, 0)
       } else {
         let first_row = first_line.rows().first_key_value().unwrap();
         let row_idx = *first_row.0;
         let first_row = first_row.1;
         let char_idx = first_row.start_char_idx();
-        let (start_dcolumn, end_dcolumn) = first_row.char2dcolumns().get(&char_idx).unwrap();
-        CursorViewport::new(*start_dcolumn..*end_dcolumn, char_idx, row_idx, line_idx)
+        CursorViewport::new(char_idx, row_idx, line_idx)
       }
     };
 
@@ -570,23 +519,14 @@ impl Viewport {
           None => { /* Skip */ }
         }
         last_row_idx = Some(*row_idx);
-        assert!(row_viewport.char2dcolumns().first_key_value().is_some());
         assert_eq!(
           *row_viewport.char2dcolumns().first_key_value().unwrap().0,
           row_viewport.start_char_idx()
-        );
-        assert_eq!(
-          row_viewport.char2dcolumns().first_key_value().unwrap().1 .0,
-          row_viewport.start_dcol_idx()
         );
         assert!(row_viewport.char2dcolumns().last_key_value().is_some());
         assert_eq!(
           *row_viewport.char2dcolumns().last_key_value().unwrap().0,
           row_viewport.end_char_idx() - 1
-        );
-        assert_eq!(
-          row_viewport.char2dcolumns().last_key_value().unwrap().1 .1,
-          row_viewport.end_dcol_idx()
         );
         for (char_idx, dcolumn_idx) in row_viewport.char2dcolumns().iter() {
           match last_char_idx {
@@ -594,13 +534,6 @@ impl Viewport {
             None => { /* Skip */ }
           }
           last_char_idx = Some(*char_idx);
-          match last_dcolumn_idx {
-            Some(last_dcolumn_idx1) => {
-              assert_eq!(dcolumn_idx.0, last_dcolumn_idx1);
-            }
-            None => { /* Skip */ }
-          }
-          last_dcolumn_idx = Some(dcolumn_idx.1);
         }
       }
     }
