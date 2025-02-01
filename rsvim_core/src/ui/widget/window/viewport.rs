@@ -91,21 +91,21 @@ impl RowViewport {
 /// The buffer line viewport in a buffer.
 pub struct LineViewport {
   rows: BTreeMap<u16, RowViewport>,
-  start_filled_columns: usize,
-  end_filled_columns: usize,
+  start_filled_cols: usize,
+  end_filled_cols: usize,
 }
 
 impl LineViewport {
   /// Make new instance.
   pub fn new(
     rows: BTreeMap<u16, RowViewport>,
-    start_filled_columns: usize,
-    end_filled_columns: usize,
+    start_filled_cols: usize,
+    end_filled_cols: usize,
   ) -> Self {
     Self {
       rows,
-      start_filled_columns,
-      end_filled_columns,
+      start_filled_cols,
+      end_filled_cols,
     }
   }
 
@@ -139,16 +139,16 @@ impl LineViewport {
   /// The example shows the first char `B` starts at column index 3 in the viewport, and its
   /// previous char `<--HT-->` uses 8 cells width so cannot fully shows in the viewport.
   ///
-  /// In this case, the variable `start_filled_columns` is 4, `start_dcolumn` is 40,
+  /// In this case, the variable `start_filled_cols` is 4, `start_dcolumn` is 40,
   /// `start_char_idx` is 37.
-  pub fn start_filled_columns(&self) -> usize {
-    self.start_filled_columns
+  pub fn start_filled_cols(&self) -> usize {
+    self.start_filled_cols
   }
 
   /// Get extra filled columns at the end of the row, see:
-  /// [`start_filled_columns`](LineViewport::start_filled_columns).
-  pub fn end_filled_columns(&self) -> usize {
-    self.end_filled_columns
+  /// [`start_filled_cols`](LineViewport::start_filled_cols).
+  pub fn end_filled_cols(&self) -> usize {
+    self.end_filled_cols
   }
 }
 
@@ -423,14 +423,14 @@ impl CursorViewport {
 ///   row of the viewport.
 /// - `start_dcolumn`: The start display column (inclusive) of the buffer, it is the the first cell
 ///   of a line displayed in the viewport.
-/// - `start_filled_columns`: The filled columns at the beginning of the row in the viewport, it is
+/// - `start_filled_cols`: The filled columns at the beginning of the row in the viewport, it is
 ///   only useful when the first char in a line doesn't show at the first column of the top row in
 ///   the viewport (because the previous char cannot be fully placed within these cells).
 /// - `end_line`: The end line (exclusive) of the buffer, it is next to the last line at the bottom
 ///   row of the viewport.
 /// - `end_dcolumn`: The end display column (exclusive) of the buffer, it is next to the last cell
 ///   of a line displayed in the viewport.
-/// - `end_filled_columns`: The filled columns at the end of the row in the viewport, it is only
+/// - `end_filled_cols`: The filled columns at the end of the row in the viewport, it is only
 ///   useful when the last char in a line doesn't show at the last column at the bottom row in the
 ///   viewport (because the following char cannot be fully placed within these cells).
 ///
@@ -1013,11 +1013,11 @@ mod tests {
         l, line_viewport, actual_line_idx, expect_start_fills, expect_end_fills
       );
       assert_eq!(
-        line_viewport.start_filled_columns(),
+        line_viewport.start_filled_cols(),
         *expect_start_fills.get(&actual_line_idx).unwrap()
       );
       assert_eq!(
-        line_viewport.end_filled_columns(),
+        line_viewport.end_filled_cols(),
         *expect_end_fills.get(&actual_line_idx).unwrap()
       );
 

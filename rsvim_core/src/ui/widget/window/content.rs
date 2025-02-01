@@ -104,18 +104,17 @@ impl Widgetable for WindowContent {
 
           let mut col_idx = 0_u16;
 
-          let start_fills = if row_idx == first_row_idx && line_viewport.start_filled_columns() > 0
-          {
+          let start_fills = if row_idx == first_row_idx && line_viewport.start_filled_cols() > 0 {
             start_fills_count += 1;
             assert!(start_fills_count == 1);
-            line_viewport.start_filled_columns() as u16
+            line_viewport.start_filled_cols() as u16
           } else {
             0_u16
           };
-          let end_fills = if row_idx == last_row_idx && line_viewport.end_filled_columns() > 0 {
+          let end_fills = if row_idx == last_row_idx && line_viewport.end_filled_cols() > 0 {
             end_fills_count += 1;
             assert!(end_fills_count == 1);
-            line_viewport.end_filled_columns() as u16
+            line_viewport.end_filled_cols() as u16
           } else {
             0_u16
           };
