@@ -90,8 +90,6 @@ impl LineViewport {
   /// ```text
   ///              Column index in viewport -> 0   3
   ///                                          |   |
-  /// 0         10        20        30    36   40  |  <- Column index in the buffer
-  /// |         |         |         |     |    |   |
   /// 0         10        20        30    36   |   37  <- Char index in the buffer
   /// |         |         |         |     |    |   |
   ///                                         |---------------------|
@@ -104,14 +102,12 @@ impl LineViewport {
   /// The example shows the first char `B` starts at column index 3 in the viewport, and its
   /// previous char `<--HT-->` uses 8 cells width so cannot fully shows in the viewport.
   ///
-  /// In this case, the variable `start_filled_cols` is 4, `start_dcolumn` is 40,
-  /// `start_char_idx` is 37.
+  /// In this case, the variable `start_filled_cols` is 4, the start char index is 37.
   pub fn start_filled_cols(&self) -> usize {
     self.start_filled_cols
   }
 
-  /// Get extra filled columns at the end of the row, see:
-  /// [`start_filled_cols`](LineViewport::start_filled_cols).
+  /// Get extra filled columns at the end of the row.
   pub fn end_filled_cols(&self) -> usize {
     self.end_filled_cols
   }
