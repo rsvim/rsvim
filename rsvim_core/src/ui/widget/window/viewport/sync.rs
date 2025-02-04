@@ -3,9 +3,9 @@
 use crate::buf::BufferWk;
 use crate::cart::U16Rect;
 use crate::envar;
-use crate::rlock;
 use crate::ui::widget::window::viewport::RowViewport;
 use crate::ui::widget::window::{LineViewport, ViewportOptions};
+use crate::wlock;
 
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
@@ -84,13 +84,13 @@ fn slice2line(s: &RopeSlice) -> String {
 }
 
 #[allow(unused_variables)]
-// Implement [`_sync_from_top_left`] with option `wrap=false`.
+// Implement [`from_top_left`] with option `wrap=false`.
 fn _from_top_left_nowrap(
   _options: &ViewportOptions,
   buffer: BufferWk,
   actual_shape: &U16Rect,
   start_line: usize,
-  start_dcolumn: usize,
+  start_dcol: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -106,7 +106,7 @@ fn _from_top_left_nowrap(
 
   // Get buffer arc pointer, and lock for read.
   let buffer = buffer.upgrade().unwrap();
-  let buffer = rlock!(buffer);
+  let buffer = wlock!(buffer);
 
   // trace!(
   //   "buffer.get_line ({:?}):{:?}",
@@ -126,7 +126,7 @@ fn _from_top_left_nowrap(
       let mut wrow = 0;
       let mut current_line = start_line;
 
-      for (l, line) in buflines.enumerate() {
+      for (l, bline) in buflines.enumerate() {
         // Current row goes out of viewport.
         if wrow >= height {
           break;
@@ -151,23 +151,21 @@ fn _from_top_left_nowrap(
         let mut start_c_idx_init = false;
         let mut _end_c_idx_init = false;
 
-        let mut ch2dcols: BTreeMap<usize, (usize, usize)> = BTreeMap::new();
-
         let mut start_fills = 0_usize;
         let mut end_fills = 0_usize;
 
         // Go through each char in the line.
-        for (i, c) in line.chars().enumerate() {
+        for (i, c) in bline.chars().enumerate() {
           let c_width = buffer.char_width(c);
 
-          // Prefix width is still before `start_dcolumn`.
-          if dcol + c_width < start_dcolumn {
+          // Prefix width is still before `start_dcol`.
+          if dcol + c_width < start_dcol {
             dcol += c_width;
             end_dcol = dcol;
             end_c_idx = i;
             // trace!(
-            //   "1-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_dcolumn:{}",
-            //   wrow, wcol, c, c_width, dcol, start_dcol, end_dcol, start_c_idx, end_c_idx, start_fills, end_fills, start_dcolumn
+            //   "1-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_dcol:{}",
+            //   wrow, wcol, c, c_width, dcol, start_dcol, end_dcol, start_c_idx, end_c_idx, start_fills, end_fills, start_dcol
             // );
             continue;
           }
@@ -176,10 +174,10 @@ fn _from_top_left_nowrap(
             start_c_idx_init = true;
             start_dcol = dcol;
             start_c_idx = i;
-            start_fills = dcol - start_dcolumn;
+            start_fills = dcol - start_dcol;
             // trace!(
-            //   "2-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_dcolumn:{}",
-            //   wrow, wcol, c, c_width, dcol, start_dcol, end_dcol, start_c_idx, end_c_idx, start_fills, end_fills, start_dcolumn
+            //   "2-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_dcol:{}",
+            //   wrow, wcol, c, c_width, dcol, start_dcol, end_dcol, start_c_idx, end_c_idx, start_fills, end_fills, start_dcol
             // );
           }
 
@@ -233,7 +231,7 @@ fn _from_top_left_nowrap(
           // );
 
           // End of the line.
-          if i + 1 == line.len_chars() {
+          if i + 1 == bline.len_chars() {
             // trace!(
             //   "6-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
             //   wrow,
@@ -316,7 +314,7 @@ fn _from_top_left_nowrap(
 }
 
 #[allow(unused_variables)]
-// Implement [`_sync_from_top_left`] with option `wrap=true` and `line-break=false`.
+// Implement [`from_top_left`] with option `wrap=true` and `line-break=false`.
 fn _from_top_left_wrap_nolinebreak(
   _options: &ViewportOptions,
   buffer: BufferWk,
@@ -338,7 +336,7 @@ fn _from_top_left_wrap_nolinebreak(
 
   // Get buffer arc pointer, and lock for read.
   let buffer = buffer.upgrade().unwrap();
-  let buffer = rlock!(buffer);
+  let buffer = wlock!(buffer);
 
   // trace!(
   //   "buffer.get_line ({:?}):'{:?}'",
@@ -359,7 +357,7 @@ fn _from_top_left_wrap_nolinebreak(
       let mut wrow = 0;
       let mut current_line = start_line;
 
-      for (l, line) in buflines.enumerate() {
+      for (l, bline) in buflines.enumerate() {
         // Current row goes out of viewport.
         if wrow >= height {
           break;
@@ -389,7 +387,7 @@ fn _from_top_left_wrap_nolinebreak(
         let mut start_fills = 0_usize;
         let mut end_fills = 0_usize;
 
-        for (i, c) in line.chars().enumerate() {
+        for (i, c) in bline.chars().enumerate() {
           let c_width = buffer.char_width(c);
 
           // Prefix width is still before `start_dcolumn`.
@@ -499,7 +497,7 @@ fn _from_top_left_wrap_nolinebreak(
           // );
 
           // End of the line.
-          if i + 1 == line.len_chars() {
+          if i + 1 == bline.len_chars() {
             // trace!(
             //   "6-wrow/wcol:{}/{}, c:{}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
             //   wrow,
@@ -620,7 +618,7 @@ fn truncate_line(line: &RopeSlice, start_column: usize, max_bytes: usize) -> Str
 }
 
 #[allow(unused_variables)]
-// Implement [`_sync_from_top_left`] with option `wrap=true` and `line-break=true`.
+// Implement [`from_top_left`] with option `wrap=true` and `line-break=true`.
 fn _from_top_left_wrap_linebreak(
   _options: &ViewportOptions,
   buffer: BufferWk,
@@ -640,7 +638,7 @@ fn _from_top_left_wrap_linebreak(
 
   // Get buffer arc pointer, and lock for read.
   let buffer = buffer.upgrade().unwrap();
-  let buffer = rlock!(buffer);
+  let buffer = wlock!(buffer);
 
   // trace!(
   //   "buffer.get_line ({:?}):'{:?}'",
@@ -661,7 +659,7 @@ fn _from_top_left_wrap_linebreak(
       let mut wrow = 0;
       let mut current_line = start_line;
 
-      for (l, line) in buflines.enumerate() {
+      for (l, bline) in buflines.enumerate() {
         // Current row goes out of viewport.
         if wrow >= height {
           break;
@@ -690,7 +688,7 @@ fn _from_top_left_wrap_linebreak(
         // NOTE: Use `height * width * 4` simply for a much bigger size for the total characters in
         // a viewport.
         let truncated_line = truncate_line(
-          &line,
+          &bline,
           start_dcolumn,
           height as usize * width as usize * 2 + height as usize * 2 + 16,
         );
