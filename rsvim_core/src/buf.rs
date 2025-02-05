@@ -331,6 +331,26 @@ impl Buffer {
       .char_until(&self.options, &self.rope, line_idx, width)
   }
 
+  /// Get the right-most char index which the width is greater than the specified width.
+  ///
+  /// Note: This API is same with [`char_until`](Buffer::char_until) except the char index's
+  /// width is only greater than the specified width, but cannot less than or euqal to it.
+  ///
+  /// # Return
+  ///
+  /// 1. It returns None if the line length is 0, i.e. the line itself is empty, or there's no such
+  ///    char.
+  /// 2. It returns the right-most char index if `width` is inside the line.
+  ///
+  /// # Panics
+  ///
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn char_after(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+    self
+      .width_index
+      .char_after(&self.options, &self.rope, line_idx, width)
+  }
+
   /// Reset tail of cache on one line, start from specified char index.
   pub fn reset_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
     self.width_index.reset_line_since_char(line_idx, char_idx)
