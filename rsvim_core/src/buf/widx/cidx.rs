@@ -351,7 +351,7 @@ impl ColIndex {
         Some(char_idx) => {
           for c in char_idx..n {
             let w = self.width_until(options, rope_line, c);
-            if w > w {
+            if w > width {
               return Some(w);
             }
           }
