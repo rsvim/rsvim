@@ -90,7 +90,7 @@ fn _from_top_left_nowrap(
   buffer: BufferWk,
   actual_shape: &U16Rect,
   start_line: usize,
-  start_dcol: usize,
+  start_dcolumn: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -159,7 +159,7 @@ fn _from_top_left_nowrap(
           let c_width = buffer.char_width(c);
 
           // Prefix width is still before `start_dcol`.
-          if dcol + c_width < start_dcol {
+          if dcol + c_width < start_dcolumn {
             dcol += c_width;
             end_dcol = dcol;
             end_c_idx = i;
@@ -174,10 +174,10 @@ fn _from_top_left_nowrap(
             start_c_idx_init = true;
             start_dcol = dcol;
             start_c_idx = i;
-            start_fills = dcol - start_dcol;
+            start_fills = dcol - start_dcolumn;
             // trace!(
-            //   "2-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_dcol:{}",
-            //   wrow, wcol, c, c_width, dcol, start_dcol, end_dcol, start_c_idx, end_c_idx, start_fills, end_fills, start_dcol
+            //   "2-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_dcolumn:{}",
+            //   wrow, wcol, c, c_width, dcol, start_dcol, end_dcol, start_c_idx, end_c_idx, start_fills, end_fills, start_dcolumn
             // );
           }
 
