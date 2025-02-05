@@ -190,7 +190,8 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns 0 if the line is empty.
+  /// 1. It returns 0 if:
+  ///    - The line is empty.
   /// 2. It returns the prefix display width if `char_idx` is inside the line.
   /// 3. It returns the whole display width of the line if `char_idx` is greater than or equal to
   ///    the line length.
@@ -293,8 +294,6 @@ impl ColIndex {
   ///
   /// 1. It returns None if:
   ///    - The line is empty.
-  ///    - The `width` is 0 thus there's no such char exists.
-  ///    - Even the 1st char is longer than the `width` thus there's no such char exists.
   /// 2. It returns the right-most char index if `width` is inside the line.
   /// 3. It returns the last char index of the line if `width` is greater than or equal to
   ///    the line's whole display width.
@@ -307,9 +306,7 @@ impl ColIndex {
     self._build_cache_until_width(options, rope_line, width);
     self._internal_check();
 
-    if width == 0 {
-      None
-    } else if self.width2char.is_empty() {
+    if self.width2char.is_empty() {
       assert_eq!(rope_line.len_chars(), 0);
       None
     } else {
@@ -353,8 +350,8 @@ impl ColIndex {
     self._build_cache_until_width(options, rope_line, width);
     self._internal_check();
 
-    if width == 0 || self.width2char.is_empty() {
-      assert_eq!((rope_line.len_chars() == 0), self.width2char.is_empty());
+    if self.width2char.is_empty() {
+      assert_eq!(rope_line.len_chars(), 0);
       None
     } else {
       assert!(!self.width2char.is_empty());
