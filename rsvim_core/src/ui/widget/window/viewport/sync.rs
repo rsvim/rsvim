@@ -149,9 +149,8 @@ fn _from_top_left_nowrap(
             None => 0_usize,
           };
           let start_fills = {
-            let start_width_before = raw_buffer.as_mut().width_before(l, start_c);
-            let start_width_until = raw_buffer.as_mut().width_until(l, start_c);
-            start_width_until - start_width_before
+            let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
+            start_width_until - start_dcolumn_per_line
           };
           let end_c = match raw_buffer
             .as_mut()
@@ -161,9 +160,8 @@ fn _from_top_left_nowrap(
             None => 0_usize,
           };
           let end_fills = {
-            let end_width_before = raw_buffer.as_mut().width_before(l, end_c);
             let end_width_until = raw_buffer.as_mut().width_until(l, end_c);
-            end_width_until - end_width_before
+            end_width_until - (start_dcolumn_per_line + width as usize)
           };
 
           let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
