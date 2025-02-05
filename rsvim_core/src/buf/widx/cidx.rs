@@ -955,13 +955,13 @@ mod tests {
     ];
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
-      (0, None),
-      (1, None),
-      (5, None),
-      (7, None),
-      (8, Some(0)),
-      (9, Some(0)),
-      (10, Some(0)),
+      (0, Some(0)),
+      (1, Some(0)),
+      (5, Some(0)),
+      (7, Some(0)),
+      (8, None),
+      (9, None),
+      (10, None),
     ];
     assert_char(
       &options,
