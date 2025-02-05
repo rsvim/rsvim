@@ -14,7 +14,7 @@ use std::sync::{Arc, Weak};
 
 pub mod sync;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 /// The row viewport in a buffer line.
 pub struct RowViewport {
   start_char_idx: usize,
@@ -507,30 +507,21 @@ impl Viewport {
         None => { /* Skip */ }
       }
       last_line_idx = Some(*line_idx);
-      let mut last_char_idx: Option<usize> = None;
-      let mut last_dcolumn_idx: Option<usize> = None;
+      let mut last_row_viewport: Option<RowViewport> = None;
       for (row_idx, row_viewport) in line_viewport.rows() {
         match last_row_idx {
           Some(last_row_idx1) => assert_eq!(last_row_idx1 + 1, *row_idx),
           None => { /* Skip */ }
         }
         last_row_idx = Some(*row_idx);
-        assert_eq!(
-          *row_viewport.char2dcolumns().first_key_value().unwrap().0,
-          row_viewport.start_char_idx()
-        );
-        assert!(row_viewport.char2dcolumns().last_key_value().is_some());
-        assert_eq!(
-          *row_viewport.char2dcolumns().last_key_value().unwrap().0,
-          row_viewport.end_char_idx() - 1
-        );
-        for (char_idx, dcolumn_idx) in row_viewport.char2dcolumns().iter() {
-          match last_char_idx {
-            Some(last_char_idx1) => assert_eq!(last_char_idx1 + 1, *char_idx),
-            None => { /* Skip */ }
-          }
-          last_char_idx = Some(*char_idx);
+        match last_row_viewport {
+          Some(last_row_viewport1) => assert_eq!(
+            last_row_viewport1.end_char_idx() + 1,
+            row_viewport.start_char_idx()
+          ),
+          None => { /* Skip */ }
         }
+        last_row_viewport = Some(*row_viewport);
       }
     }
   }
