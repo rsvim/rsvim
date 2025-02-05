@@ -1,6 +1,6 @@
 //! Internal implementations for Viewport.
 
-use crate::buf::BufferWk;
+use crate::buf::{Buffer, BufferWk};
 use crate::cart::U16Rect;
 use crate::envar;
 use crate::ui::widget::window::viewport::RowViewport;
@@ -10,6 +10,7 @@ use crate::wlock;
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
+use std::ptr::NonNull;
 // use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -90,7 +91,7 @@ fn _from_top_left_nowrap(
   buffer: BufferWk,
   actual_shape: &U16Rect,
   start_line: usize,
-  start_dcolumn: usize,
+  start_dcolumn_per_line: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = actual_shape.height();
   let width = actual_shape.width();
@@ -106,209 +107,88 @@ fn _from_top_left_nowrap(
 
   // Get buffer arc pointer, and lock for read.
   let buffer = buffer.upgrade().unwrap();
-  let buffer = wlock!(buffer);
+  let mut buffer = wlock!(buffer);
 
-  // trace!(
-  //   "buffer.get_line ({:?}):{:?}",
-  //   start_line,
-  //   match buffer.get_line(start_line) {
-  //     Some(line) => slice2line(&line),
-  //     None => "None".to_string(),
-  //   }
-  // );
+  unsafe {
+    // Fix mutable borrow on `buffer`.
+    let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+    // trace!(
+    //   "buffer.get_line ({:?}):{:?}",
+    //   start_line,
+    //   match buffer.get_line(start_line) {
+    //     Some(line) => slice2line(&line),
+    //     None => "None".to_string(),
+    //   }
+    // );
 
-  match buffer.get_lines_at(start_line) {
-    // The `start_line` is in the buffer.
-    Some(buflines) => {
-      // The first `wrow` in the window maps to the `start_line` in the buffer.
-      let mut wrow = 0;
-      let mut current_line = start_line;
+    let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-      for (l, bline) in buflines.enumerate() {
-        // Current row goes out of viewport.
-        if wrow >= height {
-          break;
-        }
+    match raw_buffer.as_ref().get_lines_at(start_line) {
+      // The `start_line` is in the buffer.
+      Some(buflines) => {
+        // The first `wrow` in the window maps to the `start_line` in the buffer.
+        let mut wrow = 0;
+        let mut current_line = start_line;
 
-        // trace!(
-        //   "0-l:{:?}, line:'{:?}', current_line:{:?}",
-        //   l,
-        //   slice2line(&line),
-        //   current_line
-        // );
-
-        let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
-        let mut wcol = 0_u16;
-
-        let mut dcol = 0_usize;
-        let mut start_dcol = 0_usize;
-        let mut end_dcol = 0_usize;
-
-        let mut start_c_idx = 0_usize;
-        let mut end_c_idx = 0_usize;
-        let mut start_c_idx_init = false;
-        let mut _end_c_idx_init = false;
-
-        let mut start_fills = 0_usize;
-        let mut end_fills = 0_usize;
-
-        // Go through each char in the line.
-        for (i, c) in bline.chars().enumerate() {
-          let c_width = buffer.char_width(c);
-
-          // Prefix width is still before `start_dcol`.
-          if dcol + c_width < start_dcolumn {
-            dcol += c_width;
-            end_dcol = dcol;
-            end_c_idx = i;
-            // trace!(
-            //   "1-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_dcol:{}",
-            //   wrow, wcol, c, c_width, dcol, start_dcol, end_dcol, start_c_idx, end_c_idx, start_fills, end_fills, start_dcol
-            // );
-            continue;
-          }
-
-          if !start_c_idx_init {
-            start_c_idx_init = true;
-            start_dcol = dcol;
-            start_c_idx = i;
-            start_fills = dcol - start_dcolumn;
-            // trace!(
-            //   "2-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_dcolumn:{}",
-            //   wrow, wcol, c, c_width, dcol, start_dcol, end_dcol, start_c_idx, end_c_idx, start_fills, end_fills, start_dcolumn
-            // );
-          }
-
-          // Row column with next char will go out of the row.
-          if wcol as usize + c_width > width as usize {
-            end_fills = width as usize - wcol as usize;
-            // trace!(
-            //   "4-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-            //   wrow,
-            //   wcol,
-            //   c,
-            //   c_width,
-            //   dcol,
-            //   start_dcol,
-            //   end_dcol,
-            //   start_c_idx,
-            //   end_c_idx,
-            //   start_fills,
-            //   end_fills
-            // );
-            rows.insert(
-              wrow,
-              RowViewport::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
-            );
+        for (l, bline) in buflines.enumerate() {
+          // Current row goes out of viewport.
+          if wrow >= height {
             break;
           }
-
-          let saved_start_dcol = dcol;
-          let saved_c_idx = i;
-
-          dcol += c_width;
-          end_dcol = dcol;
-          end_c_idx = i + 1;
-          wcol += c_width as u16;
-
-          ch2dcols.insert(saved_c_idx, (saved_start_dcol, end_dcol));
 
           // trace!(
-          //   "5-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-          //   wrow,
-          //   wcol,
-          //   c,
-          //   c_width,
-          //   dcol,
-          //   start_dcol,
-          //   end_dcol,
-          //   start_c_idx,
-          //   end_c_idx,
-          //   start_fills,
-          //   end_fills
+          //   "0-l:{:?}, line:'{:?}', current_line:{:?}",
+          //   l,
+          //   slice2line(&line),
+          //   current_line
           // );
 
-          // End of the line.
-          if i + 1 == bline.len_chars() {
-            // trace!(
-            //   "6-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-            //   wrow,
-            //   wcol,
-            //   c,
-            //   c_width,
-            //   dcol,
-            //   start_dcol,
-            //   end_dcol,
-            //   start_c_idx,
-            //   end_c_idx,
-            //   start_fills,
-            //   end_fills
-            // );
-            rows.insert(
-              wrow,
-              RowViewport::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
-            );
-            break;
-          }
+          let start_c = match raw_buffer.as_mut().char_until(l, start_dcolumn_per_line) {
+            Some(start_c) => start_c,
+            None => 0_usize,
+          };
+          let start_fills = {
+            let start_width_before = raw_buffer.as_mut().width_before(l, start_c);
+            let start_width_until = raw_buffer.as_mut().width_until(l, start_c);
+            start_width_until - start_width_before
+          };
+          let end_c = match raw_buffer
+            .as_mut()
+            .char_until(l, start_dcolumn_per_line + width as usize)
+          {
+            Some(end_c) => end_c,
+            None => 0_usize,
+          };
+          let end_fills = {
+            let end_width_before = raw_buffer.as_mut().width_before(l, end_c);
+            let end_width_until = raw_buffer.as_mut().width_until(l, end_c);
+            end_width_until - end_width_before
+          };
 
-          // Row column goes out of the row.
-          if wcol >= width {
-            // trace!(
-            //   "7-wrow/wcol:{}/{}, c:{:?}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-            //   wrow,
-            //   wcol,
-            //   c,
-            //   c_width,
-            //   dcol,
-            //   start_dcol,
-            //   end_dcol,
-            //   start_c_idx,
-            //   end_c_idx,
-            //   start_fills,
-            //   end_fills
-            // );
-            rows.insert(
-              wrow,
-              RowViewport::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
-            );
-            break;
-          }
+          let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+          rows.insert(wrow, RowViewport::new(start_c..end_c));
+
+          line_viewports.insert(
+            current_line,
+            LineViewport::new(rows, start_fills, end_fills),
+          );
+          // Go to next row and line
+          current_line += 1;
+          wrow += 1;
         }
 
-        line_viewports.insert(
-          current_line,
-          LineViewport::new(rows, start_fills, end_fills),
-        );
-        // trace!(
-        //   "8-current_line:{}, wrow/wcol:{}/{}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-        //   current_line,
-        //   wrow,
-        //   wcol,
-        //   dcol,
-        //   start_dcol,
-        //   end_dcol,
-        //   start_c_idx,
-        //   end_c_idx,
-        //   start_fills,
-        //   end_fills
-        // );
-        // Go to next row and line
-        current_line += 1;
-        wrow += 1;
+        // trace!("9-current_line:{}, row:{}", current_line, wrow,);
+        (
+          ViewportLineRange::new(start_line..current_line),
+          line_viewports,
+        )
       }
-
-      // trace!("9-current_line:{}, row:{}", current_line, wrow,);
-      (
-        ViewportLineRange::new(start_line..current_line),
-        line_viewports,
-      )
-    }
-    None => {
-      // The `start_line` is outside of the buffer.
-      // trace!("10-start_line:{}", start_line);
-      (ViewportLineRange::default(), BTreeMap::new())
+      None => {
+        // The `start_line` is outside of the buffer.
+        // trace!("10-start_line:{}", start_line);
+        (ViewportLineRange::default(), BTreeMap::new())
+      }
     }
   }
 }
