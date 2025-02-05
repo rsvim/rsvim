@@ -238,17 +238,7 @@ impl Buffer {
 
 // Display Width {
 impl Buffer {
-  /// Get the prefix display width on line `line_idx`, in char index range `[0,char_idx)`,
-  /// left-inclusive and right-exclusive.
-  ///
-  /// NOTE: This is equivalent to `width_until(line_idx, char_idx-1)`.
-  ///
-  /// # Return
-  ///
-  /// 1. It returns 0 if `char_idx <= 0`.
-  /// 2. It returns the prefix display width if `char_idx` is inside the line.
-  /// 3. It returns the whole display width of the line if `char_idx` is greater than the line
-  ///    length.
+  /// See [`ColIndex::width_before`].
   ///
   /// # Panics
   ///
@@ -259,17 +249,7 @@ impl Buffer {
       .width_before(&self.options, &self.rope, line_idx, char_idx)
   }
 
-  /// Get the prefix display width on line `line_idx`, char index range `[0,char_idx]`, both sides
-  /// are inclusive.
-  ///
-  /// NOTE: This is equivalent to `width_before(line_idx, char_idx+1)`.
-  ///
-  /// # Return
-  ///
-  /// 1. It returns 0 if the line length is 0, i.e. the line itself is empty.
-  /// 2. It returns the prefix display width if `char_idx` is inside the line.
-  /// 3. It returns the whole display width of the line if `char_idx` is greater than or equal to
-  ///    the line length.
+  /// See [`ColIndex::width_until`].
   ///
   /// # Panics
   ///
@@ -280,21 +260,7 @@ impl Buffer {
       .width_until(&self.options, &self.rope, line_idx, char_idx)
   }
 
-  /// Get the right-most char index which the width is less than the specified width, on line
-  /// `line_idx`.
-  ///
-  /// Note:
-  /// 1. The specified width is exclusive, i.e. the returned char index's width is always less than
-  ///    the specified width, but cannot be greater than or equal to it.
-  /// 2. For all the char indexes which the width is less, it returns the right-most char index.
-  ///
-  /// # Return
-  ///
-  /// 1. It returns None if the line length is 0, i.e. the line itself is empty, or there's no such
-  ///    char.
-  /// 2. It returns the right-most char index if `width` is inside the line.
-  /// 3. It returns the last char index of the line if `width` is greater than or equal to
-  ///    the line's whole display width.
+  /// See [`ColIndex::char_before`].
   ///
   /// # Panics
   ///
@@ -305,22 +271,7 @@ impl Buffer {
       .char_before(&self.options, &self.rope, line_idx, width)
   }
 
-  /// Get the right-most char index which the width is greater than or equal to the specified
-  /// width, on line `line_idx`.
-  ///
-  /// Note:
-  /// 1. The specified width is inclusive, i.e. the returned char index's width is greater than or
-  ///    equal to the specified width, but cannot be less than it.
-  /// 2. For all the char indexes which the width is greater or equal, it returns the right-most
-  ///    char index.
-  ///
-  /// # Return
-  ///
-  /// 1. It returns None if the line length is 0, i.e. the line itself is empty, or there's no such
-  ///    char.
-  /// 2. It returns the right-most char index if `width` is inside the line.
-  /// 3. It returns the last char index of the line if `width` is greater than or equal to
-  ///    the line's whole display width.
+  /// See [`ColIndex::char_until`].
   ///
   /// # Panics
   ///
@@ -331,16 +282,7 @@ impl Buffer {
       .char_until(&self.options, &self.rope, line_idx, width)
   }
 
-  /// Get the right-most char index which the width is greater than the specified width.
-  ///
-  /// Note: This API is same with [`char_until`](Buffer::char_until) except the char index's
-  /// width is only greater than the specified width, but cannot less than or euqal to it.
-  ///
-  /// # Return
-  ///
-  /// 1. It returns None if the line length is 0, i.e. the line itself is empty, or there's no such
-  ///    char.
-  /// 2. It returns the right-most char index if `width` is inside the line.
+  /// See [`ColIndex::char_after`].
   ///
   /// # Panics
   ///
@@ -351,12 +293,12 @@ impl Buffer {
       .char_after(&self.options, &self.rope, line_idx, width)
   }
 
-  /// Reset tail of cache on one line, start from specified char index.
+  /// See [`ColIndex::truncate_by_char`].
   pub fn reset_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
     self.width_index.reset_line_since_char(line_idx, char_idx)
   }
 
-  /// Reset tail of cache on one line, start from specified width.
+  /// See [`ColIndex::truncate_by_width`].
   pub fn reset_line_since_width(&mut self, line_idx: usize, width: usize) {
     self.width_index.reset_line_since_width(line_idx, width)
   }
