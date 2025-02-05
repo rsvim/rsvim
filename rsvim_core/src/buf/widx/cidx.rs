@@ -91,7 +91,6 @@ impl ColIndex {
     width_bound: Option<usize>,
   ) {
     let n = rope_line.len_chars();
-    debug_assert!(n > 0);
 
     let start_idx = self.char2width.len();
     let mut prefix: usize = if start_idx == 0 {
@@ -142,15 +141,7 @@ impl ColIndex {
     rope_line: &RopeSlice,
     char_idx: usize,
   ) {
-    // Line is empty, no need to build.
-    if rope_line.len_chars() == 0 {
-      return;
-    }
-
-    // If not cached.
-    if char_idx >= self.char2width.len() {
-      self._build_cache(options, rope_line, Some(char_idx), None);
-    }
+    self._build_cache(options, rope_line, Some(char_idx), None);
   }
 
   /// Get the prefix display width in char index range `[0,char_idx)`, left-inclusive and
@@ -231,20 +222,7 @@ impl ColIndex {
     rope_line: &RopeSlice,
     width: usize,
   ) {
-    // Line is empty, no need to build.
-    if rope_line.len_chars() == 0 {
-      return;
-    }
-
-    // If not cached.
-    match self.width2char.last_key_value() {
-      Some((last_width, _last_char_idx)) => {
-        if width > *last_width {
-          self._build_cache(options, rope_line, None, Some(width));
-        }
-      }
-      None => self._build_cache(options, rope_line, None, Some(width)),
-    }
+    self._build_cache(options, rope_line, None, Some(width));
   }
 
   /// Get the right-most char index which the width is less than the specified width.
@@ -339,6 +317,47 @@ impl ColIndex {
         None
       } else {
         Some(*last_char_idx)
+      }
+    }
+  }
+
+  /// Get the right-most char index which the width is greater than the specified width.
+  ///
+  /// Note: This API is same with [`char_until`](ColIndex::char_until) except the char index's
+  /// width is only greater than the specified width, but cannot less than or euqal to it.
+  ///
+  /// # Return
+  ///
+  /// 1. It returns None if the line length is 0, i.e. the line itself is empty, or there's no such
+  ///    char.
+  /// 2. It returns the right-most char index if `width` is inside the line.
+  pub fn char_after(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    width: usize,
+  ) -> Option<usize> {
+    self._build_cache_until_width(options, rope_line, width);
+    self._internal_check();
+
+    if width == 0 || self.width2char.is_empty() {
+      assert_eq!((rope_line.len_chars() == 0), self.width2char.is_empty());
+      None
+    } else {
+      assert!(!self.width2char.is_empty());
+      assert!(rope_line.len_chars() > 0);
+      let n = rope_line.len_chars();
+      match self.char_until(options, rope_line, width) {
+        Some(char_idx) => {
+          for c in char_idx..n {
+            let w = self.width_until(options, rope_line, c);
+            if w > w {
+              return Some(w);
+            }
+          }
+          None
+        }
+        None => None,
       }
     }
   }
