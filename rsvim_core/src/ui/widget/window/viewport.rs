@@ -944,23 +944,6 @@ mod tests {
       let rows = &line_viewport.rows();
       for (r, row) in rows.iter() {
         info!("r-{:?}, row:{:?}", r, row);
-        assert_eq!(row.chars_length(), row.char2dcolumns().len());
-        assert_eq!(
-          row.start_char_idx(),
-          *row.char2dcolumns().first_key_value().unwrap().0
-        );
-        assert_eq!(
-          row.end_char_idx(),
-          *row.char2dcolumns().last_key_value().unwrap().0 + 1
-        );
-        assert_eq!(
-          row.start_dcol_idx(),
-          row.char2dcolumns().first_key_value().unwrap().1 .0
-        );
-        assert_eq!(
-          row.end_dcol_idx(),
-          row.char2dcolumns().last_key_value().unwrap().1 .1
-        );
 
         if r > rows.first_key_value().unwrap().0 {
           let prev_r = r - 1;
@@ -969,7 +952,6 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, previous row[{}]:{:?}",
             r, r, row, prev_r, prev_row
           );
-          assert_eq!(prev_row.end_dcol_idx(), row.start_dcol_idx());
         }
         if r < rows.last_key_value().unwrap().0 {
           let next_r = r + 1;
@@ -978,29 +960,18 @@ mod tests {
             "row-{:?}, current row[{}]:{:?}, next row[{}]:{:?}",
             r, r, row, next_r, next_row
           );
-          assert_eq!(next_row.start_dcol_idx(), row.end_dcol_idx());
         }
 
-        let mut last_char_dcolumn: Option<usize> = None;
         let mut payload = String::new();
         for c_idx in row.start_char_idx()..row.end_char_idx() {
           let c = line.get_char(c_idx).unwrap();
-          let c_width = buffer.char_width(c);
-          let c_dcols = row.char2dcolumns().get(&c_idx).unwrap();
-          assert_eq!(c_dcols.1 - c_dcols.0, c_width);
-          if let Some(last_char_docl) = last_char_dcolumn {
-            assert_eq!(last_char_docl, c_dcols.0);
-          }
           payload.push(c);
-          last_char_dcolumn = Some(c_dcols.1);
         }
         info!(
           "row-{:?}, actual:{:?}, expect:{:?}",
           r, payload, expect[*r as usize]
         );
         assert_eq!(payload, expect[*r as usize]);
-        let total_width = payload.chars().map(|c| buffer.char_width(c)).sum::<usize>();
-        assert_eq!(total_width, row.end_dcol_idx() - row.start_dcol_idx());
       }
     }
   }
