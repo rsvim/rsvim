@@ -145,7 +145,7 @@ fn _from_top_left_nowrap(
           // );
 
           let start_c = match raw_buffer.as_mut().char_until(l, start_dcolumn_per_line) {
-            Some(start_c) => start_c,
+            Some(c) => c,
             None => 0_usize,
           };
           let start_fills = {
@@ -155,9 +155,9 @@ fn _from_top_left_nowrap(
           };
           let end_c = match raw_buffer
             .as_mut()
-            .char_until(l, start_dcolumn_per_line + width as usize)
+            .char_after(l, start_dcolumn_per_line + width as usize)
           {
-            Some(end_c) => end_c,
+            Some(c) => c,
             None => 0_usize,
           };
           let end_fills = {
