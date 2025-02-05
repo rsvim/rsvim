@@ -151,7 +151,9 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns 0 if `char_idx` is 0 or the line is empty.
+  /// 1. It returns 0 if:
+  ///    - The `char_idx` is 0.
+  ///    - The line is empty.
   /// 2. It returns the prefix display width if `char_idx` is inside the line.
   /// 3. It returns the whole display width of the line if `char_idx` is greater than the line
   ///    length.
@@ -236,11 +238,12 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns None if the line is empty.
-  /// 2. It returns None if even the 1st char is longer than the `width` thus there's no such char
-  ///    that meets this condition.
-  /// 3. It returns the right-most char index if `width` is inside the line.
-  /// 4. It returns the last char index of the line if `width` is greater than or equal to
+  /// 1. It returns None if:
+  ///    - The line is empty.
+  ///    - The `width` is 0 thus there's no such char exists.
+  ///    - Even the 1st char (char index is 0) is longer than the `width` thus there's no such char exists.
+  /// 2. It returns the right-most char index if `width` is inside the line.
+  /// 3. It returns the last char index of the line if `width` is greater than or equal to
   ///    the line's whole display width.
   pub fn char_before(
     &mut self,
@@ -288,8 +291,10 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns None if the line length is 0, i.e. the line itself is empty, or there's no such
-  ///    char.
+  /// 1. It returns None if:
+  ///    - The line is empty.
+  ///    - The `width` is 0 thus there's no such char exists.
+  ///    - Even the 1st char is longer than the `width` thus there's no such char exists.
   /// 2. It returns the right-most char index if `width` is inside the line.
   /// 3. It returns the last char index of the line if `width` is greater than or equal to
   ///    the line's whole display width.
@@ -302,15 +307,17 @@ impl ColIndex {
     self._build_cache_until_width(options, rope_line, width);
     self._internal_check();
 
-    if width == 0 || self.width2char.is_empty() {
-      assert_eq!((rope_line.len_chars() == 0), self.width2char.is_empty());
+    if width == 0 {
+      None
+    } else if self.width2char.is_empty() {
+      assert_eq!(rope_line.len_chars(), 0);
       None
     } else {
       assert!(!self.width2char.is_empty());
       assert!(rope_line.len_chars() > 0);
       let (last_width, last_char_idx) = self.width2char.last_key_value().unwrap();
       if width <= *last_width {
-        for w in (1..=width).rev() {
+        for w in width..=*last_width {
           match self.width2char.get(&w) {
             Some(c) => {
               return Some(*c);
