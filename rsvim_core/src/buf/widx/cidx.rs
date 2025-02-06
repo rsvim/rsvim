@@ -151,7 +151,7 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns 0 if:
+  /// 1. It returns 0 if the `char_idx` is out of the line, there're below cases:
   ///    - The `char_idx` is 0.
   ///    - The line is empty.
   /// 2. It returns the prefix display width if `char_idx` is inside the line.
@@ -190,7 +190,7 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns 0 if:
+  /// 1. It returns 0 if the `char_idx` is out of the line, there're below cases:
   ///    - The line is empty.
   /// 2. It returns the prefix display width if `char_idx` is inside the line.
   /// 3. It returns the whole display width of the line if `char_idx` is greater than or equal to
@@ -378,8 +378,7 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns None if:
-  ///    - The line is empty.
+  /// 1. It returns None if the line is empty.
   /// 2. It returns the last char index if the line is not empty.
   pub fn last_char(
     &mut self,
