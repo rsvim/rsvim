@@ -239,10 +239,10 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns None if:
+  /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
   ///    - The `width` is 0 thus there's no such char exists.
-  ///    - Even the 1st char (char index is 0) is longer than the `width` thus there's no such char exists.
+  ///    - Even the 1st char (index is 0) is longer than the `width` thus there's no such char exists.
   /// 2. It returns the right-most char index if `width` is inside the line.
   /// 3. It returns the last char index of the line if `width` is greater than or equal to
   ///    the line's whole display width.
@@ -292,7 +292,7 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns None if:
+  /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
   ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
@@ -338,7 +338,7 @@ impl ColIndex {
   ///
   /// # Return
   ///
-  /// 1. It returns None if:
+  /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
   ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
