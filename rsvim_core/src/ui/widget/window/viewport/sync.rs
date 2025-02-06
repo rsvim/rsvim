@@ -144,11 +144,8 @@ fn _from_top_left_nowrap(
           //   current_line
           // );
 
-          let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
-
-          if bline.len_chars() == 0 {
-            rows.insert(wrow, RowViewport::new(0..0));
-            line_viewports.insert(current_line, LineViewport::new(rows, 0, 0));
+          let (start_c, start_fills, end_c, end_fills) = if bline.len_chars() == 0 {
+            (0_usize, 0_usize, 0_usize, 0_usize)
           } else {
             let start_c = match raw_buffer.as_mut().char_until(l, start_dcolumn_per_line) {
               Some(c) => c,
@@ -175,14 +172,16 @@ fn _from_top_left_nowrap(
               }
             };
 
-            let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
-            rows.insert(wrow, RowViewport::new(start_c..end_c));
+            (start_c, start_fills, end_c, end_fills)
+          };
 
-            line_viewports.insert(
-              current_line,
-              LineViewport::new(rows, start_fills, end_fills),
-            );
-          }
+          let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+          rows.insert(wrow, RowViewport::new(start_c..end_c));
+          line_viewports.insert(
+            current_line,
+            LineViewport::new(rows, start_fills, end_fills),
+          );
+
           // Go to next row and line
           current_line += 1;
           wrow += 1;
