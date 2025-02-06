@@ -259,7 +259,17 @@ fn _from_top_left_wrap_nolinebreak(
         //   current_line
         // );
 
-        let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+        let (rows, start_fills, end_fills) = if bline.len_chars() == 0 {
+          let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+          rows.insert(wrow, RowViewport::new(0..0));
+          (rows, 0_usize, 0_usize)
+        } else {
+          let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+
+          rows.insert(wrow, RowViewport::new(start_c..end_c));
+          (rows, 0_usize, 0_usize)
+        }
+
         let mut wcol = 0_u16;
 
         let mut dcol = 0_usize;
