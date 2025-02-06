@@ -294,7 +294,7 @@ impl ColIndex {
   ///
   /// 1. It returns None if:
   ///    - The line is empty.
-  ///    - The `width` is greater than the line's whole display width, thus there's no such char
+  ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
   /// 2. It returns the right-most char index if `width` is less than or equal to the line's width.
   pub fn char_until(
@@ -340,7 +340,8 @@ impl ColIndex {
   ///
   /// 1. It returns None if:
   ///    - The line is empty.
-  ///    - The `width` is greater than the whole line width, thus there's no such char exists.
+  ///    - The `width` is greater than the whole line's display width, thus there's no such char
+  ///      exists.
   /// 2. It returns the right-most char index if `width` is less than the whole line's width, i.e.
   ///    such char exists in the line.
   pub fn char_after(
