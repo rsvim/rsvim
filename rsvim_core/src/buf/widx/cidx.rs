@@ -263,7 +263,7 @@ impl ColIndex {
     } else {
       assert!(!self.width2char.is_empty());
       assert!(rope_line.len_chars() > 0);
-      let (last_width, last_char_idx) = self.width2char.last_key_value().unwrap();
+      let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
       if width <= *last_width {
         for w in (1..width).rev() {
           match self.width2char.get(&w) {
