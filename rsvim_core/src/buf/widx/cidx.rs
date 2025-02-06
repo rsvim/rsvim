@@ -294,9 +294,9 @@ impl ColIndex {
   ///
   /// 1. It returns None if:
   ///    - The line is empty.
-  /// 2. It returns the right-most char index if `width` is inside the line.
-  /// 3. It returns the last char index of the line if `width` is greater than or equal to
-  ///    the line's whole display width.
+  ///    - The `width` is greater than the line's whole display width, thus there's no such char
+  ///      exists.
+  /// 2. It returns the right-most char index if `width` is less than or equal to the line's width.
   pub fn char_until(
     &mut self,
     options: &BufferLocalOptions,
@@ -312,7 +312,7 @@ impl ColIndex {
     } else {
       assert!(!self.width2char.is_empty());
       assert!(rope_line.len_chars() > 0);
-      let (last_width, last_char_idx) = self.width2char.last_key_value().unwrap();
+      let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
       if width <= *last_width {
         for w in width..=*last_width {
           match self.width2char.get(&w) {
@@ -325,7 +325,8 @@ impl ColIndex {
         // Not exist.
         None
       } else {
-        Some(*last_char_idx)
+        // Not exist.
+        None
       }
     }
   }
@@ -339,7 +340,7 @@ impl ColIndex {
   ///
   /// 1. It returns None if:
   ///    - The line is empty.
-  ///    - The whole line width is less than or equal to the `width`, thus there's no such char exists.
+  ///    - The `width` is greater than the whole line width, thus there's no such char exists.
   /// 2. It returns the right-most char index if `width` is less than the whole line's width, i.e.
   ///    such char exists in the line.
   pub fn char_after(
@@ -370,6 +371,30 @@ impl ColIndex {
         }
         None => None,
       }
+    }
+  }
+
+  /// Get the last (right-most) char index in the line.
+  ///
+  /// # Return
+  ///
+  /// 1. It returns None if:
+  ///    - The line is empty.
+  /// 2. It returns the last char index if the line is not empty.
+  pub fn last_char(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+  ) -> Option<usize> {
+    let n = rope_line.len_chars();
+    self._build_cache_until_char(options, rope_line, n);
+    self._internal_check();
+
+    if self.width2char.is_empty() {
+      assert_eq!(rope_line.len_chars(), 0);
+      None
+    } else {
+      Some(n)
     }
   }
 
