@@ -342,8 +342,7 @@ impl ColIndex {
   ///    - The line is empty.
   ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
-  /// 2. It returns the right-most char index if `width` is less than the whole line's width, i.e.
-  ///    such char exists in the line.
+  /// 2. It returns the right-most char index if `width` is less than or equal to the line's width.
   pub fn char_after(
     &mut self,
     options: &BufferLocalOptions,
