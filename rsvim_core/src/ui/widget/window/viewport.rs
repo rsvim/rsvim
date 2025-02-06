@@ -88,7 +88,7 @@ impl LineViewport {
   /// For example:
   ///
   /// ```text
-  ///              Column index in viewport -> 0   3
+  ///              Column index in viewport -> 0   4
   ///                                          |   |
   /// 0         10        20        30    36   |   37  <- Char index in the buffer
   /// |         |         |         |     |    |   |
@@ -99,7 +99,7 @@ impl LineViewport {
   ///                                         |---------------------|
   /// ```
   ///
-  /// The example shows the first char `B` starts at column index 3 in the viewport, and its
+  /// The example shows the first char `B` starts at column index 4 in the viewport, and its
   /// previous char `<--HT-->` uses 8 cells width so cannot fully shows in the viewport.
   ///
   /// In this case, the variable `start_filled_cols` is 4, the start char index is 37.

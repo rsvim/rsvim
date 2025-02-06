@@ -293,6 +293,17 @@ impl Buffer {
       .char_after(&self.options, &self.rope, line_idx, width)
   }
 
+  /// See [`ColIndex::last_char`].
+  ///
+  /// # Panics
+  ///
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn last_char(&mut self, line_idx: usize) -> Option<usize> {
+    self
+      .width_index
+      .last_char(&self.options, &self.rope, line_idx)
+  }
+
   /// See [`ColIndex::truncate_by_char`].
   pub fn reset_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
     self.width_index.reset_line_since_char(line_idx, char_idx)

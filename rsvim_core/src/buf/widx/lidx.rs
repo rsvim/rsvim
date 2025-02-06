@@ -107,6 +107,22 @@ impl LineIndex {
       .char_after(options, &rope_line, width)
   }
 
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn last_char(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope: &Rope,
+    line_idx: usize,
+  ) -> Option<usize> {
+    self.line2cidx.entry(line_idx).or_default();
+    let rope_line = rope.line(line_idx);
+    self
+      .line2cidx
+      .get_mut(&line_idx)
+      .unwrap()
+      .last_char(options, &rope_line)
+  }
+
   /// Reset tail of cache on one line, start from specified char index.
   pub fn reset_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
     match self.line2cidx.get_mut(&line_idx) {

@@ -144,33 +144,45 @@ fn _from_top_left_nowrap(
           //   current_line
           // );
 
-          let start_c = match raw_buffer.as_mut().char_until(l, start_dcolumn_per_line) {
-            Some(c) => c,
-            None => 0_usize,
-          };
-          let start_fills = {
-            let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
-            start_width_until - start_dcolumn_per_line
-          };
-          let end_c = match raw_buffer
-            .as_mut()
-            .char_after(l, start_dcolumn_per_line + width as usize)
-          {
-            Some(c) => c,
-            None => 0_usize,
-          };
-          let end_fills = {
-            let end_width_until = raw_buffer.as_mut().width_until(l, end_c);
-            end_width_until - (start_dcolumn_per_line + width as usize)
-          };
-
           let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
-          rows.insert(wrow, RowViewport::new(start_c..end_c));
 
-          line_viewports.insert(
-            current_line,
-            LineViewport::new(rows, start_fills, end_fills),
-          );
+          if bline.len_chars() == 0 {
+            rows.insert(wrow, RowViewport::new(0..0));
+            line_viewports.insert(current_line, LineViewport::new(rows, 0, 0));
+          } else {
+            let start_c = match raw_buffer.as_mut().char_until(l, start_dcolumn_per_line) {
+              Some(c) => c,
+              None => 0_usize,
+            };
+            let start_fills = {
+              let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
+              start_width_until - start_dcolumn_per_line
+            };
+
+            let end_c = match raw_buffer
+              .as_mut()
+              .char_after(l, start_dcolumn_per_line + width as usize)
+            {
+              Some(c) => c,
+              None => raw_buffer.as_mut().last_char(l).unwrap(),
+            };
+            let end_fills = {
+              let end_width_until = raw_buffer.as_mut().width_until(l, end_c);
+              if end_width_until >= start_dcolumn_per_line + width as usize {
+                end_width_until - (start_dcolumn_per_line + width as usize)
+              } else {
+                0_usize
+              }
+            };
+
+            let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+            rows.insert(wrow, RowViewport::new(start_c..end_c));
+
+            line_viewports.insert(
+              current_line,
+              LineViewport::new(rows, start_fills, end_fills),
+            );
+          }
           // Go to next row and line
           current_line += 1;
           wrow += 1;
