@@ -12,7 +12,7 @@ use std::collections::BTreeMap;
 use std::ops::Range;
 use std::ptr::NonNull;
 // use tracing::trace;
-use unicode_segmentation::UnicodeSegmentation;
+// use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 /// Lines index inside [`Viewport`].
@@ -148,10 +148,10 @@ fn _from_top_left_nowrap(
           let (start_c, start_fills, end_c, end_fills) = if bline.len_chars() == 0 {
             (0_usize, 0_usize, 0_usize, 0_usize)
           } else {
-            let start_c = match raw_buffer.as_mut().char_until(l, start_dcol_on_line) {
-              Some(c) => c,
-              None => 0_usize,
-            };
+            let start_c = raw_buffer
+              .as_mut()
+              .char_until(l, start_dcol_on_line)
+              .unwrap_or(0_usize);
             let start_fills = {
               let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
               start_width_until - start_dcol_on_line
@@ -271,10 +271,10 @@ fn _from_top_left_wrap_nolinebreak(
           } else {
             let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
 
-            let mut start_c = match raw_buffer.as_mut().char_until(l, start_dcol_on_line) {
-              Some(c) => c,
-              None => 0_usize,
-            };
+            let mut start_c = raw_buffer
+              .as_mut()
+              .char_until(l, start_dcol_on_line)
+              .unwrap_or(0_usize);
             let start_fills = {
               let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
               start_width_until - start_dcol_on_line
@@ -294,15 +294,11 @@ fn _from_top_left_wrap_nolinebreak(
               rows.insert(wrow, RowViewport::new(start_c..end_c.unwrap()));
               wrow += 1;
               start_c = end_c.unwrap();
-              end_dcol = end_dcol + width as usize;
+              end_dcol += width as usize;
             }
             let end_fills = {
               let end_width_until = raw_buffer.as_mut().width_until(l, end_c.unwrap());
-              if end_width_until >= end_dcol {
-                end_width_until - end_dcol
-              } else {
-                0_usize
-              }
+              end_width_until.saturating_sub(end_dcol)
             };
 
             (rows, start_fills, end_fills)
@@ -346,7 +342,7 @@ fn _from_top_left_wrap_nolinebreak(
 }
 
 //#[allow(unused_variables)]
-//// Implement [`from_top_left`] with option `wrap=true` and `line-break=true`.
+// // Implement [`from_top_left`] with option `wrap=true` and `line-break=true`.
 //fn _from_top_left_wrap_linebreak(
 //  _options: &ViewportOptions,
 //  buffer: BufferWk,

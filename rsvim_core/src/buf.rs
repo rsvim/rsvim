@@ -206,13 +206,11 @@ impl Buffer {
       Some(line) => match line.get_chars_at(start_char_idx) {
         Some(chars_iter) => {
           let mut builder = String::with_capacity(max_chars);
-          let mut n = 0_usize;
-          for c in chars_iter {
-            if n >= max_chars {
+          for (i, c) in chars_iter.enumerate() {
+            if i >= max_chars {
               return Some(builder);
             }
             builder.push(c);
-            n += 1;
           }
           Some(builder)
         }
