@@ -297,211 +297,15 @@ fn _from_top_left_wrap_nolinebreak(
             }
             let end_fills = {
               let end_width_until = raw_buffer.as_mut().width_until(l, end_c.unwrap());
-              if end_width_until >= start_dcolumn_per_line + width as usize {
-                end_width_until - (start_dcolumn_per_line + width as usize)
+              if end_width_until >= end_dcol {
+                end_width_until - end_dcol
               } else {
                 0_usize
               }
             };
 
-            (rows, start_fills, 0_usize)
+            (rows, start_fills, end_fills)
           };
-
-          let mut wcol = 0_u16;
-
-          let mut dcol = 0_usize;
-          let mut start_dcol = 0_usize;
-          let mut end_dcol = 0_usize;
-
-          let mut start_c_idx = 0_usize;
-          let mut end_c_idx = 0_usize;
-          let mut start_c_idx_init = false;
-          let mut _end_c_idx_init = false;
-
-          let mut ch2dcols: BTreeMap<usize, (usize, usize)> = BTreeMap::new();
-
-          let mut start_fills = 0_usize;
-          let mut end_fills = 0_usize;
-
-          for (i, c) in bline.chars().enumerate() {
-            let c_width = buffer.char_width(c);
-
-            // Prefix width is still before `start_dcolumn`.
-            if dcol + c_width < start_dcolumn_per_line {
-              dcol += c_width;
-              end_dcol = dcol;
-              end_c_idx = i;
-              // trace!(
-              //   "1-wrow/wcol:{}/{}, c:{}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, start_dcolumn:{}",
-              //   wrow, wcol, c, c_width, dcol, start_dcol, end_dcol, start_c_idx, end_c_idx, start_fills, end_fills, start_dcolumn
-              // );
-              continue;
-            }
-
-            if !start_c_idx_init {
-              start_c_idx_init = true;
-              start_dcol = dcol;
-              start_c_idx = i;
-              start_fills = dcol - start_dcolumn_per_line;
-              // trace!(
-              //   "2-wrow/wcol:{}/{}, c:{}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-              //   wrow,
-              //   wcol,
-              //   c,
-              //   c_width,
-              //   dcol,
-              //   start_dcol,
-              //   end_dcol,
-              //   start_c_idx,
-              //   end_c_idx,
-              //   start_fills,
-              //   end_fills,
-              // );
-            }
-
-            // Column with next char will goes out of the row.
-            if wcol as usize + c_width > width as usize {
-              // trace!(
-              //   "3-wrow/wcol:{}/{}, c:{}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
-              //   wrow,
-              //   wcol,
-              //   c,
-              //   c_width,
-              //   dcol,
-              //   start_dcol,
-              //   end_dcol,
-              //   start_c_idx,
-              //   end_c_idx,
-              //   start_fills,
-              //   end_fills,
-              //   width
-              // );
-              rows.insert(
-                wrow,
-                RowViewport::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
-              );
-              let saved_end_fills = width as usize - wcol as usize;
-              wrow += 1;
-              wcol = 0_u16;
-              start_dcol = end_dcol;
-              start_c_idx = end_c_idx;
-              ch2dcols.clear();
-              if wrow >= height {
-                end_fills = saved_end_fills;
-                // trace!(
-                //   "4-wrow/wcol:{}/{}, c:{}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
-                //   wrow,
-                //   wcol,
-                //   c,
-                //   c_width,
-                //   dcol,
-                //   start_dcol,
-                //   end_dcol,
-                //   start_c_idx,
-                //   end_c_idx,
-                //   start_fills,
-                //   end_fills,
-                //   height
-                // );
-                break;
-              }
-            }
-
-            let saved_c_idx = i;
-            let saved_start_dcol = dcol;
-
-            dcol += c_width;
-            end_dcol = dcol;
-            end_c_idx = i + 1;
-            wcol += c_width as u16;
-
-            ch2dcols.insert(saved_c_idx, (saved_start_dcol, end_dcol));
-
-            // trace!(
-            //   "5-wrow/wcol:{}/{}, c:{}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-            //   wrow,
-            //   wcol,
-            //   c,
-            //   c_width,
-            //   dcol,
-            //   start_dcol,
-            //   end_dcol,
-            //   start_c_idx,
-            //   end_c_idx,
-            //   start_fills,
-            //   end_fills
-            // );
-
-            // End of the line.
-            if i + 1 == bline.len_chars() {
-              // trace!(
-              //   "6-wrow/wcol:{}/{}, c:{}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}",
-              //   wrow,
-              //   wcol,
-              //   c,
-              //   c_width,
-              //   dcol,
-              //   start_dcol,
-              //   end_dcol,
-              //   start_c_idx,
-              //   end_c_idx,
-              //   start_fills,
-              //   end_fills
-              // );
-              rows.insert(
-                wrow,
-                RowViewport::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
-              );
-              break;
-            }
-
-            // Column goes out of current row.
-            if wcol >= width {
-              // trace!(
-              //   "7-wrow/wcol:{}/{}, c:{}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, width:{}",
-              //   wrow,
-              //   wcol,
-              //   c,
-              //   c_width,
-              //   dcol,
-              //   start_dcol,
-              //   end_dcol,
-              //   start_c_idx,
-              //   end_c_idx,
-              //   start_fills,
-              //   end_fills,
-              //   width
-              // );
-              rows.insert(
-                wrow,
-                RowViewport::new(start_dcol..end_dcol, start_c_idx..end_c_idx, &ch2dcols),
-              );
-              assert_eq!(wcol, width);
-              wrow += 1;
-              wcol = 0_u16;
-              start_dcol = end_dcol;
-              start_c_idx = end_c_idx;
-              ch2dcols.clear();
-              if wrow >= height {
-                // trace!(
-                //   "8-wrow/wcol:{}/{}, c:{}/{:?}, dcol:{}/{}/{}, c_idx:{}/{}, fills:{}/{}, height:{}",
-                //   wrow,
-                //   wcol,
-                //   c,
-                //   c_width,
-                //   dcol,
-                //   start_dcol,
-                //   end_dcol,
-                //   start_c_idx,
-                //   end_c_idx,
-                //   start_fills,
-                //   end_fills,
-                //   height
-                // );
-                break;
-              }
-            }
-          }
 
           line_viewports.insert(
             current_line,
@@ -520,6 +324,7 @@ fn _from_top_left_wrap_nolinebreak(
           //   start_fills,
           //   end_fills
           // );
+
           current_line += 1;
           wrow += 1;
         }
