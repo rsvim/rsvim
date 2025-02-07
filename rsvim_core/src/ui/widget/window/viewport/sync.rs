@@ -270,7 +270,7 @@ fn _from_top_left_wrap_nolinebreak(
           } else {
             let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
 
-            let start_c = match raw_buffer.as_mut().char_until(l, start_dcolumn_per_line) {
+            let mut start_c = match raw_buffer.as_mut().char_until(l, start_dcolumn_per_line) {
               Some(c) => c,
               None => 0_usize,
             };
@@ -279,8 +279,32 @@ fn _from_top_left_wrap_nolinebreak(
               start_width_until - start_dcolumn_per_line
             };
 
-            //rows.insert(wrow, RowViewport::new(start_c..end_c));
-            (rows, 0_usize, 0_usize)
+            let mut end_dcol = start_dcolumn_per_line + width as usize;
+            let mut end_c: Option<usize> = None;
+            let mut eol = false;
+            while wrow < height && !eol {
+              end_c = match raw_buffer.as_mut().char_after(l, end_dcol) {
+                Some(c) => Some(c),
+                None => {
+                  eol = true;
+                  Some(raw_buffer.as_mut().last_char(l).unwrap())
+                }
+              };
+              rows.insert(wrow, RowViewport::new(start_c..end_c.unwrap()));
+              wrow += 1;
+              start_c = end_c.unwrap();
+              end_dcol = end_dcol + width as usize;
+            }
+            let end_fills = {
+              let end_width_until = raw_buffer.as_mut().width_until(l, end_c.unwrap());
+              if end_width_until >= start_dcolumn_per_line + width as usize {
+                end_width_until - (start_dcolumn_per_line + width as usize)
+              } else {
+                0_usize
+              }
+            };
+
+            (rows, start_fills, 0_usize)
           };
 
           let mut wcol = 0_u16;
