@@ -305,13 +305,15 @@ impl Buffer {
   }
 
   /// See [`ColIndex::truncate_by_char`].
-  pub fn reset_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
-    self.width_index.reset_line_since_char(line_idx, char_idx)
+  pub fn truncate_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
+    self
+      .width_index
+      .truncate_line_since_char(line_idx, char_idx)
   }
 
   /// See [`ColIndex::truncate_by_width`].
-  pub fn reset_line_since_width(&mut self, line_idx: usize, width: usize) {
-    self.width_index.reset_line_since_width(line_idx, width)
+  pub fn truncate_line_since_width(&mut self, line_idx: usize, width: usize) {
+    self.width_index.truncate_line_since_width(line_idx, width)
   }
 
   /// Truncate lines at the tail, start from specified line index.

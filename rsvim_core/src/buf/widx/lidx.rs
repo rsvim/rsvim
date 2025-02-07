@@ -123,18 +123,18 @@ impl LineIndex {
       .last_char(options, &rope_line)
   }
 
-  /// Reset tail of cache on one line, start from specified char index.
-  pub fn reset_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
+  /// Truncate tail of cache on one line, start from specified char index.
+  pub fn truncate_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
     match self.line2cidx.get_mut(&line_idx) {
-      Some(cidx) => cidx.truncate_by_char(char_idx),
+      Some(cidx) => cidx.truncate_since_char(char_idx),
       None => { /* Do Nothing. */ }
     }
   }
 
-  /// Reset tail of cache on one line, start from specified width.
-  pub fn reset_line_since_width(&mut self, line_idx: usize, width: usize) {
+  /// Truncate tail of cache on one line, start from specified width.
+  pub fn truncate_line_since_width(&mut self, line_idx: usize, width: usize) {
     match self.line2cidx.get_mut(&line_idx) {
-      Some(cidx) => cidx.truncate_by_width(width),
+      Some(cidx) => cidx.truncate_since_width(width),
       None => { /* Do Nothing. */ }
     }
   }
