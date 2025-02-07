@@ -192,6 +192,37 @@ impl Buffer {
     self.rope.get_lines_at(line_idx)
   }
 
+  /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
+  /// (`start_char_idx`) and max chars length (`max_chars`).
+  /// NOTE: This is for performance reason that this API limits the max chars instead of the whole
+  /// line, this is useful for super long lines.
+  pub fn clone_line(
+    &self,
+    line_idx: usize,
+    start_char_idx: usize,
+    max_chars: usize,
+  ) -> Option<String> {
+    match self.rope.get_line(line_idx) {
+      Some(line) => match line.get_chars_at(start_char_idx) {
+        Some(chars_iter) => {
+          let mut builder = String::new();
+          builder.reserve(max_chars);
+          let mut n = 0_usize;
+          for c in chars_iter {
+            if n >= max_chars {
+              return Some(builder);
+            }
+            builder.push(c);
+            n += 1;
+          }
+          Some(builder)
+        }
+        None => None,
+      },
+      None => None,
+    }
+  }
+
   /// Same with [`Rope::lines`](Rope::lines).
   pub fn lines(&self) -> Lines {
     self.rope.lines()
