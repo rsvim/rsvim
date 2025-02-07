@@ -399,7 +399,7 @@ impl ColIndex {
   }
 
   /// Truncate cache since char index.
-  pub fn truncate_by_char(&mut self, char_idx: usize) {
+  pub fn truncate_since_char(&mut self, char_idx: usize) {
     self._internal_check();
 
     if self.char2width.is_empty() || self.width2char.is_empty() {
@@ -411,7 +411,7 @@ impl ColIndex {
   }
 
   /// Truncate cache since width.
-  pub fn truncate_by_width(&mut self, width: usize) {
+  pub fn truncate_since_width(&mut self, width: usize) {
     self._internal_check();
 
     if self.char2width.is_empty() || self.width2char.is_empty() {
@@ -422,7 +422,7 @@ impl ColIndex {
         for w in (1..=width).rev() {
           match self.width2char.get(&w) {
             Some(c) => {
-              self.truncate_by_char(*c);
+              self.truncate_since_char(*c);
               return;
             }
             None => { /* Skip */ }
@@ -1011,14 +1011,14 @@ mod tests {
     for (i, e) in expect.iter().enumerate() {
       let actual = widx.width_until(&options, &rope.line(0), i);
       assert_eq!(actual, *e);
-      widx.truncate_by_char(i);
+      widx.truncate_since_char(i);
     }
 
     let expect: Vec<usize> = [(0..=6).collect(), (14..=20).collect(), vec![20, 20, 20]].concat();
     for (i, e) in expect.iter().enumerate() {
       let a = widx.width_before(&options, &rope.line(0), i);
       assert_eq!(a, *e);
-      widx.truncate_by_char(i);
+      widx.truncate_since_char(i);
     }
 
     let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
@@ -1060,11 +1060,11 @@ mod tests {
     ];
     for (w, i) in expect_before.iter() {
       assert_eq!(widx.char_before(&options, &rope.line(0), *w), *i);
-      widx.truncate_by_width(*w);
+      widx.truncate_since_width(*w);
     }
     for (w, i) in expect_until.iter() {
       assert_eq!(widx.char_until(&options, &rope.line(0), *w), *i);
-      widx.truncate_by_width(*w);
+      widx.truncate_since_width(*w);
     }
   }
 }
