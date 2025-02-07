@@ -802,21 +802,33 @@ mod tests {
     expect_after: &[(usize, Option<usize>)],
   ) {
     for (w, i) in expect_before.iter() {
-      assert_eq!(widx.char_before(options, rope_line, *w), *i);
+      let actual = widx.char_before(options, rope_line, *w);
+      info!("char_before i:{i:?} w:{w:?}, actual:{actual:?}");
+      assert_eq!(actual, *i);
       if i.is_some() {
-        assert!(widx.width_until(options, rope_line, i.unwrap()) < *w);
+        let actual = widx.width_until(options, rope_line, i.unwrap());
+        info!("width_until-1 i:{i:?} w:{w:?}, actual:{actual:?}");
+        assert!(actual < *w);
       }
     }
     for (w, i) in expect_until.iter() {
-      assert_eq!(widx.char_until(options, rope_line, *w), *i);
+      let actual = widx.char_until(options, rope_line, *w);
+      info!("char_until i:{i:?} w:{w:?}, actual:{actual:?}");
+      assert_eq!(actual, *i);
       if i.is_some() {
-        assert!(widx.width_until(options, rope_line, i.unwrap()) <= *w);
+        let actual = widx.width_until(options, rope_line, i.unwrap());
+        info!("width_until-2 i:{i:?} w:{w:?}, actual:{actual:?}");
+        assert!(actual <= *w);
       }
     }
     for (w, i) in expect_after.iter() {
-      assert_eq!(widx.char_after(options, rope_line, *w), *i);
+      let actual = widx.char_after(options, rope_line, *w);
+      info!("char_after i:{i:?} w:{w:?}, actual:{actual:?}");
+      assert_eq!(actual, *i);
       if i.is_some() {
-        assert!(widx.width_until(options, rope_line, i.unwrap()) > *w);
+        let actual = widx.width_until(options, rope_line, i.unwrap());
+        info!("width_until-3 i:{i:?} w:{w:?}, actual:{actual:?}");
+        assert!(actual > *w);
       }
     }
   }
@@ -889,6 +901,9 @@ mod tests {
       &expect_until,
       &expect_after,
     );
+
+    let actual_last_char = widx.last_char(&options, &rope.line(0));
+    assert_eq!(actual_last_char, Some(34));
   }
 
   #[test]
@@ -896,106 +911,127 @@ mod tests {
     test_log_init();
 
     let options = BufferLocalOptions::default();
-    let rope = Rope::new();
-    let mut widx = ColIndex::new();
 
-    let expect_before: Vec<(usize, Option<usize>)> =
-      vec![(0, None), (1, None), (5, None), (10, None)];
+    {
+      let rope = Rope::new();
+      let mut widx = ColIndex::new();
 
-    let expect_until: Vec<(usize, Option<usize>)> =
-      vec![(0, None), (1, None), (5, None), (10, None)];
+      let actual_last_char = widx.last_char(&options, &rope.line(0));
+      assert_eq!(actual_last_char, None);
 
-    let expect_after: Vec<(usize, Option<usize>)> =
-      vec![(0, None), (1, None), (5, None), (10, None)];
-    assert_char(
-      &options,
-      &rope.line(0),
-      &mut widx,
-      &expect_before,
-      &expect_until,
-      &expect_after,
-    );
+      let expect_before: Vec<(usize, Option<usize>)> =
+        vec![(0, None), (1, None), (5, None), (10, None)];
 
-    let rope = make_rope_from_lines(vec![]);
-    let mut widx = ColIndex::new();
+      let expect_until: Vec<(usize, Option<usize>)> =
+        vec![(0, None), (1, None), (5, None), (10, None)];
 
-    let expect_before: Vec<(usize, Option<usize>)> =
-      vec![(0, None), (1, None), (5, None), (10, None)];
+      let expect_after: Vec<(usize, Option<usize>)> =
+        vec![(0, None), (1, None), (5, None), (10, None)];
+      assert_char(
+        &options,
+        &rope.line(0),
+        &mut widx,
+        &expect_before,
+        &expect_until,
+        &expect_after,
+      );
+    }
 
-    let expect_until: Vec<(usize, Option<usize>)> =
-      vec![(0, None), (1, None), (5, None), (10, None)];
+    {
+      let rope = make_rope_from_lines(vec![]);
+      let mut widx = ColIndex::new();
 
-    let expect_after: Vec<(usize, Option<usize>)> =
-      vec![(0, None), (1, None), (5, None), (10, None)];
-    assert_char(
-      &options,
-      &rope.line(0),
-      &mut widx,
-      &expect_before,
-      &expect_until,
-      &expect_after,
-    );
+      let actual_last_char = widx.last_char(&options, &rope.line(0));
+      assert_eq!(actual_last_char, None);
 
-    let rope = make_rope_from_lines(vec![""]);
-    let mut widx = ColIndex::new();
+      let expect_before: Vec<(usize, Option<usize>)> =
+        vec![(0, None), (1, None), (5, None), (10, None)];
 
-    let expect_before: Vec<(usize, Option<usize>)> =
-      vec![(0, None), (1, None), (5, None), (10, None)];
+      let expect_until: Vec<(usize, Option<usize>)> =
+        vec![(0, None), (1, None), (5, None), (10, None)];
 
-    let expect_until: Vec<(usize, Option<usize>)> =
-      vec![(0, None), (1, None), (5, None), (10, None)];
+      let expect_after: Vec<(usize, Option<usize>)> =
+        vec![(0, None), (1, None), (5, None), (10, None)];
+      assert_char(
+        &options,
+        &rope.line(0),
+        &mut widx,
+        &expect_before,
+        &expect_until,
+        &expect_after,
+      );
+    }
 
-    let expect_after: Vec<(usize, Option<usize>)> =
-      vec![(0, None), (1, None), (5, None), (10, None)];
-    assert_char(
-      &options,
-      &rope.line(0),
-      &mut widx,
-      &expect_before,
-      &expect_until,
-      &expect_after,
-    );
+    {
+      let rope = make_rope_from_lines(vec![""]);
+      let mut widx = ColIndex::new();
 
-    let rope = make_rope_from_lines(vec!["\t"]);
-    let mut widx = ColIndex::new();
+      let expect_before: Vec<(usize, Option<usize>)> =
+        vec![(0, None), (1, None), (5, None), (10, None)];
 
-    let expect_before: Vec<(usize, Option<usize>)> = vec![
-      (0, None),
-      (1, None),
-      (5, None),
-      (7, None),
-      (8, None),
-      (9, Some(0)),
-      (10, Some(0)),
-    ];
+      let expect_until: Vec<(usize, Option<usize>)> =
+        vec![(0, None), (1, None), (5, None), (10, None)];
 
-    let expect_until: Vec<(usize, Option<usize>)> = vec![
-      (0, None),
-      (1, None),
-      (5, None),
-      (7, None),
-      (8, Some(0)),
-      (9, Some(0)),
-      (10, Some(0)),
-    ];
+      let expect_after: Vec<(usize, Option<usize>)> =
+        vec![(0, None), (1, None), (5, None), (10, None)];
+      assert_char(
+        &options,
+        &rope.line(0),
+        &mut widx,
+        &expect_before,
+        &expect_until,
+        &expect_after,
+      );
 
-    let expect_after: Vec<(usize, Option<usize>)> = vec![
-      (0, Some(0)),
-      (1, Some(0)),
-      (5, Some(0)),
-      (7, Some(0)),
-      (8, None),
-      (9, None),
-      (10, None),
-    ];
-    assert_char(
-      &options,
-      &rope.line(0),
-      &mut widx,
-      &expect_before,
-      &expect_until,
-      &expect_after,
-    );
+      let actual_last_char = widx.last_char(&options, &rope.line(0));
+      assert_eq!(actual_last_char, None);
+    }
+
+    {
+      let rope = make_rope_from_lines(vec!["\t"]);
+      let mut widx = ColIndex::new();
+
+      let expect_before: Vec<(usize, Option<usize>)> = vec![
+        (0, None),
+        (1, None),
+        (5, None),
+        (7, None),
+        (8, None),
+        (9, Some(0)),
+        (10, Some(0)),
+      ];
+
+      let expect_until: Vec<(usize, Option<usize>)> = vec![
+        (0, None),
+        (1, None),
+        (5, None),
+        (7, None),
+        (8, Some(0)),
+        (9, Some(0)),
+        (10, Some(0)),
+      ];
+
+      let expect_after: Vec<(usize, Option<usize>)> = vec![
+        (0, Some(0)),
+        (1, Some(0)),
+        (5, Some(0)),
+        (7, Some(0)),
+        (8, None),
+        (9, None),
+        (10, None),
+      ];
+      assert_char(
+        &options,
+        &rope.line(0),
+        &mut widx,
+        &expect_before,
+        &expect_until,
+        &expect_after,
+      );
+
+      let actual_last_char = widx.last_char(&options, &rope.line(0));
+      assert_eq!(actual_last_char, Some(0));
+    }
   }
 
   #[test]
