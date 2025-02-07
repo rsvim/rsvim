@@ -128,13 +128,12 @@ fn _from_top_left_nowrap(
     match raw_buffer.as_ref().get_lines_at(start_line) {
       // The `start_line` is in the buffer.
       Some(buflines) => {
-        // The first `wrow` in the window maps to the `start_line` in the buffer.
-        let mut wrow = 0;
         let mut current_line = start_line;
 
-        for (l, bline) in buflines.enumerate() {
+        // The first `wrow` in the window maps to the `start_line` in the buffer.
+        for (wrow, (l, bline)) in buflines.enumerate().enumerate() {
           // Current row goes out of viewport.
-          if wrow >= height {
+          if wrow >= height as usize {
             break;
           }
 
@@ -177,7 +176,7 @@ fn _from_top_left_nowrap(
           };
 
           let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
-          rows.insert(wrow, RowViewport::new(start_c..end_c));
+          rows.insert(wrow as u16, RowViewport::new(start_c..end_c));
           line_viewports.insert(
             current_line,
             LineViewport::new(rows, start_fills, end_fills),
@@ -185,7 +184,6 @@ fn _from_top_left_nowrap(
 
           // Go to next row and line
           current_line += 1;
-          wrow += 1;
         }
 
         // trace!("9-current_line:{}, row:{}", current_line, wrow,);
