@@ -790,33 +790,33 @@ mod tests {
     expect_until: &[(usize, Option<usize>)],
     expect_after: &[(usize, Option<usize>)],
   ) {
-    for (w, i) in expect_before.iter() {
+    for (w, c) in expect_before.iter() {
       let actual = widx.char_before(options, rope_line, *w);
-      info!("char_before i:{i:?} w:{w:?}, actual:{actual:?}");
-      assert_eq!(actual, *i);
-      if i.is_some() {
-        let actual = widx.width_until(options, rope_line, i.unwrap());
-        info!("width_until-1 i:{i:?} w:{w:?}, actual:{actual:?}");
+      info!("char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      assert_eq!(actual, *c);
+      if c.is_some() {
+        let actual = widx.width_until(options, rope_line, c.unwrap());
+        info!("width_until-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual < *w);
       }
     }
-    for (w, i) in expect_until.iter() {
+    for (w, c) in expect_until.iter() {
       let actual = widx.char_until(options, rope_line, *w);
-      info!("char_until i:{i:?} w:{w:?}, actual:{actual:?}");
-      assert_eq!(actual, *i);
-      if i.is_some() {
-        let actual = widx.width_until(options, rope_line, i.unwrap());
-        info!("width_until-2 i:{i:?} w:{w:?}, actual:{actual:?}");
+      info!("char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      assert_eq!(actual, *c);
+      if c.is_some() {
+        let actual = widx.width_until(options, rope_line, c.unwrap());
+        info!("width_until-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual <= *w);
       }
     }
-    for (w, i) in expect_after.iter() {
+    for (w, c) in expect_after.iter() {
       let actual = widx.char_after(options, rope_line, *w);
-      info!("char_after i:{i:?} w:{w:?}, actual:{actual:?}");
-      assert_eq!(actual, *i);
-      if i.is_some() {
-        let actual = widx.width_until(options, rope_line, i.unwrap());
-        info!("width_until-3 i:{i:?} w:{w:?}, actual:{actual:?}");
+      info!("char_after expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      assert_eq!(actual, *c);
+      if c.is_some() {
+        let actual = widx.width_until(options, rope_line, c.unwrap());
+        info!("width_until-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual > *w);
       }
     }
