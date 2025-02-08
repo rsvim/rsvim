@@ -3,8 +3,8 @@
 use crate::res::IoResult;
 
 // Re-export
+pub use crate::buf::cidx::ColumnIndex;
 pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
-pub use crate::buf::widx::ColIndex;
 
 use ahash::AHashMap as HashMap;
 use ahash::AHashSet as HashSet;
@@ -22,9 +22,9 @@ use std::sync::{Arc, Weak};
 use std::time::Instant;
 use tracing::trace;
 
+pub mod cidx;
 pub mod opt;
 pub mod unicode;
-pub mod widx;
 
 /// Buffer ID.
 pub type BufferId = i32;
@@ -51,7 +51,7 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
-  rope_lines_width: BTreeMap<usize, ColIndex>,
+  rope_lines_width: BTreeMap<usize, ColumnIndex>,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
