@@ -92,10 +92,10 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
       w += cw;
       n += 1;
       if cw == 0 {
-        zero_width_chars.push(format!("{}", cw));
+        zero_width_chars.push(format!("{}", i));
       }
       if cw > 1 {
-        big_width_chars.push(format!("{}", cw));
+        big_width_chars.push(format!("{}", i));
       }
       if i % 10 == 0 {
         builder.push_str(&format!("{}", i));
@@ -153,24 +153,6 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
     }
     if show3 {
       info!("-{}- display width for width = 0 chars", builder3);
-    }
-
-    let mut builder = String::new();
-    let mut w = 0_usize;
-    let mut show = false;
-    for (_i, c) in line.chars().enumerate() {
-      let (_cs, cw) = buf.char_symbol(c);
-      w += cw;
-      if cw > 1 {
-        builder.push_str(&format!("{}", w));
-        show = true;
-      } else if builder.len() < w {
-        let diff = w - builder.len();
-        builder.push_str(&" ".repeat(diff));
-      }
-    }
-    if show {
-      info!("-{}- display width for width > 1 chars", builder);
     }
   });
 }
