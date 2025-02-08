@@ -347,16 +347,13 @@ impl ColumnIndex {
     self._internal_check();
 
     let n = rope_line.len_chars();
-    match self.char_until(options, rope_line, width) {
-      Some(char_idx) => {
-        if char_idx < n {
-          Some(char_idx + 1)
-        } else {
-          None
-        }
+    if let Some(char_idx) = self.char_until(options, rope_line, width) {
+      if char_idx < n {
+        return Some(char_idx + 1);
       }
-      None => None,
     }
+
+    None
   }
 
   /// Truncate cache since char index.
