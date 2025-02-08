@@ -122,7 +122,7 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
       let (_cs, cw) = buf.char_symbol(c);
       w += cw;
       if w == 1 || w % 10 == 0 {
-        if builder.is_empty() || builder.ends_with(' ') {
+        if builder.is_empty() || builder.ends_with(" ") {
           builder.push_str(&format!("{}", w));
         } else if cw > 0 {
           builder2.push_str(&format!("{}", w));
@@ -162,7 +162,7 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
       let (_cs, cw) = buf.char_symbol(c);
       w += cw;
       if cw > 1 {
-        if builder.is_empty() || builder.ends_with(' ') {
+        if builder.is_empty() || builder.ends_with(" ") {
           builder.push_str(&format!("{}", w));
           show = true;
         }
