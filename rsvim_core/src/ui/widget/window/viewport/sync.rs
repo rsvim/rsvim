@@ -161,7 +161,7 @@ fn _from_top_left_nowrap(
               .char_after(l, start_dcol_on_line + width as usize)
             {
               Some(c) => c,
-              None => raw_buffer.as_mut().last_char(l).unwrap(),
+              None => bline.len_chars() - 1, // last char index on the line.
             };
             let end_fills = {
               let end_width_until = raw_buffer.as_mut().width_until(l, end_c);
@@ -286,7 +286,9 @@ fn _from_top_left_wrap_nolinebreak(
                 Some(c) => Some(c),
                 None => {
                   eol = true;
-                  Some(raw_buffer.as_mut().last_char(l).unwrap())
+
+                  // last char index on the line.
+                  Some(bline.len_chars() - 1)
                 }
               };
               rows.insert(wrow, RowViewport::new(start_c..end_c.unwrap()));

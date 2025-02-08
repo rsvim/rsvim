@@ -316,7 +316,7 @@ impl ColumnIndex {
 
       for w in width..=*last_width {
         if let Some(c) = self.width2char.get(&w) {
-          return Some(c);
+          return Some(*c);
         }
       }
 
@@ -356,7 +356,7 @@ impl ColumnIndex {
       let n = rope_line.len_chars();
       match self.char_until(options, rope_line, width) {
         Some(char_idx) => {
-          if char_idx + 1 <= n {
+          if char_idx < n {
             Some(char_idx + 1)
           } else {
             None
@@ -364,29 +364,6 @@ impl ColumnIndex {
         }
         None => None,
       }
-    }
-  }
-
-  /// Get the last (right-most) char index in the line.
-  ///
-  /// # Return
-  ///
-  /// 1. It returns None if the line is empty.
-  /// 2. It returns the last char index if the line is not empty.
-  pub fn last_char(
-    &mut self,
-    options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
-  ) -> Option<usize> {
-    let n = rope_line.len_chars();
-    self._build_cache_until_char(options, rope_line, n);
-    self._internal_check();
-
-    if self.width2char.is_empty() {
-      assert_eq!(rope_line.len_chars(), 0);
-      None
-    } else {
-      Some(n)
     }
   }
 
@@ -893,9 +870,6 @@ mod tests {
       &expect_until,
       &expect_after,
     );
-
-    let actual_last_char = widx.last_char(&options, &rope.line(0));
-    assert_eq!(actual_last_char, Some(34));
   }
 
   #[test]
@@ -907,9 +881,6 @@ mod tests {
     {
       let rope = Rope::new();
       let mut widx = ColumnIndex::new();
-
-      let actual_last_char = widx.last_char(&options, &rope.line(0));
-      assert_eq!(actual_last_char, None);
 
       let expect_before: Vec<(usize, Option<usize>)> =
         vec![(0, None), (1, None), (5, None), (10, None)];
@@ -932,9 +903,6 @@ mod tests {
     {
       let rope = make_rope_from_lines(vec![]);
       let mut widx = ColumnIndex::new();
-
-      let actual_last_char = widx.last_char(&options, &rope.line(0));
-      assert_eq!(actual_last_char, None);
 
       let expect_before: Vec<(usize, Option<usize>)> =
         vec![(0, None), (1, None), (5, None), (10, None)];
@@ -974,9 +942,6 @@ mod tests {
         &expect_until,
         &expect_after,
       );
-
-      let actual_last_char = widx.last_char(&options, &rope.line(0));
-      assert_eq!(actual_last_char, None);
     }
 
     {
@@ -1020,9 +985,6 @@ mod tests {
         &expect_until,
         &expect_after,
       );
-
-      let actual_last_char = widx.last_char(&options, &rope.line(0));
-      assert_eq!(actual_last_char, Some(0));
     }
   }
 
