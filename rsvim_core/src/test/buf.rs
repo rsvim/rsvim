@@ -143,16 +143,20 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
 
     let mut builder = String::new();
     let mut w = 0_usize;
+    let mut show = false;
     for (_i, c) in line.chars().enumerate() {
       let (_cs, cw) = buf.char_symbol(c);
       w += cw;
       if cw > 1 {
         builder.push_str(&format!("{}", w));
+        show = true;
       } else if builder.len() < w {
         let diff = w - builder.len();
         builder.push_str(&" ".repeat(diff));
       }
     }
-    info!("-{}- display width for width > 1 chars", builder);
+    if show {
+      info!("-{}- display width for width > 1 chars", builder);
+    }
   });
 }
