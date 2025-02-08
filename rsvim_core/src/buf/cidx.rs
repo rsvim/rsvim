@@ -230,18 +230,18 @@ impl ColumnIndex {
     self._build_cache(options, rope_line, None, Some(width));
   }
 
-  /// Get the right-most char index which the width is less than the specified width.
+  /// Get the previous char index which the width is less than the specified width.
   ///
-  /// Note:
-  /// 1. The specified width is exclusive, i.e. the returned char index's width is always less than
-  ///    the specified width, but cannot be greater than or equal to it.
-  /// 2. For all the char indexes which the width is less, it returns the right-most char index.
+  /// Note: A unicode char's width can also be 0 (line break), 2 (Chinese/Japanese/Korean char) and
+  /// 8 (default tab). The **current** char index is the one that its width range covers the
+  /// specified `width`.
   ///
   /// # Return
   ///
   /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
-  ///    - The `width` is 0 thus there's no such char exists.
+  ///    - The `width` is 0 thus there's no such char exists (except 0-width chars such as line
+  ///      break).
   ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
   ///    - Even the 1st char (index is 0) is longer than the `width` thus there's no such char exists.
