@@ -7,6 +7,7 @@ use crate::envar;
 use crate::rlock;
 
 use ropey::{Rope, RopeBuilder, RopeSlice};
+use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::BufReader;
 use tracing::{self, info};
@@ -104,9 +105,13 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
     let mut show2 = false;
     let mut show3 = false;
     let mut w = 0_usize;
+    let mut zero_width_chars: Vec<String> = vec![];
     for (_i, c) in line.chars().enumerate() {
       let (_cs, cw) = buf.char_symbol(c);
       w += cw;
+      if cw == 0 {
+        zero_width_chars.push(format!("{}", cw));
+      }
       if w == 1 || w % 10 == 0 {
         if builder.is_empty() || builder.ends_with(' ') {
           builder.push_str(&format!("{}", w));
@@ -130,7 +135,13 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
         builder3.push_str(&" ".repeat(diff));
       }
     }
-    info!("-{}- display width, total width:{}", builder, w);
+    info!(
+      "-{}- display width, total width:{} (for width = 0 chars, count:{}, indexes:{})",
+      builder,
+      w,
+      zero_width_chars.len(),
+      zero_width_chars.join(",")
+    );
     if show2 {
       info!(
         "-{}- display width (extra, conflicted with the above one)",
