@@ -343,27 +343,19 @@ impl ColumnIndex {
     rope_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
-    self._build_cache_until_width(options, rope_line, width);
+    self._build_cache_until_width(options, rope_line, width + 1);
     self._internal_check();
 
-    if self.width2char.is_empty() {
-      assert_eq!(rope_line.len_chars(), 0);
-      None
-    } else {
-      assert!(!self.width2char.is_empty());
-      assert!(rope_line.len_chars() > 0);
-
-      let n = rope_line.len_chars();
-      match self.char_until(options, rope_line, width) {
-        Some(char_idx) => {
-          if char_idx < n {
-            Some(char_idx + 1)
-          } else {
-            None
-          }
+    let n = rope_line.len_chars();
+    match self.char_until(options, rope_line, width) {
+      Some(char_idx) => {
+        if char_idx < n {
+          Some(char_idx + 1)
+        } else {
+          None
         }
-        None => None,
       }
+      None => None,
     }
   }
 
