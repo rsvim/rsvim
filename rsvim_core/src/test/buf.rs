@@ -1,7 +1,10 @@
 //! Buffer utils for testing.
 
-use crate::buf::unicode;
+#![allow(unused_imports)]
+
 use crate::buf::{Buffer, BufferArc, BufferLocalOptions};
+use crate::envar;
+use crate::rlock;
 
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::fs::File;
@@ -42,8 +45,17 @@ pub fn make_empty_buffer() -> BufferArc {
   Buffer::to_arc(buf)
 }
 
+/// Create buffer from lines.
+pub fn make_buffer_from_rope(rp: Rope) -> BufferArc {
+  let buf = Buffer::_new(rp, BufferLocalOptions::default(), None, None, None, None);
+  Buffer::to_arc(buf)
+}
+
 #[allow(clippy::unused_enumerate_index)]
-pub fn print_buffer_line_details(options: &BufferLocalOptions, line: &RopeSlice, msg: &str) {
+pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
+  let buf = rlock!(buf);
+  let line = buf.get_line(line_idx).unwrap();
+
   let subscriber = tracing_subscriber::FmtSubscriber::builder()
     // .with_file(true)
     .with_line_number(false)
@@ -64,7 +76,8 @@ pub fn print_buffer_line_details(options: &BufferLocalOptions, line: &RopeSlice,
     }
     let mut builder = String::new();
     for c in line.chars() {
-      builder.push(c);
+      let (cs, _cw) = buf.char_symbol(c);
+      builder.push_str(cs.as_ref());
     }
     info!("-{}-", builder);
 
@@ -72,7 +85,7 @@ pub fn print_buffer_line_details(options: &BufferLocalOptions, line: &RopeSlice,
     let mut n = 0_usize;
     let mut w = 0_usize;
     for (i, c) in line.chars().enumerate() {
-      let cw = unicode::char_width(options, c);
+      let (_cs, cw) = buf.char_symbol(c);
       w += cw;
       n += 1;
       if i % 10 == 0 {
@@ -92,7 +105,7 @@ pub fn print_buffer_line_details(options: &BufferLocalOptions, line: &RopeSlice,
     let mut show3 = false;
     let mut w = 0_usize;
     for (_i, c) in line.chars().enumerate() {
-      let cw = unicode::char_width(options, c);
+      let (_cs, cw) = buf.char_symbol(c);
       w += cw;
       if w == 1 || w % 10 == 0 {
         if builder.is_empty() || builder.ends_with(' ') {
@@ -131,7 +144,7 @@ pub fn print_buffer_line_details(options: &BufferLocalOptions, line: &RopeSlice,
     let mut builder = String::new();
     let mut w = 0_usize;
     for (_i, c) in line.chars().enumerate() {
-      let cw = unicode::char_width(options, c);
+      let (_cs, cw) = buf.char_symbol(c);
       w += cw;
       if cw > 1 {
         builder.push_str(&format!("{}", w));

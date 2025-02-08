@@ -404,7 +404,7 @@ impl ColumnIndex {
 mod tests {
   use super::*;
 
-  use crate::test::buf::{make_rope_from_lines, print_buffer_line_details};
+  use crate::test::buf::{make_buffer_from_rope, make_rope_from_lines, print_buffer_line_details};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
 
@@ -469,7 +469,8 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
-    print_buffer_line_details(&options, &rope.line(0), "width1");
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "width1");
 
     let mut actual = ColumnIndex::new();
 
@@ -503,7 +504,9 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
-    print_buffer_line_details(&options, &rope.line(0), "width2");
+
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "width2");
 
     let mut actual = ColumnIndex::new();
 
@@ -541,7 +544,9 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
-    print_buffer_line_details(&options, &rope.line(0), "width3");
+
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "width3");
 
     let mut actual = ColumnIndex::new();
 
@@ -598,7 +603,8 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["  1. When the\r"]);
-    print_buffer_line_details(&options, &rope.line(0), "width4");
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "width4");
 
     let mut actual = ColumnIndex::new();
 
@@ -636,7 +642,9 @@ mod tests {
     let rope = make_rope_from_lines(vec![
       "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
     ]);
-    print_buffer_line_details(&options, &rope.line(0), "width5");
+
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "width5");
 
     let mut actual = ColumnIndex::new();
 
@@ -697,7 +705,8 @@ mod tests {
     let rope = make_rope_from_lines(vec![
       "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
     ]);
-    print_buffer_line_details(&options, &rope.line(0), "width6");
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "width6");
 
     let mut actual = ColumnIndex::new();
 
@@ -819,7 +828,8 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["These are\t很简单的test\tlines.\n"]);
-    print_buffer_line_details(&options, &rope.line(0), "char1");
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "char1");
 
     let mut widx = ColumnIndex::new();
 
@@ -943,7 +953,8 @@ mod tests {
 
     {
       let rope = make_rope_from_lines(vec![""]);
-      print_buffer_line_details(&options, &rope.line(0), "char2 (3)");
+      let buffer = make_buffer_from_rope(rope.clone());
+      print_buffer_line_details(buffer.clone(), 0, "char2(3)");
 
       let mut widx = ColumnIndex::new();
 
@@ -967,7 +978,8 @@ mod tests {
 
     {
       let rope = make_rope_from_lines(vec!["\t"]);
-      print_buffer_line_details(&options, &rope.line(0), "char2 (4)");
+      let buffer = make_buffer_from_rope(rope.clone());
+      print_buffer_line_details(buffer.clone(), 0, "char2(4)");
       let mut widx = ColumnIndex::new();
 
       let expect_before: Vec<(usize, Option<usize>)> = vec![
