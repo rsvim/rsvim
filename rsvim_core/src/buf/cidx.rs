@@ -232,20 +232,22 @@ impl ColumnIndex {
 
   /// Get the previous char index which the width is less than the specified width.
   ///
-  /// Note: A unicode char's width can also be 0 (line break), 2 (Chinese/Japanese/Korean char) and
+  /// NOTE: A unicode char's width can also be 0 (line-break), 2 (Chinese/Japanese/Korean char) and
   /// 8 (default tab). The **current** char index is the one that its width range covers the
-  /// specified `width`.
+  /// specified `width`. The **previous** char is the one before the **current**, the **next** char
+  /// is the one after the **current**.
   ///
   /// # Return
   ///
   /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
-  ///    - The `width` is 0 thus there's no such char exists (except 0-width chars such as line
-  ///      break).
+  ///    - The `width` is too small thus there's no such char exists. For example:
+  ///      - The `width` is 0, and there's no 0-width chars (e.g. line-break) before it.
+  ///      - The `width` is 1 (positive integer), but the 1st char is CJK unicode, its display
+  ///        width is 2 thus there's still no such char exists.
   ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
-  ///    - Even the 1st char (index is 0) is longer than the `width` thus there's no such char exists.
-  /// 2. It returns the right-most char index if `width` is less than or equal to the line's width.
+  /// 2. It returns the previous char index otherwise.
   pub fn char_before(
     &mut self,
     options: &BufferLocalOptions,
@@ -263,33 +265,26 @@ impl ColumnIndex {
     } else {
       assert!(!self.width2char.is_empty());
       assert!(rope_line.len_chars() > 0);
+
       let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
-      if width <= *last_width {
-        for w in (1..width).rev() {
-          match self.width2char.get(&w) {
-            Some(c) => {
-              return Some(*c);
-            }
-            None => { /* Skip */ }
-          }
-        }
-        // Not exist.
-        None
-      } else {
-        // Not exist.
-        None
+      if width > *last_width {
+        return None;
       }
+
+      for w in (1..width).rev() {
+        if let Some(c) = self.width2char.get(&w) {
+          return Some(*c);
+        }
+      }
+
+      // Not exist.
+      None
     }
   }
 
-  /// Get the right-most char index which the width is greater than or equal to the specified
-  /// width.
+  /// Get the **current** char index which the width range covers the specified `width`.
   ///
-  /// Note:
-  /// 1. The specified width is inclusive, i.e. the returned char index's width is greater than or
-  ///    equal to the specified width, but cannot be less than it.
-  /// 2. For all the char indexes which the width is greater or equal, it returns the right-most
-  ///    char index.
+  /// NOTE: For the term **current**, please refer to [`ColumnIndex::char_before`].
   ///
   /// # Return
   ///
@@ -297,7 +292,7 @@ impl ColumnIndex {
   ///    - The line is empty.
   ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
-  /// 2. It returns the right-most char index if `width` is less than or equal to the line's width.
+  /// 2. It returns the **current** char index otherwise.
   pub fn char_until(
     &mut self,
     options: &BufferLocalOptions,
@@ -313,29 +308,27 @@ impl ColumnIndex {
     } else {
       assert!(!self.width2char.is_empty());
       assert!(rope_line.len_chars() > 0);
+
       let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
-      if width <= *last_width {
-        for w in width..=*last_width {
-          match self.width2char.get(&w) {
-            Some(c) => {
-              return Some(*c);
-            }
-            None => { /* Skip */ }
-          }
-        }
-        // Not exist.
-        None
-      } else {
-        // Not exist.
-        None
+      if width > *last_width {
+        return None;
       }
+
+      for w in width..=*last_width {
+        if let Some(c) = self.width2char.get(&w) {
+          return Some(c);
+        }
+      }
+
+      // Not exist.
+      None
     }
   }
 
-  /// Get the right-most char index which the width is greater than the specified width.
+  /// Get the **next** char index which is next to (after) the **current** char, which the width
+  /// range covers the specified `width`.
   ///
-  /// Note: This API is same with [`char_until`](ColIndex::char_until) except the char index's
-  /// width is only greater than the specified width, but cannot less than or euqal to it.
+  /// NOTE: For the term **next** and **current**, please refer to [`ColumnIndex::char_before`].
   ///
   /// # Return
   ///
@@ -343,7 +336,7 @@ impl ColumnIndex {
   ///    - The line is empty.
   ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
-  /// 2. It returns the right-most char index if `width` is less than or equal to the line's width.
+  /// 2. It returns the next char index otherwise.
   pub fn char_after(
     &mut self,
     options: &BufferLocalOptions,
@@ -359,16 +352,15 @@ impl ColumnIndex {
     } else {
       assert!(!self.width2char.is_empty());
       assert!(rope_line.len_chars() > 0);
+
       let n = rope_line.len_chars();
       match self.char_until(options, rope_line, width) {
         Some(char_idx) => {
-          for c in char_idx..n {
-            let w = self.width_until(options, rope_line, c);
-            if w > width {
-              return Some(w);
-            }
+          if char_idx + 1 <= n {
+            Some(char_idx + 1)
+          } else {
+            None
           }
-          None
         }
         None => None,
       }
