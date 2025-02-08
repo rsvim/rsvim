@@ -85,10 +85,18 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
     let mut builder = String::new();
     let mut n = 0_usize;
     let mut w = 0_usize;
+    let mut zero_width_chars: Vec<String> = vec![];
+    let mut big_width_chars: Vec<String> = vec![];
     for (i, c) in line.chars().enumerate() {
       let (_cs, cw) = buf.char_symbol(c);
       w += cw;
       n += 1;
+      if cw == 0 {
+        zero_width_chars.push(format!("{}", cw));
+      }
+      if cw > 1 {
+        big_width_chars.push(format!("{}", cw));
+      }
       if i % 10 == 0 {
         builder.push_str(&format!("{}", i));
       }
@@ -97,7 +105,12 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
         builder.push_str(&" ".repeat(diff));
       }
     }
-    info!("-{}- char index, total chars:{}", builder, n);
+    info!("-{}- char index, total:{} (width = 0 chars: count:{} indexes:{}, width > 1 chars: count:{} indexes:{})", builder, n,
+      zero_width_chars.len(),
+      zero_width_chars.join(","),
+      big_width_chars.len(),
+      big_width_chars.join(",")
+    );
 
     let mut builder = String::new();
     let mut builder2 = String::new();
@@ -105,17 +118,9 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
     let mut show2 = false;
     let mut show3 = false;
     let mut w = 0_usize;
-    let mut zero_width_chars: Vec<String> = vec![];
-    let mut big_width_chars: Vec<String> = vec![];
     for (_i, c) in line.chars().enumerate() {
       let (_cs, cw) = buf.char_symbol(c);
       w += cw;
-      if cw == 0 {
-        zero_width_chars.push(format!("{}", cw));
-      }
-      if cw > 1 {
-        big_width_chars.push(format!("{}", cw));
-      }
       if w == 1 || w % 10 == 0 {
         if builder.is_empty() || builder.ends_with(' ') {
           builder.push_str(&format!("{}", w));
@@ -139,15 +144,7 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
         builder3.push_str(&" ".repeat(diff));
       }
     }
-    info!(
-      "-{}- display width, total width:{} (for width = 0 chars: count:{} indexes:{}, for width > 1 chars: count:{} indexes:{})",
-      builder,
-      w,
-      zero_width_chars.len(),
-      zero_width_chars.join(",")
-      big_width_chars.len(),
-      big_width_chars.join(",")
-    );
+    info!("-{}- display width, total width:{}", builder, w);
     if show2 {
       info!(
         "-{}- display width (extra, conflicted with the above one)",
