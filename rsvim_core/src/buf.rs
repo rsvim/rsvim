@@ -4,16 +4,16 @@ use crate::res::IoResult;
 
 // Re-export
 pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
-pub use crate::buf::widx::{ColIndex, LineIndex};
+pub use crate::buf::widx::ColIndex;
 
 use ahash::AHashMap as HashMap;
+use ahash::AHashSet as HashSet;
 use compact_str::CompactString;
 use parking_lot::RwLock;
 use path_absolutize::Absolutize;
 use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
-use std::collections::HashSet;
 use std::fs::Metadata;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -51,7 +51,7 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
-  width_index: LineIndex,
+  rope_lines_width: BTreeMap<usize, ColIndex>,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -76,7 +76,7 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope,
-      width_index: LineIndex::new(),
+      rope_lines_width: BTreeMap::new(),
       options,
       filename,
       absolute_filename,
@@ -91,7 +91,7 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
-      width_index: LineIndex::new(),
+      rope_lines_width: BTreeMap::new(),
       options,
       filename: None,
       absolute_filename: None,
@@ -272,9 +272,13 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_before(&mut self, line_idx: usize, char_idx: usize) -> usize {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
     self
-      .width_index
-      .width_before(&self.options, &self.rope, line_idx, char_idx)
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .width_before(&self.options, &rope_line, char_idx)
   }
 
   /// See [`ColIndex::width_until`].
@@ -283,9 +287,13 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_until(&mut self, line_idx: usize, char_idx: usize) -> usize {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
     self
-      .width_index
-      .width_until(&self.options, &self.rope, line_idx, char_idx)
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .width_until(&self.options, &rope_line, char_idx)
   }
 
   /// See [`ColIndex::char_before`].
@@ -294,9 +302,13 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_before(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
     self
-      .width_index
-      .char_before(&self.options, &self.rope, line_idx, width)
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .char_before(&self.options, &rope_line, width)
   }
 
   /// See [`ColIndex::char_until`].
@@ -305,9 +317,13 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_until(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
     self
-      .width_index
-      .char_until(&self.options, &self.rope, line_idx, width)
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .char_until(&self.options, &rope_line, width)
   }
 
   /// See [`ColIndex::char_after`].
@@ -316,9 +332,13 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_after(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
     self
-      .width_index
-      .char_after(&self.options, &self.rope, line_idx, width)
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .char_after(&self.options, &rope_line, width)
   }
 
   /// See [`ColIndex::last_char`].
@@ -327,41 +347,53 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn last_char(&mut self, line_idx: usize) -> Option<usize> {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
     self
-      .width_index
-      .last_char(&self.options, &self.rope, line_idx)
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .last_char(&self.options, &rope_line)
   }
 
   /// See [`ColIndex::truncate_by_char`].
   pub fn truncate_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
+    self.rope_lines_width.entry(line_idx).or_default();
     self
-      .width_index
-      .truncate_line_since_char(line_idx, char_idx)
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .truncate_since_char(char_idx)
   }
 
   /// See [`ColIndex::truncate_by_width`].
   pub fn truncate_line_since_width(&mut self, line_idx: usize, width: usize) {
-    self.width_index.truncate_line_since_width(line_idx, width)
+    self.rope_lines_width.entry(line_idx).or_default();
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .truncate_since_width(width)
   }
 
   /// Truncate lines at the tail, start from specified line index.
   pub fn truncate(&mut self, start_line_idx: usize) {
-    self.width_index.truncate(start_line_idx)
+    self.rope_lines_width.retain(|&l, _| l < start_line_idx);
   }
 
   /// Remove one specified line.
   pub fn remove(&mut self, line_idx: usize) {
-    self.width_index.remove(line_idx)
+    self.rope_lines_width.remove(&line_idx);
   }
 
   /// Retain multiple specified lines.
   pub fn retain(&mut self, lines_idx: HashSet<usize>) {
-    self.width_index.retain(lines_idx)
+    self.rope_lines_width.retain(|l, _| lines_idx.contains(l));
   }
 
   /// Clear.
   pub fn clear(&mut self) {
-    self.width_index.clear()
+    self.rope_lines_width.clear()
   }
 }
 // Display Width }
