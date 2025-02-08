@@ -311,7 +311,7 @@ impl ColumnIndex {
       assert!(rope_line.len_chars() > 0);
 
       if width == 0 {
-        if *self.char2width.get(0).unwrap() == 0 {
+        if *self.char2width.first().unwrap() == 0 {
           return Some(0);
         } else {
           return None;

@@ -6,6 +6,7 @@ use crate::buf::{Buffer, BufferArc, BufferLocalOptions};
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::fs::File;
 use std::io::BufReader;
+use tracing::{self, info};
 
 /// Create rope from filename.
 pub fn make_rope_from_file(filename: String) -> Rope {
@@ -41,73 +42,104 @@ pub fn make_empty_buffer() -> BufferArc {
   Buffer::to_arc(buf)
 }
 
+#[allow(clippy::unused_enumerate_index)]
 pub fn print_buffer_line_details(options: &BufferLocalOptions, line: &RopeSlice, msg: &str) {
-  let n = line.len_chars();
-  if !msg.is_empty() {
-    println!("line: {}", msg);
-  } else {
-    println!("line");
-  }
-  let mut builder = String::with_capacity(n);
-  for c in line.chars() {
-    builder.push(c);
-  }
-  println!("-{}-", builder);
+  let subscriber = tracing_subscriber::FmtSubscriber::builder()
+    // .with_file(true)
+    .with_line_number(false)
+    // .with_thread_ids(true)
+    // .with_thread_names(true)
+    .with_level(true)
+    .with_ansi(true)
+    .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+    .with_writer(std::io::stdout)
+    .without_time()
+    .finish();
 
-  let mut builder = String::with_capacity(n);
-  for (i, _) in line.chars().enumerate() {
-    if i % 10 == 0 {
-      builder.push_str(&format!("{}", i));
-    } else if builder.len() < i {
-      let diff = i - builder.len();
-      builder.push_str(&" ".repeat(diff));
+  tracing::subscriber::with_default(subscriber, || {
+    if !msg.is_empty() {
+      info!("line: {}", msg);
+    } else {
+      info!("line");
     }
-  }
-  println!("-{}- total:{}", builder, n);
+    let mut builder = String::new();
+    for c in line.chars() {
+      builder.push(c);
+    }
+    info!("-{}-", builder);
 
-  let mut builder = String::with_capacity(n);
-  let mut builder2 = String::with_capacity(n);
-  let mut builder3 = String::with_capacity(n);
-  let mut w = 0_usize;
-  for (_i, c) in line.chars().enumerate() {
-    let cw = unicode::char_width(options, c);
-    w += cw;
-    if w == 1 || w % 10 == 0 {
-      if builder.is_empty() || builder.chars().last().unwrap() == ' ' {
-        builder.push_str(&format!("{}", w));
-      } else if cw > 0 {
-        builder2.push_str(&format!("{}", w));
-      } else {
-        builder3.push_str(&format!("{}", w));
+    let mut builder = String::new();
+    let mut n = 0_usize;
+    let mut w = 0_usize;
+    for (i, c) in line.chars().enumerate() {
+      let cw = unicode::char_width(options, c);
+      w += cw;
+      n += 1;
+      if i % 10 == 0 {
+        builder.push_str(&format!("{}", i));
       }
-    } else if builder.len() < w {
-      let diff = w - builder.len();
-      builder.push_str(&" ".repeat(diff));
+      if builder.len() < w {
+        let diff = w - builder.len();
+        builder.push_str(&" ".repeat(diff));
+      }
     }
-    if builder2.len() < w {
-      let diff = w - builder2.len();
-      builder2.push_str(&" ".repeat(diff));
-    }
-    if builder3.len() < w {
-      let diff = w - builder3.len();
-      builder3.push_str(&" ".repeat(diff));
-    }
-  }
-  println!("-{}- display width total:{}", builder, w);
-  println!("-{}- display width 2", builder2);
-  println!("-{}- for width =0 chars", builder3);
+    info!("-{}- char index, total chars:{}", builder, n);
 
-  let mut builder = String::with_capacity(n);
-  let mut w = 0_usize;
-  for (_i, c) in line.chars().enumerate() {
-    let cw = unicode::char_width(options, c);
-    w += cw;
-    if cw > 1 {
-      builder.push_str(&format!("{}", w));
-    } else if builder.len() < w {
-      let diff = w - builder.len();
-      builder.push_str(&" ".repeat(diff));
+    let mut builder = String::new();
+    let mut builder2 = String::new();
+    let mut builder3 = String::new();
+    let mut show2 = false;
+    let mut show3 = false;
+    let mut w = 0_usize;
+    for (_i, c) in line.chars().enumerate() {
+      let cw = unicode::char_width(options, c);
+      w += cw;
+      if w == 1 || w % 10 == 0 {
+        if builder.is_empty() || builder.ends_with(' ') {
+          builder.push_str(&format!("{}", w));
+        } else if cw > 0 {
+          builder2.push_str(&format!("{}", w));
+          show2 = true;
+        } else {
+          builder3.push_str(&format!("{}", w));
+          show3 = true;
+        }
+      } else if builder.len() < w {
+        let diff = w - builder.len();
+        builder.push_str(&" ".repeat(diff));
+      }
+      if builder2.len() < w {
+        let diff = w - builder2.len();
+        builder2.push_str(&" ".repeat(diff));
+      }
+      if builder3.len() < w {
+        let diff = w - builder3.len();
+        builder3.push_str(&" ".repeat(diff));
+      }
     }
-  }
-  println!("-{}- for width >=1 chars", builder);
+    info!("-{}- display width, total width:{}", builder, w);
+    if show2 {
+      info!(
+        "-{}- display width (extra, conflicted with the above one)",
+        builder2
+      );
+    }
+    if show3 {
+      info!("-{}- display width for width = 0 chars", builder3);
+    }
+
+    let mut builder = String::new();
+    let mut w = 0_usize;
+    for (_i, c) in line.chars().enumerate() {
+      let cw = unicode::char_width(options, c);
+      w += cw;
+      if cw > 1 {
+        builder.push_str(&format!("{}", w));
+      } else if builder.len() < w {
+        let diff = w - builder.len();
+        builder.push_str(&" ".repeat(diff));
+      }
+    }
+    info!("-{}- display width for width > 1 chars", builder);
+  });
 }
