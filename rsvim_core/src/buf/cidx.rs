@@ -292,6 +292,7 @@ impl ColumnIndex {
   ///    - The line is empty.
   ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
+  ///    - The `width` is 0, and the 1st char is not 0-width char (e.g. line-break).
   /// 2. It returns the **current** char index otherwise.
   pub fn char_until(
     &mut self,
@@ -308,6 +309,14 @@ impl ColumnIndex {
     } else {
       assert!(!self.width2char.is_empty());
       assert!(rope_line.len_chars() > 0);
+
+      if width == 0 {
+        if *self.char2width.get(0).unwrap() == 0 {
+          return Some(0);
+        } else {
+          return None;
+        }
+      }
 
       let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
       if width > *last_width {
@@ -395,7 +404,7 @@ impl ColumnIndex {
 mod tests {
   use super::*;
 
-  use crate::test::buf::make_rope_from_lines;
+  use crate::test::buf::{make_rope_from_lines, print_buffer_line_details};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
 
@@ -460,6 +469,8 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
+    print_buffer_line_details(&options, &rope.line(0), "width1");
+
     let mut actual = ColumnIndex::new();
 
     let expect: Vec<usize> =
@@ -492,6 +503,8 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
+    print_buffer_line_details(&options, &rope.line(0), "width2");
+
     let mut actual = ColumnIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 5), 5);
@@ -528,6 +541,8 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
+    print_buffer_line_details(&options, &rope.line(0), "width3");
+
     let mut actual = ColumnIndex::new();
 
     let expect: Vec<usize> = [
@@ -583,6 +598,8 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["  1. When the\r"]);
+    print_buffer_line_details(&options, &rope.line(0), "width4");
+
     let mut actual = ColumnIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 11), 11);
@@ -619,6 +636,8 @@ mod tests {
     let rope = make_rope_from_lines(vec![
       "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
     ]);
+    print_buffer_line_details(&options, &rope.line(0), "width5");
+
     let mut actual = ColumnIndex::new();
 
     let expect: Vec<usize> = [
@@ -678,6 +697,8 @@ mod tests {
     let rope = make_rope_from_lines(vec![
       "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
     ]);
+    print_buffer_line_details(&options, &rope.line(0), "width6");
+
     let mut actual = ColumnIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 8);
@@ -715,6 +736,7 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = Rope::new();
+
     let mut actual = ColumnIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
@@ -796,24 +818,32 @@ mod tests {
     test_log_init();
 
     let options = BufferLocalOptions::default();
-    let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
+    let rope = make_rope_from_lines(vec!["These are\t很简单的test\tlines.\n"]);
+    print_buffer_line_details(&options, &rope.line(0), "char1");
+
     let mut widx = ColumnIndex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
       (0, None),
       (1, None),
       (5, Some(3)),
+      (9, Some(7)),
       (10, Some(8)),
-      (15, Some(13)),
-      (16, Some(14)),
-      (17, Some(14)),
-      (22, Some(14)),
-      (23, Some(14)),
-      (24, Some(15)),
-      (25, Some(15)),
-      (26, Some(16)),
-      (27, Some(16)),
-      (28, Some(17)),
+      (11, Some(8)),
+      (16, Some(8)),
+      (17, Some(8)),
+      (18, Some(9)),
+      (19, Some(9)),
+      (20, Some(10)),
+      (21, Some(10)),
+      (22, Some(11)),
+      (23, Some(11)),
+      (24, Some(12)),
+      (25, Some(12)),
+      (26, Some(13)),
+      (27, Some(13)),
+      (28, Some(14)),
+      (29, Some(15)),
     ];
 
     let expect_until: Vec<(usize, Option<usize>)> = vec![
@@ -913,6 +943,8 @@ mod tests {
 
     {
       let rope = make_rope_from_lines(vec![""]);
+      print_buffer_line_details(&options, &rope.line(0), "char2 (3)");
+
       let mut widx = ColumnIndex::new();
 
       let expect_before: Vec<(usize, Option<usize>)> =
@@ -935,6 +967,7 @@ mod tests {
 
     {
       let rope = make_rope_from_lines(vec!["\t"]);
+      print_buffer_line_details(&options, &rope.line(0), "char2 (4)");
       let mut widx = ColumnIndex::new();
 
       let expect_before: Vec<(usize, Option<usize>)> = vec![
