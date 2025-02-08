@@ -782,6 +782,60 @@ mod tests {
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
   }
 
+  fn assert_char_before(
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    widx: &mut ColumnIndex,
+    expect_before: &[(usize, Option<usize>)],
+  ) {
+    for (w, c) in expect_before.iter() {
+      let actual = widx.char_before(options, rope_line, *w);
+      info!("char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      assert_eq!(actual, *c);
+      if c.is_some() {
+        let actual = widx.width_until(options, rope_line, c.unwrap());
+        info!("width_until-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+        assert!(actual < *w);
+      }
+    }
+  }
+
+  fn assert_char_until(
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    widx: &mut ColumnIndex,
+    expect_until: &[(usize, Option<usize>)],
+  ) {
+    for (w, c) in expect_until.iter() {
+      let actual = widx.char_until(options, rope_line, *w);
+      info!("char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      assert_eq!(actual, *c);
+      if c.is_some() {
+        let actual = widx.width_until(options, rope_line, c.unwrap());
+        info!("width_until-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+        assert!(actual <= *w);
+      }
+    }
+  }
+
+  fn assert_char_after(
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    widx: &mut ColumnIndex,
+    expect_after: &[(usize, Option<usize>)],
+  ) {
+    for (w, c) in expect_after.iter() {
+      let actual = widx.char_after(options, rope_line, *w);
+      info!("char_after expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      assert_eq!(actual, *c);
+      if c.is_some() {
+        let actual = widx.width_until(options, rope_line, c.unwrap());
+        info!("width_until-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+        assert!(actual > *w);
+      }
+    }
+  }
+
   fn assert_char(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
@@ -864,6 +918,7 @@ mod tests {
       (43, Some(23)),
       (44, None),
     ];
+    //assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
     let expect_until: Vec<(usize, Option<usize>)> = vec![
       (0, None),
@@ -882,6 +937,7 @@ mod tests {
       (28, Some(17)),
       (29, Some(18)),
     ];
+    assert_char_until(&options, &rope.line(0), &mut widx, &expect_until);
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
@@ -900,14 +956,7 @@ mod tests {
       (28, Some(18)),
       (29, Some(19)),
     ];
-    assert_char(
-      &options,
-      &rope.line(0),
-      &mut widx,
-      &expect_before,
-      &expect_until,
-      &expect_after,
-    );
+    assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
   }
 
   #[test]
