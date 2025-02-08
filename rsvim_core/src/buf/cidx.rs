@@ -851,9 +851,18 @@ mod tests {
       (24, Some(12)),
       (25, Some(12)),
       (26, Some(13)),
-      (27, Some(13)),
-      (28, Some(14)),
-      (29, Some(15)),
+      (27, Some(14)),
+      (28, Some(15)),
+      (29, Some(16)),
+      (30, Some(17)),
+      (31, Some(17)),
+      (32, Some(17)),
+      (36, Some(17)),
+      (37, Some(17)),
+      (38, Some(18)),
+      (39, Some(19)),
+      (43, Some(23)),
+      (44, None),
     ];
 
     let expect_until: Vec<(usize, Option<usize>)> = vec![
