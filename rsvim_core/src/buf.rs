@@ -266,7 +266,7 @@ impl Buffer {
 
 // Display Width {
 impl Buffer {
-  /// See [`ColIndex::width_before`].
+  /// See [`ColumnIndex::width_before`].
   ///
   /// # Panics
   ///
@@ -281,22 +281,22 @@ impl Buffer {
       .width_before(&self.options, &rope_line, char_idx)
   }
 
-  /// See [`ColIndex::width_until`].
+  /// See [`ColumnIndex::width_at`].
   ///
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn width_until(&mut self, line_idx: usize, char_idx: usize) -> usize {
+  pub fn width_at(&mut self, line_idx: usize, char_idx: usize) -> usize {
     self.rope_lines_width.entry(line_idx).or_default();
     let rope_line = self.rope.line(line_idx);
     self
       .rope_lines_width
       .get_mut(&line_idx)
       .unwrap()
-      .width_until(&self.options, &rope_line, char_idx)
+      .width_at(&self.options, &rope_line, char_idx)
   }
 
-  /// See [`ColIndex::char_before`].
+  /// See [`ColumnIndex::char_before`].
   ///
   /// # Panics
   ///
@@ -311,22 +311,22 @@ impl Buffer {
       .char_before(&self.options, &rope_line, width)
   }
 
-  /// See [`ColIndex::char_until`].
+  /// See [`ColumnIndex::char_at`].
   ///
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn char_until(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn char_at(&mut self, line_idx: usize, width: usize) -> Option<usize> {
     self.rope_lines_width.entry(line_idx).or_default();
     let rope_line = self.rope.line(line_idx);
     self
       .rope_lines_width
       .get_mut(&line_idx)
       .unwrap()
-      .char_until(&self.options, &rope_line, width)
+      .char_at(&self.options, &rope_line, width)
   }
 
-  /// See [`ColIndex::char_after`].
+  /// See [`ColumnIndex::char_after`].
   ///
   /// # Panics
   ///
@@ -341,7 +341,7 @@ impl Buffer {
       .char_after(&self.options, &rope_line, width)
   }
 
-  /// See [`ColIndex::truncate_by_char`].
+  /// See [`ColumnIndex::truncate_by_char`].
   pub fn truncate_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
     self.rope_lines_width.entry(line_idx).or_default();
     self
@@ -351,7 +351,7 @@ impl Buffer {
       .truncate_since_char(char_idx)
   }
 
-  /// See [`ColIndex::truncate_by_width`].
+  /// See [`ColumnIndex::truncate_by_width`].
   pub fn truncate_line_since_width(&mut self, line_idx: usize, width: usize) {
     self.rope_lines_width.entry(line_idx).or_default();
     self

@@ -365,6 +365,37 @@ impl ColumnIndex {
     None
   }
 
+  /// Get the **right-most** char index which the width is less than or equal to the specified
+  /// `width`.
+  ///
+  /// NOTE: For the term **next** and **current**, please refer to [`ColumnIndex::char_before`].
+  ///
+  /// # Return
+  ///
+  /// 1. It returns None if the `width` is out of the line, there're below cases:
+  ///    - The line is empty.
+  ///    - The `width` is greater than the whole line's display width, thus there's no such char
+  ///      exists.
+  /// 2. It returns the next char index otherwise.
+  pub fn char_until(
+    &mut self,
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    width: usize,
+  ) -> Option<usize> {
+    self._build_cache_until_width(options, rope_line, width + 1);
+    self._internal_check();
+
+    let n = rope_line.len_chars();
+    if let Some(char_idx) = self.char_at(options, rope_line, width) {
+      if char_idx < n {
+        return Some(char_idx + 1);
+      }
+    }
+
+    None
+  }
+
   /// Truncate cache since char index.
   pub fn truncate_since_char(&mut self, char_idx: usize) {
     self._internal_check();

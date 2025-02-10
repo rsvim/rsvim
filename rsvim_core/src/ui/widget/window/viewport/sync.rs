@@ -149,7 +149,7 @@ fn _from_top_left_nowrap(
           } else {
             let start_c = raw_buffer
               .as_mut()
-              .char_until(l, start_dcol_on_line)
+              .char_at(l, start_dcol_on_line)
               .unwrap_or(0_usize);
             let start_fills = {
               let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
@@ -164,7 +164,7 @@ fn _from_top_left_nowrap(
               None => bline.len_chars() - 1, // last char index on the line.
             };
             let end_fills = {
-              let end_width_until = raw_buffer.as_mut().width_until(l, end_c);
+              let end_width_until = raw_buffer.as_mut().width_at(l, end_c);
               if end_width_until >= start_dcol_on_line + width as usize {
                 end_width_until - (start_dcol_on_line + width as usize)
               } else {
@@ -271,7 +271,7 @@ fn _from_top_left_wrap_nolinebreak(
 
             let mut start_c = raw_buffer
               .as_mut()
-              .char_until(l, start_dcol_on_line)
+              .char_at(l, start_dcol_on_line)
               .unwrap_or(0_usize);
             let start_fills = {
               let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
@@ -297,7 +297,7 @@ fn _from_top_left_wrap_nolinebreak(
               end_dcol += width as usize;
             }
             let end_fills = {
-              let end_width_until = raw_buffer.as_mut().width_until(l, end_c.unwrap());
+              let end_width_until = raw_buffer.as_mut().width_at(l, end_c.unwrap());
               end_width_until.saturating_sub(end_dcol)
             };
 

@@ -177,10 +177,10 @@ impl Widgetable for WindowContent {
             // Render left empty parts.
             let end_dcol_idx = raw_buffer
               .as_mut()
-              .width_until(line_idx, r_viewport.end_char_idx());
+              .width_at(line_idx, r_viewport.end_char_idx());
             let start_dcol_idx = raw_buffer
               .as_mut()
-              .width_until(line_idx, r_viewport.start_char_idx());
+              .width_at(line_idx, r_viewport.start_char_idx());
             let occupied_length = (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
 
             if width > occupied_length {
