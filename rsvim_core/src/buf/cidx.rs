@@ -874,46 +874,6 @@ mod tests {
     }
   }
 
-  fn assert_char(
-    options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
-    widx: &mut ColumnIndex,
-    expect_before: &[(usize, Option<usize>)],
-    expect_until: &[(usize, Option<usize>)],
-    expect_after: &[(usize, Option<usize>)],
-  ) {
-    for (w, c) in expect_before.iter() {
-      let actual = widx.char_before(options, rope_line, *w);
-      info!("char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}");
-      assert_eq!(actual, *c);
-      if c.is_some() {
-        let actual = widx.width_at(options, rope_line, c.unwrap());
-        info!("width_until-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
-        assert!(actual < *w);
-      }
-    }
-    for (w, c) in expect_until.iter() {
-      let actual = widx.char_at(options, rope_line, *w);
-      info!("char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
-      assert_eq!(actual, *c);
-      if c.is_some() {
-        let actual = widx.width_at(options, rope_line, c.unwrap());
-        info!("width_until-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
-        assert!(actual <= *w);
-      }
-    }
-    for (w, c) in expect_after.iter() {
-      let actual = widx.char_after(options, rope_line, *w);
-      info!("char_after expect char:{c:?} width:{w:?}, actual char:{actual:?}");
-      assert_eq!(actual, *c);
-      if c.is_some() {
-        let actual = widx.width_at(options, rope_line, c.unwrap());
-        info!("width_until-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
-        assert!(actual > *w);
-      }
-    }
-  }
-
   #[test]
   fn char1() {
     test_log_init();
@@ -1107,15 +1067,13 @@ mod tests {
 
       let mut widx = ColumnIndex::new();
 
-      let expect_before: Vec<(usize, Option<usize>)> =
-        (0..50).into_iter().map(|i| (i, None)).collect();
+      let expect_before: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
-      let expect_at: Vec<(usize, Option<usize>)> = (0..50).into_iter().map(|i| (i, None)).collect();
+      let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
-      let expect_after: Vec<(usize, Option<usize>)> =
-        (0..50).into_iter().map(|i| (i, None)).collect();
+      let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
     }
 
@@ -1123,15 +1081,13 @@ mod tests {
       let rope = make_rope_from_lines(vec![]);
       let mut widx = ColumnIndex::new();
 
-      let expect_before: Vec<(usize, Option<usize>)> =
-        (0..50).into_iter().map(|i| (i, None)).collect();
+      let expect_before: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
-      let expect_at: Vec<(usize, Option<usize>)> = (0..50).into_iter().map(|i| (i, None)).collect();
+      let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
-      let expect_after: Vec<(usize, Option<usize>)> =
-        (0..50).into_iter().map(|i| (i, None)).collect();
+      let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
     }
 
@@ -1142,15 +1098,13 @@ mod tests {
 
       let mut widx = ColumnIndex::new();
 
-      let expect_before: Vec<(usize, Option<usize>)> =
-        (0..50).into_iter().map(|i| (i, None)).collect();
+      let expect_before: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
-      let expect_at: Vec<(usize, Option<usize>)> = (0..50).into_iter().map(|i| (i, None)).collect();
+      let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
-      let expect_after: Vec<(usize, Option<usize>)> =
-        (0..50).into_iter().map(|i| (i, None)).collect();
+      let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
     }
   }
