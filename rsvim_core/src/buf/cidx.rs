@@ -957,7 +957,7 @@ mod tests {
       (44, None),
       (45, None),
     ];
-    //assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
+    assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
     let expect_at: Vec<(usize, Option<usize>)> = vec![
       (0, None),
@@ -998,7 +998,7 @@ mod tests {
       (44, None),
       (45, None),
     ];
-    //assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
+    assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
