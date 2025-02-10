@@ -830,7 +830,7 @@ mod tests {
       assert_eq!(actual, *c);
       if c.is_some() {
         let actual = widx.width_at(options, rope_line, c.unwrap());
-        info!("width_until-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+        info!("width_at-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual < *w);
       }
     }
@@ -868,7 +868,25 @@ mod tests {
       assert_eq!(actual, *c);
       if c.is_some() {
         let actual = widx.width_at(options, rope_line, c.unwrap());
-        info!("width_until-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+        info!("width_at-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+        assert!(actual >= *w);
+      }
+    }
+  }
+
+  fn assert_last_char_until(
+    options: &BufferLocalOptions,
+    rope_line: &RopeSlice,
+    widx: &mut ColumnIndex,
+    expect_until: &[(usize, Option<usize>)],
+  ) {
+    for (w, c) in expect_after.iter() {
+      let actual = widx.char_after(options, rope_line, *w);
+      info!("last_char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      assert_eq!(actual, *c);
+      if c.is_some() {
+        let actual = widx.width_at(options, rope_line, c.unwrap());
+        info!("width_until-4 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual >= *w);
       }
     }
