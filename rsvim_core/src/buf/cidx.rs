@@ -1161,15 +1161,15 @@ mod tests {
     assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
     let expect_at: Vec<(usize, Option<usize>)> = vec![
-      (0, None),
-      (1, Some(0)),
-      (2, Some(0)),
-      (3, Some(0)),
-      (4, Some(0)),
-      (5, Some(0)),
-      (6, Some(0)),
-      (7, Some(0)),
-      (8, Some(0)),
+      (0, Some(0)),
+      (1, None),
+      (2, None),
+      (3, None),
+      (4, None),
+      (5, None),
+      (6, None),
+      (7, None),
+      (8, None),
       (9, None),
       (10, None),
     ];
@@ -1190,7 +1190,7 @@ mod tests {
     assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
 
     let expect_until: Vec<(usize, Option<usize>)> = vec![
-      (0, None),
+      (0, Some(0)),
       (1, Some(0)),
       (2, Some(0)),
       (3, Some(0)),
@@ -1199,8 +1199,8 @@ mod tests {
       (6, Some(0)),
       (7, Some(0)),
       (8, Some(0)),
-      (9, None),
-      (10, None),
+      (9, Some(0)),
+      (10, Some(0)),
     ];
     assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_until);
   }
