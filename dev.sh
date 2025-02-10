@@ -71,3 +71,7 @@ while getopts "$optspec" optchar; do
 		;;
 	esac
 done
+
+echo "Error: missing arguments!"
+usage
+exit
