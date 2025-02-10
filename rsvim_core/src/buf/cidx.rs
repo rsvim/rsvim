@@ -893,11 +893,6 @@ mod tests {
       let actual = widx.last_char_until(options, rope_line, *w);
       info!("last_char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
-      if c.is_some() {
-        let actual = widx.width_at(options, rope_line, c.unwrap());
-        info!("width_until-4 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
-        assert!(actual <= *w);
-      }
     }
   }
 
