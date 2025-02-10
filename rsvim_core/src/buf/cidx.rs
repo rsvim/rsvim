@@ -365,20 +365,15 @@ impl ColumnIndex {
     None
   }
 
-  /// Get the **right-most** char index which the width is less than or equal to the specified
-  /// `width`.
-  ///
-  /// NOTE: The term **right-most** means the char is the one meets below conditions:
-  /// 1. The char's width is less than or equal to the specified `width`.
-  /// 2. If multiple chars exist, the one has the biggest index, i.e. the **right-most**.
+  /// Get the last char index which the width is less than or equal to the specified `width`.
   ///
   /// # Return
   ///
   /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
-  /// 2. It returns the right-most char index otherwise. If the `width` is longer than the whole
-  ///    line, it returns the last char index.
-  pub fn char_until(
+  /// 2. It returns the last char index otherwise. If the `width` is longer than the whole line, it
+  ///    returns the last char index.
+  pub fn last_char_until(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
