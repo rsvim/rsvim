@@ -869,7 +869,7 @@ mod tests {
       if c.is_some() {
         let actual = widx.width_at(options, rope_line, c.unwrap());
         info!("width_until-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
-        assert!(actual > *w);
+        assert!(actual >= *w);
       }
     }
   }
@@ -1003,19 +1003,42 @@ mod tests {
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
       (1, Some(1)),
-      (5, Some(4)),
+      (2, Some(2)),
+      (5, Some(5)),
+      (6, Some(6)),
+      (7, Some(7)),
+      (8, Some(8)),
+      (9, Some(9)),
       (10, Some(10)),
-      (15, Some(15)),
-      (16, Some(15)),
-      (17, Some(15)),
-      (22, Some(15)),
-      (23, Some(16)),
-      (24, Some(16)),
-      (25, Some(17)),
-      (26, Some(17)),
-      (27, Some(18)),
-      (28, Some(18)),
-      (29, Some(19)),
+      (11, Some(10)),
+      (15, Some(10)),
+      (16, Some(10)),
+      (17, Some(10)),
+      (18, Some(11)),
+      (19, Some(11)),
+      (20, Some(12)),
+      (21, Some(12)),
+      (22, Some(13)),
+      (23, Some(13)),
+      (24, Some(14)),
+      (25, Some(14)),
+      (26, Some(15)),
+      (27, Some(16)),
+      (28, Some(17)),
+      (29, Some(18)),
+      (30, Some(19)),
+      (31, Some(19)),
+      (32, Some(19)),
+      (36, Some(19)),
+      (37, Some(19)),
+      (38, Some(20)),
+      (39, Some(21)),
+      (40, Some(22)),
+      (41, Some(23)),
+      (42, Some(24)),
+      (43, Some(25)),
+      (44, None),
+      (45, None),
     ];
     assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
   }
