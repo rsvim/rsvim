@@ -4,12 +4,12 @@
 
 # Usage/help
 usage() {
-	echo "Usage: $0 [-h/--help] [-c/--clippy] [-t/--test TARGET]"
-	echo " -h/--help            Display help message and quit."
-	echo " -c/--clippy          Run 'cargo clippy' with 'RUSTFLAGS=-Dwarnings'."
-	echo "                      Use 'sccache', 'bacon' if exists."
-	echo " -t/--test [TARGET]   Run 'cargo test' on [TARGET] with 'RUST_LOG=trace'."
-	echo "                      Use 'sccache', 'cargo-nextest' if exists."
+	echo "Usage: $0 [-h] [-c] [-t TARGET]"
+	echo " -h           Display help message and quit."
+	echo " -c           Run 'cargo clippy' with 'RUSTFLAGS=-Dwarnings'."
+	echo "              Use 'sccache', 'bacon' if exists."
+	echo " -t [TARGET]  Run 'cargo test' on [TARGET] with 'RUST_LOG=trace'."
+	echo "              Use 'sccache', 'cargo-nextest' if exists."
 }
 
 cargo_clippy() {
