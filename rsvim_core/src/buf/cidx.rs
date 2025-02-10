@@ -438,7 +438,7 @@ mod tests {
   use ropey::Rope;
   use tracing::info;
 
-  fn assert_width_until(
+  fn assert_width_at(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut ColumnIndex,
@@ -451,7 +451,7 @@ mod tests {
     }
   }
 
-  fn assert_width_until_rev(
+  fn assert_width_at_rev(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     actual: &mut ColumnIndex,
@@ -503,7 +503,7 @@ mod tests {
 
     let expect: Vec<usize> =
       [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -511,7 +511,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [(0..=6).collect(), (14..=20).collect(), vec![20, 20, 20]].concat();
     assert_width_before(&options, &rope.line(0), &mut actual, &expect);
@@ -548,9 +548,9 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect1);
+    assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect1);
 
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [(0..=44).collect(), vec![44, 44, 44]].concat();
 
@@ -590,7 +590,7 @@ mod tests {
       vec![52, 52, 52, 52],
     ]
     .concat();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -598,7 +598,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [
       (0..=9).collect(),
@@ -639,7 +639,7 @@ mod tests {
     assert_eq!(actual.width_at(&options, &rope.line(0), 10), 11);
 
     let expect: Vec<usize> = [(1..=13).collect(), vec![13, 13, 13, 13]].concat();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -647,7 +647,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [(0..=13).collect(), vec![13, 13, 13]].concat();
     assert_width_before(&options, &rope.line(0), &mut actual, &expect);
@@ -689,7 +689,7 @@ mod tests {
       vec![76, 76, 76, 76],
     ]
     .concat();
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
       .iter()
@@ -697,7 +697,7 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [
       (0..=18).map(|i| i * 2).collect(),
@@ -749,9 +749,9 @@ mod tests {
       .map(|(i, e)| (*e, i))
       .rev()
       .collect();
-    assert_width_until_rev(&options, &rope.line(0), &mut actual, &expect1);
+    assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect1);
 
-    assert_width_until(&options, &rope.line(0), &mut actual, &expect);
+    assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<usize> = [vec![0, 8, 16], (17..=129).collect(), vec![129, 129, 129]].concat();
 
@@ -827,7 +827,7 @@ mod tests {
     }
   }
 
-  fn assert_char_until(
+  fn assert_char_at(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     widx: &mut ColumnIndex,
@@ -964,7 +964,7 @@ mod tests {
       (28, Some(17)),
       (29, Some(18)),
     ];
-    assert_char_until(&options, &rope.line(0), &mut widx, &expect_until);
+    assert_char_at(&options, &rope.line(0), &mut widx, &expect_until);
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
