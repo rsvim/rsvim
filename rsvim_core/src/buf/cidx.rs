@@ -380,6 +380,7 @@ impl ColumnIndex {
   ///
   /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
+  ///    - The `width` is 0, and the 1st char is not 0-width char (e.g. line-break).
   /// 2. It returns the last char index otherwise. If the `width` is longer than the whole line, it
   ///    returns the last char index.
   pub fn last_char_until(
@@ -390,6 +391,14 @@ impl ColumnIndex {
   ) -> Option<usize> {
     self._build_cache_until_width(options, rope_line, width);
     self._internal_check();
+
+    if width == 0 {
+      if *self.char2width.first().unwrap() == 0 {
+        return Some(0);
+      } else {
+        return None;
+      }
+    }
 
     let (last_width, last_char_idx) = self.width2char.last_key_value().unwrap();
     if width > *last_width {
@@ -880,8 +889,8 @@ mod tests {
     widx: &mut ColumnIndex,
     expect_until: &[(usize, Option<usize>)],
   ) {
-    for (w, c) in expect_after.iter() {
-      let actual = widx.char_after(options, rope_line, *w);
+    for (w, c) in expect_until.iter() {
+      let actual = widx.last_char_until(options, rope_line, *w);
       info!("last_char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
@@ -1019,6 +1028,48 @@ mod tests {
       (45, None),
     ];
     assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
+
+    let expect_until: Vec<(usize, Option<usize>)> = vec![
+      (0, Some(0)),
+      (1, Some(1)),
+      (2, Some(2)),
+      (5, Some(5)),
+      (6, Some(6)),
+      (7, Some(7)),
+      (8, Some(8)),
+      (9, Some(9)),
+      (10, Some(10)),
+      (11, Some(10)),
+      (15, Some(10)),
+      (16, Some(10)),
+      (17, Some(10)),
+      (18, Some(11)),
+      (19, Some(11)),
+      (20, Some(12)),
+      (21, Some(12)),
+      (22, Some(13)),
+      (23, Some(13)),
+      (24, Some(14)),
+      (25, Some(14)),
+      (26, Some(15)),
+      (27, Some(16)),
+      (28, Some(17)),
+      (29, Some(18)),
+      (30, Some(19)),
+      (31, Some(19)),
+      (32, Some(19)),
+      (36, Some(19)),
+      (37, Some(19)),
+      (38, Some(20)),
+      (39, Some(21)),
+      (40, Some(22)),
+      (41, Some(23)),
+      (42, Some(24)),
+      (43, Some(25)),
+      (44, None),
+      (45, None),
+    ];
+    assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_until);
   }
 
   #[test]
@@ -1076,6 +1127,59 @@ mod tests {
 
   #[test]
   fn char3() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+
+    let rope = make_rope_from_lines(vec!["\n"]);
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "char2");
+    let mut widx = ColumnIndex::new();
+
+    let expect_before: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, None),
+      (3, None),
+      (6, None),
+      (7, None),
+      (8, None),
+      (9, None),
+      (10, None),
+    ];
+    assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
+
+    let expect_at: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, Some(0)),
+      (2, Some(0)),
+      (3, Some(0)),
+      (4, Some(0)),
+      (5, Some(0)),
+      (6, Some(0)),
+      (7, Some(0)),
+      (8, Some(0)),
+      (9, None),
+      (10, None),
+    ];
+    assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
+
+    let expect_after: Vec<(usize, Option<usize>)> = vec![
+      (0, Some(0)),
+      (1, None),
+      (2, None),
+      (3, None),
+      (5, None),
+      (6, None),
+      (7, None),
+      (8, None),
+      (9, None),
+      (10, None),
+    ];
+    assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
+  }
+
+  #[test]
+  fn char4() {
     test_log_init();
 
     let options = BufferLocalOptions::default();
