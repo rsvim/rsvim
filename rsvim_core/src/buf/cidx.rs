@@ -379,14 +379,14 @@ impl ColumnIndex {
     rope_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
-    self._build_cache_until_width(options, rope_line, width + 1);
+    self._build_cache_until_width(options, rope_line, width);
     self._internal_check();
 
-    let n = rope_line.len_chars();
-    if let Some(char_idx) = self.char_at(options, rope_line, width) {
-      if char_idx < n {
-        return Some(char_idx + 1);
-      }
+    let (last_width, last_char_idx) = self.width2char.last_key_value().unwrap();
+    if width > *last_width {
+      return Some(*last_char_idx);
+    } else if let Some(char_idx) = self.char_at(options, rope_line, width) {
+      return Some(char_idx);
     }
 
     None
