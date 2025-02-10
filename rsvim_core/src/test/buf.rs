@@ -58,11 +58,8 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
   let line = buf.get_line(line_idx).unwrap();
 
   let subscriber = tracing_subscriber::FmtSubscriber::builder()
-    // .with_file(true)
     .with_line_number(false)
     .with_target(false)
-    // .with_thread_ids(true)
-    // .with_thread_names(true)
     .with_level(true)
     .with_ansi(true)
     .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
