@@ -1049,26 +1049,66 @@ mod tests {
 
     let options = BufferLocalOptions::default();
 
+    let rope = make_rope_from_lines(vec!["\t"]);
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "char2-1");
+    let mut widx = ColumnIndex::new();
+
+    let expect_before: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, None),
+      (5, None),
+      (7, None),
+      (8, None),
+      (9, Some(0)),
+      (10, Some(0)),
+    ];
+    assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
+
+    let expect_at: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, None),
+      (5, None),
+      (7, None),
+      (8, Some(0)),
+      (9, Some(0)),
+      (10, Some(0)),
+    ];
+    assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
+
+    let expect_after: Vec<(usize, Option<usize>)> = vec![
+      (0, Some(0)),
+      (1, Some(0)),
+      (5, Some(0)),
+      (7, Some(0)),
+      (8, None),
+      (9, None),
+      (10, None),
+    ];
+    assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
+  }
+
+  #[test]
+  fn char3() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
+
     {
       let rope = Rope::new();
+
       let mut widx = ColumnIndex::new();
 
       let expect_before: Vec<(usize, Option<usize>)> =
-        vec![(0, None), (1, None), (5, None), (10, None)];
+        (0..50).into_iter().map(|i| (i, None)).collect();
+      assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
-      let expect_until: Vec<(usize, Option<usize>)> =
-        vec![(0, None), (1, None), (5, None), (10, None)];
+      let expect_at: Vec<(usize, Option<usize>)> = (0..50).into_iter().map(|i| (i, None)).collect();
+      assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
       let expect_after: Vec<(usize, Option<usize>)> =
-        vec![(0, None), (1, None), (5, None), (10, None)];
-      assert_char(
-        &options,
-        &rope.line(0),
-        &mut widx,
-        &expect_before,
-        &expect_until,
-        &expect_after,
-      );
+        (0..50).into_iter().map(|i| (i, None)).collect();
+      assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
     }
 
     {
@@ -1076,91 +1116,34 @@ mod tests {
       let mut widx = ColumnIndex::new();
 
       let expect_before: Vec<(usize, Option<usize>)> =
-        vec![(0, None), (1, None), (5, None), (10, None)];
+        (0..50).into_iter().map(|i| (i, None)).collect();
+      assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
-      let expect_until: Vec<(usize, Option<usize>)> =
-        vec![(0, None), (1, None), (5, None), (10, None)];
+      let expect_at: Vec<(usize, Option<usize>)> = (0..50).into_iter().map(|i| (i, None)).collect();
+      assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
       let expect_after: Vec<(usize, Option<usize>)> =
-        vec![(0, None), (1, None), (5, None), (10, None)];
-      assert_char(
-        &options,
-        &rope.line(0),
-        &mut widx,
-        &expect_before,
-        &expect_until,
-        &expect_after,
-      );
+        (0..50).into_iter().map(|i| (i, None)).collect();
+      assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
     }
 
     {
       let rope = make_rope_from_lines(vec![""]);
       let buffer = make_buffer_from_rope(rope.clone());
-      print_buffer_line_details(buffer.clone(), 0, "char2(3)");
+      print_buffer_line_details(buffer.clone(), 0, "char3-1");
 
       let mut widx = ColumnIndex::new();
 
       let expect_before: Vec<(usize, Option<usize>)> =
-        vec![(0, None), (1, None), (5, None), (10, None)];
+        (0..50).into_iter().map(|i| (i, None)).collect();
+      assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
-      let expect_until: Vec<(usize, Option<usize>)> =
-        vec![(0, None), (1, None), (5, None), (10, None)];
+      let expect_at: Vec<(usize, Option<usize>)> = (0..50).into_iter().map(|i| (i, None)).collect();
+      assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
       let expect_after: Vec<(usize, Option<usize>)> =
-        vec![(0, None), (1, None), (5, None), (10, None)];
-      assert_char(
-        &options,
-        &rope.line(0),
-        &mut widx,
-        &expect_before,
-        &expect_until,
-        &expect_after,
-      );
-    }
-
-    {
-      let rope = make_rope_from_lines(vec!["\t"]);
-      let buffer = make_buffer_from_rope(rope.clone());
-      print_buffer_line_details(buffer.clone(), 0, "char2(4)");
-      let mut widx = ColumnIndex::new();
-
-      let expect_before: Vec<(usize, Option<usize>)> = vec![
-        (0, None),
-        (1, None),
-        (5, None),
-        (7, None),
-        (8, None),
-        (9, Some(0)),
-        (10, Some(0)),
-      ];
-
-      let expect_until: Vec<(usize, Option<usize>)> = vec![
-        (0, None),
-        (1, None),
-        (5, None),
-        (7, None),
-        (8, Some(0)),
-        (9, Some(0)),
-        (10, Some(0)),
-      ];
-
-      let expect_after: Vec<(usize, Option<usize>)> = vec![
-        (0, Some(0)),
-        (1, Some(0)),
-        (5, Some(0)),
-        (7, Some(0)),
-        (8, None),
-        (9, None),
-        (10, None),
-      ];
-      assert_char(
-        &options,
-        &rope.line(0),
-        &mut widx,
-        &expect_before,
-        &expect_until,
-        &expect_after,
-      );
+        (0..50).into_iter().map(|i| (i, None)).collect();
+      assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
     }
   }
 
