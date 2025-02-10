@@ -230,7 +230,7 @@ impl ColumnIndex {
     self._build_cache(options, rope_line, None, Some(width));
   }
 
-  /// Get the previous char index which the width is less than the specified width.
+  /// Get the **previous** char index which the width is less than the specified width.
   ///
   /// NOTE: A unicode char's width can also be 0 (line-break), 2 (Chinese/Japanese/Korean char) and
   /// 8 (default tab). The **current** char index is the one that its width range covers the
@@ -368,15 +368,16 @@ impl ColumnIndex {
   /// Get the **right-most** char index which the width is less than or equal to the specified
   /// `width`.
   ///
-  /// NOTE: For the term **next** and **current**, please refer to [`ColumnIndex::char_before`].
+  /// NOTE: The term **right-most** means the char is the one meets below conditions:
+  /// 1. The char's width is less than or equal to the specified `width`.
+  /// 2. If multiple chars exist, the one has the biggest index, i.e. the **right-most**.
   ///
   /// # Return
   ///
   /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
-  ///    - The `width` is greater than the whole line's display width, thus there's no such char
-  ///      exists.
-  /// 2. It returns the next char index otherwise.
+  /// 2. It returns the right-most char index otherwise. If the `width` is longer than the whole
+  ///    line, it returns the last char index.
   pub fn char_until(
     &mut self,
     options: &BufferLocalOptions,
