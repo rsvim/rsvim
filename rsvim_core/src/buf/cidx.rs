@@ -1264,24 +1264,40 @@ mod tests {
 
     let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "truncate1");
+
     let mut widx = ColumnIndex::new();
 
-    let expect: Vec<usize> =
+    let expect_at: Vec<usize> =
       [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
-    for (i, e) in expect.iter().enumerate() {
-      let actual = widx.width_at(&options, &rope.line(0), i);
-      assert_eq!(actual, *e);
-      widx.truncate_since_char(i);
+
+    for (c, w) in expect_at.iter().enumerate() {
+      let actual = widx.width_at(&options, &rope.line(0), c);
+      info!("truncate1-width_at expect width:{w:?}, char:{c:}, actual width:{actual:?}");
+      assert_eq!(actual, *w);
+      widx.truncate_since_char(c);
     }
 
-    let expect: Vec<usize> = [(0..=6).collect(), (14..=20).collect(), vec![20, 20, 20]].concat();
-    for (i, e) in expect.iter().enumerate() {
-      let a = widx.width_before(&options, &rope.line(0), i);
-      assert_eq!(a, *e);
-      widx.truncate_since_char(i);
-    }
+    let expect_before: Vec<usize> =
+      [(0..=6).collect(), (14..=20).collect(), vec![20, 20, 20]].concat();
 
+    for (c, w) in expect_before.iter().enumerate() {
+      let actual = widx.width_before(&options, &rope.line(0), c);
+      info!("truncate1-width_before expect width:{w:?}, char:{c:}, actual width:{actual:?}");
+      assert_eq!(actual, *w);
+      widx.truncate_since_char(c);
+    }
+  }
+
+  #[test]
+  fn truncate2() {
+    test_log_init();
+
+    let options = BufferLocalOptions::default();
     let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
+    let buffer = make_buffer_from_rope(rope.clone());
+    print_buffer_line_details(buffer.clone(), 0, "truncate2");
     let mut widx = ColumnIndex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
@@ -1301,7 +1317,7 @@ mod tests {
       (28, Some(17)),
     ];
 
-    let expect_until: Vec<(usize, Option<usize>)> = vec![
+    let expect_at: Vec<(usize, Option<usize>)> = vec![
       (0, None),
       (1, Some(0)),
       (5, Some(4)),
@@ -1318,12 +1334,17 @@ mod tests {
       (28, Some(17)),
       (29, Some(18)),
     ];
-    for (w, i) in expect_before.iter() {
-      assert_eq!(widx.char_before(&options, &rope.line(0), *w), *i);
+
+    for (w, c) in expect_before.iter() {
+      let actual = widx.char_before(&options, &rope.line(0), *w);
+      info!("truncate2-char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      assert_eq!(actual, *c);
       widx.truncate_since_width(*w);
     }
-    for (w, i) in expect_until.iter() {
-      assert_eq!(widx.char_at(&options, &rope.line(0), *w), *i);
+    for (w, c) in expect_at.iter() {
+      let actual = widx.char_at(&options, &rope.line(0), *w);
+      info!("truncate2-char_at expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      assert_eq!(actual, *c);
       widx.truncate_since_width(*w);
     }
   }
