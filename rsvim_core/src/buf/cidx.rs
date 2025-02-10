@@ -845,7 +845,7 @@ mod tests {
     }
   }
 
-  fn assert_last_char_until(
+  fn assert_char_at(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     widx: &mut ColumnIndex,
@@ -980,7 +980,7 @@ mod tests {
       (44, None),
       (45, None),
     ];
-    assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
+    assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
@@ -1103,7 +1103,7 @@ mod tests {
       (9, None),
       (10, None),
     ];
-    assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
+    assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
@@ -1173,7 +1173,7 @@ mod tests {
       (9, None),
       (10, None),
     ];
-    assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
+    assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
@@ -1220,7 +1220,7 @@ mod tests {
       assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
       let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
-      assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
+      assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
       let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
@@ -1234,7 +1234,7 @@ mod tests {
       assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
       let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
-      assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
+      assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
       let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
@@ -1251,7 +1251,7 @@ mod tests {
       assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
       let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
-      assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
+      assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
       let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
