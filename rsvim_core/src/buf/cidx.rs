@@ -446,7 +446,7 @@ mod tests {
   ) {
     for (i, e) in expect.iter().enumerate() {
       let a = actual.width_at(options, rope_line, i);
-      info!("width_until:{i} actual:{a:?}, expect:{e:?}");
+      info!("width_at:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
@@ -459,7 +459,7 @@ mod tests {
   ) {
     for (e, i) in expect.iter() {
       let a = actual.width_at(options, rope_line, *i);
-      info!("width_until:{i}, actual:{a:?}, expect:{e:?}");
+      info!("width_at_rev:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
   }
@@ -835,11 +835,11 @@ mod tests {
   ) {
     for (w, c) in expect_until.iter() {
       let actual = widx.char_at(options, rope_line, *w);
-      info!("char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
+      info!("char_at expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
         let actual = widx.width_at(options, rope_line, c.unwrap());
-        info!("width_until-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
+        info!("width_at-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual <= *w);
       }
     }
