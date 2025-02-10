@@ -97,7 +97,7 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
         if cw > 1 {
           big_width_chars.push(format!("{}", i));
         }
-        if i % 10 == 0 {
+        if i % 5 == 0 {
           builder.push_str(&format!("{}", i));
         }
         if builder.len() < w {
@@ -123,7 +123,7 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
       for (_i, c) in line.chars().enumerate() {
         let (_cs, cw) = buf.char_symbol(c);
         w += cw;
-        if w == 1 || w % 10 == 0 {
+        if w == 1 || w % 5 == 0 {
           if builder1.is_empty() || builder1.ends_with(" ") {
             builder1.push_str(&format!("{}", w));
           } else if cw > 0 {

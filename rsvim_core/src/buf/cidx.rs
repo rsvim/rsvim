@@ -78,7 +78,7 @@ impl ColumnIndex {
       assert!(self.width2char.contains_key(w));
       let c = self.width2char[w];
       // trace!("char2width[{i}]:{w:?}, width2char[{w}]:{c:?}");
-      assert!(i <= c);
+      assert!(i >= c);
     }
   }
 
@@ -112,7 +112,7 @@ impl ColumnIndex {
       debug_assert_eq!(i, c);
       match self.width2char.get(&prefix) {
         Some(c1) => {
-          if *c1 < c {
+          if *c1 > c {
             self.width2char.insert(prefix, c);
           }
         }
@@ -840,7 +840,7 @@ mod tests {
       if c.is_some() {
         let actual = widx.width_at(options, rope_line, c.unwrap());
         info!("width_at-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
-        assert!(actual <= *w);
+        assert!(actual >= *w);
       } else {
         info!("width_at-2 char:{c:?} expect width:{w:?}");
       }
@@ -975,16 +975,17 @@ mod tests {
       (27, Some(15)),
       (28, Some(16)),
       (29, Some(17)),
-      (30, Some(17)),
-      (35, Some(17)),
-      (36, Some(17)),
-      (37, Some(17)),
-      (38, Some(18)),
-      (39, Some(19)),
-      (40, Some(20)),
-      (41, Some(21)),
-      (42, Some(22)),
-      (43, Some(23)),
+      (30, Some(18)),
+      (35, Some(18)),
+      (36, Some(18)),
+      (37, Some(18)),
+      (38, Some(19)),
+      (39, Some(20)),
+      (40, Some(21)),
+      (41, Some(22)),
+      (42, Some(23)),
+      (43, Some(24)),
+      (44, None),
     ];
     assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
 
