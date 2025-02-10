@@ -184,7 +184,7 @@ impl ColumnIndex {
     }
   }
 
-  /// Get the prefix display width in char index range `[0,char_idx]`, both sides are inclusive.
+  /// Get the display width in char index range `[0,char_idx]`, both sides are inclusive.
   ///
   /// NOTE: This is equivalent to `width_before(char_idx+1)`.
   ///
@@ -195,7 +195,7 @@ impl ColumnIndex {
   /// 2. It returns the prefix display width if `char_idx` is inside the line.
   /// 3. It returns the whole display width of the line if `char_idx` is greater than or equal to
   ///    the line length.
-  pub fn width_until(
+  pub fn width_at(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
@@ -294,7 +294,7 @@ impl ColumnIndex {
   ///      exists.
   ///    - The `width` is 0, and the 1st char is not 0-width char (e.g. line-break).
   /// 2. It returns the **current** char index otherwise.
-  pub fn char_until(
+  pub fn char_at(
     &mut self,
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
@@ -356,7 +356,7 @@ impl ColumnIndex {
     self._internal_check();
 
     let n = rope_line.len_chars();
-    if let Some(char_idx) = self.char_until(options, rope_line, width) {
+    if let Some(char_idx) = self.char_at(options, rope_line, width) {
       if char_idx < n {
         return Some(char_idx + 1);
       }
@@ -418,7 +418,7 @@ mod tests {
     expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
-      let a = actual.width_until(options, rope_line, i);
+      let a = actual.width_at(options, rope_line, i);
       info!("width_until:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -431,7 +431,7 @@ mod tests {
     expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
-      let a = actual.width_until(options, rope_line, *i);
+      let a = actual.width_at(options, rope_line, *i);
       info!("width_until:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -511,7 +511,7 @@ mod tests {
     let mut actual = ColumnIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 5), 5);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 43), 44);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 43), 44);
 
     let expect: Vec<usize> = [(1..=44).collect(), vec![44, 44, 44, 44]].concat();
 
@@ -609,7 +609,7 @@ mod tests {
     let mut actual = ColumnIndex::new();
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 11), 11);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 11);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 10), 11);
 
     let expect: Vec<usize> = [(1..=13).collect(), vec![13, 13, 13, 13]].concat();
     assert_width_until(&options, &rope.line(0), &mut actual, &expect);
@@ -712,7 +712,7 @@ mod tests {
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 8);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 16);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 17);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 2), 17);
 
     let expect: Vec<usize> = [vec![8, 16], (17..=129).collect(), vec![129, 129, 129, 129]].concat();
 
@@ -752,10 +752,10 @@ mod tests {
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 10), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 0), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 1), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 10), 0);
 
     let rope = make_rope_from_lines(vec![]);
     let mut actual = ColumnIndex::new();
@@ -764,10 +764,10 @@ mod tests {
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 10), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 0), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 1), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 10), 0);
 
     let rope = make_rope_from_lines(vec![""]);
     let mut actual = ColumnIndex::new();
@@ -776,10 +776,10 @@ mod tests {
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 10), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 0), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 1), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 0);
-    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_at(&options, &rope.line(0), 10), 0);
   }
 
   fn assert_char_before(
@@ -793,7 +793,7 @@ mod tests {
       info!("char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_until(options, rope_line, c.unwrap());
+        let actual = widx.width_at(options, rope_line, c.unwrap());
         info!("width_until-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual < *w);
       }
@@ -807,11 +807,11 @@ mod tests {
     expect_until: &[(usize, Option<usize>)],
   ) {
     for (w, c) in expect_until.iter() {
-      let actual = widx.char_until(options, rope_line, *w);
+      let actual = widx.char_at(options, rope_line, *w);
       info!("char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_until(options, rope_line, c.unwrap());
+        let actual = widx.width_at(options, rope_line, c.unwrap());
         info!("width_until-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual <= *w);
       }
@@ -829,7 +829,7 @@ mod tests {
       info!("char_after expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_until(options, rope_line, c.unwrap());
+        let actual = widx.width_at(options, rope_line, c.unwrap());
         info!("width_until-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual > *w);
       }
@@ -849,17 +849,17 @@ mod tests {
       info!("char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_until(options, rope_line, c.unwrap());
+        let actual = widx.width_at(options, rope_line, c.unwrap());
         info!("width_until-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual < *w);
       }
     }
     for (w, c) in expect_until.iter() {
-      let actual = widx.char_until(options, rope_line, *w);
+      let actual = widx.char_at(options, rope_line, *w);
       info!("char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_until(options, rope_line, c.unwrap());
+        let actual = widx.width_at(options, rope_line, c.unwrap());
         info!("width_until-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual <= *w);
       }
@@ -869,7 +869,7 @@ mod tests {
       info!("char_after expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_until(options, rope_line, c.unwrap());
+        let actual = widx.width_at(options, rope_line, c.unwrap());
         info!("width_until-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual > *w);
       }
@@ -1091,7 +1091,7 @@ mod tests {
     let expect: Vec<usize> =
       [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
     for (i, e) in expect.iter().enumerate() {
-      let actual = widx.width_until(&options, &rope.line(0), i);
+      let actual = widx.width_at(&options, &rope.line(0), i);
       assert_eq!(actual, *e);
       widx.truncate_since_char(i);
     }
@@ -1145,7 +1145,7 @@ mod tests {
       widx.truncate_since_width(*w);
     }
     for (w, i) in expect_until.iter() {
-      assert_eq!(widx.char_until(&options, &rope.line(0), *w), *i);
+      assert_eq!(widx.char_at(&options, &rope.line(0), *w), *i);
       widx.truncate_since_width(*w);
     }
   }
