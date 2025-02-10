@@ -845,7 +845,7 @@ mod tests {
     }
   }
 
-  fn assert_char_at(
+  fn assert_last_char_until(
     options: &BufferLocalOptions,
     rope_line: &RopeSlice,
     widx: &mut ColumnIndex,
@@ -980,7 +980,7 @@ mod tests {
       (44, None),
       (45, None),
     ];
-    assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
+    assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
@@ -1103,7 +1103,7 @@ mod tests {
       (9, None),
       (10, None),
     ];
-    assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
+    assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
@@ -1118,6 +1118,23 @@ mod tests {
       (10, None),
     ];
     assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
+
+    let expect_until: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, Some(0)),
+      (2, Some(0)),
+      (3, Some(0)),
+      (4, Some(0)),
+      (5, Some(0)),
+      (6, Some(0)),
+      (7, Some(0)),
+      (8, Some(0)),
+      (9, Some(0)),
+      (10, Some(0)),
+      (11, Some(0)),
+      (12, Some(0)),
+    ];
+    assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_until);
   }
 
   #[test]
@@ -1128,7 +1145,7 @@ mod tests {
 
     let rope = make_rope_from_lines(vec!["\n"]);
     let buffer = make_buffer_from_rope(rope.clone());
-    print_buffer_line_details(buffer.clone(), 0, "char2");
+    print_buffer_line_details(buffer.clone(), 0, "char3");
     let mut widx = ColumnIndex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
@@ -1156,7 +1173,7 @@ mod tests {
       (9, None),
       (10, None),
     ];
-    assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
+    assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
 
     let expect_after: Vec<(usize, Option<usize>)> = vec![
       (0, Some(0)),
@@ -1171,6 +1188,21 @@ mod tests {
       (10, None),
     ];
     assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
+
+    let expect_until: Vec<(usize, Option<usize>)> = vec![
+      (0, None),
+      (1, Some(0)),
+      (2, Some(0)),
+      (3, Some(0)),
+      (4, Some(0)),
+      (5, Some(0)),
+      (6, Some(0)),
+      (7, Some(0)),
+      (8, Some(0)),
+      (9, None),
+      (10, None),
+    ];
+    assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_until);
   }
 
   #[test]
@@ -1188,7 +1220,7 @@ mod tests {
       assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
       let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
-      assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
+      assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
 
       let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
@@ -1202,7 +1234,7 @@ mod tests {
       assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
       let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
-      assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
+      assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
 
       let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
@@ -1219,7 +1251,7 @@ mod tests {
       assert_char_before(&options, &rope.line(0), &mut widx, &expect_before);
 
       let expect_at: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
-      assert_char_at(&options, &rope.line(0), &mut widx, &expect_at);
+      assert_last_char_until(&options, &rope.line(0), &mut widx, &expect_at);
 
       let expect_after: Vec<(usize, Option<usize>)> = (0..50).map(|i| (i, None)).collect();
       assert_char_after(&options, &rope.line(0), &mut widx, &expect_after);
