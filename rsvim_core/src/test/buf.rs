@@ -105,7 +105,7 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
           builder.push_str(&" ".repeat(diff));
         }
       }
-      info!("-{}- char index, total:{} (width = 0 chars: count:{} indexes:{}, width > 1 chars: count:{} indexes:{})", builder, n,
+      info!("-{}- Char Index, total:{} (width = 0 chars: count:{} indexes:{}, width > 1 chars: count:{} indexes:{})", builder, n,
       zero_width_chars.len(),
       zero_width_chars.join(","),
       big_width_chars.len(),
@@ -148,15 +148,15 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
           builder3.push_str(&" ".repeat(diff));
         }
       }
-      info!("-{}- display width, total width:{}", builder1, w);
+      info!("-{}- Display Width, total width:{}", builder1, w);
       if show2 {
         info!(
-          "-{}- display width (extra, conflicted with the above one)",
+          "-{}- Display Width (extra, conflicted with the above one)",
           builder2
         );
       }
       if show3 {
-        info!("-{}- display width for width = 0 chars", builder3);
+        info!("-{}- Display Width for width = 0 chars", builder3);
       }
     }
 
@@ -179,7 +179,7 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
         }
       }
       if show {
-        info!("-{}- display width for width > 1 chars", builder);
+        info!("-{}- Display Width for width > 1 chars", builder);
       }
     }
   });
