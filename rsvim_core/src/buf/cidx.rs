@@ -841,6 +841,8 @@ mod tests {
         let actual = widx.width_at(options, rope_line, c.unwrap());
         info!("width_at-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual <= *w);
+      } else {
+        info!("width_at-2 char:{c:?} expect width:{w:?}");
       }
     }
   }
