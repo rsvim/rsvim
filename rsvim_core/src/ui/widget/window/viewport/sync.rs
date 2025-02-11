@@ -172,19 +172,12 @@ fn _from_top_left_nowrap(
                   (c1_next, 0_usize)
                 }
               }
-              None => (bline.len_chars(), 0_usize),
+              None => {
+                // If the char not found, it means the `end_width` is too long than the whole line.
+                // So the char next to the line's last char is the end char.
+                (bline.len_chars(), 0_usize)
+              }
             };
-
-            // let (end_char, end_fills) = match raw_buffer.as_mut().char_after(l, end_width) {
-            //   Some(c) => {
-            //     let end_fills = {
-            //       let width_at = raw_buffer.as_mut().width_at(l, c.saturating_sub(2));
-            //       end_width.saturating_sub(width_at)
-            //     };
-            //     (c, end_fills)
-            //   }
-            //   None => (bline.len_chars(), 0_usize),
-            // };
 
             (start_char, start_fills, end_char, end_fills)
           };
