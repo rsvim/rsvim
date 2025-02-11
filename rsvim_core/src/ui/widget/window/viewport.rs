@@ -928,19 +928,23 @@ mod tests {
       let actual_line_idx = l + expect_start_line;
       let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
 
-      info!("l-{:?}, line_viewport:{:?}", l, line_viewport);
       info!(
-        "actual_line_idx:{}, expect_start_fills[{}]:{:?}, expect_end_fills[{}]:{:?}",
-        actual_line_idx,
-        actual_line_idx,
-        expect_start_fills.get(&actual_line_idx),
-        actual_line_idx,
-        expect_end_fills.get(&actual_line_idx)
+        "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
+        l, actual_line_idx, line_viewport
       );
-
+      info!(
+        "expect start_filled_cols:{:?}, actual start_filled_cols:{}",
+        expect_start_fills.get(&actual_line_idx),
+        line_viewport.start_filled_cols()
+      );
       assert_eq!(
         line_viewport.start_filled_cols(),
         *expect_start_fills.get(&actual_line_idx).unwrap()
+      );
+      info!(
+        "expect end_filled_cols:{:?}, actual end_filled_cols:{}",
+        expect_end_fills.get(&actual_line_idx),
+        line_viewport.end_filled_cols()
       );
       assert_eq!(
         line_viewport.end_filled_cols(),
