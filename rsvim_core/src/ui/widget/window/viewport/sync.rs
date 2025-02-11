@@ -160,16 +160,16 @@ fn _from_top_left_nowrap(
 
             let end_width = start_dcol_on_line + width as usize;
             let (end_char, end_fills) = match raw_buffer.as_mut().char_at(l, end_width) {
-              Some(c1) => {
-                let c1_width = raw_buffer.as_mut().width_at(l, c1);
-                if c1_width > end_width {
+              Some(c) => {
+                let c_width = raw_buffer.as_mut().width_at(l, c);
+                if c_width > end_width {
                   // If the char `c1` width is greater than `end_width`, the `c1` itself is the end char.
-                  let c1_width_before = raw_buffer.as_mut().width_before(l, c1);
-                  (c1, end_width.saturating_sub(c1_width_before))
+                  let c_width_before = raw_buffer.as_mut().width_before(l, c);
+                  (c, end_width.saturating_sub(c_width_before))
                 } else {
                   // If the char `c1` width is less than or equal to `end_width`, the char next to `c1` is the end char.
-                  let c1_next = std::cmp::min(c1 + 1, bline.len_chars() - 1);
-                  (c1_next, 0_usize)
+                  let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+                  (c_next, 0_usize)
                 }
               }
               None => {
@@ -287,20 +287,35 @@ fn _from_top_left_wrap_nolinebreak(
             };
 
             let mut end_width = start_dcol_on_line + width as usize;
-            let mut end_char = 0_usize;
-            let mut end_char_initialized = false;
+            let mut end_fills = 0_usize;
 
+            assert!(wrow < height);
             while wrow < height {
-              end_char = raw_buffer
-                .as_mut()
-                .char_after(l, end_width)
-                .unwrap_or(bline.len_chars() - 1);
-              end_char_initialized = true;
+              let (end_char, end_fills1) = match raw_buffer.as_mut().char_at(l, end_width) {
+                Some(c) => {
+                  let c_width = raw_buffer.as_mut().width_at(l, c);
+                  if c_width > end_width {
+                    // If the char `c1` width is greater than `end_width`, the `c1` itself is the end char.
+                    let c_width_before = raw_buffer.as_mut().width_before(l, c);
+                    (c, end_width.saturating_sub(c_width_before))
+                  } else {
+                    // If the char `c1` width is less than or equal to `end_width`, the char next to `c1` is the end char.
+                    let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+                    (c_next, 0_usize)
+                  }
+                }
+                None => {
+                  // If the char not found, it means the `end_width` is too long than the whole line.
+                  // So the char next to the line's last char is the end char.
+                  (bline.len_chars(), 0_usize)
+                }
+              };
+              end_fills = end_fills1;
 
               rows.insert(wrow, RowViewport::new(start_char..end_char));
 
               // Goes out of line.
-              if end_char >= bline.len_chars() - 1 {
+              if end_char >= bline.len_chars() {
                 break;
               }
 
@@ -309,12 +324,6 @@ fn _from_top_left_wrap_nolinebreak(
               start_char = end_char;
               end_width += width as usize;
             }
-
-            let end_fills = {
-              let width_at = raw_buffer.as_mut().width_at(l, end_char - 1);
-              end_width.saturating_sub(width_at)
-            };
-            assert!(end_char_initialized);
 
             (rows, start_fills, end_fills)
           };
