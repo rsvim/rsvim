@@ -85,7 +85,7 @@ fn slice2line(s: &RopeSlice) -> String {
   builder
 }
 
-#[allow(unused_variables)]
+#[allow(unused_variables, clippy::explicit_counter_loop)]
 // Implement [`from_top_left`] with option `wrap=false`.
 fn _from_top_left_nowrap(
   _options: &ViewportOptions,
@@ -128,10 +128,12 @@ fn _from_top_left_nowrap(
     match raw_buffer.as_ref().get_lines_at(start_line) {
       // The `start_line` is in the buffer.
       Some(buflines) => {
+        // The first `wrow` in the window maps to the `start_line` in the buffer.
+        let mut wrow = 0;
         let mut current_line = start_line;
 
         // The first `wrow` in the window maps to the `start_line` in the buffer.
-        for (wrow, (l, bline)) in buflines.enumerate().enumerate() {
+        for (l, bline) in buflines.enumerate() {
           // Current row goes out of viewport.
           if wrow >= height as usize {
             break;
@@ -184,6 +186,7 @@ fn _from_top_left_nowrap(
 
           // Go to next row and line
           current_line += 1;
+          wrow += 1;
         }
 
         // trace!("9-current_line:{}, row:{}", current_line, wrow,);
