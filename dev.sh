@@ -21,8 +21,8 @@ cargo_clippy() {
 	fi
 	export RUSTFLAGS="-Dwarnings"
 	if type "bacon" >/dev/null 2>&1; then
-		echo "run 'bacon -j clippy-all'"
-		bacon -j clippy-all
+		echo "run 'bacon -j clippy-all --headless'"
+		bacon -j clippy-all --headless
 	else
 		echo "run 'cargo clippy --all-features --workspace'"
 		cargo clippy --all-features --workspace
