@@ -4,11 +4,11 @@
 
 # Usage/help
 usage() {
-	echo "Usage: $0 [-h] [-c] [-l] [-t TARGET]"
+	echo "Usage: $0 [-h] [-c] [-l] [-r TEST]"
 	echo " -h           Display help message and quit."
 	echo " -c           Run 'cargo clippy' (with 'bacon' if exists) with 'RUSTFLAGS=-Dwarnings'."
 	echo " -l           List all test cases with 'cargo test' (or 'cargo-nextest' if exists)."
-	echo " -t [TARGET]  Run 'cargo test' (or 'cargo-nextest' if exists) on [TARGET] with 'RUST_LOG=trace'."
+	echo " -r [TEST]    Run 'cargo test' (or 'cargo-nextest' if exists) on [TEST] with 'RUST_LOG=trace'."
 	echo "              Note: use '--all' to run all tests."
 }
 
@@ -62,7 +62,7 @@ cargo_test_list() {
 	fi
 }
 
-optspec="hclt:"
+optspec="hclr:"
 while getopts "$optspec" optchar; do
 	case "${optchar}" in
 	h)
@@ -73,12 +73,12 @@ while getopts "$optspec" optchar; do
 		cargo_clippy
 		exit
 		;;
-	t)
-		cargo_test_run ${OPTARG}
-		exit
-		;;
 	l)
 		cargo_test_list ${OPTARG}
+		exit
+		;;
+	r)
+		cargo_test_run ${OPTARG}
 		exit
 		;;
 	*)
