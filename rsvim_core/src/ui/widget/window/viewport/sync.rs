@@ -159,14 +159,32 @@ fn _from_top_left_nowrap(
             };
 
             let end_width = start_dcol_on_line + width as usize;
-            let end_char = raw_buffer
-              .as_mut()
-              .char_after(l, end_width)
-              .unwrap_or(bline.len_chars() - 1);
-            let end_fills = {
-              let width_at = raw_buffer.as_mut().width_at(l, end_char - 1);
-              end_width.saturating_sub(width_at)
+            let (end_char, end_fills) = match raw_buffer.as_mut().char_at(l, end_width) {
+              Some(c1) => {
+                let c1_width = raw_buffer.as_mut().width_at(l, c1);
+                if c1_width > end_width {
+                  // If the char `c1` width is greater than `end_width`, the `c1` itself is the end char.
+                  let c1_width_before = raw_buffer.as_mut().width_before(l, c1);
+                  (c1, end_width.saturating_sub(c1_width_before))
+                } else {
+                  // If the char `c1` width is less than or equal to `end_width`, the char next to `c1` is the end char.
+                  let c1_next = std::cmp::min(c1 + 1, bline.len_chars() - 1);
+                  (c1_next, 0_usize)
+                }
+              }
+              None => (bline.len_chars(), 0_usize),
             };
+
+            // let (end_char, end_fills) = match raw_buffer.as_mut().char_after(l, end_width) {
+            //   Some(c) => {
+            //     let end_fills = {
+            //       let width_at = raw_buffer.as_mut().width_at(l, c.saturating_sub(2));
+            //       end_width.saturating_sub(width_at)
+            //     };
+            //     (c, end_fills)
+            //   }
+            //   None => (bline.len_chars(), 0_usize),
+            // };
 
             (start_char, start_fills, end_char, end_fills)
           };
