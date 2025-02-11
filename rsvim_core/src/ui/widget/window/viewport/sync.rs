@@ -146,39 +146,33 @@ fn _from_top_left_nowrap(
           //   current_line
           // );
 
-          let (start_c, start_fills, end_c, end_fills) = if bline.len_chars() == 0 {
+          let (start_char, start_fills, end_char, end_fills) = if bline.len_chars() == 0 {
             (0_usize, 0_usize, 0_usize, 0_usize)
           } else {
-            let start_c = raw_buffer
+            let start_char = raw_buffer
               .as_mut()
               .char_after(l, start_dcol_on_line)
               .unwrap_or(0_usize);
             let start_fills = {
-              let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
-              start_width_until - start_dcol_on_line
+              let width_before = raw_buffer.as_mut().width_before(l, start_char);
+              width_before.saturating_sub(start_dcol_on_line)
             };
 
-            let end_c = match raw_buffer
+            let end_width = start_dcol_on_line + width as usize;
+            let end_char = raw_buffer
               .as_mut()
-              .char_after(l, start_dcol_on_line + width as usize)
-            {
-              Some(c) => c,
-              None => bline.len_chars() - 1, // last char index on the line.
-            };
+              .char_after(l, end_width)
+              .unwrap_or(bline.len_chars() - 1);
             let end_fills = {
-              let end_width_until = raw_buffer.as_mut().width_at(l, end_c);
-              if end_width_until >= start_dcol_on_line + width as usize {
-                end_width_until - (start_dcol_on_line + width as usize)
-              } else {
-                0_usize
-              }
+              let width_at = raw_buffer.as_mut().width_at(l, end_char);
+              width_at.saturating_sub(end_width)
             };
 
-            (start_c, start_fills, end_c, end_fills)
+            (start_char, start_fills, end_char, end_fills)
           };
 
           let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
-          rows.insert(wrow as u16, RowViewport::new(start_c..end_c));
+          rows.insert(wrow as u16, RowViewport::new(start_char..end_char));
           line_viewports.insert(
             current_line,
             LineViewport::new(rows, start_fills, end_fills),
