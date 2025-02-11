@@ -6,8 +6,8 @@
 usage() {
 	echo "Usage: $0 [-h] [-c] [-t TARGET]"
 	echo " -h           Display help message and quit."
-	echo " -c           Run 'cargo clippy' with 'RUSTFLAGS=-Dwarnings', use 'sccache'/'bacon' if exists."
-	echo " -t [TARGET]  Run 'cargo test' on [TARGET] with 'RUST_LOG=trace', use 'sccache'/'cargo-nextest' if exists."
+	echo " -c           Run 'cargo clippy' with 'RUSTFLAGS=-Dwarnings', use 'bacon' if exists."
+	echo " -t [TARGET]  Run 'cargo test' on [TARGET] with 'RUST_LOG=trace', use 'cargo-nextest' if exists."
 	echo "              Note: use '--all' to run all tests."
 }
 
