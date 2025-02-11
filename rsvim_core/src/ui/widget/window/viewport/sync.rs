@@ -164,8 +164,8 @@ fn _from_top_left_nowrap(
               .char_after(l, end_width)
               .unwrap_or(bline.len_chars() - 1);
             let end_fills = {
-              let width_at = raw_buffer.as_mut().width_at(l, end_char);
-              width_at.saturating_sub(end_width)
+              let width_at = raw_buffer.as_mut().width_at(l, end_char - 1);
+              end_width.saturating_sub(width_at)
             };
 
             (start_char, start_fills, end_char, end_fills)
@@ -266,37 +266,44 @@ fn _from_top_left_wrap_nolinebreak(
           } else {
             let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
 
-            let mut start_c = raw_buffer
+            let mut start_char = raw_buffer
               .as_mut()
-              .char_at(l, start_dcol_on_line)
+              .char_after(l, start_dcol_on_line)
               .unwrap_or(0_usize);
             let start_fills = {
-              let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
-              start_width_until - start_dcol_on_line
+              let width_before = raw_buffer.as_mut().width_before(l, start_char);
+              width_before.saturating_sub(start_dcol_on_line)
             };
 
-            let mut end_dcol = start_dcol_on_line + width as usize;
-            let mut end_c: Option<usize> = None;
-            let mut eol = false;
-            while wrow < height && !eol {
-              end_c = match raw_buffer.as_mut().char_after(l, end_dcol) {
-                Some(c) => Some(c),
-                None => {
-                  eol = true;
+            let mut end_width = start_dcol_on_line + width as usize;
+            let mut end_char = 0_usize;
+            let mut end_char_initialized = false;
 
-                  // last char index on the line.
-                  Some(bline.len_chars() - 1)
-                }
-              };
-              rows.insert(wrow, RowViewport::new(start_c..end_c.unwrap()));
+            while wrow < height {
+              end_char = raw_buffer
+                .as_mut()
+                .char_after(l, end_width)
+                .unwrap_or(bline.len_chars() - 1);
+              end_char_initialized = true;
+
+              rows.insert(wrow, RowViewport::new(start_char..end_char));
+
+              // Goes out of line.
+              if end_char >= bline.len_chars() - 1 {
+                break;
+              }
+
+              // Prepare next row.
               wrow += 1;
-              start_c = end_c.unwrap();
-              end_dcol += width as usize;
+              start_char = end_char;
+              end_width += width as usize;
             }
+
             let end_fills = {
-              let end_width_until = raw_buffer.as_mut().width_at(l, end_c.unwrap());
-              end_width_until.saturating_sub(end_dcol)
+              let width_at = raw_buffer.as_mut().width_at(l, end_char - 1);
+              end_width.saturating_sub(width_at)
             };
+            assert!(end_char_initialized);
 
             (rows, start_fills, end_fills)
           };
