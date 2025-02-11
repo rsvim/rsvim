@@ -151,7 +151,7 @@ fn _from_top_left_nowrap(
           } else {
             let start_c = raw_buffer
               .as_mut()
-              .char_at(l, start_dcol_on_line)
+              .char_after(l, start_dcol_on_line)
               .unwrap_or(0_usize);
             let start_fills = {
               let start_width_until = raw_buffer.as_mut().width_before(l, start_c);

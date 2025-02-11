@@ -341,6 +341,21 @@ impl Buffer {
       .char_after(&self.options, &rope_line, width)
   }
 
+  /// See [`ColumnIndex::last_char_until`].
+  ///
+  /// # Panics
+  ///
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn last_char_until(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .last_char_until(&self.options, &rope_line, width)
+  }
+
   /// See [`ColumnIndex::truncate_by_char`].
   pub fn truncate_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
     self.rope_lines_width.entry(line_idx).or_default();
