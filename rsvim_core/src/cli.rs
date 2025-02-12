@@ -31,8 +31,8 @@ use clap::Parser;
 #[derive(Parser, Debug, Clone, Default)]
 #[command(
   disable_version_flag = true,
-  about,
-  long_about = "The VIM editor reinvented in Rust+TypeScript.\nPlease checkout https://rsvim.github.io/ for more documentation."
+  about = "The VIM editor reinvented in Rust+TypeScript.",
+  long_about = "The VIM editor reinvented in Rust+TypeScript.\nPlease checkout https://rsvim.github.io for more documentation."
 )]
 /// Command line options.
 pub struct CliOpt {
