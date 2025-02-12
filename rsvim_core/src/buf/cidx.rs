@@ -445,6 +445,7 @@ impl ColumnIndex {
   }
 }
 
+// spellchecker:off
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -1366,3 +1367,4 @@ mod tests {
     }
   }
 }
+// spellchecker:on
