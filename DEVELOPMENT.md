@@ -33,27 +33,14 @@ To develop code, please setup with:
 
 ### Lint
 
-To check code, please use `RUSTFLAGS="-Dwarnings"` to enable all warnings:
-
-- `RUSTFLAGS="-Dwarnings" cargo clippy --all-features --workspace (--all)`
-- `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`
+To check code, please use `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`.
 
 ### Test
 
-To run the unit tests, please run with:
-
-1. Run all test cases with `RUST_BACKTRACE=full RUST_LOG=debug cargo test`, it enables:
-
-   - All the logs over `debug` level, and prints the logs.
-   - The backtrace when panics.
-
-2. Run a specific test case with:
-
-   1. First list all test cases with `cargo test -- --list`.
-   2. Run the specific test with `cargo test {TEST_NAME}`, the `TEST_NAME` is the output test names in above step.
-   3. In case you want to add/print logs in test cases, please call the `crate::test::log::init` API before running a test case.
-
-> Recommend to use [cargo-nextest](https://github.com/nextest-rs/nextest) instead of `cargo test` for better testing experiences.
+1. To run all test cases, please use `cargo nextest run`.
+2. To run all test cases with full backtrace and logging message, please use `RUST_BACKTRACE=full RUST_LOG=trace cargo nextest run --no-capture`.
+3. To run a specific test, please use `cargo nextest run [TEST]`.
+4. To list all test cases, please use `cargo nextest list`.
 
 ### Debug
 
