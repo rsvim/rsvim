@@ -523,11 +523,11 @@ impl Viewport {
         last_row_idx = Some(*row_idx);
         match last_row_viewport {
           Some(last_row_viewport1) => {
-            trace!(
-              "last_row_viewport1.end_char_idx:{:?}, row_viewport.start_char_idx:{:?}",
-              last_row_viewport1.end_char_idx(),
-              row_viewport.start_char_idx()
-            );
+            //trace!(
+            //  "last_row_viewport1.end_char_idx:{:?}, row_viewport.start_char_idx:{:?}",
+            //  last_row_viewport1.end_char_idx(),
+            //  row_viewport.start_char_idx()
+            //);
             assert_eq!(
               last_row_viewport1.end_char_idx(),
               row_viewport.start_char_idx()
