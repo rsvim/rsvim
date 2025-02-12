@@ -30,6 +30,7 @@ To develop code, please setup with:
 - [rust-clippy](https://github.com/rust-lang/rust-clippy) and [bacon](https://github.com/Canop/bacon): linter, lint with `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`.
 - [cargo-nextest](https://github.com/nextest-rs/nextest): Test runner, run with `RUST_LOG=trace cargo nextest run --no-capture`.
 - [taplo](https://github.com/tamasfe/taplo): Toml code formatter, format with `taplo format [FILE]` or other ways you like.
+- [sccache](https://github.com/mozilla/sccache): Compiler cache to improve building speed.
 
 ### Lint
 
