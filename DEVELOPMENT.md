@@ -31,7 +31,6 @@ To develop code, please setup with:
 - [cargo-nextest](https://github.com/nextest-rs/nextest): Test runner, run with `RUST_LOG=trace cargo nextest run --no-capture`.
 - [taplo](https://github.com/tamasfe/taplo): Toml code formatter, format with `taplo format [FILE]` or other ways you like.
 - [sccache](https://github.com/mozilla/sccache): Compiler cache to improve building speed.
-- [cargo-bloat](https://github.com/RazrFalcon/cargo-bloat): Executable size analyzer.
 
 ### Lint
 
@@ -50,10 +49,6 @@ To debug code, please:
 
 1. Build `rsvim` with `cargo build`.
 2. Run with `RUST_BACKTRACE=full RUST_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
-
-### Analyze
-
-To analyze executable sizes, please use `cargo bloat --release --bin rsvim`.
 
 ### Docs
 
