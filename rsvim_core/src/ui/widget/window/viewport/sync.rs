@@ -291,7 +291,7 @@ fn _from_top_left_wrap_nolinebreak(
 
             assert!(wrow < height);
             while wrow < height {
-              let (end_char, end_fills1) = match raw_buffer.as_mut().char_at(l, end_width) {
+              let (end_char, end_fills_result) = match raw_buffer.as_mut().char_at(l, end_width) {
                 Some(c) => {
                   let c_width = raw_buffer.as_mut().width_at(l, c);
                   if c_width > end_width {
@@ -310,7 +310,7 @@ fn _from_top_left_wrap_nolinebreak(
                   (bline.len_chars(), 0_usize)
                 }
               };
-              end_fills = end_fills1;
+              end_fills = end_fills_result;
 
               rows.insert(wrow, RowViewport::new(start_char..end_char));
 
@@ -322,7 +322,7 @@ fn _from_top_left_wrap_nolinebreak(
               // Prepare next row.
               wrow += 1;
               start_char = end_char;
-              end_width += width as usize;
+              end_width = raw_buffer.as_mut().width_at(l, end_char);
             }
 
             (rows, start_fills, end_fills)

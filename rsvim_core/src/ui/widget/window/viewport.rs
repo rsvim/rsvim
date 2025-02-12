@@ -529,7 +529,7 @@ impl Viewport {
               row_viewport.start_char_idx()
             );
             assert_eq!(
-              last_row_viewport1.end_char_idx() + 1,
+              last_row_viewport1.end_char_idx(),
               row_viewport.start_char_idx()
             )
           }
@@ -889,7 +889,7 @@ mod tests {
   }
 
   #[allow(clippy::too_many_arguments)]
-  fn ensure_sync_from_top_left(
+  fn assert_sync_from_top_left(
     buffer: BufferArc,
     actual: &Viewport,
     expect: &Vec<&str>,
@@ -947,7 +947,7 @@ mod tests {
         l, actual_line_idx, line_viewport
       );
       info!(
-        "expect start_filled_cols:{:?}, actual start_filled_cols:{}",
+        "start_filled_cols expect:{:?}, actual:{}",
         expect_start_fills.get(&actual_line_idx),
         line_viewport.start_filled_cols()
       );
@@ -956,7 +956,7 @@ mod tests {
         *expect_start_fills.get(&actual_line_idx).unwrap()
       );
       info!(
-        "expect end_filled_cols:{:?}, actual end_filled_cols:{}",
+        "end_filled_cols expect:{:?}, actual:{}",
         expect_end_fills.get(&actual_line_idx),
         line_viewport.end_filled_cols()
       );
@@ -967,13 +967,13 @@ mod tests {
 
       let rows = &line_viewport.rows();
       for (r, row) in rows.iter() {
-        info!("r-{:?}, row:{:?}", r, row);
+        info!("row-index-{:?}, row:{:?}", r, row);
 
         if r > rows.first_key_value().unwrap().0 {
           let prev_r = r - 1;
           let prev_row = rows.get(&prev_r).unwrap();
           info!(
-            "row-{:?}, current row[{}]:{:?}, previous row[{}]:{:?}",
+            "row-{:?}, current[{}]:{:?}, previous[{}]:{:?}",
             r, r, row, prev_r, prev_row
           );
         }
@@ -981,7 +981,7 @@ mod tests {
           let next_r = r + 1;
           let next_row = rows.get(&next_r).unwrap();
           info!(
-            "row-{:?}, current row[{}]:{:?}, next row[{}]:{:?}",
+            "row-{:?}, current[{}]:{:?}, next[{}]:{:?}",
             r, r, row, next_r, next_row
           );
         }
@@ -992,7 +992,7 @@ mod tests {
           payload.push(c);
         }
         info!(
-          "row-{:?}, actual:{:?}, expect:{:?}",
+          "row-{:?}, payload actual:{:?}, expect:{:?}",
           r, payload, expect[*r as usize]
         );
         assert_eq!(payload, expect[*r as usize]);
@@ -1039,7 +1039,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1088,7 +1088,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1126,7 +1126,7 @@ mod tests {
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1148,7 +1148,7 @@ mod tests {
     let options = WindowLocalOptions::builder().wrap(false).build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1218,7 +1218,7 @@ mod tests {
     ]
     .into_iter()
     .collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1262,7 +1262,7 @@ mod tests {
       vec![(0, 0), (1, 1), (2, 1), (3, 0), (4, 0), (5, 0)]
         .into_iter()
         .collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer.clone(),
       &actual,
       &expect,
@@ -1306,7 +1306,7 @@ mod tests {
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    ensure_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    assert_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -1351,7 +1351,7 @@ mod tests {
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -1388,7 +1388,7 @@ mod tests {
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    ensure_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    assert_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -1403,7 +1403,7 @@ mod tests {
       .build();
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    ensure_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+    assert_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -1427,7 +1427,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 4)].into_iter().collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -1462,7 +1462,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -1497,7 +1497,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 7)].into_iter().collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -1532,7 +1532,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer,
       &actual,
       &expect,
@@ -1568,7 +1568,7 @@ mod tests {
     let actual = make_viewport_from_size(size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer,
       &actual,
       &expect,
