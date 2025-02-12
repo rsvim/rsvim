@@ -27,60 +27,28 @@ Please setup your development environment with:
 To develop code, please setup with:
 
 - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter, format with `cargo fmt` or other ways you like.
-- [rust-clippy](https://github.com/rust-lang/rust-clippy): linter, lint with `cargo clippy` or other ways you like.
-
-  > Recommend to use [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
-
+- [rust-clippy](https://github.com/rust-lang/rust-clippy) and [bacon](https://github.com/Canop/bacon): linter, lint with `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`.
+- [cargo-nextest](https://github.com/nextest-rs/nextest): Test runner, run with `RUST_LOG=trace cargo nextest run --no-capture`.
 - [taplo](https://github.com/tamasfe/taplo): Toml code formatter, format with `taplo format [FILE]` or other ways you like.
+- [sccache](https://github.com/mozilla/sccache): Compiler cache to improve building speed.
 
-### Coding Style
+### Lint
 
-- Public methods named with `_` prefix are private, the public decorator is only for testing or debugging.
-
-### Environment Variable
-
-This project uses environment variables to control some behaviors globally, i.e. you can prepend some environment variables before running the command line(s). For example:
-
-```bash
-RUST_BACKTRACE=full RUST_LOG=debug cargo test
-```
-
-To configure debugging/testing behaviors, please setup with:
-
-- `RUST_BACKTRACE`: Print all backtraces when panics.
-- `RUST_LOG`: Set logging level, by default it's `info`. To debug code, please set to `debug`.
-- `RUSTFLAGS`: Set extra flags to `rustc` compiler. To enable all warning messages, please set to `-Dwarnings`.
-
-### Check
-
-To check code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-features --all-targets`, it enables all warnings.
+To check code, please use `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`.
 
 ### Test
 
-To run the unit tests, please run with:
-
-1. Run all test cases with `RUST_BACKTRACE=full RUST_LOG=debug cargo test`, it enables:
-
-   - All the logs over `debug` level, and prints the logs.
-   - The backtrace when panics.
-
-2. Run a specific test case with:
-
-   1. First list all test cases with `cargo test -- --list`.
-   2. Run the specific test with `cargo test {TEST_NAME}`, the `TEST_NAME` is the output test names in above step.
-   3. In case you want to add/print logs in test cases, please call the `crate::test::log::init` API before running a test case.
-
-> Recommend to use [cargo-nextest](https://github.com/nextest-rs/nextest) instead of `cargo test` for better testing experiences.
+1. To run all test cases, please use `cargo nextest run`.
+2. To run all test cases with full backtrace and logging message, please use `RUST_BACKTRACE=full RUST_LOG=trace cargo nextest run --no-capture`.
+3. To run a specific test, please use `cargo nextest run [TEST]`.
+4. To list all test cases, please use `cargo nextest list`.
 
 ### Debug
 
-To debug code, please run with:
+To debug code, please:
 
-1. Build the executable binary `rsvim` with `cargo build`.
-2. Run with `RUST_BACKTRACE=full RUST_LOG=debug ./target/debug/rsvim`, it enables:
-
-   - All the logs over `debug` level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
-   - The backtrace if panics.
+1. Build `rsvim` with `cargo build`.
+2. Run with `RUST_BACKTRACE=full RUST_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
 
 ### Docs
 

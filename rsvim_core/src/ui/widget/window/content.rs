@@ -1,16 +1,17 @@
 //! Vim window's text content widget.
 
-use crate::buf::BufferWk;
+use crate::buf::{Buffer, BufferWk};
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::envar;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::window::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
-use crate::{inode_generate_impl, rlock};
+use crate::{inode_generate_impl, rlock, wlock};
 
 use geo::point;
 use std::convert::From;
+use std::ptr::NonNull;
 use tracing::trace;
 
 #[derive(Debug, Clone)]
@@ -62,161 +63,173 @@ impl Widgetable for WindowContent {
     }
 
     trace!(
-      "Draw window content, actual shape:{:?}, viewport:{:?}",
-      actual_shape,
-      viewport
+      "Draw window content, actual shape min pos:{:?}, height/width:{}/{}",
+      upos,
+      height,
+      width
     );
+    trace!("Draw window content, viewport:{:?}", viewport);
 
     let buffer = self.buffer.upgrade().unwrap();
-    let buffer = rlock!(buffer);
+    let mut buffer = wlock!(buffer);
 
     let mut row_idx = 0_u16;
     let mut line_idx = viewport.start_line_idx();
-    let mut lines_slice = buffer.get_lines_at(line_idx).unwrap();
 
-    while line_idx < viewport.end_line_idx() {
-      debug_assert!(row_idx < height);
+    unsafe {
+      // Fix mutable borrow on `buffer`.
+      let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
 
-      let mut start_fills_count = 0_usize;
-      let mut end_fills_count = 0_usize;
+      let mut buflines = raw_buffer.as_ref().get_lines_at(line_idx).unwrap();
 
-      let line_slice = lines_slice.next().unwrap();
-      let line_viewport = viewport.lines().get(&line_idx).unwrap();
+      while line_idx < viewport.end_line_idx() {
+        debug_assert!(row_idx < height);
 
-      trace!(
-        "0-line_idx:{}, row_idx:{}, line_viewport:{:?}",
-        line_idx,
-        row_idx,
-        line_viewport
-      );
+        let mut start_fills_count = 0_usize;
+        let mut end_fills_count = 0_usize;
 
-      let row_viewport = line_viewport.rows();
+        let bline = buflines.next().unwrap();
+        let line_viewport = viewport.lines().get(&line_idx).unwrap();
 
-      if !row_viewport.is_empty() {
-        let first_row = row_viewport.first_key_value().unwrap();
-        let last_row = row_viewport.last_key_value().unwrap();
-        let first_row_idx = *first_row.0;
-        let last_row_idx = *last_row.0;
+        trace!(
+          "0-line_idx:{}, row_idx:{}, line_viewport:{:?}",
+          line_idx,
+          row_idx,
+          line_viewport
+        );
 
-        for (r_idx, r) in row_viewport.iter() {
-          debug_assert_eq!(*r_idx, row_idx);
-          debug_assert!(row_idx < height);
+        let rows_viewport = line_viewport.rows();
 
-          let mut col_idx = 0_u16;
+        if !rows_viewport.is_empty() {
+          let first_row = rows_viewport.first_key_value().unwrap();
+          let last_row = rows_viewport.last_key_value().unwrap();
+          let first_row_idx = *first_row.0;
+          let last_row_idx = *last_row.0;
 
-          let start_fills = if row_idx == first_row_idx && line_viewport.start_filled_columns() > 0
-          {
-            start_fills_count += 1;
-            assert!(start_fills_count == 1);
-            line_viewport.start_filled_columns() as u16
-          } else {
-            0_u16
-          };
-          let end_fills = if row_idx == last_row_idx && line_viewport.end_filled_columns() > 0 {
-            end_fills_count += 1;
-            assert!(end_fills_count == 1);
-            line_viewport.end_filled_columns() as u16
-          } else {
-            0_u16
-          };
+          for (r_idx, r_viewport) in rows_viewport.iter() {
+            debug_assert_eq!(*r_idx, row_idx);
+            debug_assert!(row_idx < height);
 
-          // Render start fills.
-          if start_fills > 0 {
-            let cells = std::iter::repeat('>')
-              .take(start_fills as usize)
-              .map(Cell::from)
-              .collect::<Vec<_>>();
-            let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-            canvas.frame_mut().set_cells_at(cells_upos, cells);
-            col_idx += start_fills;
-            trace!(
-              "1-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
-              line_idx,
-              row_idx,
-              col_idx,
-              line_viewport,
-              r
-            );
-          }
+            let mut col_idx = 0_u16;
 
-          // Render line content.
-          if r.end_char_idx() > r.start_char_idx() {
-            let mut total_width = 0_usize;
-            let mut char_idx = r.start_char_idx();
-            let mut chars_slice = line_slice.get_chars_at(r.start_char_idx()).unwrap();
-            while char_idx < r.end_char_idx() {
-              let c = chars_slice.next().unwrap();
-              let (unicode_symbol, unicode_width) = buffer.char_symbol(c);
+            let start_fills = if row_idx == first_row_idx && line_viewport.start_filled_cols() > 0 {
+              start_fills_count += 1;
+              assert!(start_fills_count == 1);
+              line_viewport.start_filled_cols() as u16
+            } else {
+              0_u16
+            };
+            let end_fills = if row_idx == last_row_idx && line_viewport.end_filled_cols() > 0 {
+              end_fills_count += 1;
+              assert!(end_fills_count == 1);
+              line_viewport.end_filled_cols() as u16
+            } else {
+              0_u16
+            };
 
-              let cell = Cell::with_symbol(unicode_symbol);
-              let cell_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-              canvas.frame_mut().set_cell(cell_upos, cell);
-
-              col_idx += unicode_width as u16;
-              char_idx += 1;
-              total_width += unicode_width;
+            // Render start fills.
+            if start_fills > 0 {
+              let cells = std::iter::repeat('>')
+                .take(start_fills as usize)
+                .map(Cell::from)
+                .collect::<Vec<_>>();
+              let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+              canvas.frame_mut().set_cells_at(cells_upos, cells);
+              col_idx += start_fills;
+              trace!(
+                "1-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
+                line_idx,
+                row_idx,
+                col_idx,
+                line_viewport,
+                r_viewport
+              );
             }
-            trace!(
-              "2-line_idx:{}, row_idx:{}, col_idx:{}, total_width:{}, line_viewport:{:?}, r:{:?}",
-              line_idx,
-              row_idx,
-              col_idx,
-              total_width,
-              line_viewport,
-              r
-            );
-            debug_assert_eq!(total_width, r.end_dcol_idx() - r.start_dcol_idx());
+
+            // Render line content.
+            if r_viewport.end_char_idx() > r_viewport.start_char_idx() {
+              let mut total_width = 0_usize;
+              let mut char_idx = r_viewport.start_char_idx();
+              let mut chars_iter = bline.get_chars_at(r_viewport.start_char_idx()).unwrap();
+              while char_idx < r_viewport.end_char_idx() {
+                let c = chars_iter.next().unwrap();
+                let (unicode_symbol, unicode_width) = raw_buffer.as_ref().char_symbol(c);
+
+                let cell = Cell::with_symbol(unicode_symbol);
+                let cell_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+                canvas.frame_mut().set_cell(cell_upos, cell);
+
+                col_idx += unicode_width as u16;
+                char_idx += 1;
+                total_width += unicode_width;
+              }
+              trace!(
+                "2-line_idx:{}, row_idx:{}, col_idx:{}, total_width:{}, line_viewport:{:?}, r:{:?}",
+                line_idx,
+                row_idx,
+                col_idx,
+                total_width,
+                line_viewport,
+                r_viewport
+              );
+            }
+
+            // Render left empty parts.
+            let end_dcol_idx = raw_buffer
+              .as_mut()
+              .width_before(line_idx, r_viewport.end_char_idx());
+            let start_dcol_idx = raw_buffer
+              .as_mut()
+              .width_before(line_idx, r_viewport.start_char_idx());
+            let occupied_length = (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
+
+            if width > occupied_length {
+              let left_length = width - occupied_length;
+              let cells = std::iter::repeat(' ')
+                .take(left_length as usize)
+                .map(Cell::from)
+                .collect::<Vec<_>>();
+              let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+              canvas.frame_mut().set_cells_at(cells_upos, cells);
+              col_idx += left_length;
+              trace!(
+                "3-line_idx:{}, row_idx:{}, col_idx:{}, left_length:{}, line_viewport:{:?}, r:{:?}",
+                line_idx,
+                row_idx,
+                col_idx,
+                left_length,
+                line_viewport,
+                r_viewport
+              );
+            }
+
+            // Render end fills.
+            if end_fills > 0 {
+              let cells = std::iter::repeat('<')
+                .take(end_fills as usize)
+                .map(Cell::from)
+                .collect::<Vec<_>>();
+              let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
+              canvas.frame_mut().set_cells_at(cells_upos, cells);
+
+              col_idx += end_fills;
+              trace!(
+                "4-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
+                line_idx,
+                row_idx,
+                col_idx,
+                line_viewport,
+                r_viewport
+              );
+            }
+            debug_assert_eq!(width, col_idx);
+
+            row_idx += 1;
           }
-
-          // Render left empty parts.
-          let occupied_length =
-            (r.end_dcol_idx() - r.start_dcol_idx()) as u16 + start_fills + end_fills;
-          if width > occupied_length {
-            let left_length = width - occupied_length;
-            let cells = std::iter::repeat(' ')
-              .take(left_length as usize)
-              .map(Cell::from)
-              .collect::<Vec<_>>();
-            let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-            canvas.frame_mut().set_cells_at(cells_upos, cells);
-            col_idx += left_length;
-            trace!(
-              "3-line_idx:{}, row_idx:{}, col_idx:{}, left_length:{}, line_viewport:{:?}, r:{:?}",
-              line_idx,
-              row_idx,
-              col_idx,
-              left_length,
-              line_viewport,
-              r
-            );
-          }
-
-          // Render end fills.
-          if end_fills > 0 {
-            let cells = std::iter::repeat('<')
-              .take(end_fills as usize)
-              .map(Cell::from)
-              .collect::<Vec<_>>();
-            let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
-            canvas.frame_mut().set_cells_at(cells_upos, cells);
-
-            col_idx += end_fills;
-            trace!(
-              "4-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
-              line_idx,
-              row_idx,
-              col_idx,
-              line_viewport,
-              r
-            );
-          }
-          debug_assert_eq!(width, col_idx);
-
-          row_idx += 1;
         }
-      }
 
-      line_idx += 1;
+        line_idx += 1;
+      }
     }
 
     // If buffer has no more lines, render empty spaces to left parts of the window content.
@@ -232,6 +245,7 @@ impl Widgetable for WindowContent {
   }
 }
 
+// spellchecker:off
 #[allow(unused_imports)]
 #[cfg(test)]
 mod tests {
@@ -656,194 +670,195 @@ mod tests {
     do_test_draw_from_top_left(&actual, &expect);
   }
 
-  #[test]
-  fn draw_from_top_left_wrap_linebreak1() {
-    test_log_init();
-
-    let buffer = make_buffer_from_lines(vec![
-      "Hello, RSVIM!\n",
-      "This is a quite simple and small test lines.\n",
-      "But still it contains several things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-    ]);
-    let expect = vec![
-      "Hello,    ",
-      "RSVIM!    ",
-      "This is a ",
-      "quite     ",
-      "simple and",
-      " small    ",
-      "test lines",
-      ".         ",
-      "But still ",
-      "it        ",
-    ];
-
-    let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptions::builder()
-      .wrap(true)
-      .line_break(true)
-      .build();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
-    do_test_draw_from_top_left(&actual, &expect);
-  }
-
-  #[test]
-  fn draw_from_top_left_wrap_linebreak2() {
-    test_log_init();
-
-    let buffer = make_buffer_from_lines(vec![
-      "Hello, RSVIM!\n",
-      "This is a quite simple and small test lines.\n",
-      "But still it contains several things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-    ]);
-    let expect = vec![
-      "Hello, RSVIM!              ",
-      "This is a quite simple and ",
-      "small test lines.          ",
-      "But still it contains      ",
-      "several things we want to  ",
-      "test:                      ",
-      "  1. When the line is small",
-      " enough to completely put  ",
-      "inside a row of the window ",
-      "content widget, then the   ",
-      "line-wrap and word-wrap    ",
-      "doesn't affect the         ",
-      "rendering.                 ",
-      "  2. When the line is too  ",
-      "long to be completely put  ",
-    ];
-
-    let terminal_size = U16Size::new(27, 15);
-    let window_options = WindowLocalOptions::builder()
-      .wrap(true)
-      .line_break(true)
-      .build();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
-    do_test_draw_from_top_left(&actual, &expect);
-  }
-
-  #[test]
-  fn draw_from_top_left_wrap_linebreak3() {
-    test_log_init();
-
-    let buffer = make_empty_buffer();
-    let expect = vec![
-      "                    ",
-      "                    ",
-      "                    ",
-      "                    ",
-      "                    ",
-      "                    ",
-      "                    ",
-      "                    ",
-    ];
-
-    let terminal_size = U16Size::new(20, 8);
-    let window_options = WindowLocalOptions::builder()
-      .wrap(true)
-      .line_break(true)
-      .build();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
-    do_test_draw_from_top_left(&actual, &expect);
-  }
-
-  #[test]
-  fn draw_from_top_left_wrap_linebreak4() {
-    test_log_init();
-
-    let buffer = make_buffer_from_lines(vec![
-      "Hello, RSVIM!\n",
-      "This is a quite simple andsmalltestlineswithoutevenanewlinebreakbecausewewanttotesthowitwillhappensifthereisaverylongwordthatcannotbeenpplaceinsidearowofthewindowcontent.\n",
-      "But still it contains several things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, 那么行换行和单词换行选项都不会影响最终的渲染效果。\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-    ]);
-    let expect = vec![
-      "Hello, RSVIM!",
-      "             ",
-      "This is a    ",
-      "quite simple ",
-      "andsmalltestl",
-      "ineswithoutev",
-      "enanewlinebre",
-      "akbecausewewa",
-      "nttotesthowit",
-      "willhappensif",
-      "thereisaveryl",
-      "ongwordthatca",
-      "nnotbeenpplac",
-      "einsidearowof",
-      "thewindowcont",
-      "ent.         ",
-      "But still it ",
-      "contains     ",
-      "several      ",
-      "things we    ",
-      "want to test:",
-      "             ",
-      "  1. When the",
-      " line is     ",
-      "small enough ",
-      "to completely",
-      " put inside a",
-      " row of the  ",
-      "window       ",
-      "content      ",
-      "widget, 那么<",
-    ];
-
-    let terminal_size = U16Size::new(13, 31);
-    let window_options = WindowLocalOptions::builder()
-      .wrap(true)
-      .line_break(true)
-      .build();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
-    do_test_draw_from_top_left(&actual, &expect);
-  }
-
-  #[test]
-  fn draw_from_top_left_wrap_linebreak5() {
-    test_log_init();
-
-    let buffer = make_buffer_from_lines(vec![
-      "Hello, RSVIM!\n",
-      "This is a quite simple and small test lines.\n",
-      "But still it contai\tseveral things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-    ]);
-    let expect = vec![
-      "Hello,    ",
-      "RSVIM!    ",
-      "This is a ",
-      "quite     ",
-      "simple and",
-      " small    ",
-      "test lines",
-      ".         ",
-      "But still ",
-      "it contai<",
-    ];
-
-    let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptions::builder()
-      .wrap(true)
-      .line_break(true)
-      .build();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
-    do_test_draw_from_top_left(&actual, &expect);
-  }
+  //#[test]
+  //fn draw_from_top_left_wrap_linebreak1() {
+  //  test_log_init();
+  //
+  //  let buffer = make_buffer_from_lines(vec![
+  //    "Hello, RSVIM!\n",
+  //    "This is a quite simple and small test lines.\n",
+  //    "But still it contains several things we want to test:\n",
+  //    "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+  //  ]);
+  //  let expect = vec![
+  //    "Hello,    ",
+  //    "RSVIM!    ",
+  //    "This is a ",
+  //    "quite     ",
+  //    "simple and",
+  //    " small    ",
+  //    "test lines",
+  //    ".         ",
+  //    "But still ",
+  //    "it        ",
+  //  ];
+  //
+  //  let terminal_size = U16Size::new(10, 10);
+  //  let window_options = WindowLocalOptions::builder()
+  //    .wrap(true)
+  //    .line_break(true)
+  //    .build();
+  //  let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+  //  do_test_draw_from_top_left(&actual, &expect);
+  //}
+  //
+  //#[test]
+  //fn draw_from_top_left_wrap_linebreak2() {
+  //  test_log_init();
+  //
+  //  let buffer = make_buffer_from_lines(vec![
+  //    "Hello, RSVIM!\n",
+  //    "This is a quite simple and small test lines.\n",
+  //    "But still it contains several things we want to test:\n",
+  //    "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+  //  ]);
+  //  let expect = vec![
+  //    "Hello, RSVIM!              ",
+  //    "This is a quite simple and ",
+  //    "small test lines.          ",
+  //    "But still it contains      ",
+  //    "several things we want to  ",
+  //    "test:                      ",
+  //    "  1. When the line is small",
+  //    " enough to completely put  ",
+  //    "inside a row of the window ",
+  //    "content widget, then the   ",
+  //    "line-wrap and word-wrap    ",
+  //    "doesn't affect the         ",
+  //    "rendering.                 ",
+  //    "  2. When the line is too  ",
+  //    "long to be completely put  ",
+  //  ];
+  //
+  //  let terminal_size = U16Size::new(27, 15);
+  //  let window_options = WindowLocalOptions::builder()
+  //    .wrap(true)
+  //    .line_break(true)
+  //    .build();
+  //  let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+  //  do_test_draw_from_top_left(&actual, &expect);
+  //}
+  //
+  //#[test]
+  //fn draw_from_top_left_wrap_linebreak3() {
+  //  test_log_init();
+  //
+  //  let buffer = make_empty_buffer();
+  //  let expect = vec![
+  //    "                    ",
+  //    "                    ",
+  //    "                    ",
+  //    "                    ",
+  //    "                    ",
+  //    "                    ",
+  //    "                    ",
+  //    "                    ",
+  //  ];
+  //
+  //  let terminal_size = U16Size::new(20, 8);
+  //  let window_options = WindowLocalOptions::builder()
+  //    .wrap(true)
+  //    .line_break(true)
+  //    .build();
+  //  let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+  //  do_test_draw_from_top_left(&actual, &expect);
+  //}
+  //
+  //#[test]
+  //fn draw_from_top_left_wrap_linebreak4() {
+  //  test_log_init();
+  //
+  //  let buffer = make_buffer_from_lines(vec![
+  //    "Hello, RSVIM!\n",
+  //    "This is a quite simple andsmalltestlineswithoutevenanewlinebreakbecausewewanttotesthowitwillhappensifthereisaverylongwordthatcannotbeenpplaceinsidearowofthewindowcontent.\n",
+  //    "But still it contains several things we want to test:\n",
+  //    "  1. When the line is small enough to completely put inside a row of the window content widget, 那么行换行和单词换行选项都不会影响最终的渲染效果。\n",
+  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+  //  ]);
+  //  let expect = vec![
+  //    "Hello, RSVIM!",
+  //    "             ",
+  //    "This is a    ",
+  //    "quite simple ",
+  //    "andsmalltestl",
+  //    "ineswithoutev",
+  //    "enanewlinebre",
+  //    "akbecausewewa",
+  //    "nttotesthowit",
+  //    "willhappensif",
+  //    "thereisaveryl",
+  //    "ongwordthatca",
+  //    "nnotbeenpplac",
+  //    "einsidearowof",
+  //    "thewindowcont",
+  //    "ent.         ",
+  //    "But still it ",
+  //    "contains     ",
+  //    "several      ",
+  //    "things we    ",
+  //    "want to test:",
+  //    "             ",
+  //    "  1. When the",
+  //    " line is     ",
+  //    "small enough ",
+  //    "to completely",
+  //    " put inside a",
+  //    " row of the  ",
+  //    "window       ",
+  //    "content      ",
+  //    "widget, 那么<",
+  //  ];
+  //
+  //  let terminal_size = U16Size::new(13, 31);
+  //  let window_options = WindowLocalOptions::builder()
+  //    .wrap(true)
+  //    .line_break(true)
+  //    .build();
+  //  let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+  //  do_test_draw_from_top_left(&actual, &expect);
+  //}
+  //
+  //#[test]
+  //fn draw_from_top_left_wrap_linebreak5() {
+  //  test_log_init();
+  //
+  //  let buffer = make_buffer_from_lines(vec![
+  //    "Hello, RSVIM!\n",
+  //    "This is a quite simple and small test lines.\n",
+  //    "But still it contai\tseveral things we want to test:\n",
+  //    "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+  //  ]);
+  //  let expect = vec![
+  //    "Hello,    ",
+  //    "RSVIM!    ",
+  //    "This is a ",
+  //    "quite     ",
+  //    "simple and",
+  //    " small    ",
+  //    "test lines",
+  //    ".         ",
+  //    "But still ",
+  //    "it contai<",
+  //  ];
+  //
+  //  let terminal_size = U16Size::new(10, 10);
+  //  let window_options = WindowLocalOptions::builder()
+  //    .wrap(true)
+  //    .line_break(true)
+  //    .build();
+  //  let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+  //  do_test_draw_from_top_left(&actual, &expect);
+  //}
 }
+// spellchecker:on

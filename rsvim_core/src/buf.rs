@@ -1,21 +1,19 @@
 //! Vim buffers.
 
-use crate::defaults::grapheme::AsciiControlCodeFormatter;
-// use crate::evloop::msg::WorkerToMasterMessage;
 use crate::res::IoResult;
 
 // Re-export
+pub use crate::buf::cidx::ColumnIndex;
 pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 
 use ahash::AHashMap as HashMap;
-use ascii::AsciiChar;
+use ahash::AHashSet as HashSet;
 use compact_str::CompactString;
 use parking_lot::RwLock;
 use path_absolutize::Absolutize;
 use ropey::iter::Lines;
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeMap;
-use std::convert::From;
 use std::fs::Metadata;
 use std::io::Read;
 use std::path::{Path, PathBuf};
@@ -23,9 +21,10 @@ use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::{Arc, Weak};
 use std::time::Instant;
 use tracing::trace;
-use unicode_width::UnicodeWidthChar;
 
+pub mod cidx;
 pub mod opt;
+pub mod unicode;
 
 /// Buffer ID.
 pub type BufferId = i32;
@@ -37,16 +36,6 @@ pub fn next_buffer_id() -> BufferId {
   static VALUE: AtomicI32 = AtomicI32::new(1);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
-
-//#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
-///// The Vim buffer's status.
-//pub enum BufferStatus {
-//  INIT,    // After created.
-//  LOADING, // Loading text content from disk file.
-//  SAVING,  // Saving buffer content to disk file.
-//  SYNCED,  // Synced content with file system.
-//  CHANGED, // Buffer content has been modified.
-//}
 
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
@@ -62,12 +51,12 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
+  rope_lines_width: BTreeMap<usize, ColumnIndex>,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
   last_sync_time: Option<Instant>,
-  // worker_send_to_master: Sender<WorkerToMasterMessage>,
 }
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
@@ -87,6 +76,7 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope,
+      rope_lines_width: BTreeMap::new(),
       options,
       filename,
       absolute_filename,
@@ -101,6 +91,7 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
+      rope_lines_width: BTreeMap::new(),
       options,
       filename: None,
       absolute_filename: None,
@@ -167,56 +158,22 @@ impl Buffer {
   /// [UnicodeWidthChar], there's another equivalent crate
   /// [icu::properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
   pub fn char_width(&self, c: char) -> usize {
-    if c.is_ascii_control() {
-      let ac = AsciiChar::from_ascii(c).unwrap();
-      match ac {
-        AsciiChar::Tab => self.tab_stop() as usize,
-        AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
-        _ => {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          format!("{}", ascii_formatter).len()
-        }
-      }
-    } else {
-      UnicodeWidthChar::width_cjk(c).unwrap()
-    }
+    unicode::char_width(&self.options, c)
   }
 
   /// Get the printable cell symbol and its display width.
   pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
-    let width = self.char_width(c);
-    if c.is_ascii_control() {
-      let ac = AsciiChar::from_ascii(c).unwrap();
-      match ac {
-        AsciiChar::Tab => (
-          CompactString::from(" ".repeat(self.tab_stop() as usize)),
-          width,
-        ),
-        AsciiChar::LineFeed | AsciiChar::CarriageReturn => (CompactString::new(""), width),
-        _ => {
-          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-          (CompactString::from(format!("{}", ascii_formatter)), width)
-        }
-      }
-    } else {
-      (CompactString::from(c.to_string()), width)
-    }
+    unicode::char_symbol(&self.options, c)
   }
 
   /// Get the display width for a unicode `str`.
   pub fn str_width(&self, s: &str) -> usize {
-    s.chars().map(|c| self.char_width(c)).sum()
+    unicode::str_width(&self.options, s)
   }
 
   /// Get the printable cell symbols and the display width for a unicode `str`.
   pub fn str_symbols(&self, s: &str) -> (CompactString, usize) {
-    s.chars().map(|c| self.char_symbol(c)).fold(
-      (CompactString::with_capacity(s.len()), 0_usize),
-      |(mut init_symbol, init_width), (mut symbol, width)| {
-        init_symbol.push_str(symbol.as_mut_str());
-        (init_symbol, init_width + width)
-      },
-    )
+    unicode::str_symbols(&self.options, s)
   }
 }
 // Unicode }
@@ -233,6 +190,34 @@ impl Buffer {
   /// Same with [`Rope::get_lines_at`](Rope::get_lines_at).
   pub fn get_lines_at(&self, line_idx: usize) -> Option<Lines> {
     self.rope.get_lines_at(line_idx)
+  }
+
+  /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
+  /// (`start_char_idx`) and max chars length (`max_chars`).
+  /// NOTE: This is for performance reason that this API limits the max chars instead of the whole
+  /// line, this is useful for super long lines.
+  pub fn clone_line(
+    &self,
+    line_idx: usize,
+    start_char_idx: usize,
+    max_chars: usize,
+  ) -> Option<String> {
+    match self.rope.get_line(line_idx) {
+      Some(line) => match line.get_chars_at(start_char_idx) {
+        Some(chars_iter) => {
+          let mut builder = String::with_capacity(max_chars);
+          for (i, c) in chars_iter.enumerate() {
+            if i >= max_chars {
+              return Some(builder);
+            }
+            builder.push(c);
+          }
+          Some(builder)
+        }
+        None => None,
+      },
+      None => None,
+    }
   }
 
   /// Same with [`Rope::lines`](Rope::lines).
@@ -278,6 +263,140 @@ impl Buffer {
   }
 }
 // Options }
+
+// Display Width {
+impl Buffer {
+  /// See [`ColumnIndex::width_before`].
+  ///
+  /// # Panics
+  ///
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn width_before(&mut self, line_idx: usize, char_idx: usize) -> usize {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .width_before(&self.options, &rope_line, char_idx)
+  }
+
+  /// See [`ColumnIndex::width_at`].
+  ///
+  /// # Panics
+  ///
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn width_at(&mut self, line_idx: usize, char_idx: usize) -> usize {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .width_at(&self.options, &rope_line, char_idx)
+  }
+
+  /// See [`ColumnIndex::char_before`].
+  ///
+  /// # Panics
+  ///
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn char_before(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .char_before(&self.options, &rope_line, width)
+  }
+
+  /// See [`ColumnIndex::char_at`].
+  ///
+  /// # Panics
+  ///
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn char_at(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .char_at(&self.options, &rope_line, width)
+  }
+
+  /// See [`ColumnIndex::char_after`].
+  ///
+  /// # Panics
+  ///
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn char_after(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .char_after(&self.options, &rope_line, width)
+  }
+
+  /// See [`ColumnIndex::last_char_until`].
+  ///
+  /// # Panics
+  ///
+  /// It panics if the `line_idx` doesn't exist in rope.
+  pub fn last_char_until(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+    self.rope_lines_width.entry(line_idx).or_default();
+    let rope_line = self.rope.line(line_idx);
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .last_char_until(&self.options, &rope_line, width)
+  }
+
+  /// See [`ColumnIndex::truncate_by_char`].
+  pub fn truncate_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
+    self.rope_lines_width.entry(line_idx).or_default();
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .truncate_since_char(char_idx)
+  }
+
+  /// See [`ColumnIndex::truncate_by_width`].
+  pub fn truncate_line_since_width(&mut self, line_idx: usize, width: usize) {
+    self.rope_lines_width.entry(line_idx).or_default();
+    self
+      .rope_lines_width
+      .get_mut(&line_idx)
+      .unwrap()
+      .truncate_since_width(width)
+  }
+
+  /// Truncate lines at the tail, start from specified line index.
+  pub fn truncate(&mut self, start_line_idx: usize) {
+    self.rope_lines_width.retain(|&l, _| l < start_line_idx);
+  }
+
+  /// Remove one specified line.
+  pub fn remove(&mut self, line_idx: usize) {
+    self.rope_lines_width.remove(&line_idx);
+  }
+
+  /// Retain multiple specified lines.
+  pub fn retain(&mut self, lines_idx: HashSet<usize>) {
+    self.rope_lines_width.retain(|l, _| lines_idx.contains(l));
+  }
+
+  /// Clear.
+  pub fn clear(&mut self) {
+    self.rope_lines_width.clear()
+  }
+}
+// Display Width }
 
 impl PartialEq for Buffer {
   fn eq(&self, other: &Self) -> bool {
