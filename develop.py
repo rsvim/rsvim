@@ -76,14 +76,13 @@ parser.add_argument('--list-test',
                     action='store_true',
                     help='List all test cases.')
 parser.add_argument(
-    '--no-extended',
+    '--no-extend',
     action='store_true',
     help=
     'Disable third-party extended tools such as `sccache`, `bacon`, `cargo-nextest`, etc.'
 )
 
 parser = parser.parse_args()
-# print(parser)
 
 if parser.no_extended:
     __DISABLE_EXTENDED_TOOLS = True
