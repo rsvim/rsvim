@@ -4,17 +4,18 @@
 # Formatted with black/isort.
 
 import argparse
-import sys
 import os
 import shutil
+
+__DISABLE_EXTENDED_TOOLS = False
 
 
 def clippy():
     command = "RUSTFLAGS='-Dwarnings'"
-    if shutil.which('sccache') is not None:
+    if shutil.which('sccache') is not None and not __DISABLE_EXTENDED_TOOLS:
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
-    if shutil.which('bacon') is not None:
+    if shutil.which('bacon') is not None and not __DISABLE_EXTENDED_TOOLS:
         command = f"{command} bacon -j clippy-all --headless"
     else:
         command = f"{command} cargo clippy --all-features --workspace"
@@ -31,10 +32,11 @@ def test(name):
         name = '--all'
 
     command = "RUST_LOG=trace"
-    if shutil.which('sccache') is not None:
+    if shutil.which('sccache') is not None and not __DISABLE_EXTENDED_TOOLS:
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
-    if shutil.which('cargo-nextest') is not None:
+    if shutil.which(
+            'cargo-nextest') is not None and not __DISABLE_EXTENDED_TOOLS:
         command = f"{command} cargo nextest run --no-capture {name}"
     else:
         command = f"{command} cargo test {name} -- --nocapture"
@@ -45,10 +47,11 @@ def test(name):
 
 def list_test():
     command = ""
-    if shutil.which('sccache') is not None:
+    if shutil.which('sccache') is not None and not __DISABLE_EXTENDED_TOOLS:
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
-    if shutil.which('cargo-nextest') is not None:
+    if shutil.which(
+            'cargo-nextest') is not None and not __DISABLE_EXTENDED_TOOLS:
         command = f"{command} cargo nextest list"
     else:
         command = f"{command} cargo test -- --list"
@@ -72,20 +75,24 @@ parser.add_argument(
 parser.add_argument('--list-test',
                     action='store_true',
                     help='List all test cases.')
+parser.add_argument(
+    '--no-extended',
+    action='store_true',
+    help=
+    'Disable third-party extended tools such as `sccache`, `bacon`, `cargo-nextest`, etc.'
+)
 
 parser = parser.parse_args()
-print(parser)
+# print(parser)
+
+if parser.no_extended:
+    __DISABLE_EXTENDED_TOOLS = True
 
 if parser.clippy:
     clippy()
-    exit(0)
 elif parser.test is None or parser.test != __TEST_NOT_SPECIFIED:
     test(parser.test)
-    exit(0)
 elif parser.list_test:
     list_test()
-    exit(0)
 else:
-    # parser.print_help()
-    print(parser.usage)
-    exit(0)
+    print("Error: missing arguments, use -h/--help for more details.")
