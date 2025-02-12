@@ -27,33 +27,16 @@ Please setup your development environment with:
 To develop code, please setup with:
 
 - [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter, format with `cargo fmt` or other ways you like.
-- [rust-clippy](https://github.com/rust-lang/rust-clippy): linter, lint with `cargo clippy` or other ways you like.
-
-  > Recommend to use [bacon](https://github.com/Canop/bacon) to setup a background lint service, start with `bacon clippy`.
-
+- [rust-clippy](https://github.com/rust-lang/rust-clippy) and [bacon](https://github.com/Canop/bacon): linter, lint with `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`.
+- [cargo-nextest](https://github.com/nextest-rs/nextest): Test runner, run with `RUST_LOG=trace cargo nextest run --no-capture`.
 - [taplo](https://github.com/tamasfe/taplo): Toml code formatter, format with `taplo format [FILE]` or other ways you like.
 
-### Coding Style
+### Lint
 
-- Public methods named with `_` prefix are private, the public decorator is only for testing or debugging.
+To check code, please use `RUSTFLAGS="-Dwarnings"` to enable all warnings:
 
-### Environment Variable
-
-This project uses environment variables to control some behaviors globally, i.e. you can prepend some environment variables before running the command line(s). For example:
-
-```bash
-RUST_BACKTRACE=full RUST_LOG=debug cargo test
-```
-
-To configure debugging/testing behaviors, please setup with:
-
-- `RUST_BACKTRACE`: Print all backtraces when panics.
-- `RUST_LOG`: Set logging level, by default it's `info`. To debug code, please set to `debug`.
-- `RUSTFLAGS`: Set extra flags to `rustc` compiler. To enable all warning messages, please set to `-Dwarnings`.
-
-### Check
-
-To check code, please run with `RUSTFLAGS=-Dwarnings cargo clippy --all-features --all-targets`, it enables all warnings.
+- `RUSTFLAGS="-Dwarnings" cargo clippy --all-features --workspace (--all)`
+- `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`
 
 ### Test
 
