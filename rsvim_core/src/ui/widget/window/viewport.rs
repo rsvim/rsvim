@@ -10,7 +10,7 @@ use parking_lot::RwLock;
 use std::collections::BTreeMap;
 use std::ops::Range;
 use std::sync::{Arc, Weak};
-use tracing::trace;
+//use tracing::trace;
 
 pub mod sync;
 
@@ -509,13 +509,13 @@ impl Viewport {
       last_line_idx = Some(*line_idx);
       let mut last_row_viewport: Option<RowViewport> = None;
       for (row_idx, row_viewport) in line_viewport.rows() {
-        trace!(
-          "row_idx:{:?},last_row_idx:{:?},last_row_viewport:{:?}, row_viewport:{:?}",
-          row_idx,
-          last_row_idx,
-          last_row_viewport,
-          row_viewport
-        );
+        //trace!(
+        //  "row_idx:{:?},last_row_idx:{:?},last_row_viewport:{:?}, row_viewport:{:?}",
+        //  row_idx,
+        //  last_row_idx,
+        //  last_row_viewport,
+        //  row_viewport
+        //);
         match last_row_idx {
           Some(last_row_idx1) => assert_eq!(last_row_idx1 + 1, *row_idx),
           None => { /* Skip */ }
@@ -523,11 +523,11 @@ impl Viewport {
         last_row_idx = Some(*row_idx);
         match last_row_viewport {
           Some(last_row_viewport1) => {
-            trace!(
-              "last_row_viewport1.end_char_idx:{:?}, row_viewport.start_char_idx:{:?}",
-              last_row_viewport1.end_char_idx(),
-              row_viewport.start_char_idx()
-            );
+            //trace!(
+            //  "last_row_viewport1.end_char_idx:{:?}, row_viewport.start_char_idx:{:?}",
+            //  last_row_viewport1.end_char_idx(),
+            //  row_viewport.start_char_idx()
+            //);
             assert_eq!(
               last_row_viewport1.end_char_idx(),
               row_viewport.start_char_idx()
