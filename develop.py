@@ -84,7 +84,7 @@ parser.add_argument(
 
 parser = parser.parse_args()
 
-if parser.no_extended:
+if parser.no_extend:
     __DISABLE_EXTENDED_TOOLS = True
 
 if parser.clippy:

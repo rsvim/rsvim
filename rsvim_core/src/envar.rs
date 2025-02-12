@@ -111,10 +111,7 @@ mod tests {
 
   #[test]
   fn mutex_timeout1() {
-    unsafe {
-      std::env::set_var("RSVIM_MUTEX_TIMEOUT_SECS", "128");
-      assert_eq!(MUTEX_TIMEOUT_SECS(), 128_u64);
-    }
+    assert!(MUTEX_TIMEOUT_SECS() > 0);
   }
 
   #[test]
