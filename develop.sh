@@ -2,7 +2,6 @@
 
 # This is a simple shell script to help developing rsvim.
 
-# Usage/help
 usage() {
   echo "Usage: $0 [-h] [-c] [-l] [-r TEST]"
   echo "  -h          Display help message and quit."
