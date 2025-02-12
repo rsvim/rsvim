@@ -322,7 +322,7 @@ fn _from_top_left_wrap_nolinebreak(
               // Prepare next row.
               wrow += 1;
               start_char = end_char;
-              end_width = raw_buffer.as_mut().width_at(l, end_char);
+              end_width = raw_buffer.as_mut().width_before(l, end_char) + width as usize;
             }
 
             (rows, start_fills, end_fills)
