@@ -44,13 +44,10 @@ To check code, please use `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`.
 
 ### Debug
 
-To debug code, please run with:
+To debug code, please:
 
-1. Build the executable binary `rsvim` with `cargo build`.
-2. Run with `RUST_BACKTRACE=full RUST_LOG=debug ./target/debug/rsvim`, it enables:
-
-   - All the logs over `debug` level, and dumps to the log file in the format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
-   - The backtrace if panics.
+1. Build `rsvim` with `cargo build`.
+2. Run with `RUST_BACKTRACE=full RUST_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
 
 ### Docs
 
