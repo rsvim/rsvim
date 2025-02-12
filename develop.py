@@ -60,38 +60,40 @@ def list_test():
     os.system(command)
 
 
-parser = argparse.ArgumentParser(
-    description='Help running linter/tests for developing rsvim.')
-parser.add_argument('-c',
-                    '--clippy',
-                    action='store_true',
-                    help='Run clippy with `RUSTFLAGS=-Dwarnings`')
-parser.add_argument(
-    '-t',
-    '--test',
-    nargs='?',
-    default=__TEST_NOT_SPECIFIED,
-    help='Run [TEST] with `RUST_LOG=trace`, by default run all test cases.')
-parser.add_argument('--list-test',
-                    action='store_true',
-                    help='List all test cases.')
-parser.add_argument(
-    '--no-extend',
-    action='store_true',
-    help=
-    'Disable third-party extended tools such as `sccache`, `bacon`, `cargo-nextest`, etc.'
-)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description='Help running linter/tests for developing rsvim.')
+    parser.add_argument('-c',
+                        '--clippy',
+                        action='store_true',
+                        help='Run clippy with `RUSTFLAGS=-Dwarnings`')
+    parser.add_argument(
+        '-t',
+        '--test',
+        nargs='?',
+        default=__TEST_NOT_SPECIFIED,
+        help='Run [TEST] with `RUST_LOG=trace`, by default run all test cases.'
+    )
+    parser.add_argument('--list-test',
+                        action='store_true',
+                        help='List all test cases.')
+    parser.add_argument(
+        '--no-extend',
+        action='store_true',
+        help=
+        'Disable third-party extended tools such as `sccache`, `bacon`, `cargo-nextest`, etc.'
+    )
 
-parser = parser.parse_args()
+    parser = parser.parse_args()
 
-if parser.no_extend:
-    __DISABLE_EXTENDED_TOOLS = True
+    if parser.no_extend:
+        __DISABLE_EXTENDED_TOOLS = True
 
-if parser.clippy:
-    clippy()
-elif parser.test is None or parser.test != __TEST_NOT_SPECIFIED:
-    test(parser.test)
-elif parser.list_test:
-    list_test()
-else:
-    print("Error: missing arguments, use -h/--help for more details.")
+    if parser.clippy:
+        clippy()
+    elif parser.test is None or parser.test != __TEST_NOT_SPECIFIED:
+        test(parser.test)
+    elif parser.list_test:
+        list_test()
+    else:
+        print("Error: missing arguments, use -h/--help for more details.")
