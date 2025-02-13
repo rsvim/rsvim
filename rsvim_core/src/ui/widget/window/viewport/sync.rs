@@ -153,10 +153,10 @@ fn _from_top_left_nowrap(
               .as_mut()
               .char_after(l, start_dcolumn)
               .unwrap_or(0_usize);
-            let start_fills = {
-              let width_before = raw_buffer.as_mut().width_before(l, start_char);
-              width_before.saturating_sub(start_dcolumn)
-            };
+            let start_fills = raw_buffer
+              .as_mut()
+              .width_before(l, start_char)
+              .saturating_sub(start_dcolumn);
 
             let end_width = start_dcolumn + width as usize;
             let (end_char, end_fills) = match raw_buffer.as_mut().char_at(l, end_width) {
@@ -284,10 +284,10 @@ fn _from_top_left_wrap_nolinebreak(
               .as_mut()
               .char_after(l, start_dcolumn)
               .unwrap_or(0_usize);
-            let start_fills = {
-              let width_before = raw_buffer.as_mut().width_before(l, start_char);
-              width_before.saturating_sub(start_dcolumn)
-            };
+            let start_fills = raw_buffer
+              .as_mut()
+              .width_before(l, start_char)
+              .saturating_sub(start_dcolumn);
 
             let mut end_width = start_dcolumn + width as usize;
             let mut end_fills = 0_usize;
@@ -434,17 +434,16 @@ fn _from_top_left_wrap_linebreak(
               Some(cloned_line) => {
                 let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
 
-                let cloned_line = cloned_line.unwrap();
                 let word_boundaries: Vec<&str> = cloned_line.split_word_bounds().collect();
 
-                let mut start_c = match raw_buffer.as_mut().char_until(l, start_dcolumn) {
-                  Some(c) => c,
-                  None => 0_usize,
-                };
-                let start_fills = {
-                  let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
-                  start_width_until - start_dcolumn
-                };
+                let mut start_char = raw_buffer
+                  .as_mut()
+                  .char_after(l, start_dcolumn)
+                  .unwrap_or(0_usize);
+                let start_fills = raw_buffer
+                  .as_mut()
+                  .width_before(l, start_char)
+                  .saturating_sub(start_dcolumn);
 
                 let mut end_dcol = start_dcolumn + width as usize;
                 let mut end_c: Option<usize> = None;
