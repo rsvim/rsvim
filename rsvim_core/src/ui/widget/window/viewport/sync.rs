@@ -126,10 +126,10 @@ fn _from_top_left_nowrap(
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
     match raw_buffer.as_ref().get_lines_at(start_line) {
-      // The `start_line` is in the buffer.
       Some(buflines) => {
+        // The `start_line` is in the buffer.
         // The first `wrow` in the window maps to the `start_line` in the buffer.
-        let mut wrow = 0;
+        let mut wrow = 0_u16;
         let mut current_line = start_line;
 
         // The first `wrow` in the window maps to the `start_line` in the buffer.
@@ -209,7 +209,7 @@ fn _from_top_left_nowrap(
   }
 }
 
-fn empty_rows() -> (BTreeMap<u16, RowViewport>, usize, usize) {
+fn empty_rows(wrow: u16) -> (BTreeMap<u16, RowViewport>, usize, usize) {
   let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
   rows.insert(wrow, RowViewport::new(0..0));
   (rows, 0_usize, 0_usize)
@@ -258,9 +258,8 @@ fn _from_top_left_wrap_nolinebreak(
     match buffer.get_lines_at(start_line) {
       Some(buflines) => {
         // The `start_line` is inside the buffer.
-
         // The first `wrow` in the window maps to the `start_line` in the buffer.
-        let mut wrow = 0;
+        let mut wrow = 0_u16;
         let mut current_line = start_line;
 
         for (l, bline) in buflines.enumerate() {
@@ -277,7 +276,7 @@ fn _from_top_left_wrap_nolinebreak(
           // );
 
           let (rows, start_fills, end_fills) = if bline.len_chars() == 0 {
-            empty_rows()
+            empty_rows(wrow)
           } else {
             let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
 
@@ -410,9 +409,8 @@ fn _from_top_left_wrap_linebreak(
     match buffer.get_lines_at(start_line) {
       Some(buflines) => {
         // The `start_line` is inside the buffer.
-
         // The first `wrow` in the window maps to the `start_line` in the buffer.
-        let mut wrow = 0;
+        let mut wrow = 0_u16;
         let mut current_line = start_line;
 
         for (l, bline) in buflines.enumerate() {
@@ -422,7 +420,7 @@ fn _from_top_left_wrap_linebreak(
           }
 
           let (rows, start_fills, end_fills) = if bline.len_chars() == 0 {
-            empty_rows()
+            empty_rows(wrow)
           } else {
             // Here we clone the line with the max chars that can hold by current window/viewport,
             // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
@@ -474,7 +472,7 @@ fn _from_top_left_wrap_linebreak(
                 };
                 (rows, start_fills, end_fills)
               }
-              None => empty_rows(),
+              None => empty_rows(wrow),
             }
           };
 
