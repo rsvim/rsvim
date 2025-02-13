@@ -23,6 +23,7 @@ def clippy():
     else:
         command = f"{command} cargo clippy --all-features --workspace"
 
+    command = command.strip()
     print(command)
     os.system(command)
 
@@ -41,6 +42,7 @@ def test(name):
     else:
         command = f"{command} cargo test {name} -- --nocapture"
 
+    command = command.strip()
     print(command)
     os.system(command)
 
@@ -56,6 +58,7 @@ def list_test():
     else:
         command = f"{command} cargo test -- --list"
 
+    command = command.strip()
     print(command)
     os.system(command)
 
@@ -70,6 +73,7 @@ def build(release):
     else:
         command = f"{command} cargo build"
 
+    command = command.strip()
     print(command)
     os.system(command)
 
