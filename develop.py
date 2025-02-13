@@ -9,6 +9,9 @@ import shutil
 
 __DISABLE_EXTENDED_TOOLS = False
 
+__TEST_NOT_SPECIFIED = '__TEST_NOT_SPECIFIED'
+__BUILD_NOT_SPECIFIED = '__BUILD_NOT_SPECIFIED'
+
 
 def clippy():
     command = "RUSTFLAGS='-Dwarnings'"
@@ -22,9 +25,6 @@ def clippy():
 
     print(command)
     os.system(command)
-
-
-__TEST_NOT_SPECIFIED = '__TEST_NOT_SPECIFIED'
 
 
 def test(name):
@@ -60,6 +60,20 @@ def list_test():
     os.system(command)
 
 
+def build(release):
+    command = ""
+    if shutil.which('sccache') is not None and not __DISABLE_EXTENDED_TOOLS:
+        command = f"{command} RUSTC_WRAPPER=$(which sccache)"
+
+    if isinstance(release, str) and release.lower().startswith('r'):
+        command = f"{command} cargo build --release"
+    else:
+        command = f"{command} cargo build"
+
+    print(command)
+    os.system(command)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description='Help running linter/tests for developing rsvim.')
@@ -78,6 +92,15 @@ if __name__ == "__main__":
                         action='store_true',
                         help='List all test cases.')
     parser.add_argument(
+        '-b',
+        '--build',
+        nargs='?',
+        default=__BUILD_NOT_SPECIFIED,
+        metavar="TARGET",
+        help=
+        'Build debug/release [TARGET], by default is debug. Use `r(elease)` to build release.'
+    )
+    parser.add_argument(
         '--no-extend',
         action='store_true',
         help=
@@ -85,6 +108,7 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
+    # print(parser)
 
     if parser.no_extend:
         __DISABLE_EXTENDED_TOOLS = True
@@ -95,5 +119,7 @@ if __name__ == "__main__":
         test(parser.test)
     elif parser.list_test:
         list_test()
+    elif parser.build is None or parser.build != __BUILD_NOT_SPECIFIED:
+        build(parser.build)
     else:
         print("Error: missing arguments, use -h/--help for more details.")
