@@ -445,26 +445,26 @@ fn _from_top_left_wrap_linebreak(
                   .width_before(l, start_char)
                   .saturating_sub(start_dcolumn);
 
-                let mut end_dcol = start_dcolumn + width as usize;
-                let mut end_c: Option<usize> = None;
+                let mut end_width = start_dcolumn + width as usize;
+                let mut end_char: Option<usize> = None;
                 let mut eol = false;
                 while wrow < height && !eol {
-                  end_c = match raw_buffer.as_mut().char_after(l, end_dcol) {
+                  end_char = match raw_buffer.as_mut().char_after(l, end_width) {
                     Some(c) => Some(c),
                     None => {
                       eol = true;
                       Some(raw_buffer.as_mut().last_char(l).unwrap())
                     }
                   };
-                  rows.insert(wrow, RowViewport::new(start_c..end_c.unwrap()));
+                  rows.insert(wrow, RowViewport::new(start_c..end_char.unwrap()));
                   wrow += 1;
-                  start_c = end_c.unwrap();
-                  end_dcol = end_dcol + width as usize;
+                  start_c = end_char.unwrap();
+                  end_width = end_width + width as usize;
                 }
                 let end_fills = {
-                  let end_width_until = raw_buffer.as_mut().width_until(l, end_c.unwrap());
-                  if end_width_until >= end_dcol {
-                    end_width_until - end_dcol
+                  let end_width_until = raw_buffer.as_mut().width_until(l, end_char.unwrap());
+                  if end_width_until >= end_width {
+                    end_width_until - end_width
                   } else {
                     0_usize
                   }
