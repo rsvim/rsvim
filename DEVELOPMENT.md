@@ -6,7 +6,7 @@
   - [Test](#test)
   - [Debug](#debug)
 - [TypeScript/JavaScript](#typescriptjavascript)
-  - [Transpile/Compile)](#transpilecompile)
+  - [Transpile/Compile](#transpilecompile)
 
 ## Toolchain
 
