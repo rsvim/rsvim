@@ -7,21 +7,18 @@ import argparse
 import os
 import shutil
 
-__DISABLE_EXTENDED_TOOLS = False
+__DISABLE_SCCACHE = False
 
-__TEST_NOT_SPECIFIED = '__TEST_NOT_SPECIFIED'
-__BUILD_NOT_SPECIFIED = '__BUILD_NOT_SPECIFIED'
+__TEST_NOT_SPECIFIED = "__TEST_NOT_SPECIFIED"
+__BUILD_NOT_SPECIFIED = "__BUILD_NOT_SPECIFIED"
 
 
 def clippy():
     command = "RUSTFLAGS='-Dwarnings'"
-    if shutil.which('sccache') is not None and not __DISABLE_EXTENDED_TOOLS:
+    if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
-    if shutil.which('bacon') is not None and not __DISABLE_EXTENDED_TOOLS:
-        command = f"{command} bacon -j clippy-all --headless"
-    else:
-        command = f"{command} cargo clippy --all-features --workspace"
+    command = f"{command} bacon -j clippy-all --headless"
 
     command = command.strip()
     print(command)
@@ -30,17 +27,13 @@ def clippy():
 
 def test(name):
     if name is None:
-        name = '--all'
+        name = "--all"
 
     command = "RUST_LOG=trace"
-    if shutil.which('sccache') is not None and not __DISABLE_EXTENDED_TOOLS:
+    if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
-    if shutil.which(
-            'cargo-nextest') is not None and not __DISABLE_EXTENDED_TOOLS:
-        command = f"{command} cargo nextest run --no-capture {name}"
-    else:
-        command = f"{command} cargo test {name} -- --nocapture"
+    command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
     print(command)
@@ -49,14 +42,10 @@ def test(name):
 
 def list_test():
     command = ""
-    if shutil.which('sccache') is not None and not __DISABLE_EXTENDED_TOOLS:
+    if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
-    if shutil.which(
-            'cargo-nextest') is not None and not __DISABLE_EXTENDED_TOOLS:
-        command = f"{command} cargo nextest list"
-    else:
-        command = f"{command} cargo test -- --list"
+    command = f"{command} cargo nextest list"
 
     command = command.strip()
     print(command)
@@ -65,10 +54,10 @@ def list_test():
 
 def build(release):
     command = ""
-    if shutil.which('sccache') is not None and not __DISABLE_EXTENDED_TOOLS:
+    if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
-    if isinstance(release, str) and release.lower().startswith('r'):
+    if isinstance(release, str) and release.lower().startswith("r"):
         command = f"{command} cargo build --release"
     else:
         command = f"{command} cargo build"
@@ -78,44 +67,57 @@ def build(release):
     os.system(command)
 
 
+def start_doc():
+    command = "cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'"
+
+    command = command.strip()
+    print(command)
+    os.system(command)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description='Help running linter/tests for developing rsvim.')
-    parser.add_argument('-c',
-                        '--clippy',
-                        action='store_true',
-                        help='Run clippy with `RUSTFLAGS=-Dwarnings`')
-    parser.add_argument(
-        '-t',
-        '--test',
-        nargs='?',
-        default=__TEST_NOT_SPECIFIED,
-        help='Run [TEST] with `RUST_LOG=trace`, by default run all test cases.'
+        description="Help running linter/tests for developing rsvim."
     )
-    parser.add_argument('--list-test',
-                        action='store_true',
-                        help='List all test cases.')
     parser.add_argument(
-        '-b',
-        '--build',
-        nargs='?',
+        "-c",
+        "--clippy",
+        action="store_true",
+        help="Run clippy with `RUSTFLAGS=-Dwarnings`",
+    )
+    parser.add_argument(
+        "-t",
+        "--test",
+        nargs="?",
+        default=__TEST_NOT_SPECIFIED,
+        help="Run [TEST] with `RUST_LOG=trace`, by default run all test cases.",
+    )
+    parser.add_argument("--list-test", action="store_true", help="List all test cases.")
+    parser.add_argument(
+        "-b",
+        "--build",
+        nargs="?",
         default=__BUILD_NOT_SPECIFIED,
         metavar="TARGET",
-        help=
-        'Build debug/release [TARGET], by default is debug. Use `r(elease)` to build release.'
+        help="Build debug/release [TARGET], by default is debug. Use `r(elease)` to build release.",
     )
     parser.add_argument(
-        '--no-extend',
-        action='store_true',
-        help=
-        'Disable third-party extended tools such as `sccache`, `bacon`, `cargo-nextest`, etc.'
+        "-d",
+        "--doc",
+        action="store_true",
+        help="Start cargo doc service on `http://localhost:3000/rsvim`.",
+    )
+    parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Disable `sccache` when building cargo.",
     )
 
     parser = parser.parse_args()
     # print(parser)
 
-    if parser.no_extend:
-        __DISABLE_EXTENDED_TOOLS = True
+    if parser.no_cache:
+        __DISABLE_SCCACHE = True
 
     if parser.clippy:
         clippy()
@@ -125,5 +127,7 @@ if __name__ == "__main__":
         list_test()
     elif parser.build is None or parser.build != __BUILD_NOT_SPECIFIED:
         build(parser.build)
+    elif parser.doc:
+        start_doc()
     else:
         print("Error: missing arguments, use -h/--help for more details.")

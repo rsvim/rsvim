@@ -6,6 +6,8 @@ rust = "1.84.1"
 "cargo:cargo-watch" = "latest"
 "cargo:cargo-release" = "latest"
 "cargo:git-cliff" = "latest"
+"cargo:taplo-cli" = "latest"
+"cargo:typos-cli" = "latest"
 
 python = "3.13"
 "pipx:black" = "latest"
