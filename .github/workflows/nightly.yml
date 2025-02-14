@@ -51,7 +51,7 @@ jobs:
       matrix:
         include:
           - target: aarch64-unknown-linux-gnu
-            os: ubuntu-22.04
+            os: ubuntu-22.04-arm
           - target: x86_64-unknown-linux-gnu
             os: ubuntu-22.04
           # - target: aarch64-unknown-linux-musl
@@ -72,10 +72,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - uses: taiki-e/setup-cross-toolchain-action@v1
-        with:
-          target: ${{ matrix.target }}
-        if: matrix.target == 'aarch64-unknown-linux-gnu'
+      # - uses: taiki-e/setup-cross-toolchain-action@v1
+      #   with:
+      #     target: ${{ matrix.target }}
+      #   if: matrix.target == 'aarch64-unknown-linux-gnu'
       # - uses: taiki-e/install-action@cross
       #   if: contains(matrix.target, '-musl')
       - run: echo "RUSTFLAGS=${RUSTFLAGS} -C target-feature=+crt-static" >> "${GITHUB_ENV}"
