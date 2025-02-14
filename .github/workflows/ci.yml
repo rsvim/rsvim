@@ -143,9 +143,9 @@ jobs:
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --all-features --workspace --lcov --output-path lcov.info
-      - uses: codecov/codecov-action@v4
-        with:
-          fail_ci_if_error: true
-          files: lcov.info
-          token: ${{ secrets.CODECOV_TOKEN }}
-          verbose: true
+      # - uses: codecov/codecov-action@v4
+      #   with:
+      #     fail_ci_if_error: true
+      #     files: lcov.info
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     verbose: true
