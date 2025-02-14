@@ -86,20 +86,17 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        include:
-          - os: ubuntu-latest
-            toolchain: stable
-          - os: macos-latest
-            toolchain: stable
-          - os: macos-13
-            toolchain: stable
-          - os: windows-latest
-            toolchain: stable
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            macos-latest,
+            macos-13,
+            windows-latest,
+          ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.toolchain }}
+      - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.6
       - uses: actions/checkout@v4
@@ -113,20 +110,17 @@ jobs:
     name: Code Coverage
     strategy:
       matrix:
-        include:
-          - os: ubuntu-latest
-            toolchain: stable
-          - os: macos-latest
-            toolchain: stable
-          - os: macos-13
-            toolchain: stable
-          - os: windows-latest
-            toolchain: stable
+        os:
+          [
+            ubuntu-latest,
+            ubuntu-24.04-arm,
+            macos-latest,
+            macos-13,
+            windows-latest,
+          ]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ matrix.toolchain }}
+      - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.6
       - uses: actions/checkout@v4
@@ -140,6 +134,7 @@ jobs:
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --all-features --workspace --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v4
+        if: ${{ ! (startsWith(matrix.os, 'ubuntu') && endsWith(matrix.os, 'arm' )) }}
         with:
           fail_ci_if_error: true
           files: lcov.info
