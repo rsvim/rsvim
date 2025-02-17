@@ -51,10 +51,8 @@ To write docs, please:
 
 To release a new version, please:
 
-1. Dry run with `bash ./release.sh [LEVEL]`.
-2. Release with `bash ./release.sh [LEVEL] --execute --no-verify`.
-
-   > Note: You will have to use `--no-verify` to skip the check about the difference between `rsvim_cli` and the package name `rsvim`.
+1. Dry run with `./dev.py -r [LEVEL]`.
+2. Release with `./dev.py -r [LEVEL] -e`.
 
 ## TypeScript/JavaScript
 
