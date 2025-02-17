@@ -77,7 +77,7 @@ def start_doc():
 
 
 def release(execute, level):
-    cwd_path = pathlib.Path(__file__)
+    cwd_path = pathlib.Path.cwd()
     git_root_path = cwd_path / ".git"
     assert git_root_path.is_dir(), "The $CWD/$PWD must be git repo root!"
 
