@@ -5,6 +5,7 @@
 
 import argparse
 import os
+import pathlib
 import shutil
 
 __DISABLE_SCCACHE = False
@@ -75,6 +76,20 @@ def start_doc():
     os.system(command)
 
 
+def release(execute, level):
+    cwd_path = pathlib.Path(__file__)
+    git_root_path = cwd_path / ".git"
+    assert git_root_path.is_dir(), "The $CWD/$PWD must be git repo root!"
+
+    command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
+    if execute:
+        command = f"{command} --execute --no-verify"
+
+    command = command.strip()
+    print(command)
+    os.system(command)
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Help running linter/tests for developing rsvim."
@@ -108,6 +123,18 @@ if __name__ == "__main__":
         help="Start cargo doc service on `http://localhost:3000/rsvim`.",
     )
     parser.add_argument(
+        "-r",
+        "--release",
+        choices=["alpha", "beta", "rc", "major", "minor", "patch"],
+        help="Release cargo crates with [LEVEL].",
+    )
+    parser.add_argument(
+        "-e",
+        "--execute",
+        action="store_true",
+        help="Release cargo crates with additional `--execute --no-verify` option.",
+    )
+    parser.add_argument(
         "--no-cache",
         action="store_true",
         help="Disable `sccache` when building cargo.",
@@ -129,5 +156,7 @@ if __name__ == "__main__":
         build(parser.build)
     elif parser.doc:
         start_doc()
+    elif parser.release:
+        release(parser.execute, parser.release)
     else:
         print("Error: missing arguments, use -h/--help for more details.")

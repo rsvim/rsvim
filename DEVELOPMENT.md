@@ -47,6 +47,15 @@ To write docs, please:
 1. Start local service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
 2. Open browser with `http://localhost:3000/rsvim`.
 
+### Release
+
+To release a new version, please:
+
+1. Dry run with `bash ./release.sh [LEVEL]`.
+2. Release with `bash ./release.sh [LEVEL] --execute --no-verify`.
+
+   > Note: You will have to use `--no-verify` to skip the check about the difference between `rsvim_cli` and the package name `rsvim`.
+
 ## TypeScript/JavaScript
 
 ### Transpile/Compile
