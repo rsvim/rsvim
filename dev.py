@@ -90,7 +90,6 @@ def release(execute, level):
     os.system(command)
 
 
-# spellchecker:on
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Help running linter/tests for developing rsvim."
@@ -161,4 +160,3 @@ if __name__ == "__main__":
         release(parser.execute, parser.release)
     else:
         print("Error: missing arguments, use -h/--help for more details.")
-# spellchecker:off
