@@ -1,6 +1,6 @@
 # Development
 
-- [Toolchain](#toolchain)
+- [Requirements](#requirements)
 - [Rust](#rust)
   - [Lint](#lint)
   - [Test](#test)
@@ -8,7 +8,7 @@
 - [TypeScript/JavaScript](#typescriptjavascript)
   - [Transpile/Compile](#transpilecompile)
 
-## Toolchain
+## Requirements
 
 Please setup your development environment with:
 
@@ -16,9 +16,11 @@ Please setup your development environment with:
   - For Linux, please use builtin [GNU GCC](https://gcc.gnu.org/).
   - For macOS, please use [Xcode Clang](https://developer.apple.com/xcode/).
   - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
-- Latest stable [mise](https://github.com/jdx/mise) toolchain management, install rust/python/nodejs and other command lines with `mise i`.
+- Latest stable version management tools [mise](https://github.com/jdx/mise) and [pipx](https://github.com/pypa/pipx), then install multiple command lines with `mise i`.
 
 ## Rust
+
+> We provide the `dev.py` script to help running below commands, use `dev.py -h` for more details.
 
 ### Lint
 
