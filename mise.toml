@@ -1,0 +1,20 @@
+[tools]
+rust = "1.84.1"
+"cargo:sccache" = "latest"
+"cargo:bacon" = "latest"
+"cargo:cargo-nextest" = "latest"
+"cargo:cargo-watch" = "latest"
+"cargo:cargo-release" = "latest"
+"cargo:git-cliff" = "latest"
+"cargo:taplo-cli" = "latest"
+"cargo:typos-cli" = "latest"
+
+python = "3.13"
+"pipx:black" = "latest"
+"pipx:isort" = "latest"
+
+node = "22"
+"npm:prettier" = "latest"
+"npm:browser-sync" = "latest"
+"npm:typescript" = "latest"
+"npm:markdownlint" = "latest"

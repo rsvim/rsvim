@@ -1,20 +1,14 @@
 # Development
 
+- [Requirements](#requirements)
 - [Rust](#rust)
-  - [Toolchain](#toolchain)
-  - [Environment Variable](#environment-variable)
-  - [Check](#check)
+  - [Lint](#lint)
   - [Test](#test)
   - [Debug](#debug)
 - [TypeScript/JavaScript](#typescriptjavascript)
-  - [Toolchain](#toolchain)
-  - [Check](#check)
-  - [Transpile (Compile)](#transpile-compile)
-- [Markdown Document](#markdown-document)
+  - [Transpile/Compile](#transpilecompile)
 
-## Rust
-
-### Toolchain
+## Requirements
 
 Please setup your development environment with:
 
@@ -22,19 +16,15 @@ Please setup your development environment with:
   - For Linux, please use builtin [GNU GCC](https://gcc.gnu.org/).
   - For macOS, please use [Xcode Clang](https://developer.apple.com/xcode/).
   - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
-- Latest stable [Rust](https://www.rust-lang.org/) compiler, or at least 1.74.0.
+- Latest stable version management tools [mise](https://github.com/jdx/mise) and [pipx](https://github.com/pypa/pipx), then install multiple command lines with `mise i`.
 
-To develop code, please setup with:
+## Rust
 
-- [rustfmt](https://github.com/rust-lang/rustfmt): Code formatter, format with `cargo fmt` or other ways you like.
-- [rust-clippy](https://github.com/rust-lang/rust-clippy) and [bacon](https://github.com/Canop/bacon): linter, lint with `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`.
-- [cargo-nextest](https://github.com/nextest-rs/nextest): Test runner, run with `RUST_LOG=trace cargo nextest run --no-capture`.
-- [taplo](https://github.com/tamasfe/taplo): Toml code formatter, format with `taplo format [FILE]` or other ways you like.
-- [sccache](https://github.com/mozilla/sccache): Compiler cache to improve building speed.
+> We provide the `dev.py` script to help running below commands, use `dev.py -h` for more details.
 
 ### Lint
 
-To check code, please use `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`.
+To check code, please use `RUSTFLAGS='-Dwarnings' bacon -j clippy-all`.
 
 ### Test
 
@@ -47,44 +37,26 @@ To check code, please use `RUSTFLAGS="-Dwarnings" bacon -j clippy-all`.
 
 To debug code, please:
 
-1. Build `rsvim` with `cargo build`.
-2. Run with `RUST_BACKTRACE=full RUST_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
+1. Build binary with `RUST_BACKTRACE=full RUST_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
 
 ### Docs
 
-To write docs, please setup with:
+To write docs, please:
 
-- [cargo-watch](https://github.com/watchexec/cargo-watch): Watch project file changes.
-- [browser-sync](https://browsersync.io/): Reload generated docs and sync to browser, setup with:
+1. Start local service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
+2. Open browser with `http://localhost:3000/rsvim`.
 
-  1. Install with `npm install -g browser-sync`.
-  2. Start service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
-  3. Open browser with `http://localhost:3000/rsvim`.
+### Release
+
+To release a new version, please:
+
+1. Dry run with `./dev.py -r [LEVEL]`.
+2. Release with `./dev.py -r [LEVEL] -e`.
 
 ## TypeScript/JavaScript
 
-### Toolchain
+### Transpile/Compile
 
-Please setup your development environment with:
+To transpile/compile typescript code to javascript code, please run `tsc`.
 
-- [Node.js](https://nodejs.org/) &ge; v18.x.
-- Latest stable [Typescript](https://www.typescriptlang.org/), please install with `npm install -g typescript`, and run `tsc --version` to verify the installation is successful.
-
-To develop code, please setup with:
-
-- [prettier](https://prettier.io/): Code formatter.
-
-### Transpile (Compile)
-
-To transpile ts code to js code (in `./src/js/runtime` folder), please run with `tsc` (it also check the code).
-
-To automatically generate js code, please link (or copy) `./git-hooks/pre-commit` to `./git/hooks/pre-commit` in your local git repository with:
-
-- `ln -s $PWD/git-hooks/pre-commit $PWD/.git/hooks/pre-commit`
-
-## Markdown Document
-
-To write markdown docs, please setup with:
-
-- [markdownlint](https://github.com/DavidAnson/markdownlint): Markdown linter.
-- [prettier](https://prettier.io/): Markdown formatter.
+> To automatically generate js code, please link (or copy) `./git-hooks/pre-commit` to `./git/hooks/pre-commit` in local git repository with `ln -s $PWD/git-hooks/pre-commit $PWD/.git/hooks/pre-commit`.
