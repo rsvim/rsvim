@@ -37,8 +37,7 @@ To check code, please use `RUSTFLAGS='-Dwarnings' bacon -j clippy-all`.
 
 To debug code, please:
 
-1. Build binary with `cargo build`.
-2. Build binary with `RUST_BACKTRACE=full RUST_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
+1. Build binary with `RUST_BACKTRACE=full RUST_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
 
 ### Docs
 
