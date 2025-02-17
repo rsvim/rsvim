@@ -369,7 +369,7 @@ fn _from_top_left_wrap_nolinebreak(
 }
 
 //#[allow(unused_variables)]
-//// Implement [`from_top_left`] with option `wrap=true` and `line-break=true`.
+// // Implement [`from_top_left`] with option `wrap=true` and `line-break=true`.
 //fn _from_top_left_wrap_linebreak(
 //  _options: &ViewportOptions,
 //  buffer: BufferWk,
