@@ -4,7 +4,7 @@
 #[macro_export]
 macro_rules! rlock {
   ($id:expr) => {
-    ($id).try_read_for(envar::MUTEX_TIMEOUT()).unwrap()
+    ($id).try_read_for(crate::envar::MUTEX_TIMEOUT()).unwrap()
   };
 }
 
@@ -12,6 +12,6 @@ macro_rules! rlock {
 #[macro_export]
 macro_rules! wlock {
   ($id:expr) => {
-    ($id).try_write_for(envar::MUTEX_TIMEOUT()).unwrap()
+    ($id).try_write_for(crate::envar::MUTEX_TIMEOUT()).unwrap()
   };
 }
