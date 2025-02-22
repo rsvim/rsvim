@@ -10,8 +10,6 @@ rust = "1.84.1"
 "cargo:typos-cli" = "latest"
 
 python = "3.13"
-"pipx:black" = "latest"
-"pipx:isort" = "latest"
 
 node = "22"
 "npm:prettier" = "latest"
