@@ -169,10 +169,10 @@ macro_rules! geo_rect_as {
 #[macro_export]
 macro_rules! geo_size_as {
   ($size_var:ident,$type_name:ty) => {
-    Size::new(
+    crate::cart::Size::new(
       $size_var.height as $type_name,
       $size_var.width as $type_name,
-    ) as Size<$type_name>
+    ) as crate::cart::Size<$type_name>
   };
 }
 
