@@ -2,7 +2,6 @@
 
 use crate::buf::{Buffer, BufferWk};
 use crate::cart::{IRect, U16Pos, U16Rect};
-use crate::envar;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::window::viewport::ViewportWk;

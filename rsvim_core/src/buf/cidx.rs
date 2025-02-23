@@ -86,11 +86,11 @@ impl ColumnIndex {
   fn _build_cache(
     &mut self,
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     char_idx_bound: Option<usize>,
     width_bound: Option<usize>,
   ) {
-    let n = rope_line.len_chars();
+    let n = buf_line.len_chars();
 
     let start_idx = self.char2width.len();
     let mut prefix: usize = if start_idx == 0 {
@@ -99,7 +99,7 @@ impl ColumnIndex {
       self.char2width[start_idx - 1]
     };
 
-    let mut rope_chars = rope_line.chars_at(start_idx);
+    let mut rope_chars = buf_line.chars_at(start_idx);
     for i in start_idx..n {
       let c = rope_chars.next().unwrap();
       prefix += unicode::char_width(options, c);
@@ -138,10 +138,10 @@ impl ColumnIndex {
   fn _build_cache_until_char(
     &mut self,
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     char_idx: usize,
   ) {
-    self._build_cache(options, rope_line, Some(char_idx), None);
+    self._build_cache(options, buf_line, Some(char_idx), None);
   }
 
   /// Get the prefix display width in char index range `[0,char_idx)`, left-inclusive and
@@ -160,20 +160,20 @@ impl ColumnIndex {
   pub fn width_before(
     &mut self,
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     char_idx: usize,
   ) -> usize {
-    self._build_cache_until_char(options, rope_line, char_idx);
+    self._build_cache_until_char(options, buf_line, char_idx);
     self._internal_check();
 
     if char_idx == 0 {
       0
     } else if self.char2width.is_empty() {
-      assert_eq!(rope_line.len_chars(), 0);
+      assert_eq!(buf_line.len_chars(), 0);
       0
     } else {
       assert!(!self.char2width.is_empty());
-      assert!(rope_line.len_chars() > 0);
+      assert!(buf_line.len_chars() > 0);
       if char_idx - 1 < self.char2width.len() {
         // Find width from the cache.
         self.char2width[char_idx - 1]
@@ -198,18 +198,18 @@ impl ColumnIndex {
   pub fn width_at(
     &mut self,
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     char_idx: usize,
   ) -> usize {
-    self._build_cache_until_char(options, rope_line, char_idx);
+    self._build_cache_until_char(options, buf_line, char_idx);
     self._internal_check();
 
     if self.char2width.is_empty() {
-      assert_eq!(rope_line.len_chars(), 0);
+      assert_eq!(buf_line.len_chars(), 0);
       0
     } else {
       assert!(!self.char2width.is_empty());
-      assert!(rope_line.len_chars() > 0);
+      assert!(buf_line.len_chars() > 0);
       if char_idx < self.char2width.len() {
         // Find width from the cache.
         self.char2width[char_idx]
@@ -224,10 +224,10 @@ impl ColumnIndex {
   fn _build_cache_until_width(
     &mut self,
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     width: usize,
   ) {
-    self._build_cache(options, rope_line, None, Some(width));
+    self._build_cache(options, buf_line, None, Some(width));
   }
 
   /// Get the **previous** char index which the width is less than the specified width.
@@ -251,20 +251,20 @@ impl ColumnIndex {
   pub fn char_before(
     &mut self,
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
-    self._build_cache_until_width(options, rope_line, width);
+    self._build_cache_until_width(options, buf_line, width);
     self._internal_check();
 
     if width == 0 {
       None
     } else if self.width2char.is_empty() {
-      assert_eq!(rope_line.len_chars(), 0);
+      assert_eq!(buf_line.len_chars(), 0);
       None
     } else {
       assert!(!self.width2char.is_empty());
-      assert!(rope_line.len_chars() > 0);
+      assert!(buf_line.len_chars() > 0);
 
       let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
       if width > *last_width {
@@ -297,18 +297,18 @@ impl ColumnIndex {
   pub fn char_at(
     &mut self,
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
-    self._build_cache_until_width(options, rope_line, width);
+    self._build_cache_until_width(options, buf_line, width);
     self._internal_check();
 
     if self.width2char.is_empty() {
-      assert_eq!(rope_line.len_chars(), 0);
+      assert_eq!(buf_line.len_chars(), 0);
       None
     } else {
       assert!(!self.width2char.is_empty());
-      assert!(rope_line.len_chars() > 0);
+      assert!(buf_line.len_chars() > 0);
 
       if width == 0 {
         if *self.char2width.first().unwrap() == 0 {
@@ -349,13 +349,13 @@ impl ColumnIndex {
   pub fn char_after(
     &mut self,
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
-    self._build_cache_until_width(options, rope_line, width + 1);
+    self._build_cache_until_width(options, buf_line, width + 1);
     self._internal_check();
 
-    let n = rope_line.len_chars();
+    let n = buf_line.len_chars();
     if self.char2width.is_empty() {
       assert_eq!(n, 0);
       return None;
@@ -365,7 +365,7 @@ impl ColumnIndex {
       return Some(0);
     }
 
-    if let Some(char_idx) = self.char_at(options, rope_line, width) {
+    if let Some(char_idx) = self.char_at(options, buf_line, width) {
       if char_idx + 1 < n {
         return Some(char_idx + 1);
       }
@@ -386,10 +386,10 @@ impl ColumnIndex {
   pub fn last_char_until(
     &mut self,
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
-    self._build_cache_until_width(options, rope_line, width);
+    self._build_cache_until_width(options, buf_line, width);
     self._internal_check();
 
     if width == 0 {
@@ -403,7 +403,7 @@ impl ColumnIndex {
     let (last_width, last_char_idx) = self.width2char.last_key_value().unwrap();
     if width > *last_width {
       return Some(*last_char_idx);
-    } else if let Some(char_idx) = self.char_at(options, rope_line, width) {
+    } else if let Some(char_idx) = self.char_at(options, buf_line, width) {
       return Some(char_idx);
     }
 
@@ -459,12 +459,12 @@ mod tests {
 
   fn assert_width_at(
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
-      let a = actual.width_at(options, rope_line, i);
+      let a = actual.width_at(options, buf_line, i);
       info!("width_at:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -472,12 +472,12 @@ mod tests {
 
   fn assert_width_at_rev(
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
-      let a = actual.width_at(options, rope_line, *i);
+      let a = actual.width_at(options, buf_line, *i);
       info!("width_at_rev:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -485,12 +485,12 @@ mod tests {
 
   fn assert_width_before(
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
-      let a = actual.width_before(options, rope_line, i);
+      let a = actual.width_before(options, buf_line, i);
       info!("width_before:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -498,12 +498,12 @@ mod tests {
 
   fn assert_width_before_rev(
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
-      let a = actual.width_before(options, rope_line, *i);
+      let a = actual.width_before(options, buf_line, *i);
       info!("width_before:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -830,16 +830,16 @@ mod tests {
 
   fn assert_char_before(
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_before: &[(usize, Option<usize>)],
   ) {
     for (w, c) in expect_before.iter() {
-      let actual = widx.char_before(options, rope_line, *w);
+      let actual = widx.char_before(options, buf_line, *w);
       info!("char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_at(options, rope_line, c.unwrap());
+        let actual = widx.width_at(options, buf_line, c.unwrap());
         info!("width_at-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual < *w);
       }
@@ -848,16 +848,16 @@ mod tests {
 
   fn assert_char_at(
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_until: &[(usize, Option<usize>)],
   ) {
     for (w, c) in expect_until.iter() {
-      let actual = widx.char_at(options, rope_line, *w);
+      let actual = widx.char_at(options, buf_line, *w);
       info!("char_at expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_at(options, rope_line, c.unwrap());
+        let actual = widx.width_at(options, buf_line, c.unwrap());
         info!("width_at-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual >= *w);
       } else {
@@ -868,16 +868,16 @@ mod tests {
 
   fn assert_char_after(
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_after: &[(usize, Option<usize>)],
   ) {
     for (w, c) in expect_after.iter() {
-      let actual = widx.char_after(options, rope_line, *w);
+      let actual = widx.char_after(options, buf_line, *w);
       info!("char_after expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_at(options, rope_line, c.unwrap());
+        let actual = widx.width_at(options, buf_line, c.unwrap());
         info!("width_at-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual >= *w);
       }
@@ -886,12 +886,12 @@ mod tests {
 
   fn assert_last_char_until(
     options: &BufferLocalOptions,
-    rope_line: &RopeSlice,
+    buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_until: &[(usize, Option<usize>)],
   ) {
     for (w, c) in expect_until.iter() {
-      let actual = widx.last_char_until(options, rope_line, *w);
+      let actual = widx.last_char_until(options, buf_line, *w);
       info!("last_char_until expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
     }
