@@ -124,8 +124,8 @@ impl LineViewport {
 /// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we will
 /// always maintain this position information for it.
 pub struct CursorViewport {
-  // Char index.
-  char_idx: usize,
+  // Column index.
+  col_idx: usize,
   // Row index.
   row_idx: u16,
   // Line index.
@@ -134,17 +134,17 @@ pub struct CursorViewport {
 
 impl CursorViewport {
   /// Make new instance.
-  pub fn new(char_idx: usize, row_idx: u16, line_idx: usize) -> Self {
+  pub fn new(col_idx: usize, row_idx: u16, line_idx: usize) -> Self {
     Self {
-      char_idx,
+      col_idx,
       row_idx,
       line_idx,
     }
   }
 
-  /// Get char index, starts from 0.
-  pub fn char_idx(&self) -> usize {
-    self.char_idx
+  /// Get column index, starts from 0.
+  pub fn col_idx(&self) -> usize {
+    self.col_idx
   }
 
   /// Get the row index, starts from 0.
