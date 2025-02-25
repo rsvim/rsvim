@@ -18,6 +18,8 @@ Please setup your development environment with:
   - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
 - Latest stable version management tools [mise](https://github.com/jdx/mise) and [pipx](https://github.com/pypa/pipx), then install multiple command lines with `mise i`.
 
+  > Note: For windows development, please manually install all dependencies in the `mise.toml` file.
+
 ## Rust
 
 > We provide the `dev.py` script to help running below commands, use `dev.py -h` for more details.
