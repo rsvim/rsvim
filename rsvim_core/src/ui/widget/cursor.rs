@@ -5,7 +5,7 @@ use tracing::trace;
 
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_generate_impl;
-use crate::ui::canvas::{self, CCursorStyle, Canvas, CursorStyleFormatter};
+use crate::ui::canvas::{self, CCursorStyle, CCursorStyleFormatter, Canvas};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::Widgetable;
 
@@ -31,7 +31,7 @@ impl Cursor {
 
 impl Debug for Cursor {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    let style_formatter = CursorStyleFormatter::from(self.style);
+    let style_formatter = CCursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
       .field("id", &self.base.id())
       .field("blinking", &self.blinking)

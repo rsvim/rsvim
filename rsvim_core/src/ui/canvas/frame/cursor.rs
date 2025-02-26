@@ -43,21 +43,18 @@ pub struct CCursor {
   style: CCursorStyle,
 }
 
-/// The [`CursorStyle`] formatter that helps implement the `Debug`/`Display` trait.
-///
-/// NOTE: The [`SetCursorStyle`](crossterm::cursor::SetCursorStyle) doesn't implement the
-/// `Debug`/`Display` trait before 0.28.1.
-pub struct CursorStyleFormatter {
+/// The [`CCursorStyle`] formatter that helps implement the `Debug`/`Display` trait.
+pub struct CCursorStyleFormatter {
   value: CCursorStyle,
 }
 
-impl From<CCursorStyle> for CursorStyleFormatter {
+impl From<CCursorStyle> for CCursorStyleFormatter {
   fn from(style: CCursorStyle) -> Self {
-    CursorStyleFormatter { value: style }
+    CCursorStyleFormatter { value: style }
   }
 }
 
-impl fmt::Debug for CursorStyleFormatter {
+impl fmt::Debug for CCursorStyleFormatter {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
     match self.value {
       CCursorStyle::DefaultUserShape => write!(f, "DefaultUserShape"),
@@ -137,7 +134,7 @@ impl Default for CCursor {
 
 impl fmt::Debug for CCursor {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    let style_formatter = CursorStyleFormatter::from(self.style);
+    let style_formatter = CCursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
       .field("pos", &self.pos)
       .field("blinking", &self.blinking)

@@ -5,7 +5,7 @@ use crate::cart::{U16Pos, U16Size};
 // Re-export
 pub use crate::ui::canvas::frame::cell::Cell;
 pub use crate::ui::canvas::frame::cursor::{
-  ccursor_style_eq, CCursor, CCursorStyle, CursorStyleFormatter,
+  ccursor_style_eq, CCursor, CCursorStyle, CCursorStyleFormatter,
 };
 pub use crate::ui::canvas::frame::Frame;
 
@@ -386,7 +386,7 @@ impl fmt::Debug for ShaderCommand {
       ShaderCommand::CursorSetCursorStyle(command) => {
         format!(
           "CursorSetCursorStyle({:?})",
-          CursorStyleFormatter::from(*command)
+          CCursorStyleFormatter::from(*command)
         )
       }
       ShaderCommand::CursorDisableBlinking(command) => {
