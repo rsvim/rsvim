@@ -10,26 +10,26 @@ pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 /// Whether two `CursorStyle` equals.
 pub fn cursor_style_eq(a: &CursorStyle, b: &CursorStyle) -> bool {
   match a {
-    crossterm::cursor::SetCursorStyle::DefaultUserShape => {
-      matches!(b, crossterm::cursor::SetCursorStyle::DefaultUserShape)
+    CursorStyle::DefaultUserShape => {
+      matches!(b, CursorStyle::DefaultUserShape)
     }
-    crossterm::cursor::SetCursorStyle::BlinkingBlock => {
-      matches!(b, crossterm::cursor::SetCursorStyle::BlinkingBlock)
+    CursorStyle::BlinkingBlock => {
+      matches!(b, CursorStyle::BlinkingBlock)
     }
-    crossterm::cursor::SetCursorStyle::SteadyBlock => {
-      matches!(b, crossterm::cursor::SetCursorStyle::SteadyBlock)
+    CursorStyle::SteadyBlock => {
+      matches!(b, CursorStyle::SteadyBlock)
     }
-    crossterm::cursor::SetCursorStyle::BlinkingUnderScore => {
-      matches!(b, crossterm::cursor::SetCursorStyle::BlinkingUnderScore)
+    CursorStyle::BlinkingUnderScore => {
+      matches!(b, CursorStyle::BlinkingUnderScore)
     }
-    crossterm::cursor::SetCursorStyle::SteadyUnderScore => {
-      matches!(b, crossterm::cursor::SetCursorStyle::SteadyUnderScore)
+    CursorStyle::SteadyUnderScore => {
+      matches!(b, CursorStyle::SteadyUnderScore)
     }
-    crossterm::cursor::SetCursorStyle::BlinkingBar => {
-      matches!(b, crossterm::cursor::SetCursorStyle::BlinkingBar)
+    CursorStyle::BlinkingBar => {
+      matches!(b, CursorStyle::BlinkingBar)
     }
-    crossterm::cursor::SetCursorStyle::SteadyBar => {
-      matches!(b, crossterm::cursor::SetCursorStyle::SteadyBar)
+    CursorStyle::SteadyBar => {
+      matches!(b, CursorStyle::SteadyBar)
     }
   }
 }
