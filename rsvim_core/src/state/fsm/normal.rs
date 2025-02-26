@@ -3,7 +3,7 @@
 #![allow(unused_imports)]
 
 use crate::envar;
-use crate::state::command::SCommand;
+use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
