@@ -11,16 +11,16 @@ use crate::ui::widget::Widgetable;
 
 #[derive(Clone, Copy)]
 /// Cursor widget.
-pub struct WCursor {
+pub struct Cursor {
   base: InodeBase,
   blinking: bool,
   hidden: bool,
   style: CCursorStyle,
 }
 
-impl WCursor {
+impl Cursor {
   pub fn new(shape: IRect) -> Self {
-    WCursor {
+    Cursor {
       base: InodeBase::new(shape),
       blinking: true,
       hidden: false,
@@ -29,7 +29,7 @@ impl WCursor {
   }
 }
 
-impl Debug for WCursor {
+impl Debug for Cursor {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     let style_formatter = CCursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
@@ -41,9 +41,9 @@ impl Debug for WCursor {
   }
 }
 
-inode_generate_impl!(WCursor, base);
+inode_generate_impl!(Cursor, base);
 
-impl Widgetable for WCursor {
+impl Widgetable for Cursor {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();

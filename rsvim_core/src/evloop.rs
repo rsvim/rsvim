@@ -13,7 +13,7 @@ use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::{WCursor, Window};
+use crate::ui::widget::{Cursor, Window};
 use crate::{rlock, wlock};
 
 use crossterm::event::{
@@ -298,7 +298,7 @@ impl EventLoop {
 
     // Initialize cursor.
     let cursor_shape = IRect::new((0, 0), (1, 1));
-    let cursor = WCursor::new(cursor_shape);
+    let cursor = Cursor::new(cursor_shape);
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
 
