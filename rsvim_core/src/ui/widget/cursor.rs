@@ -5,7 +5,7 @@ use tracing::trace;
 
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_generate_impl;
-use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
+use crate::ui::canvas::{self, CCursorStyle, Canvas, CursorStyleFormatter};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::Widgetable;
 
@@ -15,7 +15,7 @@ pub struct Cursor {
   base: InodeBase,
   blinking: bool,
   hidden: bool,
-  style: CursorStyle,
+  style: CCursorStyle,
 }
 
 impl Cursor {
@@ -24,7 +24,7 @@ impl Cursor {
       base: InodeBase::new(shape),
       blinking: true,
       hidden: false,
-      style: CursorStyle::DefaultUserShape,
+      style: CCursorStyle::DefaultUserShape,
     }
   }
 }
@@ -53,7 +53,7 @@ impl Widgetable for Cursor {
       pos
     );
 
-    canvas.frame_mut().set_cursor(canvas::Cursor::new(
+    canvas.frame_mut().set_cursor(canvas::CCursor::new(
       pos,
       self.blinking,
       self.hidden,
