@@ -10,7 +10,7 @@
 
 #[derive(Debug, Copy, Clone)]
 // Editor operation commands.
-pub enum SCommand {
+pub enum Command {
   CursorMoveUp(u16),
   CursorMoveDown(u16),
   CursorMoveLeft(u16),

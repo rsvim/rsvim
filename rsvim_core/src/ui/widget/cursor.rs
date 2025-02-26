@@ -5,33 +5,33 @@ use tracing::trace;
 
 use crate::cart::{IRect, U16Pos, U16Rect};
 use crate::inode_generate_impl;
-use crate::ui::canvas::{CCursor, CCursorStyle, CCursorStyleFormatter, Canvas};
+use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::Widgetable;
 
 #[derive(Clone, Copy)]
 /// Cursor widget.
-pub struct WCursor {
+pub struct Cursor {
   base: InodeBase,
   blinking: bool,
   hidden: bool,
-  style: CCursorStyle,
+  style: CursorStyle,
 }
 
-impl WCursor {
+impl Cursor {
   pub fn new(shape: IRect) -> Self {
-    WCursor {
+    Cursor {
       base: InodeBase::new(shape),
       blinking: true,
       hidden: false,
-      style: CCursorStyle::DefaultUserShape,
+      style: CursorStyle::DefaultUserShape,
     }
   }
 }
 
-impl Debug for WCursor {
+impl Debug for Cursor {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    let style_formatter = CCursorStyleFormatter::from(self.style);
+    let style_formatter = CursorStyleFormatter::from(self.style);
     f.debug_struct("Cursor")
       .field("id", &self.base.id())
       .field("blinking", &self.blinking)
@@ -41,9 +41,9 @@ impl Debug for WCursor {
   }
 }
 
-inode_generate_impl!(WCursor, base);
+inode_generate_impl!(Cursor, base);
 
-impl Widgetable for WCursor {
+impl Widgetable for Cursor {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let pos: U16Pos = actual_shape.min().into();
@@ -53,8 +53,11 @@ impl Widgetable for WCursor {
       pos
     );
 
-    canvas
-      .frame_mut()
-      .set_cursor(CCursor::new(pos, self.blinking, self.hidden, self.style));
+    canvas.frame_mut().set_cursor(canvas::Cursor::new(
+      pos,
+      self.blinking,
+      self.hidden,
+      self.style,
+    ));
   }
 }
