@@ -14,7 +14,7 @@ use std::ptr::NonNull;
 // use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
-/// Lines index inside [`Viewport`].
+/// Lines index inside `Viewport`.
 pub struct ViewportLineRange {
   start_line_idx: usize,
   end_line_idx: usize,

@@ -5,7 +5,7 @@ use crate::cart::{U16Pos, U16Size};
 // Re-export
 pub use crate::ui::canvas::frame::cell::Cell;
 pub use crate::ui::canvas::frame::cursor::{
-  cursor_style_eq, Cursor, CursorStyle, CursorStyleFormatter,
+  ccursor_style_eq, CCursor, CCursorStyle, CCursorStyleFormatter,
 };
 pub use crate::ui::canvas::frame::Frame;
 
@@ -41,8 +41,8 @@ impl Canvas {
   /// Make new canvas with terminal actual size.
   pub fn new(size: U16Size) -> Self {
     Canvas {
-      prev_frame: Frame::new(size, Cursor::default()),
-      frame: Frame::new(size, Cursor::default()),
+      prev_frame: Frame::new(size, CCursor::default()),
+      frame: Frame::new(size, CCursor::default()),
     }
   }
 
@@ -73,7 +73,7 @@ impl Canvas {
   }
 
   /// Get current frame cursor.
-  pub fn cursor(&self) -> &Cursor {
+  pub fn cursor(&self) -> &CCursor {
     self.frame.cursor()
   }
 
@@ -101,7 +101,7 @@ impl Canvas {
   }
 
   /// Get previous frame cursor.
-  pub fn prev_cursor(&self) -> &Cursor {
+  pub fn prev_cursor(&self) -> &CCursor {
     self.prev_frame.cursor()
   }
 
@@ -165,7 +165,7 @@ impl Canvas {
           shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
         }
       }
-      if !cursor_style_eq(&cursor.style(), &prev_cursor.style()) {
+      if !ccursor_style_eq(&cursor.style(), &prev_cursor.style()) {
         shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
       if cursor.pos() != prev_cursor.pos() {
@@ -386,7 +386,7 @@ impl fmt::Debug for ShaderCommand {
       ShaderCommand::CursorSetCursorStyle(command) => {
         format!(
           "CursorSetCursorStyle({:?})",
-          CursorStyleFormatter::from(*command)
+          CCursorStyleFormatter::from(*command)
         )
       }
       ShaderCommand::CursorDisableBlinking(command) => {
@@ -601,13 +601,13 @@ mod tests {
     INIT.call_once(test_log_init);
     let mut can = Canvas::new(U16Size::new(10, 10));
 
-    let cursor1 = Cursor::default();
+    let cursor1 = CCursor::default();
     can.frame_mut().set_cursor(cursor1);
     let actual1 = can._shade_cursor();
     can._shade_done();
     assert!(actual1.is_empty());
 
-    let cursor2 = Cursor::new(point!(x:3, y:7), false, true, CursorStyle::BlinkingBar);
+    let cursor2 = CCursor::new(point!(x:3, y:7), false, true, CCursorStyle::BlinkingBar);
     can.frame_mut().set_cursor(cursor2);
     let actual2 = can._shade_cursor();
     can._shade_done();
@@ -663,7 +663,7 @@ mod tests {
       1
     );
 
-    let cursor3 = Cursor::new(point!(x:4, y:5), true, true, CursorStyle::SteadyUnderScore);
+    let cursor3 = CCursor::new(point!(x:4, y:5), true, true, CCursorStyle::SteadyUnderScore);
     can.frame_mut().set_cursor(cursor3);
     let actual3 = can._shade_cursor();
     can._shade_done();

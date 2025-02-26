@@ -154,9 +154,7 @@ impl Buffer {
   /// Get the display width for a `char`, supports both ASCI control codes and unicode.
   ///
   /// The char display width follows the
-  /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/), implemented with
-  /// [UnicodeWidthChar], there's another equivalent crate
-  /// [icu::properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
+  /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/).
   pub fn char_width(&self, c: char) -> usize {
     unicode::char_width(&self.options, c)
   }
@@ -356,7 +354,7 @@ impl Buffer {
       .last_char_until(&self.options, &rope_line, width)
   }
 
-  /// See [`ColumnIndex::truncate_by_char`].
+  /// See [`ColumnIndex::truncate_since_char`].
   pub fn truncate_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
     self.rope_lines_width.entry(line_idx).or_default();
     self
@@ -366,7 +364,7 @@ impl Buffer {
       .truncate_since_char(char_idx)
   }
 
-  /// See [`ColumnIndex::truncate_by_width`].
+  /// See [`ColumnIndex::truncate_since_width`].
   pub fn truncate_line_since_width(&mut self, line_idx: usize, width: usize) {
     self.rope_lines_width.entry(line_idx).or_default();
     self

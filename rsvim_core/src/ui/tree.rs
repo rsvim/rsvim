@@ -7,7 +7,7 @@ use crate::envar;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::WindowLocalOptions;
-use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
+use crate::ui::widget::{RootContainer, WCursor, Widgetable, Window};
 
 // Re-export
 pub use crate::ui::tree::opt::{WindowGlobalOptions, WindowGlobalOptionsBuilder};
@@ -25,7 +25,7 @@ pub mod opt;
 pub enum TreeNode {
   RootContainer(RootContainer),
   Window(Window),
-  Cursor(Cursor),
+  Cursor(WCursor),
 }
 
 macro_rules! tree_node_generate_dispatch {
