@@ -130,18 +130,15 @@ pub struct CursorViewport {
   line_idx: usize,
   // Row index.
   row_idx: u16,
-  // Column index (the start column of char).
-  col_idx: u16,
 }
 
 impl CursorViewport {
   /// Make new instance.
-  pub fn new(char_idx: usize, line_idx: usize, row_idx: u16, col_idx: u16) -> Self {
+  pub fn new(char_idx: usize, line_idx: usize, row_idx: u16) -> Self {
     Self {
       char_idx,
       line_idx,
       row_idx,
-      col_idx,
     }
   }
 
@@ -173,16 +170,6 @@ impl CursorViewport {
   /// Set the row index.
   pub fn set_row_idx(&mut self, row_idx: u16) {
     self.row_idx = row_idx;
-  }
-
-  /// Get the column index, starts from 0.
-  pub fn col_idx(&self) -> u16 {
-    self.col_idx
-  }
-
-  /// Set the column index.
-  pub fn set_col_idx(&mut self, col_idx: u16) {
-    self.col_idx = col_idx;
   }
 }
 
@@ -487,7 +474,7 @@ impl Viewport {
         let row_idx = *first_row.0;
         let first_row = first_row.1;
         let char_idx = first_row.start_char_idx();
-        CursorViewport::new(char_idx, row_idx, line_idx)
+        CursorViewport::new(char_idx, line_idx, row_idx)
       }
     };
 

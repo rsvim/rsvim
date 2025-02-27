@@ -131,8 +131,7 @@ impl NormalStateful {
                 None => buffer.get_rope().line(line_idx).len_chars() - 1,
               };
 
-              viewport.set_cursor_line_idx(line_idx);
-              viewport.set_cursor_char_idx(char_idx);
+              viewport.set_cursor(line_idx, char_idx);
 
               let cursor_id = tree.cursor_id().unwrap();
               let mut cursor_node = tree.node_mut(&cursor_id).unwrap();
@@ -164,7 +163,7 @@ impl NormalStateful {
                 _ => unreachable!(),
               };
 
-              viewport.set_cursor_char_idx(char_idx);
+              viewport.set_cursor(cursor_viewport.line_idx(), char_idx);
 
               let cursor_id = tree.cursor_id().unwrap();
               let mut cursor_node = tree.node_mut(&cursor_id).unwrap();
