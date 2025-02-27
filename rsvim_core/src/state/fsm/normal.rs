@@ -105,6 +105,9 @@ impl NormalStateful {
         if let TreeNode::Window(current_window_node) = current_window {
           let viewport = current_window_node.viewport();
           let viewport = wlock!(viewport);
+          let buffer = viewport.buffer();
+          let buffer = buffer.upgrade().unwrap();
+          let cursor_viewport = viewport.cursor();
           match command {
             Command::CursorMoveUp(n) => {}
             Command::CursorMoveDown(n) => {}
