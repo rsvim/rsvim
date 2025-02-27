@@ -121,27 +121,29 @@ impl NormalStateful {
             .width_at(cursor_viewport.line_idx(), cursor_viewport.char_idx());
 
           match command {
-            Command::CursorMoveUp(n) => {
-              let line_idx = cursor_viewport.line_idx().saturating_sub(n as usize);
+            Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
+              let line_idx = match command {
+                Command::CursorMoveUp(n) => cursor_viewport.line_idx().saturating_sub(n as usize),
+                Command::CursorMoveDown(n) => std::cmp::max(
+                  cursor_viewport.line_idx().saturating_add(n as usize),
+                  buffer.get_rope().len_lines(),
+                ),
+                _ => unreachable!(),
+              };
             }
-            Command::CursorMoveDown(n) => {
-              let line_idx = std::cmp::max(
-                cursor_viewport.line_idx().saturating_add(n as usize),
-                buffer.get_rope().len_lines(),
-              );
-            }
-            Command::CursorMoveLeft(n) => {
-              let char_idx = cursor_viewport.char_idx().saturating_sub(n as usize);
-            }
-            Command::CursorMoveRight(n) => {
-              let char_idx = std::cmp::max(
-                cursor_viewport.char_idx().saturating_add(n as usize),
-                buffer
-                  .get_rope()
-                  .get_line(cursor_viewport.line_idx())
-                  .unwrap()
-                  .len_chars(),
-              );
+            Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
+              let char_idx = match command {
+                Command::CursorMoveLeft(n) => cursor_viewport.char_idx().saturating_sub(n as usize),
+                Command::CursorMoveRight(n) => std::cmp::max(
+                  cursor_viewport.char_idx().saturating_add(n as usize),
+                  buffer
+                    .get_rope()
+                    .get_line(cursor_viewport.line_idx())
+                    .unwrap()
+                    .len_chars(),
+                ),
+                _ => unreachable!(),
+              };
             }
           }
         }
