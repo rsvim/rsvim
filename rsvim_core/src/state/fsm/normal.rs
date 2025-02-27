@@ -124,12 +124,29 @@ impl NormalStateful {
                 ),
                 _ => unreachable!(),
               };
+              debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+              debug_assert!(buffer.get_rope().get_line(line_idx).unwrap().len_chars() > 0);
               let cursor_col_idx = raw_buffer
                 .as_mut()
                 .width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
-              let char_idx = raw_buffer.as_mut().char_at(cursor_col_idx);
+              let char_idx = match raw_buffer.as_mut().char_at(line_idx, cursor_col_idx) {
+                Some(char_idx) => char_idx,
+                None => buffer.get_rope().line(line_idx).len_chars() - 1,
+              };
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
+              debug_assert!(buffer
+                .get_rope()
+                .get_line(cursor_viewport.line_idx())
+                .is_some());
+              debug_assert!(
+                buffer
+                  .get_rope()
+                  .get_line(cursor_viewport.line_idx())
+                  .unwrap()
+                  .len_chars()
+                  > 0
+              );
               let char_idx = match command {
                 Command::CursorMoveLeft(n) => cursor_viewport.char_idx().saturating_sub(n as usize),
                 Command::CursorMoveRight(n) => std::cmp::max(
@@ -138,7 +155,8 @@ impl NormalStateful {
                     .get_rope()
                     .get_line(cursor_viewport.line_idx())
                     .unwrap()
-                    .len_chars(),
+                    .len_chars()
+                    - 1,
                 ),
                 _ => unreachable!(),
               };
