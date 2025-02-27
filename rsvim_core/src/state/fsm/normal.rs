@@ -1,5 +1,6 @@
 //! The normal mode.
 
+use crate::buf::{Buffer, BufferWk};
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -9,6 +10,7 @@ use crate::ui::widget::window::CursorViewport;
 use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
+use std::ptr::NonNull;
 use std::time::Duration;
 
 #[derive(Debug, Copy, Clone, Default)]
@@ -104,15 +106,27 @@ impl NormalStateful {
       if let Some(TreeNode::Window(current_window_node)) = tree.node_mut(&current_window_id) {
         let viewport = current_window_node.viewport();
         let viewport = wlock!(viewport);
+        let cursor_viewport = viewport.cursor();
+
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let buffer = wlock!(buffer);
-        let cursor_viewport = viewport.cursor();
-        match command {
-          Command::CursorMoveUp(n) => {}
-          Command::CursorMoveDown(n) => {}
-          Command::CursorMoveLeft(n) => {}
-          Command::CursorMoveRight(n) => {}
+        let mut buffer = wlock!(buffer);
+        unsafe {
+          // Fix multiple mutable references on `buffer`.
+          let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+          let cursor_col_start = raw_buffer
+            .as_mut()
+            .width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
+          let cursor_col_end = raw_buffer
+            .as_mut()
+            .width_at(cursor_viewport.line_idx(), cursor_viewport.char_idx());
+
+          match command {
+            Command::CursorMoveUp(n) => {}
+            Command::CursorMoveDown(n) => {}
+            Command::CursorMoveLeft(n) => {}
+            Command::CursorMoveRight(n) => {}
+          }
         }
       }
     }

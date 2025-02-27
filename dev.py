@@ -12,14 +12,20 @@ __DISABLE_SCCACHE = False
 
 __TEST_NOT_SPECIFIED = "__TEST_NOT_SPECIFIED"
 __BUILD_NOT_SPECIFIED = "__BUILD_NOT_SPECIFIED"
+__CLIPPY_NOT_SPECIFIED = "__CLIPPY_NOT_SPECIFIED"
 
 
-def clippy():
+def clippy(mode):
     command = "RUSTFLAGS='-Dwarnings'"
     if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
-    command = f"{command} bacon -j clippy-all --headless"
+    if isinstance(mode, str) and mode.lower().startswith("s"):
+        print("Run 'clippy' as background service")
+        command = f"{command} bacon -j clippy-all --headless"
+    else:
+        print("Run 'clippy' only once")
+        command = f"{command} cargo clippy --workspace"
 
     command = command.strip()
     print(command)
@@ -29,6 +35,9 @@ def clippy():
 def test(name):
     if name is None:
         name = "--all"
+        print("Run 'test' for all cases")
+    else:
+        print("Run 'test' for: {name}")
 
     command = "RUST_LOG=trace"
     if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
@@ -59,8 +68,10 @@ def build(release):
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
     if isinstance(release, str) and release.lower().startswith("r"):
+        print("Run 'build' for 'release'")
         command = f"{command} cargo build --release"
     else:
+        print("Run 'build' for 'debug'")
         command = f"{command} cargo build"
 
     command = command.strip()
@@ -83,7 +94,10 @@ def release(execute, level):
 
     command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
     if execute:
+        print("Run 'release' with '--execute' (no dry run), in level: {level}")
         command = f"{command} --execute --no-verify"
+    else:
+        print("Run 'release' in dry run, in level: {level}")
 
     command = command.strip()
     print(command)
@@ -97,8 +111,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "-c",
         "--clippy",
-        action="store_true",
-        help="Run clippy with `RUSTFLAGS=-Dwarnings`",
+        nargs="?",
+        default=__CLIPPY_NOT_SPECIFIED,
+        metavar="SERVICE",
+        help="Run clippy with `RUSTFLAGS=-Dwarnings` once or as background service (watch file changes), by default is only once. Use `s(ervice)` to start background service",
     )
     parser.add_argument(
         "-t",
@@ -146,8 +162,8 @@ if __name__ == "__main__":
     if parser.no_cache:
         __DISABLE_SCCACHE = True
 
-    if parser.clippy:
-        clippy()
+    if parser.clippy is None or parser.clippy != __CLIPPY_NOT_SPECIFIED:
+        clippy(parser.clippy)
     elif parser.test is None or parser.test != __TEST_NOT_SPECIFIED:
         test(parser.test)
     elif parser.list_test:
