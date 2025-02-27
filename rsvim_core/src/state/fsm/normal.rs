@@ -122,10 +122,21 @@ impl NormalStateful {
             .width_at(cursor_viewport.line_idx(), cursor_viewport.char_idx());
 
           match command {
-            Command::CursorMoveUp(n) => {}
-            Command::CursorMoveDown(n) => {}
-            Command::CursorMoveLeft(n) => {}
-            Command::CursorMoveRight(n) => {}
+            Command::CursorMoveUp(n) => {
+              let line_idx = cursor_viewport.line_idx().saturating_sub(n as usize);
+            }
+            Command::CursorMoveDown(n) => {
+              let line_idx = cursor_viewport.line_idx().saturating_add(n as usize);
+            }
+            Command::CursorMoveLeft(n) => {
+              let char_idx = cursor_viewport.char_idx().saturating_sub(n as usize);
+            }
+            Command::CursorMoveRight(n) => {
+              let char_idx = std::cmp::max(
+                cursor_viewport.char_idx().saturating_add(n as usize),
+                buffer.len_chars_at_line(cursor_viewport.line_idx()),
+              );
+            }
           }
         }
       }

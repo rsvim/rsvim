@@ -228,6 +228,14 @@ impl Buffer {
     self.rope.len_lines()
   }
 
+  /// Same with [`RopeSlice::len_chars`](RopeSlice::len_chars).
+  ///
+  /// # Pancis
+  /// It pancis if `line_idx` doesn't exist in buffer.
+  pub fn len_chars_at_line(&self, line_idx: usize) -> usize {
+    self.rope.get_line(line_idx).unwrap().len_chars()
+  }
+
   // lines }
 
   /// Alias to method [`Rope::write_to`](Rope::write_to).
