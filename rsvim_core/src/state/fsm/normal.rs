@@ -126,7 +126,10 @@ impl NormalStateful {
               let line_idx = cursor_viewport.line_idx().saturating_sub(n as usize);
             }
             Command::CursorMoveDown(n) => {
-              let line_idx = cursor_viewport.line_idx().saturating_add(n as usize);
+              let line_idx = std::cmp::max(
+                cursor_viewport.line_idx().saturating_add(n as usize),
+                buffer.get_rope().len_lines(),
+              );
             }
             Command::CursorMoveLeft(n) => {
               let char_idx = cursor_viewport.char_idx().saturating_sub(n as usize);
