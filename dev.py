@@ -13,6 +13,7 @@ __DISABLE_SCCACHE = False
 __TEST_NOT_SPECIFIED = "__TEST_NOT_SPECIFIED"
 __BUILD_NOT_SPECIFIED = "__BUILD_NOT_SPECIFIED"
 __CLIPPY_NOT_SPECIFIED = "__CLIPPY_NOT_SPECIFIED"
+__DOC_NOT_SPECIFIED = "__DOC_NOT_SPECIFIED"
 
 
 def clippy(mode):
@@ -20,8 +21,8 @@ def clippy(mode):
     if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
-    if isinstance(mode, str) and mode.lower().startswith("s"):
-        print("Run 'clippy' as background service")
+    if isinstance(mode, str) and mode.lower().startswith("w"):
+        print("Run 'clippy' as service")
         command = f"{command} bacon -j clippy-all --headless"
     else:
         print("Run 'clippy' only once")
@@ -79,8 +80,14 @@ def build(release):
     os.system(command)
 
 
-def start_doc():
-    command = "cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'"
+def doc(mode):
+
+    command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim --no-open"
+    if isinstance(mode, str) and mode.lower().startswith("w"):
+        print("Run 'doc' as service")
+        command = f"cargo watch -s '{command}'"
+    else:
+        print("Run 'doc' only once")
 
     command = command.strip()
     print(command)
@@ -113,8 +120,8 @@ if __name__ == "__main__":
         "--clippy",
         nargs="?",
         default=__CLIPPY_NOT_SPECIFIED,
-        metavar="SERVICE",
-        help="Run clippy with `RUSTFLAGS=-Dwarnings` once or as background service (watch file changes), by default is only once. Use `s(ervice)` to start background service",
+        metavar="WATCH",
+        help="Run clippy with `RUSTFLAGS=-Dwarnings` once or as a service (watch file changes and run again), by default is only once. Use `w(atch)` to start service.",
     )
     parser.add_argument(
         "-t",
@@ -135,8 +142,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "-d",
         "--doc",
-        action="store_true",
-        help="Start cargo doc service on `http://localhost:3000/rsvim`.",
+        nargs="?",
+        default=__DOC_NOT_SPECIFIED,
+        metavar="WATCH",
+        help="Start cargo doc service on `http://localhost:3000/rsvim`, build document for once or as a service (watch file changes and build again), by default is only once. Use `w(atch)` to start service.",
     )
     parser.add_argument(
         "-r",
@@ -170,8 +179,8 @@ if __name__ == "__main__":
         list_test()
     elif parser.build is None or parser.build != __BUILD_NOT_SPECIFIED:
         build(parser.build)
-    elif parser.doc:
-        start_doc()
+    elif parser.doc is None or parser.doc != __DOC_NOT_SPECIFIED:
+        doc(parser.doc)
     elif parser.release:
         release(parser.execute, parser.release)
     else:
