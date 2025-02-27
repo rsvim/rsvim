@@ -95,10 +95,9 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  fn handle_cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
+  fn cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
     let _state = data_access.state;
     let tree = data_access.tree;
-
     let mut tree = wlock!(tree);
     let cursor_id = tree.cursor_id().unwrap();
 
