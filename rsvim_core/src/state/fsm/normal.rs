@@ -113,12 +113,6 @@ impl NormalStateful {
         unsafe {
           // Fix multiple mutable references on `buffer`.
           let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-          let cursor_col_start = raw_buffer
-            .as_mut()
-            .width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
-          let cursor_col_end = raw_buffer
-            .as_mut()
-            .width_at(cursor_viewport.line_idx(), cursor_viewport.char_idx());
 
           match command {
             Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
@@ -130,6 +124,10 @@ impl NormalStateful {
                 ),
                 _ => unreachable!(),
               };
+              let cursor_col_idx = raw_buffer
+                .as_mut()
+                .width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
+              let char_idx = raw_buffer.as_mut().char_at(cursor_col_idx);
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
               let char_idx = match command {
