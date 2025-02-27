@@ -134,7 +134,11 @@ impl NormalStateful {
             Command::CursorMoveRight(n) => {
               let char_idx = std::cmp::max(
                 cursor_viewport.char_idx().saturating_add(n as usize),
-                buffer.len_chars_at_line(cursor_viewport.line_idx()),
+                buffer
+                  .get_rope()
+                  .get_line(cursor_viewport.line_idx())
+                  .unwrap()
+                  .len_chars(),
               );
             }
           }
