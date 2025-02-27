@@ -107,6 +107,7 @@ impl NormalStateful {
           let viewport = wlock!(viewport);
           let buffer = viewport.buffer();
           let buffer = buffer.upgrade().unwrap();
+          let buffer = wlock!(buffer);
           let cursor_viewport = viewport.cursor();
           match command {
             Command::CursorMoveUp(n) => {}
