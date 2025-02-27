@@ -584,13 +584,9 @@ impl Viewport {
     &self.cursor
   }
 
-  /// Set cursor line.
-  pub fn set_cursor_line_idx(&mut self, line_idx: usize) {
+  /// Set cursor line and char(column).
+  pub fn set_cursor(&mut self, line_idx: usize, char_idx: usize) {
     self.cursor.set_line_idx(line_idx);
-  }
-
-  /// Set cursor char (column).
-  pub fn set_cursor_char_idx(&mut self, char_idx: usize) {
     self.cursor.set_char_idx(char_idx);
   }
 
