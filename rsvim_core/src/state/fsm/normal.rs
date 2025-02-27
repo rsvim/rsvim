@@ -135,6 +135,7 @@ impl NormalStateful {
               };
 
               let mut cursor_viewport2 = *cursor_viewport;
+              cursor_viewport2.set_line_idx(char_idx);
               cursor_viewport2.set_char_idx(char_idx);
               viewport.set_cursor(cursor_viewport2);
             }
@@ -164,6 +165,10 @@ impl NormalStateful {
                 ),
                 _ => unreachable!(),
               };
+
+              let mut cursor_viewport2 = *cursor_viewport;
+              cursor_viewport2.set_char_idx(char_idx);
+              viewport.set_cursor(cursor_viewport2);
             }
           }
         }
