@@ -60,11 +60,10 @@ unicode-segmentation = "1.12.0"
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
-# rusty_v8: https://github.com/denoland/rusty_v8
-# deno: https://github.com/denoland/deno/blob/main/Cargo.lock
-# deno_core: https://github.com/denoland/deno_core/blob/main/Cargo.toml
-v8 = { version = "=134.5.0", default-features = false }
-# deno_ast: https://github.com/denoland/deno_ast/blob/main/Cargo.toml
+# deno v2.2.2: https://github.com/denoland/deno/blob/v2.2.2/Cargo.toml
+# deno_core 0.338.0: https://github.com/denoland/deno_core/blob/0.338.0/Cargo.toml
+# deno_ast 0.45.1: https://github.com/denoland/deno_ast/blob/0.45.1/Cargo.toml
+v8 = { version = "=134.4.0", default-features = false }
 swc_atoms = "=0.6.7"
 swc_bundler = "=0.237.0"
 swc_common = { version = "=0.37.5", features = ["tty-emitter"] }
