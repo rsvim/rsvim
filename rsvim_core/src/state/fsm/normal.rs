@@ -1,17 +1,14 @@
 //! The normal mode.
 
-use crate::buf::{Buffer, BufferWk};
+use crate::buf::Buffer;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::mode::Mode;
 use crate::ui::tree::TreeNode;
-use crate::ui::widget::window::CursorViewport;
 use crate::wlock;
 
-use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
+use crossterm::event::{Event, KeyCode, KeyEventKind};
 use std::ptr::NonNull;
-use std::time::Duration;
 
 #[derive(Debug, Copy, Clone, Default)]
 /// The normal editing mode.
@@ -99,7 +96,6 @@ impl NormalStateful {
     let _state = data_access.state;
     let tree = data_access.tree;
     let mut tree = wlock!(tree);
-    let cursor_id = tree.cursor_id().unwrap();
 
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window_node)) = tree.node_mut(&current_window_id) {
@@ -176,5 +172,5 @@ impl NormalStateful {
     }
   }
 
-  fn quit(&self, data_access: StatefulDataAccess) {}
+  // fn quit(&self, data_access: StatefulDataAccess) {}
 }

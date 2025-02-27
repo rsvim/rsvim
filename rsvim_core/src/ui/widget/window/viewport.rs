@@ -945,7 +945,10 @@ mod tests {
     );
 
     let buffer = buffer.read();
-    let buflines = buffer.get_lines_at(actual.start_line_idx()).unwrap();
+    let buflines = buffer
+      .get_rope()
+      .get_lines_at(actual.start_line_idx())
+      .unwrap();
     let total_lines = expect_end_line - expect_start_line;
 
     for (l, line) in buflines.enumerate() {
