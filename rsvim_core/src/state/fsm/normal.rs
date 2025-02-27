@@ -101,20 +101,18 @@ impl NormalStateful {
     let cursor_id = tree.cursor_id().unwrap();
 
     if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(current_window) = tree.node_mut(&current_window_id) {
-        if let TreeNode::Window(current_window_node) = current_window {
-          let viewport = current_window_node.viewport();
-          let viewport = wlock!(viewport);
-          let buffer = viewport.buffer();
-          let buffer = buffer.upgrade().unwrap();
-          let buffer = wlock!(buffer);
-          let cursor_viewport = viewport.cursor();
-          match command {
-            Command::CursorMoveUp(n) => {}
-            Command::CursorMoveDown(n) => {}
-            Command::CursorMoveLeft(n) => {}
-            Command::CursorMoveRight(n) => {}
-          }
+      if let Some(TreeNode::Window(current_window_node)) = tree.node_mut(&current_window_id) {
+        let viewport = current_window_node.viewport();
+        let viewport = wlock!(viewport);
+        let buffer = viewport.buffer();
+        let buffer = buffer.upgrade().unwrap();
+        let buffer = wlock!(buffer);
+        let cursor_viewport = viewport.cursor();
+        match command {
+          Command::CursorMoveUp(n) => {}
+          Command::CursorMoveDown(n) => {}
+          Command::CursorMoveLeft(n) => {}
+          Command::CursorMoveRight(n) => {}
         }
       }
     }
