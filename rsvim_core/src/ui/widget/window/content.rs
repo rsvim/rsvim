@@ -79,7 +79,11 @@ impl Widgetable for WindowContent {
       // Fix mutable borrow on `buffer`.
       let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
 
-      let mut buflines = raw_buffer.as_ref().get_lines_at(line_idx).unwrap();
+      let mut buflines = raw_buffer
+        .as_ref()
+        .get_rope()
+        .get_lines_at(line_idx)
+        .unwrap();
 
       while line_idx < viewport.end_line_idx() {
         debug_assert!(row_idx < height);

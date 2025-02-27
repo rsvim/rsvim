@@ -1,18 +1,15 @@
 //! The normal mode.
 
-#![allow(unused_imports)]
-
-use crate::envar;
+use crate::buf::Buffer;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::mode::Mode;
 use crate::ui::tree::TreeNode;
-use crate::ui::widget::window::CursorViewport;
+use crate::ui::widget::window::{CursorViewport, Viewport};
 use crate::wlock;
 
-use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
-use std::time::Duration;
+use crossterm::event::{Event, KeyCode, KeyEventKind};
+use std::ptr::NonNull;
 
 #[derive(Debug, Copy, Clone, Default)]
 /// The normal editing mode.
@@ -95,101 +92,88 @@ impl Stateful for NormalStateful {
   }
 }
 
-//impl NormalStateful {
-//  fn handle_cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
-//    let _state = data_access.state;
-//    let tree = data_access.tree;
-//
-//    let mut tree = wlock!(tree);
-//    match tree.current_window_id() {
-//      Some(current_window_id) => {
-//        let cursor_id = tree.cursor_id().unwrap();
-//
-//        match tree.node_mut(&current_window_id) {
-//          Some(current_window) => match current_window {
-//            TreeNode::Window(cur_win) => {
-//              let viewport = cur_win.viewport();
-//              let viewport = wlock!(viewport);
-//              let cursor_viewport = viewport.cursor();
-//
-//              let next_cursor_viewport = match command {
-//                Command::CursorMoveLeft(n) => {
-//                  let line_idx = cursor_viewport.line_idx();
-//                  let row_idx = cursor_viewport.row_idx();
-//                  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-//                  let line_viewport_row = line_viewport.rows().get(&row_idx).unwrap();
-//
-//                  let next_char_idx = if cursor_viewport.char_idx() > 0 {
-//                    cursor_viewport.char_idx() - 1
-//                  } else {
-//                    0
-//                  };
-//
-//                  let (next_start_dcolumn, next_end_dcolumn) = line_viewport_row
-//                    .char2dcolumns()
-//                    .get(&next_char_idx)
-//                    .unwrap();
-//                  let next_cursor_viewport = CursorViewport::new(
-//                    *next_start_dcolumn..*next_end_dcolumn,
-//                    next_char_idx,
-//                    row_idx,
-//                    line_idx,
-//                  );
-//
-//                  // If cursor is already
-//                  if cursor_viewport.char_idx() == 0 {
-//                    assert!(*cursor_viewport == next_cursor_viewport);
-//                  }
-//
-//                  next_cursor_viewport
-//                }
-//                Command::CursorMoveRight(n) => {
-//                  let line_idx = cursor_viewport.line_idx();
-//                  let row_idx = cursor_viewport.row_idx();
-//                  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-//                  let line_viewport_row = line_viewport.rows().get(&row_idx).unwrap();
-//
-//                  let next_char_idx = if cursor_viewport.char_idx() > 0 {
-//                    cursor_viewport.char_idx() - 1
-//                  } else {
-//                    0
-//                  };
-//
-//                  if line_viewport_row.end_char_idx() > 0
-//                    && cursor_viewport.char_idx() < line_viewport_row.end_char_idx() - 1
-//                  {
-//                    let next_char_idx = cursor_viewport.char_idx() + 1;
-//                    let (next_start_dcolumn, next_end_dcolumn) = line_viewport_row
-//                      .char2dcolumns()
-//                      .get(&next_char_idx)
-//                      .unwrap();
-//                    CursorViewport::new(
-//                      *next_start_dcolumn..*next_end_dcolumn,
-//                      next_char_idx,
-//                      row_idx,
-//                      line_idx,
-//                    )
-//                  } else {
-//                    cursor_viewport.clone()
-//                  };
-//                }
-//              };
-//            }
-//            _ => unreachable!("Cursor widget parent must be window widget."),
-//          },
-//          None => { /* Skip */ }
-//        }
-//      }
-//      None => { /* Skip */ }
-//    }
-//
-//    match command {
-//      Command::CursorMoveUp(n) => {}
-//      Command::CursorMoveDown(n) => {}
-//      Command::CursorMoveLeft(n) => {}
-//      Command::CursorMoveRight(n) => {}
-//    }
-//  }
-//
-//  fn quit(&self, data_access: StatefulDataAccess) {}
-//}
+impl NormalStateful {
+  fn cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
+    let _state = data_access.state;
+    let tree = data_access.tree;
+    let mut tree = wlock!(tree);
+
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window_node)) = tree.node_mut(&current_window_id) {
+        let viewport = current_window_node.viewport();
+        let mut viewport = wlock!(viewport);
+        let cursor_viewport = viewport.cursor();
+
+        let buffer = viewport.buffer();
+        let buffer = buffer.upgrade().unwrap();
+        let mut buffer = wlock!(buffer);
+        unsafe {
+          // Fix multiple mutable references on `buffer`.
+          let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+
+          match command {
+            Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
+              let line_idx = match command {
+                Command::CursorMoveUp(n) => cursor_viewport.line_idx().saturating_sub(n as usize),
+                Command::CursorMoveDown(n) => std::cmp::max(
+                  cursor_viewport.line_idx().saturating_add(n as usize),
+                  buffer.get_rope().len_lines(),
+                ),
+                _ => unreachable!(),
+              };
+              debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+              debug_assert!(buffer.get_rope().get_line(line_idx).unwrap().len_chars() > 0);
+              let cursor_col_idx = raw_buffer
+                .as_mut()
+                .width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
+              let char_idx = match raw_buffer.as_mut().char_at(line_idx, cursor_col_idx) {
+                Some(char_idx) => char_idx,
+                None => buffer.get_rope().line(line_idx).len_chars() - 1,
+              };
+
+              viewport.set_cursor(line_idx, char_idx);
+
+              let cursor_id = tree.cursor_id().unwrap();
+              let mut cursor_node = tree.node_mut(&cursor_id).unwrap();
+            }
+            Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
+              debug_assert!(buffer
+                .get_rope()
+                .get_line(cursor_viewport.line_idx())
+                .is_some());
+              debug_assert!(
+                buffer
+                  .get_rope()
+                  .get_line(cursor_viewport.line_idx())
+                  .unwrap()
+                  .len_chars()
+                  > 0
+              );
+              let char_idx = match command {
+                Command::CursorMoveLeft(n) => cursor_viewport.char_idx().saturating_sub(n as usize),
+                Command::CursorMoveRight(n) => std::cmp::max(
+                  cursor_viewport.char_idx().saturating_add(n as usize),
+                  buffer
+                    .get_rope()
+                    .get_line(cursor_viewport.line_idx())
+                    .unwrap()
+                    .len_chars()
+                    - 1,
+                ),
+                _ => unreachable!(),
+              };
+
+              viewport.set_cursor(cursor_viewport.line_idx(), char_idx);
+
+              let cursor_id = tree.cursor_id().unwrap();
+              let mut cursor_node = tree.node_mut(&cursor_id).unwrap();
+            }
+            _ => unreachable!(),
+          }
+        }
+      }
+    }
+  }
+
+  fn quit(&self, data_access: StatefulDataAccess, command: Command) {}
+}

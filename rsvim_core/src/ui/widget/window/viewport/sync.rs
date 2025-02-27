@@ -124,7 +124,7 @@ fn _from_top_left_nowrap(
 
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-    match raw_buffer.as_ref().get_lines_at(start_line) {
+    match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
       // The `start_line` is in the buffer.
       Some(buflines) => {
         // The first `wrow` in the window maps to the `start_line` in the buffer.
@@ -248,7 +248,7 @@ fn _from_top_left_wrap_nolinebreak(
 
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-    match buffer.get_lines_at(start_line) {
+    match buffer.get_rope().get_lines_at(start_line) {
       Some(buflines) => {
         // The `start_line` is inside the buffer.
 
