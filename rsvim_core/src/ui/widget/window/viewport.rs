@@ -147,14 +147,29 @@ impl CursorViewport {
     self.char_idx
   }
 
+  /// Set char index.
+  pub fn set_char_idx(&mut self, char_idx: usize) {
+    self.char_idx = char_idx;
+  }
+
   /// Get the row index, starts from 0.
   pub fn row_idx(&self) -> u16 {
     self.row_idx
   }
 
+  /// Set the row index.
+  pub fn set_row_idx(&mut self, row_idx: u16) {
+    self.row_idx = row_idx;
+  }
+
   /// Get the line index, starts from 0.
   pub fn line_idx(&self) -> usize {
     self.line_idx
+  }
+
+  /// Set the line index.
+  pub fn set_line_idx(&mut self, line_idx: usize) {
+    self.line_idx = line_idx;
   }
 }
 

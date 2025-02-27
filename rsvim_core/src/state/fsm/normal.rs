@@ -104,7 +104,7 @@ impl NormalStateful {
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window_node)) = tree.node_mut(&current_window_id) {
         let viewport = current_window_node.viewport();
-        let viewport = wlock!(viewport);
+        let mut viewport = wlock!(viewport);
         let cursor_viewport = viewport.cursor();
 
         let buffer = viewport.buffer();
@@ -133,6 +133,10 @@ impl NormalStateful {
                 Some(char_idx) => char_idx,
                 None => buffer.get_rope().line(line_idx).len_chars() - 1,
               };
+
+              let mut cursor_viewport2 = *cursor_viewport;
+              cursor_viewport2.set_char_idx(char_idx);
+              viewport.set_cursor(cursor_viewport2);
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
               debug_assert!(buffer
