@@ -5,6 +5,7 @@ use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::TreeNode;
+use crate::ui::widget::window::{CursorViewport, Viewport};
 use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -92,7 +93,7 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  fn _cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
+  fn cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
     let _state = data_access.state;
     let tree = data_access.tree;
     let mut tree = wlock!(tree);
@@ -130,10 +131,11 @@ impl NormalStateful {
                 None => buffer.get_rope().line(line_idx).len_chars() - 1,
               };
 
-              let mut cursor_viewport2 = *cursor_viewport;
-              cursor_viewport2.set_line_idx(char_idx);
-              cursor_viewport2.set_char_idx(char_idx);
-              viewport.set_cursor(cursor_viewport2);
+              viewport.set_cursor_line_idx(line_idx);
+              viewport.set_cursor_char_idx(char_idx);
+
+              let cursor_id = tree.cursor_id().unwrap();
+              let mut cursor_node = tree.node_mut(&cursor_id).unwrap();
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
               debug_assert!(buffer
@@ -162,15 +164,17 @@ impl NormalStateful {
                 _ => unreachable!(),
               };
 
-              let mut cursor_viewport2 = *cursor_viewport;
-              cursor_viewport2.set_char_idx(char_idx);
-              viewport.set_cursor(cursor_viewport2);
+              viewport.set_cursor_char_idx(char_idx);
+
+              let cursor_id = tree.cursor_id().unwrap();
+              let mut cursor_node = tree.node_mut(&cursor_id).unwrap();
             }
+            _ => unreachable!(),
           }
         }
       }
     }
   }
 
-  // fn quit(&self, data_access: StatefulDataAccess) {}
+  fn quit(&self, data_access: StatefulDataAccess, command: Command) {}
 }
