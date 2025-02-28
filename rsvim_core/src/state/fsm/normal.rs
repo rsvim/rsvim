@@ -134,6 +134,8 @@ impl NormalStateful {
                 Some(char_idx) => char_idx,
                 None => buffer.get_rope().line(line_idx).len_chars() - 1,
               };
+              // let col_start = raw_buffer.as_mut().width_before(line_idx, char_idx);
+              // let col_end = raw_buffer.as_mut().width_at(line_idx, char_idx);
               viewport.set_cursor(line_idx, char_idx);
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
