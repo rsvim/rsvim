@@ -64,7 +64,7 @@ impl Default for State {
 
 impl State {
   pub fn handle(
-    self,
+    &mut self,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     event: Event,
