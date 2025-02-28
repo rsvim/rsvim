@@ -90,72 +90,72 @@ impl Inodeable for Window {
     self.base.node(&self.base.root_id()).unwrap().depth()
   }
 
-  fn depth_mut(&mut self) -> &mut usize {
+  fn set_depth(&mut self, depth: usize) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .depth_mut()
+      .set_depth(depth);
   }
 
   fn zindex(&self) -> &usize {
     self.base.node(&self.base.root_id()).unwrap().zindex()
   }
 
-  fn zindex_mut(&mut self) -> &mut usize {
+  fn set_zindex(&mut self, zindex: usize) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .zindex_mut()
+      .set_zindex(zindex);
   }
 
   fn shape(&self) -> &IRect {
     self.base.node(&self.base.root_id()).unwrap().shape()
   }
 
-  fn shape_mut(&mut self) -> &mut IRect {
+  fn set_shape(&mut self, shape: &IRect) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .shape_mut()
+      .set_shape(shape);
   }
 
   fn actual_shape(&self) -> &U16Rect {
     self.base.node(&self.base.root_id()).unwrap().actual_shape()
   }
 
-  fn actual_shape_mut(&mut self) -> &mut U16Rect {
+  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .actual_shape_mut()
+      .set_actual_shape(actual_shape);
   }
 
   fn enabled(&self) -> &bool {
     self.base.node(&self.base.root_id()).unwrap().enabled()
   }
 
-  fn enabled_mut(&mut self) -> &mut bool {
+  fn set_enabled(&mut self, enabled: bool) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .enabled_mut()
+      .set_enabled(enabled);
   }
 
   fn visible(&self) -> &bool {
     self.base.node(&self.base.root_id()).unwrap().visible()
   }
 
-  fn visible_mut(&mut self) -> &mut bool {
+  fn set_visible(&mut self, visible: bool) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .visible_mut()
+      .set_visible(visible);
   }
 }
 

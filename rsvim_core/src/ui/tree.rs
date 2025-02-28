@@ -28,12 +28,22 @@ pub enum TreeNode {
   Cursor(Cursor),
 }
 
-macro_rules! tree_node_generate_dispatch {
+macro_rules! tree_node_generate_getter {
   ($self_name:ident,$method_name:ident) => {
     match $self_name {
       TreeNode::RootContainer(n) => n.$method_name(),
       TreeNode::Window(n) => n.$method_name(),
       TreeNode::Cursor(n) => n.$method_name(),
+    }
+  };
+}
+
+macro_rules! tree_node_generate_setter {
+  ($self_name:ident,$method_name:ident,$method_arg:ident) => {
+    match $self_name {
+      TreeNode::RootContainer(n) => n.$method_name($method_arg),
+      TreeNode::Window(n) => n.$method_name($method_arg),
+      TreeNode::Cursor(n) => n.$method_name($method_arg),
     }
   };
 }
@@ -50,55 +60,55 @@ impl TreeNode {
 
 impl Inodeable for TreeNode {
   fn id(&self) -> InodeId {
-    tree_node_generate_dispatch!(self, id)
+    tree_node_generate_getter!(self, id)
   }
 
   fn depth(&self) -> &usize {
-    tree_node_generate_dispatch!(self, depth)
+    tree_node_generate_getter!(self, depth)
   }
 
-  fn depth_mut(&mut self) -> &mut usize {
-    tree_node_generate_dispatch!(self, depth_mut)
+  fn set_depth(&mut self, depth: usize) {
+    tree_node_generate_setter!(self, set_depth, depth)
   }
 
   fn zindex(&self) -> &usize {
-    tree_node_generate_dispatch!(self, zindex)
+    tree_node_generate_getter!(self, zindex)
   }
 
-  fn zindex_mut(&mut self) -> &mut usize {
-    tree_node_generate_dispatch!(self, zindex_mut)
+  fn set_zindex(&mut self, zindex: usize) {
+    tree_node_generate_setter!(self, set_zindex, zindex)
   }
 
   fn shape(&self) -> &IRect {
-    tree_node_generate_dispatch!(self, shape)
+    tree_node_generate_getter!(self, shape)
   }
 
-  fn shape_mut(&mut self) -> &mut IRect {
-    tree_node_generate_dispatch!(self, shape_mut)
+  fn set_shape(&mut self, shape: &IRect) {
+    tree_node_generate_getter!(self, set_shape, shape)
   }
 
   fn actual_shape(&self) -> &U16Rect {
-    tree_node_generate_dispatch!(self, actual_shape)
+    tree_node_generate_getter!(self, actual_shape)
   }
 
-  fn actual_shape_mut(&mut self) -> &mut U16Rect {
-    tree_node_generate_dispatch!(self, actual_shape_mut)
+  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+    tree_node_generate_getter!(self, set_actual_shape, actual_shape)
   }
 
   fn enabled(&self) -> &bool {
-    tree_node_generate_dispatch!(self, enabled)
+    tree_node_generate_getter!(self, enabled)
   }
 
-  fn enabled_mut(&mut self) -> &mut bool {
-    tree_node_generate_dispatch!(self, enabled_mut)
+  fn set_enabled(&mut self, enabled: bool) {
+    tree_node_generate_getter!(self, set_enabled, enabled)
   }
 
   fn visible(&self) -> &bool {
-    tree_node_generate_dispatch!(self, visible)
+    tree_node_generate_getter!(self, visible)
   }
 
-  fn visible_mut(&mut self) -> &mut bool {
-    tree_node_generate_dispatch!(self, visible_mut)
+  fn set_visible(&mut self, visible: bool) {
+    tree_node_generate_getter!(self, set_visible, visible)
   }
 }
 
