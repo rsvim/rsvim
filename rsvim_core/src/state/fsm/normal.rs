@@ -103,6 +103,8 @@ impl NormalStateful {
         let viewport = current_window_node.viewport();
         let mut viewport = wlock!(viewport);
         let cursor_viewport = viewport.cursor();
+        let cursor_line_idx = cursor_viewport.line_idx();
+        let cursor_char_idx = cursor_viewport.char_idx();
 
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
@@ -114,9 +116,9 @@ impl NormalStateful {
           match command {
             Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
               let line_idx = match command {
-                Command::CursorMoveUp(n) => cursor_viewport.line_idx().saturating_sub(n as usize),
+                Command::CursorMoveUp(n) => cursor_line_idx.saturating_sub(n as usize),
                 Command::CursorMoveDown(n) => std::cmp::max(
-                  cursor_viewport.line_idx().saturating_add(n as usize),
+                  cursor_line_idx.saturating_add(n as usize),
                   buffer.get_rope().len_lines(),
                 ),
                 _ => unreachable!(),
@@ -125,7 +127,7 @@ impl NormalStateful {
               debug_assert!(buffer.get_rope().get_line(line_idx).unwrap().len_chars() > 0);
               let cursor_col_idx = raw_buffer
                 .as_mut()
-                .width_before(cursor_viewport.line_idx(), cursor_viewport.char_idx());
+                .width_before(cursor_line_idx, cursor_char_idx);
               let char_idx = match raw_buffer.as_mut().char_at(line_idx, cursor_col_idx) {
                 Some(char_idx) => char_idx,
                 None => buffer.get_rope().line(line_idx).len_chars() - 1,
@@ -137,25 +139,22 @@ impl NormalStateful {
               let mut cursor_node = tree.node_mut(&cursor_id).unwrap();
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
-              debug_assert!(buffer
-                .get_rope()
-                .get_line(cursor_viewport.line_idx())
-                .is_some());
+              debug_assert!(buffer.get_rope().get_line(cursor_line_idx).is_some());
               debug_assert!(
                 buffer
                   .get_rope()
-                  .get_line(cursor_viewport.line_idx())
+                  .get_line(cursor_line_idx)
                   .unwrap()
                   .len_chars()
                   > 0
               );
               let char_idx = match command {
-                Command::CursorMoveLeft(n) => cursor_viewport.char_idx().saturating_sub(n as usize),
+                Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n as usize),
                 Command::CursorMoveRight(n) => std::cmp::max(
-                  cursor_viewport.char_idx().saturating_add(n as usize),
+                  cursor_char_idx.saturating_add(n as usize),
                   buffer
                     .get_rope()
-                    .get_line(cursor_viewport.line_idx())
+                    .get_line(cursor_line_idx)
                     .unwrap()
                     .len_chars()
                     - 1,
@@ -163,7 +162,7 @@ impl NormalStateful {
                 _ => unreachable!(),
               };
 
-              viewport.set_cursor(cursor_viewport.line_idx(), char_idx);
+              viewport.set_cursor(cursor_line_idx, char_idx);
 
               let cursor_id = tree.cursor_id().unwrap();
               let mut cursor_node = tree.node_mut(&cursor_id).unwrap();
