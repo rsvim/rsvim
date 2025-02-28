@@ -34,7 +34,7 @@ impl Stateful for NormalStateful {
               let mut tree = wlock!(tree);
               match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.bounded_move_up_by(cursor_id, 1);
+                  tree.bounded_move_vertically_by(cursor_id, -1);
                 }
                 None => { /* Skip */ }
               }
@@ -44,7 +44,7 @@ impl Stateful for NormalStateful {
               let mut tree = wlock!(tree);
               match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.bounded_move_down_by(cursor_id, 1);
+                  tree.bounded_move_vertically_by(cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }
@@ -54,7 +54,7 @@ impl Stateful for NormalStateful {
               let mut tree = wlock!(tree);
               match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.bounded_move_left_by(cursor_id, 1);
+                  tree.bounded_move_horizontally_by(cursor_id, -1);
                 }
                 None => { /* Skip */ }
               }
@@ -64,7 +64,7 @@ impl Stateful for NormalStateful {
               let mut tree = wlock!(tree);
               match tree.cursor_id() {
                 Some(cursor_id) => {
-                  tree.bounded_move_right_by(cursor_id, 1);
+                  tree.bounded_move_horizontally_by(cursor_id, 1);
                 }
                 None => { /* Skip */ }
               }

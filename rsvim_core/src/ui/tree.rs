@@ -424,38 +424,14 @@ impl Tree {
 
   /// Bounded move by Y-axis (or `rows`). This is simply a wrapper method on
   /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_y_by(&mut self, id: InodeId, rows: isize) -> Option<IRect> {
+  pub fn bounded_move_vertically_by(&mut self, id: InodeId, rows: isize) -> Option<IRect> {
     self.bounded_move_by(id, 0, rows)
-  }
-
-  /// Bounded move up by Y-axis (or `rows`). This is simply a wrapper method on
-  /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_up_by(&mut self, id: InodeId, rows: usize) -> Option<IRect> {
-    self.bounded_move_by(id, 0, -(rows as isize))
-  }
-
-  /// Bounded move down by Y-axis (or `rows`). This is simply a wrapper method on
-  /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_down_by(&mut self, id: InodeId, rows: usize) -> Option<IRect> {
-    self.bounded_move_by(id, 0, rows as isize)
   }
 
   /// Bounded move by X-axis (or `columns`). This is simply a wrapper method on
   /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_x_by(&mut self, id: InodeId, cols: isize) -> Option<IRect> {
+  pub fn bounded_move_horizontally_by(&mut self, id: InodeId, cols: isize) -> Option<IRect> {
     self.bounded_move_by(id, cols, 0)
-  }
-
-  /// Bounded move left by X-axis (or `columns`). This is simply a wrapper method on
-  /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_left_by(&mut self, id: InodeId, cols: usize) -> Option<IRect> {
-    self.bounded_move_by(id, -(cols as isize), 0)
-  }
-
-  /// Bounded move right by X-axis (or `columns`). This is simply a wrapper method on
-  /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_right_by(&mut self, id: InodeId, cols: usize) -> Option<IRect> {
-    self.bounded_move_by(id, cols as isize, 0)
   }
 }
 // Movement }
