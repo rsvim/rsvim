@@ -225,7 +225,7 @@ pub enum WindowNode {
   WindowContent(WindowContent),
 }
 
-macro_rules! window_node_generate_dispatch {
+macro_rules! window_node_generate_getter {
   ($self_name:ident,$method_name:ident) => {
     match $self_name {
       WindowNode::WindowRootContainer(n) => n.$method_name(),
@@ -234,57 +234,66 @@ macro_rules! window_node_generate_dispatch {
   };
 }
 
+macro_rules! window_node_generate_setter {
+  ($self_name:ident,$method_name:ident,$method_arg:ident) => {
+    match $self_name {
+      WindowNode::WindowRootContainer(n) => n.$method_name($method_arg),
+      WindowNode::WindowContent(n) => n.$method_name($method_arg),
+    }
+  };
+}
+
 impl Inodeable for WindowNode {
   fn id(&self) -> InodeId {
-    window_node_generate_dispatch!(self, id)
+    window_node_generate_getter!(self, id)
   }
 
   fn depth(&self) -> &usize {
-    window_node_generate_dispatch!(self, depth)
+    window_node_generate_getter!(self, depth)
   }
 
-  fn depth_mut(&mut self) -> &mut usize {
-    window_node_generate_dispatch!(self, depth_mut)
+  fn set_depth(&mut self, depth: usize) {
+    window_node_generate_setter!(self, set_depth, depth)
   }
 
   fn zindex(&self) -> &usize {
-    window_node_generate_dispatch!(self, zindex)
+    window_node_generate_getter!(self, zindex)
   }
 
-  fn zindex_mut(&mut self) -> &mut usize {
-    window_node_generate_dispatch!(self, zindex_mut)
+  fn set_zindex(&mut self, zindex: usize) {
+    window_node_generate_setter!(self, set_zindex, zindex)
   }
 
   fn shape(&self) -> &IRect {
-    window_node_generate_dispatch!(self, shape)
+    window_node_generate_getter!(self, shape)
   }
 
-  fn shape_mut(&mut self) -> &mut IRect {
-    window_node_generate_dispatch!(self, shape_mut)
+  fn set_shape(&mut self, shape: &IRect) {
+    window_node_generate_setter!(self, set_shape, shape)
   }
 
   fn actual_shape(&self) -> &U16Rect {
-    window_node_generate_dispatch!(self, actual_shape)
+    window_node_generate_getter!(self, actual_shape)
   }
 
-  fn actual_shape_mut(&mut self) -> &mut U16Rect {
-    window_node_generate_dispatch!(self, actual_shape_mut)
+  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+    window_node_generate_setter!(self, set_actual_shape, actual_shape)
   }
 
   fn enabled(&self) -> &bool {
-    window_node_generate_dispatch!(self, enabled)
+    window_node_generate_getter!(self, enabled)
   }
 
-  fn enabled_mut(&mut self) -> &mut bool {
-    window_node_generate_dispatch!(self, enabled_mut)
+  fn set_enabled(&mut self, enabled: bool) {
+    window_node_generate_setter!(self, set_enabled, enabled)
   }
 
   fn visible(&self) -> &bool {
-    window_node_generate_dispatch!(self, visible)
+    window_node_generate_getter!(self, visible)
   }
 
-  fn visible_mut(&mut self) -> &mut bool {
-    window_node_generate_dispatch!(self, visible_mut)
+  fn set_visible(&mut self, visible: bool) {
+    window_node_generate_setter!(self, set_visible, visible)
   }
 }
 
