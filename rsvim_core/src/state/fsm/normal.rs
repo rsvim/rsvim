@@ -18,8 +18,6 @@ pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    let _state = data_access.state;
-    let tree = data_access.tree;
     let event = data_access.event;
 
     match event {
@@ -29,44 +27,16 @@ impl Stateful for NormalStateful {
         KeyEventKind::Press => {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
-              // Up
-              let mut tree = wlock!(tree);
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.bounded_move_vertically_by(cursor_id, -1);
-                }
-                None => { /* Skip */ }
-              }
+              self.cursor_move(&data_access, Command::CursorMoveUp(1))
             }
             KeyCode::Down | KeyCode::Char('j') => {
-              // Down
-              let mut tree = wlock!(tree);
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.bounded_move_vertically_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
+              self.cursor_move(&data_access, Command::CursorMoveDown(1))
             }
             KeyCode::Left | KeyCode::Char('h') => {
-              // Left
-              let mut tree = wlock!(tree);
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.bounded_move_horizontally_by(cursor_id, -1);
-                }
-                None => { /* Skip */ }
-              }
+              self.cursor_move(&data_access, Command::CursorMoveLeft(1))
             }
             KeyCode::Right | KeyCode::Char('l') => {
-              // Right
-              let mut tree = wlock!(tree);
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.bounded_move_horizontally_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
+              self.cursor_move(&data_access, Command::CursorMoveRight(1))
             }
             _ => { /* Skip */ }
           }
@@ -94,9 +64,8 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  fn cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
-    let _state = data_access.state;
-    let tree = data_access.tree;
+  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) {
+    let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
 
     if let Some(current_window_id) = tree.current_window_id() {
@@ -199,5 +168,5 @@ impl NormalStateful {
     }
   }
 
-  fn quit(&self, data_access: StatefulDataAccess, command: Command) {}
+  fn quit(&self, data_access: &StatefulDataAccess, command: Command) {}
 }

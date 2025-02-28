@@ -37,7 +37,7 @@ pub mod select;
 pub mod terminal;
 pub mod visual;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StatefulDataAccess<'a> {
   pub state: &'a mut State,
