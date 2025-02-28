@@ -14,27 +14,27 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn depth(&self) -> &usize;
 
-  fn depth_mut(&mut self) -> &mut usize;
+  fn set_depth(&mut self, depth: usize);
 
   fn zindex(&self) -> &usize;
 
-  fn zindex_mut(&mut self) -> &mut usize;
+  fn set_zindex(&mut self, zindex: usize);
 
   fn shape(&self) -> &IRect;
 
-  fn shape_mut(&mut self) -> &mut IRect;
+  fn set_shape(&mut self, shape: &IRect);
 
   fn actual_shape(&self) -> &U16Rect;
 
-  fn actual_shape_mut(&mut self) -> &mut U16Rect;
+  fn set_actual_shape(&mut self, actual_shape: &U16Rect);
 
   fn enabled(&self) -> &bool;
 
-  fn enabled_mut(&mut self) -> &mut bool;
+  fn set_enabled(&mut self, enabled: bool);
 
   fn visible(&self) -> &bool;
 
-  fn visible_mut(&mut self) -> &mut bool;
+  fn set_visible(&mut self, visible: bool);
 }
 
 /// Generate getter/setter for `Inode`.
@@ -50,108 +50,48 @@ macro_rules! inode_generate_impl {
         self.$base_name.depth()
       }
 
-      fn depth_mut(&mut self) -> &mut usize {
-        self.$base_name.depth_mut()
+      fn set_depth(&mut self, depth: usize) {
+        self.$base_name.set_depth(depth);
       }
 
       fn zindex(&self) -> &usize {
         self.$base_name.zindex()
       }
 
-      fn zindex_mut(&mut self) -> &mut usize {
-        self.$base_name.zindex_mut()
+      fn set_zindex(&mut self, zindex: usize) {
+        self.$base_name.set_zindex(zindex);
       }
 
       fn shape(&self) -> &IRect {
         self.$base_name.shape()
       }
 
-      fn shape_mut(&mut self) -> &mut IRect {
-        self.$base_name.shape_mut()
+      fn set_shape(&mut self, shape: &IRect) {
+        self.$base_name.set_shape(shape);
       }
 
       fn actual_shape(&self) -> &U16Rect {
         self.$base_name.actual_shape()
       }
 
-      fn actual_shape_mut(&mut self) -> &mut U16Rect {
-        self.$base_name.actual_shape_mut()
+      fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+        self.$base_name.set_actual_shape(actual_shape)
       }
 
       fn enabled(&self) -> &bool {
         self.$base_name.enabled()
       }
 
-      fn enabled_mut(&mut self) -> &mut bool {
-        self.$base_name.enabled_mut()
+      fn set_enabled(&mut self, enabled: bool) {
+        self.$base_name.set_enabled(enabled);
       }
 
       fn visible(&self) -> &bool {
         self.$base_name.visible()
       }
 
-      fn visible_mut(&mut self) -> &mut bool {
-        self.$base_name.visible_mut()
-      }
-    }
-  };
-}
-
-/// Generate getter/setter for `Inode`, with 1-lifetime.
-#[macro_export]
-macro_rules! inode_generate_impl_1 {
-  ($struct_name:ident < $lt1:tt > , $base_name:ident) => {
-    impl<$lt1> Inodeable for $struct_name<$lt1> {
-      fn id(&self) -> InodeId {
-        self.$base_name.id()
-      }
-
-      fn depth(&self) -> &usize {
-        self.$base_name.depth()
-      }
-
-      fn depth_mut(&mut self) -> &mut usize {
-        self.$base_name.depth_mut()
-      }
-
-      fn zindex(&self) -> &usize {
-        self.$base_name.zindex()
-      }
-
-      fn zindex_mut(&mut self) -> &mut usize {
-        self.$base_name.zindex_mut()
-      }
-
-      fn shape(&self) -> &IRect {
-        self.$base_name.shape()
-      }
-
-      fn shape_mut(&mut self) -> &mut IRect {
-        self.$base_name.shape_mut()
-      }
-
-      fn actual_shape(&self) -> &U16Rect {
-        self.$base_name.actual_shape()
-      }
-
-      fn actual_shape_mut(&mut self) -> &mut U16Rect {
-        self.$base_name.actual_shape_mut()
-      }
-
-      fn enabled(&self) -> &bool {
-        self.$base_name.enabled()
-      }
-
-      fn enabled_mut(&mut self) -> &mut bool {
-        self.$base_name.enabled_mut()
-      }
-
-      fn visible(&self) -> &bool {
-        self.$base_name.visible()
-      }
-
-      fn visible_mut(&mut self) -> &mut bool {
-        self.$base_name.visible_mut()
+      fn set_visible(&mut self, visible: bool) {
+        self.$base_name.set_visible(visible);
       }
     }
   };
@@ -199,48 +139,48 @@ impl InodeBase {
     &self.depth
   }
 
-  pub fn depth_mut(&mut self) -> &mut usize {
-    &mut self.depth
+  pub fn set_depth(&mut self, depth: usize) {
+    self.depth = depth;
   }
 
   pub fn zindex(&self) -> &usize {
     &self.zindex
   }
 
-  pub fn zindex_mut(&mut self) -> &mut usize {
-    &mut self.zindex
+  pub fn set_zindex(&mut self, zindex: usize) {
+    self.zindex = zindex;
   }
 
   pub fn shape(&self) -> &IRect {
     &self.shape
   }
 
-  pub fn shape_mut(&mut self) -> &mut IRect {
-    &mut self.shape
+  pub fn set_shape(&mut self, shape: &IRect) {
+    self.shape = *shape;
   }
 
   pub fn actual_shape(&self) -> &U16Rect {
     &self.actual_shape
   }
 
-  pub fn actual_shape_mut(&mut self) -> &mut U16Rect {
-    &mut self.actual_shape
+  pub fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+    self.actual_shape = *actual_shape;
   }
 
   pub fn enabled(&self) -> &bool {
     &self.enabled
   }
 
-  pub fn enabled_mut(&mut self) -> &mut bool {
-    &mut self.enabled
+  pub fn set_enabled(&mut self, enabled: bool) {
+    self.enabled = enabled;
   }
 
   pub fn visible(&self) -> &bool {
     &self.visible
   }
 
-  pub fn visible_mut(&mut self) -> &mut bool {
-    &mut self.visible
+  pub fn set_visible(&mut self, visible: bool) {
+    self.visible = visible;
   }
 }
 
