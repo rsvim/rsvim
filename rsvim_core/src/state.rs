@@ -1,14 +1,15 @@
 //! Vim editing mode.
 
-use crossterm::event::Event;
-use parking_lot::RwLock;
-use std::sync::{Arc, Weak};
-use tracing::trace;
-
 use crate::buf::BuffersManagerArc;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
+use crate::wlock;
+
+use crossterm::event::Event;
+use parking_lot::RwLock;
+use std::sync::{Arc, Weak};
+use tracing::trace;
 
 pub mod command;
 pub mod fsm;
@@ -64,13 +65,15 @@ impl Default for State {
 
 impl State {
   pub fn handle(
-    &mut self,
+    self_: StateArc,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     event: Event,
   ) -> StateHandleResponse {
+    let mut self_ = wlock!(self_);
+
     // Update current mode.
-    let state_mode = match self.stateful {
+    let state_mode = match self_.stateful {
       StatefulValue::NormalMode(_) => Some(Mode::Normal),
       StatefulValue::VisualMode(_) => Some(Mode::Visual),
       StatefulValue::SelectMode(_) => Some(Mode::Select),
@@ -81,20 +84,20 @@ impl State {
       _ => None,
     };
     if let Some(mode) = state_mode {
-      self.mode = mode;
+      self_.mode = mode;
     }
 
     // Current stateful
-    let stateful = self.stateful;
+    let stateful = self_.stateful;
 
-    let data_access = StatefulDataAccess::new(self, tree, buffers, event);
+    let data_access = StatefulDataAccess::new(self.clone(), tree, buffers, event);
     let next_stateful = stateful.handle(data_access);
     trace!("Stateful now:{:?}, next:{:?}", stateful, next_stateful);
 
     // Save current stateful
-    self.last_stateful = stateful;
+    self_.last_stateful = stateful;
     // Set next stateful
-    self.stateful = next_stateful;
+    self_.stateful = next_stateful;
 
     StateHandleResponse::new(stateful, next_stateful)
   }

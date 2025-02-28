@@ -18,7 +18,7 @@ pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    let event = data_access.event;
+    let event = data_access.event.clone();
 
     match event {
       Event::FocusGained => {}
@@ -27,16 +27,20 @@ impl Stateful for NormalStateful {
         KeyEventKind::Press => {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
-              self.cursor_move(&data_access, Command::CursorMoveUp(1))
+              return self.cursor_move(&data_access, Command::CursorMoveUp(1));
             }
             KeyCode::Down | KeyCode::Char('j') => {
-              self.cursor_move(&data_access, Command::CursorMoveDown(1))
+              return self.cursor_move(&data_access, Command::CursorMoveDown(1));
             }
             KeyCode::Left | KeyCode::Char('h') => {
-              self.cursor_move(&data_access, Command::CursorMoveLeft(1))
+              return self.cursor_move(&data_access, Command::CursorMoveLeft(1));
             }
             KeyCode::Right | KeyCode::Char('l') => {
-              self.cursor_move(&data_access, Command::CursorMoveRight(1))
+              return self.cursor_move(&data_access, Command::CursorMoveRight(1));
+            }
+            KeyCode::Esc => {
+              // quit loop
+              return self.quit(&data_access, Command::QuitEditor);
             }
             _ => { /* Skip */ }
           }
@@ -53,18 +57,18 @@ impl Stateful for NormalStateful {
     //   println!("Curosr position: {:?}\r", crossterm::cursor::position());
     // }
 
-    // quit loop
-    if event == Event::Key(KeyCode::Esc.into()) {
-      // println!("ESC: {:?}\r", crossterm::cursor::position());
-      return StatefulValue::QuitState(QuitStateful::default());
-    }
+    // // quit loop
+    // if event == Event::Key(KeyCode::Esc.into()) {
+    //   // println!("ESC: {:?}\r", crossterm::cursor::position());
+    //   return StatefulValue::QuitState(QuitStateful::default());
+    // }
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
 }
 
 impl NormalStateful {
-  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) {
+  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
 
@@ -166,7 +170,10 @@ impl NormalStateful {
         }
       }
     }
+    StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  fn quit(&self, data_access: &StatefulDataAccess, command: Command) {}
+  fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
+    StatefulValue::QuitState(QuitStateful::default())
+  }
 }

@@ -343,11 +343,12 @@ impl EventLoop {
         trace!("Polled terminal event ok: {:?}", event);
 
         // Handle by state machine
-        let state_response = self
-          .state
-          .try_write_for(envar::MUTEX_TIMEOUT())
-          .unwrap()
-          .handle(self.tree.clone(), self.buffers.clone(), event);
+        let state_response = State::handle(
+          self.state.clone(),
+          self.tree.clone(),
+          self.buffers.clone(),
+          event,
+        );
 
         // Exit loop and quit.
         if let StatefulValue::QuitState(_) = state_response.next_stateful {
