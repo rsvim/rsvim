@@ -1,13 +1,12 @@
 //! The normal mode.
 
 use crate::buf::Buffer;
-use crate::cart::U16Rect;
+use crate::cart::IRect;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::ui::tree::internal::{InodeBase, Inodeable};
+use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::TreeNode;
-use crate::ui::widget::window::{CursorViewport, Viewport};
 use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -115,7 +114,7 @@ impl NormalStateful {
           // Fix multiple mutable references on `buffer`.
           let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
 
-          match command {
+          let (line_idx, char_idx) = match command {
             Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
               let line_idx = match command {
                 Command::CursorMoveUp(n) => cursor_line_idx.saturating_sub(n as usize),
@@ -136,9 +135,7 @@ impl NormalStateful {
               };
               // let col_start = raw_buffer.as_mut().width_before(line_idx, char_idx);
               // let col_end = raw_buffer.as_mut().width_at(line_idx, char_idx);
-              viewport.set_cursor(line_idx, char_idx);
-
-              let cursor_id = tree.cursor_id().unwrap();
+              (line_idx, char_idx)
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
               debug_assert!(buffer.get_rope().get_line(cursor_line_idx).is_some());
@@ -164,11 +161,38 @@ impl NormalStateful {
                 _ => unreachable!(),
               };
 
-              viewport.set_cursor(cursor_line_idx, char_idx);
-
-              let cursor_id = tree.cursor_id().unwrap();
+              (cursor_line_idx, char_idx)
             }
             _ => unreachable!(),
+          };
+
+          viewport.set_cursor(line_idx, char_idx);
+
+          let cursor_row = viewport
+            .lines()
+            .get(&line_idx)
+            .unwrap()
+            .rows()
+            .iter()
+            .filter(|(_row_idx, row_viewport)| {
+              row_viewport.start_char_idx() >= char_idx && row_viewport.end_char_idx() < char_idx
+            })
+            .collect::<Vec<_>>();
+          assert!(cursor_row.len() == 1);
+
+          let (row_idx, row_viewport) = cursor_row[0];
+          let cursor_id = tree.cursor_id().unwrap();
+
+          if let Some(&mut TreeNode::Cursor(ref mut cursor_node)) = tree.node_mut(&cursor_id) {
+            let row_start_width = raw_buffer
+              .as_mut()
+              .width_before(line_idx, row_viewport.start_char_idx());
+            let char_start_width = raw_buffer.as_mut().width_before(line_idx, char_idx);
+            let col_idx = (char_start_width - row_start_width) as isize;
+            let shape = IRect::new((*row_idx as isize, col_idx), (*row_idx as isize, col_idx));
+            cursor_node.set_shape(&shape);
+          } else {
+            unreachable!();
           }
         }
       }
