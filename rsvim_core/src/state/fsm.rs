@@ -15,7 +15,7 @@
 use crossterm::event::Event;
 
 use crate::buf::BuffersManagerArc;
-use crate::state::StateArc;
+use crate::state::State;
 use crate::ui::tree::TreeArc;
 
 // Re-export
@@ -39,15 +39,20 @@ pub mod visual;
 
 #[derive(Debug, Clone)]
 /// The mutable data passed to each state handler, and allow them access the editor.
-pub struct StatefulDataAccess {
-  pub state: StateArc,
+pub struct StatefulDataAccess<'a> {
+  pub state: &'a mut State,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub event: Event,
 }
 
-impl StatefulDataAccess {
-  pub fn new(state: StateArc, tree: TreeArc, buffers: BuffersManagerArc, event: Event) -> Self {
+impl<'a> StatefulDataAccess<'a> {
+  pub fn new(
+    state: &'a mut State,
+    tree: TreeArc,
+    buffers: BuffersManagerArc,
+    event: Event,
+  ) -> Self {
     StatefulDataAccess {
       state,
       tree,
