@@ -84,7 +84,7 @@ impl Inodeable for TreeNode {
   }
 
   fn set_shape(&mut self, shape: &IRect) {
-    tree_node_generate_getter!(self, set_shape, shape)
+    tree_node_generate_setter!(self, set_shape, shape)
   }
 
   fn actual_shape(&self) -> &U16Rect {
@@ -92,7 +92,7 @@ impl Inodeable for TreeNode {
   }
 
   fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    tree_node_generate_getter!(self, set_actual_shape, actual_shape)
+    tree_node_generate_setter!(self, set_actual_shape, actual_shape)
   }
 
   fn enabled(&self) -> &bool {
@@ -100,7 +100,7 @@ impl Inodeable for TreeNode {
   }
 
   fn set_enabled(&mut self, enabled: bool) {
-    tree_node_generate_getter!(self, set_enabled, enabled)
+    tree_node_generate_setter!(self, set_enabled, enabled)
   }
 
   fn visible(&self) -> &bool {
@@ -108,7 +108,7 @@ impl Inodeable for TreeNode {
   }
 
   fn set_visible(&mut self, visible: bool) {
-    tree_node_generate_getter!(self, set_visible, visible)
+    tree_node_generate_setter!(self, set_visible, visible)
   }
 }
 
