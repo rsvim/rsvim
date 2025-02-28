@@ -254,7 +254,7 @@ where
       // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
 
       cnode.set_depth(cnode_depth);
-      cnode.set_actual_shape(cnode_actual_shape);
+      cnode.set_actual_shape(&cnode_actual_shape);
       // trace!("after update cnode attr: {:?}", cnode_id);
 
       // trace!(
