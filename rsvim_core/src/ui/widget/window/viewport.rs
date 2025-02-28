@@ -128,18 +128,12 @@ pub struct CursorViewport {
   char_idx: usize,
   // Line index.
   line_idx: usize,
-  // Row index.
-  row_idx: u16,
 }
 
 impl CursorViewport {
   /// Make new instance.
-  pub fn new(char_idx: usize, line_idx: usize, row_idx: u16) -> Self {
-    Self {
-      char_idx,
-      line_idx,
-      row_idx,
-    }
+  pub fn new(char_idx: usize, line_idx: usize) -> Self {
+    Self { char_idx, line_idx }
   }
 
   /// Get char index, starts from 0.
@@ -160,16 +154,6 @@ impl CursorViewport {
   /// Set the line index.
   pub fn set_line_idx(&mut self, line_idx: usize) {
     self.line_idx = line_idx;
-  }
-
-  /// Get the row index, starts from 0.
-  pub fn row_idx(&self) -> u16 {
-    self.row_idx
-  }
-
-  /// Set the row index.
-  pub fn set_row_idx(&mut self, row_idx: u16) {
-    self.row_idx = row_idx;
   }
 }
 
@@ -440,7 +424,7 @@ impl Viewport {
     let (line_idx_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
     let cursor = if line_idx_range.is_empty() {
       assert!(lines.is_empty());
-      CursorViewport::new(0, 0, 0)
+      CursorViewport::new(0, 0)
     } else {
       assert!(!lines.is_empty());
       // trace!(
@@ -468,13 +452,12 @@ impl Viewport {
       let line_idx = *first_line.0;
       let first_line = first_line.1;
       if first_line.rows().is_empty() {
-        CursorViewport::new(0, 0, 0)
+        CursorViewport::new(0, 0)
       } else {
         let first_row = first_line.rows().first_key_value().unwrap();
-        let row_idx = *first_row.0;
         let first_row = first_row.1;
         let char_idx = first_row.start_char_idx();
-        CursorViewport::new(char_idx, line_idx, row_idx)
+        CursorViewport::new(char_idx, line_idx)
       }
     };
 
@@ -589,16 +572,6 @@ impl Viewport {
     assert!(self.lines.contains_key(&line_idx));
     self.cursor.set_line_idx(line_idx);
     self.cursor.set_char_idx(char_idx);
-    let mut hit = false;
-    let rows = &self.lines.get(&line_idx).unwrap().rows;
-    for (row_idx, row_viewport) in rows.iter() {
-      if row_viewport.start_char_idx() >= char_idx && row_viewport.end_char_idx() < char_idx {
-        self.cursor.set_row_idx(*row_idx);
-        hit = true;
-        break;
-      }
-    }
-    assert!(hit);
   }
 
   /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.
