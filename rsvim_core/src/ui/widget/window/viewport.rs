@@ -586,8 +586,19 @@ impl Viewport {
 
   /// Set cursor line and char (column).
   pub fn set_cursor(&mut self, line_idx: usize, char_idx: usize) {
+    assert!(self.lines.contains_key(&line_idx));
     self.cursor.set_line_idx(line_idx);
     self.cursor.set_char_idx(char_idx);
+    let mut hit = false;
+    let rows = &self.lines.get(&line_idx).unwrap().rows;
+    for (row_idx, row_viewport) in rows.iter() {
+      if row_viewport.start_char_idx() >= char_idx && row_viewport.end_char_idx() < char_idx {
+        self.cursor.set_row_idx(*row_idx);
+        hit = true;
+        break;
+      }
+    }
+    assert!(hit);
   }
 
   /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.
