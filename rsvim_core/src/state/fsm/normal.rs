@@ -137,6 +137,12 @@ impl NormalStateful {
               // let col_start = raw_buffer.as_mut().width_before(line_idx, char_idx);
               // let col_end = raw_buffer.as_mut().width_at(line_idx, char_idx);
               viewport.set_cursor(line_idx, char_idx);
+
+              let cursor_id = tree.cursor_id().unwrap();
+              if let Some(&mut TreeNode::Cursor(mut ref cursor_node)) = tree.node_mut(&cursor_id) {
+              } else {
+                unreachable!();
+              }
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
               debug_assert!(buffer.get_rope().get_line(cursor_line_idx).is_some());
@@ -163,6 +169,12 @@ impl NormalStateful {
               };
 
               viewport.set_cursor(cursor_line_idx, char_idx);
+
+              let cursor_id = tree.cursor_id().unwrap();
+              if let Some(&mut TreeNode::Cursor(mut ref cursor_node)) = tree.node_mut(&cursor_id) {
+              } else {
+                unreachable!();
+              }
             }
             _ => unreachable!(),
           }
