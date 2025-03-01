@@ -41,7 +41,7 @@ geo = { version = "0.28.0" }
 num-traits = "0.2.19"
 parking_lot = "0.12.3"
 directories = "5.0.1"
-anyhow = "1.0.94"
+anyhow = "1.0.96"
 thiserror = "2"
 regex = "1.11.1"
 url = "2.5.4"
