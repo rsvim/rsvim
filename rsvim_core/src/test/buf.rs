@@ -55,7 +55,7 @@ pub fn make_buffer_from_rope(rp: Rope) -> BufferArc {
 #[allow(clippy::unused_enumerate_index)]
 pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
   let buf = rlock!(buf);
-  let line = buf.get_line(line_idx).unwrap();
+  let line = buf.get_rope().get_line(line_idx).unwrap();
 
   let subscriber = tracing_subscriber::FmtSubscriber::builder()
     .with_line_number(false)
