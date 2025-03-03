@@ -1,7 +1,7 @@
 //! Vim editing mode.
 
 use crate::buf::BuffersManagerArc;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{StateMachine, Stateful, StatefulDataAccess};
 use crate::state::mode::Mode;
 use crate::ui::tree::TreeArc;
 
@@ -16,8 +16,8 @@ pub mod mode;
 
 #[derive(Debug, Clone)]
 pub struct State {
-  stateful: StatefulValue,
-  last_stateful: StatefulValue,
+  stateful: StateMachine,
+  last_stateful: StateMachine,
 
   // Editing mode.
   mode: Mode,
@@ -25,12 +25,12 @@ pub struct State {
 
 #[derive(Debug, Copy, Clone)]
 pub struct StateHandleResponse {
-  pub stateful: StatefulValue,
-  pub next_stateful: StatefulValue,
+  pub stateful: StateMachine,
+  pub next_stateful: StateMachine,
 }
 
 impl StateHandleResponse {
-  pub fn new(stateful: StatefulValue, next_stateful: StatefulValue) -> Self {
+  pub fn new(stateful: StateMachine, next_stateful: StateMachine) -> Self {
     StateHandleResponse {
       stateful,
       next_stateful,
@@ -44,8 +44,8 @@ pub type StateWk = Weak<RwLock<State>>;
 impl State {
   pub fn new() -> Self {
     State {
-      stateful: StatefulValue::default(),
-      last_stateful: StatefulValue::default(),
+      stateful: StateMachine::default(),
+      last_stateful: StateMachine::default(),
       mode: Mode::Normal,
     }
   }
@@ -71,13 +71,13 @@ impl State {
   ) -> StateHandleResponse {
     // Update current mode.
     let state_mode = match self.stateful {
-      StatefulValue::NormalMode(_) => Some(Mode::Normal),
-      StatefulValue::VisualMode(_) => Some(Mode::Visual),
-      StatefulValue::SelectMode(_) => Some(Mode::Select),
-      StatefulValue::OperatorPendingMode(_) => Some(Mode::OperatorPending),
-      StatefulValue::InsertMode(_) => Some(Mode::Insert),
-      StatefulValue::CommandLineMode(_) => Some(Mode::CommandLine),
-      StatefulValue::TerminalMode(_) => Some(Mode::Terminal),
+      StateMachine::NormalMode(_) => Some(Mode::Normal),
+      StateMachine::VisualMode(_) => Some(Mode::Visual),
+      StateMachine::SelectMode(_) => Some(Mode::Select),
+      StateMachine::OperatorPendingMode(_) => Some(Mode::OperatorPending),
+      StateMachine::InsertMode(_) => Some(Mode::Insert),
+      StateMachine::CommandLineMode(_) => Some(Mode::CommandLine),
+      StateMachine::TerminalMode(_) => Some(Mode::Terminal),
       _ => None,
     };
     if let Some(mode) = state_mode {
