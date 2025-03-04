@@ -361,7 +361,7 @@ impl EventLoop {
           .state
           .try_write_for(envar::MUTEX_TIMEOUT())
           .unwrap()
-          .update_stateful_machine(self.stateful_machine.clone(), next_stateful.clone());
+          .update_state_machine(self.stateful_machine.clone(), next_stateful.clone());
         self.stateful_machine = next_stateful.clone();
 
         // Exit loop and quit.

@@ -43,7 +43,7 @@ impl Default for State {
 }
 
 impl State {
-  pub fn update_stateful_machine(
+  pub fn update_state_machine(
     &mut self,
     last_stateful: StatefulValueArc,
     next_stateful: StatefulValueArc,
