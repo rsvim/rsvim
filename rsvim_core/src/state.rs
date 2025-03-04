@@ -13,7 +13,7 @@ pub mod mode;
 #[derive(Debug, Clone)]
 pub struct State {
   // Last finite-state machine.
-  last_state_machine: StatefulValue,
+  last_state_machine: StatefulValueArc,
 
   // Editing mode.
   mode: Mode,
@@ -25,7 +25,7 @@ pub type StateWk = Weak<RwLock<State>>;
 impl State {
   pub fn new() -> Self {
     State {
-      last_state_machine: StatefulValue::default(),
+      last_state_machine: StatefulValue::to_arc(StatefulValue::default()),
       mode: Mode::Normal,
     }
   }
