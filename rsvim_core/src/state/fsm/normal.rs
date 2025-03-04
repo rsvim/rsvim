@@ -4,7 +4,7 @@ use crate::buf::Buffer;
 use crate::cart::IRect;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
-use crate::state::fsm::{StateMachine, Stateful, StatefulDataAccess};
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::TreeNode;
 use crate::wlock;
@@ -17,7 +17,7 @@ use std::ptr::NonNull;
 pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> StateMachine {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
 
     match event {
@@ -63,12 +63,12 @@ impl Stateful for NormalStateful {
     //   return StateMachine::QuitState(QuitStateful::default());
     // }
 
-    StateMachine::NormalMode(NormalStateful::default())
+    StatefulValue::NormalMode(NormalStateful::default())
   }
 }
 
 impl NormalStateful {
-  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StateMachine {
+  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
 
@@ -170,10 +170,10 @@ impl NormalStateful {
         }
       }
     }
-    StateMachine::NormalMode(NormalStateful::default())
+    StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StateMachine {
-    StateMachine::QuitState(QuitStateful::default())
+  fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
+    StatefulValue::QuitState(QuitStateful::default())
   }
 }

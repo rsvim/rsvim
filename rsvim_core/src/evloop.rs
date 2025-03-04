@@ -8,7 +8,7 @@ use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::res::IoResult;
-use crate::state::fsm::{StateMachine, StateMachineArc};
+use crate::state::fsm::{StateMachineArc, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::internal::Inodeable;
@@ -353,7 +353,7 @@ impl EventLoop {
           .handle(self.tree.clone(), self.buffers.clone(), event);
 
         // Exit loop and quit.
-        if let StateMachine::QuitState(_) = state_response.next_stateful {
+        if let StatefulValue::QuitState(_) = state_response.next_stateful {
           self.cancellation_token.cancel();
         }
       }

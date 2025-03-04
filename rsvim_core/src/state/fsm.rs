@@ -64,17 +64,17 @@ impl<'a> StatefulDataAccess<'a> {
   }
 }
 
-/// The FSM state trait.
+/// The FSM trait.
 pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StatefulDataAccess) -> StateMachine;
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
 }
 
 #[derive(Debug, Copy, Clone)]
-/// The value holder for each FSM state.
-pub enum StateMachine {
+/// The value holder for each state machine.
+pub enum StatefulValue {
   // Editing modes.
   NormalMode(NormalStateful),
   VisualMode(VisualStateful),
@@ -87,31 +87,31 @@ pub enum StateMachine {
   QuitState(QuitStateful),
 }
 
-impl Default for StateMachine {
+impl Default for StatefulValue {
   /// Returns the default FMS state, by default it's the
   /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
   fn default() -> Self {
-    StateMachine::NormalMode(NormalStateful::default())
+    StatefulValue::NormalMode(NormalStateful::default())
   }
 }
 
-impl Stateful for StateMachine {
+impl Stateful for StatefulValue {
   /// Dispatch data with current FSM state.
   ///
   /// Returns the next FSM state.
-  fn handle(&self, data_access: StatefulDataAccess) -> StateMachine {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     match self {
-      StateMachine::NormalMode(s) => s.handle(data_access),
-      StateMachine::VisualMode(s) => s.handle(data_access),
-      StateMachine::SelectMode(s) => s.handle(data_access),
-      StateMachine::OperatorPendingMode(s) => s.handle(data_access),
-      StateMachine::InsertMode(s) => s.handle(data_access),
-      StateMachine::CommandLineMode(s) => s.handle(data_access),
-      StateMachine::TerminalMode(s) => s.handle(data_access),
-      StateMachine::QuitState(s) => s.handle(data_access),
+      StatefulValue::NormalMode(s) => s.handle(data_access),
+      StatefulValue::VisualMode(s) => s.handle(data_access),
+      StatefulValue::SelectMode(s) => s.handle(data_access),
+      StatefulValue::OperatorPendingMode(s) => s.handle(data_access),
+      StatefulValue::InsertMode(s) => s.handle(data_access),
+      StatefulValue::CommandLineMode(s) => s.handle(data_access),
+      StatefulValue::TerminalMode(s) => s.handle(data_access),
+      StatefulValue::QuitState(s) => s.handle(data_access),
     }
   }
 }
 
-pub type StateMachineArc = Arc<RwLock<StateMachine>>;
-pub type StateMachineWk = Weak<RwLock<StateMachine>>;
+pub type StatefulValueArc = Arc<RwLock<StatefulValue>>;
+pub type StatefulValueWk = Weak<RwLock<StatefulValue>>;
