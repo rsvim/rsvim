@@ -1,11 +1,8 @@
 //! Vim editing mode.
 
-use crate::buf::BuffersManagerArc;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue, StatefulValueArc};
 use crate::state::mode::Mode;
-use crate::ui::tree::TreeArc;
 
-use crossterm::event::Event;
 use parking_lot::RwLock;
 use std::sync::{Arc, Weak};
 use tracing::trace;
@@ -16,26 +13,11 @@ pub mod mode;
 
 #[derive(Debug, Clone)]
 pub struct State {
-  state_machine: StatefulValue,
+  // Last finite-state machine.
   last_state_machine: StatefulValue,
 
   // Editing mode.
   mode: Mode,
-}
-
-#[derive(Debug, Copy, Clone)]
-pub struct StateHandleResponse {
-  pub stateful: StatefulValue,
-  pub next_stateful: StatefulValue,
-}
-
-impl StateHandleResponse {
-  pub fn new(stateful: StatefulValue, next_stateful: StatefulValue) -> Self {
-    StateHandleResponse {
-      stateful,
-      next_stateful,
-    }
-  }
 }
 
 pub type StateArc = Arc<RwLock<State>>;
@@ -44,7 +26,6 @@ pub type StateWk = Weak<RwLock<State>>;
 impl State {
   pub fn new() -> Self {
     State {
-      state_machine: StatefulValue::default(),
       last_state_machine: StatefulValue::default(),
       mode: Mode::Normal,
     }
@@ -63,14 +44,9 @@ impl Default for State {
 }
 
 impl State {
-  pub fn handle(
-    &mut self,
-    tree: TreeArc,
-    buffers: BuffersManagerArc,
-    event: Event,
-  ) -> StateHandleResponse {
-    // Update current mode.
-    let state_mode = match self.state_machine {
+  pub fn handle_next_stateful_machine(&mut self, next_stateful: StatefulValueArc) {
+    // Update mode.
+    let next_mode = match *next_stateful {
       StatefulValue::NormalMode(_) => Some(Mode::Normal),
       StatefulValue::VisualMode(_) => Some(Mode::Visual),
       StatefulValue::SelectMode(_) => Some(Mode::Select),
@@ -80,23 +56,9 @@ impl State {
       StatefulValue::TerminalMode(_) => Some(Mode::Terminal),
       _ => None,
     };
-    if let Some(mode) = state_mode {
+    if let Some(mode) = next_mode {
       self.mode = mode;
     }
-
-    // Current stateful
-    let stateful = self.state_machine;
-
-    let data_access = StatefulDataAccess::new(self, tree, buffers, event);
-    let next_stateful = stateful.handle(data_access);
-    trace!("Stateful now:{:?}, next:{:?}", stateful, next_stateful);
-
-    // Save current stateful
-    self.last_state_machine = stateful;
-    // Set next stateful
-    self.state_machine = next_stateful;
-
-    StateHandleResponse::new(stateful, next_stateful)
   }
 
   pub fn mode(&self) -> Mode {
