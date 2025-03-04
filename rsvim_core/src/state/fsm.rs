@@ -113,5 +113,11 @@ impl Stateful for StatefulValue {
   }
 }
 
+impl StatefulValue {
+  pub fn to_arc(s: StatefulValue) -> StatefulValueArc {
+    Arc::new(RwLock::new(s))
+  }
+}
+
 pub type StatefulValueArc = Arc<RwLock<StatefulValue>>;
 pub type StatefulValueWk = Weak<RwLock<StatefulValue>>;

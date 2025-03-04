@@ -8,7 +8,7 @@ use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::res::IoResult;
-use crate::state::fsm::{StateMachineArc, StatefulValue};
+use crate::state::fsm::{StatefulValue, StatefulValueArc};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::internal::Inodeable;
@@ -78,8 +78,8 @@ pub struct EventLoop {
   /// (Global) editing state.
   pub state: StateArc,
 
-  /// Finite state machine for editing state.
-  pub state_machine: StateMachineArc,
+  /// Finite-state machine for editing state.
+  pub stateful_machine: StatefulValueArc,
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
@@ -135,6 +135,7 @@ impl EventLoop {
 
     // State
     let state = State::to_arc(State::default());
+    let stateful_machine = StatefulValue::to_arc(StatefulValue::default());
 
     // Worker => master
     let (worker_send_to_master, master_recv_from_worker) = channel(envar::CHANNEL_BUF_SIZE());
@@ -211,6 +212,7 @@ impl EventLoop {
       canvas,
       tree,
       state,
+      stateful_machine,
       buffers: buffers_manager,
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
