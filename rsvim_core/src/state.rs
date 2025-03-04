@@ -1,11 +1,10 @@
 //! Vim editing mode.
 
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue, StatefulValueArc};
+use crate::state::fsm::{StatefulValue, StatefulValueArc};
 use crate::state::mode::Mode;
 
 use parking_lot::RwLock;
 use std::sync::{Arc, Weak};
-use tracing::trace;
 
 pub mod command;
 pub mod fsm;
@@ -44,7 +43,14 @@ impl Default for State {
 }
 
 impl State {
-  pub fn handle_next_stateful_machine(&mut self, next_stateful: StatefulValueArc) {
+  pub fn update_stateful_machine(
+    &mut self,
+    last_stateful: StatefulValueArc,
+    next_stateful: StatefulValueArc,
+  ) {
+    // Save last stateful machine.
+    self.last_state_machine = last_stateful;
+
     // Update mode.
     let next_mode = match *next_stateful {
       StatefulValue::NormalMode(_) => Some(Mode::Normal),
