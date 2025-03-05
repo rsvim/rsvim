@@ -177,3 +177,11 @@ impl NormalStateful {
     StatefulValue::QuitState(QuitStateful::default())
   }
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn cursor_move1() {}
+}
