@@ -355,14 +355,13 @@ impl EventLoop {
         );
 
         // Handle by state machine
-        let current_stateful = self.stateful_machine.clone();
-        let next_stateful = current_stateful.clone().handle(data_access);
+        let next_stateful = self.stateful_machine.clone().handle(data_access);
         let next_stateful = StatefulValue::to_arc(next_stateful);
         self
           .state
           .try_write_for(envar::MUTEX_TIMEOUT())
           .unwrap()
-          .update_state_machine(current_stateful.clone(), next_stateful.clone());
+          .update_state_machine(&next_stateful);
         self.stateful_machine = next_stateful.clone();
 
         // Exit loop and quit.

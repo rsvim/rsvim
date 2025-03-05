@@ -1,6 +1,6 @@
 //! Vim editing mode.
 
-use crate::state::fsm::{StatefulValue, StatefulValueArc};
+use crate::state::fsm::StatefulValue;
 use crate::state::mode::Mode;
 
 use parking_lot::RwLock;
@@ -12,11 +12,10 @@ pub mod mode;
 
 #[derive(Debug, Clone)]
 pub struct State {
-  // Last finite-state machine.
-  last_state_machine: StatefulValueArc,
-
-  // Editing mode.
+  // Current editing mode.
   mode: Mode,
+  // Last editing mode.
+  last_mode: Mode,
 }
 
 pub type StateArc = Arc<RwLock<State>>;
@@ -25,14 +24,22 @@ pub type StateWk = Weak<RwLock<State>>;
 impl State {
   pub fn new() -> Self {
     State {
-      last_state_machine: StatefulValue::to_arc(StatefulValue::default()),
       mode: Mode::Normal,
+      last_mode: Mode::Normal,
     }
   }
 
   /// Convert struct to Arc pointer.
   pub fn to_arc(s: State) -> StateArc {
     Arc::new(RwLock::new(s))
+  }
+
+  pub fn mode(&self) -> Mode {
+    self.mode
+  }
+
+  pub fn last_mode(&self) -> Mode {
+    self.last_mode
   }
 }
 
@@ -43,16 +50,12 @@ impl Default for State {
 }
 
 impl State {
-  pub fn update_state_machine(
-    &mut self,
-    last_stateful: StatefulValueArc,
-    next_stateful: StatefulValueArc,
-  ) {
+  pub fn update_state_machine(&mut self, next_stateful: &StatefulValue) {
     // Save last stateful machine.
-    self.last_state_machine = last_stateful;
+    self.last_mode = self.mode;
 
     // Update mode.
-    let next_mode = match *next_stateful {
+    let next_mode = match next_stateful {
       StatefulValue::NormalMode(_) => Some(Mode::Normal),
       StatefulValue::VisualMode(_) => Some(Mode::Visual),
       StatefulValue::SelectMode(_) => Some(Mode::Select),
@@ -60,14 +63,26 @@ impl State {
       StatefulValue::InsertMode(_) => Some(Mode::Insert),
       StatefulValue::CommandLineMode(_) => Some(Mode::CommandLine),
       StatefulValue::TerminalMode(_) => Some(Mode::Terminal),
-      _ => None,
+      // Internal states.
+      StatefulValue::QuitState(_) => None,
     };
     if let Some(mode) = next_mode {
       self.mode = mode;
     }
   }
+}
 
-  pub fn mode(&self) -> Mode {
-    self.mode
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn update_state_machine1() {
+    let mut state = State::new();
+    assert_eq!(state.last_mode(), Mode::Normal);
+    assert_eq!(state.mode(), Mode::Normal);
+    state.update_state_machine(&StatefulValue::InsertMode(fsm::InsertStateful::default()));
+    assert_eq!(state.last_mode(), Mode::Normal);
+    assert_eq!(state.mode(), Mode::Insert);
   }
 }
