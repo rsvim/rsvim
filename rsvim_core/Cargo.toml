@@ -53,7 +53,7 @@ ascii = { workspace = true }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
-v8 = { workspace = true }
+v8 = { workspace = true, default-features = false }
 swc_atoms = { workspace = true }
 swc_common = { workspace = true, features = ["tty-emitter"] }
 swc_config = { workspace = true }
