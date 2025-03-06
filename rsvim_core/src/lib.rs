@@ -11,5 +11,6 @@ pub mod locks;
 pub mod log;
 pub mod res;
 pub mod state;
+#[cfg(test)]
 pub mod test;
 pub mod ui;
