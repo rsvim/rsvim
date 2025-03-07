@@ -285,7 +285,7 @@ impl EventLoop {
   pub fn init_windows(&mut self) -> IoResult<()> {
     // Initialize default window.
     let canvas_size = rlock!(self.canvas).size();
-    let mut tree = self.tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
+    let mut tree = wlock!(self.tree);
     let tree_root_id = tree.root_id();
     let window_shape = IRect::new(
       (0, 0),
