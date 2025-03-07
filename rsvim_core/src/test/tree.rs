@@ -73,10 +73,7 @@ pub fn make_tree_from_lines(canvas_size: U16Size, lines: Vec<&str>) -> TreeArc {
     (0, 0),
     (canvas_size.width() as isize, canvas_size.height() as isize),
   );
-  let window = {
-    let (buf_id, buf) = buffers.first_key_value().unwrap();
-    Window::new(window_shape, Arc::downgrade(buf), tree_mut.local_options())
-  };
+  let window = Window::new(window_shape, Arc::downgrade(buf), tree_mut.local_options());
   let window_id = window.id();
   let window_node = TreeNode::Window(window);
   tree_mut.bounded_insert(&tree_root_id, window_node);
