@@ -53,7 +53,7 @@ pub fn make_tree_from_file(canvas_size: U16Size, filename: &str) -> TreeArc {
 }
 
 /// Create tree with 1 window and 1 buffer, the buffer is filled with strings list.
-pub fn make_tree_from_lines(canvas_size: U16Size, lines: Vec<&str>) -> TreeArc {
+pub fn make_tree_from_lines(canvas_size: U16Size, lines: &Vec<&str>) -> TreeArc {
   // UI Tree
   let tree = Tree::to_arc(Tree::new(canvas_size));
   // Buffers

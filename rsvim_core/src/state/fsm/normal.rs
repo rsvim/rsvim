@@ -182,6 +182,12 @@ impl NormalStateful {
 mod tests {
   use super::*;
 
+  use crate::cart::U16Size;
+  use crate::test::tree::make_tree_from_lines;
+
   #[test]
-  fn cursor_move1() {}
+  fn cursor_move1() {
+    let lines = vec![];
+    let _tree = make_tree_from_lines(U16Size::new(10, 10), &lines);
+  }
 }
