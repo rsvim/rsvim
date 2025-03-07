@@ -4,6 +4,7 @@
 
 use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BuffersManager, BuffersManagerArc};
 use crate::cart::{IRect, U16Size};
+use crate::test::buf::make_rope_from_lines;
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{Cursor, Window};
@@ -58,7 +59,10 @@ pub fn make_tree_from_lines(canvas_size: U16Size, lines: Vec<&str>) -> TreeArc {
   let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
 
   let mut buffers = wlock!(buffers_manager);
-  let buf_id = buffers.new_file_buffer(Path::new(&filename)).unwrap();
+  let buf_id = buffers.new_empty_buffer();
+  let buf = buffers.get(&buf_id).unwrap();
+  let mut buf = wlock!(buf);
+  buf.get_rope_mut().append(make_rope_from_lines(lines));
 
   let mut tree_mut = wlock!(tree);
   let tree_root_id = tree_mut.root_id();
