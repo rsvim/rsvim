@@ -6,6 +6,7 @@ use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BuffersManager, BuffersM
 use crate::cart::{IRect, U16Size};
 use crate::test::buf::make_rope_from_lines;
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
+use crate::ui::tree::internal::inode::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::{Cursor, Window};
 use crate::{rlock, wlock};
@@ -35,7 +36,7 @@ pub fn make_tree_from_file(canvas_size: U16Size, filename: &str) -> TreeArc {
     (canvas_size.width() as isize, canvas_size.height() as isize),
   );
   let window = {
-    let (buf_id, buf) = buffers.first_key_value().unwrap();
+    let buf = buffers.get(&buf_id).unwrap();
     Window::new(window_shape, Arc::downgrade(buf), tree_mut.local_options())
   };
   let window_id = window.id();
@@ -48,7 +49,7 @@ pub fn make_tree_from_file(canvas_size: U16Size, filename: &str) -> TreeArc {
   let cursor_node = TreeNode::Cursor(cursor);
   tree_mut.bounded_insert(&window_id, cursor_node);
 
-  tree
+  tree.clone()
 }
 
 /// Create tree with 1 window and 1 buffer, the buffer is filled with strings list.
@@ -61,8 +62,10 @@ pub fn make_tree_from_lines(canvas_size: U16Size, lines: Vec<&str>) -> TreeArc {
   let mut buffers = wlock!(buffers_manager);
   let buf_id = buffers.new_empty_buffer();
   let buf = buffers.get(&buf_id).unwrap();
-  let mut buf = wlock!(buf);
-  buf.get_rope_mut().append(make_rope_from_lines(lines));
+
+  wlock!(buf)
+    .get_rope_mut()
+    .append(make_rope_from_lines(lines));
 
   let mut tree_mut = wlock!(tree);
   let tree_root_id = tree_mut.root_id();
@@ -84,5 +87,5 @@ pub fn make_tree_from_lines(canvas_size: U16Size, lines: Vec<&str>) -> TreeArc {
   let cursor_node = TreeNode::Cursor(cursor);
   tree_mut.bounded_insert(&window_id, cursor_node);
 
-  tree
+  tree.clone()
 }
