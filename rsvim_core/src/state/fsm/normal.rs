@@ -1,18 +1,16 @@
 //! The normal mode.
 
-#![allow(unused_imports)]
-
-use crate::envar;
+use crate::buf::Buffer;
+use crate::cart::IRect;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::mode::Mode;
+use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::TreeNode;
-use crate::ui::widget::window::CursorViewport;
 use crate::wlock;
 
-use crossterm::event::{Event, KeyCode, KeyEventKind, KeyEventState, KeyModifiers};
-use std::time::Duration;
+use crossterm::event::{Event, KeyCode, KeyEventKind};
+use std::ptr::NonNull;
 
 #[derive(Debug, Copy, Clone, Default)]
 /// The normal editing mode.
@@ -20,9 +18,7 @@ pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    let _state = data_access.state;
-    let tree = data_access.tree;
-    let event = data_access.event;
+    let event = data_access.event.clone();
 
     match event {
       Event::FocusGained => {}
@@ -31,44 +27,20 @@ impl Stateful for NormalStateful {
         KeyEventKind::Press => {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
-              // Up
-              let mut tree = wlock!(tree);
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.bounded_move_up_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
+              return self.cursor_move(&data_access, Command::CursorMoveUp(1));
             }
             KeyCode::Down | KeyCode::Char('j') => {
-              // Down
-              let mut tree = wlock!(tree);
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.bounded_move_down_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
+              return self.cursor_move(&data_access, Command::CursorMoveDown(1));
             }
             KeyCode::Left | KeyCode::Char('h') => {
-              // Left
-              let mut tree = wlock!(tree);
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.bounded_move_left_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
+              return self.cursor_move(&data_access, Command::CursorMoveLeft(1));
             }
             KeyCode::Right | KeyCode::Char('l') => {
-              // Right
-              let mut tree = wlock!(tree);
-              match tree.cursor_id() {
-                Some(cursor_id) => {
-                  tree.bounded_move_right_by(cursor_id, 1);
-                }
-                None => { /* Skip */ }
-              }
+              return self.cursor_move(&data_access, Command::CursorMoveRight(1));
+            }
+            KeyCode::Esc => {
+              // quit loop
+              return self.quit(&data_access, Command::QuitEditor);
             }
             _ => { /* Skip */ }
           }
@@ -85,111 +57,137 @@ impl Stateful for NormalStateful {
     //   println!("Curosr position: {:?}\r", crossterm::cursor::position());
     // }
 
-    // quit loop
-    if event == Event::Key(KeyCode::Esc.into()) {
-      // println!("ESC: {:?}\r", crossterm::cursor::position());
-      return StatefulValue::QuitState(QuitStateful::default());
-    }
+    // // quit loop
+    // if event == Event::Key(KeyCode::Esc.into()) {
+    //   // println!("ESC: {:?}\r", crossterm::cursor::position());
+    //   return StateMachine::QuitState(QuitStateful::default());
+    // }
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
 }
 
-//impl NormalStateful {
-//  fn handle_cursor_move(&self, data_access: StatefulDataAccess, command: Command) {
-//    let _state = data_access.state;
-//    let tree = data_access.tree;
-//
-//    let mut tree = wlock!(tree);
-//    match tree.current_window_id() {
-//      Some(current_window_id) => {
-//        let cursor_id = tree.cursor_id().unwrap();
-//
-//        match tree.node_mut(&current_window_id) {
-//          Some(current_window) => match current_window {
-//            TreeNode::Window(cur_win) => {
-//              let viewport = cur_win.viewport();
-//              let viewport = wlock!(viewport);
-//              let cursor_viewport = viewport.cursor();
-//
-//              let next_cursor_viewport = match command {
-//                Command::CursorMoveLeft(n) => {
-//                  let line_idx = cursor_viewport.line_idx();
-//                  let row_idx = cursor_viewport.row_idx();
-//                  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-//                  let line_viewport_row = line_viewport.rows().get(&row_idx).unwrap();
-//
-//                  let next_char_idx = if cursor_viewport.char_idx() > 0 {
-//                    cursor_viewport.char_idx() - 1
-//                  } else {
-//                    0
-//                  };
-//
-//                  let (next_start_dcolumn, next_end_dcolumn) = line_viewport_row
-//                    .char2dcolumns()
-//                    .get(&next_char_idx)
-//                    .unwrap();
-//                  let next_cursor_viewport = CursorViewport::new(
-//                    *next_start_dcolumn..*next_end_dcolumn,
-//                    next_char_idx,
-//                    row_idx,
-//                    line_idx,
-//                  );
-//
-//                  // If cursor is already
-//                  if cursor_viewport.char_idx() == 0 {
-//                    assert!(*cursor_viewport == next_cursor_viewport);
-//                  }
-//
-//                  next_cursor_viewport
-//                }
-//                Command::CursorMoveRight(n) => {
-//                  let line_idx = cursor_viewport.line_idx();
-//                  let row_idx = cursor_viewport.row_idx();
-//                  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-//                  let line_viewport_row = line_viewport.rows().get(&row_idx).unwrap();
-//
-//                  let next_char_idx = if cursor_viewport.char_idx() > 0 {
-//                    cursor_viewport.char_idx() - 1
-//                  } else {
-//                    0
-//                  };
-//
-//                  if line_viewport_row.end_char_idx() > 0
-//                    && cursor_viewport.char_idx() < line_viewport_row.end_char_idx() - 1
-//                  {
-//                    let next_char_idx = cursor_viewport.char_idx() + 1;
-//                    let (next_start_dcolumn, next_end_dcolumn) = line_viewport_row
-//                      .char2dcolumns()
-//                      .get(&next_char_idx)
-//                      .unwrap();
-//                    CursorViewport::new(
-//                      *next_start_dcolumn..*next_end_dcolumn,
-//                      next_char_idx,
-//                      row_idx,
-//                      line_idx,
-//                    )
-//                  } else {
-//                    cursor_viewport.clone()
-//                  };
-//                }
-//              };
-//            }
-//            _ => unreachable!("Cursor widget parent must be window widget."),
-//          },
-//          None => { /* Skip */ }
-//        }
-//      }
-//      None => { /* Skip */ }
-//    }
-//
-//    match command {
-//      Command::CursorMoveUp(n) => {}
-//      Command::CursorMoveDown(n) => {}
-//      Command::CursorMoveLeft(n) => {}
-//      Command::CursorMoveRight(n) => {}
-//    }
-//  }
-//
-//  fn quit(&self, data_access: StatefulDataAccess) {}
-//}
+impl NormalStateful {
+  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = wlock!(tree);
+
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window_node)) = tree.node_mut(&current_window_id) {
+        let viewport = current_window_node.viewport();
+        let mut viewport = wlock!(viewport);
+        let cursor_viewport = viewport.cursor();
+        let cursor_line_idx = cursor_viewport.line_idx();
+        let cursor_char_idx = cursor_viewport.char_idx();
+
+        let buffer = viewport.buffer();
+        let buffer = buffer.upgrade().unwrap();
+        let mut buffer = wlock!(buffer);
+        unsafe {
+          // Fix multiple mutable references on `buffer`.
+          let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+
+          let (line_idx, char_idx) = match command {
+            Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
+              let line_idx = match command {
+                Command::CursorMoveUp(n) => cursor_line_idx.saturating_sub(n as usize),
+                Command::CursorMoveDown(n) => std::cmp::max(
+                  cursor_line_idx.saturating_add(n as usize),
+                  buffer.get_rope().len_lines(),
+                ),
+                _ => unreachable!(),
+              };
+              debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+              debug_assert!(buffer.get_rope().get_line(line_idx).unwrap().len_chars() > 0);
+              let cursor_col_idx = raw_buffer
+                .as_mut()
+                .width_before(cursor_line_idx, cursor_char_idx);
+              let char_idx = match raw_buffer.as_mut().char_at(line_idx, cursor_col_idx) {
+                Some(char_idx) => char_idx,
+                None => buffer.get_rope().line(line_idx).len_chars() - 1,
+              };
+              // let col_start = raw_buffer.as_mut().width_before(line_idx, char_idx);
+              // let col_end = raw_buffer.as_mut().width_at(line_idx, char_idx);
+              (line_idx, char_idx)
+            }
+            Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
+              debug_assert!(buffer.get_rope().get_line(cursor_line_idx).is_some());
+              debug_assert!(
+                buffer
+                  .get_rope()
+                  .get_line(cursor_line_idx)
+                  .unwrap()
+                  .len_chars()
+                  > 0
+              );
+              let char_idx = match command {
+                Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n as usize),
+                Command::CursorMoveRight(n) => std::cmp::max(
+                  cursor_char_idx.saturating_add(n as usize),
+                  buffer
+                    .get_rope()
+                    .get_line(cursor_line_idx)
+                    .unwrap()
+                    .len_chars()
+                    - 1,
+                ),
+                _ => unreachable!(),
+              };
+
+              (cursor_line_idx, char_idx)
+            }
+            _ => unreachable!(),
+          };
+
+          viewport.set_cursor(line_idx, char_idx);
+
+          let cursor_row = viewport
+            .lines()
+            .get(&line_idx)
+            .unwrap()
+            .rows()
+            .iter()
+            .filter(|(_row_idx, row_viewport)| {
+              row_viewport.start_char_idx() >= char_idx && row_viewport.end_char_idx() < char_idx
+            })
+            .collect::<Vec<_>>();
+          assert!(cursor_row.len() == 1);
+
+          let (row_idx, row_viewport) = cursor_row[0];
+          let cursor_id = tree.cursor_id().unwrap();
+
+          if let Some(&mut TreeNode::Cursor(ref mut cursor_node)) = tree.node_mut(&cursor_id) {
+            let row_start_width = raw_buffer
+              .as_mut()
+              .width_before(line_idx, row_viewport.start_char_idx());
+            let char_start_width = raw_buffer.as_mut().width_before(line_idx, char_idx);
+            let col_idx = (char_start_width - row_start_width) as isize;
+            let shape = IRect::new((*row_idx as isize, col_idx), (*row_idx as isize, col_idx));
+            cursor_node.set_shape(&shape);
+          } else {
+            unreachable!();
+          }
+        }
+      }
+    }
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
+    StatefulValue::QuitState(QuitStateful::default())
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  // use super::*;
+
+  use crate::cart::U16Size;
+  use crate::test::tree::make_tree_from_lines;
+
+  #[test]
+  fn cursor_move1() {
+    let lines = vec![];
+    let _tree = make_tree_from_lines(U16Size::new(10, 10), &lines);
+  }
+}

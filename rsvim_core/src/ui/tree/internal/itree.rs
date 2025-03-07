@@ -253,8 +253,8 @@ where
 
       // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
 
-      *cnode.depth_mut() = cnode_depth;
-      *cnode.actual_shape_mut() = cnode_actual_shape;
+      cnode.set_depth(cnode_depth);
+      cnode.set_actual_shape(&cnode_actual_shape);
       // trace!("after update cnode attr: {:?}", cnode_id);
 
       // trace!(
@@ -359,9 +359,11 @@ where
     let parent_node = self.nodes.get(parent_id).unwrap();
     let parent_depth = *parent_node.depth();
     let parent_actual_shape = *parent_node.actual_shape();
-    *child_node.depth_mut() = parent_depth + 1;
-    *child_node.actual_shape_mut() =
-      shapes::make_actual_shape(*child_node.shape(), parent_actual_shape);
+    child_node.set_depth(parent_depth + 1);
+    child_node.set_actual_shape(&shapes::make_actual_shape(
+      *child_node.shape(),
+      parent_actual_shape,
+    ));
 
     // Update all the descendants attributes under the `child_id` node.
     unsafe {
@@ -411,7 +413,10 @@ where
     let parent_actual_shape = parent_node.actual_shape();
 
     // Bound child shape
-    *child_node.shape_mut() = shapes::bound_shape(*child_node.shape(), *parent_actual_shape);
+    child_node.set_shape(&shapes::bound_shape(
+      *child_node.shape(),
+      *parent_actual_shape,
+    ));
 
     self.insert(parent_id, child_node)
   }
@@ -594,7 +599,7 @@ where
           next_top_left_pos,
           point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
         );
-        *node.shape_mut() = next_shape;
+        node.set_shape(&next_shape);
 
         // Update all the descendants attributes under the `id` node.
         unsafe {
@@ -663,6 +668,8 @@ where
     }
   }
 
+  /// FIXME: This method is not implemented or tested.
+  ///
   /// Get the relative position of a node based on its parent.
   ///
   /// It returns the position enum, see [`InodeRelativePosition`].

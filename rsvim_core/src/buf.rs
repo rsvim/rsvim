@@ -11,8 +11,7 @@ use ahash::AHashSet as HashSet;
 use compact_str::CompactString;
 use parking_lot::RwLock;
 use path_absolutize::Absolutize;
-use ropey::iter::Lines;
-use ropey::{Rope, RopeBuilder, RopeSlice};
+use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
 use std::fs::Metadata;
 use std::io::Read;
@@ -178,16 +177,14 @@ impl Buffer {
 
 // Rope {
 impl Buffer {
-  // lines {
-
-  /// Same with [`Rope::get_line`](Rope::get_line).
-  pub fn get_line(&self, line_idx: usize) -> Option<RopeSlice> {
-    self.rope.get_line(line_idx)
+  /// Get rope.
+  pub fn get_rope(&self) -> &Rope {
+    &self.rope
   }
 
-  /// Same with [`Rope::get_lines_at`](Rope::get_lines_at).
-  pub fn get_lines_at(&self, line_idx: usize) -> Option<Lines> {
-    self.rope.get_lines_at(line_idx)
+  /// Get mutable rope.
+  pub fn get_rope_mut(&mut self) -> &mut Rope {
+    &mut self.rope
   }
 
   /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
@@ -216,28 +213,6 @@ impl Buffer {
       },
       None => None,
     }
-  }
-
-  /// Same with [`Rope::lines`](Rope::lines).
-  pub fn lines(&self) -> Lines {
-    self.rope.lines()
-  }
-
-  /// Same with [`Rope::len_lines`](Rope::len_lines).
-  pub fn len_lines(&self) -> usize {
-    self.rope.len_lines()
-  }
-
-  // lines }
-
-  /// Alias to method [`Rope::write_to`](Rope::write_to).
-  pub fn write_to<T: std::io::Write>(&self, writer: T) -> std::io::Result<()> {
-    self.rope.write_to(writer)
-  }
-
-  /// Alias to method [`Rope::append`](Rope::append).
-  pub fn append(&mut self, other: Rope) {
-    self.rope.append(other)
   }
 }
 // Rope }
