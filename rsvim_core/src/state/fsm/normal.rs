@@ -180,7 +180,7 @@ impl NormalStateful {
 
 #[cfg(test)]
 mod tests {
-  use super::*;
+  // use super::*;
 
   use crate::cart::U16Size;
   use crate::test::tree::make_tree_from_lines;
