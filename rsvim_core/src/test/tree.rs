@@ -19,15 +19,15 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tracing::{self, info};
 
-/// Create tree with 1 window and 1 buffer, the buffer is loaded from the filename.
-pub fn make_tree_from_file(canvas_size: U16Size, filename: &str) -> TreeArc {
+/// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
+pub fn make_tree_with_one_buffer(
+  canvas_size: U16Size,
+  buffers_manager: BuffersManagerArc,
+) -> TreeArc {
   // UI Tree
   let tree = Tree::to_arc(Tree::new(canvas_size));
-  // Buffers
-  let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
 
-  let mut buffers = wlock!(buffers_manager);
-  let buf_id = buffers.new_file_buffer(Path::new(filename)).unwrap();
+  let buffers = rlock!(buffers_manager);
 
   let mut tree_mut = wlock!(tree);
   let tree_root_id = tree_mut.root_id();
@@ -36,44 +36,9 @@ pub fn make_tree_from_file(canvas_size: U16Size, filename: &str) -> TreeArc {
     (canvas_size.width() as isize, canvas_size.height() as isize),
   );
   let window = {
-    let buf = buffers.get(&buf_id).unwrap();
+    let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(window_shape, Arc::downgrade(buf), tree_mut.local_options())
   };
-  let window_id = window.id();
-  let window_node = TreeNode::Window(window);
-  tree_mut.bounded_insert(&tree_root_id, window_node);
-
-  // Initialize cursor.
-  let cursor_shape = IRect::new((0, 0), (1, 1));
-  let cursor = Cursor::new(cursor_shape);
-  let cursor_node = TreeNode::Cursor(cursor);
-  tree_mut.bounded_insert(&window_id, cursor_node);
-
-  tree.clone()
-}
-
-/// Create tree with 1 window and 1 buffer, the buffer is filled with strings list.
-pub fn make_tree_from_lines(canvas_size: U16Size, lines: &Vec<&str>) -> TreeArc {
-  // UI Tree
-  let tree = Tree::to_arc(Tree::new(canvas_size));
-  // Buffers
-  let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
-
-  let mut buffers = wlock!(buffers_manager);
-  let buf_id = buffers.new_empty_buffer();
-  let buf = buffers.get(&buf_id).unwrap();
-
-  wlock!(buf)
-    .get_rope_mut()
-    .append(make_rope_from_lines(lines));
-
-  let mut tree_mut = wlock!(tree);
-  let tree_root_id = tree_mut.root_id();
-  let window_shape = IRect::new(
-    (0, 0),
-    (canvas_size.width() as isize, canvas_size.height() as isize),
-  );
-  let window = Window::new(window_shape, Arc::downgrade(buf), tree_mut.local_options());
   let window_id = window.id();
   let window_node = TreeNode::Window(window);
   tree_mut.bounded_insert(&tree_root_id, window_node);

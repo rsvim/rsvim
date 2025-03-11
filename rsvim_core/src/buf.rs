@@ -1,6 +1,7 @@
 //! Vim buffers.
 
 use crate::res::IoResult;
+use crate::rlock;
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
@@ -84,8 +85,8 @@ impl Buffer {
     }
   }
 
-  /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
-  /// manage buffer instances.
+  #[cfg(test)]
+  /// NOTE: This API should only be used for testing.
   pub fn _new_empty(options: BufferLocalOptions) -> Self {
     Self {
       id: next_buffer_id(),
@@ -498,6 +499,21 @@ impl BuffersManager {
     let buf = Buffer::to_arc(buf);
     self.buffers.insert(buf_id, buf.clone());
     self.buffers_by_path.insert(None, buf);
+    buf_id
+  }
+
+  #[cfg(test)]
+  /// NOTE: This API should only be used for testing.
+  pub fn _add_buffer(&mut self, buf: BufferArc) -> BufferId {
+    let (buf_id, abs_filepath) = {
+      let buf = rlock!(buf);
+      (buf.id(), buf.absolute_filename().clone())
+    };
+    self.buffers.insert(buf_id, buf.clone());
+    if abs_filepath.is_none() {
+      assert!(!self.buffers_by_path.contains_key(&None));
+    }
+    self.buffers_by_path.insert(abs_filepath, buf);
     buf_id
   }
 }

@@ -2,7 +2,7 @@
 
 #![allow(unused_imports)]
 
-use crate::buf::{Buffer, BufferArc, BufferLocalOptions};
+use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BuffersManager, BuffersManagerArc};
 //use crate::envar;
 use crate::rlock;
 
@@ -18,7 +18,7 @@ pub fn make_rope_from_file(filename: String) -> Rope {
 }
 
 /// Create rope from lines.
-pub fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
+pub fn make_rope_from_lines(lines: &Vec<&str>) -> Rope {
   let mut rb: RopeBuilder = RopeBuilder::new();
   for line in lines.iter() {
     rb.append(line);
@@ -26,30 +26,30 @@ pub fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
   rb.finish()
 }
 
-/// Create buffer from filename.
 pub fn make_buffer_from_file(filename: String) -> BufferArc {
   let rp = make_rope_from_file(filename);
   let bf = Buffer::_new(rp, BufferLocalOptions::default(), None, None, None, None);
   Buffer::to_arc(bf)
 }
 
-/// Create buffer from lines.
-pub fn make_buffer_from_lines(lines: Vec<&str>) -> BufferArc {
+pub fn make_buffer_from_lines(lines: &Vec<&str>) -> BufferArc {
   let rp = make_rope_from_lines(lines);
   let buf = Buffer::_new(rp, BufferLocalOptions::default(), None, None, None, None);
   Buffer::to_arc(buf)
 }
 
-/// Create empty buffer.
 pub fn make_empty_buffer() -> BufferArc {
   let buf = Buffer::_new_empty(BufferLocalOptions::default());
   Buffer::to_arc(buf)
 }
 
-/// Create buffer from lines.
 pub fn make_buffer_from_rope(rp: Rope) -> BufferArc {
   let buf = Buffer::_new(rp, BufferLocalOptions::default(), None, None, None, None);
   Buffer::to_arc(buf)
+}
+
+pub fn make_buffers_manager(bufs: &Vec<BufferArc>) -> BuffersManagerArc {
+  let bm = BuffersManager::new();
 }
 
 #[allow(clippy::unused_enumerate_index)]

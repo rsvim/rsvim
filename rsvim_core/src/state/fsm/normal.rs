@@ -6,7 +6,8 @@ use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::TreeNode;
+use crate::ui::tree::{TreeNode, TreeWriteGuard};
+use crate::ui::widget;
 use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -183,11 +184,13 @@ mod tests {
   // use super::*;
 
   use crate::cart::U16Size;
-  use crate::test::tree::make_tree_from_lines;
+  use crate::test::buf::make_buffer_from_lines;
+  use crate::test::tree::make_tree_with_one_buffer;
 
   #[test]
   fn cursor_move1() {
     let lines = vec![];
-    let _tree = make_tree_from_lines(U16Size::new(10, 10), &lines);
+    let buf = make_buffer_from_lines(&lines);
+    let tree = make_tree_with_one_buffer(U16Size::new(10, 10), &lines);
   }
 }
