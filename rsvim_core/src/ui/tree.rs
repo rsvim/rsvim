@@ -12,7 +12,7 @@ use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 // Re-export
 pub use crate::ui::tree::opt::{WindowGlobalOptions, WindowGlobalOptionsBuilder};
 
-use parking_lot::RwLock;
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 // use tracing::trace;
@@ -239,6 +239,8 @@ pub struct Tree {
 
 pub type TreeArc = Arc<RwLock<Tree>>;
 pub type TreeWk = Weak<RwLock<Tree>>;
+pub type TreeReadGuard<'a> = RwLockReadGuard<'a, Tree>;
+pub type TreeWriteGuard<'a> = RwLockReadGuard<'a, Tree>;
 
 pub type TreeNodeId = InodeId;
 // pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;

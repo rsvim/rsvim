@@ -5,7 +5,7 @@ use crate::cart::U16Rect;
 //use crate::rlock;
 use crate::ui::widget::window::ViewportOptions;
 
-use parking_lot::RwLock;
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::collections::BTreeMap;
 use std::ops::Range;
 use std::sync::{Arc, Weak};
@@ -416,6 +416,8 @@ pub struct Viewport {
 
 pub type ViewportArc = Arc<RwLock<Viewport>>;
 pub type ViewportWk = Weak<RwLock<Viewport>>;
+pub type ViewportWriteGuard<'a> = RwLockWriteGuard<'a, Viewport>>;
+pub type ViewportReadGuard<'a> = RwLockReadGuard<'a, Viewport>>;
 
 impl Viewport {
   /// Make new instance.

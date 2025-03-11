@@ -11,7 +11,7 @@ pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 use ahash::AHashMap as HashMap;
 use ahash::AHashSet as HashSet;
 use compact_str::CompactString;
-use parking_lot::RwLock;
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
@@ -62,6 +62,8 @@ pub struct Buffer {
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
 pub type BufferWk = Weak<RwLock<Buffer>>;
+pub type BufferReadGuard<'a> = RwLockReadGuard<'a, Buffer>;
+pub type BufferWriteGuard<'a> = RwLockWriteGuard<'a, Buffer>;
 
 impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
