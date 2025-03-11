@@ -49,7 +49,11 @@ pub fn make_buffer_from_rope(rp: Rope) -> BufferArc {
 }
 
 pub fn make_buffers_manager(bufs: &Vec<BufferArc>) -> BuffersManagerArc {
-  let bm = BuffersManager::new();
+  let mut bm = BuffersManager::new();
+  for buf in bufs.iter() {
+    bm._add_buffer(buf.clone());
+  }
+  BuffersManager::to_arc(bm)
 }
 
 #[allow(clippy::unused_enumerate_index)]
