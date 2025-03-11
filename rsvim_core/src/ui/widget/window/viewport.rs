@@ -416,8 +416,8 @@ pub struct Viewport {
 
 pub type ViewportArc = Arc<RwLock<Viewport>>;
 pub type ViewportWk = Weak<RwLock<Viewport>>;
-pub type ViewportWriteGuard<'a> = RwLockWriteGuard<'a, Viewport>>;
-pub type ViewportReadGuard<'a> = RwLockReadGuard<'a, Viewport>>;
+pub type ViewportWriteGuard<'a> = RwLockWriteGuard<'a, Viewport>;
+pub type ViewportReadGuard<'a> = RwLockReadGuard<'a, Viewport>;
 
 impl Viewport {
   /// Make new instance.
