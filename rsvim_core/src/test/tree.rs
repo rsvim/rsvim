@@ -20,10 +20,7 @@ use std::sync::Arc;
 use tracing::{self, info};
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
-pub fn make_tree_with_one_buffer(
-  canvas_size: U16Size,
-  buffers_manager: BuffersManagerArc,
-) -> TreeArc {
+pub fn make_tree_with_buffers(canvas_size: U16Size, buffers_manager: BuffersManagerArc) -> TreeArc {
   // UI Tree
   let tree = Tree::to_arc(Tree::new(canvas_size));
 
