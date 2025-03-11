@@ -184,13 +184,14 @@ mod tests {
   // use super::*;
 
   use crate::cart::U16Size;
-  use crate::test::buf::make_buffer_from_lines;
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::tree::make_tree_with_one_buffer;
 
   #[test]
   fn cursor_move1() {
     let lines = vec![];
     let buf = make_buffer_from_lines(&lines);
-    let tree = make_tree_with_one_buffer(U16Size::new(10, 10), &lines);
+    let bufs = make_buffers_manager(&vec![buf]);
+    let tree = make_tree_with_one_buffer(U16Size::new(10, 10), bufs);
   }
 }
