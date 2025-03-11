@@ -1,5 +1,5 @@
 [tools]
-rust = "1.84.1"
+rust = "latest"
 "cargo:sccache" = "latest"
 "cargo:bacon" = "latest"
 "cargo:cargo-nextest" = "latest"
