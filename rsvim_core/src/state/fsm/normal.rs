@@ -239,6 +239,9 @@ mod tests {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
-    assert_eq!(next_stateful, NormalStateful::default());
+    assert_eq!(
+      next_stateful,
+      StatefulValue::NormalMode(NormalStateful::default())
+    );
   }
 }

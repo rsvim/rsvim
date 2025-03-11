@@ -66,7 +66,7 @@ pub trait Stateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The value holder for each state machine.
 pub enum StatefulValue {
   // Editing modes.
