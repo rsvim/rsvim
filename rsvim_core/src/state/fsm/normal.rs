@@ -13,7 +13,7 @@ use crate::wlock;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use std::ptr::NonNull;
 
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The normal editing mode.
 pub struct NormalStateful {}
 
@@ -238,6 +238,7 @@ mod tests {
     );
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let _next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
+    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
+    assert_eq!(next_stateful, NormalStateful::default());
   }
 }
