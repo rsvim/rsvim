@@ -1,6 +1,7 @@
 //! Vim buffers.
 
 use crate::res::IoResult;
+#[allow(unused_imports)]
 use crate::rlock;
 
 // Re-export

@@ -6,8 +6,7 @@ use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::{TreeNode, TreeWriteGuard};
-use crate::ui::widget;
+use crate::ui::tree::TreeNode;
 use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -181,17 +180,30 @@ impl NormalStateful {
 
 #[cfg(test)]
 mod tests {
-  // use super::*;
+  use super::*;
 
   use crate::cart::U16Size;
+  use crate::state::State;
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::tree::make_tree_with_one_buffer;
 
+  use crossterm::event::Event;
+  use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+
   #[test]
-  fn cursor_move1() {
+  fn cursor_move_up1() {
     let lines = vec![];
-    let buf = make_buffer_from_lines(&lines);
-    let bufs = make_buffers_manager(&vec![buf]);
-    let tree = make_tree_with_one_buffer(U16Size::new(10, 10), bufs);
+    let buf = make_buffer_from_lines(lines);
+    let bufs = make_buffers_manager(vec![buf]);
+    let tree = make_tree_with_one_buffer(U16Size::new(10, 10), bufs.clone());
+    let state = State::to_arc(State::default());
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('j'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
   }
 }

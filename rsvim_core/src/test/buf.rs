@@ -18,7 +18,7 @@ pub fn make_rope_from_file(filename: String) -> Rope {
 }
 
 /// Create rope from lines.
-pub fn make_rope_from_lines(lines: &Vec<&str>) -> Rope {
+pub fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
   let mut rb: RopeBuilder = RopeBuilder::new();
   for line in lines.iter() {
     rb.append(line);
@@ -32,7 +32,7 @@ pub fn make_buffer_from_file(filename: String) -> BufferArc {
   Buffer::to_arc(bf)
 }
 
-pub fn make_buffer_from_lines(lines: &Vec<&str>) -> BufferArc {
+pub fn make_buffer_from_lines(lines: Vec<&str>) -> BufferArc {
   let rp = make_rope_from_lines(lines);
   let buf = Buffer::_new(rp, BufferLocalOptions::default(), None, None, None, None);
   Buffer::to_arc(buf)
@@ -48,7 +48,7 @@ pub fn make_buffer_from_rope(rp: Rope) -> BufferArc {
   Buffer::to_arc(buf)
 }
 
-pub fn make_buffers_manager(bufs: &Vec<BufferArc>) -> BuffersManagerArc {
+pub fn make_buffers_manager(bufs: Vec<BufferArc>) -> BuffersManagerArc {
   let mut bm = BuffersManager::new();
   for buf in bufs.iter() {
     bm._add_buffer(buf.clone());
