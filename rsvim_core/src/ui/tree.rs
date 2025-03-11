@@ -240,7 +240,7 @@ pub struct Tree {
 pub type TreeArc = Arc<RwLock<Tree>>;
 pub type TreeWk = Weak<RwLock<Tree>>;
 pub type TreeReadGuard<'a> = RwLockReadGuard<'a, Tree>;
-pub type TreeWriteGuard<'a> = RwLockReadGuard<'a, Tree>;
+pub type TreeWriteGuard<'a> = RwLockWriteGuard<'a, Tree>;
 
 pub type TreeNodeId = InodeId;
 // pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;

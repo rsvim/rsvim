@@ -1,14 +1,13 @@
 //! The normal mode.
 
-use crate::buf::{Buffer, BufferWriteGuard};
+use crate::buf::Buffer;
 use crate::cart::IRect;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::{TreeNode, TreeReadGuard, TreeWriteGuard};
-use crate::ui::widget;
-use crate::ui::widget::window::{CursorViewport, ViewportWriteGuard};
+use crate::ui::tree::TreeNode;
+use crate::ui::widget::window::CursorViewport;
 use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -83,9 +82,6 @@ impl NormalStateful {
         let viewport = current_window_node.viewport();
         let mut viewport = wlock!(viewport);
         let cursor_viewport = viewport.cursor();
-        let cursor_line_idx = cursor_viewport.line_idx();
-        let cursor_char_idx = cursor_viewport.char_idx();
-
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
         let mut buffer = wlock!(buffer);
@@ -95,10 +91,10 @@ impl NormalStateful {
 
           let cursor_move_result = match command {
             Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
-              self.cursor_move_vertically(&cursor_viewport, raw_buffer, command)
+              self.cursor_move_vertically(cursor_viewport, raw_buffer, command)
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
-              self.cursor_move_horizontally(&cursor_viewport, raw_buffer, command)
+              self.cursor_move_horizontally(cursor_viewport, raw_buffer, command)
             }
             _ => unreachable!(),
           };
@@ -178,7 +174,7 @@ impl NormalStateful {
   unsafe fn cursor_move_horizontally(
     &self,
     cursor_viewport: &CursorViewport,
-    mut raw_buffer: NonNull<Buffer>,
+    raw_buffer: NonNull<Buffer>,
     command: Command,
   ) -> Option<CursorMoveResult> {
     let cursor_line_idx = cursor_viewport.line_idx();
@@ -242,6 +238,6 @@ mod tests {
     );
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
+    let _next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
   }
 }
