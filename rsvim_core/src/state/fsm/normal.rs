@@ -103,7 +103,7 @@ impl NormalStateful {
             _ => unreachable!(),
           };
 
-          if let CursorMoveResult(line_idx, char_idx) = cursor_move_result {
+          if let Some(CursorMoveResult(line_idx, char_idx)) = cursor_move_result {
             viewport.set_cursor(line_idx, char_idx);
             let cursor_row = viewport
               .lines()
