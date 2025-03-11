@@ -225,7 +225,7 @@ mod tests {
   use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
   #[test]
-  fn cursor_move_up1() {
+  fn cursor_move_vertically_up1() {
     let lines = vec![];
     let buf = make_buffer_from_lines(lines);
     let bufs = make_buffers_manager(vec![buf]);
