@@ -217,6 +217,7 @@ mod tests {
   use super::*;
 
   use crate::cart::U16Size;
+  use crate::rlock;
   use crate::state::State;
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::tree::make_tree_with_buffers;
@@ -243,5 +244,10 @@ mod tests {
       next_stateful,
       StatefulValue::NormalMode(NormalStateful::default())
     );
+
+    let tree = data_access.tree.clone();
+    let tree = rlock!(tree);
+    let current_window_id = tree.current_window_id().unwrap();
+    let current_window = tree.node(&current_window_id).unwrap();
   }
 }
