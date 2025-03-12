@@ -268,5 +268,7 @@ mod tests {
     let tree = data_access.tree.clone();
     let actual_viewport = get_viewort(tree);
     assert_eq!(prev_viewport.cursor(), actual_viewport.cursor());
+    assert_eq!(actual_viewport.cursor().line_idx(), 0);
+    assert_eq!(actual_viewport.cursor().char_idx(), 0);
   }
 }

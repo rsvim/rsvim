@@ -38,7 +38,7 @@ def test(name):
         name = "--all"
         print("Run 'test' for all cases")
     else:
-        print("Run 'test' for: {name}")
+        print(f"Run 'test' for '{name}'")
 
     command = "RUST_LOG=trace"
     if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
