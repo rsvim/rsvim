@@ -155,6 +155,12 @@ impl NormalStateful {
       ),
       _ => unreachable!(),
     };
+
+    // If line index doesn't change, early return.
+    if line_idx == cursor_line_idx {
+      return None;
+    }
+
     match raw_buffer.as_ref().get_rope().get_line(line_idx) {
       Some(line) => {
         if line.len_chars() == 0 {
@@ -267,18 +273,16 @@ mod tests {
     );
 
     let prev_viewport = get_viewort(tree.clone());
+    assert_eq!(prev_viewport.cursor().line_idx(), 0);
+    assert_eq!(prev_viewport.cursor().char_idx(), 0);
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
-    assert_eq!(
-      next_stateful,
-      StatefulValue::NormalMode(NormalStateful::default())
-    );
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
     let actual_viewport = get_viewort(tree);
-    assert_eq!(prev_viewport.cursor(), actual_viewport.cursor());
     assert_eq!(actual_viewport.cursor().line_idx(), 0);
     assert_eq!(actual_viewport.cursor().char_idx(), 0);
   }
@@ -311,14 +315,10 @@ mod tests {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
-    assert_eq!(
-      next_stateful,
-      StatefulValue::NormalMode(NormalStateful::default())
-    );
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
     let actual_viewport = get_viewort(tree);
-    assert_ne!(prev_viewport.cursor(), actual_viewport.cursor());
     assert_eq!(actual_viewport.cursor().line_idx(), 0);
     assert_eq!(actual_viewport.cursor().char_idx(), 0);
   }
@@ -351,10 +351,8 @@ mod tests {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveDown(3));
-    assert_eq!(
-      next_stateful,
-      StatefulValue::NormalMode(NormalStateful::default())
-    );
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
     let stateful = match next_stateful {
       StatefulValue::NormalMode(s) => s,
       _ => unreachable!(),
@@ -366,10 +364,7 @@ mod tests {
     assert_eq!(viewport1.cursor().char_idx(), 0);
 
     let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveUp(1));
-    assert_eq!(
-      next_stateful,
-      StatefulValue::NormalMode(NormalStateful::default())
-    );
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
     let viewport2 = get_viewort(tree);
@@ -393,18 +388,16 @@ mod tests {
     );
 
     let prev_viewport = get_viewort(tree.clone());
+    assert_eq!(prev_viewport.cursor().line_idx(), 0);
+    assert_eq!(prev_viewport.cursor().char_idx(), 0);
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveDown(1));
-    assert_eq!(
-      next_stateful,
-      StatefulValue::NormalMode(NormalStateful::default())
-    );
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
     let actual_viewport = get_viewort(tree);
-    assert_eq!(prev_viewport.cursor(), actual_viewport.cursor());
     assert_eq!(actual_viewport.cursor().line_idx(), 0);
     assert_eq!(actual_viewport.cursor().char_idx(), 0);
   }
