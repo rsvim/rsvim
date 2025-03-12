@@ -78,8 +78,8 @@ impl NormalStateful {
     let mut tree = wlock!(tree);
 
     if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window_node)) = tree.node_mut(&current_window_id) {
-        let viewport = current_window_node.viewport();
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
+        let viewport = current_window.viewport();
         let mut viewport = wlock!(viewport);
         let cursor_viewport = viewport.cursor();
         let buffer = viewport.buffer();
@@ -221,9 +221,26 @@ mod tests {
   use crate::state::State;
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::widget::window::Viewport;
 
   use crossterm::event::Event;
   use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+
+  fn get_viewort(tree: TreeArc) -> Viewport {
+    let tree = rlock!(tree);
+    let current_window_id = tree.current_window_id().unwrap();
+    let current_window_node = tree.node(&current_window_id).unwrap();
+    assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => {
+        let viewport = current_window.viewport();
+        let viewport = rlock!(viewport);
+        viewport.clone()
+      }
+      _ => unreachable!(),
+    }
+  }
 
   #[test]
   fn cursor_move_vertically_up1() {
@@ -237,6 +254,9 @@ mod tests {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
+
+    let prev_viewport = get_viewort(tree.clone());
+
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
@@ -246,8 +266,7 @@ mod tests {
     );
 
     let tree = data_access.tree.clone();
-    let tree = rlock!(tree);
-    let current_window_id = tree.current_window_id().unwrap();
-    let current_window = tree.node(&current_window_id).unwrap();
+    let actual_viewport = get_viewort(tree);
+    assert_eq!(prev_viewport.cursor(), actual_viewport.cursor());
   }
 }
