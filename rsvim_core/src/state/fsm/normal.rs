@@ -12,6 +12,7 @@ use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use std::ptr::NonNull;
+use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The normal editing mode.
@@ -99,6 +100,7 @@ impl NormalStateful {
             _ => unreachable!(),
           };
 
+          trace!("cursor_move_result:{:?}", cursor_move_result);
           if let Some(CursorMoveResult(line_idx, char_idx)) = cursor_move_result {
             viewport.set_cursor(line_idx, char_idx);
             let cursor_row = viewport
@@ -221,6 +223,7 @@ mod tests {
   use crate::rlock;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::widget::window::Viewport;
@@ -253,6 +256,8 @@ mod tests {
 
   #[test]
   fn cursor_move_up1() {
+    test_log_init();
+
     let (tree, state, bufs) = make_tree(vec![]);
 
     let key_event = KeyEvent::new_with_kind(
@@ -280,6 +285,8 @@ mod tests {
 
   #[test]
   fn cursor_move_up2() {
+    test_log_init();
+
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -318,6 +325,8 @@ mod tests {
 
   #[test]
   fn cursor_move_up3() {
+    test_log_init();
+
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -370,6 +379,8 @@ mod tests {
 
   #[test]
   fn cursor_move_down1() {
+    test_log_init();
+
     let lines = vec![];
     let buf = make_buffer_from_lines(lines);
     let bufs = make_buffers_manager(vec![buf]);
