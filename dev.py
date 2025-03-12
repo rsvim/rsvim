@@ -101,10 +101,10 @@ def release(execute, level):
 
     command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
     if execute:
-        print("Run 'release' with '--execute' (no dry run), in level: {level}")
+        print(f"Run 'release' with '--execute' (no dry run), in level: {level}")
         command = f"{command} --execute --no-verify"
     else:
-        print("Run 'release' in dry run, in level: {level}")
+        print(f"Run 'release' in dry run, in level: {level}")
 
     command = command.strip()
     print(command)
