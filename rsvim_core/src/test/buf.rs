@@ -26,30 +26,31 @@ pub fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
   rb.finish()
 }
 
-pub fn make_buffer_from_file(filename: String) -> BufferArc {
+pub fn make_buffer_from_file(opts: BufferLocalOptions, filename: String) -> BufferArc {
   let rp = make_rope_from_file(filename);
-  let bf = Buffer::_new(rp, BufferLocalOptions::default(), None, None, None, None);
+  let bf = Buffer::_new(rp, opts, None, None, None, None);
   Buffer::to_arc(bf)
 }
 
-pub fn make_buffer_from_lines(lines: Vec<&str>) -> BufferArc {
+pub fn make_buffer_from_lines(opts: BufferLocalOptions, lines: Vec<&str>) -> BufferArc {
   let rp = make_rope_from_lines(lines);
-  let buf = Buffer::_new(rp, BufferLocalOptions::default(), None, None, None, None);
+  let buf = Buffer::_new(rp, opts, None, None, None, None);
   Buffer::to_arc(buf)
 }
 
-pub fn make_empty_buffer() -> BufferArc {
-  let buf = Buffer::_new_empty(BufferLocalOptions::default());
+pub fn make_empty_buffer(opts: BufferLocalOptions) -> BufferArc {
+  let buf = Buffer::_new_empty(opts);
   Buffer::to_arc(buf)
 }
 
-pub fn make_buffer_from_rope(rp: Rope) -> BufferArc {
-  let buf = Buffer::_new(rp, BufferLocalOptions::default(), None, None, None, None);
+pub fn make_buffer_from_rope(opts: BufferLocalOptions, rp: Rope) -> BufferArc {
+  let buf = Buffer::_new(rp, opts, None, None, None, None);
   Buffer::to_arc(buf)
 }
 
-pub fn make_buffers_manager(bufs: Vec<BufferArc>) -> BuffersManagerArc {
+pub fn make_buffers_manager(opts: BufferLocalOptions, bufs: Vec<BufferArc>) -> BuffersManagerArc {
   let mut bm = BuffersManager::new();
+  bm.set_local_options(&opts);
   for buf in bufs.iter() {
     bm._add_buffer(buf.clone());
   }

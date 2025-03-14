@@ -2,31 +2,29 @@
 
 #![allow(unused_imports)]
 
-use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BuffersManager, BuffersManagerArc};
+use crate::buf::BuffersManagerArc;
 use crate::cart::{IRect, U16Size};
-use crate::test::buf::make_rope_from_lines;
-use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::internal::inode::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
+use crate::ui::widget::window::WindowLocalOptions;
 use crate::ui::widget::{Cursor, Window};
 use crate::{rlock, wlock};
 
-use ropey::{Rope, RopeBuilder, RopeSlice};
-use std::collections::BTreeSet;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use tracing::{self, info};
+use tracing::{self};
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
-pub fn make_tree_with_buffers(canvas_size: U16Size, buffers_manager: BuffersManagerArc) -> TreeArc {
+pub fn make_tree_with_buffers(
+  window_local_opts: WindowLocalOptions,
+  canvas_size: U16Size,
+  buffers_manager: BuffersManagerArc,
+) -> TreeArc {
   // UI Tree
   let tree = Tree::to_arc(Tree::new(canvas_size));
-
   let buffers = rlock!(buffers_manager);
 
   let mut tree_mut = wlock!(tree);
+  tree_mut.set_local_options(&window_local_opts);
   let tree_root_id = tree_mut.root_id();
   let window_shape = IRect::new(
     (0, 0),

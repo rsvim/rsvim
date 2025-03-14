@@ -629,7 +629,7 @@ impl Viewport {
 mod tests {
   use super::*;
 
-  use crate::buf::BufferArc;
+  use crate::buf::{BufferArc, BufferLocalOptions};
   use crate::cart::{IRect, U16Size};
   use crate::rlock;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -778,7 +778,10 @@ mod tests {
   fn sync_from_top_left_nowrap1() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -800,7 +803,7 @@ mod tests {
     ];
     let size = U16Size::new(10, 10);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -814,7 +817,7 @@ mod tests {
     .into_iter()
     .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -828,7 +831,10 @@ mod tests {
   fn sync_from_top_left_nowrap2() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -849,7 +855,7 @@ mod tests {
     ];
     let size = U16Size::new(27, 15);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -863,7 +869,7 @@ mod tests {
     .into_iter()
     .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -877,7 +883,10 @@ mod tests {
   fn sync_from_top_left_nowrap3() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -896,12 +905,12 @@ mod tests {
 
     let size = U16Size::new(31, 5);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -937,7 +946,10 @@ mod tests {
   fn sync_from_top_left_nowrap5() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello,\tRSVIM!\n",
       "This\r",
       "is a quite\tsimple and small test lines.\n",
@@ -963,7 +975,7 @@ mod tests {
 
     let size = U16Size::new(10, 10);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -993,7 +1005,7 @@ mod tests {
     .into_iter()
     .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -1007,7 +1019,10 @@ mod tests {
   fn sync_from_top_left_nowrap6() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "你好，\tRSVIM！\n",
       "这是\ta quite 简单而且很小的测试文字内容行。\n",
       "But still\\it\t包含了好几种我们想测试的情况：\n",
@@ -1027,7 +1042,7 @@ mod tests {
 
     let size = U16Size::new(27, 6);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
         .into_iter()
@@ -1037,7 +1052,7 @@ mod tests {
         .into_iter()
         .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -1051,7 +1066,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak1() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -1078,14 +1096,17 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    assert_sync_from_top_left(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak2() {
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -1118,7 +1139,7 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
@@ -1126,7 +1147,7 @@ mod tests {
       .into_iter()
       .collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,

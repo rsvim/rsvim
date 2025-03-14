@@ -254,7 +254,7 @@ impl Widgetable for WindowContent {
 mod tests {
   use super::*;
 
-  use crate::buf::BufferArc;
+  use crate::buf::{BufferArc, BufferLocalOptions};
   use crate::cart::U16Size;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
@@ -324,7 +324,10 @@ mod tests {
   fn draw_from_top_left_nowrap1() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -348,7 +351,7 @@ mod tests {
 
     let terminal_size = U16Size::new(10, 10);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buf.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
 
@@ -356,7 +359,10 @@ mod tests {
   fn draw_from_top_left_nowrap2() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buffer = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -385,7 +391,10 @@ mod tests {
   fn draw_from_top_left_nowrap3() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buffer = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello,  R\tS\tV\tI\tM!\n",
       "这是一个非常简单而且非常短的测试例子，只包含几行文本内容。\n",
       "But still\tit\tcontains\tseveral things we want to test:\n",
@@ -418,7 +427,10 @@ mod tests {
   fn draw_from_top_left_nowrap4() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buffer = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -461,7 +473,8 @@ mod tests {
   fn draw_from_top_left_nowrap5() {
     test_log_init();
 
-    let buffer = make_empty_buffer();
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_empty_buffer(buf_opts);
     let expect = vec![
       "                               ",
       "                               ",
@@ -487,7 +500,7 @@ mod tests {
 
     let terminal_size = U16Size::new(31, 20);
     let window_options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buf.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
 
@@ -495,7 +508,10 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak1() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buffer = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -527,7 +543,10 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak2() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buffer = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "\t\t\t* The extra parts are split\tinto the next row,\tif either line-wrap\tor word-wrap options are been set. If the extra parts are still too long to\t来放在下一个横行内，一遍又一遍的重复这样的操作。This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
@@ -553,7 +572,8 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak3() {
     test_log_init();
 
-    let buffer = make_empty_buffer();
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_empty_buffer(buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -568,7 +588,7 @@ mod tests {
 
     let terminal_size = U16Size::new(20, 9);
     let window_options = WindowLocalOptions::builder().wrap(true).build();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buf.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
 
@@ -576,7 +596,10 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak4() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buffer = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things\t我们想要测试的：\n",
@@ -628,7 +651,10 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak5() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buffer = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things\t我们想要测试的：\n",

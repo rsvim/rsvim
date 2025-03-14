@@ -236,7 +236,7 @@ impl NormalStateful {
 mod tests {
   use super::*;
 
-  use crate::buf::BuffersManagerArc;
+  use crate::buf::{BufferLocalOptions, BuffersManagerArc};
   use crate::cart::U16Size;
   use crate::rlock;
   use crate::state::{State, StateArc};
@@ -244,15 +244,20 @@ mod tests {
   use crate::test::log::init as test_log_init;
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
-  use crate::ui::widget::window::Viewport;
+  use crate::ui::widget::window::{Viewport, WindowLocalOptions};
 
   use crossterm::event::Event;
   use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 
-  fn make_tree(lines: Vec<&str>) -> (TreeArc, StateArc, BuffersManagerArc) {
-    let buf = make_buffer_from_lines(lines);
-    let bufs = make_buffers_manager(vec![buf]);
-    let tree = make_tree_with_buffers(U16Size::new(10, 10), bufs.clone());
+  fn make_tree(
+    window_local_opts: WindowLocalOptions,
+    canvas_size: U16Size,
+    lines: Vec<&str>,
+  ) -> (TreeArc, StateArc, BuffersManagerArc) {
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let bufs = make_buffers_manager(buf_opts, vec![buf]);
+    let tree = make_tree_with_buffers(window_local_opts, canvas_size, bufs.clone());
     let state = State::to_arc(State::default());
     (tree, state, bufs)
   }
@@ -276,7 +281,11 @@ mod tests {
   fn cursor_move_up1() {
     test_log_init();
 
-    let (tree, state, bufs) = make_tree(vec![]);
+    let (tree, state, bufs) = make_tree(
+      WindowLocalOptions::builder().wrap(false).build(),
+      U16Size::new(10, 10),
+      vec![],
+    );
 
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('a'),
@@ -312,7 +321,11 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs) = make_tree(lines);
+    let (tree, state, bufs) = make_tree(
+      WindowLocalOptions::builder().wrap(false).build(),
+      U16Size::new(10, 10),
+      lines,
+    );
 
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('a'),
@@ -348,7 +361,11 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs) = make_tree(lines);
+    let (tree, state, bufs) = make_tree(
+      WindowLocalOptions::builder().wrap(false).build(),
+      U16Size::new(10, 10),
+      lines,
+    );
 
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('a'),
@@ -389,9 +406,14 @@ mod tests {
     test_log_init();
 
     let lines = vec![];
-    let buf = make_buffer_from_lines(lines);
-    let bufs = make_buffers_manager(vec![buf]);
-    let tree = make_tree_with_buffers(U16Size::new(10, 10), bufs.clone());
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let bufs = make_buffers_manager(buf_opts, vec![buf]);
+    let tree = make_tree_with_buffers(
+      WindowLocalOptions::builder().wrap(false).build(),
+      U16Size::new(10, 10),
+      bufs.clone(),
+    );
     let state = State::to_arc(State::default());
     let key_event = KeyEvent::new_with_kind(
       KeyCode::Char('j'),
