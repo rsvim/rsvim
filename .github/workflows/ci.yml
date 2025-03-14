@@ -82,6 +82,7 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v1
         with:
           command: check advisories
+          arguments: --all-features --exclude v8
   unit_test:
     name: Unit Test
     strategy:

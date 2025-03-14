@@ -12,7 +12,7 @@ use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
 // Re-export
 pub use crate::ui::tree::opt::{WindowGlobalOptions, WindowGlobalOptionsBuilder};
 
-use parking_lot::RwLock;
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::collections::BTreeSet;
 use std::sync::{Arc, Weak};
 // use tracing::trace;
@@ -28,12 +28,22 @@ pub enum TreeNode {
   Cursor(Cursor),
 }
 
-macro_rules! tree_node_generate_dispatch {
+macro_rules! tree_node_generate_getter {
   ($self_name:ident,$method_name:ident) => {
     match $self_name {
       TreeNode::RootContainer(n) => n.$method_name(),
       TreeNode::Window(n) => n.$method_name(),
       TreeNode::Cursor(n) => n.$method_name(),
+    }
+  };
+}
+
+macro_rules! tree_node_generate_setter {
+  ($self_name:ident,$method_name:ident,$method_arg:ident) => {
+    match $self_name {
+      TreeNode::RootContainer(n) => n.$method_name($method_arg),
+      TreeNode::Window(n) => n.$method_name($method_arg),
+      TreeNode::Cursor(n) => n.$method_name($method_arg),
     }
   };
 }
@@ -50,55 +60,55 @@ impl TreeNode {
 
 impl Inodeable for TreeNode {
   fn id(&self) -> InodeId {
-    tree_node_generate_dispatch!(self, id)
+    tree_node_generate_getter!(self, id)
   }
 
   fn depth(&self) -> &usize {
-    tree_node_generate_dispatch!(self, depth)
+    tree_node_generate_getter!(self, depth)
   }
 
-  fn depth_mut(&mut self) -> &mut usize {
-    tree_node_generate_dispatch!(self, depth_mut)
+  fn set_depth(&mut self, depth: usize) {
+    tree_node_generate_setter!(self, set_depth, depth)
   }
 
   fn zindex(&self) -> &usize {
-    tree_node_generate_dispatch!(self, zindex)
+    tree_node_generate_getter!(self, zindex)
   }
 
-  fn zindex_mut(&mut self) -> &mut usize {
-    tree_node_generate_dispatch!(self, zindex_mut)
+  fn set_zindex(&mut self, zindex: usize) {
+    tree_node_generate_setter!(self, set_zindex, zindex)
   }
 
   fn shape(&self) -> &IRect {
-    tree_node_generate_dispatch!(self, shape)
+    tree_node_generate_getter!(self, shape)
   }
 
-  fn shape_mut(&mut self) -> &mut IRect {
-    tree_node_generate_dispatch!(self, shape_mut)
+  fn set_shape(&mut self, shape: &IRect) {
+    tree_node_generate_setter!(self, set_shape, shape)
   }
 
   fn actual_shape(&self) -> &U16Rect {
-    tree_node_generate_dispatch!(self, actual_shape)
+    tree_node_generate_getter!(self, actual_shape)
   }
 
-  fn actual_shape_mut(&mut self) -> &mut U16Rect {
-    tree_node_generate_dispatch!(self, actual_shape_mut)
+  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+    tree_node_generate_setter!(self, set_actual_shape, actual_shape)
   }
 
   fn enabled(&self) -> &bool {
-    tree_node_generate_dispatch!(self, enabled)
+    tree_node_generate_getter!(self, enabled)
   }
 
-  fn enabled_mut(&mut self) -> &mut bool {
-    tree_node_generate_dispatch!(self, enabled_mut)
+  fn set_enabled(&mut self, enabled: bool) {
+    tree_node_generate_setter!(self, set_enabled, enabled)
   }
 
   fn visible(&self) -> &bool {
-    tree_node_generate_dispatch!(self, visible)
+    tree_node_generate_getter!(self, visible)
   }
 
-  fn visible_mut(&mut self) -> &mut bool {
-    tree_node_generate_dispatch!(self, visible_mut)
+  fn set_visible(&mut self, visible: bool) {
+    tree_node_generate_setter!(self, set_visible, visible)
   }
 }
 
@@ -229,6 +239,9 @@ pub struct Tree {
 
 pub type TreeArc = Arc<RwLock<Tree>>;
 pub type TreeWk = Weak<RwLock<Tree>>;
+pub type TreeReadGuard<'a> = RwLockReadGuard<'a, Tree>;
+pub type TreeWriteGuard<'a> = RwLockWriteGuard<'a, Tree>;
+
 pub type TreeNodeId = InodeId;
 // pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
 // pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
@@ -414,38 +427,14 @@ impl Tree {
 
   /// Bounded move by Y-axis (or `rows`). This is simply a wrapper method on
   /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_y_by(&mut self, id: InodeId, rows: isize) -> Option<IRect> {
+  pub fn bounded_move_vertically_by(&mut self, id: InodeId, rows: isize) -> Option<IRect> {
     self.bounded_move_by(id, 0, rows)
-  }
-
-  /// Bounded move up by Y-axis (or `rows`). This is simply a wrapper method on
-  /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_up_by(&mut self, id: InodeId, rows: usize) -> Option<IRect> {
-    self.bounded_move_by(id, 0, -(rows as isize))
-  }
-
-  /// Bounded move down by Y-axis (or `rows`). This is simply a wrapper method on
-  /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_down_by(&mut self, id: InodeId, rows: usize) -> Option<IRect> {
-    self.bounded_move_by(id, 0, rows as isize)
   }
 
   /// Bounded move by X-axis (or `columns`). This is simply a wrapper method on
   /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_x_by(&mut self, id: InodeId, cols: isize) -> Option<IRect> {
+  pub fn bounded_move_horizontally_by(&mut self, id: InodeId, cols: isize) -> Option<IRect> {
     self.bounded_move_by(id, cols, 0)
-  }
-
-  /// Bounded move left by X-axis (or `columns`). This is simply a wrapper method on
-  /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_left_by(&mut self, id: InodeId, cols: usize) -> Option<IRect> {
-    self.bounded_move_by(id, -(cols as isize), 0)
-  }
-
-  /// Bounded move right by X-axis (or `columns`). This is simply a wrapper method on
-  /// [`bounded_move_by`](Tree::bounded_move_by).
-  pub fn bounded_move_right_by(&mut self, id: InodeId, cols: usize) -> Option<IRect> {
-    self.bounded_move_by(id, cols as isize, 0)
   }
 }
 // Movement }

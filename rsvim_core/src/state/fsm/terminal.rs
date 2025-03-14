@@ -2,7 +2,7 @@
 
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The terminal editing mode.
 pub struct TerminalStateful {}
 

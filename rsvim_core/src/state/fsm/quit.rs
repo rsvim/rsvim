@@ -2,7 +2,7 @@
 
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The quit state.
 ///
 /// NOTE: This is an internal state to tell the editor to quit.

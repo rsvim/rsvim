@@ -8,7 +8,7 @@ use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::res::IoResult;
-use crate::state::fsm::StatefulValue;
+use crate::state::fsm::{StatefulDataAccess, StatefulValue, StatefulValueArc};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::internal::Inodeable;
@@ -78,6 +78,9 @@ pub struct EventLoop {
   /// (Global) editing state.
   pub state: StateArc,
 
+  /// Finite-state machine for editing state.
+  pub stateful_machine: StatefulValueArc,
+
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
 
@@ -132,6 +135,7 @@ impl EventLoop {
 
     // State
     let state = State::to_arc(State::default());
+    let stateful_machine = StatefulValue::to_arc(StatefulValue::default());
 
     // Worker => master
     let (worker_send_to_master, master_recv_from_worker) = channel(envar::CHANNEL_BUF_SIZE());
@@ -208,6 +212,7 @@ impl EventLoop {
       canvas,
       tree,
       state,
+      stateful_machine,
       buffers: buffers_manager,
       writer: BufWriter::new(std::io::stdout()),
       cancellation_token: CancellationToken::new(),
@@ -280,7 +285,7 @@ impl EventLoop {
   pub fn init_windows(&mut self) -> IoResult<()> {
     // Initialize default window.
     let canvas_size = rlock!(self.canvas).size();
-    let mut tree = self.tree.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
+    let mut tree = wlock!(self.tree);
     let tree_root_id = tree.root_id();
     let window_shape = IRect::new(
       (0, 0),
@@ -342,15 +347,25 @@ impl EventLoop {
       Some(Ok(event)) => {
         trace!("Polled terminal event ok: {:?}", event);
 
+        let data_access = StatefulDataAccess::new(
+          self.state.clone(),
+          self.tree.clone(),
+          self.buffers.clone(),
+          event,
+        );
+
         // Handle by state machine
-        let state_response = self
+        let next_stateful = self.stateful_machine.clone().handle(data_access);
+        let next_stateful = StatefulValue::to_arc(next_stateful);
+        self
           .state
           .try_write_for(envar::MUTEX_TIMEOUT())
           .unwrap()
-          .handle(self.tree.clone(), self.buffers.clone(), event);
+          .update_state_machine(&next_stateful);
+        self.stateful_machine = next_stateful.clone();
 
         // Exit loop and quit.
-        if let StatefulValue::QuitState(_) = state_response.next_stateful {
+        if let StatefulValue::QuitState(_) = *next_stateful {
           self.cancellation_token.cancel();
         }
       }

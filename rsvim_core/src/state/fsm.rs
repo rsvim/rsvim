@@ -12,11 +12,12 @@
 //!
 //! * Quit state: The editor should quit on this state.
 
-use crossterm::event::Event;
-
 use crate::buf::BuffersManagerArc;
-use crate::state::State;
+use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
+
+use crossterm::event::Event;
+use std::sync::{Arc, Weak};
 
 // Re-export
 pub use crate::state::fsm::command_line::CommandLineStateful;
@@ -39,20 +40,15 @@ pub mod visual;
 
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.
-pub struct StatefulDataAccess<'a> {
-  pub state: &'a mut State,
+pub struct StatefulDataAccess {
+  pub state: StateArc,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   pub event: Event,
 }
 
-impl<'a> StatefulDataAccess<'a> {
-  pub fn new(
-    state: &'a mut State,
-    tree: TreeArc,
-    buffers: BuffersManagerArc,
-    event: Event,
-  ) -> Self {
+impl StatefulDataAccess {
+  pub fn new(state: StateArc, tree: TreeArc, buffers: BuffersManagerArc, event: Event) -> Self {
     StatefulDataAccess {
       state,
       tree,
@@ -62,7 +58,7 @@ impl<'a> StatefulDataAccess<'a> {
   }
 }
 
-/// The FSM state trait.
+/// The FSM trait.
 pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
@@ -70,8 +66,8 @@ pub trait Stateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
 }
 
-#[derive(Debug, Copy, Clone)]
-/// The value holder for each FSM state.
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+/// The value holder for each state machine.
 pub enum StatefulValue {
   // Editing modes.
   NormalMode(NormalStateful),
@@ -93,12 +89,12 @@ impl Default for StatefulValue {
   }
 }
 
-impl Stateful for StatefulValue {
+impl StatefulValue {
   /// Dispatch data with current FSM state.
   ///
   /// Returns the next FSM state.
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    match self {
+  pub fn handle(self: Arc<Self>, data_access: StatefulDataAccess) -> StatefulValue {
+    match *self {
       StatefulValue::NormalMode(s) => s.handle(data_access),
       StatefulValue::VisualMode(s) => s.handle(data_access),
       StatefulValue::SelectMode(s) => s.handle(data_access),
@@ -110,3 +106,12 @@ impl Stateful for StatefulValue {
     }
   }
 }
+
+impl StatefulValue {
+  pub fn to_arc(s: StatefulValue) -> StatefulValueArc {
+    Arc::new(s)
+  }
+}
+
+pub type StatefulValueArc = Arc<StatefulValue>;
+pub type StatefulValueWk = Weak<StatefulValue>;
