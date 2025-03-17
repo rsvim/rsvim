@@ -152,7 +152,7 @@ impl NormalStateful {
       Command::CursorMoveUp(n) => cursor_line_idx.saturating_sub(n as usize),
       Command::CursorMoveDown(n) => std::cmp::min(
         cursor_line_idx.saturating_add(n as usize),
-        raw_buffer.as_ref().get_rope().len_lines(),
+        raw_buffer.as_ref().get_rope().len_lines().saturating_sub(1),
       ),
       _ => unreachable!(),
     };
