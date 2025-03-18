@@ -322,7 +322,7 @@ mod tests {
   use std::sync::Once;
   use tracing::info;
 
-  use crate::buf::{Buffer, BufferArc};
+  use crate::buf::{Buffer, BufferArc, BufferLocalOptions};
   use crate::cart::U16Size;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
@@ -370,7 +370,10 @@ mod tests {
   fn draw_after_init1() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -394,7 +397,7 @@ mod tests {
 
     let terminal_size = U16Size::new(10, 10);
     let window_local_options = WindowLocalOptions::builder().wrap(false).build();
-    let window = make_window_from_size(terminal_size, buffer.clone(), &window_local_options);
+    let window = make_window_from_size(terminal_size, buf.clone(), &window_local_options);
     let mut actual = Canvas::new(terminal_size);
     window.draw(&mut actual);
     do_test_draw(&actual, &expect);

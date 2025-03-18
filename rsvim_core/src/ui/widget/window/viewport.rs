@@ -924,15 +924,16 @@ mod tests {
   fn sync_from_top_left_nowrap4() {
     test_log_init();
 
-    let buffer = make_empty_buffer();
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_empty_buffer(buf_opts);
     let expect = vec![""];
 
     let size = U16Size::new(20, 20);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -1159,7 +1160,10 @@ mod tests {
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak3() {
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -1181,14 +1185,15 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    assert_sync_from_top_left(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak4() {
-    let buffer = make_empty_buffer();
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_empty_buffer(buf_opts);
     let expect = vec![""];
 
     let size = U16Size::new(10, 10);
@@ -1196,14 +1201,17 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+    assert_sync_from_top_left(buf, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak5() {
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "\t\t* The extra parts are\tsplit into the next\trow,\tif either line-wrap or word-wrap options are been set. If the extra\tparts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
@@ -1219,11 +1227,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 4)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -1237,7 +1245,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak6() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "But still it contains several things we want to test:\n",
       "\t\t1. When\tthe line\tis small\tenough to\tcompletely put\tinside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
     ]);
@@ -1254,11 +1265,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -1272,7 +1283,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak7() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "But still it contains several things we want to test:\n",
       "\t\t1. When\tthe line\tis small\tenough\tto\tcompletely put\tinside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
     ]);
@@ -1289,11 +1303,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 7)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -1307,7 +1321,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak8() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "但它仍然contains several things 我们想要测试的文字内容：\n",
       "\t第一，当一行文字内容太小了，然后可以完全的放进窗口的一行之中，那么行wrap和词wrap两个选项并不会影响渲染的最终效果。\n",
     ]);
@@ -1324,11 +1341,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -1342,7 +1359,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak9() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "但它仍然contains several th\tings 我们想要测试的文字内容：\n",
       "\t第一，当一行文字内容太小了，然后可以完全的放进窗口的一行之中，那么行wrap和词wrap两个选项并不会影响渲染的最终效果。\n",
     ]);
@@ -1360,11 +1380,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
