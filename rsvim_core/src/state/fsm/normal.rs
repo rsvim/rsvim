@@ -7,7 +7,7 @@ use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::TreeNode;
-use crate::ui::widget::window::CursorViewport;
+use crate::ui::widget::window::{CursorViewport, Viewport};
 use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -82,7 +82,6 @@ impl NormalStateful {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
         let viewport = current_window.viewport();
         let mut viewport = wlock!(viewport);
-        let cursor_viewport = viewport.cursor();
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
         let mut buffer = wlock!(buffer);
@@ -92,10 +91,10 @@ impl NormalStateful {
 
           let cursor_move_result = match command {
             Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
-              self.cursor_move_vertically(cursor_viewport, raw_buffer, command)
+              self.cursor_move_vertically(&viewport, raw_buffer, command)
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
-              self.cursor_move_horizontally(cursor_viewport, raw_buffer, command)
+              self.cursor_move_horizontally(&viewport, raw_buffer, command)
             }
             _ => unreachable!(),
           };
@@ -140,20 +139,30 @@ impl NormalStateful {
 
   unsafe fn cursor_move_vertically(
     &self,
-    cursor_viewport: &CursorViewport,
+    viewport: &Viewport,
     mut raw_buffer: NonNull<Buffer>,
     command: Command,
   ) -> Option<CursorMoveResult> {
     trace!("command:{:?}", command);
+    let cursor_viewport = viewport.cursor();
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
 
     let line_idx = match command {
       Command::CursorMoveUp(n) => cursor_line_idx.saturating_sub(n as usize),
-      Command::CursorMoveDown(n) => std::cmp::min(
-        cursor_line_idx.saturating_add(n as usize),
-        raw_buffer.as_ref().get_rope().len_lines().saturating_sub(1),
-      ),
+      Command::CursorMoveDown(n) => {
+        let expected = cursor_line_idx.saturating_add(n as usize);
+        let end_line_idx = viewport.end_line_idx();
+        let upper_bound = end_line_idx.saturating_sub(1);
+        trace!(
+          "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},upper_bound:{:?}",
+          cursor_line_idx,
+          expected,
+          end_line_idx,
+          upper_bound
+        );
+        std::cmp::min(expected, upper_bound)
+      }
       _ => unreachable!(),
     };
     trace!(
@@ -193,10 +202,11 @@ impl NormalStateful {
 
   unsafe fn cursor_move_horizontally(
     &self,
-    cursor_viewport: &CursorViewport,
+    viewport: &Viewport,
     raw_buffer: NonNull<Buffer>,
     command: Command,
   ) -> Option<CursorMoveResult> {
+    let cursor_viewport = viewport.cursor();
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
 
