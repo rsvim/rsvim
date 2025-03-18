@@ -234,16 +234,29 @@ impl NormalStateful {
 
     let char_idx = match command {
       Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n as usize),
-      Command::CursorMoveRight(n) => std::cmp::max(
-        cursor_char_idx.saturating_add(n as usize),
-        raw_buffer
+      Command::CursorMoveRight(n) => {
+        let expected = cursor_char_idx.saturating_add(n as usize);
+        let cursor_line = raw_buffer
           .as_ref()
           .get_rope()
           .get_line(cursor_line_idx)
-          .unwrap()
-          .len_chars()
-          - 1,
-      ),
+          .unwrap();
+        let last_char_idx = {
+          let mut c = cursor_line.len_chars();
+          while raw_buffer
+            .as_ref()
+            .char_width(cursor_line.get_char(c).unwrap())
+            == 0
+          {
+            c = c.saturating_sub(1);
+            if c == 0 {
+              break;
+            }
+          }
+          c
+        };
+        std::cmp::min(expected, last_char_idx)
+      }
       _ => unreachable!(),
     };
 
