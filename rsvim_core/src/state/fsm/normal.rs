@@ -301,7 +301,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_up1() {
+  fn cursor_move_vertically1() {
     test_log_init();
 
     let (tree, state, bufs) = make_tree(
@@ -332,7 +332,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_up2() {
+  fn cursor_move_vertically2() {
     test_log_init();
 
     let lines = vec![
@@ -372,7 +372,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_up3() {
+  fn cursor_move_vertically3() {
     test_log_init();
 
     let lines = vec![
@@ -425,7 +425,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_up4() {
+  fn cursor_move_vertically4() {
     test_log_init();
 
     let lines = vec![
@@ -478,7 +478,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_up5() {
+  fn cursor_move_vertically5() {
     test_log_init();
 
     let lines = vec![
@@ -531,7 +531,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_down1() {
+  fn cursor_move_vertically6() {
     test_log_init();
 
     let lines = vec![];
