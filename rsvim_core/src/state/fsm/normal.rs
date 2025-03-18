@@ -109,9 +109,22 @@ impl NormalStateful {
               .rows()
               .iter()
               .filter(|(_row_idx, row_viewport)| {
-                row_viewport.start_char_idx() >= char_idx && row_viewport.end_char_idx() < char_idx
+                trace!(
+                  "row_viewport:{:?}, start_char_idx:{:?},end_char_idx:{:?},char_idx:{:?}",
+                  row_viewport,
+                  row_viewport.start_char_idx(),
+                  row_viewport.end_char_idx(),
+                  char_idx
+                );
+                row_viewport.start_char_idx() <= char_idx && row_viewport.end_char_idx() > char_idx
               })
               .collect::<Vec<_>>();
+            trace!(
+              "char_idx:{:?}, cursor_row({:?}):{:?}",
+              char_idx,
+              cursor_row.len(),
+              cursor_row
+            );
             assert_eq!(cursor_row.len(), 1);
 
             let (row_idx, row_viewport) = cursor_row[0];
@@ -425,7 +438,7 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (tree, state, bufs) = make_tree(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptions::builder().wrap(true).build(),
       U16Size::new(10, 10),
       lines,
     );
@@ -452,7 +465,7 @@ mod tests {
 
     let tree = data_access.tree.clone();
     let viewport1 = get_viewport(tree);
-    assert_eq!(viewport1.cursor().line_idx(), 3);
+    assert_eq!(viewport1.cursor().line_idx(), 2);
     assert_eq!(viewport1.cursor().char_idx(), 0);
 
     let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveUp(1));
