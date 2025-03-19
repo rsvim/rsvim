@@ -131,6 +131,11 @@ impl NormalStateful {
             let cursor_id = tree.cursor_id().unwrap();
 
             if let Some(&mut TreeNode::Cursor(ref mut cursor_node)) = tree.node_mut(&cursor_id) {
+              trace!(
+                "(before) cursor node shape:{:?}, actual_shape:{:?}",
+                cursor_node.shape(),
+                cursor_node.actual_shape()
+              );
               let row_start_width = raw_buffer
                 .as_mut()
                 .width_before(line_idx, row_viewport.start_char_idx());
@@ -138,6 +143,11 @@ impl NormalStateful {
               let col_idx = (char_start_width - row_start_width) as isize;
               let shape = IRect::new((*row_idx as isize, col_idx), (*row_idx as isize, col_idx));
               cursor_node.set_shape(&shape);
+              trace!(
+                "(after) cursor node shape:{:?}, actual_shape:{:?}",
+                cursor_node.shape(),
+                cursor_node.actual_shape()
+              );
             } else {
               unreachable!();
             }
