@@ -236,13 +236,23 @@ impl NormalStateful {
       Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n as usize),
       Command::CursorMoveRight(n) => {
         let expected = cursor_char_idx.saturating_add(n as usize);
-        let cursor_line = raw_buffer
-          .as_ref()
-          .get_rope()
-          .get_line(cursor_line_idx)
-          .unwrap();
         let last_char_idx = {
-          let mut c = cursor_line.len_chars();
+          let cursor_line = raw_buffer
+            .as_ref()
+            .get_rope()
+            .get_line(cursor_line_idx)
+            .unwrap();
+          assert!(viewport.lines().contains_key(&cursor_line_idx));
+          let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
+          let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+          let mut c = last_row_viewport.end_char_idx() - 1;
+          trace!(
+            "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, c:{}",
+            cursor_char_idx,
+            expected,
+            last_row_viewport,
+            c
+          );
           while raw_buffer
             .as_ref()
             .char_width(cursor_line.get_char(c).unwrap())
@@ -696,7 +706,7 @@ mod tests {
     let tree = data_access.tree.clone();
     let actual_viewport = get_viewport(tree);
     assert_eq!(actual_viewport.cursor().line_idx(), 0);
-    assert_eq!(actual_viewport.cursor().char_idx(), 12);
+    assert_eq!(actual_viewport.cursor().char_idx(), 9);
   }
 
   #[test]
@@ -796,7 +806,7 @@ mod tests {
     assert_eq!(actual_viewport.cursor().line_idx(), 0);
     assert_eq!(actual_viewport.cursor().char_idx(), 5);
 
-    for i in (0..4).rev() {
+    for i in (0..=4).rev() {
       let stateful = match next_stateful {
         StatefulValue::NormalMode(s) => s,
         _ => unreachable!(),
