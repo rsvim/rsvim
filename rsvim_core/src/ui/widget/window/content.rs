@@ -151,7 +151,7 @@ impl Widgetable for WindowContent {
 
             // Render line content.
             if r_viewport.end_char_idx() > r_viewport.start_char_idx() {
-              let mut total_width = 0_usize;
+              // let mut total_width = 0_usize;
               let mut char_idx = r_viewport.start_char_idx();
               let mut chars_iter = bline.get_chars_at(r_viewport.start_char_idx()).unwrap();
               while char_idx < r_viewport.end_char_idx() {
@@ -164,7 +164,7 @@ impl Widgetable for WindowContent {
 
                 col_idx += unicode_width as u16;
                 char_idx += 1;
-                total_width += unicode_width;
+                // total_width += unicode_width;
               }
               // trace!(
               //   "2-line_idx:{}, row_idx:{}, col_idx:{}, total_width:{}, line_viewport:{:?}, r:{:?}",
