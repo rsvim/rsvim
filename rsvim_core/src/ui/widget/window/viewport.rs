@@ -5,7 +5,7 @@ use crate::cart::U16Rect;
 //use crate::rlock;
 use crate::ui::widget::window::ViewportOptions;
 
-use parking_lot::RwLock;
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::collections::BTreeMap;
 use std::ops::Range;
 use std::sync::{Arc, Weak};
@@ -126,20 +126,14 @@ impl LineViewport {
 pub struct CursorViewport {
   // Char index.
   char_idx: usize,
-  // Row index.
-  row_idx: u16,
   // Line index.
   line_idx: usize,
 }
 
 impl CursorViewport {
   /// Make new instance.
-  pub fn new(char_idx: usize, row_idx: u16, line_idx: usize) -> Self {
-    Self {
-      char_idx,
-      row_idx,
-      line_idx,
-    }
+  pub fn new(char_idx: usize, line_idx: usize) -> Self {
+    Self { char_idx, line_idx }
   }
 
   /// Get char index, starts from 0.
@@ -147,14 +141,19 @@ impl CursorViewport {
     self.char_idx
   }
 
-  /// Get the row index, starts from 0.
-  pub fn row_idx(&self) -> u16 {
-    self.row_idx
+  /// Set char index.
+  pub fn set_char_idx(&mut self, char_idx: usize) {
+    self.char_idx = char_idx;
   }
 
   /// Get the line index, starts from 0.
   pub fn line_idx(&self) -> usize {
     self.line_idx
+  }
+
+  /// Set the line index.
+  pub fn set_line_idx(&mut self, line_idx: usize) {
+    self.line_idx = line_idx;
   }
 }
 
@@ -417,6 +416,8 @@ pub struct Viewport {
 
 pub type ViewportArc = Arc<RwLock<Viewport>>;
 pub type ViewportWk = Weak<RwLock<Viewport>>;
+pub type ViewportWriteGuard<'a> = RwLockWriteGuard<'a, Viewport>;
+pub type ViewportReadGuard<'a> = RwLockReadGuard<'a, Viewport>;
 
 impl Viewport {
   /// Make new instance.
@@ -425,7 +426,7 @@ impl Viewport {
     let (line_idx_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
     let cursor = if line_idx_range.is_empty() {
       assert!(lines.is_empty());
-      CursorViewport::new(0, 0, 0)
+      CursorViewport::new(0, 0)
     } else {
       assert!(!lines.is_empty());
       // trace!(
@@ -453,13 +454,12 @@ impl Viewport {
       let line_idx = *first_line.0;
       let first_line = first_line.1;
       if first_line.rows().is_empty() {
-        CursorViewport::new(0, 0, 0)
+        CursorViewport::new(0, 0)
       } else {
         let first_row = first_line.rows().first_key_value().unwrap();
-        let row_idx = *first_row.0;
         let first_row = first_row.1;
         let char_idx = first_row.start_char_idx();
-        CursorViewport::new(char_idx, row_idx, line_idx)
+        CursorViewport::new(char_idx, line_idx)
       }
     };
 
@@ -569,9 +569,11 @@ impl Viewport {
     &self.cursor
   }
 
-  /// Set cursor viewport information.
-  pub fn set_cursor(&mut self, cursor: CursorViewport) {
-    self.cursor = cursor;
+  /// Set cursor line and char (column).
+  pub fn set_cursor(&mut self, line_idx: usize, char_idx: usize) {
+    assert!(self.lines.contains_key(&line_idx));
+    self.cursor.set_line_idx(line_idx);
+    self.cursor.set_char_idx(char_idx);
   }
 
   /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.
@@ -588,235 +590,6 @@ impl Viewport {
     self.lines = lines;
   }
 }
-
-//#[derive(Debug, Clone, Copy)]
-// /// The vertical offset for viewport/cursor move up/down.
-//pub enum ViewportVerticalOffset {
-//  Up(usize),
-//  Down(usize),
-//}
-//
-//#[derive(Debug, Clone, Copy)]
-// /// The horizontal offset for viewport/cursor move left/right.
-//pub enum ViewportHorizontalOffset {
-//  Left(usize),
-//  Right(usize),
-//}
-//
-// // Cursor Movement {
-//impl Viewport {
-//  /// Detect whether current viewport contains a specific line (vertical).
-//  pub fn contains_line(&self, line_idx: usize) -> bool {
-//    if line_idx < self.start_line_idx() {
-//      false
-//    } else if line_idx >= self.end_line_idx() {
-//      false
-//    } else {
-//      true
-//    }
-//  }
-//
-//  /// Calculate how to move the viewport so that it can contain the specific line.
-//  ///
-//  /// It returns the start line index for the viewport, which indicates the viewport that starts
-//  /// from this line index can contain the specific line, and the movement of the viewport is
-//  /// minimized.
-//  ///
-//  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
-//  ///
-//  /// # Returns
-//  ///
-//  /// It returns `None` if the specific line is already inside current viewport, i.e. the viewport
-//  /// doesn't need to move.
-//  ///
-//  /// It returns the start line index which indicates the new viewport should start from.
-//  pub fn vertical_displacement(&self, line_idx: usize) -> Option<usize> {
-//    if line_idx < self.start_line_idx() {
-//      Some(line_idx)
-//    } else if line_idx >= self.end_line_idx() {
-//      let height = self.actual_shape.height() as usize;
-//      let buf_lines_len = rlock!(self.buffer.upgrade().unwrap()).len_lines();
-//      let line_idx = std::cmp::min(buf_lines_len, line_idx);
-//      if line_idx >= height {
-//        Some(line_idx - height)
-//      } else {
-//        Some(0_usize)
-//      }
-//    } else {
-//      None
-//    }
-//  }
-//
-//  /// Detect whether current viewport contains a specific char (horizontal).
-//  pub fn contains_char(&self, char_idx: usize) -> bool {
-//    if char_idx < self.start_line_idx() {
-//      false
-//    } else if char_idx >= self.end_line_idx() {
-//      false
-//    } else {
-//      true
-//    }
-//  }
-//
-//  /// Calculate how to move the viewport so that it can contain the specific line.
-//  ///
-//  /// It doesn't panic if the line doesn't exist in the buffer, but it try to move to it.
-//  ///
-//  /// # Returns
-//  ///
-//  /// It returns None if the line is already inside current viewport, i.e. the viewport
-//  /// doesn't need to move.
-//  ///
-//  /// It returns a offset, which indicates the movement is either up or down.
-//  pub fn get_horizontal_displacement(&self, line_idx: usize) -> Option<ViewportHorizontalOffset> {
-//    if line_idx < self.start_line_idx() {
-//      Some(ViewportHorizontalOffset::Left(
-//        self.start_line_idx() - line_idx,
-//      ))
-//    } else if line_idx >= self.end_line_idx() {
-//      Some(ViewportHorizontalOffset::Right(
-//        line_idx - self.end_line_idx(),
-//      ))
-//    } else {
-//      None
-//    }
-//  }
-//
-//  /// Get relative location based on current cursor viewport, this is useful when implementing
-//  /// cursor movement.
-//  ///
-//  /// There are several scenarios when moving cursor:
-//  /// - The cursor is still inside of current viewport after movement.
-//  /// - The cursor goes outside of current viewport after movement. Thus the viewport needs to be
-//  ///   adjusted as well, and cursor actually remains at the same position (based on terminal).
-//  pub fn cursor_relative_position(&self, offset: ViewportVerticalOffset) -> CursorViewport {
-//    // If current viewport is empty, don't move.
-//    if self.is_empty() {
-//      return self.cursor;
-//    }
-//
-//    let cur = &self.cursor;
-//    match offset {
-//      ViewportVerticalOffset::Up(n) => {
-//        let n = n as usize;
-//        // Inside.
-//        if cur.line_idx() >= self.start_line_idx() + n {
-//          let line_idx = cur.line_idx() - n;
-//          self._cursor_vertical_relative_position(line_idx)
-//        } else {
-//          // Outside.
-//          unimplemented!();
-//        }
-//      }
-//      ViewportVerticalOffset::Down(n) => {
-//        let n = n as usize;
-//        // Inside.
-//        if cur.line_idx() + n < self.end_line_idx() {
-//          let line_idx = cur.line_idx() + n;
-//          self._cursor_vertical_relative_position(line_idx)
-//        } else {
-//          // Outside.
-//          unimplemented!();
-//        }
-//      }
-//      ViewportVerticalOffset::Left(n) => {
-//        let n = n as usize;
-//        // Inside.
-//        if cur.line_idx() >= self.start_line_idx() + n {
-//          let line_idx = cur.line_idx() - n;
-//          let line_viewport = self.lines.get(&line_idx).unwrap();
-//          for (row, row_viewport) in line_viewport.rows().iter() {
-//            if row_viewport.start_char_idx() >= cur.char_idx()
-//              && row_viewport.end_char_idx() < cur.char_idx()
-//            {
-//              let row_idx = *row;
-//              let char_idx = cur.char_idx();
-//              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
-//              let start_dcol_idx = dcol.0;
-//              let end_dcol_idx = dcol.1;
-//              return CursorViewport::new(
-//                start_dcol_idx..end_dcol_idx,
-//                char_idx,
-//                row_idx,
-//                line_idx,
-//              );
-//            }
-//          }
-//          unreachable!("Failed to find the char_idx for CursorViewport");
-//        } else {
-//          // Outside.
-//          unimplemented!();
-//        }
-//      }
-//      ViewportVerticalOffset::Right(n) => {
-//        let n = n as usize;
-//        // Inside.
-//        if cur.line_idx() >= self.start_line_idx() + n {
-//          let line_idx = cur.line_idx() - n;
-//          let line_viewport = self.lines.get(&line_idx).unwrap();
-//          for (row, row_viewport) in line_viewport.rows().iter() {
-//            if row_viewport.start_char_idx() >= cur.char_idx()
-//              && row_viewport.end_char_idx() < cur.char_idx()
-//            {
-//              let row_idx = *row;
-//              let char_idx = cur.char_idx();
-//              let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
-//              let start_dcol_idx = dcol.0;
-//              let end_dcol_idx = dcol.1;
-//              return CursorViewport::new(
-//                start_dcol_idx..end_dcol_idx,
-//                char_idx,
-//                row_idx,
-//                line_idx,
-//              );
-//            }
-//          }
-//          unreachable!("Failed to find the char_idx for CursorViewport");
-//        } else {
-//          // Outside.
-//          unimplemented!();
-//        }
-//      }
-//    }
-//  }
-//
-//  fn _cursor_vertical_relative_position(&self, line_idx: usize) -> CursorViewport {
-//    let cur = &self.cursor;
-//    let line_viewport = self.lines.get(&line_idx).unwrap();
-//    for (row, row_viewport) in line_viewport.rows().iter() {
-//      if row_viewport.start_char_idx() >= cur.char_idx()
-//        && row_viewport.end_char_idx() < cur.char_idx()
-//      {
-//        let row_idx = *row;
-//        let char_idx = cur.char_idx();
-//        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
-//        let start_dcol_idx = dcol.0;
-//        let end_dcol_idx = dcol.1;
-//        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
-//      }
-//    }
-//    unreachable!("Failed to find vertical relative position for CursorViewport")
-//  }
-//
-//  fn _cursor_horizontal_relative_position(&self, line_idx: usize) -> CursorViewport {
-//    let cur = &self.cursor;
-//    let line_viewport = self.lines.get(&line_idx).unwrap();
-//    for (row, row_viewport) in line_viewport.rows().iter() {
-//      if row_viewport.start_char_idx() >= cur.char_idx()
-//        && row_viewport.end_char_idx() < cur.char_idx()
-//      {
-//        let row_idx = *row;
-//        let char_idx = cur.char_idx();
-//        let dcol = row_viewport.char2dcolumns().get(&char_idx).unwrap();
-//        let start_dcol_idx = dcol.0;
-//        let end_dcol_idx = dcol.1;
-//        return CursorViewport::new(start_dcol_idx..end_dcol_idx, char_idx, row_idx, line_idx);
-//      }
-//    }
-//    unreachable!("Failed to find vertical relative position for CursorViewport")
-//  }
-//}
-// // Cursor Movement }
 
 impl Viewport {
   /// Get options.
@@ -856,7 +629,7 @@ impl Viewport {
 mod tests {
   use super::*;
 
-  use crate::buf::BufferArc;
+  use crate::buf::{BufferArc, BufferLocalOptions};
   use crate::cart::{IRect, U16Size};
   use crate::rlock;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -930,7 +703,10 @@ mod tests {
     );
 
     let buffer = buffer.read();
-    let buflines = buffer.get_lines_at(actual.start_line_idx()).unwrap();
+    let buflines = buffer
+      .get_rope()
+      .get_lines_at(actual.start_line_idx())
+      .unwrap();
     let total_lines = expect_end_line - expect_start_line;
 
     for (l, line) in buflines.enumerate() {
@@ -1002,7 +778,10 @@ mod tests {
   fn sync_from_top_left_nowrap1() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -1024,7 +803,7 @@ mod tests {
     ];
     let size = U16Size::new(10, 10);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1038,7 +817,7 @@ mod tests {
     .into_iter()
     .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -1052,7 +831,10 @@ mod tests {
   fn sync_from_top_left_nowrap2() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -1073,7 +855,7 @@ mod tests {
     ];
     let size = U16Size::new(27, 15);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1087,7 +869,7 @@ mod tests {
     .into_iter()
     .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -1101,7 +883,10 @@ mod tests {
   fn sync_from_top_left_nowrap3() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -1120,12 +905,12 @@ mod tests {
 
     let size = U16Size::new(31, 5);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -1139,15 +924,16 @@ mod tests {
   fn sync_from_top_left_nowrap4() {
     test_log_init();
 
-    let buffer = make_empty_buffer();
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_empty_buffer(buf_opts);
     let expect = vec![""];
 
     let size = U16Size::new(20, 20);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -1161,7 +947,10 @@ mod tests {
   fn sync_from_top_left_nowrap5() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello,\tRSVIM!\n",
       "This\r",
       "is a quite\tsimple and small test lines.\n",
@@ -1187,7 +976,7 @@ mod tests {
 
     let size = U16Size::new(10, 10);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -1217,7 +1006,7 @@ mod tests {
     .into_iter()
     .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -1231,7 +1020,10 @@ mod tests {
   fn sync_from_top_left_nowrap6() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "你好，\tRSVIM！\n",
       "这是\ta quite 简单而且很小的测试文字内容行。\n",
       "But still\\it\t包含了好几种我们想测试的情况：\n",
@@ -1251,7 +1043,7 @@ mod tests {
 
     let size = U16Size::new(27, 6);
     let options = WindowLocalOptions::builder().wrap(false).build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
         .into_iter()
@@ -1261,7 +1053,7 @@ mod tests {
         .into_iter()
         .collect();
     assert_sync_from_top_left(
-      buffer.clone(),
+      buf.clone(),
       &actual,
       &expect,
       0,
@@ -1275,7 +1067,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak1() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -1302,14 +1097,17 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    assert_sync_from_top_left(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak2() {
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -1342,7 +1140,7 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
@@ -1350,7 +1148,7 @@ mod tests {
       .into_iter()
       .collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -1362,7 +1160,10 @@ mod tests {
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak3() {
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -1384,14 +1185,15 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_sync_from_top_left(buffer, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    assert_sync_from_top_left(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak4() {
-    let buffer = make_empty_buffer();
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_empty_buffer(buf_opts);
     let expect = vec![""];
 
     let size = U16Size::new(10, 10);
@@ -1399,14 +1201,17 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+    assert_sync_from_top_left(buf, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak5() {
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "\t\t* The extra parts are\tsplit into the next\trow,\tif either line-wrap or word-wrap options are been set. If the extra\tparts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ]);
     let expect = vec![
@@ -1422,11 +1227,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 4)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -1440,7 +1245,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak6() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "But still it contains several things we want to test:\n",
       "\t\t1. When\tthe line\tis small\tenough to\tcompletely put\tinside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
     ]);
@@ -1457,11 +1265,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -1475,7 +1283,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak7() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "But still it contains several things we want to test:\n",
       "\t\t1. When\tthe line\tis small\tenough\tto\tcompletely put\tinside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
     ]);
@@ -1492,11 +1303,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 7)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -1510,7 +1321,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak8() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "但它仍然contains several things 我们想要测试的文字内容：\n",
       "\t第一，当一行文字内容太小了，然后可以完全的放进窗口的一行之中，那么行wrap和词wrap两个选项并不会影响渲染的最终效果。\n",
     ]);
@@ -1527,11 +1341,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -1545,7 +1359,10 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak9() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "但它仍然contains several th\tings 我们想要测试的文字内容：\n",
       "\t第一，当一行文字内容太小了，然后可以完全的放进窗口的一行之中，那么行wrap和词wrap两个选项并不会影响渲染的最终效果。\n",
     ]);
@@ -1563,11 +1380,11 @@ mod tests {
       .wrap(true)
       .line_break(false)
       .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
     assert_sync_from_top_left(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,

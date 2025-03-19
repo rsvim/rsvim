@@ -14,7 +14,8 @@ pub use crate::ui::widget::window::opt::{
   ViewportOptions, WindowLocalOptions, WindowOptionsBuilder,
 };
 pub use crate::ui::widget::window::viewport::{
-  CursorViewport, LineViewport, RowViewport, Viewport, ViewportArc,
+  CursorViewport, LineViewport, RowViewport, Viewport, ViewportArc, ViewportReadGuard, ViewportWk,
+  ViewportWriteGuard,
 };
 
 use std::convert::From;
@@ -90,72 +91,72 @@ impl Inodeable for Window {
     self.base.node(&self.base.root_id()).unwrap().depth()
   }
 
-  fn depth_mut(&mut self) -> &mut usize {
+  fn set_depth(&mut self, depth: usize) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .depth_mut()
+      .set_depth(depth);
   }
 
   fn zindex(&self) -> &usize {
     self.base.node(&self.base.root_id()).unwrap().zindex()
   }
 
-  fn zindex_mut(&mut self) -> &mut usize {
+  fn set_zindex(&mut self, zindex: usize) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .zindex_mut()
+      .set_zindex(zindex);
   }
 
   fn shape(&self) -> &IRect {
     self.base.node(&self.base.root_id()).unwrap().shape()
   }
 
-  fn shape_mut(&mut self) -> &mut IRect {
+  fn set_shape(&mut self, shape: &IRect) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .shape_mut()
+      .set_shape(shape);
   }
 
   fn actual_shape(&self) -> &U16Rect {
     self.base.node(&self.base.root_id()).unwrap().actual_shape()
   }
 
-  fn actual_shape_mut(&mut self) -> &mut U16Rect {
+  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .actual_shape_mut()
+      .set_actual_shape(actual_shape);
   }
 
   fn enabled(&self) -> &bool {
     self.base.node(&self.base.root_id()).unwrap().enabled()
   }
 
-  fn enabled_mut(&mut self) -> &mut bool {
+  fn set_enabled(&mut self, enabled: bool) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .enabled_mut()
+      .set_enabled(enabled);
   }
 
   fn visible(&self) -> &bool {
     self.base.node(&self.base.root_id()).unwrap().visible()
   }
 
-  fn visible_mut(&mut self) -> &mut bool {
+  fn set_visible(&mut self, visible: bool) {
     self
       .base
       .node_mut(&self.base.root_id())
       .unwrap()
-      .visible_mut()
+      .set_visible(visible);
   }
 }
 
@@ -225,7 +226,7 @@ pub enum WindowNode {
   WindowContent(WindowContent),
 }
 
-macro_rules! window_node_generate_dispatch {
+macro_rules! window_node_generate_getter {
   ($self_name:ident,$method_name:ident) => {
     match $self_name {
       WindowNode::WindowRootContainer(n) => n.$method_name(),
@@ -234,57 +235,66 @@ macro_rules! window_node_generate_dispatch {
   };
 }
 
+macro_rules! window_node_generate_setter {
+  ($self_name:ident,$method_name:ident,$method_arg:ident) => {
+    match $self_name {
+      WindowNode::WindowRootContainer(n) => n.$method_name($method_arg),
+      WindowNode::WindowContent(n) => n.$method_name($method_arg),
+    }
+  };
+}
+
 impl Inodeable for WindowNode {
   fn id(&self) -> InodeId {
-    window_node_generate_dispatch!(self, id)
+    window_node_generate_getter!(self, id)
   }
 
   fn depth(&self) -> &usize {
-    window_node_generate_dispatch!(self, depth)
+    window_node_generate_getter!(self, depth)
   }
 
-  fn depth_mut(&mut self) -> &mut usize {
-    window_node_generate_dispatch!(self, depth_mut)
+  fn set_depth(&mut self, depth: usize) {
+    window_node_generate_setter!(self, set_depth, depth)
   }
 
   fn zindex(&self) -> &usize {
-    window_node_generate_dispatch!(self, zindex)
+    window_node_generate_getter!(self, zindex)
   }
 
-  fn zindex_mut(&mut self) -> &mut usize {
-    window_node_generate_dispatch!(self, zindex_mut)
+  fn set_zindex(&mut self, zindex: usize) {
+    window_node_generate_setter!(self, set_zindex, zindex)
   }
 
   fn shape(&self) -> &IRect {
-    window_node_generate_dispatch!(self, shape)
+    window_node_generate_getter!(self, shape)
   }
 
-  fn shape_mut(&mut self) -> &mut IRect {
-    window_node_generate_dispatch!(self, shape_mut)
+  fn set_shape(&mut self, shape: &IRect) {
+    window_node_generate_setter!(self, set_shape, shape)
   }
 
   fn actual_shape(&self) -> &U16Rect {
-    window_node_generate_dispatch!(self, actual_shape)
+    window_node_generate_getter!(self, actual_shape)
   }
 
-  fn actual_shape_mut(&mut self) -> &mut U16Rect {
-    window_node_generate_dispatch!(self, actual_shape_mut)
+  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
+    window_node_generate_setter!(self, set_actual_shape, actual_shape)
   }
 
   fn enabled(&self) -> &bool {
-    window_node_generate_dispatch!(self, enabled)
+    window_node_generate_getter!(self, enabled)
   }
 
-  fn enabled_mut(&mut self) -> &mut bool {
-    window_node_generate_dispatch!(self, enabled_mut)
+  fn set_enabled(&mut self, enabled: bool) {
+    window_node_generate_setter!(self, set_enabled, enabled)
   }
 
   fn visible(&self) -> &bool {
-    window_node_generate_dispatch!(self, visible)
+    window_node_generate_getter!(self, visible)
   }
 
-  fn visible_mut(&mut self) -> &mut bool {
-    window_node_generate_dispatch!(self, visible_mut)
+  fn set_visible(&mut self, visible: bool) {
+    window_node_generate_setter!(self, set_visible, visible)
   }
 }
 
@@ -312,7 +322,7 @@ mod tests {
   use std::sync::Once;
   use tracing::info;
 
-  use crate::buf::{Buffer, BufferArc};
+  use crate::buf::{Buffer, BufferArc, BufferLocalOptions};
   use crate::cart::U16Size;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
@@ -360,7 +370,10 @@ mod tests {
   fn draw_after_init1() {
     test_log_init();
 
-    let buffer = make_buffer_from_lines(vec![
+    let buf_opts = BufferLocalOptions::default();
+    let buf = make_buffer_from_lines(
+      buf_opts,
+      vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
@@ -384,7 +397,7 @@ mod tests {
 
     let terminal_size = U16Size::new(10, 10);
     let window_local_options = WindowLocalOptions::builder().wrap(false).build();
-    let window = make_window_from_size(terminal_size, buffer.clone(), &window_local_options);
+    let window = make_window_from_size(terminal_size, buf.clone(), &window_local_options);
     let mut actual = Canvas::new(terminal_size);
     window.draw(&mut actual);
     do_test_draw(&actual, &expect);

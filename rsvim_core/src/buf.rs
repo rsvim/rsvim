@@ -1,6 +1,8 @@
 //! Vim buffers.
 
 use crate::res::IoResult;
+#[allow(unused_imports)]
+use crate::rlock;
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
@@ -9,10 +11,9 @@ pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
 use ahash::AHashMap as HashMap;
 use ahash::AHashSet as HashSet;
 use compact_str::CompactString;
-use parking_lot::RwLock;
+use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use path_absolutize::Absolutize;
-use ropey::iter::Lines;
-use ropey::{Rope, RopeBuilder, RopeSlice};
+use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
 use std::fs::Metadata;
 use std::io::Read;
@@ -61,6 +62,8 @@ pub struct Buffer {
 
 pub type BufferArc = Arc<RwLock<Buffer>>;
 pub type BufferWk = Weak<RwLock<Buffer>>;
+pub type BufferReadGuard<'a> = RwLockReadGuard<'a, Buffer>;
+pub type BufferWriteGuard<'a> = RwLockWriteGuard<'a, Buffer>;
 
 impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
@@ -85,8 +88,8 @@ impl Buffer {
     }
   }
 
-  /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
-  /// manage buffer instances.
+  #[cfg(test)]
+  /// NOTE: This API should only be used for testing.
   pub fn _new_empty(options: BufferLocalOptions) -> Self {
     Self {
       id: next_buffer_id(),
@@ -178,16 +181,14 @@ impl Buffer {
 
 // Rope {
 impl Buffer {
-  // lines {
-
-  /// Same with [`Rope::get_line`](Rope::get_line).
-  pub fn get_line(&self, line_idx: usize) -> Option<RopeSlice> {
-    self.rope.get_line(line_idx)
+  /// Get rope.
+  pub fn get_rope(&self) -> &Rope {
+    &self.rope
   }
 
-  /// Same with [`Rope::get_lines_at`](Rope::get_lines_at).
-  pub fn get_lines_at(&self, line_idx: usize) -> Option<Lines> {
-    self.rope.get_lines_at(line_idx)
+  /// Get mutable rope.
+  pub fn get_rope_mut(&mut self) -> &mut Rope {
+    &mut self.rope
   }
 
   /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
@@ -216,28 +217,6 @@ impl Buffer {
       },
       None => None,
     }
-  }
-
-  /// Same with [`Rope::lines`](Rope::lines).
-  pub fn lines(&self) -> Lines {
-    self.rope.lines()
-  }
-
-  /// Same with [`Rope::len_lines`](Rope::len_lines).
-  pub fn len_lines(&self) -> usize {
-    self.rope.len_lines()
-  }
-
-  // lines }
-
-  /// Alias to method [`Rope::write_to`](Rope::write_to).
-  pub fn write_to<T: std::io::Write>(&self, writer: T) -> std::io::Result<()> {
-    self.rope.write_to(writer)
-  }
-
-  /// Alias to method [`Rope::append`](Rope::append).
-  pub fn append(&mut self, other: Rope) {
-    self.rope.append(other)
   }
 }
 // Rope }
@@ -523,6 +502,21 @@ impl BuffersManager {
     let buf = Buffer::to_arc(buf);
     self.buffers.insert(buf_id, buf.clone());
     self.buffers_by_path.insert(None, buf);
+    buf_id
+  }
+
+  #[cfg(test)]
+  /// NOTE: This API should only be used for testing.
+  pub fn _add_buffer(&mut self, buf: BufferArc) -> BufferId {
+    let (buf_id, abs_filepath) = {
+      let buf = rlock!(buf);
+      (buf.id(), buf.absolute_filename().clone())
+    };
+    self.buffers.insert(buf_id, buf.clone());
+    if abs_filepath.is_none() {
+      assert!(!self.buffers_by_path.contains_key(&None));
+    }
+    self.buffers_by_path.insert(abs_filepath, buf);
     buf_id
   }
 }
