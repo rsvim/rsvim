@@ -94,12 +94,12 @@ impl Widgetable for WindowContent {
         let bline = buflines.next().unwrap();
         let line_viewport = viewport.lines().get(&line_idx).unwrap();
 
-        trace!(
-          "0-line_idx:{}, row_idx:{}, line_viewport:{:?}",
-          line_idx,
-          row_idx,
-          line_viewport
-        );
+        // trace!(
+        //   "0-line_idx:{}, row_idx:{}, line_viewport:{:?}",
+        //   line_idx,
+        //   row_idx,
+        //   line_viewport
+        // );
 
         let rows_viewport = line_viewport.rows();
 
@@ -139,14 +139,14 @@ impl Widgetable for WindowContent {
               let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
               canvas.frame_mut().set_cells_at(cells_upos, cells);
               col_idx += start_fills;
-              trace!(
-                "1-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
-                line_idx,
-                row_idx,
-                col_idx,
-                line_viewport,
-                r_viewport
-              );
+              // trace!(
+              //   "1-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
+              //   line_idx,
+              //   row_idx,
+              //   col_idx,
+              //   line_viewport,
+              //   r_viewport
+              // );
             }
 
             // Render line content.
@@ -166,15 +166,15 @@ impl Widgetable for WindowContent {
                 char_idx += 1;
                 total_width += unicode_width;
               }
-              trace!(
-                "2-line_idx:{}, row_idx:{}, col_idx:{}, total_width:{}, line_viewport:{:?}, r:{:?}",
-                line_idx,
-                row_idx,
-                col_idx,
-                total_width,
-                line_viewport,
-                r_viewport
-              );
+              // trace!(
+              //   "2-line_idx:{}, row_idx:{}, col_idx:{}, total_width:{}, line_viewport:{:?}, r:{:?}",
+              //   line_idx,
+              //   row_idx,
+              //   col_idx,
+              //   total_width,
+              //   line_viewport,
+              //   r_viewport
+              // );
             }
 
             // Render left empty parts.
@@ -195,15 +195,15 @@ impl Widgetable for WindowContent {
               let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
               canvas.frame_mut().set_cells_at(cells_upos, cells);
               col_idx += left_length;
-              trace!(
-                "3-line_idx:{}, row_idx:{}, col_idx:{}, left_length:{}, line_viewport:{:?}, r:{:?}",
-                line_idx,
-                row_idx,
-                col_idx,
-                left_length,
-                line_viewport,
-                r_viewport
-              );
+              // trace!(
+              //   "3-line_idx:{}, row_idx:{}, col_idx:{}, left_length:{}, line_viewport:{:?}, r:{:?}",
+              //   line_idx,
+              //   row_idx,
+              //   col_idx,
+              //   left_length,
+              //   line_viewport,
+              //   r_viewport
+              // );
             }
 
             // Render end fills.
@@ -216,14 +216,14 @@ impl Widgetable for WindowContent {
               canvas.frame_mut().set_cells_at(cells_upos, cells);
 
               col_idx += end_fills;
-              trace!(
-                "4-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
-                line_idx,
-                row_idx,
-                col_idx,
-                line_viewport,
-                r_viewport
-              );
+              // trace!(
+              //   "4-line_idx:{}, row_idx:{}, col_idx:{}, line_viewport:{:?}, r:{:?}",
+              //   line_idx,
+              //   row_idx,
+              //   col_idx,
+              //   line_viewport,
+              //   r_viewport
+              // );
             }
             debug_assert_eq!(width, col_idx);
 
