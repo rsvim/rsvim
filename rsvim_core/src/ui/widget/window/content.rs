@@ -67,7 +67,7 @@ impl Widgetable for WindowContent {
       height,
       width
     );
-    trace!("Draw window content, viewport:{:?}", viewport);
+    // trace!("Draw window content, viewport:{:?}", viewport);
 
     let buffer = self.buffer.upgrade().unwrap();
     let mut buffer = wlock!(buffer);
