@@ -61,12 +61,12 @@ impl Widgetable for WindowContent {
       return;
     }
 
-    trace!(
-      "Draw window content, actual shape min pos:{:?}, height/width:{}/{}",
-      upos,
-      height,
-      width
-    );
+    // trace!(
+    //   "Draw window content, actual shape min pos:{:?}, height/width:{}/{}",
+    //   upos,
+    //   height,
+    //   width
+    // );
     // trace!("Draw window content, viewport:{:?}", viewport);
 
     let buffer = self.buffer.upgrade().unwrap();
