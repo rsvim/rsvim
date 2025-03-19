@@ -3,7 +3,7 @@
 use compact_str::CompactString;
 use geo::point;
 use std::ops::Range;
-use tracing::trace;
+// use tracing::trace;
 
 use crate::cart::{U16Pos, U16Size};
 use crate::ui::canvas::frame::cell::Cell;
