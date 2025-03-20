@@ -1,7 +1,7 @@
 //! Internal tree structure that implements the widget tree.
 
-use crate::cart::{IPos, IRect, U16Rect};
 use crate::geo_rect_as;
+use crate::prelude::*;
 use crate::ui::tree::internal::shapes;
 use crate::ui::tree::internal::{InodeId, Inodeable};
 

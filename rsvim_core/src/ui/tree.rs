@@ -2,8 +2,8 @@
 
 #![allow(dead_code)]
 
-use crate::cart::{IRect, U16Rect, U16Size};
 use crate::envar;
+use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::WindowLocalOptions;

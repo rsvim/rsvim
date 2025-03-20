@@ -1,6 +1,6 @@
 //! Canvas.
 
-use crate::cart::{U16Pos, U16Size};
+use crate::prelude::*;
 
 // Re-export
 pub use crate::ui::canvas::frame::cell::Cell;

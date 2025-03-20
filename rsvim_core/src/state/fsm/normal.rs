@@ -1,7 +1,7 @@
 //! The normal mode.
 
 use crate::buf::Buffer;
-use crate::cart::IRect;
+use crate::prelude::*;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};

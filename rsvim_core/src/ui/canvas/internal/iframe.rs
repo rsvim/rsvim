@@ -1,12 +1,12 @@
 //! Internal implementations for `Iframe`.
 
+use crate::prelude::*;
+use crate::ui::canvas::frame::cell::Cell;
+
 use compact_str::CompactString;
 use geo::point;
 use std::ops::Range;
 // use tracing::trace;
-
-use crate::cart::{U16Pos, U16Size};
-use crate::ui::canvas::frame::cell::Cell;
 
 #[derive(Debug, Clone)]
 /// Internal implementation for `Iframe`.

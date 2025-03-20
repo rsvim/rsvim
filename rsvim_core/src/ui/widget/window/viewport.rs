@@ -1,8 +1,7 @@
 //! Buffer viewport on a window.
 
 use crate::buf::BufferWk;
-use crate::cart::U16Rect;
-//use crate::rlock;
+use crate::prelude::*;
 use crate::ui::widget::window::ViewportOptions;
 
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};

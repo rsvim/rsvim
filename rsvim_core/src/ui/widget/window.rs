@@ -1,7 +1,7 @@
 //! Vim window.
 
 use crate::buf::BufferWk;
-use crate::cart::{IRect, U16Rect};
+use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::content::WindowContent;
