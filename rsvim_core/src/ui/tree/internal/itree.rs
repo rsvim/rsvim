@@ -717,7 +717,7 @@ mod tests {
   use crate::inode_generate_impl;
   use tracing::info;
 
-  use crate::cart::{IRect, U16Rect};
+  use crate::prelude::*;
   // use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::{InodeBase, Inodeable};
 
