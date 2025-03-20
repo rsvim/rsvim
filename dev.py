@@ -8,17 +8,17 @@ import os
 import pathlib
 import shutil
 
-__DISABLE_SCCACHE = False
-
 __TEST_NOT_SPECIFIED = "__TEST_NOT_SPECIFIED"
 __BUILD_NOT_SPECIFIED = "__BUILD_NOT_SPECIFIED"
 __CLIPPY_NOT_SPECIFIED = "__CLIPPY_NOT_SPECIFIED"
 __DOC_NOT_SPECIFIED = "__DOC_NOT_SPECIFIED"
 
 
-def clippy(mode):
+def clippy(mode, recache):
     command = "RUSTFLAGS='-Dwarnings'"
-    if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
+    if shutil.which("sccache") is not None:
+        if recache:
+            command = f"{command} SCCACHE_RECACHE=1"
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
     if isinstance(mode, str) and mode.lower().startswith("w"):
@@ -33,7 +33,7 @@ def clippy(mode):
     os.system(command)
 
 
-def test(name):
+def test(name, recache):
     if name is None:
         name = "--all"
         print("Run 'test' for all cases")
@@ -41,7 +41,9 @@ def test(name):
         print(f"Run 'test' for '{name}'")
 
     command = "RUST_LOG=trace"
-    if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
+    if shutil.which("sccache") is not None:
+        if recache:
+            command = f"{command} SCCACHE_RECACHE=1"
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
     command = f"{command} cargo nextest run --no-capture {name}"
@@ -51,9 +53,11 @@ def test(name):
     os.system(command)
 
 
-def list_test():
+def list_test(recache):
     command = ""
-    if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
+    if shutil.which("sccache") is not None:
+        if recache:
+            command = f"{command} SCCACHE_RECACHE=1"
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
     command = f"{command} cargo nextest list"
@@ -63,9 +67,11 @@ def list_test():
     os.system(command)
 
 
-def build(release):
+def build(release, recache):
     command = ""
-    if shutil.which("sccache") is not None and not __DISABLE_SCCACHE:
+    if shutil.which("sccache") is not None:
+        if recache:
+            command = f"{command} SCCACHE_RECACHE=1"
         command = f"{command} RUSTC_WRAPPER=$(which sccache)"
 
     if isinstance(release, str) and release.lower().startswith("r"):
@@ -130,7 +136,9 @@ if __name__ == "__main__":
         default=__TEST_NOT_SPECIFIED,
         help="Run [TEST] with `RUST_LOG=trace`, by default run all test cases.",
     )
-    parser.add_argument("--list-test", action="store_true", help="List all test cases.")
+    parser.add_argument(
+        "-l", "--list-test", action="store_true", help="List all test cases."
+    )
     parser.add_argument(
         "-b",
         "--build",
@@ -160,25 +168,22 @@ if __name__ == "__main__":
         help="Release cargo crates with additional `--execute --no-verify` option.",
     )
     parser.add_argument(
-        "--no-cache",
+        "--recache",
         action="store_true",
-        help="Disable `sccache` when building cargo.",
+        help="Rebuild cache for `sccache`.",
     )
 
     parser = parser.parse_args()
     # print(parser)
 
-    if parser.no_cache:
-        __DISABLE_SCCACHE = True
-
     if parser.clippy is None or parser.clippy != __CLIPPY_NOT_SPECIFIED:
-        clippy(parser.clippy)
+        clippy(parser.clippy, parser.recache)
     elif parser.test is None or parser.test != __TEST_NOT_SPECIFIED:
-        test(parser.test)
+        test(parser.test, parser.recache)
     elif parser.list_test:
-        list_test()
+        list_test(parser.recache)
     elif parser.build is None or parser.build != __BUILD_NOT_SPECIFIED:
-        build(parser.build)
+        build(parser.build, parser.recache)
     elif parser.doc is None or parser.doc != __DOC_NOT_SPECIFIED:
         doc(parser.doc)
     elif parser.release:
