@@ -9,9 +9,9 @@ rust = "latest"
 "cargo:taplo-cli" = "latest"
 "cargo:typos-cli" = "latest"
 
-python = "3.13"
+python = "latest"
 
-node = "22"
+node = "latest"
 "npm:prettier" = "latest"
 "npm:browser-sync" = "latest"
 "npm:typescript" = "latest"
