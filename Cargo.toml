@@ -48,7 +48,7 @@ url = "2.5.4"
 ahash = "0.8.11"
 path-absolutize = "3.1.1"
 toml = "0.8.19"
-once_cell = { version = "1.20.2", features = ["parking_lot"] }
+once_cell = { version = "1.21.1", features = ["parking_lot"] }
 tempfile = "3"
 assert_fs = "1.1.2"
 zstd = "0.13.2"
