@@ -47,7 +47,7 @@ regex = "1.11.1"
 url = "2.5.4"
 ahash = "0.8.11"
 path-absolutize = "3.1.1"
-toml = "0.8.19"
+toml = "0.8.20"
 once_cell = { version = "1.21.1", features = ["parking_lot"] }
 tempfile = "3"
 assert_fs = "1.1.2"
