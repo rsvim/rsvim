@@ -490,7 +490,7 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  use crate::cart::U16Size;
+  use crate::prelude::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;

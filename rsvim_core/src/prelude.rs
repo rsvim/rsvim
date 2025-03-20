@@ -64,7 +64,7 @@ macro_rules! wlock {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use geo::point;
+  use geo::{point, Point, Rect};
   use std::mem;
 
   #[test]

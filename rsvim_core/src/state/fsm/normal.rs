@@ -293,7 +293,6 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferLocalOptions, BuffersManagerArc};
-  use crate::prelude::*;
   use crate::rlock;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
