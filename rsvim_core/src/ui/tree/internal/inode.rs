@@ -188,7 +188,7 @@ impl InodeBase {
 mod tests {
   use std::cell::RefCell;
 
-  use crate::cart::IRect;
+  use crate::prelude::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;
