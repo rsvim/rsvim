@@ -9,18 +9,18 @@ pub mod file_encoding;
 
 #[derive(Debug, Clone)]
 /// Local buffer options.
-pub struct Options {
+pub struct LocalOptions {
   tab_stop: u16,
   file_encoding: FileEncodingOption,
 }
 
-impl Default for Options {
+impl Default for LocalOptions {
   fn default() -> Self {
     Self::builder().build()
   }
 }
 
-impl Options {
+impl LocalOptions {
   pub fn builder() -> BufferLocalOptionsBuilder {
     BufferLocalOptionsBuilder::default()
   }
@@ -60,8 +60,8 @@ impl BufferLocalOptionsBuilder {
     self
   }
 
-  pub fn build(&self) -> Options {
-    Options {
+  pub fn build(&self) -> LocalOptions {
+    LocalOptions {
       tab_stop: self.tab_stop,
       file_encoding: self.file_encoding,
     }
@@ -83,7 +83,7 @@ mod tests {
 
   #[test]
   fn default1() {
-    let opt1 = Options::default();
+    let opt1 = LocalOptions::default();
     let opt2 = BufferLocalOptionsBuilder::default().build();
     assert_eq!(opt1.tab_stop(), opt2.tab_stop());
   }

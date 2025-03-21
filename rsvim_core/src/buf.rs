@@ -6,7 +6,7 @@ use crate::rlock;
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
-pub use crate::buf::opt::{FileEncodingOption, Options};
+pub use crate::buf::opt::{FileEncodingOption, LocalOptions};
 
 use ahash::AHashMap as HashMap;
 use ahash::AHashSet as HashSet;
@@ -53,7 +53,7 @@ pub struct Buffer {
   id: BufferId,
   rope: Rope,
   rope_lines_width: BTreeMap<usize, ColumnIndex>,
-  options: Options,
+  options: LocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
@@ -70,7 +70,7 @@ impl Buffer {
   /// manage buffer instances.
   pub fn _new(
     rope: Rope,
-    options: Options,
+    options: LocalOptions,
     filename: Option<PathBuf>,
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
@@ -90,7 +90,7 @@ impl Buffer {
 
   #[cfg(test)]
   /// NOTE: This API should only be used for testing.
-  pub fn _new_empty(options: Options) -> Self {
+  pub fn _new_empty(options: LocalOptions) -> Self {
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
@@ -204,11 +204,11 @@ impl Buffer {
 
 // Options {
 impl Buffer {
-  pub fn options(&self) -> &Options {
+  pub fn options(&self) -> &LocalOptions {
     &self.options
   }
 
-  pub fn set_options(&mut self, options: &Options) {
+  pub fn set_options(&mut self, options: &LocalOptions) {
     self.options = options.clone();
   }
 }
@@ -359,8 +359,8 @@ pub struct BuffersManager {
   // Buffers maps by absolute file path.
   buffers_by_path: HashMap<Option<PathBuf>, BufferArc>,
 
-  // Global *local* options for buffers.
-  options: Options,
+  // Global-local options for buffers.
+  global_local_options: LocalOptions,
 }
 
 impl BuffersManager {
@@ -368,7 +368,7 @@ impl BuffersManager {
     BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: HashMap::new(),
-      options: Options::default(),
+      global_local_options: LocalOptions::default(),
     }
   }
 
@@ -424,7 +424,7 @@ impl BuffersManager {
     } else {
       Buffer::_new(
         Rope::new(),
-        self.global_options().clone(),
+        self.global_local_options().clone(),
         Some(filename.to_path_buf()),
         Some(abs_filename.clone()),
         None,
@@ -457,7 +457,7 @@ impl BuffersManager {
 
     let buf = Buffer::_new(
       Rope::new(),
-      self.global_options().clone(),
+      self.global_local_options().clone(),
       None,
       None,
       None,
@@ -497,7 +497,7 @@ impl BuffersManager {
   }
 
   fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
-    let fencoding = self.global_options().file_encoding();
+    let fencoding = self.global_local_options().file_encoding();
     match fencoding {
       FileEncodingOption::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
     }
@@ -533,7 +533,7 @@ impl BuffersManager {
 
         Ok(Buffer::_new(
           self.to_rope(&buf, buf.len()),
-          self.global_options().clone(),
+          self.global_local_options().clone(),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
@@ -602,12 +602,12 @@ impl Default for BuffersManager {
 
 // Options {
 impl BuffersManager {
-  pub fn global_options(&self) -> &Options {
-    &self.options
+  pub fn global_local_options(&self) -> &LocalOptions {
+    &self.global_local_options
   }
 
-  pub fn set_global_options(&mut self, options: &Options) {
-    self.options = options.clone();
+  pub fn set_global_local_options(&mut self, options: &LocalOptions) {
+    self.global_local_options = options.clone();
   }
 }
 // Options }

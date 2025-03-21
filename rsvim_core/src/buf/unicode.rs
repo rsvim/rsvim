@@ -1,6 +1,6 @@
 //! Unicode utils.
 
-use crate::buf::opt::Options;
+use crate::buf::LocalOptions;
 use crate::defaults::grapheme::AsciiControlCodeFormatter;
 
 use ascii::AsciiChar;
@@ -14,7 +14,7 @@ use unicode_width::UnicodeWidthChar;
 /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/), implemented with
 /// [UnicodeWidthChar], there's another equivalent crate
 /// [icu::properties::EastAsianWidth](https://docs.rs/icu/latest/icu/properties/maps/fn.east_asian_width.html#).
-pub fn char_width(opt: &Options, c: char) -> usize {
+pub fn char_width(opt: &LocalOptions, c: char) -> usize {
   if c.is_ascii_control() {
     let ac = AsciiChar::from_ascii(c).unwrap();
     match ac {
@@ -31,7 +31,7 @@ pub fn char_width(opt: &Options, c: char) -> usize {
 }
 
 /// Get the printable cell symbol and its display width.
-pub fn char_symbol(opt: &Options, c: char) -> (CompactString, usize) {
+pub fn char_symbol(opt: &LocalOptions, c: char) -> (CompactString, usize) {
   let width = char_width(opt, c);
   if c.is_ascii_control() {
     let ac = AsciiChar::from_ascii(c).unwrap();
@@ -52,12 +52,12 @@ pub fn char_symbol(opt: &Options, c: char) -> (CompactString, usize) {
 }
 
 /// Get the display width for a unicode `str`.
-pub fn str_width(opt: &Options, s: &str) -> usize {
+pub fn str_width(opt: &LocalOptions, s: &str) -> usize {
   s.chars().map(|c| char_width(opt, c)).sum()
 }
 
 /// Get the printable cell symbols and the display width for a unicode `str`.
-pub fn str_symbols(opt: &Options, s: &str) -> (CompactString, usize) {
+pub fn str_symbols(opt: &LocalOptions, s: &str) -> (CompactString, usize) {
   s.chars().map(|c| char_symbol(opt, c)).fold(
     (CompactString::with_capacity(s.len()), 0_usize),
     |(mut init_symbol, init_width), (mut symbol, width)| {

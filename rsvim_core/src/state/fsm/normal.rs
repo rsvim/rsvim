@@ -291,7 +291,7 @@ impl NormalStateful {
 mod tests {
   use super::*;
 
-  use crate::buf::{BuffersManagerArc, Options};
+  use crate::buf::{BuffersManagerArc, LocalOptions};
   use crate::rlock;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -308,7 +308,7 @@ mod tests {
     canvas_size: U16Size,
     lines: Vec<&str>,
   ) -> (TreeArc, StateArc, BuffersManagerArc) {
-    let buf_opts = Options::default();
+    let buf_opts = LocalOptions::default();
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(window_local_opts, canvas_size, bufs.clone());
@@ -566,7 +566,7 @@ mod tests {
     test_log_init();
 
     let lines = vec![];
-    let buf_opts = Options::default();
+    let buf_opts = LocalOptions::default();
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
@@ -601,7 +601,7 @@ mod tests {
     test_log_init();
 
     let lines = vec![];
-    let buf_opts = Options::default();
+    let buf_opts = LocalOptions::default();
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
@@ -644,7 +644,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = Options::default();
+    let buf_opts = LocalOptions::default();
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
@@ -687,7 +687,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = Options::default();
+    let buf_opts = LocalOptions::default();
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
@@ -730,7 +730,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = Options::default();
+    let buf_opts = LocalOptions::default();
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
@@ -785,7 +785,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = Options::default();
+    let buf_opts = LocalOptions::default();
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
