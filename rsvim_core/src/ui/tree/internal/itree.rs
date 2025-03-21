@@ -221,60 +221,62 @@ where
     // Tuple of (child, parent id, parent depth, parent actual shape)
     type ChildAndParentPair<'a, T> = (&'a mut T, InodeId, usize, U16Rect);
 
-    // Avoid the multiple mutable references on `self.nodes.get_mut` when updating all descendants attributes.
-    let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
+    unsafe {
+      // Avoid the multiple mutable references on `self.nodes.get_mut` when updating all descendants attributes.
+      let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
 
-    // trace!("before create que");
-    let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
-    let pnode = raw_nodes.as_ref().get(&start_parent_id).unwrap();
-    let pnode_id = pnode.id();
-    let pnode_depth = *pnode.depth();
-    let pnode_actual_shape = *pnode.actual_shape();
-    que.push_back((
-      raw_nodes.as_mut().get_mut(&start_id).unwrap(),
-      pnode_id,
-      pnode_depth,
-      pnode_actual_shape,
-    ));
-    // trace!("after create que");
+      // trace!("before create que");
+      let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
+      let pnode = raw_nodes.as_ref().get(&start_parent_id).unwrap();
+      let pnode_id = pnode.id();
+      let pnode_depth = *pnode.depth();
+      let pnode_actual_shape = *pnode.actual_shape();
+      que.push_back((
+        raw_nodes.as_mut().get_mut(&start_id).unwrap(),
+        pnode_id,
+        pnode_depth,
+        pnode_actual_shape,
+      ));
+      // trace!("after create que");
 
-    // Iterate all descendants, and update their attributes.
-    while let Some(child_and_parent) = que.pop_front() {
-      let cnode = child_and_parent.0;
-      let _pnode_id = child_and_parent.1;
-      let pnode_depth = child_and_parent.2;
-      let pnode_actual_shape = child_and_parent.3;
+      // Iterate all descendants, and update their attributes.
+      while let Some(child_and_parent) = que.pop_front() {
+        let cnode = child_and_parent.0;
+        let _pnode_id = child_and_parent.1;
+        let pnode_depth = child_and_parent.2;
+        let pnode_actual_shape = child_and_parent.3;
 
-      // trace!("before update cnode attr: {:?}", cnode);
-      let cnode_id = cnode.id();
-      let cnode_depth = pnode_depth + 1;
-      let cnode_shape = *cnode.shape();
-      let cnode_actual_shape = shapes::make_actual_shape(cnode_shape, pnode_actual_shape);
+        // trace!("before update cnode attr: {:?}", cnode);
+        let cnode_id = cnode.id();
+        let cnode_depth = pnode_depth + 1;
+        let cnode_shape = *cnode.shape();
+        let cnode_actual_shape = shapes::make_actual_shape(cnode_shape, pnode_actual_shape);
 
-      // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+        // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
 
-      cnode.set_depth(cnode_depth);
-      cnode.set_actual_shape(&cnode_actual_shape);
-      // trace!("after update cnode attr: {:?}", cnode_id);
+        cnode.set_depth(cnode_depth);
+        cnode.set_actual_shape(&cnode_actual_shape);
+        // trace!("after update cnode attr: {:?}", cnode_id);
 
-      // trace!(
-      //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
-      //   cnode_id, self.children_ids
-      // );
-      match self.children_ids.get(&cnode_id) {
-        Some(descendant_ids) => {
-          for dnode_id in descendant_ids.iter() {
-            // trace!("before push dnode: {:?}", dnode_id);
-            match raw_nodes.as_mut().get_mut(dnode_id) {
-              Some(dnode) => {
-                que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
+        // trace!(
+        //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
+        //   cnode_id, self.children_ids
+        // );
+        match self.children_ids.get(&cnode_id) {
+          Some(descendant_ids) => {
+            for dnode_id in descendant_ids.iter() {
+              // trace!("before push dnode: {:?}", dnode_id);
+              match raw_nodes.as_mut().get_mut(dnode_id) {
+                Some(dnode) => {
+                  que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
+                }
+                None => { /* Skip */ }
               }
-              None => { /* Skip */ }
+              // trace!("after push dnode: {:?}", dnode_id);
             }
-            // trace!("after push dnode: {:?}", dnode_id);
           }
+          None => { /* Skip */ }
         }
-        None => { /* Skip */ }
       }
     }
   }
