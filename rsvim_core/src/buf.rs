@@ -142,14 +142,6 @@ impl Buffer {
   pub fn set_last_sync_time(&mut self, last_sync_time: Option<Instant>) {
     self.last_sync_time = last_sync_time;
   }
-
-  // pub fn status(&self) -> BufferStatus {
-  //   BufferStatus::INIT
-  // }
-
-  // pub fn worker_send_to_master(&self) -> &Sender<WorkerToMasterMessage> {
-  //   &self.worker_send_to_master
-  // }
 }
 
 // Unicode {
@@ -165,16 +157,6 @@ impl Buffer {
   /// Get the printable cell symbol and its display width.
   pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
     unicode::char_symbol(&self.options, c)
-  }
-
-  /// Get the display width for a unicode `str`.
-  pub fn str_width(&self, s: &str) -> usize {
-    unicode::str_width(&self.options, s)
-  }
-
-  /// Get the printable cell symbols and the display width for a unicode `str`.
-  pub fn str_symbols(&self, s: &str) -> (CompactString, usize) {
-    unicode::str_symbols(&self.options, s)
   }
 }
 // Unicode }
