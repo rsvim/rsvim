@@ -29,7 +29,7 @@ use std::time::{Instant, SystemTime, UNIX_EPOCH};
 use std::io::Write;
 use std::io::{BufWriter, Stdout};
 use std::sync::Arc;
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use tracing::{error, trace};

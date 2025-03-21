@@ -179,7 +179,7 @@ macro_rules! geo_size_as {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use geo::{point, Point, Rect};
+  use geo::{Point, Rect, point};
   use std::mem;
 
   #[test]

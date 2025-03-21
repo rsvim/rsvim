@@ -403,9 +403,11 @@ impl BuffersManager {
       }
     };
 
-    assert!(!self
-      .buffers_by_path
-      .contains_key(&Some(abs_filename.clone())));
+    assert!(
+      !self
+        .buffers_by_path
+        .contains_key(&Some(abs_filename.clone()))
+    );
 
     let existed = match std::fs::exists(abs_filename.clone()) {
       Ok(existed) => existed,

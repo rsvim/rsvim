@@ -5,8 +5,8 @@ use crate::coord::*;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::ui::tree::internal::Inodeable;
 use crate::ui::tree::TreeNode;
+use crate::ui::tree::internal::Inodeable;
 use crate::ui::widget::window::Viewport;
 use crate::wlock;
 
@@ -179,10 +179,7 @@ impl NormalStateful {
         let upper_bound = end_line_idx.saturating_sub(1);
         trace!(
           "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},upper_bound:{:?}",
-          cursor_line_idx,
-          expected,
-          end_line_idx,
-          upper_bound
+          cursor_line_idx, expected, end_line_idx, upper_bound
         );
         std::cmp::min(expected, upper_bound)
       }
@@ -190,9 +187,7 @@ impl NormalStateful {
     };
     trace!(
       "cursor:{}/{},line_idx:{}",
-      cursor_line_idx,
-      cursor_char_idx,
-      line_idx
+      cursor_line_idx, cursor_char_idx, line_idx
     );
 
     // If line index doesn't change, early return.
@@ -261,10 +256,7 @@ impl NormalStateful {
             let mut c = last_row_viewport.end_char_idx() - 1;
             trace!(
               "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, c:{}",
-              cursor_char_idx,
-              expected,
-              last_row_viewport,
-              c
+              cursor_char_idx, expected, last_row_viewport, c
             );
             while raw_buffer
               .as_ref()

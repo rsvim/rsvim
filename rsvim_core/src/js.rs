@@ -6,8 +6,8 @@ use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
 use crate::js::module::{
-  create_origin, fetch_module_tree, load_import, resolve_import, ImportKind, ImportMap, ModuleMap,
-  ModuleStatus,
+  ImportKind, ImportMap, ModuleMap, ModuleStatus, create_origin, fetch_module_tree, load_import,
+  resolve_import,
 };
 use crate::js::msg::{EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::res::AnyErr;
@@ -20,9 +20,9 @@ use parking_lot::RwLock;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicI32, Ordering};
 use std::sync::Arc;
 use std::sync::Once;
+use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
 use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::{error, trace};

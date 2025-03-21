@@ -4,7 +4,7 @@
 
 use rsvim_core::cli::CliOpt;
 use rsvim_core::evloop::EventLoop;
-use rsvim_core::js::{v8_version, SnapshotData};
+use rsvim_core::js::{SnapshotData, v8_version};
 use rsvim_core::log;
 use rsvim_core::res::IoResult;
 

@@ -1,7 +1,7 @@
 //! Js module.
 
-use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::js::JsRuntime;
+use crate::js::loader::{CoreModuleLoader, FsModuleLoader, ModuleLoader};
 use crate::res::AnyResult;
 
 use ahash::AHashMap as HashMap;
