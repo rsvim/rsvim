@@ -12,7 +12,7 @@
             delay = 1;
         }
         if (typeof callback !== "function") {
-            throw new Error("\"setTimeout\" callback must be function type, but found ".concat(callback, " (").concat(typeof callback, ")"));
+            throw new Error("\"setTimeout\" callback parameter must be a function, but found ".concat(callback, " (").concat(typeof callback, ")"));
         }
         var id = nextTimerId++;
         var timer = __InternalRsvimGlobalObject.global_set_timeout(function () {
@@ -24,7 +24,7 @@
     }
     function clearTimeout(id) {
         if (!Number.isInteger(id)) {
-            throw new Error("\"clearTimeout\" id must be integer type, but found ".concat(id, " (").concat(typeof id, ")"));
+            throw new Error("\"clearTimeout\" id parameter must be an integer value, but found ".concat(id, " (").concat(typeof id, ")"));
         }
         if (activeTimers.has(id)) {
             __InternalRsvimGlobalObject.global_clear_timeout(activeTimers.get(id));
