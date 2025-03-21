@@ -6,7 +6,7 @@ use crate::rlock;
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
-pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
+pub use crate::buf::opt::{BufferLocalOptions, FileEncodingOption};
 
 use ahash::AHashMap as HashMap;
 use ahash::AHashSet as HashSet;
@@ -191,33 +191,33 @@ impl Buffer {
     &mut self.rope
   }
 
-  /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
-  /// (`start_char_idx`) and max chars length (`max_chars`).
-  /// NOTE: This is for performance reason that this API limits the max chars instead of the whole
-  /// line, this is useful for super long lines.
-  pub fn clone_line(
-    &self,
-    line_idx: usize,
-    start_char_idx: usize,
-    max_chars: usize,
-  ) -> Option<String> {
-    match self.rope.get_line(line_idx) {
-      Some(line) => match line.get_chars_at(start_char_idx) {
-        Some(chars_iter) => {
-          let mut builder = String::with_capacity(max_chars);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars {
-              return Some(builder);
-            }
-            builder.push(c);
-          }
-          Some(builder)
-        }
-        None => None,
-      },
-      None => None,
-    }
-  }
+  // /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
+  // /// (`start_char_idx`) and max chars length (`max_chars`).
+  // /// NOTE: This is for performance reason that this API limits the max chars instead of the whole
+  // /// line, this is useful for super long lines.
+  // pub fn clone_line(
+  //   &self,
+  //   line_idx: usize,
+  //   start_char_idx: usize,
+  //   max_chars: usize,
+  // ) -> Option<String> {
+  //   match self.rope.get_line(line_idx) {
+  //     Some(line) => match line.get_chars_at(start_char_idx) {
+  //       Some(chars_iter) => {
+  //         let mut builder = String::with_capacity(max_chars);
+  //         for (i, c) in chars_iter.enumerate() {
+  //           if i >= max_chars {
+  //             return Some(builder);
+  //           }
+  //           builder.push(c);
+  //         }
+  //         Some(builder)
+  //       }
+  //       None => None,
+  //     },
+  //     None => None,
+  //   }
+  // }
 }
 // Rope }
 
@@ -229,14 +229,6 @@ impl Buffer {
 
   pub fn set_options(&mut self, options: &BufferLocalOptions) {
     self.options = options.clone();
-  }
-
-  pub fn tab_stop(&self) -> u16 {
-    self.options.tab_stop()
-  }
-
-  pub fn set_tab_stop(&mut self, value: u16) {
-    self.options.set_tab_stop(value);
   }
 }
 // Options }
@@ -534,7 +526,7 @@ impl BuffersManager {
   fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
     let fencoding = self.local_options().file_encoding();
     match fencoding {
-      FileEncoding::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
+      FileEncodingOption::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
     }
   }
 

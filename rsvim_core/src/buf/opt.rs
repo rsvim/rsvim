@@ -3,7 +3,7 @@
 use crate::defaults;
 
 // Re-export
-pub use file_encoding::FileEncoding;
+pub use file_encoding::FileEncodingOption;
 
 pub mod file_encoding;
 
@@ -11,7 +11,7 @@ pub mod file_encoding;
 /// Local buffer options.
 pub struct BufferLocalOptions {
   tab_stop: u16,
-  file_encoding: FileEncoding,
+  file_encoding: FileEncodingOption,
 }
 
 impl Default for BufferLocalOptions {
@@ -33,11 +33,11 @@ impl BufferLocalOptions {
     self.tab_stop = value;
   }
 
-  pub fn file_encoding(&self) -> FileEncoding {
+  pub fn file_encoding(&self) -> FileEncodingOption {
     self.file_encoding
   }
 
-  pub fn set_file_encoding(&mut self, value: FileEncoding) {
+  pub fn set_file_encoding(&mut self, value: FileEncodingOption) {
     self.file_encoding = value;
   }
 }
@@ -46,7 +46,7 @@ impl BufferLocalOptions {
 /// Local buffer options builder.
 pub struct BufferLocalOptionsBuilder {
   tab_stop: u16,
-  file_encoding: FileEncoding,
+  file_encoding: FileEncodingOption,
 }
 
 impl BufferLocalOptionsBuilder {
@@ -55,7 +55,7 @@ impl BufferLocalOptionsBuilder {
     self
   }
 
-  pub fn file_encoding(&mut self, value: FileEncoding) -> &mut Self {
+  pub fn file_encoding(&mut self, value: FileEncodingOption) -> &mut Self {
     self.file_encoding = value;
     self
   }
