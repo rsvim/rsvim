@@ -38,6 +38,7 @@ jobs:
       - run: |
           sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' Cargo.toml
           sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' ./rsvim_core/Cargo.toml
+          sed -i 's/channel[[:space:]]*=[[:space:]]*"1.85.0"/channel = "nightly"/' ./rust-toolchain.toml
           git diff --color=always
           cargo miri test
         env:
