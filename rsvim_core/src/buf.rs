@@ -173,11 +173,10 @@ impl Buffer {
     &mut self.rope
   }
 
-  /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
-  /// (`start_char_idx`) and max chars length (`max_chars`).
-  /// NOTE: This is for performance reason that this API limits the max chars instead of the whole
-  /// line, this is useful for super long lines.
-  pub fn clone_line(
+  /// Similar with [`Rope::get_line`] but it create a cloned string, with start char index
+  /// (`start_char_idx`) and max chars length (`max_chars`). The limited max chars can limits the
+  /// CPU/memory usage to avoid performance issue.
+  pub fn clone_rope_line(
     &self,
     line_idx: usize,
     start_char_idx: usize,
