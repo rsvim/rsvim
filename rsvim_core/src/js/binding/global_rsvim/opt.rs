@@ -19,6 +19,7 @@ pub fn get_wrap(
     .tree
     .try_read_for(envar::MUTEX_TIMEOUT())
     .unwrap()
+    .global_local_options()
     .wrap();
   trace!("get_wrap: {:?}", value);
   rv.set_bool(value);
@@ -39,6 +40,7 @@ pub fn set_wrap(
     .tree
     .try_write_for(envar::MUTEX_TIMEOUT())
     .unwrap()
+    .global_local_options_mut()
     .set_wrap(value);
 }
 
@@ -56,6 +58,7 @@ pub fn get_line_break(
     .tree
     .try_read_for(envar::MUTEX_TIMEOUT())
     .unwrap()
+    .global_local_options()
     .line_break();
   trace!("get_line_break: {:?}", value);
   rv.set_bool(value);
@@ -76,5 +79,6 @@ pub fn set_line_break(
     .tree
     .try_write_for(envar::MUTEX_TIMEOUT())
     .unwrap()
+    .global_local_options_mut()
     .set_line_break(value);
 }

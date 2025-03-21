@@ -441,12 +441,20 @@ impl Tree {
     &self.global_options
   }
 
+  pub fn global_options_mut(&mut self) -> &mut GlobalOptions {
+    &mut self.global_options
+  }
+
   pub fn set_global_options(&mut self, options: &GlobalOptions) {
     self.global_options = options.clone();
   }
 
   pub fn global_local_options(&self) -> &LocalOptions {
     &self.global_local_options
+  }
+
+  pub fn global_local_options_mut(&mut self) -> &mut LocalOptions {
+    &mut self.global_local_options
   }
 
   pub fn set_global_local_options(&mut self, options: &LocalOptions) {
