@@ -1,7 +1,7 @@
 //! The normal mode.
 
 use crate::buf::Buffer;
-use crate::cart::IRect;
+use crate::coord::*;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -293,7 +293,6 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferLocalOptions, BuffersManagerArc};
-  use crate::cart::U16Size;
   use crate::rlock;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};

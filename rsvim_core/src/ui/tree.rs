@@ -2,7 +2,7 @@
 
 #![allow(dead_code)]
 
-use crate::cart::{IRect, U16Rect, U16Size};
+use crate::coord::*;
 use crate::envar;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
@@ -490,7 +490,7 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  use crate::cart::U16Size;
+  use crate::coord::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;

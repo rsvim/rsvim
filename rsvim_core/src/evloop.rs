@@ -1,8 +1,8 @@
 //! Event loop.
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
-use crate::cart::{IRect, U16Size};
 use crate::cli::CliOpt;
+use crate::coord::*;
 use crate::envar;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};

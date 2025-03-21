@@ -3,7 +3,7 @@
 use std::fmt::Debug;
 use tracing::trace;
 
-use crate::cart::{IRect, U16Pos, U16Rect};
+use crate::coord::*;
 use crate::inode_generate_impl;
 use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};

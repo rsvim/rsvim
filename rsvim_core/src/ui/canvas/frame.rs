@@ -5,7 +5,7 @@ use geo::point;
 use std::ops::Range;
 // use tracing::debug;
 
-use crate::cart::{U16Pos, U16Size};
+use crate::coord::*;
 use crate::ui::canvas::frame::cell::Cell;
 use crate::ui::canvas::frame::cursor::Cursor;
 use crate::ui::canvas::internal::iframe::Iframe;

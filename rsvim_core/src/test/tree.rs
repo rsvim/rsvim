@@ -3,7 +3,7 @@
 #![allow(unused_imports)]
 
 use crate::buf::BuffersManagerArc;
-use crate::cart::{IRect, U16Size};
+use crate::coord::*;
 use crate::ui::tree::internal::inode::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
 use crate::ui::widget::window::WindowLocalOptions;

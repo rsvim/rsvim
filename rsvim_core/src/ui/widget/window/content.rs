@@ -1,7 +1,7 @@
 //! Vim window's text content widget.
 
 use crate::buf::{Buffer, BufferWk};
-use crate::cart::{IRect, U16Pos, U16Rect};
+use crate::coord::*;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::window::viewport::ViewportWk;
@@ -255,7 +255,7 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptions};
-  use crate::cart::U16Size;
+  use crate::coord::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;

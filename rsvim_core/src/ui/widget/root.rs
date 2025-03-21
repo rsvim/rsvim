@@ -1,6 +1,6 @@
 //! Root container is the root node in the widget tree.
 
-use crate::cart::{IRect, U16Rect};
+use crate::coord::*;
 use crate::inode_generate_impl;
 use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
 use crate::ui::widget::Widgetable;

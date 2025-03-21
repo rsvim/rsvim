@@ -169,17 +169,17 @@ macro_rules! geo_rect_as {
 #[macro_export]
 macro_rules! geo_size_as {
   ($size_var:ident,$type_name:ty) => {
-    $crate::cart::Size::new(
-      $size_var.height as $type_name,
-      $size_var.width as $type_name,
-    ) as $crate::cart::Size<$type_name>
+    Size::new(
+      $size_var.height() as $type_name,
+      $size_var.width() as $type_name,
+    ) as Size<$type_name>
   };
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
-  use geo::{point, Rect};
+  use geo::{point, Point, Rect};
   use std::mem;
 
   #[test]

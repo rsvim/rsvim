@@ -6,7 +6,7 @@ use geo::point;
 use std::cmp::{max, min};
 // use tracing::trace;
 
-use crate::cart::{IPos, IRect, ISize, U16Pos, U16Rect};
+use crate::coord::*;
 use crate::geo_point_as;
 
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
@@ -165,7 +165,7 @@ mod tests {
   use std::cmp::min;
   use tracing::info;
 
-  use crate::cart::{IRect, U16Rect};
+  use crate::coord::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;

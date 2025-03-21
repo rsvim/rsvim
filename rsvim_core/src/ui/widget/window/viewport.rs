@@ -1,8 +1,7 @@
 //! Buffer viewport on a window.
 
 use crate::buf::BufferWk;
-use crate::cart::U16Rect;
-//use crate::rlock;
+use crate::coord::*;
 use crate::ui::widget::window::ViewportOptions;
 
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
@@ -630,7 +629,7 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptions};
-  use crate::cart::{IRect, U16Size};
+  use crate::coord::*;
   use crate::rlock;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
