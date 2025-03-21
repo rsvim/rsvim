@@ -17,6 +17,7 @@ Please setup your development environment with:
   - For macOS, please use [Xcode Clang](https://developer.apple.com/xcode/).
   - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
 - Latest stable version management tools [mise](https://github.com/jdx/mise) and [pipx](https://github.com/pypa/pipx), then install multiple command lines with `mise i`.
+- Link (or copy) `./git-hooks/pre-commit` to `./git/hooks/pre-commit` in your local git repository with `ln -s $PWD/git-hooks/pre-commit $PWD/.git/hooks/pre-commit`.
 
   > Note: For windows development, please manually install all dependencies in the `mise.toml` file.
 
@@ -60,5 +61,3 @@ To release a new version, please:
 ### Transpile/Compile
 
 To transpile/compile typescript code to javascript code, please run `tsc`.
-
-> To automatically generate js code, please link (or copy) `./git-hooks/pre-commit` to `./git/hooks/pre-commit` in local git repository with `ln -s $PWD/git-hooks/pre-commit $PWD/.git/hooks/pre-commit`.
