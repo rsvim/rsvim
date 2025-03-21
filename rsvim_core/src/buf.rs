@@ -211,14 +211,6 @@ impl Buffer {
   pub fn set_options(&mut self, options: &BufferLocalOptions) {
     self.options = options.clone();
   }
-
-  pub fn tab_stop(&self) -> u16 {
-    self.options.tab_stop()
-  }
-
-  pub fn set_tab_stop(&mut self, value: u16) {
-    self.options.set_tab_stop(value);
-  }
 }
 // Options }
 
