@@ -1,6 +1,6 @@
 //! Cursor of canvas frame.
 
-use crate::prelude::*;
+use crate::coord::*;
 
 use geo::point;
 use std::cmp::{Eq, PartialEq};

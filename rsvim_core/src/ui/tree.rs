@@ -2,8 +2,8 @@
 
 #![allow(dead_code)]
 
+use crate::coord::*;
 use crate::envar;
-use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::WindowLocalOptions;
@@ -490,7 +490,7 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  use crate::prelude::*;
+  use crate::coord::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;

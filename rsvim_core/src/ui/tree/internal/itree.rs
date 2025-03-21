@@ -1,7 +1,7 @@
 //! Internal tree structure that implements the widget tree.
 
+use crate::coord::*;
 use crate::geo_rect_as;
-use crate::prelude::*;
 use crate::ui::tree::internal::shapes;
 use crate::ui::tree::internal::{InodeId, Inodeable};
 
@@ -717,7 +717,7 @@ mod tests {
   use crate::inode_generate_impl;
   use tracing::info;
 
-  use crate::prelude::*;
+  use crate::coord::*;
   // use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::{InodeBase, Inodeable};
 

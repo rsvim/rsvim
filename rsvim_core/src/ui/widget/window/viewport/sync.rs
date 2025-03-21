@@ -1,7 +1,7 @@
 //! Internal implementations for Viewport.
 
 use crate::buf::{Buffer, BufferWk};
-use crate::prelude::*;
+use crate::coord::*;
 use crate::ui::widget::window::viewport::RowViewport;
 use crate::ui::widget::window::{LineViewport, ViewportOptions};
 use crate::wlock;

@@ -2,13 +2,13 @@
 
 pub mod buf;
 pub mod cli;
-pub mod coordinate;
+pub mod coord;
 pub mod defaults;
 pub mod envar;
 pub mod evloop;
 pub mod js;
+pub mod lock;
 pub mod log;
-pub mod prelude;
 pub mod res;
 pub mod state;
 pub mod ui;

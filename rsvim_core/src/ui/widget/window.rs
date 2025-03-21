@@ -1,7 +1,7 @@
 //! Vim window.
 
 use crate::buf::BufferWk;
-use crate::prelude::*;
+use crate::coord::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
 use crate::ui::widget::window::content::WindowContent;
@@ -323,7 +323,7 @@ mod tests {
   use tracing::info;
 
   use crate::buf::{Buffer, BufferArc, BufferLocalOptions};
-  use crate::prelude::*;
+  use crate::coord::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;

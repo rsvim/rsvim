@@ -1,7 +1,7 @@
 //! The node structure of the internal tree.
 
+use crate::coord::*;
 use crate::geo_rect_as;
-use crate::prelude::*;
 
 use geo;
 use std::fmt::Debug;
@@ -188,7 +188,7 @@ impl InodeBase {
 mod tests {
   use std::cell::RefCell;
 
-  use crate::prelude::*;
+  use crate::coord::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;
