@@ -30,10 +30,10 @@ jobs:
           npm install -g typescript
           tsc --version
           echo "show PWD=${PWD}"
-          echo "ls -la"
-          ls -la
           echo "tsc"
           tsc
+          echo "git status"
+          git status
   rs_lint:
     name: Rust Lint
     runs-on: ubuntu-latest
