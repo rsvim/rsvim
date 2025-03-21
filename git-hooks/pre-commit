@@ -1,5 +1,5 @@
 #!/bin/bash
 
 cargo fmt
-prettier *.md rsvim_core/src/js/runtime/*.ts --write
+prettier *.md **/*.ts --write
 tsc
