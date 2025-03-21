@@ -49,7 +49,7 @@ pub fn make_buffer_from_rope(opts: Options, rp: Rope) -> BufferArc {
 
 pub fn make_buffers_manager(opts: Options, bufs: Vec<BufferArc>) -> BuffersManagerArc {
   let mut bm = BuffersManager::new();
-  bm.set_local_options(&opts);
+  bm.set_global_options(&opts);
   for buf in bufs.iter() {
     bm._add_buffer(buf.clone());
   }
