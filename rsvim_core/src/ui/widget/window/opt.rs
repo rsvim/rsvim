@@ -73,6 +73,32 @@ impl Default for WindowOptionsBuilder {
   }
 }
 
+#[derive(Debug, Clone)]
+/// Global window options.
+pub struct WindowGlobalOptions {}
+
+impl Default for WindowGlobalOptions {
+  fn default() -> Self {
+    Self::builder().build()
+  }
+}
+
+impl WindowGlobalOptions {
+  pub fn builder() -> WindowGlobalOptionsBuilder {
+    WindowGlobalOptionsBuilder::default()
+  }
+}
+
+#[derive(Debug, Clone, Default)]
+/// Global window options builder.
+pub struct WindowGlobalOptionsBuilder {}
+
+impl WindowGlobalOptionsBuilder {
+  pub fn build(&self) -> WindowGlobalOptions {
+    WindowGlobalOptions {}
+  }
+}
+
 #[derive(Debug, Copy, Clone)]
 // Viewport options.
 pub struct ViewportOptions {

@@ -274,7 +274,7 @@ mod tests {
     buffer: BufferArc,
   ) -> Canvas {
     let mut tree = Tree::new(terminal_size);
-    tree.set_local_options(&window_options);
+    tree.set_global_local_options(&window_options);
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let viewport_options = ViewportOptions::from(&window_options);
     let viewport = Viewport::new(&viewport_options, Arc::downgrade(&buffer), &actual_shape);
