@@ -173,32 +173,32 @@ impl Buffer {
     &mut self.rope
   }
 
-  /// Similar with [`Rope::get_line`] but it create a cloned string, with start char index
-  /// (`start_char_idx`) and max chars length (`max_chars`). The limited max chars can limits the
-  /// CPU/memory usage to avoid performance issue.
-  pub fn clone_rope_line(
-    &self,
-    line_idx: usize,
-    start_char_idx: usize,
-    max_chars: usize,
-  ) -> Option<String> {
-    match self.rope.get_line(line_idx) {
-      Some(line) => match line.get_chars_at(start_char_idx) {
-        Some(chars_iter) => {
-          let mut builder = String::with_capacity(max_chars);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars {
-              return Some(builder);
-            }
-            builder.push(c);
-          }
-          Some(builder)
-        }
-        None => None,
-      },
-      None => None,
-    }
-  }
+  // /// Similar with [`Rope::get_line`] but it create a cloned string, with start char index
+  // /// (`start_char_idx`) and max chars length (`max_chars`). The limited max chars can limits the
+  // /// CPU/memory usage to avoid performance issue.
+  // pub fn clone_rope_line(
+  //   &self,
+  //   line_idx: usize,
+  //   start_char_idx: usize,
+  //   max_chars: usize,
+  // ) -> Option<String> {
+  //   match self.rope.get_line(line_idx) {
+  //     Some(line) => match line.get_chars_at(start_char_idx) {
+  //       Some(chars_iter) => {
+  //         let mut builder = String::with_capacity(max_chars);
+  //         for (i, c) in chars_iter.enumerate() {
+  //           if i >= max_chars {
+  //             return Some(builder);
+  //           }
+  //           builder.push(c);
+  //         }
+  //         Some(builder)
+  //       }
+  //       None => None,
+  //     },
+  //     None => None,
+  //   }
+  // }
 }
 // Rope }
 
