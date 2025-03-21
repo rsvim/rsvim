@@ -11,9 +11,9 @@ use crate::res::IoResult;
 use crate::state::fsm::{StatefulDataAccess, StatefulValue, StatefulValueArc};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
-use crate::ui::tree::internal::Inodeable;
-use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::{Cursor, Window};
+use crate::ui::tree::*;
+use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::window::Window;
 use crate::{rlock, wlock};
 
 use crossterm::event::{

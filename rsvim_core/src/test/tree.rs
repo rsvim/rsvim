@@ -4,10 +4,9 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::coord::*;
-use crate::ui::tree::internal::inode::Inodeable;
-use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::window::WindowLocalOptions;
-use crate::ui::widget::{Cursor, Window};
+use crate::ui::tree::*;
+use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::window::{Window, WindowLocalOptions};
 use crate::{rlock, wlock};
 
 use std::sync::Arc;

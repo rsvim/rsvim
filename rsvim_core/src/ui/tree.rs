@@ -5,9 +5,15 @@
 use crate::coord::*;
 use crate::envar;
 use crate::ui::canvas::{Canvas, CanvasArc};
-use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
-use crate::ui::widget::window::{WindowGlobalOptions, WindowLocalOptions};
-use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
+use crate::ui::widget::Widgetable;
+use crate::ui::widget::cursor::Cursor;
+use crate::ui::widget::root::RootContainer;
+use crate::ui::widget::window::{Window, WindowGlobalOptions, WindowLocalOptions};
+
+// Re-export
+pub use crate::ui::tree::internal::{
+  InodeBase, InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut,
+};
 
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::collections::BTreeSet;

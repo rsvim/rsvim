@@ -4,11 +4,6 @@ use crate::ui::canvas::Canvas;
 
 // use tracing::trace;
 
-// Re-export
-pub use crate::ui::widget::cursor::Cursor;
-pub use crate::ui::widget::root::RootContainer;
-pub use crate::ui::widget::window::Window;
-
 pub mod cursor;
 pub mod root;
 pub mod window;
