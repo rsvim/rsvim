@@ -1,7 +1,7 @@
 //! Display width index (char-wise) for each unicode char in vim buffer.
 
-use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
+use crate::buf::Options;
 use ropey::RopeSlice;
 
 use std::collections::BTreeMap;
@@ -85,7 +85,7 @@ impl ColumnIndex {
   // Build cache beyond the bound by `char_idx` or `width`.
   fn _build_cache(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     char_idx_bound: Option<usize>,
     width_bound: Option<usize>,
@@ -135,12 +135,7 @@ impl ColumnIndex {
   }
 
   // Build cache until `char_idx`.
-  fn _build_cache_until_char(
-    &mut self,
-    options: &BufferLocalOptions,
-    buf_line: &RopeSlice,
-    char_idx: usize,
-  ) {
+  fn _build_cache_until_char(&mut self, options: &Options, buf_line: &RopeSlice, char_idx: usize) {
     self._build_cache(options, buf_line, Some(char_idx), None);
   }
 
@@ -159,7 +154,7 @@ impl ColumnIndex {
   ///    length.
   pub fn width_before(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     char_idx: usize,
   ) -> usize {
@@ -195,12 +190,7 @@ impl ColumnIndex {
   /// 2. It returns the prefix display width if `char_idx` is inside the line.
   /// 3. It returns the whole display width of the line if `char_idx` is greater than or equal to
   ///    the line length.
-  pub fn width_at(
-    &mut self,
-    options: &BufferLocalOptions,
-    buf_line: &RopeSlice,
-    char_idx: usize,
-  ) -> usize {
+  pub fn width_at(&mut self, options: &Options, buf_line: &RopeSlice, char_idx: usize) -> usize {
     self._build_cache_until_char(options, buf_line, char_idx);
     self._internal_check();
 
@@ -221,12 +211,7 @@ impl ColumnIndex {
   }
 
   // Build cache until specified `width`.
-  fn _build_cache_until_width(
-    &mut self,
-    options: &BufferLocalOptions,
-    buf_line: &RopeSlice,
-    width: usize,
-  ) {
+  fn _build_cache_until_width(&mut self, options: &Options, buf_line: &RopeSlice, width: usize) {
     self._build_cache(options, buf_line, None, Some(width));
   }
 
@@ -250,7 +235,7 @@ impl ColumnIndex {
   /// 2. It returns the previous char index otherwise.
   pub fn char_before(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -296,7 +281,7 @@ impl ColumnIndex {
   /// 2. It returns the **current** char index otherwise.
   pub fn char_at(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -348,7 +333,7 @@ impl ColumnIndex {
   /// 2. It returns the next char index otherwise.
   pub fn char_after(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -385,7 +370,7 @@ impl ColumnIndex {
   ///    returns the last char index.
   pub fn last_char_until(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -458,7 +443,7 @@ mod tests {
   use tracing::info;
 
   fn assert_width_at(
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[usize],
@@ -471,7 +456,7 @@ mod tests {
   }
 
   fn assert_width_at_rev(
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[(usize, usize)],
@@ -484,7 +469,7 @@ mod tests {
   }
 
   fn assert_width_before(
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[usize],
@@ -497,7 +482,7 @@ mod tests {
   }
 
   fn assert_width_before_rev(
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[(usize, usize)],
@@ -513,7 +498,7 @@ mod tests {
   fn width1() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let buffer = make_buffer_from_rope(options.clone(), rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width1");
@@ -548,7 +533,7 @@ mod tests {
   fn width2() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
 
     let buffer = make_buffer_from_rope(options.clone(), rope.clone());
@@ -588,7 +573,7 @@ mod tests {
   fn width3() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
 
     let buffer = make_buffer_from_rope(options.clone(), rope.clone());
@@ -647,7 +632,7 @@ mod tests {
   fn width4() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = make_rope_from_lines(vec!["  1. When the\r"]);
     let buffer = make_buffer_from_rope(options.clone(), rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width4");
@@ -684,7 +669,7 @@ mod tests {
   fn width5() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = make_rope_from_lines(vec![
       "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
     ]);
@@ -747,7 +732,7 @@ mod tests {
   fn width6() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = make_rope_from_lines(vec![
       "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
     ]);
@@ -789,7 +774,7 @@ mod tests {
   fn width7() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = Rope::new();
 
     let mut actual = ColumnIndex::new();
@@ -829,7 +814,7 @@ mod tests {
   }
 
   fn assert_char_before(
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_before: &[(usize, Option<usize>)],
@@ -847,7 +832,7 @@ mod tests {
   }
 
   fn assert_char_at(
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_until: &[(usize, Option<usize>)],
@@ -867,7 +852,7 @@ mod tests {
   }
 
   fn assert_char_after(
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_after: &[(usize, Option<usize>)],
@@ -885,7 +870,7 @@ mod tests {
   }
 
   fn assert_last_char_until(
-    options: &BufferLocalOptions,
+    options: &Options,
     buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_until: &[(usize, Option<usize>)],
@@ -901,7 +886,7 @@ mod tests {
   fn char1() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = make_rope_from_lines(vec!["These are\t很简单的test\tlines.\n"]);
     let buffer = make_buffer_from_rope(options.clone(), rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "char1");
@@ -1072,7 +1057,7 @@ mod tests {
   fn char2() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
 
     let rope = make_rope_from_lines(vec!["\t"]);
     let buffer = make_buffer_from_rope(options.clone(), rope.clone());
@@ -1142,7 +1127,7 @@ mod tests {
   fn char3() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
 
     let rope = make_rope_from_lines(vec!["\n"]);
     let buffer = make_buffer_from_rope(options.clone(), rope.clone());
@@ -1210,7 +1195,7 @@ mod tests {
   fn char4() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
 
     {
       let rope = Rope::new();
@@ -1263,7 +1248,7 @@ mod tests {
   fn truncate1() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let buffer = make_buffer_from_rope(options.clone(), rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "truncate1");
@@ -1295,7 +1280,7 @@ mod tests {
   fn truncate2() {
     test_log_init();
 
-    let options = BufferLocalOptions::default();
+    let options = Options::default();
     let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
     let buffer = make_buffer_from_rope(options.clone(), rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "truncate2");

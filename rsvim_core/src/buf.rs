@@ -6,7 +6,7 @@ use crate::rlock;
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
-pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
+pub use crate::buf::opt::{FileEncodingOption, Options};
 
 use ahash::AHashMap as HashMap;
 use ahash::AHashSet as HashSet;
@@ -53,7 +53,7 @@ pub struct Buffer {
   id: BufferId,
   rope: Rope,
   rope_lines_width: BTreeMap<usize, ColumnIndex>,
-  options: BufferLocalOptions,
+  options: Options,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
@@ -70,7 +70,7 @@ impl Buffer {
   /// manage buffer instances.
   pub fn _new(
     rope: Rope,
-    options: BufferLocalOptions,
+    options: Options,
     filename: Option<PathBuf>,
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
@@ -90,7 +90,7 @@ impl Buffer {
 
   #[cfg(test)]
   /// NOTE: This API should only be used for testing.
-  pub fn _new_empty(options: BufferLocalOptions) -> Self {
+  pub fn _new_empty(options: Options) -> Self {
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
@@ -204,11 +204,11 @@ impl Buffer {
 
 // Options {
 impl Buffer {
-  pub fn options(&self) -> &BufferLocalOptions {
+  pub fn options(&self) -> &Options {
     &self.options
   }
 
-  pub fn set_options(&mut self, options: &BufferLocalOptions) {
+  pub fn set_options(&mut self, options: &Options) {
     self.options = options.clone();
   }
 }
@@ -359,8 +359,8 @@ pub struct BuffersManager {
   // Buffers maps by absolute file path.
   buffers_by_path: HashMap<Option<PathBuf>, BufferArc>,
 
-  // Local options for buffers.
-  local_options: BufferLocalOptions,
+  // Global *local* options for buffers.
+  options: Options,
 }
 
 impl BuffersManager {
@@ -368,7 +368,7 @@ impl BuffersManager {
     BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: HashMap::new(),
-      local_options: BufferLocalOptions::default(),
+      options: Options::default(),
     }
   }
 
@@ -424,7 +424,7 @@ impl BuffersManager {
     } else {
       Buffer::_new(
         Rope::new(),
-        self.local_options().clone(),
+        self.global_options().clone(),
         Some(filename.to_path_buf()),
         Some(abs_filename.clone()),
         None,
@@ -457,7 +457,7 @@ impl BuffersManager {
 
     let buf = Buffer::_new(
       Rope::new(),
-      self.local_options().clone(),
+      self.global_options().clone(),
       None,
       None,
       None,
@@ -497,9 +497,9 @@ impl BuffersManager {
   }
 
   fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
-    let fencoding = self.local_options().file_encoding();
+    let fencoding = self.global_options().file_encoding();
     match fencoding {
-      FileEncoding::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
+      FileEncodingOption::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
     }
   }
 
@@ -533,7 +533,7 @@ impl BuffersManager {
 
         Ok(Buffer::_new(
           self.to_rope(&buf, buf.len()),
-          self.local_options().clone(),
+          self.global_options().clone(),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
@@ -602,12 +602,12 @@ impl Default for BuffersManager {
 
 // Options {
 impl BuffersManager {
-  pub fn local_options(&self) -> &BufferLocalOptions {
-    &self.local_options
+  pub fn global_options(&self) -> &Options {
+    &self.options
   }
 
-  pub fn set_local_options(&mut self, options: &BufferLocalOptions) {
-    self.local_options = options.clone();
+  pub fn set_global_options(&mut self, options: &Options) {
+    self.options = options.clone();
   }
 }
 // Options }
@@ -621,60 +621,9 @@ pub type BuffersManagerIter<'a> = std::collections::btree_map::Iter<'a, BufferId
 #[cfg(test)]
 mod tests {
   use super::*;
-  // use std::fs::File;
-  // use tempfile::tempfile;
-  // use tokio::sync::mpsc::Receiver;
-
-  // fn make_channel() -> (
-  //   Sender<WorkerToMasterMessage>,
-  //   Receiver<WorkerToMasterMessage>,
-  // ) {
-  //   tokio::sync::mpsc::channel(1)
-  // }
-
-  // #[test]
-  // fn buffer_from1() {
-  //   let (sender, _) = make_channel();
-  //
-  //   let r1 = Rope::from_str("Hello");
-  //   let buf1 = Buffer::_from_rope(sender.clone(), r1);
-  //   let tmp1 = tempfile().unwrap();
-  //   buf1.write_to(tmp1).unwrap();
-  //
-  //   let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
-  //   let buf2 = Buffer::_from_rope(sender, r2);
-  //   let tmp2 = tempfile().unwrap();
-  //   buf2.write_to(tmp2).unwrap();
-  // }
-  //
-  // #[test]
-  // fn buffer_from2() {
-  //   let (sender, _) = make_channel();
-  //
-  //   let mut builder1 = RopeBuilder::new();
-  //   builder1.append("Hello");
-  //   builder1.append("World");
-  //   let buf1 = Buffer::_from_rope_builder(sender, builder1);
-  //   let tmp1 = tempfile().unwrap();
-  //   buf1.write_to(tmp1).unwrap();
-  // }
 
   #[test]
   fn next_buffer_id1() {
     assert!(next_buffer_id() > 0);
   }
-
-  // #[test]
-  // fn buffer_unicode_width1() {
-  //   let (sender, _) = make_channel();
-  //
-  //   let b1 = Buffer::_from_rope_builder(sender, RopeBuilder::new());
-  //   assert_eq!(b1.char_width('A'), 1);
-  //   assert_eq!(b1.char_symbol('A'), (CompactString::new("A"), 1));
-  //   assert_eq!(b1.str_width("ABCDEFG"), 7);
-  //   assert_eq!(
-  //     b1.str_symbols("ABCDEFG"),
-  //     (CompactString::new("ABCDEFG"), 7)
-  //   );
-  // }
 }

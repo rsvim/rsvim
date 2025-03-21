@@ -3,24 +3,24 @@
 use crate::defaults;
 
 // Re-export
-pub use file_encoding::FileEncoding;
+pub use file_encoding::FileEncodingOption;
 
 pub mod file_encoding;
 
 #[derive(Debug, Clone)]
 /// Local buffer options.
-pub struct BufferLocalOptions {
+pub struct Options {
   tab_stop: u16,
-  file_encoding: FileEncoding,
+  file_encoding: FileEncodingOption,
 }
 
-impl Default for BufferLocalOptions {
+impl Default for Options {
   fn default() -> Self {
     Self::builder().build()
   }
 }
 
-impl BufferLocalOptions {
+impl Options {
   pub fn builder() -> BufferLocalOptionsBuilder {
     BufferLocalOptionsBuilder::default()
   }
@@ -33,11 +33,11 @@ impl BufferLocalOptions {
     self.tab_stop = value;
   }
 
-  pub fn file_encoding(&self) -> FileEncoding {
+  pub fn file_encoding(&self) -> FileEncodingOption {
     self.file_encoding
   }
 
-  pub fn set_file_encoding(&mut self, value: FileEncoding) {
+  pub fn set_file_encoding(&mut self, value: FileEncodingOption) {
     self.file_encoding = value;
   }
 }
@@ -46,7 +46,7 @@ impl BufferLocalOptions {
 /// Local buffer options builder.
 pub struct BufferLocalOptionsBuilder {
   tab_stop: u16,
-  file_encoding: FileEncoding,
+  file_encoding: FileEncodingOption,
 }
 
 impl BufferLocalOptionsBuilder {
@@ -55,13 +55,13 @@ impl BufferLocalOptionsBuilder {
     self
   }
 
-  pub fn file_encoding(&mut self, value: FileEncoding) -> &mut Self {
+  pub fn file_encoding(&mut self, value: FileEncodingOption) -> &mut Self {
     self.file_encoding = value;
     self
   }
 
-  pub fn build(&self) -> BufferLocalOptions {
-    BufferLocalOptions {
+  pub fn build(&self) -> Options {
+    Options {
       tab_stop: self.tab_stop,
       file_encoding: self.file_encoding,
     }
@@ -83,7 +83,7 @@ mod tests {
 
   #[test]
   fn default1() {
-    let opt1 = BufferLocalOptions::default();
+    let opt1 = Options::default();
     let opt2 = BufferLocalOptionsBuilder::default().build();
     assert_eq!(opt1.tab_stop(), opt2.tab_stop());
   }
