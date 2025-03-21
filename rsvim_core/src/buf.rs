@@ -386,8 +386,8 @@ pub struct BuffersManager {
   // Buffers maps by absolute file path.
   buffers_by_path: HashMap<Option<PathBuf>, BufferArc>,
 
-  // Local options for buffers.
-  local_options: BufferLocalOptions,
+  // Global-local options for buffers.
+  global_local_options: BufferLocalOptions,
 }
 
 impl BuffersManager {
@@ -395,7 +395,7 @@ impl BuffersManager {
     BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: HashMap::new(),
-      local_options: BufferLocalOptions::default(),
+      global_local_options: BufferLocalOptions::default(),
     }
   }
 
@@ -451,7 +451,7 @@ impl BuffersManager {
     } else {
       Buffer::_new(
         Rope::new(),
-        self.local_options().clone(),
+        self.global_local_options().clone(),
         Some(filename.to_path_buf()),
         Some(abs_filename.clone()),
         None,
@@ -484,7 +484,7 @@ impl BuffersManager {
 
     let buf = Buffer::_new(
       Rope::new(),
-      self.local_options().clone(),
+      self.global_local_options().clone(),
       None,
       None,
       None,
@@ -524,7 +524,7 @@ impl BuffersManager {
   }
 
   fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
-    let fencoding = self.local_options().file_encoding();
+    let fencoding = self.global_local_options().file_encoding();
     match fencoding {
       FileEncodingOption::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
     }
@@ -560,7 +560,7 @@ impl BuffersManager {
 
         Ok(Buffer::_new(
           self.to_rope(&buf, buf.len()),
-          self.local_options().clone(),
+          self.global_local_options().clone(),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
@@ -629,12 +629,16 @@ impl Default for BuffersManager {
 
 // Options {
 impl BuffersManager {
-  pub fn local_options(&self) -> &BufferLocalOptions {
-    &self.local_options
+  pub fn global_local_options(&self) -> &BufferLocalOptions {
+    &self.global_local_options
   }
 
-  pub fn set_local_options(&mut self, options: &BufferLocalOptions) {
-    self.local_options = options.clone();
+  pub fn global_local_options_mut(&mut self) -> &mut BufferLocalOptions {
+    &mut self.global_local_options
+  }
+
+  pub fn set_global_local_options(&mut self, options: &BufferLocalOptions) {
+    self.global_local_options = options.clone();
   }
 }
 // Options }
