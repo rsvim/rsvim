@@ -12,6 +12,7 @@ pub struct PathConfig {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 struct CachedDirs {
   config_dir: PathBuf,
   home_dir: PathBuf,
@@ -19,14 +20,14 @@ struct CachedDirs {
   data_dir: PathBuf,
 }
 
-// `$env:USERPROFILE\AppData\Roaming\rsvim`
-#[cfg(target_os = "windows")]
+/// For windows: `$env:USERPROFILE\AppData\Roaming\rsvim`.
+/// For others: `$XDG_CONFIG_HOME/rsvim` or `$HOME/.config/rsvim`.
+#[cfg(not(target_os = "macos"))]
 fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.config_dir.join("rsvim").to_path_buf()
 }
 
-// `$XDG_CONFIG_HOME/rsvim` or `$HOME/.config/rsvim`
-#[cfg(not(target_os = "windows"))]
+#[cfg(target_os = "macos")]
 fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
   match std::env::var("XDG_CONFIG_HOME") {
     Ok(config_path) => std::path::Path::new(&config_path)
@@ -36,11 +37,19 @@ fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
   }
 }
 
-// `$HOME/.rsvim`
+/// For all: `$HOME/.rsvim`.
 fn _home_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.home_dir.join(".rsvim")
 }
 
+/// Find the config file `rsvim.ts` or `rsvim.js` in rsvim config directory. This method will look
+/// for the config file in 3 locations:
+/// 1. The `$HOME/.rsvim.ts` or `$HOME/.rsvim.js`. This is similar to vim's `$HOME/.vimrc` config
+///    file.
+/// 2. The `$HOME/.rsvim/rsvim.ts` or `$HOME/.rsvim/rsvim.js`.
+/// 3. The `$XDG_CONFIG_HOME/rsvim/rsvim.ts` or `$XDG_CONFIG_HOME/rsvim/rsvim.js`.
+///
+/// NOTE: The `ts` file always has higher priority.
 fn get_config_file(cached_dirs: &CachedDirs) -> Option<PathBuf> {
   for config_dir in [_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)].iter() {
     let ts_config = config_dir.join("rsvim.ts");
@@ -69,14 +78,14 @@ fn get_config_dirs(cached_dirs: &CachedDirs) -> Vec<PathBuf> {
     .collect()
 }
 
-// `$env:USERPROFILE\AppData\Local\rsvim-cache`
-#[cfg(target_os = "windows")]
+/// For windows: `$env:USERPROFILE\AppData\Local\rsvim-cache`.
+/// For others: `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`.
+#[cfg(not(target_os = "macos"))]
 fn _xdg_cache_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.cache_dir.join("rsvim-cache").to_path_buf()
 }
 
-// `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`
-#[cfg(not(target_os = "windows"))]
+#[cfg(target_os = "macos")]
 fn _xdg_cache_dir(cached_dirs: &CachedDirs) -> PathBuf {
   match std::env::var("XDG_CACHE_HOME") {
     Ok(cache_path) => std::path::Path::new(&cache_path)
@@ -86,14 +95,14 @@ fn _xdg_cache_dir(cached_dirs: &CachedDirs) -> PathBuf {
   }
 }
 
-// `$env:USERPROFILE\AppData\Roaming\rsvim-data`
-#[cfg(target_os = "windows")]
+// For windows: `$env:USERPROFILE\AppData\Roaming\rsvim-data`.
+// For others: `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`.
+#[cfg(not(target_os = "macos"))]
 fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.data_dir.join("rsvim-data").to_path_buf()
 }
 
-// `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`
-#[cfg(not(target_os = "windows"))]
+#[cfg(target_os = "macos")]
 fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
   match std::env::var("XDG_DATA_HOME") {
     Ok(data_path) => std::path::Path::new(&data_path).join("rsvim").to_path_buf(),
