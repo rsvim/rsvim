@@ -67,4 +67,4 @@ If you like RSVIM, please consider sponsoring it. Your support encourages contri
 
 ## License
 
-Licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE-VIM.txt).
+Licensed under [Vim License](https://github.com/rsvim/rsvim/blob/main/LICENSE.txt).

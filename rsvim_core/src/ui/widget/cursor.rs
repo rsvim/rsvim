@@ -6,7 +6,7 @@ use tracing::trace;
 use crate::coord::*;
 use crate::inode_generate_impl;
 use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
-use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
+use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 
 #[derive(Clone, Copy)]

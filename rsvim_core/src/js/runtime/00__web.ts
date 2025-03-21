@@ -58,7 +58,7 @@ export interface GlobalThis {
     // Check if callback is a valid function.
     if (typeof callback !== "function") {
       throw new Error(
-        `"setTimeout" callback must be function type, but found ${callback} (${typeof callback})`,
+        `"setTimeout" callback parameter must be a function, but found ${callback} (${typeof callback})`,
       );
     }
 
@@ -81,7 +81,7 @@ export interface GlobalThis {
     // Check parameter's type.
     if (!Number.isInteger(id)) {
       throw new Error(
-        `"clearTimeout" id must be integer type, but found ${id} (${typeof id})`,
+        `"clearTimeout" id parameter must be an integer value, but found ${id} (${typeof id})`,
       );
     }
 

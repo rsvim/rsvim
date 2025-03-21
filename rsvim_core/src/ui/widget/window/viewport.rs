@@ -635,7 +635,7 @@ mod tests {
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::tree::internal::Inodeable;
+  use crate::ui::tree::*;
   use crate::ui::widget::window::{Window, WindowLocalOptions};
 
   use compact_str::ToCompactString;

@@ -17,7 +17,7 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
-  ts_lint:
+  js_lint:
     name: JavaScript Lint
     runs-on: ubuntu-latest
     steps:
@@ -25,6 +25,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: latest
+      - name: Prettier
+        run: |
+          npm install -g prettier
+          prettier --version
+          echo "show PWD=${PWD}"
+          echo "prettier --check *.md **/*.ts"
+          prettier --check *.md **/*.ts
       - name: Tsc
         run: |
           npm install -g typescript
@@ -32,8 +39,6 @@ jobs:
           echo "show PWD=${PWD}"
           echo "tsc"
           tsc
-          echo "git status"
-          git status
   rs_lint:
     name: Rust Lint
     runs-on: ubuntu-latest

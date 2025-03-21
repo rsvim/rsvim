@@ -3,9 +3,9 @@
 use crate::buf::{Buffer, BufferWk};
 use crate::coord::*;
 use crate::ui::canvas::{Canvas, Cell};
-use crate::ui::tree::internal::{InodeBase, InodeId, Inodeable};
+use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::viewport::ViewportWk;
+use crate::ui::widget::window::ViewportWk;
 use crate::{inode_generate_impl, rlock, wlock};
 
 use geo::point;

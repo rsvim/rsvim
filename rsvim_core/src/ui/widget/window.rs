@@ -3,7 +3,7 @@
 use crate::buf::BufferWk;
 use crate::coord::*;
 use crate::ui::canvas::Canvas;
-use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
+use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;

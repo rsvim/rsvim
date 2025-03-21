@@ -92,7 +92,7 @@ export class RsvimOpt {
   set wrap(value: boolean) {
     if (typeof value !== "boolean") {
       throw new Error(
-        `"Rsvim.opt.wrap" value must be boolean type, but found ${value} (${typeof value})`,
+        `"Rsvim.opt.wrap" must be a boolean value, but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning
@@ -141,7 +141,7 @@ export class RsvimOpt {
   set lineBreak(value: boolean) {
     if (typeof value !== "boolean") {
       throw new Error(
-        `"Rsvim.opt.lineBreak" value must be boolean type, but found ${value} (${typeof value})`,
+        `"Rsvim.opt.lineBreak" must be a boolean value, but found ${value} (${typeof value})`,
       );
     }
     // @ts-ignore Ignore warning

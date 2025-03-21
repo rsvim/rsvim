@@ -5,8 +5,7 @@ use crate::coord::*;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::ui::tree::TreeNode;
-use crate::ui::tree::internal::Inodeable;
+use crate::ui::tree::*;
 use crate::ui::widget::window::Viewport;
 use crate::wlock;
 
