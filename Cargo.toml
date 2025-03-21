@@ -40,7 +40,7 @@ ropey = { version = "1.6.1" }
 geo = { version = "0.28.0" }
 num-traits = "0.2.19"
 parking_lot = "0.12.3"
-directories = "5.0.1"
+dirs = "6.0.0"
 anyhow = "1.0.97"
 thiserror = "2"
 regex = "1.11.1"

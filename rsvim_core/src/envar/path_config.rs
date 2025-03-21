@@ -1,6 +1,5 @@
 //! File path configs.
 
-use directories::BaseDirs;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
@@ -12,30 +11,38 @@ pub struct PathConfig {
   data_dir: PathBuf,
 }
 
-// `$env:LocalAppData\rsvim`
+#[derive(Debug, Clone)]
+struct CachedDirs {
+  config_dir: PathBuf,
+  home_dir: PathBuf,
+  cache_dir: PathBuf,
+  data_dir: PathBuf,
+}
+
+// `$env:USERPROFILE\AppData\Roaming\rsvim`
 #[cfg(target_os = "windows")]
-fn _xdg_config_dir(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs.config_local_dir().join("rsvim").to_path_buf()
+fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
+  cached_dirs.config_dir.join("rsvim").to_path_buf()
 }
 
 // `$XDG_CONFIG_HOME/rsvim` or `$HOME/.config/rsvim`
 #[cfg(not(target_os = "windows"))]
-fn _xdg_config_dir(base_dirs: &BaseDirs) -> PathBuf {
+fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
   match std::env::var("XDG_CONFIG_HOME") {
     Ok(config_path) => std::path::Path::new(&config_path)
       .join("rsvim")
       .to_path_buf(),
-    Err(_) => base_dirs.home_dir().join(".config").join("rsvim"),
+    Err(_) => cached_dirs.home_dir.join(".config").join("rsvim"),
   }
 }
 
 // `$HOME/.rsvim`
-fn _home_config_dir(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs.home_dir().join(".rsvim")
+fn _home_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
+  cached_dirs.home_dir.join(".rsvim")
 }
 
-fn get_config_file(base_dirs: &BaseDirs) -> Option<PathBuf> {
-  for config_dir in [_xdg_config_dir(base_dirs), _home_config_dir(base_dirs)].iter() {
+fn get_config_file(cached_dirs: &CachedDirs) -> Option<PathBuf> {
+  for config_dir in [_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)].iter() {
     let ts_config = config_dir.join("rsvim.ts");
     if ts_config.as_path().exists() {
       return Some(ts_config);
@@ -48,78 +55,70 @@ fn get_config_file(base_dirs: &BaseDirs) -> Option<PathBuf> {
 
   // `$HOME/.rsvim.js` or `$HOME/.rsvim.ts`
   vec![
-    base_dirs.home_dir().join(".rsvim.ts").to_path_buf(),
-    base_dirs.home_dir().join(".rsvim.js").to_path_buf(),
+    cached_dirs.home_dir.join(".rsvim.ts").to_path_buf(),
+    cached_dirs.home_dir.join(".rsvim.js").to_path_buf(),
   ]
   .into_iter()
   .find(|p| p.exists())
 }
 
-fn get_config_dirs(base_dirs: &BaseDirs) -> Vec<PathBuf> {
-  vec![_xdg_config_dir(base_dirs), _home_config_dir(base_dirs)]
+fn get_config_dirs(cached_dirs: &CachedDirs) -> Vec<PathBuf> {
+  vec![_xdg_config_dir(cached_dirs), _home_config_dir(cached_dirs)]
     .into_iter()
     .filter(|p| p.exists())
     .collect()
 }
 
-// `$env:LocalAppData\rsvim-cache`
+// `$env:USERPROFILE\AppData\Local\rsvim-cache`
 #[cfg(target_os = "windows")]
-fn _xdg_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs.cache_dir().join("rsvim-cache").to_path_buf()
+fn _xdg_cache_dir(cached_dirs: &CachedDirs) -> PathBuf {
+  cached_dirs.cache_dir.join("rsvim-cache").to_path_buf()
 }
 
 // `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`
 #[cfg(not(target_os = "windows"))]
-fn _xdg_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
+fn _xdg_cache_dir(cached_dirs: &CachedDirs) -> PathBuf {
   match std::env::var("XDG_CACHE_HOME") {
     Ok(cache_path) => std::path::Path::new(&cache_path)
       .join("rsvim")
       .to_path_buf(),
-    Err(_) => base_dirs.home_dir().join(".cache").join("rsvim"),
+    Err(_) => cached_dirs.home_dir.join(".cache").join("rsvim"),
   }
 }
 
-// For windows: `$env:`
-fn get_cache_dir(base_dirs: &BaseDirs) -> PathBuf {
-  _xdg_cache_dir(base_dirs)
-}
-
-// `$env:LocalAppData\rsvim-data`
+// `$env:USERPROFILE\AppData\Roaming\rsvim-data`
 #[cfg(target_os = "windows")]
-fn _xdg_data_dir(base_dirs: &BaseDirs) -> PathBuf {
-  base_dirs.data_local_dir().join("rsvim-data").to_path_buf()
+fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
+  cached_dirs.data_dir.join("rsvim-data").to_path_buf()
 }
 
 // `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`
 #[cfg(not(target_os = "windows"))]
-fn _xdg_data_dir(base_dirs: &BaseDirs) -> PathBuf {
+fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
   match std::env::var("XDG_DATA_HOME") {
     Ok(data_path) => std::path::Path::new(&data_path).join("rsvim").to_path_buf(),
-    Err(_) => base_dirs
-      .home_dir()
+    Err(_) => cached_dirs
+      .home_dir
       .join(".local")
       .join("share")
       .join("rsvim"),
   }
 }
 
-fn get_data_dir(base_dirs: &BaseDirs) -> PathBuf {
-  _xdg_data_dir(base_dirs)
-}
-
 impl PathConfig {
   /// Make new path config.
   pub fn new() -> Self {
-    let base_dirs = BaseDirs::new().unwrap();
-    let config_file = get_config_file(&base_dirs);
-    let config_dirs = get_config_dirs(&base_dirs);
-    let cache_dir = get_cache_dir(&base_dirs);
-    let data_dir = get_data_dir(&base_dirs);
+    let cached_dirs = CachedDirs {
+      config_dir: dirs::config_dir().unwrap(),
+      home_dir: dirs::home_dir().unwrap(),
+      cache_dir: dirs::cache_dir().unwrap(),
+      data_dir: dirs::data_dir().unwrap(),
+    };
     PathConfig {
-      config_file,
-      config_dirs,
-      cache_dir,
-      data_dir,
+      config_file: get_config_file(&cached_dirs),
+      config_dirs: get_config_dirs(&cached_dirs),
+      cache_dir: _xdg_cache_dir(&cached_dirs),
+      data_dir: _xdg_data_dir(&cached_dirs),
     }
   }
 
