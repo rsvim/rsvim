@@ -3,21 +3,21 @@
 use crate::defaults;
 
 #[derive(Debug, Clone)]
-/// Window options.
-pub struct WindowLocalOptions {
+/// Window local options.
+pub struct LocalOptions {
   wrap: bool,
   line_break: bool,
 }
 
-impl Default for WindowLocalOptions {
+impl Default for LocalOptions {
   fn default() -> Self {
     Self::builder().build()
   }
 }
 
-impl WindowLocalOptions {
-  pub fn builder() -> WindowOptionsBuilder {
-    WindowOptionsBuilder::default()
+impl LocalOptions {
+  pub fn builder() -> LocalOptionsBuilder {
+    LocalOptionsBuilder::default()
   }
 
   /// The 'wrap' option, also known as 'line-wrap', default to `true`.
@@ -41,13 +41,13 @@ impl WindowLocalOptions {
   }
 }
 
-/// The builder for [`WindowLocalOptions`].
-pub struct WindowOptionsBuilder {
+/// The builder for [`LocalOptions`].
+pub struct LocalOptionsBuilder {
   wrap: bool,
   line_break: bool,
 }
 
-impl WindowOptionsBuilder {
+impl LocalOptionsBuilder {
   pub fn wrap(&mut self, value: bool) -> &mut Self {
     self.wrap = value;
     self
@@ -56,20 +56,46 @@ impl WindowOptionsBuilder {
     self.line_break = value;
     self
   }
-  pub fn build(&self) -> WindowLocalOptions {
-    WindowLocalOptions {
+  pub fn build(&self) -> LocalOptions {
+    LocalOptions {
       wrap: self.wrap,
       line_break: self.line_break,
     }
   }
 }
 
-impl Default for WindowOptionsBuilder {
+impl Default for LocalOptionsBuilder {
   fn default() -> Self {
-    WindowOptionsBuilder {
+    LocalOptionsBuilder {
       wrap: defaults::win::WRAP,
       line_break: defaults::win::LINE_BREAK,
     }
+  }
+}
+
+#[derive(Debug, Clone)]
+/// Window global options.
+pub struct GlobalOptions {}
+
+impl Default for GlobalOptions {
+  fn default() -> Self {
+    Self::builder().build()
+  }
+}
+
+impl GlobalOptions {
+  pub fn builder() -> GlobalOptionsBuilder {
+    GlobalOptionsBuilder::default()
+  }
+}
+
+#[derive(Debug, Clone, Default)]
+/// Window global options builder.
+pub struct GlobalOptionsBuilder {}
+
+impl GlobalOptionsBuilder {
+  pub fn build(&self) -> GlobalOptions {
+    GlobalOptions {}
   }
 }
 
@@ -80,8 +106,8 @@ pub struct ViewportOptions {
   pub line_break: bool,
 }
 
-impl From<&WindowLocalOptions> for ViewportOptions {
-  fn from(value: &WindowLocalOptions) -> Self {
+impl From<&LocalOptions> for ViewportOptions {
+  fn from(value: &LocalOptions) -> Self {
     Self {
       wrap: value.wrap(),
       line_break: value.line_break(),
@@ -95,12 +121,12 @@ mod tests {
 
   #[test]
   pub fn options1() {
-    let mut builder = WindowOptionsBuilder::default();
+    let mut builder = LocalOptionsBuilder::default();
     let opt1 = builder.wrap(true).line_break(true).build();
     assert!(opt1.wrap());
     assert!(opt1.line_break());
 
-    let opt2 = WindowLocalOptions::builder().build();
+    let opt2 = LocalOptions::builder().build();
     assert!(opt2.wrap());
     assert!(!opt2.line_break());
   }

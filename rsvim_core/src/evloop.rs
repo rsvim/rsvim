@@ -295,7 +295,11 @@ impl EventLoop {
       let buffers = rlock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
       trace!("Bind first buffer to default window {:?}", buf_id);
-      Window::new(window_shape, Arc::downgrade(buf), tree.local_options())
+      Window::new(
+        window_shape,
+        Arc::downgrade(buf),
+        tree.global_local_options(),
+      )
     };
     let window_id = window.id();
     let window_node = TreeNode::Window(window);

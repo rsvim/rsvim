@@ -6,7 +6,7 @@ use crate::buf::BuffersManagerArc;
 use crate::coord::*;
 use crate::ui::tree::internal::inode::Inodeable;
 use crate::ui::tree::{Tree, TreeArc, TreeNode};
-use crate::ui::widget::window::WindowLocalOptions;
+use crate::ui::widget::window::LocalOptions;
 use crate::ui::widget::{Cursor, Window};
 use crate::{rlock, wlock};
 
@@ -15,7 +15,7 @@ use tracing::{self};
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
-  window_local_opts: WindowLocalOptions,
+  window_local_opts: LocalOptions,
   canvas_size: U16Size,
   buffers_manager: BuffersManagerArc,
 ) -> TreeArc {
@@ -32,7 +32,11 @@ pub fn make_tree_with_buffers(
   );
   let window = {
     let (_, buf) = buffers.first_key_value().unwrap();
-    Window::new(window_shape, Arc::downgrade(buf), tree_mut.local_options())
+    Window::new(
+      window_shape,
+      Arc::downgrade(buf),
+      tree_mut.global_local_options(),
+    )
   };
   let window_id = window.id();
   let window_node = TreeNode::Window(window);

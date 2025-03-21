@@ -6,11 +6,8 @@ use crate::coord::*;
 use crate::envar;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::tree::internal::{InodeId, Inodeable, Itree};
-use crate::ui::widget::window::WindowLocalOptions;
+use crate::ui::widget::window::{GlobalOptions, LocalOptions};
 use crate::ui::widget::{Cursor, RootContainer, Widgetable, Window};
-
-// Re-export
-pub use crate::ui::tree::opt::{WindowGlobalOptions, WindowGlobalOptionsBuilder};
 
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::collections::BTreeSet;
@@ -18,7 +15,6 @@ use std::sync::{Arc, Weak};
 // use tracing::trace;
 
 pub mod internal;
-pub mod opt;
 
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
@@ -231,10 +227,10 @@ pub struct Tree {
   // Cursor and window state }
 
   // Global options for windows.
-  global_options: WindowGlobalOptions,
+  global_options: GlobalOptions,
 
-  // Local options for windows.
-  local_options: WindowLocalOptions,
+  // Global-local options for windows.
+  global_local_options: LocalOptions,
 }
 
 pub type TreeArc = Arc<RwLock<Tree>>;
@@ -265,8 +261,8 @@ impl Tree {
       base: Itree::new(root_node),
       cursor_id: None,
       window_ids: BTreeSet::new(),
-      global_options: WindowGlobalOptions::default(),
-      local_options: WindowLocalOptions::default(),
+      global_options: GlobalOptions::default(),
+      global_local_options: LocalOptions::default(),
     }
   }
 
@@ -441,36 +437,20 @@ impl Tree {
 
 // Global options {
 impl Tree {
-  pub fn global_options(&self) -> &WindowGlobalOptions {
+  pub fn global_options(&self) -> &GlobalOptions {
     &self.global_options
   }
 
-  pub fn set_global_options(&mut self, options: &WindowGlobalOptions) {
+  pub fn set_global_options(&mut self, options: &GlobalOptions) {
     self.global_options = options.clone();
   }
 
-  pub fn local_options(&self) -> &WindowLocalOptions {
-    &self.local_options
+  pub fn global_local_options(&self) -> &LocalOptions {
+    &self.global_local_options
   }
 
-  pub fn set_local_options(&mut self, options: &WindowLocalOptions) {
-    self.local_options = options.clone();
-  }
-
-  pub fn wrap(&self) -> bool {
-    self.local_options.wrap()
-  }
-
-  pub fn set_wrap(&mut self, value: bool) {
-    self.local_options.set_wrap(value);
-  }
-
-  pub fn line_break(&self) -> bool {
-    self.local_options.line_break()
-  }
-
-  pub fn set_line_break(&mut self, value: bool) {
-    self.local_options.set_line_break(value);
+  pub fn set_global_local_options(&mut self, options: &LocalOptions) {
+    self.global_local_options = options.clone();
   }
 }
 // Global options }

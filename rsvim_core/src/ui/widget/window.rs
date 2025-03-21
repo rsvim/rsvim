@@ -11,7 +11,7 @@ use crate::wlock;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{
-  ViewportOptions, WindowLocalOptions, WindowOptionsBuilder,
+  GlobalOptions, GlobalOptionsBuilder, LocalOptions, LocalOptionsBuilder, ViewportOptions,
 };
 pub use crate::ui::widget::window::viewport::{
   CursorViewport, LineViewport, RowViewport, Viewport, ViewportArc, ViewportReadGuard, ViewportWk,
@@ -42,14 +42,14 @@ pub struct Window {
 
   // Local window options.
   // By default these options will inherit from global options of UI.
-  options: WindowLocalOptions,
+  options: LocalOptions,
 
   // Viewport.
   viewport: ViewportArc,
 }
 
 impl Window {
-  pub fn new(shape: IRect, buffer: BufferWk, local_options: &WindowLocalOptions) -> Self {
+  pub fn new(shape: IRect, buffer: BufferWk, local_options: &LocalOptions) -> Self {
     let options = local_options.clone();
 
     let window_root = WindowRootContainer::new(shape);
@@ -172,12 +172,12 @@ impl Widgetable for Window {
 // Options {
 impl Window {
   /// Get window local options.
-  pub fn options(&self) -> &WindowLocalOptions {
+  pub fn options(&self) -> &LocalOptions {
     &self.options
   }
 
   /// Set window local options.
-  pub fn set_options(&mut self, options: &WindowLocalOptions) {
+  pub fn set_options(&mut self, options: &LocalOptions) {
     self.options = options.clone();
     let viewport_options = ViewportOptions::from(&self.options);
     wlock!(self.viewport).set_options(&viewport_options);
@@ -332,12 +332,16 @@ mod tests {
   fn make_window_from_size(
     size: U16Size,
     buffer: BufferArc,
-    window_options: &WindowLocalOptions,
+    window_options: &LocalOptions,
   ) -> Window {
     let mut tree = Tree::new(size);
-    tree.set_local_options(window_options);
+    tree.set_global_local_options(window_options);
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
-    Window::new(window_shape, Arc::downgrade(&buffer), tree.local_options())
+    Window::new(
+      window_shape,
+      Arc::downgrade(&buffer),
+      tree.global_local_options(),
+    )
   }
 
   fn do_test_draw(actual: &Canvas, expect: &[&str]) {
@@ -396,7 +400,7 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let window_local_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_local_options = LocalOptions::builder().wrap(false).build();
     let window = make_window_from_size(terminal_size, buf.clone(), &window_local_options);
     let mut actual = Canvas::new(terminal_size);
     window.draw(&mut actual);
