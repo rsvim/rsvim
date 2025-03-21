@@ -348,14 +348,6 @@ impl Buffer {
 }
 // Display Width }
 
-impl PartialEq for Buffer {
-  fn eq(&self, other: &Self) -> bool {
-    self.id == other.id
-  }
-}
-
-impl Eq for Buffer {}
-
 #[derive(Debug, Clone)]
 /// The manager for all normal (file) buffers.
 ///
