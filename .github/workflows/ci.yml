@@ -24,16 +24,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: latest
       - name: Tsc
         run: |
           npm install -g typescript
           tsc --version
           echo "show PWD=${PWD}"
-          echo "ls -la"
-          ls -la
           echo "tsc"
           tsc
+          echo "git status"
+          git status
   rs_lint:
     name: Rust Lint
     runs-on: ubuntu-latest

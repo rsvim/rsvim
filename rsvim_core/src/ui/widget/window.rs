@@ -11,7 +11,8 @@ use crate::wlock;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{
-  ViewportOptions, WindowLocalOptions, WindowOptionsBuilder,
+  ViewportOptions, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
+  WindowOptionsBuilder,
 };
 pub use crate::ui::widget::window::viewport::{
   CursorViewport, LineViewport, RowViewport, Viewport, ViewportArc, ViewportReadGuard, ViewportWk,
@@ -335,9 +336,13 @@ mod tests {
     window_options: &WindowLocalOptions,
   ) -> Window {
     let mut tree = Tree::new(size);
-    tree.set_local_options(window_options);
+    tree.set_global_local_options(window_options);
     let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
-    Window::new(window_shape, Arc::downgrade(&buffer), tree.local_options())
+    Window::new(
+      window_shape,
+      Arc::downgrade(&buffer),
+      tree.global_local_options(),
+    )
   }
 
   fn do_test_draw(actual: &Canvas, expect: &[&str]) {

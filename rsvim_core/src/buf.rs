@@ -6,7 +6,7 @@ use crate::rlock;
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
-pub use crate::buf::opt::{BufferLocalOptions, FileEncoding};
+pub use crate::buf::opt::{BufferLocalOptions, FileEncodingOption};
 
 use ahash::AHashMap as HashMap;
 use ahash::AHashSet as HashSet;
@@ -142,14 +142,6 @@ impl Buffer {
   pub fn set_last_sync_time(&mut self, last_sync_time: Option<Instant>) {
     self.last_sync_time = last_sync_time;
   }
-
-  // pub fn status(&self) -> BufferStatus {
-  //   BufferStatus::INIT
-  // }
-
-  // pub fn worker_send_to_master(&self) -> &Sender<WorkerToMasterMessage> {
-  //   &self.worker_send_to_master
-  // }
 }
 
 // Unicode {
@@ -166,16 +158,6 @@ impl Buffer {
   pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
     unicode::char_symbol(&self.options, c)
   }
-
-  /// Get the display width for a unicode `str`.
-  pub fn str_width(&self, s: &str) -> usize {
-    unicode::str_width(&self.options, s)
-  }
-
-  /// Get the printable cell symbols and the display width for a unicode `str`.
-  pub fn str_symbols(&self, s: &str) -> (CompactString, usize) {
-    unicode::str_symbols(&self.options, s)
-  }
 }
 // Unicode }
 
@@ -191,33 +173,33 @@ impl Buffer {
     &mut self.rope
   }
 
-  /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
-  /// (`start_char_idx`) and max chars length (`max_chars`).
-  /// NOTE: This is for performance reason that this API limits the max chars instead of the whole
-  /// line, this is useful for super long lines.
-  pub fn clone_line(
-    &self,
-    line_idx: usize,
-    start_char_idx: usize,
-    max_chars: usize,
-  ) -> Option<String> {
-    match self.rope.get_line(line_idx) {
-      Some(line) => match line.get_chars_at(start_char_idx) {
-        Some(chars_iter) => {
-          let mut builder = String::with_capacity(max_chars);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars {
-              return Some(builder);
-            }
-            builder.push(c);
-          }
-          Some(builder)
-        }
-        None => None,
-      },
-      None => None,
-    }
-  }
+  // /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
+  // /// (`start_char_idx`) and max chars length (`max_chars`).
+  // /// NOTE: This is for performance reason that this API limits the max chars instead of the whole
+  // /// line, this is useful for super long lines.
+  // pub fn clone_line(
+  //   &self,
+  //   line_idx: usize,
+  //   start_char_idx: usize,
+  //   max_chars: usize,
+  // ) -> Option<String> {
+  //   match self.rope.get_line(line_idx) {
+  //     Some(line) => match line.get_chars_at(start_char_idx) {
+  //       Some(chars_iter) => {
+  //         let mut builder = String::with_capacity(max_chars);
+  //         for (i, c) in chars_iter.enumerate() {
+  //           if i >= max_chars {
+  //             return Some(builder);
+  //           }
+  //           builder.push(c);
+  //         }
+  //         Some(builder)
+  //       }
+  //       None => None,
+  //     },
+  //     None => None,
+  //   }
+  // }
 }
 // Rope }
 
@@ -229,14 +211,6 @@ impl Buffer {
 
   pub fn set_options(&mut self, options: &BufferLocalOptions) {
     self.options = options.clone();
-  }
-
-  pub fn tab_stop(&self) -> u16 {
-    self.options.tab_stop()
-  }
-
-  pub fn set_tab_stop(&mut self, value: u16) {
-    self.options.set_tab_stop(value);
   }
 }
 // Options }
@@ -375,14 +349,6 @@ impl Buffer {
 }
 // Display Width }
 
-impl PartialEq for Buffer {
-  fn eq(&self, other: &Self) -> bool {
-    self.id == other.id
-  }
-}
-
-impl Eq for Buffer {}
-
 #[derive(Debug, Clone)]
 /// The manager for all normal (file) buffers.
 ///
@@ -394,8 +360,8 @@ pub struct BuffersManager {
   // Buffers maps by absolute file path.
   buffers_by_path: HashMap<Option<PathBuf>, BufferArc>,
 
-  // Local options for buffers.
-  local_options: BufferLocalOptions,
+  // Global-local options for buffers.
+  global_local_options: BufferLocalOptions,
 }
 
 impl BuffersManager {
@@ -403,7 +369,7 @@ impl BuffersManager {
     BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: HashMap::new(),
-      local_options: BufferLocalOptions::default(),
+      global_local_options: BufferLocalOptions::default(),
     }
   }
 
@@ -459,7 +425,7 @@ impl BuffersManager {
     } else {
       Buffer::_new(
         Rope::new(),
-        self.local_options().clone(),
+        self.global_local_options().clone(),
         Some(filename.to_path_buf()),
         Some(abs_filename.clone()),
         None,
@@ -492,7 +458,7 @@ impl BuffersManager {
 
     let buf = Buffer::_new(
       Rope::new(),
-      self.local_options().clone(),
+      self.global_local_options().clone(),
       None,
       None,
       None,
@@ -532,9 +498,9 @@ impl BuffersManager {
   }
 
   fn to_str(&self, buf: &[u8], bufsize: usize) -> String {
-    let fencoding = self.local_options().file_encoding();
+    let fencoding = self.global_local_options().file_encoding();
     match fencoding {
-      FileEncoding::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
+      FileEncodingOption::Utf8 => String::from_utf8_lossy(&buf[0..bufsize]).into_owned(),
     }
   }
 
@@ -568,7 +534,7 @@ impl BuffersManager {
 
         Ok(Buffer::_new(
           self.to_rope(&buf, buf.len()),
-          self.local_options().clone(),
+          self.global_local_options().clone(),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
@@ -637,12 +603,16 @@ impl Default for BuffersManager {
 
 // Options {
 impl BuffersManager {
-  pub fn local_options(&self) -> &BufferLocalOptions {
-    &self.local_options
+  pub fn global_local_options(&self) -> &BufferLocalOptions {
+    &self.global_local_options
   }
 
-  pub fn set_local_options(&mut self, options: &BufferLocalOptions) {
-    self.local_options = options.clone();
+  pub fn global_local_options_mut(&mut self) -> &mut BufferLocalOptions {
+    &mut self.global_local_options
+  }
+
+  pub fn set_global_local_options(&mut self, options: &BufferLocalOptions) {
+    self.global_local_options = options.clone();
   }
 }
 // Options }
@@ -656,60 +626,9 @@ pub type BuffersManagerIter<'a> = std::collections::btree_map::Iter<'a, BufferId
 #[cfg(test)]
 mod tests {
   use super::*;
-  // use std::fs::File;
-  // use tempfile::tempfile;
-  // use tokio::sync::mpsc::Receiver;
-
-  // fn make_channel() -> (
-  //   Sender<WorkerToMasterMessage>,
-  //   Receiver<WorkerToMasterMessage>,
-  // ) {
-  //   tokio::sync::mpsc::channel(1)
-  // }
-
-  // #[test]
-  // fn buffer_from1() {
-  //   let (sender, _) = make_channel();
-  //
-  //   let r1 = Rope::from_str("Hello");
-  //   let buf1 = Buffer::_from_rope(sender.clone(), r1);
-  //   let tmp1 = tempfile().unwrap();
-  //   buf1.write_to(tmp1).unwrap();
-  //
-  //   let r2 = Rope::from_reader(File::open("Cargo.toml").unwrap()).unwrap();
-  //   let buf2 = Buffer::_from_rope(sender, r2);
-  //   let tmp2 = tempfile().unwrap();
-  //   buf2.write_to(tmp2).unwrap();
-  // }
-  //
-  // #[test]
-  // fn buffer_from2() {
-  //   let (sender, _) = make_channel();
-  //
-  //   let mut builder1 = RopeBuilder::new();
-  //   builder1.append("Hello");
-  //   builder1.append("World");
-  //   let buf1 = Buffer::_from_rope_builder(sender, builder1);
-  //   let tmp1 = tempfile().unwrap();
-  //   buf1.write_to(tmp1).unwrap();
-  // }
 
   #[test]
   fn next_buffer_id1() {
     assert!(next_buffer_id() > 0);
   }
-
-  // #[test]
-  // fn buffer_unicode_width1() {
-  //   let (sender, _) = make_channel();
-  //
-  //   let b1 = Buffer::_from_rope_builder(sender, RopeBuilder::new());
-  //   assert_eq!(b1.char_width('A'), 1);
-  //   assert_eq!(b1.char_symbol('A'), (CompactString::new("A"), 1));
-  //   assert_eq!(b1.str_width("ABCDEFG"), 7);
-  //   assert_eq!(
-  //     b1.str_symbols("ABCDEFG"),
-  //     (CompactString::new("ABCDEFG"), 7)
-  //   );
-  // }
 }

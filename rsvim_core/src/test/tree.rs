@@ -24,7 +24,7 @@ pub fn make_tree_with_buffers(
   let buffers = rlock!(buffers_manager);
 
   let mut tree_mut = wlock!(tree);
-  tree_mut.set_local_options(&window_local_opts);
+  tree_mut.set_global_local_options(&window_local_opts);
   let tree_root_id = tree_mut.root_id();
   let window_shape = IRect::new(
     (0, 0),
@@ -32,7 +32,11 @@ pub fn make_tree_with_buffers(
   );
   let window = {
     let (_, buf) = buffers.first_key_value().unwrap();
-    Window::new(window_shape, Arc::downgrade(buf), tree_mut.local_options())
+    Window::new(
+      window_shape,
+      Arc::downgrade(buf),
+      tree_mut.global_local_options(),
+    )
   };
   let window_id = window.id();
   let window_node = TreeNode::Window(window);
