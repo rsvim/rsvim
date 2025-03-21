@@ -32,14 +32,14 @@ jobs:
         with:
           components: miri,rust-src
       - uses: Swatinem/rust-cache@v2
-      - uses: mozilla-actions/sccache-action@v0.0.6
+      - uses: mozilla-actions/sccache-action@v0.0.8
       - uses: actions/checkout@v4
       # Do some hacks here
       - run: |
           sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' Cargo.toml
           sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' ./rsvim_core/Cargo.toml
           git diff --color=always
-          cargo miri test
+          cargo +nightly miri test
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"

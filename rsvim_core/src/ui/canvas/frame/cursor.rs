@@ -203,9 +203,9 @@ mod tests {
       ),
     ];
     let expects = [
-        "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: true, hidden: false, style: DefaultUserShape }",
-        "Cursor { pos: Point(Coord { x: 0, y: 10 }), blinking: false, hidden: true, style: SteadyUnderScore }",
-        "Cursor { pos: Point(Coord { x: 7, y: 3 }), blinking: true, hidden: false, style: BlinkingBar }"
+      "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: true, hidden: false, style: DefaultUserShape }",
+      "Cursor { pos: Point(Coord { x: 0, y: 10 }), blinking: false, hidden: true, style: SteadyUnderScore }",
+      "Cursor { pos: Point(Coord { x: 7, y: 3 }), blinking: true, hidden: false, style: BlinkingBar }",
     ];
     for (i, c) in cursors.iter().enumerate() {
       let actual = format!("{:?}", c);

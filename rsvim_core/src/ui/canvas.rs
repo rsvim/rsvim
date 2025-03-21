@@ -3,11 +3,11 @@
 use crate::coord::*;
 
 // Re-export
+pub use crate::ui::canvas::frame::Frame;
 pub use crate::ui::canvas::frame::cell::Cell;
 pub use crate::ui::canvas::frame::cursor::{
-  cursor_style_eq, Cursor, CursorStyle, CursorStyleFormatter,
+  Cursor, CursorStyle, CursorStyleFormatter, cursor_style_eq,
 };
-pub use crate::ui::canvas::frame::Frame;
 
 use compact_str::ToCompactString;
 use crossterm;

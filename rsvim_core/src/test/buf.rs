@@ -110,12 +110,15 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
           builder.push_str(&" ".repeat(diff));
         }
       }
-      info!("-{}- Char Index, total:{} (width = 0 chars: count:{} indexes:{}, width > 1 chars: count:{} indexes:{})", builder, n,
-      zero_width_chars.len(),
-      zero_width_chars.join(","),
-      big_width_chars.len(),
-      big_width_chars.join(",")
-    );
+      info!(
+        "-{}- Char Index, total:{} (width = 0 chars: count:{} indexes:{}, width > 1 chars: count:{} indexes:{})",
+        builder,
+        n,
+        zero_width_chars.len(),
+        zero_width_chars.join(","),
+        big_width_chars.len(),
+        big_width_chars.join(",")
+      );
     }
 
     {

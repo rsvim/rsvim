@@ -1,7 +1,7 @@
 //! Js exceptions.
 
-use crate::js::binding::set_function_to;
 use crate::js::JsRuntime;
+use crate::js::binding::set_function_to;
 
 pub type PromiseRejectionEntry = (v8::Global<v8::Promise>, v8::Global<v8::Value>);
 
