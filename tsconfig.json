@@ -8,7 +8,7 @@
     "keyofStringsOnly": false,
     "lib": ["esnext"],
     "module": "esnext",
-    "moduleResolution": "classic",
+    "moduleResolution": "bundler",
     "noErrorTruncation": false,
     "noFallthroughCasesInSwitch": false,
     "noImplicitAny": true,
