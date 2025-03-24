@@ -126,7 +126,7 @@ jobs:
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --all-features --workspace --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v4
-        # if: ${{ ! (startsWith(matrix.os, 'ubuntu') && endsWith(matrix.os, 'arm' )) }}
+        if: ${{ ! (startsWith(matrix.os, 'ubuntu') && endsWith(matrix.os, 'arm' )) }}
         with:
           fail_ci_if_error: true
           files: lcov.info
