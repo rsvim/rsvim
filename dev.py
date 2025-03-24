@@ -40,7 +40,7 @@ def test(name, recache):
     else:
         print(f"Run 'test' for '{name}'")
 
-    command = "RUST_LOG=trace"
+    command = "RSVIM_LOG=trace"
     if shutil.which("sccache") is not None:
         if recache:
             command = f"{command} SCCACHE_RECACHE=1"
@@ -134,7 +134,7 @@ if __name__ == "__main__":
         "--test",
         nargs="?",
         default=__TEST_NOT_SPECIFIED,
-        help="Run [TEST] with `RUST_LOG=trace`, by default run all test cases.",
+        help="Run [TEST] with `RSVIM_LOG=trace`, by default run all test cases.",
     )
     parser.add_argument(
         "-l", "--list-test", action="store_true", help="List all test cases."

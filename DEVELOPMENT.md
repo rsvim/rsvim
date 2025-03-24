@@ -33,7 +33,7 @@ To check code, please use `RUSTFLAGS='-Dwarnings' bacon -j clippy-all`.
 ### Test
 
 1. To run all test cases, please use `cargo nextest run`.
-2. To run all test cases with full backtrace and logging message, please use `RUST_BACKTRACE=full RUST_LOG=trace cargo nextest run --no-capture`.
+2. To run all test cases with full backtrace and logging message, please use `RUST_BACKTRACE=full RSVIM_LOG=trace cargo nextest run --no-capture`.
 3. To run a specific test, please use `cargo nextest run [TEST]`.
 4. To list all test cases, please use `cargo nextest list`.
 
@@ -41,7 +41,7 @@ To check code, please use `RUSTFLAGS='-Dwarnings' bacon -j clippy-all`.
 
 To debug code, please:
 
-1. Build binary with `RUST_BACKTRACE=full RUST_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
+1. Build binary with `RUST_BACKTRACE=full RSVIM_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
 
 ### Docs
 
