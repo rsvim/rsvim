@@ -16,7 +16,7 @@ pub fn init() {
       // .with_thread_names(true)
       .with_level(true)
       .with_ansi(true)
-      .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+      .with_env_filter(tracing_subscriber::EnvFilter::from_env("RSVIM_LOG"))
       .with_writer(std::io::stderr)
       .without_time()
       .finish();

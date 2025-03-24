@@ -80,11 +80,11 @@ jobs:
           echo "Info: cargo doc --workspace"
           cargo doc --workspace
       - name: Security Audit
-        uses: rustsec/audit-check@v1.4.1
+        uses: rustsec/audit-check@v2.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Security Advisory
-        uses: EmbarkStudios/cargo-deny-action@v1
+        uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check advisories
           arguments: --all-features --exclude v8
@@ -92,14 +92,7 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os:
-          [
-            ubuntu-latest,
-            ubuntu-24.04-arm,
-            macos-latest,
-            macos-13,
-            windows-latest,
-          ]
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@stable
@@ -116,14 +109,7 @@ jobs:
     name: Code Coverage
     strategy:
       matrix:
-        os:
-          [
-            ubuntu-latest,
-            ubuntu-24.04-arm,
-            macos-latest,
-            macos-13,
-            windows-latest,
-          ]
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@stable

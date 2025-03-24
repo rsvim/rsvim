@@ -23,7 +23,7 @@ defaults:
 jobs:
   prepare:
     name: Release Nightly
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: ${{ github.ref == 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
