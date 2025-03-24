@@ -41,7 +41,7 @@ jobs:
           tsc
   rs_lint:
     name: Rust Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
@@ -92,14 +92,7 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os:
-          [
-            ubuntu-latest,
-            ubuntu-24.04-arm,
-            macos-latest,
-            macos-13,
-            windows-latest,
-          ]
+        os: [ubuntu-22.04, ubuntu-24.04-arm, macos-14, macos-13, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@stable
@@ -116,14 +109,7 @@ jobs:
     name: Code Coverage
     strategy:
       matrix:
-        os:
-          [
-            ubuntu-latest,
-            ubuntu-24.04-arm,
-            macos-latest,
-            macos-13,
-            windows-latest,
-          ]
+        os: [ubuntu-22.04, ubuntu-24.04-arm, macos-14, macos-13, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@stable
