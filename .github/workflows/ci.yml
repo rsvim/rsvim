@@ -92,7 +92,7 @@ jobs:
     name: Unit Test
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04-arm, macos-14, macos-13, windows-latest]
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@stable
@@ -109,7 +109,7 @@ jobs:
     name: Code Coverage
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04-arm, macos-14, macos-13, windows-latest]
+        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: dtolnay/rust-toolchain@stable
@@ -126,7 +126,7 @@ jobs:
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --all-features --workspace --lcov --output-path lcov.info
       - uses: codecov/codecov-action@v4
-        if: ${{ ! (startsWith(matrix.os, 'ubuntu') && endsWith(matrix.os, 'arm' )) }}
+        # if: ${{ ! (startsWith(matrix.os, 'ubuntu') && endsWith(matrix.os, 'arm' )) }}
         with:
           fail_ci_if_error: true
           files: lcov.info
