@@ -619,18 +619,40 @@ where
   /// 2. `None` if the node `id` doesn't exist.
   pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     match self.parent_ids.get(&id) {
-      Some(parent_id) => match self.nodes.get(parent_id) {
-        Some(node) => {
-          let current_shape = *node.shape();
-          let current_top_left_pos: IPos = current_shape.min().into();
-          self.bounded_move_to(
-            id,
-            current_top_left_pos.x() + x,
-            current_top_left_pos.y() + y,
-          )
+      Some(parent_id) => {
+        unsafe {
+          // Fix mutable borrow on `self.base.node_mut`.
+          let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
+
+          match raw_nodes.as_ref().get(parent_id) {
+            Some(parent_node) => {
+              match raw_nodes.as_mut().get_mut(&id) {
+                Some(node) => {
+                  let current_shape = *node.shape();
+                  let current_top_left_pos: IPos = current_shape.min().into();
+                  let expected_top_left_pos: IPos =
+                    point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
+                  let expected_shape = IRect::new(
+                    expected_top_left_pos,
+                    point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
+                  );
+
+                  let parent_actual_shape = *parent_node.actual_shape();
+                  let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
+                  let final_top_left_pos: IPos = final_shape.min().into();
+
+                  // Real movement
+                  let final_x = final_top_left_pos.x() - current_top_left_pos.x();
+                  let final_y = final_top_left_pos.y() - current_top_left_pos.y();
+                  self.move_by(id, final_x, final_y)
+                }
+                None => None,
+              }
+            }
+            None => None,
+          }
         }
-        None => None,
-      },
+      }
       None => None,
     }
   }
