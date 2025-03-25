@@ -1,7 +1,6 @@
 //! The normal mode.
 
 use crate::buf::Buffer;
-use crate::coord::*;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -129,30 +128,19 @@ impl NormalStateful {
             let (row_idx, row_viewport) = cursor_row[0];
             let cursor_id = tree.cursor_id().unwrap();
 
-            if let Some(&mut TreeNode::Cursor(ref mut cursor_node)) = tree.node_mut(&cursor_id) {
-              trace!(
-                "(before) cursor node shape:{:?}, actual_shape:{:?}",
-                cursor_node.shape(),
-                cursor_node.actual_shape()
-              );
-              let row_start_width = raw_buffer
-                .as_mut()
-                .width_before(line_idx, row_viewport.start_char_idx());
-              let char_start_width = raw_buffer.as_mut().width_before(line_idx, char_idx);
-              let col_idx = (char_start_width - row_start_width) as isize;
-              let shape = IRect::new((*row_idx as isize, col_idx), (*row_idx as isize, col_idx));
-              cursor_node.set_shape(&shape);
-              trace!(
-                "(after) cursor node shape:{:?}, actual_shape:{:?}",
-                cursor_node.shape(),
-                cursor_node.actual_shape()
-              );
-            } else {
-              unreachable!();
-            }
-          } else {
-            // Do nothing, stay at where you are
+            let row_start_width = raw_buffer
+              .as_mut()
+              .width_before(line_idx, row_viewport.start_char_idx());
+            let char_start_width = raw_buffer.as_mut().width_before(line_idx, char_idx);
+            let col_idx = (char_start_width - row_start_width) as isize;
+            let row_idx = *row_idx as isize;
+            tree.bounded_move_to(cursor_id, col_idx, row_idx);
+            trace!(
+              "(after) cursor node position x/y:{:?}/{:?}",
+              col_idx, row_idx
+            );
           }
+          // Or, just do nothing, stay at where you are
         }
       }
     }
@@ -288,6 +276,7 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferLocalOptions, BuffersManagerArc};
+  use crate::coord::*;
   use crate::rlock;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
