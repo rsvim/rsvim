@@ -576,14 +576,14 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  /// Move node by `(x, y)`.
+  /// Move node by distance `(x, y)`, the `x`/`y` is the motion distances.
   ///
   /// * The node moves left when `x < 0`.
   /// * The node moves right when `x > 0`.
   /// * The node moves up when `y < 0`.
   /// * The node moves down when `y > 0`.
   ///
-  /// NOTE: This operation also updates all descendants attributes such as
+  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
   /// [`insert`](Itree::insert) method.
   ///
   /// # Returns
@@ -595,36 +595,23 @@ where
       Some(node) => {
         let current_shape = *node.shape();
         let current_top_left_pos: IPos = current_shape.min().into();
-        let next_top_left_pos: IPos =
-          point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
-        let next_shape = IRect::new(
-          next_top_left_pos,
-          point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
-        );
-        node.set_shape(&next_shape);
-
-        // Update all the descendants attributes under the `id` node.
-        unsafe {
-          // Fix mutable references on `self.update_descendant_attributes`.
-          let mut raw_self = NonNull::new(self as *mut Itree<T>).unwrap();
-          raw_self
-            .as_mut()
-            .update_descendant_attributes(id, *self.parent_ids.get(&id).unwrap());
-        }
-
-        Some(next_shape)
+        self.move_to(
+          id,
+          current_top_left_pos.x() + x,
+          current_top_left_pos.y() + y,
+        )
       }
       None => None,
     }
   }
 
-  /// Bounded move node by `(x, y)`.
+  /// Bounded move node by distance `(x, y)`, the `x`/`y` is the motion distances.
   ///
   /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
   /// its parent, it simply stops moving.
   ///
-  /// NOTE: This operation also updates all descendants attributes (same with the
-  /// [`insert`](Itree::insert) method).
+  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
+  /// [`insert`](Itree::insert) method.
   ///
   /// # Returns
   ///
@@ -662,6 +649,88 @@ where
                 None => None,
               }
             }
+            None => None,
+          }
+        }
+      }
+      None => None,
+    }
+  }
+
+  /// Move node to position `(x, y)`, the `(x, y)` is the new position. The position is based on
+  /// the left-top anchor of the node.
+  ///
+  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
+  /// [`insert`](Itree::insert) method.
+  ///
+  /// # Returns
+  ///
+  /// 1. The new shape after movement if successfully.
+  /// 2. `None` if the node `id` doesn't exist.
+  pub fn move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+    match self.nodes.get_mut(&id) {
+      Some(node) => {
+        let current_shape = *node.shape();
+        let next_top_left_pos: IPos = point!(x: x, y: y);
+        let next_shape = IRect::new(
+          next_top_left_pos,
+          point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
+        );
+        node.set_shape(&next_shape);
+
+        // Update all the descendants attributes under the `id` node.
+        unsafe {
+          // Fix mutable references on `self.update_descendant_attributes`.
+          let mut raw_self = NonNull::new(self as *mut Itree<T>).unwrap();
+          raw_self
+            .as_mut()
+            .update_descendant_attributes(id, *self.parent_ids.get(&id).unwrap());
+        }
+
+        Some(next_shape)
+      }
+      None => None,
+    }
+  }
+
+  /// Bounded move node to position `(x, y)`, the `(x, y)` is the new position. The position is
+  /// based on the left-top anchor of the node.
+  ///
+  /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
+  /// its parent, it simply stops moving.
+  ///
+  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
+  /// [`insert`](Itree::insert) method.
+  ///
+  /// # Returns
+  ///
+  /// 1. The new shape after movement if successfully.
+  /// 2. `None` if the node `id` doesn't exist.
+  pub fn bounded_move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+    match self.parent_ids.get(&id) {
+      Some(parent_id) => {
+        unsafe {
+          // Fix mutable borrow on `self.base.node_mut`.
+          let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
+
+          match raw_nodes.as_ref().get(parent_id) {
+            Some(parent_node) => match raw_nodes.as_mut().get_mut(&id) {
+              Some(node) => {
+                let current_shape = *node.shape();
+                let expected_top_left_pos: IPos = point!(x: x, y: y);
+                let expected_shape = IRect::new(
+                  expected_top_left_pos,
+                  point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
+                );
+
+                let parent_actual_shape = *parent_node.actual_shape();
+                let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
+                let final_top_left_pos: IPos = final_shape.min().into();
+
+                self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
+              }
+              None => None,
+            },
             None => None,
           }
         }
@@ -720,7 +789,7 @@ mod tests {
   use tracing::info;
 
   use crate::coord::*;
-  // use crate::test::log::init as test_log_init;
+  use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::{InodeBase, Inodeable};
 
   use super::*;
@@ -1622,7 +1691,7 @@ mod tests {
 
   #[test]
   fn bounded_move_by1() {
-    // test_log_init();
+    test_log_init();
 
     let s1 = IRect::new((0, 0), (20, 20));
     let n1 = TestValue::new(1, s1);
@@ -1657,7 +1726,7 @@ mod tests {
     print_node!(n2, "n2");
     print_node!(n3, "n3");
 
-    // n3 bounded move: (x, y)
+    // n3 bounded move by: (x, y)
     let moves: Vec<(isize, isize)> = vec![
       (-10, -4),
       (2, -7),
@@ -1685,6 +1754,150 @@ mod tests {
       let x = m.0;
       let y = m.1;
       tree.bounded_move_by(nid3, x, y);
+      let actual = *tree.node(&nid3).unwrap().shape();
+      let expect = expects[i];
+      info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
+      assert!(actual == expect);
+    }
+  }
+
+  #[test]
+  fn move_to1() {
+    test_log_init();
+
+    let s1 = IRect::new((0, 0), (20, 20));
+    let n1 = TestValue::new(1, s1);
+    let nid1 = n1.id();
+
+    let s2 = IRect::new((0, 0), (20, 20));
+    let n2 = TestValue::new(2, s2);
+    let nid2 = n2.id();
+
+    let s3 = IRect::new((0, 0), (1, 1));
+    let n3 = TestValue::new(3, s3);
+    let nid3 = n3.id();
+
+    /*
+     * The tree looks like:
+     * ```
+     *           n1
+     *         /
+     *        n2
+     *       /
+     *      n3
+     * ```
+     */
+    let mut tree = Itree::new(n1);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid2, n3);
+
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
+    print_node!(n1, "n1");
+    print_node!(n2, "n2");
+    print_node!(n3, "n3");
+
+    // n3 Move: (x, y)
+    let moves: Vec<(isize, isize)> = vec![
+      (-10, -4),
+      (2, -7),
+      (1, 90),
+      (-70, 41),
+      (23, -4),
+      (49, -121),
+      (8, 3),
+      (-10, -7),
+      (6, 8),
+    ];
+    let expects: Vec<IRect> = vec![
+      IRect::new((-10, -4), (-9, -3)),
+      IRect::new((2, -7), (3, -6)),
+      IRect::new((1, 90), (2, 91)),
+      IRect::new((-70, 41), (-69, 42)),
+      IRect::new((23, -4), (24, -3)),
+      IRect::new((49, -121), (50, -120)),
+      IRect::new((8, 3), (9, 4)),
+      IRect::new((-10, -7), (-9, -6)),
+      IRect::new((6, 8), (7, 9)),
+    ];
+
+    for (i, m) in moves.iter().enumerate() {
+      let x = m.0;
+      let y = m.1;
+      tree.move_to(nid3, x, y);
+      let actual = *tree.node(&nid3).unwrap().shape();
+      let expect = expects[i];
+      info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
+      assert!(actual == expect);
+    }
+  }
+
+  #[test]
+  fn bounded_move_to1() {
+    test_log_init();
+
+    let s1 = IRect::new((0, 0), (20, 20));
+    let n1 = TestValue::new(1, s1);
+    let nid1 = n1.id();
+
+    let s2 = IRect::new((0, 0), (20, 20));
+    let n2 = TestValue::new(2, s2);
+    let nid2 = n2.id();
+
+    let s3 = IRect::new((0, 0), (1, 1));
+    let n3 = TestValue::new(3, s3);
+    let nid3 = n3.id();
+
+    /*
+     * The tree looks like:
+     * ```
+     *           n1
+     *         /
+     *        n2
+     *       /
+     *      n3
+     * ```
+     */
+    let mut tree = Itree::new(n1);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid2, n3);
+
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
+    print_node!(n1, "n1");
+    print_node!(n2, "n2");
+    print_node!(n3, "n3");
+
+    // n3 bounded move to: (x, y)
+    let moves: Vec<(isize, isize)> = vec![
+      (-10, -4),
+      (2, -7),
+      (1, 90),
+      (-70, 41),
+      (23, -4),
+      (49, -121),
+      (8, 3),
+      (5, 6),
+      (6, 8),
+    ];
+    let expects: Vec<IRect> = vec![
+      IRect::new((0, 0), (1, 1)),
+      IRect::new((2, 0), (3, 1)),
+      IRect::new((1, 19), (2, 20)),
+      IRect::new((0, 19), (1, 20)),
+      IRect::new((19, 0), (20, 1)),
+      IRect::new((19, 0), (20, 1)),
+      IRect::new((8, 3), (9, 4)),
+      IRect::new((5, 6), (6, 7)),
+      IRect::new((6, 8), (7, 9)),
+    ];
+
+    for (i, m) in moves.iter().enumerate() {
+      let x = m.0;
+      let y = m.1;
+      tree.bounded_move_to(nid3, x, y);
       let actual = *tree.node(&nid3).unwrap().shape();
       let expect = expects[i];
       info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
