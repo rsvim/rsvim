@@ -576,14 +576,14 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  /// Move node by `(x, y)`.
+  /// Move node by distance `(x, y)`, the `x`/`y` is the motion distances.
   ///
   /// * The node moves left when `x < 0`.
   /// * The node moves right when `x > 0`.
   /// * The node moves up when `y < 0`.
   /// * The node moves down when `y > 0`.
   ///
-  /// NOTE: This operation also updates all descendants attributes such as
+  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
   /// [`insert`](Itree::insert) method.
   ///
   /// # Returns
@@ -595,8 +595,61 @@ where
       Some(node) => {
         let current_shape = *node.shape();
         let current_top_left_pos: IPos = current_shape.min().into();
-        let next_top_left_pos: IPos =
-          point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
+        self.move_to(
+          id,
+          current_top_left_pos.x() + x,
+          current_top_left_pos.y() + y,
+        )
+      }
+      None => None,
+    }
+  }
+
+  /// Bounded move node by distance `(x, y)`, the `x`/`y` is the motion distances.
+  ///
+  /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
+  /// its parent, it simply stops moving.
+  ///
+  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
+  /// [`insert`](Itree::insert) method.
+  ///
+  /// # Returns
+  ///
+  /// 1. The new shape after movement if successfully.
+  /// 2. `None` if the node `id` doesn't exist.
+  pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+    match self.parent_ids.get(&id) {
+      Some(parent_id) => match self.nodes.get(parent_id) {
+        Some(node) => {
+          let current_shape = *node.shape();
+          let current_top_left_pos: IPos = current_shape.min().into();
+          self.bounded_move_to(
+            id,
+            current_top_left_pos.x() + x,
+            current_top_left_pos.y() + y,
+          )
+        }
+        None => None,
+      },
+      None => None,
+    }
+  }
+
+  /// Move node to position `(x, y)`, the `(x, y)` is the new position. The position is based on
+  /// the left-top anchor of the node.
+  ///
+  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
+  /// [`insert`](Itree::insert) method.
+  ///
+  /// # Returns
+  ///
+  /// 1. The new shape after movement if successfully.
+  /// 2. `None` if the node `id` doesn't exist.
+  pub fn move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+    match self.nodes.get_mut(&id) {
+      Some(node) => {
+        let current_shape = *node.shape();
+        let next_top_left_pos: IPos = point!(x: x, y: y);
         let next_shape = IRect::new(
           next_top_left_pos,
           point!(x: next_top_left_pos.x() + current_shape.width(), y: next_top_left_pos.y() + current_shape.height()),
@@ -618,19 +671,20 @@ where
     }
   }
 
-  /// Bounded move node by `(x, y)`.
+  /// Bounded move node to position `(x, y)`, the `(x, y)` is the new position. The position is
+  /// based on the left-top anchor of the node.
   ///
   /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
   /// its parent, it simply stops moving.
   ///
-  /// NOTE: This operation also updates all descendants attributes (same with the
-  /// [`insert`](Itree::insert) method).
+  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
+  /// [`insert`](Itree::insert) method.
   ///
   /// # Returns
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
     match self.parent_ids.get(&id) {
       Some(parent_id) => {
         unsafe {
@@ -638,30 +692,23 @@ where
           let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
 
           match raw_nodes.as_ref().get(parent_id) {
-            Some(parent_node) => {
-              match raw_nodes.as_mut().get_mut(&id) {
-                Some(node) => {
-                  let current_shape = *node.shape();
-                  let current_top_left_pos: IPos = current_shape.min().into();
-                  let expected_top_left_pos: IPos =
-                    point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
-                  let expected_shape = IRect::new(
-                    expected_top_left_pos,
-                    point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
-                  );
+            Some(parent_node) => match raw_nodes.as_mut().get_mut(&id) {
+              Some(node) => {
+                let current_shape = *node.shape();
+                let expected_top_left_pos: IPos = point!(x: x, y: y);
+                let expected_shape = IRect::new(
+                  expected_top_left_pos,
+                  point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
+                );
 
-                  let parent_actual_shape = *parent_node.actual_shape();
-                  let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
-                  let final_top_left_pos: IPos = final_shape.min().into();
+                let parent_actual_shape = *parent_node.actual_shape();
+                let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
+                let final_top_left_pos: IPos = final_shape.min().into();
 
-                  // Real movement
-                  let final_x = final_top_left_pos.x() - current_top_left_pos.x();
-                  let final_y = final_top_left_pos.y() - current_top_left_pos.y();
-                  self.move_by(id, final_x, final_y)
-                }
-                None => None,
+                self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
               }
-            }
+              None => None,
+            },
             None => None,
           }
         }
