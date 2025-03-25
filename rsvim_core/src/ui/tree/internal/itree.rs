@@ -767,7 +767,7 @@ mod tests {
   use tracing::info;
 
   use crate::coord::*;
-  // use crate::test::log::init as test_log_init;
+  use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::{InodeBase, Inodeable};
 
   use super::*;
@@ -1669,7 +1669,7 @@ mod tests {
 
   #[test]
   fn bounded_move_by1() {
-    // test_log_init();
+    test_log_init();
 
     let s1 = IRect::new((0, 0), (20, 20));
     let n1 = TestValue::new(1, s1);
