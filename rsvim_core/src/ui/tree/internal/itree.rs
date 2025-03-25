@@ -1762,6 +1762,78 @@ mod tests {
   }
 
   #[test]
+  fn move_to1() {
+    test_log_init();
+
+    let s1 = IRect::new((0, 0), (20, 20));
+    let n1 = TestValue::new(1, s1);
+    let nid1 = n1.id();
+
+    let s2 = IRect::new((0, 0), (20, 20));
+    let n2 = TestValue::new(2, s2);
+    let nid2 = n2.id();
+
+    let s3 = IRect::new((0, 0), (1, 1));
+    let n3 = TestValue::new(3, s3);
+    let nid3 = n3.id();
+
+    /*
+     * The tree looks like:
+     * ```
+     *           n1
+     *         /
+     *        n2
+     *       /
+     *      n3
+     * ```
+     */
+    let mut tree = Itree::new(n1);
+    tree.insert(&nid1, n2);
+    tree.insert(&nid2, n3);
+
+    let n1 = tree.node(&nid1).unwrap();
+    let n2 = tree.node(&nid2).unwrap();
+    let n3 = tree.node(&nid3).unwrap();
+    print_node!(n1, "n1");
+    print_node!(n2, "n2");
+    print_node!(n3, "n3");
+
+    // n3 Move: (x, y)
+    let moves: Vec<(isize, isize)> = vec![
+      (-10, -4),
+      (2, -7),
+      (1, 90),
+      (-70, 41),
+      (23, -4),
+      (49, -121),
+      (8, 3),
+      (-10, -7),
+      (6, 8),
+    ];
+    let expects: Vec<IRect> = vec![
+      IRect::new((-10, -4), (-9, -3)),
+      IRect::new((2, -7), (3, -6)),
+      IRect::new((1, 90), (2, 91)),
+      IRect::new((-70, 41), (-69, 42)),
+      IRect::new((23, -4), (24, -3)),
+      IRect::new((49, -121), (50, -120)),
+      IRect::new((8, 3), (9, 4)),
+      IRect::new((-10, -7), (-9, -6)),
+      IRect::new((6, 8), (7, 9)),
+    ];
+
+    for (i, m) in moves.iter().enumerate() {
+      let x = m.0;
+      let y = m.1;
+      tree.move_to(nid3, x, y);
+      let actual = *tree.node(&nid3).unwrap().shape();
+      let expect = expects[i];
+      info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
+      assert!(actual == expect);
+    }
+  }
+
+  #[test]
   fn bounded_move_to1() {
     test_log_init();
 
