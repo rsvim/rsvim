@@ -6,7 +6,6 @@ use crate::ui::canvas::frame::cursor::Cursor;
 use crate::ui::canvas::internal::iframe::Iframe;
 
 use compact_str::CompactString;
-use geo::point;
 use std::ops::Range;
 // use tracing::debug;
 
