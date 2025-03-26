@@ -7,6 +7,7 @@ use geo::point;
 use std::cmp::{max, min};
 // use tracing::trace;
 
+#[allow(clippy::let_and_return)]
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
 ///
 /// NOTE:
@@ -69,6 +70,7 @@ pub fn make_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect 
   //   "actual_isize:{:?}, actual_top_left_pos:{:?}",
   //   actual_isize, actual_top_left_pos
   // );
+
   let actual_shape = U16Rect::new(
     actual_top_left_pos,
     point!(x: actual_top_left_pos.x() + actual_isize.width() as u16, y: actual_top_left_pos.y() + actual_isize.height() as u16),
