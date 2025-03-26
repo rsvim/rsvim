@@ -1,5 +1,7 @@
 //! Internal tree node shape utils.
 
+#![allow(clippy::let_and_return)]
+
 use crate::mc_geo_point_as;
 use crate::prelude::*;
 
@@ -7,7 +9,6 @@ use geo::point;
 use std::cmp::{max, min};
 // use tracing::trace;
 
-#[allow(clippy::let_and_return)]
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
 ///
 /// NOTE:
@@ -83,7 +84,6 @@ pub fn make_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect 
   actual_shape
 }
 
-#[allow(clippy::let_and_return)]
 /// Bound (truncate) child size by its parent actual size.
 pub fn bound_size(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
   use std::cmp::{max, min};
@@ -102,7 +102,6 @@ pub fn bound_size(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
   )
 }
 
-#[allow(clippy::let_and_return)]
 /// Bound child position by its parent actual shape.
 /// When it's out of its parent, simply put it at the boundary.
 pub fn bound_position(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
