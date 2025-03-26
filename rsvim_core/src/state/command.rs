@@ -15,5 +15,7 @@ pub enum Command {
   CursorMoveDown(u16),
   CursorMoveLeft(u16),
   CursorMoveRight(u16),
+  CursorScrollUp(u16),
+  CursorScrollDown(u16),
   QuitEditor,
 }
