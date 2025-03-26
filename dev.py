@@ -23,10 +23,10 @@ def clippy(mode, recache):
 
     if isinstance(mode, str) and mode.lower().startswith("w"):
         print("Run 'clippy' as service")
-        command = f"{command} bacon -j clippy-all --headless"
+        command = f"{command} bacon -j clippy-all --headless --all-features"
     else:
         print("Run 'clippy' only once")
-        command = f"{command} cargo clippy --workspace"
+        command = f"{command} cargo clippy --workspace --all-features --all-targets"
 
     command = command.strip()
     print(command)
