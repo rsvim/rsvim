@@ -9,7 +9,8 @@ pub mod evloop;
 pub mod js;
 pub mod lock;
 pub mod log;
-pub mod res;
+pub mod prelude;
+pub mod results;
 pub mod state;
 pub mod ui;
 

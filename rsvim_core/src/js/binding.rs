@@ -1,6 +1,6 @@
 //! Js runtime bindings.
 
-use crate::res::{AnyErr, IoErr};
+use crate::prelude::*;
 // use crate::dns;
 // use crate::exceptions;
 // use crate::file;
@@ -14,9 +14,9 @@ use crate::res::{AnyErr, IoErr};
 // use crate::signals;
 // use crate::stdio;
 // use crate::timers;
+// use crate::prelude::*;
 
 use std::ffi::c_void;
-// use ahash::AHashMap as HashMap;
 // use tracing::error;
 
 pub mod global_rsvim;

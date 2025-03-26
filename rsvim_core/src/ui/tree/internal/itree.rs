@@ -1,11 +1,10 @@
 //! Internal tree structure that implements the widget tree.
 
-use crate::coord::*;
 use crate::geo_rect_as;
+use crate::prelude::*;
 use crate::ui::tree::internal::shapes;
 use crate::ui::tree::internal::{InodeId, Inodeable};
 
-use ahash::AHashMap as HashMap;
 use geo::algorithm::coordinate_position::{CoordPos, CoordinatePosition};
 use geo::point;
 use std::fmt::Debug;
@@ -785,10 +784,10 @@ where
 
 #[cfg(test)]
 mod tests {
-  use crate::inode_generate_impl;
+  use crate::inode_impl;
   use tracing::info;
 
-  use crate::coord::*;
+  use crate::prelude::*;
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::{InodeBase, Inodeable};
 
@@ -809,7 +808,7 @@ mod tests {
     }
   }
 
-  inode_generate_impl!(TestValue, base);
+  inode_impl!(TestValue, base);
 
   macro_rules! assert_node_id_eq {
     ($node: ident, $id: ident) => {
@@ -829,7 +828,7 @@ mod tests {
     };
   }
 
-  macro_rules! assert_parent_child_nodes_depth {
+  macro_rules! assert_parent_child_depth {
     ($parent: ident, $child: ident) => {
       loop {
         assert_eq!(*$parent.depth() + 1, *$child.depth());
@@ -941,12 +940,12 @@ mod tests {
     assert!(nid4 < nid5);
     assert!(nid5 < nid6);
 
-    assert_parent_child_nodes_depth!(n1, n2);
-    assert_parent_child_nodes_depth!(n1, n3);
-    assert_parent_child_nodes_depth!(n2, n4);
-    assert_parent_child_nodes_depth!(n2, n5);
-    assert_parent_child_nodes_depth!(n2, n6);
-    assert_parent_child_nodes_depth!(n3, n6);
+    assert_parent_child_depth!(n1, n2);
+    assert_parent_child_depth!(n1, n3);
+    assert_parent_child_depth!(n2, n4);
+    assert_parent_child_depth!(n2, n5);
+    assert_parent_child_depth!(n2, n6);
+    assert_parent_child_depth!(n3, n6);
 
     assert_eq!(tree.children_ids(&nid1).unwrap().len(), 2);
     assert_eq!(tree.children_ids(&nid2).unwrap().len(), 2);
@@ -1077,15 +1076,15 @@ mod tests {
     assert!(nid7 < nid8);
     assert!(nid8 < nid9);
 
-    assert_parent_child_nodes_depth!(n1, n2);
-    assert_parent_child_nodes_depth!(n1, n3);
-    assert_parent_child_nodes_depth!(n2, n4);
-    assert_parent_child_nodes_depth!(n2, n5);
-    assert_parent_child_nodes_depth!(n2, n6);
-    assert_parent_child_nodes_depth!(n3, n6);
-    assert_parent_child_nodes_depth!(n5, n7);
-    assert_parent_child_nodes_depth!(n7, n8);
-    assert_parent_child_nodes_depth!(n7, n9);
+    assert_parent_child_depth!(n1, n2);
+    assert_parent_child_depth!(n1, n3);
+    assert_parent_child_depth!(n2, n4);
+    assert_parent_child_depth!(n2, n5);
+    assert_parent_child_depth!(n2, n6);
+    assert_parent_child_depth!(n3, n6);
+    assert_parent_child_depth!(n5, n7);
+    assert_parent_child_depth!(n7, n8);
+    assert_parent_child_depth!(n7, n9);
 
     assert_eq!(tree.children_ids(&nid1).unwrap().len(), 2);
     assert_eq!(tree.children_ids(&nid2).unwrap().len(), 2);

@@ -6,7 +6,7 @@ use rsvim_core::cli::CliOpt;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::{SnapshotData, v8_version};
 use rsvim_core::log;
-use rsvim_core::res::IoResult;
+use rsvim_core::prelude::*;
 
 use clap::Parser;
 use once_cell::sync::Lazy;

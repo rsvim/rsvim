@@ -2,12 +2,12 @@
 
 #![allow(clippy::let_and_return)]
 
+use crate::geo_point_as;
+use crate::prelude::*;
+
 use geo::point;
 use std::cmp::{max, min};
 // use tracing::trace;
-
-use crate::coord::*;
-use crate::geo_point_as;
 
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
 ///
@@ -70,6 +70,7 @@ pub fn make_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect 
   //   "actual_isize:{:?}, actual_top_left_pos:{:?}",
   //   actual_isize, actual_top_left_pos
   // );
+
   let actual_shape = U16Rect::new(
     actual_top_left_pos,
     point!(x: actual_top_left_pos.x() + actual_isize.width() as u16, y: actual_top_left_pos.y() + actual_isize.height() as u16),
@@ -165,7 +166,7 @@ mod tests {
   use std::cmp::min;
   use tracing::info;
 
-  use crate::coord::*;
+  use crate::prelude::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;

@@ -78,9 +78,10 @@ jobs:
           tar: all
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
-          include: README.md,CHANGELOG.md,LICENSE-VIM.txt
+          include: README.md,CHANGELOG.md,LICENSE.txt
           checksum: sha256
           profile: release
+          locked: true
       - name: After Upload
         run: |
           echo "ls -lah --color=always"

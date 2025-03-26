@@ -72,6 +72,10 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
+  /// Cursor move up/down/left/right in current window.
+  /// NOTE: This will not scroll the buffer if cursor reaches the top/bottom of the window.
+  ///
+  /// Also see [`NormalStateful::cursor_move_with_scroll`].
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
@@ -89,10 +93,10 @@ impl NormalStateful {
 
           let cursor_move_result = match command {
             Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
-              self.cursor_move_vertically(&viewport, raw_buffer, command)
+              self._cursor_move_vertically(&viewport, raw_buffer, command)
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
-              self.cursor_move_horizontally(&viewport, raw_buffer, command)
+              self._cursor_move_horizontally(&viewport, raw_buffer, command)
             }
             _ => unreachable!(),
           };
@@ -147,7 +151,7 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  unsafe fn cursor_move_vertically(
+  unsafe fn _cursor_move_vertically(
     &self,
     viewport: &Viewport,
     mut raw_buffer: NonNull<Buffer>,
@@ -207,7 +211,7 @@ impl NormalStateful {
     }
   }
 
-  unsafe fn cursor_move_horizontally(
+  unsafe fn _cursor_move_horizontally(
     &self,
     viewport: &Viewport,
     raw_buffer: NonNull<Buffer>,
@@ -266,6 +270,42 @@ impl NormalStateful {
     }
   }
 
+  /// Cursor move up/down/left/right in current window, or scroll buffer up/down if it reaches the
+  /// top/bottom of the window and the buffer has more contents.
+  fn _cursor_move_or_scroll(
+    &self,
+    _data_access: &StatefulDataAccess,
+    _command: Command,
+  ) -> StatefulValue {
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  /// Cursor scroll buffer up/down in current window.
+  /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
+  /// buffer contents changed, i.e. moved up/down.
+  fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = wlock!(tree);
+
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
+        let viewport = current_window.viewport();
+        let viewport = wlock!(viewport);
+        let buffer = viewport.buffer();
+        let buffer = buffer.upgrade().unwrap();
+        let mut _buffer = wlock!(buffer);
+
+        match command {
+          Command::CursorScrollUp(_n) => {}
+          Command::CursorScrollDown(_n) => {}
+          _ => unreachable!(),
+        }
+      }
+    }
+
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
     StatefulValue::QuitState(QuitStateful::default())
   }
@@ -276,7 +316,7 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferLocalOptions, BuffersManagerArc};
-  use crate::coord::*;
+  use crate::prelude::*;
   use crate::rlock;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};

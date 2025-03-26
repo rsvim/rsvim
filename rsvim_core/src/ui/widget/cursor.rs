@@ -3,8 +3,8 @@
 use std::fmt::Debug;
 use tracing::trace;
 
-use crate::coord::*;
-use crate::inode_generate_impl;
+use crate::inode_impl;
+use crate::prelude::*;
 use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
@@ -41,7 +41,7 @@ impl Debug for Cursor {
   }
 }
 
-inode_generate_impl!(Cursor, base);
+inode_impl!(Cursor, base);
 
 impl Widgetable for Cursor {
   fn draw(&self, canvas: &mut Canvas) {

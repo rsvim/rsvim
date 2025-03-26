@@ -1,12 +1,12 @@
 //! Vim window's text content widget.
 
 use crate::buf::{Buffer, BufferWk};
-use crate::coord::*;
+use crate::prelude::*;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::ViewportWk;
-use crate::{inode_generate_impl, rlock, wlock};
+use crate::{inode_impl, rlock, wlock};
 
 use geo::point;
 use std::convert::From;
@@ -37,7 +37,7 @@ impl WindowContent {
   }
 }
 
-inode_generate_impl!(WindowContent, base);
+inode_impl!(WindowContent, base);
 
 impl Widgetable for WindowContent {
   fn draw(&self, canvas: &mut Canvas) {
@@ -255,7 +255,7 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptions};
-  use crate::coord::*;
+  use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;

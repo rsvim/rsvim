@@ -87,10 +87,11 @@ jobs:
           tar: all
           zip: windows
           token: ${{ secrets.GITHUB_TOKEN }}
-          include: README.md,CHANGELOG.md,LICENSE-VIM.txt
+          include: README.md,CHANGELOG.md,LICENSE.txt
           checksum: sha256
           ref: refs/tags/nightly
           profile: nightly
+          locked: true
       - name: After Upload
         run: |
           echo "ls -lah --color=always"

@@ -38,20 +38,3 @@ pub enum JsRuntimeErr {
 pub type JsRuntimeResult<T> = std::result::Result<T, JsRuntimeErr>;
 
 // Js Runtime }
-
-// Buffer {
-
-// #[derive(Debug, ThisError)]
-// /// Vim buffer error code implemented by [`thiserror::Error`].
-// pub enum BufferErr {
-//   #[error("File path already exists: {0}")]
-//   FilePathAlreadyExists(PathBuf),
-//
-//   #[error("Io error: {0}")]
-//   IoErr(IoErr),
-// }
-//
-// /// [`std::result::Result`] with `T` if ok, [`TheBufferErr`] if error.
-// pub type BufferResult<T> = std::result::Result<T, BufferErr>;
-
-// Buffer }

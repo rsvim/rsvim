@@ -3,7 +3,7 @@
 #![allow(unused_imports)]
 
 use crate::buf::BuffersManagerArc;
-use crate::coord::*;
+use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::{Window, WindowLocalOptions};

@@ -7,7 +7,7 @@ use crate::js::module::ModuleSource;
 // use crate::js::transpiler::Jsx;
 use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Wasm;
-use crate::res::{AnyResult, JsRuntimeErr};
+use crate::prelude::*;
 
 use anyhow::bail;
 // use regex::Regex;
