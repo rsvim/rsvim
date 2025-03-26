@@ -2,7 +2,6 @@
 
 use crate::prelude::*;
 
-use geo::point;
 use std::cmp::{Eq, PartialEq};
 use std::fmt;
 
