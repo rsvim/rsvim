@@ -83,6 +83,7 @@ pub fn make_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect 
   actual_shape
 }
 
+#[allow(clippy::let_and_return)]
 /// Bound (truncate) child size by its parent actual size.
 pub fn bound_size(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
   use std::cmp::{max, min};
