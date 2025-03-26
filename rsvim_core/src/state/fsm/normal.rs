@@ -266,6 +266,10 @@ impl NormalStateful {
     }
   }
 
+  fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
     StatefulValue::QuitState(QuitStateful::default())
   }
