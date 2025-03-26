@@ -284,11 +284,25 @@ impl NormalStateful {
   /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
   /// buffer contents changed, i.e. moved up/down.
   fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
-    match command {
-      Command::CursorScrollUp(n) => {}
-      Command::CursorScrollDown(n) => {}
-      _ => unreachable!(),
+    let tree = data_access.tree.clone();
+    let mut tree = wlock!(tree);
+
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
+        let viewport = current_window.viewport();
+        let mut viewport = wlock!(viewport);
+        let buffer = viewport.buffer();
+        let buffer = buffer.upgrade().unwrap();
+        let mut buffer = wlock!(buffer);
+
+        match command {
+          Command::CursorScrollUp(n) => {}
+          Command::CursorScrollDown(n) => {}
+          _ => unreachable!(),
+        }
+      }
     }
+
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
