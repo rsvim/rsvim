@@ -40,7 +40,7 @@
 //! This is also compatible with the coordinates used in the
 //! [crossterm](https://docs.rs/crossterm/latest/crossterm/index.html) library.
 
-use geo::{Point, Rect};
+pub use geo::{self, Point, Rect};
 
 // Positions {
 
