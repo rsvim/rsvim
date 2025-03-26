@@ -7,7 +7,7 @@ use crate::js::module::ModuleSource;
 // use crate::js::transpiler::Jsx;
 use crate::js::transpiler::TypeScript;
 // use crate::js::transpiler::Wasm;
-use crate::res::{AnyResult, JsRuntimeErr};
+use crate::prelude::*;
 
 use anyhow::bail;
 // use regex::Regex;
@@ -140,7 +140,7 @@ impl ModuleLoader for FsModuleLoader {
     match path_extension {
       // "wasm" => Ok(Wasm::parse(&source)),
       "ts" => {
-        TypeScript::compile(fname, &source).map_err(|e| JsRuntimeErr::Message(e.to_string()).into())
+        TypeScript::compile(fname, &source).map_err(|e| JsrtErr::Message(e.to_string()).into())
       }
       // "jsx" => {
       //   Jsx::compile(fname, &source).map_err(|e| JsRuntimeErr::Message(e.to_string()).into())

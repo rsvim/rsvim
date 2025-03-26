@@ -1,6 +1,6 @@
 //! Vim buffers.
 
-use crate::res::IoResult;
+use crate::prelude::*;
 #[allow(unused_imports)]
 use crate::rlock;
 
@@ -8,8 +8,6 @@ use crate::rlock;
 pub use crate::buf::cidx::ColumnIndex;
 pub use crate::buf::opt::{BufferLocalOptions, FileEncodingOption};
 
-use ahash::AHashMap as HashMap;
-use ahash::AHashSet as HashSet;
 use compact_str::CompactString;
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use path_absolutize::Absolutize;

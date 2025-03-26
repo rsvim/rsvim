@@ -272,10 +272,10 @@ impl NormalStateful {
 
   /// Cursor move up/down/left/right in current window, or scroll buffer up/down if it reaches the
   /// top/bottom of the window and the buffer has more contents.
-  fn cursor_move_or_scroll(
+  fn _cursor_move_or_scroll(
     &self,
-    data_access: &StatefulDataAccess,
-    command: Command,
+    _data_access: &StatefulDataAccess,
+    _command: Command,
   ) -> StatefulValue {
     StatefulValue::NormalMode(NormalStateful::default())
   }
@@ -283,21 +283,21 @@ impl NormalStateful {
   /// Cursor scroll buffer up/down in current window.
   /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
   /// buffer contents changed, i.e. moved up/down.
-  fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
 
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
         let viewport = current_window.viewport();
-        let mut viewport = wlock!(viewport);
+        let viewport = wlock!(viewport);
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut buffer = wlock!(buffer);
+        let mut _buffer = wlock!(buffer);
 
         match command {
-          Command::CursorScrollUp(n) => {}
-          Command::CursorScrollDown(n) => {}
+          Command::CursorScrollUp(_n) => {}
+          Command::CursorScrollDown(_n) => {}
           _ => unreachable!(),
         }
       }
