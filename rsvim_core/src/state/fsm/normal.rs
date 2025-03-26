@@ -927,7 +927,7 @@ mod tests {
     assert_eq!(prev_viewport.cursor().char_idx(), 0);
 
     for _ in 0..10 {
-      let commands = vec![
+      let commands = [
         Command::CursorMoveDown(2),
         Command::CursorMoveRight(3),
         Command::CursorMoveUp(2),
@@ -951,7 +951,7 @@ mod tests {
     }
 
     for _ in 0..10 {
-      let commands = vec![
+      let commands = [
         Command::CursorMoveRight(5),
         Command::CursorMoveDown(1),
         Command::CursorMoveLeft(5),
