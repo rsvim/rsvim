@@ -271,7 +271,7 @@ impl NormalStateful {
   }
 
   /// Cursor motion up/down/left/right in current window, with buffer scrolling if it reaches the
-  /// top/bottom of the window and has more buffer contents.
+  /// top/bottom of the window and the buffer has more contents.
   fn cursor_move_with_scroll(
     &self,
     data_access: &StatefulDataAccess,
