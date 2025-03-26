@@ -72,6 +72,12 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
+  /// Cursor motion up/down/left/right in current window.
+  ///
+  /// NOTE: This is a low level operation api, which is not directly for editor user. i.e. It will
+  /// not scroll the buffer if cursor reaches the top/bottom of the window.
+  ///
+  /// Also see [`NormalStateful::cursor_move_with_scroll`].
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
@@ -89,10 +95,10 @@ impl NormalStateful {
 
           let cursor_move_result = match command {
             Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
-              self.cursor_move_vertically(&viewport, raw_buffer, command)
+              self._cursor_move_vertically(&viewport, raw_buffer, command)
             }
             Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
-              self.cursor_move_horizontally(&viewport, raw_buffer, command)
+              self._cursor_move_horizontally(&viewport, raw_buffer, command)
             }
             _ => unreachable!(),
           };
@@ -147,7 +153,7 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  unsafe fn cursor_move_vertically(
+  unsafe fn _cursor_move_vertically(
     &self,
     viewport: &Viewport,
     mut raw_buffer: NonNull<Buffer>,
@@ -207,7 +213,7 @@ impl NormalStateful {
     }
   }
 
-  unsafe fn cursor_move_horizontally(
+  unsafe fn _cursor_move_horizontally(
     &self,
     viewport: &Viewport,
     raw_buffer: NonNull<Buffer>,
@@ -266,7 +272,19 @@ impl NormalStateful {
     }
   }
 
-  fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  /// Cursor motion up/down/left/right in current window, with buffer scrolling if it reaches the
+  /// top/bottom of the window and has more buffer contents.
+  ///
+  /// NOTE: This is a high level operation api, which is directly for editor user.
+  fn cursor_move_with_scroll(
+    &self,
+    data_access: &StatefulDataAccess,
+    command: Command,
+  ) -> StatefulValue {
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
