@@ -1,6 +1,6 @@
 //! Window root container.
 
-use crate::mc_inode_impl;
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
@@ -19,6 +19,6 @@ impl WindowRootContainer {
   }
 }
 
-mc_inode_impl!(WindowRootContainer, base);
+inode_impl!(WindowRootContainer, base);
 
 impl Widgetable for WindowRootContainer {}

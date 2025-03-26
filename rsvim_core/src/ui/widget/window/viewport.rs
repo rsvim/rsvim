@@ -629,8 +629,8 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptions};
-  use crate::mc_rlock;
   use crate::prelude::*;
+  use crate::rlock;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
@@ -659,7 +659,7 @@ mod tests {
       Arc::downgrade(&buffer),
       tree.global_local_options(),
     );
-    mc_rlock!(window.viewport()).clone()
+    rlock!(window.viewport()).clone()
   }
 
   #[allow(clippy::too_many_arguments)]

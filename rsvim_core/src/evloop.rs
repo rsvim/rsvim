@@ -13,7 +13,7 @@ use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
-use crate::{mc_rlock, mc_wlock};
+use crate::{rlock, wlock};
 
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
@@ -262,7 +262,7 @@ impl EventLoop {
     let input_files = self.cli_opt.file().to_vec();
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
-        let maybe_buf_id = mc_wlock!(self.buffers).new_file_buffer(Path::new(input_file));
+        let maybe_buf_id = wlock!(self.buffers).new_file_buffer(Path::new(input_file));
         match maybe_buf_id {
           Ok(buf_id) => {
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
@@ -273,7 +273,7 @@ impl EventLoop {
         }
       }
     } else {
-      let buf_id = mc_wlock!(self.buffers).new_empty_buffer();
+      let buf_id = wlock!(self.buffers).new_empty_buffer();
       trace!("Created empty buffer {:?}", buf_id);
     }
 
@@ -283,15 +283,15 @@ impl EventLoop {
   /// Initialize windows.
   pub fn init_windows(&mut self) -> IoResult<()> {
     // Initialize default window.
-    let canvas_size = mc_rlock!(self.canvas).size();
-    let mut tree = mc_wlock!(self.tree);
+    let canvas_size = rlock!(self.canvas).size();
+    let mut tree = wlock!(self.tree);
     let tree_root_id = tree.root_id();
     let window_shape = IRect::new(
       (0, 0),
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
     let window = {
-      let buffers = mc_rlock!(self.buffers);
+      let buffers = rlock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
       trace!("Bind first buffer to default window {:?}", buf_id);
       Window::new(

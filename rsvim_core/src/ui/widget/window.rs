@@ -1,13 +1,13 @@
 //! Vim window.
 
 use crate::buf::BufferWk;
-use crate::mc_wlock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
+use crate::wlock;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{
@@ -181,7 +181,7 @@ impl Window {
   pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = options.clone();
     let viewport_options = ViewportOptions::from(&self.options);
-    mc_wlock!(self.viewport).set_options(&viewport_options);
+    wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn wrap(&self) -> bool {
@@ -191,7 +191,7 @@ impl Window {
   pub fn set_wrap(&mut self, value: bool) {
     self.options.set_wrap(value);
     let viewport_options = ViewportOptions::from(&self.options);
-    mc_wlock!(self.viewport).set_options(&viewport_options);
+    wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn line_break(&self) -> bool {
@@ -201,7 +201,7 @@ impl Window {
   pub fn set_line_break(&mut self, value: bool) {
     self.options.set_line_break(value);
     let viewport_options = ViewportOptions::from(&self.options);
-    mc_wlock!(self.viewport).set_options(&viewport_options);
+    wlock!(self.viewport).set_options(&viewport_options);
   }
 
   /// Get viewport.
@@ -227,7 +227,7 @@ pub enum WindowNode {
   WindowContent(WindowContent),
 }
 
-macro_rules! window_node_generate_getter {
+macro_rules! window_node_getter {
   ($self_name:ident,$method_name:ident) => {
     match $self_name {
       WindowNode::WindowRootContainer(n) => n.$method_name(),
@@ -236,7 +236,7 @@ macro_rules! window_node_generate_getter {
   };
 }
 
-macro_rules! window_node_generate_setter {
+macro_rules! window_node_setter {
   ($self_name:ident,$method_name:ident,$method_arg:ident) => {
     match $self_name {
       WindowNode::WindowRootContainer(n) => n.$method_name($method_arg),
@@ -247,55 +247,55 @@ macro_rules! window_node_generate_setter {
 
 impl Inodeable for WindowNode {
   fn id(&self) -> InodeId {
-    window_node_generate_getter!(self, id)
+    window_node_getter!(self, id)
   }
 
   fn depth(&self) -> &usize {
-    window_node_generate_getter!(self, depth)
+    window_node_getter!(self, depth)
   }
 
   fn set_depth(&mut self, depth: usize) {
-    window_node_generate_setter!(self, set_depth, depth)
+    window_node_setter!(self, set_depth, depth)
   }
 
   fn zindex(&self) -> &usize {
-    window_node_generate_getter!(self, zindex)
+    window_node_getter!(self, zindex)
   }
 
   fn set_zindex(&mut self, zindex: usize) {
-    window_node_generate_setter!(self, set_zindex, zindex)
+    window_node_setter!(self, set_zindex, zindex)
   }
 
   fn shape(&self) -> &IRect {
-    window_node_generate_getter!(self, shape)
+    window_node_getter!(self, shape)
   }
 
   fn set_shape(&mut self, shape: &IRect) {
-    window_node_generate_setter!(self, set_shape, shape)
+    window_node_setter!(self, set_shape, shape)
   }
 
   fn actual_shape(&self) -> &U16Rect {
-    window_node_generate_getter!(self, actual_shape)
+    window_node_getter!(self, actual_shape)
   }
 
   fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    window_node_generate_setter!(self, set_actual_shape, actual_shape)
+    window_node_setter!(self, set_actual_shape, actual_shape)
   }
 
   fn enabled(&self) -> &bool {
-    window_node_generate_getter!(self, enabled)
+    window_node_getter!(self, enabled)
   }
 
   fn set_enabled(&mut self, enabled: bool) {
-    window_node_generate_setter!(self, set_enabled, enabled)
+    window_node_setter!(self, set_enabled, enabled)
   }
 
   fn visible(&self) -> &bool {
-    window_node_generate_getter!(self, visible)
+    window_node_getter!(self, visible)
   }
 
   fn set_visible(&mut self, visible: bool) {
-    window_node_generate_setter!(self, set_visible, visible)
+    window_node_setter!(self, set_visible, visible)
   }
 }
 

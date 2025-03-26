@@ -30,7 +30,7 @@ pub enum TreeNode {
   Cursor(Cursor),
 }
 
-macro_rules! mc_tree_node_getter {
+macro_rules! tree_node_getter {
   ($self_name:ident,$method_name:ident) => {
     match $self_name {
       TreeNode::RootContainer(n) => n.$method_name(),
@@ -40,7 +40,7 @@ macro_rules! mc_tree_node_getter {
   };
 }
 
-macro_rules! mc_tree_node_setter {
+macro_rules! tree_node_setter {
   ($self_name:ident,$method_name:ident,$method_arg:ident) => {
     match $self_name {
       TreeNode::RootContainer(n) => n.$method_name($method_arg),
@@ -62,55 +62,55 @@ impl TreeNode {
 
 impl Inodeable for TreeNode {
   fn id(&self) -> InodeId {
-    mc_tree_node_getter!(self, id)
+    tree_node_getter!(self, id)
   }
 
   fn depth(&self) -> &usize {
-    mc_tree_node_getter!(self, depth)
+    tree_node_getter!(self, depth)
   }
 
   fn set_depth(&mut self, depth: usize) {
-    mc_tree_node_setter!(self, set_depth, depth)
+    tree_node_setter!(self, set_depth, depth)
   }
 
   fn zindex(&self) -> &usize {
-    mc_tree_node_getter!(self, zindex)
+    tree_node_getter!(self, zindex)
   }
 
   fn set_zindex(&mut self, zindex: usize) {
-    mc_tree_node_setter!(self, set_zindex, zindex)
+    tree_node_setter!(self, set_zindex, zindex)
   }
 
   fn shape(&self) -> &IRect {
-    mc_tree_node_getter!(self, shape)
+    tree_node_getter!(self, shape)
   }
 
   fn set_shape(&mut self, shape: &IRect) {
-    mc_tree_node_setter!(self, set_shape, shape)
+    tree_node_setter!(self, set_shape, shape)
   }
 
   fn actual_shape(&self) -> &U16Rect {
-    mc_tree_node_getter!(self, actual_shape)
+    tree_node_getter!(self, actual_shape)
   }
 
   fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    mc_tree_node_setter!(self, set_actual_shape, actual_shape)
+    tree_node_setter!(self, set_actual_shape, actual_shape)
   }
 
   fn enabled(&self) -> &bool {
-    mc_tree_node_getter!(self, enabled)
+    tree_node_getter!(self, enabled)
   }
 
   fn set_enabled(&mut self, enabled: bool) {
-    mc_tree_node_setter!(self, set_enabled, enabled)
+    tree_node_setter!(self, set_enabled, enabled)
   }
 
   fn visible(&self) -> &bool {
-    mc_tree_node_getter!(self, visible)
+    tree_node_getter!(self, visible)
   }
 
   fn set_visible(&mut self, visible: bool) {
-    mc_tree_node_setter!(self, set_visible, visible)
+    tree_node_setter!(self, set_visible, visible)
   }
 }
 

@@ -7,7 +7,7 @@ use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::{Window, WindowLocalOptions};
-use crate::{mc_rlock, mc_wlock};
+use crate::{rlock, wlock};
 
 use std::sync::Arc;
 use tracing::{self};
@@ -20,9 +20,9 @@ pub fn make_tree_with_buffers(
 ) -> TreeArc {
   // UI Tree
   let tree = Tree::to_arc(Tree::new(canvas_size));
-  let buffers = mc_rlock!(buffers_manager);
+  let buffers = rlock!(buffers_manager);
 
-  let mut tree_mut = mc_wlock!(tree);
+  let mut tree_mut = wlock!(tree);
   tree_mut.set_global_local_options(&window_local_opts);
   let tree_root_id = tree_mut.root_id();
   let window_shape = IRect::new(

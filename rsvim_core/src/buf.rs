@@ -1,8 +1,8 @@
 //! Vim buffers.
 
-#[allow(unused_imports)]
-use crate::mc_rlock;
 use crate::prelude::*;
+#[allow(unused_imports)]
+use crate::rlock;
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
@@ -475,7 +475,7 @@ impl BuffersManager {
   /// NOTE: This API should only be used for testing.
   pub fn _add_buffer(&mut self, buf: BufferArc) -> BufferId {
     let (buf_id, abs_filepath) = {
-      let buf = mc_rlock!(buf);
+      let buf = rlock!(buf);
       (buf.id(), buf.absolute_filename().clone())
     };
     self.buffers.insert(buf_id, buf.clone());
