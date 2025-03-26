@@ -72,7 +72,7 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  /// Cursor motion up/down/left/right in current window.
+  /// Cursor move up/down/left/right in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the top/bottom of the window.
   ///
   /// Also see [`NormalStateful::cursor_move_with_scroll`].
@@ -270,9 +270,9 @@ impl NormalStateful {
     }
   }
 
-  /// Cursor motion up/down/left/right in current window, with buffer scrolling if it reaches the
+  /// Cursor move up/down/left/right in current window, or scroll buffer up/down if it reaches the
   /// top/bottom of the window and the buffer has more contents.
-  fn cursor_move_with_scroll(
+  fn cursor_move_or_scroll(
     &self,
     data_access: &StatefulDataAccess,
     command: Command,
@@ -280,10 +280,15 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  /// Cursor scroll the buffer up/down in current window.
+  /// Cursor scroll buffer up/down in current window.
   /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
   /// buffer contents changed, i.e. moved up/down.
-  fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    match command {
+      Command::CursorScrollUp(n) => {}
+      Command::CursorScrollDown(n) => {}
+      _ => unreachable!(),
+    }
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
