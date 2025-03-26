@@ -102,6 +102,7 @@ pub fn bound_size(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
   )
 }
 
+#[allow(clippy::let_and_return)]
 /// Bound child position by its parent actual shape.
 /// When it's out of its parent, simply put it at the boundary.
 pub fn bound_position(shape: IRect, parent_actual_shape: U16Rect) -> IRect {
