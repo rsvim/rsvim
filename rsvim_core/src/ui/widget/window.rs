@@ -1,13 +1,13 @@
 //! Vim window.
 
 use crate::buf::BufferWk;
-use crate::coord::*;
+use crate::mc_wlock;
+use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
-use crate::wlock;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{
@@ -181,7 +181,7 @@ impl Window {
   pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = options.clone();
     let viewport_options = ViewportOptions::from(&self.options);
-    wlock!(self.viewport).set_options(&viewport_options);
+    mc_wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn wrap(&self) -> bool {
@@ -191,7 +191,7 @@ impl Window {
   pub fn set_wrap(&mut self, value: bool) {
     self.options.set_wrap(value);
     let viewport_options = ViewportOptions::from(&self.options);
-    wlock!(self.viewport).set_options(&viewport_options);
+    mc_wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn line_break(&self) -> bool {
@@ -201,7 +201,7 @@ impl Window {
   pub fn set_line_break(&mut self, value: bool) {
     self.options.set_line_break(value);
     let viewport_options = ViewportOptions::from(&self.options);
-    wlock!(self.viewport).set_options(&viewport_options);
+    mc_wlock!(self.viewport).set_options(&viewport_options);
   }
 
   /// Get viewport.
@@ -324,7 +324,7 @@ mod tests {
   use tracing::info;
 
   use crate::buf::{Buffer, BufferArc, BufferLocalOptions};
-  use crate::coord::*;
+  use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;

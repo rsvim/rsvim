@@ -1,13 +1,11 @@
 //! Internal tree node shape utils.
 
-#![allow(clippy::let_and_return)]
+use crate::mc_geo_point_as;
+use crate::prelude::*;
 
 use geo::point;
 use std::cmp::{max, min};
 // use tracing::trace;
-
-use crate::coord::*;
-use crate::geo_point_as;
 
 /// Convert (relative/logical) shape to actual shape, based on its parent's actual shape.
 ///
@@ -21,9 +19,10 @@ pub fn make_actual_shape(shape: IRect, parent_actual_shape: U16Rect) -> U16Rect 
   //   shape, parent_actual_shape
   // );
   let parent_actual_top_left_pos: U16Pos = parent_actual_shape.min().into();
-  let parent_actual_top_left_ipos: IPos = geo_point_as!(parent_actual_top_left_pos, isize);
+  let parent_actual_top_left_ipos: IPos = mc_geo_point_as!(parent_actual_top_left_pos, isize);
   let parent_actual_bottom_right_pos: U16Pos = parent_actual_shape.max().into();
-  let parent_actual_bottom_right_ipos: IPos = geo_point_as!(parent_actual_bottom_right_pos, isize);
+  let parent_actual_bottom_right_ipos: IPos =
+    mc_geo_point_as!(parent_actual_bottom_right_pos, isize);
 
   let top_left_pos: IPos = shape.min().into();
   let bottom_right_pos: IPos = shape.max().into();
@@ -165,7 +164,7 @@ mod tests {
   use std::cmp::min;
   use tracing::info;
 
-  use crate::coord::*;
+  use crate::prelude::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;

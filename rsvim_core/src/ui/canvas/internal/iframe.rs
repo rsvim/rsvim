@@ -1,6 +1,6 @@
 //! Internal implementations for `Iframe`.
 
-use crate::coord::*;
+use crate::prelude::*;
 use crate::ui::canvas::frame::cell::Cell;
 
 use compact_str::CompactString;

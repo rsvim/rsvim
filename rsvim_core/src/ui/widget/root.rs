@@ -1,7 +1,7 @@
 //! Root container is the root node in the widget tree.
 
-use crate::coord::*;
-use crate::inode_generate_impl;
+use crate::mc_inode_impl;
+use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 
@@ -19,6 +19,6 @@ impl RootContainer {
   }
 }
 
-inode_generate_impl!(RootContainer, base);
+mc_inode_impl!(RootContainer, base);
 
 impl Widgetable for RootContainer {}

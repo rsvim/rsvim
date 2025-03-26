@@ -1,12 +1,12 @@
 //! Vim window's text content widget.
 
 use crate::buf::{Buffer, BufferWk};
-use crate::coord::*;
+use crate::prelude::*;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::ViewportWk;
-use crate::{inode_generate_impl, rlock, wlock};
+use crate::{mc_inode_impl, mc_rlock, mc_wlock};
 
 use geo::point;
 use std::convert::From;
@@ -37,7 +37,7 @@ impl WindowContent {
   }
 }
 
-inode_generate_impl!(WindowContent, base);
+mc_inode_impl!(WindowContent, base);
 
 impl Widgetable for WindowContent {
   fn draw(&self, canvas: &mut Canvas) {
@@ -53,7 +53,7 @@ impl Widgetable for WindowContent {
     }
 
     let viewport = self.viewport.upgrade().unwrap();
-    let viewport = rlock!(viewport);
+    let viewport = mc_rlock!(viewport);
 
     // If viewport has no lines.
     if viewport.end_line_idx() <= viewport.start_line_idx() {
@@ -70,7 +70,7 @@ impl Widgetable for WindowContent {
     // trace!("Draw window content, viewport:{:?}", viewport);
 
     let buffer = self.buffer.upgrade().unwrap();
-    let mut buffer = wlock!(buffer);
+    let mut buffer = mc_wlock!(buffer);
 
     let mut row_idx = 0_u16;
     let mut line_idx = viewport.start_line_idx();
@@ -255,7 +255,7 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptions};
-  use crate::coord::*;
+  use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;

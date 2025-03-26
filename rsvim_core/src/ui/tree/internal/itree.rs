@@ -1,6 +1,6 @@
 //! Internal tree structure that implements the widget tree.
 
-use crate::geo_rect_as;
+use crate::mc_geo_rect_as;
 use crate::prelude::*;
 use crate::ui::tree::internal::shapes;
 use crate::ui::tree::internal::{InodeId, Inodeable};
@@ -763,8 +763,8 @@ where
       // [`&Coord<Self::Scalar>`](https://docs.rs/geo/latest/geo/algorithm/coordinate_position/trait.CoordinatePosition.html#associatedtype.Scalar),
       // which is a [`GeoNum`](https://docs.rs/geo/latest/geo/trait.GeoNum.html) trait.
 
-      let parent_actual_shape = geo_rect_as!(parent_actual_shape, i32);
-      let child_actual_shape = geo_rect_as!(child_actual_shape, i32);
+      let parent_actual_shape = mc_geo_rect_as!(parent_actual_shape, i32);
+      let child_actual_shape = mc_geo_rect_as!(child_actual_shape, i32);
 
       let top_left_pos = child_actual_shape.min();
       let bottom_right_pos = child_actual_shape.max();
@@ -784,10 +784,10 @@ where
 
 #[cfg(test)]
 mod tests {
-  use crate::inode_generate_impl;
+  use crate::mc_inode_impl;
   use tracing::info;
 
-  use crate::coord::*;
+  use crate::prelude::*;
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::internal::{InodeBase, Inodeable};
 
@@ -808,9 +808,9 @@ mod tests {
     }
   }
 
-  inode_generate_impl!(TestValue, base);
+  mc_inode_impl!(TestValue, base);
 
-  macro_rules! assert_node_id_eq {
+  macro_rules! mc_assert_node_id_eq {
     ($node: ident, $id: ident) => {
       loop {
         assert!($node.id() == $id);
@@ -819,7 +819,7 @@ mod tests {
     };
   }
 
-  macro_rules! print_node {
+  macro_rules! mc_print_node {
     ($node: ident, $name: expr) => {
       loop {
         info!("{}: {:?}", $name, $node.clone());
@@ -828,7 +828,7 @@ mod tests {
     };
   }
 
-  macro_rules! assert_parent_child_nodes_depth {
+  macro_rules! mc_assert_parent_child_depth {
     ($parent: ident, $child: ident) => {
       loop {
         assert_eq!(*$parent.depth() + 1, *$child.depth());
@@ -837,7 +837,7 @@ mod tests {
     };
   }
 
-  macro_rules! assert_node_actual_shape_eq {
+  macro_rules! mc_assert_node_actual_shape_eq {
     ($node: ident, $expect: expr, $index: expr) => {
       loop {
         assert_eq!(*$node.actual_shape(), $expect, "index:{:?}", $index,);
@@ -846,7 +846,7 @@ mod tests {
     };
   }
 
-  macro_rules! assert_node_value_eq {
+  macro_rules! mc_assert_node_value_eq {
     ($node: ident, $expect: expr) => {
       loop {
         assert_eq!($node.value, $expect);
@@ -871,7 +871,7 @@ mod tests {
     assert!(tree.children_ids(&nid1).unwrap().is_empty());
 
     for node in tree.iter() {
-      assert_node_id_eq!(node, nid1);
+      mc_assert_node_id_eq!(node, nid1);
     }
   }
 
@@ -927,12 +927,12 @@ mod tests {
     let n4 = tree.node(&nid4).unwrap();
     let n5 = tree.node(&nid5).unwrap();
     let n6 = tree.node(&nid6).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
-    print_node!(n4, "n4");
-    print_node!(n5, "n5");
-    print_node!(n6, "n6");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
+    mc_print_node!(n4, "n4");
+    mc_print_node!(n5, "n5");
+    mc_print_node!(n6, "n6");
 
     assert!(nid1 < nid2);
     assert!(nid2 < nid3);
@@ -940,12 +940,12 @@ mod tests {
     assert!(nid4 < nid5);
     assert!(nid5 < nid6);
 
-    assert_parent_child_nodes_depth!(n1, n2);
-    assert_parent_child_nodes_depth!(n1, n3);
-    assert_parent_child_nodes_depth!(n2, n4);
-    assert_parent_child_nodes_depth!(n2, n5);
-    assert_parent_child_nodes_depth!(n2, n6);
-    assert_parent_child_nodes_depth!(n3, n6);
+    mc_assert_parent_child_depth!(n1, n2);
+    mc_assert_parent_child_depth!(n1, n3);
+    mc_assert_parent_child_depth!(n2, n4);
+    mc_assert_parent_child_depth!(n2, n5);
+    mc_assert_parent_child_depth!(n2, n6);
+    mc_assert_parent_child_depth!(n3, n6);
 
     assert_eq!(tree.children_ids(&nid1).unwrap().len(), 2);
     assert_eq!(tree.children_ids(&nid2).unwrap().len(), 2);
@@ -1057,15 +1057,15 @@ mod tests {
     let n7 = tree.node(&nid7).unwrap();
     let n8 = tree.node(&nid8).unwrap();
     let n9 = tree.node(&nid9).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
-    print_node!(n4, "n4");
-    print_node!(n5, "n5");
-    print_node!(n6, "n6");
-    print_node!(n7, "n7");
-    print_node!(n8, "n8");
-    print_node!(n9, "n9");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
+    mc_print_node!(n4, "n4");
+    mc_print_node!(n5, "n5");
+    mc_print_node!(n6, "n6");
+    mc_print_node!(n7, "n7");
+    mc_print_node!(n8, "n8");
+    mc_print_node!(n9, "n9");
 
     assert!(nid1 < nid2);
     assert!(nid2 < nid3);
@@ -1076,15 +1076,15 @@ mod tests {
     assert!(nid7 < nid8);
     assert!(nid8 < nid9);
 
-    assert_parent_child_nodes_depth!(n1, n2);
-    assert_parent_child_nodes_depth!(n1, n3);
-    assert_parent_child_nodes_depth!(n2, n4);
-    assert_parent_child_nodes_depth!(n2, n5);
-    assert_parent_child_nodes_depth!(n2, n6);
-    assert_parent_child_nodes_depth!(n3, n6);
-    assert_parent_child_nodes_depth!(n5, n7);
-    assert_parent_child_nodes_depth!(n7, n8);
-    assert_parent_child_nodes_depth!(n7, n9);
+    mc_assert_parent_child_depth!(n1, n2);
+    mc_assert_parent_child_depth!(n1, n3);
+    mc_assert_parent_child_depth!(n2, n4);
+    mc_assert_parent_child_depth!(n2, n5);
+    mc_assert_parent_child_depth!(n2, n6);
+    mc_assert_parent_child_depth!(n3, n6);
+    mc_assert_parent_child_depth!(n5, n7);
+    mc_assert_parent_child_depth!(n7, n8);
+    mc_assert_parent_child_depth!(n7, n9);
 
     assert_eq!(tree.children_ids(&nid1).unwrap().len(), 2);
     assert_eq!(tree.children_ids(&nid2).unwrap().len(), 2);
@@ -1221,22 +1221,22 @@ mod tests {
     let n7 = tree.node(&nid7).unwrap();
     let n8 = tree.node(&nid8).unwrap();
     let n9 = tree.node(&nid9).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
-    print_node!(n4, "n4");
-    print_node!(n5, "n5");
-    print_node!(n6, "n6");
-    print_node!(n7, "n7");
-    print_node!(n8, "n8");
-    print_node!(n9, "n9");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
+    mc_print_node!(n4, "n4");
+    mc_print_node!(n5, "n5");
+    mc_print_node!(n6, "n6");
+    mc_print_node!(n7, "n7");
+    mc_print_node!(n8, "n8");
+    mc_print_node!(n9, "n9");
 
     let expects = [us1, us2, us3, us4, us5, us6, us7, us8, us9];
     let nodes = [n1, n2, n3, n4, n5, n6, n7, n8, n9];
     for i in 0..9 {
       let expect = expects[i];
       let node = nodes[i];
-      assert_node_actual_shape_eq!(node, expect, i);
+      mc_assert_node_actual_shape_eq!(node, expect, i);
     }
   }
 
@@ -1302,19 +1302,19 @@ mod tests {
     let n4 = tree.node(&nid4).unwrap();
     let n5 = tree.node(&nid5).unwrap();
     let n6 = tree.node(&nid6).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
-    print_node!(n4, "n4");
-    print_node!(n5, "n5");
-    print_node!(n6, "n6");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
+    mc_print_node!(n4, "n4");
+    mc_print_node!(n5, "n5");
+    mc_print_node!(n6, "n6");
 
     let expects = [us1, us2, us3, us4, us5, us6];
     let nodes = [n1, n2, n3, n4, n5, n6];
     for i in 0..6 {
       let expect = expects[i];
       let node = &nodes[i];
-      assert_node_actual_shape_eq!(node, expect, i);
+      mc_assert_node_actual_shape_eq!(node, expect, i);
     }
   }
 
@@ -1353,7 +1353,7 @@ mod tests {
     for (i, nid) in nodes_ids.iter().enumerate() {
       let node = tree.node(nid).unwrap();
       let expect = node_values[i];
-      assert_node_value_eq!(node, expect);
+      mc_assert_node_value_eq!(node, expect);
     }
 
     let first1 = tree.children_ids(&nodes_ids[0]).unwrap().first();
@@ -1404,7 +1404,7 @@ mod tests {
 
     assert!(remove2.is_some());
     let remove2 = &remove2.unwrap();
-    assert_node_value_eq!(remove2, 3);
+    mc_assert_node_value_eq!(remove2, 3);
     assert!(
       !tree
         .children_ids(&tree.root_id())
@@ -1413,7 +1413,7 @@ mod tests {
     );
     assert!(remove4.is_some());
     let remove4 = &remove4.unwrap();
-    assert_node_value_eq!(remove4, 5);
+    mc_assert_node_value_eq!(remove4, 5);
     assert!(
       !tree
         .children_ids(&tree.root_id())
@@ -1427,7 +1427,7 @@ mod tests {
     // 1,2,(3),4,(5)
     assert!(remove1.is_some());
     let remove1 = &remove1.unwrap();
-    assert_node_value_eq!(remove1, 2);
+    mc_assert_node_value_eq!(remove1, 2);
     assert!(
       !tree
         .children_ids(&tree.root_id())
@@ -1436,7 +1436,7 @@ mod tests {
     );
     assert!(remove3.is_some());
     let remove3 = &remove3.unwrap();
-    assert_node_value_eq!(remove3, 4);
+    mc_assert_node_value_eq!(remove3, 4);
     assert!(
       !tree
         .children_ids(&tree.root_id())
@@ -1528,15 +1528,15 @@ mod tests {
     let n7 = tree.node(&nid7).unwrap();
     let n8 = tree.node(&nid8).unwrap();
     let n9 = tree.node(&nid9).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
-    print_node!(n4, "n4");
-    print_node!(n5, "n5");
-    print_node!(n6, "n6");
-    print_node!(n7, "n7");
-    print_node!(n8, "n8");
-    print_node!(n9, "n9");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
+    mc_print_node!(n4, "n4");
+    mc_print_node!(n5, "n5");
+    mc_print_node!(n6, "n6");
+    mc_print_node!(n7, "n7");
+    mc_print_node!(n8, "n8");
+    mc_print_node!(n9, "n9");
   }
 
   #[test]
@@ -1600,19 +1600,19 @@ mod tests {
     let n4 = tree.node(&nid4).unwrap();
     let n5 = tree.node(&nid5).unwrap();
     let n6 = tree.node(&nid6).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
-    print_node!(n4, "n4");
-    print_node!(n5, "n5");
-    print_node!(n6, "n6");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
+    mc_print_node!(n4, "n4");
+    mc_print_node!(n5, "n5");
+    mc_print_node!(n6, "n6");
 
     let expects = [us1, us2, us3, us4, us5, us6];
     let nodes = [n1, n2, n3, n4, n5, n6];
     for i in 0..6 {
       let expect = expects[i];
       let node = &nodes[i];
-      assert_node_actual_shape_eq!(node, expect, i);
+      mc_assert_node_actual_shape_eq!(node, expect, i);
     }
   }
 
@@ -1649,9 +1649,9 @@ mod tests {
     let n1 = tree.node(&nid1).unwrap();
     let n2 = tree.node(&nid2).unwrap();
     let n3 = tree.node(&nid3).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
 
     // n3 Move: (x, y)
     let moves: Vec<(isize, isize)> = vec![
@@ -1721,9 +1721,9 @@ mod tests {
     let n1 = tree.node(&nid1).unwrap();
     let n2 = tree.node(&nid2).unwrap();
     let n3 = tree.node(&nid3).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
 
     // n3 bounded move by: (x, y)
     let moves: Vec<(isize, isize)> = vec![
@@ -1793,9 +1793,9 @@ mod tests {
     let n1 = tree.node(&nid1).unwrap();
     let n2 = tree.node(&nid2).unwrap();
     let n3 = tree.node(&nid3).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
 
     // n3 Move: (x, y)
     let moves: Vec<(isize, isize)> = vec![
@@ -1865,9 +1865,9 @@ mod tests {
     let n1 = tree.node(&nid1).unwrap();
     let n2 = tree.node(&nid2).unwrap();
     let n3 = tree.node(&nid3).unwrap();
-    print_node!(n1, "n1");
-    print_node!(n2, "n2");
-    print_node!(n3, "n3");
+    mc_print_node!(n1, "n1");
+    mc_print_node!(n2, "n2");
+    mc_print_node!(n3, "n3");
 
     // n3 bounded move to: (x, y)
     let moves: Vec<(isize, isize)> = vec![

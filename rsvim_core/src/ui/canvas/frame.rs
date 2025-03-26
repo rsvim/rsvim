@@ -1,14 +1,14 @@
 //! Frame inside the canvas.
 
+use crate::prelude::*;
+use crate::ui::canvas::frame::cell::Cell;
+use crate::ui::canvas::frame::cursor::Cursor;
+use crate::ui::canvas::internal::iframe::Iframe;
+
 use compact_str::CompactString;
 use geo::point;
 use std::ops::Range;
 // use tracing::debug;
-
-use crate::coord::*;
-use crate::ui::canvas::frame::cell::Cell;
-use crate::ui::canvas::frame::cursor::Cursor;
-use crate::ui::canvas::internal::iframe::Iframe;
 
 pub mod cell;
 pub mod cursor;

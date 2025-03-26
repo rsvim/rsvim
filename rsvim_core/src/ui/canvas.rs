@@ -1,6 +1,6 @@
 //! Canvas.
 
-use crate::coord::*;
+use crate::prelude::*;
 
 // Re-export
 pub use crate::ui::canvas::frame::Frame;

@@ -1,12 +1,12 @@
 //! The normal mode.
 
 use crate::buf::Buffer;
+use crate::mc_wlock;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::*;
 use crate::ui::widget::window::Viewport;
-use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use std::ptr::NonNull;
@@ -78,15 +78,15 @@ impl NormalStateful {
   /// Also see [`NormalStateful::cursor_move_with_scroll`].
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
-    let mut tree = wlock!(tree);
+    let mut tree = mc_wlock!(tree);
 
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
         let viewport = current_window.viewport();
-        let mut viewport = wlock!(viewport);
+        let mut viewport = mc_wlock!(viewport);
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut buffer = wlock!(buffer);
+        let mut buffer = mc_wlock!(buffer);
         unsafe {
           // Fix multiple mutable references on `buffer`.
           let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
@@ -285,15 +285,15 @@ impl NormalStateful {
   /// buffer contents changed, i.e. moved up/down.
   fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
-    let mut tree = wlock!(tree);
+    let mut tree = mc_wlock!(tree);
 
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
         let viewport = current_window.viewport();
-        let viewport = wlock!(viewport);
+        let viewport = mc_wlock!(viewport);
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut _buffer = wlock!(buffer);
+        let mut _buffer = mc_wlock!(buffer);
 
         match command {
           Command::CursorScrollUp(_n) => {}
@@ -316,8 +316,8 @@ mod tests {
   use super::*;
 
   use crate::buf::{BufferLocalOptions, BuffersManagerArc};
-  use crate::coord::*;
-  use crate::rlock;
+  use crate::mc_rlock;
+  use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::log::init as test_log_init;
@@ -342,14 +342,14 @@ mod tests {
   }
 
   fn get_viewport(tree: TreeArc) -> Viewport {
-    let tree = rlock!(tree);
+    let tree = mc_rlock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(&current_window_id).unwrap();
     assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
       TreeNode::Window(current_window) => {
         let viewport = current_window.viewport();
-        let viewport = rlock!(viewport);
+        let viewport = mc_rlock!(viewport);
         viewport.clone()
       }
       _ => unreachable!(),

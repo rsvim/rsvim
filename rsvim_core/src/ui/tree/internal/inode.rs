@@ -1,7 +1,7 @@
 //! The node structure of the internal tree.
 
-use crate::coord::*;
-use crate::geo_rect_as;
+use crate::mc_geo_rect_as;
+use crate::prelude::*;
 
 use geo;
 use std::fmt::Debug;
@@ -39,7 +39,7 @@ pub trait Inodeable: Sized + Clone + Debug {
 
 /// Generate getter/setter for `Inode`.
 #[macro_export]
-macro_rules! inode_generate_impl {
+macro_rules! mc_inode_impl {
   ($struct_name:ty,$base_name:ident) => {
     impl Inodeable for $struct_name {
       fn id(&self) -> InodeId {
@@ -119,7 +119,7 @@ pub struct InodeBase {
 
 impl InodeBase {
   pub fn new(shape: IRect) -> Self {
-    let actual_shape = geo_rect_as!(shape, u16);
+    let actual_shape = mc_geo_rect_as!(shape, u16);
     InodeBase {
       id: next_node_id(),
       depth: 0,
@@ -188,7 +188,7 @@ impl InodeBase {
 mod tests {
   use std::cell::RefCell;
 
-  use crate::coord::*;
+  use crate::prelude::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;
@@ -209,7 +209,7 @@ mod tests {
     }
   }
 
-  inode_generate_impl!(TestNode, base);
+  mc_inode_impl!(TestNode, base);
 
   #[test]
   fn new() {

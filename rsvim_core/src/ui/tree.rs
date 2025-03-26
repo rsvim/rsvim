@@ -2,8 +2,8 @@
 
 #![allow(dead_code)]
 
-use crate::coord::*;
 use crate::envar;
+use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
@@ -30,7 +30,7 @@ pub enum TreeNode {
   Cursor(Cursor),
 }
 
-macro_rules! tree_node_generate_getter {
+macro_rules! mc_tree_node_getter {
   ($self_name:ident,$method_name:ident) => {
     match $self_name {
       TreeNode::RootContainer(n) => n.$method_name(),
@@ -40,7 +40,7 @@ macro_rules! tree_node_generate_getter {
   };
 }
 
-macro_rules! tree_node_generate_setter {
+macro_rules! mc_tree_node_setter {
   ($self_name:ident,$method_name:ident,$method_arg:ident) => {
     match $self_name {
       TreeNode::RootContainer(n) => n.$method_name($method_arg),
@@ -62,55 +62,55 @@ impl TreeNode {
 
 impl Inodeable for TreeNode {
   fn id(&self) -> InodeId {
-    tree_node_generate_getter!(self, id)
+    mc_tree_node_getter!(self, id)
   }
 
   fn depth(&self) -> &usize {
-    tree_node_generate_getter!(self, depth)
+    mc_tree_node_getter!(self, depth)
   }
 
   fn set_depth(&mut self, depth: usize) {
-    tree_node_generate_setter!(self, set_depth, depth)
+    mc_tree_node_setter!(self, set_depth, depth)
   }
 
   fn zindex(&self) -> &usize {
-    tree_node_generate_getter!(self, zindex)
+    mc_tree_node_getter!(self, zindex)
   }
 
   fn set_zindex(&mut self, zindex: usize) {
-    tree_node_generate_setter!(self, set_zindex, zindex)
+    mc_tree_node_setter!(self, set_zindex, zindex)
   }
 
   fn shape(&self) -> &IRect {
-    tree_node_generate_getter!(self, shape)
+    mc_tree_node_getter!(self, shape)
   }
 
   fn set_shape(&mut self, shape: &IRect) {
-    tree_node_generate_setter!(self, set_shape, shape)
+    mc_tree_node_setter!(self, set_shape, shape)
   }
 
   fn actual_shape(&self) -> &U16Rect {
-    tree_node_generate_getter!(self, actual_shape)
+    mc_tree_node_getter!(self, actual_shape)
   }
 
   fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    tree_node_generate_setter!(self, set_actual_shape, actual_shape)
+    mc_tree_node_setter!(self, set_actual_shape, actual_shape)
   }
 
   fn enabled(&self) -> &bool {
-    tree_node_generate_getter!(self, enabled)
+    mc_tree_node_getter!(self, enabled)
   }
 
   fn set_enabled(&mut self, enabled: bool) {
-    tree_node_generate_setter!(self, set_enabled, enabled)
+    mc_tree_node_setter!(self, set_enabled, enabled)
   }
 
   fn visible(&self) -> &bool {
-    tree_node_generate_getter!(self, visible)
+    mc_tree_node_getter!(self, visible)
   }
 
   fn set_visible(&mut self, visible: bool) {
-    tree_node_generate_setter!(self, set_visible, visible)
+    mc_tree_node_setter!(self, set_visible, visible)
   }
 }
 
@@ -490,7 +490,7 @@ impl Tree {
 
 #[cfg(test)]
 mod tests {
-  use crate::coord::*;
+  use crate::prelude::*;
   // use crate::test::log::init as test_log_init;
 
   use super::*;
