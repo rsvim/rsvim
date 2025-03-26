@@ -73,9 +73,7 @@ impl Stateful for NormalStateful {
 
 impl NormalStateful {
   /// Cursor motion up/down/left/right in current window.
-  ///
-  /// NOTE: This is a low level operation api, which is not directly for editor user. i.e. It will
-  /// not scroll the buffer if cursor reaches the top/bottom of the window.
+  /// NOTE: This will not scroll the buffer if cursor reaches the top/bottom of the window.
   ///
   /// Also see [`NormalStateful::cursor_move_with_scroll`].
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
@@ -274,8 +272,6 @@ impl NormalStateful {
 
   /// Cursor motion up/down/left/right in current window, with buffer scrolling if it reaches the
   /// top/bottom of the window and has more buffer contents.
-  ///
-  /// NOTE: This is a high level operation api, which is directly for editor user.
   fn cursor_move_with_scroll(
     &self,
     data_access: &StatefulDataAccess,
