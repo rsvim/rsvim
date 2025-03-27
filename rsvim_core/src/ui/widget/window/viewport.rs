@@ -1377,10 +1377,11 @@ mod tests {
     ];
 
     let size = U16Size::new(31, 5);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
