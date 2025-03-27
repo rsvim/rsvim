@@ -283,7 +283,7 @@ impl NormalStateful {
   /// Cursor scroll buffer up/down in current window.
   /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
   /// buffer contents changed, i.e. moved up/down.
-  fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
 
@@ -296,8 +296,8 @@ impl NormalStateful {
         let mut _buffer = wlock!(buffer);
 
         match command {
-          Command::CursorScrollUp(n) | Command::CursorScrollDown(n) => {}
-          Command::CursorScrollLeft(n) | Command::CursorScrollRight(n) => {}
+          Command::CursorScrollUp(_n) | Command::CursorScrollDown(_n) => {}
+          Command::CursorScrollLeft(_n) | Command::CursorScrollRight(_n) => {}
           _ => unreachable!(),
         }
       }
@@ -377,7 +377,7 @@ mod tests {
   use crate::test::log::init as test_log_init;
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
-  use crate::ui::widget::window::{Viewport, WindowLocalOptions};
+  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use crossterm::event::Event;
   use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -415,7 +415,10 @@ mod tests {
     test_log_init();
 
     let (tree, state, bufs) = make_tree(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       vec![],
     );
@@ -455,7 +458,10 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (tree, state, bufs) = make_tree(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       lines,
     );
@@ -495,7 +501,10 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (tree, state, bufs) = make_tree(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       lines,
     );
@@ -548,7 +557,10 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (tree, state, bufs) = make_tree(
-      WindowLocalOptions::builder().wrap(true).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(true)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       lines,
     );
@@ -601,7 +613,10 @@ mod tests {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (tree, state, bufs) = make_tree(
-      WindowLocalOptions::builder().wrap(true).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(true)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       lines,
     );

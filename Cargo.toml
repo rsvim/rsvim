@@ -57,6 +57,7 @@ unicode-width = "0.2.0"
 unicode-segmentation = "1.12.0"
 # unicode-normalization = "0.1.24"
 # icu = { version = "1.5.0", features = ["compiled_data"] }
+derive_builder = "0.20.2"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 

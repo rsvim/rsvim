@@ -11,8 +11,9 @@ use crate::wlock;
 
 // Re-export
 pub use crate::ui::widget::window::opt::{
-  ViewportOptions, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
-  WindowOptionsBuilder,
+  ViewportOptions, WindowGlobalOptions, WindowGlobalOptionsBuilder,
+  WindowGlobalOptionsBuilderError, WindowLocalOptions, WindowLocalOptionsBuilder,
+  WindowLocalOptionsBuilderError,
 };
 pub use crate::ui::widget::window::viewport::{
   CursorViewport, LineViewport, RowViewport, Viewport, ViewportArc, ViewportReadGuard, ViewportWk,
@@ -58,10 +59,7 @@ impl Window {
     let window_root_node = WindowNode::WindowRootContainer(window_root);
     let window_root_actual_shape = *window_root_node.actual_shape();
 
-    let viewport_options = ViewportOptions {
-      wrap: options.wrap(),
-      line_break: options.line_break(),
-    };
+    let viewport_options = ViewportOptions::from(local_options);
     let viewport = Viewport::new(&viewport_options, buffer.clone(), &window_root_actual_shape);
     let viewport = Viewport::to_arc(viewport);
 
@@ -185,21 +183,31 @@ impl Window {
   }
 
   pub fn wrap(&self) -> bool {
-    self.options.wrap()
+    self.options.wrap
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.options.set_wrap(value);
+    self.options.wrap = value;
     let viewport_options = ViewportOptions::from(&self.options);
     wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn line_break(&self) -> bool {
-    self.options.line_break()
+    self.options.line_break
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.options.set_line_break(value);
+    self.options.line_break = value;
+    let viewport_options = ViewportOptions::from(&self.options);
+    wlock!(self.viewport).set_options(&viewport_options);
+  }
+
+  pub fn scroll_off(&self) -> u16 {
+    self.options.scroll_off
+  }
+
+  pub fn set_scroll_off(&mut self, value: u16) {
+    self.options.scroll_off = value;
     let viewport_options = ViewportOptions::from(&self.options);
     wlock!(self.viewport).set_options(&viewport_options);
   }
