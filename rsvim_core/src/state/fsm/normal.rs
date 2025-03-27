@@ -272,7 +272,7 @@ impl NormalStateful {
 
   /// Cursor move up/down/left/right in current window, or scroll buffer up/down if it reaches the
   /// top/bottom of the window and the buffer has more contents.
-  fn _cursor_move_or_scroll(
+  fn cursor_move_or_scroll(
     &self,
     _data_access: &StatefulDataAccess,
     _command: Command,
@@ -283,7 +283,7 @@ impl NormalStateful {
   /// Cursor scroll buffer up/down in current window.
   /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
   /// buffer contents changed, i.e. moved up/down.
-  fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
 
