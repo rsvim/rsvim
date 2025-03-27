@@ -27,11 +27,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: crate-ci/typos@master
-  miri:
-    name: (Experimental) Cargo Miri
-    runs-on: ubuntu-latest
-    if: ${{ github.ref != 'refs/heads/main' }}
-    steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
         with:
@@ -39,7 +34,7 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.8
       - uses: actions/checkout@v4
-      - name: Cargo miri
+      - name: (Experimental) Cargo miri
         env:
           SCCACHE_GHA_ENABLED: "true"
           RUSTC_WRAPPER: "sccache"
