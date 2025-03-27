@@ -106,7 +106,7 @@ jobs:
           command: check advisories
           arguments: --all-features --exclude v8
   unit_test:
-    name: Code Coverage
+    name: Unit Test
     strategy:
       matrix:
         os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-2022]
@@ -119,12 +119,12 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.8
       - uses: actions/checkout@v4
-      - uses: taiki-e/install-action@cargo-llvm-cov
-      - uses: taiki-e/install-action@nextest
-      - name: Run 'cargo test'
+      - name: Cargo test
         run: |
           cargo test --all-features --workspace
-      - name: Run 'cargo nextest'
+      - uses: taiki-e/install-action@cargo-llvm-cov
+      - uses: taiki-e/install-action@nextest
+      - name: Cargo nextest with code coverage
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --all-features --workspace --lcov --output-path lcov.info
