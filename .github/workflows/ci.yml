@@ -17,8 +17,36 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
-  js_lint:
-    name: JavaScript Lint
+  pr:
+    name: PR
+    runs-on: ubuntu-latest
+    if: ${{ github.ref != 'refs/heads/main' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: crate-ci/typos@master
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri,rust-src
+      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.8
+      - uses: actions/checkout@v4
+      - name: (Experimental) Cargo miri
+        env:
+          SCCACHE_GHA_ENABLED: "true"
+          RUSTC_WRAPPER: "sccache"
+          MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-permissive-provenance"
+        # Disable simd features
+        run: |
+          sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' Cargo.toml
+          sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' ./rsvim_core/Cargo.toml
+          git diff --color=always
+          cargo +nightly miri test
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,14 +67,9 @@ jobs:
           echo "show PWD=${PWD}"
           echo "tsc"
           tsc
-  rs_lint:
-    name: Rust Lint
-    runs-on: ubuntu-latest
-    steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: cargo-bins/cargo-binstall@main
-      - uses: actions/checkout@v4
       - name: Rustfmt
         run: cargo fmt --check
       - name: Taplo
@@ -94,34 +117,20 @@ jobs:
       matrix:
         os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-2022]
     runs-on: ${{ matrix.os }}
+    env:
+      SCCACHE_GHA_ENABLED: "true"
+      RUSTC_WRAPPER: "sccache"
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.8
       - uses: actions/checkout@v4
-      - name: Run tests
-        env:
-          SCCACHE_GHA_ENABLED: "true"
-          RUSTC_WRAPPER: "sccache"
+      - name: Cargo test
         run: |
           cargo test --all-features --workspace
-  code_coverage:
-    name: Code Coverage
-    strategy:
-      matrix:
-        os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-2022]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: mozilla-actions/sccache-action@v0.0.8
-      - uses: actions/checkout@v4
       - uses: taiki-e/install-action@cargo-llvm-cov
       - uses: taiki-e/install-action@nextest
-      - name: Run tests with coverage
-        env:
-          SCCACHE_GHA_ENABLED: "true"
-          RUSTC_WRAPPER: "sccache"
+      - name: Cargo nextest with code coverage
         run: |
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --all-features --workspace --lcov --output-path lcov.info

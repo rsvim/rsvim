@@ -3,7 +3,6 @@
 use crate::geo_rect_as;
 use crate::prelude::*;
 
-use geo;
 use std::fmt::Debug;
 use std::sync::atomic::{AtomicI32, Ordering};
 
