@@ -20,6 +20,7 @@ jobs:
   pr:
     name: PR
     runs-on: ubuntu-latest
+    if: ${{ github.ref != 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
       - uses: amannn/action-semantic-pull-request@v5
@@ -29,6 +30,7 @@ jobs:
   miri:
     name: (Experimental) Cargo Miri
     runs-on: ubuntu-latest
+    if: ${{ github.ref != 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
