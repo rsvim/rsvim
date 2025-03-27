@@ -296,10 +296,8 @@ impl NormalStateful {
         let mut _buffer = wlock!(buffer);
 
         match command {
-          Command::CursorScrollUp(_n) => {}
-          Command::CursorScrollDown(_n) => {}
-          Command::CursorScrollLeft(_n) => {}
-          Command::CursorScrollRight(_n) => {}
+          Command::CursorScrollUp(n) | Command::CursorScrollDown(n) => {}
+          Command::CursorScrollLeft(n) | Command::CursorScrollRight(n) => {}
           _ => unreachable!(),
         }
       }

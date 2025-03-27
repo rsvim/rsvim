@@ -2,11 +2,27 @@
 
 use crate::defaults;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
+struct LocalOpts {
+  pub wrap: bool,
+  pub line_break: bool,
+  pub scroll_off: u16,
+}
+
+impl Default for LocalOpts {
+  fn default() -> Self {
+    Self {
+      wrap: defaults::win::WRAP,
+      line_break: defaults::win::LINE_BREAK,
+      scroll_off: defaults::win::SCROLL_OFF,
+    }
+  }
+}
+
+#[derive(Debug, Copy, Clone)]
 /// Window options.
 pub struct WindowLocalOptions {
-  wrap: bool,
-  line_break: bool,
+  opts: LocalOpts,
 }
 
 impl Default for WindowLocalOptions {
@@ -23,52 +39,65 @@ impl WindowLocalOptions {
   /// The 'wrap' option, also known as 'line-wrap', default to `true`.
   /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub fn wrap(&self) -> bool {
-    self.wrap
+    self.opts.wrap
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.wrap = value;
+    self.opts.wrap = value;
   }
 
   /// The 'line-break' option, also known as 'word-wrap', default to `false`.
   /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   pub fn line_break(&self) -> bool {
-    self.line_break
+    self.opts.line_break
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.line_break = value;
+    self.opts.line_break = value;
+  }
+
+  /// The 'scroll-off' option, default to `0`.
+  /// See: <https://vimhelp.org/options.txt.html#%27scrolloff%27>.
+  pub fn scroll_off(&self) -> u16 {
+    self.opts.scroll_off
+  }
+
+  pub fn set_scroll_off(&mut self, value: u16) {
+    self.opts.scroll_off = value;
   }
 }
 
+#[derive(Debug, Copy, Clone)]
 /// The builder for [`WindowLocalOptions`].
 pub struct WindowOptionsBuilder {
-  wrap: bool,
-  line_break: bool,
+  opts: LocalOpts,
 }
 
 impl WindowOptionsBuilder {
   pub fn wrap(&mut self, value: bool) -> &mut Self {
-    self.wrap = value;
+    self.opts.wrap = value;
     self
   }
+
   pub fn line_break(&mut self, value: bool) -> &mut Self {
-    self.line_break = value;
+    self.opts.line_break = value;
     self
   }
+
+  pub fn scroll_off(&mut self, value: u16) -> &mut Self {
+    self.opts.scroll_off = value;
+    self
+  }
+
   pub fn build(&self) -> WindowLocalOptions {
-    WindowLocalOptions {
-      wrap: self.wrap,
-      line_break: self.line_break,
-    }
+    WindowLocalOptions { opts: self.opts }
   }
 }
 
 impl Default for WindowOptionsBuilder {
   fn default() -> Self {
     WindowOptionsBuilder {
-      wrap: defaults::win::WRAP,
-      line_break: defaults::win::LINE_BREAK,
+      opts: LocalOpts::default(),
     }
   }
 }
@@ -104,6 +133,7 @@ impl WindowGlobalOptionsBuilder {
 pub struct ViewportOptions {
   pub wrap: bool,
   pub line_break: bool,
+  pub scroll_off: u16,
 }
 
 impl From<&WindowLocalOptions> for ViewportOptions {
@@ -111,6 +141,7 @@ impl From<&WindowLocalOptions> for ViewportOptions {
     Self {
       wrap: value.wrap(),
       line_break: value.line_break(),
+      scroll_off: value.scroll_off(),
     }
   }
 }
