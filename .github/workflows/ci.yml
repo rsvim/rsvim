@@ -17,6 +17,15 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
+  pr:
+    name: PR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: crate-ci/typos@master
   miri:
     name: (Experimental) Cargo Miri
     runs-on: ubuntu-latest
