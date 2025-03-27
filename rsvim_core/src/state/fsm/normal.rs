@@ -702,7 +702,10 @@ mod tests {
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       bufs.clone(),
     );
@@ -745,7 +748,10 @@ mod tests {
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       bufs.clone(),
     );
@@ -788,7 +794,10 @@ mod tests {
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       bufs.clone(),
     );
@@ -831,7 +840,10 @@ mod tests {
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       bufs.clone(),
     );
@@ -886,7 +898,10 @@ mod tests {
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       bufs.clone(),
     );
@@ -943,7 +958,10 @@ mod tests {
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       bufs.clone(),
     );
@@ -1023,7 +1041,10 @@ mod tests {
     let buf = make_buffer_from_lines(buf_opts.clone(), lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
-      WindowLocalOptions::builder().wrap(false).build(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
       U16Size::new(10, 10),
       bufs.clone(),
     );
