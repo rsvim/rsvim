@@ -298,6 +298,62 @@ impl NormalStateful {
         match command {
           Command::CursorScrollUp(_n) => {}
           Command::CursorScrollDown(_n) => {}
+          Command::CursorScrollLeft(_n) => {}
+          Command::CursorScrollRight(_n) => {}
+          _ => unreachable!(),
+        }
+      }
+    }
+
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  fn _cursor_scroll_vertically(
+    &self,
+    data_access: &StatefulDataAccess,
+    command: Command,
+  ) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = wlock!(tree);
+
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
+        let viewport = current_window.viewport();
+        let viewport = wlock!(viewport);
+        let buffer = viewport.buffer();
+        let buffer = buffer.upgrade().unwrap();
+        let mut _buffer = wlock!(buffer);
+
+        match command {
+          Command::CursorScrollUp(_n) => {}
+          Command::CursorScrollDown(_n) => {}
+          _ => unreachable!(),
+        }
+      }
+    }
+
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  fn _cursor_scroll_horizontally(
+    &self,
+    data_access: &StatefulDataAccess,
+    command: Command,
+  ) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = wlock!(tree);
+
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
+        let viewport = current_window.viewport();
+        let viewport = wlock!(viewport);
+        let buffer = viewport.buffer();
+        let buffer = buffer.upgrade().unwrap();
+        let mut _buffer = wlock!(buffer);
+
+        match command {
+          Command::CursorScrollLeft(_n) => {}
+          Command::CursorScrollRight(_n) => {}
           _ => unreachable!(),
         }
       }
