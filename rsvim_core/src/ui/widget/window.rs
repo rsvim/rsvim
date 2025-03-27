@@ -410,7 +410,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let window_local_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_local_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let window = make_window_from_size(terminal_size, buf.clone(), &window_local_options);
     let mut actual = Canvas::new(terminal_size);
     window.draw(&mut actual);
