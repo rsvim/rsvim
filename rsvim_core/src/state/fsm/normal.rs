@@ -369,7 +369,7 @@ impl NormalStateful {
 mod tests {
   use super::*;
 
-  use crate::buf::{BufferLocalOptions, BuffersManagerArc};
+  use crate::buf::{BufferLocalOptionsBuilder, BuffersManagerArc};
   use crate::prelude::*;
   use crate::rlock;
   use crate::state::{State, StateArc};
@@ -387,8 +387,8 @@ mod tests {
     canvas_size: U16Size,
     lines: Vec<&str>,
   ) -> (TreeArc, StateArc, BuffersManagerArc) {
-    let buf_opts = BufferLocalOptions::default();
-    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(window_local_opts, canvas_size, bufs.clone());
     let state = State::to_arc(State::default());
@@ -660,8 +660,8 @@ mod tests {
     test_log_init();
 
     let lines = vec![];
-    let buf_opts = BufferLocalOptions::default();
-    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       WindowLocalOptionsBuilder::default()
@@ -698,8 +698,8 @@ mod tests {
     test_log_init();
 
     let lines = vec![];
-    let buf_opts = BufferLocalOptions::default();
-    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       WindowLocalOptionsBuilder::default()
@@ -744,8 +744,8 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferLocalOptions::default();
-    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       WindowLocalOptionsBuilder::default()
@@ -790,8 +790,8 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferLocalOptions::default();
-    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       WindowLocalOptionsBuilder::default()
@@ -836,8 +836,8 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferLocalOptions::default();
-    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       WindowLocalOptionsBuilder::default()
@@ -894,8 +894,8 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferLocalOptions::default();
-    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       WindowLocalOptionsBuilder::default()
@@ -954,8 +954,8 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferLocalOptions::default();
-    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       WindowLocalOptionsBuilder::default()
@@ -1037,8 +1037,8 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let buf_opts = BufferLocalOptions::default();
-    let buf = make_buffer_from_lines(buf_opts.clone(), lines);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       WindowLocalOptionsBuilder::default()

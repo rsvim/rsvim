@@ -208,7 +208,7 @@ impl Buffer {
   }
 
   pub fn set_options(&mut self, options: &BufferLocalOptions) {
-    self.options = options.clone();
+    self.options = *options;
   }
 }
 // Options }
@@ -367,7 +367,7 @@ impl BuffersManager {
     BuffersManager {
       buffers: BTreeMap::new(),
       buffers_by_path: HashMap::new(),
-      global_local_options: BufferLocalOptions::default(),
+      global_local_options: BufferLocalOptionsBuilder::default().build().unwrap(),
     }
   }
 
@@ -425,7 +425,7 @@ impl BuffersManager {
     } else {
       Buffer::_new(
         Rope::new(),
-        self.global_local_options().clone(),
+        *self.global_local_options(),
         Some(filename.to_path_buf()),
         Some(abs_filename.clone()),
         None,
@@ -458,7 +458,7 @@ impl BuffersManager {
 
     let buf = Buffer::_new(
       Rope::new(),
-      self.global_local_options().clone(),
+      *self.global_local_options(),
       None,
       None,
       None,
@@ -534,7 +534,7 @@ impl BuffersManager {
 
         Ok(Buffer::_new(
           self.to_rope(&buf, buf.len()),
-          self.global_local_options().clone(),
+          *self.global_local_options(),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
@@ -612,7 +612,7 @@ impl BuffersManager {
   }
 
   pub fn set_global_local_options(&mut self, options: &BufferLocalOptions) {
-    self.global_local_options = options.clone();
+    self.global_local_options = *options;
   }
 }
 // Options }

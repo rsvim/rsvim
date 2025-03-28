@@ -1280,7 +1280,7 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak6() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1320,7 +1320,7 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak7() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1360,7 +1360,7 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak8() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1400,7 +1400,7 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak9() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![

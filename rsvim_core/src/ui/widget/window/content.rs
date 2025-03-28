@@ -254,7 +254,7 @@ impl Widgetable for WindowContent {
 mod tests {
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions};
+  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
@@ -326,7 +326,7 @@ mod tests {
   fn draw_from_top_left_nowrap1() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -365,7 +365,7 @@ mod tests {
   fn draw_from_top_left_nowrap2() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -401,7 +401,7 @@ mod tests {
   fn draw_from_top_left_nowrap3() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -441,7 +441,7 @@ mod tests {
   fn draw_from_top_left_nowrap4() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -491,7 +491,7 @@ mod tests {
   fn draw_from_top_left_nowrap5() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_empty_buffer(buf_opts);
     let expect = vec![
       "                               ",
@@ -529,7 +529,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak1() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -568,7 +568,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak2() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -601,7 +601,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak3() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_empty_buffer(buf_opts);
     let expect = vec![
       "                    ",
@@ -628,7 +628,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak4() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -687,7 +687,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak5() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
