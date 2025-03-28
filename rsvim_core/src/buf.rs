@@ -9,9 +9,9 @@ pub use crate::buf::cidx::ColumnIndex;
 pub use crate::buf::opt::*;
 
 use compact_str::CompactString;
+use lru::LruCache;
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use path_absolutize::Absolutize;
-use quick_cache::unsync::Cache;
 use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
 use std::fs::Metadata;
@@ -51,7 +51,7 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
-  cached_lines_width: Cache<usize, ColumnIndex>,
+  cached_lines_width: LruCache<usize, ColumnIndex>,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -65,8 +65,8 @@ pub type BufferReadGuard<'a> = RwLockReadGuard<'a, Buffer>;
 pub type BufferWriteGuard<'a> = RwLockWriteGuard<'a, Buffer>;
 
 #[inline]
-fn lines_cached_size(terminal_height: u16) -> usize {
-  (terminal_height as usize) * 2 + 1
+fn lines_cached_size(terminal_height: u16) -> std::num::NonZeroUsize {
+  std::num::NonZeroUsize::new((terminal_height as usize) * 2 + 1).unwrap()
 }
 
 impl Buffer {
@@ -84,7 +84,7 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope,
-      cached_lines_width: Cache::new(lines_cached_size(terminal_height)),
+      cached_lines_width: LruCache::new(lines_cached_size(terminal_height)),
       options,
       filename,
       absolute_filename,
@@ -99,7 +99,7 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
-      cached_lines_width: Cache::new(lines_cached_size(terminal_height)),
+      cached_lines_width: LruCache::new(lines_cached_size(terminal_height)),
       options,
       filename: None,
       absolute_filename: None,
@@ -231,9 +231,7 @@ impl Buffer {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
-      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
-      .unwrap()
-      .unwrap()
+      .get_or_insert_mut(line_idx, ColumnIndex::new)
       .width_before(&self.options, &rope_line, char_idx)
   }
 
@@ -246,9 +244,7 @@ impl Buffer {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
-      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
-      .unwrap()
-      .unwrap()
+      .get_or_insert_mut(line_idx, ColumnIndex::new)
       .width_at(&self.options, &rope_line, char_idx)
   }
 
@@ -261,9 +257,7 @@ impl Buffer {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
-      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
-      .unwrap()
-      .unwrap()
+      .get_or_insert_mut(line_idx, ColumnIndex::new)
       .char_before(&self.options, &rope_line, width)
   }
 
@@ -276,9 +270,7 @@ impl Buffer {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
-      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
-      .unwrap()
-      .unwrap()
+      .get_or_insert_mut(line_idx, ColumnIndex::new)
       .char_at(&self.options, &rope_line, width)
   }
 
@@ -291,9 +283,7 @@ impl Buffer {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
-      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
-      .unwrap()
-      .unwrap()
+      .get_or_insert_mut(line_idx, ColumnIndex::new)
       .char_after(&self.options, &rope_line, width)
   }
 
@@ -306,9 +296,7 @@ impl Buffer {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
-      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
-      .unwrap()
-      .unwrap()
+      .get_or_insert_mut(line_idx, ColumnIndex::new)
       .last_char_until(&self.options, &rope_line, width)
   }
 
@@ -316,9 +304,7 @@ impl Buffer {
   pub fn truncate_since_char(&mut self, line_idx: usize, char_idx: usize) {
     self
       .cached_lines_width
-      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
-      .unwrap()
-      .unwrap()
+      .get_or_insert_mut(line_idx, ColumnIndex::new)
       .truncate_since_char(char_idx)
   }
 
@@ -326,15 +312,13 @@ impl Buffer {
   pub fn truncate_since_width(&mut self, line_idx: usize, width: usize) {
     self
       .cached_lines_width
-      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
-      .unwrap()
-      .unwrap()
+      .get_or_insert_mut(line_idx, ColumnIndex::new)
       .truncate_since_width(width)
   }
 
   /// Remove one specified line.
   pub fn remove(&mut self, line_idx: usize) {
-    self.cached_lines_width.remove(&line_idx);
+    self.cached_lines_width.pop(&line_idx);
   }
 
   /// Retain multiple lines by lambda function `f`.
@@ -342,7 +326,15 @@ impl Buffer {
   where
     F: Fn(&usize, &ColumnIndex) -> bool,
   {
-    self.cached_lines_width.retain(f);
+    let retained_lines: Vec<usize> = self
+      .cached_lines_width
+      .iter()
+      .filter(|(line_idx, column_idx)| !f(line_idx, column_idx))
+      .map(|(line_idx, _)| *line_idx)
+      .collect();
+    for line_idx in retained_lines.iter() {
+      self.cached_lines_width.pop(line_idx);
+    }
   }
 
   /// Clear.

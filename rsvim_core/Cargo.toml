@@ -51,7 +51,7 @@ unicode-segmentation = { workspace = true }
 # unicode-normalization = { workspace = true }
 # icu = { workspace = true, features = ["compiled_data"] }
 derive_builder = { workspace = true }
-quick_cache = { workspace = true }
+lru = { workspace = true }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
