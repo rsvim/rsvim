@@ -11,6 +11,7 @@ pub use crate::buf::opt::*;
 use compact_str::CompactString;
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 use path_absolutize::Absolutize;
+use quick_cache::unsync::Cache;
 use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
 use std::fs::Metadata;
@@ -50,7 +51,7 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
-  rope_lines_width: BTreeMap<usize, ColumnIndex>,
+  cached_lines_width: Cache<usize, ColumnIndex>,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -63,10 +64,16 @@ pub type BufferWk = Weak<RwLock<Buffer>>;
 pub type BufferReadGuard<'a> = RwLockReadGuard<'a, Buffer>;
 pub type BufferWriteGuard<'a> = RwLockWriteGuard<'a, Buffer>;
 
+#[inline]
+fn lines_cached_size(terminal_height: u16) -> usize {
+  (terminal_height as usize) * 2 + 1
+}
+
 impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
   /// manage buffer instances.
   pub fn _new(
+    terminal_height: u16,
     rope: Rope,
     options: BufferLocalOptions,
     filename: Option<PathBuf>,
@@ -77,7 +84,7 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope,
-      rope_lines_width: BTreeMap::new(),
+      cached_lines_width: Cache::new(lines_cached_size(terminal_height)),
       options,
       filename,
       absolute_filename,
@@ -88,11 +95,11 @@ impl Buffer {
 
   #[cfg(test)]
   /// NOTE: This API should only be used for testing.
-  pub fn _new_empty(options: BufferLocalOptions) -> Self {
+  pub fn _new_empty(terminal_height: u16, options: BufferLocalOptions) -> Self {
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
-      rope_lines_width: BTreeMap::new(),
+      cached_lines_width: Cache::new(lines_cached_size(terminal_height)),
       options,
       filename: None,
       absolute_filename: None,
@@ -221,11 +228,11 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_before(&mut self, line_idx: usize, char_idx: usize) -> usize {
-    self.rope_lines_width.entry(line_idx).or_default();
     let rope_line = self.rope.line(line_idx);
     self
-      .rope_lines_width
-      .get_mut(&line_idx)
+      .cached_lines_width
+      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
+      .unwrap()
       .unwrap()
       .width_before(&self.options, &rope_line, char_idx)
   }
@@ -236,11 +243,11 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_at(&mut self, line_idx: usize, char_idx: usize) -> usize {
-    self.rope_lines_width.entry(line_idx).or_default();
     let rope_line = self.rope.line(line_idx);
     self
-      .rope_lines_width
-      .get_mut(&line_idx)
+      .cached_lines_width
+      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
+      .unwrap()
       .unwrap()
       .width_at(&self.options, &rope_line, char_idx)
   }
@@ -251,11 +258,11 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_before(&mut self, line_idx: usize, width: usize) -> Option<usize> {
-    self.rope_lines_width.entry(line_idx).or_default();
     let rope_line = self.rope.line(line_idx);
     self
-      .rope_lines_width
-      .get_mut(&line_idx)
+      .cached_lines_width
+      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
+      .unwrap()
       .unwrap()
       .char_before(&self.options, &rope_line, width)
   }
@@ -266,11 +273,11 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_at(&mut self, line_idx: usize, width: usize) -> Option<usize> {
-    self.rope_lines_width.entry(line_idx).or_default();
     let rope_line = self.rope.line(line_idx);
     self
-      .rope_lines_width
-      .get_mut(&line_idx)
+      .cached_lines_width
+      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
+      .unwrap()
       .unwrap()
       .char_at(&self.options, &rope_line, width)
   }
@@ -281,11 +288,11 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_after(&mut self, line_idx: usize, width: usize) -> Option<usize> {
-    self.rope_lines_width.entry(line_idx).or_default();
     let rope_line = self.rope.line(line_idx);
     self
-      .rope_lines_width
-      .get_mut(&line_idx)
+      .cached_lines_width
+      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
+      .unwrap()
       .unwrap()
       .char_after(&self.options, &rope_line, width)
   }
@@ -296,53 +303,51 @@ impl Buffer {
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
   pub fn last_char_until(&mut self, line_idx: usize, width: usize) -> Option<usize> {
-    self.rope_lines_width.entry(line_idx).or_default();
     let rope_line = self.rope.line(line_idx);
     self
-      .rope_lines_width
-      .get_mut(&line_idx)
+      .cached_lines_width
+      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
+      .unwrap()
       .unwrap()
       .last_char_until(&self.options, &rope_line, width)
   }
 
   /// See [`ColumnIndex::truncate_since_char`].
-  pub fn truncate_line_since_char(&mut self, line_idx: usize, char_idx: usize) {
-    self.rope_lines_width.entry(line_idx).or_default();
+  pub fn truncate_since_char(&mut self, line_idx: usize, char_idx: usize) {
     self
-      .rope_lines_width
-      .get_mut(&line_idx)
+      .cached_lines_width
+      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
+      .unwrap()
       .unwrap()
       .truncate_since_char(char_idx)
   }
 
   /// See [`ColumnIndex::truncate_since_width`].
-  pub fn truncate_line_since_width(&mut self, line_idx: usize, width: usize) {
-    self.rope_lines_width.entry(line_idx).or_default();
+  pub fn truncate_since_width(&mut self, line_idx: usize, width: usize) {
     self
-      .rope_lines_width
-      .get_mut(&line_idx)
+      .cached_lines_width
+      .get_mut_or_insert_with(&line_idx, || AnyResult::Ok(ColumnIndex::new()))
+      .unwrap()
       .unwrap()
       .truncate_since_width(width)
   }
 
-  /// Truncate lines at the tail, start from specified line index.
-  pub fn truncate(&mut self, start_line_idx: usize) {
-    self.rope_lines_width.retain(|&l, _| l < start_line_idx);
-  }
-
   /// Remove one specified line.
   pub fn remove(&mut self, line_idx: usize) {
-    self.rope_lines_width.remove(&line_idx);
+    self.cached_lines_width.remove(&line_idx);
   }
 
-  /// Retain multiple specified lines.
-  pub fn retain(&mut self, lines_idx: HashSet<usize>) {
-    self.rope_lines_width.retain(|l, _| lines_idx.contains(l));
+  /// Retain multiple lines by lambda function `f`.
+  pub fn retain<F>(&mut self, f: F)
+  where
+    F: Fn(&usize, &ColumnIndex) -> bool,
+  {
+    self.cached_lines_width.retain(f);
   }
 
   /// Clear.
   pub fn clear(&mut self) {
-    self.rope_lines_width.clear()
+    self.cached_lines_width.clear()
   }
 }
 // Display Width }
@@ -392,7 +397,7 @@ impl BuffersManager {
   /// If the file name already exists.
   ///
   /// NOTE: This is a primitive API.
-  pub fn new_file_buffer(&mut self, filename: &Path) -> IoResult<BufferId> {
+  pub fn new_file_buffer(&mut self, terminal_height: u16, filename: &Path) -> IoResult<BufferId> {
     let abs_filename = match filename.absolutize() {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
@@ -416,7 +421,7 @@ impl BuffersManager {
     };
 
     let buf = if existed {
-      match self.edit_file(filename, &abs_filename) {
+      match self.edit_file(terminal_height, filename, &abs_filename) {
         Ok(buf) => buf,
         Err(e) => {
           return Err(e);
@@ -424,6 +429,7 @@ impl BuffersManager {
       }
     } else {
       Buffer::_new(
+        terminal_height,
         Rope::new(),
         *self.global_local_options(),
         Some(filename.to_path_buf()),
@@ -453,10 +459,11 @@ impl BuffersManager {
   /// If there is already other unnamed buffers.
   ///
   /// NOTE: This is a primitive API.
-  pub fn new_empty_buffer(&mut self) -> BufferId {
+  pub fn new_empty_buffer(&mut self, terminal_height: u16) -> BufferId {
     assert!(!self.buffers_by_path.contains_key(&None));
 
     let buf = Buffer::_new(
+      terminal_height,
       Rope::new(),
       *self.global_local_options(),
       None,
@@ -505,7 +512,12 @@ impl BuffersManager {
   }
 
   // Implementation for [new_buffer_edit_file](new_buffer_edit_file).
-  fn edit_file(&self, filename: &Path, absolute_filename: &Path) -> IoResult<Buffer> {
+  fn edit_file(
+    &self,
+    terminal_height: u16,
+    filename: &Path,
+    absolute_filename: &Path,
+  ) -> IoResult<Buffer> {
     match std::fs::File::open(filename) {
       Ok(fp) => {
         let metadata = match fp.metadata() {
@@ -533,6 +545,7 @@ impl BuffersManager {
         assert!(bytes == buf.len());
 
         Ok(Buffer::_new(
+          terminal_height,
           self.to_rope(&buf, buf.len()),
           *self.global_local_options(),
           Some(filename.to_path_buf()),

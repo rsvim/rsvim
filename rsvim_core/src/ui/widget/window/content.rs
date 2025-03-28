@@ -326,8 +326,10 @@ mod tests {
   fn draw_from_top_left_nowrap1() {
     test_log_init();
 
+    let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
+      terminal_size.height(),
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -352,7 +354,6 @@ mod tests {
       "          ",
     ];
 
-    let terminal_size = U16Size::new(10, 10);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(false)
       .build()
@@ -365,8 +366,10 @@ mod tests {
   fn draw_from_top_left_nowrap2() {
     test_log_init();
 
+    let terminal_size = U16Size::new(35, 6);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
+      terminal_size.height(),
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -388,7 +391,6 @@ mod tests {
       "     * The extra parts are been tru",
     ];
 
-    let terminal_size = U16Size::new(35, 6);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(false)
       .build()
@@ -401,8 +403,10 @@ mod tests {
   fn draw_from_top_left_nowrap3() {
     test_log_init();
 
+    let terminal_size = U16Size::new(33, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
+      terminal_size.height(),
       buf_opts,
       vec![
         "Hello,  R\tS\tV\tI\tM!\n",
@@ -428,7 +432,6 @@ mod tests {
       "                                 ",
     ];
 
-    let terminal_size = U16Size::new(33, 10);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(false)
       .build()
@@ -441,8 +444,10 @@ mod tests {
   fn draw_from_top_left_nowrap4() {
     test_log_init();
 
+    let terminal_size = U16Size::new(31, 20);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
+      terminal_size.height(),
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -478,7 +483,6 @@ mod tests {
       "                               ",
     ];
 
-    let terminal_size = U16Size::new(31, 20);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(false)
       .build()
@@ -529,8 +533,10 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak1() {
     test_log_init();
 
+    let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
+      terminal_size.height(),
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -555,7 +561,6 @@ mod tests {
       "s several ",
     ];
 
-    let terminal_size = U16Size::new(10, 10);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .build()
@@ -568,8 +573,10 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak2() {
     test_log_init();
 
+    let terminal_size = U16Size::new(27, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
+      terminal_size.height(),
       buf_opts,
       vec![
         "\t\t\t* The extra parts are split\tinto the next row,\tif either line-wrap\tor word-wrap options are been set. If the extra parts are still too long to\t来放在下一个横行内，一遍又一遍的重复这样的操作。This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
@@ -588,7 +595,6 @@ mod tests {
       "操作。This operation also e",
     ];
 
-    let terminal_size = U16Size::new(27, 10);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .build()
@@ -628,8 +634,10 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak4() {
     test_log_init();
 
+    let terminal_size = U16Size::new(19, 30);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
+      terminal_size.height(),
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -674,7 +682,6 @@ mod tests {
       "截断。             ",
     ];
 
-    let terminal_size = U16Size::new(19, 30);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .build()
@@ -687,8 +694,10 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak5() {
     test_log_init();
 
+    let terminal_size = U16Size::new(19, 27);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
+      terminal_size.height(),
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -730,7 +739,6 @@ mod tests {
       "行这两个选项都没有<",
     ];
 
-    let terminal_size = U16Size::new(19, 27);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .build()
