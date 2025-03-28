@@ -1,7 +1,7 @@
 //! Unicode utils.
 
 use crate::buf::opt::BufferLocalOptions;
-use crate::defaults::grapheme::AsciiControlCodeFormatter;
+use crate::defaults::ascii::AsciiControlCodeFormatter;
 
 use ascii::AsciiChar;
 use compact_str::CompactString;

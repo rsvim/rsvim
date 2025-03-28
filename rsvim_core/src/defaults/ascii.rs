@@ -1,4 +1,4 @@
-//! Grapheme cluster and unicode.
+//! ASCII char.
 
 use ascii::AsciiChar;
 use std::fmt;
@@ -62,7 +62,8 @@ impl fmt::Display for AsciiControlCodeFormatter {
 
 #[cfg(test)]
 mod tests {
-  use crate::defaults::grapheme::AsciiControlCodeFormatter;
+  use super::*;
+
   use ascii::AsciiChar;
 
   #[test]
