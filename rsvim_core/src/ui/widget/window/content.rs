@@ -495,8 +495,9 @@ mod tests {
   fn draw_from_top_left_nowrap5() {
     test_log_init();
 
+    let terminal_size = U16Size::new(31, 20);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_empty_buffer(buf_opts);
+    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
     let expect = vec![
       "                               ",
       "                               ",
@@ -520,7 +521,6 @@ mod tests {
       "                               ",
     ];
 
-    let terminal_size = U16Size::new(31, 20);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(false)
       .build()
@@ -607,8 +607,9 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak3() {
     test_log_init();
 
+    let terminal_size = U16Size::new(20, 9);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_empty_buffer(buf_opts);
+    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -621,7 +622,6 @@ mod tests {
       "                    ",
     ];
 
-    let terminal_size = U16Size::new(20, 9);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .build()

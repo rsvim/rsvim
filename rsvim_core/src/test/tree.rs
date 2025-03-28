@@ -14,8 +14,8 @@ use tracing::{self};
 
 /// Create tree with 1 window and 1 buffer, the buffer is in buffers manager.
 pub fn make_tree_with_buffers(
-  window_local_opts: WindowLocalOptions,
   canvas_size: U16Size,
+  window_local_opts: WindowLocalOptions,
   buffers_manager: BuffersManagerArc,
 ) -> TreeArc {
   // UI Tree
