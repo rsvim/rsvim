@@ -18,7 +18,6 @@ exclude = [".DS_Store"]
 
 [workspace.dependencies]
 rsvim_core = { version = "0.1.1-alpha.8", path = "./rsvim_core" }
-
 crossterm = { version = "0.28", features = ["event-stream"] }
 jiff = { version = "0.2.4", features = ["tzdb-bundle-always"] }
 tracing = "0.1"
