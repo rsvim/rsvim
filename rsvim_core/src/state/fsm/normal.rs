@@ -272,7 +272,7 @@ impl NormalStateful {
 
   /// Cursor move up/down/left/right in current window, or scroll buffer up/down if it reaches the
   /// top/bottom of the window and the buffer has more contents.
-  fn cursor_move_or_scroll(
+  fn _cursor_move_or_scroll(
     &self,
     _data_access: &StatefulDataAccess,
     _command: Command,

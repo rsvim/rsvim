@@ -45,7 +45,7 @@ pub struct Window {
 
 impl Window {
   pub fn new(shape: IRect, buffer: BufferWk, local_options: &WindowLocalOptions) -> Self {
-    let options = local_options.clone();
+    let options = *local_options;
 
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
@@ -170,37 +170,37 @@ impl Window {
 
   /// Set window local options.
   pub fn set_options(&mut self, options: &WindowLocalOptions) {
-    self.options = options.clone();
+    self.options = *options;
     let viewport_options = ViewportOptions::from(&self.options);
     wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn wrap(&self) -> bool {
-    self.options.wrap
+    self.options.wrap()
   }
 
   pub fn set_wrap(&mut self, value: bool) {
-    self.options.wrap = value;
+    self.options.set_wrap(value);
     let viewport_options = ViewportOptions::from(&self.options);
     wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn line_break(&self) -> bool {
-    self.options.line_break
+    self.options.line_break()
   }
 
   pub fn set_line_break(&mut self, value: bool) {
-    self.options.line_break = value;
+    self.options.set_line_break(value);
     let viewport_options = ViewportOptions::from(&self.options);
     wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn scroll_off(&self) -> u16 {
-    self.options.scroll_off
+    self.options.scroll_off()
   }
 
   pub fn set_scroll_off(&mut self, value: u16) {
-    self.options.scroll_off = value;
+    self.options.set_scroll_off(value);
     let viewport_options = ViewportOptions::from(&self.options);
     wlock!(self.viewport).set_options(&viewport_options);
   }

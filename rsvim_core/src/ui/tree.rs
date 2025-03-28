@@ -461,7 +461,7 @@ impl Tree {
   }
 
   pub fn set_global_options(&mut self, options: &WindowGlobalOptions) {
-    self.global_options = options.clone();
+    self.global_options = *options;
   }
 
   pub fn global_local_options(&self) -> &WindowLocalOptions {
@@ -473,7 +473,7 @@ impl Tree {
   }
 
   pub fn set_global_local_options(&mut self, options: &WindowLocalOptions) {
-    self.global_local_options = options.clone();
+    self.global_local_options = *options;
   }
 }
 // Global options }
