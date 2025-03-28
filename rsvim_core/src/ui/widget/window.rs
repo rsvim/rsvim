@@ -10,15 +10,8 @@ use crate::ui::widget::window::root::WindowRootContainer;
 use crate::wlock;
 
 // Re-export
-pub use crate::ui::widget::window::opt::{
-  ViewportOptions, WindowGlobalOptions, WindowGlobalOptionsBuilder,
-  WindowGlobalOptionsBuilderError, WindowLocalOptions, WindowLocalOptionsBuilder,
-  WindowLocalOptionsBuilderError,
-};
-pub use crate::ui::widget::window::viewport::{
-  CursorViewport, LineViewport, RowViewport, Viewport, ViewportArc, ViewportReadGuard, ViewportWk,
-  ViewportWriteGuard,
-};
+pub use crate::ui::widget::window::opt::*;
+pub use crate::ui::widget::window::viewport::*;
 
 use std::convert::From;
 use std::sync::Arc;
