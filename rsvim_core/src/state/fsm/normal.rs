@@ -390,7 +390,7 @@ mod tests {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let tree = make_tree_with_buffers(window_local_opts, terminal_size, bufs.clone());
+    let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
     let state = State::to_arc(State::default());
     (tree, state, bufs)
   }
