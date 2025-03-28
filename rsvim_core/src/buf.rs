@@ -6,7 +6,7 @@ use crate::rlock;
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
-pub use crate::buf::opt::{BufferLocalOptions, FileEncodingOption};
+pub use crate::buf::opt::*;
 
 use compact_str::CompactString;
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};

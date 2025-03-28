@@ -5,7 +5,7 @@ use crate::defaults;
 use derive_builder::Builder;
 
 // Re-export
-pub use file_encoding::FileEncodingOption;
+pub use file_encoding::*;
 
 pub mod file_encoding;
 

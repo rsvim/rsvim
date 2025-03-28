@@ -324,7 +324,7 @@ mod tests {
   use std::sync::Once;
   use tracing::info;
 
-  use crate::buf::{Buffer, BufferArc, BufferLocalOptions};
+  use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
@@ -376,7 +376,7 @@ mod tests {
   fn draw_after_init1() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
