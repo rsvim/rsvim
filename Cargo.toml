@@ -35,7 +35,7 @@ futures = "0.3"
 # heed = "0.20.5"
 # bytes = { version = "1" }
 # serde_json = "1.0.132"
-compact_str = { version = "0.8.1", features = ["bytes"] }
+compact_str = { version = "0.9", features = ["bytes"] }
 ropey = { version = "1.6.1" }
 geo = { version = "0.28.0" }
 num-traits = "0.2.19"
@@ -49,14 +49,13 @@ ahash = "0.8.11"
 path-absolutize = "3.1.1"
 toml = "0.8.20"
 once_cell = { version = "1.21.1", features = ["parking_lot"] }
-tempfile = "3"
-assert_fs = "1.1.2"
 zstd = "0.13.2"
 ascii = "1.1.0"
 unicode-width = "0.2.0"
 unicode-segmentation = "1.12.0"
 # unicode-normalization = "0.1.24"
 # icu = { version = "1.5.0", features = ["compiled_data"] }
+derive_builder = "0.20.2"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 

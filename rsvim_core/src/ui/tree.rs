@@ -8,7 +8,10 @@ use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootContainer;
-use crate::ui::widget::window::{Window, WindowGlobalOptions, WindowLocalOptions};
+use crate::ui::widget::window::{
+  Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
+  WindowLocalOptionsBuilder,
+};
 
 // Re-export
 pub use crate::ui::tree::internal::{
@@ -267,8 +270,8 @@ impl Tree {
       base: Itree::new(root_node),
       cursor_id: None,
       window_ids: BTreeSet::new(),
-      global_options: WindowGlobalOptions::default(),
-      global_local_options: WindowLocalOptions::default(),
+      global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
+      global_local_options: WindowLocalOptionsBuilder::default().build().unwrap(),
     }
   }
 
@@ -458,7 +461,7 @@ impl Tree {
   }
 
   pub fn set_global_options(&mut self, options: &WindowGlobalOptions) {
-    self.global_options = options.clone();
+    self.global_options = *options;
   }
 
   pub fn global_local_options(&self) -> &WindowLocalOptions {
@@ -470,7 +473,7 @@ impl Tree {
   }
 
   pub fn set_global_local_options(&mut self, options: &WindowLocalOptions) {
-    self.global_local_options = options.clone();
+    self.global_local_options = *options;
   }
 }
 // Global options }

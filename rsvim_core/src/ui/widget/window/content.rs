@@ -254,12 +254,14 @@ impl Widgetable for WindowContent {
 mod tests {
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions};
+  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::widget::window::{Viewport, ViewportOptions, WindowLocalOptions};
+  use crate::ui::widget::window::{
+    Viewport, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -324,7 +326,7 @@ mod tests {
   fn draw_from_top_left_nowrap1() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -351,7 +353,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buf.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -360,7 +365,7 @@ mod tests {
   fn draw_from_top_left_nowrap2() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -384,7 +389,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(35, 6);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -393,7 +401,7 @@ mod tests {
   fn draw_from_top_left_nowrap3() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -421,7 +429,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(33, 10);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -430,7 +441,7 @@ mod tests {
   fn draw_from_top_left_nowrap4() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -468,7 +479,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(31, 20);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -477,7 +491,7 @@ mod tests {
   fn draw_from_top_left_nowrap5() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_empty_buffer(buf_opts);
     let expect = vec![
       "                               ",
@@ -503,7 +517,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(31, 20);
-    let window_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buf.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -512,7 +529,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak1() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -539,7 +556,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let window_options = WindowLocalOptions::builder().wrap(true).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -548,7 +568,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak2() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -569,7 +589,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(27, 10);
-    let window_options = WindowLocalOptions::builder().wrap(true).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -578,7 +601,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak3() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_empty_buffer(buf_opts);
     let expect = vec![
       "                    ",
@@ -593,7 +616,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(20, 9);
-    let window_options = WindowLocalOptions::builder().wrap(true).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buf.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -602,7 +628,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak4() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -649,7 +675,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(19, 30);
-    let window_options = WindowLocalOptions::builder().wrap(true).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }
@@ -658,7 +687,7 @@ mod tests {
   fn draw_from_top_left_wrap_nolinebreak5() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -702,7 +731,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(19, 27);
-    let window_options = WindowLocalOptions::builder().wrap(true).build();
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .build()
+      .unwrap();
     let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
     do_test_draw_from_top_left(&actual, &expect);
   }

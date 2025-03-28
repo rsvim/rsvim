@@ -1,5 +1,5 @@
 //! Vim's default options.
 
+pub mod ascii;
 pub mod buf;
-pub mod grapheme;
 pub mod win;

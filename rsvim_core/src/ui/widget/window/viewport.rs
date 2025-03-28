@@ -628,7 +628,7 @@ impl Viewport {
 mod tests {
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions};
+  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::rlock;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -636,7 +636,7 @@ mod tests {
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
   use crate::ui::tree::*;
-  use crate::ui::widget::window::{Window, WindowLocalOptions};
+  use crate::ui::widget::window::{Window, WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -781,7 +781,7 @@ mod tests {
   fn sync_from_top_left_nowrap1() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -806,7 +806,10 @@ mod tests {
       "",
     ];
     let size = U16Size::new(10, 10);
-    let options = WindowLocalOptions::builder().wrap(false).build();
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
@@ -835,7 +838,7 @@ mod tests {
   fn sync_from_top_left_nowrap2() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -859,7 +862,10 @@ mod tests {
       "",
     ];
     let size = U16Size::new(27, 15);
-    let options = WindowLocalOptions::builder().wrap(false).build();
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
@@ -888,7 +894,7 @@ mod tests {
   fn sync_from_top_left_nowrap3() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -910,7 +916,10 @@ mod tests {
     ];
 
     let size = U16Size::new(31, 5);
-    let options = WindowLocalOptions::builder().wrap(false).build();
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
@@ -930,12 +939,15 @@ mod tests {
   fn sync_from_top_left_nowrap4() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_empty_buffer(buf_opts);
     let expect = vec![""];
 
     let size = U16Size::new(20, 20);
-    let options = WindowLocalOptions::builder().wrap(false).build();
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_sync_from_top_left(
@@ -953,7 +965,7 @@ mod tests {
   fn sync_from_top_left_nowrap5() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -982,7 +994,10 @@ mod tests {
     ];
 
     let size = U16Size::new(10, 10);
-    let options = WindowLocalOptions::builder().wrap(false).build();
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
@@ -1027,7 +1042,7 @@ mod tests {
   fn sync_from_top_left_nowrap6() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1050,7 +1065,10 @@ mod tests {
     ];
 
     let size = U16Size::new(27, 6);
-    let options = WindowLocalOptions::builder().wrap(false).build();
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
@@ -1075,7 +1093,7 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak1() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1102,10 +1120,11 @@ mod tests {
     ];
 
     let size = U16Size::new(10, 10);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_sync_from_top_left(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
@@ -1113,7 +1132,7 @@ mod tests {
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak2() {
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1146,10 +1165,11 @@ mod tests {
     ];
 
     let size = U16Size::new(27, 15);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
@@ -1170,7 +1190,7 @@ mod tests {
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak3() {
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1192,10 +1212,11 @@ mod tests {
     ];
 
     let size = U16Size::new(31, 5);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_sync_from_top_left(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
@@ -1203,15 +1224,16 @@ mod tests {
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak4() {
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_empty_buffer(buf_opts);
     let expect = vec![""];
 
     let size = U16Size::new(10, 10);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_sync_from_top_left(buf, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
@@ -1219,7 +1241,7 @@ mod tests {
 
   #[test]
   fn sync_from_top_left_wrap_nolinebreak5() {
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1235,10 +1257,11 @@ mod tests {
     ];
 
     let size = U16Size::new(31, 5);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 4)].into_iter().collect();
@@ -1257,7 +1280,7 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak6() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1274,10 +1297,11 @@ mod tests {
     ];
 
     let size = U16Size::new(31, 5);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
@@ -1296,7 +1320,7 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak7() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1313,10 +1337,11 @@ mod tests {
     ];
 
     let size = U16Size::new(31, 5);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 7)].into_iter().collect();
@@ -1335,7 +1360,7 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak8() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1352,10 +1377,11 @@ mod tests {
     ];
 
     let size = U16Size::new(31, 5);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
@@ -1374,7 +1400,7 @@ mod tests {
   fn sync_from_top_left_wrap_nolinebreak9() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -1392,10 +1418,11 @@ mod tests {
     ];
 
     let size = U16Size::new(31, 5);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
-      .build();
+      .build()
+      .unwrap();
     let actual = make_viewport_from_size(size, buf.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();

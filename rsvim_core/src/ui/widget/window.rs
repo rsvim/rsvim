@@ -10,14 +10,8 @@ use crate::ui::widget::window::root::WindowRootContainer;
 use crate::wlock;
 
 // Re-export
-pub use crate::ui::widget::window::opt::{
-  ViewportOptions, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
-  WindowOptionsBuilder,
-};
-pub use crate::ui::widget::window::viewport::{
-  CursorViewport, LineViewport, RowViewport, Viewport, ViewportArc, ViewportReadGuard, ViewportWk,
-  ViewportWriteGuard,
-};
+pub use crate::ui::widget::window::opt::*;
+pub use crate::ui::widget::window::viewport::*;
 
 use std::convert::From;
 use std::sync::Arc;
@@ -51,17 +45,14 @@ pub struct Window {
 
 impl Window {
   pub fn new(shape: IRect, buffer: BufferWk, local_options: &WindowLocalOptions) -> Self {
-    let options = local_options.clone();
+    let options = *local_options;
 
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
     let window_root_actual_shape = *window_root_node.actual_shape();
 
-    let viewport_options = ViewportOptions {
-      wrap: options.wrap(),
-      line_break: options.line_break(),
-    };
+    let viewport_options = ViewportOptions::from(local_options);
     let viewport = Viewport::new(&viewport_options, buffer.clone(), &window_root_actual_shape);
     let viewport = Viewport::to_arc(viewport);
 
@@ -179,7 +170,7 @@ impl Window {
 
   /// Set window local options.
   pub fn set_options(&mut self, options: &WindowLocalOptions) {
-    self.options = options.clone();
+    self.options = *options;
     let viewport_options = ViewportOptions::from(&self.options);
     wlock!(self.viewport).set_options(&viewport_options);
   }
@@ -200,6 +191,16 @@ impl Window {
 
   pub fn set_line_break(&mut self, value: bool) {
     self.options.set_line_break(value);
+    let viewport_options = ViewportOptions::from(&self.options);
+    wlock!(self.viewport).set_options(&viewport_options);
+  }
+
+  pub fn scroll_off(&self) -> u16 {
+    self.options.scroll_off()
+  }
+
+  pub fn set_scroll_off(&mut self, value: u16) {
+    self.options.set_scroll_off(value);
     let viewport_options = ViewportOptions::from(&self.options);
     wlock!(self.viewport).set_options(&viewport_options);
   }
@@ -323,7 +324,7 @@ mod tests {
   use std::sync::Once;
   use tracing::info;
 
-  use crate::buf::{Buffer, BufferArc, BufferLocalOptions};
+  use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
@@ -375,7 +376,7 @@ mod tests {
   fn draw_after_init1() {
     test_log_init();
 
-    let buf_opts = BufferLocalOptions::default();
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
       buf_opts,
       vec![
@@ -402,7 +403,10 @@ mod tests {
     ];
 
     let terminal_size = U16Size::new(10, 10);
-    let window_local_options = WindowLocalOptions::builder().wrap(false).build();
+    let window_local_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let window = make_window_from_size(terminal_size, buf.clone(), &window_local_options);
     let mut actual = Canvas::new(terminal_size);
     window.draw(&mut actual);
