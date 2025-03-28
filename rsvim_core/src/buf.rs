@@ -8,6 +8,7 @@ use crate::rlock;
 pub use crate::buf::cidx::ColumnIndex;
 pub use crate::buf::opt::*;
 
+use ahash::RandomState;
 use compact_str::CompactString;
 use lru::LruCache;
 use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
@@ -51,7 +52,7 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
-  cached_lines_width: LruCache<usize, ColumnIndex>,
+  cached_lines_width: LruCache<usize, ColumnIndex, RandomState>,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -84,7 +85,10 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope,
-      cached_lines_width: LruCache::new(lines_cached_size(terminal_height)),
+      cached_lines_width: LruCache::with_hasher(
+        lines_cached_size(terminal_height),
+        RandomState::new(),
+      ),
       options,
       filename,
       absolute_filename,
@@ -99,7 +103,10 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
-      cached_lines_width: LruCache::new(lines_cached_size(terminal_height)),
+      cached_lines_width: LruCache::with_hasher(
+        lines_cached_size(terminal_height),
+        RandomState::new(),
+      ),
       options,
       filename: None,
       absolute_filename: None,
