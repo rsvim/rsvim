@@ -256,13 +256,10 @@ impl Tree {
   /// Make a widget tree.
   ///
   /// NOTE: The root node is created along with the tree.
-  pub fn new(terminal_size: U16Size) -> Self {
+  pub fn new(canvas_size: U16Size) -> Self {
     let shape = IRect::new(
       (0, 0),
-      (
-        terminal_size.width() as isize,
-        terminal_size.height() as isize,
-      ),
+      (canvas_size.width() as isize, canvas_size.height() as isize),
     );
     let root_container = RootContainer::new(shape);
     let root_node = TreeNode::RootContainer(root_container);

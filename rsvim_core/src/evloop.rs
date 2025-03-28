@@ -258,11 +258,14 @@ impl EventLoop {
 
   /// Initialize buffers.
   pub fn init_buffers(&mut self) -> IoResult<()> {
-    // Initialize buffers.
+    let canvas_size = rlock!(self.canvas).size();
+
+    // Create buffers from parameters.
     let input_files = self.cli_opt.file().to_vec();
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
-        let maybe_buf_id = wlock!(self.buffers).new_file_buffer(Path::new(input_file));
+        let maybe_buf_id =
+          wlock!(self.buffers).new_file_buffer(canvas_size.height(), Path::new(input_file));
         match maybe_buf_id {
           Ok(buf_id) => {
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
@@ -273,7 +276,7 @@ impl EventLoop {
         }
       }
     } else {
-      let buf_id = wlock!(self.buffers).new_empty_buffer();
+      let buf_id = wlock!(self.buffers).new_empty_buffer(canvas_size.height());
       trace!("Created empty buffer {:?}", buf_id);
     }
 

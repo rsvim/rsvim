@@ -332,13 +332,19 @@ mod tests {
   use crate::ui::tree::Tree;
 
   fn make_window_from_size(
-    size: U16Size,
+    terminal_size: U16Size,
     buffer: BufferArc,
     window_options: &WindowLocalOptions,
   ) -> Window {
-    let mut tree = Tree::new(size);
+    let mut tree = Tree::new(terminal_size);
     tree.set_global_local_options(window_options);
-    let window_shape = IRect::new((0, 0), (size.width() as isize, size.height() as isize));
+    let window_shape = IRect::new(
+      (0, 0),
+      (
+        terminal_size.width() as isize,
+        terminal_size.height() as isize,
+      ),
+    );
     Window::new(
       window_shape,
       Arc::downgrade(&buffer),
@@ -376,8 +382,10 @@ mod tests {
   fn draw_after_init1() {
     test_log_init();
 
+    let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
+      terminal_size.height(),
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -402,7 +410,6 @@ mod tests {
       "          ",
     ];
 
-    let terminal_size = U16Size::new(10, 10);
     let window_local_options = WindowLocalOptionsBuilder::default()
       .wrap(false)
       .build()
