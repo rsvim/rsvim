@@ -19,9 +19,8 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
 
 
 def set_env(command, name, value):
+    assert isinstance(command, str)
     os.environ[name] = value
-    if command is None:
-        command = ""
     if not WINDOWS:
         command = f"{command} {name}={value}"
     return command.strip()
@@ -31,10 +30,11 @@ def set_sccache(command, recache):
     if recache:
         command = set_env(command, "SCCACHE_RECACHE", "1")
     command = set_env(command, "RUSTC_WRAPPER", "sccache")
+    return command.strip()
 
 
 def clippy(mode, recache):
-    command = set_env(None, "RUSTFLAGS", "'-Dwarnings'")
+    command = set_env("", "RUSTFLAGS", "'-Dwarnings'")
     command = set_sccache(command, recache)
 
     if isinstance(mode, str) and mode.lower().startswith("w"):
@@ -56,7 +56,7 @@ def test(name, recache):
     else:
         print(f"Run 'test' for '{name}'")
 
-    command = set_env(None, "RSVIM_LOG", "trace")
+    command = set_env("", "RSVIM_LOG", "trace")
     command = set_sccache(command, recache)
 
     command = f"{command} cargo nextest run --no-capture {name}"
@@ -67,7 +67,7 @@ def test(name, recache):
 
 
 def list_test(recache):
-    command = set_sccache(None, recache)
+    command = set_sccache("", recache)
 
     command = f"{command} cargo nextest list"
 
@@ -77,7 +77,7 @@ def list_test(recache):
 
 
 def build(release, recache):
-    command = set_sccache(None, recache)
+    command = set_sccache("", recache)
 
     if isinstance(release, str) and release.lower().startswith("r"):
         print("Run 'build' for 'release'")
