@@ -34,7 +34,7 @@ def set_sccache(command, recache):
 
 
 def clippy(mode, recache):
-    command = set_env("", "RUSTFLAGS", "'-Dwarnings'")
+    command = set_env("", "RUSTFLAGS", "-Dwarnings")
     command = set_sccache(command, recache)
 
     if isinstance(mode, str) and mode.lower().startswith("w"):
