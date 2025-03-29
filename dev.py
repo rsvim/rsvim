@@ -6,20 +6,36 @@
 import argparse
 import os
 import pathlib
-import shutil
+import platform
 
 __TEST_NOT_SPECIFIED = "__TEST_NOT_SPECIFIED"
 __BUILD_NOT_SPECIFIED = "__BUILD_NOT_SPECIFIED"
 __CLIPPY_NOT_SPECIFIED = "__CLIPPY_NOT_SPECIFIED"
 __DOC_NOT_SPECIFIED = "__DOC_NOT_SPECIFIED"
 
+WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
+    "CYGWIN_NT"
+)
+
+
+def set_env(command, name, value):
+    os.environ[name] = value
+    if command is None:
+        command = ""
+    if not WINDOWS:
+        command = f"{command} {name}={value}"
+    return command.strip()
+
+
+def set_sccache(command, recache):
+    if recache:
+        command = set_env(command, "SCCACHE_RECACHE", "1")
+    command = set_env(command, "RUSTC_WRAPPER", "sccache")
+
 
 def clippy(mode, recache):
-    command = "RUSTFLAGS='-Dwarnings'"
-    if shutil.which("sccache") is not None:
-        if recache:
-            command = f"{command} SCCACHE_RECACHE=1"
-        command = f"{command} RUSTC_WRAPPER=$(which sccache)"
+    command = set_env(None, "RUSTFLAGS", "'-Dwarnings'")
+    command = set_sccache(command, recache)
 
     if isinstance(mode, str) and mode.lower().startswith("w"):
         print("Run 'clippy' as service")
@@ -40,11 +56,8 @@ def test(name, recache):
     else:
         print(f"Run 'test' for '{name}'")
 
-    command = "RSVIM_LOG=trace"
-    if shutil.which("sccache") is not None:
-        if recache:
-            command = f"{command} SCCACHE_RECACHE=1"
-        command = f"{command} RUSTC_WRAPPER=$(which sccache)"
+    command = set_env(None, "RSVIM_LOG", "trace")
+    command = set_sccache(command, recache)
 
     command = f"{command} cargo nextest run --no-capture {name}"
 
@@ -54,11 +67,7 @@ def test(name, recache):
 
 
 def list_test(recache):
-    command = ""
-    if shutil.which("sccache") is not None:
-        if recache:
-            command = f"{command} SCCACHE_RECACHE=1"
-        command = f"{command} RUSTC_WRAPPER=$(which sccache)"
+    command = set_sccache(None, recache)
 
     command = f"{command} cargo nextest list"
 
@@ -68,11 +77,7 @@ def list_test(recache):
 
 
 def build(release, recache):
-    command = ""
-    if shutil.which("sccache") is not None:
-        if recache:
-            command = f"{command} SCCACHE_RECACHE=1"
-        command = f"{command} RUSTC_WRAPPER=$(which sccache)"
+    command = set_sccache(None, recache)
 
     if isinstance(release, str) and release.lower().startswith("r"):
         print("Run 'build' for 'release'")
