@@ -324,12 +324,12 @@ impl Buffer {
   }
 
   /// Remove one specified line.
-  pub fn remove(&mut self, line_idx: usize) {
+  pub fn remove_cached_line(&mut self, line_idx: usize) {
     self.cached_lines_width.pop(&line_idx);
   }
 
   /// Retain multiple lines by lambda function `f`.
-  pub fn retain<F>(&mut self, f: F)
+  pub fn retain_cached_lines<F>(&mut self, f: F)
   where
     F: Fn(&usize, &ColumnIndex) -> bool,
   {
@@ -345,7 +345,7 @@ impl Buffer {
   }
 
   /// Clear.
-  pub fn clear(&mut self) {
+  pub fn clear_cached_lines(&mut self) {
     self.cached_lines_width.clear()
   }
 }
