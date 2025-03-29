@@ -66,15 +66,15 @@ pub type BufferReadGuard<'a> = RwLockReadGuard<'a, Buffer>;
 pub type BufferWriteGuard<'a> = RwLockWriteGuard<'a, Buffer>;
 
 #[inline]
-fn lines_cached_size(terminal_height: u16) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new((terminal_height as usize) * 2 + 1).unwrap()
+fn get_cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
+  std::num::NonZeroUsize::new((canvas_height as usize) * 2 + 1).unwrap()
 }
 
 impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
   /// manage buffer instances.
   pub fn _new(
-    terminal_height: u16,
+    canvas_height: u16,
     rope: Rope,
     options: BufferLocalOptions,
     filename: Option<PathBuf>,
@@ -85,10 +85,7 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope,
-      cached_lines_width: LruCache::with_hasher(
-        lines_cached_size(terminal_height),
-        RandomState::new(),
-      ),
+      cached_lines_width: LruCache::with_hasher(get_cached_size(canvas_height), RandomState::new()),
       options,
       filename,
       absolute_filename,
@@ -99,14 +96,11 @@ impl Buffer {
 
   #[cfg(test)]
   /// NOTE: This API should only be used for testing.
-  pub fn _new_empty(terminal_height: u16, options: BufferLocalOptions) -> Self {
+  pub fn _new_empty(canvas_height: u16, options: BufferLocalOptions) -> Self {
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
-      cached_lines_width: LruCache::with_hasher(
-        lines_cached_size(terminal_height),
-        RandomState::new(),
-      ),
+      cached_lines_width: LruCache::with_hasher(get_cached_size(canvas_height), RandomState::new()),
       options,
       filename: None,
       absolute_filename: None,
@@ -348,6 +342,14 @@ impl Buffer {
   pub fn clear_cached_lines(&mut self) {
     self.cached_lines_width.clear()
   }
+
+  /// Resize cache.
+  pub fn resize_cached_lines(&mut self, canvas_height: u16) {
+    let new_cached_size = get_cached_size(canvas_height);
+    if new_cached_size > self.cached_lines_width.cap() {
+      self.cached_lines_width.resize(new_cached_size);
+    }
+  }
 }
 // Display Width }
 
@@ -396,7 +398,7 @@ impl BuffersManager {
   /// If the file name already exists.
   ///
   /// NOTE: This is a primitive API.
-  pub fn new_file_buffer(&mut self, terminal_height: u16, filename: &Path) -> IoResult<BufferId> {
+  pub fn new_file_buffer(&mut self, canvas_height: u16, filename: &Path) -> IoResult<BufferId> {
     let abs_filename = match filename.absolutize() {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
@@ -420,7 +422,7 @@ impl BuffersManager {
     };
 
     let buf = if existed {
-      match self.edit_file(terminal_height, filename, &abs_filename) {
+      match self.edit_file(canvas_height, filename, &abs_filename) {
         Ok(buf) => buf,
         Err(e) => {
           return Err(e);
@@ -428,7 +430,7 @@ impl BuffersManager {
       }
     } else {
       Buffer::_new(
-        terminal_height,
+        canvas_height,
         Rope::new(),
         *self.global_local_options(),
         Some(filename.to_path_buf()),
@@ -458,11 +460,11 @@ impl BuffersManager {
   /// If there is already other unnamed buffers.
   ///
   /// NOTE: This is a primitive API.
-  pub fn new_empty_buffer(&mut self, terminal_height: u16) -> BufferId {
+  pub fn new_empty_buffer(&mut self, canvas_height: u16) -> BufferId {
     assert!(!self.buffers_by_path.contains_key(&None));
 
     let buf = Buffer::_new(
-      terminal_height,
+      canvas_height,
       Rope::new(),
       *self.global_local_options(),
       None,
@@ -513,7 +515,7 @@ impl BuffersManager {
   // Implementation for [new_buffer_edit_file](new_buffer_edit_file).
   fn edit_file(
     &self,
-    terminal_height: u16,
+    canvas_height: u16,
     filename: &Path,
     absolute_filename: &Path,
   ) -> IoResult<Buffer> {
@@ -544,7 +546,7 @@ impl BuffersManager {
         assert!(bytes == buf.len());
 
         Ok(Buffer::_new(
-          terminal_height,
+          canvas_height,
           self.to_rope(&buf, buf.len()),
           *self.global_local_options(),
           Some(filename.to_path_buf()),
