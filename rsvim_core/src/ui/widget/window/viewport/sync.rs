@@ -387,18 +387,18 @@ fn _from_top_left_wrap_linebreak(
   let buffer = buffer.upgrade().unwrap();
   let mut buffer = wlock!(buffer);
 
+  trace!(
+    "buffer.get_line ({:?}):'{:?}'",
+    start_line,
+    match buffer.get_rope().get_line(start_line) {
+      Some(line) => slice2line(&line),
+      None => "None".to_string(),
+    }
+  );
+
   unsafe {
     // Fix mutable borrow on `buffer`.
     let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
-    // trace!(
-    //   "buffer.get_line ({:?}):'{:?}'",
-    //   start_line,
-    //   match buffer.get_line(start_line) {
-    //     Some(line) => slice2line(&line),
-    //     None => "None".to_string(),
-    //   }
-    // );
 
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
