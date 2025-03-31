@@ -179,33 +179,34 @@ impl Buffer {
     &mut self.rope
   }
 
-  // /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
-  // /// (`start_char_idx`) and max chars length (`max_chars`).
-  // /// NOTE: This is for performance reason that this API limits the max chars instead of the whole
-  // /// line, this is useful for super long lines.
-  // pub fn clone_line(
-  //   &self,
-  //   line_idx: usize,
-  //   start_char_idx: usize,
-  //   max_chars: usize,
-  // ) -> Option<String> {
-  //   match self.rope.get_line(line_idx) {
-  //     Some(line) => match line.get_chars_at(start_char_idx) {
-  //       Some(chars_iter) => {
-  //         let mut builder = String::with_capacity(max_chars);
-  //         for (i, c) in chars_iter.enumerate() {
-  //           if i >= max_chars {
-  //             return Some(builder);
-  //           }
-  //           builder.push(c);
-  //         }
-  //         Some(builder)
-  //       }
-  //       None => None,
-  //     },
-  //     None => None,
-  //   }
-  // }
+  /// Similar with [`Rope::get_line`], but collect and clone a normal string with start index
+  /// (`start_char_idx`) and max chars length (`max_chars`).
+  ///
+  /// NOTE: It is for performance reason that limits maximized chars count instead of the whole
+  /// line, which is useful for super long lines.
+  pub fn clone_line(
+    &self,
+    line_idx: usize,
+    start_char_idx: usize,
+    max_chars: usize,
+  ) -> Option<String> {
+    match self.rope.get_line(line_idx) {
+      Some(line) => match line.get_chars_at(start_char_idx) {
+        Some(chars_iter) => {
+          let mut builder = String::with_capacity(max_chars);
+          for (i, c) in chars_iter.enumerate() {
+            if i >= max_chars {
+              return Some(builder);
+            }
+            builder.push(c);
+          }
+          Some(builder)
+        }
+        None => None,
+      },
+      None => None,
+    }
+  }
 }
 // Rope }
 
