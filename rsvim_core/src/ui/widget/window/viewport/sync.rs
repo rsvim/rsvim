@@ -365,8 +365,37 @@ fn _from_top_left_wrap_nolinebreak(
 }
 
 /// Find the word index by the char index.
-fn find_word_by_char<'a>(words: &'a Vec<&str>, char_idx: usize) -> Option<usize> {
-  None
+///
+/// Returns the word index which contains this char, and whether the char is the last char in the
+/// word.
+fn find_word_by_char<'a>(
+  words: &'a Vec<&str>,
+  word_accumulated_chars_index: &HashMap<usize, usize>,
+  char_idx: usize,
+) -> (usize, bool) {
+  let mut low = 0;
+  let mut high = words.len() - 1;
+
+  while low < high {
+    let mid = (low + high) / 2;
+
+    let start_char_idx = if mid > 0 {
+      *word_accumulated_chars_index.get(&(mid - 1)).unwrap()
+    } else {
+      0_usize
+    };
+    let end_char_idx = *word_accumulated_chars_index.get(&mid).unwrap();
+
+    if start_char_idx <= char_idx && end_char_idx > char_idx {
+      return (mid, char_idx + 1 == end_char_idx);
+    } else if start_char_idx > char_idx {
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  unreachable!()
 }
 
 #[allow(unused_variables)]
@@ -443,25 +472,20 @@ fn _from_top_left_wrap_linebreak(
             } else {
               let cloned_line = cloned_line.unwrap();
               let word_boundaries: Vec<&str> = cloned_line.split_word_bounds().collect();
-              // Word index => word width (only the single word itself).
-              let word_boundaries_width: HashMap<usize, usize> = word_boundaries
+              // Word index => word's chars count (only the word itself).
+              let word_chars_count: HashMap<usize, usize> = word_boundaries
                 .iter()
                 .enumerate()
-                .map(|(i, wd)| {
-                  let wd_width = wd
-                    .chars()
-                    .fold(0_usize, |acc, c| acc + raw_buffer.as_ref().char_width(c));
-                  (i, wd_width)
-                })
+                .map(|(i, wd)| (i, wd.chars().count()))
                 .collect();
-              // Word index => display prefix width (from the first char until current word).
-              let word_boundaries_len: HashMap<usize, usize> = word_boundaries
+              // Word index => accumulated word's chars index (from the first char until current
+              // word).
+              let word_accumulated_chars_index: HashMap<usize, usize> = word_boundaries
                 .iter()
                 .enumerate()
-                .scan(0_usize, |prefix, (i, wd)| {
-                  let wd_width = word_boundaries_width.get(&i).unwrap();
-                  *prefix = *prefix + wd_width;
-                  Some((i, *prefix))
+                .scan(0_usize, |state, (i, wd)| {
+                  *state = *state + word_chars_count.get(&i).unwrap();
+                  Some((i, *state))
                 })
                 .collect();
 
@@ -482,7 +506,8 @@ fn _from_top_left_wrap_linebreak(
               while wrow < height && !eol {
                 end_char = match raw_buffer.as_mut().char_after(l, end_width) {
                   Some(c) => {
-                    let word_idx = find_word_by_char(&word_boundaries, c);
+                    let (word_idx, is_last_char_in_word) =
+                      find_word_by_char(&word_boundaries, &word_accumulated_chars_index, c);
                     Some(c)
                   }
                   None => {
