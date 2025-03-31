@@ -364,8 +364,13 @@ fn _from_top_left_wrap_nolinebreak(
   }
 }
 
+/// Find the word index by the char index.
+fn find_word_by_char<'a>(words: &'a Vec<&str>, char_idx: usize) -> Option<usize> {
+  None
+}
+
 #[allow(unused_variables)]
-// Implements [`from_top_left`] with option `wrap=true` and `line-break=true`.
+/// Implements [`from_top_left`] with option `wrap=true` and `line-break=true`.
 fn _from_top_left_wrap_linebreak(
   _options: &ViewportOptions,
   buffer: BufferWk,
@@ -438,6 +443,27 @@ fn _from_top_left_wrap_linebreak(
             } else {
               let cloned_line = cloned_line.unwrap();
               let word_boundaries: Vec<&str> = cloned_line.split_word_bounds().collect();
+              // Word index => word width (only the single word itself).
+              let word_boundaries_width: HashMap<usize, usize> = word_boundaries
+                .iter()
+                .enumerate()
+                .map(|(i, wd)| {
+                  let wd_width = wd
+                    .chars()
+                    .fold(0_usize, |acc, c| acc + raw_buffer.as_ref().char_width(c));
+                  (i, wd_width)
+                })
+                .collect();
+              // Word index => display prefix width (from the first char until current word).
+              let word_boundaries_len: HashMap<usize, usize> = word_boundaries
+                .iter()
+                .enumerate()
+                .scan(0_usize, |prefix, (i, wd)| {
+                  let wd_width = word_boundaries_width.get(&i).unwrap();
+                  *prefix = *prefix + wd_width;
+                  Some((i, *prefix))
+                })
+                .collect();
 
               let mut start_char = raw_buffer
                 .as_mut()
@@ -455,7 +481,10 @@ fn _from_top_left_wrap_linebreak(
               assert!(wrow < height);
               while wrow < height && !eol {
                 end_char = match raw_buffer.as_mut().char_after(l, end_width) {
-                  Some(c) => Some(c),
+                  Some(c) => {
+                    let word_idx = find_word_by_char(&word_boundaries, c);
+                    Some(c)
+                  }
                   None => {
                     eol = true;
                     Some(raw_buffer.as_mut().last_char(l).unwrap())
