@@ -317,12 +317,12 @@ impl Buffer {
       .truncate_since_width(width)
   }
 
-  /// Remove one specified line.
+  /// Remove one cached line.
   pub fn remove_cached_line(&mut self, line_idx: usize) {
     self.cached_lines_width.pop(&line_idx);
   }
 
-  /// Retain multiple lines by lambda function `f`.
+  /// Retain multiple cached lines by lambda function `f`.
   pub fn retain_cached_lines<F>(&mut self, f: F)
   where
     F: Fn(&usize, &ColumnIndex) -> bool,
@@ -338,7 +338,7 @@ impl Buffer {
     }
   }
 
-  /// Clear.
+  /// Clear cache.
   pub fn clear_cached_lines(&mut self) {
     self.cached_lines_width.clear()
   }
