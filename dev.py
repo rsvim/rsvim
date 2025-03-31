@@ -20,8 +20,9 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
 
 def set_env(command, name, value):
     assert isinstance(command, str)
-    os.environ[name] = value
-    if not WINDOWS:
+    if WINDOWS:
+        os.environ[name] = value
+    else:
         command = f"{command} {name}={value}"
     return command.strip()
 
