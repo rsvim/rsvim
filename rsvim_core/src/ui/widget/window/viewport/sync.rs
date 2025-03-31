@@ -162,11 +162,11 @@ fn _from_top_left_nowrap(
               Some(c) => {
                 let c_width = raw_buffer.as_mut().width_at(l, c);
                 if c_width > end_width {
-                  // If the char `c1` width is greater than `end_width`, the `c1` itself is the end char.
+                  // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
                   let c_width_before = raw_buffer.as_mut().width_before(l, c);
                   (c, end_width.saturating_sub(c_width_before))
                 } else {
-                  // If the char `c1` width is less than or equal to `end_width`, the char next to `c1` is the end char.
+                  // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
                   let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
                   (c_next, 0_usize)
                 }
@@ -294,11 +294,11 @@ fn _from_top_left_wrap_nolinebreak(
                 Some(c) => {
                   let c_width = raw_buffer.as_mut().width_at(l, c);
                   if c_width > end_width {
-                    // If the char `c1` width is greater than `end_width`, the `c1` itself is the end char.
+                    // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
                     let c_width_before = raw_buffer.as_mut().width_before(l, c);
                     (c, end_width.saturating_sub(c_width_before))
                   } else {
-                    // If the char `c1` width is less than or equal to `end_width`, the char next to `c1` is the end char.
+                    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
                     let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
                     (c_next, 0_usize)
                   }
@@ -444,30 +444,33 @@ fn _from_top_left_wrap_linebreak(
                 .char_after(l, start_dcol_on_line)
                 .unwrap_or(0_usize);
               let start_fills = {
-                let start_width_until = raw_buffer.as_mut().width_before(l, start_char);
-                start_width_until - start_dcol_on_line
+                let width_before = raw_buffer.as_mut().width_before(l, start_char);
+                width_before.saturating_sub(start_dcol_on_line)
               };
 
-              let mut end_dcol = start_dcol_on_line + width as usize;
-              let mut end_c: Option<usize> = None;
+              let mut end_width = start_dcol_on_line + width as usize;
+              let mut end_char: Option<usize> = None;
               let mut eol = false;
+
+              assert!(wrow < height);
               while wrow < height && !eol {
-                end_c = match raw_buffer.as_mut().char_after(l, end_dcol) {
+                end_char = match raw_buffer.as_mut().char_after(l, end_width) {
                   Some(c) => Some(c),
                   None => {
                     eol = true;
                     Some(raw_buffer.as_mut().last_char(l).unwrap())
                   }
                 };
-                rows.insert(wrow, RowViewport::new(start_char..end_c.unwrap()));
+                rows.insert(wrow, RowViewport::new(start_char..end_char.unwrap()));
                 wrow += 1;
-                start_char = end_c.unwrap();
-                end_dcol = end_dcol + width as usize;
+                start_char = end_char.unwrap();
+                end_width = end_width + width as usize;
               }
+
               let end_fills = {
-                let end_width_until = raw_buffer.as_mut().width_until(l, end_c.unwrap());
-                if end_width_until >= end_dcol {
-                  end_width_until - end_dcol
+                let end_width_until = raw_buffer.as_mut().width_until(l, end_char.unwrap());
+                if end_width_until >= end_width {
+                  end_width_until - end_width
                 } else {
                   0_usize
                 }
