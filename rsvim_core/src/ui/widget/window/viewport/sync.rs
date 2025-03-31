@@ -423,7 +423,7 @@ fn _from_top_left_wrap_linebreak(
           } else {
             let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
 
-            // Here we clone the line with the max chars that can hold by current window/viewport,
+            // Here clone the line with the max chars that can hold by current window/viewport,
             // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
             // performance issue when iterating on super long lines.
             let cloned_line = raw_buffer.as_ref().clone_line(
@@ -434,47 +434,47 @@ fn _from_top_left_wrap_linebreak(
 
             if cloned_line.is_none() {
               rows.insert(wrow, RowViewport::new(0..0));
-              return (rows, 0_usize, 0_usize);
-            }
+              (rows, 0_usize, 0_usize)
+            } else {
+              let cloned_line = cloned_line.unwrap();
+              let word_boundaries: Vec<&str> = cloned_line.split_word_bounds().collect();
 
-            let cloned_line = cloned_line.unwrap();
-            let word_boundaries: Vec<&str> = cloned_line.split_word_bounds().collect();
+              let mut start_char = raw_buffer
+                .as_mut()
+                .char_after(l, start_dcol_on_line)
+                .unwrap_or(0_usize);
+              let start_fills = {
+                let start_width_until = raw_buffer.as_mut().width_before(l, start_char);
+                start_width_until - start_dcol_on_line
+              };
 
-            let mut start_c = match raw_buffer.as_mut().char_until(l, start_dcol_on_line) {
-              Some(c) => c,
-              None => 0_usize,
-            };
-            let start_fills = {
-              let start_width_until = raw_buffer.as_mut().width_before(l, start_c);
-              start_width_until - start_dcol_on_line
-            };
-
-            let mut end_dcol = start_dcol_on_line + width as usize;
-            let mut end_c: Option<usize> = None;
-            let mut eol = false;
-            while wrow < height && !eol {
-              end_c = match raw_buffer.as_mut().char_after(l, end_dcol) {
-                Some(c) => Some(c),
-                None => {
-                  eol = true;
-                  Some(raw_buffer.as_mut().last_char(l).unwrap())
+              let mut end_dcol = start_dcol_on_line + width as usize;
+              let mut end_c: Option<usize> = None;
+              let mut eol = false;
+              while wrow < height && !eol {
+                end_c = match raw_buffer.as_mut().char_after(l, end_dcol) {
+                  Some(c) => Some(c),
+                  None => {
+                    eol = true;
+                    Some(raw_buffer.as_mut().last_char(l).unwrap())
+                  }
+                };
+                rows.insert(wrow, RowViewport::new(start_char..end_c.unwrap()));
+                wrow += 1;
+                start_char = end_c.unwrap();
+                end_dcol = end_dcol + width as usize;
+              }
+              let end_fills = {
+                let end_width_until = raw_buffer.as_mut().width_until(l, end_c.unwrap());
+                if end_width_until >= end_dcol {
+                  end_width_until - end_dcol
+                } else {
+                  0_usize
                 }
               };
-              rows.insert(wrow, RowViewport::new(start_c..end_c.unwrap()));
-              wrow += 1;
-              start_c = end_c.unwrap();
-              end_dcol = end_dcol + width as usize;
-            }
-            let end_fills = {
-              let end_width_until = raw_buffer.as_mut().width_until(l, end_c.unwrap());
-              if end_width_until >= end_dcol {
-                end_width_until - end_dcol
-              } else {
-                0_usize
-              }
-            };
 
-            (rows, start_fills, end_fills)
+              (rows, start_fills, end_fills)
+            }
           };
 
           let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
