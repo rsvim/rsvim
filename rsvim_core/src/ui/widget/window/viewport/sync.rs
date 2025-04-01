@@ -370,9 +370,9 @@ fn _from_top_left_wrap_nolinebreak(
 /// word.
 fn find_word_by_char<'a>(
   words: &'a Vec<&str>,
-  word_accumulated_chars_index: &HashMap<usize, usize>,
+  word_end_chars_index: &HashMap<usize, usize>,
   char_idx: usize,
-) -> (usize, bool) {
+) -> (usize, usize, usize) {
   let mut low = 0;
   let mut high = words.len() - 1;
 
@@ -380,14 +380,14 @@ fn find_word_by_char<'a>(
     let mid = (low + high) / 2;
 
     let start_char_idx = if mid > 0 {
-      *word_accumulated_chars_index.get(&(mid - 1)).unwrap()
+      *word_end_chars_index.get(&(mid - 1)).unwrap()
     } else {
       0_usize
     };
-    let end_char_idx = *word_accumulated_chars_index.get(&mid).unwrap();
+    let end_char_idx = *word_end_chars_index.get(&mid).unwrap();
 
     if start_char_idx <= char_idx && end_char_idx > char_idx {
-      return (mid, char_idx + 1 == end_char_idx);
+      return (mid, start_char_idx, end_char_idx);
     } else if start_char_idx > char_idx {
       high = mid - 1;
     } else {
@@ -471,20 +471,14 @@ fn _from_top_left_wrap_linebreak(
               (rows, 0_usize, 0_usize)
             } else {
               let cloned_line = cloned_line.unwrap();
-              let word_boundaries: Vec<&str> = cloned_line.split_word_bounds().collect();
-              // Word index => word's chars count (only the word itself).
-              let word_chars_count: HashMap<usize, usize> = word_boundaries
-                .iter()
-                .enumerate()
-                .map(|(i, wd)| (i, wd.chars().count()))
-                .collect();
-              // Word index => accumulated word's chars index (from the first char until current
-              // word).
-              let word_accumulated_chars_index: HashMap<usize, usize> = word_boundaries
+              let words: Vec<&str> = cloned_line.split_word_bounds().collect();
+              // Word index => end char index (from the first char until current word).
+              let word_end_chars_index: HashMap<usize, usize> = words
                 .iter()
                 .enumerate()
                 .scan(0_usize, |state, (i, wd)| {
-                  *state = *state + word_chars_count.get(&i).unwrap();
+                  let wd_chars = wd.chars().count();
+                  *state = *state + wd_chars;
                   Some((i, *state))
                 })
                 .collect();
@@ -500,18 +494,44 @@ fn _from_top_left_wrap_linebreak(
 
               let mut end_width = start_dcol_on_line + width as usize;
               let mut end_char: Option<usize> = None;
-              let mut eol = false;
 
               assert!(wrow < height);
-              while wrow < height && !eol {
-                end_char = match raw_buffer.as_mut().char_after(l, end_width) {
+              while wrow < height {
+                end_char = match raw_buffer.as_mut().char_at(l, end_width) {
                   Some(c) => {
-                    let (word_idx, is_last_char_in_word) =
-                      find_word_by_char(&word_boundaries, &word_accumulated_chars_index, c);
-                    Some(c)
+                    let (wd_idx, start_char_in_wd, end_char_in_wd) =
+                      find_word_by_char(&words, &word_end_chars_index, c);
+                    if end_char_in_wd == c + 1 {
+                      // This is fortunately the word ends at the end of the row, i.e. the last
+                      // char in the `wd` happens to be at the end of the row. So this word can be
+                      // put at the end of the row, don't need to be wrapped to the next row.
+                      Some(c)
+                    } else if end_char_in_wd > c + 1 {
+                      // Or unfortunatedly, this word is longer than current row, i.e. it needs to
+                      // be put into the next row (instead of current row).
+
+                      // Here's the tricky part, there are two sub-cases in this scenario:
+                      // 1. For most (happy) cases, the word is not longer than a whole row in the
+                      //    window, so it can be completely put to next row. It is quite simple and
+                      //    we don't need to handle any edge cases.
+                      // 2. For very rare cases, the word is just too long to put in an entire row
+                      //    in the window. And in this case, we fallback to non-line-break
+                      //    rendering behavior, i.e. just cut the word in the middle, and force
+                      //    rendering the word on multiple rows in the window (because otherwise
+                      //    there will be never enough places to put the whole word).
+                      if start_char_in_wd <= end_width {
+                        // Case-2: The word is too long to put in the whole row.
+                      } else {
+                        // Case-1: The word is not too long.
+                      }
+                      let wd = words[wd_idx];
+                    } else {
+                      unreachable!()
+                    }
                   }
                   None => {
-                    eol = true;
+                    let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+                    // (c_next, 0_usize)
                     Some(raw_buffer.as_mut().last_char(l).unwrap())
                   }
                 };
