@@ -500,13 +500,32 @@ fn _from_top_left_wrap_linebreak(
             while wrow < height {
               let (end_char, end_fills_result) = match raw_buffer.as_mut().char_at(l, end_width) {
                 Some(c) => {
-                  let c_width = raw_buffer.as_mut().width_at(l, c);
-                  if c_width > end_width {
-                    // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-                    let c_width_before = raw_buffer.as_mut().width_before(l, c);
-                    (c, end_width.saturating_sub(c_width_before))
+                  let (wd_idx, start_c_of_wd, end_c_of_wd) =
+                    find_word_by_char(&words, &words_end_char_idx, c);
+
+                  let end_c_width = raw_buffer.as_mut().width_at(l, end_c_of_wd);
+                  if end_c_width > end_width {
+                    // The current word is longer than current row, it needs to be put to next row.
+
+                    // Here's the tricky part, there are two sub-cases in this scenario:
+                    // 1. For most happy cases, the word is not longer than a whole row in the
+                    //    window, so it can be completely put to next row.
+                    // 2. For very rare cases, the word is just too long to put in an entire row
+                    //    in the window. And in this case, we fallback to the no-line-break
+                    //    rendering behavior, i.e. just cut the word by chars and force rendering
+                    //    the word on multiple rows in the window (because otherwise there will be
+                    //    never enough places to put the whole word).
+
+                    if start_c_of_wd > start_char {
+                      // Case-1, simply wrapped this word to next row.
+
+                      while wrow < height && 
+                      rows.insert(wrow, RowViewport::new(start_char..start_c_of_wd));
+                    } else {
+                      // Case-2, cut this word and force rendering it ignoring line-break behavior.
+                    }
                   } else {
-                    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
+                    // The current word is not long, it can be put in current row.
                     let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
                     (c_next, 0_usize)
                   }
