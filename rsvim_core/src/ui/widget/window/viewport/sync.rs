@@ -460,98 +460,97 @@ fn _from_top_left_wrap_linebreak(
             // Here clone the line with the max chars that can hold by current window/viewport,
             // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
             // performance issue when iterating on super long lines.
-            let cloned_line = raw_buffer.as_ref().clone_line(
-              l,
-              0,
-              height as usize * width as usize * 2 + 16 + start_dcol_on_line,
-            );
+            let cloned_line = raw_buffer
+              .as_ref()
+              .clone_line(
+                l,
+                0,
+                height as usize * width as usize * 2 + 16 + start_dcol_on_line,
+              )
+              .unwrap();
 
-            if cloned_line.is_none() {
-              rows.insert(wrow, RowViewport::new(0..0));
-              (rows, 0_usize, 0_usize)
-            } else {
-              let cloned_line = cloned_line.unwrap();
-              let words: Vec<&str> = cloned_line.split_word_bounds().collect();
-              // Word index => end char index (from the first char until current word).
-              let word_end_chars_index: HashMap<usize, usize> = words
-                .iter()
-                .enumerate()
-                .scan(0_usize, |state, (i, wd)| {
-                  let wd_chars = wd.chars().count();
-                  *state = *state + wd_chars;
-                  Some((i, *state))
-                })
-                .collect();
+            let cloned_line = cloned_line.unwrap();
+            let words: Vec<&str> = cloned_line.split_word_bounds().collect();
+            // Word index => end char index (from the first char until current word).
+            let word_end_chars_index: HashMap<usize, usize> = words
+              .iter()
+              .enumerate()
+              .scan(0_usize, |state, (i, wd)| {
+                let wd_chars = wd.chars().count();
+                *state = *state + wd_chars;
+                Some((i, *state))
+              })
+              .collect();
 
-              let mut start_char = raw_buffer
-                .as_mut()
-                .char_after(l, start_dcol_on_line)
-                .unwrap_or(0_usize);
-              let start_fills = {
-                let width_before = raw_buffer.as_mut().width_before(l, start_char);
-                width_before.saturating_sub(start_dcol_on_line)
-              };
+            let mut start_char = raw_buffer
+              .as_mut()
+              .char_after(l, start_dcol_on_line)
+              .unwrap_or(0_usize);
+            let start_fills = {
+              let width_before = raw_buffer.as_mut().width_before(l, start_char);
+              width_before.saturating_sub(start_dcol_on_line)
+            };
 
-              let mut end_width = start_dcol_on_line + width as usize;
-              let mut end_char: Option<usize> = None;
+            let mut prev_end_width = start_dcol_on_line;
+            let mut end_width = start_dcol_on_line + width as usize;
+            let mut end_char: Option<usize> = None;
 
-              assert!(wrow < height);
-              while wrow < height {
-                end_char = match raw_buffer.as_mut().char_at(l, end_width) {
-                  Some(c) => {
-                    let (wd_idx, start_char_in_wd, end_char_in_wd) =
-                      find_word_by_char(&words, &word_end_chars_index, c);
-                    if end_char_in_wd == c + 1 {
-                      // This is fortunately the word ends at the end of the row, i.e. the last
-                      // char in the `wd` happens to be at the end of the row. So this word can be
-                      // put at the end of the row, don't need to be wrapped to the next row.
-                      Some(c)
-                    } else if end_char_in_wd > c + 1 {
-                      // Or unfortunatedly, this word is longer than current row, i.e. it needs to
-                      // be put into the next row (instead of current row).
+            assert!(wrow < height);
+            while wrow < height {
+              end_char = match raw_buffer.as_mut().char_at(l, end_width) {
+                Some(c) => {
+                  let (wd_idx, start_char_in_wd, end_char_in_wd) =
+                    find_word_by_char(&words, &word_end_chars_index, c);
+                  if end_char_in_wd == c + 1 {
+                    // This is fortunately the word ends at the end of the row, i.e. the last
+                    // char in the `wd` happens to be at the end of the row. So this word can be
+                    // put at the end of the row, don't need to be wrapped to the next row.
+                    Some(c)
+                  } else if end_char_in_wd > c + 1 {
+                    // Or unfortunatedly, this word is longer than current row, i.e. it needs to
+                    // be put into the next row (instead of current row).
 
-                      // Here's the tricky part, there are two sub-cases in this scenario:
-                      // 1. For most (happy) cases, the word is not longer than a whole row in the
-                      //    window, so it can be completely put to next row. It is quite simple and
-                      //    we don't need to handle any edge cases.
-                      // 2. For very rare cases, the word is just too long to put in an entire row
-                      //    in the window. And in this case, we fallback to non-line-break
-                      //    rendering behavior, i.e. just cut the word in the middle, and force
-                      //    rendering the word on multiple rows in the window (because otherwise
-                      //    there will be never enough places to put the whole word).
-                      if start_char_in_wd <= end_width {
-                        // Case-2: The word is too long to put in the whole row.
-                      } else {
-                        // Case-1: The word is not too long.
-                      }
-                      let wd = words[wd_idx];
+                    // Here's the tricky part, there are two sub-cases in this scenario:
+                    // 1. For most (happy) cases, the word is not longer than a whole row in the
+                    //    window, so it can be completely put to next row. It is quite simple and
+                    //    we don't need to handle any edge cases.
+                    // 2. For very rare cases, the word is just too long to put in an entire row
+                    //    in the window. And in this case, we fallback to non-line-break
+                    //    rendering behavior, i.e. just cut the word in the middle, and force
+                    //    rendering the word on multiple rows in the window (because otherwise
+                    //    there will be never enough places to put the whole word).
+                    if start_char_in_wd <= prev_end_width {
+                      // Case-2: The word is too long to put in the whole row.
                     } else {
-                      unreachable!()
+                      // Case-1: The word is not too long.
                     }
+                    let wd = words[wd_idx];
+                  } else {
+                    unreachable!()
                   }
-                  None => {
-                    let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
-                    // (c_next, 0_usize)
-                    Some(raw_buffer.as_mut().last_char(l).unwrap())
-                  }
-                };
-                rows.insert(wrow, RowViewport::new(start_char..end_char.unwrap()));
-                wrow += 1;
-                start_char = end_char.unwrap();
-                end_width = end_width + width as usize;
-              }
-
-              let end_fills = {
-                let end_width_until = raw_buffer.as_mut().width_until(l, end_char.unwrap());
-                if end_width_until >= end_width {
-                  end_width_until - end_width
-                } else {
-                  0_usize
+                }
+                None => {
+                  let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+                  // (c_next, 0_usize)
+                  Some(raw_buffer.as_mut().last_char(l).unwrap())
                 }
               };
-
-              (rows, start_fills, end_fills)
+              rows.insert(wrow, RowViewport::new(start_char..end_char.unwrap()));
+              wrow += 1;
+              start_char = end_char.unwrap();
+              end_width = end_width + width as usize;
             }
+
+            let end_fills = {
+              let end_width_until = raw_buffer.as_mut().width_until(l, end_char.unwrap());
+              if end_width_until >= end_width {
+                end_width_until - end_width
+              } else {
+                0_usize
+              }
+            };
+
+            (rows, start_fills, end_fills)
           };
 
           let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
