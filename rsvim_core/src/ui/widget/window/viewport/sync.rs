@@ -368,8 +368,8 @@ fn _from_top_left_wrap_nolinebreak(
 ///
 /// Returns the word index which contains this char, and whether the char is the last char in the
 /// word.
-fn find_word_by_char<'a>(
-  words: &'a Vec<&str>,
+fn find_word_by_char(
+  words: &Vec<&str>,
   word_end_chars_index: &HashMap<usize, usize>,
   char_idx: usize,
 ) -> (usize, usize, usize) {
