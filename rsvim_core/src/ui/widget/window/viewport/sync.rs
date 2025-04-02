@@ -626,17 +626,20 @@ fn _from_top_left_wrap_linebreak(
                         }
                       }
                     }
-                    None => wrap_linebreak_part1(
-                      &words,
-                      &words_end_char_idx,
-                      raw_buffer,
-                      &bline,
-                      l,
-                      c,
-                      end_width,
-                      start_char,
-                      &mut last_word_is_too_long,
-                    ),
+                    None => {
+                      // Part-1
+                      wrap_linebreak_part1(
+                        &words,
+                        &words_end_char_idx,
+                        raw_buffer,
+                        &bline,
+                        l,
+                        c,
+                        end_width,
+                        start_char,
+                        &mut last_word_is_too_long,
+                      )
+                    }
                   }
                 }
                 None => {
