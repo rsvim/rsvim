@@ -346,9 +346,9 @@ impl Buffer {
 
   /// Resize cache.
   pub fn resize_cached_lines(&mut self, canvas_height: u16) {
-    let new_cached_size = get_cached_size(canvas_height);
-    if new_cached_size > self.cached_lines_width.cap() {
-      self.cached_lines_width.resize(new_cached_size);
+    let new_cache_size = get_cached_size(canvas_height);
+    if new_cache_size > self.cached_lines_width.cap() {
+      self.cached_lines_width.resize(new_cache_size);
     }
   }
 }
