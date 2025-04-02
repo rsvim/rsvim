@@ -490,44 +490,89 @@ fn _from_top_left_wrap_linebreak(
               let width_before = raw_buffer.as_mut().width_before(l, start_char);
               width_before.saturating_sub(start_dcol_on_line)
             };
-            let (start_word_idx, start_char_of_start_word, end_char_of_start_word) =
-              find_word_by_char(&words, &words_end_char_idx, start_char);
+
+            // // First char, first word.
+            // let (mut wd_idx, mut start_char_of_wd, mut end_char_of_wd) =
+            //   find_word_by_char(&words, &words_end_char_idx, start_char);
 
             let mut end_width = start_dcol_on_line + width as usize;
             let mut end_fills = 0_usize;
+
+            // Saved last word info, if it is too long to put in an entire row of window.
+            // The tuple is:
+            // 1. Word index.
+            // 2. Start char of the word.
+            // 3. End char of the word.
+            // 4. Continued start char index of the word (which should be continue to rendering on
+            //    current row).
+            let mut last_word_is_too_long: Option<(usize, usize, usize, usize)> = None;
 
             assert!(wrow < height);
             while wrow < height {
               let (end_char, end_fills_result) = match raw_buffer.as_mut().char_at(l, end_width) {
                 Some(c) => {
-                  let (wd_idx, start_c_of_wd, end_c_of_wd) =
-                    find_word_by_char(&words, &words_end_char_idx, c);
+                  match last_word_is_too_long {
+                    Some((
+                      last_wd_idx,
+                      start_char_of_last_wd,
+                      end_char_of_last_wd,
+                      continued_char_of_last_wd,
+                    )) => {
+                      // Part-2
+                      // This is the following logic of part-1, you should first see part-1 before
+                      // this.
+                      // This part is to process the case-2 of the tricky part, i.e. if the word is
+                      // too long to put in an entire row, and we cut it into pieces and force
+                      // rendering it with no-line-break behavior.
 
-                  let end_c_width = raw_buffer.as_mut().width_at(l, end_c_of_wd);
-                  if end_c_width > end_width {
-                    // The current word is longer than current row, it needs to be put to next row.
-
-                    // Here's the tricky part, there are two sub-cases in this scenario:
-                    // 1. For most happy cases, the word is not longer than a whole row in the
-                    //    window, so it can be completely put to next row.
-                    // 2. For very rare cases, the word is just too long to put in an entire row
-                    //    in the window. And in this case, we fallback to the no-line-break
-                    //    rendering behavior, i.e. just cut the word by chars and force rendering
-                    //    the word on multiple rows in the window (because otherwise there will be
-                    //    never enough places to put the whole word).
-
-                    if start_c_of_wd > start_char {
-                      // Case-1, simply wrapped this word to next row.
-
-                      while wrow < height && 
-                      rows.insert(wrow, RowViewport::new(start_char..start_c_of_wd));
-                    } else {
-                      // Case-2, cut this word and force rendering it ignoring line-break behavior.
+                      (0_usize, 0_usize)
                     }
-                  } else {
-                    // The current word is not long, it can be put in current row.
-                    let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
-                    (c_next, 0_usize)
+                    None => {
+                      let (wd_idx, start_c_of_wd, end_c_of_wd) =
+                        find_word_by_char(&words, &words_end_char_idx, c);
+
+                      let end_c_width = raw_buffer.as_mut().width_at(l, end_c_of_wd);
+                      if end_c_width > end_width {
+                        // The current word is longer than current row, it needs to be put to next row.
+
+                        // Part-1
+                        // Here's the **tricky** part, there are two sub-cases in this scenario:
+                        // 1. For most happy cases, the word is not longer than a whole row in the
+                        //    window, so it can be completely put to next row.
+                        // 2. For very rare cases, the word is just too long to put in an entire row
+                        //    in the window. And in this case, we fallback to the no-line-break
+                        //    rendering behavior, i.e. just cut the word by chars and force rendering
+                        //    the word on multiple rows in the window (because otherwise there will be
+                        //    never enough places to put the whole word).
+
+                        if start_c_of_wd > start_char {
+                          // Case-1, simply wrapped this word to next row.
+                          // Here we actually use the `start_c_of_wd` as the end char for current row.
+
+                          // If the `start_c_of_wd` width is greater than `end_width`, it is the end
+                          // char itself.
+                          let start_c_width_before =
+                            raw_buffer.as_mut().width_before(l, start_c_of_wd);
+                          (
+                            start_c_of_wd,
+                            end_width.saturating_sub(start_c_width_before),
+                          )
+                        } else {
+                          // Case-2, cut this word and force rendering it ignoring line-break behavior.
+                          assert_eq!(start_c_of_wd, start_char);
+                          // Record the position (c) where we cut the words into pieces.
+                          last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
+
+                          // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+                          let c_width_before = raw_buffer.as_mut().width_before(l, c);
+                          (c, end_width.saturating_sub(c_width_before))
+                        }
+                      } else {
+                        // The current word is not long, it can be put in current row.
+                        let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+                        (c_next, 0_usize)
+                      }
+                    }
                   }
                 }
                 None => {
