@@ -1456,521 +1456,526 @@ mod tests {
     );
   }
 
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak1() {
-  //  test_log_init();
-  //
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and small test lines.\n",
-  //    "But still it contains several things we want to test:\n",
-  //    "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, ",
-  //    "RSVIM!\n",
-  //    "This is a ",
-  //    "quite ",
-  //    "simple and",
-  //    " small ",
-  //    "test lines",
-  //    ".\n",
-  //    "But still ",
-  //    "it ",
-  //  ];
-  //
-  //  let size = U16Size::new(10, 10);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    3,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak2() {
-  //  test_log_init();
-  //
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and small test lines.\n",
-  //    "But still it contains several things we want to test:\n",
-  //    "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-  //    "  2. When the line is to\to long to be completely p\tut in a row of the window content widget, there're multiple cases:\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and ",
-  //    "small test lines.\n",
-  //    "But still it contains ",
-  //    "several things we want to ",
-  //    "test:\n",
-  //    "  1. When the line is small",
-  //    " enough to completely put ",
-  //    "inside a row of the window ",
-  //    "content widget, then the ",
-  //    "line-wrap and word-wrap ",
-  //    "doesn't affect the ",
-  //    "rendering.\n",
-  //    "  2. When the line is to",
-  //    "\to long to be ",
-  //  ];
-  //
-  //  let size = U16Size::new(27, 15);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-  //    .into_iter()
-  //    .collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-  //    .into_iter()
-  //    .collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    5,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak3() {
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and small test lines.\n",
-  //    "But still it contains several things we want to test:\n",
-  //    "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and ",
-  //    "small test lines.\n",
-  //    "But still it contains several ",
-  //    "things we want to test:\n",
-  //    "  1. When the line is small ",
-  //    "enough to completely put inside",
-  //    " a row of the window content ",
-  //    "widget, then the line-wrap and ",
-  //    "word-wrap doesn't affect the ",
-  //    "rendering.\n",
-  //    "",
-  //  ];
-  //
-  //  let size = U16Size::new(31, 11);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    4,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak4() {
-  //  test_log_init();
-  //
-  //  let buffer = make_empty_buffer();
-  //  let expect = vec![""];
-  //
-  //  let size = U16Size::new(10, 10);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-  //  ensure_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak5() {
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and small test lines.\n",
-  //    "But still it contains several things we want to test:\n",
-  //    "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and ",
-  //    "small test lines.\n",
-  //    "But still it contains several ",
-  //    "things we want to test:\n",
-  //    "  1. When the line is small ",
-  //    "enough to completely put inside",
-  //    " a row of the window content ",
-  //    "widget, then the line-wrap and ",
-  //    "word-wrap doesn't affect the ",
-  //  ];
-  //
-  //  let size = U16Size::new(31, 10);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    4,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak6() {
-  //  test_log_init();
-  //
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and small test lines.\n",
-  //    "But still it contains several things we want to test:\n",
-  //    "\t\t第一，当一行文本内容的长度足够短，短到可以完整的放入一个窗口（的一行）之中，那么基于行的换行和基于单词的换行两个选项都不会影响渲染的最终效果。\n",
-  //    "\t\t第二，当一行内容文本的长度足够长，而无法放入窗口中，那么我们需要考虑很多种情况：\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and ",
-  //    "small test lines.\n",
-  //    "But still it contains several ",
-  //    "things we want to test:\n",
-  //    "\t\t第一，当一行文",
-  //    "本内容的长度足够短，短到可以完",
-  //    "整的放入一个窗口（的一行）之中",
-  //    "，那么基于行的换行和基于单词的",
-  //    "换行两个选项都不会影响渲染的最",
-  //  ];
-  //
-  //  let size = U16Size::new(31, 10);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    4,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak7() {
-  //  test_log_init();
-  //
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and small test lines.\n",
-  //    "But still it contains several things we want to test:\n",
-  //    "\t\t第一，当一行文本内容的长度足够短，短到可以完整的放入一个窗口（的一行）之中，那么基于行的换行和基于单词的换行两个选项都不会影响渲染的最终效果。\n",
-  //    "\t\t第二，当一行内容文本的长度足够长，而无法放入窗口中，那么我们需要考虑很多种情况：\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and ",
-  //    "small test lines.\n",
-  //    "But still it contains several ",
-  //    "things we want to test:\n",
-  //    "\t\t第一，当一行文",
-  //    "本内容的长度足够短，短到可以完",
-  //    "整的放入一个窗口（的一行）之中",
-  //    "，那么基于行的换行和基于单词的",
-  //    "换行两个选项都不会影响渲染的最",
-  //    "终效果。\n",
-  //  ];
-  //
-  //  let size = U16Size::new(31, 11);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    4,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak8() {
-  //  test_log_init();
-  //
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple andsmalltestlineswithoutevenanewlinebreakbecausewewanttotesthowitwillhappensifthereisaverylongwordthatcannotbeenpplaceinsidearowofthewindowcontent.\n",
-  //    "But still it contains several things we want to test:\n",
-  //    "\t\t第一，当一行文本内容的长度足够短，短到可以完整的放入一个窗口（的一行）之中，那么基于行的换行和基于单词的换行两个选项都不会影响渲染的最终效果。\n",
-  //    "\t\t第二，当一行内容文本的长度足够长，而无法放入窗口中，那么我们需要考虑很多种情况：\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple ",
-  //    "andsmalltestlineswithoutevenane",
-  //    "wlinebreakbecausewewanttotestho",
-  //    "witwillhappensifthereisaverylon",
-  //    "gwordthatcannotbeenpplaceinside",
-  //    "arowofthewindowcontent.\n",
-  //    "But still it contains several ",
-  //    "things we want to test:\n",
-  //    "\t\t第一，当一行文",
-  //    "本内容的长度足够短，短到可以完",
-  //  ];
-  //
-  //  let size = U16Size::new(31, 11);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    4,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak9() {
-  //  test_log_init();
-  //
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and small test lines.\n",
-  //    "But still it contains several things we want to test:\n",
-  //    "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, ",
-  //    "RSVIM!\n",
-  //    "This is a ",
-  //    "quite ",
-  //    "simple and",
-  //    " small ",
-  //    "test lines",
-  //    ".\n",
-  //    "But still ",
-  //    "it ",
-  //  ];
-  //
-  //  let size = U16Size::new(10, 10);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    3,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak10() {
-  //  test_log_init();
-  //
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple and small test lines.\n",
-  //    "But still it contai\tseveral things we want to test:\n",
-  //    "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, ",
-  //    "RSVIM!\n",
-  //    "This is a ",
-  //    "quite ",
-  //    "simple and",
-  //    " small ",
-  //    "test lines",
-  //    ".\n",
-  //    "But still ",
-  //    "it contai",
-  //  ];
-  //
-  //  let size = U16Size::new(10, 10);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 1)].into_iter().collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    3,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
-  //
-  //#[test]
-  //fn sync_from_top_left_wrap_linebreak11() {
-  //  test_log_init();
-  //
-  //  let buffer = make_buffer_from_lines(vec![
-  //    "Hello, RSVIM!\n",
-  //    "This is a quite simple andsmalltestlineswithoutevenanewlinebreakbecausewewanttotesthowitwillhappensifthereisaverylongwordthatcannotbeenpplaceinsidearowofthewindowcontent.\n",
-  //    "But still it contains several things we want to test:\n",
-  //    "  1. When the line is small enough to completely put inside a row of the window content widget, 那么行换行和单词换行选项都不会影响最终的渲染效果。\n",
-  //    "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-  //    "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-  //    "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-  //  ]);
-  //  let expect = vec![
-  //    "Hello, RSVIM!",
-  //    "\n",
-  //    "This is a ",
-  //    "quite simple ",
-  //    "andsmalltestl",
-  //    "ineswithoutev",
-  //    "enanewlinebre",
-  //    "akbecausewewa",
-  //    "nttotesthowit",
-  //    "willhappensif",
-  //    "thereisaveryl",
-  //    "ongwordthatca",
-  //    "nnotbeenpplac",
-  //    "einsidearowof",
-  //    "thewindowcont",
-  //    "ent.\n",
-  //    "But still it ",
-  //    "contains ",
-  //    "several ",
-  //    "things we ",
-  //    "want to test:",
-  //    "\n",
-  //    "  1. When the",
-  //    " line is ",
-  //    "small enough ",
-  //    "to completely",
-  //    " put inside a",
-  //    " row of the ",
-  //    "window ",
-  //    "content ",
-  //    "widget, 那么",
-  //    "行换行和单词",
-  //    "换行选项都不",
-  //  ];
-  //
-  //  let size = U16Size::new(13, 31);
-  //  let options = WindowLocalOptions::builder()
-  //    .wrap(true)
-  //    .line_break(true)
-  //    .build();
-  //  let actual = make_viewport_from_size(size, buffer.clone(), &options);
-  //  let expect_start_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-  //  let expect_end_fills: BTreeMap<usize, usize> =
-  //    vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
-  //  ensure_sync_from_top_left(
-  //    buffer,
-  //    &actual,
-  //    &expect,
-  //    0,
-  //    4,
-  //    &expect_start_fills,
-  //    &expect_end_fills,
-  //  );
-  //}
+  #[test]
+  fn sync_from_top_left_wrap_linebreak1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 10);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buffer = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, ",
+      "RSVIM!\n",
+      "This is a ",
+      "quite ",
+      "simple and",
+      " small ",
+      "test lines",
+      ".\n",
+      "But still ",
+      "it ",
+    ];
+
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      3,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak2() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is to\to long to be completely p\tut in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and ",
+      "small test lines.\n",
+      "But still it contains ",
+      "several things we want to ",
+      "test:\n",
+      "  1. When the line is small",
+      " enough to completely put ",
+      "inside a row of the window ",
+      "content widget, then the ",
+      "line-wrap and word-wrap ",
+      "doesn't affect the ",
+      "rendering.\n",
+      "  2. When the line is to",
+      "\to long to be ",
+    ];
+
+    let size = U16Size::new(27, 15);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      5,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak3() {
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and ",
+      "small test lines.\n",
+      "But still it contains several ",
+      "things we want to test:\n",
+      "  1. When the line is small ",
+      "enough to completely put inside",
+      " a row of the window content ",
+      "widget, then the line-wrap and ",
+      "word-wrap doesn't affect the ",
+      "rendering.\n",
+      "",
+    ];
+
+    let size = U16Size::new(31, 11);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak4() {
+    test_log_init();
+
+    let buffer = make_empty_buffer();
+    let expect = vec![""];
+
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    ensure_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak5() {
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and ",
+      "small test lines.\n",
+      "But still it contains several ",
+      "things we want to test:\n",
+      "  1. When the line is small ",
+      "enough to completely put inside",
+      " a row of the window content ",
+      "widget, then the line-wrap and ",
+      "word-wrap doesn't affect the ",
+    ];
+
+    let size = U16Size::new(31, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak6() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "\t\t第一，当一行文本内容的长度足够短，短到可以完整的放入一个窗口（的一行）之中，那么基于行的换行和基于单词的换行两个选项都不会影响渲染的最终效果。\n",
+      "\t\t第二，当一行内容文本的长度足够长，而无法放入窗口中，那么我们需要考虑很多种情况：\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and ",
+      "small test lines.\n",
+      "But still it contains several ",
+      "things we want to test:\n",
+      "\t\t第一，当一行文",
+      "本内容的长度足够短，短到可以完",
+      "整的放入一个窗口（的一行）之中",
+      "，那么基于行的换行和基于单词的",
+      "换行两个选项都不会影响渲染的最",
+    ];
+
+    let size = U16Size::new(31, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak7() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "\t\t第一，当一行文本内容的长度足够短，短到可以完整的放入一个窗口（的一行）之中，那么基于行的换行和基于单词的换行两个选项都不会影响渲染的最终效果。\n",
+      "\t\t第二，当一行内容文本的长度足够长，而无法放入窗口中，那么我们需要考虑很多种情况：\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and ",
+      "small test lines.\n",
+      "But still it contains several ",
+      "things we want to test:\n",
+      "\t\t第一，当一行文",
+      "本内容的长度足够短，短到可以完",
+      "整的放入一个窗口（的一行）之中",
+      "，那么基于行的换行和基于单词的",
+      "换行两个选项都不会影响渲染的最",
+      "终效果。\n",
+    ];
+
+    let size = U16Size::new(31, 11);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak8() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple andsmalltestlineswithoutevenanewlinebreakbecausewewanttotesthowitwillhappensifthereisaverylongwordthatcannotbeenpplaceinsidearowofthewindowcontent.\n",
+      "But still it contains several things we want to test:\n",
+      "\t\t第一，当一行文本内容的长度足够短，短到可以完整的放入一个窗口（的一行）之中，那么基于行的换行和基于单词的换行两个选项都不会影响渲染的最终效果。\n",
+      "\t\t第二，当一行内容文本的长度足够长，而无法放入窗口中，那么我们需要考虑很多种情况：\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple ",
+      "andsmalltestlineswithoutevenane",
+      "wlinebreakbecausewewanttotestho",
+      "witwillhappensifthereisaverylon",
+      "gwordthatcannotbeenpplaceinside",
+      "arowofthewindowcontent.\n",
+      "But still it contains several ",
+      "things we want to test:\n",
+      "\t\t第一，当一行文",
+      "本内容的长度足够短，短到可以完",
+    ];
+
+    let size = U16Size::new(31, 11);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak9() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, ",
+      "RSVIM!\n",
+      "This is a ",
+      "quite ",
+      "simple and",
+      " small ",
+      "test lines",
+      ".\n",
+      "But still ",
+      "it ",
+    ];
+
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      3,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak10() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contai\tseveral things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, ",
+      "RSVIM!\n",
+      "This is a ",
+      "quite ",
+      "simple and",
+      " small ",
+      "test lines",
+      ".\n",
+      "But still ",
+      "it contai",
+    ];
+
+    let size = U16Size::new(10, 10);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 1)].into_iter().collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      3,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_from_top_left_wrap_linebreak11() {
+    test_log_init();
+
+    let buffer = make_buffer_from_lines(vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple andsmalltestlineswithoutevenanewlinebreakbecausewewanttotesthowitwillhappensifthereisaverylongwordthatcannotbeenpplaceinsidearowofthewindowcontent.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, 那么行换行和单词换行选项都不会影响最终的渲染效果。\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ]);
+    let expect = vec![
+      "Hello, RSVIM!",
+      "\n",
+      "This is a ",
+      "quite simple ",
+      "andsmalltestl",
+      "ineswithoutev",
+      "enanewlinebre",
+      "akbecausewewa",
+      "nttotesthowit",
+      "willhappensif",
+      "thereisaveryl",
+      "ongwordthatca",
+      "nnotbeenpplac",
+      "einsidearowof",
+      "thewindowcont",
+      "ent.\n",
+      "But still it ",
+      "contains ",
+      "several ",
+      "things we ",
+      "want to test:",
+      "\n",
+      "  1. When the",
+      " line is ",
+      "small enough ",
+      "to completely",
+      " put inside a",
+      " row of the ",
+      "window ",
+      "content ",
+      "widget, 那么",
+      "行换行和单词",
+      "换行选项都不",
+    ];
+
+    let size = U16Size::new(13, 31);
+    let options = WindowLocalOptions::builder()
+      .wrap(true)
+      .line_break(true)
+      .build();
+    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
+    ensure_sync_from_top_left(
+      buffer,
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
 }
 // spellchecker:on
