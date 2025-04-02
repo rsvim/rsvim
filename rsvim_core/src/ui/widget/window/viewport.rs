@@ -1603,17 +1603,17 @@ mod tests {
       "",
     ];
 
-    let size = U16Size::new(31, 11);
-    let options = WindowLocalOptions::builder()
+    let options = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(true)
-      .build();
-    let actual = make_viewport_from_size(size, buffer.clone(), &options);
+      .build()
+      .unwrap();
+    let actual = make_viewport_from_size(terminal_size, buffer.clone(), &options);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    ensure_sync_from_top_left(
+    assert_sync_from_top_left(
       buffer,
       &actual,
       &expect,
