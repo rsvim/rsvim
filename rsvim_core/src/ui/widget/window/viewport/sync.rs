@@ -519,11 +519,31 @@ fn _from_top_left_wrap_linebreak(
                       continued_char_of_last_wd,
                     )) => {
                       // Part-2
-                      // This is the following logic of part-1, you should first see part-1 before
+                      // This is the following logic of part-1.2, you should see part-1 before
                       // this.
-                      // This part is to process the case-2 of the tricky part, i.e. if the word is
-                      // too long to put in an entire row, and we cut it into pieces and force
-                      // rendering it with no-line-break behavior.
+                      //
+                      // If the word is too long to put in an entire row, and we cut it into
+                      // pieces. In this part, we need to continue rendering the rest part of the
+                      // word on current row.
+                      //
+                      // Here we also have two sub-cases:
+                      // 1. If the rest part of the word is still too long to put in current row.
+                      // 2. If the rest part of the word is not long and can be put in current row.
+
+                      match raw_buffer.as_mut().char_at(l, end_width) {
+                        Some(c) => {
+                          if end_char_of_last_wd > c {
+                            // Part-2.1, the rest part of the word is still too long.
+                          } else {
+                            // Part-2.2, the rest part of the word is not long.
+                          }
+                        }
+                        None => {
+                          // If the char not found, it means the `end_width` is too long than the
+                          // whole buffer line.
+                          // So the char next to the line's last char is the end char.
+                        }
+                      }
 
                       (0_usize, 0_usize)
                     }
@@ -546,7 +566,7 @@ fn _from_top_left_wrap_linebreak(
                         //    never enough places to put the whole word).
 
                         if start_c_of_wd > start_char {
-                          // Case-1, simply wrapped this word to next row.
+                          // Part-1.1, simply wrapped this word to next row.
                           // Here we actually use the `start_c_of_wd` as the end char for current row.
 
                           // If the `start_c_of_wd` width is greater than `end_width`, it is the end
@@ -558,7 +578,7 @@ fn _from_top_left_wrap_linebreak(
                             end_width.saturating_sub(start_c_width_before),
                           )
                         } else {
-                          // Case-2, cut this word and force rendering it ignoring line-break behavior.
+                          // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
                           assert_eq!(start_c_of_wd, start_char);
                           // Record the position (c) where we cut the words into pieces.
                           last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
