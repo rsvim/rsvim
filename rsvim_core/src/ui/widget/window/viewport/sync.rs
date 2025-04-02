@@ -369,7 +369,7 @@ fn _from_top_left_wrap_nolinebreak(
 /// Returns the word index which contains this char, and whether the char is the last char in the
 /// word.
 fn find_word_by_char(
-  words: &Vec<&str>,
+  words: &[&str],
   word_end_chars_index: &HashMap<usize, usize>,
   char_idx: usize,
 ) -> (usize, usize, usize) {
@@ -398,12 +398,13 @@ fn find_word_by_char(
   unreachable!()
 }
 
+#[allow(clippy::too_many_arguments)]
 /// Part-1 of the processing algorithm in `_from_top_left_wrap_linebreak`.
-unsafe fn part1<'a>(
-  words: &Vec<&str>,
+unsafe fn part1(
+  words: &[&str],
   words_end_char_idx: &HashMap<usize, usize>,
   mut raw_buffer: NonNull<Buffer>,
-  bline: &ropey::RopeSlice<'a>,
+  bline: &ropey::RopeSlice<'_>,
   l: usize,
   c: usize,
   end_width: usize,
@@ -534,8 +535,7 @@ fn _from_top_left_wrap_linebreak(
               .iter()
               .enumerate()
               .scan(0_usize, |state, (i, wd)| {
-                let wd_chars = wd.chars().count();
-                *state = *state + wd_chars;
+                *state += wd.chars().count();
                 Some((i, *state))
               })
               .collect::<HashMap<usize, usize>>();
