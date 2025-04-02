@@ -399,7 +399,7 @@ fn find_word_by_char<'a>(
 }
 
 /// Part-1 of the processing algorithm in `_from_top_left_wrap_linebreak`.
-unsafe fn wrap_linebreak_part1<'a>(
+unsafe fn part1<'a>(
   words: &Vec<&str>,
   words_end_char_idx: &HashMap<usize, usize>,
   mut raw_buffer: NonNull<Buffer>,
@@ -549,10 +549,6 @@ fn _from_top_left_wrap_linebreak(
               width_before.saturating_sub(start_dcol_on_line)
             };
 
-            // // First char, first word.
-            // let (mut wd_idx, mut start_char_of_wd, mut end_char_of_wd) =
-            //   find_word_by_char(&words, &words_end_char_idx, start_char);
-
             let mut end_width = start_dcol_on_line + width as usize;
             let mut end_fills = 0_usize;
 
@@ -605,7 +601,7 @@ fn _from_top_left_wrap_linebreak(
                             // Part-2.2, the rest part of the word is not long.
                             // Thus we can go back to *normal* algorithm just like part-1.
 
-                            wrap_linebreak_part1(
+                            part1(
                               &words,
                               &words_end_char_idx,
                               raw_buffer,
@@ -628,7 +624,7 @@ fn _from_top_left_wrap_linebreak(
                     }
                     None => {
                       // Part-1
-                      wrap_linebreak_part1(
+                      part1(
                         &words,
                         &words_end_char_idx,
                         raw_buffer,
