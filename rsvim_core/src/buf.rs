@@ -67,7 +67,7 @@ pub type BufferWriteGuard<'a> = RwLockWriteGuard<'a, Buffer>;
 
 #[inline]
 fn get_cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new((canvas_height as usize) * 2 + 1).unwrap()
+  std::num::NonZeroUsize::new(canvas_height as usize + 3_usize).unwrap()
 }
 
 impl Buffer {
