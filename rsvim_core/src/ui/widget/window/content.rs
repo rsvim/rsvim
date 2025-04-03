@@ -132,8 +132,7 @@ impl Widgetable for WindowContent {
 
             // Render start fills.
             if start_fills > 0 {
-              let cells = std::iter::repeat('>')
-                .take(start_fills as usize)
+              let cells = std::iter::repeat_n('>', start_fills as usize)
                 .map(Cell::from)
                 .collect::<Vec<_>>();
               let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
