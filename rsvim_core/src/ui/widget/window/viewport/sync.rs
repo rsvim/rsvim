@@ -564,7 +564,7 @@ fn _from_top_left_wrap_linebreak(
             // 1. Word index.
             // 2. Start char of the word.
             // 3. End char of the word.
-            // 4. Continued start char index of the word (which should be continue to rendering on
+            // 4. Continued start char index of the word (which should be continued to rendering on
             //    current row).
             let mut last_word_is_too_long: Option<(usize, usize, usize, usize)> = None;
 
