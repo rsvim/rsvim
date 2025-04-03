@@ -130,7 +130,6 @@ opt-level = 3
 opt-level = 3
 [profile.release.package.zstd-sys]
 opt-level = 3
-
 # Release }
 
 # Nightly

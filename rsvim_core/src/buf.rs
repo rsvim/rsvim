@@ -67,7 +67,7 @@ pub type BufferWriteGuard<'a> = RwLockWriteGuard<'a, Buffer>;
 
 #[inline]
 fn get_cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new((canvas_height as usize) * 2 + 1).unwrap()
+  std::num::NonZeroUsize::new(canvas_height as usize * 2 + 3).unwrap()
 }
 
 impl Buffer {
@@ -179,33 +179,34 @@ impl Buffer {
     &mut self.rope
   }
 
-  // /// Similar with [`Buffer::get_line`], but collect and clone a normal string with start index
-  // /// (`start_char_idx`) and max chars length (`max_chars`).
-  // /// NOTE: This is for performance reason that this API limits the max chars instead of the whole
-  // /// line, this is useful for super long lines.
-  // pub fn clone_line(
-  //   &self,
-  //   line_idx: usize,
-  //   start_char_idx: usize,
-  //   max_chars: usize,
-  // ) -> Option<String> {
-  //   match self.rope.get_line(line_idx) {
-  //     Some(line) => match line.get_chars_at(start_char_idx) {
-  //       Some(chars_iter) => {
-  //         let mut builder = String::with_capacity(max_chars);
-  //         for (i, c) in chars_iter.enumerate() {
-  //           if i >= max_chars {
-  //             return Some(builder);
-  //           }
-  //           builder.push(c);
-  //         }
-  //         Some(builder)
-  //       }
-  //       None => None,
-  //     },
-  //     None => None,
-  //   }
-  // }
+  /// Similar with [`Rope::get_line`], but collect and clone a normal string with start index
+  /// (`start_char_idx`) and max chars length (`max_chars`).
+  ///
+  /// NOTE: It is for performance reason that limits maximized chars count instead of the whole
+  /// line, which is useful for super long lines.
+  pub fn clone_line(
+    &self,
+    line_idx: usize,
+    start_char_idx: usize,
+    max_chars: usize,
+  ) -> Option<String> {
+    match self.rope.get_line(line_idx) {
+      Some(line) => match line.get_chars_at(start_char_idx) {
+        Some(chars_iter) => {
+          let mut builder = String::with_capacity(max_chars);
+          for (i, c) in chars_iter.enumerate() {
+            if i >= max_chars {
+              return Some(builder);
+            }
+            builder.push(c);
+          }
+          Some(builder)
+        }
+        None => None,
+      },
+      None => None,
+    }
+  }
 }
 // Rope }
 
@@ -317,12 +318,12 @@ impl Buffer {
       .truncate_since_width(width)
   }
 
-  /// Remove one specified line.
+  /// Remove one cached line.
   pub fn remove_cached_line(&mut self, line_idx: usize) {
     self.cached_lines_width.pop(&line_idx);
   }
 
-  /// Retain multiple lines by lambda function `f`.
+  /// Retain multiple cached lines by lambda function `f`.
   pub fn retain_cached_lines<F>(&mut self, f: F)
   where
     F: Fn(&usize, &ColumnIndex) -> bool,
@@ -338,16 +339,16 @@ impl Buffer {
     }
   }
 
-  /// Clear.
+  /// Clear cache.
   pub fn clear_cached_lines(&mut self) {
     self.cached_lines_width.clear()
   }
 
   /// Resize cache.
   pub fn resize_cached_lines(&mut self, canvas_height: u16) {
-    let new_cached_size = get_cached_size(canvas_height);
-    if new_cached_size > self.cached_lines_width.cap() {
-      self.cached_lines_width.resize(new_cached_size);
+    let new_cache_size = get_cached_size(canvas_height);
+    if new_cache_size > self.cached_lines_width.cap() {
+      self.cached_lines_width.resize(new_cache_size);
     }
   }
 }
