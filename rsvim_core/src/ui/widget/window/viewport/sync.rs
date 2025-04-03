@@ -421,7 +421,7 @@ unsafe fn part1(
   let (wd_idx, start_c_of_wd, end_c_of_wd) = find_word_by_char(words, words_end_char_idx, c);
 
   unsafe {
-    let end_c_width = raw_buffer.as_mut().width_at(l, end_c_of_wd);
+    let end_c_width = raw_buffer.as_mut().width_before(l, end_c_of_wd);
     if end_c_width > end_width {
       // The current word is longer than current row, it needs to be put to next row.
 
@@ -457,8 +457,9 @@ unsafe fn part1(
         (c, end_width.saturating_sub(c_width_before))
       }
     } else {
+      assert_eq!(c + 1, end_c_of_wd);
       // The current word is not long, it can be put in current row.
-      let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+      let c_next = std::cmp::min(end_c_of_wd, bline.len_chars());
       (c_next, 0_usize)
     }
   }
