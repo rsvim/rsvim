@@ -4,8 +4,8 @@ use crate::buf::{Buffer, BufferWk};
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::*;
-use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::ViewportWk;
+use crate::ui::widget::Widgetable;
 use crate::{inode_impl, rlock, wlock};
 
 use geo::point;
@@ -911,7 +911,7 @@ mod tests {
       " row of the  ",
       "window       ",
       "content      ",
-      "widget, 那么<",
+      "widget, 那么 ",
     ];
 
     let window_options = WindowLocalOptionsBuilder::default()
@@ -952,7 +952,7 @@ mod tests {
       "test lines",
       ".         ",
       "But still ",
-      "it contai<",
+      "it contai ",
     ];
 
     let window_options = WindowLocalOptionsBuilder::default()
