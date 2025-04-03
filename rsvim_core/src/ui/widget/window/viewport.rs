@@ -1843,7 +1843,7 @@ mod tests {
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_sync_from_top_left(
       buffer,
       &actual,
@@ -2025,7 +2025,7 @@ mod tests {
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_sync_from_top_left(
       buffer,
       &actual,
@@ -2084,10 +2084,10 @@ mod tests {
       "small enough ",
       "to completely",
       " put inside a",
-      " row of the  ",
+      " row of the ",
       "window ",
       "content ",
-      "widget, 那么<",
+      "widget, 那么",
     ];
 
     let options = WindowLocalOptionsBuilder::default()
@@ -2099,7 +2099,7 @@ mod tests {
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_sync_from_top_left(
       buffer,
       &actual,

@@ -595,8 +595,7 @@ fn _from_top_left_wrap_linebreak(
 
                             // If the char `c` width is greater than `end_width`, the `c` itself is
                             // the end char.
-                            let c_width_before = raw_buffer.as_mut().width_before(l, c);
-                            (c, end_width.saturating_sub(c_width_before))
+                            end_char_and_prefills(raw_buffer, &bline, l, c, end_width)
                           } else {
                             // Part-2.2, the rest part of the word is not long.
                             // Thus we can go back to *normal* algorithm just like part-1.
