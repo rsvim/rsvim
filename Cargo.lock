@@ -1905,6 +1905,7 @@ dependencies = [
  "num-traits",
  "once_cell",
  "parking_lot",
+ "paste",
  "path-absolutize",
  "regex",
  "ropey",

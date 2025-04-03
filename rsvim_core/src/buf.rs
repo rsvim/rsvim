@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 #[allow(unused_imports)]
-use crate::rlock;
+use crate::{arc_impl, rlock};
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
@@ -11,7 +11,7 @@ pub use crate::buf::opt::*;
 use ahash::RandomState;
 use compact_str::CompactString;
 use lru::LruCache;
-use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
@@ -19,7 +19,6 @@ use std::fs::Metadata;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
-use std::sync::{Arc, Weak};
 use std::time::Instant;
 use tracing::trace;
 
@@ -60,10 +59,7 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 }
 
-pub type BufferArc = Arc<RwLock<Buffer>>;
-pub type BufferWk = Weak<RwLock<Buffer>>;
-pub type BufferReadGuard<'a> = RwLockReadGuard<'a, Buffer>;
-pub type BufferWriteGuard<'a> = RwLockWriteGuard<'a, Buffer>;
+arc_impl!(Buffer);
 
 #[inline]
 fn get_cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
@@ -107,10 +103,6 @@ impl Buffer {
       metadata: None,
       last_sync_time: None,
     }
-  }
-
-  pub fn to_arc(b: Buffer) -> BufferArc {
-    Arc::new(RwLock::new(b))
   }
 
   pub fn id(&self) -> BufferId {
@@ -369,6 +361,12 @@ pub struct BuffersManager {
   global_local_options: BufferLocalOptions,
 }
 
+arc_impl!(BuffersManager);
+
+pub type BuffersManagerKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
+pub type BuffersManagerValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;
+pub type BuffersManagerIter<'a> = std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
+
 impl BuffersManager {
   pub fn new() -> Self {
     BuffersManager {
@@ -376,10 +374,6 @@ impl BuffersManager {
       buffers_by_path: HashMap::new(),
       global_local_options: BufferLocalOptionsBuilder::default().build().unwrap(),
     }
-  }
-
-  pub fn to_arc(b: BuffersManager) -> BuffersManagerArc {
-    Arc::new(RwLock::new(b))
   }
 
   /// Open a file with a newly created buffer.
@@ -631,12 +625,6 @@ impl BuffersManager {
   }
 }
 // Options }
-
-pub type BuffersManagerArc = Arc<RwLock<BuffersManager>>;
-pub type BuffersManagerWk = Weak<RwLock<BuffersManager>>;
-pub type BuffersManagerKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
-pub type BuffersManagerValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;
-pub type BuffersManagerIter<'a> = std::collections::btree_map::Iter<'a, BufferId, BufferArc>;
 
 #[cfg(test)]
 mod tests {

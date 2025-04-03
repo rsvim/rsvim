@@ -126,7 +126,7 @@ fn _from_top_left_nowrap(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for read.
+  // Get buffer arc pointer, and lock for write.
   let buffer = buffer.upgrade().unwrap();
   let mut buffer = wlock!(buffer);
 
@@ -239,7 +239,7 @@ fn _from_top_left_wrap_nolinebreak(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for read.
+  // Get buffer arc pointer, and lock for write.
   let buffer = buffer.upgrade().unwrap();
   let mut buffer = wlock!(buffer);
 
@@ -476,7 +476,7 @@ fn _from_top_left_wrap_linebreak(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for read.
+  // Get buffer arc pointer, and lock for write.
   let buffer = buffer.upgrade().unwrap();
   let mut buffer = wlock!(buffer);
 
