@@ -2,6 +2,7 @@
 
 #![allow(dead_code)]
 
+use crate::arc_impl;
 use crate::envar;
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
@@ -18,9 +19,8 @@ pub use crate::ui::tree::internal::{
   InodeBase, InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut,
 };
 
-use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use paste::paste;
 use std::collections::BTreeSet;
-use std::sync::{Arc, Weak};
 // use tracing::trace;
 
 pub mod internal;
@@ -242,10 +242,7 @@ pub struct Tree {
   global_local_options: WindowLocalOptions,
 }
 
-pub type TreeArc = Arc<RwLock<Tree>>;
-pub type TreeWk = Weak<RwLock<Tree>>;
-pub type TreeReadGuard<'a> = RwLockReadGuard<'a, Tree>;
-pub type TreeWriteGuard<'a> = RwLockWriteGuard<'a, Tree>;
+arc_impl!(Tree);
 
 pub type TreeNodeId = InodeId;
 // pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
@@ -270,11 +267,6 @@ impl Tree {
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowLocalOptionsBuilder::default().build().unwrap(),
     }
-  }
-
-  /// Convert `Tree` struct to `Arc<RwLock<_>>` pointer.
-  pub fn to_arc(tree: Tree) -> TreeArc {
-    Arc::new(RwLock::new(tree))
   }
 
   /// Nodes count, include the root node.
