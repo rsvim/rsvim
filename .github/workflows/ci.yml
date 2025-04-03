@@ -16,9 +16,6 @@ env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
-  SCCACHE_GHA_VERSION: 0.2
-  SCCACHE_GHA_ENABLED: "true"
-  RUSTC_WRAPPER: "sccache"
 jobs:
   pr:
     name: PR
@@ -118,6 +115,10 @@ jobs:
       matrix:
         os: [ubuntu-22.04, ubuntu-22.04-arm, macos-14, macos-13, windows-2022]
     runs-on: ${{ matrix.os }}
+    env:
+      SCCACHE_GHA_VERSION: v0.2
+      SCCACHE_GHA_ENABLED: "true"
+      RUSTC_WRAPPER: "sccache"
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
