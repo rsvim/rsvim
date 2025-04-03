@@ -2,16 +2,16 @@
 
 /// Generate Arc pointers.
 #[macro_export]
-macro_rules! arc_impl {
+macro_rules! arc_pointer_impl {
   ($name:ident) => {
     paste! {
-      pub type [<$name Arc>] = std::sync::Arc<parking_lot::ReentrantMutex<$name>>;
-      pub type [<$name Wk>] = std::sync::Weak<parking_lot::ReentrantMutex<$name>>;
-      pub type [<$name MutexGuard>]<'a> = parking_lot::ReentrantMutexGuard<'a, $name>>;
+      pub type [<$name Arc>] = std::sync::Arc<parking_lot::Mutex<$name>>;
+      pub type [<$name Wk>] = std::sync::Weak<parking_lot::Mutex<$name>>;
+      pub type [<$name MutexGuard>]<'a> = parking_lot::MutexGuard<'a, $name>;
 
       impl $name {
         pub fn to_arc(value: $name) -> [<$name Arc>] {
-          std::sync::Arc::new(parking_lot::ReentrantMutex::new(value))
+          std::sync::Arc::new(parking_lot::Mutex::new(value))
         }
       }
     }
@@ -20,7 +20,7 @@ macro_rules! arc_impl {
 
 /// Generate Rc pointers.
 #[macro_export]
-macro_rules! rc_impl {
+macro_rules! rc_pointer_impl {
   ($name:ident) => {
     paste! {
       pub type [<$name Rc>] = std::rc::Rc<std::cell::RefCell<$name>>;
@@ -31,6 +31,14 @@ macro_rules! rc_impl {
         }
       }
     }
+  };
+}
+
+/// Alias to `($id).try_lock_for(envar::MUTEX_TIMEOUT()).unwrap()`.
+#[macro_export]
+macro_rules! lock {
+  ($id:expr) => {
+    ($id).try_lock_for($crate::envar::MUTEX_TIMEOUT()).unwrap()
   };
 }
 
