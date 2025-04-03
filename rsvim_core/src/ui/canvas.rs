@@ -1,5 +1,6 @@
 //! Canvas.
 
+use crate::arc_impl;
 use crate::prelude::*;
 
 // Re-export
@@ -12,11 +13,10 @@ pub use crate::ui::canvas::frame::cursor::{
 use compact_str::ToCompactString;
 use crossterm;
 use geo::point;
-use parking_lot::RwLock;
+use paste::paste;
 use std::fmt;
 use std::fmt::Debug;
 use std::slice::Iter;
-use std::sync::Arc;
 use tracing::trace;
 
 pub mod frame;
@@ -35,7 +35,7 @@ pub struct Canvas {
   prev_frame: Frame,
 }
 
-pub type CanvasArc = Arc<RwLock<Canvas>>;
+arc_impl!(Canvas);
 
 impl Canvas {
   /// Make new canvas with terminal actual size.
@@ -44,11 +44,6 @@ impl Canvas {
       prev_frame: Frame::new(size, Cursor::default()),
       frame: Frame::new(size, Cursor::default()),
     }
-  }
-
-  /// Convert struct into smart pointer.
-  pub fn to_arc(t: Canvas) -> CanvasArc {
-    Arc::new(RwLock::new(t))
   }
 
   // Current frame {

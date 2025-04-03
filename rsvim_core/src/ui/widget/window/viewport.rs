@@ -1,13 +1,13 @@
 //! Buffer viewport on a window.
 
+use crate::arc_impl;
 use crate::buf::BufferWk;
 use crate::prelude::*;
 use crate::ui::widget::window::ViewportOptions;
 
-use parking_lot::{RwLock, RwLockReadGuard, RwLockWriteGuard};
+use paste::paste;
 use std::collections::BTreeMap;
 use std::ops::Range;
-use std::sync::{Arc, Weak};
 //use tracing::trace;
 
 pub mod sync;
@@ -413,10 +413,7 @@ pub struct Viewport {
   cursor: CursorViewport,
 }
 
-pub type ViewportArc = Arc<RwLock<Viewport>>;
-pub type ViewportWk = Weak<RwLock<Viewport>>;
-pub type ViewportWriteGuard<'a> = RwLockWriteGuard<'a, Viewport>;
-pub type ViewportReadGuard<'a> = RwLockReadGuard<'a, Viewport>;
+arc_impl!(Viewport);
 
 impl Viewport {
   /// Make new instance.
@@ -471,11 +468,6 @@ impl Viewport {
       lines,
       cursor,
     }
-  }
-
-  /// Convert struct to Arc pointer.
-  pub fn to_arc(v: Viewport) -> ViewportArc {
-    Arc::new(RwLock::new(v))
   }
 
   #[cfg(not(debug_assertions))]
