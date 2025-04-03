@@ -13,7 +13,7 @@ use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
-use crate::{lock, rlock, wlock};
+use crate::{rlock, wlock};
 
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
@@ -265,7 +265,7 @@ impl EventLoop {
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
         let maybe_buf_id =
-          lock!(self.buffers).new_file_buffer(canvas_size.height(), Path::new(input_file));
+          wlock!(self.buffers).new_file_buffer(canvas_size.height(), Path::new(input_file));
         match maybe_buf_id {
           Ok(buf_id) => {
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
@@ -276,7 +276,7 @@ impl EventLoop {
         }
       }
     } else {
-      let buf_id = lock!(self.buffers).new_empty_buffer(canvas_size.height());
+      let buf_id = wlock!(self.buffers).new_empty_buffer(canvas_size.height());
       trace!("Created empty buffer {:?}", buf_id);
     }
 
@@ -294,7 +294,7 @@ impl EventLoop {
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
     let window = {
-      let buffers = lock!(self.buffers);
+      let buffers = rlock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
       trace!("Bind first buffer to default window {:?}", buf_id);
       Window::new(

@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 #[allow(unused_imports)]
-use crate::{arc_pointer_impl, lock, rlock};
+use crate::{arc_pointer, rlock};
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
@@ -59,7 +59,7 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 }
 
-arc_pointer_impl!(Buffer);
+arc_pointer!(Buffer);
 
 #[inline]
 fn get_cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
@@ -361,7 +361,7 @@ pub struct BuffersManager {
   global_local_options: BufferLocalOptions,
 }
 
-arc_pointer_impl!(BuffersManager);
+arc_pointer!(BuffersManager);
 
 pub type BuffersManagerKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
 pub type BuffersManagerValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;
@@ -478,7 +478,7 @@ impl BuffersManager {
   /// NOTE: This API should only be used for testing.
   pub fn _add_buffer(&mut self, buf: BufferArc) -> BufferId {
     let (buf_id, abs_filepath) = {
-      let buf = lock!(buf);
+      let buf = rlock!(buf);
       (buf.id(), buf.absolute_filename().clone())
     };
     self.buffers.insert(buf_id, buf.clone());

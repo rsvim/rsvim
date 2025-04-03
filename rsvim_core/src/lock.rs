@@ -2,7 +2,7 @@
 
 /// Generate Arc pointers.
 #[macro_export]
-macro_rules! arc_pointer_impl {
+macro_rules! arc_pointer {
   ($name:ident) => {
     paste! {
       pub type [<$name Arc>] = std::sync::Arc<parking_lot::RwLock<$name>>;
@@ -21,7 +21,7 @@ macro_rules! arc_pointer_impl {
 
 /// Generate Rc pointers.
 #[macro_export]
-macro_rules! rc_pointer_impl {
+macro_rules! rc_pointer {
   ($name:ident) => {
     paste! {
       pub type [<$name Rc>] = std::rc::Rc<std::cell::RefCell<$name>>;
