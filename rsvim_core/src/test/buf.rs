@@ -4,7 +4,7 @@
 
 use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BuffersManager, BuffersManagerArc};
 //use crate::envar;
-use crate::{lock, rlock};
+use crate::rlock;
 
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeSet;
@@ -71,7 +71,7 @@ pub fn make_buffers_manager(opts: BufferLocalOptions, bufs: Vec<BufferArc>) -> B
 
 #[allow(clippy::unused_enumerate_index)]
 pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
-  let buf = lock!(buf);
+  let buf = rlock!(buf);
   let line = buf.get_rope().get_line(line_idx).unwrap();
 
   let subscriber = tracing_subscriber::FmtSubscriber::builder()

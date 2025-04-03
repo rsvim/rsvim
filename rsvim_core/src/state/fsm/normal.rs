@@ -6,7 +6,7 @@ use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::*;
 use crate::ui::widget::window::Viewport;
-use crate::{lock, wlock};
+use crate::wlock;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use std::ptr::NonNull;
@@ -86,7 +86,7 @@ impl NormalStateful {
         let mut viewport = wlock!(viewport);
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut buffer = lock!(buffer);
+        let mut buffer = wlock!(buffer);
         unsafe {
           // Fix multiple mutable references on `buffer`.
           let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
@@ -293,7 +293,7 @@ impl NormalStateful {
         let viewport = wlock!(viewport);
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut _buffer = lock!(buffer);
+        let mut _buffer = wlock!(buffer);
 
         match command {
           Command::CursorScrollUp(_n) | Command::CursorScrollDown(_n) => {}
@@ -320,7 +320,7 @@ impl NormalStateful {
         let viewport = wlock!(viewport);
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut _buffer = lock!(buffer);
+        let mut _buffer = wlock!(buffer);
 
         match command {
           Command::CursorScrollUp(_n) => {}
@@ -347,7 +347,7 @@ impl NormalStateful {
         let viewport = wlock!(viewport);
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut _buffer = lock!(buffer);
+        let mut _buffer = wlock!(buffer);
 
         match command {
           Command::CursorScrollLeft(_n) => {}

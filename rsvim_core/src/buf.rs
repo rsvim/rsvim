@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 #[allow(unused_imports)]
-use crate::{arc_pointer, rlock};
+use crate::{arc_impl, rlock};
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
@@ -59,7 +59,7 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 }
 
-arc_pointer!(Buffer);
+arc_impl!(Buffer);
 
 #[inline]
 fn get_cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
@@ -361,7 +361,7 @@ pub struct BuffersManager {
   global_local_options: BufferLocalOptions,
 }
 
-arc_pointer!(BuffersManager);
+arc_impl!(BuffersManager);
 
 pub type BuffersManagerKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
 pub type BuffersManagerValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;

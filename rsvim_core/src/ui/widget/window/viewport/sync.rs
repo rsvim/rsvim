@@ -1,10 +1,10 @@
 //! Internal implementations for Viewport.
 
 use crate::buf::{Buffer, BufferWk};
-use crate::lock;
 use crate::prelude::*;
 use crate::ui::widget::window::viewport::RowViewport;
 use crate::ui::widget::window::{LineViewport, ViewportOptions};
+use crate::wlock;
 
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
@@ -126,9 +126,9 @@ fn _from_top_left_nowrap(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for read.
+  // Get buffer arc pointer, and lock for write.
   let buffer = buffer.upgrade().unwrap();
-  let mut buffer = lock!(buffer);
+  let mut buffer = wlock!(buffer);
 
   unsafe {
     // Fix mutable borrow on `buffer`.
@@ -239,9 +239,9 @@ fn _from_top_left_wrap_nolinebreak(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for read.
+  // Get buffer arc pointer, and lock for write.
   let buffer = buffer.upgrade().unwrap();
-  let mut buffer = lock!(buffer);
+  let mut buffer = wlock!(buffer);
 
   // trace!(
   //   "buffer.get_line ({:?}):'{:?}'",
@@ -476,9 +476,9 @@ fn _from_top_left_wrap_linebreak(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for read.
+  // Get buffer arc pointer, and lock for write.
   let buffer = buffer.upgrade().unwrap();
-  let mut buffer = lock!(buffer);
+  let mut buffer = wlock!(buffer);
 
   trace!(
     "buffer.get_line ({:?}):'{:?}'",
