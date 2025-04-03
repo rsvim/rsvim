@@ -234,8 +234,7 @@ impl Widgetable for WindowContent {
 
     // If buffer has no more lines, render empty spaces to left parts of the window content.
     while row_idx < height {
-      let cells = std::iter::repeat(' ')
-        .take(width as usize)
+      let cells = std::iter::repeat_n(' ', width as usize)
         .map(Cell::from)
         .collect::<Vec<_>>();
       let cells_upos = point!(x: upos.x(), y: row_idx + upos.y());
