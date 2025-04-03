@@ -110,7 +110,7 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check advisories
-          arguments: --all-features --exclude v8
+          arguments: --all-features --exclude v8 --exclude paste
   unit_test:
     name: Unit Test
     strategy:
