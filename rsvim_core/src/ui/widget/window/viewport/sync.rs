@@ -84,6 +84,27 @@ fn slice2line(s: &RopeSlice) -> String {
   builder
 }
 
+unsafe fn end_char_and_prefills(
+  mut raw_buffer: NonNull<Buffer>,
+  bline: &RopeSlice,
+  l: usize,
+  c: usize,
+  end_width: usize,
+) -> (usize, usize) {
+  unsafe {
+    let c_width = raw_buffer.as_mut().width_at(l, c);
+    if c_width > end_width {
+      // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+      let c_width_before = raw_buffer.as_mut().width_before(l, c);
+      (c, end_width.saturating_sub(c_width_before))
+    } else {
+      // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
+      let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+      (c_next, 0_usize)
+    }
+  }
+}
+
 #[allow(unused_variables, clippy::explicit_counter_loop)]
 /// Implements [`from_top_left`] with option `wrap=false`.
 fn _from_top_left_nowrap(
@@ -159,18 +180,7 @@ fn _from_top_left_nowrap(
 
             let end_width = start_dcol_on_line + width as usize;
             let (end_char, end_fills) = match raw_buffer.as_mut().char_at(l, end_width) {
-              Some(c) => {
-                let c_width = raw_buffer.as_mut().width_at(l, c);
-                if c_width > end_width {
-                  // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-                  let c_width_before = raw_buffer.as_mut().width_before(l, c);
-                  (c, end_width.saturating_sub(c_width_before))
-                } else {
-                  // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
-                  let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
-                  (c_next, 0_usize)
-                }
-              }
+              Some(c) => end_char_and_prefills(raw_buffer, &bline, l, c, end_width),
               None => {
                 // If the char not found, it means the `end_width` is too long than the whole line.
                 // So the char next to the line's last char is the end char.
@@ -291,18 +301,7 @@ fn _from_top_left_wrap_nolinebreak(
             assert!(wrow < height);
             while wrow < height {
               let (end_char, end_fills_result) = match raw_buffer.as_mut().char_at(l, end_width) {
-                Some(c) => {
-                  let c_width = raw_buffer.as_mut().width_at(l, c);
-                  if c_width > end_width {
-                    // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-                    let c_width_before = raw_buffer.as_mut().width_before(l, c);
-                    (c, end_width.saturating_sub(c_width_before))
-                  } else {
-                    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
-                    let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
-                    (c_next, 0_usize)
-                  }
-                }
+                Some(c) => end_char_and_prefills(raw_buffer, &bline, l, c, end_width),
                 None => {
                   // If the char not found, it means the `end_width` is too long than the whole line.
                   // So the char next to the line's last char is the end char.
@@ -411,7 +410,7 @@ unsafe fn part1(
   words: &[&str],
   words_end_char_idx: &HashMap<usize, usize>,
   mut raw_buffer: NonNull<Buffer>,
-  bline: &ropey::RopeSlice<'_>,
+  bline: &RopeSlice,
   l: usize,
   c: usize,
   end_width: usize,
@@ -439,13 +438,7 @@ unsafe fn part1(
         // Part-1.1, simply wrapped this word to next row.
         // Here we actually use the `start_c_of_wd` as the end char for current row.
 
-        // If the `start_c_of_wd` width is greater than `end_width`, it is the end
-        // char itself.
-        let start_c_width_before = raw_buffer.as_mut().width_before(l, start_c_of_wd);
-        (
-          start_c_of_wd,
-          end_width.saturating_sub(start_c_width_before),
-        )
+        end_char_and_prefills(raw_buffer, bline, l, start_c_of_wd - 1, end_width)
       } else {
         // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
         assert_eq!(start_c_of_wd, start_char);
@@ -453,8 +446,7 @@ unsafe fn part1(
         *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
 
         // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-        let c_width_before = raw_buffer.as_mut().width_before(l, c);
-        (c, end_width.saturating_sub(c_width_before))
+        end_char_and_prefills(raw_buffer, bline, l, c, end_width)
       }
     } else {
       assert_eq!(c + 1, end_c_of_wd);
