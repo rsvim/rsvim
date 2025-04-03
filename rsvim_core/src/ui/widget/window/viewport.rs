@@ -630,13 +630,13 @@ mod tests {
 
   use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
-  use crate::rlock;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
   use crate::ui::tree::*;
   use crate::ui::widget::window::{Window, WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::{lock, rlock};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -711,7 +711,7 @@ mod tests {
       expect_end_fills.len()
     );
 
-    let buffer = buffer.read();
+    let buffer = buffer.lock();
     let buflines = buffer
       .get_rope()
       .get_lines_at(actual.start_line_idx())

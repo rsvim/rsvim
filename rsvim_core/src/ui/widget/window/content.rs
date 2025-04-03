@@ -6,7 +6,7 @@ use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::ViewportWk;
-use crate::{inode_impl, rlock, wlock};
+use crate::{inode_impl, lock, rlock};
 
 use geo::point;
 use std::convert::From;
@@ -70,7 +70,7 @@ impl Widgetable for WindowContent {
     // trace!("Draw window content, viewport:{:?}", viewport);
 
     let buffer = self.buffer.upgrade().unwrap();
-    let mut buffer = wlock!(buffer);
+    let mut buffer = lock!(buffer);
 
     let mut row_idx = 0_u16;
     let mut line_idx = viewport.start_line_idx();
