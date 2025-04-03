@@ -373,10 +373,11 @@ fn find_word_by_char(
   word_end_chars_index: &HashMap<usize, usize>,
   char_idx: usize,
 ) -> (usize, usize, usize) {
+  // trace!("words:{words:?}, words_end_chars:{word_end_chars_index:?},char_idx:{char_idx}");
   let mut low = 0;
   let mut high = words.len() - 1;
 
-  while low < high {
+  while low <= high {
     let mid = (low + high) / 2;
 
     let start_char_idx = if mid > 0 {
@@ -386,7 +387,13 @@ fn find_word_by_char(
     };
     let end_char_idx = *word_end_chars_index.get(&mid).unwrap();
 
+    // trace!(
+    //   "low:{low},high:{high},mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
+    // );
     if start_char_idx <= char_idx && end_char_idx > char_idx {
+      // trace!(
+      //   "return mid:{mid},start_char_idx:{start_char_idx},end_char_idx:{end_char_idx},char_idx:{char_idx}"
+      // );
       return (mid, start_char_idx, end_char_idx);
     } else if start_char_idx > char_idx {
       high = mid - 1;
