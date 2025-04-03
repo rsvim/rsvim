@@ -1,10 +1,10 @@
 //! Vim editing mode.
 
+use crate::arc_impl;
 use crate::state::fsm::StatefulValue;
 use crate::state::mode::Mode;
 
-use parking_lot::RwLock;
-use std::sync::{Arc, Weak};
+use paste::paste;
 
 pub mod command;
 pub mod fsm;
@@ -18,8 +18,7 @@ pub struct State {
   last_mode: Mode,
 }
 
-pub type StateArc = Arc<RwLock<State>>;
-pub type StateWk = Weak<RwLock<State>>;
+arc_impl!(State);
 
 impl State {
   pub fn new() -> Self {
@@ -27,11 +26,6 @@ impl State {
       mode: Mode::Normal,
       last_mode: Mode::Normal,
     }
-  }
-
-  /// Convert struct to Arc pointer.
-  pub fn to_arc(s: State) -> StateArc {
-    Arc::new(RwLock::new(s))
   }
 
   pub fn mode(&self) -> Mode {
