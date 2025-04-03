@@ -52,6 +52,7 @@ unicode-segmentation = { workspace = true }
 # icu = { workspace = true, features = ["compiled_data"] }
 derive_builder = { workspace = true }
 lru = { workspace = true }
+paste = { workspace = true }
 
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
