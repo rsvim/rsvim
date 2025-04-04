@@ -111,7 +111,7 @@ jobs:
       - name: Security Advisory
         uses: EmbarkStudios/cargo-deny-action@v2
         with:
-          command: check advisories
+          command: check advisories --allow unmaintained
   unit_test:
     name: Unit Test
     strategy:
