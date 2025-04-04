@@ -132,8 +132,7 @@ impl Widgetable for WindowContent {
 
             // Render start fills.
             if start_fills > 0 {
-              let cells = std::iter::repeat('>')
-                .take(start_fills as usize)
+              let cells = std::iter::repeat_n('>', start_fills as usize)
                 .map(Cell::from)
                 .collect::<Vec<_>>();
               let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
@@ -188,8 +187,7 @@ impl Widgetable for WindowContent {
 
             if width > occupied_length {
               let left_length = width - occupied_length;
-              let cells = std::iter::repeat(' ')
-                .take(left_length as usize)
+              let cells = std::iter::repeat_n(' ', left_length as usize)
                 .map(Cell::from)
                 .collect::<Vec<_>>();
               let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
@@ -208,8 +206,7 @@ impl Widgetable for WindowContent {
 
             // Render end fills.
             if end_fills > 0 {
-              let cells = std::iter::repeat('<')
-                .take(end_fills as usize)
+              let cells = std::iter::repeat_n('<', end_fills as usize)
                 .map(Cell::from)
                 .collect::<Vec<_>>();
               let cells_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
@@ -237,8 +234,7 @@ impl Widgetable for WindowContent {
 
     // If buffer has no more lines, render empty spaces to left parts of the window content.
     while row_idx < height {
-      let cells = std::iter::repeat(' ')
-        .take(width as usize)
+      let cells = std::iter::repeat_n(' ', width as usize)
         .map(Cell::from)
         .collect::<Vec<_>>();
       let cells_upos = point!(x: upos.x(), y: row_idx + upos.y());
