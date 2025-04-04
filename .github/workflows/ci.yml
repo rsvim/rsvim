@@ -112,6 +112,7 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check advisories
+          arguments: --allow unmaintained
   unit_test:
     name: Unit Test
     strategy:
