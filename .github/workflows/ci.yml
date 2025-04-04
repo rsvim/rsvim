@@ -29,9 +29,6 @@ jobs:
       - uses: crate-ci/typos@master
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
-        with:
-          prefix-key: "v0-rust"
-          cache-directories: "~/.cache/sccache"
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: miri,rust-src
@@ -71,8 +68,6 @@ jobs:
           tsc
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-        with:
-          prefix-key: "v0-rust"
       - uses: cargo-bins/cargo-binstall@main
       - uses: mozilla-actions/sccache-action@v0.0.8
       - name: Rustfmt
@@ -117,7 +112,6 @@ jobs:
         uses: EmbarkStudios/cargo-deny-action@v2
         with:
           command: check advisories
-          # arguments: --all-features --exclude v8 --exclude paste
   unit_test:
     name: Unit Test
     strategy:
@@ -129,9 +123,6 @@ jobs:
     steps:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-        with:
-          prefix-key: "v0-rust"
-          cache-directories: "~/.cache/sccache"
       - uses: mozilla-actions/sccache-action@v0.0.8
       - uses: actions/checkout@v4
       - name: Cargo test
