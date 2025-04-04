@@ -73,7 +73,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           prefix-key: "v0-rust"
-          cache-directories: "~/.cache/sccache"
       - uses: cargo-bins/cargo-binstall@main
       - uses: mozilla-actions/sccache-action@v0.0.8
       - name: Rustfmt
