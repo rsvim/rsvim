@@ -19,7 +19,7 @@ env:
 jobs:
   pr:
     name: PR
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: ${{ github.ref != 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +49,7 @@ jobs:
           cargo +nightly miri test
   lint:
     name: Lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
