@@ -22,6 +22,15 @@ impl Cursor {
   pub fn new(shape: IRect, blinking: bool, hidden: bool, style: CursorStyle) -> Self {
     Cursor {
       base: InodeBase::new(shape),
+      blinking,
+      hidden,
+      style,
+    }
+  }
+
+  pub fn default(shape: IRect) -> Self {
+    Cursor {
+      base: InodeBase::new(shape),
       blinking: true,
       hidden: false,
       style: CursorStyle::DefaultUserShape,

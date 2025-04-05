@@ -3,7 +3,6 @@
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOpt;
 use crate::envar;
-use crate::evloop::ctx::TuiContext;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
