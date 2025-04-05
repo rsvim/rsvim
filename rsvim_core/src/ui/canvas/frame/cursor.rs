@@ -131,7 +131,7 @@ impl Default for Cursor {
       pos: point! {x:0_u16, y:0_u16},
       blinking: true,
       hidden: false,
-      style: CursorStyle::BlinkingBlock,
+      style: CursorStyle::SteadyBlock,
     }
   }
 }
@@ -169,7 +169,7 @@ mod tests {
     let c = Cursor::default();
     assert!(c.blinking);
     assert!(!c.hidden);
-    assert!(cursor_style_eq(&c.style(), &CursorStyle::BlinkingBlock));
+    assert!(cursor_style_eq(&c.style(), &CursorStyle::SteadyBlock));
   }
 
   #[test]
@@ -203,7 +203,7 @@ mod tests {
       ),
     ];
     let expects = [
-      "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: true, hidden: false, style: BlinkingBlock }",
+      "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: true, hidden: false, style: SteadyBlock }",
       "Cursor { pos: Point(Coord { x: 0, y: 10 }), blinking: false, hidden: true, style: SteadyUnderScore }",
       "Cursor { pos: Point(Coord { x: 7, y: 3 }), blinking: true, hidden: false, style: BlinkingBar }",
     ];

@@ -33,7 +33,7 @@ impl Cursor {
       base: InodeBase::new(shape),
       blinking: true,
       hidden: false,
-      style: CursorStyle::BlinkingBlock,
+      style: CursorStyle::SteadyBlock,
     }
   }
 }
