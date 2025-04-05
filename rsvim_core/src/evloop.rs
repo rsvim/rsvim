@@ -3,6 +3,7 @@
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOpt;
 use crate::envar;
+use crate::evloop::ctx::TuiContext;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
@@ -33,6 +34,7 @@ use tokio_util::sync::CancellationToken;
 use tokio_util::task::TaskTracker;
 use tracing::{error, trace};
 
+pub mod ctx;
 pub mod msg;
 pub mod task;
 
@@ -71,6 +73,8 @@ pub struct EventLoop {
   pub tree: TreeArc,
   /// Canvas for UI.
   pub canvas: CanvasArc,
+  /// Saved TUI context.
+  pub saved_tui_context: TuiContext,
   /// Stdout writer for UI.
   pub writer: BufWriter<Stdout>,
 
