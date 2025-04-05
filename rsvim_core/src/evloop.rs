@@ -286,7 +286,12 @@ impl EventLoop {
   /// Initialize windows.
   pub fn init_windows(&mut self) -> IoResult<()> {
     // Initialize default window.
-    let canvas_size = rlock!(self.canvas).size();
+    let (canvas_size, canvas_cursor) = {
+      let canvas = rlock!(self.canvas);
+      let canvas_size = canvas.size();
+      let canvas_cursor = *canvas.frame().cursor();
+      (canvas_size, canvas_cursor)
+    };
     let mut tree = wlock!(self.tree);
     let tree_root_id = tree.root_id();
     let window_shape = IRect::new(
@@ -309,7 +314,12 @@ impl EventLoop {
 
     // Initialize cursor.
     let cursor_shape = IRect::new((0, 0), (1, 1));
-    let cursor = Cursor::new(cursor_shape);
+    let cursor = Cursor::new(
+      cursor_shape,
+      canvas_cursor.blinking(),
+      canvas_cursor.hidden(),
+      canvas_cursor.style(),
+    );
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(&window_id, cursor_node);
 

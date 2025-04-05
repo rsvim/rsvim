@@ -19,12 +19,21 @@ pub struct Cursor {
 }
 
 impl Cursor {
-  pub fn new(shape: IRect) -> Self {
+  pub fn new(shape: IRect, blinking: bool, hidden: bool, style: CursorStyle) -> Self {
     Cursor {
       base: InodeBase::new(shape),
-      blinking: true,
+      blinking,
+      hidden,
+      style,
+    }
+  }
+
+  pub fn default(shape: IRect) -> Self {
+    Cursor {
+      base: InodeBase::new(shape),
+      blinking: false,
       hidden: false,
-      style: CursorStyle::DefaultUserShape,
+      style: CursorStyle::SteadyBlock,
     }
   }
 }

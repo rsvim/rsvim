@@ -608,7 +608,7 @@ mod tests {
     can._shade_done();
     info!("actual2:{:?}", actual2);
     assert!(!actual2.is_empty());
-    assert_eq!(actual2.len(), 4);
+    assert_eq!(actual2.len(), 3);
     assert_eq!(
       actual2
         .iter()
@@ -634,7 +634,7 @@ mod tests {
         })
         .collect::<Vec<_>>()
         .len(),
-      1
+      0
     );
     assert_eq!(
       actual2

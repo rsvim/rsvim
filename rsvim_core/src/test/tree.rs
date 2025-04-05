@@ -43,7 +43,7 @@ pub fn make_tree_with_buffers(
 
   // Initialize cursor.
   let cursor_shape = IRect::new((0, 0), (1, 1));
-  let cursor = Cursor::new(cursor_shape);
+  let cursor = Cursor::default(cursor_shape);
   let cursor_node = TreeNode::Cursor(cursor);
   tree_mut.bounded_insert(&window_id, cursor_node);
 
