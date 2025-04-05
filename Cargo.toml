@@ -63,7 +63,7 @@ paste = "1.0.15"
 
 # deno v2.2.4: https://github.com/denoland/deno/blob/v2.2.4/Cargo.toml
 # deno_core 0.340.0: https://github.com/denoland/deno_core/blob/0.340.0/Cargo.toml
-v8 = { version = "=134.5.0", default-features = false }
+v8 = { version = "=135.0.0", default-features = false }
 # deno_ast 0.46.2: https://github.com/denoland/deno_ast/blob/0.46.2/Cargo.toml
 swc_atoms = "=5.0.0"
 swc_common = "=8.0.0"
