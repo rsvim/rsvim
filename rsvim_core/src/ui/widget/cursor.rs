@@ -31,7 +31,7 @@ impl Cursor {
   pub fn default(shape: IRect) -> Self {
     Cursor {
       base: InodeBase::new(shape),
-      blinking: true,
+      blinking: false,
       hidden: false,
       style: CursorStyle::SteadyBlock,
     }

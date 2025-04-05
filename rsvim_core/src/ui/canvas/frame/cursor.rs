@@ -129,7 +129,7 @@ impl Default for Cursor {
   fn default() -> Self {
     Cursor {
       pos: point! {x:0_u16, y:0_u16},
-      blinking: true,
+      blinking: false,
       hidden: false,
       style: CursorStyle::SteadyBlock,
     }
@@ -203,7 +203,7 @@ mod tests {
       ),
     ];
     let expects = [
-      "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: true, hidden: false, style: SteadyBlock }",
+      "Cursor { pos: Point(Coord { x: 0, y: 0 }), blinking: false, hidden: false, style: SteadyBlock }",
       "Cursor { pos: Point(Coord { x: 0, y: 10 }), blinking: false, hidden: true, style: SteadyUnderScore }",
       "Cursor { pos: Point(Coord { x: 7, y: 3 }), blinking: true, hidden: false, style: BlinkingBar }",
     ];
