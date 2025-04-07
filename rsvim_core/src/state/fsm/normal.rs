@@ -20,6 +20,24 @@ pub struct NormalStateful {}
 /// The first is line index, second is char index.
 pub struct CursorMoveResult(usize, usize);
 
+unsafe fn _last_visible_char(
+  raw_buffer: NonNull<Buffer>,
+  line_idx: usize,
+  char_idx: usize,
+) -> usize {
+  unsafe {
+    let bline = raw_buffer.as_ref().get_rope().get_line(line_idx).unwrap();
+    let mut c = char_idx;
+    while raw_buffer.as_ref().char_width(bline.get_char(c).unwrap()) == 0 {
+      c = c.saturating_sub(1);
+      if c == 0 {
+        break;
+      }
+    }
+    c
+  }
+}
+
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
@@ -206,7 +224,7 @@ impl NormalStateful {
         Some(char_idx) => char_idx,
         None => {
           let c = raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1;
-          Self::_last_visible_char(raw_buffer, line_idx, c)
+          _last_visible_char(raw_buffer, line_idx, c)
         }
       };
       trace!("cursor_col_idx:{},char_idx:{}", cursor_col_idx, char_idx);
@@ -247,7 +265,7 @@ impl NormalStateful {
               "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, c:{}",
               cursor_char_idx, expected, last_row_viewport, c
             );
-            Self::_last_visible_char(raw_buffer, cursor_line_idx, c)
+            _last_visible_char(raw_buffer, cursor_line_idx, c)
           };
           std::cmp::min(expected, last_char_idx)
         }
@@ -346,24 +364,6 @@ impl NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
-  }
-
-  unsafe fn _last_visible_char(
-    raw_buffer: NonNull<Buffer>,
-    line_idx: usize,
-    char_idx: usize,
-  ) -> usize {
-    unsafe {
-      let bline = raw_buffer.as_ref().get_rope().get_line(line_idx).unwrap();
-      let mut c = char_idx;
-      while raw_buffer.as_ref().char_width(bline.get_char(c).unwrap()) == 0 {
-        c = c.saturating_sub(1);
-        if c == 0 {
-          break;
-        }
-      }
-      c
-    }
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
