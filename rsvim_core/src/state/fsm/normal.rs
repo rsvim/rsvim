@@ -1122,7 +1122,6 @@ mod tests {
     test_log_init();
 
     let lines = vec![
-      "Hello, RSVIM!\n",
       "This is a quite simple test.\n",
       "It has these parts:\n",
       "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
@@ -1132,7 +1131,7 @@ mod tests {
     ];
     let terminal_size = U16Size::new(50, 50);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines.clone());
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -1150,52 +1149,38 @@ mod tests {
     assert_eq!(prev_viewport.cursor().line_idx(), 0);
     assert_eq!(prev_viewport.cursor().char_idx(), 0);
 
-    for _ in 0..10 {
-      let commands = [
-        Command::CursorMoveDown(2),
-        Command::CursorMoveRight(3),
-        Command::CursorMoveUp(2),
-        Command::CursorMoveLeft(3),
-      ];
-      let data_access = StatefulDataAccess::new(
-        state.clone(),
-        tree.clone(),
-        bufs.clone(),
-        Event::Key(key_event),
-      );
-      for c in commands.iter() {
-        let stateful = NormalStateful::default();
-        let next_stateful = stateful.cursor_move(&data_access, *c);
-        assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-      }
-      let tree = data_access.tree.clone();
-      let actual_viewport = get_viewport(tree);
-      assert_eq!(actual_viewport.cursor().line_idx(), 0);
-      assert_eq!(actual_viewport.cursor().char_idx(), 0);
-    }
+    // step-1: Move to the end of line-1.
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree.clone(),
+      bufs.clone(),
+      Event::Key(key_event),
+    );
+    let command = Command::CursorMoveRight(lines[0].len() as u16);
+    let stateful = NormalStateful::default();
+    let next_stateful = stateful.cursor_move(&data_access, command);
 
-    for _ in 0..10 {
-      let commands = [
-        Command::CursorMoveRight(5),
-        Command::CursorMoveDown(1),
-        Command::CursorMoveLeft(5),
-        Command::CursorMoveUp(1),
-      ];
-      let data_access = StatefulDataAccess::new(
-        state.clone(),
-        tree.clone(),
-        bufs.clone(),
-        Event::Key(key_event),
-      );
-      for c in commands.iter() {
-        let stateful = NormalStateful::default();
-        let next_stateful = stateful.cursor_move(&data_access, *c);
-        assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-      }
-      let tree = data_access.tree.clone();
-      let actual_viewport = get_viewport(tree);
-      assert_eq!(actual_viewport.cursor().line_idx(), 0);
-      assert_eq!(actual_viewport.cursor().char_idx(), 0);
-    }
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let actual_tree = data_access.tree.clone();
+    let actual_viewport = get_viewport(actual_tree.clone());
+    assert_eq!(actual_viewport.cursor().line_idx(), 0);
+    assert_eq!(actual_viewport.cursor().char_idx(), 27);
+
+    // step-2: Move down to line-2.
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree.clone(),
+      bufs.clone(),
+      Event::Key(key_event),
+    );
+    let command = Command::CursorMoveDown(1);
+    let stateful = NormalStateful::default();
+    let next_stateful = stateful.cursor_move(&data_access, command);
+
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let actual_tree = data_access.tree.clone();
+    let actual_viewport = get_viewport(actual_tree);
+    assert_eq!(actual_viewport.cursor().line_idx(), 1);
+    assert_eq!(actual_viewport.cursor().char_idx(), 18);
   }
 }
