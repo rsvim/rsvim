@@ -90,6 +90,16 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
+  /// Cursor move up/down/left/right in current window, or scroll buffer up/down if it reaches the
+  /// top/bottom of the window and the buffer has more contents.
+  fn cursor_move_or_scroll(
+    &self,
+    _data_access: &StatefulDataAccess,
+    _command: Command,
+  ) -> StatefulValue {
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
   /// Cursor move up/down/left/right in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the top/bottom of the window.
   ///
@@ -276,20 +286,10 @@ impl NormalStateful {
     }
   }
 
-  /// Cursor move up/down/left/right in current window, or scroll buffer up/down if it reaches the
-  /// top/bottom of the window and the buffer has more contents.
-  fn _cursor_move_or_scroll(
-    &self,
-    _data_access: &StatefulDataAccess,
-    _command: Command,
-  ) -> StatefulValue {
-    StatefulValue::NormalMode(NormalStateful::default())
-  }
-
   /// Cursor scroll buffer up/down in current window.
   /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
   /// buffer contents changed, i.e. moved up/down.
-  fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
 
@@ -299,12 +299,21 @@ impl NormalStateful {
         let viewport = wlock!(viewport);
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut _buffer = wlock!(buffer);
+        let mut buffer = wlock!(buffer);
 
-        match command {
-          Command::CursorScrollUp(_n) | Command::CursorScrollDown(_n) => {}
-          Command::CursorScrollLeft(_n) | Command::CursorScrollRight(_n) => {}
-          _ => unreachable!(),
+        unsafe {
+          // Fix multiple mutable references on `buffer`.
+          let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+
+          let cursor_move_result = match command {
+            Command::CursorScrollUp(_n) | Command::CursorScrollDown(_n) => {
+              self._cursor_scroll_vertically(&viewport, raw_buffer, command)
+            }
+            Command::CursorScrollLeft(_n) | Command::CursorScrollRight(_n) => {
+              self._cursor_scroll_vertically(&viewport, raw_buffer, command)
+            }
+            _ => unreachable!(),
+          };
         }
       }
     }
@@ -312,58 +321,32 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
+  /// Returns the `start_line_idx` and `start_column_idx` for the viewport.
   fn _cursor_scroll_vertically(
     &self,
-    data_access: &StatefulDataAccess,
+    viewport: &Viewport,
+    mut raw_buffer: NonNull<Buffer>,
     command: Command,
-  ) -> StatefulValue {
-    let tree = data_access.tree.clone();
-    let mut tree = wlock!(tree);
+  ) -> (usize, usize) {
+    let cursor_viewport = viewport.cursor();
+    let cursor_line_idx = cursor_viewport.line_idx();
+    let cursor_char_idx = cursor_viewport.char_idx();
 
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
-        let viewport = current_window.viewport();
-        let viewport = wlock!(viewport);
-        let buffer = viewport.buffer();
-        let buffer = buffer.upgrade().unwrap();
-        let mut _buffer = wlock!(buffer);
-
-        match command {
-          Command::CursorScrollUp(_n) => {}
-          Command::CursorScrollDown(_n) => {}
-          _ => unreachable!(),
-        }
-      }
-    }
-
-    StatefulValue::NormalMode(NormalStateful::default())
+    (0_usize, 0_usize)
   }
 
+  /// Returns the `start_line_idx` and `start_column_idx` for the viewport.
   fn _cursor_scroll_horizontally(
     &self,
-    data_access: &StatefulDataAccess,
+    viewport: &Viewport,
+    mut raw_buffer: NonNull<Buffer>,
     command: Command,
-  ) -> StatefulValue {
-    let tree = data_access.tree.clone();
-    let mut tree = wlock!(tree);
+  ) -> (usize, usize) {
+    let cursor_viewport = viewport.cursor();
+    let cursor_line_idx = cursor_viewport.line_idx();
+    let cursor_char_idx = cursor_viewport.char_idx();
 
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
-        let viewport = current_window.viewport();
-        let viewport = wlock!(viewport);
-        let buffer = viewport.buffer();
-        let buffer = buffer.upgrade().unwrap();
-        let mut _buffer = wlock!(buffer);
-
-        match command {
-          Command::CursorScrollLeft(_n) => {}
-          Command::CursorScrollRight(_n) => {}
-          _ => unreachable!(),
-        }
-      }
-    }
-
-    StatefulValue::NormalMode(NormalStateful::default())
+    (0_usize, 0_usize)
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
