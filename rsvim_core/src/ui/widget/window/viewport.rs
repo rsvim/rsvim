@@ -410,7 +410,7 @@ pub struct Viewport {
   // Start displayed column index (in the buffer), starts from 0.
   start_column_idx: usize,
 
-  // Maps `line_idx` => its line-wise viewports.
+  // Maps `line_idx` (in the buffer) => its line-wise viewports.
   lines: BTreeMap<usize, LineViewport>,
 
   // Cursor position.
