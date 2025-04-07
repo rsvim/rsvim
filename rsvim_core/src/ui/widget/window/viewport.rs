@@ -558,6 +558,12 @@ impl Viewport {
     self.end_line_idx
   }
 
+  /// Get start displayed column index in the buffer.
+  pub fn start_column_idx(&self) -> usize {
+    self._internal_check();
+    self.start_column_idx
+  }
+
   /// Get viewport information by lines.
   pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
     self._internal_check();
