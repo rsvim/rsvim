@@ -57,23 +57,23 @@ paste = { workspace = true }
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
 
 v8 = { workspace = true, default-features = false }
-# swc_atoms = { workspace = true }
+swc_atoms = { workspace = true }
 swc_common = { workspace = true, features = ["tty-emitter"] }
-# swc_config = { workspace = true }
-# swc_config_macro = { workspace = true }
-# swc_ecma_ast = { workspace = true }
+swc_config = { workspace = true }
+swc_config_macro = { workspace = true }
+swc_ecma_ast = { workspace = true }
 swc_ecma_codegen = { workspace = true }
-# swc_ecma_codegen_macros = { workspace = true }
+swc_ecma_codegen_macros = { workspace = true }
 swc_ecma_parser = { workspace = true }
 swc_ecma_transforms_base = { workspace = true }
-# swc_ecma_transforms_macros = { workspace = true }
-# swc_ecma_transforms_react = { workspace = true }
+swc_ecma_transforms_macros = { workspace = true }
+swc_ecma_transforms_react = { workspace = true }
 swc_ecma_transforms_typescript = { workspace = true }
 swc_ecma_utils = { workspace = true }
 swc_ecma_visit = { workspace = true }
-# swc_eq_ignore_macros = { workspace = true }
-# swc_macros_common = { workspace = true }
-# swc_visit = { workspace = true }
+swc_eq_ignore_macros = { workspace = true }
+swc_macros_common = { workspace = true }
+swc_visit = { workspace = true }
 
 # swc_ecma_transforms_optimization = { workspace = true }
 # swc_ecma_loader = { workspace = true }
@@ -84,5 +84,5 @@ swc_ecma_visit = { workspace = true }
 # NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot }
 
 [dev-dependencies]
-# tempfile = "3"
+tempfile = "3"
 assert_fs = "1.1.2"
