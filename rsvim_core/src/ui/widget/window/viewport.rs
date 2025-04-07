@@ -406,6 +406,9 @@ pub struct Viewport {
   // End line index (in the buffer).
   end_line_idx: usize,
 
+  // Start displayed column index (in the buffer), starts from 0.
+  start_column_idx: usize,
+
   // Maps `line_idx` to its row-wise viewports.
   lines: BTreeMap<usize, LineViewport>,
 
@@ -418,8 +421,20 @@ arc_impl!(Viewport);
 impl Viewport {
   /// Make new instance.
   pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
+    let start_line_idx = 0_usize;
+    let start_column_idx = 0_usize;
+
     // By default the viewport start from the first line, i.e. starts from 0.
-    let (line_idx_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
+    let (line_idx_range, lines) = sync::from_top_left(
+      options,
+      buffer.clone(),
+      actual_shape,
+      start_line_idx,
+      start_column_idx,
+    );
+
+    assert_eq!(line_idx_range.start_line_idx(), start_line_idx);
+
     let cursor = if line_idx_range.is_empty() {
       assert!(lines.is_empty());
       CursorViewport::new(0, 0)
@@ -465,6 +480,7 @@ impl Viewport {
       actual_shape: *actual_shape,
       start_line_idx: line_idx_range.start_line_idx(),
       end_line_idx: line_idx_range.end_line_idx(),
+      start_column_idx,
       lines,
       cursor,
     }
