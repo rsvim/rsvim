@@ -21,6 +21,7 @@ pub struct BufferLocalOptions {
 
 impl BufferLocalOptions {
   /// Buffer 'tab-stop' option.
+  ///
   /// See: <https://vimhelp.org/options.txt.html#%27tabstop%27>.
   pub fn tab_stop(&self) -> u16 {
     self.tab_stop
@@ -31,6 +32,7 @@ impl BufferLocalOptions {
   }
 
   /// Buffer 'file-encoding' option.
+  ///
   /// See: <https://vimhelp.org/options.txt.html#%27fileencoding%27>.
   pub fn file_encoding(&self) -> FileEncodingOption {
     self.file_encoding
