@@ -204,7 +204,10 @@ impl NormalStateful {
         .width_before(cursor_line_idx, cursor_char_idx);
       let char_idx = match raw_buffer.as_mut().char_after(line_idx, cursor_col_idx) {
         Some(char_idx) => char_idx,
-        None => raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1,
+        None => {
+          let c = raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1;
+          Self::_last_visible_char(raw_buffer, line_idx, c)
+        }
       };
       trace!("cursor_col_idx:{},char_idx:{}", cursor_col_idx, char_idx);
       Some(CursorMoveResult(line_idx, char_idx))
@@ -236,30 +239,15 @@ impl NormalStateful {
         Command::CursorMoveRight(n) => {
           let expected = cursor_char_idx.saturating_add(n as usize);
           let last_char_idx = {
-            let cursor_line = raw_buffer
-              .as_ref()
-              .get_rope()
-              .get_line(cursor_line_idx)
-              .unwrap();
             assert!(viewport.lines().contains_key(&cursor_line_idx));
             let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
             let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-            let mut c = last_row_viewport.end_char_idx() - 1;
+            let c = last_row_viewport.end_char_idx() - 1;
             trace!(
               "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, c:{}",
               cursor_char_idx, expected, last_row_viewport, c
             );
-            while raw_buffer
-              .as_ref()
-              .char_width(cursor_line.get_char(c).unwrap())
-              == 0
-            {
-              c = c.saturating_sub(1);
-              if c == 0 {
-                break;
-              }
-            }
-            c
+            Self::_last_visible_char(raw_buffer, cursor_line_idx, c)
           };
           std::cmp::min(expected, last_char_idx)
         }
@@ -358,6 +346,24 @@ impl NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  unsafe fn _last_visible_char(
+    raw_buffer: NonNull<Buffer>,
+    line_idx: usize,
+    char_idx: usize,
+  ) -> usize {
+    unsafe {
+      let bline = raw_buffer.as_ref().get_rope().get_line(line_idx).unwrap();
+      let mut c = char_idx;
+      while raw_buffer.as_ref().char_width(bline.get_char(c).unwrap()) == 0 {
+        c = c.saturating_sub(1);
+        if c == 0 {
+          break;
+        }
+      }
+      c
+    }
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
