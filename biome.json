@@ -1,5 +1,6 @@
 {
   "files": {
+    "include": ["rsvim_core/src/js/runtime/*.ts"],
     "ignore": [
       "rsvim_core/src/js/runtime/*.d.ts",
       "rsvim_core/src/js/runtime/*.js"

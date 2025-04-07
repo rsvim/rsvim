@@ -1,5 +1,5 @@
 #!/bin/bash
 
 cargo fmt
-biome format --write **/*.ts
+biome format --write
 tsc
