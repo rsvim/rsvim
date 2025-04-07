@@ -407,9 +407,6 @@ pub struct Viewport {
   // End line index (in the buffer).
   end_line_idx: usize,
 
-  // Start displayed column index (in the buffer), starts from 0.
-  start_column_idx: usize,
-
   // Maps `line_idx` (in the buffer) => its line-wise viewports.
   lines: BTreeMap<usize, LineViewport>,
 
@@ -481,7 +478,6 @@ impl Viewport {
       actual_shape: *actual_shape,
       start_line_idx: line_idx_range.start_line_idx(),
       end_line_idx: line_idx_range.end_line_idx(),
-      start_column_idx,
       lines,
       cursor,
     }
@@ -559,12 +555,6 @@ impl Viewport {
     self.end_line_idx
   }
 
-  /// Get start displayed column index in the buffer.
-  pub fn start_column_idx(&self) -> usize {
-    self._internal_check();
-    self.start_column_idx
-  }
-
   /// Get viewport information by lines.
   pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
     self._internal_check();
@@ -590,14 +580,14 @@ impl Viewport {
     self.cursor.set_char_idx(char_idx);
   }
 
-  /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.
-  pub fn sync_from_top_left(&mut self, start_line: usize, start_dcolumn: usize) {
+  /// Sync from top-left corner, i.e. `start_line` and `start_column`.
+  pub fn sync_from_top_left(&mut self, start_line: usize, start_column: usize) {
     let (line_idx_range, lines) = sync::from_top_left(
       &self.options,
       self.buffer.clone(),
       &self.actual_shape,
       start_line,
-      start_dcolumn,
+      start_column,
     );
     self.start_line_idx = line_idx_range.start_line_idx();
     self.end_line_idx = line_idx_range.end_line_idx();
