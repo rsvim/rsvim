@@ -52,13 +52,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: latest
-      - name: Prettier
+      - uses: biomejs/setup-biome@v2
+      - name: Biome
         run: |
-          npm install -g prettier
-          prettier --version
-          echo "show PWD=${PWD}"
-          echo "prettier --check *.md **/*.ts"
-          prettier --check *.md **/*.ts
+          biome format --write **/*.ts
       - name: Tsc
         run: |
           npm install -g typescript
