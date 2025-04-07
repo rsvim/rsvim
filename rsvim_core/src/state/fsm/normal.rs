@@ -16,10 +16,6 @@ use tracing::trace;
 /// The normal editing mode.
 pub struct NormalStateful {}
 
-#[derive(Debug, Copy, Clone)]
-/// The first is line index, second is char index.
-pub struct CursorMoveResult(usize, usize);
-
 unsafe fn _last_visible_char(
   raw_buffer: NonNull<Buffer>,
   line_idx: usize,
@@ -130,7 +126,7 @@ impl NormalStateful {
           };
 
           trace!("cursor_move_result:{:?}", cursor_move_result);
-          if let Some(CursorMoveResult(line_idx, char_idx)) = cursor_move_result {
+          if let Some((line_idx, char_idx)) = cursor_move_result {
             viewport.set_cursor(line_idx, char_idx);
             let cursor_row = viewport
               .lines()
@@ -179,12 +175,13 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
+  /// Returns the `line_idx` and `char_idx` for the cursor.
   unsafe fn _cursor_move_vertically(
     &self,
     viewport: &Viewport,
     mut raw_buffer: NonNull<Buffer>,
     command: Command,
-  ) -> Option<CursorMoveResult> {
+  ) -> Option<(usize, usize)> {
     trace!("command:{:?}", command);
     let cursor_viewport = viewport.cursor();
     let cursor_line_idx = cursor_viewport.line_idx();
@@ -238,16 +235,17 @@ impl NormalStateful {
         }
       };
       trace!("cursor_col_idx:{},char_idx:{}", cursor_col_idx, char_idx);
-      Some(CursorMoveResult(line_idx, char_idx))
+      Some((line_idx, char_idx))
     }
   }
 
+  /// Returns the `line_idx` and `char_idx` for the cursor.
   unsafe fn _cursor_move_horizontally(
     &self,
     viewport: &Viewport,
     raw_buffer: NonNull<Buffer>,
     command: Command,
-  ) -> Option<CursorMoveResult> {
+  ) -> Option<(usize, usize)> {
     let cursor_viewport = viewport.cursor();
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
@@ -282,7 +280,7 @@ impl NormalStateful {
         _ => unreachable!(),
       };
 
-      Some(CursorMoveResult(cursor_line_idx, char_idx))
+      Some((cursor_line_idx, char_idx))
     }
   }
 
@@ -305,7 +303,7 @@ impl NormalStateful {
           // Fix multiple mutable references on `buffer`.
           let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
 
-          let cursor_move_result = match command {
+          let cursor_scroll_result = match command {
             Command::CursorScrollUp(_n) | Command::CursorScrollDown(_n) => {
               self._cursor_scroll_vertically(&viewport, raw_buffer, command)
             }
@@ -314,6 +312,9 @@ impl NormalStateful {
             }
             _ => unreachable!(),
           };
+
+          if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {}
+          // Or, just do nothing, keep the old viewport.
         }
       }
     }
@@ -327,12 +328,12 @@ impl NormalStateful {
     viewport: &Viewport,
     mut raw_buffer: NonNull<Buffer>,
     command: Command,
-  ) -> (usize, usize) {
+  ) -> Option<(usize, usize)> {
     let cursor_viewport = viewport.cursor();
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
 
-    (0_usize, 0_usize)
+    None
   }
 
   /// Returns the `start_line_idx` and `start_column_idx` for the viewport.
@@ -341,12 +342,12 @@ impl NormalStateful {
     viewport: &Viewport,
     mut raw_buffer: NonNull<Buffer>,
     command: Command,
-  ) -> (usize, usize) {
+  ) -> Option<(usize, usize)> {
     let cursor_viewport = viewport.cursor();
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
 
-    (0_usize, 0_usize)
+    None
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
