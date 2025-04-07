@@ -400,16 +400,16 @@ pub struct Viewport {
   // Actual shape.
   actual_shape: U16Rect,
 
-  // Start line index in the buffer, starts from 0.
+  // Start line index (in the buffer), starts from 0.
   start_line_idx: usize,
 
-  // End line index in the buffer.
+  // End line index (in the buffer).
   end_line_idx: usize,
 
-  // Maps from buffer line index to its displayed rows in the window.
+  // Maps `line_idx` to its row-wise viewports.
   lines: BTreeMap<usize, LineViewport>,
 
-  // Cursor position (if has).
+  // Cursor position.
   cursor: CursorViewport,
 }
 
