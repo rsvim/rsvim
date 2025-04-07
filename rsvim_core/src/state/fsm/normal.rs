@@ -308,7 +308,7 @@ impl NormalStateful {
               self._cursor_scroll_vertically(&viewport, raw_buffer, command)
             }
             Command::CursorScrollLeft(_n) | Command::CursorScrollRight(_n) => {
-              self._cursor_scroll_vertically(&viewport, raw_buffer, command)
+              self._cursor_scroll_horizontally(&viewport, raw_buffer, command)
             }
             _ => unreachable!(),
           };
