@@ -1,0 +1,13 @@
+{
+  "files": {
+    "ignore": [
+      "rsvim_core/src/js/runtime/*.d.ts",
+      "rsvim_core/src/js/runtime/*.js"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
+}

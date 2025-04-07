@@ -15,7 +15,7 @@ rust = "latest"
 python = "latest"
 
 node = "latest"
-"npm:prettier" = "latest"
+"npm:@biomejs/biome" = "latest"
 "npm:browser-sync" = "latest"
 "npm:typescript" = "latest"
 "npm:markdownlint" = "latest"
