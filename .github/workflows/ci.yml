@@ -57,7 +57,7 @@ jobs:
         run: |
           biome --version
           echo "PWD=${PWD}"
-          biome format --write **/*.ts
+          biome format --write
       - name: Tsc
         run: |
           npm install -g typescript
