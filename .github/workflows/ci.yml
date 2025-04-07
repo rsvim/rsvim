@@ -27,17 +27,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: crate-ci/typos@master
+      - uses: mozilla-actions/sccache-action@v0.0.9
       - uses: actions/checkout@v4
-      - uses: Swatinem/rust-cache@v2
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: miri,rust-src
-      - uses: mozilla-actions/sccache-action@v0.0.8
       - uses: actions/checkout@v4
       - name: (Experimental) Cargo miri
         env:
           MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-permissive-provenance"
           RUSTC_WRAPPER: "sccache"
+          SCCACHE_GHA_ENABLED: "true"
         # Disable simd features
         run: |
           sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' Cargo.toml
@@ -66,10 +66,9 @@ jobs:
           echo "show PWD=${PWD}"
           echo "tsc"
           tsc
+      - uses: mozilla-actions/sccache-action@v0.0.9
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
       - uses: cargo-bins/cargo-binstall@main
-      - uses: mozilla-actions/sccache-action@v0.0.8
       - name: Rustfmt
         run: cargo fmt --check
       - name: Taplo
@@ -84,6 +83,7 @@ jobs:
       - name: Clippy
         env:
           RUSTC_WRAPPER: "sccache"
+          SCCACHE_GHA_ENABLED: "true"
         run: cargo clippy --all-targets --all-features
       - name: MSRV
         run: |
@@ -120,10 +120,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       RUSTC_WRAPPER: "sccache"
+      SCCACHE_GHA_ENABLED: "true"
     steps:
+      - uses: mozilla-actions/sccache-action@v0.0.9
       - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-      - uses: mozilla-actions/sccache-action@v0.0.8
       - uses: actions/checkout@v4
       - name: Cargo test
         run: |

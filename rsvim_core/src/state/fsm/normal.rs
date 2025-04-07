@@ -204,7 +204,10 @@ impl NormalStateful {
         .width_before(cursor_line_idx, cursor_char_idx);
       let char_idx = match raw_buffer.as_mut().char_after(line_idx, cursor_col_idx) {
         Some(char_idx) => char_idx,
-        None => raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1,
+        None => {
+          let c = raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1;
+          Self::_last_visible_char(raw_buffer, line_idx, c)
+        }
       };
       trace!("cursor_col_idx:{},char_idx:{}", cursor_col_idx, char_idx);
       Some(CursorMoveResult(line_idx, char_idx))
@@ -236,30 +239,15 @@ impl NormalStateful {
         Command::CursorMoveRight(n) => {
           let expected = cursor_char_idx.saturating_add(n as usize);
           let last_char_idx = {
-            let cursor_line = raw_buffer
-              .as_ref()
-              .get_rope()
-              .get_line(cursor_line_idx)
-              .unwrap();
             assert!(viewport.lines().contains_key(&cursor_line_idx));
             let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
             let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-            let mut c = last_row_viewport.end_char_idx() - 1;
+            let c = last_row_viewport.end_char_idx() - 1;
             trace!(
               "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, c:{}",
               cursor_char_idx, expected, last_row_viewport, c
             );
-            while raw_buffer
-              .as_ref()
-              .char_width(cursor_line.get_char(c).unwrap())
-              == 0
-            {
-              c = c.saturating_sub(1);
-              if c == 0 {
-                break;
-              }
-            }
-            c
+            Self::_last_visible_char(raw_buffer, cursor_line_idx, c)
           };
           std::cmp::min(expected, last_char_idx)
         }
@@ -358,6 +346,24 @@ impl NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  unsafe fn _last_visible_char(
+    raw_buffer: NonNull<Buffer>,
+    line_idx: usize,
+    char_idx: usize,
+  ) -> usize {
+    unsafe {
+      let bline = raw_buffer.as_ref().get_rope().get_line(line_idx).unwrap();
+      let mut c = char_idx;
+      while raw_buffer.as_ref().char_width(bline.get_char(c).unwrap()) == 0 {
+        c = c.saturating_sub(1);
+        if c == 0 {
+          break;
+        }
+      }
+      c
+    }
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
@@ -1115,5 +1121,72 @@ mod tests {
       assert_eq!(actual_viewport.cursor().line_idx(), 0);
       assert_eq!(actual_viewport.cursor().char_idx(), 0);
     }
+  }
+
+  #[test]
+  fn cursor_move3() {
+    test_log_init();
+
+    let lines = vec![
+      "This is a quite simple test.\n",
+      "It has these parts:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let terminal_size = U16Size::new(50, 50);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines.clone());
+    let bufs = make_buffers_manager(buf_opts, vec![buf]);
+    let tree = make_tree_with_buffers(
+      terminal_size,
+      WindowLocalOptionsBuilder::default().build().unwrap(),
+      bufs.clone(),
+    );
+    let state = State::to_arc(State::default());
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('j'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_viewport = get_viewport(tree.clone());
+    assert_eq!(prev_viewport.cursor().line_idx(), 0);
+    assert_eq!(prev_viewport.cursor().char_idx(), 0);
+
+    // step-1: Move to the end of line-1.
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree.clone(),
+      bufs.clone(),
+      Event::Key(key_event),
+    );
+    let command = Command::CursorMoveRight(lines[0].len() as u16);
+    let stateful = NormalStateful::default();
+    let next_stateful = stateful.cursor_move(&data_access, command);
+
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let actual_tree = data_access.tree.clone();
+    let actual_viewport = get_viewport(actual_tree.clone());
+    assert_eq!(actual_viewport.cursor().line_idx(), 0);
+    assert_eq!(actual_viewport.cursor().char_idx(), 27);
+
+    // step-2: Move down to line-2.
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree.clone(),
+      bufs.clone(),
+      Event::Key(key_event),
+    );
+    let command = Command::CursorMoveDown(1);
+    let stateful = NormalStateful::default();
+    let next_stateful = stateful.cursor_move(&data_access, command);
+
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let actual_tree = data_access.tree.clone();
+    let actual_viewport = get_viewport(actual_tree);
+    assert_eq!(actual_viewport.cursor().line_idx(), 1);
+    assert_eq!(actual_viewport.cursor().char_idx(), 18);
   }
 }
