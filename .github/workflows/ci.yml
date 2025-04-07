@@ -56,13 +56,13 @@ jobs:
       - name: Biome
         run: |
           biome --version
+          echo "PWD=${PWD}"
           biome format --write **/*.ts
       - name: Tsc
         run: |
           npm install -g typescript
           tsc --version
-          echo "show PWD=${PWD}"
-          echo "tsc"
+          echo "PWD=${PWD}"
           tsc
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
