@@ -8,22 +8,18 @@ use derive_builder::Builder;
 /// Window local options.
 pub struct WindowLocalOptions {
   #[builder(default = defaults::win::WRAP)]
-  /// The 'wrap' option, also known as 'line-wrap', default to `true`.
-  /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   wrap: bool,
 
   #[builder(default = defaults::win::LINE_BREAK)]
-  /// The 'line-break' option, also known as 'word-wrap', default to `false`.
-  /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   line_break: bool,
 
   #[builder(default = defaults::win::SCROLL_OFF)]
-  /// The 'scroll-off' option, default to `0`.
-  /// See: <https://vimhelp.org/options.txt.html#%27scrolloff%27>.
   scroll_off: u16,
 }
 
 impl WindowLocalOptions {
+  /// The 'wrap' option, also known as 'line-wrap', default to `true`.
+  /// See: <https://vimhelp.org/options.txt.html#%27wrap%27>.
   pub fn wrap(&self) -> bool {
     self.wrap
   }
@@ -32,6 +28,8 @@ impl WindowLocalOptions {
     self.wrap = value;
   }
 
+  /// The 'line-break' option, also known as 'word-wrap', default to `false`.
+  /// See: <https://vimhelp.org/options.txt.html#%27linebreak%27>.
   pub fn line_break(&self) -> bool {
     self.line_break
   }
@@ -40,6 +38,8 @@ impl WindowLocalOptions {
     self.line_break = value;
   }
 
+  /// The 'scroll-off' option, default to `0`.
+  /// See: <https://vimhelp.org/options.txt.html#%27scrolloff%27>.
   pub fn scroll_off(&self) -> u16 {
     self.scroll_off
   }
