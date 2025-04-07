@@ -72,7 +72,8 @@ impl LineViewport {
     }
   }
 
-  /// Maps from row index (based on the window) to a row in the buffer line, starts from 0.
+  /// Maps `row_idx` (in the window) => its row-wise viewport.
+  /// The row index starts from 0.
   pub fn rows(&self) -> &BTreeMap<u16, RowViewport> {
     &self.rows
   }
@@ -409,7 +410,7 @@ pub struct Viewport {
   // Start displayed column index (in the buffer), starts from 0.
   start_column_idx: usize,
 
-  // Maps `line_idx` to its row-wise viewports.
+  // Maps `line_idx` => its line-wise viewports.
   lines: BTreeMap<usize, LineViewport>,
 
   // Cursor position.
