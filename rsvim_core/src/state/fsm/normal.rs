@@ -16,14 +16,14 @@ use tracing::trace;
 /// The normal editing mode.
 pub struct NormalStateful {}
 
-unsafe fn _last_visible_char(
-  raw_buffer: NonNull<Buffer>,
-  line_idx: usize,
-  char_idx: usize,
-) -> usize {
+unsafe fn _last_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
+  unsafe { raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1 }
+}
+
+unsafe fn _last_visible_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
   unsafe {
     let bline = raw_buffer.as_ref().get_rope().get_line(line_idx).unwrap();
-    let mut c = char_idx;
+    let mut c = _last_char_on_line(raw_buffer, line_idx);
     while raw_buffer.as_ref().char_width(bline.get_char(c).unwrap()) == 0 {
       c = c.saturating_sub(1);
       if c == 0 {
@@ -192,12 +192,12 @@ impl NormalStateful {
       Command::CursorMoveDown(n) => {
         let expected = cursor_line_idx.saturating_add(n as usize);
         let end_line_idx = viewport.end_line_idx();
-        let upper_bound = end_line_idx.saturating_sub(1);
+        let last_line_idx = end_line_idx.saturating_sub(1);
         trace!(
-          "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},upper_bound:{:?}",
-          cursor_line_idx, expected, end_line_idx, upper_bound
+          "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
+          cursor_line_idx, expected, end_line_idx, last_line_idx
         );
-        std::cmp::min(expected, upper_bound)
+        std::cmp::min(expected, last_line_idx)
       }
       _ => unreachable!(),
     };
@@ -229,10 +229,7 @@ impl NormalStateful {
         .width_before(cursor_line_idx, cursor_char_idx);
       let char_idx = match raw_buffer.as_mut().char_after(line_idx, cursor_col_idx) {
         Some(char_idx) => char_idx,
-        None => {
-          let c = raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1;
-          _last_visible_char(raw_buffer, line_idx, c)
-        }
+        None => _last_visible_char_on_line(raw_buffer, line_idx),
       };
       trace!("cursor_col_idx:{},char_idx:{}", cursor_col_idx, char_idx);
       Some((line_idx, char_idx))
@@ -264,17 +261,7 @@ impl NormalStateful {
         Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n as usize),
         Command::CursorMoveRight(n) => {
           let expected = cursor_char_idx.saturating_add(n as usize);
-          let last_char_idx = {
-            assert!(viewport.lines().contains_key(&cursor_line_idx));
-            let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
-            let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-            let c = last_row_viewport.end_char_idx() - 1;
-            trace!(
-              "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, c:{}",
-              cursor_char_idx, expected, last_row_viewport, c
-            );
-            _last_visible_char(raw_buffer, cursor_line_idx, c)
-          };
+          let last_char_idx = _last_visible_char_on_line(raw_buffer, cursor_line_idx);
           std::cmp::min(expected, last_char_idx)
         }
         _ => unreachable!(),
