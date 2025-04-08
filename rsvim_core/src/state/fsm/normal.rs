@@ -20,10 +20,14 @@ unsafe fn _last_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> us
   unsafe { raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1 }
 }
 
-unsafe fn _last_visible_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
+unsafe fn _last_visible_char_on_line_since(
+  raw_buffer: NonNull<Buffer>,
+  line_idx: usize,
+  char_idx: usize,
+) -> usize {
   unsafe {
     let bline = raw_buffer.as_ref().get_rope().get_line(line_idx).unwrap();
-    let mut c = _last_char_on_line(raw_buffer, line_idx);
+    let mut c = char_idx;
     while raw_buffer.as_ref().char_width(bline.get_char(c).unwrap()) == 0 {
       c = c.saturating_sub(1);
       if c == 0 {
@@ -31,6 +35,13 @@ unsafe fn _last_visible_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usiz
       }
     }
     c
+  }
+}
+
+unsafe fn _last_visible_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
+  unsafe {
+    let c = _last_char_on_line(raw_buffer, line_idx);
+    _last_visible_char_on_line_since(raw_buffer, line_idx, c)
   }
 }
 
@@ -261,7 +272,17 @@ impl NormalStateful {
         Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n as usize),
         Command::CursorMoveRight(n) => {
           let expected = cursor_char_idx.saturating_add(n as usize);
-          let last_char_idx = _last_visible_char_on_line(raw_buffer, cursor_line_idx);
+          let last_char_idx = {
+            assert!(viewport.lines().contains_key(&cursor_line_idx));
+            let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
+            let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+            let last_char_on_row = last_row_viewport.end_char_idx() - 1;
+            trace!(
+              "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
+              cursor_char_idx, expected, last_row_viewport, last_char_on_row
+            );
+            _last_visible_char_on_line_since(raw_buffer, cursor_line_idx, last_char_on_row)
+          };
           std::cmp::min(expected, last_char_idx)
         }
         _ => unreachable!(),
