@@ -293,6 +293,7 @@ impl NormalStateful {
   }
 
   /// Cursor scroll buffer up/down in current window.
+  ///
   /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
   /// buffer contents changed, i.e. moved up/down.
   fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
