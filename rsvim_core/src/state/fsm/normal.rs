@@ -273,7 +273,7 @@ impl NormalStateful {
         Command::CursorMoveRight(n) => {
           let expected = cursor_char_idx.saturating_add(n as usize);
           let last_char_idx = {
-            assert!(viewport.lines().contains_key(&cursor_line_idx));
+            debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
             let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
             let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
             let last_char_on_row = last_row_viewport.end_char_idx() - 1;
@@ -302,14 +302,14 @@ impl NormalStateful {
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
         let viewport = current_window.viewport();
-        let viewport = wlock!(viewport);
+        let mut viewport = wlock!(viewport);
         let buffer = viewport.buffer();
         let buffer = buffer.upgrade().unwrap();
         let mut buffer = wlock!(buffer);
 
         unsafe {
           // Fix multiple mutable references on `buffer`.
-          let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+          let raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
 
           let cursor_scroll_result = match command {
             Command::CursorScrollUp(_n) | Command::CursorScrollDown(_n) => {
@@ -321,7 +321,10 @@ impl NormalStateful {
             _ => unreachable!(),
           };
 
-          if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {}
+          if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {
+            // Sync the viewport
+            viewport.sync_from_top_left(start_line_idx, start_column_idx);
+          }
           // Or, just do nothing, keep the old viewport.
         }
       }
@@ -373,29 +376,46 @@ impl NormalStateful {
     let start_line_idx = viewport.start_line_idx();
     let start_column_idx = viewport.start_column_idx();
     unsafe {
-      let column_idx = match command {
-        Command::CursorScrollLeft(n) => match raw_buffer
-          .as_mut()
-          .char_at(start_line_idx, start_column_idx)
-        {
-          Some(start_char_idx) => {
+      let column_idx = match raw_buffer
+        .as_mut()
+        .char_at(start_line_idx, start_column_idx)
+      {
+        Some(start_char_idx) => match command {
+          Command::CursorScrollLeft(n) => {
             let c = start_char_idx.saturating_sub(n as usize);
             raw_buffer.as_mut().width_before(start_line_idx, c)
           }
-          None => 0_usize,
+          Command::CursorScrollRight(n) => {
+            debug_assert!(viewport.lines().contains_key(&start_line_idx));
+            let line_viewport = viewport.lines().get(&start_line_idx).unwrap();
+            let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+            let end_char_idx = last_row_viewport.end_char_idx();
+            let expected = end_char_idx.saturating_add(n);
+            let bline = raw_buffer
+              .as_ref()
+              .get_rope()
+              .get_line(start_line_idx)
+              .unwrap();
+            let end_c = std::cmp::min(bline.len_chars(), expected);
+            let scrolled_right_columns = raw_buffer
+              .as_mut()
+              .width_before(start_line_idx, end_c)
+              .saturating_sub(
+                raw_buffer
+                  .as_mut()
+                  .width_before(start_line_idx, end_char_idx),
+              );
+            start_column_idx.saturating_add(scrolled_right_columns)
+          }
+          _ => unreachable!(),
         },
-        Command::CursorScrollRight(n) => {
-          let expected = start_line_idx.saturating_add(n as usize);
-          let end_line_idx = viewport.end_line_idx();
-          let last_line_idx = end_line_idx.saturating_sub(1);
-          trace!(
-            "start_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
-            start_line_idx, expected, end_line_idx, last_line_idx
-          );
-          std::cmp::min(expected, last_line_idx)
-        }
-        _ => unreachable!(),
+        None => 0_usize,
       };
+
+      if column_idx == start_column_idx {
+        return None;
+      }
+
       Some((start_line_idx, column_idx))
     }
   }
