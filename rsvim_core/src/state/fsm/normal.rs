@@ -334,14 +334,28 @@ impl NormalStateful {
   fn _cursor_scroll_vertically(
     &self,
     viewport: &Viewport,
-    mut raw_buffer: NonNull<Buffer>,
+    mut _raw_buffer: NonNull<Buffer>,
     command: Command,
   ) -> Option<(usize, usize)> {
-    let cursor_viewport = viewport.cursor();
-    let cursor_line_idx = cursor_viewport.line_idx();
-    let cursor_char_idx = cursor_viewport.char_idx();
+    let start_line_idx = viewport.start_line_idx();
+    let start_column_idx = viewport.start_column_idx();
 
-    None
+    let line_idx = match command {
+      Command::CursorScrollUp(n) => start_line_idx.saturating_sub(n as usize),
+      Command::CursorScrollDown(n) => {
+        let expected = start_line_idx.saturating_add(n as usize);
+        let end_line_idx = viewport.end_line_idx();
+        let last_line_idx = end_line_idx.saturating_sub(1);
+        trace!(
+          "start_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
+          start_line_idx, expected, end_line_idx, last_line_idx
+        );
+        std::cmp::min(expected, last_line_idx)
+      }
+      _ => unreachable!(),
+    };
+
+    Some((line_idx, start_column_idx))
   }
 
   /// Returns the `start_line_idx` and `start_column_idx` for the viewport.
@@ -351,11 +365,35 @@ impl NormalStateful {
     mut raw_buffer: NonNull<Buffer>,
     command: Command,
   ) -> Option<(usize, usize)> {
-    let cursor_viewport = viewport.cursor();
-    let cursor_line_idx = cursor_viewport.line_idx();
-    let cursor_char_idx = cursor_viewport.char_idx();
+    let start_line_idx = viewport.start_line_idx();
+    let start_column_idx = viewport.start_column_idx();
 
-    None
+    unsafe {
+      match raw_buffer
+        .as_mut()
+        .char_at(start_line_idx, start_column_idx)
+      {
+        Some(start_char_idx) => {
+          let start_char_width = raw_buffer.as_mut().width_at(start_line_idx, start_char_idx);
+          let column_idx = match command {
+            Command::CursorScrollLeft(n) => start_line_idx.saturating_sub(n as usize),
+            Command::CursorScrollRight(n) => {
+              let expected = start_line_idx.saturating_add(n as usize);
+              let end_line_idx = viewport.end_line_idx();
+              let last_line_idx = end_line_idx.saturating_sub(1);
+              trace!(
+                "start_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
+                start_line_idx, expected, end_line_idx, last_line_idx
+              );
+              std::cmp::min(expected, last_line_idx)
+            }
+            _ => unreachable!(),
+          };
+          Some((start_line_idx, column_idx))
+        }
+        None => None,
+      }
+    }
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
