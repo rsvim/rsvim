@@ -54,7 +54,7 @@ derive_builder = { workspace = true }
 lru = { workspace = true }
 paste = { workspace = true }
 
-# NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot {
+# NOTE: Javascript dependencies always keep the same with `deno` {
 
 v8 = { workspace = true, default-features = false }
 swc_atoms = { workspace = true }
@@ -81,7 +81,7 @@ swc_visit = { workspace = true }
 # swc_graph_analyzer = { workspace = true }
 # sourcemap = { workspace = true }
 
-# NOTE: For javascript dependencies, we simply keep same with deno and don't use dependabot }
+# NOTE: Javascript dependencies always keep the same with `deno` }
 
 [dev-dependencies]
 tempfile = "3"
