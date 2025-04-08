@@ -127,45 +127,70 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Help running linter/tests for developing rsvim."
     )
-    parser.add_argument(
-        "-c",
-        "--clippy",
-        nargs="?",
-        default=__CLIPPY_NOT_SPECIFIED,
-        metavar="WATCH",
-        help="Run clippy with `RUSTFLAGS=-Dwarnings` once or as a service (watch file changes and run again), by default is only once. Use `w(atch)` to start service.",
+    subparsers = parser.add_subparsers()
+    clippy_subparser = subparsers.add_parser(
+        "clippy",
+        aliases=["c"],
+        help="Run `cargo clippy` with `RUSTFLAGS=-Dwarnings`",
     )
-    parser.add_argument(
-        "-t",
-        "--test",
-        nargs="?",
-        default=__TEST_NOT_SPECIFIED,
-        help="Run [TEST] with `RSVIM_LOG=trace`, by default run all test cases.",
+    clippy_subparser.add_argument(
+        "-w",
+        "--watch",
+        action="store_true",
+        help="Running clippy as a service and watching file changes, by default is `false`",
     )
-    parser.add_argument(
-        "-l", "--list-test", action="store_true", help="List all test cases."
+
+    test_subparser = subparsers.add_parser(
+        "test",
+        aliases=["t"],
+        help="Run `cargo test` with `RSVIM_LOG=trace`, by default runs all test cases",
     )
-    parser.add_argument(
-        "-b",
-        "--build",
-        nargs="?",
-        default=__BUILD_NOT_SPECIFIED,
-        metavar="TARGET",
-        help="Build debug/release [TARGET], by default is debug. Use `r(elease)` to build release.",
+    test_subparser.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        help="List all test cases instead of running them",
     )
-    parser.add_argument(
-        "-d",
-        "--doc",
-        nargs="?",
-        default=__DOC_NOT_SPECIFIED,
-        metavar="WATCH",
-        help="Start cargo doc service on `http://localhost:3000/rsvim`, build document for once or as a service (watch file changes and build again), by default is only once. Use `w(atch)` to start service.",
+    test_subparser.add_argument(
+        "name",
+        nargs="*",
+        default=[],
+        help="Multiple test names that need to run, by default is empty (runs all test cases)",
     )
-    parser.add_argument(
-        "-r",
-        "--release",
+
+    build_subparser = subparsers.add_parser(
+        "build",
+        aliases=["b"],
+        help="Build debug/release target with `sccache`, by default is debug",
+    )
+    build_subparser.add_argument(
+        "-r", "--release", action="store_true", help="Build release target"
+    )
+
+    doc_subparser = subparsers.add_parser(
+        "doc",
+        help="Start `cargo doc` service on `http://localhost:3000/rsvim`",
+    )
+    doc_subparser.add_argument(
+        "-w",
+        "--watch",
+        action="store_true",
+        help="Running cargo doc as a service and watching file changes, by default is `false`",
+    )
+
+    release_subparser = subparsers.add_parser(
+        "release", aliases=["r"], help="Run `cargo release` to publish crates"
+    )
+    release_subparser.add_argument(
+        "level",
         choices=["alpha", "beta", "rc", "major", "minor", "patch"],
-        help="Release cargo crates with [LEVEL].",
+        help="Release [LEVEL]",
+    )
+    release_subparser.add_argument(
+        "-e",
+        "--execute",
+        action="store_true",
+        help="Execute `cargo release`",
     )
     parser.add_argument(
         "-e",
