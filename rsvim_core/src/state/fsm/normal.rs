@@ -330,8 +330,9 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  /// Returns the `start_line_idx` and `start_column_idx` for the viewport.
-  fn _cursor_scroll_vertically(
+  /// Returns the `start_line_idx`/`start_column_idx` (for viewport) and `line_idx`/`char_idx` (for
+  /// cursor viewport).
+  unsafe fn _cursor_scroll_vertically(
     &self,
     viewport: &Viewport,
     mut _raw_buffer: NonNull<Buffer>,
@@ -355,11 +356,15 @@ impl NormalStateful {
       _ => unreachable!(),
     };
 
+    if line_idx == start_line_idx {
+      return None;
+    }
+
     Some((line_idx, start_column_idx))
   }
 
   /// Returns the `start_line_idx` and `start_column_idx` for the viewport.
-  fn _cursor_scroll_horizontally(
+  unsafe fn _cursor_scroll_horizontally(
     &self,
     viewport: &Viewport,
     mut raw_buffer: NonNull<Buffer>,
@@ -367,32 +372,31 @@ impl NormalStateful {
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
     let start_column_idx = viewport.start_column_idx();
-
     unsafe {
-      match raw_buffer
-        .as_mut()
-        .char_at(start_line_idx, start_column_idx)
-      {
-        Some(start_char_idx) => {
-          let start_char_width = raw_buffer.as_mut().width_at(start_line_idx, start_char_idx);
-          let column_idx = match command {
-            Command::CursorScrollLeft(n) => start_line_idx.saturating_sub(n as usize),
-            Command::CursorScrollRight(n) => {
-              let expected = start_line_idx.saturating_add(n as usize);
-              let end_line_idx = viewport.end_line_idx();
-              let last_line_idx = end_line_idx.saturating_sub(1);
-              trace!(
-                "start_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
-                start_line_idx, expected, end_line_idx, last_line_idx
-              );
-              std::cmp::min(expected, last_line_idx)
-            }
-            _ => unreachable!(),
-          };
-          Some((start_line_idx, column_idx))
+      let column_idx = match command {
+        Command::CursorScrollLeft(n) => match raw_buffer
+          .as_mut()
+          .char_at(start_line_idx, start_column_idx)
+        {
+          Some(start_char_idx) => {
+            let c = start_char_idx.saturating_sub(n as usize);
+            raw_buffer.as_mut().width_before(start_line_idx, c)
+          }
+          None => 0_usize,
+        },
+        Command::CursorScrollRight(n) => {
+          let expected = start_line_idx.saturating_add(n as usize);
+          let end_line_idx = viewport.end_line_idx();
+          let last_line_idx = end_line_idx.saturating_sub(1);
+          trace!(
+            "start_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
+            start_line_idx, expected, end_line_idx, last_line_idx
+          );
+          std::cmp::min(expected, last_line_idx)
         }
-        None => None,
-      }
+        _ => unreachable!(),
+      };
+      Some((start_line_idx, column_idx))
     }
   }
 
@@ -1192,7 +1196,7 @@ mod tests {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveRight(lines[0].len() as u16);
+    let command = Command::CursorMoveRight(lines[0].len());
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
