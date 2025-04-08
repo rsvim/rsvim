@@ -99,7 +99,7 @@ impl Stateful for NormalStateful {
 impl NormalStateful {
   /// Cursor move up/down/left/right in current window, or scroll buffer up/down if it reaches the
   /// top/bottom of the window and the buffer has more contents.
-  fn cursor_move_or_scroll(
+  fn _cursor_move_or_scroll(
     &self,
     _data_access: &StatefulDataAccess,
     _command: Command,
@@ -199,9 +199,9 @@ impl NormalStateful {
     let cursor_char_idx = cursor_viewport.char_idx();
 
     let line_idx = match command {
-      Command::CursorMoveUp(n) => cursor_line_idx.saturating_sub(n as usize),
+      Command::CursorMoveUp(n) => cursor_line_idx.saturating_sub(n),
       Command::CursorMoveDown(n) => {
-        let expected = cursor_line_idx.saturating_add(n as usize);
+        let expected = cursor_line_idx.saturating_add(n);
         let end_line_idx = viewport.end_line_idx();
         let last_line_idx = end_line_idx.saturating_sub(1);
         trace!(
@@ -269,9 +269,9 @@ impl NormalStateful {
       }
 
       let char_idx = match command {
-        Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n as usize),
+        Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n),
         Command::CursorMoveRight(n) => {
-          let expected = cursor_char_idx.saturating_add(n as usize);
+          let expected = cursor_char_idx.saturating_add(n);
           let last_char_idx = {
             debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
             let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
@@ -296,7 +296,7 @@ impl NormalStateful {
   ///
   /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
   /// buffer contents changed, i.e. moved up/down.
-  fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
 
@@ -346,9 +346,9 @@ impl NormalStateful {
     let start_column_idx = viewport.start_column_idx();
 
     let line_idx = match command {
-      Command::CursorScrollUp(n) => start_line_idx.saturating_sub(n as usize),
+      Command::CursorScrollUp(n) => start_line_idx.saturating_sub(n),
       Command::CursorScrollDown(n) => {
-        let expected = start_line_idx.saturating_add(n as usize);
+        let expected = start_line_idx.saturating_add(n);
         let end_line_idx = viewport.end_line_idx();
         let last_line_idx = end_line_idx.saturating_sub(1);
         trace!(
@@ -383,7 +383,7 @@ impl NormalStateful {
       {
         Some(start_char_idx) => match command {
           Command::CursorScrollLeft(n) => {
-            let c = start_char_idx.saturating_sub(n as usize);
+            let c = start_char_idx.saturating_sub(n);
             raw_buffer.as_mut().width_before(start_line_idx, c)
           }
           Command::CursorScrollRight(n) => {
