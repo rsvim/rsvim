@@ -296,7 +296,7 @@ impl NormalStateful {
   ///
   /// NOTE: The cursor actually stays still in the window, its "position" is not changed. The
   /// buffer contents changed, i.e. moved up/down.
-  fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = wlock!(tree);
 
@@ -1270,7 +1270,7 @@ mod tests {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveUp(1));
+    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorScrollUp(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
