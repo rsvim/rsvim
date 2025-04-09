@@ -45,6 +45,28 @@ unsafe fn last_visible_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize
   }
 }
 
+unsafe fn adjust_cursor_char_idx_on_vertical_motion(
+  mut raw_buffer: NonNull<Buffer>,
+  cursor_line_idx: usize,
+  cursor_char_idx: usize,
+  line_idx: usize,
+) -> usize {
+  unsafe {
+    let cursor_col_idx = raw_buffer
+      .as_mut()
+      .width_before(cursor_line_idx, cursor_char_idx);
+    let char_idx = match raw_buffer.as_mut().char_after(line_idx, cursor_col_idx) {
+      Some(char_idx) => char_idx,
+      None => last_visible_char_on_line(raw_buffer, line_idx),
+    };
+    trace!(
+      "cursor_line_idx:{},cursor_col_idx:{},line_idx:{},char_idx:{}",
+      cursor_line_idx, cursor_col_idx, line_idx, char_idx
+    );
+    char_idx
+  }
+}
+
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
@@ -190,7 +212,7 @@ impl NormalStateful {
   unsafe fn _cursor_move_vertically(
     &self,
     viewport: &Viewport,
-    mut raw_buffer: NonNull<Buffer>,
+    raw_buffer: NonNull<Buffer>,
     command: Command,
   ) -> Option<(usize, usize)> {
     trace!("command:{:?}", command);
@@ -235,14 +257,12 @@ impl NormalStateful {
           return None;
         }
       }
-      let cursor_col_idx = raw_buffer
-        .as_mut()
-        .width_before(cursor_line_idx, cursor_char_idx);
-      let char_idx = match raw_buffer.as_mut().char_after(line_idx, cursor_col_idx) {
-        Some(char_idx) => char_idx,
-        None => last_visible_char_on_line(raw_buffer, line_idx),
-      };
-      trace!("cursor_col_idx:{},char_idx:{}", cursor_col_idx, char_idx);
+      let char_idx = adjust_cursor_char_idx_on_vertical_motion(
+        raw_buffer,
+        cursor_line_idx,
+        cursor_char_idx,
+        line_idx,
+      );
       Some((line_idx, char_idx))
     }
   }
@@ -334,8 +354,7 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  /// Returns the `start_line_idx`/`start_column_idx` (for viewport) and `line_idx`/`char_idx` (for
-  /// cursor viewport).
+  /// Returns the `start_line_idx`/`start_column_idx` for viewport.
   unsafe fn _cursor_scroll_vertically(
     &self,
     viewport: &Viewport,
@@ -367,7 +386,7 @@ impl NormalStateful {
     Some((line_idx, start_column_idx))
   }
 
-  /// Returns the `start_line_idx` and `start_column_idx` for the viewport.
+  /// Returns the same as [`Self::_cursor_scroll_vertically`].
   unsafe fn _cursor_scroll_horizontally(
     &self,
     viewport: &Viewport,
@@ -376,8 +395,9 @@ impl NormalStateful {
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
     let start_column_idx = viewport.start_column_idx();
+
     unsafe {
-      let column_idx = match raw_buffer
+      let (start_col) = match raw_buffer
         .as_mut()
         .char_at(start_line_idx, start_column_idx)
       {
@@ -413,11 +433,11 @@ impl NormalStateful {
         None => 0_usize,
       };
 
-      if column_idx == start_column_idx {
+      if start_col == start_column_idx {
         return None;
       }
 
-      Some((start_line_idx, column_idx))
+      Some((start_line_idx, start_col))
     }
   }
 
@@ -756,7 +776,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_horizontally1() {
+  fn cursor_move_horizontally_nowrap1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -795,7 +815,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_horizontally2() {
+  fn cursor_move_horizontally_nowrap2() {
     test_log_init();
 
     let lines = vec![
@@ -842,7 +862,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_horizontally3() {
+  fn cursor_move_horizontally_nowrap3() {
     test_log_init();
 
     let lines = vec![
@@ -890,7 +910,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_horizontally4() {
+  fn cursor_move_horizontally_nowrap4() {
     test_log_init();
 
     let lines = vec![
@@ -949,7 +969,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_horizontally5() {
+  fn cursor_move_horizontally_nowrap5() {
     test_log_init();
 
     let lines = vec![
@@ -1010,7 +1030,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move1() {
+  fn cursor_move_nowrap1() {
     test_log_init();
 
     let lines = vec![
@@ -1094,7 +1114,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move2() {
+  fn cursor_move_nowrap2() {
     test_log_init();
 
     let lines = vec![
@@ -1179,7 +1199,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move3() {
+  fn cursor_move_wrap1() {
     test_log_init();
 
     let lines = vec![
@@ -1196,7 +1216,10 @@ mod tests {
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
-      WindowLocalOptionsBuilder::default().build().unwrap(),
+      WindowLocalOptionsBuilder::default()
+        .wrap(true)
+        .build()
+        .unwrap(),
       bufs.clone(),
     );
     let state = State::to_arc(State::default());
@@ -1246,7 +1269,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_scroll_vertically1() {
+  fn cursor_scroll_vertically_nowrap1() {
     test_log_init();
 
     let (tree, state, bufs) = make_tree(
@@ -1280,7 +1303,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_scroll_vertically2() {
+  fn cursor_scroll_vertically_nowrap2() {
     test_log_init();
 
     let lines = vec![
@@ -1313,7 +1336,53 @@ mod tests {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorMoveUp(1));
+    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorMoveDown(1));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    let actual_viewport = get_viewport(tree);
+    assert_eq!(actual_viewport.cursor().line_idx(), 0);
+    assert_eq!(actual_viewport.cursor().char_idx(), 0);
+  }
+
+  #[test]
+  fn cursor_scroll_vertically_nowrap3() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "  3. If a single char needs multiple cells to display on the window, and it happens the char is at the end of the row, there can be multiple cases:\n",
+      "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
+      "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
+    ];
+    let (tree, state, bufs) = make_tree(
+      U16Size::new(10, 7),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_viewport = get_viewport(tree.clone());
+    assert_eq!(prev_viewport.cursor().line_idx(), 0);
+    assert_eq!(prev_viewport.cursor().char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorMoveDown(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
