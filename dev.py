@@ -133,7 +133,7 @@ if __name__ == "__main__":
         "-w",
         "--watch",
         action="store_true",
-        help="Running clippy as a service and watching file changes, by default is `false`",
+        help="Running clippy as a service and watching file changes, by default is false",
     )
     clippy_subparser.add_argument(
         "--recache",
@@ -188,7 +188,7 @@ if __name__ == "__main__":
         "-w",
         "--watch",
         action="store_true",
-        help="Running cargo doc as a service and watching file changes, by default is `false`",
+        help="Running cargo doc as a service and watching file changes, by default is false",
     )
 
     release_subparser = subparsers.add_parser(
