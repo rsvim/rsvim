@@ -397,7 +397,7 @@ impl NormalStateful {
     let start_column_idx = viewport.start_column_idx();
 
     unsafe {
-      let (start_col) = match raw_buffer
+      let start_col = match raw_buffer
         .as_mut()
         .char_at(start_line_idx, start_column_idx)
       {
@@ -1417,9 +1417,16 @@ mod tests {
       KeyEventKind::Press,
     );
 
-    let prev_viewport = get_viewport(tree.clone());
-    assert_eq!(prev_viewport.cursor().line_idx(), 0);
-    assert_eq!(prev_viewport.cursor().char_idx(), 0);
+    // Before cursor scroll
+    {
+      let viewport = get_viewport(tree.clone());
+      assert_eq!(viewport.cursor().line_idx(), 0);
+      assert_eq!(viewport.cursor().char_idx(), 0);
+      let expect = vec![""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+
+      assert_viewport_scroll(&viewport, &expect, 0, 1, &expect_fills, &expect_fills);
+    }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
@@ -1427,9 +1434,17 @@ mod tests {
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
-    let actual_viewport = get_viewport(tree);
-    assert_eq!(actual_viewport.cursor().line_idx(), 0);
-    assert_eq!(actual_viewport.cursor().char_idx(), 0);
+
+    // After cursor scroll
+    {
+      let viewport = get_viewport(tree);
+      assert_eq!(viewport.cursor().line_idx(), 0);
+      assert_eq!(viewport.cursor().char_idx(), 0);
+      let expect = vec![""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+
+      assert_viewport_scroll(&viewport, &expect, 0, 1, &expect_fills, &expect_fills);
+    }
   }
 
   #[test]
