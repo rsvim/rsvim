@@ -8,9 +8,7 @@ import os
 import pathlib
 import platform
 
-__TEST_NOT_SPECIFIED = "__TEST_NOT_SPECIFIED"
 __BUILD_NOT_SPECIFIED = "__BUILD_NOT_SPECIFIED"
-__CLIPPY_NOT_SPECIFIED = "__CLIPPY_NOT_SPECIFIED"
 __DOC_NOT_SPECIFIED = "__DOC_NOT_SPECIFIED"
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
@@ -34,12 +32,12 @@ def set_sccache(command, recache):
     return command.strip()
 
 
-def clippy(mode, recache):
+def clippy(watch, recache):
     command = set_env("", "RUSTFLAGS", "-Dwarnings")
     command = set_sccache(command, recache)
 
-    if isinstance(mode, str) and mode.lower().startswith("w"):
-        print("Run 'clippy' as service")
+    if watch:
+        print("Run 'clippy' as a service and watching file changes")
         command = f"{command} bacon -j clippy-all --headless --all-features"
     else:
         print("Run 'clippy' only once")
@@ -51,8 +49,8 @@ def clippy(mode, recache):
 
 
 def test(name, recache):
-    if name is None:
-        name = "--all"
+    if len(name) == 0:
+        name = ["--all"]
         print("Run 'test' for all cases")
     else:
         print(f"Run 'test' for '{name}'")
@@ -60,7 +58,7 @@ def test(name, recache):
     command = set_env("", "RSVIM_LOG", "trace")
     command = set_sccache(command, recache)
 
-    command = f"{command} cargo nextest run --no-capture {name}"
+    command = f"{command} cargo nextest run --no-capture {" ".join([n for n in name])}"
 
     command = command.strip()
     print(command)
@@ -127,7 +125,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Help running linter/tests for developing rsvim."
     )
-    subparsers = parser.add_subparsers()
+    subparsers = parser.add_subparsers(dest="subcommand")
+
     clippy_subparser = subparsers.add_parser(
         "clippy",
         aliases=["c"],
@@ -139,6 +138,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Running clippy as a service and watching file changes, by default is `false`",
     )
+    clippy_subparser.add_argument(
+        "--recache",
+        action="store_true",
+        help="Rebuild cache in `sccache`",
+    )
 
     test_subparser = subparsers.add_parser(
         "test",
@@ -149,6 +153,7 @@ if __name__ == "__main__":
         "-l",
         "--list",
         action="store_true",
+        dest="list_test",
         help="List all test cases instead of running them",
     )
     test_subparser.add_argument(
@@ -156,6 +161,11 @@ if __name__ == "__main__":
         nargs="*",
         default=[],
         help="Multiple test names that need to run, by default is empty (runs all test cases)",
+    )
+    test_subparser.add_argument(
+        "--recache",
+        action="store_true",
+        help="Rebuild cache in `sccache`",
     )
 
     build_subparser = subparsers.add_parser(
@@ -166,9 +176,15 @@ if __name__ == "__main__":
     build_subparser.add_argument(
         "-r", "--release", action="store_true", help="Build release target"
     )
+    build_subparser.add_argument(
+        "--recache",
+        action="store_true",
+        help="Rebuild cache in `sccache`",
+    )
 
     doc_subparser = subparsers.add_parser(
         "doc",
+        aliases=["d"],
         help="Start `cargo doc` service on `http://localhost:3000/rsvim`",
     )
     doc_subparser.add_argument(
@@ -179,7 +195,9 @@ if __name__ == "__main__":
     )
 
     release_subparser = subparsers.add_parser(
-        "release", aliases=["r"], help="Run `cargo release` to publish crates"
+        "release",
+        aliases=["r"],
+        help="Run `cargo release` to publish crates",
     )
     release_subparser.add_argument(
         "level",
@@ -190,29 +208,19 @@ if __name__ == "__main__":
         "-e",
         "--execute",
         action="store_true",
-        help="Execute `cargo release`",
-    )
-    parser.add_argument(
-        "-e",
-        "--execute",
-        action="store_true",
-        help="Release cargo crates with additional `--execute --no-verify` option.",
-    )
-    parser.add_argument(
-        "--recache",
-        action="store_true",
-        help="Rebuild cache for `sccache`.",
+        help="Execute `cargo release` with `--no-verify`",
     )
 
     parser = parser.parse_args()
-    # print(parser)
+    print(parser)
 
-    if parser.clippy is None or parser.clippy != __CLIPPY_NOT_SPECIFIED:
-        clippy(parser.clippy, parser.recache)
-    elif parser.test is None or parser.test != __TEST_NOT_SPECIFIED:
-        test(parser.test, parser.recache)
-    elif parser.list_test:
-        list_test(parser.recache)
+    if parser.subcommand == "clippy" or parser.subcommand == "c":
+        clippy(parser.watch, parser.recache)
+    elif parser.subcommand == "test" or parser.subcommand == "t":
+        if parser.list_test:
+            list_test(parser.recache)
+        else:
+            test(parser.name, parser.recache)
     elif parser.build is None or parser.build != __BUILD_NOT_SPECIFIED:
         build(parser.build, parser.recache)
     elif parser.doc is None or parser.doc != __DOC_NOT_SPECIFIED:
