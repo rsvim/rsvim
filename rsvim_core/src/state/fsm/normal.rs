@@ -472,7 +472,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_vertically1() {
+  fn cursor_move_vertically_nowrap1() {
     test_log_init();
 
     let (tree, state, bufs) = make_tree(
@@ -506,7 +506,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_vertically2() {
+  fn cursor_move_vertically_nowrap2() {
     test_log_init();
 
     let lines = vec![
@@ -549,7 +549,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_vertically3() {
+  fn cursor_move_vertically_nowrap3() {
     test_log_init();
 
     let lines = vec![
@@ -605,7 +605,7 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_vertically4() {
+  fn cursor_move_vertically_nowrap4() {
     test_log_init();
 
     let lines = vec![
@@ -661,7 +661,46 @@ mod tests {
   }
 
   #[test]
-  fn cursor_move_vertically5() {
+  fn cursor_move_vertically_nowrap5() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 10);
+    let lines = vec![];
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let bufs = make_buffers_manager(buf_opts, vec![buf]);
+    let tree = make_tree_with_buffers(
+      terminal_size,
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      bufs.clone(),
+    );
+    let state = State::to_arc(State::default());
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('j'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_viewport = get_viewport(tree.clone());
+    assert_eq!(prev_viewport.cursor().line_idx(), 0);
+    assert_eq!(prev_viewport.cursor().char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveDown(1));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    let actual_viewport = get_viewport(tree);
+    assert_eq!(actual_viewport.cursor().line_idx(), 0);
+    assert_eq!(actual_viewport.cursor().char_idx(), 0);
+  }
+
+  #[test]
+  fn cursor_move_vertically_wrap1() {
     test_log_init();
 
     let lines = vec![
@@ -714,45 +753,6 @@ mod tests {
     let viewport2 = get_viewport(tree);
     assert_eq!(viewport2.cursor().line_idx(), 1);
     assert_eq!(viewport2.cursor().char_idx(), 0);
-  }
-
-  #[test]
-  fn cursor_move_vertically6() {
-    test_log_init();
-
-    let terminal_size = U16Size::new(10, 10);
-    let lines = vec![];
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let tree = make_tree_with_buffers(
-      terminal_size,
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
-      bufs.clone(),
-    );
-    let state = State::to_arc(State::default());
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('j'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
-    );
-
-    let prev_viewport = get_viewport(tree.clone());
-    assert_eq!(prev_viewport.cursor().line_idx(), 0);
-    assert_eq!(prev_viewport.cursor().char_idx(), 0);
-
-    let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveDown(1));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
-    let actual_viewport = get_viewport(tree);
-    assert_eq!(actual_viewport.cursor().line_idx(), 0);
-    assert_eq!(actual_viewport.cursor().char_idx(), 0);
   }
 
   #[test]
@@ -1256,6 +1256,49 @@ mod tests {
         .build()
         .unwrap(),
       vec![],
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_viewport = get_viewport(tree.clone());
+    assert_eq!(prev_viewport.cursor().line_idx(), 0);
+    assert_eq!(prev_viewport.cursor().char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorMoveUp(1));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    let actual_viewport = get_viewport(tree);
+    assert_eq!(actual_viewport.cursor().line_idx(), 0);
+    assert_eq!(actual_viewport.cursor().char_idx(), 0);
+  }
+
+  #[test]
+  fn cursor_scroll_vertically2() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let (tree, state, bufs) = make_tree(
+      U16Size::new(10, 10),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      lines,
     );
 
     let key_event = KeyEvent::new_with_kind(
