@@ -450,7 +450,7 @@ impl NormalStateful {
 mod tests {
   use super::*;
 
-  use crate::buf::{BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
   use crate::prelude::*;
   use crate::rlock;
   use crate::state::{State, StateArc};
@@ -460,8 +460,9 @@ mod tests {
   use crate::ui::tree::TreeArc;
   use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
 
-  use crossterm::event::Event;
-  use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
 
   fn make_tree(
     terminal_size: U16Size,
@@ -1268,6 +1269,135 @@ mod tests {
     assert_eq!(actual_viewport.cursor().char_idx(), 18);
   }
 
+  #[allow(clippy::too_many_arguments)]
+  fn assert_viewport_scroll(
+    actual: &Viewport,
+    expect: &Vec<&str>,
+    expect_start_line: usize,
+    expect_end_line: usize,
+    expect_start_fills: &BTreeMap<usize, usize>,
+    expect_end_fills: &BTreeMap<usize, usize>,
+  ) {
+    info!(
+      "actual start_line/end_line:{:?}/{:?}",
+      actual.start_line_idx(),
+      actual.end_line_idx()
+    );
+    info!(
+      "expect start_line/end_line:{:?}/{:?}",
+      expect_start_line, expect_end_line
+    );
+    for (k, v) in actual.lines().iter() {
+      info!("actual line[{:?}]: {:?}", k, v);
+    }
+    for (i, e) in expect.iter().enumerate() {
+      info!("expect line[{}]:{:?}", i, e);
+    }
+    assert_eq!(expect_start_fills.len(), expect_end_fills.len());
+    for (k, start_v) in expect_start_fills.iter() {
+      let end_v = expect_end_fills.get(&k).unwrap();
+      info!(
+        "expect start_fills/end_fills line[{}]:{:?}/{:?}",
+        k, start_v, end_v
+      );
+    }
+
+    assert_eq!(actual.start_line_idx(), expect_start_line);
+    assert_eq!(actual.end_line_idx(), expect_end_line);
+    if actual.lines().is_empty() {
+      assert!(actual.end_line_idx() <= actual.start_line_idx());
+    } else {
+      let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
+      let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
+      assert_eq!(*first_line_idx, actual.start_line_idx());
+      assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
+    }
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      actual.lines().len()
+    );
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      expect_start_fills.len()
+    );
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      expect_end_fills.len()
+    );
+
+    let buffer = actual.buffer().upgrade().unwrap();
+    let buffer = rlock!(buffer);
+    let buflines = buffer
+      .get_rope()
+      .get_lines_at(actual.start_line_idx())
+      .unwrap();
+    let total_lines = expect_end_line - expect_start_line;
+
+    for (l, line) in buflines.enumerate() {
+      if l >= total_lines {
+        break;
+      }
+      let actual_line_idx = l + expect_start_line;
+      let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
+
+      info!(
+        "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
+        l, actual_line_idx, line_viewport
+      );
+      info!(
+        "start_filled_cols expect:{:?}, actual:{}",
+        expect_start_fills.get(&actual_line_idx),
+        line_viewport.start_filled_cols()
+      );
+      assert_eq!(
+        line_viewport.start_filled_cols(),
+        *expect_start_fills.get(&actual_line_idx).unwrap()
+      );
+      info!(
+        "end_filled_cols expect:{:?}, actual:{}",
+        expect_end_fills.get(&actual_line_idx),
+        line_viewport.end_filled_cols()
+      );
+      assert_eq!(
+        line_viewport.end_filled_cols(),
+        *expect_end_fills.get(&actual_line_idx).unwrap()
+      );
+
+      let rows = &line_viewport.rows();
+      for (r, row) in rows.iter() {
+        info!("row-index-{:?}, row:{:?}", r, row);
+
+        if r > rows.first_key_value().unwrap().0 {
+          let prev_r = r - 1;
+          let prev_row = rows.get(&prev_r).unwrap();
+          info!(
+            "row-{:?}, current[{}]:{:?}, previous[{}]:{:?}",
+            r, r, row, prev_r, prev_row
+          );
+        }
+        if r < rows.last_key_value().unwrap().0 {
+          let next_r = r + 1;
+          let next_row = rows.get(&next_r).unwrap();
+          info!(
+            "row-{:?}, current[{}]:{:?}, next[{}]:{:?}",
+            r, r, row, next_r, next_row
+          );
+        }
+
+        let mut payload = String::new();
+        for c_idx in row.start_char_idx()..row.end_char_idx() {
+          let c = line.get_char(c_idx).unwrap();
+          payload.push(c);
+        }
+        info!(
+          "row-{:?}, payload actual:{:?}, expect:{:?}",
+          r, payload, expect[*r as usize]
+        );
+        assert_eq!(payload, expect[*r as usize]);
+      }
+    }
+  }
+
   #[test]
   fn cursor_scroll_vertically_nowrap1() {
     test_log_init();
@@ -1376,9 +1506,34 @@ mod tests {
       KeyEventKind::Press,
     );
 
-    let prev_viewport = get_viewport(tree.clone());
-    assert_eq!(prev_viewport.cursor().line_idx(), 0);
-    assert_eq!(prev_viewport.cursor().char_idx(), 0);
+    // Before cursor scroll
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+
+      assert_viewport_scroll(&viewport, &expect, 0, 8, &expect_fills, &expect_fills);
+    }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
@@ -1386,8 +1541,34 @@ mod tests {
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
-    let actual_viewport = get_viewport(tree);
-    assert_eq!(actual_viewport.cursor().line_idx(), 0);
-    assert_eq!(actual_viewport.cursor().char_idx(), 0);
+
+    // After cursor scroll
+    {
+      let viewport = get_viewport(tree);
+      let expect = vec![
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "  3. If a ",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+        (8, 0),
+      ]
+      .into_iter()
+      .collect();
+
+      assert_viewport_scroll(&viewport, &expect, 1, 9, &expect_fills, &expect_fills);
+    }
   }
 }
