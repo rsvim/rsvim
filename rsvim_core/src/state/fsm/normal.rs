@@ -324,30 +324,33 @@ impl NormalStateful {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
         let viewport = current_window.viewport();
         let mut viewport = wlock!(viewport);
-        let buffer = viewport.buffer();
-        let buffer = buffer.upgrade().unwrap();
-        let mut buffer = wlock!(buffer);
 
-        unsafe {
-          // Fix multiple mutable references on `buffer`.
-          let raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+        let cursor_scroll_result = {
+          let buffer = viewport.buffer();
+          let buffer = buffer.upgrade().unwrap();
+          let mut buffer = wlock!(buffer);
 
-          let cursor_scroll_result = match command {
-            Command::CursorMoveUp(_n) | Command::CursorMoveDown(_n) => {
-              self._cursor_scroll_vertically(&viewport, raw_buffer, command)
+          unsafe {
+            // Fix multiple mutable references on `buffer`.
+            let raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+
+            match command {
+              Command::CursorMoveUp(_n) | Command::CursorMoveDown(_n) => {
+                self._cursor_scroll_vertically(&viewport, raw_buffer, command)
+              }
+              Command::CursorMoveLeft(_n) | Command::CursorMoveRight(_n) => {
+                self._cursor_scroll_horizontally(&viewport, raw_buffer, command)
+              }
+              _ => unreachable!(),
             }
-            Command::CursorMoveLeft(_n) | Command::CursorMoveRight(_n) => {
-              self._cursor_scroll_horizontally(&viewport, raw_buffer, command)
-            }
-            _ => unreachable!(),
-          };
-
-          if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {
-            // Sync the viewport
-            viewport.sync_from_top_left(start_line_idx, start_column_idx);
           }
-          // Or, just do nothing, keep the old viewport.
+        };
+
+        if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {
+          // Sync the viewport
+          viewport.sync_from_top_left(start_line_idx, start_column_idx);
         }
+        // Or, just do nothing, keep the old viewport.
       }
     }
 
@@ -450,7 +453,7 @@ impl NormalStateful {
 mod tests {
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::buf::{BufferLocalOptionsBuilder, BuffersManagerArc};
   use crate::prelude::*;
   use crate::rlock;
   use crate::state::{State, StateArc};
@@ -1477,6 +1480,7 @@ mod tests {
 
     // Before cursor scroll
     {
+      info!("before cursor scroll");
       let viewport = get_viewport(tree.clone());
       assert_eq!(viewport.cursor().line_idx(), 0);
       assert_eq!(viewport.cursor().char_idx(), 0);
@@ -1490,11 +1494,19 @@ mod tests {
         "     * The",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-          .into_iter()
-          .collect();
-      assert_viewport_scroll(&viewport, &expect, 0, 7, &expect_fills, &expect_fills);
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport_scroll(&viewport, &expect, 0, 8, &expect_fills, &expect_fills);
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
@@ -1506,6 +1518,7 @@ mod tests {
 
     // After cursor scroll
     {
+      info!("after cursor scroll");
       let viewport = get_viewport(tree.clone());
       assert_eq!(viewport.cursor().line_idx(), 0);
       assert_eq!(viewport.cursor().char_idx(), 0);
@@ -1519,11 +1532,19 @@ mod tests {
         "     * The",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-          .into_iter()
-          .collect();
-      assert_viewport_scroll(&viewport, &expect, 0, 7, &expect_fills, &expect_fills);
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport_scroll(&viewport, &expect, 0, 8, &expect_fills, &expect_fills);
     }
   }
 
