@@ -8,8 +8,6 @@ import os
 import pathlib
 import platform
 
-__DOC_NOT_SPECIFIED = "__DOC_NOT_SPECIFIED"
-
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
 )
@@ -103,17 +101,17 @@ def doc(watch):
     os.system(command)
 
 
-def release(execute, level):
+def release(level, execute):
     cwd_path = pathlib.Path.cwd()
     git_root_path = cwd_path / ".git"
     assert git_root_path.is_dir(), "The $CWD/$PWD must be git repo root!"
 
     command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
     if execute:
-        print(f"Run 'release' with '--execute' (no dry run), in level: {level}")
+        print(f"Run 'release' with '--execute' (no dry run), level: {level}")
         command = f"{command} --execute --no-verify"
     else:
-        print(f"Run 'release' in dry run, in level: {level}")
+        print(f"Run 'release' in dry run, level: {level}")
 
     command = command.strip()
     print(command)
@@ -224,7 +222,7 @@ if __name__ == "__main__":
         build(parser.release, parser.recache)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
         doc(parser.watch)
-    elif parser.release:
-        release(parser.execute, parser.release)
+    elif parser.subcommand == "release" or parser.subcommand == "r":
+        release(parser.level, parser.execute)
     else:
         print("Error: missing arguments, use -h/--help for more details.")
