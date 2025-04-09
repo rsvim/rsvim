@@ -58,7 +58,8 @@ def test(name, recache):
     command = set_env("", "RSVIM_LOG", "trace")
     command = set_sccache(command, recache)
 
-    command = f"{command} cargo nextest run --no-capture {" ".join([n for n in name])}"
+    names = " ".join(list(dict.fromkeys(name)))
+    command = f"{command} cargo nextest run --no-capture {names}"
 
     command = command.strip()
     print(command)
