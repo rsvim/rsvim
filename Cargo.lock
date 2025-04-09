@@ -1845,6 +1845,7 @@ dependencies = [
  "path-absolutize",
  "regex",
  "ropey",
+ "sourcemap",
  "swc_atoms",
  "swc_common",
  "swc_config",

@@ -87,12 +87,12 @@ swc_eq_ignore_macros = "=1.0.0"
 swc_macros_common = "=1.0.0"
 swc_visit = "=2.0.0"
 swc_visit_macros = "=0.5.13"
+sourcemap = "9.0.0"
 
 # swc_ecma_transforms_optimization = "=11.0.0"
 # swc_ecma_loader = "=8.0.0"
 # swc_bundler = "=11.0.0"
 # swc_graph_analyzer = "=8.0.0"
-# sourcemap = "9.0.0"
 
 # NOTE: Javascript dependencies always keep the same with `deno` }
 
