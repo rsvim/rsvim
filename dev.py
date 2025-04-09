@@ -8,7 +8,6 @@ import os
 import pathlib
 import platform
 
-__BUILD_NOT_SPECIFIED = "__BUILD_NOT_SPECIFIED"
 __DOC_NOT_SPECIFIED = "__DOC_NOT_SPECIFIED"
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
@@ -53,13 +52,13 @@ def test(name, recache):
         name = ["--all"]
         print("Run 'test' for all cases")
     else:
+        name = " ".join(list(dict.fromkeys(name)))
         print(f"Run 'test' for '{name}'")
 
     command = set_env("", "RSVIM_LOG", "trace")
     command = set_sccache(command, recache)
 
-    names = " ".join(list(dict.fromkeys(name)))
-    command = f"{command} cargo nextest run --no-capture {names}"
+    command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
     print(command)
@@ -79,7 +78,7 @@ def list_test(recache):
 def build(release, recache):
     command = set_sccache("", recache)
 
-    if isinstance(release, str) and release.lower().startswith("r"):
+    if release:
         print("Run 'build' for 'release'")
         command = f"{command} cargo build --release"
     else:
@@ -91,11 +90,10 @@ def build(release, recache):
     os.system(command)
 
 
-def doc(mode):
-
+def doc(watch):
     command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim --no-open"
-    if isinstance(mode, str) and mode.lower().startswith("w"):
-        print("Run 'doc' as service")
+    if watch:
+        print("Run 'doc' as a service and watching file changes")
         command = f"cargo watch -s '{command}'"
     else:
         print("Run 'doc' only once")
@@ -222,10 +220,10 @@ if __name__ == "__main__":
             list_test(parser.recache)
         else:
             test(parser.name, parser.recache)
-    elif parser.build is None or parser.build != __BUILD_NOT_SPECIFIED:
-        build(parser.build, parser.recache)
-    elif parser.doc is None or parser.doc != __DOC_NOT_SPECIFIED:
-        doc(parser.doc)
+    elif parser.subcommand == "build" or parser.subcommand == "b":
+        build(parser.release, parser.recache)
+    elif parser.subcommand == "doc" or parser.subcommand == "d":
+        doc(parser.watch)
     elif parser.release:
         release(parser.execute, parser.release)
     else:
