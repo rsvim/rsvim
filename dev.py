@@ -120,7 +120,7 @@ def release(level, execute):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Help running linter/tests for developing rsvim."
+        description="help running linter/tests when developing rsvim"
     )
     subparsers = parser.add_subparsers(dest="subcommand")
 
