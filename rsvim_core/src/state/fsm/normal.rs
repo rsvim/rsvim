@@ -16,11 +16,11 @@ use tracing::trace;
 /// The normal editing mode.
 pub struct NormalStateful {}
 
-unsafe fn _last_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
+unsafe fn last_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
   unsafe { raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1 }
 }
 
-unsafe fn _last_visible_char_on_line_since(
+unsafe fn last_visible_char_on_line_since(
   raw_buffer: NonNull<Buffer>,
   line_idx: usize,
   char_idx: usize,
@@ -38,10 +38,10 @@ unsafe fn _last_visible_char_on_line_since(
   }
 }
 
-unsafe fn _last_visible_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
+unsafe fn last_visible_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
   unsafe {
-    let c = _last_char_on_line(raw_buffer, line_idx);
-    _last_visible_char_on_line_since(raw_buffer, line_idx, c)
+    let c = last_char_on_line(raw_buffer, line_idx);
+    last_visible_char_on_line_since(raw_buffer, line_idx, c)
   }
 }
 
@@ -240,7 +240,7 @@ impl NormalStateful {
         .width_before(cursor_line_idx, cursor_char_idx);
       let char_idx = match raw_buffer.as_mut().char_after(line_idx, cursor_col_idx) {
         Some(char_idx) => char_idx,
-        None => _last_visible_char_on_line(raw_buffer, line_idx),
+        None => last_visible_char_on_line(raw_buffer, line_idx),
       };
       trace!("cursor_col_idx:{},char_idx:{}", cursor_col_idx, char_idx);
       Some((line_idx, char_idx))
@@ -281,7 +281,7 @@ impl NormalStateful {
               "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
               cursor_char_idx, expected, last_row_viewport, last_char_on_row
             );
-            _last_visible_char_on_line_since(raw_buffer, cursor_line_idx, last_char_on_row)
+            last_visible_char_on_line_since(raw_buffer, cursor_line_idx, last_char_on_row)
           };
           std::cmp::min(expected, last_char_idx)
         }
