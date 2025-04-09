@@ -47,7 +47,7 @@ def clippy(watch, recache):
 
 def test(name, recache):
     if len(name) == 0:
-        name = ["--all"]
+        name = "--all"
         print("Run 'test' for all cases")
     else:
         name = " ".join(list(dict.fromkeys(name)))

@@ -1270,7 +1270,7 @@ mod tests {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorScrollUp(1));
+    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorMoveUp(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
