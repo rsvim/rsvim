@@ -54,8 +54,8 @@ To write docs, please:
 
 To release a new version, please:
 
-1. Dry run with `./dev.py -r [LEVEL]`.
-2. Release with `./dev.py -r [LEVEL] -e`.
+1. Dry run with `./dev.py r [LEVEL]`.
+2. Execute with `./dev.py r [LEVEL] -e`.
 
 ## TypeScript/JavaScript
 
