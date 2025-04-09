@@ -313,10 +313,10 @@ impl NormalStateful {
           let raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
 
           let cursor_scroll_result = match command {
-            Command::CursorScrollUp(_n) | Command::CursorScrollDown(_n) => {
+            Command::CursorMoveUp(_n) | Command::CursorMoveDown(_n) => {
               self._cursor_scroll_vertically(&viewport, raw_buffer, command)
             }
-            Command::CursorScrollLeft(_n) | Command::CursorScrollRight(_n) => {
+            Command::CursorMoveLeft(_n) | Command::CursorMoveRight(_n) => {
               self._cursor_scroll_horizontally(&viewport, raw_buffer, command)
             }
             _ => unreachable!(),
@@ -346,8 +346,8 @@ impl NormalStateful {
     let start_column_idx = viewport.start_column_idx();
 
     let line_idx = match command {
-      Command::CursorScrollUp(n) => start_line_idx.saturating_sub(n),
-      Command::CursorScrollDown(n) => {
+      Command::CursorMoveUp(n) => start_line_idx.saturating_sub(n),
+      Command::CursorMoveDown(n) => {
         let expected = start_line_idx.saturating_add(n);
         let end_line_idx = viewport.end_line_idx();
         let last_line_idx = end_line_idx.saturating_sub(1);
@@ -382,11 +382,11 @@ impl NormalStateful {
         .char_at(start_line_idx, start_column_idx)
       {
         Some(start_char_idx) => match command {
-          Command::CursorScrollLeft(n) => {
+          Command::CursorMoveLeft(n) => {
             let c = start_char_idx.saturating_sub(n);
             raw_buffer.as_mut().width_before(start_line_idx, c)
           }
-          Command::CursorScrollRight(n) => {
+          Command::CursorMoveRight(n) => {
             debug_assert!(viewport.lines().contains_key(&start_line_idx));
             let line_viewport = viewport.lines().get(&start_line_idx).unwrap();
             let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();

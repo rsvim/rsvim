@@ -15,9 +15,5 @@ pub enum Command {
   CursorMoveDown(usize),
   CursorMoveLeft(usize),
   CursorMoveRight(usize),
-  CursorScrollUp(usize),
-  CursorScrollDown(usize),
-  CursorScrollLeft(usize),
-  CursorScrollRight(usize),
   QuitEditor,
 }
