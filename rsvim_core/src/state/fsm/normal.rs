@@ -1622,7 +1622,7 @@ mod tests {
       .into_iter()
       .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 0, 8, &expect_fills, &expect_fills);
+      assert_viewport_scroll(&viewport, &expect, 0, 7, &expect_fills, &expect_fills);
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
@@ -1658,7 +1658,7 @@ mod tests {
       .into_iter()
       .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 1, 9, &expect_fills, &expect_fills);
+      assert_viewport_scroll(&viewport, &expect, 1, 8, &expect_fills, &expect_fills);
     }
   }
 }
