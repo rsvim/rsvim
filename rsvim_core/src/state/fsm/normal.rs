@@ -361,47 +361,49 @@ impl NormalStateful {
   unsafe fn _cursor_scroll_vertically(
     &self,
     viewport: &Viewport,
-    mut raw_buffer: NonNull<Buffer>,
+    raw_buffer: NonNull<Buffer>,
     command: Command,
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
 
-    let line_idx = match command {
-      Command::CursorMoveUp(n) => start_line_idx.saturating_sub(n),
-      Command::CursorMoveDown(n) => {
-        // Viewport already shows the last line of buffer, cannot scroll down anymore.
-        if end_line_idx == raw_buffer.as_ref().get_rope().len_lines() {
-          return None;
+    unsafe {
+      let line_idx = match command {
+        Command::CursorMoveUp(n) => start_line_idx.saturating_sub(n),
+        Command::CursorMoveDown(n) => {
+          // Viewport already shows the last line of buffer, cannot scroll down anymore.
+          if end_line_idx == raw_buffer.as_ref().get_rope().len_lines() {
+            return None;
+          }
+
+          // Viewport doesn't show the last line of buffer, but the rest of lines is less than `n`,
+          // so cannot scroll down `n` lines. The scrolled lines is less than `n`.
+          let expected_end_line = std::cmp::min(
+            end_line_idx.saturating_add(n),
+            raw_buffer.as_ref().get_rope().len_lines(),
+          );
+          let scrolled_lines = expected_end_line.saturating_sub(end_line_idx);
+          let expected_start_line = start_line_idx.saturating_add(scrolled_lines);
+
+          assert!(expected_start_line >= start_line_idx);
+          // If the expected (after scrolled) start line index is current start line index, then don't
+          // scroll.
+          if expected_start_line == start_line_idx {
+            return None;
+          }
+
+          trace!(
+            "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
+            start_line_idx, end_line_idx, expected_start_line
+          );
+          expected_start_line
         }
+        _ => unreachable!(),
+      };
 
-        // Viewport doesn't show the last line of buffer, but the rest of lines is less than `n`,
-        // so cannot scroll down `n` lines. The scrolled lines is less than `n`.
-        let expected_end_line = std::cmp::min(
-          end_line_idx.saturating_add(n),
-          raw_buffer.as_ref().get_rope().len_lines(),
-        );
-        let scrolled_lines = expected_end_line.saturating_sub(end_line_idx);
-        let expected_start_line = start_line_idx.saturating_add(scrolled_lines);
-
-        assert!(expected_start_line >= start_line_idx);
-        // If the expected (after scrolled) start line index is current start line index, then don't
-        // scroll.
-        if expected_start_line == start_line_idx {
-          return None;
-        }
-
-        trace!(
-          "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
-          start_line_idx, end_line_idx, expected_start_line
-        );
-        expected_start_line
-      }
-      _ => unreachable!(),
-    };
-
-    Some((line_idx, start_column_idx))
+      Some((line_idx, start_column_idx))
+    }
   }
 
   /// Returns the same as [`Self::_cursor_scroll_vertically`].
