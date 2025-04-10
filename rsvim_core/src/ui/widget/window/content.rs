@@ -256,7 +256,7 @@ mod tests {
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
   use crate::ui::widget::window::{
-    Viewport, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
+    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
   use compact_str::ToCompactString;
@@ -266,17 +266,49 @@ mod tests {
   use std::sync::Arc;
   use tracing::info;
 
-  fn make_window_content_drawn_canvas(
+  fn make_viewport(
     terminal_size: U16Size,
     window_options: WindowLocalOptions,
     buffer: BufferArc,
-  ) -> Canvas {
+  ) -> ViewportArc {
     let mut tree = Tree::new(terminal_size);
     tree.set_global_local_options(&window_options);
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let viewport_options = ViewportOptions::from(&window_options);
     let viewport = Viewport::new(&viewport_options, Arc::downgrade(&buffer), &actual_shape);
-    let viewport = Viewport::to_arc(viewport);
+    Viewport::to_arc(viewport)
+  }
+
+  fn make_canvas(
+    terminal_size: U16Size,
+    window_options: WindowLocalOptions,
+    buffer: BufferArc,
+    viewport: ViewportArc,
+  ) -> Canvas {
+    let mut tree = Tree::new(terminal_size);
+    tree.set_global_local_options(&window_options);
+    let shape = IRect::new(
+      (0, 0),
+      (
+        terminal_size.width() as isize,
+        terminal_size.height() as isize,
+      ),
+    );
+    let window_content =
+      WindowContent::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
+    let mut canvas = Canvas::new(terminal_size);
+    window_content.draw(&mut canvas);
+    canvas
+  }
+
+  fn make_window_content_drawn_canvas(
+    terminal_size: U16Size,
+    window_options: WindowLocalOptions,
+    buffer: BufferArc,
+    viewport: ViewportArc,
+  ) -> Canvas {
+    let mut tree = Tree::new(terminal_size);
+    tree.set_global_local_options(&window_options);
     let shape = IRect::new(
       (0, 0),
       (
@@ -319,12 +351,12 @@ mod tests {
   }
 
   #[test]
-  fn draw_from_top_left_nowrap1() {
+  fn draw_new_nowrap1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(
+    let buffer = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
       vec![
@@ -354,12 +386,13 @@ mod tests {
       .wrap(false)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buf.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_nowrap2() {
+  fn draw_new_nowrap2() {
     test_log_init();
 
     let terminal_size = U16Size::new(35, 6);
@@ -391,12 +424,13 @@ mod tests {
       .wrap(false)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_nowrap3() {
+  fn draw_new_nowrap3() {
     test_log_init();
 
     let terminal_size = U16Size::new(33, 10);
@@ -432,12 +466,13 @@ mod tests {
       .wrap(false)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_nowrap4() {
+  fn draw_new_nowrap4() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 20);
@@ -483,17 +518,18 @@ mod tests {
       .wrap(false)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_nowrap5() {
+  fn draw_new_nowrap5() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 20);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
     let expect = vec![
       "                               ",
       "                               ",
@@ -521,12 +557,13 @@ mod tests {
       .wrap(false)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buf.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_nolinebreak1() {
+  fn draw_new_wrap_nolinebreak1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -561,12 +598,13 @@ mod tests {
       .wrap(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_nolinebreak2() {
+  fn draw_new_wrap_nolinebreak2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 10);
@@ -595,17 +633,18 @@ mod tests {
       .wrap(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_nolinebreak3() {
+  fn draw_new_wrap_nolinebreak3() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 9);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -622,12 +661,13 @@ mod tests {
       .wrap(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buf.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_nolinebreak4() {
+  fn draw_new_wrap_nolinebreak4() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 30);
@@ -682,12 +722,13 @@ mod tests {
       .wrap(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_nolinebreak5() {
+  fn draw_new_wrap_nolinebreak5() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 27);
@@ -739,12 +780,86 @@ mod tests {
       .wrap(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_linebreak1() {
+  fn draw_update_wrap_nolinebreak1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(19, 15);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buffer = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things\t我们想要测试的：\n",
+        "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "\t\t* 如果行换行和单词换行这两个选项都没有选中，那么这些超出窗口的文本内容会被截断。\n",
+        "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSVIM!      ",
+      "This is a quite sim",
+      "ple and small test ",
+      "lines.             ",
+      "But still it contai",
+      "ns several things  ",
+      "        我们想要测 ",
+      "试的：             ",
+      "        1. When the",
+      " line is small enou",
+      "gh to completely pu",
+      "t inside a row of t",
+      "he window content w",
+      "idget, then the lin",
+      "e-wrap and word-wra",
+    ];
+
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(
+      terminal_size,
+      window_options,
+      buffer.clone(),
+      viewport.clone(),
+    );
+    do_test_draw_from_top_left(&actual, &expect);
+
+    let expect = vec![
+      "        1. When the",
+      " line is small enou",
+      "gh to completely pu",
+      "t inside a row of t",
+      "he window content w",
+      "idget, then the lin",
+      "e-wrap and word-wra",
+      "p doesn't affect th",
+      "e rendering.       ",
+      "        2. When the",
+      " line is too long t",
+      "o be completely put",
+      " in a row of the wi",
+      "ndow content widget",
+      ", there're multiple",
+    ];
+    wlock!(viewport).sync_from_top_left(3, 0);
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
+    do_test_draw_from_top_left(&actual, &expect);
+  }
+
+  #[test]
+  fn draw_new_wrap_linebreak1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -780,12 +895,13 @@ mod tests {
       .line_break(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_linebreak2() {
+  fn draw_new_wrap_linebreak2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
@@ -826,12 +942,13 @@ mod tests {
       .line_break(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_linebreak3() {
+  fn draw_new_wrap_linebreak3() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 8);
@@ -853,12 +970,13 @@ mod tests {
       .line_break(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_linebreak4() {
+  fn draw_new_wrap_linebreak4() {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
@@ -915,12 +1033,13 @@ mod tests {
       .line_break(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 
   #[test]
-  fn draw_from_top_left_wrap_linebreak5() {
+  fn draw_new_wrap_linebreak5() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -956,7 +1075,8 @@ mod tests {
       .line_break(true)
       .build()
       .unwrap();
-    let actual = make_window_content_drawn_canvas(terminal_size, window_options, buffer.clone());
+    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
+    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
     do_test_draw_from_top_left(&actual, &expect);
   }
 }

@@ -1611,7 +1611,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_top_left_wrap_nolinebreak13() {
+  fn sync_top_left_wrap_nolinebreak1() {
     let terminal_size = U16Size::new(15, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
@@ -1692,6 +1692,150 @@ mod tests {
         &expect,
         2,
         4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn sync_top_left_wrap_nolinebreak2() {
+    let terminal_size = U16Size::new(15, 15);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+
+    let mut actual = {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite",
+        " simple and sma",
+        "ll test lines.\n",
+        "But still it co",
+        "ntains several ",
+        "things we want ",
+        "to test:\n",
+        "  1. When the l",
+        "ine is small en",
+        "ough to complet",
+        "ely put inside ",
+        "a row of the wi",
+        "ndow content wi",
+        "dget, then the ",
+      ];
+      let options = WindowLocalOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap();
+      let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+      actual
+    };
+
+    {
+      let expect = vec![
+        "     * The extr",
+        "a parts are spl",
+        "it into the nex",
+        "t row, if eithe",
+        "r line-wrap or ",
+        "word-wrap optio",
+        "ns are been set",
+        ". If the extra ",
+        "parts are still",
+        " too long to pu",
+        "t in the next r",
+        "ow, repeat this",
+        " operation agai",
+        "n and again. Th",
+        "is operation al",
+      ];
+      actual.sync_from_top_left(6, 0);
+      let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        6,
+        7,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn sync_top_left_wrap_nolinebreak3() {
+    let terminal_size = U16Size::new(15, 15);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+      ],
+    );
+
+    let mut actual = {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite",
+        " simple and sma",
+        "ll test lines.\n",
+        "",
+      ];
+      let options = WindowLocalOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap();
+      let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        3,
+        &expect_fills,
+        &expect_fills,
+      );
+      actual
+    };
+
+    {
+      let expect = vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
+      actual.sync_from_top_left(1, 0);
+      let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        1,
+        3,
         &expect_fills,
         &expect_fills,
       );
