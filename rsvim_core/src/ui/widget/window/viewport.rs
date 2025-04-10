@@ -591,7 +591,7 @@ impl Viewport {
   }
 
   /// Sync from top-left corner, i.e. `start_line` and `start_column`.
-  pub fn update(&mut self, start_line: usize, start_column: usize) {
+  pub fn sync_from_top_left(&mut self, start_line: usize, start_column: usize) {
     let (line_idx_range, lines) = sync::from_top_left(
       &self.options,
       self.buffer.clone(),
@@ -1611,7 +1611,7 @@ mod tests {
   }
 
   #[test]
-  fn update_wrap_nolinebreak13() {
+  fn sync_top_left_wrap_nolinebreak13() {
     let terminal_size = U16Size::new(15, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
@@ -1684,7 +1684,7 @@ mod tests {
         "t affect the re",
         "ndering.\n",
       ];
-      actual.update(2, 0);
+      actual.sync_from_top_left(2, 0);
       let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
       assert_sync_from_top_left(
         buf.clone(),

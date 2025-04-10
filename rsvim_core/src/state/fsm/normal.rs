@@ -348,7 +348,7 @@ impl NormalStateful {
 
         if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {
           // Sync the viewport
-          viewport.update(start_line_idx, start_column_idx);
+          viewport.sync_from_top_left(start_line_idx, start_column_idx);
         }
         // Or, just do nothing, keep the old viewport.
       }
