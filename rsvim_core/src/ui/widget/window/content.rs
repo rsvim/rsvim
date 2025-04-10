@@ -301,28 +301,6 @@ mod tests {
     canvas
   }
 
-  fn make_window_content_drawn_canvas(
-    terminal_size: U16Size,
-    window_options: WindowLocalOptions,
-    buffer: BufferArc,
-    viewport: ViewportArc,
-  ) -> Canvas {
-    let mut tree = Tree::new(terminal_size);
-    tree.set_global_local_options(&window_options);
-    let shape = IRect::new(
-      (0, 0),
-      (
-        terminal_size.width() as isize,
-        terminal_size.height() as isize,
-      ),
-    );
-    let window_content =
-      WindowContent::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
-    let mut canvas = Canvas::new(terminal_size);
-    window_content.draw(&mut canvas);
-    canvas
-  }
-
   #[allow(clippy::too_many_arguments)]
   fn do_test_draw_from_top_left(actual: &Canvas, expect: &[&str]) {
     let actual = actual
@@ -1196,15 +1174,15 @@ mod tests {
 
     let expect = vec![
       "But still ",
+      "it contai ",
+      "          ",
+      "several   ",
+      "things we ",
+      "want to   ",
+      "test:     ",
       "  1. When ",
-      "  2. When ",
-      "     * The",
-      "     * The",
-      "          ",
-      "          ",
-      "          ",
-      "          ",
-      "          ",
+      "the line  ",
+      "is small  ",
     ];
 
     wlock!(viewport).sync_from_top_left(2, 0);
