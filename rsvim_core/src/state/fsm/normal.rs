@@ -1607,20 +1607,12 @@ mod tests {
         "  2. When ",
         "     * The",
         "     * The",
-        "",
+        "  3. If a ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(&viewport, &expect, 0, 7, &expect_fills, &expect_fills);
     }
@@ -1643,20 +1635,12 @@ mod tests {
         "     * The",
         "     * The",
         "  3. If a ",
-        "",
+        "     * The",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-        (8, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
 
       assert_viewport_scroll(&viewport, &expect, 1, 8, &expect_fills, &expect_fills);
     }
