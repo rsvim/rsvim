@@ -8,11 +8,6 @@ import os
 import pathlib
 import platform
 
-__TEST_NOT_SPECIFIED = "__TEST_NOT_SPECIFIED"
-__BUILD_NOT_SPECIFIED = "__BUILD_NOT_SPECIFIED"
-__CLIPPY_NOT_SPECIFIED = "__CLIPPY_NOT_SPECIFIED"
-__DOC_NOT_SPECIFIED = "__DOC_NOT_SPECIFIED"
-
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
 )
@@ -34,12 +29,12 @@ def set_sccache(command, recache):
     return command.strip()
 
 
-def clippy(mode, recache):
+def clippy(watch, recache):
     command = set_env("", "RUSTFLAGS", "-Dwarnings")
     command = set_sccache(command, recache)
 
-    if isinstance(mode, str) and mode.lower().startswith("w"):
-        print("Run 'clippy' as service")
+    if watch:
+        print("Run 'clippy' as a service and watching file changes")
         command = f"{command} bacon -j clippy-all --headless --all-features"
     else:
         print("Run 'clippy' only once")
@@ -51,10 +46,11 @@ def clippy(mode, recache):
 
 
 def test(name, recache):
-    if name is None:
+    if len(name) == 0:
         name = "--all"
         print("Run 'test' for all cases")
     else:
+        name = " ".join(list(dict.fromkeys(name)))
         print(f"Run 'test' for '{name}'")
 
     command = set_env("", "RSVIM_LOG", "trace")
@@ -80,7 +76,7 @@ def list_test(recache):
 def build(release, recache):
     command = set_sccache("", recache)
 
-    if isinstance(release, str) and release.lower().startswith("r"):
+    if release:
         print("Run 'build' for 'release'")
         command = f"{command} cargo build --release"
     else:
@@ -92,11 +88,10 @@ def build(release, recache):
     os.system(command)
 
 
-def doc(mode):
-
+def doc(watch):
     command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim --no-open"
-    if isinstance(mode, str) and mode.lower().startswith("w"):
-        print("Run 'doc' as service")
+    if watch:
+        print("Run 'doc' as a service and watching file changes")
         command = f"cargo watch -s '{command}'"
     else:
         print("Run 'doc' only once")
@@ -106,17 +101,17 @@ def doc(mode):
     os.system(command)
 
 
-def release(execute, level):
+def release(level, execute):
     cwd_path = pathlib.Path.cwd()
     git_root_path = cwd_path / ".git"
     assert git_root_path.is_dir(), "The $CWD/$PWD must be git repo root!"
 
     command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
     if execute:
-        print(f"Run 'release' with '--execute' (no dry run), in level: {level}")
+        print(f"Run 'release' with '--execute' (no dry run), level: {level}")
         command = f"{command} --execute --no-verify"
     else:
-        print(f"Run 'release' in dry run, in level: {level}")
+        print(f"Run 'release' in dry run, level: {level}")
 
     command = command.strip()
     print(command)
@@ -125,74 +120,109 @@ def release(execute, level):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Help running linter/tests for developing rsvim."
+        description="help running linter/tests when developing rsvim"
     )
-    parser.add_argument(
-        "-c",
-        "--clippy",
-        nargs="?",
-        default=__CLIPPY_NOT_SPECIFIED,
-        metavar="WATCH",
-        help="Run clippy with `RUSTFLAGS=-Dwarnings` once or as a service (watch file changes and run again), by default is only once. Use `w(atch)` to start service.",
+    subparsers = parser.add_subparsers(dest="subcommand")
+
+    clippy_subparser = subparsers.add_parser(
+        "clippy",
+        aliases=["c"],
+        help="Run `cargo clippy` with `RUSTFLAGS=-Dwarnings`",
     )
-    parser.add_argument(
-        "-t",
-        "--test",
-        nargs="?",
-        default=__TEST_NOT_SPECIFIED,
-        help="Run [TEST] with `RSVIM_LOG=trace`, by default run all test cases.",
+    clippy_subparser.add_argument(
+        "-w",
+        "--watch",
+        action="store_true",
+        help="Running clippy as a service and watching file changes, by default is false",
     )
-    parser.add_argument(
-        "-l", "--list-test", action="store_true", help="List all test cases."
+    clippy_subparser.add_argument(
+        "--recache",
+        action="store_true",
+        help="Rebuild cache in `sccache`",
     )
-    parser.add_argument(
-        "-b",
-        "--build",
-        nargs="?",
-        default=__BUILD_NOT_SPECIFIED,
-        metavar="TARGET",
-        help="Build debug/release [TARGET], by default is debug. Use `r(elease)` to build release.",
+
+    test_subparser = subparsers.add_parser(
+        "test",
+        aliases=["t"],
+        help="Run `cargo test` with `RSVIM_LOG=trace`, by default runs all test cases",
     )
-    parser.add_argument(
-        "-d",
-        "--doc",
-        nargs="?",
-        default=__DOC_NOT_SPECIFIED,
-        metavar="WATCH",
-        help="Start cargo doc service on `http://localhost:3000/rsvim`, build document for once or as a service (watch file changes and build again), by default is only once. Use `w(atch)` to start service.",
+    test_subparser.add_argument(
+        "-l",
+        "--list",
+        action="store_true",
+        dest="list_test",
+        help="List all test cases instead of running them",
     )
-    parser.add_argument(
-        "-r",
-        "--release",
+    test_subparser.add_argument(
+        "name",
+        nargs="*",
+        default=[],
+        help="Multiple test names that need to run, by default is empty (runs all test cases)",
+    )
+    test_subparser.add_argument(
+        "--recache",
+        action="store_true",
+        help="Rebuild cache in `sccache`",
+    )
+
+    build_subparser = subparsers.add_parser(
+        "build",
+        aliases=["b"],
+        help="Build debug/release target with `sccache`, by default is debug",
+    )
+    build_subparser.add_argument(
+        "-r", "--release", action="store_true", help="Build release target"
+    )
+    build_subparser.add_argument(
+        "--recache",
+        action="store_true",
+        help="Rebuild cache in `sccache`",
+    )
+
+    doc_subparser = subparsers.add_parser(
+        "doc",
+        aliases=["d"],
+        help="Start `cargo doc` service on `http://localhost:3000/rsvim`",
+    )
+    doc_subparser.add_argument(
+        "-w",
+        "--watch",
+        action="store_true",
+        help="Running cargo doc as a service and watching file changes, by default is false",
+    )
+
+    release_subparser = subparsers.add_parser(
+        "release",
+        aliases=["r"],
+        help="Run `cargo release` to publish crates",
+    )
+    release_subparser.add_argument(
+        "level",
         choices=["alpha", "beta", "rc", "major", "minor", "patch"],
-        help="Release cargo crates with [LEVEL].",
+        help="Release [LEVEL]",
     )
-    parser.add_argument(
+    release_subparser.add_argument(
         "-e",
         "--execute",
         action="store_true",
-        help="Release cargo crates with additional `--execute --no-verify` option.",
-    )
-    parser.add_argument(
-        "--recache",
-        action="store_true",
-        help="Rebuild cache for `sccache`.",
+        help="Execute `cargo release` with `--no-verify`",
     )
 
     parser = parser.parse_args()
     # print(parser)
 
-    if parser.clippy is None or parser.clippy != __CLIPPY_NOT_SPECIFIED:
-        clippy(parser.clippy, parser.recache)
-    elif parser.test is None or parser.test != __TEST_NOT_SPECIFIED:
-        test(parser.test, parser.recache)
-    elif parser.list_test:
-        list_test(parser.recache)
-    elif parser.build is None or parser.build != __BUILD_NOT_SPECIFIED:
-        build(parser.build, parser.recache)
-    elif parser.doc is None or parser.doc != __DOC_NOT_SPECIFIED:
-        doc(parser.doc)
-    elif parser.release:
-        release(parser.execute, parser.release)
+    if parser.subcommand == "clippy" or parser.subcommand == "c":
+        clippy(parser.watch, parser.recache)
+    elif parser.subcommand == "test" or parser.subcommand == "t":
+        if parser.list_test:
+            list_test(parser.recache)
+        else:
+            test(parser.name, parser.recache)
+    elif parser.subcommand == "build" or parser.subcommand == "b":
+        build(parser.release, parser.recache)
+    elif parser.subcommand == "doc" or parser.subcommand == "d":
+        doc(parser.watch)
+    elif parser.subcommand == "release" or parser.subcommand == "r":
+        release(parser.level, parser.execute)
     else:
         print("Error: missing arguments, use -h/--help for more details.")

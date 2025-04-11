@@ -11,13 +11,9 @@
 #[derive(Debug, Copy, Clone)]
 // Editor operation commands.
 pub enum Command {
-  CursorMoveUp(u16),
-  CursorMoveDown(u16),
-  CursorMoveLeft(u16),
-  CursorMoveRight(u16),
-  CursorScrollUp(u16),
-  CursorScrollDown(u16),
-  CursorScrollLeft(u16),
-  CursorScrollRight(u16),
+  CursorMoveUp(usize),
+  CursorMoveDown(usize),
+  CursorMoveLeft(usize),
+  CursorMoveRight(usize),
   QuitEditor,
 }

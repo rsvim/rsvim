@@ -72,7 +72,8 @@ impl LineViewport {
     }
   }
 
-  /// Maps from row index (based on the window) to a row in the buffer line, starts from 0.
+  /// Maps `row_idx` (in the window) => its row-wise viewport.
+  /// The row index starts from 0.
   pub fn rows(&self) -> &BTreeMap<u16, RowViewport> {
     &self.rows
   }
@@ -400,16 +401,19 @@ pub struct Viewport {
   // Actual shape.
   actual_shape: U16Rect,
 
-  // Start line index in the buffer, starts from 0.
+  // Start line index (in the buffer), starts from 0.
   start_line_idx: usize,
 
-  // End line index in the buffer.
+  // End line index (in the buffer).
   end_line_idx: usize,
 
-  // Maps from buffer line index to its displayed rows in the window.
+  // Start display column index (in the buffer), starts from 0.
+  start_column_idx: usize,
+
+  // Maps `line_idx` (in the buffer) => its line-wise viewports.
   lines: BTreeMap<usize, LineViewport>,
 
-  // Cursor position (if has).
+  // Cursor position.
   cursor: CursorViewport,
 }
 
@@ -418,8 +422,20 @@ arc_impl!(Viewport);
 impl Viewport {
   /// Make new instance.
   pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
+    let start_line_idx = 0_usize;
+    let start_column_idx = 0_usize;
+
     // By default the viewport start from the first line, i.e. starts from 0.
-    let (line_idx_range, lines) = sync::from_top_left(options, buffer.clone(), actual_shape, 0, 0);
+    let (line_idx_range, lines) = sync::from_top_left(
+      options,
+      buffer.clone(),
+      actual_shape,
+      start_line_idx,
+      start_column_idx,
+    );
+
+    assert_eq!(line_idx_range.start_line_idx(), start_line_idx);
+
     let cursor = if line_idx_range.is_empty() {
       assert!(lines.is_empty());
       CursorViewport::new(0, 0)
@@ -465,6 +481,7 @@ impl Viewport {
       actual_shape: *actual_shape,
       start_line_idx: line_idx_range.start_line_idx(),
       end_line_idx: line_idx_range.end_line_idx(),
+      start_column_idx,
       lines,
       cursor,
     }
@@ -542,6 +559,12 @@ impl Viewport {
     self.end_line_idx
   }
 
+  /// Get start display column index in the buffer.
+  pub fn start_column_idx(&self) -> usize {
+    self._internal_check();
+    self.start_column_idx
+  }
+
   /// Get viewport information by lines.
   pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
     self._internal_check();
@@ -567,17 +590,20 @@ impl Viewport {
     self.cursor.set_char_idx(char_idx);
   }
 
-  /// Sync from top-left corner, i.e. `start_line` and `start_dcolumn`.
-  pub fn sync_from_top_left(&mut self, start_line: usize, start_dcolumn: usize) {
+  /// Sync from top-left corner, i.e. `start_line` and `start_column`.
+  pub fn sync_from_top_left(&mut self, start_line: usize, start_column: usize) {
     let (line_idx_range, lines) = sync::from_top_left(
       &self.options,
       self.buffer.clone(),
       &self.actual_shape,
       start_line,
-      start_dcolumn,
+      start_column,
     );
+    assert_eq!(start_line, line_idx_range.start_line_idx());
+
     self.start_line_idx = line_idx_range.start_line_idx();
     self.end_line_idx = line_idx_range.end_line_idx();
+    self.start_column_idx = start_column;
     self.lines = lines;
   }
 }
@@ -776,7 +802,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_nowrap1() {
+  fn new_nowrap1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -834,7 +860,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_nowrap2() {
+  fn new_nowrap2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
@@ -891,7 +917,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_nowrap3() {
+  fn new_nowrap3() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -937,7 +963,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_nowrap4() {
+  fn new_nowrap4() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
@@ -963,7 +989,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_nowrap5() {
+  fn new_nowrap5() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1041,7 +1067,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_nowrap6() {
+  fn new_nowrap6() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 6);
@@ -1093,7 +1119,59 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_nolinebreak1() {
+  fn new_nowrap7() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(20, 20);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![]);
+    let expect = vec![""];
+
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_sync_from_top_left(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn new_nowrap8() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(20, 20);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
+    let expect = vec![""];
+
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_sync_from_top_left(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn new_wrap_nolinebreak1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1135,7 +1213,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_nolinebreak2() {
+  fn new_wrap_nolinebreak2() {
     let terminal_size = U16Size::new(27, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
@@ -1194,7 +1272,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_nolinebreak3() {
+  fn new_wrap_nolinebreak3() {
     let terminal_size = U16Size::new(31, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
@@ -1229,7 +1307,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_nolinebreak4() {
+  fn new_wrap_nolinebreak4() {
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_empty_buffer(terminal_size.height(), buf_opts);
@@ -1246,7 +1324,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_nolinebreak5() {
+  fn new_wrap_nolinebreak5() {
     let terminal_size = U16Size::new(31, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
@@ -1284,7 +1362,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_nolinebreak6() {
+  fn new_wrap_nolinebreak6() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1325,7 +1403,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_nolinebreak7() {
+  fn new_wrap_nolinebreak7() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1366,7 +1444,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_nolinebreak8() {
+  fn new_wrap_nolinebreak8() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1407,7 +1485,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_nolinebreak9() {
+  fn new_wrap_nolinebreak9() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1449,7 +1527,323 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak1() {
+  fn new_wrap_nolinebreak10() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(31, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![]);
+    let expect = vec![""];
+
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_sync_from_top_left(
+      buf,
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn new_wrap_nolinebreak11() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(31, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
+    let expect = vec![""];
+
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_sync_from_top_left(
+      buf,
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn new_wrap_nolinebreak12() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(31, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
+    let expect = vec![""];
+
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_sync_from_top_left(
+      buf,
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn sync_top_left_wrap_nolinebreak1() {
+    let terminal_size = U16Size::new(15, 15);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+
+    let mut actual = {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite",
+        " simple and sma",
+        "ll test lines.\n",
+        "But still it co",
+        "ntains several ",
+        "things we want ",
+        "to test:\n",
+        "  1. When the l",
+        "ine is small en",
+        "ough to complet",
+        "ely put inside ",
+        "a row of the wi",
+        "ndow content wi",
+        "dget, then the ",
+      ];
+      let options = WindowLocalOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap();
+      let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+      actual
+    };
+
+    {
+      let expect = vec![
+        "But still it co",
+        "ntains several ",
+        "things we want ",
+        "to test:\n",
+        "  1. When the l",
+        "ine is small en",
+        "ough to complet",
+        "ely put inside ",
+        "a row of the wi",
+        "ndow content wi",
+        "dget, then the ",
+        "line-wrap and w",
+        "ord-wrap doesn'",
+        "t affect the re",
+        "ndering.\n",
+      ];
+      actual.sync_from_top_left(2, 0);
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn sync_top_left_wrap_nolinebreak2() {
+    let terminal_size = U16Size::new(15, 15);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+
+    let mut actual = {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite",
+        " simple and sma",
+        "ll test lines.\n",
+        "But still it co",
+        "ntains several ",
+        "things we want ",
+        "to test:\n",
+        "  1. When the l",
+        "ine is small en",
+        "ough to complet",
+        "ely put inside ",
+        "a row of the wi",
+        "ndow content wi",
+        "dget, then the ",
+      ];
+      let options = WindowLocalOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap();
+      let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+      actual
+    };
+
+    {
+      let expect = vec![
+        "     * The extr",
+        "a parts are spl",
+        "it into the nex",
+        "t row, if eithe",
+        "r line-wrap or ",
+        "word-wrap optio",
+        "ns are been set",
+        ". If the extra ",
+        "parts are still",
+        " too long to pu",
+        "t in the next r",
+        "ow, repeat this",
+        " operation agai",
+        "n and again. Th",
+        "is operation al",
+      ];
+      actual.sync_from_top_left(6, 0);
+      let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        6,
+        7,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn sync_top_left_wrap_nolinebreak3() {
+    let terminal_size = U16Size::new(15, 15);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+      ],
+    );
+
+    let mut actual = {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite",
+        " simple and sma",
+        "ll test lines.\n",
+        "",
+      ];
+      let options = WindowLocalOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap();
+      let actual = make_viewport_from_size(terminal_size, buf.clone(), &options);
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        3,
+        &expect_fills,
+        &expect_fills,
+      );
+      actual
+    };
+
+    {
+      let expect = vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
+      actual.sync_from_top_left(1, 0);
+      let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
+      assert_sync_from_top_left(
+        buf.clone(),
+        &actual,
+        &expect,
+        1,
+        3,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn new_wrap_linebreak1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1502,7 +1896,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak2() {
+  fn new_wrap_linebreak2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
@@ -1562,7 +1956,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak3() {
+  fn new_wrap_linebreak3() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 11);
@@ -1617,7 +2011,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak4() {
+  fn new_wrap_linebreak4() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1636,7 +2030,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak5() {
+  fn new_wrap_linebreak5() {
     let terminal_size = U16Size::new(31, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buffer = make_buffer_from_lines(
@@ -1687,7 +2081,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak6() {
+  fn new_wrap_linebreak6() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 10);
@@ -1740,7 +2134,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak7() {
+  fn new_wrap_linebreak7() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 11);
@@ -1794,7 +2188,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak8() {
+  fn new_wrap_linebreak8() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 11);
@@ -1848,7 +2242,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak9() {
+  fn new_wrap_linebreak9() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1901,7 +2295,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak10() {
+  fn new_wrap_linebreak10() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1954,7 +2348,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak11() {
+  fn new_wrap_linebreak11() {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
@@ -2030,7 +2424,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_from_top_left_wrap_linebreak12() {
+  fn new_wrap_linebreak12() {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
@@ -2101,6 +2495,44 @@ mod tests {
       &expect_start_fills,
       &expect_end_fills,
     );
+  }
+
+  #[test]
+  fn new_wrap_linebreak13() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(13, 31);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buffer = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![]);
+    let expect = vec![""];
+
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(true)
+      .build()
+      .unwrap();
+    let actual = make_viewport_from_size(terminal_size, buffer.clone(), &options);
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+  }
+
+  #[test]
+  fn new_wrap_linebreak14() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(13, 31);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buffer = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
+    let expect = vec![""];
+
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(true)
+      .build()
+      .unwrap();
+    let actual = make_viewport_from_size(terminal_size, buffer.clone(), &options);
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_sync_from_top_left(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 }
 // spellchecker:on
