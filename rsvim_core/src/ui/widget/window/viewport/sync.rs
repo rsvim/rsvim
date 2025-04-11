@@ -1,10 +1,9 @@
 //! Internal implementations for Viewport.
 
-use crate::buf::{Buffer, BufferWk};
+use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::ui::widget::window::viewport::RowViewport;
-use crate::ui::widget::window::{LineViewport, ViewportOptions};
-use crate::wlock;
+use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
@@ -50,27 +49,34 @@ impl ViewportLineRange {
 
 // Given the buffer and window size, collect information from start line and column, i.e. from the
 // top-left corner.
-pub fn from_top_left(
-  options: &ViewportOptions,
-  buffer: BufferWk,
-  actual_shape: &U16Rect,
+pub unsafe fn from_top_left(
+  raw_buffer: NonNull<Buffer>,
+  window_actual_shape: &U16Rect,
+  window_local_options: &WindowLocalOptions,
   start_line: usize,
   start_dcolumn: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   // If window is zero-sized.
-  let height = actual_shape.height();
-  let width = actual_shape.width();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
   if height == 0 || width == 0 {
     return (ViewportLineRange::default(), BTreeMap::new());
   }
 
-  match (options.wrap, options.line_break) {
-    (false, _) => _from_top_left_nowrap(options, buffer, actual_shape, start_line, start_dcolumn),
-    (true, false) => {
-      _from_top_left_wrap_nolinebreak(options, buffer, actual_shape, start_line, start_dcolumn)
-    }
-    (true, true) => {
-      _from_top_left_wrap_linebreak(options, buffer, actual_shape, start_line, start_dcolumn)
+  unsafe {
+    match (
+      window_local_options.wrap(),
+      window_local_options.line_break(),
+    ) {
+      (false, _) => {
+        _from_top_left_nowrap(raw_buffer, window_actual_shape, start_line, start_dcolumn)
+      }
+      (true, false) => {
+        _from_top_left_wrap_nolinebreak(raw_buffer, window_actual_shape, start_line, start_dcolumn)
+      }
+      (true, true) => {
+        _from_top_left_wrap_linebreak(raw_buffer, window_actual_shape, start_line, start_dcolumn)
+      }
     }
   }
 }
@@ -107,15 +113,14 @@ unsafe fn end_char_and_prefills(
 
 #[allow(unused_variables, clippy::explicit_counter_loop)]
 /// Implements [`from_top_left`] with option `wrap=false`.
-fn _from_top_left_nowrap(
-  _options: &ViewportOptions,
-  buffer: BufferWk,
-  actual_shape: &U16Rect,
+unsafe fn _from_top_left_nowrap(
+  mut raw_buffer: NonNull<Buffer>,
+  window_actual_shape: &U16Rect,
   start_line: usize,
-  start_dcol_on_line: usize,
+  start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
-  let height = actual_shape.height();
-  let width = actual_shape.width();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
 
   assert!(height > 0);
   assert!(width > 0);
@@ -126,14 +131,7 @@ fn _from_top_left_nowrap(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for write.
-  let buffer = buffer.upgrade().unwrap();
-  let mut buffer = wlock!(buffer);
-
   unsafe {
-    // Fix mutable borrow on `buffer`.
-    let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
     // trace!(
     //   "buffer.get_line ({:?}):{:?}",
     //   start_line,
@@ -171,14 +169,14 @@ fn _from_top_left_nowrap(
           } else {
             let start_char = raw_buffer
               .as_mut()
-              .char_after(current_line, start_dcol_on_line)
+              .char_after(current_line, start_column)
               .unwrap_or(0_usize);
             let start_fills = {
               let width_before = raw_buffer.as_mut().width_before(current_line, start_char);
-              width_before.saturating_sub(start_dcol_on_line)
+              width_before.saturating_sub(start_column)
             };
 
-            let end_width = start_dcol_on_line + width as usize;
+            let end_width = start_column + width as usize;
             let (end_char, end_fills) = match raw_buffer.as_mut().char_at(current_line, end_width) {
               Some(c) => end_char_and_prefills(raw_buffer, &bline, current_line, c, end_width),
               None => {
@@ -220,15 +218,14 @@ fn _from_top_left_nowrap(
 
 #[allow(unused_variables)]
 /// Implements [`from_top_left`] with option `wrap=true` and `line-break=false`.
-fn _from_top_left_wrap_nolinebreak(
-  _options: &ViewportOptions,
-  buffer: BufferWk,
-  actual_shape: &U16Rect,
+unsafe fn _from_top_left_wrap_nolinebreak(
+  mut raw_buffer: NonNull<Buffer>,
+  window_actual_shape: &U16Rect,
   start_line: usize,
-  start_dcol_on_line: usize,
+  start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
-  let height = actual_shape.height();
-  let width = actual_shape.width();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
 
   assert!(height > 0);
   assert!(width > 0);
@@ -238,10 +235,6 @@ fn _from_top_left_wrap_nolinebreak(
   //   height,
   //   width
   // );
-
-  // Get buffer arc pointer, and lock for write.
-  let buffer = buffer.upgrade().unwrap();
-  let mut buffer = wlock!(buffer);
 
   // trace!(
   //   "buffer.get_line ({:?}):'{:?}'",
@@ -253,12 +246,9 @@ fn _from_top_left_wrap_nolinebreak(
   // );
 
   unsafe {
-    // Fix mutable borrow on `buffer`.
-    let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-    match buffer.get_rope().get_lines_at(start_line) {
+    match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
       Some(buflines) => {
         // The `start_line` is inside the buffer.
 
@@ -288,14 +278,14 @@ fn _from_top_left_wrap_nolinebreak(
 
             let mut start_char = raw_buffer
               .as_mut()
-              .char_after(current_line, start_dcol_on_line)
+              .char_after(current_line, start_column)
               .unwrap_or(0_usize);
             let start_fills = {
               let width_before = raw_buffer.as_mut().width_before(current_line, start_char);
-              width_before.saturating_sub(start_dcol_on_line)
+              width_before.saturating_sub(start_column)
             };
 
-            let mut end_width = start_dcol_on_line + width as usize;
+            let mut end_width = start_column + width as usize;
             let mut end_fills = 0_usize;
 
             assert!(wrow < height);
@@ -460,15 +450,14 @@ unsafe fn part1(
 
 #[allow(unused_variables)]
 /// Implements [`from_top_left`] with option `wrap=true` and `line-break=true`.
-fn _from_top_left_wrap_linebreak(
-  _options: &ViewportOptions,
-  buffer: BufferWk,
-  actual_shape: &U16Rect,
+unsafe fn _from_top_left_wrap_linebreak(
+  mut raw_buffer: NonNull<Buffer>,
+  window_actual_shape: &U16Rect,
   start_line: usize,
-  start_dcol_on_line: usize,
+  start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
-  let height = actual_shape.height();
-  let width = actual_shape.width();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
 
   // trace!(
   //   "_collect_from_top_left_with_wrap_linebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
@@ -477,23 +466,16 @@ fn _from_top_left_wrap_linebreak(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for write.
-  let buffer = buffer.upgrade().unwrap();
-  let mut buffer = wlock!(buffer);
-
-  trace!(
-    "buffer.get_line ({:?}):'{:?}'",
-    start_line,
-    match buffer.get_rope().get_line(start_line) {
-      Some(line) => slice2line(&line),
-      None => "None".to_string(),
-    }
-  );
+  // trace!(
+  //   "buffer.get_line ({:?}):'{:?}'",
+  //   start_line,
+  //   match raw_buffer.as_ref().get_rope().get_line(start_line) {
+  //     Some(line) => slice2line(&line),
+  //     None => "None".to_string(),
+  //   }
+  // );
 
   unsafe {
-    // Fix mutable borrow on `buffer`.
-    let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
     match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
@@ -525,7 +507,7 @@ fn _from_top_left_wrap_linebreak(
               .clone_line(
                 current_line,
                 0,
-                height as usize * width as usize * 2 + 16 + start_dcol_on_line,
+                height as usize * width as usize * 2 + 16 + start_column,
               )
               .unwrap();
 
@@ -543,14 +525,14 @@ fn _from_top_left_wrap_linebreak(
 
             let mut start_char = raw_buffer
               .as_mut()
-              .char_after(current_line, start_dcol_on_line)
+              .char_after(current_line, start_column)
               .unwrap_or(0_usize);
             let start_fills = {
               let width_before = raw_buffer.as_mut().width_before(current_line, start_char);
-              width_before.saturating_sub(start_dcol_on_line)
+              width_before.saturating_sub(start_column)
             };
 
-            let mut end_width = start_dcol_on_line + width as usize;
+            let mut end_width = start_column + width as usize;
             let mut end_fills = 0_usize;
 
             // Saved last word info, if it is too long to put in an entire row of window.

@@ -1,13 +1,14 @@
 //! Buffer viewport on a window.
 
 use crate::arc_impl;
-use crate::buf::BufferWk;
+use crate::buf::{Buffer, BufferWk};
 use crate::prelude::*;
-use crate::ui::widget::window::ViewportOptions;
+use crate::ui::widget::window::WindowLocalOptions;
 
 use paste::paste;
 use std::collections::BTreeMap;
 use std::ops::Range;
+use std::ptr::NonNull;
 //use tracing::trace;
 
 pub mod sync;
@@ -392,15 +393,6 @@ impl CursorViewport {
 // spellchecker:on
 #[allow(dead_code)]
 pub struct Viewport {
-  // Options.
-  options: ViewportOptions,
-
-  // Buffer.
-  buffer: BufferWk,
-
-  // Actual shape.
-  actual_shape: U16Rect,
-
   // Start line index (in the buffer), starts from 0.
   start_line_idx: usize,
 
@@ -412,14 +404,42 @@ pub struct Viewport {
 
   // Maps `line_idx` (in the buffer) => its line-wise viewports.
   lines: BTreeMap<usize, LineViewport>,
-
-  // Cursor position.
-  cursor: CursorViewport,
 }
 
 arc_impl!(Viewport);
 
 impl Viewport {
+  /// Render viewport starts from top-left corner.
+  ///
+  /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a
+  /// window.
+  pub unsafe fn from_top_left(
+    raw_buffer: NonNull<Buffer>,
+    window_actual_shape: &U16Rect,
+    window_local_options: &WindowLocalOptions,
+    start_line_idx: usize,
+    start_column_idx: usize,
+  ) -> Self {
+    unsafe {
+      let (line_idx_range, lines) = sync::from_top_left(
+        raw_buffer,
+        window_actual_shape,
+        window_local_options,
+        start_line_idx,
+        start_column_idx,
+      );
+
+      assert_eq!(line_idx_range.start_line_idx(), start_line_idx);
+
+      Viewport {
+        start_line_idx: line_idx_range.start_line_idx(),
+        end_line_idx: line_idx_range.end_line_idx(),
+        start_column_idx,
+        lines,
+      }
+    }
+  }
+
   /// Make new instance.
   pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
     let start_line_idx = 0_usize;
