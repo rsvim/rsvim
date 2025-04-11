@@ -8,6 +8,7 @@
     "keyofStringsOnly": false,
     "lib": ["es2022"],
     "module": "es2022",
+    // "target": "es2022",
     "moduleResolution": "bundler",
     "noErrorTruncation": false,
     "noFallthroughCasesInSwitch": false,
@@ -26,7 +27,10 @@
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
     "useUnknownInCatchVariables": false,
-    "removeComments": true
+    "removeComments": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true
   },
-  "include": ["./rsvim_core/src/js/runtime/*.ts"]
+  "include": ["./rsvim_core/src/js/runtime/*.ts"],
+  "exclude": ["**/*.d.ts"]
 }
