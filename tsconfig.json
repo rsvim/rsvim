@@ -8,7 +8,7 @@
     "keyofStringsOnly": false,
     "lib": ["es2022"],
     "module": "es2022",
-    // "target": "es2022",
+    "target": "es2022",
     "moduleResolution": "bundler",
     "noErrorTruncation": false,
     "noFallthroughCasesInSwitch": false,

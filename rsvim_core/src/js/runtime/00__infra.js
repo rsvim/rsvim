@@ -1,59 +1,59 @@
 export function stringify(value) {
     if (typeof value === "string") {
-        return "string[\"".concat(value, "\"]");
+        return `string["${value}"]`;
     }
     if (typeof value === "number") {
         if (Number.isInteger(value)) {
-            return "int[".concat(value, "]");
+            return `int[${value}]`;
         }
-        return "float[".concat(value, "]");
+        return `float[${value}]`;
     }
     if (typeof value === "boolean") {
-        return "boolean[".concat(value ? "true" : "false", "]");
+        return `boolean[${value ? "true" : "false"}]`;
     }
     if (typeof value === "function") {
-        return "function[".concat(value.toString(), "]");
+        return `function[${value.toString()}]`;
     }
     if (typeof value === "object") {
         if (Array.isArray(value)) {
-            return "array[length: ".concat(value.length, "]");
+            return `array[length: ${value.length}]`;
         }
         if (value instanceof Map) {
-            return "Map[size: ".concat(value.size, "]");
+            return `Map[size: ${value.size}]`;
         }
         if (value instanceof WeakMap) {
-            return "WeakMap[]";
+            return `WeakMap[]`;
         }
         if (value instanceof Set) {
-            return "Set[size: ".concat(value.size, "]");
+            return `Set[size: ${value.size}]`;
         }
         if (value instanceof WeakSet) {
-            return "WeakSet[]";
+            return `WeakSet[]`;
         }
         if (value instanceof String) {
-            return "String[\"".concat(value, "\"]");
+            return `String["${value}"]`;
         }
         if (value instanceof Number) {
-            var source = value.valueOf();
+            let source = value.valueOf();
             if (Number.isInteger(source)) {
-                return "Number:int[".concat(source, "]");
+                return `Number:int[${source}]`;
             }
-            return "Number:float[".concat(source, "]");
+            return `Number:float[${source}]`;
         }
         if (value instanceof Boolean) {
-            return "Boolean[".concat(value.valueOf() ? "true" : "false", "]");
+            return `Boolean[${value.valueOf() ? "true" : "false"}]`;
         }
         if (value instanceof Date) {
-            return "Date[\"".concat(value.toUTCString(), "\"]");
+            return `Date["${value.toUTCString()}"]`;
         }
         if (value instanceof RegExp) {
-            return "RegExp[".concat(value.toString(), "]");
+            return `RegExp[${value.toString()}]`;
         }
-        return "object[".concat(JSON.stringify(value), "]");
+        return `object[${JSON.stringify(value)}]`;
     }
     if (typeof value === "undefined") {
         return "undefined";
     }
-    throw "Unhandled type ".concat(typeof value);
+    throw `Unhandled type ${typeof value}`;
 }
-export default { stringify: stringify };
+export default { stringify };
