@@ -22,19 +22,8 @@ struct CachedDirs {
 
 /// For windows: `$env:USERPROFILE\AppData\Roaming\rsvim`.
 /// For others: `$XDG_CONFIG_HOME/rsvim` or `$HOME/.config/rsvim`.
-#[cfg(not(target_os = "macos"))]
 fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
   cached_dirs.config_dir.join("rsvim").to_path_buf()
-}
-
-#[cfg(target_os = "macos")]
-fn _xdg_config_dir(cached_dirs: &CachedDirs) -> PathBuf {
-  match std::env::var("XDG_CONFIG_HOME") {
-    Ok(config_path) => std::path::Path::new(&config_path)
-      .join("rsvim")
-      .to_path_buf(),
-    Err(_) => cached_dirs.home_dir.join(".config").join("rsvim"),
-  }
 }
 
 /// For all: `$HOME/.rsvim`.
@@ -80,38 +69,24 @@ fn get_config_dirs(cached_dirs: &CachedDirs) -> Vec<PathBuf> {
 
 /// For windows: `$env:USERPROFILE\AppData\Local\rsvim-cache`.
 /// For others: `$XDG_CACHE_HOME/rsvim` or `$HOME/.cache/rsvim`.
-#[cfg(not(target_os = "macos"))]
 fn _xdg_cache_dir(cached_dirs: &CachedDirs) -> PathBuf {
-  cached_dirs.cache_dir.join("rsvim-cache").to_path_buf()
-}
-
-#[cfg(target_os = "macos")]
-fn _xdg_cache_dir(cached_dirs: &CachedDirs) -> PathBuf {
-  match std::env::var("XDG_CACHE_HOME") {
-    Ok(cache_path) => std::path::Path::new(&cache_path)
-      .join("rsvim")
-      .to_path_buf(),
-    Err(_) => cached_dirs.home_dir.join(".cache").join("rsvim"),
-  }
+  let folder = if cfg!(target_os = "windows") {
+    "rsvim-cache"
+  } else {
+    "rsvim"
+  };
+  cached_dirs.cache_dir.join(folder).to_path_buf()
 }
 
 // For windows: `$env:USERPROFILE\AppData\Roaming\rsvim-data`.
 // For others: `$XDG_DATA_HOME/rsvim` or `$HOME/.local/share/rsvim`.
-#[cfg(not(target_os = "macos"))]
 fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
-  cached_dirs.data_dir.join("rsvim-data").to_path_buf()
-}
-
-#[cfg(target_os = "macos")]
-fn _xdg_data_dir(cached_dirs: &CachedDirs) -> PathBuf {
-  match std::env::var("XDG_DATA_HOME") {
-    Ok(data_path) => std::path::Path::new(&data_path).join("rsvim").to_path_buf(),
-    Err(_) => cached_dirs
-      .home_dir
-      .join(".local")
-      .join("share")
-      .join("rsvim"),
-  }
+  let folder = if cfg!(target_os = "windows") {
+    "rsvim-data"
+  } else {
+    "rsvim"
+  };
+  cached_dirs.data_dir.join(folder).to_path_buf()
 }
 
 impl PathConfig {
