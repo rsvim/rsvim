@@ -8,7 +8,6 @@ use crate::ui::widget::window::WindowLocalOptions;
 use paste::paste;
 use std::collections::BTreeMap;
 use std::ops::Range;
-use std::ptr::NonNull;
 //use tracing::trace;
 
 pub mod sync;
@@ -155,6 +154,34 @@ impl CursorViewport {
   /// Set the line index.
   pub fn set_line_idx(&mut self, line_idx: usize) {
     self.line_idx = line_idx;
+  }
+
+  /// Create with viewport.
+  pub fn from_viewport_top_left(viewport: &Viewport) -> Self {
+    debug_assert!(viewport.end_line_idx() >= viewport.start_line_idx());
+    if viewport.end_line_idx() <= viewport.start_line_idx() {
+      Self::new(0, 0)
+    } else {
+      let lines = viewport.lines();
+      debug_assert!(!lines.is_empty());
+      debug_assert!(lines.len() == viewport.end_line_idx() - viewport.start_line_idx());
+      debug_assert!(lines.first_key_value().is_some());
+      debug_assert!(lines.last_key_value().is_some());
+      debug_assert!(*lines.first_key_value().unwrap().0 == viewport.start_line_idx());
+      debug_assert!(viewport.end_line_idx() > 0);
+      debug_assert!(*lines.last_key_value().unwrap().0 == viewport.end_line_idx() - 1);
+      let first_line = lines.first_key_value().unwrap();
+      let line_idx = *first_line.0;
+      let first_line = first_line.1;
+      if first_line.rows().is_empty() {
+        Self::new(0, 0)
+      } else {
+        let first_row = first_line.rows().first_key_value().unwrap();
+        let first_row = first_row.1;
+        let char_idx = first_row.start_char_idx();
+        Self::new(char_idx, line_idx)
+      }
+    }
   }
 }
 
@@ -413,97 +440,28 @@ impl Viewport {
   ///
   /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a
   /// window.
-  pub unsafe fn from_top_left(
-    raw_buffer: NonNull<Buffer>,
+  pub fn from_top_left(
+    buffer: &mut Buffer,
     window_actual_shape: &U16Rect,
     window_local_options: &WindowLocalOptions,
     start_line_idx: usize,
     start_column_idx: usize,
   ) -> Self {
-    unsafe {
-      let (line_idx_range, lines) = sync::from_top_left(
-        raw_buffer,
-        window_actual_shape,
-        window_local_options,
-        start_line_idx,
-        start_column_idx,
-      );
-
-      assert_eq!(line_idx_range.start_line_idx(), start_line_idx);
-
-      Viewport {
-        start_line_idx: line_idx_range.start_line_idx(),
-        end_line_idx: line_idx_range.end_line_idx(),
-        start_column_idx,
-        lines,
-      }
-    }
-  }
-
-  /// Make new instance.
-  pub fn new(options: &ViewportOptions, buffer: BufferWk, actual_shape: &U16Rect) -> Self {
-    let start_line_idx = 0_usize;
-    let start_column_idx = 0_usize;
-
-    // By default the viewport start from the first line, i.e. starts from 0.
     let (line_idx_range, lines) = sync::from_top_left(
-      options,
-      buffer.clone(),
-      actual_shape,
+      buffer,
+      window_actual_shape,
+      window_local_options,
       start_line_idx,
       start_column_idx,
     );
 
     assert_eq!(line_idx_range.start_line_idx(), start_line_idx);
 
-    let cursor = if line_idx_range.is_empty() {
-      assert!(lines.is_empty());
-      CursorViewport::new(0, 0)
-    } else {
-      assert!(!lines.is_empty());
-      // trace!(
-      //   "lines.len:{:?} line_range.len:{:?}",
-      //   lines.len(),
-      //   line_range.len()
-      // );
-      assert!(lines.len() == line_idx_range.len());
-      assert!(lines.first_key_value().is_some());
-      assert!(lines.last_key_value().is_some());
-      // trace!(
-      //   "lines.first_key_value:{:?} line_range.start_line:{:?}",
-      //   lines.first_key_value().unwrap(),
-      //   line_range.start_line()
-      // );
-      assert!(*lines.first_key_value().unwrap().0 == line_idx_range.start_line_idx());
-      // trace!(
-      //   "lines.last_key_value:{:?} line_range.end_line:{:?}",
-      //   lines.last_key_value().unwrap(),
-      //   line_range.end_line()
-      // );
-      assert!(line_idx_range.end_line_idx() > 0);
-      assert!(*lines.last_key_value().unwrap().0 == line_idx_range.end_line_idx() - 1);
-      let first_line = lines.first_key_value().unwrap();
-      let line_idx = *first_line.0;
-      let first_line = first_line.1;
-      if first_line.rows().is_empty() {
-        CursorViewport::new(0, 0)
-      } else {
-        let first_row = first_line.rows().first_key_value().unwrap();
-        let first_row = first_row.1;
-        let char_idx = first_row.start_char_idx();
-        CursorViewport::new(char_idx, line_idx)
-      }
-    };
-
     Viewport {
-      options: *options,
-      buffer,
-      actual_shape: *actual_shape,
       start_line_idx: line_idx_range.start_line_idx(),
       end_line_idx: line_idx_range.end_line_idx(),
       start_column_idx,
       lines,
-      cursor,
     }
   }
 
@@ -512,8 +470,9 @@ impl Viewport {
 
   #[cfg(debug_assertions)]
   fn _internal_check(&self) {
+    assert!(self.end_line_idx >= self.start_line_idx);
     assert_eq!(
-      self.end_line_idx <= self.start_line_idx,
+      self.end_line_idx == self.start_line_idx,
       self.lines.is_empty()
     );
     assert!(self.lines.first_key_value().is_some());
@@ -595,68 +554,6 @@ impl Viewport {
   pub fn is_empty(&self) -> bool {
     self._internal_check();
     self.lines.is_empty()
-  }
-
-  /// Get cursor viewport information.
-  pub fn cursor(&self) -> &CursorViewport {
-    self._internal_check();
-    &self.cursor
-  }
-
-  /// Set cursor line and char (column).
-  pub fn set_cursor(&mut self, line_idx: usize, char_idx: usize) {
-    assert!(self.lines.contains_key(&line_idx));
-    self.cursor.set_line_idx(line_idx);
-    self.cursor.set_char_idx(char_idx);
-  }
-
-  /// Sync from top-left corner, i.e. `start_line` and `start_column`.
-  pub fn sync_from_top_left(&mut self, start_line: usize, start_column: usize) {
-    let (line_idx_range, lines) = sync::from_top_left(
-      &self.options,
-      self.buffer.clone(),
-      &self.actual_shape,
-      start_line,
-      start_column,
-    );
-    assert_eq!(start_line, line_idx_range.start_line_idx());
-
-    self.start_line_idx = line_idx_range.start_line_idx();
-    self.end_line_idx = line_idx_range.end_line_idx();
-    self.start_column_idx = start_column;
-    self.lines = lines;
-  }
-}
-
-impl Viewport {
-  /// Get options.
-  pub fn options(&self) -> &ViewportOptions {
-    &self.options
-  }
-
-  /// Set options.
-  pub fn set_options(&mut self, options: &ViewportOptions) {
-    self.options = *options;
-  }
-
-  /// Get buffer.
-  pub fn buffer(&self) -> BufferWk {
-    self.buffer.clone()
-  }
-
-  /// Set buffer.
-  pub fn set_buffer(&mut self, buffer: BufferWk) {
-    self.buffer = buffer;
-  }
-
-  /// Get actual shape.
-  pub fn actual_shape(&self) -> &U16Rect {
-    &self.actual_shape
-  }
-
-  /// Set actual shape.
-  pub fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    self.actual_shape = *actual_shape;
   }
 }
 
