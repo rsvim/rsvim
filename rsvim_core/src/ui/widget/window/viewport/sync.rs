@@ -63,18 +63,16 @@ pub fn from_top_left(
     return (ViewportLineRange::default(), BTreeMap::new());
   }
 
-  unsafe {
-    match (
-      window_local_options.wrap(),
-      window_local_options.line_break(),
-    ) {
-      (false, _) => _from_top_left_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
-      (true, false) => {
-        _from_top_left_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_dcolumn)
-      }
-      (true, true) => {
-        _from_top_left_wrap_linebreak(buffer, window_actual_shape, start_line, start_dcolumn)
-      }
+  match (
+    window_local_options.wrap(),
+    window_local_options.line_break(),
+  ) {
+    (false, _) => _from_top_left_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
+    (true, false) => {
+      _from_top_left_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_dcolumn)
+    }
+    (true, true) => {
+      _from_top_left_wrap_linebreak(buffer, window_actual_shape, start_line, start_dcolumn)
     }
   }
 }
@@ -95,20 +93,15 @@ fn end_char_and_prefills(
   c: usize,
   end_width: usize,
 ) -> (usize, usize) {
-  unsafe {
-    // Fix multiple mutable references on `buffer`.
-    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
-    let c_width = raw_buffer.as_mut().width_at(l, c);
-    if c_width > end_width {
-      // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-      let c_width_before = raw_buffer.as_mut().width_before(l, c);
-      (c, end_width.saturating_sub(c_width_before))
-    } else {
-      // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
-      let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
-      (c_next, 0_usize)
-    }
+  let c_width = buffer.width_at(l, c);
+  if c_width > end_width {
+    // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+    let c_width_before = buffer.width_before(l, c);
+    (c, end_width.saturating_sub(c_width_before))
+  } else {
+    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
+    let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+    (c_next, 0_usize)
   }
 }
 
@@ -419,49 +412,45 @@ fn part1(
 ) -> (usize, usize) {
   let (wd_idx, start_c_of_wd, end_c_of_wd) = find_word_by_char(words, words_end_char_idx, c);
 
-  unsafe {
-    // Fix multiple mutable references on `buffer`.
-    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-    let end_c_width = raw_buffer.as_mut().width_before(l, end_c_of_wd);
-    if end_c_width > end_width {
-      // The current word is longer than current row, it needs to be put to next row.
+  let end_c_width = buffer.width_before(l, end_c_of_wd);
+  if end_c_width > end_width {
+    // The current word is longer than current row, it needs to be put to next row.
 
-      // Part-1
-      // Here's the **tricky** part, there are two sub-cases in this scenario:
-      // 1. For most happy cases, the word is not longer than a whole row in the
-      //    window, so it can be completely put to next row.
-      // 2. For very rare cases, the word is just too long to put in an entire row
-      //    in the window. And in this case, we fallback to the no-line-break
-      //    rendering behavior, i.e. just cut the word by chars and force rendering
-      //    the word on multiple rows in the window (because otherwise there will be
-      //    never enough places to put the whole word).
+    // Part-1
+    // Here's the **tricky** part, there are two sub-cases in this scenario:
+    // 1. For most happy cases, the word is not longer than a whole row in the
+    //    window, so it can be completely put to next row.
+    // 2. For very rare cases, the word is just too long to put in an entire row
+    //    in the window. And in this case, we fallback to the no-line-break
+    //    rendering behavior, i.e. just cut the word by chars and force rendering
+    //    the word on multiple rows in the window (because otherwise there will be
+    //    never enough places to put the whole word).
 
-      if start_c_of_wd > start_char {
-        // Part-1.1, simply wrapped this word to next row.
-        // Here we actually use the `start_c_of_wd` as the end char for current row.
+    if start_c_of_wd > start_char {
+      // Part-1.1, simply wrapped this word to next row.
+      // Here we actually use the `start_c_of_wd` as the end char for current row.
 
-        end_char_and_prefills(raw_buffer.as_mut(), bline, l, start_c_of_wd - 1, end_width)
-      } else {
-        // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
-        assert_eq!(start_c_of_wd, start_char);
-        // Record the position (c) where we cut the words into pieces.
-        *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
-
-        // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-        end_char_and_prefills(raw_buffer.as_mut(), bline, l, c, end_width)
-      }
+      end_char_and_prefills(buffer, bline, l, start_c_of_wd - 1, end_width)
     } else {
-      assert_eq!(c + 1, end_c_of_wd);
-      // The current word is not long, it can be put in current row.
-      let c_next = std::cmp::min(end_c_of_wd, bline.len_chars());
-      (c_next, 0_usize)
+      // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
+      assert_eq!(start_c_of_wd, start_char);
+      // Record the position (c) where we cut the words into pieces.
+      *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
+
+      // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+      end_char_and_prefills(buffer, bline, l, c, end_width)
     }
+  } else {
+    assert_eq!(c + 1, end_c_of_wd);
+    // The current word is not long, it can be put in current row.
+    let c_next = std::cmp::min(end_c_of_wd, bline.len_chars());
+    (c_next, 0_usize)
   }
 }
 
 #[allow(unused_variables)]
 /// Implements [`from_top_left`] with option `wrap=true` and `line-break=true`.
-unsafe fn _from_top_left_wrap_linebreak(
+fn _from_top_left_wrap_linebreak(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   start_line: usize,

@@ -1,7 +1,7 @@
 //! Buffer viewport on a window.
 
 use crate::arc_impl;
-use crate::buf::{Buffer, BufferWk};
+use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::ui::widget::window::WindowLocalOptions;
 
