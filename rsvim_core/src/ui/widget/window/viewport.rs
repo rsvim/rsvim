@@ -1749,6 +1749,12 @@ mod tests {
   fn sync_top_left_wrap_nolinebreak3() {
     let terminal_size = U16Size::new(15, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+
     let buf = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -1766,12 +1772,7 @@ mod tests {
         "ll test lines.\n",
         "",
       ];
-      let options = WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap();
-      let actual = make_window(terminal_size, buf.clone(), &options);
+      let actual = make_window(terminal_size, buf.clone(), &win_opts);
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
