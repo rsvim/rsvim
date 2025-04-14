@@ -553,6 +553,11 @@ mod tests {
 
     let terminal_size = U16Size::new(21, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
     let buffer = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -580,17 +585,8 @@ mod tests {
       "                     ",
     ];
 
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
-    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
-    let actual = make_canvas(
-      terminal_size,
-      window_options,
-      buffer.clone(),
-      viewport.clone(),
-    );
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_from_top_left(&actual, &expect);
 
     let expect = vec![
@@ -608,15 +604,10 @@ mod tests {
     let viewport = {
       let mut buffer = wlock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::from_top_left(&mut *buffer, &actual_shape, &window_options, 4, 0);
+      let viewport = Viewport::from_top_left(&mut *buffer, &actual_shape, &win_opts, 4, 0);
       Viewport::to_arc(viewport)
     };
-    let actual = make_canvas(
-      terminal_size,
-      window_options,
-      buffer.clone(),
-      viewport.clone(),
-    );
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_from_top_left(&actual, &expect);
   }
 
@@ -626,6 +617,11 @@ mod tests {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .build()
+      .unwrap();
+
     let buffer = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -652,12 +648,8 @@ mod tests {
       "s several ",
     ];
 
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
-    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
-    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_from_top_left(&actual, &expect);
   }
 
@@ -667,6 +659,11 @@ mod tests {
 
     let terminal_size = U16Size::new(27, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .build()
+      .unwrap();
+
     let buffer = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -687,12 +684,8 @@ mod tests {
       "操作。This operation also e",
     ];
 
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
-    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
-    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_from_top_left(&actual, &expect);
   }
 
