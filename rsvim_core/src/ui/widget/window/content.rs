@@ -378,6 +378,11 @@ mod tests {
 
     let terminal_size = U16Size::new(35, 6);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
     let buffer = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -401,12 +406,8 @@ mod tests {
       "     * The extra parts are been tru",
     ];
 
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
-    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
-    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_from_top_left(&actual, &expect);
   }
 
@@ -416,6 +417,11 @@ mod tests {
 
     let terminal_size = U16Size::new(33, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
     let buffer = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -443,12 +449,8 @@ mod tests {
       "                                 ",
     ];
 
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
-    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
-    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_from_top_left(&actual, &expect);
   }
 
@@ -458,6 +460,11 @@ mod tests {
 
     let terminal_size = U16Size::new(31, 20);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
     let buffer = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -495,12 +502,8 @@ mod tests {
       "                               ",
     ];
 
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
-    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
-    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_from_top_left(&actual, &expect);
   }
 
@@ -510,6 +513,11 @@ mod tests {
 
     let terminal_size = U16Size::new(31, 20);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
     let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
     let expect = vec![
       "                               ",
@@ -534,12 +542,8 @@ mod tests {
       "                               ",
     ];
 
-    let window_options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
-    let viewport = make_viewport(terminal_size, window_options, buffer.clone());
-    let actual = make_canvas(terminal_size, window_options, buffer.clone(), viewport);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_from_top_left(&actual, &expect);
   }
 
