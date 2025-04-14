@@ -890,14 +890,16 @@ mod tests {
 
     let terminal_size = U16Size::new(20, 20);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
-    let expect = vec![""];
-
-    let options = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowLocalOptionsBuilder::default()
       .wrap(false)
       .build()
       .unwrap();
-    let actual = make_window(terminal_size, buf.clone(), &options);
+
+    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
+    let expect = vec![""];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_viewport(
       buf.clone(),
@@ -916,6 +918,11 @@ mod tests {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
     let buf = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -944,11 +951,8 @@ mod tests {
       "",
     ];
 
-    let options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
-    let actual = make_window(terminal_size, buf.clone(), &options);
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
       (1, 0),
@@ -994,6 +998,10 @@ mod tests {
 
     let terminal_size = U16Size::new(27, 6);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
     let buf = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -1016,11 +1024,7 @@ mod tests {
       "\t* The extra\t",
     ];
 
-    let options = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
-    let actual = make_window(terminal_size, buf.clone(), &options);
+    let actual = make_window(terminal_size, buf.clone(), &win_opts);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
         .into_iter()
