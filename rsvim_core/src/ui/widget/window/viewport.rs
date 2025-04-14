@@ -565,13 +565,13 @@ mod tests {
 
   use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
-  use crate::rlock;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
   use crate::ui::tree::*;
   use crate::ui::widget::window::{Window, WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::{rlock, wlock};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -1512,15 +1512,17 @@ mod tests {
 
     let terminal_size = U16Size::new(31, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
-    let expect = vec![""];
-
-    let options = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
       .unwrap();
-    let actual = make_window(terminal_size, buf.clone(), &options);
+
+    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
+    let expect = vec![""];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_viewport(
@@ -1540,15 +1542,17 @@ mod tests {
 
     let terminal_size = U16Size::new(31, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
-    let expect = vec![""];
-
-    let options = WindowLocalOptionsBuilder::default()
+    let win_opts = WindowLocalOptionsBuilder::default()
       .wrap(true)
       .line_break(false)
       .build()
       .unwrap();
-    let actual = make_window(terminal_size, buf.clone(), &options);
+
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
+    let expect = vec![""];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_viewport(
@@ -1566,6 +1570,11 @@ mod tests {
   fn sync_top_left_wrap_nolinebreak1() {
     let terminal_size = U16Size::new(15, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
     let buf = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -1580,43 +1589,36 @@ mod tests {
       ],
     );
 
-    let mut actual = {
-      let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite",
-        " simple and sma",
-        "ll test lines.\n",
-        "But still it co",
-        "ntains several ",
-        "things we want ",
-        "to test:\n",
-        "  1. When the l",
-        "ine is small en",
-        "ough to complet",
-        "ely put inside ",
-        "a row of the wi",
-        "ndow content wi",
-        "dget, then the ",
-      ];
-      let options = WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap();
-      let actual = make_window(terminal_size, buf.clone(), &options);
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport(
-        buf.clone(),
-        &actual,
-        &expect,
-        0,
-        4,
-        &expect_fills,
-        &expect_fills,
-      );
-      actual
-    };
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite",
+      " simple and sma",
+      "ll test lines.\n",
+      "But still it co",
+      "ntains several ",
+      "things we want ",
+      "to test:\n",
+      "  1. When the l",
+      "ine is small en",
+      "ough to complet",
+      "ely put inside ",
+      "a row of the wi",
+      "ndow content wi",
+      "dget, then the ",
+    ];
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = rlock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_fills,
+      &expect_fills,
+    );
 
     {
       let expect = vec![
@@ -1636,7 +1638,10 @@ mod tests {
         "t affect the re",
         "ndering.\n",
       ];
-      actual.sync_from_top_left(2, 0);
+      let actual = {
+        let mut buf = wlock!(buf);
+        Viewport::from_top_left(&mut *buf, window.actual_shape(), &win_opts, 2, 0)
+      };
       let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
@@ -1654,6 +1659,12 @@ mod tests {
   fn sync_top_left_wrap_nolinebreak2() {
     let terminal_size = U16Size::new(15, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+
     let buf = make_buffer_from_lines(
       terminal_size.height(),
       buf_opts,
@@ -1668,43 +1679,36 @@ mod tests {
       ],
     );
 
-    let mut actual = {
-      let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite",
-        " simple and sma",
-        "ll test lines.\n",
-        "But still it co",
-        "ntains several ",
-        "things we want ",
-        "to test:\n",
-        "  1. When the l",
-        "ine is small en",
-        "ough to complet",
-        "ely put inside ",
-        "a row of the wi",
-        "ndow content wi",
-        "dget, then the ",
-      ];
-      let options = WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap();
-      let actual = make_window(terminal_size, buf.clone(), &options);
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport(
-        buf.clone(),
-        &actual,
-        &expect,
-        0,
-        4,
-        &expect_fills,
-        &expect_fills,
-      );
-      actual
-    };
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite",
+      " simple and sma",
+      "ll test lines.\n",
+      "But still it co",
+      "ntains several ",
+      "things we want ",
+      "to test:\n",
+      "  1. When the l",
+      "ine is small en",
+      "ough to complet",
+      "ely put inside ",
+      "a row of the wi",
+      "ndow content wi",
+      "dget, then the ",
+    ];
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = rlock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      4,
+      &expect_fills,
+      &expect_fills,
+    );
 
     {
       let expect = vec![
@@ -1724,7 +1728,10 @@ mod tests {
         "n and again. Th",
         "is operation al",
       ];
-      actual.sync_from_top_left(6, 0);
+      let actual = {
+        let mut buf = wlock!(buf);
+        Viewport::from_top_left(&mut *buf, window.actual_shape(), &win_opts, 6, 0)
+      };
       let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
