@@ -32,18 +32,19 @@ pub struct Window {
   // The Window content widget ID.
   content_id: InodeId,
 
+  // Buffer.
+  buffer: BufferWk,
+
   // Local window options.
   // By default these options will inherit from global options of UI.
   options: WindowLocalOptions,
-
-  buffer: BufferWk,
 
   // Viewport.
   viewport: ViewportArc,
 }
 
 impl Window {
-  pub fn new(shape: IRect, local_options: &WindowLocalOptions, buffer: BufferWk) -> Self {
+  pub fn new(shape: IRect, buffer: BufferWk, local_options: &WindowLocalOptions) -> Self {
     let options = *local_options;
 
     let window_root = WindowRootContainer::new(shape);
@@ -51,10 +52,10 @@ impl Window {
     let window_root_node = WindowNode::WindowRootContainer(window_root);
     let window_root_actual_shape = *window_root_node.actual_shape();
 
-    let viewport_options = ViewportOptions::from(local_options);
     let viewport = {
-      let mut buffer = wlock!(buffer.upgrade().unwrap());
-      Viewport::from_top_left(&buffer, &window_root_actual_shape, local_options, 0, 0)
+      let buffer = buffer.upgrade().unwrap();
+      let mut buffer = wlock!(buffer);
+      Viewport::from_top_left(&mut *buffer, &window_root_actual_shape, local_options, 0, 0)
     };
     let viewport = Viewport::to_arc(viewport);
 
