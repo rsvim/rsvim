@@ -13,7 +13,6 @@ use crate::wlock;
 pub use crate::ui::widget::window::opt::*;
 pub use crate::ui::widget::window::viewport::*;
 
-use std::convert::From;
 use std::sync::Arc;
 // use tracing::trace;
 
@@ -41,6 +40,9 @@ pub struct Window {
 
   // Viewport.
   viewport: ViewportArc,
+
+  // Cursor viewport.
+  cursor_viewport: CursorViewportArc,
 }
 
 impl Window {
@@ -52,9 +54,16 @@ impl Window {
     let window_root_node = WindowNode::WindowRootContainer(window_root);
     let window_root_actual_shape = *window_root_node.actual_shape();
 
-    let viewport_options = ViewportOptions::from(local_options);
-    let viewport = Viewport::new(&viewport_options, buffer.clone(), &window_root_actual_shape);
+    let (viewport, cursor_viewport) = {
+      let buffer = buffer.upgrade().unwrap();
+      let mut buffer = wlock!(buffer);
+      let viewport =
+        Viewport::from_top_left(&mut buffer, &window_root_actual_shape, local_options, 0, 0);
+      let cursor_viewport = CursorViewport::from_viewport_top_left(&viewport);
+      (viewport, cursor_viewport)
+    };
     let viewport = Viewport::to_arc(viewport);
+    let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
     let mut base = Itree::new(window_root_node);
 
@@ -70,6 +79,7 @@ impl Window {
       buffer,
       options,
       viewport,
+      cursor_viewport,
     }
   }
 }
@@ -171,8 +181,6 @@ impl Window {
   /// Set window local options.
   pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = *options;
-    let viewport_options = ViewportOptions::from(&self.options);
-    wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn wrap(&self) -> bool {
@@ -181,8 +189,6 @@ impl Window {
 
   pub fn set_wrap(&mut self, value: bool) {
     self.options.set_wrap(value);
-    let viewport_options = ViewportOptions::from(&self.options);
-    wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn line_break(&self) -> bool {
@@ -191,8 +197,6 @@ impl Window {
 
   pub fn set_line_break(&mut self, value: bool) {
     self.options.set_line_break(value);
-    let viewport_options = ViewportOptions::from(&self.options);
-    wlock!(self.viewport).set_options(&viewport_options);
   }
 
   pub fn scroll_off(&self) -> u16 {
@@ -201,24 +205,45 @@ impl Window {
 
   pub fn set_scroll_off(&mut self, value: u16) {
     self.options.set_scroll_off(value);
-    let viewport_options = ViewportOptions::from(&self.options);
-    wlock!(self.viewport).set_options(&viewport_options);
   }
+}
+// Options }
 
+// Viewport {
+impl Window {
   /// Get viewport.
   pub fn viewport(&self) -> ViewportArc {
     self.viewport.clone()
+  }
+
+  /// Set viewport.
+  pub fn set_viewport(&mut self, viewport: ViewportArc) {
+    self.viewport = viewport;
+  }
+
+  /// Get cursor viewport.
+  pub fn cursor_viewport(&self) -> CursorViewportArc {
+    self.cursor_viewport.clone()
+  }
+
+  /// Set cursor viewport.
+  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
+    self.cursor_viewport = cursor_viewport;
   }
 
   /// Get buffer.
   pub fn buffer(&self) -> BufferWk {
     self.buffer.clone()
   }
-}
-// Options }
 
-// Viewport {
-impl Window {}
+  /// Get window content widget.
+  pub fn window_content(&self) -> &WindowContent {
+    match self.base.node(&self.content_id) {
+      Some(WindowNode::WindowContent(w)) => w,
+      _ => unreachable!(),
+    }
+  }
+}
 // Viewport }
 
 #[derive(Debug, Clone)]

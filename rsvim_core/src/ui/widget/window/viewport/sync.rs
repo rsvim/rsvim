@@ -1,10 +1,9 @@
 //! Internal implementations for Viewport.
 
-use crate::buf::{Buffer, BufferWk};
+use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::ui::widget::window::viewport::RowViewport;
-use crate::ui::widget::window::{LineViewport, ViewportOptions};
-use crate::wlock;
+use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
@@ -51,26 +50,29 @@ impl ViewportLineRange {
 // Given the buffer and window size, collect information from start line and column, i.e. from the
 // top-left corner.
 pub fn from_top_left(
-  options: &ViewportOptions,
-  buffer: BufferWk,
-  actual_shape: &U16Rect,
+  buffer: &mut Buffer,
+  window_actual_shape: &U16Rect,
+  window_local_options: &WindowLocalOptions,
   start_line: usize,
   start_dcolumn: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   // If window is zero-sized.
-  let height = actual_shape.height();
-  let width = actual_shape.width();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
   if height == 0 || width == 0 {
     return (ViewportLineRange::default(), BTreeMap::new());
   }
 
-  match (options.wrap, options.line_break) {
-    (false, _) => _from_top_left_nowrap(options, buffer, actual_shape, start_line, start_dcolumn),
+  match (
+    window_local_options.wrap(),
+    window_local_options.line_break(),
+  ) {
+    (false, _) => _from_top_left_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
     (true, false) => {
-      _from_top_left_wrap_nolinebreak(options, buffer, actual_shape, start_line, start_dcolumn)
+      _from_top_left_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_dcolumn)
     }
     (true, true) => {
-      _from_top_left_wrap_linebreak(options, buffer, actual_shape, start_line, start_dcolumn)
+      _from_top_left_wrap_linebreak(buffer, window_actual_shape, start_line, start_dcolumn)
     }
   }
 }
@@ -84,38 +86,35 @@ fn slice2line(s: &RopeSlice) -> String {
   builder
 }
 
-unsafe fn end_char_and_prefills(
-  mut raw_buffer: NonNull<Buffer>,
+fn end_char_and_prefills(
+  buffer: &mut Buffer,
   bline: &RopeSlice,
   l: usize,
   c: usize,
   end_width: usize,
 ) -> (usize, usize) {
-  unsafe {
-    let c_width = raw_buffer.as_mut().width_at(l, c);
-    if c_width > end_width {
-      // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-      let c_width_before = raw_buffer.as_mut().width_before(l, c);
-      (c, end_width.saturating_sub(c_width_before))
-    } else {
-      // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
-      let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
-      (c_next, 0_usize)
-    }
+  let c_width = buffer.width_at(l, c);
+  if c_width > end_width {
+    // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+    let c_width_before = buffer.width_before(l, c);
+    (c, end_width.saturating_sub(c_width_before))
+  } else {
+    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
+    let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+    (c_next, 0_usize)
   }
 }
 
 #[allow(unused_variables, clippy::explicit_counter_loop)]
 /// Implements [`from_top_left`] with option `wrap=false`.
 fn _from_top_left_nowrap(
-  _options: &ViewportOptions,
-  buffer: BufferWk,
-  actual_shape: &U16Rect,
+  buffer: &mut Buffer,
+  window_actual_shape: &U16Rect,
   start_line: usize,
-  start_dcol_on_line: usize,
+  start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
-  let height = actual_shape.height();
-  let width = actual_shape.width();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
 
   assert!(height > 0);
   assert!(width > 0);
@@ -126,14 +125,7 @@ fn _from_top_left_nowrap(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for write.
-  let buffer = buffer.upgrade().unwrap();
-  let mut buffer = wlock!(buffer);
-
   unsafe {
-    // Fix mutable borrow on `buffer`.
-    let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
     // trace!(
     //   "buffer.get_line ({:?}):{:?}",
     //   start_line,
@@ -143,6 +135,8 @@ fn _from_top_left_nowrap(
     //   }
     // );
 
+    // Fix multiple mutable references on `buffer`.
+    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
     match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
@@ -171,16 +165,18 @@ fn _from_top_left_nowrap(
           } else {
             let start_char = raw_buffer
               .as_mut()
-              .char_after(current_line, start_dcol_on_line)
+              .char_after(current_line, start_column)
               .unwrap_or(0_usize);
             let start_fills = {
               let width_before = raw_buffer.as_mut().width_before(current_line, start_char);
-              width_before.saturating_sub(start_dcol_on_line)
+              width_before.saturating_sub(start_column)
             };
 
-            let end_width = start_dcol_on_line + width as usize;
+            let end_width = start_column + width as usize;
             let (end_char, end_fills) = match raw_buffer.as_mut().char_at(current_line, end_width) {
-              Some(c) => end_char_and_prefills(raw_buffer, &bline, current_line, c, end_width),
+              Some(c) => {
+                end_char_and_prefills(raw_buffer.as_mut(), &bline, current_line, c, end_width)
+              }
               None => {
                 // If the char not found, it means the `end_width` is too long than the whole line.
                 // So the char next to the line's last char is the end char.
@@ -221,14 +217,13 @@ fn _from_top_left_nowrap(
 #[allow(unused_variables)]
 /// Implements [`from_top_left`] with option `wrap=true` and `line-break=false`.
 fn _from_top_left_wrap_nolinebreak(
-  _options: &ViewportOptions,
-  buffer: BufferWk,
-  actual_shape: &U16Rect,
+  buffer: &mut Buffer,
+  window_actual_shape: &U16Rect,
   start_line: usize,
-  start_dcol_on_line: usize,
+  start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
-  let height = actual_shape.height();
-  let width = actual_shape.width();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
 
   assert!(height > 0);
   assert!(width > 0);
@@ -238,10 +233,6 @@ fn _from_top_left_wrap_nolinebreak(
   //   height,
   //   width
   // );
-
-  // Get buffer arc pointer, and lock for write.
-  let buffer = buffer.upgrade().unwrap();
-  let mut buffer = wlock!(buffer);
 
   // trace!(
   //   "buffer.get_line ({:?}):'{:?}'",
@@ -253,12 +244,11 @@ fn _from_top_left_wrap_nolinebreak(
   // );
 
   unsafe {
-    // Fix mutable borrow on `buffer`.
-    let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
+    // Fix multiple mutable references on `buffer`.
+    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-    match buffer.get_rope().get_lines_at(start_line) {
+    match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
       Some(buflines) => {
         // The `start_line` is inside the buffer.
 
@@ -288,21 +278,23 @@ fn _from_top_left_wrap_nolinebreak(
 
             let mut start_char = raw_buffer
               .as_mut()
-              .char_after(current_line, start_dcol_on_line)
+              .char_after(current_line, start_column)
               .unwrap_or(0_usize);
             let start_fills = {
               let width_before = raw_buffer.as_mut().width_before(current_line, start_char);
-              width_before.saturating_sub(start_dcol_on_line)
+              width_before.saturating_sub(start_column)
             };
 
-            let mut end_width = start_dcol_on_line + width as usize;
+            let mut end_width = start_column + width as usize;
             let mut end_fills = 0_usize;
 
             assert!(wrow < height);
             while wrow < height {
               let (end_char, end_fills_result) =
                 match raw_buffer.as_mut().char_at(current_line, end_width) {
-                  Some(c) => end_char_and_prefills(raw_buffer, &bline, current_line, c, end_width),
+                  Some(c) => {
+                    end_char_and_prefills(raw_buffer.as_mut(), &bline, current_line, c, end_width)
+                  }
                   None => {
                     // If the char not found, it means the `end_width` is too long than the whole line.
                     // So the char next to the line's last char is the end char.
@@ -407,10 +399,10 @@ fn find_word_by_char(
 
 #[allow(clippy::too_many_arguments)]
 /// Part-1 of the processing algorithm in `_from_top_left_wrap_linebreak`.
-unsafe fn part1(
+fn part1(
   words: &[&str],
   words_end_char_idx: &HashMap<usize, usize>,
-  mut raw_buffer: NonNull<Buffer>,
+  buffer: &mut Buffer,
   bline: &RopeSlice,
   l: usize,
   c: usize,
@@ -420,55 +412,52 @@ unsafe fn part1(
 ) -> (usize, usize) {
   let (wd_idx, start_c_of_wd, end_c_of_wd) = find_word_by_char(words, words_end_char_idx, c);
 
-  unsafe {
-    let end_c_width = raw_buffer.as_mut().width_before(l, end_c_of_wd);
-    if end_c_width > end_width {
-      // The current word is longer than current row, it needs to be put to next row.
+  let end_c_width = buffer.width_before(l, end_c_of_wd);
+  if end_c_width > end_width {
+    // The current word is longer than current row, it needs to be put to next row.
 
-      // Part-1
-      // Here's the **tricky** part, there are two sub-cases in this scenario:
-      // 1. For most happy cases, the word is not longer than a whole row in the
-      //    window, so it can be completely put to next row.
-      // 2. For very rare cases, the word is just too long to put in an entire row
-      //    in the window. And in this case, we fallback to the no-line-break
-      //    rendering behavior, i.e. just cut the word by chars and force rendering
-      //    the word on multiple rows in the window (because otherwise there will be
-      //    never enough places to put the whole word).
+    // Part-1
+    // Here's the **tricky** part, there are two sub-cases in this scenario:
+    // 1. For most happy cases, the word is not longer than a whole row in the
+    //    window, so it can be completely put to next row.
+    // 2. For very rare cases, the word is just too long to put in an entire row
+    //    in the window. And in this case, we fallback to the no-line-break
+    //    rendering behavior, i.e. just cut the word by chars and force rendering
+    //    the word on multiple rows in the window (because otherwise there will be
+    //    never enough places to put the whole word).
 
-      if start_c_of_wd > start_char {
-        // Part-1.1, simply wrapped this word to next row.
-        // Here we actually use the `start_c_of_wd` as the end char for current row.
+    if start_c_of_wd > start_char {
+      // Part-1.1, simply wrapped this word to next row.
+      // Here we actually use the `start_c_of_wd` as the end char for current row.
 
-        end_char_and_prefills(raw_buffer, bline, l, start_c_of_wd - 1, end_width)
-      } else {
-        // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
-        assert_eq!(start_c_of_wd, start_char);
-        // Record the position (c) where we cut the words into pieces.
-        *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
-
-        // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-        end_char_and_prefills(raw_buffer, bline, l, c, end_width)
-      }
+      end_char_and_prefills(buffer, bline, l, start_c_of_wd - 1, end_width)
     } else {
-      assert_eq!(c + 1, end_c_of_wd);
-      // The current word is not long, it can be put in current row.
-      let c_next = std::cmp::min(end_c_of_wd, bline.len_chars());
-      (c_next, 0_usize)
+      // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
+      assert_eq!(start_c_of_wd, start_char);
+      // Record the position (c) where we cut the words into pieces.
+      *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
+
+      // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
+      end_char_and_prefills(buffer, bline, l, c, end_width)
     }
+  } else {
+    assert_eq!(c + 1, end_c_of_wd);
+    // The current word is not long, it can be put in current row.
+    let c_next = std::cmp::min(end_c_of_wd, bline.len_chars());
+    (c_next, 0_usize)
   }
 }
 
 #[allow(unused_variables)]
 /// Implements [`from_top_left`] with option `wrap=true` and `line-break=true`.
 fn _from_top_left_wrap_linebreak(
-  _options: &ViewportOptions,
-  buffer: BufferWk,
-  actual_shape: &U16Rect,
+  buffer: &mut Buffer,
+  window_actual_shape: &U16Rect,
   start_line: usize,
-  start_dcol_on_line: usize,
+  start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
-  let height = actual_shape.height();
-  let width = actual_shape.width();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
 
   // trace!(
   //   "_collect_from_top_left_with_wrap_linebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
@@ -477,23 +466,18 @@ fn _from_top_left_wrap_linebreak(
   //   width
   // );
 
-  // Get buffer arc pointer, and lock for write.
-  let buffer = buffer.upgrade().unwrap();
-  let mut buffer = wlock!(buffer);
-
-  trace!(
-    "buffer.get_line ({:?}):'{:?}'",
-    start_line,
-    match buffer.get_rope().get_line(start_line) {
-      Some(line) => slice2line(&line),
-      None => "None".to_string(),
-    }
-  );
+  // trace!(
+  //   "buffer.get_line ({:?}):'{:?}'",
+  //   start_line,
+  //   match raw_buffer.as_ref().get_rope().get_line(start_line) {
+  //     Some(line) => slice2line(&line),
+  //     None => "None".to_string(),
+  //   }
+  // );
 
   unsafe {
-    // Fix mutable borrow on `buffer`.
-    let mut raw_buffer = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
+    // Fix multiple mutable references on `buffer`.
+    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
     match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
@@ -525,7 +509,7 @@ fn _from_top_left_wrap_linebreak(
               .clone_line(
                 current_line,
                 0,
-                height as usize * width as usize * 2 + 16 + start_dcol_on_line,
+                height as usize * width as usize * 2 + 16 + start_column,
               )
               .unwrap();
 
@@ -543,14 +527,14 @@ fn _from_top_left_wrap_linebreak(
 
             let mut start_char = raw_buffer
               .as_mut()
-              .char_after(current_line, start_dcol_on_line)
+              .char_after(current_line, start_column)
               .unwrap_or(0_usize);
             let start_fills = {
               let width_before = raw_buffer.as_mut().width_before(current_line, start_char);
-              width_before.saturating_sub(start_dcol_on_line)
+              width_before.saturating_sub(start_column)
             };
 
-            let mut end_width = start_dcol_on_line + width as usize;
+            let mut end_width = start_column + width as usize;
             let mut end_fills = 0_usize;
 
             // Saved last word info, if it is too long to put in an entire row of window.
@@ -597,7 +581,13 @@ fn _from_top_left_wrap_linebreak(
 
                               // If the char `c` width is greater than `end_width`, the `c` itself is
                               // the end char.
-                              end_char_and_prefills(raw_buffer, &bline, current_line, c, end_width)
+                              end_char_and_prefills(
+                                raw_buffer.as_mut(),
+                                &bline,
+                                current_line,
+                                c,
+                                end_width,
+                              )
                             } else {
                               // Part-2.2, the rest part of the word is not long.
                               // Thus we can go back to *normal* algorithm just like part-1.
@@ -605,7 +595,7 @@ fn _from_top_left_wrap_linebreak(
                               part1(
                                 &words,
                                 &words_end_char_idx,
-                                raw_buffer,
+                                raw_buffer.as_mut(),
                                 &bline,
                                 current_line,
                                 c,
@@ -628,7 +618,7 @@ fn _from_top_left_wrap_linebreak(
                         part1(
                           &words,
                           &words_end_char_idx,
-                          raw_buffer,
+                          raw_buffer.as_mut(),
                           &bline,
                           current_line,
                           c,
