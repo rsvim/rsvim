@@ -67,12 +67,40 @@ pub fn from_top_left(
     window_local_options.wrap(),
     window_local_options.line_break(),
   ) {
-    (false, _) => from_top_left_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
+    (false, _) => from_top_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
     (true, false) => {
       _from_top_left_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_dcolumn)
     }
     (true, true) => {
       _from_top_left_wrap_linebreak(buffer, window_actual_shape, start_line, start_dcolumn)
+    }
+  }
+}
+
+// Calculate viewport from bottom to top.
+pub fn from_bottom(
+  buffer: &mut Buffer,
+  window_actual_shape: &U16Rect,
+  window_local_options: &WindowLocalOptions,
+  last_line: usize,
+  start_dcolumn: usize,
+) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  if height == 0 || width == 0 {
+    return (ViewportLineRange::default(), BTreeMap::new());
+  }
+
+  match (
+    window_local_options.wrap(),
+    window_local_options.line_break(),
+  ) {
+    (false, _) => from_bottom_nowrap(buffer, window_actual_shape, last_line, start_dcolumn),
+    (true, false) => {
+      unreachable!()
+    }
+    (true, true) => {
+      unreachable!()
     }
   }
 }
@@ -146,7 +174,7 @@ fn process_line_from_top_left_nowrap(
 
 #[allow(clippy::explicit_counter_loop)]
 /// Implements [`from_top_left`] with option `wrap=false`.
-fn from_top_left_nowrap(
+fn from_top_nowrap(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   start_line: usize,
@@ -222,6 +250,99 @@ fn from_top_left_nowrap(
         // trace!("9-current_line:{}, row:{}", current_line, wrow,);
         (
           ViewportLineRange::new(start_line..current_line),
+          line_viewports,
+        )
+      }
+      None => {
+        // The `start_line` is outside of the buffer.
+        // trace!("10-start_line:{}", start_line);
+        (ViewportLineRange::default(), BTreeMap::new())
+      }
+    }
+  }
+}
+
+#[allow(clippy::explicit_counter_loop)]
+/// Implements [`from_top_left`] with option `wrap=false`.
+fn from_bottom_nowrap(
+  buffer: &mut Buffer,
+  window_actual_shape: &U16Rect,
+  last_line: usize,
+  start_column: usize,
+) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
+  // trace!(
+  //   "_collect_from_top_left_with_nowrap, actual_shape:{:?}, height/width:{:?}/{:?}",
+  //   actual_shape,
+  //   height,
+  //   width
+  // );
+
+  unsafe {
+    // trace!(
+    //   "buffer.get_line ({:?}):{:?}",
+    //   start_line,
+    //   match buffer.get_line(start_line) {
+    //     Some(line) => slice2line(&line),
+    //     None => "None".to_string(),
+    //   }
+    // );
+
+    // Fix multiple mutable references on `buffer`.
+    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+    let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+
+    match raw_buffer.as_ref().get_rope().get_lines_at(last_line) {
+      // The `start_line` is in the buffer.
+      Some(buflines) => {
+        // The first `wrow` in the window maps to the `start_line` in the buffer.
+        let mut current_row: isize = height as isize - 1;
+        let mut current_line = last_line;
+
+        // The first `wrow` in the window maps to the `start_line` in the buffer.
+        for bline in buflines.reversed() {
+          // Current row goes out of viewport.
+          if current_row < 0 {
+            break;
+          }
+
+          // trace!(
+          //   "0-l:{:?}, line:'{:?}', current_line:{:?}",
+          //   l,
+          //   slice2line(&line),
+          //   current_line
+          // );
+
+          let (rows, start_fills, end_fills) = process_line_from_top_left_nowrap(
+            raw_buffer.as_mut(),
+            &bline,
+            current_line,
+            start_column,
+            current_row as u16,
+            height,
+            width,
+          );
+
+          line_viewports.insert(
+            current_line,
+            LineViewport::new(rows, start_fills, end_fills),
+          );
+
+          // Go to next row and line
+          current_line += 1;
+          current_row -= 1;
+          if current_row < 0 {
+            break;
+          }
+        }
+
+        // trace!("9-current_line:{}, row:{}", current_line, wrow,);
+        (
+          ViewportLineRange::new(last_line..current_line),
           line_viewports,
         )
       }
