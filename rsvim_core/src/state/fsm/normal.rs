@@ -171,7 +171,7 @@ impl NormalStateful {
             cursor_row.len(),
             cursor_row
           );
-          assert_eq!(cursor_row.len(), 1);
+          debug_assert_eq!(cursor_row.len(), 1);
 
           let (row_idx, row_viewport) = cursor_row[0];
           let cursor_id = tree.cursor_id().unwrap();
