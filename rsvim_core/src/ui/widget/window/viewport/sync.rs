@@ -248,7 +248,7 @@ fn _from_top_left_wrap_nolinebreak(
     let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-    match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
+    match buffer.get_rope().get_lines_at(start_line) {
       Some(buflines) => {
         // The `start_line` is inside the buffer.
 
@@ -480,7 +480,7 @@ fn _from_top_left_wrap_linebreak(
     let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-    match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
+    match buffer.get_rope().get_lines_at(start_line) {
       Some(buflines) => {
         // The `start_line` is inside the buffer.
 
