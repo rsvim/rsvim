@@ -117,14 +117,14 @@ impl Widgetable for WindowContent {
 
             let start_fills = if row_idx == first_row_idx && line_viewport.start_filled_cols() > 0 {
               start_fills_count += 1;
-              assert!(start_fills_count == 1);
+              debug_assert_eq!(start_fills_count, 1);
               line_viewport.start_filled_cols() as u16
             } else {
               0_u16
             };
             let end_fills = if row_idx == last_row_idx && line_viewport.end_filled_cols() > 0 {
               end_fills_count += 1;
-              assert!(end_fills_count == 1);
+              debug_assert_eq!(end_fills_count, 1);
               line_viewport.end_filled_cols() as u16
             } else {
               0_u16

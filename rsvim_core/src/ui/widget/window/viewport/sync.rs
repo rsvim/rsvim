@@ -116,8 +116,8 @@ fn _from_top_left_nowrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  assert!(height > 0);
-  assert!(width > 0);
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
   // trace!(
   //   "_collect_from_top_left_with_nowrap, actual_shape:{:?}, height/width:{:?}/{:?}",
   //   actual_shape,
@@ -225,8 +225,8 @@ fn _from_top_left_wrap_nolinebreak(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  assert!(height > 0);
-  assert!(width > 0);
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
   // trace!(
   //   "_collect_from_top_left_with_wrap_nolinebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
   //   actual_shape,
@@ -288,7 +288,7 @@ fn _from_top_left_wrap_nolinebreak(
             let mut end_width = start_column + width as usize;
             let mut end_fills = 0_usize;
 
-            assert!(wrow < height);
+            debug_assert!(wrow < height);
             while wrow < height {
               let (end_char, end_fills_result) =
                 match raw_buffer.as_mut().char_at(current_line, end_width) {
@@ -433,7 +433,7 @@ fn part1(
       end_char_and_prefills(buffer, bline, l, start_c_of_wd - 1, end_width)
     } else {
       // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
-      assert_eq!(start_c_of_wd, start_char);
+      debug_assert_eq!(start_c_of_wd, start_char);
       // Record the position (c) where we cut the words into pieces.
       *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
 
@@ -441,7 +441,7 @@ fn part1(
       end_char_and_prefills(buffer, bline, l, c, end_width)
     }
   } else {
-    assert_eq!(c + 1, end_c_of_wd);
+    debug_assert_eq!(c + 1, end_c_of_wd);
     // The current word is not long, it can be put in current row.
     let c_next = std::cmp::min(end_c_of_wd, bline.len_chars());
     (c_next, 0_usize)
@@ -546,7 +546,7 @@ fn _from_top_left_wrap_linebreak(
             //    current row).
             let mut last_word_is_too_long: Option<(usize, usize, usize, usize)> = None;
 
-            assert!(wrow < height);
+            debug_assert!(wrow < height);
             while wrow < height {
               let (end_char, end_fills_result) =
                 match raw_buffer.as_mut().char_at(current_line, end_width) {

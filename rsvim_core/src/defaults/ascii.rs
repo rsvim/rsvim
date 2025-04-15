@@ -15,7 +15,7 @@ pub struct AsciiControlCodeFormatter {
 /// If the value is not a valid ASCII control code.
 impl From<AsciiChar> for AsciiControlCodeFormatter {
   fn from(value: AsciiChar) -> Self {
-    assert!(value.is_ascii_control());
+    debug_assert!(value.is_ascii_control());
     AsciiControlCodeFormatter { value }
   }
 }

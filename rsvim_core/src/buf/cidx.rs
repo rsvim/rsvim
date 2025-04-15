@@ -63,22 +63,22 @@ impl ColumnIndex {
   #[cfg(debug_assertions)]
   pub fn _internal_check(&self) {
     // Check length.
-    assert!(self.char2width.len() >= self.width2char.len());
+    debug_assert!(self.char2width.len() >= self.width2char.len());
 
     // Check indexing.
     let mut last_width: Option<usize> = None;
     for (i, w) in self.char2width.iter().enumerate() {
       match last_width {
         Some(last_width1) => {
-          assert!(*w >= last_width1);
+          debug_assert!(*w >= last_width1);
         }
         None => { /* Skip */ }
       }
       last_width = Some(*w);
-      assert!(self.width2char.contains_key(w));
+      debug_assert!(self.width2char.contains_key(w));
       let c = self.width2char[w];
       // trace!("char2width[{i}]:{w:?}, width2char[{w}]:{c:?}");
-      assert!(i >= c);
+      debug_assert!(i >= c);
     }
   }
 
@@ -169,11 +169,11 @@ impl ColumnIndex {
     if char_idx == 0 {
       0
     } else if self.char2width.is_empty() {
-      assert_eq!(buf_line.len_chars(), 0);
+      debug_assert_eq!(buf_line.len_chars(), 0);
       0
     } else {
-      assert!(!self.char2width.is_empty());
-      assert!(buf_line.len_chars() > 0);
+      debug_assert!(!self.char2width.is_empty());
+      debug_assert!(buf_line.len_chars() > 0);
       if char_idx - 1 < self.char2width.len() {
         // Find width from the cache.
         self.char2width[char_idx - 1]
@@ -205,11 +205,11 @@ impl ColumnIndex {
     self._internal_check();
 
     if self.char2width.is_empty() {
-      assert_eq!(buf_line.len_chars(), 0);
+      debug_assert_eq!(buf_line.len_chars(), 0);
       0
     } else {
-      assert!(!self.char2width.is_empty());
-      assert!(buf_line.len_chars() > 0);
+      debug_assert!(!self.char2width.is_empty());
+      debug_assert!(buf_line.len_chars() > 0);
       if char_idx < self.char2width.len() {
         // Find width from the cache.
         self.char2width[char_idx]
@@ -260,11 +260,11 @@ impl ColumnIndex {
     if width == 0 {
       None
     } else if self.width2char.is_empty() {
-      assert_eq!(buf_line.len_chars(), 0);
+      debug_assert_eq!(buf_line.len_chars(), 0);
       None
     } else {
-      assert!(!self.width2char.is_empty());
-      assert!(buf_line.len_chars() > 0);
+      debug_assert!(!self.width2char.is_empty());
+      debug_assert!(buf_line.len_chars() > 0);
 
       let (last_width, _last_char_idx) = self.width2char.last_key_value().unwrap();
       if width > *last_width {
@@ -304,11 +304,11 @@ impl ColumnIndex {
     self._internal_check();
 
     if self.width2char.is_empty() {
-      assert_eq!(buf_line.len_chars(), 0);
+      debug_assert_eq!(buf_line.len_chars(), 0);
       None
     } else {
-      assert!(!self.width2char.is_empty());
-      assert!(buf_line.len_chars() > 0);
+      debug_assert!(!self.width2char.is_empty());
+      debug_assert!(buf_line.len_chars() > 0);
 
       if width == 0 {
         if *self.char2width.first().unwrap() == 0 {
@@ -357,7 +357,7 @@ impl ColumnIndex {
 
     let n = buf_line.len_chars();
     if self.char2width.is_empty() {
-      assert_eq!(n, 0);
+      debug_assert_eq!(n, 0);
       return None;
     }
 

@@ -402,7 +402,7 @@ impl BuffersManager {
       }
     };
 
-    assert!(
+    debug_assert!(
       !self
         .buffers_by_path
         .contains_key(&Some(abs_filename.clone()))
@@ -456,7 +456,7 @@ impl BuffersManager {
   ///
   /// NOTE: This is a primitive API.
   pub fn new_empty_buffer(&mut self, canvas_height: u16) -> BufferId {
-    assert!(!self.buffers_by_path.contains_key(&None));
+    debug_assert!(!self.buffers_by_path.contains_key(&None));
 
     let buf = Buffer::_new(
       canvas_height,
@@ -538,7 +538,7 @@ impl BuffersManager {
           buf.len(),
           filename
         );
-        assert!(bytes == buf.len());
+        debug_assert!(bytes == buf.len());
 
         Ok(Buffer::_new(
           canvas_height,
