@@ -212,7 +212,7 @@ impl Canvas {
     let frame = self.frame();
     let mut shaders = Vec::new();
 
-    assert!(end_col > start_col);
+    debug_assert!(end_col > start_col);
     let new_cells = frame.get_cells_at(
       point!(x: start_col, y: row),
       end_col as usize - start_col as usize,
