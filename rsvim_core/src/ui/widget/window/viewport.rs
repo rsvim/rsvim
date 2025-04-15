@@ -130,6 +130,8 @@ pub struct CursorViewport {
   line_idx: usize,
 }
 
+arc_impl!(CursorViewport);
+
 impl CursorViewport {
   /// Make new instance.
   pub fn new(char_idx: usize, line_idx: usize) -> Self {

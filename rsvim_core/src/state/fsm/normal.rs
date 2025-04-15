@@ -5,8 +5,8 @@ use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::*;
-use crate::ui::widget::window::Viewport;
-use crate::wlock;
+use crate::ui::widget::window::{CursorViewport, Viewport};
+use crate::{rlock, wlock};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use std::ptr::NonNull;
@@ -16,55 +16,43 @@ use tracing::trace;
 /// The normal editing mode.
 pub struct NormalStateful {}
 
-unsafe fn last_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
-  unsafe { raw_buffer.as_ref().get_rope().line(line_idx).len_chars() - 1 }
+fn last_char_on_line(buffer: &Buffer, line_idx: usize) -> usize {
+  buffer.get_rope().line(line_idx).len_chars() - 1
 }
 
-unsafe fn last_visible_char_on_line_since(
-  raw_buffer: NonNull<Buffer>,
-  line_idx: usize,
-  char_idx: usize,
-) -> usize {
-  unsafe {
-    let bline = raw_buffer.as_ref().get_rope().get_line(line_idx).unwrap();
-    let mut c = char_idx;
-    while raw_buffer.as_ref().char_width(bline.get_char(c).unwrap()) == 0 {
-      c = c.saturating_sub(1);
-      if c == 0 {
-        break;
-      }
+fn last_visible_char_on_line_since(buffer: &Buffer, line_idx: usize, char_idx: usize) -> usize {
+  let bline = buffer.get_rope().get_line(line_idx).unwrap();
+  let mut c = char_idx;
+  while buffer.char_width(bline.get_char(c).unwrap()) == 0 {
+    c = c.saturating_sub(1);
+    if c == 0 {
+      break;
     }
-    c
   }
+  c
 }
 
-unsafe fn last_visible_char_on_line(raw_buffer: NonNull<Buffer>, line_idx: usize) -> usize {
-  unsafe {
-    let c = last_char_on_line(raw_buffer, line_idx);
-    last_visible_char_on_line_since(raw_buffer, line_idx, c)
-  }
+fn last_visible_char_on_line(buffer: &Buffer, line_idx: usize) -> usize {
+  let c = last_char_on_line(buffer, line_idx);
+  last_visible_char_on_line_since(buffer, line_idx, c)
 }
 
-unsafe fn adjust_cursor_char_idx_on_vertical_motion(
-  mut raw_buffer: NonNull<Buffer>,
+fn adjust_cursor_char_idx_on_vertical_motion(
+  buffer: &mut Buffer,
   cursor_line_idx: usize,
   cursor_char_idx: usize,
   line_idx: usize,
 ) -> usize {
-  unsafe {
-    let cursor_col_idx = raw_buffer
-      .as_mut()
-      .width_before(cursor_line_idx, cursor_char_idx);
-    let char_idx = match raw_buffer.as_mut().char_after(line_idx, cursor_col_idx) {
-      Some(char_idx) => char_idx,
-      None => last_visible_char_on_line(raw_buffer, line_idx),
-    };
-    trace!(
-      "cursor_line_idx:{},cursor_col_idx:{},line_idx:{},char_idx:{}",
-      cursor_line_idx, cursor_col_idx, line_idx, char_idx
-    );
-    char_idx
-  }
+  let cursor_col_idx = buffer.width_before(cursor_line_idx, cursor_char_idx);
+  let char_idx = match buffer.char_after(line_idx, cursor_col_idx) {
+    Some(char_idx) => char_idx,
+    None => last_visible_char_on_line(buffer, line_idx),
+  };
+  trace!(
+    "cursor_line_idx:{},cursor_col_idx:{},line_idx:{},char_idx:{}",
+    cursor_line_idx, cursor_col_idx, line_idx, char_idx
+  );
+  char_idx
 }
 
 impl Stateful for NormalStateful {
@@ -139,84 +127,80 @@ impl NormalStateful {
 
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
-        let viewport = current_window.viewport();
-        let mut viewport = wlock!(viewport);
-        let buffer = viewport.buffer();
+        let buffer = current_window.buffer();
         let buffer = buffer.upgrade().unwrap();
         let mut buffer = wlock!(buffer);
-        unsafe {
-          // Fix multiple mutable references on `buffer`.
-          let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
-          let cursor_move_result = match command {
-            Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
-              self._cursor_move_vertically(&viewport, raw_buffer, command)
-            }
-            Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
-              self._cursor_move_horizontally(&viewport, raw_buffer, command)
-            }
-            _ => unreachable!(),
-          };
-
-          trace!("cursor_move_result:{:?}", cursor_move_result);
-          if let Some((line_idx, char_idx)) = cursor_move_result {
-            viewport.set_cursor(line_idx, char_idx);
-            let cursor_row = viewport
-              .lines()
-              .get(&line_idx)
-              .unwrap()
-              .rows()
-              .iter()
-              .filter(|(_row_idx, row_viewport)| {
-                trace!(
-                  "row_viewport:{:?}, start_char_idx:{:?},end_char_idx:{:?},char_idx:{:?}",
-                  row_viewport,
-                  row_viewport.start_char_idx(),
-                  row_viewport.end_char_idx(),
-                  char_idx
-                );
-                row_viewport.start_char_idx() <= char_idx && row_viewport.end_char_idx() > char_idx
-              })
-              .collect::<Vec<_>>();
-            trace!(
-              "char_idx:{:?}, cursor_row({:?}):{:?}",
-              char_idx,
-              cursor_row.len(),
-              cursor_row
-            );
-            assert_eq!(cursor_row.len(), 1);
-
-            let (row_idx, row_viewport) = cursor_row[0];
-            let cursor_id = tree.cursor_id().unwrap();
-
-            let row_start_width = raw_buffer
-              .as_mut()
-              .width_before(line_idx, row_viewport.start_char_idx());
-            let char_start_width = raw_buffer.as_mut().width_before(line_idx, char_idx);
-            let col_idx = (char_start_width - row_start_width) as isize;
-            let row_idx = *row_idx as isize;
-            tree.bounded_move_to(cursor_id, col_idx, row_idx);
-            trace!(
-              "(after) cursor node position x/y:{:?}/{:?}",
-              col_idx, row_idx
-            );
+        let viewport = current_window.viewport();
+        let viewport = rlock!(viewport);
+        let cursor_viewport = current_window.cursor_viewport();
+        let cursor_viewport = rlock!(cursor_viewport);
+        let cursor_move_result = match command {
+          Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
+            self._cursor_move_vertically(&viewport, &cursor_viewport, &mut *buffer, command)
           }
-          // Or, just do nothing, stay at where you are
+          Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
+            self._cursor_move_horizontally(&viewport, &cursor_viewport, &mut *buffer, command)
+          }
+          _ => unreachable!(),
+        };
+
+        trace!("cursor_move_result:{:?}", cursor_move_result);
+        if let Some((line_idx, char_idx)) = cursor_move_result {
+          current_window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::new(
+            char_idx, line_idx,
+          )));
+          let cursor_row = viewport
+            .lines()
+            .get(&line_idx)
+            .unwrap()
+            .rows()
+            .iter()
+            .filter(|(_row_idx, row_viewport)| {
+              trace!(
+                "row_viewport:{:?}, start_char_idx:{:?},end_char_idx:{:?},char_idx:{:?}",
+                row_viewport,
+                row_viewport.start_char_idx(),
+                row_viewport.end_char_idx(),
+                char_idx
+              );
+              row_viewport.start_char_idx() <= char_idx && row_viewport.end_char_idx() > char_idx
+            })
+            .collect::<Vec<_>>();
+          trace!(
+            "char_idx:{:?}, cursor_row({:?}):{:?}",
+            char_idx,
+            cursor_row.len(),
+            cursor_row
+          );
+          assert_eq!(cursor_row.len(), 1);
+
+          let (row_idx, row_viewport) = cursor_row[0];
+          let cursor_id = tree.cursor_id().unwrap();
+
+          let row_start_width = buffer.width_before(line_idx, row_viewport.start_char_idx());
+          let char_start_width = buffer.width_before(line_idx, char_idx);
+          let col_idx = (char_start_width - row_start_width) as isize;
+          let row_idx = *row_idx as isize;
+          tree.bounded_move_to(cursor_id, col_idx, row_idx);
+          trace!(
+            "(after) cursor node position x/y:{:?}/{:?}",
+            col_idx, row_idx
+          );
         }
+        // Or, just do nothing, stay at where you are
       }
     }
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
   /// Returns the `line_idx` and `char_idx` for the cursor.
-  unsafe fn _cursor_move_vertically(
+  fn _cursor_move_vertically(
     &self,
     viewport: &Viewport,
-    raw_buffer: NonNull<Buffer>,
+    cursor_viewport: &CursorViewport,
+    buffer: &mut Buffer,
     command: Command,
   ) -> Option<(usize, usize)> {
-    trace!("command:{:?}", command);
-    let cursor_viewport = viewport.cursor();
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
 
@@ -244,72 +228,64 @@ impl NormalStateful {
       return None;
     }
 
-    unsafe {
-      match raw_buffer.as_ref().get_rope().get_line(line_idx) {
-        Some(line) => {
-          trace!("line.len_chars:{}", line.len_chars());
-          if line.len_chars() == 0 {
-            return None;
-          }
-        }
-        None => {
-          trace!("get_line not found:{}", line_idx);
+    match buffer.get_rope().get_line(line_idx) {
+      Some(line) => {
+        trace!("line.len_chars:{}", line.len_chars());
+        if line.len_chars() == 0 {
           return None;
         }
       }
-      let char_idx = adjust_cursor_char_idx_on_vertical_motion(
-        raw_buffer,
-        cursor_line_idx,
-        cursor_char_idx,
-        line_idx,
-      );
-      Some((line_idx, char_idx))
+      None => {
+        trace!("get_line not found:{}", line_idx);
+        return None;
+      }
     }
+    let char_idx =
+      adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
+    Some((line_idx, char_idx))
   }
 
   /// Returns the `line_idx` and `char_idx` for the cursor.
-  unsafe fn _cursor_move_horizontally(
+  fn _cursor_move_horizontally(
     &self,
     viewport: &Viewport,
-    raw_buffer: NonNull<Buffer>,
+    cursor_viewport: &CursorViewport,
+    buffer: &mut Buffer,
     command: Command,
   ) -> Option<(usize, usize)> {
-    let cursor_viewport = viewport.cursor();
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
 
-    unsafe {
-      match raw_buffer.as_ref().get_rope().get_line(cursor_line_idx) {
-        Some(line) => {
-          if line.len_chars() == 0 {
-            return None;
-          }
+    match buffer.get_rope().get_line(cursor_line_idx) {
+      Some(line) => {
+        if line.len_chars() == 0 {
+          return None;
         }
-        None => return None,
       }
-
-      let char_idx = match command {
-        Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n),
-        Command::CursorMoveRight(n) => {
-          let expected = cursor_char_idx.saturating_add(n);
-          let last_char_idx = {
-            debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
-            let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
-            let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-            let last_char_on_row = last_row_viewport.end_char_idx() - 1;
-            trace!(
-              "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
-              cursor_char_idx, expected, last_row_viewport, last_char_on_row
-            );
-            last_visible_char_on_line_since(raw_buffer, cursor_line_idx, last_char_on_row)
-          };
-          std::cmp::min(expected, last_char_idx)
-        }
-        _ => unreachable!(),
-      };
-
-      Some((cursor_line_idx, char_idx))
+      None => return None,
     }
+
+    let char_idx = match command {
+      Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n),
+      Command::CursorMoveRight(n) => {
+        let expected = cursor_char_idx.saturating_add(n);
+        let last_char_idx = {
+          debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
+          let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
+          let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+          let last_char_on_row = last_row_viewport.end_char_idx() - 1;
+          trace!(
+            "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
+            cursor_char_idx, expected, last_row_viewport, last_char_on_row
+          );
+          last_visible_char_on_line_since(buffer, cursor_line_idx, last_char_on_row)
+        };
+        std::cmp::min(expected, last_char_idx)
+      }
+      _ => unreachable!(),
+    };
+
+    Some((cursor_line_idx, char_idx))
   }
 
   /// Cursor scroll buffer up/down in current window.
@@ -323,32 +299,34 @@ impl NormalStateful {
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
         let viewport = current_window.viewport();
-        let mut viewport = wlock!(viewport);
+        let viewport = rlock!(viewport);
+        let buffer = current_window.buffer();
+        let buffer = buffer.upgrade().unwrap();
+        let mut buffer = wlock!(buffer);
 
         let cursor_scroll_result = {
-          let buffer = viewport.buffer();
-          let buffer = buffer.upgrade().unwrap();
-          let mut buffer = wlock!(buffer);
-
-          unsafe {
-            // Fix multiple mutable references on `buffer`.
-            let raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
-
-            match command {
-              Command::CursorMoveUp(_n) | Command::CursorMoveDown(_n) => {
-                self._cursor_scroll_vertically(&viewport, raw_buffer, command)
-              }
-              Command::CursorMoveLeft(_n) | Command::CursorMoveRight(_n) => {
-                self._cursor_scroll_horizontally(&viewport, raw_buffer, command)
-              }
-              _ => unreachable!(),
+          match command {
+            Command::CursorMoveUp(_n) | Command::CursorMoveDown(_n) => {
+              self._cursor_scroll_vertically(&viewport, &mut *buffer, command)
             }
+            Command::CursorMoveLeft(_n) | Command::CursorMoveRight(_n) => {
+              self._cursor_scroll_horizontally(&viewport, &mut *buffer, command)
+            }
+            _ => unreachable!(),
           }
         };
 
         if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {
           // Sync the viewport
-          viewport.sync_from_top_left(start_line_idx, start_column_idx);
+          let window_actual_shape = current_window.window_content().actual_shape();
+          let window_local_options = current_window.options();
+          current_window.set_viewport(Viewport::to_arc(Viewport::from_top_left(
+            &mut *buffer,
+            window_actual_shape,
+            window_local_options,
+            start_line_idx,
+            start_column_idx,
+          )));
         }
         // Or, just do nothing, keep the old viewport.
       }
@@ -358,107 +336,91 @@ impl NormalStateful {
   }
 
   /// Returns the `start_line_idx`/`start_column_idx` for viewport.
-  unsafe fn _cursor_scroll_vertically(
+  fn _cursor_scroll_vertically(
     &self,
     viewport: &Viewport,
-    raw_buffer: NonNull<Buffer>,
+    buffer: &Buffer,
     command: Command,
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
 
-    unsafe {
-      let line_idx = match command {
-        Command::CursorMoveUp(n) => start_line_idx.saturating_sub(n),
-        Command::CursorMoveDown(n) => {
-          // Viewport already shows the last line of buffer, cannot scroll down anymore.
-          if end_line_idx == raw_buffer.as_ref().get_rope().len_lines() {
-            return None;
-          }
-
-          // Viewport doesn't show the last line of buffer, but the rest of lines is less than `n`,
-          // so cannot scroll down `n` lines. The scrolled lines is less than `n`.
-          let expected_end_line = std::cmp::min(
-            end_line_idx.saturating_add(n),
-            raw_buffer.as_ref().get_rope().len_lines(),
-          );
-          let scrolled_lines = expected_end_line.saturating_sub(end_line_idx);
-          let expected_start_line = start_line_idx.saturating_add(scrolled_lines);
-
-          assert!(expected_start_line >= start_line_idx);
-          // If the expected (after scrolled) start line index is current start line index, then don't
-          // scroll.
-          if expected_start_line == start_line_idx {
-            return None;
-          }
-
-          trace!(
-            "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
-            start_line_idx, end_line_idx, expected_start_line
-          );
-          expected_start_line
+    let line_idx = match command {
+      Command::CursorMoveUp(n) => start_line_idx.saturating_sub(n),
+      Command::CursorMoveDown(n) => {
+        // Viewport already shows the last line of buffer, cannot scroll down anymore.
+        if end_line_idx == buffer.get_rope().len_lines() {
+          return None;
         }
-        _ => unreachable!(),
-      };
 
-      Some((line_idx, start_column_idx))
-    }
+        // Viewport doesn't show the last line of buffer, but the rest of lines is less than `n`,
+        // so cannot scroll down `n` lines. The scrolled lines is less than `n`.
+        let expected_end_line = std::cmp::min(
+          end_line_idx.saturating_add(n),
+          buffer.get_rope().len_lines(),
+        );
+        let scrolled_lines = expected_end_line.saturating_sub(end_line_idx);
+        let expected_start_line = start_line_idx.saturating_add(scrolled_lines);
+
+        assert!(expected_start_line >= start_line_idx);
+        // If the expected (after scrolled) start line index is current start line index, then don't
+        // scroll.
+        if expected_start_line == start_line_idx {
+          return None;
+        }
+
+        trace!(
+          "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
+          start_line_idx, end_line_idx, expected_start_line
+        );
+        expected_start_line
+      }
+      _ => unreachable!(),
+    };
+
+    Some((line_idx, start_column_idx))
   }
 
   /// Returns the same as [`Self::_cursor_scroll_vertically`].
-  unsafe fn _cursor_scroll_horizontally(
+  fn _cursor_scroll_horizontally(
     &self,
     viewport: &Viewport,
-    mut raw_buffer: NonNull<Buffer>,
+    buffer: &mut Buffer,
     command: Command,
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
     let start_column_idx = viewport.start_column_idx();
 
-    unsafe {
-      let start_col = match raw_buffer
-        .as_mut()
-        .char_at(start_line_idx, start_column_idx)
-      {
-        Some(start_char_idx) => match command {
-          Command::CursorMoveLeft(n) => {
-            let c = start_char_idx.saturating_sub(n);
-            raw_buffer.as_mut().width_before(start_line_idx, c)
-          }
-          Command::CursorMoveRight(n) => {
-            debug_assert!(viewport.lines().contains_key(&start_line_idx));
-            let line_viewport = viewport.lines().get(&start_line_idx).unwrap();
-            let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-            let end_char_idx = last_row_viewport.end_char_idx();
-            let expected = end_char_idx.saturating_add(n);
-            let bline = raw_buffer
-              .as_ref()
-              .get_rope()
-              .get_line(start_line_idx)
-              .unwrap();
-            let end_c = std::cmp::min(bline.len_chars(), expected);
-            let scrolled_right_columns = raw_buffer
-              .as_mut()
-              .width_before(start_line_idx, end_c)
-              .saturating_sub(
-                raw_buffer
-                  .as_mut()
-                  .width_before(start_line_idx, end_char_idx),
-              );
-            start_column_idx.saturating_add(scrolled_right_columns)
-          }
-          _ => unreachable!(),
-        },
-        None => 0_usize,
-      };
+    let start_col = match buffer.char_at(start_line_idx, start_column_idx) {
+      Some(start_char_idx) => match command {
+        Command::CursorMoveLeft(n) => {
+          let c = start_char_idx.saturating_sub(n);
+          buffer.width_before(start_line_idx, c)
+        }
+        Command::CursorMoveRight(n) => {
+          debug_assert!(viewport.lines().contains_key(&start_line_idx));
+          let line_viewport = viewport.lines().get(&start_line_idx).unwrap();
+          let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+          let end_char_idx = last_row_viewport.end_char_idx();
+          let expected = end_char_idx.saturating_add(n);
+          let bline = buffer.get_rope().get_line(start_line_idx).unwrap();
+          let end_c = std::cmp::min(bline.len_chars(), expected);
+          let scrolled_right_columns = buffer
+            .width_before(start_line_idx, end_c)
+            .saturating_sub(buffer.width_before(start_line_idx, end_char_idx));
+          start_column_idx.saturating_add(scrolled_right_columns)
+        }
+        _ => unreachable!(),
+      },
+      None => 0_usize,
+    };
 
-      if start_col == start_column_idx {
-        return None;
-      }
-
-      Some((start_line_idx, start_col))
+    if start_col == start_column_idx {
+      return None;
     }
+
+    Some((start_line_idx, start_col))
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
