@@ -5,11 +5,11 @@ use tracing::trace;
 
 use crate::inode_impl;
 use crate::prelude::*;
-use crate::ui::canvas::{self, Canvas, CursorStyle, CursorStyleFormatter};
+use crate::ui::canvas::{self, Canvas, CursorStyle};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 
-#[derive(Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 /// Cursor widget.
 pub struct Cursor {
   base: InodeBase,
@@ -35,18 +35,6 @@ impl Cursor {
       hidden: false,
       style: CursorStyle::SteadyBlock,
     }
-  }
-}
-
-impl Debug for Cursor {
-  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-    let style_formatter = CursorStyleFormatter::from(self.style);
-    f.debug_struct("Cursor")
-      .field("id", &self.base.id())
-      .field("blinking", &self.blinking)
-      .field("hidden", &self.hidden)
-      .field("style", &style_formatter)
-      .finish()
   }
 }
 
