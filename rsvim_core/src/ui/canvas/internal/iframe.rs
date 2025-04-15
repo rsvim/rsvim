@@ -67,7 +67,7 @@ impl Iframe {
   ///
   /// If index is outside of frame shape.
   pub fn idx2xy(&self, index: usize) -> (usize, usize) {
-    assert!(index <= self.cells.len());
+    debug_assert!(index <= self.cells.len());
     let x = index % self.size.width() as usize;
     let y = index / self.size.width() as usize;
     (x, y)

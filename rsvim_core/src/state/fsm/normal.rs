@@ -362,7 +362,7 @@ impl NormalStateful {
         let scrolled_lines = expected_end_line.saturating_sub(end_line_idx);
         let expected_start_line = start_line_idx.saturating_add(scrolled_lines);
 
-        assert!(expected_start_line >= start_line_idx);
+        debug_assert!(expected_start_line >= start_line_idx);
         // If the expected (after scrolled) start line index is current start line index, then don't
         // scroll.
         if expected_start_line == start_line_idx {

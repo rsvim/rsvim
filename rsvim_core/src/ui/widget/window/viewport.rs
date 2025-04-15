@@ -472,18 +472,18 @@ impl Viewport {
 
   #[cfg(debug_assertions)]
   fn _internal_check(&self) {
-    assert!(self.end_line_idx >= self.start_line_idx);
-    assert_eq!(
+    debug_assert!(self.end_line_idx >= self.start_line_idx);
+    debug_assert_eq!(
       self.end_line_idx == self.start_line_idx,
       self.lines.is_empty()
     );
-    assert!(self.lines.first_key_value().is_some());
-    assert_eq!(
+    debug_assert!(self.lines.first_key_value().is_some());
+    debug_assert_eq!(
       *self.lines.first_key_value().unwrap().0,
       self.start_line_idx
     );
-    assert!(self.lines.last_key_value().is_some());
-    assert_eq!(
+    debug_assert!(self.lines.last_key_value().is_some());
+    debug_assert_eq!(
       *self.lines.last_key_value().unwrap().0,
       self.end_line_idx - 1
     );
@@ -491,7 +491,7 @@ impl Viewport {
     let mut last_row_idx: Option<u16> = None;
     for (line_idx, line_viewport) in self.lines.iter() {
       match last_line_idx {
-        Some(last_line_idx1) => assert_eq!(last_line_idx1 + 1, *line_idx),
+        Some(last_line_idx1) => debug_assert_eq!(last_line_idx1 + 1, *line_idx),
         None => { /* Skip */ }
       }
       last_line_idx = Some(*line_idx);

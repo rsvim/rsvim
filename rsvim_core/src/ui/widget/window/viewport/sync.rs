@@ -116,8 +116,8 @@ fn _from_top_left_nowrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  assert!(height > 0);
-  assert!(width > 0);
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
   // trace!(
   //   "_collect_from_top_left_with_nowrap, actual_shape:{:?}, height/width:{:?}/{:?}",
   //   actual_shape,
@@ -225,8 +225,8 @@ fn _from_top_left_wrap_nolinebreak(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  assert!(height > 0);
-  assert!(width > 0);
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
   // trace!(
   //   "_collect_from_top_left_with_wrap_nolinebreak, actual_shape:{:?}, height/width:{:?}/{:?}",
   //   actual_shape,
@@ -288,7 +288,7 @@ fn _from_top_left_wrap_nolinebreak(
             let mut end_width = start_column + width as usize;
             let mut end_fills = 0_usize;
 
-            assert!(wrow < height);
+            debug_assert!(wrow < height);
             while wrow < height {
               let (end_char, end_fills_result) =
                 match raw_buffer.as_mut().char_at(current_line, end_width) {
@@ -546,7 +546,7 @@ fn _from_top_left_wrap_linebreak(
             //    current row).
             let mut last_word_is_too_long: Option<(usize, usize, usize, usize)> = None;
 
-            assert!(wrow < height);
+            debug_assert!(wrow < height);
             while wrow < height {
               let (end_char, end_fills_result) =
                 match raw_buffer.as_mut().char_at(current_line, end_width) {

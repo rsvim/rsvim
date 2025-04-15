@@ -309,8 +309,8 @@ where
     // );
 
     // Panics if `parent_id` not exists.
-    assert!(self.nodes.contains_key(parent_id));
-    assert!(
+    debug_assert!(self.nodes.contains_key(parent_id));
+    debug_assert!(
       self.children_ids.contains_key(parent_id),
       "children_ids {:?} doesn't contains parent_id {:?}",
       self.children_ids,
@@ -408,7 +408,7 @@ where
   /// If `parent_id` doesn't exist.
   pub fn bounded_insert(&mut self, parent_id: &InodeId, mut child_node: T) -> Option<T> {
     // Panics if `parent_id` not exists.
-    assert!(self.nodes.contains_key(parent_id));
+    debug_assert!(self.nodes.contains_key(parent_id));
 
     let parent_node = self.nodes.get(parent_id).unwrap();
     let parent_actual_shape = parent_node.actual_shape();
@@ -439,7 +439,7 @@ where
   /// If the node `id` is the root node id since root node cannot be removed.
   pub fn remove(&mut self, id: InodeId) -> Option<T> {
     // Cannot remove root node.
-    assert!(id != self.root_id);
+    debug_assert!(id != self.root_id);
 
     // Remove child from nodes collection.
     match self.nodes.remove(&id) {
@@ -771,8 +771,10 @@ where
 
       let top_left_coordpos = parent_actual_shape.coordinate_position(&top_left_pos);
       let bottom_right_coordpos = parent_actual_shape.coordinate_position(&bottom_right_pos);
-      assert!(top_left_coordpos == CoordPos::Inside || top_left_coordpos == CoordPos::OnBoundary);
-      assert!(
+      debug_assert!(
+        top_left_coordpos == CoordPos::Inside || top_left_coordpos == CoordPos::OnBoundary
+      );
+      debug_assert!(
         bottom_right_coordpos == CoordPos::Inside || bottom_right_coordpos == CoordPos::OnBoundary
       );
 
