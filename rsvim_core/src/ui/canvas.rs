@@ -6,15 +6,12 @@ use crate::prelude::*;
 // Re-export
 pub use crate::ui::canvas::frame::Frame;
 pub use crate::ui::canvas::frame::cell::Cell;
-pub use crate::ui::canvas::frame::cursor::{
-  Cursor, CursorStyle, CursorStyleFormatter, cursor_style_eq,
-};
+pub use crate::ui::canvas::frame::cursor::{Cursor, CursorStyle};
 
 use compact_str::ToCompactString;
 use crossterm;
 use geo::point;
 use paste::paste;
-use std::fmt;
 use std::fmt::Debug;
 use std::slice::Iter;
 use tracing::trace;
@@ -160,7 +157,7 @@ impl Canvas {
           shader.push(ShaderCommand::CursorShow(crossterm::cursor::Show));
         }
       }
-      if !cursor_style_eq(&cursor.style(), &prev_cursor.style()) {
+      if cursor.style() != prev_cursor.style() {
         shader.push(ShaderCommand::CursorSetCursorStyle(cursor.style()));
       }
       if cursor.pos() != prev_cursor.pos() {
@@ -323,7 +320,7 @@ impl Canvas {
   }
 }
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 /// Shader command enums.
 ///
 /// All-in-one wrapper to wrap all the [`crossterm::Command`], thus helps to return the rendering
@@ -375,142 +372,6 @@ pub enum ShaderCommand {
   TerminalSetSize(crossterm::terminal::SetSize),
 }
 
-impl fmt::Debug for ShaderCommand {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    let s = match self {
-      ShaderCommand::CursorSetCursorStyle(command) => {
-        format!(
-          "CursorSetCursorStyle({:?})",
-          CursorStyleFormatter::from(*command)
-        )
-      }
-      ShaderCommand::CursorDisableBlinking(command) => {
-        format!("CursorDisableBlinking({:?})", command)
-      }
-      ShaderCommand::CursorEnableBlinking(command) => {
-        format!("CursorEnableBlinking({:?})", command)
-      }
-      ShaderCommand::CursorHide(command) => format!("CursorHide({:?})", command),
-      ShaderCommand::CursorMoveDown(command) => {
-        format!("CursorMoveDown({:?})", command)
-      }
-      ShaderCommand::CursorMoveLeft(command) => {
-        format!("CursorMoveLeft({:?})", command)
-      }
-      ShaderCommand::CursorMoveRight(command) => {
-        format!("CursorMoveRight({:?})", command)
-      }
-      ShaderCommand::CursorMoveTo(command) => format!("CursorMoveTo({:?})", command),
-      ShaderCommand::CursorMoveToColumn(command) => {
-        format!("CursorMoveToColumn({:?})", command)
-      }
-      ShaderCommand::CursorMoveToNextLine(command) => {
-        format!("CursorMoveToNextLine({:?})", command)
-      }
-      ShaderCommand::CursorMoveToPreviousLine(command) => {
-        format!("CursorMoveToPreviousLine({:?})", command)
-      }
-      ShaderCommand::CursorMoveToRow(command) => {
-        format!("CursorMoveToRow({:?})", command)
-      }
-      ShaderCommand::CursorMoveUp(command) => format!("CursorMoveUp({:?})", command),
-      ShaderCommand::CursorRestorePosition(command) => {
-        format!("CursorRestorePosition({:?})", command)
-      }
-      ShaderCommand::CursorSavePosition(command) => {
-        format!("CursorSavePosition({:?})", command)
-      }
-      ShaderCommand::CursorShow(command) => format!("CursorShow({:?})", command),
-      ShaderCommand::EventDisableBracketedPaste(command) => {
-        format!("EventDisableBracketedPaste({:?})", command)
-      }
-      ShaderCommand::EventDisableFocusChange(command) => {
-        format!("EventDisableFocusChange({:?})", command)
-      }
-      ShaderCommand::EventDisableMouseCapture(command) => {
-        format!("EventDisableMouseCapture({:?})", command)
-      }
-      ShaderCommand::EventEnableBracketedPaste(command) => {
-        format!("EventEnableBracketedPaste({:?})", command)
-      }
-      ShaderCommand::EventEnableFocusChange(command) => {
-        format!("EventEnableFocusChange({:?})", command)
-      }
-      ShaderCommand::EventEnableMouseCapture(command) => {
-        format!("EventEnableMouseCapture({:?})", command)
-      }
-      ShaderCommand::EventPopKeyboardEnhancementFlags(command) => {
-        format!("EventPopKeyboardEnhancementFlags({:?})", command)
-      }
-      ShaderCommand::EventPushKeyboardEnhancementFlags(command) => {
-        format!("EventPushKeyboardEnhancementFlags({:?})", command)
-      }
-      ShaderCommand::StyleResetColor(command) => {
-        format!("StyleResetColor({:?})", command)
-      }
-      ShaderCommand::StyleSetAttribute(command) => {
-        format!("StyleSetAttribute({:?})", command)
-      }
-      ShaderCommand::StyleSetAttributes(command) => {
-        format!("StyleSetAttributes({:?})", command)
-      }
-      ShaderCommand::StyleSetBackgroundColor(command) => {
-        format!("StyleSetBackgroundColor({:?})", command)
-      }
-      ShaderCommand::StyleSetColors(command) => {
-        format!("StyleSetColors({:?})", command)
-      }
-      ShaderCommand::StyleSetForegroundColor(command) => {
-        format!("StyleSetForegroundColor({:?})", command)
-      }
-      ShaderCommand::StyleSetStyle(command) => {
-        format!("StyleSetStyle({:?})", command)
-      }
-      ShaderCommand::StyleSetUnderlineColor(command) => {
-        format!("StyleSetUnderlineColor({:?})", command)
-      }
-      ShaderCommand::StylePrintStyledContentString(command) => {
-        format!("StylePrintStyledContentString({:?})", command)
-      }
-      ShaderCommand::StylePrintString(command) => {
-        format!("StylePrintString({:?})", command)
-      }
-      ShaderCommand::TerminalBeginSynchronizedUpdate(command) => {
-        format!("TerminalBeginSynchronizedUpdate({:?})", command)
-      }
-      ShaderCommand::TerminalClear(command) => {
-        format!("TerminalClear({:?})", command)
-      }
-      ShaderCommand::TerminalDisableLineWrap(command) => {
-        format!("TerminalDisableLineWrap({:?})", command)
-      }
-      ShaderCommand::TerminalEnableLineWrap(command) => {
-        format!("TerminalEnableLineWrap({:?})", command)
-      }
-      ShaderCommand::TerminalEndSynchronizedUpdate(command) => {
-        format!("TerminalEndSynchronizedUpdate({:?})", command)
-      }
-      ShaderCommand::TerminalEnterAlternateScreen(command) => {
-        format!("TerminalEnterAlternateScreen({:?})", command)
-      }
-      ShaderCommand::TerminalLeaveAlternateScreen(command) => {
-        format!("TerminalLeaveAlternateScreen({:?})", command)
-      }
-      ShaderCommand::TerminalScrollDown(command) => {
-        format!("TerminalScrollDown({:?})", command)
-      }
-      ShaderCommand::TerminalScrollUp(command) => {
-        format!("TerminalScrollUp({:?})", command)
-      }
-      ShaderCommand::TerminalSetSize(command) => {
-        format!("TerminalSetSize({:?})", command)
-      }
-    };
-    let s = format!("ShaderCommand::{}", s);
-    f.debug_struct(&s).finish()
-  }
-}
-
 #[derive(Debug, Default, Clone)]
 /// The rendering updates on each draw, returns from [`Canvas::shade`] method.
 ///
@@ -543,15 +404,12 @@ impl Shader {
 
 #[cfg(test)]
 mod tests {
-  use compact_str::CompactString;
-  use std::sync::Once;
-  use tracing::info;
+  use super::*;
 
   use crate::test::log::init as test_log_init;
 
-  use super::*;
-
-  static INIT: Once = Once::new();
+  use compact_str::CompactString;
+  use tracing::info;
 
   fn int2letter(i: u8) -> char {
     (i + 65) as char
@@ -565,35 +423,8 @@ mod tests {
   }
 
   #[test]
-  fn shader_command_debug1() {
-    INIT.call_once(test_log_init);
-    info!(
-      "ShaderCommand::TerminalEndSynchronizedUpdate: {:?}",
-      ShaderCommand::TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate)
-    );
-    assert_eq!(
-      format!(
-        "{:?}",
-        ShaderCommand::TerminalEndSynchronizedUpdate(crossterm::terminal::EndSynchronizedUpdate)
-      ),
-      "ShaderCommand::TerminalEndSynchronizedUpdate(EndSynchronizedUpdate)"
-    );
-    info!(
-      "ShaderCommand::CursorSetCursorStyle(DefaultUserShape): {:?}",
-      ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::DefaultUserShape)
-    );
-    assert_eq!(
-      format!(
-        "{:?}",
-        ShaderCommand::CursorSetCursorStyle(crossterm::cursor::SetCursorStyle::DefaultUserShape)
-      ),
-      "ShaderCommand::CursorSetCursorStyle(DefaultUserShape)"
-    );
-  }
-
-  #[test]
   fn _shade_cursor1() {
-    INIT.call_once(test_log_init);
+    test_log_init();
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     let cursor1 = Cursor::default();
@@ -710,7 +541,7 @@ mod tests {
 
   #[test]
   fn _next_same_cell_in_row1() {
-    INIT.call_once(test_log_init);
+    test_log_init();
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can
@@ -730,7 +561,7 @@ mod tests {
 
   #[test]
   fn _next_same_cell_in_row2() {
-    INIT.call_once(test_log_init);
+    test_log_init();
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -786,7 +617,7 @@ mod tests {
 
   #[test]
   fn _next_same_cell_in_row3() {
-    INIT.call_once(test_log_init);
+    test_log_init();
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -831,7 +662,7 @@ mod tests {
 
   #[test]
   fn _make_print_shader1() {
-    INIT.call_once(test_log_init);
+    test_log_init();
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(
@@ -861,7 +692,7 @@ mod tests {
 
   #[test]
   fn diff1() {
-    INIT.call_once(test_log_init);
+    test_log_init();
     let mut can = Canvas::new(U16Size::new(10, 10));
 
     can.frame_mut().set_cells_at(

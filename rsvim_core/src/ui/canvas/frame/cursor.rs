@@ -3,73 +3,16 @@
 use crate::prelude::*;
 
 use geo::point;
-use std::cmp::{Eq, PartialEq};
-use std::fmt;
 
 pub type CursorStyle = crossterm::cursor::SetCursorStyle;
 
-/// Whether two `CursorStyle` equals.
-pub fn cursor_style_eq(a: &CursorStyle, b: &CursorStyle) -> bool {
-  match a {
-    CursorStyle::DefaultUserShape => {
-      matches!(b, CursorStyle::DefaultUserShape)
-    }
-    CursorStyle::BlinkingBlock => {
-      matches!(b, CursorStyle::BlinkingBlock)
-    }
-    CursorStyle::SteadyBlock => {
-      matches!(b, CursorStyle::SteadyBlock)
-    }
-    CursorStyle::BlinkingUnderScore => {
-      matches!(b, CursorStyle::BlinkingUnderScore)
-    }
-    CursorStyle::SteadyUnderScore => {
-      matches!(b, CursorStyle::SteadyUnderScore)
-    }
-    CursorStyle::BlinkingBar => {
-      matches!(b, CursorStyle::BlinkingBar)
-    }
-    CursorStyle::SteadyBar => {
-      matches!(b, CursorStyle::SteadyBar)
-    }
-  }
-}
-
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Terminal cursor.
 pub struct Cursor {
   pos: U16Pos,
   blinking: bool,
   hidden: bool,
   style: CursorStyle,
-}
-
-/// The [`CursorStyle`] formatter that helps implement the `Debug`/`Display` trait.
-///
-/// NOTE: The [`SetCursorStyle`](crossterm::cursor::SetCursorStyle) doesn't implement the
-/// `Debug`/`Display` trait before 0.28.1.
-pub struct CursorStyleFormatter {
-  value: CursorStyle,
-}
-
-impl From<CursorStyle> for CursorStyleFormatter {
-  fn from(style: CursorStyle) -> Self {
-    CursorStyleFormatter { value: style }
-  }
-}
-
-impl fmt::Debug for CursorStyleFormatter {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    match self.value {
-      CursorStyle::DefaultUserShape => write!(f, "DefaultUserShape"),
-      CursorStyle::BlinkingBlock => write!(f, "BlinkingBlock"),
-      CursorStyle::SteadyBlock => write!(f, "SteadyBlock"),
-      CursorStyle::BlinkingUnderScore => write!(f, "BlinkingUnderScore"),
-      CursorStyle::SteadyUnderScore => write!(f, "SteadyUnderScore"),
-      CursorStyle::BlinkingBar => write!(f, "BlinkingBar"),
-      CursorStyle::SteadyBar => write!(f, "SteadyBar"),
-    }
-  }
 }
 
 impl Cursor {
@@ -136,30 +79,6 @@ impl Default for Cursor {
   }
 }
 
-impl fmt::Debug for Cursor {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-    let style_formatter = CursorStyleFormatter::from(self.style);
-    f.debug_struct("Cursor")
-      .field("pos", &self.pos)
-      .field("blinking", &self.blinking)
-      .field("hidden", &self.hidden)
-      .field("style", &style_formatter)
-      .finish()
-  }
-}
-
-impl PartialEq for Cursor {
-  /// Whether two cursors equals to each other.
-  fn eq(&self, other: &Self) -> bool {
-    self.pos == other.pos
-      && self.blinking == other.blinking
-      && self.hidden == other.hidden
-      && cursor_style_eq(&self.style, &other.style)
-  }
-}
-
-impl Eq for Cursor {}
-
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -169,20 +88,7 @@ mod tests {
     let c = Cursor::default();
     assert!(!c.blinking);
     assert!(!c.hidden);
-    assert!(cursor_style_eq(&c.style(), &CursorStyle::SteadyBlock));
-  }
-
-  #[test]
-  fn cursor_style_equals1() {
-    assert!(cursor_style_eq(
-      &CursorStyle::DefaultUserShape,
-      &CursorStyle::DefaultUserShape
-    ));
-    let cs1 = CursorStyle::DefaultUserShape;
-    let cs2 = CursorStyle::BlinkingBlock;
-    let cs3 = CursorStyle::DefaultUserShape;
-    assert!(!cursor_style_eq(&cs1, &cs2));
-    assert!(cursor_style_eq(&cs1, &cs3));
+    assert_eq!(c.style(), CursorStyle::SteadyBlock);
   }
 
   #[test]
