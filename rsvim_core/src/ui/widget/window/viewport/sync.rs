@@ -134,7 +134,7 @@ fn end_char_and_prefills(
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`.
-fn process_line_from_top_left_nowrap(
+fn process_line_nowrap(
   buffer: &mut Buffer,
   bufline: &RopeSlice,
   current_line: usize,
@@ -227,7 +227,7 @@ fn from_top_nowrap(
           //   current_line
           // );
 
-          let (rows, start_fills, end_fills) = process_line_from_top_left_nowrap(
+          let (rows, start_fills, end_fills) = process_line_nowrap(
             raw_buffer.as_mut(),
             &bline,
             current_line,
@@ -317,7 +317,7 @@ fn from_bottom_nowrap(
           //   current_line
           // );
 
-          let (rows, start_fills, end_fills) = process_line_from_top_left_nowrap(
+          let (rows, start_fills, end_fills) = process_line_nowrap(
             raw_buffer.as_mut(),
             &bline,
             current_line,
