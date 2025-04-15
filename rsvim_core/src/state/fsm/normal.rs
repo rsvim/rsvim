@@ -9,7 +9,6 @@ use crate::ui::widget::window::{CursorViewport, Viewport};
 use crate::{rlock, wlock};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
-use std::ptr::NonNull;
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -136,10 +135,10 @@ impl NormalStateful {
         let cursor_viewport = rlock!(cursor_viewport);
         let cursor_move_result = match command {
           Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
-            self._cursor_move_vertically(&viewport, &cursor_viewport, &mut *buffer, command)
+            self._cursor_move_vertically(&viewport, &cursor_viewport, &mut buffer, command)
           }
           Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
-            self._cursor_move_horizontally(&viewport, &cursor_viewport, &mut *buffer, command)
+            self._cursor_move_horizontally(&viewport, &cursor_viewport, &mut buffer, command)
           }
           _ => unreachable!(),
         };
@@ -307,10 +306,10 @@ impl NormalStateful {
         let cursor_scroll_result = {
           match command {
             Command::CursorMoveUp(_n) | Command::CursorMoveDown(_n) => {
-              self._cursor_scroll_vertically(&viewport, &mut *buffer, command)
+              self._cursor_scroll_vertically(&viewport, &buffer, command)
             }
             Command::CursorMoveLeft(_n) | Command::CursorMoveRight(_n) => {
-              self._cursor_scroll_horizontally(&viewport, &mut *buffer, command)
+              self._cursor_scroll_horizontally(&viewport, &mut buffer, command)
             }
             _ => unreachable!(),
           }
@@ -321,7 +320,7 @@ impl NormalStateful {
           let window_actual_shape = current_window.window_content().actual_shape();
           let window_local_options = current_window.options();
           current_window.set_viewport(Viewport::to_arc(Viewport::from_top_left(
-            &mut *buffer,
+            &mut buffer,
             window_actual_shape,
             window_local_options,
             start_line_idx,
@@ -433,7 +432,7 @@ impl NormalStateful {
 mod tests {
   use super::*;
 
-  use crate::buf::{BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
   use crate::prelude::*;
   use crate::rlock;
   use crate::state::{State, StateArc};
@@ -451,13 +450,13 @@ mod tests {
     terminal_size: U16Size,
     window_local_opts: WindowLocalOptions,
     lines: Vec<&str>,
-  ) -> (TreeArc, StateArc, BuffersManagerArc) {
+  ) -> (TreeArc, StateArc, BuffersManagerArc, BufferArc) {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
-    let bufs = make_buffers_manager(buf_opts, vec![buf]);
+    let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
     let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
     let state = State::to_arc(State::default());
-    (tree, state, bufs)
+    (tree, state, bufs, buf)
   }
 
   fn get_viewport(tree: TreeArc) -> Viewport {
@@ -484,7 +483,7 @@ mod tests {
       TreeNode::Window(current_window) => {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = rlock!(cursor_viewport);
-        cursor_viewport.clone()
+        *cursor_viewport
       }
       _ => unreachable!(),
     }
@@ -494,7 +493,7 @@ mod tests {
   fn cursor_move_vertically_nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, _buf) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -537,7 +536,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, _buf) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -580,7 +579,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, _buf) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -636,7 +635,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, _buf) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
@@ -731,7 +730,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, _buf) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
@@ -1269,6 +1268,7 @@ mod tests {
 
   #[allow(clippy::too_many_arguments)]
   fn assert_viewport_scroll(
+    buffer: BufferArc,
     actual: &Viewport,
     expect: &Vec<&str>,
     expect_start_line: usize,
@@ -1323,7 +1323,6 @@ mod tests {
       expect_end_fills.len()
     );
 
-    let buffer = actual.buffer().upgrade().unwrap();
     let buffer = rlock!(buffer);
     let buflines = buffer
       .get_rope()
@@ -1400,7 +1399,7 @@ mod tests {
   fn cursor_scroll_vertically_nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, buf) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -1418,12 +1417,22 @@ mod tests {
     // Before cursor scroll
     {
       let viewport = get_viewport(tree.clone());
-      assert_eq!(viewport.cursor().line_idx(), 0);
-      assert_eq!(viewport.cursor().char_idx(), 0);
+      let cursor_viewport = get_cursor_viewport(tree.clone());
+      assert_eq!(cursor_viewport.line_idx(), 0);
+      assert_eq!(cursor_viewport.char_idx(), 0);
+
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
 
-      assert_viewport_scroll(&viewport, &expect, 0, 1, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
@@ -1435,13 +1444,19 @@ mod tests {
 
     // After cursor scroll
     {
-      let viewport = get_viewport(tree);
-      assert_eq!(viewport.cursor().line_idx(), 0);
-      assert_eq!(viewport.cursor().char_idx(), 0);
+      let viewport = get_viewport(tree.clone());
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
 
-      assert_viewport_scroll(&viewport, &expect, 0, 1, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
     }
   }
 
@@ -1458,7 +1473,7 @@ mod tests {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, buf) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -1477,8 +1492,6 @@ mod tests {
     {
       info!("before cursor scroll");
       let viewport = get_viewport(tree.clone());
-      assert_eq!(viewport.cursor().line_idx(), 0);
-      assert_eq!(viewport.cursor().char_idx(), 0);
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -1501,7 +1514,15 @@ mod tests {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(&viewport, &expect, 0, 8, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
@@ -1515,8 +1536,6 @@ mod tests {
     {
       info!("after cursor scroll");
       let viewport = get_viewport(tree.clone());
-      assert_eq!(viewport.cursor().line_idx(), 0);
-      assert_eq!(viewport.cursor().char_idx(), 0);
       let expect = vec![
         "Hello, RSV",
         "This is a ",
@@ -1539,7 +1558,15 @@ mod tests {
       ]
       .into_iter()
       .collect();
-      assert_viewport_scroll(&viewport, &expect, 0, 8, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
     }
   }
 
@@ -1559,7 +1586,7 @@ mod tests {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, buf) = make_tree(
       U16Size::new(10, 7),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -1592,7 +1619,15 @@ mod tests {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 0, 7, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        7,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
@@ -1620,7 +1655,15 @@ mod tests {
           .into_iter()
           .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 1, 8, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        1,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
     }
   }
 
@@ -1640,7 +1683,7 @@ mod tests {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, buf) = make_tree(
       U16Size::new(10, 5),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -1669,7 +1712,15 @@ mod tests {
         .into_iter()
         .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 0, 5, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
@@ -1693,7 +1744,15 @@ mod tests {
         .into_iter()
         .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 4, 9, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        4,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
     }
   }
 
@@ -1713,7 +1772,7 @@ mod tests {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, buf) = make_tree(
       U16Size::new(10, 5),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -1742,7 +1801,15 @@ mod tests {
         .into_iter()
         .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 0, 5, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     // Scroll-1
@@ -1766,7 +1833,15 @@ mod tests {
         .into_iter()
         .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 4, 9, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        4,
+        9,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     // Scroll-2
@@ -1784,7 +1859,15 @@ mod tests {
         .into_iter()
         .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 6, 11, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        6,
+        11,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     // Scroll-3
@@ -1808,7 +1891,15 @@ mod tests {
         .into_iter()
         .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 5, 10, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        5,
+        10,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     // Scroll-4
@@ -1832,7 +1923,15 @@ mod tests {
         .into_iter()
         .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 1, 6, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        1,
+        6,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     // Scroll-5
@@ -1856,7 +1955,15 @@ mod tests {
         .into_iter()
         .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 0, 5, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     // Scroll-6
@@ -1880,7 +1987,15 @@ mod tests {
         .into_iter()
         .collect();
 
-      assert_viewport_scroll(&viewport, &expect, 0, 5, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
     }
   }
 
@@ -1900,7 +2015,7 @@ mod tests {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, buf) = make_tree(
       U16Size::new(15, 15),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
@@ -1944,7 +2059,15 @@ mod tests {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(&viewport, &expect, 0, 4, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
@@ -1975,7 +2098,15 @@ mod tests {
         "set.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
-      assert_viewport_scroll(&viewport, &expect, 4, 6, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        4,
+        6,
+        &expect_fills,
+        &expect_fills,
+      );
     }
   }
 

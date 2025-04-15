@@ -1,7 +1,5 @@
 //! Vim window.
 
-use crossterm::cursor;
-
 use crate::buf::BufferWk;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -15,7 +13,6 @@ use crate::wlock;
 pub use crate::ui::widget::window::opt::*;
 pub use crate::ui::widget::window::viewport::*;
 
-use std::convert::From;
 use std::sync::Arc;
 // use tracing::trace;
 
@@ -61,7 +58,7 @@ impl Window {
       let buffer = buffer.upgrade().unwrap();
       let mut buffer = wlock!(buffer);
       let viewport =
-        Viewport::from_top_left(&mut *buffer, &window_root_actual_shape, local_options, 0, 0);
+        Viewport::from_top_left(&mut buffer, &window_root_actual_shape, local_options, 0, 0);
       let cursor_viewport = CursorViewport::from_viewport_top_left(&viewport);
       (viewport, cursor_viewport)
     };

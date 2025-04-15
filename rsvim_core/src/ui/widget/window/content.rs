@@ -276,7 +276,7 @@ mod tests {
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let viewport = {
       let mut buffer = wlock!(buffer);
-      Viewport::from_top_left(&mut *buffer, &actual_shape, &window_options, 0, 0)
+      Viewport::from_top_left(&mut buffer, &actual_shape, &window_options, 0, 0)
     };
     Viewport::to_arc(viewport)
   }
@@ -604,7 +604,7 @@ mod tests {
     let viewport = {
       let mut buffer = wlock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::from_top_left(&mut *buffer, &actual_shape, &win_opts, 4, 0);
+      let viewport = Viewport::from_top_left(&mut buffer, &actual_shape, &win_opts, 4, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
@@ -906,7 +906,7 @@ mod tests {
     let viewport = {
       let mut buffer = wlock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::from_top_left(&mut *buffer, &actual_shape, &win_opts, 3, 0);
+      let viewport = Viewport::from_top_left(&mut buffer, &actual_shape, &win_opts, 3, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1198,7 +1198,7 @@ mod tests {
     let viewport = {
       let mut buffer = wlock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::from_top_left(&mut *buffer, &actual_shape, &win_opts, 2, 0);
+      let viewport = Viewport::from_top_left(&mut buffer, &actual_shape, &win_opts, 2, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
