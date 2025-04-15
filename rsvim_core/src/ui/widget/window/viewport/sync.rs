@@ -138,8 +138,9 @@ fn _from_top_left_nowrap(
     // Fix multiple mutable references on `buffer`.
     let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+    let rope = raw_buffer.as_mut().get_rope_mut();
 
-    match buffer.get_rope().get_lines_at(start_line) {
+    match rope.get_lines_at(start_line) {
       // The `start_line` is in the buffer.
       Some(buflines) => {
         // The first `wrow` in the window maps to the `start_line` in the buffer.
@@ -247,8 +248,9 @@ fn _from_top_left_wrap_nolinebreak(
     // Fix multiple mutable references on `buffer`.
     let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+    let rope = raw_buffer.as_mut().get_rope_mut();
 
-    match buffer.get_rope().get_lines_at(start_line) {
+    match rope.get_lines_at(start_line) {
       Some(buflines) => {
         // The `start_line` is inside the buffer.
 
@@ -479,8 +481,9 @@ fn _from_top_left_wrap_linebreak(
     // Fix multiple mutable references on `buffer`.
     let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+    let rope = raw_buffer.as_mut().get_rope_mut();
 
-    match buffer.get_rope().get_lines_at(start_line) {
+    match rope.get_lines_at(start_line) {
       Some(buflines) => {
         // The `start_line` is inside the buffer.
 
