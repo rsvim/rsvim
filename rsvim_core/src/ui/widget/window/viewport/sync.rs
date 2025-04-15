@@ -67,7 +67,7 @@ pub fn from_top_left(
     window_local_options.wrap(),
     window_local_options.line_break(),
   ) {
-    (false, _) => _from_top_left_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
+    (false, _) => from_top_left_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
     (true, false) => {
       _from_top_left_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_dcolumn)
     }
@@ -105,9 +105,48 @@ fn end_char_and_prefills(
   }
 }
 
-#[allow(unused_variables, clippy::explicit_counter_loop)]
+/// Returns `rows`, `start_fills`, `end_fills`.
+fn process_line_from_top_left_nowrap(
+  buffer: &mut Buffer,
+  bufline: &RopeSlice,
+  current_line: usize,
+  start_column: usize,
+  current_row: u16,
+  _window_height: u16,
+  window_width: u16,
+) -> (BTreeMap<u16, RowViewport>, usize, usize) {
+  let (start_char, start_fills, end_char, end_fills) = if bufline.len_chars() == 0 {
+    (0_usize, 0_usize, 0_usize, 0_usize)
+  } else {
+    let start_char = buffer
+      .char_after(current_line, start_column)
+      .unwrap_or(0_usize);
+    let start_fills = {
+      let width_before = buffer.width_before(current_line, start_char);
+      width_before.saturating_sub(start_column)
+    };
+
+    let end_width = start_column + window_width as usize;
+    let (end_char, end_fills) = match buffer.char_at(current_line, end_width) {
+      Some(c) => end_char_and_prefills(buffer, bufline, current_line, c, end_width),
+      None => {
+        // If the char not found, it means the `end_width` is too long than the whole line.
+        // So the char next to the line's last char is the end char.
+        (bufline.len_chars(), 0_usize)
+      }
+    };
+
+    (start_char, start_fills, end_char, end_fills)
+  };
+
+  let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+  rows.insert(current_row, RowViewport::new(start_char..end_char));
+  (rows, start_fills, end_fills)
+}
+
+#[allow(clippy::explicit_counter_loop)]
 /// Implements [`from_top_left`] with option `wrap=false`.
-fn _from_top_left_nowrap(
+fn from_top_left_nowrap(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   start_line: usize,
@@ -143,13 +182,13 @@ fn _from_top_left_nowrap(
       // The `start_line` is in the buffer.
       Some(buflines) => {
         // The first `wrow` in the window maps to the `start_line` in the buffer.
-        let mut wrow = 0;
+        let mut current_row = 0_u16;
         let mut current_line = start_line;
 
         // The first `wrow` in the window maps to the `start_line` in the buffer.
         for bline in buflines {
           // Current row goes out of viewport.
-          if wrow >= height as usize {
+          if current_row >= height {
             break;
           }
 
@@ -160,35 +199,16 @@ fn _from_top_left_nowrap(
           //   current_line
           // );
 
-          let (start_char, start_fills, end_char, end_fills) = if bline.len_chars() == 0 {
-            (0_usize, 0_usize, 0_usize, 0_usize)
-          } else {
-            let start_char = raw_buffer
-              .as_mut()
-              .char_after(current_line, start_column)
-              .unwrap_or(0_usize);
-            let start_fills = {
-              let width_before = raw_buffer.as_mut().width_before(current_line, start_char);
-              width_before.saturating_sub(start_column)
-            };
+          let (rows, start_fills, end_fills) = process_line_from_top_left_nowrap(
+            raw_buffer.as_mut(),
+            &bline,
+            current_line,
+            start_column,
+            current_row,
+            height,
+            width,
+          );
 
-            let end_width = start_column + width as usize;
-            let (end_char, end_fills) = match raw_buffer.as_mut().char_at(current_line, end_width) {
-              Some(c) => {
-                end_char_and_prefills(raw_buffer.as_mut(), &bline, current_line, c, end_width)
-              }
-              None => {
-                // If the char not found, it means the `end_width` is too long than the whole line.
-                // So the char next to the line's last char is the end char.
-                (bline.len_chars(), 0_usize)
-              }
-            };
-
-            (start_char, start_fills, end_char, end_fills)
-          };
-
-          let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
-          rows.insert(wrow as u16, RowViewport::new(start_char..end_char));
           line_viewports.insert(
             current_line,
             LineViewport::new(rows, start_fills, end_fills),
@@ -196,7 +216,7 @@ fn _from_top_left_nowrap(
 
           // Go to next row and line
           current_line += 1;
-          wrow += 1;
+          current_row += 1;
         }
 
         // trace!("9-current_line:{}, row:{}", current_line, wrow,);
