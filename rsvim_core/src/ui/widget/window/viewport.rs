@@ -438,7 +438,7 @@ pub struct Viewport {
 arc_impl!(Viewport);
 
 impl Viewport {
-  /// Render viewport starts from top-left corner.
+  /// Calculate viewport downward, from top to bottom.
   ///
   /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a
   /// window.
@@ -458,6 +458,32 @@ impl Viewport {
     );
 
     debug_assert_eq!(line_idx_range.start_line_idx(), start_line_idx);
+
+    Viewport {
+      start_line_idx: line_idx_range.start_line_idx(),
+      end_line_idx: line_idx_range.end_line_idx(),
+      start_column_idx,
+      lines,
+    }
+  }
+
+  /// Calculate viewport upward, from bottom to top.
+  pub fn upward(
+    buffer: &mut Buffer,
+    window_actual_shape: &U16Rect,
+    window_local_options: &WindowLocalOptions,
+    last_line_idx: usize,
+    start_column_idx: usize,
+  ) -> Self {
+    let (line_idx_range, lines) = sync::upward(
+      buffer,
+      window_actual_shape,
+      window_local_options,
+      last_line_idx,
+      start_column_idx,
+    );
+
+    debug_assert_eq!(line_idx_range.end_line_idx(), last_line_idx + 1);
 
     Viewport {
       start_line_idx: line_idx_range.start_line_idx(),

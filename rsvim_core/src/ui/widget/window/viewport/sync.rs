@@ -65,7 +65,7 @@ pub fn downward(
     window_local_options.wrap(),
     window_local_options.line_break(),
   ) {
-    (false, _) => from_top_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
+    (false, _) => downward_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
     (true, false) => {
       _from_top_left_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_dcolumn)
     }
@@ -93,7 +93,7 @@ pub fn upward(
     window_local_options.wrap(),
     window_local_options.line_break(),
   ) {
-    (false, _) => from_bottom_nowrap(buffer, window_actual_shape, last_line, start_dcolumn),
+    (false, _) => upward_nowrap(buffer, window_actual_shape, last_line, start_dcolumn),
     (true, false) => {
       unreachable!()
     }
@@ -171,8 +171,8 @@ fn process_line_nowrap(
 }
 
 #[allow(clippy::explicit_counter_loop)]
-/// Implements [`from_top_left`] with option `wrap=false`.
-fn from_top_nowrap(
+/// Implements [`downward`] with option `wrap=false`.
+fn downward_nowrap(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   start_line: usize,
@@ -261,8 +261,8 @@ fn from_top_nowrap(
 }
 
 #[allow(clippy::explicit_counter_loop)]
-/// Implements [`from_top_left`] with option `wrap=false`.
-fn from_bottom_nowrap(
+/// Implements [`upward`] with option `wrap=false`.
+fn upward_nowrap(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   last_line: usize,
