@@ -1367,7 +1367,9 @@ mod tests_upward_nowrap {
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
-    let expect = vec![""];
+    let expect = vec![
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
@@ -1395,7 +1397,9 @@ mod tests_upward_nowrap {
     let win_opts = make_nowrap();
 
     let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
-    let expect = vec![];
+    let expect = vec![
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+    ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
