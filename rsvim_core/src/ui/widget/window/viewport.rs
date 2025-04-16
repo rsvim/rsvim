@@ -1209,11 +1209,11 @@ mod tests_upward_nowrap {
       "",
       "",
       "",
+      "",
       "Hello, RSV",
       "This is a ",
       "But still ",
       "  1. When ",
-      "  2. When ",
     ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
@@ -1249,12 +1249,12 @@ mod tests_upward_nowrap {
       "",
       "",
       "",
+      "",
       "Hello, RSV",
       "This is a ",
       "But still ",
       "  1. When ",
       "  2. When ",
-      "     * The",
       "     * The",
     ];
 

@@ -296,17 +296,15 @@ fn upward_nowrap(
 
     match raw_buffer.as_ref().get_rope().get_lines_at(end_line) {
       // The `start_line` is in the buffer.
-      Some(mut buflines) => {
+      Some(buflines) => {
         // The first `wrow` in the window maps to the `start_line` in the buffer.
         let mut current_row: isize = height as isize - 1;
-        let mut current_line = end_line;
-
-        buflines.reverse();
+        let mut current_line: isize = end_line as isize - 1;
 
         // The first `wrow` in the window maps to the `start_line` in the buffer.
-        for bline in buflines {
-          // Current row goes out of viewport.
-          if current_row < 0 {
+        for bline in buflines.reversed() {
+          // Current row goes out of window, or line goes out of buffer.
+          if current_row < 0 || current_line < 0 {
             break;
           }
 
@@ -320,7 +318,7 @@ fn upward_nowrap(
           let (rows, start_fills, end_fills) = process_line_nowrap(
             raw_buffer.as_mut(),
             &bline,
-            current_line,
+            current_line as usize,
             start_column,
             current_row as u16,
             height,
@@ -328,21 +326,23 @@ fn upward_nowrap(
           );
 
           line_viewports.insert(
-            current_line,
+            current_line as usize,
             LineViewport::new(rows, start_fills, end_fills),
           );
 
           // Go to next row and line
-          current_line += 1;
+          current_line -= 1;
           current_row -= 1;
-          if current_row < 0 {
+
+          // Current row goes out of window, or line goes out of buffer.
+          if current_row < 0 || current_line < 0 {
             break;
           }
         }
 
         // trace!("9-current_line:{}, row:{}", current_line, wrow,);
         (
-          ViewportLineRange::new(end_line..current_line),
+          ViewportLineRange::new(std::cmp::max(current_line, 0_isize) as usize..end_line),
           line_viewports,
         )
       }
