@@ -768,6 +768,121 @@ mod tests_util {
       }
     }
   }
+
+  #[allow(clippy::too_many_arguments)]
+  pub fn assert_upward(
+    buffer: BufferArc,
+    actual: &Viewport,
+    expect: &Vec<&str>,
+    expect_start_line: usize,
+    expect_end_line: usize,
+    expect_start_fills: &BTreeMap<usize, usize>,
+    expect_end_fills: &BTreeMap<usize, usize>,
+  ) {
+    info!(
+      "actual start_line/end_line:{:?}/{:?}",
+      actual.start_line_idx(),
+      actual.end_line_idx()
+    );
+    for (k, v) in actual.lines().iter() {
+      info!("actual-{:?}: {:?}", k, v);
+    }
+    info!("expect:{:?}", expect);
+
+    assert_eq!(actual.start_line_idx(), expect_start_line);
+    assert_eq!(actual.end_line_idx(), expect_end_line);
+    if actual.lines().is_empty() {
+      assert!(actual.end_line_idx() <= actual.start_line_idx());
+    } else {
+      let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
+      let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
+      assert_eq!(*first_line_idx, actual.start_line_idx());
+      assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
+    }
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      actual.lines().len()
+    );
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      expect_start_fills.len()
+    );
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      expect_end_fills.len()
+    );
+
+    let buffer = rlock!(buffer);
+    let buflines = buffer
+      .get_rope()
+      .get_lines_at(actual.start_line_idx())
+      .unwrap();
+    let total_lines = expect_end_line - expect_start_line;
+
+    for (l, line) in buflines.enumerate() {
+      if l >= total_lines {
+        break;
+      }
+      let actual_line_idx = l + expect_start_line;
+      let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
+
+      info!(
+        "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
+        l, actual_line_idx, line_viewport
+      );
+      info!(
+        "start_filled_cols expect:{:?}, actual:{}",
+        expect_start_fills.get(&actual_line_idx),
+        line_viewport.start_filled_cols()
+      );
+      assert_eq!(
+        line_viewport.start_filled_cols(),
+        *expect_start_fills.get(&actual_line_idx).unwrap()
+      );
+      info!(
+        "end_filled_cols expect:{:?}, actual:{}",
+        expect_end_fills.get(&actual_line_idx),
+        line_viewport.end_filled_cols()
+      );
+      assert_eq!(
+        line_viewport.end_filled_cols(),
+        *expect_end_fills.get(&actual_line_idx).unwrap()
+      );
+
+      let rows = &line_viewport.rows();
+      for (r, row) in rows.iter() {
+        info!("row-index-{:?}, row:{:?}", r, row);
+
+        if r > rows.first_key_value().unwrap().0 {
+          let prev_r = r - 1;
+          let prev_row = rows.get(&prev_r).unwrap();
+          info!(
+            "row-{:?}, current[{}]:{:?}, previous[{}]:{:?}",
+            r, r, row, prev_r, prev_row
+          );
+        }
+        if r < rows.last_key_value().unwrap().0 {
+          let next_r = r + 1;
+          let next_row = rows.get(&next_r).unwrap();
+          info!(
+            "row-{:?}, current[{}]:{:?}, next[{}]:{:?}",
+            r, r, row, next_r, next_row
+          );
+        }
+
+        let mut payload = String::new();
+        for c_idx in row.start_char_idx()..row.end_char_idx() {
+          let c = line.get_char(c_idx).unwrap();
+          payload.push(c);
+        }
+        info!(
+          "row-{:?}, payload actual:{:?}, expect:{:?}",
+          r, payload, expect[*r as usize]
+        );
+        assert_eq!(payload, expect[*r as usize]);
+      }
+    }
+  }
 }
 
 #[allow(unused_imports)]
@@ -1214,7 +1329,7 @@ mod tests_upward_nowrap {
     ]
     .into_iter()
     .collect();
-    assert_downward(
+    assert_upward(
       buf.clone(),
       &actual,
       &expect,
@@ -1256,7 +1371,7 @@ mod tests_upward_nowrap {
     ]
     .into_iter()
     .collect();
-    assert_downward(
+    assert_upward(
       buf.clone(),
       &actual,
       &expect,
