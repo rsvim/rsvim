@@ -17,8 +17,8 @@ macro_rules! arc_impl {
 
         /// # Safety
         ///
-        /// This api converts mutable reference to `std::ptr::NonNull` raw pointers to allow both
-        /// immutable and mutable calls on it.
+        /// Converts mutable reference to `std::ptr::NonNull` raw pointers to allow both immutable
+        /// and mutable calls on it.
         pub unsafe fn to_nonnull(value: &mut $name) -> std::ptr::NonNull<$name> {
           std::ptr::NonNull::new(&mut *value as *mut $name).unwrap()
         }
