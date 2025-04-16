@@ -376,7 +376,7 @@ fn downward_wrap_nolinebreak(
       while current_row < height && current_line < buffer_len_lines {
         let bufline = raw_buffer.as_ref().get_rope().line(current_line);
 
-        let (rows, start_fills, end_fills, tmp_current_row) = process_line_wrap_nolinebreak(
+        let (rows, start_fills, end_fills, changed_current_row) = process_line_wrap_nolinebreak(
           raw_buffer.as_mut(),
           &bufline,
           current_line,
@@ -385,7 +385,7 @@ fn downward_wrap_nolinebreak(
           height,
           width,
         );
-        current_row = tmp_current_row;
+        current_row = changed_current_row;
 
         line_viewports.insert(
           current_line,
