@@ -1176,7 +1176,7 @@ mod tests_upward_nowrap {
   use tracing::info;
 
   #[test]
-  fn new1() {
+  fn update1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1224,6 +1224,8 @@ mod tests_upward_nowrap {
       (5, 0),
       (6, 0),
       (7, 0),
+      (8, 0),
+      (9, 0),
     ]
     .into_iter()
     .collect();
@@ -1232,7 +1234,49 @@ mod tests_upward_nowrap {
       &actual,
       &expect,
       0,
-      8,
+      10,
+      &expect_fills,
+      &expect_fills,
+    );
+
+    let expect = vec![
+      "",
+      "",
+      "",
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = {
+      let mut buf = wlock!(buf);
+      Viewport::upward(&mut buf, window.actual_shape(), &win_opts, 6, 0)
+    };
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+    ]
+    .into_iter()
+    .collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      10,
       &expect_fills,
       &expect_fills,
     );
