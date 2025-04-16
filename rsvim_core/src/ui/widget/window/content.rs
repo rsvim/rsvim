@@ -10,7 +10,6 @@ use crate::{inode_impl, rlock, wlock};
 
 use geo::point;
 use std::convert::From;
-use std::ptr::NonNull;
 use tracing::trace;
 
 #[derive(Debug, Clone)]

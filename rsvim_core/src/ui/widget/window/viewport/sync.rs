@@ -8,7 +8,6 @@ use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
-use std::ptr::NonNull;
 #[allow(unused_imports)]
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;

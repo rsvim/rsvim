@@ -15,6 +15,10 @@ macro_rules! arc_impl {
           std::sync::Arc::new(parking_lot::RwLock::new(value))
         }
 
+        /// # Safety
+        ///
+        /// This api converts mutable reference to `std::ptr::NonNull` raw pointers to allow both
+        /// immutable and mutable calls on it.
         pub unsafe fn to_nonnull(value: &mut $name) -> std::ptr::NonNull<$name> {
           std::ptr::NonNull::new(&mut *value as *mut $name).unwrap()
         }
