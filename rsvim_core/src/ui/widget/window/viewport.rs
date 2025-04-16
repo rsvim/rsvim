@@ -764,7 +764,7 @@ mod tests {
   }
 
   #[test]
-  fn new_nowrap1() {
+  fn new_downward_nowrap1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -822,7 +822,7 @@ mod tests {
   }
 
   #[test]
-  fn new_nowrap2() {
+  fn new_downward_nowrap2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
@@ -878,7 +878,7 @@ mod tests {
   }
 
   #[test]
-  fn new_nowrap3() {
+  fn new_downward_nowrap3() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -923,7 +923,7 @@ mod tests {
   }
 
   #[test]
-  fn new_nowrap4() {
+  fn new_downward_nowrap4() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
@@ -948,7 +948,7 @@ mod tests {
   }
 
   #[test]
-  fn new_nowrap5() {
+  fn new_downward_nowrap5() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1025,7 +1025,7 @@ mod tests {
   }
 
   #[test]
-  fn new_nowrap6() {
+  fn new_downward_nowrap6() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 6);
@@ -1076,7 +1076,7 @@ mod tests {
   }
 
   #[test]
-  fn new_nowrap7() {
+  fn new_downward_nowrap7() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
@@ -1101,7 +1101,7 @@ mod tests {
   }
 
   #[test]
-  fn new_nowrap8() {
+  fn new_downward_nowrap8() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
