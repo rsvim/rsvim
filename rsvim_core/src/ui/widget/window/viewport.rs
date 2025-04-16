@@ -1126,7 +1126,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak1() {
+  fn new_downward_wrap_nolinebreak1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1166,7 +1166,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak2() {
+  fn new_downward_wrap_nolinebreak2() {
     let terminal_size = U16Size::new(27, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
@@ -1223,7 +1223,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak3() {
+  fn new_downward_wrap_nolinebreak3() {
     let terminal_size = U16Size::new(31, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
@@ -1256,7 +1256,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak4() {
+  fn new_downward_wrap_nolinebreak4() {
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
@@ -1271,7 +1271,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak5() {
+  fn new_downward_wrap_nolinebreak5() {
     let terminal_size = U16Size::new(31, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
@@ -1307,7 +1307,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak6() {
+  fn new_downward_wrap_nolinebreak6() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1346,7 +1346,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak7() {
+  fn new_downward_wrap_nolinebreak7() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1385,7 +1385,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak8() {
+  fn new_downward_wrap_nolinebreak8() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1424,7 +1424,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak9() {
+  fn new_downward_wrap_nolinebreak9() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1464,7 +1464,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak10() {
+  fn new_downward_wrap_nolinebreak10() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1490,7 +1490,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak11() {
+  fn new_downward_wrap_nolinebreak11() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1516,7 +1516,7 @@ mod tests {
   }
 
   #[test]
-  fn new_wrap_nolinebreak12() {
+  fn new_downward_wrap_nolinebreak12() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -1542,7 +1542,7 @@ mod tests {
   }
 
   #[test]
-  fn sync_top_left_wrap_nolinebreak1() {
+  fn update_downward_wrap_nolinebreak1() {
     let terminal_size = U16Size::new(15, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
