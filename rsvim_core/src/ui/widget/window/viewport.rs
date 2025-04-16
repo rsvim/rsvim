@@ -468,22 +468,28 @@ impl Viewport {
   }
 
   /// Calculate viewport upward, from bottom to top.
+  ///
+  /// NOTE: The `end_line_idx` itself doesn't contain in the final calculation results. This is due
+  /// to the behavior of `Rope` lines reverse iteration. For example, if we have a `rope` and it
+  /// has 10 lines `[0-9]`, when use `for line in rope.lines_at(4).reversed()`, the first line we
+  /// got is line `3`, not line `4`. While without `reversed`, the first line of `rope.lines_at(4)`
+  /// produces line `4`.
   pub fn upward(
     buffer: &mut Buffer,
     window_actual_shape: &U16Rect,
     window_local_options: &WindowLocalOptions,
-    last_line_idx: usize,
+    end_line_idx: usize,
     start_column_idx: usize,
   ) -> Self {
     let (line_idx_range, lines) = sync::upward(
       buffer,
       window_actual_shape,
       window_local_options,
-      last_line_idx,
+      end_line_idx,
       start_column_idx,
     );
 
-    debug_assert_eq!(line_idx_range.end_line_idx(), last_line_idx + 1);
+    debug_assert_eq!(line_idx_range.end_line_idx(), end_line_idx + 1);
 
     Viewport {
       start_line_idx: line_idx_range.start_line_idx(),

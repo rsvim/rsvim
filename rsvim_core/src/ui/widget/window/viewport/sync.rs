@@ -80,7 +80,7 @@ pub fn upward(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   window_local_options: &WindowLocalOptions,
-  last_line: usize,
+  end_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
@@ -93,7 +93,7 @@ pub fn upward(
     window_local_options.wrap(),
     window_local_options.line_break(),
   ) {
-    (false, _) => upward_nowrap(buffer, window_actual_shape, last_line, start_column),
+    (false, _) => upward_nowrap(buffer, window_actual_shape, end_line, start_column),
     (true, false) => {
       unreachable!()
     }
@@ -265,7 +265,7 @@ fn downward_nowrap(
 fn upward_nowrap(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
-  last_line: usize,
+  end_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
@@ -294,15 +294,17 @@ fn upward_nowrap(
     let mut raw_buffer = Buffer::to_nonnull(buffer);
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-    match raw_buffer.as_ref().get_rope().get_lines_at(last_line) {
+    match raw_buffer.as_ref().get_rope().get_lines_at(end_line) {
       // The `start_line` is in the buffer.
-      Some(buflines) => {
+      Some(mut buflines) => {
         // The first `wrow` in the window maps to the `start_line` in the buffer.
         let mut current_row: isize = height as isize - 1;
-        let mut current_line = last_line;
+        let mut current_line = end_line;
+
+        buflines.reverse();
 
         // The first `wrow` in the window maps to the `start_line` in the buffer.
-        for bline in buflines.reversed() {
+        for bline in buflines {
           // Current row goes out of viewport.
           if current_row < 0 {
             break;
@@ -340,7 +342,7 @@ fn upward_nowrap(
 
         // trace!("9-current_line:{}, row:{}", current_line, wrow,);
         (
-          ViewportLineRange::new(last_line..current_line),
+          ViewportLineRange::new(end_line..current_line),
           line_viewports,
         )
       }
