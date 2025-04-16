@@ -1136,6 +1136,31 @@ mod tests_downward_nowrap {
       &expect_fills,
     );
   }
+
+  #[test]
+  fn new9() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(20, 20);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![]);
+    let expect = vec![""];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = rlock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
 }
 
 #[allow(unused_imports)]
@@ -1328,6 +1353,62 @@ mod tests_upward_nowrap {
       &expect,
       2,
       7,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn update3() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(20, 20);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
+    let expect = vec![""];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = {
+      let mut buf = wlock!(buf);
+      Viewport::upward(&mut buf, window.actual_shape(), &win_opts, 1, 0)
+    };
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn update4() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(20, 20);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
+    let expect = vec![];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = {
+      let mut buf = wlock!(buf);
+      Viewport::upward(&mut buf, window.actual_shape(), &win_opts, 1, 0)
+    };
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
       &expect_fills,
       &expect_fills,
     );

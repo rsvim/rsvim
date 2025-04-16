@@ -191,14 +191,7 @@ fn downward_nowrap(
   // );
 
   unsafe {
-    // trace!(
-    //   "buffer.get_line ({:?}):{:?}",
-    //   start_line,
-    //   match buffer.get_line(start_line) {
-    //     Some(line) => slice2line(&line),
-    //     None => "None".to_string(),
-    //   }
-    // );
+    trace!("buffer.len_lines:{:?}", buffer.get_rope().len_lines(),);
 
     // Fix multiple mutable references on `buffer`.
     let mut raw_buffer = Buffer::to_nonnull(buffer);
@@ -260,6 +253,10 @@ fn downward_nowrap(
   }
 }
 
+fn line_in_range(line_idx: isize, buf_len_lines: usize) -> bool {
+  line_idx >= 0 && (line_idx as usize) < buf_len_lines
+}
+
 #[allow(clippy::explicit_counter_loop)]
 /// Implements [`upward`] with option `wrap=false`.
 fn upward_nowrap(
@@ -281,76 +278,66 @@ fn upward_nowrap(
   // );
 
   unsafe {
-    // trace!(
-    //   "buffer.get_line ({:?}):{:?}",
-    //   start_line,
-    //   match buffer.get_line(start_line) {
-    //     Some(line) => slice2line(&line),
-    //     None => "None".to_string(),
-    //   }
-    // );
+    trace!("buffer.len_lines:{:?}", buffer.get_rope().len_lines(),);
 
     // Fix multiple mutable references on `buffer`.
     let mut raw_buffer = Buffer::to_nonnull(buffer);
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-    match raw_buffer.as_ref().get_rope().get_lines_at(end_line) {
-      // The `start_line` is in the buffer.
-      Some(buflines) => {
-        // The first `wrow` in the window maps to the `start_line` in the buffer.
-        let mut current_row: isize = height as isize - 1;
-        let mut current_line: isize = end_line as isize - 1;
+    // The first `wrow` in the window maps to the `start_line` in the buffer.
+    let mut current_row: isize = height as isize - 1;
+    let mut current_line: isize = end_line as isize - 1;
+    let buf_len_lines = raw_buffer.as_ref().get_rope().len_lines();
 
-        // The first `wrow` in the window maps to the `start_line` in the buffer.
-        for bline in buflines.reversed() {
-          // Current row goes out of window, or line goes out of buffer.
-          if current_row < 0 || current_line < 0 {
-            break;
-          }
-
-          // trace!(
-          //   "0-l:{:?}, line:'{:?}', current_line:{:?}",
-          //   l,
-          //   slice2line(&line),
-          //   current_line
-          // );
-
-          let (rows, start_fills, end_fills) = process_line_nowrap(
-            raw_buffer.as_mut(),
-            &bline,
-            current_line as usize,
-            start_column,
-            current_row as u16,
-            height,
-            width,
-          );
-
-          line_viewports.insert(
-            current_line as usize,
-            LineViewport::new(rows, start_fills, end_fills),
-          );
-
-          // Go to next row and line
-          current_line -= 1;
-          current_row -= 1;
-
-          // Current row goes out of window, or line goes out of buffer.
-          if current_row < 0 || current_line < 0 {
-            break;
-          }
+    if line_in_range(current_line, buf_len_lines) {
+      while line_in_range(current_line, buf_len_lines) {
+        // Current row goes out of window
+        if current_row < 0 {
+          break;
         }
 
-        // trace!("9-current_line:{}, row:{}", current_line, wrow,);
-        (
-          ViewportLineRange::new((current_line + 1) as usize..end_line),
-          line_viewports,
-        )
+        let bline = raw_buffer.as_ref().get_rope().line(current_line as usize);
+
+        // trace!(
+        //   "0-l:{:?}, line:'{:?}', current_line:{:?}",
+        //   l,
+        //   slice2line(&line),
+        //   current_line
+        // );
+
+        let (rows, start_fills, end_fills) = process_line_nowrap(
+          raw_buffer.as_mut(),
+          &bline,
+          current_line as usize,
+          start_column,
+          current_row as u16,
+          height,
+          width,
+        );
+
+        line_viewports.insert(
+          current_line as usize,
+          LineViewport::new(rows, start_fills, end_fills),
+        );
+
+        // Go to next row and line
+        current_line -= 1;
+        current_row -= 1;
+
+        // Current row goes out of window, or line goes out of buffer.
+        if current_row < 0 || current_line < 0 {
+          break;
+        }
       }
-      None => {
-        // The `start_line` is outside of the buffer.
-        // trace!("10-start_line:{}", start_line);
-        (ViewportLineRange::default(), BTreeMap::new())
-      }
+
+      // trace!("9-current_line:{}, row:{}", current_line, wrow,);
+      (
+        ViewportLineRange::new((current_line + 1) as usize..end_line),
+        line_viewports,
+      )
+    } else {
+      // The `current_line` is outside of the buffer.
+      (ViewportLineRange::default(), BTreeMap::new())
     }
   }
 }
