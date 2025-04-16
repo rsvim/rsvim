@@ -342,7 +342,7 @@ fn upward_nowrap(
 
         // trace!("9-current_line:{}, row:{}", current_line, wrow,);
         (
-          ViewportLineRange::new(std::cmp::max(current_line, 0_isize) as usize..end_line),
+          ViewportLineRange::new((current_line + 1) as usize..end_line),
           line_viewports,
         )
       }
