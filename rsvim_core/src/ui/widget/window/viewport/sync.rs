@@ -47,9 +47,8 @@ impl ViewportLineRange {
   }
 }
 
-// Given the buffer and window size, collect information from start line and column, i.e. from the
-// top-left corner.
-pub fn from_top_left(
+/// Calculate viewport downward, from top to bottom.
+pub fn from_top(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   window_local_options: &WindowLocalOptions,
@@ -77,7 +76,7 @@ pub fn from_top_left(
   }
 }
 
-// Calculate viewport from bottom to top.
+/// Calculate viewport upward, from bottom to top.
 pub fn from_bottom(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,

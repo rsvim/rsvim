@@ -276,7 +276,7 @@ mod tests {
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let viewport = {
       let mut buffer = wlock!(buffer);
-      Viewport::from_top_left(&mut buffer, &actual_shape, &window_options, 0, 0)
+      Viewport::from_top(&mut buffer, &actual_shape, &window_options, 0, 0)
     };
     Viewport::to_arc(viewport)
   }
@@ -304,7 +304,7 @@ mod tests {
   }
 
   #[allow(clippy::too_many_arguments)]
-  fn assert_from_top_left(actual: &Canvas, expect: &[&str]) {
+  fn assert_from_top(actual: &Canvas, expect: &[&str]) {
     let actual = actual
       .frame()
       .raw_symbols()
@@ -369,7 +369,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -408,7 +408,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -451,7 +451,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -504,7 +504,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -544,11 +544,11 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
-  fn draw_sync_nowrap1() {
+  fn draw_update_nowrap1() {
     test_log_init();
 
     let terminal_size = U16Size::new(21, 10);
@@ -587,7 +587,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
 
     let expect = vec![
       "  2. When the line is",
@@ -604,11 +604,11 @@ mod tests {
     let viewport = {
       let mut buffer = wlock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::from_top_left(&mut buffer, &actual_shape, &win_opts, 4, 0);
+      let viewport = Viewport::from_top(&mut buffer, &actual_shape, &win_opts, 4, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -650,7 +650,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -686,7 +686,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -715,7 +715,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -777,7 +777,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -836,11 +836,11 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
-  fn draw_sync_wrap_nolinebreak1() {
+  fn draw_update_wrap_nolinebreak1() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 15);
@@ -884,7 +884,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
 
     let expect = vec![
       "        1. When the",
@@ -906,11 +906,11 @@ mod tests {
     let viewport = {
       let mut buffer = wlock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::from_top_left(&mut buffer, &actual_shape, &win_opts, 3, 0);
+      let viewport = Viewport::from_top(&mut buffer, &actual_shape, &win_opts, 3, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -953,7 +953,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -1001,7 +1001,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -1030,7 +1030,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -1094,7 +1094,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
@@ -1137,11 +1137,11 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 
   #[test]
-  fn draw_sync_wrap_linebreak1() {
+  fn draw_update_wrap_linebreak1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1180,7 +1180,7 @@ mod tests {
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
 
     let expect = vec![
       "But still ",
@@ -1198,11 +1198,11 @@ mod tests {
     let viewport = {
       let mut buffer = wlock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::from_top_left(&mut buffer, &actual_shape, &win_opts, 2, 0);
+      let viewport = Viewport::from_top(&mut buffer, &actual_shape, &win_opts, 2, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
-    assert_from_top_left(&actual, &expect);
+    assert_from_top(&actual, &expect);
   }
 }
 // spellchecker:on

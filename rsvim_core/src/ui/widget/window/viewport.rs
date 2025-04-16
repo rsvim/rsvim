@@ -442,14 +442,14 @@ impl Viewport {
   ///
   /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a
   /// window.
-  pub fn from_top_left(
+  pub fn from_top(
     buffer: &mut Buffer,
     window_actual_shape: &U16Rect,
     window_local_options: &WindowLocalOptions,
     start_line_idx: usize,
     start_column_idx: usize,
   ) -> Self {
-    let (line_idx_range, lines) = sync::from_top_left(
+    let (line_idx_range, lines) = sync::from_top(
       buffer,
       window_actual_shape,
       window_local_options,
@@ -1585,7 +1585,7 @@ mod tests {
     ];
     let actual = {
       let mut buf = wlock!(buf);
-      Viewport::from_top_left(&mut buf, window.actual_shape(), &win_opts, 2, 0)
+      Viewport::from_top(&mut buf, window.actual_shape(), &win_opts, 2, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
@@ -1669,7 +1669,7 @@ mod tests {
     ];
     let actual = {
       let mut buf = wlock!(buf);
-      Viewport::from_top_left(&mut buf, window.actual_shape(), &win_opts, 6, 0)
+      Viewport::from_top(&mut buf, window.actual_shape(), &win_opts, 6, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
     assert_viewport(
@@ -1721,7 +1721,7 @@ mod tests {
     let expect = vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
     let actual = {
       let mut buf = wlock!(buf);
-      Viewport::from_top_left(&mut buf, window.actual_shape(), &win_opts, 1, 0)
+      Viewport::from_top(&mut buf, window.actual_shape(), &win_opts, 1, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
     assert_viewport(

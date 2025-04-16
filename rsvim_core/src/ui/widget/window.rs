@@ -58,7 +58,7 @@ impl Window {
       let buffer = buffer.upgrade().unwrap();
       let mut buffer = wlock!(buffer);
       let viewport =
-        Viewport::from_top_left(&mut buffer, &window_root_actual_shape, local_options, 0, 0);
+        Viewport::from_top(&mut buffer, &window_root_actual_shape, local_options, 0, 0);
       let cursor_viewport = CursorViewport::from_viewport_top_left(&viewport);
       (viewport, cursor_viewport)
     };
