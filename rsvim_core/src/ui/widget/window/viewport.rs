@@ -483,7 +483,7 @@ impl Viewport {
       start_column_idx,
     );
 
-    // debug_assert_eq!(line_idx_range.end_line_idx(), last_line_idx + 1);
+    debug_assert_eq!(line_idx_range.end_line_idx(), last_line_idx + 1);
 
     Viewport {
       start_line_idx: line_idx_range.start_line_idx(),
