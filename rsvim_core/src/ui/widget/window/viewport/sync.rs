@@ -357,6 +357,7 @@ fn downward_wrap_nolinebreak(
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
+  let buffer_len_lines = buffer.get_rope().len_lines();
 
   debug_assert!(height > 0);
   debug_assert!(width > 0);
@@ -366,51 +367,41 @@ fn downward_wrap_nolinebreak(
     let mut raw_buffer = Buffer::to_nonnull(buffer);
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
-    match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
-      Some(buflines) => {
-        // The `start_line` is inside the buffer.
+    // The first `wrow` in the window maps to the `start_line` in the buffer.
+    let mut current_row = 0;
+    let mut current_line = start_line;
 
-        // The first `wrow` in the window maps to the `start_line` in the buffer.
-        let mut current_row = 0;
-        let mut current_line = start_line;
+    if current_line < buffer_len_lines {
+      // If `current_row` goes out of window, `current_line` goes out of buffer.
+      while current_row < height && current_line < buffer_len_lines {
+        let bufline = raw_buffer.as_ref().get_rope().line(current_line);
 
-        for bline in buflines {
-          // Current row goes out of viewport.
-          if current_row >= height {
-            break;
-          }
+        let (rows, start_fills, end_fills, tmp_current_row) = process_line_wrap_nolinebreak(
+          raw_buffer.as_mut(),
+          &bufline,
+          current_line,
+          start_column,
+          current_row,
+          height,
+          width,
+        );
+        current_row = tmp_current_row;
 
-          let (rows, start_fills, end_fills, tmp_current_row) = process_line_wrap_nolinebreak(
-            raw_buffer.as_mut(),
-            &bline,
-            current_line,
-            start_column,
-            current_row,
-            height,
-            width,
-          );
-          current_row = tmp_current_row;
+        line_viewports.insert(
+          current_line,
+          LineViewport::new(rows, start_fills, end_fills),
+        );
 
-          line_viewports.insert(
-            current_line,
-            LineViewport::new(rows, start_fills, end_fills),
-          );
-
-          current_line += 1;
-          current_row += 1;
-        }
-
-        // trace!("10-current_line:{}, wrow:{}", current_line, wrow);
-        (
-          ViewportLineRange::new(start_line..current_line),
-          line_viewports,
-        )
+        current_line += 1;
+        current_row += 1;
       }
-      None => {
-        // The `start_line` is outside of the buffer.
-        // trace!("11-start_line:{}", start_line);
-        (ViewportLineRange::default(), BTreeMap::new())
-      }
+
+      (
+        ViewportLineRange::new(start_line..current_line),
+        line_viewports,
+      )
+    } else {
+      (ViewportLineRange::default(), BTreeMap::new())
     }
   }
 }
