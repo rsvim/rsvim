@@ -300,7 +300,9 @@ fn process_line_wrap_nolinebreak(
   window_height: u16,
   window_width: u16,
 ) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
-  if bufline.len_chars() == 0 {
+  let bufline_len_chars = bufline.len_chars();
+
+  if bufline_len_chars == 0 {
     let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
@@ -325,7 +327,7 @@ fn process_line_wrap_nolinebreak(
         None => {
           // If the char not found, it means the `end_width` is too long than the whole line.
           // So the char next to the line's last char is the end char.
-          (bufline.len_chars(), 0_usize)
+          (bufline_len_chars, 0_usize)
         }
       };
       end_fills = end_fills_result;
@@ -333,7 +335,7 @@ fn process_line_wrap_nolinebreak(
       rows.insert(current_row, RowViewport::new(start_char..end_char));
 
       // Goes out of line.
-      if end_char >= bufline.len_chars() {
+      if end_char >= bufline_len_chars {
         break;
       }
 
