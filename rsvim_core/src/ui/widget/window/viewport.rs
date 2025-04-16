@@ -655,7 +655,7 @@ mod tests_util {
   }
 
   #[allow(clippy::too_many_arguments)]
-  pub fn assert_downward(
+  pub fn assert_viewport(
     buffer: BufferArc,
     actual: &Viewport,
     expect: &Vec<&str>,
@@ -687,129 +687,6 @@ mod tests_util {
     assert_eq!(
       actual.end_line_idx() - actual.start_line_idx(),
       actual.lines().len()
-    );
-    assert_eq!(
-      actual.end_line_idx() - actual.start_line_idx(),
-      expect_start_fills.len()
-    );
-    assert_eq!(
-      actual.end_line_idx() - actual.start_line_idx(),
-      expect_end_fills.len()
-    );
-
-    let buffer = rlock!(buffer);
-    let buflines = buffer
-      .get_rope()
-      .get_lines_at(actual.start_line_idx())
-      .unwrap();
-    let total_lines = expect_end_line - expect_start_line;
-
-    for (l, line) in buflines.enumerate() {
-      if l >= total_lines {
-        break;
-      }
-      let actual_line_idx = l + expect_start_line;
-      let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
-
-      info!(
-        "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
-        l, actual_line_idx, line_viewport
-      );
-      info!(
-        "start_filled_cols expect:{:?}, actual:{}",
-        expect_start_fills.get(&actual_line_idx),
-        line_viewport.start_filled_cols()
-      );
-      assert_eq!(
-        line_viewport.start_filled_cols(),
-        *expect_start_fills.get(&actual_line_idx).unwrap()
-      );
-      info!(
-        "end_filled_cols expect:{:?}, actual:{}",
-        expect_end_fills.get(&actual_line_idx),
-        line_viewport.end_filled_cols()
-      );
-      assert_eq!(
-        line_viewport.end_filled_cols(),
-        *expect_end_fills.get(&actual_line_idx).unwrap()
-      );
-
-      let rows = &line_viewport.rows();
-      for (r, row) in rows.iter() {
-        info!("row-index-{:?}, row:{:?}", r, row);
-
-        if r > rows.first_key_value().unwrap().0 {
-          let prev_r = r - 1;
-          let prev_row = rows.get(&prev_r).unwrap();
-          info!(
-            "row-{:?}, current[{}]:{:?}, previous[{}]:{:?}",
-            r, r, row, prev_r, prev_row
-          );
-        }
-        if r < rows.last_key_value().unwrap().0 {
-          let next_r = r + 1;
-          let next_row = rows.get(&next_r).unwrap();
-          info!(
-            "row-{:?}, current[{}]:{:?}, next[{}]:{:?}",
-            r, r, row, next_r, next_row
-          );
-        }
-
-        let mut payload = String::new();
-        for c_idx in row.start_char_idx()..row.end_char_idx() {
-          let c = line.get_char(c_idx).unwrap();
-          payload.push(c);
-        }
-        info!(
-          "row-{:?}, payload actual:{:?}, expect:{:?}",
-          r, payload, expect[*r as usize]
-        );
-        assert_eq!(payload, expect[*r as usize]);
-      }
-    }
-  }
-
-  #[allow(clippy::too_many_arguments)]
-  pub fn assert_upward(
-    buffer: BufferArc,
-    actual: &Viewport,
-    expect: &Vec<&str>,
-    expect_start_line: usize,
-    expect_end_line: usize,
-    expect_start_fills: &BTreeMap<usize, usize>,
-    expect_end_fills: &BTreeMap<usize, usize>,
-  ) {
-    info!(
-      "actual start_line/end_line:{:?}/{:?}",
-      actual.start_line_idx(),
-      actual.end_line_idx()
-    );
-    for (k, v) in actual.lines().iter() {
-      info!("actual-{:?}: {:?}", k, v);
-    }
-    info!("expect:{:?}", expect);
-
-    assert_eq!(actual.start_line_idx(), expect_start_line);
-    assert_eq!(actual.end_line_idx(), expect_end_line);
-    if actual.lines().is_empty() {
-      assert!(actual.end_line_idx() <= actual.start_line_idx());
-    } else {
-      let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
-      let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
-      assert_eq!(*first_line_idx, actual.start_line_idx());
-      assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
-    }
-    assert_eq!(
-      actual.end_line_idx() - actual.start_line_idx(),
-      actual.lines().len()
-    );
-    assert_eq!(
-      actual.end_line_idx() - actual.start_line_idx(),
-      expect_start_fills.len()
-    );
-    assert_eq!(
-      actual.end_line_idx() - actual.start_line_idx(),
-      expect_end_fills.len()
     );
 
     let buffer = rlock!(buffer);
@@ -945,7 +822,7 @@ mod tests_downward_nowrap {
     ]
     .into_iter()
     .collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1001,7 +878,7 @@ mod tests_downward_nowrap {
     ]
     .into_iter()
     .collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1046,7 +923,7 @@ mod tests_downward_nowrap {
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1071,7 +948,7 @@ mod tests_downward_nowrap {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1148,7 +1025,7 @@ mod tests_downward_nowrap {
     ]
     .into_iter()
     .collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1199,7 +1076,7 @@ mod tests_downward_nowrap {
       vec![(0, 0), (1, 1), (2, 1), (3, 0), (4, 0), (5, 0)]
         .into_iter()
         .collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1224,7 +1101,7 @@ mod tests_downward_nowrap {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1249,7 +1126,7 @@ mod tests_downward_nowrap {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1329,7 +1206,7 @@ mod tests_upward_nowrap {
     ]
     .into_iter()
     .collect();
-    assert_upward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1371,12 +1248,12 @@ mod tests_upward_nowrap {
     ]
     .into_iter()
     .collect();
-    assert_upward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
       0,
-      10,
+      6,
       &expect_fills,
       &expect_fills,
     );
@@ -1434,7 +1311,7 @@ mod tests_downward_wrap_nolinebreak {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_downward(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    assert_viewport(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -1483,7 +1360,7 @@ mod tests_downward_wrap_nolinebreak {
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
-    assert_downward(
+    assert_viewport(
       buf,
       &actual,
       &expect,
@@ -1524,7 +1401,7 @@ mod tests_downward_wrap_nolinebreak {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_downward(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
+    assert_viewport(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -1539,7 +1416,7 @@ mod tests_downward_wrap_nolinebreak {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(buf, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+    assert_viewport(buf, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -1567,7 +1444,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 4)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf,
       &actual,
       &expect,
@@ -1606,7 +1483,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf,
       &actual,
       &expect,
@@ -1645,7 +1522,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 7)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf,
       &actual,
       &expect,
@@ -1684,7 +1561,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf,
       &actual,
       &expect,
@@ -1724,7 +1601,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf,
       &actual,
       &expect,
@@ -1750,7 +1627,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf,
       &actual,
       &expect,
@@ -1776,7 +1653,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf,
       &actual,
       &expect,
@@ -1802,7 +1679,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf,
       &actual,
       &expect,
@@ -1854,7 +1731,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1886,7 +1763,7 @@ mod tests_downward_wrap_nolinebreak {
       Viewport::downward(&mut buf, window.actual_shape(), &win_opts, 2, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1938,7 +1815,7 @@ mod tests_downward_wrap_nolinebreak {
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -1970,7 +1847,7 @@ mod tests_downward_wrap_nolinebreak {
       Viewport::downward(&mut buf, window.actual_shape(), &win_opts, 6, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -2006,7 +1883,7 @@ mod tests_downward_wrap_nolinebreak {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -2022,7 +1899,7 @@ mod tests_downward_wrap_nolinebreak {
       Viewport::downward(&mut buf, window.actual_shape(), &win_opts, 1, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buf.clone(),
       &actual,
       &expect,
@@ -2087,7 +1964,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2145,7 +2022,7 @@ mod tests_downward_wrap_linebreak {
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
       .collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2198,7 +2075,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2223,7 +2100,7 @@ mod tests_downward_wrap_linebreak {
     let window = make_window(terminal_size, buffer.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+    assert_viewport(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -2264,7 +2141,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2315,7 +2192,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2367,7 +2244,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2419,7 +2296,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2470,7 +2347,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2521,7 +2398,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2595,7 +2472,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2667,7 +2544,7 @@ mod tests_downward_wrap_linebreak {
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-    assert_downward(
+    assert_viewport(
       buffer,
       &actual,
       &expect,
@@ -2692,7 +2569,7 @@ mod tests_downward_wrap_linebreak {
     let window = make_window(terminal_size, buffer.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+    assert_viewport(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 
   #[test]
@@ -2709,7 +2586,7 @@ mod tests_downward_wrap_linebreak {
     let window = make_window(terminal_size, buffer.clone(), &win_opts);
     let actual = rlock!(window.viewport()).clone();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-    assert_downward(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
+    assert_viewport(buffer, &actual, &expect, 0, 1, &expect_fills, &expect_fills);
   }
 }
 // spellchecker:on
