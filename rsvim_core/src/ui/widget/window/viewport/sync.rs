@@ -52,7 +52,7 @@ pub fn downward(
   window_actual_shape: &U16Rect,
   window_local_options: &WindowLocalOptions,
   start_line: usize,
-  start_dcolumn: usize,
+  start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   // If window is zero-sized.
   let height = window_actual_shape.height();
@@ -65,12 +65,12 @@ pub fn downward(
     window_local_options.wrap(),
     window_local_options.line_break(),
   ) {
-    (false, _) => downward_nowrap(buffer, window_actual_shape, start_line, start_dcolumn),
+    (false, _) => downward_nowrap(buffer, window_actual_shape, start_line, start_column),
     (true, false) => {
-      _from_top_left_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_dcolumn)
+      _from_top_left_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_column)
     }
     (true, true) => {
-      _from_top_left_wrap_linebreak(buffer, window_actual_shape, start_line, start_dcolumn)
+      _from_top_left_wrap_linebreak(buffer, window_actual_shape, start_line, start_column)
     }
   }
 }
@@ -81,7 +81,7 @@ pub fn upward(
   window_actual_shape: &U16Rect,
   window_local_options: &WindowLocalOptions,
   last_line: usize,
-  start_dcolumn: usize,
+  start_column: usize,
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
@@ -93,7 +93,7 @@ pub fn upward(
     window_local_options.wrap(),
     window_local_options.line_break(),
   ) {
-    (false, _) => upward_nowrap(buffer, window_actual_shape, last_line, start_dcolumn),
+    (false, _) => upward_nowrap(buffer, window_actual_shape, last_line, start_column),
     (true, false) => {
       unreachable!()
     }
