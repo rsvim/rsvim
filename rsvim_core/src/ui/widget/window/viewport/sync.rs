@@ -180,6 +180,8 @@ fn downward_nowrap(
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  // trace!("buffer.len_lines:{:?}", buffer_len_lines);
 
   debug_assert!(height > 0);
   debug_assert!(width > 0);
@@ -191,8 +193,6 @@ fn downward_nowrap(
   // );
 
   unsafe {
-    trace!("buffer.len_lines:{:?}", buffer.get_rope().len_lines(),);
-
     // Fix multiple mutable references on `buffer`.
     let mut raw_buffer = Buffer::to_nonnull(buffer);
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
@@ -200,11 +200,10 @@ fn downward_nowrap(
     // The first `current_row` in the window maps to the `start_line` in the buffer.
     let mut current_row = 0_u16;
     let mut current_line = start_line;
-    let buf_len_lines = raw_buffer.as_ref().get_rope().len_lines();
 
-    if current_line < buf_len_lines {
+    if current_line < buffer_len_lines {
       // If `current_row` goes out of window, `current_line` goes out of buffer.
-      while current_row < height && current_line < buf_len_lines {
+      while current_row < height && current_line < buffer_len_lines {
         let bline = raw_buffer.as_ref().get_rope().line(current_line);
 
         // trace!(
@@ -257,6 +256,8 @@ fn upward_nowrap(
 ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  // trace!("buffer_len_lines:{:?}", buffer_len_lines);
 
   debug_assert!(height > 0);
   debug_assert!(width > 0);
@@ -268,8 +269,6 @@ fn upward_nowrap(
   // );
 
   unsafe {
-    trace!("buffer.len_lines:{:?}", buffer.get_rope().len_lines(),);
-
     // Fix multiple mutable references on `buffer`.
     let mut raw_buffer = Buffer::to_nonnull(buffer);
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
@@ -277,11 +276,10 @@ fn upward_nowrap(
     // The first `wrow` in the window maps to the `start_line` in the buffer.
     let mut current_row: isize = height as isize - 1;
     let mut current_line: isize = end_line as isize - 1;
-    let buf_len_lines = raw_buffer.as_ref().get_rope().len_lines();
 
-    if current_line >= 0 && (current_line as usize) < buf_len_lines {
+    if current_line >= 0 && (current_line as usize) < buffer_len_lines {
       // If `current_row` goes out of window, `current_line` goes out of buffer.
-      while current_row >= 0 && current_line >= 0 && (current_line as usize) < buf_len_lines {
+      while current_row >= 0 && current_line >= 0 && (current_line as usize) < buffer_len_lines {
         let bline = raw_buffer.as_ref().get_rope().line(current_line as usize);
 
         // trace!(
