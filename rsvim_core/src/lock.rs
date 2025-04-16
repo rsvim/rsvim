@@ -14,6 +14,10 @@ macro_rules! arc_impl {
         pub fn to_arc(value: $name) -> [<$name Arc>] {
           std::sync::Arc::new(parking_lot::RwLock::new(value))
         }
+
+        pub unsafe fn to_nonnull(value: &mut $name) -> std::ptr::NonNull<$name> {
+          std::ptr::NonNull::new(&mut *value as *mut $name).unwrap()
+        }
       }
     }
   };

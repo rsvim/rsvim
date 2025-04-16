@@ -67,6 +67,10 @@ fn get_cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
 }
 
 impl Buffer {
+  // pub unsafe fn to_nonnull(value: &mut BufferWriteGuard) -> std::ptr::NonNull<Buffer> {
+  //   rawptr!(value)
+  // }
+
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
   /// manage buffer instances.
   pub fn _new(

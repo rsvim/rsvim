@@ -47,8 +47,8 @@ impl ViewportLineRange {
   }
 }
 
-/// Calculate viewport downward, from top to bottom.
-pub fn from_top(
+/// Calculate viewport with option `wrap=false` downward, from top to bottom.
+pub fn downward(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   window_local_options: &WindowLocalOptions,
@@ -76,8 +76,8 @@ pub fn from_top(
   }
 }
 
-/// Calculate viewport upward, from bottom to top.
-pub fn from_bottom(
+/// Calculate viewport with option `wrap=false` upward, from bottom to top.
+pub fn upward(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   window_local_options: &WindowLocalOptions,
@@ -202,7 +202,7 @@ fn from_top_nowrap(
     // );
 
     // Fix multiple mutable references on `buffer`.
-    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+    let mut raw_buffer = Buffer::to_nonnull(buffer);
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
     match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
@@ -292,7 +292,7 @@ fn from_bottom_nowrap(
     // );
 
     // Fix multiple mutable references on `buffer`.
-    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+    let mut raw_buffer = Buffer::to_nonnull(buffer);
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
     match raw_buffer.as_ref().get_rope().get_lines_at(last_line) {
@@ -385,7 +385,7 @@ fn _from_top_left_wrap_nolinebreak(
 
   unsafe {
     // Fix multiple mutable references on `buffer`.
-    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+    let mut raw_buffer = Buffer::to_nonnull(buffer);
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
     match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
@@ -617,7 +617,7 @@ fn _from_top_left_wrap_linebreak(
 
   unsafe {
     // Fix multiple mutable references on `buffer`.
-    let mut raw_buffer: NonNull<Buffer> = NonNull::new(&mut *buffer as *mut Buffer).unwrap();
+    let mut raw_buffer = Buffer::to_nonnull(buffer);
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
     match raw_buffer.as_ref().get_rope().get_lines_at(start_line) {
