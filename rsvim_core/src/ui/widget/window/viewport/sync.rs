@@ -370,7 +370,7 @@ fn downward_wrap_nolinebreak(
     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
     // The first `wrow` in the window maps to the `start_line` in the buffer.
-    let mut current_row = 0;
+    let mut current_row = 0_u16;
     let mut current_line = start_line;
 
     if current_line < buffer_len_lines {
