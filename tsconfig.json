@@ -28,6 +28,7 @@
     "suppressImplicitAnyIndexErrors": false,
     "useUnknownInCatchVariables": false,
     "removeComments": true,
+    "useDefineForClassFields": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true
   },
