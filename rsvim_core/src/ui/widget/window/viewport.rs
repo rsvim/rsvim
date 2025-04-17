@@ -159,12 +159,13 @@ impl CursorViewport {
   }
 
   /// Create with viewport.
-  pub fn from_viewport_top_left(viewport: &Viewport) -> Self {
+  pub fn from_top_left(viewport: &Viewport) -> Self {
     debug_assert!(viewport.end_line_idx() >= viewport.start_line_idx());
-    if viewport.end_line_idx() <= viewport.start_line_idx() {
+    if viewport.end_line_idx() == viewport.start_line_idx() {
       Self::new(0, 0)
     } else {
       let lines = viewport.lines();
+      debug_assert!(viewport.end_line_idx() > viewport.start_line_idx());
       debug_assert!(!lines.is_empty());
       debug_assert!(lines.len() == viewport.end_line_idx() - viewport.start_line_idx());
       debug_assert!(lines.first_key_value().is_some());
