@@ -198,6 +198,10 @@ impl CursorViewport {
   }
 
   /// Create cursor viewport with specified line/char index from the window viewport and buffer.
+  ///
+  /// # Panics
+  ///
+  /// It panics if the line/char index are not shown in the window viewport.
   pub fn from_position(
     viewport: &Viewport,
     buffer: &mut Buffer,
@@ -222,8 +226,8 @@ impl CursorViewport {
         row_viewport.start_char_idx() <= char_idx && row_viewport.end_char_idx() > char_idx
       })
       .collect::<Vec<_>>();
-    debug_assert_eq!(cursor_row.len(), 1);
 
+    debug_assert_eq!(cursor_row.len(), 1);
     let (row_idx, row_viewport) = cursor_row[0];
 
     let row_start_width = buffer.width_before(line_idx, row_viewport.start_char_idx());
