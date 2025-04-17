@@ -74,7 +74,7 @@ pub fn downward(
 }
 
 /// Calculate viewport with option `wrap=false` upward, from bottom to top.
-pub fn upward(
+pub fn _upward(
   buffer: &mut Buffer,
   window_actual_shape: &U16Rect,
   window_local_options: &WindowLocalOptions,

@@ -474,14 +474,14 @@ impl Viewport {
   /// has 10 lines `[0-9]`, when use `for line in rope.lines_at(4).reversed()`, the first line we
   /// got is line `3`, not line `4`. While without `reversed`, the first line of `rope.lines_at(4)`
   /// produces line `4`.
-  pub fn upward(
+  pub fn _upward(
     buffer: &mut Buffer,
     window_actual_shape: &U16Rect,
     window_local_options: &WindowLocalOptions,
     end_line_idx: usize,
     start_column_idx: usize,
   ) -> Self {
-    let (line_idx_range, lines) = sync::upward(
+    let (line_idx_range, lines) = sync::_upward(
       buffer,
       window_actual_shape,
       window_local_options,
@@ -1215,7 +1215,7 @@ mod tests_upward_nowrap {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let mut buf = wlock!(buf);
-      Viewport::upward(&mut buf, window.actual_shape(), &win_opts, 4, 0)
+      Viewport::_upward(&mut buf, window.actual_shape(), &win_opts, 4, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
@@ -1257,7 +1257,7 @@ mod tests_upward_nowrap {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let mut buf = wlock!(buf);
-      Viewport::upward(&mut buf, window.actual_shape(), &win_opts, 6, 0)
+      Viewport::_upward(&mut buf, window.actual_shape(), &win_opts, 6, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![
       (0, 0),
@@ -1316,7 +1316,7 @@ mod tests_upward_nowrap {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let mut buf = wlock!(buf);
-      Viewport::upward(&mut buf, window.actual_shape(), &win_opts, 5, 0)
+      Viewport::_upward(&mut buf, window.actual_shape(), &win_opts, 5, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
       .into_iter()
@@ -1342,7 +1342,7 @@ mod tests_upward_nowrap {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let mut buf = wlock!(buf);
-      Viewport::upward(&mut buf, window.actual_shape(), &win_opts, 7, 0)
+      Viewport::_upward(&mut buf, window.actual_shape(), &win_opts, 7, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
       .into_iter()
@@ -1374,7 +1374,7 @@ mod tests_upward_nowrap {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let mut buf = wlock!(buf);
-      Viewport::upward(&mut buf, window.actual_shape(), &win_opts, 1, 0)
+      Viewport::_upward(&mut buf, window.actual_shape(), &win_opts, 1, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_viewport(
@@ -1404,7 +1404,7 @@ mod tests_upward_nowrap {
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let mut buf = wlock!(buf);
-      Viewport::upward(&mut buf, window.actual_shape(), &win_opts, 1, 0)
+      Viewport::_upward(&mut buf, window.actual_shape(), &win_opts, 1, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_viewport(
