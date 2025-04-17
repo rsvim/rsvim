@@ -575,16 +575,17 @@ impl<T> Itree<T>
 where
   T: Inodeable,
 {
-  /// Move node by distance `(x, y)`, the `x`/`y` is the motion distances. The position is
-  /// relatively based on the left-top anchor of the node parent.
+  /// Move node by distance `(x, y)`, the `x`/`y` is the motion distances.
   ///
   /// * The node moves left when `x < 0`.
   /// * The node moves right when `x > 0`.
   /// * The node moves up when `y < 0`.
   /// * The node moves down when `y > 0`.
   ///
-  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
-  /// [`insert`](Itree::insert) method.
+  /// NOTE:
+  /// 1. The position is relatively based on the node parent.
+  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
+  ///    [`insert`](Itree::insert) method.
   ///
   /// # Returns
   ///
@@ -605,14 +606,15 @@ where
     }
   }
 
-  /// Bounded move node by distance `(x, y)`, the `x`/`y` is the motion distances. The position is
-  /// relatively based on the left-top anchor of the node parent.
+  /// Bounded move node by distance `(x, y)`, the `x`/`y` is the motion distances.
   ///
   /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
   /// its parent, it simply stops moving.
   ///
-  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
-  /// [`insert`](Itree::insert) method.
+  /// NOTE:
+  /// 1. The position is relatively based on the node parent.
+  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
+  ///    [`insert`](Itree::insert) method.
   ///
   /// # Returns
   ///
@@ -658,11 +660,13 @@ where
     }
   }
 
-  /// Move node to position `(x, y)`, the `(x, y)` is the new position. The position is relatively
-  /// based on the left-top anchor of the node parent.
+  /// Move node to position `(x, y)`, the `(x, y)` is the new position.
   ///
-  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
-  /// [`insert`](Itree::insert) method.
+  /// NOTE:
+  /// 1. The position is relatively based on the node parent. The `(x, y)` is based on the left-top
+  ///    anchor, i.e. the left-top anchor position is `(0, 0)`.
+  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
+  ///    [`insert`](Itree::insert) method.
   ///
   /// # Returns
   ///
@@ -694,14 +698,16 @@ where
     }
   }
 
-  /// Bounded move node to position `(x, y)`, the `(x, y)` is the new position. The position is
-  /// relatively based on the left-top anchor of the node parent.
+  /// Bounded move node to position `(x, y)`, the `(x, y)` is the new position.
   ///
   /// It works similar to [`move_by`](Itree::move_by), but when a node hits the actual boundary of
   /// its parent, it simply stops moving.
   ///
-  /// NOTE: This operation also updates the shape/position of all descendant nodes, similar to
-  /// [`insert`](Itree::insert) method.
+  /// NOTE:
+  /// 1. The position is relatively based on the node parent. The `(x, y)` is based on the left-top
+  ///    anchor, i.e. the left-top anchor position is `(0, 0)`.
+  /// 2, This operation also updates the shape/position of all descendant nodes, similar to
+  ///    [`insert`](Itree::insert) method.
   ///
   /// # Returns
   ///
