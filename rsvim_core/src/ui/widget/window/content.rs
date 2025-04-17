@@ -246,7 +246,7 @@ impl Widgetable for WindowContent {
 // spellchecker:off
 #[allow(unused_imports)]
 #[cfg(test)]
-mod tests {
+mod tests_util {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
@@ -265,7 +265,7 @@ mod tests {
   use std::sync::Arc;
   use tracing::info;
 
-  fn make_viewport(
+  pub fn make_viewport(
     terminal_size: U16Size,
     window_options: WindowLocalOptions,
     buffer: BufferArc,
@@ -280,7 +280,7 @@ mod tests {
     Viewport::to_arc(viewport)
   }
 
-  fn make_canvas(
+  pub fn make_canvas(
     terminal_size: U16Size,
     window_options: WindowLocalOptions,
     buffer: BufferArc,
@@ -303,7 +303,7 @@ mod tests {
   }
 
   #[allow(clippy::too_many_arguments)]
-  fn assert_from_top(actual: &Canvas, expect: &[&str]) {
+  pub fn assert_from_top(actual: &Canvas, expect: &[&str]) {
     let actual = actual
       .frame()
       .raw_symbols()
@@ -328,9 +328,32 @@ mod tests {
       assert_eq!(e, a);
     }
   }
+}
+
+#[allow(unused_imports)]
+#[cfg(test)]
+mod tests_nowrap {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::prelude::*;
+  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
+  use crate::test::log::init as test_log_init;
+  use crate::ui::tree::Tree;
+  use crate::ui::widget::window::{
+    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
+
+  use compact_str::ToCompactString;
+  use ropey::{Rope, RopeBuilder};
+  use std::fs::File;
+  use std::io::{BufReader, BufWriter};
+  use std::sync::Arc;
+  use tracing::info;
 
   #[test]
-  fn draw_new_nowrap1() {
+  fn new1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -372,7 +395,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_nowrap2() {
+  fn new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(35, 6);
@@ -411,7 +434,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_nowrap3() {
+  fn new3() {
     test_log_init();
 
     let terminal_size = U16Size::new(33, 10);
@@ -454,7 +477,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_nowrap4() {
+  fn new4() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 20);
@@ -507,7 +530,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_nowrap5() {
+  fn new5() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 20);
@@ -547,7 +570,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_update_nowrap1() {
+  fn update1() {
     test_log_init();
 
     let terminal_size = U16Size::new(21, 10);
@@ -609,9 +632,32 @@ mod tests {
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_from_top(&actual, &expect);
   }
+}
+
+#[allow(unused_imports)]
+#[cfg(test)]
+mod tests_wrap_nolinebreak {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::prelude::*;
+  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
+  use crate::test::log::init as test_log_init;
+  use crate::ui::tree::Tree;
+  use crate::ui::widget::window::{
+    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
+
+  use compact_str::ToCompactString;
+  use ropey::{Rope, RopeBuilder};
+  use std::fs::File;
+  use std::io::{BufReader, BufWriter};
+  use std::sync::Arc;
+  use tracing::info;
 
   #[test]
-  fn draw_new_wrap_nolinebreak1() {
+  fn new1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -653,7 +699,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_wrap_nolinebreak2() {
+  fn new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 10);
@@ -689,7 +735,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_wrap_nolinebreak3() {
+  fn new3() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 9);
@@ -718,7 +764,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_wrap_nolinebreak4() {
+  fn new4() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 30);
@@ -780,7 +826,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_wrap_nolinebreak5() {
+  fn new5() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 27);
@@ -839,7 +885,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_update_wrap_nolinebreak1() {
+  fn update1() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 15);
@@ -911,9 +957,32 @@ mod tests {
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_from_top(&actual, &expect);
   }
+}
+
+#[allow(unused_imports)]
+#[cfg(test)]
+mod tests_wrap_linebreak {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::prelude::*;
+  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
+  use crate::test::log::init as test_log_init;
+  use crate::ui::tree::Tree;
+  use crate::ui::widget::window::{
+    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
+
+  use compact_str::ToCompactString;
+  use ropey::{Rope, RopeBuilder};
+  use std::fs::File;
+  use std::io::{BufReader, BufWriter};
+  use std::sync::Arc;
+  use tracing::info;
 
   #[test]
-  fn draw_new_wrap_linebreak1() {
+  fn new1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -956,7 +1025,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_wrap_linebreak2() {
+  fn new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
@@ -1004,7 +1073,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_wrap_linebreak3() {
+  fn new3() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 8);
@@ -1033,7 +1102,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_wrap_linebreak4() {
+  fn new4() {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
@@ -1097,7 +1166,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_new_wrap_linebreak5() {
+  fn new5() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1140,7 +1209,7 @@ mod tests {
   }
 
   #[test]
-  fn draw_update_wrap_linebreak1() {
+  fn update1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
