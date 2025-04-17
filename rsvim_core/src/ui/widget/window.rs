@@ -59,7 +59,7 @@ impl Window {
       let mut buffer = wlock!(buffer);
       let viewport =
         Viewport::downward(&mut buffer, &window_root_actual_shape, local_options, 0, 0);
-      let cursor_viewport = CursorViewport::from_top_left(&viewport);
+      let cursor_viewport = CursorViewport::from_top_left(&viewport, &mut buffer);
       (viewport, cursor_viewport)
     };
     let viewport = Viewport::to_arc(viewport);

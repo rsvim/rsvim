@@ -8,7 +8,8 @@ use crate::ui::widget::window::WindowLocalOptions;
 use paste::paste;
 use std::collections::BTreeMap;
 use std::ops::Range;
-//use tracing::trace;
+#[allow(unused_imports)]
+use tracing::trace;
 
 pub mod sync;
 
@@ -124,18 +125,32 @@ impl LineViewport {
 /// NOTE: It is not a must that a window/buffer has a cursor inside it. But once it has, we will
 /// always maintain this position information for it.
 pub struct CursorViewport {
-  // Char index.
-  char_idx: usize,
   // Line index.
   line_idx: usize,
+  // Char index.
+  char_idx: usize,
+  // Row index.
+  row_idx: u16,
+  // Column index.
+  column_idx: u16,
 }
 
 arc_impl!(CursorViewport);
 
 impl CursorViewport {
   /// Make new instance.
-  pub fn new(char_idx: usize, line_idx: usize) -> Self {
-    Self { char_idx, line_idx }
+  pub fn new(line_idx: usize, char_idx: usize, row_idx: u16, column_idx: u16) -> Self {
+    Self {
+      line_idx,
+      char_idx,
+      row_idx,
+      column_idx,
+    }
+  }
+
+  /// Get line index, starts from 0.
+  pub fn line_idx(&self) -> usize {
+    self.line_idx
   }
 
   /// Get char index, starts from 0.
@@ -143,26 +158,21 @@ impl CursorViewport {
     self.char_idx
   }
 
-  /// Set char index.
-  pub fn set_char_idx(&mut self, char_idx: usize) {
-    self.char_idx = char_idx;
+  /// Get row index, starts from 0.
+  pub fn row_idx(&self) -> u16 {
+    self.row_idx
   }
 
-  /// Get the line index, starts from 0.
-  pub fn line_idx(&self) -> usize {
-    self.line_idx
-  }
-
-  /// Set the line index.
-  pub fn set_line_idx(&mut self, line_idx: usize) {
-    self.line_idx = line_idx;
+  /// Get column index, starts from 0.
+  pub fn column_idx(&self) -> u16 {
+    self.column_idx
   }
 
   /// Create with viewport.
-  pub fn from_top_left(viewport: &Viewport) -> Self {
+  pub fn from_top_left(viewport: &Viewport, buffer: &mut Buffer) -> Self {
     debug_assert!(viewport.end_line_idx() >= viewport.start_line_idx());
     if viewport.end_line_idx() == viewport.start_line_idx() {
-      Self::new(0, 0)
+      Self::new(0, 0, 0, 0)
     } else {
       let lines = viewport.lines();
       debug_assert!(viewport.end_line_idx() > viewport.start_line_idx());
@@ -177,14 +187,50 @@ impl CursorViewport {
       let line_idx = *first_line.0;
       let first_line = first_line.1;
       if first_line.rows().is_empty() {
-        Self::new(0, 0)
+        Self::new(0, 0, 0, 0)
       } else {
         let first_row = first_line.rows().first_key_value().unwrap();
         let first_row = first_row.1;
         let char_idx = first_row.start_char_idx();
-        Self::new(char_idx, line_idx)
+        Self::from_position(viewport, buffer, line_idx, char_idx)
       }
     }
+  }
+
+  pub fn from_position(
+    viewport: &Viewport,
+    buffer: &mut Buffer,
+    line_idx: usize,
+    char_idx: usize,
+  ) -> Self {
+    let cursor_row = viewport
+      .lines()
+      .get(&line_idx)
+      .unwrap()
+      .rows()
+      .iter()
+      .filter(|(_row_idx, row_viewport)| {
+        // trace!(
+        //   "row_viewport:{:?},start_char_idx:{},end_char_idx:{},line_idx:{},char_idx:{}",
+        //   row_viewport,
+        //   row_viewport.start_char_idx(),
+        //   row_viewport.end_char_idx(),
+        //   line_idx,
+        //   char_idx
+        // );
+        row_viewport.start_char_idx() <= char_idx && row_viewport.end_char_idx() > char_idx
+      })
+      .collect::<Vec<_>>();
+    debug_assert_eq!(cursor_row.len(), 1);
+
+    let (row_idx, row_viewport) = cursor_row[0];
+
+    let row_start_width = buffer.width_before(line_idx, row_viewport.start_char_idx());
+    let char_start_width = buffer.width_before(line_idx, char_idx);
+    let col_idx = (char_start_width - row_start_width) as u16;
+    let row_idx = *row_idx;
+
+    CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
   }
 }
 

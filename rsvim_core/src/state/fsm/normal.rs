@@ -145,46 +145,17 @@ impl NormalStateful {
 
         trace!("cursor_move_result:{:?}", cursor_move_result);
         if let Some((line_idx, char_idx)) = cursor_move_result {
-          current_window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::new(
-            char_idx, line_idx,
-          )));
-          let cursor_row = viewport
-            .lines()
-            .get(&line_idx)
-            .unwrap()
-            .rows()
-            .iter()
-            .filter(|(_row_idx, row_viewport)| {
-              trace!(
-                "row_viewport:{:?}, start_char_idx:{:?},end_char_idx:{:?},char_idx:{:?}",
-                row_viewport,
-                row_viewport.start_char_idx(),
-                row_viewport.end_char_idx(),
-                char_idx
-              );
-              row_viewport.start_char_idx() <= char_idx && row_viewport.end_char_idx() > char_idx
-            })
-            .collect::<Vec<_>>();
-          trace!(
-            "char_idx:{:?}, cursor_row({:?}):{:?}",
-            char_idx,
-            cursor_row.len(),
-            cursor_row
-          );
-          debug_assert_eq!(cursor_row.len(), 1);
+          let moved_cursor_viewport =
+            CursorViewport::from_position(&viewport, &mut buffer, line_idx, char_idx);
+          current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
 
-          let (row_idx, row_viewport) = cursor_row[0];
           let cursor_id = tree.cursor_id().unwrap();
-
-          let row_start_width = buffer.width_before(line_idx, row_viewport.start_char_idx());
-          let char_start_width = buffer.width_before(line_idx, char_idx);
-          let col_idx = (char_start_width - row_start_width) as isize;
-          let row_idx = *row_idx as isize;
-          tree.bounded_move_to(cursor_id, col_idx, row_idx);
-          trace!(
-            "(after) cursor node position x/y:{:?}/{:?}",
-            col_idx, row_idx
+          tree.bounded_move_to(
+            cursor_id,
+            moved_cursor_viewport.column_idx() as isize,
+            moved_cursor_viewport.row_idx() as isize,
           );
+          trace!("(after) cursor node position:{:?}", moved_cursor_viewport);
         }
         // Or, just do nothing, stay at where you are
       }
