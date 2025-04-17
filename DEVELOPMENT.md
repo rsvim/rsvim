@@ -24,18 +24,15 @@ Please setup your development environment with:
 
 ## Rust
 
-> We provide the `dev.py` script to help running below commands, use `dev.py -h` for more details.
+> We provide the `dev.py` script to help running below commands, use `dev.py -h` for more details. For window development, please use `dev.cmd`. Checkout the script for commands running underhood.
 
 ### Lint
 
-To check code, please use `RUSTFLAGS='-Dwarnings' bacon -j clippy-all`.
+To check code, please use `./dev.py clippy` (`cargo clippy`).
 
 ### Test
 
-1. To run all test cases, please use `cargo nextest run`.
-2. To run all test cases with full backtrace and logging message, please use `RUST_BACKTRACE=full RSVIM_LOG=trace cargo nextest run --no-capture`.
-3. To run a specific test, please use `cargo nextest run [TEST]`.
-4. To list all test cases, please use `cargo nextest list`.
+To run unit test, please use `./dev.py test` (`cargo test`).
 
 ### Debug
 
@@ -45,17 +42,11 @@ To debug code, please:
 
 ### Docs
 
-To write docs, please:
-
-1. Start local service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
-2. Open browser with `http://localhost:3000/rsvim`.
+To write docs, please use `./dev.py doc` (`cargo doc`).
 
 ### Release
 
-To release a new version, please:
-
-1. Dry run with `./dev.py r [LEVEL]`.
-2. Execute with `./dev.py r [LEVEL] -e`.
+To release a new version, please use `./dev.py release [LEVEL]` (`cargo release`):
 
 ## TypeScript/JavaScript
 

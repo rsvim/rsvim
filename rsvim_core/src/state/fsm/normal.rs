@@ -315,25 +315,18 @@ impl NormalStateful {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
+    let buffer_len_lines = buffer.get_rope().len_lines();
 
     let line_idx = match command {
       Command::CursorMoveUp(n) => start_line_idx.saturating_sub(n),
       Command::CursorMoveDown(n) => {
         // Viewport already shows the last line of buffer, cannot scroll down anymore.
-        if end_line_idx == buffer.get_rope().len_lines() {
+        if end_line_idx == buffer_len_lines {
           return None;
         }
 
-        // Viewport doesn't show the last line of buffer, but the rest of lines is less than `n`,
-        // so cannot scroll down `n` lines. The scrolled lines is less than `n`.
-        let expected_end_line = std::cmp::min(
-          end_line_idx.saturating_add(n),
-          buffer.get_rope().len_lines(),
-        );
-        let scrolled_lines = expected_end_line.saturating_sub(end_line_idx);
-        let expected_start_line = start_line_idx.saturating_add(scrolled_lines);
+        let expected_start_line = start_line_idx.saturating_add(n);
 
-        debug_assert!(expected_start_line >= start_line_idx);
         // If the expected (after scrolled) start line index is current start line index, then don't
         // scroll.
         if expected_start_line == start_line_idx {
@@ -1898,16 +1891,15 @@ mod tests_cursor_scroll_vertically {
     let tree = data_access.tree.clone();
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["     * The", "  3. If a ", "     * The", "     * The", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(6, 0), (7, 0), (8, 0), (9, 0), (10, 0)]
-        .into_iter()
-        .collect();
+      let expect = vec!["     * The", "     * The", "", "", ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(8, 0), (9, 0), (10, 0)].into_iter().collect();
 
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        6,
+        8,
         11,
         &expect_fills,
         &expect_fills,
@@ -1924,23 +1916,16 @@ mod tests_cursor_scroll_vertically {
     let tree = data_access.tree.clone();
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "     * The",
-        "     * The",
-        "  3. If a ",
-        "     * The",
-        "     * The",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
-        .into_iter()
-        .collect();
+      let expect = vec!["  3. If a ", "     * The", "     * The", "", ""];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(7, 0), (8, 0), (9, 0), (10, 0)].into_iter().collect();
 
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        5,
-        10,
+        7,
+        11,
         &expect_fills,
         &expect_fills,
       );
@@ -1957,13 +1942,13 @@ mod tests_cursor_scroll_vertically {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "This is a ",
-        "But still ",
         "  1. When ",
         "  2. When ",
         "     * The",
+        "     * The",
+        "  3. If a ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
 
@@ -1971,8 +1956,8 @@ mod tests_cursor_scroll_vertically {
         buf.clone(),
         &viewport,
         &expect,
-        1,
-        6,
+        3,
+        8,
         &expect_fills,
         &expect_fills,
       );
@@ -2170,7 +2155,7 @@ mod tests_cursor_scroll_vertically {
       "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
       "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
     ];
-    let (tree, state, bufs) = make_tree(
+    let (tree, state, bufs, buf) = make_tree(
       U16Size::new(15, 15),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
@@ -2207,13 +2192,21 @@ mod tests_cursor_scroll_vertically {
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
-      assert_viewport_scroll(&viewport, &expect, 0, 4, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorMoveDown(8));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(8));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2239,13 +2232,21 @@ mod tests_cursor_scroll_vertically {
         "     * The char ",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0)].into_iter().collect();
-      assert_viewport_scroll(&viewport, &expect, 8, 10, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        8,
+        10,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorMoveDown(1));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2271,13 +2272,21 @@ mod tests_cursor_scroll_vertically {
         "     * The char ",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0)].into_iter().collect();
-      assert_viewport_scroll(&viewport, &expect, 8, 10, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        8,
+        10,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorMoveDown(3));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(3));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2303,13 +2312,21 @@ mod tests_cursor_scroll_vertically {
         "     * The char ",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0)].into_iter().collect();
-      assert_viewport_scroll(&viewport, &expect, 8, 10, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        8,
+        10,
+        &expect_fills,
+        &expect_fills,
+      );
     }
 
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_scroll(&data_access, Command::CursorMoveUp(2));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveUp(2));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2319,7 +2336,15 @@ mod tests_cursor_scroll_vertically {
       let viewport = get_viewport(tree.clone());
       let expect = vec![];
       let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0)].into_iter().collect();
-      assert_viewport_scroll(&viewport, &expect, 8, 10, &expect_fills, &expect_fills);
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        8,
+        10,
+        &expect_fills,
+        &expect_fills,
+      );
     }
   }
 }
