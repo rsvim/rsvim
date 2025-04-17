@@ -319,7 +319,7 @@ impl NormalStateful {
           // Sync the viewport
           let window_actual_shape = current_window.window_content().actual_shape();
           let window_local_options = current_window.options();
-          current_window.set_viewport(Viewport::to_arc(Viewport::from_top_left(
+          current_window.set_viewport(Viewport::to_arc(Viewport::downward(
             &mut buffer,
             window_actual_shape,
             window_local_options,
