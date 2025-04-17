@@ -706,7 +706,7 @@ where
   /// NOTE:
   /// 1. The position is relatively based on the node parent. The `(x, y)` is based on the left-top
   ///    anchor, i.e. the left-top anchor position is `(0, 0)`.
-  /// 2, This operation also updates the shape/position of all descendant nodes, similar to
+  /// 2. This operation also updates the shape/position of all descendant nodes, similar to
   ///    [`insert`](Itree::insert) method.
   ///
   /// # Returns
