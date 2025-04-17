@@ -172,29 +172,38 @@ impl CursorViewport {
   pub fn from_top_left(viewport: &Viewport, buffer: &mut Buffer) -> Self {
     debug_assert!(viewport.end_line_idx() >= viewport.start_line_idx());
     if viewport.end_line_idx() == viewport.start_line_idx() {
-      Self::new(0, 0, 0, 0)
-    } else {
-      let lines = viewport.lines();
-      debug_assert!(viewport.end_line_idx() > viewport.start_line_idx());
-      debug_assert!(!lines.is_empty());
-      debug_assert!(lines.len() == viewport.end_line_idx() - viewport.start_line_idx());
-      debug_assert!(lines.first_key_value().is_some());
-      debug_assert!(lines.last_key_value().is_some());
-      debug_assert!(*lines.first_key_value().unwrap().0 == viewport.start_line_idx());
-      debug_assert!(viewport.end_line_idx() > 0);
-      debug_assert!(*lines.last_key_value().unwrap().0 == viewport.end_line_idx() - 1);
-      let first_line = lines.first_key_value().unwrap();
-      let line_idx = *first_line.0;
-      let first_line = first_line.1;
-      if first_line.rows().is_empty() {
-        Self::new(0, 0, 0, 0)
-      } else {
-        let first_row = first_line.rows().first_key_value().unwrap();
-        let first_row = first_row.1;
-        let char_idx = first_row.start_char_idx();
-        Self::from_position(viewport, buffer, line_idx, char_idx)
-      }
+      return Self::new(0, 0, 0, 0);
     }
+
+    let lines = viewport.lines();
+    debug_assert!(viewport.end_line_idx() > viewport.start_line_idx());
+    debug_assert!(!lines.is_empty());
+    debug_assert!(lines.len() == viewport.end_line_idx() - viewport.start_line_idx());
+    debug_assert!(lines.first_key_value().is_some());
+    debug_assert!(lines.last_key_value().is_some());
+    debug_assert!(*lines.first_key_value().unwrap().0 == viewport.start_line_idx());
+    debug_assert!(viewport.end_line_idx() > 0);
+    debug_assert!(*lines.last_key_value().unwrap().0 == viewport.end_line_idx() - 1);
+    let first_line = lines.first_key_value().unwrap();
+    let line_idx = *first_line.0;
+    let first_line = first_line.1;
+
+    if first_line.rows().is_empty() {
+      return Self::new(0, 0, 0, 0);
+    }
+
+    let first_row = first_line.rows().first_key_value().unwrap();
+    let first_row = first_row.1;
+
+    debug_assert!(first_row.end_char_idx() >= first_row.start_char_idx());
+    if first_row.end_char_idx() == first_row.start_char_idx() {
+      debug_assert_eq!(first_row.start_char_idx(), 0);
+      debug_assert_eq!(first_row.end_char_idx(), 0);
+      return Self::new(0, 0, 0, 0);
+    }
+
+    let char_idx = first_row.start_char_idx();
+    Self::from_position(viewport, buffer, line_idx, char_idx)
   }
 
   /// Create cursor viewport with specified position (buffer's line/char index) from the window

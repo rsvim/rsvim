@@ -400,7 +400,8 @@ impl NormalStateful {
 
 // spellchecker:off
 #[cfg(test)]
-mod tests {
+#[allow(unused_imports)]
+mod tests_util {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
@@ -417,7 +418,7 @@ mod tests {
   use std::collections::BTreeMap;
   use tracing::info;
 
-  fn make_tree(
+  pub fn make_tree(
     terminal_size: U16Size,
     window_local_opts: WindowLocalOptions,
     lines: Vec<&str>,
@@ -430,7 +431,7 @@ mod tests {
     (tree, state, bufs, buf)
   }
 
-  fn get_viewport(tree: TreeArc) -> Viewport {
+  pub fn get_viewport(tree: TreeArc) -> Viewport {
     let tree = rlock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(&current_window_id).unwrap();
@@ -445,7 +446,7 @@ mod tests {
     }
   }
 
-  fn get_cursor_viewport(tree: TreeArc) -> CursorViewport {
+  pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewport {
     let tree = rlock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(&current_window_id).unwrap();
@@ -459,6 +460,156 @@ mod tests {
       _ => unreachable!(),
     }
   }
+
+  #[allow(clippy::too_many_arguments)]
+  pub fn assert_viewport_scroll(
+    buffer: BufferArc,
+    actual: &Viewport,
+    expect: &Vec<&str>,
+    expect_start_line: usize,
+    expect_end_line: usize,
+    expect_start_fills: &BTreeMap<usize, usize>,
+    expect_end_fills: &BTreeMap<usize, usize>,
+  ) {
+    info!(
+      "actual start_line/end_line:{:?}/{:?}",
+      actual.start_line_idx(),
+      actual.end_line_idx()
+    );
+    info!(
+      "expect start_line/end_line:{:?}/{:?}",
+      expect_start_line, expect_end_line
+    );
+    for (k, v) in actual.lines().iter() {
+      info!("actual line[{:?}]: {:?}", k, v);
+    }
+    for (i, e) in expect.iter().enumerate() {
+      info!("expect line[{}]:{:?}", i, e);
+    }
+    assert_eq!(expect_start_fills.len(), expect_end_fills.len());
+    for (k, start_v) in expect_start_fills.iter() {
+      let end_v = expect_end_fills.get(k).unwrap();
+      info!(
+        "expect start_fills/end_fills line[{}]:{:?}/{:?}",
+        k, start_v, end_v
+      );
+    }
+
+    assert_eq!(actual.start_line_idx(), expect_start_line);
+    assert_eq!(actual.end_line_idx(), expect_end_line);
+    if actual.lines().is_empty() {
+      assert!(actual.end_line_idx() <= actual.start_line_idx());
+    } else {
+      let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
+      let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
+      assert_eq!(*first_line_idx, actual.start_line_idx());
+      assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
+    }
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      actual.lines().len()
+    );
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      expect_start_fills.len()
+    );
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      expect_end_fills.len()
+    );
+
+    let buffer = rlock!(buffer);
+    let buflines = buffer
+      .get_rope()
+      .get_lines_at(actual.start_line_idx())
+      .unwrap();
+    let total_lines = expect_end_line - expect_start_line;
+
+    for (l, line) in buflines.enumerate() {
+      if l >= total_lines {
+        break;
+      }
+      let actual_line_idx = l + expect_start_line;
+      let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
+
+      info!(
+        "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
+        l, actual_line_idx, line_viewport
+      );
+      info!(
+        "start_filled_cols expect:{:?}, actual:{}",
+        expect_start_fills.get(&actual_line_idx),
+        line_viewport.start_filled_cols()
+      );
+      assert_eq!(
+        line_viewport.start_filled_cols(),
+        *expect_start_fills.get(&actual_line_idx).unwrap()
+      );
+      info!(
+        "end_filled_cols expect:{:?}, actual:{}",
+        expect_end_fills.get(&actual_line_idx),
+        line_viewport.end_filled_cols()
+      );
+      assert_eq!(
+        line_viewport.end_filled_cols(),
+        *expect_end_fills.get(&actual_line_idx).unwrap()
+      );
+
+      let rows = &line_viewport.rows();
+      for (r, row) in rows.iter() {
+        info!("row-index-{:?}, row:{:?}", r, row);
+
+        if r > rows.first_key_value().unwrap().0 {
+          let prev_r = r - 1;
+          let prev_row = rows.get(&prev_r).unwrap();
+          info!(
+            "row-{:?}, current[{}]:{:?}, previous[{}]:{:?}",
+            r, r, row, prev_r, prev_row
+          );
+        }
+        if r < rows.last_key_value().unwrap().0 {
+          let next_r = r + 1;
+          let next_row = rows.get(&next_r).unwrap();
+          info!(
+            "row-{:?}, current[{}]:{:?}, next[{}]:{:?}",
+            r, r, row, next_r, next_row
+          );
+        }
+
+        let mut payload = String::new();
+        for c_idx in row.start_char_idx()..row.end_char_idx() {
+          let c = line.get_char(c_idx).unwrap();
+          payload.push(c);
+        }
+        info!(
+          "row-{:?}, payload actual:{:?}, expect:{:?}",
+          r, payload, expect[*r as usize]
+        );
+        assert_eq!(payload, expect[*r as usize]);
+      }
+    }
+  }
+}
+
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_cursor_move_vertically {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::rlock;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
 
   #[test]
   fn cursor_move_vertically_nowrap1() {
@@ -743,6 +894,27 @@ mod tests {
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 0);
   }
+}
+
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_cursor_move_horizontally {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::rlock;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
 
   #[test]
   fn cursor_move_horizontally_nowrap1() {
@@ -997,6 +1169,27 @@ mod tests {
       assert_eq!(actual.char_idx(), i);
     }
   }
+}
+
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_cursor_move {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::rlock;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
 
   #[test]
   fn cursor_move_nowrap1() {
@@ -1236,135 +1429,27 @@ mod tests {
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 18);
   }
+}
 
-  #[allow(clippy::too_many_arguments)]
-  fn assert_viewport_scroll(
-    buffer: BufferArc,
-    actual: &Viewport,
-    expect: &Vec<&str>,
-    expect_start_line: usize,
-    expect_end_line: usize,
-    expect_start_fills: &BTreeMap<usize, usize>,
-    expect_end_fills: &BTreeMap<usize, usize>,
-  ) {
-    info!(
-      "actual start_line/end_line:{:?}/{:?}",
-      actual.start_line_idx(),
-      actual.end_line_idx()
-    );
-    info!(
-      "expect start_line/end_line:{:?}/{:?}",
-      expect_start_line, expect_end_line
-    );
-    for (k, v) in actual.lines().iter() {
-      info!("actual line[{:?}]: {:?}", k, v);
-    }
-    for (i, e) in expect.iter().enumerate() {
-      info!("expect line[{}]:{:?}", i, e);
-    }
-    assert_eq!(expect_start_fills.len(), expect_end_fills.len());
-    for (k, start_v) in expect_start_fills.iter() {
-      let end_v = expect_end_fills.get(k).unwrap();
-      info!(
-        "expect start_fills/end_fills line[{}]:{:?}/{:?}",
-        k, start_v, end_v
-      );
-    }
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_cursor_scroll_vertically {
+  use super::tests_util::*;
+  use super::*;
 
-    assert_eq!(actual.start_line_idx(), expect_start_line);
-    assert_eq!(actual.end_line_idx(), expect_end_line);
-    if actual.lines().is_empty() {
-      assert!(actual.end_line_idx() <= actual.start_line_idx());
-    } else {
-      let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
-      let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
-      assert_eq!(*first_line_idx, actual.start_line_idx());
-      assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
-    }
-    assert_eq!(
-      actual.end_line_idx() - actual.start_line_idx(),
-      actual.lines().len()
-    );
-    assert_eq!(
-      actual.end_line_idx() - actual.start_line_idx(),
-      expect_start_fills.len()
-    );
-    assert_eq!(
-      actual.end_line_idx() - actual.start_line_idx(),
-      expect_end_fills.len()
-    );
+  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::rlock;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
 
-    let buffer = rlock!(buffer);
-    let buflines = buffer
-      .get_rope()
-      .get_lines_at(actual.start_line_idx())
-      .unwrap();
-    let total_lines = expect_end_line - expect_start_line;
-
-    for (l, line) in buflines.enumerate() {
-      if l >= total_lines {
-        break;
-      }
-      let actual_line_idx = l + expect_start_line;
-      let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
-
-      info!(
-        "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
-        l, actual_line_idx, line_viewport
-      );
-      info!(
-        "start_filled_cols expect:{:?}, actual:{}",
-        expect_start_fills.get(&actual_line_idx),
-        line_viewport.start_filled_cols()
-      );
-      assert_eq!(
-        line_viewport.start_filled_cols(),
-        *expect_start_fills.get(&actual_line_idx).unwrap()
-      );
-      info!(
-        "end_filled_cols expect:{:?}, actual:{}",
-        expect_end_fills.get(&actual_line_idx),
-        line_viewport.end_filled_cols()
-      );
-      assert_eq!(
-        line_viewport.end_filled_cols(),
-        *expect_end_fills.get(&actual_line_idx).unwrap()
-      );
-
-      let rows = &line_viewport.rows();
-      for (r, row) in rows.iter() {
-        info!("row-index-{:?}, row:{:?}", r, row);
-
-        if r > rows.first_key_value().unwrap().0 {
-          let prev_r = r - 1;
-          let prev_row = rows.get(&prev_r).unwrap();
-          info!(
-            "row-{:?}, current[{}]:{:?}, previous[{}]:{:?}",
-            r, r, row, prev_r, prev_row
-          );
-        }
-        if r < rows.last_key_value().unwrap().0 {
-          let next_r = r + 1;
-          let next_row = rows.get(&next_r).unwrap();
-          info!(
-            "row-{:?}, current[{}]:{:?}, next[{}]:{:?}",
-            r, r, row, next_r, next_row
-          );
-        }
-
-        let mut payload = String::new();
-        for c_idx in row.start_char_idx()..row.end_char_idx() {
-          let c = line.get_char(c_idx).unwrap();
-          payload.push(c);
-        }
-        info!(
-          "row-{:?}, payload actual:{:?}, expect:{:?}",
-          r, payload, expect[*r as usize]
-        );
-        assert_eq!(payload, expect[*r as usize]);
-      }
-    }
-  }
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
 
   #[test]
   fn cursor_scroll_vertically_nowrap1() {
