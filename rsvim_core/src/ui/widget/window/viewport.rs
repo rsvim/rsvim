@@ -197,7 +197,8 @@ impl CursorViewport {
     }
   }
 
-  /// Create cursor viewport with specified line/char index from the window viewport and buffer.
+  /// Create cursor viewport with specified position (buffer's line/char index) from the window
+  /// viewport.
   ///
   /// # Panics
   ///
