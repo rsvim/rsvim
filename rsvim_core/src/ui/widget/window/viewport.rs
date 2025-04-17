@@ -168,7 +168,7 @@ impl CursorViewport {
     self.column_idx
   }
 
-  /// Create with viewport.
+  /// Create cursor viewport with the top-left corner position from the window viewport.
   pub fn from_top_left(viewport: &Viewport, buffer: &mut Buffer) -> Self {
     debug_assert!(viewport.end_line_idx() >= viewport.start_line_idx());
     if viewport.end_line_idx() == viewport.start_line_idx() {
@@ -197,6 +197,7 @@ impl CursorViewport {
     }
   }
 
+  /// Create cursor viewport with specified line/char index from the window viewport and buffer.
   pub fn from_position(
     viewport: &Viewport,
     buffer: &mut Buffer,
