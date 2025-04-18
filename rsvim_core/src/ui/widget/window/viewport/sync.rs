@@ -73,33 +73,33 @@ pub fn downward(
   }
 }
 
-/// Calculate viewport with option `wrap=false` upward, from bottom to top.
-pub fn _upward(
-  buffer: &mut Buffer,
-  window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
-  end_line: usize,
-  start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
-  if height == 0 || width == 0 {
-    return (ViewportLineRange::default(), BTreeMap::new());
-  }
-
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
-    (false, _) => upward_nowrap(buffer, window_actual_shape, end_line, start_column),
-    (true, false) => {
-      unreachable!()
-    }
-    (true, true) => {
-      unreachable!()
-    }
-  }
-}
+// /// Calculate viewport with option `wrap=false` upward, from bottom to top.
+// pub fn _upward(
+//   buffer: &mut Buffer,
+//   window_actual_shape: &U16Rect,
+//   window_local_options: &WindowLocalOptions,
+//   end_line: usize,
+//   start_column: usize,
+// ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+//   let height = window_actual_shape.height();
+//   let width = window_actual_shape.width();
+//   if height == 0 || width == 0 {
+//     return (ViewportLineRange::default(), BTreeMap::new());
+//   }
+//
+//   match (
+//     window_local_options.wrap(),
+//     window_local_options.line_break(),
+//   ) {
+//     (false, _) => upward_nowrap(buffer, window_actual_shape, end_line, start_column),
+//     (true, false) => {
+//       unreachable!()
+//     }
+//     (true, true) => {
+//       unreachable!()
+//     }
+//   }
+// }
 
 #[allow(dead_code)]
 fn slice2line(s: &RopeSlice) -> String {
@@ -228,65 +228,65 @@ fn downward_nowrap(
   }
 }
 
-#[allow(clippy::explicit_counter_loop)]
-/// Implements [`upward`] with option `wrap=false`.
-fn upward_nowrap(
-  buffer: &mut Buffer,
-  window_actual_shape: &U16Rect,
-  end_line: usize,
-  start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-  // trace!("buffer_len_lines:{:?}", buffer_len_lines);
-
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
-
-  unsafe {
-    // Fix multiple mutable references on `buffer`.
-    let mut raw_buffer = Buffer::to_nonnull(buffer);
-    let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
-
-    // The first `current_row` in the window maps to the `start_line` in the buffer.
-    let mut current_row: isize = height as isize - 1;
-    let mut current_line: isize = end_line as isize - 1;
-
-    if current_line >= 0 && (current_line as usize) < buffer_len_lines {
-      // If `current_row` goes out of window, `current_line` goes out of buffer.
-      while current_row >= 0 && current_line >= 0 && (current_line as usize) < buffer_len_lines {
-        let bufline = raw_buffer.as_ref().get_rope().line(current_line as usize);
-
-        let (rows, start_fills, end_fills) = process_line_nowrap(
-          raw_buffer.as_mut(),
-          &bufline,
-          current_line as usize,
-          start_column,
-          current_row as u16,
-          height,
-          width,
-        );
-
-        line_viewports.insert(
-          current_line as usize,
-          LineViewport::new(rows, start_fills, end_fills),
-        );
-
-        // Go up to previous row and line
-        current_line -= 1;
-        current_row -= 1;
-      }
-
-      (
-        ViewportLineRange::new((current_line + 1) as usize..end_line),
-        line_viewports,
-      )
-    } else {
-      (ViewportLineRange::default(), BTreeMap::new())
-    }
-  }
-}
+// #[allow(clippy::explicit_counter_loop)]
+// /// Implements [`upward`] with option `wrap=false`.
+// fn upward_nowrap(
+//   buffer: &mut Buffer,
+//   window_actual_shape: &U16Rect,
+//   end_line: usize,
+//   start_column: usize,
+// ) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+//   let height = window_actual_shape.height();
+//   let width = window_actual_shape.width();
+//   let buffer_len_lines = buffer.get_rope().len_lines();
+//   // trace!("buffer_len_lines:{:?}", buffer_len_lines);
+//
+//   debug_assert!(height > 0);
+//   debug_assert!(width > 0);
+//
+//   unsafe {
+//     // Fix multiple mutable references on `buffer`.
+//     let mut raw_buffer = Buffer::to_nonnull(buffer);
+//     let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+//
+//     // The first `current_row` in the window maps to the `start_line` in the buffer.
+//     let mut current_row: isize = height as isize - 1;
+//     let mut current_line: isize = end_line as isize - 1;
+//
+//     if current_line >= 0 && (current_line as usize) < buffer_len_lines {
+//       // If `current_row` goes out of window, `current_line` goes out of buffer.
+//       while current_row >= 0 && current_line >= 0 && (current_line as usize) < buffer_len_lines {
+//         let bufline = raw_buffer.as_ref().get_rope().line(current_line as usize);
+//
+//         let (rows, start_fills, end_fills) = process_line_nowrap(
+//           raw_buffer.as_mut(),
+//           &bufline,
+//           current_line as usize,
+//           start_column,
+//           current_row as u16,
+//           height,
+//           width,
+//         );
+//
+//         line_viewports.insert(
+//           current_line as usize,
+//           LineViewport::new(rows, start_fills, end_fills),
+//         );
+//
+//         // Go up to previous row and line
+//         current_line -= 1;
+//         current_row -= 1;
+//       }
+//
+//       (
+//         ViewportLineRange::new((current_line + 1) as usize..end_line),
+//         line_viewports,
+//       )
+//     } else {
+//       (ViewportLineRange::default(), BTreeMap::new())
+//     }
+//   }
+// }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
 fn process_line_wrap_nolinebreak(
