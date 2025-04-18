@@ -19,7 +19,7 @@ doctest = false
 
 [features]
 default = ["simd", "unicode_lines"]
-simd = ["ropey/simd", "str_indices/simd"]
+simd = ["ropey/simd"]
 unicode_lines = ["ropey/unicode_lines"]
 
 [dependencies]
