@@ -181,6 +181,7 @@ if __name__ == "__main__":
         "-l",
         "--list",
         action="store_true",
+        dest="list_test",
         help="List all test cases instead of running them",
     )
     test_subparser.add_argument(
@@ -202,7 +203,7 @@ if __name__ == "__main__":
     test_subparser.add_argument(
         "--threads",
         type=int,
-        dest="N",
+        metavar="N",
         help="Run tests (include `miri`) concurrently with multiple threads",
     )
 
@@ -250,7 +251,7 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    # print(parser)
+    print(parser)
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch, parser.recache)
