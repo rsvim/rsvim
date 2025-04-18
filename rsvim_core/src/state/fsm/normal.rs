@@ -321,6 +321,7 @@ impl NormalStateful {
       Command::CursorMoveUp(n) => start_line_idx.saturating_sub(n),
       Command::CursorMoveDown(n) => {
         // Viewport already shows the last line of buffer, cannot scroll down anymore.
+        debug_assert!(end_line_idx <= buffer_len_lines);
         if end_line_idx == buffer_len_lines {
           return None;
         }
@@ -1974,13 +1975,13 @@ mod tests_cursor_scroll_vertically {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
         "  1. When ",
         "  2. When ",
+        "     * The",
+        "     * The",
+        "  3. If a ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
 
@@ -1988,8 +1989,8 @@ mod tests_cursor_scroll_vertically {
         buf.clone(),
         &viewport,
         &expect,
-        0,
-        5,
+        3,
+        8,
         &expect_fills,
         &expect_fills,
       );
@@ -2006,13 +2007,13 @@ mod tests_cursor_scroll_vertically {
     {
       let viewport = get_viewport(tree);
       let expect = vec![
-        "Hello, RSV",
-        "This is a ",
         "But still ",
         "  1. When ",
         "  2. When ",
+        "     * The",
+        "     * The",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
         .collect();
 
@@ -2020,8 +2021,8 @@ mod tests_cursor_scroll_vertically {
         buf.clone(),
         &viewport,
         &expect,
-        0,
-        5,
+        2,
+        7,
         &expect_fills,
         &expect_fills,
       );
