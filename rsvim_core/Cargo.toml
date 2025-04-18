@@ -17,10 +17,6 @@ description = "The core library for the RSVIM editor."
 [lib]
 doctest = false
 
-[features]
-default = ["simd"]
-simd = ["ropey/simd"]
-
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream"] }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }

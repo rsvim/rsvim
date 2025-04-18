@@ -56,7 +56,15 @@ def test(name, recache, miri):
     command = ""
 
     if miri:
-        command = f"cargo +nightly miri test --no-default-features {name}"
+        command = set_env(
+            "", "MIRIFLAGS", "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'"
+        )
+        cpu_cores = os.cpu_count()
+        cpu_cores = cpu_cores if cpu_cores is not None else 1
+        workers = max(4, cpu_cores * 4 + 1)
+        command = (
+            f"{command} cargo +nightly miri test {name} -- --test-threads {workers}"
+        )
     else:
         command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command, recache)
