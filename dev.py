@@ -73,10 +73,10 @@ def test(name, recache, miri):
 
     command = command.strip()
     print(command)
-    start_at = time.time_ns()
+    start_at = time.time_ns() // 1_000_000
     print(f"start at: {start_at}ms")
     os.system(command)
-    stop_at = time.time_ns()
+    stop_at = time.time_ns() // 1_000_000
     used = stop_at - start_at
     print(f"stop at: {stop_at}ms, used: {used}ms")
 
