@@ -641,6 +641,7 @@ mod tests_wrap_nolinebreak {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::geo_size_into_rect;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
@@ -983,26 +984,80 @@ mod tests_wrap_nolinebreak {
         "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
       ],
     );
+
     let expect = vec![
-      "        1. When the",
-      " line is small enou",
-      "gh to completely pu",
-      "t inside a row of t",
-      "he window content w",
-      "idget, then the lin",
-      "e-wrap and word-wra",
-      "p doesn't affect th",
-      "e rendering.       ",
-      "        2. When the",
-      " line is too long t",
-      "o be completely put",
-      " in a row of the wi",
-      "ndow content widget",
-      ", there're multiple",
+      "                * T",
+      "he extra parts are ",
+      "split into the next",
+      " row, if either lin",
+      "e-wrap or word-wrap",
+      " options are been s",
+      "et. If the extra pa",
+      "rts are still too l",
+      "ong to put in the n",
+      "ext row, repeat thi",
+      "s operation again a",
+      "nd again. This oper",
+      "ation also eats mor",
+      "e rows in the windo",
+      "w, thus it may cont",
     ];
     let viewport = {
       let mut buffer = wlock!(buffer);
-      let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
+      let actual_shape = geo_size_into_rect!(terminal_size, u16);
+      let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 6, 0);
+      Viewport::to_arc(viewport)
+    };
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+  }
+
+  #[test]
+  fn update3() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(19, 15);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+
+    let buffer = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things\t我们想要测试的：\n",
+        "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "\t\t* 如果行换行和单词换行这两个选项都没有选中，那么这些超出窗口的文本内容会被截断。\n",
+        "\t\t* The extra parts are split into the next row\n",
+      ],
+    );
+
+    let expect = vec![
+      "                * T",
+      "he extra parts are ",
+      "split into the next",
+      " row               ",
+      "                   ",
+      "                   ",
+      "                   ",
+      "                   ",
+      "                   ",
+      "                   ",
+      "                   ",
+      "                   ",
+      "                   ",
+      "                   ",
+      "                   ",
+    ];
+    let viewport = {
+      let mut buffer = wlock!(buffer);
+      let actual_shape = geo_size_into_rect!(terminal_size, u16);
       let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 6, 0);
       Viewport::to_arc(viewport)
     };
