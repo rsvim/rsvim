@@ -326,7 +326,12 @@ impl NormalStateful {
           return None;
         }
 
-        let expected_start_line = start_line_idx.saturating_add(n);
+        // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
+        // line.
+        let expected_start_line = std::cmp::min(
+          start_line_idx.saturating_add(n),
+          buffer_len_lines.saturating_sub(1),
+        );
 
         // If the expected (after scrolled) start line index is current start line index, then don't
         // scroll.
@@ -2079,13 +2084,6 @@ mod tests_cursor_scroll_vertically {
         "a row of the wi",
         "ndow content wi",
         "dget, then the ",
-        // "line-wrap and word-wrap doesn't affect the rendering.\n",
-        // "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        // "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        // "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-        // "  3. If a single char needs multiple cells to display on the window, and it happens the char is at the end of the row, there can be multiple cases:\n",
-        // "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
-        // "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
