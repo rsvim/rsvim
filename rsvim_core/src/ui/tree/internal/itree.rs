@@ -8,7 +8,7 @@ use crate::ui::tree::internal::{InodeId, Inodeable};
 use geo::algorithm::coordinate_position::{CoordPos, CoordinatePosition};
 use geo::point;
 use std::fmt::Debug;
-use std::marker::PhantomData;
+// use std::marker::PhantomData;
 use std::ptr::NonNull;
 use std::{collections::VecDeque, iter::Iterator};
 // use tracing::trace;
@@ -81,61 +81,61 @@ where
   }
 }
 
-#[derive(Debug)]
-/// The mutable pre-order iterator of the tree.
-pub struct ItreeIterMut<'a, T>
-where
-  T: Inodeable,
-{
-  tree: NonNull<Itree<T>>,
-  queue: VecDeque<InodeId>,
-  phantom: PhantomData<&'a mut Itree<T>>,
-}
-
-impl<'a, T> Iterator for ItreeIterMut<'a, T>
-where
-  T: Inodeable,
-{
-  type Item = &'a mut T;
-
-  fn next(&mut self) -> Option<Self::Item> {
-    if let Some(id) = self.queue.pop_front() {
-      unsafe {
-        // Fix `self.tree` mutable references.
-        match self.tree.as_ref().children_ids(&id) {
-          Some(children_ids) => {
-            for child_id in children_ids.iter() {
-              if self.tree.as_ref().node(child_id).is_some() {
-                self.queue.push_back(*child_id);
-              }
-            }
-          }
-          None => { /* Skip */ }
-        }
-        return self.tree.as_mut().node_mut(&id);
-      }
-    }
-    None
-  }
-}
-
-impl<'a, T> ItreeIterMut<'a, T>
-where
-  T: Inodeable,
-{
-  pub fn new(tree: &'a mut Itree<T>, start_node_id: Option<InodeId>) -> Self {
-    let mut queue = VecDeque::new();
-    match start_node_id {
-      Some(id) => queue.push_back(id),
-      None => { /* Do nothing */ }
-    }
-    ItreeIterMut {
-      tree: NonNull::new(tree as *mut Itree<T>).unwrap(),
-      queue,
-      phantom: PhantomData,
-    }
-  }
-}
+// #[derive(Debug)]
+// /// The mutable pre-order iterator of the tree.
+// pub struct ItreeIterMut<'a, T>
+// where
+//   T: Inodeable,
+// {
+//   tree: NonNull<Itree<T>>,
+//   queue: VecDeque<InodeId>,
+//   phantom: PhantomData<&'a mut Itree<T>>,
+// }
+//
+// impl<'a, T> Iterator for ItreeIterMut<'a, T>
+// where
+//   T: Inodeable,
+// {
+//   type Item = &'a mut T;
+//
+//   fn next(&mut self) -> Option<Self::Item> {
+//     if let Some(id) = self.queue.pop_front() {
+//       unsafe {
+//         // Fix `self.tree` mutable references.
+//         match self.tree.as_ref().children_ids(&id) {
+//           Some(children_ids) => {
+//             for child_id in children_ids.iter() {
+//               if self.tree.as_ref().node(child_id).is_some() {
+//                 self.queue.push_back(*child_id);
+//               }
+//             }
+//           }
+//           None => { /* Skip */ }
+//         }
+//         return self.tree.as_mut().node_mut(&id);
+//       }
+//     }
+//     None
+//   }
+// }
+//
+// impl<'a, T> ItreeIterMut<'a, T>
+// where
+//   T: Inodeable,
+// {
+//   pub fn new(tree: &'a mut Itree<T>, start_node_id: Option<InodeId>) -> Self {
+//     let mut queue = VecDeque::new();
+//     match start_node_id {
+//       Some(id) => queue.push_back(id),
+//       None => { /* Do nothing */ }
+//     }
+//     ItreeIterMut {
+//       tree: NonNull::new(tree as *mut Itree<T>).unwrap(),
+//       queue,
+//       phantom: PhantomData,
+//     }
+//   }
+// }
 
 // Attributes {
 impl<T> Itree<T>
@@ -196,10 +196,10 @@ where
     ItreeIter::new(self, Some(self.root_id))
   }
 
-  /// Get the iterator that returns mutable reference.
-  pub fn iter_mut(&mut self) -> ItreeIterMut<T> {
-    ItreeIterMut::new(self, Some(self.root_id))
-  }
+  // /// Get the iterator that returns mutable reference.
+  // pub fn iter_mut(&mut self) -> ItreeIterMut<T> {
+  //   ItreeIterMut::new(self, Some(self.root_id))
+  // }
 }
 // Attributes }
 

@@ -16,7 +16,7 @@ use crate::ui::widget::window::{
 
 // Re-export
 pub use crate::ui::tree::internal::{
-  InodeBase, InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut,
+  InodeBase, InodeId, Inodeable, Itree, ItreeIter, /*ItreeIterMut,*/
 };
 
 use paste::paste;
