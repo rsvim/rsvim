@@ -176,6 +176,21 @@ macro_rules! geo_size_as {
   };
 }
 
+/// Convert the `Size<T>` to `Rect<U>` with another type `U`. The min point is `(0, 0)`, max point
+/// is `(width, height)` where width/height is from `Size<T>`.
+#[macro_export]
+macro_rules! geo_size_into_rect {
+  ($size_var:ident,$type_name:ty) => {
+    geo::Rect::new(
+      (0 as $type_name, 0 as $type_name),
+      (
+        $size_var.width() as $type_name,
+        $size_var.height() as $type_name,
+      ),
+    ) as geo::Rect<$type_name>
+  };
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -258,5 +273,19 @@ mod tests {
     let actual3_w = actual3.width();
     assert_eq!(mem::size_of_val(&actual3_w), mem::size_of_val(&78_i16));
     assert_eq!(mem::size_of_val(&actual3_h), mem::size_of_val(&88_i16));
+  }
+
+  #[test]
+  fn cast_geo_size_into_rect() {
+    let s1: ISize = ISize::new(1, 2);
+    let actual = geo_size_into_rect!(s1, u8);
+    assert_eq!(mem::size_of_val(&actual.min().x), mem::size_of_val(&1_u8));
+    assert_eq!(mem::size_of_val(&actual.min().y), mem::size_of_val(&1_u8));
+    assert_eq!(mem::size_of_val(&actual.max().x), mem::size_of_val(&1_u8));
+    assert_eq!(mem::size_of_val(&actual.max().y), mem::size_of_val(&1_u8));
+    assert_eq!(actual.min().x, 0_u8);
+    assert_eq!(actual.min().y, 0_u8);
+    assert_eq!(actual.max().x, 1_u8);
+    assert_eq!(actual.max().y, 2_u8);
   }
 }

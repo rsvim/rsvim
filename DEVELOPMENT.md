@@ -1,13 +1,5 @@
 # Development
 
-- [Requirements](#requirements)
-- [Rust](#rust)
-  - [Lint](#lint)
-  - [Test](#test)
-  - [Debug](#debug)
-- [TypeScript/JavaScript](#typescriptjavascript)
-  - [Transpile/Compile](#transpilecompile)
-
 ## Requirements
 
 Please setup your development environment with:
@@ -24,41 +16,14 @@ Please setup your development environment with:
 
 ## Rust
 
-> We provide the `dev.py` script to help running below commands, use `dev.py -h` for more details.
+> We provide the `dev.py` script to help running below commands, use `dev.py -h` for more details. For window development, please use `dev.cmd`. Checkout the script for commands running underhood.
 
-### Lint
-
-To check code, please use `RUSTFLAGS='-Dwarnings' bacon -j clippy-all`.
-
-### Test
-
-1. To run all test cases, please use `cargo nextest run`.
-2. To run all test cases with full backtrace and logging message, please use `RUST_BACKTRACE=full RSVIM_LOG=trace cargo nextest run --no-capture`.
-3. To run a specific test, please use `cargo nextest run [TEST]`.
-4. To list all test cases, please use `cargo nextest list`.
-
-### Debug
-
-To debug code, please:
-
-1. Build binary with `RUST_BACKTRACE=full RSVIM_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
-
-### Docs
-
-To write docs, please:
-
-1. Start local service with `cargo watch -s 'cargo doc && browser-sync start --ss target/doc -s target/doc --directory --no-open'`.
-2. Open browser with `http://localhost:3000/rsvim`.
-
-### Release
-
-To release a new version, please:
-
-1. Dry run with `./dev.py r [LEVEL]`.
-2. Execute with `./dev.py r [LEVEL] -e`.
+- To lint code, please use `./dev.py clippy` (`cargo clippy`).
+- To run unit test, please use `./dev.py test` (`cargo test`).
+- To debug code, please build binary with `RUST_BACKTRACE=full RSVIM_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim-YYYYMMDD-HHmmss-SSS.log`.
+- To write docs, please use `./dev.py doc` (`cargo doc`).
+- To release a new version, please use `./dev.py release [LEVEL]` (`cargo release`):
 
 ## TypeScript/JavaScript
 
-### Transpile/Compile
-
-To transpile/compile typescript code to javascript code, please run `tsc`.
+- To transpile/compile typescript code to javascript code, please run `tsc`.
