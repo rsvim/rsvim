@@ -17,6 +17,10 @@ description = "The core library for the RSVIM editor."
 [lib]
 doctest = false
 
+[features]
+default = ["simd"]
+simd = ["ropey/simd"]
+
 [dependencies]
 crossterm = { workspace = true, features = ["event-stream"] }
 jiff = { workspace = true, features = ["tzdb-bundle-always"] }
@@ -31,7 +35,9 @@ tokio-util = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }
 futures = { workspace = true }
 compact_str = { workspace = true, features = ["bytes"] }
-ropey = { workspace = true }
+ropey = { workspace = true, default-features = false, features = [
+  "unicode_lines",
+] }
 geo = { workspace = true }
 num-traits = { workspace = true }
 parking_lot = { workspace = true }
