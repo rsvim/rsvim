@@ -17,8 +17,8 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
-  lint:
-    name: Lint
+  check:
+    name: Check
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
