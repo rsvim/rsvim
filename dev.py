@@ -54,7 +54,7 @@ def clippy(watch, recache):
     os.system(command)
 
 
-def test(name, recache, miri):
+def test(name, recache, miri, threads):
     if len(name) == 0:
         name = "--all"
         print("Run 'test' for all cases")
@@ -68,16 +68,19 @@ def test(name, recache, miri):
         command = set_env(
             "", "MIRIFLAGS", "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'"
         )
-        cpu_cores = os.cpu_count()
-        cpu_cores = cpu_cores if cpu_cores is not None else 1
-        workers = max(8, cpu_cores * 8 + 1)
-        command = (
-            f"{command} cargo +nightly miri test {name} -- --test-threads {workers}"
-        )
+        if threads is not None and threads > 1:
+            command = (
+                f"{command} cargo +nightly miri test {name} -- --test-threads {threads}"
+            )
+        else:
+            command = f"{command} cargo +nightly miri test {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command, recache)
-        command = f"{command} cargo nextest run --no-capture {name}"
+        if threads is not None and threads > 1:
+            command = f"{command} cargo nextest run -j {threads} --no-capture {name}"
+        else:
+            command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
     print(command)
@@ -178,7 +181,6 @@ if __name__ == "__main__":
         "-l",
         "--list",
         action="store_true",
-        dest="list_test",
         help="List all test cases instead of running them",
     )
     test_subparser.add_argument(
@@ -196,6 +198,12 @@ if __name__ == "__main__":
         "--miri",
         action="store_true",
         help="Run `cargo +nightly miri test`, this will disable `sccache`",
+    )
+    test_subparser.add_argument(
+        "--threads",
+        type=int,
+        dest="N",
+        help="Run tests (include `miri`) concurrently with multiple threads",
     )
 
     build_subparser = subparsers.add_parser(
@@ -250,7 +258,7 @@ if __name__ == "__main__":
         if parser.list_test:
             list_test(parser.recache)
         else:
-            test(parser.name, parser.recache, parser.miri)
+            test(parser.name, parser.recache, parser.miri, parser.threads)
     elif parser.subcommand == "build" or parser.subcommand == "b":
         build(parser.release, parser.recache)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
