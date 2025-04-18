@@ -61,7 +61,7 @@ def test(name, recache, miri):
         )
         cpu_cores = os.cpu_count()
         cpu_cores = cpu_cores if cpu_cores is not None else 1
-        workers = max(4, cpu_cores * 4 + 1)
+        workers = max(8, cpu_cores * 8 + 1)
         command = (
             f"{command} cargo +nightly miri test {name} -- --test-threads {workers}"
         )
