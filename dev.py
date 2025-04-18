@@ -7,19 +7,10 @@ import argparse
 import os
 import pathlib
 import platform
-import time
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
 )
-
-
-def now_millisecs():
-    return time.time_ns() // 1_000_000
-
-
-def format_millisecs_in_secs(ms):
-    return format(ms / 1000, ".3f")
 
 
 def set_env(command, name, value):
@@ -54,9 +45,9 @@ def clippy(watch, recache):
     os.system(command)
 
 
-def test(name, recache, miri, threads):
+def test(name, recache, miri):
     if len(name) == 0:
-        name = "--all"
+        name = None
         print("Run 'test' for all cases")
     else:
         name = " ".join(list(dict.fromkeys(name)))
@@ -64,34 +55,23 @@ def test(name, recache, miri, threads):
 
     command = ""
 
-    if miri:
+    if miri is not None:
         command = set_env(
             "", "MIRIFLAGS", "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'"
         )
-        if threads is not None and threads > 1:
-            command = (
-                f"{command} cargo +nightly miri test {name} -- --test-threads {threads}"
-            )
-        else:
-            command = f"{command} cargo +nightly miri test {name}"
+        if name is None:
+            name = ""
+        command = f"{command} cargo +nightly miri test -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command, recache)
-        if threads is not None and threads > 1:
-            command = f"{command} cargo nextest run -j {threads} --no-capture {name}"
-        else:
-            command = f"{command} cargo nextest run --no-capture {name}"
+        if name is None:
+            name = "--all"
+        command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
     print(command)
-    start_at = now_millisecs()
-    print(f"start at: {format_millisecs_in_secs(start_at)}s")
     os.system(command)
-    stop_at = now_millisecs()
-    used = stop_at - start_at
-    print(
-        f"stop at: {format_millisecs_in_secs(stop_at)}s, used: {format_millisecs_in_secs(used)}s"
-    )
 
 
 def list_test(recache):
@@ -197,14 +177,8 @@ if __name__ == "__main__":
     )
     test_subparser.add_argument(
         "--miri",
-        action="store_true",
-        help="Run `cargo +nightly miri test`, this will disable `sccache`",
-    )
-    test_subparser.add_argument(
-        "--threads",
-        type=int,
-        metavar="N",
-        help="Run tests (include `miri`) concurrently with multiple threads",
+        metavar="PACKAGE",
+        help="Run `cargo +nightly miri test` on specified [PACKAGE]",
     )
 
     build_subparser = subparsers.add_parser(
@@ -251,7 +225,7 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    # print(parser)
+    print(parser)
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch, parser.recache)
@@ -259,7 +233,7 @@ if __name__ == "__main__":
         if parser.list_test:
             list_test(parser.recache)
         else:
-            test(parser.name, parser.recache, parser.miri, parser.threads)
+            test(parser.name, parser.recache, parser.miri)
     elif parser.subcommand == "build" or parser.subcommand == "b":
         build(parser.release, parser.recache)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
