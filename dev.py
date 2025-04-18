@@ -45,18 +45,29 @@ def clippy(watch, recache):
     os.system(command)
 
 
-def test(name, recache):
+def test(name, recache, miri):
     if len(name) == 0:
-        name = "--all"
+        name = None
         print("Run 'test' for all cases")
     else:
         name = " ".join(list(dict.fromkeys(name)))
         print(f"Run 'test' for '{name}'")
 
-    command = set_env("", "RSVIM_LOG", "trace")
-    command = set_sccache(command, recache)
+    command = ""
 
-    command = f"{command} cargo nextest run --no-capture {name}"
+    if miri is not None:
+        command = set_env(
+            "", "MIRIFLAGS", "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'"
+        )
+        if name is None:
+            name = ""
+        command = f"{command} cargo +nightly miri test -F unicode_lines --no-default-features -p {miri} {name}"
+    else:
+        command = set_env("", "RSVIM_LOG", "trace")
+        command = set_sccache(command, recache)
+        if name is None:
+            name = "--all"
+        command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
     print(command)
@@ -164,6 +175,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Rebuild cache in `sccache`",
     )
+    test_subparser.add_argument(
+        "--miri",
+        metavar="PACKAGE",
+        help="Run `cargo +nightly miri test` on specified [PACKAGE]",
+    )
 
     build_subparser = subparsers.add_parser(
         "build",
@@ -209,7 +225,7 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    # print(parser)
+    print(parser)
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch, parser.recache)
@@ -217,7 +233,7 @@ if __name__ == "__main__":
         if parser.list_test:
             list_test(parser.recache)
         else:
-            test(parser.name, parser.recache)
+            test(parser.name, parser.recache, parser.miri)
     elif parser.subcommand == "build" or parser.subcommand == "b":
         build(parser.release, parser.recache)
     elif parser.subcommand == "doc" or parser.subcommand == "d":

@@ -17,38 +17,15 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
-  pr:
-    name: PR
+  check:
+    name: Check
     runs-on: ubuntu-22.04
-    if: ${{ github.ref != 'refs/heads/main' }}
     steps:
       - uses: actions/checkout@v4
       - uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: crate-ci/typos@master
-      - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@nightly
-        with:
-          components: miri,rust-src
-      - uses: actions/checkout@v4
-      - name: (Experimental) Cargo miri
-        env:
-          MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-permissive-provenance -Zmiri-disable-stacked-borrows"
-          RUSTC_WRAPPER: "sccache"
-          SCCACHE_GHA_ENABLED: "true"
-        # Disable simd features
-        run: |
-          sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' Cargo.toml
-          sed -i 's/ropey[[:space:]]*=[[:space:]]*{/ropey = { default-features=false, features=["unicode_lines"],/' ./rsvim_core/Cargo.toml
-          git diff --color=always
-          cargo +nightly miri test
-  lint:
-    name: Lint
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: latest
