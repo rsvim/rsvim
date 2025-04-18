@@ -2272,7 +2272,7 @@ mod tests_cursor_scroll_vertically {
         "",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(9, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(9, 0), (10, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2312,7 +2312,7 @@ mod tests_cursor_scroll_vertically {
         "",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(9, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(9, 0), (10, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
