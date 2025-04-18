@@ -45,7 +45,7 @@ def clippy(watch, recache):
     os.system(command)
 
 
-def test(name, recache):
+def test(name, recache, miri):
     if len(name) == 0:
         name = "--all"
         print("Run 'test' for all cases")
@@ -53,10 +53,14 @@ def test(name, recache):
         name = " ".join(list(dict.fromkeys(name)))
         print(f"Run 'test' for '{name}'")
 
-    command = set_env("", "RSVIM_LOG", "trace")
-    command = set_sccache(command, recache)
+    command = ""
 
-    command = f"{command} cargo nextest run --no-capture {name}"
+    if miri:
+        command = f"cargo +nightly miri test --no-default-features {name}"
+    else:
+        command = set_env("", "RSVIM_LOG", "trace")
+        command = set_sccache(command, recache)
+        command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
     print(command)
@@ -164,6 +168,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Rebuild cache in `sccache`",
     )
+    test_subparser.add_argument(
+        "--miri",
+        action="store_true",
+        help="Run `cargo +nightly miri test`, this will disable `sccache`",
+    )
 
     build_subparser = subparsers.add_parser(
         "build",
@@ -217,7 +226,7 @@ if __name__ == "__main__":
         if parser.list_test:
             list_test(parser.recache)
         else:
-            test(parser.name, parser.recache)
+            test(parser.name, parser.recache, parser.miri)
     elif parser.subcommand == "build" or parser.subcommand == "b":
         build(parser.release, parser.recache)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
