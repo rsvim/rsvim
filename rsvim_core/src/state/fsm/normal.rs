@@ -1975,38 +1975,6 @@ mod tests_cursor_scroll_vertically {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
-        "  3. If a ",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
-
-      assert_viewport_scroll(
-        buf.clone(),
-        &viewport,
-        &expect,
-        3,
-        8,
-        &expect_fills,
-        &expect_fills,
-      );
-    }
-
-    // Scroll-6
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveUp(1));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
-    {
-      let viewport = get_viewport(tree);
-      let expect = vec![
         "But still ",
         "  1. When ",
         "  2. When ",
@@ -2023,6 +1991,38 @@ mod tests_cursor_scroll_vertically {
         &expect,
         2,
         7,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Scroll-6
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveUp(3));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    {
+      let viewport = get_viewport(tree);
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
         &expect_fills,
         &expect_fills,
       );
