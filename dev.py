@@ -14,6 +14,14 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
 )
 
 
+def now_millisecs():
+    return time.time_ns() // 1_000_000
+
+
+def format_millisecs_in_secs(ms):
+    return format(ms / 1000, ".3f")
+
+
 def set_env(command, name, value):
     assert isinstance(command, str)
     if WINDOWS:
@@ -73,12 +81,14 @@ def test(name, recache, miri):
 
     command = command.strip()
     print(command)
-    start_at = time.time_ns() // 1_000_000
-    print(f"start at: {start_at}ms")
+    start_at = now_millisecs()
+    print(f"start at: {format_millisecs_in_secs(start_at)}s")
     os.system(command)
-    stop_at = time.time_ns() // 1_000_000
+    stop_at = now_millisecs()
     used = stop_at - start_at
-    print(f"stop at: {stop_at}ms, used: {used}ms")
+    print(
+        f"stop at: {format_millisecs_in_secs(stop_at)}s, used: {format_millisecs_in_secs(used)}s"
+    )
 
 
 def list_test(recache):
