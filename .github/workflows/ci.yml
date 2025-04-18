@@ -23,6 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: amannn/action-semantic-pull-request@v5
+        if: ${{ github.ref != 'refs/heads/main' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: crate-ci/typos@master
