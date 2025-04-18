@@ -7,6 +7,7 @@ import argparse
 import os
 import pathlib
 import platform
+import time
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
@@ -72,7 +73,12 @@ def test(name, recache, miri):
 
     command = command.strip()
     print(command)
+    start_at = time.time_ns()
+    print(f"start at: {start_at}ms")
     os.system(command)
+    stop_at = time.time_ns()
+    used = stop_at - start_at
+    print(f"stop at: {stop_at}ms, used: {used}ms")
 
 
 def list_test(recache):
