@@ -1,6 +1,5 @@
 //! APIs for `Rsvim.opt` namespace.
 
-use crate::envar;
 use crate::js::JsRuntime;
 use crate::{rlock, wlock};
 

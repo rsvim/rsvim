@@ -2,8 +2,6 @@
 
 #![allow(dead_code)]
 
-use crate::arc_impl;
-use crate::envar;
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::widget::Widgetable;
@@ -13,6 +11,7 @@ use crate::ui::widget::window::{
   Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
   WindowLocalOptionsBuilder,
 };
+use crate::{arc_impl, wlock};
 
 // Re-export
 pub use crate::ui::tree::internal::{
@@ -471,7 +470,7 @@ impl Tree {
 impl Tree {
   /// Draw the widget tree to canvas.
   pub fn draw(&self, canvas: CanvasArc) {
-    let mut canvas = canvas.try_write_for(envar::MUTEX_TIMEOUT()).unwrap();
+    let mut canvas = wlock!(canvas);
     for node in self.base.iter() {
       // trace!("Draw tree:{:?}", node);
       node.draw(&mut canvas);

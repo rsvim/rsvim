@@ -15,7 +15,7 @@ use crate::state::StateArc;
 use crate::ui::tree::TreeArc;
 
 use once_cell::sync::Lazy;
-use parking_lot::RwLock;
+use parking_lot::Mutex;
 use std::cell::RefCell;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -337,7 +337,7 @@ pub struct JsRuntimeState {
   // Js runtime <==response== master.
   pub js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   pub cli_opt: CliOpt,
-  pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+  pub runtime_path: Arc<Mutex<Vec<PathBuf>>>,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
   // Same as the `state` in EventLoop.
@@ -377,7 +377,7 @@ impl JsRuntime {
     js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
     js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
-    runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+    runtime_path: Arc<Mutex<Vec<PathBuf>>>,
     tree: TreeArc,
     buffers: BuffersManagerArc,
     editing_state: StateArc,

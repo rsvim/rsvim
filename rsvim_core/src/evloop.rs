@@ -21,7 +21,7 @@ use crossterm::event::{
 };
 use crossterm::{self, execute, queue};
 use futures::StreamExt;
-use parking_lot::RwLock;
+use parking_lot::Mutex;
 use std::path::{Path, PathBuf};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;
@@ -65,7 +65,7 @@ pub struct EventLoop {
   /// Also see [`CONFIG_DIRS_PATH`](crate::envar::CONFIG_DIRS_PATH).
   ///
   /// NOTE: All the external plugins are been searched under runtime path.
-  pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+  pub runtime_path: Arc<Mutex<Vec<PathBuf>>>,
 
   /// Widget tree for UI.
   pub tree: TreeArc,
@@ -177,7 +177,7 @@ impl EventLoop {
 
     // Runtime Path
     let runtime_path = envar::CONFIG_DIRS_PATH();
-    let runtime_path = Arc::new(RwLock::new(runtime_path));
+    let runtime_path = Arc::new(Mutex::new(runtime_path));
 
     // Task Tracker
     let detached_tracker = TaskTracker::new();
@@ -329,12 +329,10 @@ impl EventLoop {
   /// First flush TUI to terminal.
   pub fn init_tui_done(&mut self) -> IoResult<()> {
     // Initialize cursor
-    let cursor = *self
-      .canvas
-      .try_read_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .frame()
-      .cursor();
+    let cursor = {
+      let canvas = rlock!(self.canvas);
+      *canvas.frame().cursor()
+    };
 
     if cursor.blinking() {
       queue!(self.writer, crossterm::cursor::EnableBlinking)?;
@@ -373,11 +371,10 @@ impl EventLoop {
         // Handle by state machine
         let next_stateful = self.stateful_machine.clone().handle(data_access);
         let next_stateful = StatefulValue::to_arc(next_stateful);
-        self
-          .state
-          .try_write_for(envar::MUTEX_TIMEOUT())
-          .unwrap()
-          .update_state_machine(&next_stateful);
+        {
+          let mut state = wlock!(self.state);
+          state.update_state_machine(&next_stateful);
+        }
         self.stateful_machine = next_stateful.clone();
 
         // Exit loop and quit.
@@ -482,18 +479,10 @@ impl EventLoop {
 
   fn render(&mut self) -> IoResult<()> {
     // Draw UI components to the canvas.
-    self
-      .tree
-      .try_write_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .draw(self.canvas.clone());
+    wlock!(self.tree).draw(self.canvas.clone());
 
     // Compute the commands that need to output to the terminal device.
-    let shader = self
-      .canvas
-      .try_write_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .shade();
+    let shader = wlock!(self.canvas).shade();
 
     self.queue_shader(shader)?;
     self.writer.flush()?;
