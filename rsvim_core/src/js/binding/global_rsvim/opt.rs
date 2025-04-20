@@ -2,6 +2,7 @@
 
 use crate::envar;
 use crate::js::JsRuntime;
+use crate::{rlock, wlock};
 
 use tracing::trace;
 
@@ -14,13 +15,9 @@ pub fn get_wrap(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let value = state_rc
-    .borrow()
-    .tree
-    .try_read_for(envar::MUTEX_TIMEOUT())
-    .unwrap()
-    .global_local_options()
-    .wrap();
+  let tree = state_rc.borrow().tree.clone();
+  let tree = rlock!(tree);
+  let value = tree.global_local_options().wrap();
   trace!("get_wrap: {:?}", value);
   rv.set_bool(value);
 }
@@ -33,15 +30,11 @@ pub fn set_wrap(
 ) {
   assert!(args.length() == 1);
   let value = args.get(0).to_boolean(scope).boolean_value(scope);
-  let state_rc = JsRuntime::state(scope);
   trace!("set_wrap: {:?}", value);
-  state_rc
-    .borrow_mut()
-    .tree
-    .try_write_for(envar::MUTEX_TIMEOUT())
-    .unwrap()
-    .global_local_options_mut()
-    .set_wrap(value);
+  let state_rc = JsRuntime::state(scope);
+  let tree = state_rc.borrow().tree.clone();
+  let mut tree = wlock!(tree);
+  tree.global_local_options_mut().set_wrap(value);
 }
 
 /// Get the _line-break_ option.
@@ -53,13 +46,9 @@ pub fn get_line_break(
   mut rv: v8::ReturnValue,
 ) {
   let state_rc = JsRuntime::state(scope);
-  let value = state_rc
-    .borrow()
-    .tree
-    .try_read_for(envar::MUTEX_TIMEOUT())
-    .unwrap()
-    .global_local_options()
-    .line_break();
+  let tree = state_rc.borrow().tree.clone();
+  let tree = rlock!(tree);
+  let value = tree.global_local_options().line_break();
   trace!("get_line_break: {:?}", value);
   rv.set_bool(value);
 }
@@ -72,13 +61,9 @@ pub fn set_line_break(
 ) {
   assert!(args.length() == 1);
   let value = args.get(0).to_boolean(scope).boolean_value(scope);
-  let state_rc = JsRuntime::state(scope);
   trace!("set_line_break: {:?}", value);
-  state_rc
-    .borrow_mut()
-    .tree
-    .try_write_for(envar::MUTEX_TIMEOUT())
-    .unwrap()
-    .global_local_options_mut()
-    .set_line_break(value);
+  let state_rc = JsRuntime::state(scope);
+  let tree = state_rc.borrow().tree.clone();
+  let mut tree = wlock!(tree);
+  tree.global_local_options_mut().set_line_break(value);
 }
