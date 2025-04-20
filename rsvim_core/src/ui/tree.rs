@@ -11,7 +11,7 @@ use crate::ui::widget::window::{
   Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
   WindowLocalOptionsBuilder,
 };
-use crate::{arc_impl, wlock};
+use crate::{arc_impl, lock};
 
 // Re-export
 pub use crate::ui::tree::internal::{
@@ -470,7 +470,7 @@ impl Tree {
 impl Tree {
   /// Draw the widget tree to canvas.
   pub fn draw(&self, canvas: CanvasArc) {
-    let mut canvas = wlock!(canvas);
+    let mut canvas = lock!(canvas);
     for node in self.base.iter() {
       // trace!("Draw tree:{:?}", node);
       node.draw(&mut canvas);

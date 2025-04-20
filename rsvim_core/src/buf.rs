@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 #[allow(unused_imports)]
-use crate::{arc_impl, rlock};
+use crate::{arc_impl, lock};
 
 // Re-export
 pub use crate::buf::cidx::ColumnIndex;
@@ -478,7 +478,7 @@ impl BuffersManager {
   /// NOTE: This API should only be used for testing.
   pub fn _add_buffer(&mut self, buf: BufferArc) -> BufferId {
     let (buf_id, abs_filepath) = {
-      let buf = rlock!(buf);
+      let buf = lock!(buf);
       (buf.id(), buf.absolute_filename().clone())
     };
     self.buffers.insert(buf_id, buf.clone());

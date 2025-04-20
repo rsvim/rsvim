@@ -44,14 +44,7 @@ macro_rules! rc_impl {
 }
 
 #[macro_export]
-macro_rules! rlock {
-  ($id:expr) => {
-    ($id).try_lock_for($crate::envar::MUTEX_TIMEOUT()).unwrap()
-  };
-}
-
-#[macro_export]
-macro_rules! wlock {
+macro_rules! lock {
   ($id:expr) => {
     ($id).try_lock_for($crate::envar::MUTEX_TIMEOUT()).unwrap()
   };

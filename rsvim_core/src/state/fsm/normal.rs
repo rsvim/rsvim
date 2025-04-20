@@ -1,12 +1,12 @@
 //! The normal mode.
 
 use crate::buf::Buffer;
+use crate::lock;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::*;
 use crate::ui::widget::window::{CursorViewport, Viewport};
-use crate::{rlock, wlock};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -122,17 +122,17 @@ impl NormalStateful {
   /// Also see [`NormalStateful::cursor_move_with_scroll`].
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
-    let mut tree = wlock!(tree);
+    let mut tree = lock!(tree);
 
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
         let buffer = current_window.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut buffer = wlock!(buffer);
+        let mut buffer = lock!(buffer);
         let viewport = current_window.viewport();
-        let viewport = rlock!(viewport);
+        let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
-        let cursor_viewport = rlock!(cursor_viewport);
+        let cursor_viewport = lock!(cursor_viewport);
         let cursor_move_result = match command {
           Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
             self._cursor_move_vertically(&viewport, &cursor_viewport, &mut buffer, command)
@@ -264,15 +264,15 @@ impl NormalStateful {
   /// buffer contents changed, i.e. moved up/down.
   fn _cursor_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
-    let mut tree = wlock!(tree);
+    let mut tree = lock!(tree);
 
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(&current_window_id) {
         let viewport = current_window.viewport();
-        let viewport = rlock!(viewport);
+        let viewport = lock!(viewport);
         let buffer = current_window.buffer();
         let buffer = buffer.upgrade().unwrap();
-        let mut buffer = wlock!(buffer);
+        let mut buffer = lock!(buffer);
 
         let cursor_scroll_result = {
           match command {
@@ -404,8 +404,8 @@ mod tests_util {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::lock;
   use crate::prelude::*;
-  use crate::rlock;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::log::init as test_log_init;
@@ -431,14 +431,14 @@ mod tests_util {
   }
 
   pub fn get_viewport(tree: TreeArc) -> Viewport {
-    let tree = rlock!(tree);
+    let tree = lock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(&current_window_id).unwrap();
     assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
       TreeNode::Window(current_window) => {
         let viewport = current_window.viewport();
-        let viewport = rlock!(viewport);
+        let viewport = lock!(viewport);
         viewport.clone()
       }
       _ => unreachable!(),
@@ -446,14 +446,14 @@ mod tests_util {
   }
 
   pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewport {
-    let tree = rlock!(tree);
+    let tree = lock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(&current_window_id).unwrap();
     assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
       TreeNode::Window(current_window) => {
         let cursor_viewport = current_window.cursor_viewport();
-        let cursor_viewport = rlock!(cursor_viewport);
+        let cursor_viewport = lock!(cursor_viewport);
         *cursor_viewport
       }
       _ => unreachable!(),
@@ -517,7 +517,7 @@ mod tests_util {
       expect_end_fills.len()
     );
 
-    let buffer = rlock!(buffer);
+    let buffer = lock!(buffer);
     let buflines = buffer
       .get_rope()
       .get_lines_at(actual.start_line_idx())
@@ -1425,8 +1425,8 @@ mod tests_cursor_scroll_vertically {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::lock;
   use crate::prelude::*;
-  use crate::rlock;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::log::init as test_log_init;
