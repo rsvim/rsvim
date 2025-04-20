@@ -1488,12 +1488,12 @@ mod tests_downward_wrap_nolinebreak {
   use super::*;
 
   use crate::buf::BufferLocalOptionsBuilder;
+  use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::*;
-  use crate::{lock, lock};
 
   #[test]
   fn new1() {
