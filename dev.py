@@ -61,7 +61,7 @@ def test(name, recache, miri):
         )
         if name is None:
             name = ""
-        command = f"{command} cargo +nightly miri nextest test -F unicode_lines --no-default-features -p {miri} {name}"
+        command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command, recache)
