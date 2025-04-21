@@ -5,14 +5,13 @@
 macro_rules! arc_impl {
   ($name:ident) => {
     paste! {
-      pub type [<$name Arc>] = std::sync::Arc<parking_lot::RwLock<$name>>;
-      pub type [<$name Wk>] = std::sync::Weak<parking_lot::RwLock<$name>>;
-      pub type [<$name ReasGuard>]<'a> = parking_lot::RwLockReadGuard<'a, $name>;
-      pub type [<$name WriteGuard>]<'a> = parking_lot::RwLockWriteGuard<'a, $name>;
+      pub type [<$name Arc>] = std::sync::Arc<parking_lot::Mutex<$name>>;
+      pub type [<$name Wk>] = std::sync::Weak<parking_lot::Mutex<$name>>;
+      pub type [<$name ReasGuard>]<'a> = parking_lot::MutexGuard<'a, $name>;
 
       impl $name {
         pub fn to_arc(value: $name) -> [<$name Arc>] {
-          std::sync::Arc::new(parking_lot::RwLock::new(value))
+          std::sync::Arc::new(parking_lot::Mutex::new(value))
         }
 
         /// # Safety
@@ -27,35 +26,26 @@ macro_rules! arc_impl {
   };
 }
 
-/// Generate Rc pointers.
-#[macro_export]
-macro_rules! rc_impl {
-  ($name:ident) => {
-    paste! {
-      pub type [<$name Rc>] = std::rc::Rc<std::cell::RefCell<$name>>;
-      pub type [<$name Wk>] = std::rc::Weak<std::cell::RefCell<$name>>;
+// /// Generate Rc pointers.
+// #[macro_export]
+// macro_rules! rc_impl {
+//   ($name:ident) => {
+//     paste! {
+//       pub type [<$name Rc>] = std::rc::Rc<std::cell::RefCell<$name>>;
+//       pub type [<$name Wk>] = std::rc::Weak<std::cell::RefCell<$name>>;
+//
+//       impl $name {
+//         pub fn to_rc(value: $name) -> [<$name Rc>] {
+//           std::rc::Rc::new(std::cell::RefCell::new(value))
+//         }
+//       }
+//     }
+//   };
+// }
 
-      impl $name {
-        pub fn to_rc(value: $name) -> [<$name Rc>] {
-          std::rc::Rc::new(std::cell::RefCell::new(value))
-        }
-      }
-    }
-  };
-}
-
-/// Alias to `($id).try_read_for(envar::MUTEX_TIMEOUT()).unwrap()`.
 #[macro_export]
-macro_rules! rlock {
+macro_rules! lock {
   ($id:expr) => {
-    ($id).try_read_for($crate::envar::MUTEX_TIMEOUT()).unwrap()
-  };
-}
-
-/// Alias to `($id).try_write_for(envar::MUTEX_TIMEOUT()).unwrap()`.
-#[macro_export]
-macro_rules! wlock {
-  ($id:expr) => {
-    ($id).try_write_for($crate::envar::MUTEX_TIMEOUT()).unwrap()
+    ($id).try_lock_for($crate::envar::MUTEX_TIMEOUT()).unwrap()
   };
 }

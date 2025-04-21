@@ -1,13 +1,13 @@
 //! Vim window.
 
 use crate::buf::BufferWk;
+use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
-use crate::wlock;
 
 // Re-export
 pub use crate::ui::widget::window::opt::*;
@@ -56,7 +56,7 @@ impl Window {
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
-      let mut buffer = wlock!(buffer);
+      let mut buffer = lock!(buffer);
       let viewport =
         Viewport::downward(&mut buffer, &window_root_actual_shape, local_options, 0, 0);
       let cursor_viewport = CursorViewport::from_top_left(&viewport, &mut buffer);

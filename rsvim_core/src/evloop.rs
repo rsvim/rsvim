@@ -6,6 +6,7 @@ use crate::envar;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
+use crate::lock;
 use crate::prelude::*;
 use crate::state::fsm::{StatefulDataAccess, StatefulValue, StatefulValueArc};
 use crate::state::{State, StateArc};
@@ -13,7 +14,6 @@ use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
-use crate::{rlock, wlock};
 
 use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
@@ -21,7 +21,7 @@ use crossterm::event::{
 };
 use crossterm::{self, execute, queue};
 use futures::StreamExt;
-use parking_lot::RwLock;
+use parking_lot::Mutex;
 use std::path::{Path, PathBuf};
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 // use heed::types::U16;
@@ -65,7 +65,7 @@ pub struct EventLoop {
   /// Also see [`CONFIG_DIRS_PATH`](crate::envar::CONFIG_DIRS_PATH).
   ///
   /// NOTE: All the external plugins are been searched under runtime path.
-  pub runtime_path: Arc<RwLock<Vec<PathBuf>>>,
+  pub runtime_path: Arc<Mutex<Vec<PathBuf>>>,
 
   /// Widget tree for UI.
   pub tree: TreeArc,
@@ -177,7 +177,7 @@ impl EventLoop {
 
     // Runtime Path
     let runtime_path = envar::CONFIG_DIRS_PATH();
-    let runtime_path = Arc::new(RwLock::new(runtime_path));
+    let runtime_path = Arc::new(Mutex::new(runtime_path));
 
     // Task Tracker
     let detached_tracker = TaskTracker::new();
@@ -258,14 +258,14 @@ impl EventLoop {
 
   /// Initialize buffers.
   pub fn init_buffers(&mut self) -> IoResult<()> {
-    let canvas_size = rlock!(self.canvas).size();
+    let canvas_size = lock!(self.canvas).size();
 
     // Create buffers from parameters.
     let input_files = self.cli_opt.file().to_vec();
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
         let maybe_buf_id =
-          wlock!(self.buffers).new_file_buffer(canvas_size.height(), Path::new(input_file));
+          lock!(self.buffers).new_file_buffer(canvas_size.height(), Path::new(input_file));
         match maybe_buf_id {
           Ok(buf_id) => {
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
@@ -276,7 +276,7 @@ impl EventLoop {
         }
       }
     } else {
-      let buf_id = wlock!(self.buffers).new_empty_buffer(canvas_size.height());
+      let buf_id = lock!(self.buffers).new_empty_buffer(canvas_size.height());
       trace!("Created empty buffer {:?}", buf_id);
     }
 
@@ -287,19 +287,19 @@ impl EventLoop {
   pub fn init_windows(&mut self) -> IoResult<()> {
     // Initialize default window.
     let (canvas_size, canvas_cursor) = {
-      let canvas = rlock!(self.canvas);
+      let canvas = lock!(self.canvas);
       let canvas_size = canvas.size();
       let canvas_cursor = *canvas.frame().cursor();
       (canvas_size, canvas_cursor)
     };
-    let mut tree = wlock!(self.tree);
+    let mut tree = lock!(self.tree);
     let tree_root_id = tree.root_id();
     let window_shape = IRect::new(
       (0, 0),
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
     let window = {
-      let buffers = rlock!(self.buffers);
+      let buffers = lock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
       trace!("Bind first buffer to default window {:?}", buf_id);
       Window::new(
@@ -329,12 +329,10 @@ impl EventLoop {
   /// First flush TUI to terminal.
   pub fn init_tui_done(&mut self) -> IoResult<()> {
     // Initialize cursor
-    let cursor = *self
-      .canvas
-      .try_read_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .frame()
-      .cursor();
+    let cursor = {
+      let canvas = lock!(self.canvas);
+      *canvas.frame().cursor()
+    };
 
     if cursor.blinking() {
       queue!(self.writer, crossterm::cursor::EnableBlinking)?;
@@ -373,11 +371,10 @@ impl EventLoop {
         // Handle by state machine
         let next_stateful = self.stateful_machine.clone().handle(data_access);
         let next_stateful = StatefulValue::to_arc(next_stateful);
-        self
-          .state
-          .try_write_for(envar::MUTEX_TIMEOUT())
-          .unwrap()
-          .update_state_machine(&next_stateful);
+        {
+          let mut state = lock!(self.state);
+          state.update_state_machine(&next_stateful);
+        }
         self.stateful_machine = next_stateful.clone();
 
         // Exit loop and quit.
@@ -482,18 +479,10 @@ impl EventLoop {
 
   fn render(&mut self) -> IoResult<()> {
     // Draw UI components to the canvas.
-    self
-      .tree
-      .try_write_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .draw(self.canvas.clone());
+    lock!(self.tree).draw(self.canvas.clone());
 
     // Compute the commands that need to output to the terminal device.
-    let shader = self
-      .canvas
-      .try_write_for(envar::MUTEX_TIMEOUT())
-      .unwrap()
-      .shade();
+    let shader = lock!(self.canvas).shade();
 
     self.queue_shader(shader)?;
     self.writer.flush()?;

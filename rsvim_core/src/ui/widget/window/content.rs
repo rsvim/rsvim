@@ -6,7 +6,7 @@ use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::ViewportWk;
-use crate::{inode_impl, rlock, wlock};
+use crate::{inode_impl, lock};
 
 use geo::point;
 use std::convert::From;
@@ -52,7 +52,7 @@ impl Widgetable for WindowContent {
     }
 
     let viewport = self.viewport.upgrade().unwrap();
-    let viewport = rlock!(viewport);
+    let viewport = lock!(viewport);
 
     // If viewport has no lines.
     if viewport.end_line_idx() <= viewport.start_line_idx() {
@@ -69,7 +69,7 @@ impl Widgetable for WindowContent {
     // trace!("Draw window content, viewport:{:?}", viewport);
 
     let buffer = self.buffer.upgrade().unwrap();
-    let mut buffer = wlock!(buffer);
+    let mut buffer = lock!(buffer);
 
     let mut row_idx = 0_u16;
     let mut line_idx = viewport.start_line_idx();
@@ -274,7 +274,7 @@ mod tests_util {
     tree.set_global_local_options(&window_options);
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let viewport = {
-      let mut buffer = wlock!(buffer);
+      let mut buffer = lock!(buffer);
       Viewport::downward(&mut buffer, &actual_shape, &window_options, 0, 0)
     };
     Viewport::to_arc(viewport)
@@ -624,7 +624,7 @@ mod tests_nowrap {
       "                     ",
     ];
     let viewport = {
-      let mut buffer = wlock!(buffer);
+      let mut buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
       let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 4, 0);
       Viewport::to_arc(viewport)
@@ -950,7 +950,7 @@ mod tests_wrap_nolinebreak {
       ", there're multiple",
     ];
     let viewport = {
-      let mut buffer = wlock!(buffer);
+      let mut buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
       let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 3, 0);
       Viewport::to_arc(viewport)
@@ -1003,7 +1003,7 @@ mod tests_wrap_nolinebreak {
       "w, thus it may cont",
     ];
     let viewport = {
-      let mut buffer = wlock!(buffer);
+      let mut buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
       let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 6, 0);
       Viewport::to_arc(viewport)
@@ -1056,7 +1056,7 @@ mod tests_wrap_nolinebreak {
       "                   ",
     ];
     let viewport = {
-      let mut buffer = wlock!(buffer);
+      let mut buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
       let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 6, 0);
       Viewport::to_arc(viewport)
@@ -1371,7 +1371,7 @@ mod tests_wrap_linebreak {
     ];
 
     let viewport = {
-      let mut buffer = wlock!(buffer);
+      let mut buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
       let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 2, 0);
       Viewport::to_arc(viewport)

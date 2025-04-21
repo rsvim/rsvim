@@ -61,7 +61,7 @@ def test(name, recache, miri):
         )
         if name is None:
             name = ""
-        command = f"{command} cargo +nightly miri test -F unicode_lines --no-default-features -p {miri} {name}"
+        command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command, recache)
@@ -225,7 +225,7 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    print(parser)
+    # print(parser)
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch, parser.recache)
