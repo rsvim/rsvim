@@ -225,7 +225,7 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    print(parser)
+    # print(parser)
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch, parser.recache)
