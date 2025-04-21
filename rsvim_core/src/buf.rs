@@ -14,10 +14,12 @@ use lru::LruCache;
 use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
+use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fs::Metadata;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
 use tracing::trace;
@@ -51,7 +53,7 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   rope: Rope,
-  cached_lines_width: LruCache<usize, ColumnIndex, RandomState>,
+  cached_lines_width: Rc<RefCell<LruCache<usize, ColumnIndex, RandomState>>>,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -81,7 +83,10 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope,
-      cached_lines_width: LruCache::with_hasher(get_cached_size(canvas_height), RandomState::new()),
+      cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
+        get_cached_size(canvas_height),
+        RandomState::new(),
+      ))),
       options,
       filename,
       absolute_filename,
@@ -96,7 +101,10 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
-      cached_lines_width: LruCache::with_hasher(get_cached_size(canvas_height), RandomState::new()),
+      cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
+        get_cached_size(canvas_height),
+        RandomState::new(),
+      ))),
       options,
       filename: None,
       absolute_filename: None,
@@ -221,10 +229,11 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn width_before(&mut self, line_idx: usize, char_idx: usize) -> usize {
+  pub fn width_before(&self, line_idx: usize, char_idx: usize) -> usize {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
+      .borrow_mut()
       .get_or_insert_mut(line_idx, ColumnIndex::new)
       .width_before(&self.options, &rope_line, char_idx)
   }
@@ -234,10 +243,11 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn width_at(&mut self, line_idx: usize, char_idx: usize) -> usize {
+  pub fn width_at(&self, line_idx: usize, char_idx: usize) -> usize {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
+      .borrow_mut()
       .get_or_insert_mut(line_idx, ColumnIndex::new)
       .width_at(&self.options, &rope_line, char_idx)
   }
@@ -247,10 +257,11 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn char_before(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn char_before(&self, line_idx: usize, width: usize) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
+      .borrow_mut()
       .get_or_insert_mut(line_idx, ColumnIndex::new)
       .char_before(&self.options, &rope_line, width)
   }
@@ -260,10 +271,11 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn char_at(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn char_at(&self, line_idx: usize, width: usize) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
+      .borrow_mut()
       .get_or_insert_mut(line_idx, ColumnIndex::new)
       .char_at(&self.options, &rope_line, width)
   }
@@ -273,10 +285,11 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn char_after(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn char_after(&self, line_idx: usize, width: usize) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
+      .borrow_mut()
       .get_or_insert_mut(line_idx, ColumnIndex::new)
       .char_after(&self.options, &rope_line, width)
   }
@@ -286,61 +299,65 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn last_char_until(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn last_char_until(&self, line_idx: usize, width: usize) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
+      .borrow_mut()
       .get_or_insert_mut(line_idx, ColumnIndex::new)
       .last_char_until(&self.options, &rope_line, width)
   }
 
   /// See [`ColumnIndex::truncate_since_char`].
-  pub fn truncate_since_char(&mut self, line_idx: usize, char_idx: usize) {
+  pub fn truncate_since_char(&self, line_idx: usize, char_idx: usize) {
     self
       .cached_lines_width
+      .borrow_mut()
       .get_or_insert_mut(line_idx, ColumnIndex::new)
       .truncate_since_char(char_idx)
   }
 
   /// See [`ColumnIndex::truncate_since_width`].
-  pub fn truncate_since_width(&mut self, line_idx: usize, width: usize) {
+  pub fn truncate_since_width(&self, line_idx: usize, width: usize) {
     self
       .cached_lines_width
+      .borrow_mut()
       .get_or_insert_mut(line_idx, ColumnIndex::new)
       .truncate_since_width(width)
   }
 
   /// Remove one cached line.
-  pub fn remove_cached_line(&mut self, line_idx: usize) {
-    self.cached_lines_width.pop(&line_idx);
+  pub fn remove_cached_line(&self, line_idx: usize) {
+    self.cached_lines_width.borrow_mut().pop(&line_idx);
   }
 
   /// Retain multiple cached lines by lambda function `f`.
-  pub fn retain_cached_lines<F>(&mut self, f: F)
+  pub fn retain_cached_lines<F>(&self, f: F)
   where
     F: Fn(&usize, &ColumnIndex) -> bool,
   {
-    let retained_lines: Vec<usize> = self
-      .cached_lines_width
+    let mut cached_width = self.cached_lines_width.borrow_mut();
+    let retained_lines: Vec<usize> = cached_width
       .iter()
       .filter(|(line_idx, column_idx)| !f(line_idx, column_idx))
       .map(|(line_idx, _)| *line_idx)
       .collect();
     for line_idx in retained_lines.iter() {
-      self.cached_lines_width.pop(line_idx);
+      cached_width.pop(line_idx);
     }
   }
 
   /// Clear cache.
-  pub fn clear_cached_lines(&mut self) {
-    self.cached_lines_width.clear()
+  pub fn clear_cached_lines(&self) {
+    self.cached_lines_width.borrow_mut().clear()
   }
 
   /// Resize cache.
-  pub fn resize_cached_lines(&mut self, canvas_height: u16) {
+  pub fn resize_cached_lines(&self, canvas_height: u16) {
     let new_cache_size = get_cached_size(canvas_height);
-    if new_cache_size > self.cached_lines_width.cap() {
-      self.cached_lines_width.resize(new_cache_size);
+    let mut cached_width = self.cached_lines_width.borrow_mut();
+    if new_cache_size > cached_width.cap() {
+      cached_width.resize(new_cache_size);
     }
   }
 }
