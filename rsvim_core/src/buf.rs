@@ -11,7 +11,6 @@ pub use crate::buf::opt::*;
 use ahash::RandomState;
 use compact_str::CompactString;
 use lru::LruCache;
-use parking_lot::Mutex;
 use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
