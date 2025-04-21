@@ -244,7 +244,7 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn width_at(&mut self, line_idx: usize, char_idx: usize) -> usize {
+  pub fn width_at(&self, line_idx: usize, char_idx: usize) -> usize {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
@@ -258,7 +258,7 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn char_before(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn char_before(&self, line_idx: usize, width: usize) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
@@ -272,7 +272,7 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn char_at(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn char_at(&self, line_idx: usize, width: usize) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
@@ -286,7 +286,7 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn char_after(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn char_after(&self, line_idx: usize, width: usize) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
@@ -300,7 +300,7 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn last_char_until(&mut self, line_idx: usize, width: usize) -> Option<usize> {
+  pub fn last_char_until(&self, line_idx: usize, width: usize) -> Option<usize> {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
@@ -310,7 +310,7 @@ impl Buffer {
   }
 
   /// See [`ColumnIndex::truncate_since_char`].
-  pub fn truncate_since_char(&mut self, line_idx: usize, char_idx: usize) {
+  pub fn truncate_since_char(&self, line_idx: usize, char_idx: usize) {
     self
       .cached_lines_width
       .borrow_mut()
@@ -319,7 +319,7 @@ impl Buffer {
   }
 
   /// See [`ColumnIndex::truncate_since_width`].
-  pub fn truncate_since_width(&mut self, line_idx: usize, width: usize) {
+  pub fn truncate_since_width(&self, line_idx: usize, width: usize) {
     self
       .cached_lines_width
       .borrow_mut()
@@ -328,12 +328,12 @@ impl Buffer {
   }
 
   /// Remove one cached line.
-  pub fn remove_cached_line(&mut self, line_idx: usize) {
+  pub fn remove_cached_line(&self, line_idx: usize) {
     self.cached_lines_width.borrow_mut().pop(&line_idx);
   }
 
   /// Retain multiple cached lines by lambda function `f`.
-  pub fn retain_cached_lines<F>(&mut self, f: F)
+  pub fn retain_cached_lines<F>(&self, f: F)
   where
     F: Fn(&usize, &ColumnIndex) -> bool,
   {
@@ -349,12 +349,12 @@ impl Buffer {
   }
 
   /// Clear cache.
-  pub fn clear_cached_lines(&mut self) {
+  pub fn clear_cached_lines(&self) {
     self.cached_lines_width.borrow_mut().clear()
   }
 
   /// Resize cache.
-  pub fn resize_cached_lines(&mut self, canvas_height: u16) {
+  pub fn resize_cached_lines(&self, canvas_height: u16) {
     let new_cache_size = get_cached_size(canvas_height);
     let mut cached_width = self.cached_lines_width.borrow_mut();
     if new_cache_size > cached_width.cap() {
