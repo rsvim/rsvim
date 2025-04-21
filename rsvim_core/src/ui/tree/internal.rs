@@ -6,4 +6,4 @@ pub mod shapes;
 
 // Re-export
 pub use crate::ui::tree::internal::inode::{InodeBase, InodeId, Inodeable};
-pub use crate::ui::tree::internal::itree::{Itree, ItreeIter, ItreeIterMut};
+pub use crate::ui::tree::internal::itree::{Itree, ItreeIter /*, ItreeIterMut*/};

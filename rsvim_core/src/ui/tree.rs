@@ -15,7 +15,7 @@ use crate::{arc_impl, lock};
 
 // Re-export
 pub use crate::ui::tree::internal::{
-  InodeBase, InodeId, Inodeable, Itree, ItreeIter, ItreeIterMut,
+  InodeBase, InodeId, Inodeable, Itree, ItreeIter, /*ItreeIterMut,*/
 };
 
 use paste::paste;
