@@ -26,22 +26,22 @@ macro_rules! arc_impl {
   };
 }
 
-/// Generate Rc pointers.
-#[macro_export]
-macro_rules! rc_impl {
-  ($name:ident) => {
-    paste! {
-      pub type [<$name Rc>] = std::rc::Rc<std::cell::RefCell<$name>>;
-      pub type [<$name Wk>] = std::rc::Weak<std::cell::RefCell<$name>>;
-
-      impl $name {
-        pub fn to_rc(value: $name) -> [<$name Rc>] {
-          std::rc::Rc::new(std::cell::RefCell::new(value))
-        }
-      }
-    }
-  };
-}
+// /// Generate Rc pointers.
+// #[macro_export]
+// macro_rules! rc_impl {
+//   ($name:ident) => {
+//     paste! {
+//       pub type [<$name Rc>] = std::rc::Rc<std::cell::RefCell<$name>>;
+//       pub type [<$name Wk>] = std::rc::Weak<std::cell::RefCell<$name>>;
+//
+//       impl $name {
+//         pub fn to_rc(value: $name) -> [<$name Rc>] {
+//           std::rc::Rc::new(std::cell::RefCell::new(value))
+//         }
+//       }
+//     }
+//   };
+// }
 
 #[macro_export]
 macro_rules! lock {
