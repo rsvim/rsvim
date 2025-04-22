@@ -29,7 +29,7 @@ pub struct Window {
   base: Itree<WindowNode>,
 
   // The Window content widget ID.
-  content_id: InodeId,
+  content_id: TreeNodeId,
 
   // Buffer.
   buffer: BufferWk,
@@ -71,7 +71,7 @@ impl Window {
     let window_content_id = window_content.id();
     let window_content_node = WindowNode::WindowContent(window_content);
 
-    base.bounded_insert(&window_root_id, window_content_node);
+    base.bounded_insert(window_root_id, window_content_node);
 
     Window {
       base,
@@ -85,78 +85,78 @@ impl Window {
 }
 
 impl Inodeable for Window {
-  fn id(&self) -> InodeId {
+  fn id(&self) -> TreeNodeId {
     self.base.root_id()
   }
 
-  fn depth(&self) -> &usize {
-    self.base.node(&self.base.root_id()).unwrap().depth()
+  fn depth(&self) -> usize {
+    self.base.node(self.base.root_id()).unwrap().depth()
   }
 
   fn set_depth(&mut self, depth: usize) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_depth(depth);
   }
 
-  fn zindex(&self) -> &usize {
-    self.base.node(&self.base.root_id()).unwrap().zindex()
+  fn zindex(&self) -> usize {
+    self.base.node(self.base.root_id()).unwrap().zindex()
   }
 
   fn set_zindex(&mut self, zindex: usize) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_zindex(zindex);
   }
 
   fn shape(&self) -> &IRect {
-    self.base.node(&self.base.root_id()).unwrap().shape()
+    self.base.node(self.base.root_id()).unwrap().shape()
   }
 
   fn set_shape(&mut self, shape: &IRect) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_shape(shape);
   }
 
   fn actual_shape(&self) -> &U16Rect {
-    self.base.node(&self.base.root_id()).unwrap().actual_shape()
+    self.base.node(self.base.root_id()).unwrap().actual_shape()
   }
 
   fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_actual_shape(actual_shape);
   }
 
-  fn enabled(&self) -> &bool {
-    self.base.node(&self.base.root_id()).unwrap().enabled()
+  fn enabled(&self) -> bool {
+    self.base.node(self.base.root_id()).unwrap().enabled()
   }
 
   fn set_enabled(&mut self, enabled: bool) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_enabled(enabled);
   }
 
-  fn visible(&self) -> &bool {
-    self.base.node(&self.base.root_id()).unwrap().visible()
+  fn visible(&self) -> bool {
+    self.base.node(self.base.root_id()).unwrap().visible()
   }
 
   fn set_visible(&mut self, visible: bool) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_visible(visible);
   }
@@ -238,7 +238,7 @@ impl Window {
 
   /// Get window content widget.
   pub fn window_content(&self) -> &WindowContent {
-    match self.base.node(&self.content_id) {
+    match self.base.node(self.content_id) {
       Some(WindowNode::WindowContent(w)) => w,
       _ => unreachable!(),
     }
@@ -272,11 +272,11 @@ macro_rules! window_node_setter {
 }
 
 impl Inodeable for WindowNode {
-  fn id(&self) -> InodeId {
+  fn id(&self) -> TreeNodeId {
     window_node_getter!(self, id)
   }
 
-  fn depth(&self) -> &usize {
+  fn depth(&self) -> usize {
     window_node_getter!(self, depth)
   }
 
@@ -284,7 +284,7 @@ impl Inodeable for WindowNode {
     window_node_setter!(self, set_depth, depth)
   }
 
-  fn zindex(&self) -> &usize {
+  fn zindex(&self) -> usize {
     window_node_getter!(self, zindex)
   }
 
@@ -308,7 +308,7 @@ impl Inodeable for WindowNode {
     window_node_setter!(self, set_actual_shape, actual_shape)
   }
 
-  fn enabled(&self) -> &bool {
+  fn enabled(&self) -> bool {
     window_node_getter!(self, enabled)
   }
 
@@ -316,7 +316,7 @@ impl Inodeable for WindowNode {
     window_node_setter!(self, set_enabled, enabled)
   }
 
-  fn visible(&self) -> &bool {
+  fn visible(&self) -> bool {
     window_node_getter!(self, visible)
   }
 

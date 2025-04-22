@@ -1,32 +1,216 @@
 //! Internal tree structure that implements the widget tree.
 
-use crate::geo_rect_as;
 use crate::prelude::*;
 use crate::ui::tree::internal::shapes;
-use crate::ui::tree::internal::{InodeId, Inodeable};
+use crate::ui::tree::internal::{Inodeable, TreeNodeId};
 
-use geo::algorithm::coordinate_position::{CoordPos, CoordinatePosition};
 use geo::point;
 use std::fmt::Debug;
-// use std::marker::PhantomData;
-use std::ptr::NonNull;
 use std::{collections::VecDeque, iter::Iterator};
 // use tracing::trace;
+use std::cell::RefCell;
+use std::rc::Rc;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
+struct Relationships {
+  // Root id.
+  root_id: TreeNodeId,
+
+  // Maps node id => its parent node id.
+  parent_id: HashMap<TreeNodeId, TreeNodeId>,
+
+  // Maps node id => all its children node ids.
+  children_ids: HashMap<TreeNodeId, Vec<TreeNodeId>>,
+}
+
+impl Relationships {
+  pub fn new(root_id: TreeNodeId) -> Self {
+    let mut children_ids: HashMap<TreeNodeId, Vec<TreeNodeId>> = HashMap::new();
+    children_ids.insert(root_id, Vec::new());
+
+    Self {
+      root_id,
+      parent_id: HashMap::new(),
+      children_ids,
+    }
+  }
+
+  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+    self.parent_id.get(&id).cloned()
+  }
+
+  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
+    match self.children_ids.get(&id) {
+      Some(children_ids) => children_ids.to_vec(),
+      None => Vec::new(),
+    }
+  }
+
+  pub fn is_empty(&self) -> bool {
+    self.children_ids.is_empty()
+  }
+
+  pub fn len(&self) -> usize {
+    self.children_ids.len()
+  }
+
+  #[cfg(not(debug_assertions))]
+  pub fn _internal_check(&self) {}
+
+  #[cfg(debug_assertions)]
+  fn _internal_check(&self) {
+    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
+    que.push_back(self.root_id);
+
+    while let Some(id) = que.pop_front() {
+      let children_ids = self.children_ids(id);
+      for c in children_ids {
+        let p = self.parent_id.get(&c).cloned();
+        debug_assert!(p.is_some());
+        debug_assert_eq!(p.unwrap(), id);
+      }
+      match self.parent_id.get(&id).cloned() {
+        Some(parent) => {
+          debug_assert_eq!(
+            self
+              .children_ids(parent)
+              .iter()
+              .cloned()
+              .filter(|c| *c == id)
+              .count(),
+            1
+          );
+        }
+        None => debug_assert_eq!(id, self.root_id),
+      }
+    }
+  }
+
+  pub fn root_id(&self) -> TreeNodeId {
+    self.root_id
+  }
+
+  pub fn contains_id(&self, id: TreeNodeId) -> bool {
+    self._internal_check();
+    self.children_ids.contains_key(&id)
+  }
+
+  pub fn add_child<T>(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_id: TreeNodeId,
+    child_zindex: usize,
+    nodes: &HashMap<TreeNodeId, T>,
+  ) where
+    T: Inodeable,
+  {
+    debug_assert!(!self.contains_id(child_id));
+    self._internal_check();
+
+    // Initialize children_ids vector.
+    self.children_ids.insert(child_id, Vec::new());
+
+    // Binds connection from child => parent.
+    self.parent_id.insert(child_id, parent_id);
+
+    // Binds connection from parent => child.
+    //
+    // NOTE: It inserts child to the `children_ids` vector which belongs to the parent, and the
+    // children are sorted by their Z-index value from lower to higher (UI widget node with higher
+    // Z-index has a higher priority to show on the final TUI, but the order is reversed when
+    // rendering). For those children that share the same Z-index value, it inserts at the end of
+    // those children.
+    let higher_zindex_pos: Vec<usize> = self
+      .children_ids
+      .get(&parent_id)
+      .unwrap()
+      .iter()
+      .enumerate()
+      .filter(|(_index, cid)| match nodes.get(cid) {
+        Some(cnode) => cnode.zindex() > child_zindex,
+        None => false,
+      })
+      .map(|(index, _cid)| index)
+      .collect();
+    match higher_zindex_pos.first() {
+      Some(insert_pos) => {
+        self
+          .children_ids
+          .get_mut(&parent_id)
+          .unwrap()
+          .insert(*insert_pos, child_id);
+      }
+      None => {
+        self
+          .children_ids
+          .get_mut(&parent_id)
+          .unwrap()
+          .push(child_id);
+      }
+    }
+
+    self._internal_check();
+  }
+
+  pub fn remove_child(&mut self, child_id: TreeNodeId) -> bool {
+    self._internal_check();
+
+    let result = match self.parent_id.remove(&child_id) {
+      Some(removed_parent) => match self.children_ids.get_mut(&removed_parent) {
+        Some(to_be_removed_children) => {
+          let to_be_removed_child = to_be_removed_children
+            .iter()
+            .enumerate()
+            .filter(|(_idx, c)| **c == child_id)
+            .map(|(idx, c)| (idx, *c))
+            .collect::<Vec<(usize, TreeNodeId)>>();
+          if !to_be_removed_child.is_empty() {
+            debug_assert_eq!(to_be_removed_child.len(), 1);
+            let to_be_removed = to_be_removed_child[0];
+            to_be_removed_children.remove(to_be_removed.0);
+
+            // If `to_be_removed` has a empty `children` vector, remove it to workaround the `len`
+            // api.
+            let children_of_to_be_removed_exists = self.children_ids.contains_key(&to_be_removed.1);
+            let children_of_to_be_removed_is_empty = self
+              .children_ids
+              .get(&to_be_removed.1)
+              .is_none_or(|children| children.is_empty());
+            if children_of_to_be_removed_exists && children_of_to_be_removed_is_empty {
+              self.children_ids.remove(&to_be_removed.1);
+            }
+
+            true
+          } else {
+            false
+          }
+        }
+        None => false,
+      },
+      None => false,
+    };
+
+    self._internal_check();
+    result
+  }
+}
+
+#[derive(Debug, Clone)]
 pub struct Itree<T>
 where
   T: Inodeable,
 {
-  // Root node ID.
-  root_id: InodeId,
   // Nodes collection, maps from node ID to its node struct.
-  nodes: HashMap<InodeId, T>,
-  // Maps from child ID to its parent ID.
-  parent_ids: HashMap<InodeId, InodeId>,
-  // Maps from parent ID to its children IDs, the children are sorted by zindex value from lower to higher.
-  // For those children share the same zindex value, the one later inserted into the vector will be put in the back, thus it will be rendered later, i.e. it implicitly has a higher priority to show.
-  children_ids: HashMap<InodeId, Vec<InodeId>>,
+  nodes: HashMap<TreeNodeId, T>,
+
+  // Maps parent and children edges. The parent edge weight is negative, children edges are
+  // positive. The edge weight of each child is increased with the order when they are inserted,
+  // i.e. the first child has the lowest edge weight, the last child has the highest edge weight.
+  //
+  // NOTE: The children (under the same parent) are rendered with the order of their Z-index value
+  // from lower to higher, for those children share the same Z-index, the child how owns the lower
+  // edge weight will be rendered first.
+  relationships: Rc<RefCell<Relationships>>,
 }
 
 #[derive(Debug)]
@@ -40,7 +224,7 @@ where
   T: Inodeable,
 {
   tree: &'a Itree<T>,
-  queue: VecDeque<InodeId>,
+  que: VecDeque<TreeNodeId>,
 }
 
 impl<'a, T> Iterator for ItreeIter<'a, T>
@@ -50,20 +234,16 @@ where
   type Item = &'a T;
 
   fn next(&mut self) -> Option<Self::Item> {
-    if let Some(id) = self.queue.pop_front() {
-      match self.tree.children_ids(&id) {
-        Some(children_ids) => {
-          for child_id in children_ids.iter() {
-            if self.tree.node(child_id).is_some() {
-              self.queue.push_back(*child_id);
-            }
-          }
+    if let Some(id) = self.que.pop_front() {
+      for child_id in self.tree.children_ids(id) {
+        if self.tree.node(child_id).is_some() {
+          self.que.push_back(child_id);
         }
-        None => { /* Skip */ }
       }
-      return self.tree.node(&id);
+      self.tree.node(id)
+    } else {
+      None
     }
-    None
   }
 }
 
@@ -71,71 +251,14 @@ impl<'a, T> ItreeIter<'a, T>
 where
   T: Inodeable,
 {
-  pub fn new(tree: &'a Itree<T>, start_node_id: Option<InodeId>) -> Self {
-    let mut queue = VecDeque::new();
-    match start_node_id {
-      Some(id) => queue.push_back(id),
-      None => { /* Do nothing */ }
+  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
+    let mut que = VecDeque::new();
+    if let Some(id) = start_node_id {
+      que.push_back(id);
     }
-    ItreeIter { tree, queue }
+    Self { tree, que }
   }
 }
-
-// #[derive(Debug)]
-// /// The mutable pre-order iterator of the tree.
-// pub struct ItreeIterMut<'a, T>
-// where
-//   T: Inodeable,
-// {
-//   tree: NonNull<Itree<T>>,
-//   queue: VecDeque<InodeId>,
-//   phantom: PhantomData<&'a mut Itree<T>>,
-// }
-//
-// impl<'a, T> Iterator for ItreeIterMut<'a, T>
-// where
-//   T: Inodeable,
-// {
-//   type Item = &'a mut T;
-//
-//   fn next(&mut self) -> Option<Self::Item> {
-//     if let Some(id) = self.queue.pop_front() {
-//       unsafe {
-//         // Fix `self.tree` mutable references.
-//         match self.tree.as_ref().children_ids(&id) {
-//           Some(children_ids) => {
-//             for child_id in children_ids.iter() {
-//               if self.tree.as_ref().node(child_id).is_some() {
-//                 self.queue.push_back(*child_id);
-//               }
-//             }
-//           }
-//           None => { /* Skip */ }
-//         }
-//         return self.tree.as_mut().node_mut(&id);
-//       }
-//     }
-//     None
-//   }
-// }
-//
-// impl<'a, T> ItreeIterMut<'a, T>
-// where
-//   T: Inodeable,
-// {
-//   pub fn new(tree: &'a mut Itree<T>, start_node_id: Option<InodeId>) -> Self {
-//     let mut queue = VecDeque::new();
-//     match start_node_id {
-//       Some(id) => queue.push_back(id),
-//       None => { /* Do nothing */ }
-//     }
-//     ItreeIterMut {
-//       tree: NonNull::new(tree as *mut Itree<T>).unwrap(),
-//       queue,
-//       phantom: PhantomData,
-//     }
-//   }
-// }
 
 // Attributes {
 impl<T> Itree<T>
@@ -146,13 +269,54 @@ where
     let root_id = root_node.id();
     let mut nodes = HashMap::new();
     nodes.insert(root_id, root_node);
-    let mut children_ids: HashMap<InodeId, Vec<InodeId>> = HashMap::new();
-    children_ids.insert(root_id, vec![]);
+    let relationships = Relationships::new(root_id);
     Itree {
-      root_id,
       nodes,
-      parent_ids: HashMap::new(),
-      children_ids,
+      relationships: Rc::new(RefCell::new(relationships)),
+    }
+  }
+
+  #[cfg(not(debug_assertions))]
+  pub fn _internal_check(&self) {}
+
+  #[cfg(debug_assertions)]
+  pub fn _internal_check(&self) {
+    debug_assert!(!self.nodes.is_empty());
+    debug_assert!(!self.relationships.borrow().is_empty());
+    debug_assert_eq!(self.relationships.borrow().len(), self.nodes.len());
+
+    let root_id = self.relationships.borrow().root_id();
+    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
+    que.push_back(root_id);
+
+    while let Some(id) = que.pop_front() {
+      let parent = self.relationships.borrow().parent_id(id);
+      if id == root_id {
+        debug_assert!(parent.is_none());
+      } else {
+        debug_assert!(parent.is_some());
+        let parents_children = self.relationships.borrow().children_ids(parent.unwrap());
+        for c in parents_children {
+          let child_parent = self.relationships.borrow().parent_id(c);
+          debug_assert!(child_parent.is_some());
+          debug_assert_eq!(child_parent.unwrap(), parent.unwrap());
+        }
+      }
+
+      let children_ids = self.relationships.borrow().children_ids(id);
+      debug_assert_eq!(
+        children_ids.len(),
+        children_ids
+          .iter()
+          .cloned()
+          .collect::<HashSet<TreeNodeId>>()
+          .len()
+      );
+      for c in children_ids {
+        let child_parent = self.relationships.borrow().parent_id(c);
+        debug_assert!(child_parent.is_some());
+        debug_assert_eq!(child_parent.unwrap(), id);
+      }
     }
   }
 
@@ -164,28 +328,28 @@ where
     self.nodes.len() <= 1
   }
 
-  pub fn root_id(&self) -> InodeId {
-    self.root_id
+  pub fn root_id(&self) -> TreeNodeId {
+    self.relationships.borrow().root_id()
   }
 
-  pub fn node_ids(&self) -> Vec<InodeId> {
+  pub fn node_ids(&self) -> Vec<TreeNodeId> {
     self.nodes.keys().copied().collect()
   }
 
-  pub fn parent_id(&self, id: &InodeId) -> Option<&InodeId> {
-    self.parent_ids.get(id)
+  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
+    self.relationships.borrow().parent_id(id)
   }
 
-  pub fn children_ids(&self, id: &InodeId) -> Option<&Vec<InodeId>> {
-    self.children_ids.get(id)
+  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
+    self.relationships.borrow().children_ids(id)
   }
 
-  pub fn node(&self, id: &InodeId) -> Option<&T> {
-    self.nodes.get(id)
+  pub fn node(&self, id: TreeNodeId) -> Option<&T> {
+    self.nodes.get(&id)
   }
 
-  pub fn node_mut(&mut self, id: &InodeId) -> Option<&mut T> {
-    self.nodes.get_mut(id)
+  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut T> {
+    self.nodes.get_mut(&id)
   }
 
   /// Get the iterator.
@@ -193,13 +357,8 @@ where
   /// By default, it iterates in pre-order iterator which starts from the root.
   /// For the children under the same node, it visits from lower z-index to higher.
   pub fn iter(&self) -> ItreeIter<T> {
-    ItreeIter::new(self, Some(self.root_id))
+    ItreeIter::new(self, Some(self.relationships.borrow().root_id()))
   }
-
-  // /// Get the iterator that returns mutable reference.
-  // pub fn iter_mut(&mut self) -> ItreeIterMut<T> {
-  //   ItreeIterMut::new(self, Some(self.root_id))
-  // }
 }
 // Attributes }
 
@@ -212,69 +371,57 @@ where
   ///
   /// Below attributes will be update:
   ///
-  /// 1. [`depth`](Inode::depth()): The child depth should be always the parent depth + 1.
-  /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always be clipped by parent's boundaries.
-  unsafe fn update_descendant_attributes(&mut self, start_id: InodeId, start_parent_id: InodeId) {
+  /// 1. [`depth`](Inode::depth()): The child depth should always be the parent's depth + 1.
+  /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always clipped
+  ///    by parent's boundaries.
+  fn update_descendant_attributes(&mut self, start_id: TreeNodeId, start_parent_id: TreeNodeId) {
     // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
 
-    // Tuple of (child, parent id, parent depth, parent actual shape)
-    type ChildAndParentPair<'a, T> = (&'a mut T, InodeId, usize, U16Rect);
+    // Tuple of (child_id, parent_id, parent_depth, parent_actual_shape)
+    type ChildAndParent = (TreeNodeId, TreeNodeId, usize, U16Rect);
 
-    unsafe {
-      // Avoid the multiple mutable references on `self.nodes.get_mut` when updating all descendants attributes.
-      let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
+    // trace!("before create que");
+    let mut que: VecDeque<ChildAndParent> = VecDeque::new();
+    let pnode = self.nodes.get_mut(&start_parent_id).unwrap();
+    let pnode_id = pnode.id();
+    let pnode_depth = pnode.depth();
+    let pnode_actual_shape = *pnode.actual_shape();
+    que.push_back((start_id, pnode_id, pnode_depth, pnode_actual_shape));
+    // trace!("after create que");
 
-      // trace!("before create que");
-      let mut que: VecDeque<ChildAndParentPair<T>> = VecDeque::new();
-      let pnode = raw_nodes.as_ref().get(&start_parent_id).unwrap();
-      let pnode_id = pnode.id();
-      let pnode_depth = *pnode.depth();
-      let pnode_actual_shape = *pnode.actual_shape();
-      que.push_back((
-        raw_nodes.as_mut().get_mut(&start_id).unwrap(),
-        pnode_id,
-        pnode_depth,
-        pnode_actual_shape,
-      ));
-      // trace!("after create que");
+    // Iterate all descendants, and update their attributes.
+    while let Some(child_and_parent) = que.pop_front() {
+      let cnode_id = child_and_parent.0;
+      let _pnode_id = child_and_parent.1;
+      let pnode_depth = child_and_parent.2;
+      let pnode_actual_shape = child_and_parent.3;
 
-      // Iterate all descendants, and update their attributes.
-      while let Some(child_and_parent) = que.pop_front() {
-        let cnode = child_and_parent.0;
-        let _pnode_id = child_and_parent.1;
-        let pnode_depth = child_and_parent.2;
-        let pnode_actual_shape = child_and_parent.3;
+      // trace!("before update cnode attr: {:?}", cnode);
+      let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
+      let cnode_depth = pnode_depth + 1;
+      let cnode_shape = *cnode_ref.shape();
+      let cnode_actual_shape = shapes::make_actual_shape(&cnode_shape, &pnode_actual_shape);
 
-        // trace!("before update cnode attr: {:?}", cnode);
-        let cnode_id = cnode.id();
-        let cnode_depth = pnode_depth + 1;
-        let cnode_shape = *cnode.shape();
-        let cnode_actual_shape = shapes::make_actual_shape(cnode_shape, pnode_actual_shape);
+      // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
 
-        // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
+      // let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
+      cnode_ref.set_depth(cnode_depth);
+      cnode_ref.set_actual_shape(&cnode_actual_shape);
 
-        cnode.set_depth(cnode_depth);
-        cnode.set_actual_shape(&cnode_actual_shape);
-        // trace!("after update cnode attr: {:?}", cnode_id);
+      // raw_nodes
+      //   .as_mut()
+      //   .get_mut(&cnode_id)
+      //   .unwrap()
+      //   .set_depth(cnode_depth);
+      // raw_nodes
+      //   .as_mut()
+      //   .get_mut(&cnode_id)
+      //   .unwrap()
+      //   .set_actual_shape(&cnode_actual_shape);
 
-        // trace!(
-        //   "before push descendant_ids, cnode_id:{:?}, children_ids: {:?}",
-        //   cnode_id, self.children_ids
-        // );
-        match self.children_ids.get(&cnode_id) {
-          Some(descendant_ids) => {
-            for dnode_id in descendant_ids.iter() {
-              // trace!("before push dnode: {:?}", dnode_id);
-              match raw_nodes.as_mut().get_mut(dnode_id) {
-                Some(dnode) => {
-                  que.push_back((dnode, cnode_id, cnode_depth, cnode_actual_shape));
-                }
-                None => { /* Skip */ }
-              }
-              // trace!("after push dnode: {:?}", dnode_id);
-            }
-          }
-          None => { /* Skip */ }
+      for dnode_id in self.children_ids(cnode_id).iter() {
+        if self.nodes.contains_key(dnode_id) {
+          que.push_back((*dnode_id, cnode_id, cnode_depth, cnode_actual_shape));
         }
       }
     }
@@ -300,91 +447,51 @@ where
   /// # Panics
   ///
   /// If `parent_id` doesn't exist.
-  pub fn insert(&mut self, parent_id: &InodeId, mut child_node: T) -> Option<T> {
-    // trace!(
-    //   "parent_id:{:?}, node_ids:{:?}, children_ids:{:?}",
-    //   parent_id,
-    //   self.node_ids(),
-    //   self.children_ids
-    // );
+  pub fn insert(&mut self, parent_id: TreeNodeId, mut child_node: T) -> Option<T> {
+    self._internal_check();
+    debug_assert!(self.nodes.contains_key(&parent_id));
+    debug_assert!(self.relationships.borrow().contains_id(parent_id));
 
-    // Panics if `parent_id` not exists.
-    debug_assert!(self.nodes.contains_key(parent_id));
-    debug_assert!(
-      self.children_ids.contains_key(parent_id),
-      "children_ids {:?} doesn't contains parent_id {:?}",
-      self.children_ids,
-      parent_id
-    );
-
-    // Insert node.
+    // Child node.
     let child_id = child_node.id();
-    let child_zindex = *child_node.zindex();
+    let child_zindex = child_node.zindex();
 
-    // Maps the inserted child => its parent.
-    self.children_ids.insert(child_id, vec![]);
+    debug_assert!(!self.relationships.borrow().contains_id(child_id));
 
-    // Maps its parent => the inserted child.
+    // Update attributes for both the newly inserted child, and all its descendants (if the child
+    // itself is also a sub-tree in current relationship).
     //
-    // It inserts child ID to the `children_ids` vector of the parent, sorted by the Z-index.
-    // For the children that have the same z-index value, it inserts at the end of those children.
-    self.parent_ids.insert(child_id, *parent_id);
-    let higher_zindex_pos: Vec<usize> = self
-      .children_ids
-      .get(parent_id)
-      .unwrap()
-      .iter()
-      .enumerate()
-      .filter(|(_index, cid)| match self.nodes.get(cid) {
-        Some(cnode) => *cnode.zindex() > child_zindex,
-        None => false,
-      })
-      .map(|(index, _cid)| index)
-      .collect();
-    match higher_zindex_pos.first() {
-      Some(insert_pos) => {
-        self
-          .children_ids
-          .get_mut(parent_id)
-          .unwrap()
-          .insert(*insert_pos, child_id);
-      }
-      None => {
-        self.children_ids.get_mut(parent_id).unwrap().push(child_id);
-      }
-    }
-
-    // Update the inserted child attributes:
+    // NOTE: This is useful when we want to move some widgets and all its children nodes to another
+    // place. We don't need to remove all the nodes (which could be slow), but only need to move
+    // the root of the tree.
+    //
+    // The attributes to be updated:
     // 1. Depth.
     // 2. Actual shape.
-    let parent_node = self.nodes.get(parent_id).unwrap();
-    let parent_depth = *parent_node.depth();
+    let parent_node = self.nodes.get(&parent_id).unwrap();
+    let parent_depth = parent_node.depth();
     let parent_actual_shape = *parent_node.actual_shape();
     child_node.set_depth(parent_depth + 1);
     child_node.set_actual_shape(&shapes::make_actual_shape(
-      *child_node.shape(),
-      parent_actual_shape,
+      child_node.shape(),
+      &parent_actual_shape,
     ));
 
+    // Insert node into collection.
+    let result = self.nodes.insert(child_id, child_node);
+    // Create edge between child and its parent.
+    self
+      .relationships
+      .borrow_mut()
+      .add_child(parent_id, child_id, child_zindex, &self.nodes);
+
     // Update all the descendants attributes under the `child_id` node.
-    unsafe {
-      // Fix mutable references on `self.update_descendant_attributes`.
-      let mut raw_self = NonNull::new(self as *mut Itree<T>).unwrap();
+    for dnode_id in self.children_ids(child_id).iter() {
+      self.update_descendant_attributes(*dnode_id, child_id);
+    }
 
-      match raw_self.as_ref().children_ids.get(&child_id) {
-        Some(descendant_ids) => {
-          for dnode_id in descendant_ids.iter() {
-            raw_self
-              .as_mut()
-              .update_descendant_attributes(*dnode_id, child_id);
-          }
-        }
-        None => { /* Skip */ }
-      }
-    } // unsafe
-
-    // Maps inserted child ID => the struct itself.
-    self.nodes.insert(child_id, child_node)
+    self._internal_check();
+    result
   }
 
   /// Insert a node to the tree.
@@ -406,17 +513,17 @@ where
   /// # Panics
   ///
   /// If `parent_id` doesn't exist.
-  pub fn bounded_insert(&mut self, parent_id: &InodeId, mut child_node: T) -> Option<T> {
+  pub fn bounded_insert(&mut self, parent_id: TreeNodeId, mut child_node: T) -> Option<T> {
     // Panics if `parent_id` not exists.
-    debug_assert!(self.nodes.contains_key(parent_id));
+    debug_assert!(self.nodes.contains_key(&parent_id));
 
-    let parent_node = self.nodes.get(parent_id).unwrap();
+    let parent_node = self.nodes.get(&parent_id).unwrap();
     let parent_actual_shape = parent_node.actual_shape();
 
     // Bound child shape
     child_node.set_shape(&shapes::bound_shape(
-      *child_node.shape(),
-      *parent_actual_shape,
+      child_node.shape(),
+      parent_actual_shape,
     ));
 
     self.insert(parent_id, child_node)
@@ -437,139 +544,129 @@ where
   /// # Panics
   ///
   /// If the node `id` is the root node id since root node cannot be removed.
-  pub fn remove(&mut self, id: InodeId) -> Option<T> {
+  pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
-    debug_assert!(id != self.root_id);
+    debug_assert_ne!(id, self.relationships.borrow().root_id());
+    self._internal_check();
 
-    // Remove child from nodes collection.
-    match self.nodes.remove(&id) {
+    // Remove child node from collection.
+    let result = match self.nodes.remove(&id) {
       Some(removed) => {
-        // Remove child `id` => parent ID mapping.
-        match self.parent_ids.remove(&id) {
-          Some(parent_id) => {
-            // Remove the child `id` from the children vector of its parent.
-            match self.children_ids.get_mut(&parent_id) {
-              Some(children_ids) => {
-                let filtered_indexes = children_ids
-                  .iter()
-                  .enumerate()
-                  .filter(|(_index, cid)| **cid == id)
-                  .map(|(index, _cid)| index)
-                  .collect::<Vec<usize>>();
-                if !filtered_indexes.is_empty() {
-                  let removed_index = filtered_indexes[0];
-                  children_ids.remove(removed_index);
-                }
-              }
-              None => { /* Skip */ }
-            }
-          }
-          None => { /* Skip */ }
-        }
+        // Remove node/edge relationship.
+        debug_assert!(self.relationships.borrow().contains_id(id));
+        // Remove edges between `id` and its parent.
+        let relation_removed = self.relationships.borrow_mut().remove_child(id);
+        debug_assert!(relation_removed);
         Some(removed)
       }
-      None => None,
-    }
+      None => {
+        debug_assert!(!self.relationships.borrow().contains_id(id));
+        None
+      }
+    };
+
+    self._internal_check();
+    result
   }
 }
 // Insert/Remove }
 
 // Movement {
 
-/// Describe the relative position of a node and its parent node, based on the actual shape (after
-/// truncated).
-///
-/// There're several kinds of use cases:
-///
-/// 1. No-edge contact (inside): The node is completely inside its parent without any edges
-///    contacted, which looks like:
-///
-///    ```text
-///    -----------------
-///    |               |
-///    |    --------   |
-///    |    |//////|   |
-///    |    |//////|   |
-///    |    --------   |
-///    |               |
-///    -----------------
-///    ```
-///
-/// 2. Single-edge contact: The node is in contact with its parent on only 1 edge, which looks
-///    like:
-///
-///    ```text
-///    -----------------
-///    |               |
-///    |        -------|
-///    |        |//////|
-///    |        |//////|
-///    |        -------|
-///    |               |
-///    -----------------
-///    ```
-///
-/// 3. Double-edges contact: The node is in contact on 2 edges, which looks like:
-///
-///    ```text
-///    -----------------
-///    |        |//////|
-///    |        |//////|
-///    |        -------|
-///    |               |
-///    |               |
-///    |               |
-///    -----------------
-///    ```
-///
-/// 4. Triple-edges contact: The node is in contact on 3 edges, which looks like:
-///
-///    ```text
-///    -----------------
-///    |  |////////////|
-///    |  |////////////|
-///    |  |////////////|
-///    |  |////////////|
-///    |  |////////////|
-///    |  |////////////|
-///    -----------------
-///    ```
-///
-/// 5. All-edges contact (overlapping): The node is in contact on 4 edges, i.e. the node is exactly
-///    the same with (or even bigger than, and truncated by) its parent, which looks like:
-///
-///    ```text
-///    -----------------
-///    |///////////////|
-///    |///////////////|
-///    |///////////////|
-///    |///////////////|
-///    |///////////////|
-///    |///////////////|
-///    -----------------
-///    ```
-///
-pub enum InodeRelativePosition {
-  /// 0-edge
-  Inside,
-  /// 1-edge
-  Top,
-  Bottom,
-  Left,
-  Right,
-  // 2-edges
-  TopLeft,
-  TopRight,
-  BottomLeft,
-  BottomRight,
-  // 3-edges
-  TopBottomLeft,
-  TopBottomRight,
-  LeftRightTop,
-  LeftRightBottom,
-  // All-edges
-  Overlapping,
-}
+// /// Describe the relative position of a node and its parent node, based on the actual shape (after
+// /// truncated).
+// ///
+// /// There're several kinds of use cases:
+// ///
+// /// 1. No-edge contact (inside): The node is completely inside its parent without any edges
+// ///    contacted, which looks like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |               |
+// ///    |    --------   |
+// ///    |    |//////|   |
+// ///    |    |//////|   |
+// ///    |    --------   |
+// ///    |               |
+// ///    -----------------
+// ///    ```
+// ///
+// /// 2. Single-edge contact: The node is in contact with its parent on only 1 edge, which looks
+// ///    like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |               |
+// ///    |        -------|
+// ///    |        |//////|
+// ///    |        |//////|
+// ///    |        -------|
+// ///    |               |
+// ///    -----------------
+// ///    ```
+// ///
+// /// 3. Double-edges contact: The node is in contact on 2 edges, which looks like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |        |//////|
+// ///    |        |//////|
+// ///    |        -------|
+// ///    |               |
+// ///    |               |
+// ///    |               |
+// ///    -----------------
+// ///    ```
+// ///
+// /// 4. Triple-edges contact: The node is in contact on 3 edges, which looks like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    -----------------
+// ///    ```
+// ///
+// /// 5. All-edges contact (overlapping): The node is in contact on 4 edges, i.e. the node is exactly
+// ///    the same with (or even bigger than, and truncated by) its parent, which looks like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    -----------------
+// ///    ```
+// ///
+// pub enum InodeRelativePosition {
+//   /// 0-edge
+//   Inside,
+//   /// 1-edge
+//   Top,
+//   Bottom,
+//   Left,
+//   Right,
+//   // 2-edges
+//   TopLeft,
+//   TopRight,
+//   BottomLeft,
+//   BottomRight,
+//   // 3-edges
+//   TopBottomLeft,
+//   TopBottomRight,
+//   LeftRightTop,
+//   LeftRightBottom,
+//   // All-edges
+//   Overlapping,
+// }
 
 impl<T> Itree<T>
 where
@@ -591,8 +688,9 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
-    match self.nodes.get_mut(&id) {
+  pub fn move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+    self._internal_check();
+    let result = match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
         let current_top_left_pos: IPos = current_shape.min().into();
@@ -603,7 +701,10 @@ where
         )
       }
       None => None,
-    }
+    };
+
+    self._internal_check();
+    result
   }
 
   /// Bounded move node by distance `(x, y)`, the `x`/`y` is the motion distances.
@@ -620,40 +721,39 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
-    match self.parent_ids.get(&id) {
+  pub fn bounded_move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+    match self.parent_id(id) {
       Some(parent_id) => {
-        unsafe {
-          // Fix mutable borrow on `self.base.node_mut`.
-          let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
+        let maybe_parent_actual_shape: Option<U16Rect> = self
+          .nodes
+          .get(&parent_id)
+          .map(|parent_node| *parent_node.actual_shape());
 
-          match raw_nodes.as_ref().get(parent_id) {
-            Some(parent_node) => {
-              match raw_nodes.as_mut().get_mut(&id) {
-                Some(node) => {
-                  let current_shape = *node.shape();
-                  let current_top_left_pos: IPos = current_shape.min().into();
-                  let expected_top_left_pos: IPos =
-                    point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
-                  let expected_shape = IRect::new(
-                    expected_top_left_pos,
-                    point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
-                  );
+        match maybe_parent_actual_shape {
+          Some(parent_actual_shape) => {
+            match self.nodes.get_mut(&id) {
+              Some(node) => {
+                let current_shape = *node.shape();
+                let current_top_left_pos: IPos = current_shape.min().into();
+                let expected_top_left_pos: IPos =
+                  point!(x: current_top_left_pos.x() + x, y: current_top_left_pos.y() + y);
+                let expected_shape = IRect::new(
+                  expected_top_left_pos,
+                  point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
+                );
 
-                  let parent_actual_shape = *parent_node.actual_shape();
-                  let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
-                  let final_top_left_pos: IPos = final_shape.min().into();
+                let final_shape = shapes::bound_shape(&expected_shape, &parent_actual_shape);
+                let final_top_left_pos: IPos = final_shape.min().into();
 
-                  // Real movement
-                  let final_x = final_top_left_pos.x() - current_top_left_pos.x();
-                  let final_y = final_top_left_pos.y() - current_top_left_pos.y();
-                  self.move_by(id, final_x, final_y)
-                }
-                None => None,
+                // Real movement
+                let final_x = final_top_left_pos.x() - current_top_left_pos.x();
+                let final_y = final_top_left_pos.y() - current_top_left_pos.y();
+                self.move_by(id, final_x, final_y)
               }
+              None => None,
             }
-            None => None,
           }
+          None => None,
         }
       }
       None => None,
@@ -672,8 +772,9 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
-    match self.nodes.get_mut(&id) {
+  pub fn move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+    self._internal_check();
+    let result = match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
         let next_top_left_pos: IPos = point!(x: x, y: y);
@@ -684,18 +785,15 @@ where
         node.set_shape(&next_shape);
 
         // Update all the descendants attributes under the `id` node.
-        unsafe {
-          // Fix mutable references on `self.update_descendant_attributes`.
-          let mut raw_self = NonNull::new(self as *mut Itree<T>).unwrap();
-          raw_self
-            .as_mut()
-            .update_descendant_attributes(id, *self.parent_ids.get(&id).unwrap());
-        }
+        self.update_descendant_attributes(id, self.parent_id(id).unwrap());
 
         Some(next_shape)
       }
       None => None,
-    }
+    };
+
+    self._internal_check();
+    result
   }
 
   /// Bounded move node to position `(x, y)`, the `(x, y)` is the new position.
@@ -713,80 +811,35 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn bounded_move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
-    match self.parent_ids.get(&id) {
+  pub fn bounded_move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
+    match self.parent_id(id) {
       Some(parent_id) => {
-        unsafe {
-          // Fix mutable borrow on `self.base.node_mut`.
-          let mut raw_nodes = NonNull::new(&mut self.nodes as *mut HashMap<InodeId, T>).unwrap();
+        let maybe_parent_actual_shape: Option<U16Rect> = self
+          .nodes
+          .get(&parent_id)
+          .map(|parent_node| *parent_node.actual_shape());
 
-          match raw_nodes.as_ref().get(parent_id) {
-            Some(parent_node) => match raw_nodes.as_mut().get_mut(&id) {
-              Some(node) => {
-                let current_shape = *node.shape();
-                let expected_top_left_pos: IPos = point!(x: x, y: y);
-                let expected_shape = IRect::new(
-                  expected_top_left_pos,
-                  point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
-                );
+        match maybe_parent_actual_shape {
+          Some(parent_actual_shape) => match self.nodes.get_mut(&id) {
+            Some(node) => {
+              let current_shape = *node.shape();
+              let expected_top_left_pos: IPos = point!(x: x, y: y);
+              let expected_shape = IRect::new(
+                expected_top_left_pos,
+                point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
+              );
 
-                let parent_actual_shape = *parent_node.actual_shape();
-                let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
-                let final_top_left_pos: IPos = final_shape.min().into();
+              let final_shape = shapes::bound_shape(&expected_shape, &parent_actual_shape);
+              let final_top_left_pos: IPos = final_shape.min().into();
 
-                self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
-              }
-              None => None,
-            },
+              self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
+            }
             None => None,
-          }
+          },
+          None => None,
         }
       }
       None => None,
-    }
-  }
-
-  /// FIXME: This method is not implemented or tested.
-  ///
-  /// Get the relative position of a node based on its parent.
-  ///
-  /// It returns the position enum, see [`InodeRelativePosition`].
-  ///
-  /// For root ID, since it doesn't have parent node, or say, its parent is the terminal device. So
-  /// it returns [`InodeRelativePosition::Overlapping`].
-  ///
-  /// # Panics
-  ///
-  /// If the node doesn't have a parent inside the tree.
-  pub fn relative_position(&self, id: InodeId) -> InodeRelativePosition {
-    if id == self.root_id {
-      InodeRelativePosition::Overlapping
-    } else {
-      let parent_id = self.parent_id(&id).unwrap();
-      let parent_actual_shape = self.node(parent_id).unwrap().actual_shape();
-      let child_actual_shape = self.node(&id).unwrap().actual_shape();
-
-      // Here we use `i32` instead of `u16`, since `CoordinatePosition` algorithm requires the
-      // argument `coord` must be
-      // [`&Coord<Self::Scalar>`](https://docs.rs/geo/latest/geo/algorithm/coordinate_position/trait.CoordinatePosition.html#associatedtype.Scalar),
-      // which is a [`GeoNum`](https://docs.rs/geo/latest/geo/trait.GeoNum.html) trait.
-
-      let parent_actual_shape = geo_rect_as!(parent_actual_shape, i32);
-      let child_actual_shape = geo_rect_as!(child_actual_shape, i32);
-
-      let top_left_pos = child_actual_shape.min();
-      let bottom_right_pos = child_actual_shape.max();
-
-      let top_left_coordpos = parent_actual_shape.coordinate_position(&top_left_pos);
-      let bottom_right_coordpos = parent_actual_shape.coordinate_position(&bottom_right_pos);
-      debug_assert!(
-        top_left_coordpos == CoordPos::Inside || top_left_coordpos == CoordPos::OnBoundary
-      );
-      debug_assert!(
-        bottom_right_coordpos == CoordPos::Inside || bottom_right_coordpos == CoordPos::OnBoundary
-      );
-
-      InodeRelativePosition::Overlapping
     }
   }
 }
@@ -820,48 +873,27 @@ mod tests {
 
   inode_impl!(TestValue, base);
 
-  macro_rules! assert_node_id_eq {
-    ($node: ident, $id: ident) => {
-      loop {
-        assert!($node.id() == $id);
-        break;
-      }
-    };
-  }
-
   macro_rules! print_node {
     ($node: ident, $name: expr) => {
-      loop {
-        info!("{}: {:?}", $name, $node.clone());
-        break;
-      }
+      info!("{}: {:?}", $name, $node.clone());
     };
   }
 
   macro_rules! assert_parent_child_depth {
     ($parent: ident, $child: ident) => {
-      loop {
-        assert_eq!(*$parent.depth() + 1, *$child.depth());
-        break;
-      }
+      assert_eq!($parent.depth() + 1, $child.depth());
     };
   }
 
   macro_rules! assert_node_actual_shape_eq {
     ($node: ident, $expect: expr, $index: expr) => {
-      loop {
-        assert_eq!(*$node.actual_shape(), $expect, "index:{:?}", $index,);
-        break;
-      }
+      assert_eq!(*$node.actual_shape(), $expect, "index:{:?}", $index,);
     };
   }
 
   macro_rules! assert_node_value_eq {
     ($node: ident, $expect: expr) => {
-      loop {
-        assert_eq!($node.value, $expect);
-        break;
-      }
+      assert_eq!($node.value, $expect);
     };
   }
 
@@ -876,13 +908,8 @@ mod tests {
 
     assert_eq!(tree.len(), 1);
     assert_eq!(tree.root_id(), nid1);
-    assert!(tree.parent_id(&nid1).is_none());
-    assert!(tree.children_ids(&nid1).is_some());
-    assert!(tree.children_ids(&nid1).unwrap().is_empty());
-
-    for node in tree.iter() {
-      assert_node_id_eq!(node, nid1);
-    }
+    assert!(tree.parent_id(nid1).is_none());
+    assert!(tree.children_ids(nid1).is_empty());
   }
 
   #[test]
@@ -924,19 +951,19 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid1, n3);
-    tree.insert(&nid2, n4);
-    tree.insert(&nid2, n5);
-    tree.insert(&nid3, n6);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid2, n4);
+    tree.insert(nid2, n5);
+    tree.insert(nid3, n6);
 
     assert!(tree.root_id() == nid1);
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
-    let n4 = tree.node(&nid4).unwrap();
-    let n5 = tree.node(&nid5).unwrap();
-    let n6 = tree.node(&nid6).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
+    let n6 = tree.node(nid6).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -957,25 +984,21 @@ mod tests {
     assert_parent_child_depth!(n2, n6);
     assert_parent_child_depth!(n3, n6);
 
-    assert_eq!(tree.children_ids(&nid1).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(&nid2).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(&nid3).unwrap().len(), 1);
-    assert_eq!(tree.children_ids(&nid4).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(&nid5).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(&nid6).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(nid1).len(), 2);
+    assert_eq!(tree.children_ids(nid2).len(), 2);
+    assert_eq!(tree.children_ids(nid3).len(), 1);
+    assert_eq!(tree.children_ids(nid4).len(), 0);
+    assert_eq!(tree.children_ids(nid5).len(), 0);
+    assert_eq!(tree.children_ids(nid6).len(), 0);
 
-    let contains_child = |parent_id: InodeId, child_id: InodeId| -> bool {
-      match tree.children_ids(&parent_id) {
-        Some(children_ids) => {
-          children_ids
-            .iter()
-            .filter(|cid| **cid == child_id)
-            .collect::<Vec<_>>()
-            .len()
-            == 1
-        }
-        None => false,
-      }
+    let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
+      tree
+        .children_ids(parent_id)
+        .iter()
+        .filter(|cid| **cid == child_id)
+        .collect::<Vec<_>>()
+        .len()
+        == 1
     };
 
     assert!(contains_child(nid1, nid2));
@@ -1048,25 +1071,25 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid1, n3);
-    tree.insert(&nid2, n4);
-    tree.insert(&nid2, n5);
-    tree.insert(&nid3, n6);
-    tree.insert(&nid5, n7);
-    tree.insert(&nid7, n8);
-    tree.insert(&nid7, n9);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid2, n4);
+    tree.insert(nid2, n5);
+    tree.insert(nid3, n6);
+    tree.insert(nid5, n7);
+    tree.insert(nid7, n8);
+    tree.insert(nid7, n9);
 
     assert!(tree.root_id() == nid1);
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
-    let n4 = tree.node(&nid4).unwrap();
-    let n5 = tree.node(&nid5).unwrap();
-    let n6 = tree.node(&nid6).unwrap();
-    let n7 = tree.node(&nid7).unwrap();
-    let n8 = tree.node(&nid8).unwrap();
-    let n9 = tree.node(&nid9).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
+    let n6 = tree.node(nid6).unwrap();
+    let n7 = tree.node(nid7).unwrap();
+    let n8 = tree.node(nid8).unwrap();
+    let n9 = tree.node(nid9).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1096,33 +1119,29 @@ mod tests {
     assert_parent_child_depth!(n7, n8);
     assert_parent_child_depth!(n7, n9);
 
-    assert_eq!(tree.children_ids(&nid1).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(&nid2).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(&nid3).unwrap().len(), 1);
-    assert_eq!(tree.children_ids(&nid4).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(&nid5).unwrap().len(), 1);
-    assert_eq!(tree.children_ids(&nid6).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(&nid7).unwrap().len(), 2);
-    assert_eq!(tree.children_ids(&nid8).unwrap().len(), 0);
-    assert_eq!(tree.children_ids(&nid9).unwrap().len(), 0);
+    assert_eq!(tree.children_ids(nid1).len(), 2);
+    assert_eq!(tree.children_ids(nid2).len(), 2);
+    assert_eq!(tree.children_ids(nid3).len(), 1);
+    assert_eq!(tree.children_ids(nid4).len(), 0);
+    assert_eq!(tree.children_ids(nid5).len(), 1);
+    assert_eq!(tree.children_ids(nid6).len(), 0);
+    assert_eq!(tree.children_ids(nid7).len(), 2);
+    assert_eq!(tree.children_ids(nid8).len(), 0);
+    assert_eq!(tree.children_ids(nid9).len(), 0);
 
-    let contains_child = |parent_id: InodeId, child_id: InodeId| -> bool {
-      let result = match tree.children_ids(&parent_id) {
-        Some(children_ids) => {
-          children_ids
-            .iter()
-            .filter(|cid| **cid == child_id)
-            .collect::<Vec<_>>()
-            .len()
-            == 1
-        }
-        None => false,
-      };
+    let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
+      let result = tree
+        .children_ids(parent_id)
+        .iter()
+        .filter(|cid| **cid == child_id)
+        .collect::<Vec<_>>()
+        .len()
+        == 1;
       info!(
         "parent: {:?}, child: {:?}, children_ids: {:?}, contains: {:?}",
         parent_id,
         child_id,
-        tree.children_ids(&parent_id),
+        tree.children_ids(parent_id),
         result
       );
       result
@@ -1212,25 +1231,25 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid1, n3);
-    tree.insert(&nid2, n4);
-    tree.insert(&nid2, n5);
-    tree.insert(&nid3, n6);
-    tree.insert(&nid5, n7);
-    tree.insert(&nid7, n8);
-    tree.insert(&nid7, n9);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid2, n4);
+    tree.insert(nid2, n5);
+    tree.insert(nid3, n6);
+    tree.insert(nid5, n7);
+    tree.insert(nid7, n8);
+    tree.insert(nid7, n9);
 
     assert!(tree.root_id() == nid1);
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
-    let n4 = tree.node(&nid4).unwrap();
-    let n5 = tree.node(&nid5).unwrap();
-    let n6 = tree.node(&nid6).unwrap();
-    let n7 = tree.node(&nid7).unwrap();
-    let n8 = tree.node(&nid8).unwrap();
-    let n9 = tree.node(&nid9).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
+    let n6 = tree.node(nid6).unwrap();
+    let n7 = tree.node(nid7).unwrap();
+    let n8 = tree.node(nid8).unwrap();
+    let n9 = tree.node(nid9).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1299,19 +1318,19 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid1, n3);
-    tree.insert(&nid2, n4);
-    tree.insert(&nid4, n5);
-    tree.insert(&nid5, n6);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid2, n4);
+    tree.insert(nid4, n5);
+    tree.insert(nid5, n6);
 
     assert!(tree.root_id() == nid1);
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
-    let n4 = tree.node(&nid4).unwrap();
-    let n5 = tree.node(&nid5).unwrap();
-    let n6 = tree.node(&nid6).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
+    let n6 = tree.node(nid6).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1338,7 +1357,7 @@ mod tests {
       .iter()
       .map(|value| TestValue::new(*value, shape))
       .collect();
-    let nodes_ids: Vec<InodeId> = nodes.iter().map(|n| n.id()).collect();
+    let nodes_ids: Vec<TreeNodeId> = nodes.iter().map(|n| n.id()).collect();
 
     /*
      * The tree looks like:
@@ -1350,41 +1369,41 @@ mod tests {
      */
     let mut tree = Itree::new(nodes[0]);
     for node in nodes.iter().skip(1) {
-      tree.insert(&nodes_ids[0], *node);
+      tree.insert(nodes_ids[0], *node);
     }
 
     assert!(tree.root_id() == nodes_ids[0]);
-    assert!(tree.children_ids(&nodes_ids[0]).unwrap().len() == 4);
-    assert!(!tree.children_ids(&nodes_ids[0]).unwrap().is_empty());
+    assert!(tree.children_ids(nodes_ids[0]).len() == 4);
+    assert!(!tree.children_ids(nodes_ids[0]).is_empty());
     for nid in nodes_ids.iter().skip(1) {
-      assert!(tree.children_ids(nid).unwrap().is_empty());
+      assert!(tree.children_ids(*nid).is_empty());
     }
 
     for (i, nid) in nodes_ids.iter().enumerate() {
-      let node = tree.node(nid).unwrap();
+      let node = tree.node(*nid).unwrap();
       let expect = node_values[i];
       assert_node_value_eq!(node, expect);
     }
 
-    let first1 = tree.children_ids(&nodes_ids[0]).unwrap().first();
+    let first1 = tree.children_ids(nodes_ids[0]).first().cloned();
     assert!(first1.is_some());
-    assert_eq!(*first1.unwrap(), nodes_ids[1]);
+    assert_eq!(first1.unwrap(), nodes_ids[1]);
 
-    let last1 = tree.children_ids(&nodes_ids[0]).unwrap().last();
+    let last1 = tree.children_ids(nodes_ids[0]).last().cloned();
     assert!(last1.is_some());
-    assert_eq!(*last1.unwrap(), nodes_ids[4]);
+    assert_eq!(last1.unwrap(), nodes_ids[4]);
 
     for nid in nodes_ids.iter().skip(1) {
-      let first = tree.children_ids(nid).unwrap().first();
-      let last = tree.children_ids(nid).unwrap().last();
+      let first = tree.children_ids(*nid).first().cloned();
+      let last = tree.children_ids(*nid).last().cloned();
       assert!(first.is_none());
       assert!(last.is_none());
     }
   }
 
-  fn make_tree(n: usize) -> (Vec<InodeId>, Itree<TestValue>) {
+  fn make_tree(n: usize) -> (Vec<TreeNodeId>, Itree<TestValue>) {
     let mut value = 1;
-    let mut node_ids: Vec<InodeId> = vec![];
+    let mut node_ids: Vec<TreeNodeId> = vec![];
 
     let s = IRect::new((0, 0), (10, 10));
     let root = TestValue::new(value, s);
@@ -1397,7 +1416,7 @@ mod tests {
       let node = TestValue::new(value, s);
       let node_id = node.id();
       value += 1;
-      tree.insert(&root_id, node);
+      tree.insert(root_id, node);
       node_ids.push(node_id);
     }
 
@@ -1415,21 +1434,11 @@ mod tests {
     assert!(remove2.is_some());
     let remove2 = &remove2.unwrap();
     assert_node_value_eq!(remove2, 3);
-    assert!(
-      !tree
-        .children_ids(&tree.root_id())
-        .unwrap()
-        .contains(&remove2.id())
-    );
+    assert!(!tree.children_ids(tree.root_id()).contains(&remove2.id()));
     assert!(remove4.is_some());
     let remove4 = &remove4.unwrap();
     assert_node_value_eq!(remove4, 5);
-    assert!(
-      !tree
-        .children_ids(&tree.root_id())
-        .unwrap()
-        .contains(&remove4.id())
-    );
+    assert!(!tree.children_ids(tree.root_id()).contains(&remove4.id()));
 
     let remove1 = tree.remove(node_ids[1]);
     let remove3 = tree.remove(node_ids[3]);
@@ -1438,21 +1447,11 @@ mod tests {
     assert!(remove1.is_some());
     let remove1 = &remove1.unwrap();
     assert_node_value_eq!(remove1, 2);
-    assert!(
-      !tree
-        .children_ids(&tree.root_id())
-        .unwrap()
-        .contains(&remove1.id())
-    );
+    assert!(!tree.children_ids(tree.root_id()).contains(&remove1.id()));
     assert!(remove3.is_some());
     let remove3 = &remove3.unwrap();
     assert_node_value_eq!(remove3, 4);
-    assert!(
-      !tree
-        .children_ids(&tree.root_id())
-        .unwrap()
-        .contains(&remove3.id())
-    );
+    assert!(!tree.children_ids(tree.root_id()).contains(&remove3.id()));
   }
 
   #[test]
@@ -1519,25 +1518,25 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid1, n3);
-    tree.insert(&nid2, n4);
-    tree.insert(&nid2, n5);
-    tree.insert(&nid3, n6);
-    tree.insert(&nid5, n7);
-    tree.insert(&nid7, n8);
-    tree.insert(&nid7, n9);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid2, n4);
+    tree.insert(nid2, n5);
+    tree.insert(nid3, n6);
+    tree.insert(nid5, n7);
+    tree.insert(nid7, n8);
+    tree.insert(nid7, n9);
 
     assert!(nid1 == tree.root_id());
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
-    let n4 = tree.node(&nid4).unwrap();
-    let n5 = tree.node(&nid5).unwrap();
-    let n6 = tree.node(&nid6).unwrap();
-    let n7 = tree.node(&nid7).unwrap();
-    let n8 = tree.node(&nid8).unwrap();
-    let n9 = tree.node(&nid9).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
+    let n6 = tree.node(nid6).unwrap();
+    let n7 = tree.node(nid7).unwrap();
+    let n8 = tree.node(nid8).unwrap();
+    let n9 = tree.node(nid9).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1598,18 +1597,18 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid1, n3);
-    tree.insert(&nid2, n4);
-    tree.insert(&nid4, n5);
-    tree.insert(&nid5, n6);
+    tree.insert(nid1, n2);
+    tree.insert(nid1, n3);
+    tree.insert(nid2, n4);
+    tree.insert(nid4, n5);
+    tree.insert(nid5, n6);
 
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
-    let n4 = tree.node(&nid4).unwrap();
-    let n5 = tree.node(&nid5).unwrap();
-    let n6 = tree.node(&nid6).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
+    let n4 = tree.node(nid4).unwrap();
+    let n5 = tree.node(nid5).unwrap();
+    let n6 = tree.node(nid6).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1653,12 +1652,12 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid2, n3);
+    tree.insert(nid1, n2);
+    tree.insert(nid2, n3);
 
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1691,7 +1690,7 @@ mod tests {
       let x = m.0;
       let y = m.1;
       tree.move_by(nid3, x, y);
-      let actual = *tree.node(&nid3).unwrap().shape();
+      let actual = *tree.node(nid3).unwrap().shape();
       let expect = expects[i];
       info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
       assert!(actual == expect);
@@ -1725,12 +1724,12 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid2, n3);
+    tree.insert(nid1, n2);
+    tree.insert(nid2, n3);
 
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1763,7 +1762,7 @@ mod tests {
       let x = m.0;
       let y = m.1;
       tree.bounded_move_by(nid3, x, y);
-      let actual = *tree.node(&nid3).unwrap().shape();
+      let actual = *tree.node(nid3).unwrap().shape();
       let expect = expects[i];
       info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
       assert!(actual == expect);
@@ -1797,12 +1796,12 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid2, n3);
+    tree.insert(nid1, n2);
+    tree.insert(nid2, n3);
 
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1835,7 +1834,7 @@ mod tests {
       let x = m.0;
       let y = m.1;
       tree.move_to(nid3, x, y);
-      let actual = *tree.node(&nid3).unwrap().shape();
+      let actual = *tree.node(nid3).unwrap().shape();
       let expect = expects[i];
       info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
       assert!(actual == expect);
@@ -1869,12 +1868,12 @@ mod tests {
      * ```
      */
     let mut tree = Itree::new(n1);
-    tree.insert(&nid1, n2);
-    tree.insert(&nid2, n3);
+    tree.insert(nid1, n2);
+    tree.insert(nid2, n3);
 
-    let n1 = tree.node(&nid1).unwrap();
-    let n2 = tree.node(&nid2).unwrap();
-    let n3 = tree.node(&nid3).unwrap();
+    let n1 = tree.node(nid1).unwrap();
+    let n2 = tree.node(nid2).unwrap();
+    let n3 = tree.node(nid3).unwrap();
     print_node!(n1, "n1");
     print_node!(n2, "n2");
     print_node!(n3, "n3");
@@ -1907,7 +1906,7 @@ mod tests {
       let x = m.0;
       let y = m.1;
       tree.bounded_move_to(nid3, x, y);
-      let actual = *tree.node(&nid3).unwrap().shape();
+      let actual = *tree.node(nid3).unwrap().shape();
       let expect = expects[i];
       info!("i:{:?}, actual:{:?}, expect:{:?}", i, actual, expect);
       assert!(actual == expect);

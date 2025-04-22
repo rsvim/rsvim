@@ -39,13 +39,13 @@ pub fn make_tree_with_buffers(
   };
   let window_id = window.id();
   let window_node = TreeNode::Window(window);
-  tree_mut.bounded_insert(&tree_root_id, window_node);
+  tree_mut.bounded_insert(tree_root_id, window_node);
 
   // Initialize cursor.
   let cursor_shape = IRect::new((0, 0), (1, 1));
   let cursor = Cursor::default(cursor_shape);
   let cursor_node = TreeNode::Cursor(cursor);
-  tree_mut.bounded_insert(&window_id, cursor_node);
+  tree_mut.bounded_insert(window_id, cursor_node);
 
   tree.clone()
 }

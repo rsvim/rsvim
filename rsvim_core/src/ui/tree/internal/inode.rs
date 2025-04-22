@@ -6,16 +6,16 @@ use crate::prelude::*;
 use std::fmt::Debug;
 use std::sync::atomic::{AtomicI32, Ordering};
 
-pub type InodeId = i32;
+pub type TreeNodeId = i32;
 
 pub trait Inodeable: Sized + Clone + Debug {
-  fn id(&self) -> InodeId;
+  fn id(&self) -> TreeNodeId;
 
-  fn depth(&self) -> &usize;
+  fn depth(&self) -> usize;
 
   fn set_depth(&mut self, depth: usize);
 
-  fn zindex(&self) -> &usize;
+  fn zindex(&self) -> usize;
 
   fn set_zindex(&mut self, zindex: usize);
 
@@ -27,11 +27,11 @@ pub trait Inodeable: Sized + Clone + Debug {
 
   fn set_actual_shape(&mut self, actual_shape: &U16Rect);
 
-  fn enabled(&self) -> &bool;
+  fn enabled(&self) -> bool;
 
   fn set_enabled(&mut self, enabled: bool);
 
-  fn visible(&self) -> &bool;
+  fn visible(&self) -> bool;
 
   fn set_visible(&mut self, visible: bool);
 }
@@ -41,11 +41,11 @@ pub trait Inodeable: Sized + Clone + Debug {
 macro_rules! inode_impl {
   ($struct_name:ty,$base_name:ident) => {
     impl Inodeable for $struct_name {
-      fn id(&self) -> InodeId {
+      fn id(&self) -> TreeNodeId {
         self.$base_name.id()
       }
 
-      fn depth(&self) -> &usize {
+      fn depth(&self) -> usize {
         self.$base_name.depth()
       }
 
@@ -53,7 +53,7 @@ macro_rules! inode_impl {
         self.$base_name.set_depth(depth);
       }
 
-      fn zindex(&self) -> &usize {
+      fn zindex(&self) -> usize {
         self.$base_name.zindex()
       }
 
@@ -77,7 +77,7 @@ macro_rules! inode_impl {
         self.$base_name.set_actual_shape(actual_shape)
       }
 
-      fn enabled(&self) -> &bool {
+      fn enabled(&self) -> bool {
         self.$base_name.enabled()
       }
 
@@ -85,7 +85,7 @@ macro_rules! inode_impl {
         self.$base_name.set_enabled(enabled);
       }
 
-      fn visible(&self) -> &bool {
+      fn visible(&self) -> bool {
         self.$base_name.visible()
       }
 
@@ -99,7 +99,7 @@ macro_rules! inode_impl {
 /// Next unique UI widget ID.
 ///
 /// NOTE: Start from 100001, so be different from buffer ID.
-pub fn next_node_id() -> InodeId {
+pub fn next_node_id() -> TreeNodeId {
   static VALUE: AtomicI32 = AtomicI32::new(100001);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
@@ -107,7 +107,7 @@ pub fn next_node_id() -> InodeId {
 #[derive(Debug, Clone, Copy)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
-  id: InodeId,
+  id: TreeNodeId,
   depth: usize,
   shape: IRect,
   actual_shape: U16Rect,
@@ -130,20 +130,20 @@ impl InodeBase {
     }
   }
 
-  pub fn id(&self) -> InodeId {
+  pub fn id(&self) -> TreeNodeId {
     self.id
   }
 
-  pub fn depth(&self) -> &usize {
-    &self.depth
+  pub fn depth(&self) -> usize {
+    self.depth
   }
 
   pub fn set_depth(&mut self, depth: usize) {
     self.depth = depth;
   }
 
-  pub fn zindex(&self) -> &usize {
-    &self.zindex
+  pub fn zindex(&self) -> usize {
+    self.zindex
   }
 
   pub fn set_zindex(&mut self, zindex: usize) {
@@ -166,16 +166,16 @@ impl InodeBase {
     self.actual_shape = *actual_shape;
   }
 
-  pub fn enabled(&self) -> &bool {
-    &self.enabled
+  pub fn enabled(&self) -> bool {
+    self.enabled
   }
 
   pub fn set_enabled(&mut self, enabled: bool) {
     self.enabled = enabled;
   }
 
-  pub fn visible(&self) -> &bool {
-    &self.visible
+  pub fn visible(&self) -> bool {
+    self.visible
   }
 
   pub fn set_visible(&mut self, visible: bool) {
@@ -228,8 +228,8 @@ mod tests {
     assert_eq!(n1.borrow().value, 3);
     assert_eq!(n2.borrow().value, 4);
 
-    assert_eq!(*n1.borrow().depth(), 0);
-    assert_eq!(*n1.borrow().zindex(), 0);
+    assert_eq!(n1.borrow().depth(), 0);
+    assert_eq!(n1.borrow().zindex(), 0);
     assert!(n1.borrow().enabled());
     assert!(n1.borrow().visible());
 
