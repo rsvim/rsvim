@@ -162,12 +162,24 @@ impl Relationships {
             .iter()
             .enumerate()
             .filter(|(_idx, c)| **c == child_id)
-            .map(|(idx, _c)| idx)
-            .collect::<Vec<usize>>();
+            .map(|(idx, c)| (idx, *c))
+            .collect::<Vec<(usize, TreeNodeId)>>();
           if !to_be_removed_child.is_empty() {
             debug_assert_eq!(to_be_removed_child.len(), 1);
             let to_be_removed = to_be_removed_child[0];
-            to_be_removed_children.remove(to_be_removed);
+            to_be_removed_children.remove(to_be_removed.0);
+
+            // If `to_be_removed` has a empty `children` vector, remove it to workaround the `len`
+            // api.
+            let children_of_to_be_removed_exists = self.children_ids.contains_key(&to_be_removed.1);
+            let children_of_to_be_removed_is_empty = self
+              .children_ids
+              .get(&to_be_removed.1)
+              .map_or(true, |children| children.is_empty());
+            if children_of_to_be_removed_exists && children_of_to_be_removed_is_empty {
+              self.children_ids.remove(&to_be_removed.1);
+            }
+
             true
           } else {
             false
@@ -543,7 +555,8 @@ where
         // Remove node/edge relationship.
         debug_assert!(self.relationships.borrow().contains_id(id));
         // Remove edges between `id` and its parent.
-        self.relationships.borrow_mut().remove_child(id);
+        let relation_removed = self.relationships.borrow_mut().remove_child(id);
+        debug_assert!(relation_removed);
         Some(removed)
       }
       None => {
