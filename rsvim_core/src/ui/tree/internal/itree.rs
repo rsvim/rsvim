@@ -203,7 +203,7 @@ impl Relationships {
             .map(|(idx, _c)| idx)
             .collect::<Vec<usize>>();
           if !to_be_removed_child.is_empty() {
-            debug_assert_ne!(to_be_removed_child.len(), 1);
+            debug_assert_eq!(to_be_removed_child.len(), 1);
             let to_be_removed = to_be_removed_child[0];
             to_be_removed_children.remove(to_be_removed);
             true
