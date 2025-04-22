@@ -124,57 +124,57 @@ where
   relationships: Rc<RefCell<GraphMap<InodeId, InodeEdge, Directed, RandomState>>>,
 }
 
-// #[derive(Debug)]
-// /// The pre-order iterator of the tree.
-// ///
-// /// For each node, it first visits the node itself, then visits all its children.
-// /// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
-// /// This also follows the order when rendering the widget tree to terminal device.
-// pub struct ItreeIter<'a, T>
-// where
-//   T: Inodeable,
-// {
-//   tree: &'a Itree<T>,
-//   queue: VecDeque<InodeId>,
-// }
-//
-// impl<'a, T> Iterator for ItreeIter<'a, T>
-// where
-//   T: Inodeable,
-// {
-//   type Item = &'a T;
-//
-//   fn next(&mut self) -> Option<Self::Item> {
-//     if let Some(id) = self.queue.pop_front() {
-//       match self.tree.children_ids(&id) {
-//         Some(children_ids) => {
-//           for child_id in children_ids.iter() {
-//             if self.tree.node(child_id).is_some() {
-//               self.queue.push_back(*child_id);
-//             }
-//           }
-//         }
-//         None => { /* Skip */ }
-//       }
-//       return self.tree.node(&id);
-//     }
-//     None
-//   }
-// }
-//
-// impl<'a, T> ItreeIter<'a, T>
-// where
-//   T: Inodeable,
-// {
-//   pub fn new(tree: &'a Itree<T>, start_node_id: Option<InodeId>) -> Self {
-//     let mut queue = VecDeque::new();
-//     match start_node_id {
-//       Some(id) => queue.push_back(id),
-//       None => { /* Do nothing */ }
-//     }
-//     ItreeIter { tree, queue }
-//   }
-// }
+#[derive(Debug)]
+/// The pre-order iterator of the tree.
+///
+/// For each node, it first visits the node itself, then visits all its children.
+/// For all the children under the same parent, it visits from lower z-index to higher, thus the higher z-index ones will cover those lower ones.
+/// This also follows the order when rendering the widget tree to terminal device.
+pub struct ItreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  tree: &'a Itree<T>,
+  queue: VecDeque<InodeId>,
+}
+
+impl<'a, T> Iterator for ItreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  type Item = &'a T;
+
+  fn next(&mut self) -> Option<Self::Item> {
+    if let Some(id) = self.queue.pop_front() {
+      match self.tree.children_ids(&id) {
+        Some(children_ids) => {
+          for child_id in children_ids.iter() {
+            if self.tree.node(child_id).is_some() {
+              self.queue.push_back(*child_id);
+            }
+          }
+        }
+        None => { /* Skip */ }
+      }
+      return self.tree.node(&id);
+    }
+    None
+  }
+}
+
+impl<'a, T> ItreeIter<'a, T>
+where
+  T: Inodeable,
+{
+  pub fn new(tree: &'a Itree<T>, start_node_id: Option<InodeId>) -> Self {
+    let mut queue = VecDeque::new();
+    match start_node_id {
+      Some(id) => queue.push_back(id),
+      None => { /* Do nothing */ }
+    }
+    ItreeIter { tree, queue }
+  }
+}
 
 // #[derive(Debug)]
 // /// The mutable pre-order iterator of the tree.
@@ -390,13 +390,13 @@ where
     self.nodes.get_mut(&id)
   }
 
-  // /// Get the iterator.
-  // ///
-  // /// By default, it iterates in pre-order iterator which starts from the root.
-  // /// For the children under the same node, it visits from lower z-index to higher.
-  // pub fn iter(&self) -> ItreeIter<T> {
-  //   ItreeIter::new(self, Some(self.root_id))
-  // }
+  /// Get the iterator.
+  ///
+  /// By default, it iterates in pre-order iterator which starts from the root.
+  /// For the children under the same node, it visits from lower z-index to higher.
+  pub fn iter(&self) -> ItreeIter<T> {
+    ItreeIter::new(self, Some(self.root_id))
+  }
 
   // /// Get the iterator that returns mutable reference.
   // pub fn iter_mut(&mut self) -> ItreeIterMut<T> {

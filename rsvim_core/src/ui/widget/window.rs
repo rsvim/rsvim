@@ -71,7 +71,7 @@ impl Window {
     let window_content_id = window_content.id();
     let window_content_node = WindowNode::WindowContent(window_content);
 
-    base.bounded_insert(&window_root_id, window_content_node);
+    base.bounded_insert(window_root_id, window_content_node);
 
     Window {
       base,
@@ -156,7 +156,7 @@ impl Inodeable for Window {
   fn set_visible(&mut self, visible: bool) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_visible(visible);
   }
@@ -238,7 +238,7 @@ impl Window {
 
   /// Get window content widget.
   pub fn window_content(&self) -> &WindowContent {
-    match self.base.node(&self.content_id) {
+    match self.base.node(self.content_id) {
       Some(WindowNode::WindowContent(w)) => w,
       _ => unreachable!(),
     }
@@ -276,7 +276,7 @@ impl Inodeable for WindowNode {
     window_node_getter!(self, id)
   }
 
-  fn depth(&self) -> &usize {
+  fn depth(&self) -> usize {
     window_node_getter!(self, depth)
   }
 
@@ -284,7 +284,7 @@ impl Inodeable for WindowNode {
     window_node_setter!(self, set_depth, depth)
   }
 
-  fn zindex(&self) -> &usize {
+  fn zindex(&self) -> usize {
     window_node_getter!(self, zindex)
   }
 
@@ -308,7 +308,7 @@ impl Inodeable for WindowNode {
     window_node_setter!(self, set_actual_shape, actual_shape)
   }
 
-  fn enabled(&self) -> &bool {
+  fn enabled(&self) -> bool {
     window_node_getter!(self, enabled)
   }
 
@@ -316,7 +316,7 @@ impl Inodeable for WindowNode {
     window_node_setter!(self, set_enabled, enabled)
   }
 
-  fn visible(&self) -> &bool {
+  fn visible(&self) -> bool {
     window_node_getter!(self, visible)
   }
 
