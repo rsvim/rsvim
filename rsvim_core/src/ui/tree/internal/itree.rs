@@ -281,11 +281,11 @@ where
     self.nodes.keys().copied().collect()
   }
 
-  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self._internal_check();
-    let parent = self
-      .relationships
-      .borrow()
+  fn _parent_id(
+    relationships: &std::cell::Ref<GraphMap<TreeNodeId, InodeEdge, Directed, RandomState>>,
+    id: TreeNodeId,
+  ) -> Option<TreeNodeId> {
+    let parent = relationships
       .edges_directed(id, Outgoing)
       .filter(|(_from_id, _to_id, edge)| edge.is_parent_edge())
       .map(|(_from_id, to_id, _edge)| to_id)
@@ -299,15 +299,54 @@ where
     }
   }
 
-  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
+  fn _parent_id_mut(
+    relationships: &std::cell::RefMut<GraphMap<TreeNodeId, InodeEdge, Directed, RandomState>>,
+    id: TreeNodeId,
+  ) -> Option<TreeNodeId> {
+    let parent = relationships
+      .edges_directed(id, Outgoing)
+      .filter(|(_from_id, _to_id, edge)| edge.is_parent_edge())
+      .map(|(_from_id, to_id, _edge)| to_id)
+      .collect::<Vec<TreeNodeId>>();
+
+    if parent.is_empty() {
+      None
+    } else {
+      debug_assert_eq!(parent.len(), 1);
+      Some(parent[0])
+    }
+  }
+
+  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
-    self
-      .relationships
-      .borrow()
+    Self::_parent_id(&self.relationships.borrow(), id)
+  }
+
+  fn _children_ids(
+    relationships: &std::cell::Ref<GraphMap<TreeNodeId, InodeEdge, Directed, RandomState>>,
+    id: TreeNodeId,
+  ) -> Vec<TreeNodeId> {
+    relationships
       .edges_directed(id, Outgoing)
       .filter(|(_from_id, _to_id, edge)| edge.is_child_edge())
       .map(|(_from_id, to_id, _edge)| to_id)
       .collect::<Vec<TreeNodeId>>()
+  }
+
+  fn _children_ids_mut(
+    relationships: &std::cell::RefMut<GraphMap<TreeNodeId, InodeEdge, Directed, RandomState>>,
+    id: TreeNodeId,
+  ) -> Vec<TreeNodeId> {
+    relationships
+      .edges_directed(id, Outgoing)
+      .filter(|(_from_id, _to_id, edge)| edge.is_child_edge())
+      .map(|(_from_id, to_id, _edge)| to_id)
+      .collect::<Vec<TreeNodeId>>()
+  }
+
+  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
+    self._internal_check();
+    Self::_children_ids(&self.relationships.borrow(), id)
   }
 
   pub fn node(&self, id: TreeNodeId) -> Option<&T> {
@@ -431,16 +470,14 @@ where
 
     // Create edge between child and its parent.
     {
+      let children_count = Self::_children_ids(&self.relationships.borrow(), parent_id).len();
       let mut relationships = self.relationships.borrow_mut();
       relationships.add_node(child_id);
       // Add edge: parent => child.
       relationships.add_edge(
         parent_id,
         child_id,
-        InodeEdge::new(
-          child_zindex,
-          self.children_ids(parent_id).len() as isize + 1,
-        ),
+        InodeEdge::new(child_zindex, children_count as isize + 1),
       );
       // Add edge: child => parent.
       // NOTE: For parent pointing edge, the Z-index value is not used.
@@ -535,7 +572,7 @@ where
         // Remove node/edge relationship.
         debug_assert!(self.relationships.borrow().contains_node(id));
         let mut relationships = self.relationships.borrow_mut();
-        let parent_id = self.parent_id(id).unwrap();
+        let parent_id = Self::_parent_id_mut(&relationships, id).unwrap();
         debug_assert!(relationships.contains_edge(parent_id, id));
         // Remove edges between `id` and its parent.
         relationships.remove_edge(parent_id, id);
