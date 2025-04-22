@@ -8,12 +8,11 @@ use geo::point;
 use std::fmt::Debug;
 use std::{collections::VecDeque, iter::Iterator};
 // use tracing::trace;
-use ahash::RandomState;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 #[derive(Debug)]
-pub struct RsIter<'a> {
+struct RsIter<'a> {
   rs: &'a Relationships,
   que: VecDeque<TreeNodeId>,
 }
@@ -82,12 +81,6 @@ impl Relationships {
     }
   }
 
-  #[cfg(not(debug_assertions))]
-  pub fn _internal_check(&self) {}
-
-  #[cfg(debug_assertions)]
-  fn _internal_check(&self) {}
-
   pub fn is_empty(&self) -> bool {
     self.children_ids.is_empty()
   }
@@ -96,45 +89,136 @@ impl Relationships {
     self.children_ids.len()
   }
 
+  #[cfg(not(debug_assertions))]
+  pub fn _internal_check(&self) {}
+
+  #[cfg(debug_assertions)]
+  fn _internal_check(&self) {
+    let mut que: VecDeque<TreeNodeId> = VecDeque::new();
+    que.push_back(self.root_id);
+
+    while let Some(id) = que.pop_front() {
+      let children_ids = self.children_ids(id);
+      for c in children_ids {
+        let p = self.parent_id.get(&c).cloned();
+        debug_assert!(p.is_some());
+        debug_assert_eq!(p.unwrap(), id);
+      }
+      match self.parent_id.get(&id).cloned() {
+        Some(parent) => {
+          debug_assert_eq!(
+            self
+              .children_ids(parent)
+              .iter()
+              .cloned()
+              .filter(|c| *c == id)
+              .count(),
+            1
+          );
+        }
+        None => debug_assert_eq!(id, self.root_id),
+      }
+    }
+  }
+
   pub fn root_id(&self) -> TreeNodeId {
     self.root_id
   }
 
   pub fn contains_node(&self, id: TreeNodeId) -> bool {
-    let result = self.children_ids.contains_key(&id);
-    if result {
-      if id == self.root_id {
-        debug_assert!(!self.parent_id.contains_key(&id));
-      } else {
-        debug_assert!(self.parent_id.contains_key(&id));
-      }
-    } else {
-      debug_assert!(!self.parent_id.contains_key(&id));
-    }
-    result
+    self._internal_check();
+    self.children_ids.contains_key(&id)
   }
 
   pub fn contains_edge(&self, parent_id: TreeNodeId, child_id: TreeNodeId) -> bool {
-    let result = match self.parent_id.get(&child_id) {
+    self._internal_check();
+    match self.parent_id.get(&child_id) {
       Some(pid) => *pid == parent_id,
       None => false,
-    };
-    if result {
-      debug_assert!(self.children_ids.contains_key(&parent_id));
-      debug_assert_eq!(
+    }
+  }
+
+  pub fn add_edge<T>(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_id: TreeNodeId,
+    child_zindex: usize,
+    nodes: &HashMap<TreeNodeId, T>,
+  ) where
+    T: Inodeable,
+  {
+    debug_assert!(!self.contains_edge(parent_id, child_id));
+    self._internal_check();
+
+    // Binds connection from child => parent.
+    self.parent_id.insert(child_id, parent_id);
+
+    // Binds connection from parent => child.
+    //
+    // NOTE: It inserts child to the `children_ids` vector which belongs to the parent, and the
+    // children are sorted by their Z-index value from lower to higher (UI widget node with higher
+    // Z-index has a higher priority to show on the final TUI, but the order is reversed when
+    // rendering). For those children that share the same Z-index value, it inserts at the end of
+    // those children.
+    let higher_zindex_pos: Vec<usize> = self
+      .children_ids
+      .get(&parent_id)
+      .unwrap()
+      .iter()
+      .enumerate()
+      .filter(|(_index, cid)| match nodes.get(cid) {
+        Some(cnode) => cnode.zindex() > child_zindex,
+        None => false,
+      })
+      .map(|(index, _cid)| index)
+      .collect();
+    match higher_zindex_pos.first() {
+      Some(insert_pos) => {
         self
           .children_ids
-          .get(&parent_id)
+          .get_mut(&parent_id)
           .unwrap()
-          .iter()
-          .cloned()
-          .filter(|c| *c == child_id)
-          .count(),
-        1
-      );
-    } else {
+          .insert(*insert_pos, child_id);
+      }
+      None => {
+        self
+          .children_ids
+          .get_mut(&parent_id)
+          .unwrap()
+          .push(child_id);
+      }
     }
 
+    self._internal_check();
+  }
+
+  pub fn remove_child(&mut self, child_id: TreeNodeId) -> bool {
+    self._internal_check();
+
+    let result = match self.parent_id.remove(&child_id) {
+      Some(removed_parent) => match self.children_ids.get_mut(&removed_parent) {
+        Some(to_be_removed_children) => {
+          let to_be_removed_child = to_be_removed_children
+            .iter()
+            .enumerate()
+            .filter(|(_idx, c)| **c == child_id)
+            .map(|(idx, _c)| idx)
+            .collect::<Vec<usize>>();
+          if !to_be_removed_child.is_empty() {
+            debug_assert_ne!(to_be_removed_child.len(), 1);
+            let to_be_removed = to_be_removed_child[0];
+            to_be_removed_children.remove(to_be_removed);
+            true
+          } else {
+            false
+          }
+        }
+        None => false,
+      },
+      None => false,
+    };
+
+    self._internal_check();
     result
   }
 }
@@ -410,20 +494,10 @@ where
     );
 
     // Create edge between child and its parent.
-    {
-      let children_count = Self::_children_ids(&self.relationships.borrow(), parent_id).len();
-      let mut relationships = self.relationships.borrow_mut();
-      relationships.add_node(child_id);
-      // Add edge: parent => child.
-      relationships.add_edge(
-        parent_id,
-        child_id,
-        InodeEdge::new(child_zindex, children_count as isize + 1),
-      );
-      // Add edge: child => parent.
-      // NOTE: For parent pointing edge, the Z-index value is not used.
-      relationships.add_edge(child_id, parent_id, InodeEdge::new(0, PARENT_EDGE_WEIGHT));
-    }
+    self
+      .relationships
+      .borrow_mut()
+      .add_edge(parent_id, child_id, child_zindex, &self.nodes);
 
     // Update attributes for both the newly inserted child, and all its descendants (if the child
     // itself is also a sub-tree in current relationship).
@@ -507,28 +581,21 @@ where
   /// If the node `id` is the root node id since root node cannot be removed.
   pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
-    debug_assert_ne!(id, self.root_id);
+    debug_assert_ne!(id, self.relationships.borrow().root_id());
 
     // Remove child node from collection.
     match self.nodes.remove(&id) {
       Some(removed) => {
         // Remove node/edge relationship.
         debug_assert!(self.relationships.borrow().contains_node(id));
-        let mut relationships = self.relationships.borrow_mut();
-        let parent_id = Self::_parent_id_mut(&relationships, id).unwrap();
-        debug_assert!(relationships.contains_edge(parent_id, id));
         // Remove edges between `id` and its parent.
-        relationships.remove_edge(parent_id, id);
-        // Remove edges between `id` and its descendants.
-        for dnode_id in self.children_ids(id).iter() {
-          relationships.remove_edge(id, *dnode_id);
-        }
-        // Remove the node itself.
-        relationships.remove_node(id);
-
+        self.relationships.borrow_mut().remove_child(id);
         Some(removed)
       }
-      None => None,
+      None => {
+        debug_assert!(!self.relationships.borrow().contains_node(id));
+        None
+      }
     }
   }
 }
