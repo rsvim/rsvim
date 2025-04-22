@@ -15,7 +15,8 @@ use crate::{arc_impl, lock};
 
 // Re-export
 pub use crate::ui::tree::internal::{
-  InodeBase, InodeId, Inodeable, Itree, ItreeIter, /*ItreeIterMut,*/
+  InodeBase, Inodeable, Itree, ItreeIter, /*ItreeIterMut,*/
+  TreeNodeId,
 };
 
 use paste::paste;
@@ -63,7 +64,7 @@ impl TreeNode {
 }
 
 impl Inodeable for TreeNode {
-  fn id(&self) -> InodeId {
+  fn id(&self) -> TreeNodeId {
     tree_node_getter!(self, id)
   }
 
@@ -243,7 +244,6 @@ pub struct Tree {
 
 arc_impl!(Tree);
 
-pub type TreeNodeId = InodeId;
 // pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
 // pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
 
@@ -289,22 +289,22 @@ impl Tree {
   }
 
   /// Get the parent ID by a node `id`.
-  pub fn parent_id(&self, id: &TreeNodeId) -> Option<&TreeNodeId> {
+  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self.base.parent_id(id)
   }
 
   /// Get the children IDs by a node `id`.
-  pub fn children_ids(&self, id: &TreeNodeId) -> Option<&Vec<TreeNodeId>> {
+  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
     self.base.children_ids(id)
   }
 
   /// Get the node struct by its `id`.
-  pub fn node(&self, id: &TreeNodeId) -> Option<&TreeNode> {
+  pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
     self.base.node(id)
   }
 
   /// Get mutable node struct by its `id`.
-  pub fn node_mut(&mut self, id: &TreeNodeId) -> Option<&mut TreeNode> {
+  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
     self.base.node_mut(id)
   }
 
@@ -333,11 +333,11 @@ impl Tree {
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
     if let Some(cursor_id) = self.cursor_id {
       let mut id = cursor_id;
-      while let Some(parent_id) = self.parent_id(&id) {
+      while let Some(parent_id) = self.parent_id(id) {
         if let Some(TreeNode::Window(_w)) = self.node(parent_id) {
-          return Some(*parent_id);
+          return Some(parent_id);
         }
-        id = *parent_id;
+        id = parent_id;
       }
     }
 
@@ -357,7 +357,7 @@ impl Tree {
   //
   // 1. When insert a cursor widget, it's parent widget must be a window widget.
   // 2. Maintain the cursor widget ID and window widget IDs when insert.
-  fn insert_guard(&mut self, node: &TreeNode, parent_id: &TreeNodeId) {
+  fn insert_guard(&mut self, node: &TreeNode, parent_id: TreeNodeId) {
     match node {
       TreeNode::Cursor(cursor) => {
         // Ensure the parent node is a window widget.
@@ -381,10 +381,10 @@ impl Tree {
   // 2. Maintain the cursor widget ID and window widget IDs when remove.
   fn remove_guard(&mut self, id: TreeNodeId) {
     // If the removed ID is cursor ID, remove it.
-    if self.cursor_id == Some(*id) {
+    if self.cursor_id == Some(id) {
       self.cursor_id = None;
     }
-    self.window_ids.remove(id);
+    self.window_ids.remove(&id);
   }
 
   /// See [`Itree::insert`].
@@ -405,7 +405,7 @@ impl Tree {
 
   /// See [`Itree::remove`].
   pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
-    self.remove_guard(&id);
+    self.remove_guard(id);
     self.base.remove(id)
   }
 }
@@ -415,24 +415,24 @@ impl Tree {
 impl Tree {
   /// Bounded move by x(columns) and y(rows). This is simply a wrapper method on
   /// [`Itree::bounded_move_by`].
-  pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_by(id, x, y)
   }
 
   /// Move by x(columns) and y(rows). This is simply a wrapper method on [`Itree::move_by`].
-  pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.move_by(id, x, y)
   }
 
   /// Bounded move to position x(columns) and y(rows). This is simply a wrapper method on
   /// [`Itree::bounded_move_to`].
-  pub fn bounded_move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_to(id, x, y)
   }
 
   /// Move to position x(columns) and y(rows). This is simply a wrapper method on
   /// [`Itree::move_to`].
-  pub fn move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.move_to(id, x, y)
   }
 }

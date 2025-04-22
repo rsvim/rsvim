@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 use crate::ui::tree::internal::shapes;
-use crate::ui::tree::internal::{InodeId, Inodeable};
+use crate::ui::tree::internal::{Inodeable, TreeNodeId};
 
 use geo::point;
 use std::fmt::Debug;
@@ -105,9 +105,9 @@ where
   T: Inodeable,
 {
   // Root node ID.
-  root_id: InodeId,
+  root_id: TreeNodeId,
   // Nodes collection, maps from node ID to its node struct.
-  nodes: HashMap<InodeId, T>,
+  nodes: HashMap<TreeNodeId, T>,
 
   // // Maps from child ID to its parent ID.
   // parent_ids: HashMap<InodeId, InodeId>,
@@ -121,7 +121,7 @@ where
   // NOTE: The children (under the same parent) are rendered with the order of their Z-index value
   // from lower to higher, for those children share the same Z-index, the child how owns the lower
   // edge weight will be rendered first.
-  relationships: Rc<RefCell<GraphMap<InodeId, InodeEdge, Directed, RandomState>>>,
+  relationships: Rc<RefCell<GraphMap<TreeNodeId, InodeEdge, Directed, RandomState>>>,
 }
 
 #[derive(Debug)]
@@ -135,7 +135,7 @@ where
   T: Inodeable,
 {
   tree: &'a Itree<T>,
-  queue: VecDeque<InodeId>,
+  queue: VecDeque<TreeNodeId>,
 }
 
 impl<'a, T> Iterator for ItreeIter<'a, T>
@@ -161,7 +161,7 @@ impl<'a, T> ItreeIter<'a, T>
 where
   T: Inodeable,
 {
-  pub fn new(tree: &'a Itree<T>, start_node_id: Option<InodeId>) -> Self {
+  pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
     let mut queue = VecDeque::new();
     match start_node_id {
       Some(id) => queue.push_back(id),
@@ -260,7 +260,7 @@ where
     } else {
       debug_assert_eq!(self.relationships.borrow().node_count(), self.nodes.len());
 
-      let mut que: VecDeque<InodeId> = VecDeque::new();
+      let mut que: VecDeque<TreeNodeId> = VecDeque::new();
       que.push_back(self.root_id);
 
       while let Some(id) = que.pop_front() {
@@ -270,7 +270,7 @@ where
           .edges_directed(id, Outgoing)
           .filter(|(_from_id, _to_id, edge)| edge.is_parent_edge())
           .map(|(_from_id, to_id, _edge)| to_id)
-          .collect::<Vec<InodeId>>();
+          .collect::<Vec<TreeNodeId>>();
         if id == self.root_id {
           debug_assert!(parent.is_empty());
         } else {
@@ -283,13 +283,13 @@ where
           .edges_directed(id, Outgoing)
           .filter(|(_from_id, _to_id, edge)| edge.is_child_edge())
           .map(|(_from_id, to_id, _edge)| to_id)
-          .collect::<Vec<InodeId>>();
+          .collect::<Vec<TreeNodeId>>();
         debug_assert_eq!(
           children_nodes.len(),
           children_nodes
             .iter()
             .cloned()
-            .collect::<HashSet<InodeId>>()
+            .collect::<HashSet<TreeNodeId>>()
             .len()
         );
         let children_edge_weights = self
@@ -340,15 +340,15 @@ where
     self.nodes.len() <= 1
   }
 
-  pub fn root_id(&self) -> InodeId {
+  pub fn root_id(&self) -> TreeNodeId {
     self.root_id
   }
 
-  pub fn node_ids(&self) -> Vec<InodeId> {
+  pub fn node_ids(&self) -> Vec<TreeNodeId> {
     self.nodes.keys().copied().collect()
   }
 
-  pub fn parent_id(&self, id: InodeId) -> Option<InodeId> {
+  pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
     self._internal_check();
     let parent = self
       .relationships
@@ -356,7 +356,7 @@ where
       .edges_directed(id, Outgoing)
       .filter(|(_from_id, _to_id, edge)| edge.is_parent_edge())
       .map(|(_from_id, to_id, _edge)| to_id)
-      .collect::<Vec<InodeId>>();
+      .collect::<Vec<TreeNodeId>>();
 
     if parent.is_empty() {
       None
@@ -366,7 +366,7 @@ where
     }
   }
 
-  pub fn children_ids(&self, id: InodeId) -> Vec<InodeId> {
+  pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
     self._internal_check();
     self
       .relationships
@@ -374,14 +374,14 @@ where
       .edges_directed(id, Outgoing)
       .filter(|(_from_id, _to_id, edge)| edge.is_child_edge())
       .map(|(_from_id, to_id, _edge)| to_id)
-      .collect::<Vec<InodeId>>()
+      .collect::<Vec<TreeNodeId>>()
   }
 
-  pub fn node(&self, id: InodeId) -> Option<&T> {
+  pub fn node(&self, id: TreeNodeId) -> Option<&T> {
     self.nodes.get(&id)
   }
 
-  pub fn node_mut(&mut self, id: InodeId) -> Option<&mut T> {
+  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut T> {
     self.nodes.get_mut(&id)
   }
 
@@ -412,11 +412,11 @@ where
   /// 1. [`depth`](Inode::depth()): The child depth should always be the parent's depth + 1.
   /// 2. [`actual_shape`](Inode::actual_shape()): The child actual shape should be always clipped
   ///    by parent's boundaries.
-  fn update_descendant_attributes(&mut self, start_id: InodeId, start_parent_id: InodeId) {
+  fn update_descendant_attributes(&mut self, start_id: TreeNodeId, start_parent_id: TreeNodeId) {
     // Create the queue of parent-child ID pairs, to iterate all descendants under the child node.
 
     // Tuple of (child_id, parent_id, parent_depth, parent_actual_shape)
-    type ChildAndParent = (InodeId, InodeId, usize, U16Rect);
+    type ChildAndParent = (TreeNodeId, TreeNodeId, usize, U16Rect);
 
     // trace!("before create que");
     let mut que: VecDeque<ChildAndParent> = VecDeque::new();
@@ -485,7 +485,7 @@ where
   /// # Panics
   ///
   /// If `parent_id` doesn't exist.
-  pub fn insert(&mut self, parent_id: InodeId, mut child_node: T) -> Option<T> {
+  pub fn insert(&mut self, parent_id: TreeNodeId, mut child_node: T) -> Option<T> {
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.relationships.borrow().contains_node(parent_id));
 
@@ -566,7 +566,7 @@ where
   /// # Panics
   ///
   /// If `parent_id` doesn't exist.
-  pub fn bounded_insert(&mut self, parent_id: InodeId, mut child_node: T) -> Option<T> {
+  pub fn bounded_insert(&mut self, parent_id: TreeNodeId, mut child_node: T) -> Option<T> {
     // Panics if `parent_id` not exists.
     debug_assert!(self.nodes.contains_key(&parent_id));
 
@@ -597,7 +597,7 @@ where
   /// # Panics
   ///
   /// If the node `id` is the root node id since root node cannot be removed.
-  pub fn remove(&mut self, id: InodeId) -> Option<T> {
+  pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
     debug_assert_ne!(id, self.root_id);
 
@@ -743,7 +743,7 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
@@ -772,7 +772,7 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn bounded_move_by(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     match self.parent_id(id) {
       Some(parent_id) => {
         let maybe_parent_actual_shape: Option<U16Rect> = {
@@ -826,7 +826,7 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
@@ -861,7 +861,7 @@ where
   ///
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
-  pub fn bounded_move_to(&mut self, id: InodeId, x: isize, y: isize) -> Option<IRect> {
+  pub fn bounded_move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     match self.parent_id(id) {
       Some(parent_id) => {
         let maybe_parent_actual_shape: Option<U16Rect> = {
@@ -1049,7 +1049,7 @@ mod tests {
     assert_eq!(tree.children_ids(nid5).len(), 0);
     assert_eq!(tree.children_ids(nid6).len(), 0);
 
-    let contains_child = |parent_id: InodeId, child_id: InodeId| -> bool {
+    let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
       tree
         .children_ids(parent_id)
         .iter()
@@ -1187,7 +1187,7 @@ mod tests {
     assert_eq!(tree.children_ids(nid8).len(), 0);
     assert_eq!(tree.children_ids(nid9).len(), 0);
 
-    let contains_child = |parent_id: InodeId, child_id: InodeId| -> bool {
+    let contains_child = |parent_id: TreeNodeId, child_id: TreeNodeId| -> bool {
       let result = tree
         .children_ids(parent_id)
         .iter()
@@ -1415,7 +1415,7 @@ mod tests {
       .iter()
       .map(|value| TestValue::new(*value, shape))
       .collect();
-    let nodes_ids: Vec<InodeId> = nodes.iter().map(|n| n.id()).collect();
+    let nodes_ids: Vec<TreeNodeId> = nodes.iter().map(|n| n.id()).collect();
 
     /*
      * The tree looks like:
@@ -1459,9 +1459,9 @@ mod tests {
     }
   }
 
-  fn make_tree(n: usize) -> (Vec<InodeId>, Itree<TestValue>) {
+  fn make_tree(n: usize) -> (Vec<TreeNodeId>, Itree<TestValue>) {
     let mut value = 1;
-    let mut node_ids: Vec<InodeId> = vec![];
+    let mut node_ids: Vec<TreeNodeId> = vec![];
 
     let s = IRect::new((0, 0), (10, 10));
     let root = TestValue::new(value, s);
