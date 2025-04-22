@@ -175,7 +175,7 @@ impl Relationships {
             let children_of_to_be_removed_is_empty = self
               .children_ids
               .get(&to_be_removed.1)
-              .map_or(true, |children| children.is_empty());
+              .is_none_or(|children| children.is_empty());
             if children_of_to_be_removed_exists && children_of_to_be_removed_is_empty {
               self.children_ids.remove(&to_be_removed.1);
             }
