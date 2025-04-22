@@ -128,20 +128,12 @@ impl Relationships {
     self.root_id
   }
 
-  pub fn contains_node(&self, id: TreeNodeId) -> bool {
+  pub fn contains_id(&self, id: TreeNodeId) -> bool {
     self._internal_check();
     self.children_ids.contains_key(&id)
   }
 
-  pub fn contains_edge(&self, parent_id: TreeNodeId, child_id: TreeNodeId) -> bool {
-    self._internal_check();
-    match self.parent_id.get(&child_id) {
-      Some(pid) => *pid == parent_id,
-      None => false,
-    }
-  }
-
-  pub fn add_edge<T>(
+  pub fn add_child<T>(
     &mut self,
     parent_id: TreeNodeId,
     child_id: TreeNodeId,
@@ -150,8 +142,11 @@ impl Relationships {
   ) where
     T: Inodeable,
   {
-    debug_assert!(!self.contains_edge(parent_id, child_id));
+    debug_assert!(!self.contains_id(child_id));
     self._internal_check();
+
+    // Initialize children_ids vector.
+    self.children_ids.insert(child_id, Vec::new());
 
     // Binds connection from child => parent.
     self.parent_id.insert(child_id, parent_id);
@@ -474,25 +469,13 @@ where
   pub fn insert(&mut self, parent_id: TreeNodeId, mut child_node: T) -> Option<T> {
     self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
-    debug_assert!(self.relationships.borrow().contains_node(parent_id));
+    debug_assert!(self.relationships.borrow().contains_id(parent_id));
 
     // Child node.
     let child_id = child_node.id();
     let child_zindex = child_node.zindex();
 
-    debug_assert!(!self.relationships.borrow().contains_node(child_id));
-    debug_assert!(
-      !self
-        .relationships
-        .borrow()
-        .contains_edge(parent_id, child_id)
-    );
-
-    // Create edge between child and its parent.
-    self
-      .relationships
-      .borrow_mut()
-      .add_edge(parent_id, child_id, child_zindex, &self.nodes);
+    debug_assert!(!self.relationships.borrow().contains_id(child_id));
 
     // Update attributes for both the newly inserted child, and all its descendants (if the child
     // itself is also a sub-tree in current relationship).
@@ -515,6 +498,11 @@ where
 
     // Insert node into collection.
     let result = self.nodes.insert(child_id, child_node);
+    // Create edge between child and its parent.
+    self
+      .relationships
+      .borrow_mut()
+      .add_child(parent_id, child_id, child_zindex, &self.nodes);
 
     // Update all the descendants attributes under the `child_id` node.
     for dnode_id in self.children_ids(child_id).iter() {
@@ -584,13 +572,13 @@ where
     let result = match self.nodes.remove(&id) {
       Some(removed) => {
         // Remove node/edge relationship.
-        debug_assert!(self.relationships.borrow().contains_node(id));
+        debug_assert!(self.relationships.borrow().contains_id(id));
         // Remove edges between `id` and its parent.
         self.relationships.borrow_mut().remove_child(id);
         Some(removed)
       }
       None => {
-        debug_assert!(!self.relationships.borrow().contains_node(id));
+        debug_assert!(!self.relationships.borrow().contains_id(id));
         None
       }
     };
