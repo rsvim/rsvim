@@ -248,7 +248,7 @@ where
           last_edge_weight = Some(*e);
         }
         if !children_edge_weights.is_empty() {
-          let min_edge = children_edge_weights.iter().cloned().max().unwrap();
+          let min_edge = children_edge_weights.iter().cloned().min().unwrap();
           let max_edge = children_edge_weights.iter().cloned().max().unwrap();
           debug_assert_eq!(min_edge, 1);
           debug_assert_eq!(max_edge, children_edge_weights.len() as isize);
@@ -481,7 +481,7 @@ where
       );
       // Add edge: child => parent.
       // NOTE: For parent pointing edge, the Z-index value is not used.
-      relationships.add_edge(parent_id, child_id, InodeEdge::new(0, PARENT_EDGE_WEIGHT));
+      relationships.add_edge(child_id, parent_id, InodeEdge::new(0, PARENT_EDGE_WEIGHT));
     }
 
     // Update attributes for both the newly inserted child, and all its descendants (if the child
@@ -503,13 +503,16 @@ where
       parent_actual_shape,
     ));
 
+    // Insert node into collection.
+    let result = self.nodes.insert(child_id, child_node);
+
+
     // Update all the descendants attributes under the `child_id` node.
     for dnode_id in self.children_ids(child_id).iter() {
       self.update_descendant_attributes(*dnode_id, child_id);
     }
 
-    // Maps inserted child ID => the struct itself.
-    self.nodes.insert(child_id, child_node)
+    result
   }
 
   /// Insert a node to the tree.
