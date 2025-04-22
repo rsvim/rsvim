@@ -41,7 +41,7 @@ pub trait Inodeable: Sized + Clone + Debug {
 macro_rules! inode_impl {
   ($struct_name:ty,$base_name:ident) => {
     impl Inodeable for $struct_name {
-      fn id(&self) -> InodeId {
+      fn id(&self) -> TreeNodeId {
         self.$base_name.id()
       }
 

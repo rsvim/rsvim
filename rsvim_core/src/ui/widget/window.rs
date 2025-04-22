@@ -29,7 +29,7 @@ pub struct Window {
   base: Itree<WindowNode>,
 
   // The Window content widget ID.
-  content_id: InodeId,
+  content_id: TreeNodeId,
 
   // Buffer.
   buffer: BufferWk,
@@ -85,7 +85,7 @@ impl Window {
 }
 
 impl Inodeable for Window {
-  fn id(&self) -> InodeId {
+  fn id(&self) -> TreeNodeId {
     self.base.root_id()
   }
 
@@ -272,7 +272,7 @@ macro_rules! window_node_setter {
 }
 
 impl Inodeable for WindowNode {
-  fn id(&self) -> InodeId {
+  fn id(&self) -> TreeNodeId {
     window_node_getter!(self, id)
   }
 

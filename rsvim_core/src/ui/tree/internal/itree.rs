@@ -6,8 +6,6 @@ use crate::ui::tree::internal::{Inodeable, TreeNodeId};
 
 use geo::point;
 use std::fmt::Debug;
-// use std::marker::PhantomData;
-use std::ptr::NonNull;
 use std::{collections::VecDeque, iter::Iterator};
 // use tracing::trace;
 use ahash::RandomState;
@@ -109,11 +107,6 @@ where
   // Nodes collection, maps from node ID to its node struct.
   nodes: HashMap<TreeNodeId, T>,
 
-  // // Maps from child ID to its parent ID.
-  // parent_ids: HashMap<InodeId, InodeId>,
-  // // Maps from parent ID to its children IDs, the
-  // children_ids: HashMap<InodeId, Vec<InodeId>>,
-
   // Maps parent and children edges. The parent edge weight is negative, children edges are
   // positive. The edge weight of each child is increased with the order when they are inserted,
   // i.e. the first child has the lowest edge weight, the last child has the highest edge weight.
@@ -171,62 +164,6 @@ where
   }
 }
 
-// #[derive(Debug)]
-// /// The mutable pre-order iterator of the tree.
-// pub struct ItreeIterMut<'a, T>
-// where
-//   T: Inodeable,
-// {
-//   tree: NonNull<Itree<T>>,
-//   queue: VecDeque<InodeId>,
-//   phantom: PhantomData<&'a mut Itree<T>>,
-// }
-//
-// impl<'a, T> Iterator for ItreeIterMut<'a, T>
-// where
-//   T: Inodeable,
-// {
-//   type Item = &'a mut T;
-//
-//   fn next(&mut self) -> Option<Self::Item> {
-//     if let Some(id) = self.queue.pop_front() {
-//       unsafe {
-//         // Fix `self.tree` mutable references.
-//         match self.tree.as_ref().children_ids(&id) {
-//           Some(children_ids) => {
-//             for child_id in children_ids.iter() {
-//               if self.tree.as_ref().node(child_id).is_some() {
-//                 self.queue.push_back(*child_id);
-//               }
-//             }
-//           }
-//           None => { /* Skip */ }
-//         }
-//         return self.tree.as_mut().node_mut(&id);
-//       }
-//     }
-//     None
-//   }
-// }
-//
-// impl<'a, T> ItreeIterMut<'a, T>
-// where
-//   T: Inodeable,
-// {
-//   pub fn new(tree: &'a mut Itree<T>, start_node_id: Option<InodeId>) -> Self {
-//     let mut queue = VecDeque::new();
-//     match start_node_id {
-//       Some(id) => queue.push_back(id),
-//       None => { /* Do nothing */ }
-//     }
-//     ItreeIterMut {
-//       tree: NonNull::new(tree as *mut Itree<T>).unwrap(),
-//       queue,
-//       phantom: PhantomData,
-//     }
-//   }
-// }
-
 // Attributes {
 impl<T> Itree<T>
 where
@@ -236,12 +173,8 @@ where
     let root_id = root_node.id();
     let mut nodes = HashMap::new();
     nodes.insert(root_id, root_node);
-    // let mut children_ids: HashMap<InodeId, Vec<InodeId>> = HashMap::new();
-    // children_ids.insert(root_id, vec![]);
-
     let mut relationships = GraphMap::new();
     relationships.add_node(root_id);
-
     Itree {
       root_id,
       nodes,
@@ -392,11 +325,6 @@ where
   pub fn iter(&self) -> ItreeIter<T> {
     ItreeIter::new(self, Some(self.root_id))
   }
-
-  // /// Get the iterator that returns mutable reference.
-  // pub fn iter_mut(&mut self) -> ItreeIterMut<T> {
-  //   ItreeIterMut::new(self, Some(self.root_id))
-  // }
 }
 // Attributes }
 
@@ -628,79 +556,79 @@ where
 
 // Movement {
 
-/// Describe the relative position of a node and its parent node, based on the actual shape (after
-/// truncated).
-///
-/// There're several kinds of use cases:
-///
-/// 1. No-edge contact (inside): The node is completely inside its parent without any edges
-///    contacted, which looks like:
-///
-///    ```text
-///    -----------------
-///    |               |
-///    |    --------   |
-///    |    |//////|   |
-///    |    |//////|   |
-///    |    --------   |
-///    |               |
-///    -----------------
-///    ```
-///
-/// 2. Single-edge contact: The node is in contact with its parent on only 1 edge, which looks
-///    like:
-///
-///    ```text
-///    -----------------
-///    |               |
-///    |        -------|
-///    |        |//////|
-///    |        |//////|
-///    |        -------|
-///    |               |
-///    -----------------
-///    ```
-///
-/// 3. Double-edges contact: The node is in contact on 2 edges, which looks like:
-///
-///    ```text
-///    -----------------
-///    |        |//////|
-///    |        |//////|
-///    |        -------|
-///    |               |
-///    |               |
-///    |               |
-///    -----------------
-///    ```
-///
-/// 4. Triple-edges contact: The node is in contact on 3 edges, which looks like:
-///
-///    ```text
-///    -----------------
-///    |  |////////////|
-///    |  |////////////|
-///    |  |////////////|
-///    |  |////////////|
-///    |  |////////////|
-///    |  |////////////|
-///    -----------------
-///    ```
-///
-/// 5. All-edges contact (overlapping): The node is in contact on 4 edges, i.e. the node is exactly
-///    the same with (or even bigger than, and truncated by) its parent, which looks like:
-///
-///    ```text
-///    -----------------
-///    |///////////////|
-///    |///////////////|
-///    |///////////////|
-///    |///////////////|
-///    |///////////////|
-///    |///////////////|
-///    -----------------
-///    ```
-///
+// /// Describe the relative position of a node and its parent node, based on the actual shape (after
+// /// truncated).
+// ///
+// /// There're several kinds of use cases:
+// ///
+// /// 1. No-edge contact (inside): The node is completely inside its parent without any edges
+// ///    contacted, which looks like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |               |
+// ///    |    --------   |
+// ///    |    |//////|   |
+// ///    |    |//////|   |
+// ///    |    --------   |
+// ///    |               |
+// ///    -----------------
+// ///    ```
+// ///
+// /// 2. Single-edge contact: The node is in contact with its parent on only 1 edge, which looks
+// ///    like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |               |
+// ///    |        -------|
+// ///    |        |//////|
+// ///    |        |//////|
+// ///    |        -------|
+// ///    |               |
+// ///    -----------------
+// ///    ```
+// ///
+// /// 3. Double-edges contact: The node is in contact on 2 edges, which looks like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |        |//////|
+// ///    |        |//////|
+// ///    |        -------|
+// ///    |               |
+// ///    |               |
+// ///    |               |
+// ///    -----------------
+// ///    ```
+// ///
+// /// 4. Triple-edges contact: The node is in contact on 3 edges, which looks like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    |  |////////////|
+// ///    -----------------
+// ///    ```
+// ///
+// /// 5. All-edges contact (overlapping): The node is in contact on 4 edges, i.e. the node is exactly
+// ///    the same with (or even bigger than, and truncated by) its parent, which looks like:
+// ///
+// ///    ```text
+// ///    -----------------
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    |///////////////|
+// ///    -----------------
+// ///    ```
+// ///
 // pub enum InodeRelativePosition {
 //   /// 0-edge
 //   Inside,
@@ -775,12 +703,10 @@ where
   pub fn bounded_move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     match self.parent_id(id) {
       Some(parent_id) => {
-        let maybe_parent_actual_shape: Option<U16Rect> = {
-          match self.nodes.get(&parent_id) {
-            Some(parent_node) => Some(*parent_node.actual_shape()),
-            None => None,
-          }
-        };
+        let maybe_parent_actual_shape: Option<U16Rect> = self
+          .nodes
+          .get(&parent_id)
+          .map(|parent_node| *parent_node.actual_shape());
 
         match maybe_parent_actual_shape {
           Some(parent_actual_shape) => {
@@ -795,7 +721,6 @@ where
                   point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
                 );
 
-                let parent_actual_shape = parent_actual_shape;
                 let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
                 let final_top_left_pos: IPos = final_shape.min().into();
 
@@ -864,12 +789,11 @@ where
   pub fn bounded_move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     match self.parent_id(id) {
       Some(parent_id) => {
-        let maybe_parent_actual_shape: Option<U16Rect> = {
-          match self.nodes.get(&parent_id) {
-            Some(parent_node) => Some(*parent_node.actual_shape()),
-            None => None,
-          }
-        };
+        let maybe_parent_actual_shape: Option<U16Rect> = self
+          .nodes
+          .get(&parent_id)
+          .map(|parent_node| *parent_node.actual_shape());
+
         match maybe_parent_actual_shape {
           Some(parent_actual_shape) => match self.nodes.get_mut(&id) {
             Some(node) => {
@@ -880,7 +804,6 @@ where
                 point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
               );
 
-              let parent_actual_shape = parent_actual_shape;
               let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
               let final_top_left_pos: IPos = final_shape.min().into();
 
@@ -924,12 +847,6 @@ mod tests {
   }
 
   inode_impl!(TestValue, base);
-
-  macro_rules! assert_node_id_eq {
-    ($node: ident, $id: ident) => {
-      assert!($node.id() == $id);
-    };
-  }
 
   macro_rules! print_node {
     ($node: ident, $name: expr) => {

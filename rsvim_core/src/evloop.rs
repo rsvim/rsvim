@@ -310,7 +310,7 @@ impl EventLoop {
     };
     let window_id = window.id();
     let window_node = TreeNode::Window(window);
-    tree.bounded_insert(&tree_root_id, window_node);
+    tree.bounded_insert(tree_root_id, window_node);
 
     // Initialize cursor.
     let cursor_shape = IRect::new((0, 0), (1, 1));
@@ -321,7 +321,7 @@ impl EventLoop {
       canvas_cursor.style(),
     );
     let cursor_node = TreeNode::Cursor(cursor);
-    tree.bounded_insert(&window_id, cursor_node);
+    tree.bounded_insert(window_id, cursor_node);
 
     Ok(())
   }
