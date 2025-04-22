@@ -17,7 +17,7 @@ struct RsIter<'a> {
   que: VecDeque<TreeNodeId>,
 }
 
-impl<'a> Iterator for RsIter<'a> {
+impl Iterator for RsIter<'_> {
   type Item = TreeNodeId;
 
   fn next(&mut self) -> Option<Self::Item> {
@@ -76,7 +76,7 @@ impl Relationships {
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
     match self.children_ids.get(&id) {
-      Some(children_ids) => children_ids.iter().cloned().collect(),
+      Some(children_ids) => children_ids.to_vec(),
       None => Vec::new(),
     }
   }
