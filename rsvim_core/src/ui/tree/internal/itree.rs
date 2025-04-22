@@ -9,20 +9,20 @@ use std::fmt::Debug;
 use std::{collections::VecDeque, iter::Iterator};
 // use tracing::trace;
 use std::cell::RefCell;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 #[derive(Debug)]
-struct RsIter<'a> {
-  rs: &'a Relationships,
+struct RsIter {
+  rs: Weak<RefCell<Relationships>>,
   que: VecDeque<TreeNodeId>,
 }
 
-impl Iterator for RsIter<'_> {
+impl Iterator for RsIter {
   type Item = TreeNodeId;
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.que.pop_front() {
-      for child_id in self.rs.children_ids(id).iter() {
+      for child_id in self.rs.upgrade().unwrap().borrow().children_ids(id).iter() {
         self.que.push_back(*child_id);
       }
       Some(id)
@@ -32,8 +32,11 @@ impl Iterator for RsIter<'_> {
   }
 }
 
-impl<'a> RsIter<'a> {
-  pub fn new(relationships: &'a Relationships, start_node_id: Option<TreeNodeId>) -> Self {
+impl RsIter {
+  pub fn new(
+    relationships: Weak<RefCell<Relationships>>,
+    start_node_id: Option<TreeNodeId>,
+  ) -> Self {
     let mut queue = VecDeque::new();
     match start_node_id {
       Some(id) => queue.push_back(id),
@@ -252,7 +255,7 @@ where
   T: Inodeable,
 {
   tree: &'a Itree<T>,
-  queue: VecDeque<TreeNodeId>,
+  rs_iter: RsIter,
 }
 
 impl<'a, T> Iterator for ItreeIter<'a, T>
@@ -262,15 +265,10 @@ where
   type Item = &'a T;
 
   fn next(&mut self) -> Option<Self::Item> {
-    if let Some(id) = self.queue.pop_front() {
-      for child_id in self.tree.children_ids(id).iter() {
-        if self.tree.node(*child_id).is_some() {
-          self.queue.push_back(*child_id);
-        }
-      }
-      return self.tree.node(id);
+    match self.rs_iter.next() {
+      Some(id) => self.tree.node(id),
+      None => None,
     }
-    None
   }
 }
 
@@ -279,12 +277,10 @@ where
   T: Inodeable,
 {
   pub fn new(tree: &'a Itree<T>, start_node_id: Option<TreeNodeId>) -> Self {
-    let mut queue = VecDeque::new();
-    match start_node_id {
-      Some(id) => queue.push_back(id),
-      None => { /* Do nothing */ }
+    Self {
+      tree,
+      rs_iter: RsIter::new(Rc::downgrade(&tree.relationships), start_node_id),
     }
-    ItreeIter { tree, queue }
   }
 }
 
