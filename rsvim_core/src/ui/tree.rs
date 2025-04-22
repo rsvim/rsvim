@@ -67,7 +67,7 @@ impl Inodeable for TreeNode {
     tree_node_getter!(self, id)
   }
 
-  fn depth(&self) -> &usize {
+  fn depth(&self) -> usize {
     tree_node_getter!(self, depth)
   }
 
@@ -75,7 +75,7 @@ impl Inodeable for TreeNode {
     tree_node_setter!(self, set_depth, depth)
   }
 
-  fn zindex(&self) -> &usize {
+  fn zindex(&self) -> usize {
     tree_node_getter!(self, zindex)
   }
 
@@ -99,7 +99,7 @@ impl Inodeable for TreeNode {
     tree_node_setter!(self, set_actual_shape, actual_shape)
   }
 
-  fn enabled(&self) -> &bool {
+  fn enabled(&self) -> bool {
     tree_node_getter!(self, enabled)
   }
 
@@ -107,7 +107,7 @@ impl Inodeable for TreeNode {
     tree_node_setter!(self, set_enabled, enabled)
   }
 
-  fn visible(&self) -> &bool {
+  fn visible(&self) -> bool {
     tree_node_getter!(self, visible)
   }
 
@@ -379,7 +379,7 @@ impl Tree {
   //
   // 1. When insert a cursor widget, it's parent widget must be a window widget.
   // 2. Maintain the cursor widget ID and window widget IDs when remove.
-  fn remove_guard(&mut self, id: &TreeNodeId) {
+  fn remove_guard(&mut self, id: TreeNodeId) {
     // If the removed ID is cursor ID, remove it.
     if self.cursor_id == Some(*id) {
       self.cursor_id = None;
@@ -388,7 +388,7 @@ impl Tree {
   }
 
   /// See [`Itree::insert`].
-  pub fn insert(&mut self, parent_id: &TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
+  pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
     self.insert_guard(&child_node, parent_id);
     self.base.insert(parent_id, child_node)
   }
@@ -396,7 +396,7 @@ impl Tree {
   /// See [`Itree::bounded_insert`].
   pub fn bounded_insert(
     &mut self,
-    parent_id: &TreeNodeId,
+    parent_id: TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
     self.insert_guard(&child_node, parent_id);
