@@ -38,6 +38,7 @@ futures = { workspace = true }
 compact_str = { workspace = true, features = ["bytes"] }
 ropey = { workspace = true, default-features = false }
 geo = { workspace = true }
+petgraph = { workspace = true }
 num-traits = { workspace = true }
 parking_lot = { workspace = true }
 dirs = { workspace = true }

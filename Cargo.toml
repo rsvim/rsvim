@@ -37,7 +37,8 @@ futures = "0.3"
 # serde_json = "1.0.132"
 compact_str = { version = "0.9", features = ["bytes"] }
 ropey = { version = "1.6.1", default-features = false }
-geo = { version = "0.28.0" }
+geo = "0.28.0"
+petgraph = "0.8.1"
 num-traits = "0.2.19"
 parking_lot = "0.12.3"
 dirs = "6.0.0"
