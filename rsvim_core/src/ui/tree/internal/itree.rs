@@ -400,7 +400,7 @@ where
       let cnode_ref = self.nodes.get_mut(&cnode_id).unwrap();
       let cnode_depth = pnode_depth + 1;
       let cnode_shape = *cnode_ref.shape();
-      let cnode_actual_shape = shapes::make_actual_shape(cnode_shape, pnode_actual_shape);
+      let cnode_actual_shape = shapes::make_actual_shape(&cnode_shape, &pnode_actual_shape);
 
       // trace!("update attr, cnode id/depth/actual_shape:{:?}/{:?}/{:?}, pnode id/depth/actual_shape:{:?}/{:?}/{:?}", cnode_id, cnode_depth, cnode_actual_shape, pnode_id, pnode_depth, pnode_actual_shape);
 
@@ -473,8 +473,8 @@ where
     let parent_actual_shape = *parent_node.actual_shape();
     child_node.set_depth(parent_depth + 1);
     child_node.set_actual_shape(&shapes::make_actual_shape(
-      *child_node.shape(),
-      parent_actual_shape,
+      child_node.shape(),
+      &parent_actual_shape,
     ));
 
     // Insert node into collection.
@@ -522,8 +522,8 @@ where
 
     // Bound child shape
     child_node.set_shape(&shapes::bound_shape(
-      *child_node.shape(),
-      *parent_actual_shape,
+      child_node.shape(),
+      parent_actual_shape,
     ));
 
     self.insert(parent_id, child_node)
@@ -742,7 +742,7 @@ where
                   point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
                 );
 
-                let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
+                let final_shape = shapes::bound_shape(&expected_shape, &parent_actual_shape);
                 let final_top_left_pos: IPos = final_shape.min().into();
 
                 // Real movement
@@ -829,7 +829,7 @@ where
                 point!(x: expected_top_left_pos.x() + current_shape.width(), y: expected_top_left_pos.y() + current_shape.height()),
               );
 
-              let final_shape = shapes::bound_shape(expected_shape, parent_actual_shape);
+              let final_shape = shapes::bound_shape(&expected_shape, &parent_actual_shape);
               let final_top_left_pos: IPos = final_shape.min().into();
 
               self.move_to(id, final_top_left_pos.x(), final_top_left_pos.y())
