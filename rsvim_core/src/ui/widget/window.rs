@@ -89,68 +89,68 @@ impl Inodeable for Window {
     self.base.root_id()
   }
 
-  fn depth(&self) -> &usize {
-    self.base.node(&self.base.root_id()).unwrap().depth()
+  fn depth(&self) -> usize {
+    self.base.node(self.base.root_id()).unwrap().depth()
   }
 
   fn set_depth(&mut self, depth: usize) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_depth(depth);
   }
 
-  fn zindex(&self) -> &usize {
-    self.base.node(&self.base.root_id()).unwrap().zindex()
+  fn zindex(&self) -> usize {
+    self.base.node(self.base.root_id()).unwrap().zindex()
   }
 
   fn set_zindex(&mut self, zindex: usize) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_zindex(zindex);
   }
 
   fn shape(&self) -> &IRect {
-    self.base.node(&self.base.root_id()).unwrap().shape()
+    self.base.node(self.base.root_id()).unwrap().shape()
   }
 
   fn set_shape(&mut self, shape: &IRect) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_shape(shape);
   }
 
   fn actual_shape(&self) -> &U16Rect {
-    self.base.node(&self.base.root_id()).unwrap().actual_shape()
+    self.base.node(self.base.root_id()).unwrap().actual_shape()
   }
 
   fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_actual_shape(actual_shape);
   }
 
-  fn enabled(&self) -> &bool {
-    self.base.node(&self.base.root_id()).unwrap().enabled()
+  fn enabled(&self) -> bool {
+    self.base.node(self.base.root_id()).unwrap().enabled()
   }
 
   fn set_enabled(&mut self, enabled: bool) {
     self
       .base
-      .node_mut(&self.base.root_id())
+      .node_mut(self.base.root_id())
       .unwrap()
       .set_enabled(enabled);
   }
 
-  fn visible(&self) -> &bool {
-    self.base.node(&self.base.root_id()).unwrap().visible()
+  fn visible(&self) -> bool {
+    self.base.node(self.base.root_id()).unwrap().visible()
   }
 
   fn set_visible(&mut self, visible: bool) {

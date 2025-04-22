@@ -146,17 +146,12 @@ where
 
   fn next(&mut self) -> Option<Self::Item> {
     if let Some(id) = self.queue.pop_front() {
-      match self.tree.children_ids(&id) {
-        Some(children_ids) => {
-          for child_id in children_ids.iter() {
-            if self.tree.node(child_id).is_some() {
-              self.queue.push_back(*child_id);
-            }
-          }
+      for child_id in self.tree.children_ids(id).iter() {
+        if self.tree.node(*child_id).is_some() {
+          self.queue.push_back(*child_id);
         }
-        None => { /* Skip */ }
       }
-      return self.tree.node(&id);
+      return self.tree.node(id);
     }
     None
   }
