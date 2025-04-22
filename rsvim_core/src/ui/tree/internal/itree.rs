@@ -361,12 +361,10 @@ where
   }
 
   pub fn parent_id(&self, id: TreeNodeId) -> Option<TreeNodeId> {
-    self._internal_check();
     self.relationships.borrow().parent_id(id)
   }
 
   pub fn children_ids(&self, id: TreeNodeId) -> Vec<TreeNodeId> {
-    self._internal_check();
     self.relationships.borrow().children_ids(id)
   }
 
@@ -474,6 +472,7 @@ where
   ///
   /// If `parent_id` doesn't exist.
   pub fn insert(&mut self, parent_id: TreeNodeId, mut child_node: T) -> Option<T> {
+    self._internal_check();
     debug_assert!(self.nodes.contains_key(&parent_id));
     debug_assert!(self.relationships.borrow().contains_node(parent_id));
 
@@ -522,6 +521,7 @@ where
       self.update_descendant_attributes(*dnode_id, child_id);
     }
 
+    self._internal_check();
     result
   }
 
@@ -578,9 +578,10 @@ where
   pub fn remove(&mut self, id: TreeNodeId) -> Option<T> {
     // Cannot remove root node.
     debug_assert_ne!(id, self.relationships.borrow().root_id());
+    self._internal_check();
 
     // Remove child node from collection.
-    match self.nodes.remove(&id) {
+    let result = match self.nodes.remove(&id) {
       Some(removed) => {
         // Remove node/edge relationship.
         debug_assert!(self.relationships.borrow().contains_node(id));
@@ -592,7 +593,10 @@ where
         debug_assert!(!self.relationships.borrow().contains_node(id));
         None
       }
-    }
+    };
+
+    self._internal_check();
+    result
   }
 }
 // Insert/Remove }
@@ -715,7 +719,8 @@ where
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
   pub fn move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
-    match self.nodes.get_mut(&id) {
+    self._internal_check();
+    let result = match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
         let current_top_left_pos: IPos = current_shape.min().into();
@@ -726,7 +731,10 @@ where
         )
       }
       None => None,
-    }
+    };
+
+    self._internal_check();
+    result
   }
 
   /// Bounded move node by distance `(x, y)`, the `x`/`y` is the motion distances.
@@ -795,7 +803,8 @@ where
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
   pub fn move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
-    match self.nodes.get_mut(&id) {
+    self._internal_check();
+    let result = match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
         let next_top_left_pos: IPos = point!(x: x, y: y);
@@ -811,7 +820,10 @@ where
         Some(next_shape)
       }
       None => None,
-    }
+    };
+
+    self._internal_check();
+    result
   }
 
   /// Bounded move node to position `(x, y)`, the `(x, y)` is the new position.
