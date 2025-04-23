@@ -759,7 +759,7 @@ mod tests_nowrap_startcol {
 
     let expect = vec![
       "S        V        I        M!    ",
-      ">而且非常短的测试例子，只包含几行",
+      ">且非常短的测试例子，只包含几行文",
       "it        contains        several",
       ">内容足够短，以至于能够被完全的放",
       "e is too long to be completely pu",
