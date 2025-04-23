@@ -2036,7 +2036,7 @@ mod tests_wrap_linebreak_startcol {
   use tracing::info;
 
   #[test]
-  fn _new1() {
+  fn new1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
