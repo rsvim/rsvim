@@ -727,7 +727,7 @@ mod tests_nowrap_startcol {
       "     * The extra parts are been tru",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -770,7 +770,7 @@ mod tests_nowrap_startcol {
       "                                 ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -823,7 +823,7 @@ mod tests_nowrap_startcol {
       "                               ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -863,7 +863,7 @@ mod tests_nowrap_startcol {
       "                               ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -906,7 +906,7 @@ mod tests_nowrap_startcol {
       "                     ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_canvas(&actual, &expect);
 
@@ -993,7 +993,7 @@ mod tests_wrap_nolinebreak {
       "s several ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1029,7 +1029,7 @@ mod tests_wrap_nolinebreak {
       "操作。This operation also e",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1058,7 +1058,7 @@ mod tests_wrap_nolinebreak {
       "                    ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1120,7 +1120,7 @@ mod tests_wrap_nolinebreak {
       "截断。             ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1179,7 +1179,7 @@ mod tests_wrap_nolinebreak {
       "行这两个选项都没有<",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1227,7 +1227,7 @@ mod tests_wrap_nolinebreak {
       "e-wrap and word-wra",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_canvas(&actual, &expect);
 
@@ -1425,7 +1425,7 @@ mod tests_wrap_linebreak {
       "it        ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1473,7 +1473,7 @@ mod tests_wrap_linebreak {
       "long to be completely put  ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1502,7 +1502,7 @@ mod tests_wrap_linebreak {
       "                    ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1566,7 +1566,7 @@ mod tests_wrap_linebreak {
       "widget, 那么 ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1609,7 +1609,7 @@ mod tests_wrap_linebreak {
       "it contai ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1652,7 +1652,7 @@ mod tests_wrap_linebreak {
       "it contai ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_canvas(&actual, &expect);
 
