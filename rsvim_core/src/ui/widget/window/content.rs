@@ -1410,15 +1410,15 @@ mod tests_wrap_nolinebreak_startcol {
     );
     let expect = vec![
       ">>>>>        * The extra pa",
-      "rts are split           int",
-      "o the next row,         if ",
-      "either line-wrap        or ",
-      "word-wrap options are been ",
-      "set. If the extra parts are",
-      " still too long to        ",
-      "来放在下一个横行 内，一遍又",
-      "一遍的重复这样的 操作。This",
-      " operation also eats more r",
+      "rts are split        into t",
+      "he next row,        if eith",
+      "er line-wrap        or word",
+      "-wrap options are been set.",
+      " If the extra parts are sti",
+      "ll too long to        来放 ",
+      "在下一个横行内，一遍又一遍 ",
+      "的重复这样的操作。This oper",
+      "ation also eats more rows i",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 11);
