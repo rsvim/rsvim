@@ -270,9 +270,8 @@ impl NormalStateful {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
         let viewport = current_window.viewport();
         let viewport = lock!(viewport);
-        let buffer = current_window.buffer();
-        let buffer = buffer.upgrade().unwrap();
-        let mut buffer = lock!(buffer);
+        let buffer = current_window.buffer().upgrade().unwrap();
+        let buffer = lock!(buffer);
 
         let cursor_scroll_result = {
           match command {
@@ -280,7 +279,7 @@ impl NormalStateful {
               self._cursor_scroll_vertically(&viewport, &buffer, command)
             }
             Command::CursorMoveLeft(_n) | Command::CursorMoveRight(_n) => {
-              self._cursor_scroll_horizontally(&viewport, &mut buffer, command)
+              self._cursor_scroll_horizontally(&viewport, &buffer, command)
             }
             _ => unreachable!(),
           }
@@ -291,7 +290,7 @@ impl NormalStateful {
           let window_actual_shape = current_window.window_content().actual_shape();
           let window_local_options = current_window.options();
           current_window.set_viewport(Viewport::to_arc(Viewport::downward(
-            &mut buffer,
+            &buffer,
             window_actual_shape,
             window_local_options,
             start_line_idx,
@@ -355,7 +354,7 @@ impl NormalStateful {
   fn _cursor_scroll_horizontally(
     &self,
     viewport: &Viewport,
-    buffer: &mut Buffer,
+    buffer: &Buffer,
     command: Command,
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();

@@ -261,8 +261,8 @@ mod tests_util {
     tree.set_global_local_options(&window_options);
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let viewport = {
-      let mut buffer = lock!(buffer);
-      Viewport::downward(&mut buffer, &actual_shape, &window_options, 0, 0)
+      let buffer = lock!(buffer);
+      Viewport::downward(&buffer, &actual_shape, &window_options, 0, 0)
     };
     Viewport::to_arc(viewport)
   }
@@ -611,9 +611,9 @@ mod tests_nowrap {
       "                     ",
     ];
     let viewport = {
-      let mut buffer = lock!(buffer);
+      let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 4, 0);
+      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 4, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
@@ -937,9 +937,9 @@ mod tests_wrap_nolinebreak {
       ", there're multiple",
     ];
     let viewport = {
-      let mut buffer = lock!(buffer);
+      let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 3, 0);
+      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 3, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -990,9 +990,9 @@ mod tests_wrap_nolinebreak {
       "w, thus it may cont",
     ];
     let viewport = {
-      let mut buffer = lock!(buffer);
+      let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 6, 0);
+      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 6, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1043,9 +1043,9 @@ mod tests_wrap_nolinebreak {
       "                   ",
     ];
     let viewport = {
-      let mut buffer = lock!(buffer);
+      let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 6, 0);
+      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 6, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1358,9 +1358,9 @@ mod tests_wrap_linebreak {
     ];
 
     let viewport = {
-      let mut buffer = lock!(buffer);
+      let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::downward(&mut buffer, &actual_shape, &win_opts, 2, 0);
+      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 2, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
