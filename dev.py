@@ -84,15 +84,21 @@ def list_test(recache):
     os.system(command)
 
 
-def build(release, recache):
+def build(release, recache, features, all_features):
     command = set_sccache("", recache)
 
+    feature_flags = ""
+    if all_features:
+        feature_flags = "--all-features"
+    elif len(features) > 0:
+        feature_flags = " ".join([f"--features {f}" for f in features])
+
     if release:
-        print("Run 'build' for 'release'")
-        command = f"{command} cargo build --release"
+        print(f"Run 'build' for 'release' with {feature_flags}")
+        command = f"{command} cargo build --release {feature_flags}"
     else:
-        print("Run 'build' for 'debug'")
-        command = f"{command} cargo build"
+        print(f"Run 'build' for 'debug' with {feature_flags}")
+        command = f"{command} cargo build {feature_flags}"
 
     command = command.strip()
     print(command)
@@ -190,6 +196,19 @@ if __name__ == "__main__":
         "-r", "--release", action="store_true", help="Build release target"
     )
     build_subparser.add_argument(
+        "-f",
+        "--features",
+        nargs="*",
+        default=[],
+        help="Build with specified features",
+    )
+    build_subparser.add_argument(
+        "--all-features",
+        dest="all_features",
+        action="store_true",
+        help="Build with all features",
+    )
+    build_subparser.add_argument(
         "--recache",
         action="store_true",
         help="Rebuild cache in `sccache`",
@@ -235,7 +254,7 @@ if __name__ == "__main__":
         else:
             test(parser.name, parser.recache, parser.miri)
     elif parser.subcommand == "build" or parser.subcommand == "b":
-        build(parser.release, parser.recache)
+        build(parser.release, parser.recache, parser.features, parser.all_features)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
         doc(parser.watch)
     elif parser.subcommand == "release" or parser.subcommand == "r":
