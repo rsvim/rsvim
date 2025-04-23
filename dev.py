@@ -91,7 +91,7 @@ def build(release, recache, features, all_features):
     if all_features:
         feature_flags = "--all-features"
     elif len(features) > 0:
-        feature_flags = " ".join([f"--features {f}" for f in features])
+        feature_flags = " ".join([f"--features {f}" for feat in features for f in feat])
 
     fmt = lambda ff: "default features" if len(ff) == 0 else ff
 
@@ -202,6 +202,7 @@ if __name__ == "__main__":
         "--features",
         nargs="+",
         default=[],
+        action="append",
         help="Build with specified features",
     )
     build_subparser.add_argument(
@@ -246,7 +247,7 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    # print(parser)
+    print(parser)
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch, parser.recache)
