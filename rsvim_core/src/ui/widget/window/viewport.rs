@@ -2670,6 +2670,44 @@ mod tests_downward_wrap_nolinebreak_startcol {
     let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(buf, &actual, &expect, 1, 4, &expect_fills, &expect_fills);
   }
+
+  #[test]
+  fn update5() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(31, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "但它仍然contains several th\tings 我们想要测试的文字内容：\n",
+        "\t第一，当一行文字内容太小了，然后可以完全的放进窗口的一行之中，那么行wrap和词wrap两个选项并不会影响渲染的最终效果。\n",
+      ],
+    );
+    let expect = vec![
+      "ains several th\tings 我",
+      "们想要测试的文字内容：\n",
+      "当一行文字内容太小了，然后可",
+      "以完全的放进窗口的一行之中，",
+      "那么行wrap和词wrap两个选项并",
+    ];
+
+    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = {
+      let buf = lock!(buf);
+      let window_actual_shape = window.actual_shape();
+      let window_local_options = window.options();
+      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 13);
+      window.set_viewport(Viewport::to_arc(viewport));
+      lock!(window.viewport()).clone()
+    };
+    let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
+    assert_viewport(buf, &actual, &expect, 0, 2, &expect_fills, &expect_fills);
+  }
 }
 
 #[allow(unused_imports)]
