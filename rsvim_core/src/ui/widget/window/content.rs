@@ -2207,7 +2207,7 @@ mod tests_wrap_linebreak_startcol {
       "enough to    ",
       "completely   ",
       "put inside a ",
-      "row of the  ",
+      "row of the   ",
       "window       ",
       "content      ",
       "widget, 那么 ",
