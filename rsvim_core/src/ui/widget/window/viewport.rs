@@ -1225,6 +1225,23 @@ mod tests_downward_nowrap {
   }
 }
 
+#[allow(unused_imports)]
+#[cfg(test)]
+mod tests_downward_nowrap_start_column {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::lock;
+  use crate::prelude::*;
+  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
+  #[allow(dead_code)]
+  use crate::test::log::init as test_log_init;
+
+  #[test]
+  fn new1() {}
+}
+
 // #[allow(unused_imports)]
 // #[cfg(test)]
 // mod tests_upward_nowrap {
