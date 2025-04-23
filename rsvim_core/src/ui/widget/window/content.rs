@@ -721,10 +721,10 @@ mod tests_nowrap_startcol {
     let expect = vec![
       "                                   ",
       "                                   ",
-      "                                   ",
       "a row of the window content widget,",
       " of the window content widget, ther",
       "and word-wrap options are not set. ",
+      "r line-wrap or word-wrap options ar",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 1, 60);
