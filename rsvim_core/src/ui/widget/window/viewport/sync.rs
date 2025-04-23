@@ -301,43 +301,46 @@ fn process_line_wrap_nolinebreak(
   } else {
     let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
 
-    let mut start_char = buffer
-      .char_after(current_line, start_column)
-      .unwrap_or(0_usize);
-    let start_fills = {
-      let width_before = buffer.width_before(current_line, start_char);
-      width_before.saturating_sub(start_column)
-    };
+    // let mut start_char = buffer
+    match buffer.char_after(current_line, start_column) {
+      Some(mut start_char) => {
+        let start_fills = {
+          let width_before = buffer.width_before(current_line, start_char);
+          width_before.saturating_sub(start_column)
+        };
 
-    let mut end_width = start_column + window_width as usize;
-    let mut end_fills = 0_usize;
+        let mut end_width = start_column + window_width as usize;
+        let mut end_fills = 0_usize;
 
-    debug_assert!(current_row < window_height);
-    while current_row < window_height {
-      let (end_char, end_fills_result) = match buffer.char_at(current_line, end_width) {
-        Some(c) => end_char_and_prefills(buffer, bufline, current_line, c, end_width),
-        None => {
-          // If the char not found, it means the `end_width` is too long than the whole line.
-          // So the char next to the line's last char is the end char.
-          (bufline_len_chars, 0_usize)
+        debug_assert!(current_row < window_height);
+        while current_row < window_height {
+          let (end_char, end_fills_result) = match buffer.char_at(current_line, end_width) {
+            Some(c) => end_char_and_prefills(buffer, bufline, current_line, c, end_width),
+            None => {
+              // If the char not found, it means the `end_width` is too long than the whole line.
+              // So the char next to the line's last char is the end char.
+              (bufline_len_chars, 0_usize)
+            }
+          };
+          end_fills = end_fills_result;
+
+          rows.insert(current_row, RowViewport::new(start_char..end_char));
+
+          // Goes out of line.
+          if end_char >= bufline_len_chars {
+            break;
+          }
+
+          // Prepare next row.
+          current_row += 1;
+          start_char = end_char;
+          end_width = buffer.width_before(current_line, end_char) + window_width as usize;
         }
-      };
-      end_fills = end_fills_result;
 
-      rows.insert(current_row, RowViewport::new(start_char..end_char));
-
-      // Goes out of line.
-      if end_char >= bufline_len_chars {
-        break;
+        (rows, start_fills, end_fills, current_row)
       }
-
-      // Prepare next row.
-      current_row += 1;
-      start_char = end_char;
-      end_width = buffer.width_before(current_line, end_char) + window_width as usize;
+      None => (rows, 0_usize, 0_usize, current_row),
     }
-
-    (rows, start_fills, end_fills, current_row)
   }
 }
 
