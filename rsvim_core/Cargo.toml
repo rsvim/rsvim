@@ -85,6 +85,7 @@ sourcemap = { workspace = true }
 # swc_ecma_loader = { workspace = true }
 # swc_bundler = { workspace = true }
 # swc_graph_analyzer = { workspace = true }
+# swc_trace_macro = { workspace = true }
 
 # NOTE: Javascript dependencies }
 
