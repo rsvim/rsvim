@@ -2688,11 +2688,11 @@ mod tests_downward_wrap_nolinebreak_startcol {
       ],
     );
     let expect = vec![
-      "ains several th\tings 我",
-      "们想要测试的文字内容：\n",
-      "当一行文字内容太小了，然后可",
-      "以完全的放进窗口的一行之中，",
-      "那么行wrap和词wrap两个选项并",
+      "ins several th\tings 我们",
+      "想要测试的文字内容：\n",
+      "当一行文字内容太小了，然后可以",
+      "完全的放进窗口的一行之中，那么",
+      "行wrap和词wrap两个选项并不会影",
     ];
 
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
@@ -2706,7 +2706,15 @@ mod tests_downward_wrap_nolinebreak_startcol {
     };
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 1)].into_iter().collect();
-    assert_viewport(buf, &actual, &expect, 0, 2, &expect_fills, &expect_fills);
+    assert_viewport(
+      buf,
+      &actual,
+      &expect,
+      0,
+      2,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
   }
 }
 
