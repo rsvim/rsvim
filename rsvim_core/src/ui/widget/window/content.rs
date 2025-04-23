@@ -1373,19 +1373,19 @@ mod tests_wrap_nolinebreak_startcol {
       ],
     );
     let expect = vec![
-      "Hello, RSV",
-      "IM!       ",
-      "This is a ",
-      "quite simp",
-      "le and sma",
-      "ll test li",
-      "nes.      ",
-      "But still ",
-      "it contain",
-      "s several ",
+      "l test lin",
+      "es.       ",
+      "hings we w",
+      "ant to tes",
+      "t:        ",
+      "ugh to com",
+      "pletely pu",
+      "t inside a",
+      " row of th",
+      "e window c",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 1, 31);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
