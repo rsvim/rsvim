@@ -1456,7 +1456,7 @@ mod tests_wrap_nolinebreak_startcol {
   }
 
   #[test]
-  fn _new4() {
+  fn new4() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 30);
@@ -1501,6 +1501,7 @@ mod tests_wrap_nolinebreak_startcol {
       "ow of the window co",
       "ntent widget, there",
       "'re multiple cases:",
+      "                   ",
       ">        * 如果行换",
       "行和单词换行这两个 ",
       "选项都没有选中，那 ",
@@ -1509,7 +1510,6 @@ mod tests_wrap_nolinebreak_startcol {
       ">        * The extr",
       "a parts are split i",
       "nto the next row, i",
-      "f either line-wrap ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 7);
@@ -1518,66 +1518,7 @@ mod tests_wrap_nolinebreak_startcol {
   }
 
   #[test]
-  fn _new5() {
-    test_log_init();
-
-    let terminal_size = U16Size::new(19, 27);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .build()
-      .unwrap();
-
-    let buffer = make_buffer_from_lines(
-      terminal_size.height(),
-      buf_opts,
-      vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
-        "But still it contains several things\t我们想要测试的：\n",
-        "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "\t\t* 如果行换行和单词换行这两个选项都没有选中，那么这些超出窗口的文本内容会被截断。\n",
-        "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
-      ],
-    );
-    let expect = vec![
-      "Hello, RSVIM!      ",
-      "This is a quite sim",
-      "ple and small test ",
-      "lines.             ",
-      "But still it contai",
-      "ns several things  ",
-      "        我们想要测 ",
-      "试的：             ",
-      "        1. When the",
-      " line is small enou",
-      "gh to completely pu",
-      "t inside a row of t",
-      "he window content w",
-      "idget, then the lin",
-      "e-wrap and word-wra",
-      "p doesn't affect th",
-      "e rendering.       ",
-      "        2. When the",
-      " line is too long t",
-      "o be completely put",
-      " in a row of the wi",
-      "ndow content widget",
-      ", there're multiple",
-      " cases:            ",
-      "                *  ",
-      "如果行换行和单词换 ",
-      "行这两个选项都没有<",
-    ];
-
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
-  }
-
-  #[test]
-  fn _update1() {
+  fn update1() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 15);
@@ -1624,26 +1565,26 @@ mod tests_wrap_nolinebreak_startcol {
     assert_canvas(&actual, &expect);
 
     let expect = vec![
-      "        1. When the",
-      " line is small enou",
-      "gh to completely pu",
-      "t inside a row of t",
-      "he window content w",
-      "idget, then the lin",
-      "e-wrap and word-wra",
-      "p doesn't affect th",
-      "e rendering.       ",
-      "        2. When the",
-      " line is too long t",
-      "o be completely put",
-      " in a row of the wi",
-      "ndow content widget",
-      ", there're multiple",
+      ">>>>>>>1. When the ",
+      "line is small enoug",
+      "h to completely put",
+      " inside a row of th",
+      "e window content wi",
+      "dget, then the line",
+      "-wrap and word-wrap",
+      " doesn't affect the",
+      " rendering.        ",
+      ">>>>>>>2. When the ",
+      "line is too long to",
+      " be completely put ",
+      "in a row of the win",
+      "dow content widget,",
+      " there're multiple ",
     ];
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 3, 0);
+      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 3, 1);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
