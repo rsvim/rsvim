@@ -3628,8 +3628,8 @@ mod tests_downward_wrap_linebreak_startcol {
       "arowofthewindowcontent.\n",
       "ntains several things we want ",
       "to test:\n",
-      "\t\t第一，当一行文",
-      "本内容的长度足够短，短到可以完",
+      "第一，当一行文本内容的长度足够",
+      "短，短到可以完整的放入一个窗口",
     ];
 
     let mut window = make_window(terminal_size, buffer.clone(), &win_opts);
@@ -3642,7 +3642,7 @@ mod tests_downward_wrap_linebreak_startcol {
       lock!(window.viewport()).clone()
     };
     let expect_start_fills: BTreeMap<usize, usize> =
-      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
