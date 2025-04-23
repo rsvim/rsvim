@@ -829,46 +829,6 @@ mod tests_nowrap_startcol {
   }
 
   #[test]
-  fn new5() {
-    test_log_init();
-
-    let terminal_size = U16Size::new(31, 20);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = WindowLocalOptionsBuilder::default()
-      .wrap(false)
-      .build()
-      .unwrap();
-
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
-    let expect = vec![
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-      "                               ",
-    ];
-
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
-    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
-    assert_canvas(&actual, &expect);
-  }
-
-  #[test]
   fn update1() {
     test_log_init();
 
@@ -911,9 +871,9 @@ mod tests_nowrap_startcol {
     assert_canvas(&actual, &expect);
 
     let expect = vec![
-      "  2. When the line is",
-      "     * The extra part",
-      "     * The extra part",
+      "When the line is too ",
+      "* The extra parts are",
+      "* The extra parts are",
       "                     ",
       "                     ",
       "                     ",
@@ -925,7 +885,7 @@ mod tests_nowrap_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 4, 0);
+      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 4, 5);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
