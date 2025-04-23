@@ -2062,6 +2062,7 @@ mod tests_wrap_linebreak_startcol {
     );
     let expect = vec![
       "lo, RSVIM!",
+      "          ",
       "s is a    ",
       "quite     ",
       "simple and",
@@ -2070,7 +2071,6 @@ mod tests_wrap_linebreak_startcol {
       ".         ",
       " still it ",
       "contains  ",
-      "several   ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 3);
