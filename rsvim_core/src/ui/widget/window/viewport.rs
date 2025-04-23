@@ -1393,7 +1393,7 @@ mod tests_downward_nowrap_start_column {
 
     let expect = vec![
       "",
-      "e simple a",
+      " simple an",
       "ntains sev",
       "ine is sma",
       "ine is too",
