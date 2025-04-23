@@ -2036,7 +2036,7 @@ mod tests_wrap_linebreak_startcol {
   use tracing::info;
 
   #[test]
-  fn new1() {
+  fn _new1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -2079,7 +2079,7 @@ mod tests_wrap_linebreak_startcol {
   }
 
   #[test]
-  fn new2() {
+  fn _new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
@@ -2127,7 +2127,7 @@ mod tests_wrap_linebreak_startcol {
   }
 
   #[test]
-  fn new3() {
+  fn _new3() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 8);
@@ -2156,7 +2156,7 @@ mod tests_wrap_linebreak_startcol {
   }
 
   #[test]
-  fn new4() {
+  fn _new4() {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
@@ -2220,7 +2220,7 @@ mod tests_wrap_linebreak_startcol {
   }
 
   #[test]
-  fn new5() {
+  fn _new5() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -2263,7 +2263,7 @@ mod tests_wrap_linebreak_startcol {
   }
 
   #[test]
-  fn update1() {
+  fn _update1() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
