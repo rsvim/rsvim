@@ -14,13 +14,6 @@ categories.workspace = true
 exclude.workspace = true
 description = "The command line(s) for the RSVIM editor."
 
-[features]
-debug = [
-  "tikv-jemallocator/debug",
-  "tikv-jemallocator/profiling",
-  "tikv-jemallocator/stats",
-]
-
 [dependencies]
 rsvim_core = { workspace = true }
 tracing = { workspace = true }
@@ -34,6 +27,3 @@ zstd = { workspace = true }
 rsvim_core = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 zstd = { workspace = true }
-
-[target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = "0.6"
