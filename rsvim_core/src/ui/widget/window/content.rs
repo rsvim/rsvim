@@ -719,15 +719,15 @@ mod tests_nowrap_startcol {
     );
 
     let expect = vec![
-      "Hello, RSVIM!                      ",
-      "This is a quite simple and small te",
-      "But still it contains several thing",
-      "  1. When the line is small enough ",
-      "  2. When the line is too long to b",
-      "     * The extra parts are been tru",
+      "                                   ",
+      "                                   ",
+      "                                   ",
+      "a row of the window content widget,",
+      " of the window content widget, ther",
+      "and word-wrap options are not set. ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 1, 60);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
