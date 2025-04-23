@@ -37,7 +37,7 @@ fn last_visible_char_on_line(buffer: &Buffer, line_idx: usize) -> usize {
 }
 
 fn adjust_cursor_char_idx_on_vertical_motion(
-  buffer: &mut Buffer,
+  buffer: &Buffer,
   cursor_line_idx: usize,
   cursor_char_idx: usize,
   line_idx: usize,
@@ -126,19 +126,18 @@ impl NormalStateful {
 
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let buffer = current_window.buffer();
-        let buffer = buffer.upgrade().unwrap();
-        let mut buffer = lock!(buffer);
+        let buffer = current_window.buffer().upgrade().unwrap();
+        let buffer = lock!(buffer);
         let viewport = current_window.viewport();
         let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
         let cursor_move_result = match command {
           Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
-            self._cursor_move_vertically(&viewport, &cursor_viewport, &mut buffer, command)
+            self._cursor_move_vertically(&viewport, &cursor_viewport, &buffer, command)
           }
           Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
-            self._cursor_move_horizontally(&viewport, &cursor_viewport, &mut buffer, command)
+            self._cursor_move_horizontally(&viewport, &cursor_viewport, &buffer, command)
           }
           _ => unreachable!(),
         };
@@ -146,7 +145,7 @@ impl NormalStateful {
         trace!("cursor_move_result:{:?}", cursor_move_result);
         if let Some((line_idx, char_idx)) = cursor_move_result {
           let moved_cursor_viewport =
-            CursorViewport::from_position(&viewport, &mut buffer, line_idx, char_idx);
+            CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
           current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
 
           let cursor_id = tree.cursor_id().unwrap();
@@ -168,7 +167,7 @@ impl NormalStateful {
     &self,
     viewport: &Viewport,
     cursor_viewport: &CursorViewport,
-    buffer: &mut Buffer,
+    buffer: &Buffer,
     command: Command,
   ) -> Option<(usize, usize)> {
     let cursor_line_idx = cursor_viewport.line_idx();
@@ -220,7 +219,7 @@ impl NormalStateful {
     &self,
     viewport: &Viewport,
     cursor_viewport: &CursorViewport,
-    buffer: &mut Buffer,
+    buffer: &Buffer,
     command: Command,
   ) -> Option<(usize, usize)> {
     let cursor_line_idx = cursor_viewport.line_idx();

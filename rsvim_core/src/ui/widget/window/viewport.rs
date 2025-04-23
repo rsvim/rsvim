@@ -169,7 +169,7 @@ impl CursorViewport {
   }
 
   /// Create cursor viewport with the top-left corner position from the window viewport.
-  pub fn from_top_left(viewport: &Viewport, buffer: &mut Buffer) -> Self {
+  pub fn from_top_left(viewport: &Viewport, buffer: &Buffer) -> Self {
     debug_assert!(viewport.end_line_idx() >= viewport.start_line_idx());
     if viewport.end_line_idx() == viewport.start_line_idx() {
       return Self::new(0, 0, 0, 0);
@@ -214,7 +214,7 @@ impl CursorViewport {
   /// It panics if the line/char index are not shown in the window viewport.
   pub fn from_position(
     viewport: &Viewport,
-    buffer: &mut Buffer,
+    buffer: &Buffer,
     line_idx: usize,
     char_idx: usize,
   ) -> Self {
