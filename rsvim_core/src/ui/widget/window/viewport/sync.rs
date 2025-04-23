@@ -142,25 +142,27 @@ fn process_line_nowrap(
   let (start_char, start_fills, end_char, end_fills) = if bufline.len_chars() == 0 {
     (0_usize, 0_usize, 0_usize, 0_usize)
   } else {
-    let start_char = buffer
-      .char_after(current_line, start_column)
-      .unwrap_or(0_usize);
-    let start_fills = {
-      let width_before = buffer.width_before(current_line, start_char);
-      width_before.saturating_sub(start_column)
-    };
+    match buffer.char_after(current_line, start_column) {
+      Some(start_char) => {
+        let start_fills = {
+          let width_before = buffer.width_before(current_line, start_char);
+          width_before.saturating_sub(start_column)
+        };
 
-    let end_width = start_column + window_width as usize;
-    let (end_char, end_fills) = match buffer.char_at(current_line, end_width) {
-      Some(c) => end_char_and_prefills(buffer, bufline, current_line, c, end_width),
-      None => {
-        // If the char not found, it means the `end_width` is too long than the whole line.
-        // So the char next to the line's last char is the end char.
-        (bufline.len_chars(), 0_usize)
+        let end_width = start_column + window_width as usize;
+        let (end_char, end_fills) = match buffer.char_at(current_line, end_width) {
+          Some(c) => end_char_and_prefills(buffer, bufline, current_line, c, end_width),
+          None => {
+            // If the char not found, it means the `end_width` is too long than the whole line.
+            // So the char next to the line's last char is the end char.
+            (bufline.len_chars(), 0_usize)
+          }
+        };
+
+        (start_char, start_fills, end_char, end_fills)
       }
-    };
-
-    (start_char, start_fills, end_char, end_fills)
+      None => (0_usize, 0_usize, 0_usize, 0_usize),
+    }
   };
 
   let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
