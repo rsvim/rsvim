@@ -256,13 +256,21 @@ mod tests_util {
     terminal_size: U16Size,
     window_options: WindowLocalOptions,
     buffer: BufferArc,
+    start_line_idx: usize,
+    start_column_idx: usize,
   ) -> ViewportArc {
     let mut tree = Tree::new(terminal_size);
     tree.set_global_local_options(&window_options);
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
     let viewport = {
       let buffer = lock!(buffer);
-      Viewport::downward(&buffer, &actual_shape, &window_options, 0, 0)
+      Viewport::downward(
+        &buffer,
+        &actual_shape,
+        &window_options,
+        start_line_idx,
+        start_column_idx,
+      )
     };
     Viewport::to_arc(viewport)
   }
@@ -376,7 +384,7 @@ mod tests_nowrap {
       "          ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -415,7 +423,7 @@ mod tests_nowrap {
       "     * The extra parts are been tru",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -458,7 +466,7 @@ mod tests_nowrap {
       "                                 ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -511,7 +519,7 @@ mod tests_nowrap {
       "                               ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -551,7 +559,7 @@ mod tests_nowrap {
       "                               ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -594,7 +602,7 @@ mod tests_nowrap {
       "                     ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_canvas(&actual, &expect);
 
@@ -668,19 +676,19 @@ mod tests_nowrap_startcol {
       ],
     );
     let expect = vec![
-      "Hello, RSV",
-      "This is a ",
-      "But still ",
-      "  1. When ",
-      "  2. When ",
-      "     * The",
-      "     * The",
-      "          ",
-      "          ",
-      "          ",
+      "o, RSVIM!\n",
+      " is a quit",
+      "still it c",
+      " When the ",
+      " When the ",
+      " * The ext",
+      " * The ext",
+      "",
+      "",
+      "",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone());
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 4);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
