@@ -93,11 +93,13 @@ def build(release, recache, features, all_features):
     elif len(features) > 0:
         feature_flags = " ".join([f"--features {f}" for f in features])
 
+    fmt = lambda ff: "default features" if len(ff) == 0 else ff
+
     if release:
-        print(f"Run 'build' for 'release' with {feature_flags}")
+        print(f"Run 'build' for 'release' with {fmt(feature_flags)}")
         command = f"{command} cargo build --release {feature_flags}"
     else:
-        print(f"Run 'build' for 'debug' with {feature_flags}")
+        print(f"Run 'build' for 'debug' with {fmt(feature_flags)}")
         command = f"{command} cargo build {feature_flags}"
 
     command = command.strip()
@@ -198,7 +200,7 @@ if __name__ == "__main__":
     build_subparser.add_argument(
         "-f",
         "--features",
-        nargs="*",
+        nargs="+",
         default=[],
         help="Build with specified features",
     )
