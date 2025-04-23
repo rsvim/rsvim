@@ -676,16 +676,16 @@ mod tests_nowrap_startcol {
       ],
     );
     let expect = vec![
-      "o, RSVIM!\n",
+      "o, RSVIM! ",
       " is a quit",
       "still it c",
       " When the ",
       " When the ",
       " * The ext",
       " * The ext",
-      "",
-      "",
-      "",
+      "          ",
+      "          ",
+      "          ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 4);
