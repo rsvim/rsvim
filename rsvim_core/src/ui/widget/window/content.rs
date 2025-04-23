@@ -2079,7 +2079,7 @@ mod tests_wrap_linebreak_startcol {
   }
 
   #[test]
-  fn _new2() {
+  fn new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
@@ -2104,24 +2104,24 @@ mod tests_wrap_linebreak_startcol {
       ],
     );
     let expect = vec![
-      "Hello, RSVIM!              ",
-      "This is a quite simple and ",
-      "small test lines.          ",
-      "But still it contains      ",
-      "several things we want to  ",
-      "test:                      ",
-      "  1. When the line is small",
-      " enough to completely put  ",
-      "inside a row of the window ",
-      "content widget, then the   ",
-      "line-wrap and word-wrap    ",
-      "doesn't affect the         ",
-      "rendering.                 ",
-      "  2. When the line is too  ",
-      "long to be completely put  ",
+      "imple and small test lines.",
+      "                           ",
+      "ains several things we want",
+      " to test:                  ",
+      "e is small enough to       ",
+      "completely put inside a row",
+      " of the window content     ",
+      "widget, then the line-wrap ",
+      "and word-wrap doesn't      ",
+      "affect the rendering.      ",
+      "e is too long to be        ",
+      "completely put in a row of ",
+      "the window content widget, ",
+      "there're multiple cases:   ",
+      "parts are been truncated if",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 1, 17);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
