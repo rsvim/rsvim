@@ -758,19 +758,19 @@ mod tests_nowrap_startcol {
     );
 
     let expect = vec![
-      "Hello,  R        S        V<<<<<<",
-      "这是一个非常简单而且非常短的测试<",
-      "But still        it        contai",
-      "  第一，当一行文本内容足够短，以<",
-      "  2. When the line is too long to",
-      "     * The extra parts are been t",
-      "     * The extra parts are split ",
+      "S        V        I        M!    ",
+      ">而且非常短的测试例子，只包含几行",
+      "it        contains        several",
+      ">内容足够短，以至于能够被完全的放",
+      "e is too long to be completely pu",
+      "parts are been truncated if both ",
+      "parts are split into the next row",
       "                                 ",
       "                                 ",
       "                                 ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 17);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
