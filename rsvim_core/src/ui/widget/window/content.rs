@@ -801,13 +801,13 @@ mod tests_nowrap_startcol {
     );
 
     let expect = vec![
-      "Hello, RSVIM!                  ",
-      "This is a quite simple and smal",
-      "But still it contains several t",
-      "  1. When the line is small eno",
-      "  2. When the line is too long ",
-      "     * The extra parts are been",
-      "     * The extra parts are spli",
+      "RSVIM!                         ",
+      " a quite simple and small test ",
+      "ll it contains several things w",
+      "en the line is small enough to ",
+      "en the line is too long to be c",
+      "The extra parts are been trunca",
+      "The extra parts are split into ",
       "                               ",
       "                               ",
       "                               ",
@@ -823,7 +823,7 @@ mod tests_nowrap_startcol {
       "                               ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 7);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
