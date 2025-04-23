@@ -1592,7 +1592,7 @@ mod tests_wrap_nolinebreak_startcol {
   }
 
   #[test]
-  fn _update2() {
+  fn update2() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 15);
@@ -1671,10 +1671,10 @@ mod tests_wrap_nolinebreak_startcol {
     );
 
     let expect = vec![
-      "                * T",
-      "he extra parts are ",
-      "split into the next",
-      " row               ",
+      ">>>>        * The e",
+      "xtra parts are spli",
+      "t into the next row",
+      "                   ",
       "                   ",
       "                   ",
       "                   ",
@@ -1690,7 +1690,7 @@ mod tests_wrap_nolinebreak_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 6, 0);
+      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 6, 4);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
