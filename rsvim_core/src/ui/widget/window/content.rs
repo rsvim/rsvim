@@ -2127,7 +2127,7 @@ mod tests_wrap_linebreak_startcol {
   }
 
   #[test]
-  fn _new3() {
+  fn new3() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 8);
@@ -2150,13 +2150,13 @@ mod tests_wrap_linebreak_startcol {
       "                    ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 5);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 
   #[test]
-  fn _new4() {
+  fn new4() {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 31);
@@ -2181,10 +2181,9 @@ mod tests_wrap_linebreak_startcol {
       ],
     );
     let expect = vec![
-      "Hello, RSVIM!",
-      "             ",
-      "This is a    ",
-      "quite simple ",
+      " RSVIM!      ",
+      "s a quite    ",
+      "simple       ",
       "andsmalltestl",
       "ineswithoutev",
       "enanewlinebre",
@@ -2197,24 +2196,25 @@ mod tests_wrap_linebreak_startcol {
       "einsidearowof",
       "thewindowcont",
       "ent.         ",
-      "But still it ",
+      "ill it       ",
       "contains     ",
       "several      ",
       "things we    ",
       "want to test:",
       "             ",
-      "  1. When the",
-      " line is     ",
-      "small enough ",
-      "to completely",
-      " put inside a",
-      " row of the  ",
+      "hen the line ",
+      "is small     ",
+      "enough to    ",
+      "completely   ",
+      "put inside a ",
+      "row of the  ",
       "window       ",
       "content      ",
       "widget, 那么 ",
+      "行换行和单词 ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 6);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
