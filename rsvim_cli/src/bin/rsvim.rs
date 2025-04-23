@@ -2,6 +2,13 @@
 //!
 //! See [rsvim_core] for more details.
 
+#[cfg(not(target_env = "msvc"))]
+use tikv_jemallocator::Jemalloc;
+
+#[cfg(not(target_env = "msvc"))]
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
+
 use rsvim_core::cli::CliOpt;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::{SnapshotData, v8_version};

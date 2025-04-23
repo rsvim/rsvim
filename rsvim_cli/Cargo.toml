@@ -27,3 +27,6 @@ zstd = { workspace = true }
 rsvim_core = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 zstd = { workspace = true }
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+tikv-jemallocator = "0.6"
