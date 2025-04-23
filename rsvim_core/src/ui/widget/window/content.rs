@@ -1391,7 +1391,7 @@ mod tests_wrap_nolinebreak_startcol {
   }
 
   #[test]
-  fn _new2() {
+  fn new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 10);
@@ -1427,7 +1427,7 @@ mod tests_wrap_nolinebreak_startcol {
   }
 
   #[test]
-  fn _new3() {
+  fn new3() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 9);
@@ -1450,7 +1450,7 @@ mod tests_wrap_nolinebreak_startcol {
       "                    ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 3);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1480,39 +1480,39 @@ mod tests_wrap_nolinebreak_startcol {
       ],
     );
     let expect = vec![
-      "Hello, RSVIM!      ",
-      "This is a quite sim",
-      "ple and small test ",
-      "lines.             ",
-      "But still it contai",
-      "ns several things  ",
-      "        我们想要测 ",
-      "试的：             ",
-      "        1. When the",
-      " line is small enou",
-      "gh to completely pu",
-      "t inside a row of t",
-      "he window content w",
-      "idget, then the lin",
-      "e-wrap and word-wra",
-      "p doesn't affect th",
-      "e rendering.       ",
-      "        2. When the",
-      " line is too long t",
-      "o be completely put",
-      " in a row of the wi",
-      "ndow content widget",
-      ", there're multiple",
-      " cases:            ",
-      "                *  ",
-      "如果行换行和单词换 ",
-      "行这两个选项都没有 ",
-      "选中，那么这些超出 ",
-      "窗口的文本内容会被 ",
-      "截断。             ",
+      "RSVIM!             ",
+      " a quite simple and",
+      " small test lines. ",
+      "ll it contains seve",
+      "ral things         ",
+      "我们想要测试的：   ",
+      ">1. When the line i",
+      "s small enough to c",
+      "ompletely put insid",
+      "e a row of the wind",
+      "ow content widget, ",
+      "then the line-wrap ",
+      "and word-wrap doesn",
+      "'t affect the rende",
+      "ring.              ",
+      ">2. When the line i",
+      "s too long to be co",
+      "mpletely put in a r",
+      "ow of the window co",
+      "ntent widget, there",
+      "'re multiple cases:",
+      ">        * 如果行换",
+      "行和单词换行这两个 ",
+      "选项都没有选中，那 ",
+      "么这些超出窗口的文 ",
+      "本内容会被截断。   ",
+      ">        * The extr",
+      "a parts are split i",
+      "nto the next row, i",
+      "f either line-wrap ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 7);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
