@@ -1618,7 +1618,6 @@ mod tests_wrap_nolinebreak_startcol {
     );
 
     let expect = vec![
-      "                * T",
       "he extra parts are ",
       "split into the next",
       " row, if either lin",
@@ -1633,11 +1632,12 @@ mod tests_wrap_nolinebreak_startcol {
       "ation also eats mor",
       "e rows in the windo",
       "w, thus it may cont",
+      "ains less lines in ",
     ];
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 6, 0);
+      let viewport = Viewport::downward(&buffer, &actual_shape, &win_opts, 6, 19);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
