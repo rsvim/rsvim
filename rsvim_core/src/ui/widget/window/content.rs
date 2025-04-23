@@ -1409,19 +1409,19 @@ mod tests_wrap_nolinebreak_startcol {
       ],
     );
     let expect = vec![
-      "                        * T",
-      "he extra parts are split   ",
-      "        into the next row, ",
-      "        if either line-wrap",
-      "        or word-wrap option",
-      "s are been set. If the extr",
-      "a parts are still too long ",
-      "to        来放在下一个横行 ",
-      "内，一遍又一遍的重复这样的 ",
-      "操作。This operation also e",
+      ">>>>>        * The extra pa",
+      "rts are split           int",
+      "o the next row,         if ",
+      "either line-wrap        or ",
+      "word-wrap options are been ",
+      "set. If the extra parts are",
+      " still too long to        ",
+      "来放在下一个横行 内，一遍又",
+      "一遍的重复这样的 操作。This",
+      " operation also eats more r",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 11);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
