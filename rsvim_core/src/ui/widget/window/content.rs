@@ -2061,19 +2061,19 @@ mod tests_wrap_linebreak_startcol {
       ],
     );
     let expect = vec![
-      "Hello,    ",
-      "RSVIM!    ",
-      "This is a ",
+      "lo, RSVIM!",
+      "s is a    ",
       "quite     ",
       "simple and",
       " small    ",
       "test lines",
       ".         ",
-      "But still ",
-      "it        ",
+      " still it ",
+      "contains  ",
+      "several   ",
     ];
 
-    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 3);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
