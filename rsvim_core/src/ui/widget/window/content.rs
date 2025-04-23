@@ -1645,7 +1645,7 @@ mod tests_wrap_nolinebreak_startcol {
   }
 
   #[test]
-  fn _update3() {
+  fn update3() {
     test_log_init();
 
     let terminal_size = U16Size::new(19, 15);
