@@ -364,17 +364,14 @@ impl NormalStateful {
     debug_assert!(end_line_idx > start_line_idx);
     debug_assert!(viewport.lines().contains_key(&start_line_idx));
 
-    let start_col = match buffer.char_after(start_line_idx, start_column_idx) {
-      Some(start_char_idx) => match command {
-        Command::CursorMoveLeft(n) => {
-          let c = start_char_idx.saturating_sub(n);
-          buffer.width_before(start_line_idx, c)
-        }
+    let start_col = {
+      match command {
+        Command::CursorMoveLeft(n) => start_column_idx.saturating_sub(n),
         Command::CursorMoveRight(n) => {
           let expected = start_column_idx.saturating_add(n);
           let upper_bounded = {
             // Calculate how many columns that each line (in current viewport) need to scroll until
-            // the their own line's end. This is the upper bound of the actual columns that could
+            // their own line's end. This is the upper bound of the actual columns that could
             // scroll.
             let max_scrolls = viewport
               .lines()
@@ -389,27 +386,43 @@ impl NormalStateful {
                   _last_row_idx, last_row_viewport
                 );
                 debug_assert!(buffer.get_rope().get_line(*line_idx).is_some());
-                let result = match buffer.last_visible_char_on_line(*line_idx) {
-                  Some(last_char) => {
-                    (last_char + 1).saturating_sub(last_row_viewport.end_char_idx())
+                let upper_bounded_on_line = match buffer.last_visible_char_on_line(*line_idx) {
+                  Some(last_visible_c) => {
+                    let last_visible_col = buffer.width_at(*line_idx, last_visible_c);
+                    let last_col_on_row = buffer.width_at(
+                      *line_idx,
+                      last_row_viewport.end_char_idx().saturating_sub(1),
+                    );
+                    let column_difference = last_visible_col.saturating_sub(last_col_on_row);
+                    trace!(
+                      "last_visible_c:{},last_row_viewport.end_char_idx:{},last_visible_col:{},last_col_on_row:{},column_difference:{}",
+                      last_visible_c,
+                      last_row_viewport.end_char_idx(),
+                      last_visible_col,
+                      last_col_on_row,
+                      column_difference
+                    );
+                    column_difference
                   }
                   None => 0_usize,
                 };
-                trace!("result:{}", result);
-                result
+                trace!("result:{}", upper_bounded_on_line);
+                upper_bounded_on_line
               })
               .max();
             debug_assert!(max_scrolls.is_some());
             let max_scrolls = max_scrolls.unwrap();
             let upper_bounded = start_column_idx.saturating_add(max_scrolls);
-            trace!("max_scrolls: upper_bounded:{}", upper_bounded);
+            trace!(
+              "max_scrolls:{},upper_bounded:{}",
+              max_scrolls, upper_bounded
+            );
             upper_bounded
           };
           std::cmp::min(expected, upper_bounded)
         }
         _ => unreachable!(),
-      },
-      None => 0_usize,
+      }
     };
 
     if start_col == start_column_idx {
@@ -2679,7 +2692,7 @@ mod tests_cursor_scroll_horizontally {
   }
 
   #[test]
-  fn _nowrap4() {
+  fn nowrap4() {
     test_log_init();
 
     let lines = vec![
@@ -2745,14 +2758,8 @@ mod tests_cursor_scroll_horizontally {
     // After cursor scroll
     {
       let viewport = get_viewport(tree);
-      let expect = vec![
-        "          ",
-        "          ",
-        "          ",
-        "rendering.",
-        "          ",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0)(4, 0)]
+      let expect = vec!["", "", "", "rendering.", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
 
@@ -2769,7 +2776,146 @@ mod tests_cursor_scroll_horizontally {
   }
 
   #[test]
-  fn _nowrap5() {
+  fn nowrap5() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "  3. If a single char needs multiple cells to display on the window, and it happens the char is at the end of the row, there can be multiple cases:\n",
+      "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
+      "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
+    ];
+    let (tree, state, bufs, buf) = make_tree(
+      U16Size::new(10, 5),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    // Before cursor scroll
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful =
+      stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(100));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+
+    // Scroll-1
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["", "", "", " the line-", "multiple c"];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(10));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+
+    // Scroll-2
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["", "", "", "wrap and w", "ases:\n"];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(50));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+
+    // Scroll-3
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["", "", "", "rendering.", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn _nowrap6() {
     test_log_init();
 
     let lines = vec![
