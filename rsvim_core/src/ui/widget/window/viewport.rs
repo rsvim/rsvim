@@ -2596,7 +2596,6 @@ mod tests_downward_wrap_nolinebreak_startcol {
     );
     let expect = vec![
       "lo, RSVIM!",
-      "\n",
       "s is a qui",
       "te simple ",
       "and small ",
@@ -2605,6 +2604,7 @@ mod tests_downward_wrap_nolinebreak_startcol {
       " still it ",
       "contains s",
       "everal thi",
+      "ngs we wan"
     ];
 
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
@@ -2643,7 +2643,6 @@ mod tests_downward_wrap_nolinebreak_startcol {
     );
     let expect = vec![
       "lo, RSVIM!",
-      "\n",
       "s is a qui",
       "te simple ",
       "and small ",
@@ -2652,6 +2651,7 @@ mod tests_downward_wrap_nolinebreak_startcol {
       " still it ",
       "contains s",
       "everal thi",
+      "ngs we wan"
     ];
 
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
