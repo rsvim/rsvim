@@ -1551,7 +1551,7 @@ mod tests_wrap_nolinebreak_startcol {
       ">        * The extr",
       "a parts are split i",
       "nto the next row, i",
-      "f either line-wrap "
+      "f either line-wrap ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 7);
@@ -1909,7 +1909,6 @@ mod tests_wrap_linebreak {
     );
     let expect = vec![
       "Hello, RSVIM!",
-      "             ",
       "This is a    ",
       "quite simple ",
       "andsmalltestl",
@@ -1929,7 +1928,6 @@ mod tests_wrap_linebreak {
       "several      ",
       "things we    ",
       "want to test:",
-      "             ",
       "  1. When the",
       " line is     ",
       "small enough ",
@@ -1939,6 +1937,8 @@ mod tests_wrap_linebreak {
       "window       ",
       "content      ",
       "widget, 那么 ",
+      "行换行和单词 ",
+      "换行选项都不 ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
@@ -2104,7 +2104,6 @@ mod tests_wrap_linebreak_startcol {
     );
     let expect = vec![
       "lo, RSVIM!",
-      "          ",
       "s is a    ",
       "quite     ",
       "simple and",
@@ -2113,6 +2112,7 @@ mod tests_wrap_linebreak_startcol {
       ".         ",
       " still it ",
       "contains  ",
+      "several   ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 3);
@@ -2147,7 +2147,6 @@ mod tests_wrap_linebreak_startcol {
     );
     let expect = vec![
       "imple and small test lines.",
-      "                           ",
       "ains several things we want",
       " to test:                  ",
       "e is small enough to       ",
@@ -2161,6 +2160,7 @@ mod tests_wrap_linebreak_startcol {
       "the window content widget, ",
       "there're multiple cases:   ",
       "parts are been truncated if",
+      " both line-wrap and word-  ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 1, 17);
@@ -2243,7 +2243,6 @@ mod tests_wrap_linebreak_startcol {
       "several      ",
       "things we    ",
       "want to test:",
-      "             ",
       "hen the line ",
       "is small     ",
       "enough to    ",
@@ -2254,6 +2253,7 @@ mod tests_wrap_linebreak_startcol {
       "content      ",
       "widget, 那么 ",
       "行换行和单词 ",
+      "换行选项都不 ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 6);
