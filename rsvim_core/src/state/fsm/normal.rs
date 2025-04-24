@@ -2662,7 +2662,7 @@ mod tests_cursor_scroll_horizontally {
         "     * The",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0,0),(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
 
@@ -2736,7 +2736,8 @@ mod tests_cursor_scroll_horizontally {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(4));
+    let next_stateful =
+      stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(149));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2745,13 +2746,13 @@ mod tests_cursor_scroll_horizontally {
     {
       let viewport = get_viewport(tree);
       let expect = vec![
-        "  2. When ",
-        "     * The",
-        "     * The",
-        "  3. If a ",
-        "     * The",
+        "          ",
+        "          ",
+        "          ",
+        "rendering.",
+        "          ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0)(4, 0)]
         .into_iter()
         .collect();
 
@@ -2759,8 +2760,8 @@ mod tests_cursor_scroll_horizontally {
         buf.clone(),
         &viewport,
         &expect,
-        4,
-        9,
+        0,
+        5,
         &expect_fills,
         &expect_fills,
       );
