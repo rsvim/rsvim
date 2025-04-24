@@ -123,8 +123,13 @@ fn end_char_and_prefills(
     let c_width_before = buffer.width_before(l, c);
     (c, end_width.saturating_sub(c_width_before))
   } else {
-    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
-    let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+    // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
+    debug_assert!(bline.len_chars() > 0);
+    let next_to_last_visible_char = buffer.last_visible_char_on_line(l).unwrap() + 1;
+
+    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
+    // char.
+    let c_next = std::cmp::min(c + 1, next_to_last_visible_char);
     (c_next, 0_usize)
   }
 }
@@ -327,7 +332,8 @@ fn process_line_wrap_nolinebreak(
           rows.insert(current_row, RowViewport::new(start_char..end_char));
 
           // Goes out of line.
-          if end_char >= bufline_len_chars {
+          debug_assert!(bufline.len_chars() > 0);
+          if end_char > buffer.last_visible_char_on_line(current_line).unwrap() {
             break;
           }
 
@@ -642,7 +648,8 @@ fn process_line_wrap_linebreak(
           rows.insert(current_row, RowViewport::new(start_char..end_char));
 
           // Goes out of line.
-          if end_char >= bufline.len_chars() {
+          debug_assert!(bufline.len_chars() > 0);
+          if end_char > buffer.last_visible_char_on_line(current_line).unwrap() {
             break;
           }
 

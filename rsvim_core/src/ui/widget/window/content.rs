@@ -565,6 +565,48 @@ mod tests_nowrap {
   }
 
   #[test]
+  fn new6() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(13, 10);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
+    let buffer = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSVIM!",
+      "This is a qui",
+      "But still it ",
+      "  1. When the",
+      "  2. When the",
+      "     * The ex",
+      "     * The ex",
+      "             ",
+      "             ",
+      "             ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+  }
+
+  #[test]
   fn update1() {
     test_log_init();
 
@@ -1501,7 +1543,6 @@ mod tests_wrap_nolinebreak_startcol {
       "ow of the window co",
       "ntent widget, there",
       "'re multiple cases:",
-      "                   ",
       ">        * 如果行换",
       "行和单词换行这两个 ",
       "选项都没有选中，那 ",
@@ -1510,6 +1551,7 @@ mod tests_wrap_nolinebreak_startcol {
       ">        * The extr",
       "a parts are split i",
       "nto the next row, i",
+      "f either line-wrap ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 7);
@@ -1867,7 +1909,6 @@ mod tests_wrap_linebreak {
     );
     let expect = vec![
       "Hello, RSVIM!",
-      "             ",
       "This is a    ",
       "quite simple ",
       "andsmalltestl",
@@ -1887,7 +1928,6 @@ mod tests_wrap_linebreak {
       "several      ",
       "things we    ",
       "want to test:",
-      "             ",
       "  1. When the",
       " line is     ",
       "small enough ",
@@ -1897,6 +1937,8 @@ mod tests_wrap_linebreak {
       "window       ",
       "content      ",
       "widget, 那么 ",
+      "行换行和单词 ",
+      "换行选项都不 ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
@@ -2062,7 +2104,6 @@ mod tests_wrap_linebreak_startcol {
     );
     let expect = vec![
       "lo, RSVIM!",
-      "          ",
       "s is a    ",
       "quite     ",
       "simple and",
@@ -2071,6 +2112,7 @@ mod tests_wrap_linebreak_startcol {
       ".         ",
       " still it ",
       "contains  ",
+      "several   ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 3);
@@ -2105,7 +2147,6 @@ mod tests_wrap_linebreak_startcol {
     );
     let expect = vec![
       "imple and small test lines.",
-      "                           ",
       "ains several things we want",
       " to test:                  ",
       "e is small enough to       ",
@@ -2119,6 +2160,7 @@ mod tests_wrap_linebreak_startcol {
       "the window content widget, ",
       "there're multiple cases:   ",
       "parts are been truncated if",
+      " both line-wrap and word-  ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 1, 17);
@@ -2201,7 +2243,6 @@ mod tests_wrap_linebreak_startcol {
       "several      ",
       "things we    ",
       "want to test:",
-      "             ",
       "hen the line ",
       "is small     ",
       "enough to    ",
@@ -2212,6 +2253,7 @@ mod tests_wrap_linebreak_startcol {
       "content      ",
       "widget, 那么 ",
       "行换行和单词 ",
+      "换行选项都不 ",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 6);
