@@ -3335,7 +3335,6 @@ mod tests_downward_wrap_linebreak {
     );
     let expect = vec![
       "Hello, RSVIM!",
-      "\n",
       "This is a ",
       "quite simple ",
       "andsmalltestl",
@@ -3355,7 +3354,6 @@ mod tests_downward_wrap_linebreak {
       "several ",
       "things we ",
       "want to test:",
-      "\n",
       "  1. When the",
       " line is ",
       "small enough ",
@@ -3367,6 +3365,8 @@ mod tests_downward_wrap_linebreak {
       "widget, 那么",
       "行换行和单词",
       "换行选项都不",
+      "会影响最终的",
+      "渲染效果。\n",
     ];
 
     let window = make_window(terminal_size, buffer.clone(), &win_opts);
@@ -3409,7 +3409,6 @@ mod tests_downward_wrap_linebreak {
     );
     let expect = vec![
       "Hello, RSVIM!",
-      "\n",
       "This is a ",
       "quite simple ",
       "andsmalltestl",
@@ -3429,7 +3428,6 @@ mod tests_downward_wrap_linebreak {
       "several ",
       "things we ",
       "want to test:",
-      "\n",
       "  1. When the",
       " line is ",
       "small enough ",
@@ -3439,6 +3437,9 @@ mod tests_downward_wrap_linebreak {
       "window ",
       "content ",
       "widget, 那么",
+      "行换行和单词",
+      "换行选项都不",
+      // "会影响最终的渲染效果。\n"
     ];
 
     let window = make_window(terminal_size, buffer.clone(), &win_opts);
