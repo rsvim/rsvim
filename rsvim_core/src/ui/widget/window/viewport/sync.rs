@@ -110,6 +110,19 @@ fn slice2line(s: &RopeSlice) -> String {
   builder
 }
 
+fn last_visible_char_on_line(buffer: &Buffer, bline: &RopeSlice) -> usize {
+  let bline_len_chars = bline.len_chars();
+  debug_assert!(bline_len_chars > 0);
+  let mut c = bline_len_chars - 1;
+  while buffer.char_width(bline.get_char(c).unwrap()) == 0 {
+    c = c.saturating_sub(1);
+    if c == 0 {
+      break;
+    }
+  }
+  c
+}
+
 fn end_char_and_prefills(
   buffer: &Buffer,
   bline: &RopeSlice,
@@ -123,8 +136,15 @@ fn end_char_and_prefills(
     let c_width_before = buffer.width_before(l, c);
     (c, end_width.saturating_sub(c_width_before))
   } else {
-    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end char.
-    let c_next = std::cmp::min(c + 1, bline.len_chars() - 1);
+    // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
+    let bline_len_chars = bline.len_chars();
+    debug_assert!(bline_len_chars > 0);
+
+    let next_to_last_visible_char = last_visible_char_on_line(buffer, bline) + 1;
+
+    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
+    // char.
+    let c_next = std::cmp::min(c + 1, next_to_last_visible_char);
     (c_next, 0_usize)
   }
 }
@@ -327,7 +347,7 @@ fn process_line_wrap_nolinebreak(
           rows.insert(current_row, RowViewport::new(start_char..end_char));
 
           // Goes out of line.
-          if end_char >= bufline_len_chars {
+          if end_char >= last_visible_char_on_line(buffer, bufline) + 1 {
             break;
           }
 
