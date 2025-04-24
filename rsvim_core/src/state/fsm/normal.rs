@@ -364,7 +364,7 @@ impl NormalStateful {
     debug_assert!(end_line_idx > start_line_idx);
     debug_assert!(viewport.lines().contains_key(&start_line_idx));
 
-    let start_col = match buffer.char_at(start_line_idx, start_column_idx) {
+    let start_col = match buffer.char_after(start_line_idx, start_column_idx) {
       Some(start_char_idx) => match command {
         Command::CursorMoveLeft(n) => {
           let c = start_char_idx.saturating_sub(n);
@@ -380,20 +380,30 @@ impl NormalStateful {
               .lines()
               .iter()
               .map(|(line_idx, line_viewport)| {
+                trace!("line_idx:{},line_viewport:{:?}", line_idx, line_viewport);
                 debug_assert!(!line_viewport.rows().is_empty());
                 let (_last_row_idx, last_row_viewport) =
                   line_viewport.rows().last_key_value().unwrap();
+                trace!(
+                  "_last_row_idx:{},last_row_viewport:{:?}",
+                  _last_row_idx, last_row_viewport
+                );
                 debug_assert!(buffer.get_rope().get_line(*line_idx).is_some());
-                debug_assert!(buffer.get_rope().line(*line_idx).len_chars() > 0);
-                buffer
-                  .last_char_on_line(*line_idx)
-                  .unwrap()
-                  .saturating_sub(last_row_viewport.end_char_idx())
+                let result = match buffer.last_visible_char_on_line(*line_idx) {
+                  Some(last_char) => {
+                    (last_char + 1).saturating_sub(last_row_viewport.end_char_idx())
+                  }
+                  None => 0_usize,
+                };
+                trace!("result:{}", result);
+                result
               })
               .max();
             debug_assert!(max_scrolls.is_some());
             let max_scrolls = max_scrolls.unwrap();
-            start_column_idx.saturating_add(max_scrolls)
+            let upper_bounded = start_column_idx.saturating_add(max_scrolls);
+            trace!("max_scrolls: upper_bounded:{}", upper_bounded);
+            upper_bounded
           };
           std::cmp::min(expected, upper_bounded)
         }
