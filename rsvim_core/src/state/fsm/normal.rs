@@ -238,7 +238,7 @@ impl NormalStateful {
       Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n),
       Command::CursorMoveRight(n) => {
         let expected = cursor_char_idx.saturating_add(n);
-        let last_char_idx = {
+        let upper_bounded = {
           debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
           let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
           let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
@@ -249,7 +249,7 @@ impl NormalStateful {
           );
           last_visible_char_on_line_since(buffer, cursor_line_idx, last_char_on_row)
         };
-        std::cmp::min(expected, last_char_idx)
+        std::cmp::min(expected, upper_bounded)
       }
       _ => unreachable!(),
     };
@@ -357,7 +357,15 @@ impl NormalStateful {
     command: Command,
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
+    let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
+
+    if end_line_idx == start_line_idx {
+      return None;
+    }
+
+    debug_assert!(end_line_idx > start_line_idx);
+    debug_assert!(viewport.lines().contains_key(&start_line_idx));
 
     let start_col = match buffer.char_at(start_line_idx, start_column_idx) {
       Some(start_char_idx) => match command {
@@ -366,17 +374,28 @@ impl NormalStateful {
           buffer.width_before(start_line_idx, c)
         }
         Command::CursorMoveRight(n) => {
-          debug_assert!(viewport.lines().contains_key(&start_line_idx));
-          let line_viewport = viewport.lines().get(&start_line_idx).unwrap();
-          let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-          let end_char_idx = last_row_viewport.end_char_idx();
-          let expected = end_char_idx.saturating_add(n);
-          let bline = buffer.get_rope().get_line(start_line_idx).unwrap();
-          let end_c = std::cmp::min(bline.len_chars(), expected);
-          let scrolled_right_columns = buffer
-            .width_before(start_line_idx, end_c)
-            .saturating_sub(buffer.width_before(start_line_idx, end_char_idx));
-          start_column_idx.saturating_add(scrolled_right_columns)
+          let expected = start_column_idx.saturating_add(n);
+          let upper_bounded = {
+            // Calculate how many columns that each line (in current viewport) need to scroll until
+            // the their own line's end. This is the upper bound of the actual columns that could
+            // scroll.
+            let max_scrolls = viewport
+              .lines()
+              .iter()
+              .map(|(line_idx, line_viewport)| {
+                debug_assert!(!line_viewport.rows().is_empty());
+                let (_last_row_idx, last_row_viewport) =
+                  line_viewport.rows().last_key_value().unwrap();
+                let scroll = last_char_on_line(buffer, *line_idx)
+                  .saturating_sub(last_row_viewport.end_char_idx());
+                scroll
+              })
+              .max();
+            debug_assert!(max_scrolls.is_some());
+            let max_scrolls = max_scrolls.unwrap();
+            start_column_idx.saturating_add(max_scrolls)
+          };
+          std::cmp::min(expected, upper_bounded)
         }
         _ => unreachable!(),
       },
