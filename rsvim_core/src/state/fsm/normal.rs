@@ -1682,7 +1682,6 @@ mod tests_cursor_scroll_vertically {
         "  2. When ",
         "     * The",
         "     * The",
-        "  3. If a ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
@@ -1718,7 +1717,6 @@ mod tests_cursor_scroll_vertically {
         "     * The",
         "     * The",
         "  3. If a ",
-        "     * The",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
@@ -2627,7 +2625,6 @@ mod tests_cursor_scroll_horizontally {
         "  2. When ",
         "     * The",
         "     * The",
-        "  3. If a ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
@@ -2656,17 +2653,16 @@ mod tests_cursor_scroll_horizontally {
     {
       let viewport = get_viewport(tree);
       let expect = vec![
+        "Hello, RSV",
         "This is a ",
         "But still ",
         "  1. When ",
         "  2. When ",
         "     * The",
         "     * The",
-        "  3. If a ",
-        "     * The",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+        vec![(0,0),(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
 
@@ -2674,8 +2670,8 @@ mod tests_cursor_scroll_horizontally {
         buf.clone(),
         &viewport,
         &expect,
-        1,
-        8,
+        0,
+        7,
         &expect_fills,
         &expect_fills,
       );
