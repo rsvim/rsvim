@@ -386,9 +386,8 @@ impl NormalStateful {
                 debug_assert!(!line_viewport.rows().is_empty());
                 let (_last_row_idx, last_row_viewport) =
                   line_viewport.rows().last_key_value().unwrap();
-                let scroll = last_char_on_line(buffer, *line_idx)
-                  .saturating_sub(last_row_viewport.end_char_idx());
-                scroll
+                last_char_on_line(buffer, *line_idx)
+                  .saturating_sub(last_row_viewport.end_char_idx())
               })
               .max();
             debug_assert!(max_scrolls.is_some());
