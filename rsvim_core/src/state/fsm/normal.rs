@@ -15,10 +15,6 @@ use tracing::trace;
 /// The normal editing mode.
 pub struct NormalStateful {}
 
-fn last_char_on_line(buffer: &Buffer, line_idx: usize) -> usize {
-  buffer.get_rope().line(line_idx).len_chars() - 1
-}
-
 fn last_visible_char_on_line_since(buffer: &Buffer, line_idx: usize, char_idx: usize) -> usize {
   let bline = buffer.get_rope().get_line(line_idx).unwrap();
   let mut c = char_idx;
@@ -31,11 +27,6 @@ fn last_visible_char_on_line_since(buffer: &Buffer, line_idx: usize, char_idx: u
   c
 }
 
-fn last_visible_char_on_line(buffer: &Buffer, line_idx: usize) -> usize {
-  let c = last_char_on_line(buffer, line_idx);
-  last_visible_char_on_line_since(buffer, line_idx, c)
-}
-
 fn adjust_cursor_char_idx_on_vertical_motion(
   buffer: &Buffer,
   cursor_line_idx: usize,
@@ -45,7 +36,11 @@ fn adjust_cursor_char_idx_on_vertical_motion(
   let cursor_col_idx = buffer.width_before(cursor_line_idx, cursor_char_idx);
   let char_idx = match buffer.char_after(line_idx, cursor_col_idx) {
     Some(char_idx) => char_idx,
-    None => last_visible_char_on_line(buffer, line_idx),
+    None => {
+      debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+      debug_assert!(buffer.get_rope().line(line_idx).len_chars() > 0);
+      buffer.last_visible_char_on_line(line_idx).unwrap()
+    }
   };
   trace!(
     "cursor_line_idx:{},cursor_col_idx:{},line_idx:{},char_idx:{}",
@@ -386,7 +381,11 @@ impl NormalStateful {
                 debug_assert!(!line_viewport.rows().is_empty());
                 let (_last_row_idx, last_row_viewport) =
                   line_viewport.rows().last_key_value().unwrap();
-                last_char_on_line(buffer, *line_idx)
+                debug_assert!(buffer.get_rope().get_line(*line_idx).is_some());
+                debug_assert!(buffer.get_rope().line(*line_idx).len_chars() > 0);
+                buffer
+                  .last_char_on_line(*line_idx)
+                  .unwrap()
                   .saturating_sub(last_row_viewport.end_char_idx())
               })
               .max();
