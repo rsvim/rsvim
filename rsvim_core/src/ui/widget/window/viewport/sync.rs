@@ -347,7 +347,7 @@ fn process_line_wrap_nolinebreak(
           rows.insert(current_row, RowViewport::new(start_char..end_char));
 
           // Goes out of line.
-          if end_char >= last_visible_char_on_line(buffer, bufline) + 1 {
+          if end_char > last_visible_char_on_line(buffer, bufline) {
             break;
           }
 
@@ -662,7 +662,7 @@ fn process_line_wrap_linebreak(
           rows.insert(current_row, RowViewport::new(start_char..end_char));
 
           // Goes out of line.
-          if end_char >= last_visible_char_on_line(buffer, bufline) + 1 {
+          if end_char > last_visible_char_on_line(buffer, bufline) {
             break;
           }
 
