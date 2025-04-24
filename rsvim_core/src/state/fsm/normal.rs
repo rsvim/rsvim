@@ -345,6 +345,8 @@ impl NormalStateful {
   }
 
   /// Returns the same as [`Self::_cursor_scroll_vertically`].
+  ///
+  /// NOTE: The `n` inside the command is by columns, not by chars.
   fn _cursor_scroll_horizontally(
     &self,
     viewport: &Viewport,
@@ -2464,7 +2466,7 @@ mod tests_cursor_scroll_horizontally {
   }
 
   #[test]
-  fn _nowrap2() {
+  fn nowrap2() {
     test_log_init();
 
     let lines = vec![
@@ -2530,7 +2532,7 @@ mod tests_cursor_scroll_horizontally {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(1));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2540,13 +2542,13 @@ mod tests_cursor_scroll_horizontally {
       info!("after cursor scroll");
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
+        "ello, RSVI",
+        "his is a q",
+        "ut still i",
+        " 1. When t",
+        " 2. When t",
+        "    * The ",
+        "    * The ",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
