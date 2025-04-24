@@ -3439,7 +3439,6 @@ mod tests_downward_wrap_linebreak {
       "widget, 那么",
       "行换行和单词",
       "换行选项都不",
-      // "会影响最终的渲染效果。\n"
     ];
 
     let window = make_window(terminal_size, buffer.clone(), &win_opts);
@@ -3582,7 +3581,6 @@ mod tests_downward_wrap_linebreak_startcol {
     );
     let expect = vec![
       "lo, RSVIM!",
-      "\n",
       "s is a ",
       "quite ",
       "simple and",
@@ -3591,6 +3589,7 @@ mod tests_downward_wrap_linebreak_startcol {
       ".\n",
       " still it ",
       "contains ",
+      "several ",
     ];
 
     let mut window = make_window(terminal_size, buffer.clone(), &win_opts);
