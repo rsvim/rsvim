@@ -27,18 +27,8 @@ toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
 
-# windows && aarch64
-[target.'cfg(all(target_os = "windows", target_arch = "aarch64"))'.dependencies]
-mimalloc-safe = { workspace = true, features = [
-  "no_opt_arch",
-], optional = true }
-
-# windows && !aarch64
-[target.'cfg(all(target_os = "windows", not(target_arch = "aarch64")))'.dependencies]
-mimalloc-safe = { workspace = true, optional = true }
-
-# linux && !aarch64
-[target.'cfg(all(target_os = "linux", not(target_arch = "aarch64")))'.dependencies]
+# (linux && !aarch64) || freebsd
+[target.'cfg(any(all(target_os = "linux", not(target_arch = "aarch64")), target_os = "freebsd"))'.dependencies]
 mimalloc-safe = { workspace = true, features = [
   "local_dynamic_tls",
 ], optional = true }
@@ -50,8 +40,8 @@ mimalloc-safe = { workspace = true, features = [
   "no_opt_arch",
 ], optional = true }
 
-# !linux && !windows
-[target.'cfg(not(any(target_os = "linux", target_os = "windows")))'.dependencies]
+# !linux && !freebsd && !wasm
+[target.'cfg(all(not(target_os = "linux"), not(target_os = "freebsd"), not(target_family="wasm")))'.dependencies]
 mimalloc-safe = { workspace = true, optional = true }
 
 [build-dependencies]
