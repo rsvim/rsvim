@@ -2,9 +2,9 @@
 //!
 //! See [rsvim_core] for more details.
 
-#[cfg(all(feature = "allocator", not(target_family = "wasm")))]
-#[global_allocator]
-static ALLOC: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
+// #[cfg(all(feature = "allocator", not(target_family = "wasm")))]
+// #[global_allocator]
+// static ALLOC: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
 
 use rsvim_core::cli::CliOpt;
 use rsvim_core::evloop::EventLoop;
