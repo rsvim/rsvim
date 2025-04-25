@@ -27,12 +27,14 @@ toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
 
-# windows
-[target.'cfg(target_os = "windows")'.dependencies]
-mimalloc = { workspace = true, optional = true }
+# windows && aarch64
+[target.'cfg(all(target_os = "windows", target_arch = "aarch64"))'.dependencies]
+mimalloc-safe = { workspace = true, features = [
+  "no_opt_arch",
+], optional = true }
 
-# !linux && !windows
-[target.'cfg(not(any(target_os = "linux", target_os = "windows")))'.dependencies]
+# windows && !aarch64
+[target.'cfg(all(target_os = "windows", not(target_arch = "aarch64")))'.dependencies]
 mimalloc-safe = { workspace = true, optional = true }
 
 # linux && !aarch64
@@ -47,6 +49,10 @@ mimalloc-safe = { workspace = true, features = [
   "local_dynamic_tls",
   "no_opt_arch",
 ], optional = true }
+
+# !linux && !windows
+[target.'cfg(not(any(target_os = "linux", target_os = "windows")))'.dependencies]
+mimalloc-safe = { workspace = true, optional = true }
 
 [build-dependencies]
 rsvim_core = { workspace = true }
