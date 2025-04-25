@@ -2940,7 +2940,7 @@ mod tests_cursor_scroll_horizontally {
   }
 
   #[test]
-  fn _nowrap6() {
+  fn nowrap6() {
     test_log_init();
 
     let lines = vec![
@@ -3189,7 +3189,7 @@ mod tests_cursor_scroll_horizontally {
   }
 
   #[test]
-  fn _wrap1() {
+  fn wrap1() {
     test_log_init();
 
     let lines = vec![
@@ -3254,7 +3254,7 @@ mod tests_cursor_scroll_horizontally {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(4));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3263,29 +3263,30 @@ mod tests_cursor_scroll_horizontally {
     {
       let viewport = get_viewport(tree);
       let expect = vec![
-        "  2. When the l",
-        "ine is too long",
-        " to be complete",
-        "ly put in a row",
-        " of the window ",
-        "content widget,",
-        " there're multi",
-        "ple cases:\n",
-        "     * The extr",
-        "a parts are bee",
-        "n truncated if ",
-        "both line-wrap ",
-        "and word-wrap o",
-        "ptions are not ",
-        "set.\n",
+        "o, RSVIM!\n",
+        " is a quite sim",
+        "ple and small t",
+        "est lines.\n",
+        "still it contai",
+        "ns several thin",
+        "gs we want to t",
+        "est:\n",
+        " When the line ",
+        "is small enough",
+        " to completely ",
+        "put inside a ro",
+        "w of the window",
+        " content widget",
+        ", then the line",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
+        0,
         4,
-        6,
         &expect_fills,
         &expect_fills,
       );
@@ -3359,7 +3360,7 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(8));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(8));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3368,29 +3369,30 @@ mod tests_cursor_scroll_horizontally {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "     * The char",
-        " exactly ends a",
-        "t the end of th",
-        "e row, i.e. the",
-        " last display c",
-        "olumn of the ch",
-        "ar is exactly t",
-        "he last column ",
-        "on the row. In ",
-        "this case, we a",
-        "re happy becaus",
-        "e the char can ",
-        "be put at the e",
-        "nd of the row.\n",
-        "     * The char",
+        "SVIM!\n",
+        "a quite simple ",
+        "and small test ",
+        "lines.\n",
+        "l it contains s",
+        "everal things w",
+        "e want to test:",
+        "n the line is s",
+        "mall enough to ",
+        "completely put ",
+        "inside a row of",
+        " the window con",
+        "tent widget, th",
+        "en the line-wra",
+        "p and word-wrap",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        8,
-        10,
+        0,
+        4,
         &expect_fills,
         &expect_fills,
       );
@@ -3399,7 +3401,7 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(1));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3408,29 +3410,32 @@ mod tests_cursor_scroll_horizontally {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "     * The char",
-        " is too long to",
-        " put at the end",
-        " of the row, th",
-        "us we will have",
-        " to put the cha",
-        "r to the beginn",
-        "ing of the next",
-        " row (because w",
-        "e don't cut a s",
-        "ingle char into",
-        " pieces)\n",
-        "",
-        "",
-        "",
+        "VIM!\n",
+        " quite simple a",
+        "nd small test l",
+        "ines.\n",
+        " it contains se",
+        "veral things we",
+        " want to test:\n",
+        " the line is sm",
+        "all enough to c",
+        "ompletely put i",
+        "nside a row of ",
+        "the window cont",
+        "ent widget, the",
+        "n the line-wrap",
+        " and word-wrap ",
+        "doesn't affect ",
+        "the rendering.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(9, 0), (10, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        9,
-        11,
+        0,
+        4,
         &expect_fills,
         &expect_fills,
       );
@@ -3439,7 +3444,7 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(3));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(3));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3448,29 +3453,32 @@ mod tests_cursor_scroll_horizontally {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "     * The char",
-        " is too long to",
-        " put at the end",
-        " of the row, th",
-        "us we will have",
-        " to put the cha",
-        "r to the beginn",
-        "ing of the next",
-        " row (because w",
-        "e don't cut a s",
-        "ingle char into",
-        " pieces)\n",
-        "",
-        "",
-        "",
+        "!\n",
+        "ite simple and ",
+        "small test line",
+        "s.\n",
+        " contains sever",
+        "al things we wa",
+        "nt to test:\n",
+        "e line is small",
+        " enough to comp",
+        "letely put insi",
+        "de a row of the",
+        " window content",
+        " widget, then t",
+        "he line-wrap an",
+        "d word-wrap doe",
+        "sn't affect the",
+        " rendering.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(9, 0), (10, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        9,
-        11,
+        0,
+        4,
         &expect_fills,
         &expect_fills,
       );
@@ -3479,7 +3487,7 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveUp(2));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveLeft(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3488,29 +3496,32 @@ mod tests_cursor_scroll_horizontally {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "  3. If a singl",
-        "e char needs mu",
-        "ltiple cells to",
-        " display on the",
-        " window, and it",
-        " happens the ch",
-        "ar is at the en",
-        "d of the row, t",
-        "here can be mul",
-        "tiple cases:\n",
-        "     * The char",
-        " exactly ends a",
-        "t the end of th",
-        "e row, i.e. the",
-        " last display c",
+        "M!\n",
+        "uite simple and",
+        " small test lin",
+        "es.\n",
+        "t contains seve",
+        "ral things we w",
+        "ant to test:\n",
+        "he line is smal",
+        "l enough to com",
+        "pletely put ins",
+        "ide a row of th",
+        "e window conten",
+        "t widget, then ",
+        "the line-wrap a",
+        "nd word-wrap do",
+        "esn't affect th",
+        "e rendering.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(7, 0), (8, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        7,
-        9,
+        0,
+        4,
         &expect_fills,
         &expect_fills,
       );
