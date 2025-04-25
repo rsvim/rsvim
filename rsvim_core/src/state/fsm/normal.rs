@@ -3012,7 +3012,7 @@ mod tests_cursor_scroll_horizontally {
         " When the ",
         " When the ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
 
@@ -3020,8 +3020,8 @@ mod tests_cursor_scroll_horizontally {
         buf.clone(),
         &viewport,
         &expect,
-        4,
-        9,
+        0,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -3044,15 +3044,16 @@ mod tests_cursor_scroll_horizontally {
         "n the line",
         "n the line",
       ];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(8, 0), (9, 0), (10, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
 
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        8,
-        11,
+        0,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -3075,15 +3076,16 @@ mod tests_cursor_scroll_horizontally {
         "en the lin",
         "en the lin",
       ];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(7, 0), (8, 0), (9, 0), (10, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
 
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        7,
-        11,
+        0,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -3106,7 +3108,7 @@ mod tests_cursor_scroll_horizontally {
         ". When the",
         ". When the",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
 
@@ -3114,8 +3116,8 @@ mod tests_cursor_scroll_horizontally {
         buf.clone(),
         &viewport,
         &expect,
-        3,
-        8,
+        0,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -3138,7 +3140,7 @@ mod tests_cursor_scroll_horizontally {
         "1. When th",
         "2. When th",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
 
@@ -3146,8 +3148,8 @@ mod tests_cursor_scroll_horizontally {
         buf.clone(),
         &viewport,
         &expect,
-        2,
-        7,
+        0,
+        5,
         &expect_fills,
         &expect_fills,
       );
