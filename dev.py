@@ -107,6 +107,27 @@ def build(release, recache, features, all_features):
     os.system(command)
 
 
+def deps(features, all_features):
+    flags = ""
+    if all_features:
+        flags = " --all-features"
+        deps = f"deps_with_all_features.txt"
+    elif len(features) > 0:
+        flags = " ".join([f"--features {f}" for f in features])
+        flags = f" {flags}"
+        deps = "-".join([f for f in features])
+        deps = f"deps_with_{deps}.txt"
+    else:
+        flags = ""
+        deps = f"deps.txt"
+
+    command = f"cargo tree{flags} -e features>{deps}"
+
+    command = command.strip()
+    print(command)
+    os.system(command)
+
+
 def doc(watch):
     command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim --no-open"
     if watch:
@@ -246,6 +267,25 @@ if __name__ == "__main__":
         help="Execute `cargo release` with `--no-verify`",
     )
 
+    deps_subparser = subparsers.add_parser(
+        "deps",
+        help="Run `cargo tree -e features` to dump all dependencies",
+    )
+    deps_subparser.add_argument(
+        "-f",
+        "--features",
+        nargs="*",
+        default=[],
+        help="Execute `cargo tree -e features` with `--features`",
+    )
+    deps_subparser.add_argument(
+        "-a",
+        "--all-features",
+        dest="all_features",
+        action="store_true",
+        help="Execute `cargo tree -e features` with `--all-features`",
+    )
+
     parser = parser.parse_args()
     # print(parser)
 
@@ -262,5 +302,7 @@ if __name__ == "__main__":
         doc(parser.watch)
     elif parser.subcommand == "release" or parser.subcommand == "r":
         release(parser.level, parser.execute)
+    elif parser.subcommand == "deps":
+        deps(parser.features, parser.all_features)
     else:
         print("Error: missing arguments, use -h/--help for more details.")

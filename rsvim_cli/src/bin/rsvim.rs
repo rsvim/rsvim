@@ -2,11 +2,11 @@
 //!
 //! See [rsvim_core] for more details.
 
-#[cfg(not(target_os = "windows"))]
+#[cfg(all(not(target_os = "windows"), feature = "allocator"))]
 #[global_allocator]
 static ALLOC: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
 
-#[cfg(target_os = "windows")]
+#[cfg(all(target_os = "windows", feature = "allocator"))]
 #[global_allocator]
 static ALLOC: mimalloc::MiMalloc = mimalloc::MiMalloc;
 
