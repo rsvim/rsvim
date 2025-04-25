@@ -2999,18 +2999,18 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(4));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "  2. When ",
-        "     * The",
-        "     * The",
-        "  3. If a ",
-        "     * The",
+        "o, RSVIM!\n",
+        " is a quit",
+        "still it c",
+        " When the ",
+        " When the ",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
         .into_iter()
@@ -3031,13 +3031,19 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveDown(4));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveRight(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["     * The", "     * The", "", "", ""];
+      let expect = vec![
+        "SVIM!\n",
+        "a quite si",
+        "l it conta",
+        "n the line",
+        "n the line",
+      ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(8, 0), (9, 0), (10, 0)].into_iter().collect();
 
@@ -3056,13 +3062,19 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveUp(1));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveLeft(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["  3. If a ", "     * The", "     * The", "", ""];
+      let expect = vec![
+        "RSVIM!\n",
+        " a quite s",
+        "ll it cont",
+        "en the lin",
+        "en the lin",
+      ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(7, 0), (8, 0), (9, 0), (10, 0)].into_iter().collect();
 
@@ -3081,18 +3093,18 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveUp(4));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveLeft(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
-        "  3. If a ",
+        "lo, RSVIM!",
+        "s is a qui",
+        " still it ",
+        ". When the",
+        ". When the",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
@@ -3113,18 +3125,18 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveUp(1));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveLeft(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
+        "llo, RSVIM",
+        "is is a qu",
+        "t still it",
+        "1. When th",
+        "2. When th",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
@@ -3145,7 +3157,7 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveUp(3));
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveLeft(3));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
