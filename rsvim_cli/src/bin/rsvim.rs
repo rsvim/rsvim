@@ -2,6 +2,12 @@
 //!
 //! See [rsvim_core] for more details.
 
+use mimalloc_safe::MiMalloc;
+
+#[cfg(feature = "allocator")]
+#[global_allocator]
+static GLOBAL: MiMalloc = MiMalloc;
+
 use rsvim_core::cli::CliOpt;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::{SnapshotData, v8_version};

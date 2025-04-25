@@ -368,6 +368,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6"
 
 [[package]]
+name = "cmake"
+version = "0.1.54"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e7caa3f9de89ddbe2c607f4101924c5abec803763ae9534e4f4d7d8f84aa81f0"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "colorchoice"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1338,6 +1347,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4ec2a862134d2a7d32d7983ddcdd1c4923530833c9f2ea1a44fc5fa473989058"
 
 [[package]]
+name = "libmimalloc-sys2"
+version = "0.1.47"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8fafa21713ec3fb5eb3e7774bf88e545225f1a85eae6881ca3ffb1f7aaee1d0"
+dependencies = [
+ "cmake",
+ "libc",
+]
+
+[[package]]
 name = "libredox"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1410,6 +1429,15 @@ name = "memchr"
 version = "2.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6c8640c5d730cb13ebd907d8d04b52f55ac9a2eec55b440c8892f40d56c76c1d"
+
+[[package]]
+name = "mimalloc-safe"
+version = "0.1.51"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1d3e28f6a7b2f19aa1257bfabd5ade912dd5b980d2d72456db73586343bd9016"
+dependencies = [
+ "libmimalloc-sys2",
+]
 
 [[package]]
 name = "minimal-lexical"
@@ -1917,6 +1945,7 @@ name = "rsvim"
 version = "0.1.1-alpha.8"
 dependencies = [
  "clap",
+ "mimalloc-safe",
  "once_cell",
  "rsvim_core",
  "tokio",

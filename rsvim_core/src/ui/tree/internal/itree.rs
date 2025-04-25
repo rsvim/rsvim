@@ -689,8 +689,7 @@ where
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
   pub fn move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
-    self._internal_check();
-    let result = match self.nodes.get_mut(&id) {
+    match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
         let current_top_left_pos: IPos = current_shape.min().into();
@@ -701,10 +700,7 @@ where
         )
       }
       None => None,
-    };
-
-    self._internal_check();
-    result
+    }
   }
 
   /// Bounded move node by distance `(x, y)`, the `x`/`y` is the motion distances.
@@ -773,8 +769,7 @@ where
   /// 1. The new shape after movement if successfully.
   /// 2. `None` if the node `id` doesn't exist.
   pub fn move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
-    self._internal_check();
-    let result = match self.nodes.get_mut(&id) {
+    match self.nodes.get_mut(&id) {
       Some(node) => {
         let current_shape = *node.shape();
         let next_top_left_pos: IPos = point!(x: x, y: y);
@@ -790,10 +785,7 @@ where
         Some(next_shape)
       }
       None => None,
-    };
-
-    self._internal_check();
-    result
+    }
   }
 
   /// Bounded move node to position `(x, y)`, the `(x, y)` is the new position.
