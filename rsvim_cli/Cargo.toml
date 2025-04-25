@@ -19,7 +19,9 @@ default = []
 allocator = ["dep:mimalloc-safe"]
 
 [dependencies]
-mimalloc-safe = { workspace = true, optional = true }
+mimalloc-safe = { workspace = true, features = [
+  "skip_collect_on_exit",
+], optional = true }
 rsvim_core = { workspace = true }
 tracing = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
