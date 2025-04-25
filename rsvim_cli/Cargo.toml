@@ -27,19 +27,24 @@ toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
 
-# !linux && !freebsd && !arm && !wasm
-[target.'cfg(all(not(target_os = "linux"), not(target_os = "freebsd"), not(target_arch = "arm"), not(target_family = "wasm")))'.dependencies]
-mimalloc-safe = { workspace = true, features = [
-  "skip_collect_on_exit",
-], optional = true }
+# windows
+[target.'cfg(target_os = "windows")'.dependencies]
+mimalloc = "0.1.45"
 
-# (linux && !arm) || freebsd
-[target.'cfg(any(all(target_os = "linux", not(target_arch = "arm")), target_os = "freebsd"))'.dependencies]
-mimalloc-safe = { workspace = true, features = [
-  "skip_collect_on_exit",
+# !linux && !windows
+[target.'cfg(not(any(target_os = "linux", target_os = "windows")))'.dependencies]
+mimalloc-safe = "0.1"
+
+# linux && !aarch64
+[target.'cfg(all(target_os = "linux", not(target_arch = "aarch64")))'.dependencies]
+mimalloc-safe = { version = "0.1", features = ["local_dynamic_tls"] }
+
+# linux && aarch64
+[target.'cfg(all(target_os = "linux", target_arch = "aarch64"))'.dependencies]
+mimalloc-safe = { version = "0.1", features = [
   "local_dynamic_tls",
-], optional = true }
-
+  "no_opt_arch",
+] }
 
 [build-dependencies]
 rsvim_core = { workspace = true }
