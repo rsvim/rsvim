@@ -16,7 +16,6 @@ description = "The command line(s) for the RSVIM editor."
 
 [features]
 default = []
-allocator = ["dep:mimalloc-safe"]
 
 [dependencies]
 rsvim_core = { workspace = true }
@@ -26,27 +25,6 @@ clap = { workspace = true, features = ["derive", "unicode"] }
 toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
-
-# linux && !arm && !aarch64
-[target.'cfg(all(target_os = "linux", not(target_arch = "arm"), not(target_arch = "aarch64")))'.dependencies]
-mimalloc-safe = { workspace = true, features = [
-  "skip_collect_on_exit",
-  "local_dynamic_tls",
-], optional = true }
-
-# linux && aarch64
-[target.'cfg(all(target_os = "linux", target_arch = "aarch64"))'.dependencies]
-mimalloc-safe = { workspace = true, features = [
-  "skip_collect_on_exit",
-  "local_dynamic_tls",
-  "no_opt_arch",
-], optional = true }
-
-# !linux && !arm && !freebsd && !wasm
-[target.'cfg(all(not(target_os = "linux"), not(target_arch = "arm"), not(target_os = "freebsd"), not(target_family="wasm")))'.dependencies]
-mimalloc-safe = { workspace = true, features = [
-  "skip_collect_on_exit",
-], optional = true }
 
 [build-dependencies]
 rsvim_core = { workspace = true }
