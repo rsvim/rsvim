@@ -2,6 +2,7 @@
 //!
 //! See [rsvim_core] for more details.
 
+#[cfg(feature = "allocator")]
 use mimalloc_safe::MiMalloc;
 
 #[cfg(feature = "allocator")]
