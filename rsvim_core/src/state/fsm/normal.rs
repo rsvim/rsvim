@@ -378,11 +378,11 @@ impl NormalStateful {
               trace!("line_idx:{},line_viewport:{:?}", line_idx, line_viewport);
               debug_assert!(!line_viewport.rows().is_empty());
               let (_last_row_idx, last_row_viewport) =
-                  line_viewport.rows().last_key_value().unwrap();
+                line_viewport.rows().last_key_value().unwrap();
               trace!(
-                  "_last_row_idx:{},last_row_viewport:{:?}",
-                  _last_row_idx, last_row_viewport
-                );
+                "_last_row_idx:{},last_row_viewport:{:?}",
+                _last_row_idx, last_row_viewport
+              );
               debug_assert!(buffer.get_rope().get_line(*line_idx).is_some());
               // If `last_row_viewport` is empty, i.e. the `end_char_idx == start_char_idx`, the scrolls is 0.
               if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
@@ -395,13 +395,13 @@ impl NormalStateful {
                     );
                     let column_difference = last_visible_col.saturating_sub(last_col_on_row);
                     trace!(
-                        "last_visible_c:{},last_row_viewport.end_char_idx:{},last_visible_col:{},last_col_on_row:{},column_difference:{}",
-                        last_visible_c,
-                        last_row_viewport.end_char_idx(),
-                        last_visible_col,
-                        last_col_on_row,
-                        column_difference
-                      );
+                      "last_visible_c:{},last_row_viewport.end_char_idx:{},last_visible_col:{},last_col_on_row:{},column_difference:{}",
+                      last_visible_c,
+                      last_row_viewport.end_char_idx(),
+                      last_visible_col,
+                      last_col_on_row,
+                      column_difference
+                    );
                     column_difference
                   }
                   None => 0_usize,
@@ -2896,6 +2896,33 @@ mod tests_cursor_scroll_horizontally {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "", "rendering.", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful = stateful_machine._cursor_scroll(&data_access, Command::CursorMoveLeft(10));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+
+    // Scroll-4
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["", "", "", "ffect the ", ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
