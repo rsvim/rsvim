@@ -19,9 +19,6 @@ default = []
 allocator = ["dep:mimalloc-safe"]
 
 [dependencies]
-mimalloc-safe = { workspace = true, features = [
-  "skip_collect_on_exit",
-], optional = true }
 rsvim_core = { workspace = true }
 tracing = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
@@ -29,6 +26,20 @@ clap = { workspace = true, features = ["derive", "unicode"] }
 toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
+
+# !linux && !freebsd && !arm && !wasm
+[target.'cfg(all(not(target_os = "linux"), not(target_os = "freebsd"), not(target_arch = "arm"), not(target_family = "wasm")))'.dependencies]
+mimalloc-safe = { workspace = true, features = [
+  "skip_collect_on_exit",
+], optional = true }
+
+# (linux && !arm) || freebsd
+[target.'cfg(any(all(target_os = "linux", not(target_arch = "arm")), target_os = "freebsd"))'.dependencies]
+mimalloc-safe = { workspace = true, features = [
+  "skip_collect_on_exit",
+  "local_dynamic_tls",
+], optional = true }
+
 
 [build-dependencies]
 rsvim_core = { workspace = true }
