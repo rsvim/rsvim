@@ -3294,7 +3294,7 @@ mod tests_cursor_scroll_horizontally {
   }
 
   #[test]
-  fn _wrap2() {
+  fn wrap2() {
     test_log_init();
 
     let lines = vec![
