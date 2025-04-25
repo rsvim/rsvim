@@ -16,7 +16,7 @@ description = "The command line(s) for the RSVIM editor."
 
 [features]
 default = []
-allocator = ["dep:mimalloc", "dep:mimalloc-safe"]
+allocator = ["dep:mimalloc-safe"]
 
 [dependencies]
 rsvim_core = { workspace = true }
