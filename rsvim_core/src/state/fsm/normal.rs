@@ -255,13 +255,13 @@ impl NormalStateful {
         let (column_idx, line_idx) = match command {
           Command::WindowScrollBy((x, y)) => {
             let column_idx = if x != 0 {
-              self._window_scroll_horizontally_by(&viewport, &buffer, x)
+              self._window_scroll_x_by(&viewport, &buffer, x)
             } else {
               viewport.start_column_idx()
             };
 
             let line_idx = if y != 0 {
-              self._window_scroll_vertically_by(&viewport, &buffer, y)
+              self._window_scroll_y_by(&viewport, &buffer, y)
             } else {
               viewport.start_line_idx()
             };
@@ -294,7 +294,7 @@ impl NormalStateful {
 
   // Scroll window vertically by `y`, relatively based on current window viewport.
   // Returns the `start_line_idx`/`start_column_idx` for viewport.
-  fn _window_scroll_vertically_by(&self, viewport: &Viewport, buffer: &Buffer, y: isize) -> usize {
+  fn _window_scroll_y_by(&self, viewport: &Viewport, buffer: &Buffer, y: isize) -> usize {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
@@ -311,7 +311,7 @@ impl NormalStateful {
 
   // Calculate how many columns that each line (in current viewport) need to scroll until their own
   // line's end. This is the upper bound of the actual columns that could scroll.
-  fn _window_scroll_horizontally_max_scrolls(&self, viewport: &Viewport, buffer: &Buffer) -> usize {
+  fn _window_scroll_x_max_scrolls(&self, viewport: &Viewport, buffer: &Buffer) -> usize {
     let mut max_scrolls = 0_usize;
     for (line_idx, line_viewport) in viewport.lines().iter() {
       trace!("line_idx:{},line_viewport:{:?}", line_idx, line_viewport);
@@ -355,12 +355,7 @@ impl NormalStateful {
   // Returns the `start_line_idx`/`start_column_idx` for viewport.
   //
   // NOTE: The `x` is columns, not chars.
-  fn _window_scroll_horizontally_by(
-    &self,
-    viewport: &Viewport,
-    buffer: &Buffer,
-    x: isize,
-  ) -> usize {
+  fn _window_scroll_x_by(&self, viewport: &Viewport, buffer: &Buffer, x: isize) -> usize {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
@@ -404,7 +399,7 @@ impl NormalStateful {
     };
 
     let column_idx = {
-      let max_scrolls = self._window_scroll_horizontally_max_scrolls(viewport, buffer);
+      let max_scrolls = self._window_scroll_x_max_scrolls(viewport, buffer);
       let upper_bounded = start_column_idx.saturating_add(max_scrolls);
       trace!(
         "max_scrolls:{},upper_bounded:{}",
