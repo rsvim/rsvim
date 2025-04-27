@@ -2,10 +2,6 @@
 //!
 //! See [rsvim_core] for more details.
 
-// #[cfg(all(feature = "allocator", not(target_family = "wasm")))]
-// #[global_allocator]
-// static ALLOC: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
-
 use rsvim_core::cli::CliOpt;
 use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::{SnapshotData, v8_version};
