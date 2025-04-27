@@ -1622,7 +1622,7 @@ mod tests_cursor_move_to {
   }
 
   #[test]
-  fn _nowrap4() {
+  fn nowrap4() {
     test_log_init();
 
     let lines = vec![
