@@ -313,9 +313,10 @@ impl NormalStateful {
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
+    let start_column_idx = viewport.start_column_idx();
     let buffer_len_lines = buffer.get_rope().len_lines();
 
-    let expected_y = if y < 0 {
+    let line_idx = if y < 0 {
       let n = -y as usize;
       start_line_idx.saturating_sub(n)
     } else {
@@ -329,7 +330,7 @@ impl NormalStateful {
       start_line_idx.saturating_add(n)
     };
 
-    self._window_scroll_to(viewport, buffer, start_line_idx, expected_y)
+    self._window_scroll_to(viewport, buffer, start_column_idx, line_idx)
   }
 
   // // Scroll window vertically to `y`, absolutely.
@@ -429,7 +430,7 @@ impl NormalStateful {
     debug_assert!(end_line_idx > start_line_idx);
     debug_assert!(viewport.lines().contains_key(&start_line_idx));
 
-    let expected_x = if x < 0 {
+    let column_idx = if x < 0 {
       let n = -x as usize;
       start_column_idx.saturating_sub(n)
     } else {
@@ -437,7 +438,7 @@ impl NormalStateful {
       start_column_idx.saturating_add(n)
     };
 
-    self._window_scroll_to(viewport, buffer, expected_x, start_column_idx)
+    self._window_scroll_to(viewport, buffer, column_idx, start_line_idx)
   }
 
   // // Scroll window horizontally to `x`, absolutely.
@@ -487,12 +488,6 @@ impl NormalStateful {
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
     let buffer_len_lines = buffer.get_rope().len_lines();
-
-    if end_line_idx == start_line_idx {
-      return None;
-    }
-    debug_assert!(end_line_idx > start_line_idx);
-    debug_assert!(viewport.lines().contains_key(&start_line_idx));
 
     let line_idx = {
       // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
