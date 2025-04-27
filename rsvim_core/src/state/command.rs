@@ -11,9 +11,21 @@
 #[derive(Debug, Copy, Clone)]
 // Editor operation commands.
 pub enum Command {
-  CursorMoveUp(usize),
-  CursorMoveDown(usize),
-  CursorMoveLeft(usize),
-  CursorMoveRight(usize),
-  QuitEditor,
+  /// Move cursor by offset `(x,y)`, relatively based on current cursor position.
+  /// The `x` is chars count, `y` is lines count.
+  ///
+  /// NOTE: When the cursor moves to a position out of current window, it scrolls the window's
+  /// viewport.
+  CursorMoveBy((isize, isize)),
+
+  /// Similar to [`Command::CursorMoveBy`], but it moves cursor to an absolute position based on
+  /// current buffer.
+  /// The `x` is char index, `y` is line index.
+  ///
+  /// NOTE: When the cursor moves to a position out of current window, it scrolls the window's
+  /// viewport.
+  CursorMoveTo((usize, usize)),
+
+  /// Quit editor
+  EditorQuit,
 }
