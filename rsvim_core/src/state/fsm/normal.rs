@@ -214,16 +214,20 @@ impl NormalStateful {
       cursor_line_idx, cursor_char_idx, line_idx
     );
 
-    // If the target `line_idx` doesn't exists or empty, early return.
     match buffer.get_rope().get_line(line_idx) {
       Some(line) => {
-        trace!("line.len_chars:{}", line.len_chars());
         if line.len_chars() == 0 {
-          return None;
+          if line_idx == cursor_line_idx {
+            // If the `line_idx` is current cursor line, don't move.
+            return None;
+          } else {
+            // If the `line_idx` is empty, move `char_idx` to 0.
+            return Some((line_idx, 0_usize));
+          }
         }
       }
       None => {
-        trace!("get_line not found:{}", line_idx);
+        // If the `line_idx` doesn't exist, don't move.
         return None;
       }
     }
@@ -245,6 +249,7 @@ impl NormalStateful {
       std::cmp::min(x, upper_bounded)
     };
 
+    // If the `line_idx`/`char_idx` is current cursor line/char, don't move.
     if line_idx == cursor_line_idx && char_idx == cursor_char_idx {
       return None;
     }
@@ -1546,7 +1551,7 @@ mod tests_cursor_move_to {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveTo((7, 1)));
+    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveTo((1, 7)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
