@@ -1708,8 +1708,7 @@ mod tests_cursor_scroll_vertically {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowSrollBy((0, 1)));
+    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveBy((0, 1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
