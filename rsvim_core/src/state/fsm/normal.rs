@@ -4334,15 +4334,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-1
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 4)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 4)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "  2. When ",
@@ -4367,15 +4371,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-2
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 4)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 8)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec!["     * The", "     * The", "", "", ""];
       let expect_fills: BTreeMap<usize, usize> =
@@ -4393,15 +4401,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-3
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -1)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 7)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec!["  3. If a ", "     * The", "     * The", "", ""];
       let expect_fills: BTreeMap<usize, usize> =
@@ -4419,15 +4431,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-4
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -4)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 3)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "  1. When ",
@@ -4452,15 +4468,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-5
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -1)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 2)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "But still ",
@@ -4485,15 +4505,15 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-6
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -3)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access =
+        StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 0)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree);
       let expect = vec![
         "Hello, RSV",
