@@ -345,8 +345,8 @@ impl NormalStateful {
 
     let char_idx = {
       let upper_bounded = {
-        debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
-        let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
+        debug_assert!(viewport.lines().contains_key(&line_idx));
+        let line_viewport = viewport.lines().get(&line_idx).unwrap();
         let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
         let last_char_on_row = last_row_viewport.end_char_idx() - 1;
         trace!(
@@ -354,7 +354,7 @@ impl NormalStateful {
           cursor_char_idx, x, last_row_viewport, last_char_on_row
         );
         buffer
-          .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
+          .last_visible_char_on_line_since(line_idx, last_char_on_row)
           .unwrap()
       };
       std::cmp::min(x, upper_bounded)
