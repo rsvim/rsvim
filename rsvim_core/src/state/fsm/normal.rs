@@ -5988,8 +5988,6 @@ mod tests_window_scroll_to {
         "ent widget, the",
         "n the line-wrap",
         " and word-wrap ",
-        "doesn't affect ",
-        "the rendering.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -6036,8 +6034,6 @@ mod tests_window_scroll_to {
         " widget, then t",
         "he line-wrap an",
         "d word-wrap doe",
-        "sn't affect the",
-        " rendering.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -6084,8 +6080,6 @@ mod tests_window_scroll_to {
         "t widget, then ",
         "the line-wrap a",
         "nd word-wrap do",
-        "esn't affect th",
-        "e rendering.\n",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
