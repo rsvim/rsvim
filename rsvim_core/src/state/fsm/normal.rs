@@ -89,20 +89,8 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  /// Cursor move up/down/left/right in current window, or scroll buffer up/down if it reaches the
-  /// top/bottom of the window and the buffer has more contents.
-  fn _cursor_move_or_scroll(
-    &self,
-    _data_access: &StatefulDataAccess,
-    _command: Command,
-  ) -> StatefulValue {
-    StatefulValue::NormalMode(NormalStateful::default())
-  }
-
-  /// Cursor move up/down/left/right in current window.
-  /// NOTE: This will not scroll the buffer if cursor reaches the top/bottom of the window.
-  ///
-  /// Also see [`NormalStateful::cursor_move_with_scroll`].
+  /// Cursor move in current window.
+  /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
@@ -149,7 +137,7 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  // Returns the `line_idx` and `char_idx` for new cursor position.
+  // Returns the `line_idx`/`char_idx` for new cursor position.
   // NOTE: `y` is lines count.
   fn _cursor_move_y_by(
     &self,
@@ -202,7 +190,7 @@ impl NormalStateful {
     Some((line_idx, char_idx))
   }
 
-  // Returns the `line_idx` and `char_idx` for new cursor position.
+  // Returns the `line_idx`/`char_idx` for new cursor position.
   // NOTE: `x` is chars count.
   fn _cursor_move_x_by(
     &self,
@@ -248,7 +236,7 @@ impl NormalStateful {
     Some((cursor_line_idx, char_idx))
   }
 
-  /// Cursor scroll buffer up/down in current window.
+  /// Window scrolls buffer content.
   fn _window_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
@@ -296,7 +284,7 @@ impl NormalStateful {
   }
 
   /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-  /// NOTE: `y` is the lines count
+  /// NOTE: `y` is the lines count.
   fn _window_scroll_y_by(
     &self,
     viewport: &Viewport,
@@ -386,7 +374,7 @@ impl NormalStateful {
   }
 
   /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-  /// NOTE: `x` is the columns count
+  /// NOTE: `x` is the columns count (not chars).
   fn _window_scroll_x_by(
     &self,
     viewport: &Viewport,
