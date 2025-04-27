@@ -127,14 +127,7 @@ impl NormalStateful {
             }
           }
           Command::CursorMoveTo((x, y)) => {
-            if x != 0 {
-              debug_assert_eq!(y, 0);
-              self._cursor_move_horizontally_to(&viewport, &cursor_viewport, &buffer, x)
-            } else {
-              debug_assert_eq!(x, 0);
-              debug_assert_ne!(y, 0);
-              self._cursor_move_vertically_to(&viewport, &cursor_viewport, &buffer, y)
-            }
+            self._cursor_move_to(&viewport, &cursor_viewport, &buffer, x, y)
           }
           _ => unreachable!(),
         };
@@ -169,6 +162,7 @@ impl NormalStateful {
     y: isize,
   ) -> Option<(usize, usize)> {
     let cursor_line_idx = cursor_viewport.line_idx();
+    let cursor_char_idx = cursor_viewport.char_idx();
 
     let expected_y = if y < 0 {
       let n = -y as usize;
@@ -178,16 +172,145 @@ impl NormalStateful {
       cursor_line_idx.saturating_add(n)
     };
 
-    self._cursor_move_vertically_to(viewport, cursor_viewport, buffer, expected_y)
+    self._cursor_move_to(
+      viewport,
+      cursor_viewport,
+      buffer,
+      cursor_char_idx,
+      expected_y,
+    )
   }
 
-  // Move cursor vertically to `y`, absolutely based on buffer.
+  // // Move cursor vertically to `y`, absolutely based on buffer.
+  // // Returns new `line_idx` and `char_idx` for cursor position.
+  // fn _cursor_move_vertically_to(
+  //   &self,
+  //   viewport: &Viewport,
+  //   cursor_viewport: &CursorViewport,
+  //   buffer: &Buffer,
+  //   y: usize,
+  // ) -> Option<(usize, usize)> {
+  //   let cursor_line_idx = cursor_viewport.line_idx();
+  //   let cursor_char_idx = cursor_viewport.char_idx();
+  //
+  //   let line_idx = {
+  //     let n = y;
+  //     let expected = n;
+  //     let end_line_idx = viewport.end_line_idx();
+  //     let last_line_idx = end_line_idx.saturating_sub(1);
+  //     trace!(
+  //       "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
+  //       cursor_line_idx, expected, end_line_idx, last_line_idx
+  //     );
+  //     std::cmp::min(expected, last_line_idx)
+  //   };
+  //   trace!(
+  //     "cursor:{}/{},line_idx:{}",
+  //     cursor_line_idx, cursor_char_idx, line_idx
+  //   );
+  //
+  //   // If line index doesn't change, early return.
+  //   if line_idx == cursor_line_idx {
+  //     return None;
+  //   }
+  //
+  //   match buffer.get_rope().get_line(line_idx) {
+  //     Some(line) => {
+  //       trace!("line.len_chars:{}", line.len_chars());
+  //       if line.len_chars() == 0 {
+  //         return None;
+  //       }
+  //     }
+  //     None => {
+  //       trace!("get_line not found:{}", line_idx);
+  //       return None;
+  //     }
+  //   }
+  //   let char_idx =
+  //     adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
+  //   Some((line_idx, char_idx))
+  // }
+
+  // Move cursor horizontally by `x`, relatively based on cursor position.
   // Returns new `line_idx` and `char_idx` for cursor position.
-  fn _cursor_move_vertically_to(
+  fn _cursor_move_horizontally_by(
     &self,
     viewport: &Viewport,
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
+    x: isize,
+  ) -> Option<(usize, usize)> {
+    let cursor_line_idx = cursor_viewport.line_idx();
+    let cursor_char_idx = cursor_viewport.char_idx();
+
+    let expected_x = if x < 0 {
+      let n = -x as usize;
+      cursor_char_idx.saturating_sub(n)
+    } else {
+      let n = x as usize;
+      cursor_char_idx.saturating_add(n)
+    };
+
+    self._cursor_move_to(
+      viewport,
+      cursor_viewport,
+      buffer,
+      expected_x,
+      cursor_line_idx,
+    )
+  }
+
+  // // Move cursor horizontally to `x`, absolutely based on buffer.
+  // // Returns new `line_idx` and `char_idx` for cursor position.
+  // fn _cursor_move_horizontally_to(
+  //   &self,
+  //   viewport: &Viewport,
+  //   cursor_viewport: &CursorViewport,
+  //   buffer: &Buffer,
+  //   x: usize,
+  // ) -> Option<(usize, usize)> {
+  //   let cursor_line_idx = cursor_viewport.line_idx();
+  //   let cursor_char_idx = cursor_viewport.char_idx();
+  //
+  //   match buffer.get_rope().get_line(cursor_line_idx) {
+  //     Some(line) => {
+  //       if line.len_chars() == 0 {
+  //         return None;
+  //       }
+  //     }
+  //     None => return None,
+  //   }
+  //
+  //   let char_idx = {
+  //     let upper_bounded = {
+  //       debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
+  //       let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
+  //       let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+  //       let last_char_on_row = last_row_viewport.end_char_idx() - 1;
+  //       trace!(
+  //         "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
+  //         cursor_char_idx, x, last_row_viewport, last_char_on_row
+  //       );
+  //       buffer
+  //         .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
+  //         .unwrap()
+  //     };
+  //     std::cmp::min(x, upper_bounded)
+  //   };
+  //
+  //   Some((cursor_line_idx, char_idx))
+  // }
+
+  // Move cursor to `(x,y)`, absolutely based on buffer.
+  // Returns new `line_idx` and `char_idx` for cursor position.
+  //
+  // NOTE: `x` is char index, `y` is line index.
+  fn _cursor_move_to(
+    &self,
+    viewport: &Viewport,
+    cursor_viewport: &CursorViewport,
+    buffer: &Buffer,
+    x: usize,
     y: usize,
   ) -> Option<(usize, usize)> {
     let cursor_line_idx = cursor_viewport.line_idx();
@@ -205,15 +328,11 @@ impl NormalStateful {
       std::cmp::min(expected, last_line_idx)
     };
     trace!(
-      "cursor:{}/{},line_idx:{}",
+      "cursor line_idx/char:{}/{},line_idx:{}",
       cursor_line_idx, cursor_char_idx, line_idx
     );
 
-    // If line index doesn't change, early return.
-    if line_idx == cursor_line_idx {
-      return None;
-    }
-
+    // If the target `line_idx` doesn't change, early return.
     match buffer.get_rope().get_line(line_idx) {
       Some(line) => {
         trace!("line.len_chars:{}", line.len_chars());
@@ -225,53 +344,6 @@ impl NormalStateful {
         trace!("get_line not found:{}", line_idx);
         return None;
       }
-    }
-    let char_idx =
-      adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
-    Some((line_idx, char_idx))
-  }
-
-  // Move cursor horizontally by `x`, relatively based on cursor position.
-  // Returns new `line_idx` and `char_idx` for cursor position.
-  fn _cursor_move_horizontally_by(
-    &self,
-    viewport: &Viewport,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    x: isize,
-  ) -> Option<(usize, usize)> {
-    let cursor_char_idx = cursor_viewport.char_idx();
-
-    let expected_x = if x < 0 {
-      let n = -x as usize;
-      cursor_char_idx.saturating_sub(n)
-    } else {
-      let n = x as usize;
-      cursor_char_idx.saturating_add(n)
-    };
-
-    self._cursor_move_horizontally_to(viewport, cursor_viewport, buffer, expected_x)
-  }
-
-  // Move cursor horizontally to `x`, absolutely based on buffer.
-  // Returns new `line_idx` and `char_idx` for cursor position.
-  fn _cursor_move_horizontally_to(
-    &self,
-    viewport: &Viewport,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    x: usize,
-  ) -> Option<(usize, usize)> {
-    let cursor_line_idx = cursor_viewport.line_idx();
-    let cursor_char_idx = cursor_viewport.char_idx();
-
-    match buffer.get_rope().get_line(cursor_line_idx) {
-      Some(line) => {
-        if line.len_chars() == 0 {
-          return None;
-        }
-      }
-      None => return None,
     }
 
     let char_idx = {
@@ -291,7 +363,7 @@ impl NormalStateful {
       std::cmp::min(x, upper_bounded)
     };
 
-    Some((cursor_line_idx, char_idx))
+    Some((line_idx, char_idx))
   }
 
   /// Cursor scroll buffer up/down in current window.
