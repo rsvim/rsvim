@@ -1,19 +1,53 @@
 //! An abstract layer between terminal events and editor operations.
 //!
-//! The terminal keyboard/mouse events, for example, both h/j/k/l and left/up/down/right keys in
-//! vim editor (normal mode) means cursor move left/up/down/right. But they have different
-//! behaviors in different scenarios.
-//!
-//! And if one day, we support other editor modes such as emacs, vscode, etc, different key codes
-//! will indicate different editor operations. Thus this layer will help to maintain different
-//! editor modes and internal core logics.
+//! This is the low-level commands between terminal keyboard/mouse events and the behaviors that we
+//! want editor to do.
 
 #[derive(Debug, Copy, Clone)]
-// Editor operation commands.
+/// Editor operations.
+///
+/// NOTE: The enum name is following the `Subject-Predicate-Object` English grammar.
 pub enum Command {
-  CursorMoveUp(usize),
-  CursorMoveDown(usize),
-  CursorMoveLeft(usize),
-  CursorMoveRight(usize),
-  QuitEditor,
+  /// Move cursor by offset `(x,y)` relatively, based on current cursor position.
+  ///
+  /// - The `x` is chars count, when negative it moves to left, when positive it moves to right.
+  /// - The `y` is lines count, when negative it moves to up, when positive it moves to down.
+  ///
+  /// NOTE: When the cursor moves to a position not showing in the window, it tries to scroll the
+  /// window.
+  CursorMoveBy((isize, isize)),
+
+  /// Similar to [`Command::CursorMoveBy`], except it moves cursor to an absolute position based on
+  /// current buffer.
+  ///
+  /// - The `x` is char index on the buffer.
+  /// - The `y` is line index on the buffer.
+  ///
+  /// NOTE: When the cursor moves to a position not showing in the window, it tries to scroll the
+  /// window.
+  CursorMoveTo((usize, usize)),
+
+  /// Scroll buffer by offset `(x,y)` relatively, based on current window.
+  ///
+  /// - The `x` is columns (not chars) count, when negative it moves to left, when positive it
+  ///   moves to right.
+  /// - The `y` is lines count, when negative it moves to up, when positive it moves to down.
+  ///
+  /// NOTE: When scrolling will move the cursor out of window, the cursor position will be drag to
+  /// keep it still inside the window.
+  WindowScrollBy((isize, isize)),
+
+  /// Similar to [`Command::WindowScrollBy`], except it scrolls window to an absolute position
+  /// based on current buffer.
+  ///
+  /// - The `x` is column (not char) index on the buffer.
+  /// - The `y` is line index on the buffer.
+  /// - The `(x,y)` is the top-left anchor of the window viewport.
+  ///
+  /// NOTE: When scrolling will move the cursor out of window, the cursor position will be drag to
+  /// keep it still inside the window.
+  WindowScrollTo((usize, usize)),
+
+  /// Quit editor
+  EditorQuit,
 }
