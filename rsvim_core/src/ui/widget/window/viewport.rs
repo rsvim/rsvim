@@ -220,6 +220,7 @@ impl CursorViewport {
   ) -> Self {
     let mut first_row: Vec<(u16, &RowViewport)> = vec![];
     let mut cursor_row: Vec<(u16, &RowViewport)> = vec![];
+
     let line_viewport = viewport.lines().get(&line_idx).unwrap();
     for (row_idx, row_viewport) in line_viewport.rows().iter() {
       if first_row.is_empty() {
