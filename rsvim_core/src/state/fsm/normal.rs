@@ -5518,15 +5518,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-1
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((4, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((4, 0)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "o, RSVIM!\n",
@@ -5551,15 +5555,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-2
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((4, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((8, 0)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "SVIM!\n",
@@ -5584,15 +5592,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-3
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-1, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((7, 0)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "RSVIM!\n",
@@ -5617,15 +5629,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-4
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-4, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((3, 0)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "lo, RSVIM!",
@@ -5650,15 +5666,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-5
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-1, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((2, 0)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "llo, RSVIM",
@@ -5683,15 +5703,19 @@ mod tests_window_scroll_to {
     }
 
     // Scroll-6
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-3, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
     {
+      let data_access = StatefulDataAccess::new(
+        state.clone(),
+        tree.clone(),
+        bufs.clone(),
+        Event::Key(key_event),
+      );
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 0)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
       let viewport = get_viewport(tree);
       let expect = vec![
         "Hello, RSV",
