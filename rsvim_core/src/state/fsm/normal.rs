@@ -15,28 +15,6 @@ use tracing::trace;
 /// The normal editing mode.
 pub struct NormalStateful {}
 
-fn adjust_cursor_char_idx_on_vertical_motion(
-  buffer: &Buffer,
-  cursor_line_idx: usize,
-  cursor_char_idx: usize,
-  line_idx: usize,
-) -> usize {
-  let cursor_col_idx = buffer.width_before(cursor_line_idx, cursor_char_idx);
-  let char_idx = match buffer.char_after(line_idx, cursor_col_idx) {
-    Some(char_idx) => char_idx,
-    None => {
-      debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-      debug_assert!(buffer.get_rope().line(line_idx).len_chars() > 0);
-      buffer.last_visible_char_on_line(line_idx).unwrap()
-    }
-  };
-  trace!(
-    "cursor_line_idx:{},cursor_col_idx:{},line_idx:{},char_idx:{}",
-    cursor_line_idx, cursor_col_idx, line_idx, char_idx
-  );
-  char_idx
-}
-
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
