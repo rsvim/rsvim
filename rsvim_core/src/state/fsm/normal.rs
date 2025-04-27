@@ -1070,7 +1070,7 @@ mod tests_cursor_move_vertically_to {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveBy((0, -1)));
+    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveTo((0, 0)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
