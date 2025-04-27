@@ -1013,6 +1013,7 @@ mod tests_cursor_move_vertically_to {
       "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "",
     ];
     let (tree, state, bufs, _buf) = make_tree(
       U16Size::new(10, 10),
@@ -1035,7 +1036,7 @@ mod tests_cursor_move_vertically_to {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveTo((0, 0)));
+    let next_stateful = stateful_machine.cursor_move(&data_access, Command::CursorMoveTo((7, 1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1045,7 +1046,7 @@ mod tests_cursor_move_vertically_to {
   }
 
   #[test]
-  fn nowrap3() {
+  fn _nowrap3() {
     test_log_init();
 
     let lines = vec![
@@ -1101,7 +1102,7 @@ mod tests_cursor_move_vertically_to {
   }
 
   #[test]
-  fn nowrap4() {
+  fn _nowrap4() {
     test_log_init();
 
     let lines = vec![
@@ -1157,7 +1158,7 @@ mod tests_cursor_move_vertically_to {
   }
 
   #[test]
-  fn nowrap5() {
+  fn _nowrap5() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -1196,7 +1197,7 @@ mod tests_cursor_move_vertically_to {
   }
 
   #[test]
-  fn wrap1() {
+  fn _wrap1() {
     test_log_init();
 
     let lines = vec![
