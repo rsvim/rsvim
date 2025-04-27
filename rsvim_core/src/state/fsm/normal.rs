@@ -91,22 +91,27 @@ impl NormalStateful {
         let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
-        let cursor_move_result = match command {
+
+        let (char_idx, line_idx) = match command {
           Command::CursorMoveBy((x, y)) => {
-            if x != 0 {
-              debug_assert_eq!(y, 0);
-              self._cursor_move_horizontally_by(&viewport, &cursor_viewport, &buffer, x)
+            let char_idx = if x != 0 {
+              self._cursor_move_horizontally_by(&cursor_viewport, x)
             } else {
-              debug_assert_eq!(x, 0);
-              debug_assert_ne!(y, 0);
-              self._cursor_move_vertically_by(&viewport, &cursor_viewport, &buffer, y)
-            }
+              cursor_viewport.char_idx()
+            };
+            let line_idx = if y != 0 {
+              self._cursor_move_vertically_by(&cursor_viewport, y)
+            } else {
+              cursor_viewport.line_idx()
+            };
+            (char_idx, line_idx)
           }
-          Command::CursorMoveTo((x, y)) => {
-            self._cursor_move_to(&viewport, &cursor_viewport, &buffer, x, y)
-          }
+          Command::CursorMoveTo((x, y)) => (x, y),
           _ => unreachable!(),
         };
+
+        let cursor_move_result =
+          self._cursor_move_to(&viewport, &cursor_viewport, &buffer, char_idx, line_idx);
 
         trace!("cursor_move_result:{:?}", cursor_move_result);
         if let Some((line_idx, char_idx)) = cursor_move_result {
@@ -130,60 +135,30 @@ impl NormalStateful {
 
   // Move cursor vertically by `y`, relatively based on cursor position.
   // Returns new `line_idx` and `char_idx` for cursor position.
-  fn _cursor_move_vertically_by(
-    &self,
-    viewport: &Viewport,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    y: isize,
-  ) -> Option<(usize, usize)> {
+  fn _cursor_move_vertically_by(&self, cursor_viewport: &CursorViewport, y: isize) -> usize {
     let cursor_line_idx = cursor_viewport.line_idx();
-    let cursor_char_idx = cursor_viewport.char_idx();
 
-    let expected_y = if y < 0 {
+    if y < 0 {
       let n = -y as usize;
       cursor_line_idx.saturating_sub(n)
     } else {
       let n = y as usize;
       cursor_line_idx.saturating_add(n)
-    };
-
-    self._cursor_move_to(
-      viewport,
-      cursor_viewport,
-      buffer,
-      cursor_char_idx,
-      expected_y,
-    )
+    }
   }
 
   // Move cursor horizontally by `x`, relatively based on cursor position.
   // Returns new `line_idx` and `char_idx` for cursor position.
-  fn _cursor_move_horizontally_by(
-    &self,
-    viewport: &Viewport,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    x: isize,
-  ) -> Option<(usize, usize)> {
-    let cursor_line_idx = cursor_viewport.line_idx();
+  fn _cursor_move_horizontally_by(&self, cursor_viewport: &CursorViewport, x: isize) -> usize {
     let cursor_char_idx = cursor_viewport.char_idx();
 
-    let expected_x = if x < 0 {
+    if x < 0 {
       let n = -x as usize;
       cursor_char_idx.saturating_sub(n)
     } else {
       let n = x as usize;
       cursor_char_idx.saturating_add(n)
-    };
-
-    self._cursor_move_to(
-      viewport,
-      cursor_viewport,
-      buffer,
-      expected_x,
-      cursor_line_idx,
-    )
+    }
   }
 
   // Move cursor to `(x,y)`, absolutely based on buffer.
@@ -277,22 +252,26 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        let cursor_scroll_result = {
-          match command {
-            Command::WindowScrollBy((x, y)) => {
-              if x != 0 {
-                debug_assert_eq!(y, 0);
-                self._window_scroll_horizontally_by(&viewport, &buffer, x)
-              } else {
-                debug_assert_eq!(x, 0);
-                debug_assert_ne!(y, 0);
-                self._window_scroll_vertically_by(&viewport, &buffer, y)
-              }
-            }
-            Command::WindowScrollTo((x, y)) => self._window_scroll_to(&viewport, &buffer, x, y),
-            _ => unreachable!(),
+        let (column_idx, line_idx) = match command {
+          Command::WindowScrollBy((x, y)) => {
+            let column_idx = if x != 0 {
+              self._window_scroll_horizontally_by(&viewport, &buffer, x)
+            } else {
+              viewport.start_column_idx()
+            };
+
+            let line_idx = if y != 0 {
+              self._window_scroll_vertically_by(&viewport, &buffer, y)
+            } else {
+              viewport.start_line_idx()
+            };
+            (column_idx, line_idx)
           }
+          Command::WindowScrollTo((x, y)) => (x, y),
+          _ => unreachable!(),
         };
+
+        let cursor_scroll_result = self._window_scroll_to(&viewport, &buffer, column_idx, line_idx);
 
         if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {
           // Sync the viewport
@@ -315,32 +294,19 @@ impl NormalStateful {
 
   // Scroll window vertically by `y`, relatively based on current window viewport.
   // Returns the `start_line_idx`/`start_column_idx` for viewport.
-  fn _window_scroll_vertically_by(
-    &self,
-    viewport: &Viewport,
-    buffer: &Buffer,
-    y: isize,
-  ) -> Option<(usize, usize)> {
+  fn _window_scroll_vertically_by(&self, viewport: &Viewport, buffer: &Buffer, y: isize) -> usize {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
     let buffer_len_lines = buffer.get_rope().len_lines();
 
-    let line_idx = if y < 0 {
+    if y < 0 {
       let n = -y as usize;
       start_line_idx.saturating_sub(n)
     } else {
       let n = y as usize;
-      // Viewport already shows the last line of buffer, cannot scroll down anymore.
-      debug_assert!(end_line_idx <= buffer_len_lines);
-      if end_line_idx == buffer_len_lines {
-        return None;
-      }
-
       start_line_idx.saturating_add(n)
-    };
-
-    self._window_scroll_to(viewport, buffer, start_column_idx, line_idx)
+    }
   }
 
   // Calculate how many columns that each line (in current viewport) need to scroll until their own
@@ -394,27 +360,21 @@ impl NormalStateful {
     viewport: &Viewport,
     buffer: &Buffer,
     x: isize,
-  ) -> Option<(usize, usize)> {
+  ) -> usize {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
 
-    if end_line_idx == start_line_idx {
-      return None;
-    }
+    // debug_assert!(end_line_idx > start_line_idx);
+    // debug_assert!(viewport.lines().contains_key(&start_line_idx));
 
-    debug_assert!(end_line_idx > start_line_idx);
-    debug_assert!(viewport.lines().contains_key(&start_line_idx));
-
-    let column_idx = if x < 0 {
+    if x < 0 {
       let n = -x as usize;
       start_column_idx.saturating_sub(n)
     } else {
       let n = x as usize;
       start_column_idx.saturating_add(n)
-    };
-
-    self._window_scroll_to(viewport, buffer, column_idx, start_line_idx)
+    }
   }
 
   // Scroll window to `(x,y)`, absolutely.
