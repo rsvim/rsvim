@@ -2576,7 +2576,7 @@ mod tests_cursor_scroll_horizontally {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((-1, 0)));
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((1, 0)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
