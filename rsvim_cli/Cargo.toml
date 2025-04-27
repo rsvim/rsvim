@@ -14,9 +14,6 @@ categories.workspace = true
 exclude.workspace = true
 description = "The command line(s) for the RSVIM editor."
 
-[features]
-default = []
-
 [dependencies]
 rsvim_core = { workspace = true }
 tracing = { workspace = true }
