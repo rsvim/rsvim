@@ -317,13 +317,11 @@ impl NormalStateful {
     let cursor_char_idx = cursor_viewport.char_idx();
 
     let line_idx = {
-      let n = y;
-      let expected = n;
-      let end_line_idx = viewport.end_line_idx();
-      let last_line_idx = end_line_idx.saturating_sub(1);
+      let expected = y;
+      let last_line_idx = viewport.end_line_idx().saturating_sub(1);
       trace!(
-        "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
-        cursor_line_idx, expected, end_line_idx, last_line_idx
+        "cursor_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
+        cursor_line_idx, expected, last_line_idx
       );
       std::cmp::min(expected, last_line_idx)
     };
@@ -332,7 +330,7 @@ impl NormalStateful {
       cursor_line_idx, cursor_char_idx, line_idx
     );
 
-    // If the target `line_idx` doesn't change, early return.
+    // If the target `line_idx` doesn't exists or empty, early return.
     match buffer.get_rope().get_line(line_idx) {
       Some(line) => {
         trace!("line.len_chars:{}", line.len_chars());
@@ -362,6 +360,10 @@ impl NormalStateful {
       };
       std::cmp::min(x, upper_bounded)
     };
+
+    if line_idx == cursor_line_idx && char_idx == cursor_char_idx {
+      return None;
+    }
 
     Some((line_idx, char_idx))
   }
