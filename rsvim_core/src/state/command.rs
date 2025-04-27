@@ -29,16 +29,16 @@ pub enum Command {
   ///
   /// NOTE: When the cursor is at the window border and scrolling will move the cursor out of
   /// window, the cursor position will be drag to keep it still inside the window.
-  WindowSrollBy((isize, isize)),
+  WindowScrollBy((isize, isize)),
 
-  /// Similar to [`Command::WindowSrollBy`], but it srolls window to an absolute position based on
+  /// Similar to [`Command::WindowScrollBy`], but it scrolls window to an absolute position based on
   /// current buffer.
   /// The `x` is columns index, `y` is line index. The anchor is at the top-left of window
   /// viewport.
   ///
   /// NOTE: When the cursor is at the window border and scrolling will move the cursor out of
   /// window, the cursor position will be drag to keep it still inside the window.
-  WindowSrollTo((usize, usize)),
+  WindowScrollTo((usize, usize)),
 
   /// Quit editor
   EditorQuit,
