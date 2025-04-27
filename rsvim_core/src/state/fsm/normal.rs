@@ -255,13 +255,20 @@ impl NormalStateful {
         let (column_idx, line_idx) = match command {
           Command::WindowScrollBy((x, y)) => {
             let column_idx = if x != 0 {
-              self._window_scroll_x_by(&viewport, &buffer, x)
+              self._window_scroll_x_by(&viewport, x)
             } else {
               viewport.start_column_idx()
             };
 
             let line_idx = if y != 0 {
-              self._window_scroll_y_by(&viewport, &buffer, y)
+              if viewport.end_line_idx() == buffer.get_rope().len_lines() && y > 0 {
+                // In current viewport, the last line is already the last line in the buffer, i.e.
+                // there's no more lines to scroll, and user still wants to scroll down, then don't
+                // scroll.
+                viewport.start_line_idx()
+              } else {
+                self._window_scroll_y_by(&viewport, y)
+              }
             } else {
               viewport.start_line_idx()
             };
@@ -294,11 +301,8 @@ impl NormalStateful {
 
   // Scroll window vertically by `y`, relatively based on current window viewport.
   // Returns the `start_line_idx`/`start_column_idx` for viewport.
-  fn _window_scroll_y_by(&self, viewport: &Viewport, buffer: &Buffer, y: isize) -> usize {
+  fn _window_scroll_y_by(&self, viewport: &Viewport, y: isize) -> usize {
     let start_line_idx = viewport.start_line_idx();
-    let end_line_idx = viewport.end_line_idx();
-    let start_column_idx = viewport.start_column_idx();
-    let buffer_len_lines = buffer.get_rope().len_lines();
 
     if y < 0 {
       let n = -y as usize;
@@ -355,9 +359,7 @@ impl NormalStateful {
   // Returns the `start_line_idx`/`start_column_idx` for viewport.
   //
   // NOTE: The `x` is columns, not chars.
-  fn _window_scroll_x_by(&self, viewport: &Viewport, buffer: &Buffer, x: isize) -> usize {
-    let start_line_idx = viewport.start_line_idx();
-    let end_line_idx = viewport.end_line_idx();
+  fn _window_scroll_x_by(&self, viewport: &Viewport, x: isize) -> usize {
     let start_column_idx = viewport.start_column_idx();
 
     // debug_assert!(end_line_idx > start_line_idx);
