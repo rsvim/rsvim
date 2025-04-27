@@ -4243,16 +4243,16 @@ mod tests_window_scroll_to {
       );
     }
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 4)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
-
-    let tree = data_access.tree.clone();
-
     // After cursor scroll
     {
+      let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
+      let stateful_machine = NormalStateful::default();
+      let next_stateful =
+        stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 4)));
+      assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+      let tree = data_access.tree.clone();
+
       let viewport = get_viewport(tree);
       let expect = vec![
         "  2. When ",
