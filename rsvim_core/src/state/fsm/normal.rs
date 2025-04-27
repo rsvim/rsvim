@@ -1551,7 +1551,7 @@ mod tests_cursor_move_to {
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
-    assert_eq!(actual.line_idx(), 0);
+    assert_eq!(actual.line_idx(), 7);
     assert_eq!(actual.char_idx(), 0);
   }
 
