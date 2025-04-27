@@ -219,7 +219,7 @@ impl NormalStateful {
       Some(line) => {
         trace!("line.len_chars:{}", line.len_chars());
         if line.len_chars() == 0 {
-          return Some((line_idx, 0_usize));
+          return None;
         }
       }
       None => {
