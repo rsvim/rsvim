@@ -407,9 +407,52 @@ impl NormalStateful {
     Some((line_idx, start_column_idx))
   }
 
-  /// Returns the same as [`Self::_cursor_scroll_vertically`].
-  ///
-  /// NOTE: The `n` inside the command is by columns, not by chars.
+  // Calculate how many columns that each line (in current viewport) need to scroll until their own
+  // line's end. This is the upper bound of the actual columns that could scroll.
+  fn _window_scroll_horizontally_max_scrolls(&self, viewport: &Viewport, buffer: &Buffer) -> usize {
+    let mut max_scrolls = 0_usize;
+    for (line_idx, line_viewport) in viewport.lines().iter() {
+      trace!("line_idx:{},line_viewport:{:?}", line_idx, line_viewport);
+      debug_assert!(!line_viewport.rows().is_empty());
+      let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+      trace!(
+        "_last_row_idx:{},last_row_viewport:{:?}",
+        _last_row_idx, last_row_viewport
+      );
+      debug_assert!(buffer.get_rope().get_line(*line_idx).is_some());
+      // If `last_row_viewport` is empty, i.e. the `end_char_idx == start_char_idx`, the scrolls is 0.
+      if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
+        let max_scrolls_on_line = match buffer.last_visible_char_on_line(*line_idx) {
+          Some(last_visible_c) => {
+            let last_visible_col = buffer.width_at(*line_idx, last_visible_c);
+            let last_col_on_row = buffer.width_at(
+              *line_idx,
+              last_row_viewport.end_char_idx().saturating_sub(1),
+            );
+            let column_difference = last_visible_col.saturating_sub(last_col_on_row);
+            trace!(
+              "last_visible_c:{},last_row_viewport.end_char_idx:{},last_visible_col:{},last_col_on_row:{},column_difference:{}",
+              last_visible_c,
+              last_row_viewport.end_char_idx(),
+              last_visible_col,
+              last_col_on_row,
+              column_difference
+            );
+            column_difference
+          }
+          None => 0_usize,
+        };
+        trace!("result:{}", max_scrolls_on_line);
+        max_scrolls = std::cmp::max(max_scrolls, max_scrolls_on_line);
+      }
+    }
+    max_scrolls
+  }
+
+  // Scroll window horizontally by `x`, relatively based on current window.
+  // Returns the `start_line_idx`/`start_column_idx` for viewport.
+  //
+  // NOTE: The `x` is columns, not chars.
   fn _window_scroll_horizontally_by(
     &self,
     viewport: &Viewport,
@@ -427,60 +470,46 @@ impl NormalStateful {
     debug_assert!(end_line_idx > start_line_idx);
     debug_assert!(viewport.lines().contains_key(&start_line_idx));
 
-    let start_col = if x < 0 {
+    let expected_x = if x < 0 {
       let n = -x as usize;
       start_column_idx.saturating_sub(n)
     } else {
       let n = x as usize;
-      let expected = start_column_idx.saturating_add(n);
-      let upper_bounded = {
-        // Calculate how many columns that each line (in current viewport) need to scroll until
-        // their own line's end. This is the upper bound of the actual columns that could
-        // scroll.
-        let mut max_scrolls = 0_usize;
-        for (line_idx, line_viewport) in viewport.lines().iter() {
-          trace!("line_idx:{},line_viewport:{:?}", line_idx, line_viewport);
-          debug_assert!(!line_viewport.rows().is_empty());
-          let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-          trace!(
-            "_last_row_idx:{},last_row_viewport:{:?}",
-            _last_row_idx, last_row_viewport
-          );
-          debug_assert!(buffer.get_rope().get_line(*line_idx).is_some());
-          // If `last_row_viewport` is empty, i.e. the `end_char_idx == start_char_idx`, the scrolls is 0.
-          if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
-            let max_scrolls_on_line = match buffer.last_visible_char_on_line(*line_idx) {
-              Some(last_visible_c) => {
-                let last_visible_col = buffer.width_at(*line_idx, last_visible_c);
-                let last_col_on_row = buffer.width_at(
-                  *line_idx,
-                  last_row_viewport.end_char_idx().saturating_sub(1),
-                );
-                let column_difference = last_visible_col.saturating_sub(last_col_on_row);
-                trace!(
-                  "last_visible_c:{},last_row_viewport.end_char_idx:{},last_visible_col:{},last_col_on_row:{},column_difference:{}",
-                  last_visible_c,
-                  last_row_viewport.end_char_idx(),
-                  last_visible_col,
-                  last_col_on_row,
-                  column_difference
-                );
-                column_difference
-              }
-              None => 0_usize,
-            };
-            trace!("result:{}", max_scrolls_on_line);
-            max_scrolls = std::cmp::max(max_scrolls, max_scrolls_on_line);
-          }
-        }
-        let upper_bounded = start_column_idx.saturating_add(max_scrolls);
-        trace!(
-          "max_scrolls:{},upper_bounded:{}",
-          max_scrolls, upper_bounded
-        );
-        upper_bounded
-      };
-      std::cmp::min(expected, upper_bounded)
+      start_column_idx.saturating_add(n)
+    };
+
+    self._window_scroll_horizontally_to(viewport, buffer, expected_x)
+  }
+
+  // Scroll window horizontally to `x`, absolutely.
+  // Returns the `start_line_idx`/`start_column_idx` for viewport.
+  //
+  // NOTE: The `x` is columns, not chars.
+  fn _window_scroll_horizontally_to(
+    &self,
+    viewport: &Viewport,
+    buffer: &Buffer,
+    x: usize,
+  ) -> Option<(usize, usize)> {
+    let start_line_idx = viewport.start_line_idx();
+    let end_line_idx = viewport.end_line_idx();
+    let start_column_idx = viewport.start_column_idx();
+
+    if end_line_idx == start_line_idx {
+      return None;
+    }
+
+    debug_assert!(end_line_idx > start_line_idx);
+    debug_assert!(viewport.lines().contains_key(&start_line_idx));
+
+    let start_col = {
+      let max_scrolls = self._window_scroll_horizontally_max_scrolls(viewport, buffer);
+      let upper_bounded = start_column_idx.saturating_add(max_scrolls);
+      trace!(
+        "max_scrolls:{},upper_bounded:{}",
+        max_scrolls, upper_bounded
+      );
+      std::cmp::min(x, upper_bounded)
     };
 
     if start_col == start_column_idx {
