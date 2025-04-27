@@ -279,16 +279,7 @@ impl NormalStateful {
                 self._window_scroll_vertically_by(&viewport, &buffer, y)
               }
             }
-            Command::WindowSrollTo((x, y)) => {
-              if x != 0 {
-                debug_assert_eq!(y, 0);
-                self._window_scroll_horizontally_to(&viewport, &buffer, x)
-              } else {
-                debug_assert_eq!(x, 0);
-                debug_assert_ne!(y, 0);
-                self._window_scroll_vertically_to(&viewport, &buffer, y)
-              }
-            }
+            Command::WindowSrollTo((x, y)) => self._window_scroll_to(&viewport, &buffer, x, y),
             _ => unreachable!(),
           }
         };
@@ -338,42 +329,42 @@ impl NormalStateful {
       start_line_idx.saturating_add(n)
     };
 
-    self._window_scroll_vertically_to(viewport, buffer, expected_y)
+    self._window_scroll_to(viewport, buffer, start_line_idx, expected_y)
   }
 
-  // Scroll window vertically to `y`, absolutely.
-  // Returns the `start_line_idx`/`start_column_idx` for viewport.
-  fn _window_scroll_vertically_to(
-    &self,
-    viewport: &Viewport,
-    buffer: &Buffer,
-    y: usize,
-  ) -> Option<(usize, usize)> {
-    let start_line_idx = viewport.start_line_idx();
-    let end_line_idx = viewport.end_line_idx();
-    let start_column_idx = viewport.start_column_idx();
-    let buffer_len_lines = buffer.get_rope().len_lines();
-
-    let line_idx = {
-      // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
-      // line.
-      let expected_start_line = std::cmp::min(y, buffer_len_lines.saturating_sub(1));
-
-      // If the expected (after scrolled) start line index is current start line index, then don't
-      // scroll.
-      if expected_start_line == start_line_idx {
-        return None;
-      }
-
-      trace!(
-        "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
-        start_line_idx, end_line_idx, expected_start_line
-      );
-      expected_start_line
-    };
-
-    Some((line_idx, start_column_idx))
-  }
+  // // Scroll window vertically to `y`, absolutely.
+  // // Returns the `start_line_idx`/`start_column_idx` for viewport.
+  // fn _window_scroll_vertically_to(
+  //   &self,
+  //   viewport: &Viewport,
+  //   buffer: &Buffer,
+  //   y: usize,
+  // ) -> Option<(usize, usize)> {
+  //   let start_line_idx = viewport.start_line_idx();
+  //   let end_line_idx = viewport.end_line_idx();
+  //   let start_column_idx = viewport.start_column_idx();
+  //   let buffer_len_lines = buffer.get_rope().len_lines();
+  //
+  //   let line_idx = {
+  //     // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
+  //     // line.
+  //     let expected_start_line = std::cmp::min(y, buffer_len_lines.saturating_sub(1));
+  //
+  //     // If the expected (after scrolled) start line index is current start line index, then don't
+  //     // scroll.
+  //     if expected_start_line == start_line_idx {
+  //       return None;
+  //     }
+  //
+  //     trace!(
+  //       "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
+  //       start_line_idx, end_line_idx, expected_start_line
+  //     );
+  //     expected_start_line
+  //   };
+  //
+  //   Some((line_idx, start_column_idx))
+  // }
 
   // Calculate how many columns that each line (in current viewport) need to scroll until their own
   // line's end. This is the upper bound of the actual columns that could scroll.
@@ -446,31 +437,76 @@ impl NormalStateful {
       start_column_idx.saturating_add(n)
     };
 
-    self._window_scroll_horizontally_to(viewport, buffer, expected_x)
+    self._window_scroll_to(viewport, buffer, expected_x, start_column_idx)
   }
 
-  // Scroll window horizontally to `x`, absolutely.
-  // Returns the `start_line_idx`/`start_column_idx` for viewport.
+  // // Scroll window horizontally to `x`, absolutely.
+  // // Returns the `start_line_idx`/`start_column_idx` for viewport.
+  // //
+  // // NOTE: The `x` is columns, not chars.
+  // fn _window_scroll_horizontally_to(
+  //   &self,
+  //   viewport: &Viewport,
+  //   buffer: &Buffer,
+  //   x: usize,
+  // ) -> Option<(usize, usize)> {
+  //   let start_line_idx = viewport.start_line_idx();
+  //   let end_line_idx = viewport.end_line_idx();
+  //   let start_column_idx = viewport.start_column_idx();
   //
-  // NOTE: The `x` is columns, not chars.
-  fn _window_scroll_horizontally_to(
+  //   debug_assert!(end_line_idx > start_line_idx);
+  //   debug_assert!(viewport.lines().contains_key(&start_line_idx));
+  //
+  //   let start_col = {
+  //     let max_scrolls = self._window_scroll_horizontally_max_scrolls(viewport, buffer);
+  //     let upper_bounded = start_column_idx.saturating_add(max_scrolls);
+  //     trace!(
+  //       "max_scrolls:{},upper_bounded:{}",
+  //       max_scrolls, upper_bounded
+  //     );
+  //     std::cmp::min(x, upper_bounded)
+  //   };
+  //
+  //   if start_col == start_column_idx {
+  //     return None;
+  //   }
+  //
+  //   Some((start_line_idx, start_col))
+  // }
+
+  // Scroll window to `(x,y)`, absolutely.
+  // Returns the `start_line_idx`/`start_column_idx` for viewport.
+  fn _window_scroll_to(
     &self,
     viewport: &Viewport,
     buffer: &Buffer,
     x: usize,
+    y: usize,
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
+    let buffer_len_lines = buffer.get_rope().len_lines();
 
     if end_line_idx == start_line_idx {
       return None;
     }
-
     debug_assert!(end_line_idx > start_line_idx);
     debug_assert!(viewport.lines().contains_key(&start_line_idx));
 
-    let start_col = {
+    let line_idx = {
+      // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
+      // line.
+      let expected_start_line = std::cmp::min(y, buffer_len_lines.saturating_sub(1));
+
+      trace!(
+        "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
+        start_line_idx, end_line_idx, expected_start_line
+      );
+      expected_start_line
+    };
+
+    let column_idx = {
       let max_scrolls = self._window_scroll_horizontally_max_scrolls(viewport, buffer);
       let upper_bounded = start_column_idx.saturating_add(max_scrolls);
       trace!(
@@ -480,11 +516,13 @@ impl NormalStateful {
       std::cmp::min(x, upper_bounded)
     };
 
-    if start_col == start_column_idx {
+    // If the target `start_line_idx` and `start_column_idx` is current line/column, then don't
+    // scroll.
+    if line_idx == start_line_idx && column_idx == start_column_idx {
       return None;
     }
 
-    Some((start_line_idx, start_col))
+    Some((line_idx, column_idx))
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
