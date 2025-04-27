@@ -1655,7 +1655,7 @@ mod tests_cursor_move_to {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful = NormalStateful::default();
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((0, 2)));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveTo((2, 7)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let stateful = match next_stateful {
@@ -1665,10 +1665,10 @@ mod tests_cursor_move_to {
 
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree);
-    assert_eq!(actual1.line_idx(), 2);
+    assert_eq!(actual1.line_idx(), 7);
     assert_eq!(actual1.char_idx(), 0);
 
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((0, -1)));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((0, 1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
