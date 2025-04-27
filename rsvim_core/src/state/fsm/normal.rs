@@ -333,40 +333,6 @@ impl NormalStateful {
     self._window_scroll_to(viewport, buffer, start_column_idx, line_idx)
   }
 
-  // // Scroll window vertically to `y`, absolutely.
-  // // Returns the `start_line_idx`/`start_column_idx` for viewport.
-  // fn _window_scroll_vertically_to(
-  //   &self,
-  //   viewport: &Viewport,
-  //   buffer: &Buffer,
-  //   y: usize,
-  // ) -> Option<(usize, usize)> {
-  //   let start_line_idx = viewport.start_line_idx();
-  //   let end_line_idx = viewport.end_line_idx();
-  //   let start_column_idx = viewport.start_column_idx();
-  //   let buffer_len_lines = buffer.get_rope().len_lines();
-  //
-  //   let line_idx = {
-  //     // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
-  //     // line.
-  //     let expected_start_line = std::cmp::min(y, buffer_len_lines.saturating_sub(1));
-  //
-  //     // If the expected (after scrolled) start line index is current start line index, then don't
-  //     // scroll.
-  //     if expected_start_line == start_line_idx {
-  //       return None;
-  //     }
-  //
-  //     trace!(
-  //       "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
-  //       start_line_idx, end_line_idx, expected_start_line
-  //     );
-  //     expected_start_line
-  //   };
-  //
-  //   Some((line_idx, start_column_idx))
-  // }
-
   // Calculate how many columns that each line (in current viewport) need to scroll until their own
   // line's end. This is the upper bound of the actual columns that could scroll.
   fn _window_scroll_horizontally_max_scrolls(&self, viewport: &Viewport, buffer: &Buffer) -> usize {
@@ -440,40 +406,6 @@ impl NormalStateful {
 
     self._window_scroll_to(viewport, buffer, column_idx, start_line_idx)
   }
-
-  // // Scroll window horizontally to `x`, absolutely.
-  // // Returns the `start_line_idx`/`start_column_idx` for viewport.
-  // //
-  // // NOTE: The `x` is columns, not chars.
-  // fn _window_scroll_horizontally_to(
-  //   &self,
-  //   viewport: &Viewport,
-  //   buffer: &Buffer,
-  //   x: usize,
-  // ) -> Option<(usize, usize)> {
-  //   let start_line_idx = viewport.start_line_idx();
-  //   let end_line_idx = viewport.end_line_idx();
-  //   let start_column_idx = viewport.start_column_idx();
-  //
-  //   debug_assert!(end_line_idx > start_line_idx);
-  //   debug_assert!(viewport.lines().contains_key(&start_line_idx));
-  //
-  //   let start_col = {
-  //     let max_scrolls = self._window_scroll_horizontally_max_scrolls(viewport, buffer);
-  //     let upper_bounded = start_column_idx.saturating_add(max_scrolls);
-  //     trace!(
-  //       "max_scrolls:{},upper_bounded:{}",
-  //       max_scrolls, upper_bounded
-  //     );
-  //     std::cmp::min(x, upper_bounded)
-  //   };
-  //
-  //   if start_col == start_column_idx {
-  //     return None;
-  //   }
-  //
-  //   Some((start_line_idx, start_col))
-  // }
 
   // Scroll window to `(x,y)`, absolutely.
   // Returns the `start_line_idx`/`start_column_idx` for viewport.
