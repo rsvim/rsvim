@@ -317,13 +317,12 @@ impl NormalStateful {
     let cursor_char_idx = cursor_viewport.char_idx();
 
     let line_idx = {
-      let expected = y;
       let last_line_idx = viewport.end_line_idx().saturating_sub(1);
       trace!(
-        "cursor_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
-        cursor_line_idx, expected, last_line_idx
+        "cursor_line_idx:{:?},y:{:?},last_line_idx:{:?}",
+        cursor_line_idx, y, last_line_idx
       );
-      std::cmp::min(expected, last_line_idx)
+      std::cmp::min(y, last_line_idx)
     };
     trace!(
       "cursor line_idx/char:{}/{},line_idx:{}",
