@@ -1442,7 +1442,7 @@ mod tests_cursor_move {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_scroll_vertically {
+mod tests_window_scroll_y {
   use super::tests_util::*;
   use super::*;
 
@@ -2400,7 +2400,7 @@ mod tests_cursor_scroll_vertically {
 }
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_scroll_horizontally {
+mod tests_window_scroll_x {
   use super::tests_util::*;
   use super::*;
 
