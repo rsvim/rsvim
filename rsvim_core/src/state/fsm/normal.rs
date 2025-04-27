@@ -1566,7 +1566,7 @@ mod tests_cursor_move_to {
   }
 
   #[test]
-  fn _nowrap3() {
+  fn nowrap3() {
     test_log_init();
 
     let lines = vec![
@@ -1599,7 +1599,7 @@ mod tests_cursor_move_to {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful = NormalStateful::default();
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((0, 3)));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveTo((0, 3)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let stateful = match next_stateful {
@@ -1612,7 +1612,7 @@ mod tests_cursor_move_to {
     assert_eq!(actual1.line_idx(), 3);
     assert_eq!(actual1.char_idx(), 0);
 
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((0, -1)));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveTo((0, 2)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
