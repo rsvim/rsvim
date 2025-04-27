@@ -227,6 +227,8 @@ impl Buffer {
 
   /// Get last visible char index on line.
   ///
+  /// NOTE: This function iterates each char from the end of the line, not from the beginning.
+  ///
   /// It returns the char index if exists, returns `None` if line not exists or line is
   /// empty/blank.
   pub fn last_visible_char_on_line(&self, line_idx: usize) -> Option<usize> {
@@ -241,6 +243,8 @@ impl Buffer {
 
   /// Get last visible char index on line, starts from specified `char_idx` instead of the last
   /// char on the line.
+  ///
+  /// NOTE: This function iterates each char from the end of the line, not from the beginning.
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is
   /// empty/blank, or `char_idx` is out of line length.
