@@ -324,11 +324,11 @@ impl NormalStateful {
             Command::WindowSrollTo((x, y)) => {
               if x != 0 {
                 debug_assert_eq!(y, 0);
-                self._window_scroll_vertically_to(&viewport, &buffer, x)
+                self._window_scroll_horizontally_to(&viewport, &buffer, x)
               } else {
                 debug_assert_eq!(x, 0);
                 debug_assert_ne!(y, 0);
-                self._window_scroll_horizontally_to(&viewport, &buffer, y)
+                self._window_scroll_vertically_to(&viewport, &buffer, y)
               }
             }
             _ => unreachable!(),
