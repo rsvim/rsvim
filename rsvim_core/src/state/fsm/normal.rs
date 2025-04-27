@@ -1526,7 +1526,7 @@ mod tests_cursor_move {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveRight(lines[0].len());
+    let command = Command::CursorMoveBy((lines[0].len() as isize, 0));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
@@ -1543,7 +1543,7 @@ mod tests_cursor_move {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveDown(1);
+    let command = Command::CursorMoveBy((0, 1));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
@@ -1617,7 +1617,8 @@ mod tests_cursor_scroll_vertically {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveUp(1));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, -1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1707,7 +1708,8 @@ mod tests_cursor_scroll_vertically {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveDown(1));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1811,7 +1813,8 @@ mod tests_cursor_scroll_vertically {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveDown(1));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1903,7 +1906,8 @@ mod tests_cursor_scroll_vertically {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveDown(4));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 4)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1994,7 +1998,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveDown(4));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 4)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2026,7 +2031,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveDown(4));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 4)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2051,7 +2057,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveUp(1));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, -1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2076,7 +2083,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveUp(4));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, -4)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2108,7 +2116,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveUp(1));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, -1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2140,7 +2149,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveUp(3));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, -3)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2235,7 +2245,8 @@ mod tests_cursor_scroll_vertically {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveDown(4));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 4)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2340,7 +2351,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveDown(8));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 8)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2380,7 +2392,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveDown(1));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2420,7 +2433,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveDown(3));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 3)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2460,7 +2474,8 @@ mod tests_cursor_scroll_vertically {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveUp(2));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, -2)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2560,7 +2575,8 @@ mod tests_cursor_scroll_horizontally {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveRight(1));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((-1, 0)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2650,7 +2666,8 @@ mod tests_cursor_scroll_horizontally {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveRight(1));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2754,7 +2771,8 @@ mod tests_cursor_scroll_horizontally {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveLeft(1));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((-1, 0)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2847,7 +2865,7 @@ mod tests_cursor_scroll_horizontally {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::CursorMoveRight(149));
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 149)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2932,7 +2950,7 @@ mod tests_cursor_scroll_horizontally {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::CursorMoveRight(100));
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 100)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2959,7 +2977,8 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveRight(10));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 10)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2986,7 +3005,8 @@ mod tests_cursor_scroll_horizontally {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::CursorMoveRight(50));
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::CursorMoveBy((0, 50)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
