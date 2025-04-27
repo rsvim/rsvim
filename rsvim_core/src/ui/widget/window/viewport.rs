@@ -218,34 +218,32 @@ impl CursorViewport {
     line_idx: usize,
     char_idx: usize,
   ) -> Self {
-    let cursor_row = viewport
-      .lines()
-      .get(&line_idx)
-      .unwrap()
-      .rows()
-      .iter()
-      .filter(|(_row_idx, row_viewport)| {
-        // trace!(
-        //   "row_viewport:{:?},start_char_idx:{},end_char_idx:{},line_idx:{},char_idx:{}",
-        //   row_viewport,
-        //   row_viewport.start_char_idx(),
-        //   row_viewport.end_char_idx(),
-        //   line_idx,
-        //   char_idx
-        // );
-        row_viewport.start_char_idx() <= char_idx && row_viewport.end_char_idx() > char_idx
-      })
-      .collect::<Vec<_>>();
+    let mut first_row: Vec<(u16, &RowViewport)> = vec![];
+    let mut cursor_row: Vec<(u16, &RowViewport)> = vec![];
+    let line_viewport = viewport.lines().get(&line_idx).unwrap();
+    for (row_idx, row_viewport) in line_viewport.rows().iter() {
+      if first_row.is_empty() {
+        first_row.push((*row_idx, row_viewport));
+      }
+      if char_idx >= row_viewport.start_char_idx() && char_idx < row_viewport.end_char_idx() {
+        cursor_row.push((*row_idx, row_viewport));
+      }
+    }
 
-    debug_assert_eq!(cursor_row.len(), 1);
-    let (row_idx, row_viewport) = cursor_row[0];
+    if !cursor_row.is_empty() {
+      debug_assert_eq!(cursor_row.len(), 1);
+      let (row_idx, row_viewport) = cursor_row[0];
 
-    let row_start_width = buffer.width_before(line_idx, row_viewport.start_char_idx());
-    let char_start_width = buffer.width_before(line_idx, char_idx);
-    let col_idx = (char_start_width - row_start_width) as u16;
-    let row_idx = *row_idx;
+      let row_start_width = buffer.width_before(line_idx, row_viewport.start_char_idx());
+      let char_start_width = buffer.width_before(line_idx, char_idx);
+      let col_idx = (char_start_width - row_start_width) as u16;
 
-    CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
+      CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
+    } else {
+      debug_assert!(!first_row.is_empty());
+      let (first_row_idx, _first_row_viewport) = first_row[0];
+      CursorViewport::new(line_idx, char_idx, first_row_idx, 0_u16)
+    }
   }
 }
 

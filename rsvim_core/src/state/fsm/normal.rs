@@ -201,6 +201,11 @@ impl NormalStateful {
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
 
+    // If viewport is empty, don't move.
+    if viewport.end_line_idx() == viewport.start_line_idx() {
+      return None;
+    }
+
     let line_idx = {
       let last_line_idx = viewport.end_line_idx().saturating_sub(1);
       trace!(
