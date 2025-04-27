@@ -227,14 +227,34 @@ impl Buffer {
 
   /// Get last visible char index on line.
   ///
+  /// NOTE: This function iterates each char from the end of the line to the beginning of the line.
+  ///
   /// It returns the char index if exists, returns `None` if line not exists or line is
   /// empty/blank.
   pub fn last_visible_char_on_line(&self, line_idx: usize) -> Option<usize> {
     match self.rope.get_line(line_idx) {
       Some(line) => {
         let line_len_chars = line.len_chars();
-        if line_len_chars > 0 {
-          let mut c = line_len_chars - 1;
+        self.last_visible_char_on_line_since(line_idx, line_len_chars.saturating_sub(1))
+      }
+      None => None,
+    }
+  }
+
+  /// Get last visible char index on line, starts from `char_idx` instead of the last char of the
+  /// line.
+  ///
+  /// NOTE: This function iterates each char from `char_idx` of the line to the beginning of the
+  /// line.
+  ///
+  /// It returns the char index if exists, returns `None` if line not exists or line is
+  /// empty/blank, or the `char_idx` is out of line length.
+  pub fn last_visible_char_on_line_since(&self, line_idx: usize, char_idx: usize) -> Option<usize> {
+    match self.rope.get_line(line_idx) {
+      Some(line) => {
+        let line_len_chars = line.len_chars();
+        if line_len_chars > char_idx {
+          let mut c = char_idx;
           while self.char_width(line.get_char(c).unwrap()) == 0 {
             c = c.saturating_sub(1);
             if c == 0 {
