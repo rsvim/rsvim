@@ -48,20 +48,20 @@ impl Stateful for NormalStateful {
         KeyEventKind::Press => {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
-              return self.cursor_move(&data_access, Command::CursorMoveUp(1));
+              return self.cursor_move(&data_access, Command::CursorMoveBy((0, -1)));
             }
             KeyCode::Down | KeyCode::Char('j') => {
-              return self.cursor_move(&data_access, Command::CursorMoveDown(1));
+              return self.cursor_move(&data_access, Command::CursorMoveBy((0, 1)));
             }
             KeyCode::Left | KeyCode::Char('h') => {
-              return self.cursor_move(&data_access, Command::CursorMoveLeft(1));
+              return self.cursor_move(&data_access, Command::CursorMoveBy((-1, 0)));
             }
             KeyCode::Right | KeyCode::Char('l') => {
-              return self.cursor_move(&data_access, Command::CursorMoveRight(1));
+              return self.cursor_move(&data_access, Command::CursorMoveBy((1, 0)));
             }
             KeyCode::Esc => {
               // quit loop
-              return self.quit(&data_access, Command::QuitEditor);
+              return self.quit(&data_access, Command::EditorQuit);
             }
             _ => { /* Skip */ }
           }
@@ -116,11 +116,25 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
         let cursor_move_result = match command {
-          Command::CursorMoveUp(_) | Command::CursorMoveDown(_) => {
-            self._cursor_move_vertically(&viewport, &cursor_viewport, &buffer, command)
+          Command::CursorMoveBy((x, y)) => {
+            if x != 0 {
+              debug_assert_eq!(y, 0);
+              self._cursor_move_horizontally_by(&viewport, &cursor_viewport, &buffer, x)
+            } else {
+              debug_assert_eq!(x, 0);
+              debug_assert_ne!(y, 0);
+              self._cursor_move_vertically_by(&viewport, &cursor_viewport, &buffer, y)
+            }
           }
-          Command::CursorMoveLeft(_) | Command::CursorMoveRight(_) => {
-            self._cursor_move_horizontally(&viewport, &cursor_viewport, &buffer, command)
+          Command::CursorMoveTo((x, y)) => {
+            if x != 0 {
+              debug_assert_eq!(y, 0);
+              self._cursor_move_horizontally_to(&viewport, &cursor_viewport, &buffer, x)
+            } else {
+              debug_assert_eq!(x, 0);
+              debug_assert_ne!(y, 0);
+              self._cursor_move_vertically_to(&viewport, &cursor_viewport, &buffer, y)
+            }
           }
           _ => unreachable!(),
         };
@@ -145,30 +159,50 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  /// Returns the `line_idx` and `char_idx` for the cursor.
-  fn _cursor_move_vertically(
+  // Move cursor vertically by `y`, relatively based on cursor position.
+  // Returns new `line_idx` and `char_idx` for cursor position.
+  fn _cursor_move_vertically_by(
     &self,
     viewport: &Viewport,
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
-    command: Command,
+    y: isize,
+  ) -> Option<(usize, usize)> {
+    let cursor_line_idx = cursor_viewport.line_idx();
+
+    let expected_y = if y < 0 {
+      let n = -y as usize;
+      cursor_line_idx.saturating_sub(n)
+    } else {
+      let n = y as usize;
+      cursor_line_idx.saturating_add(n)
+    };
+
+    self._cursor_move_vertically_to(viewport, cursor_viewport, buffer, expected_y)
+  }
+
+  // Move cursor vertically to `y`, absolutely based on buffer.
+  // Returns new `line_idx` and `char_idx` for cursor position.
+  fn _cursor_move_vertically_to(
+    &self,
+    viewport: &Viewport,
+    cursor_viewport: &CursorViewport,
+    buffer: &Buffer,
+    y: usize,
   ) -> Option<(usize, usize)> {
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
 
-    let line_idx = match command {
-      Command::CursorMoveUp(n) => cursor_line_idx.saturating_sub(n),
-      Command::CursorMoveDown(n) => {
-        let expected = cursor_line_idx.saturating_add(n);
-        let end_line_idx = viewport.end_line_idx();
-        let last_line_idx = end_line_idx.saturating_sub(1);
-        trace!(
-          "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
-          cursor_line_idx, expected, end_line_idx, last_line_idx
-        );
-        std::cmp::min(expected, last_line_idx)
-      }
-      _ => unreachable!(),
+    let line_idx = {
+      let n = y;
+      let expected = n;
+      let end_line_idx = viewport.end_line_idx();
+      let last_line_idx = end_line_idx.saturating_sub(1);
+      trace!(
+        "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
+        cursor_line_idx, expected, end_line_idx, last_line_idx
+      );
+      std::cmp::min(expected, last_line_idx)
     };
     trace!(
       "cursor:{}/{},line_idx:{}",
@@ -197,13 +231,36 @@ impl NormalStateful {
     Some((line_idx, char_idx))
   }
 
-  /// Returns the `line_idx` and `char_idx` for the cursor.
-  fn _cursor_move_horizontally(
+  // Move cursor horizontally by `x`, relatively based on cursor position.
+  // Returns new `line_idx` and `char_idx` for cursor position.
+  fn _cursor_move_horizontally_by(
     &self,
     viewport: &Viewport,
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
-    command: Command,
+    x: isize,
+  ) -> Option<(usize, usize)> {
+    let cursor_char_idx = cursor_viewport.char_idx();
+
+    let expected_x = if x < 0 {
+      let n = -x as usize;
+      cursor_char_idx.saturating_sub(n)
+    } else {
+      let n = x as usize;
+      cursor_char_idx.saturating_add(n)
+    };
+
+    self._cursor_move_horizontally_to(viewport, cursor_viewport, buffer, expected_x)
+  }
+
+  // Move cursor horizontally to `x`, absolutely based on buffer.
+  // Returns new `line_idx` and `char_idx` for cursor position.
+  fn _cursor_move_horizontally_to(
+    &self,
+    viewport: &Viewport,
+    cursor_viewport: &CursorViewport,
+    buffer: &Buffer,
+    x: usize,
   ) -> Option<(usize, usize)> {
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
@@ -217,26 +274,21 @@ impl NormalStateful {
       None => return None,
     }
 
-    let char_idx = match command {
-      Command::CursorMoveLeft(n) => cursor_char_idx.saturating_sub(n),
-      Command::CursorMoveRight(n) => {
-        let expected = cursor_char_idx.saturating_add(n);
-        let upper_bounded = {
-          debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
-          let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
-          let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-          let last_char_on_row = last_row_viewport.end_char_idx() - 1;
-          trace!(
-            "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
-            cursor_char_idx, expected, last_row_viewport, last_char_on_row
-          );
-          buffer
-            .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
-            .unwrap()
-        };
-        std::cmp::min(expected, upper_bounded)
-      }
-      _ => unreachable!(),
+    let char_idx = {
+      let upper_bounded = {
+        debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
+        let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
+        let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+        let last_char_on_row = last_row_viewport.end_char_idx() - 1;
+        trace!(
+          "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
+          cursor_char_idx, x, last_row_viewport, last_char_on_row
+        );
+        buffer
+          .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
+          .unwrap()
+      };
+      std::cmp::min(x, upper_bounded)
     };
 
     Some((cursor_line_idx, char_idx))
