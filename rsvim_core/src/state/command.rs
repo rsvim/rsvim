@@ -6,8 +6,6 @@
 
 #[derive(Debug, Copy, Clone)]
 /// Editor operation commands.
-///
-/// NOTE: The command enums are named following the `Subject-Predicate-Object` in English grammar.
 pub enum Command {
   /// Move cursor by offset `(x,y)`, relatively based on current cursor position.
   /// The `x` is chars count, when negative it moves to left, when positive it moves to right. The
