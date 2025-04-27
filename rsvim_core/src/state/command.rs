@@ -38,7 +38,7 @@ pub enum Command {
   ///
   /// NOTE: When the cursor is at the window border and scrolling will move the cursor out of
   /// window, the cursor position will be drag to keep it still inside the window.
-  WindowSrollTo((isize, isize)),
+  WindowSrollTo((usize, usize)),
 
   /// Quit editor
   EditorQuit,
