@@ -15,17 +15,17 @@ use tracing::trace;
 /// The normal editing mode.
 pub struct NormalStateful {}
 
-fn last_visible_char_on_line_since(buffer: &Buffer, line_idx: usize, char_idx: usize) -> usize {
-  let bline = buffer.get_rope().get_line(line_idx).unwrap();
-  let mut c = char_idx;
-  while buffer.char_width(bline.get_char(c).unwrap()) == 0 {
-    c = c.saturating_sub(1);
-    if c == 0 {
-      break;
-    }
-  }
-  c
-}
+// fn last_visible_char_on_line_since(buffer: &Buffer, line_idx: usize, char_idx: usize) -> usize {
+//   let bline = buffer.get_rope().get_line(line_idx).unwrap();
+//   let mut c = char_idx;
+//   while buffer.char_width(bline.get_char(c).unwrap()) == 0 {
+//     c = c.saturating_sub(1);
+//     if c == 0 {
+//       break;
+//     }
+//   }
+//   c
+// }
 
 fn adjust_cursor_char_idx_on_vertical_motion(
   buffer: &Buffer,
@@ -242,7 +242,10 @@ impl NormalStateful {
             "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
             cursor_char_idx, expected, last_row_viewport, last_char_on_row
           );
-          last_visible_char_on_line_since(buffer, cursor_line_idx, last_char_on_row)
+          buffer
+            .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
+            .unwrap()
+          // last_visible_char_on_line_since(buffer, cursor_line_idx, last_char_on_row)
         };
         std::cmp::min(expected, upper_bounded)
       }

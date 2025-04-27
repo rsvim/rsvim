@@ -233,8 +233,23 @@ impl Buffer {
     match self.rope.get_line(line_idx) {
       Some(line) => {
         let line_len_chars = line.len_chars();
-        if line_len_chars > 0 {
-          let mut c = line_len_chars - 1;
+        self.last_visible_char_on_line_since(line_idx, line_len_chars - 1)
+      }
+      None => None,
+    }
+  }
+
+  /// Get last visible char index on line, starts from specified `char_idx` instead of the last
+  /// char on the line.
+  ///
+  /// It returns the char index if exists, returns `None` if line not exists or line is
+  /// empty/blank, or `char_idx` is out of line length.
+  pub fn last_visible_char_on_line_since(&self, line_idx: usize, char_idx: usize) -> Option<usize> {
+    match self.rope.get_line(line_idx) {
+      Some(line) => {
+        let line_len_chars = line.len_chars();
+        if line_len_chars > char_idx {
+          let mut c = char_idx;
           while self.char_width(line.get_char(c).unwrap()) == 0 {
             c = c.saturating_sub(1);
             if c == 0 {
