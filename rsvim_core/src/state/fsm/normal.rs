@@ -614,7 +614,7 @@ mod tests_util {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_vertically {
+mod tests_cursor_move_y {
   use super::tests_util::*;
   use super::*;
 
@@ -915,7 +915,7 @@ mod tests_cursor_move_vertically {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_horizontally {
+mod tests_cursor_move_x {
   use super::tests_util::*;
   use super::*;
 
