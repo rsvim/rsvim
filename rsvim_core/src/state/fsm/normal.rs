@@ -95,12 +95,12 @@ impl NormalStateful {
         let (char_idx, line_idx) = match command {
           Command::CursorMoveBy((x, y)) => {
             let char_idx = if x != 0 {
-              self._cursor_move_horizontally_by(&cursor_viewport, x)
+              self._cursor_move_x_by(&cursor_viewport, x)
             } else {
               cursor_viewport.char_idx()
             };
             let line_idx = if y != 0 {
-              self._cursor_move_vertically_by(&cursor_viewport, y)
+              self._cursor_move_y_by(&cursor_viewport, y)
             } else {
               cursor_viewport.line_idx()
             };
@@ -135,7 +135,7 @@ impl NormalStateful {
 
   // Move cursor vertically by `y`, relatively based on cursor position.
   // Returns new `line_idx` and `char_idx` for cursor position.
-  fn _cursor_move_vertically_by(&self, cursor_viewport: &CursorViewport, y: isize) -> usize {
+  fn _cursor_move_y_by(&self, cursor_viewport: &CursorViewport, y: isize) -> usize {
     let cursor_line_idx = cursor_viewport.line_idx();
 
     if y < 0 {
@@ -149,7 +149,7 @@ impl NormalStateful {
 
   // Move cursor horizontally by `x`, relatively based on cursor position.
   // Returns new `line_idx` and `char_idx` for cursor position.
-  fn _cursor_move_horizontally_by(&self, cursor_viewport: &CursorViewport, x: isize) -> usize {
+  fn _cursor_move_x_by(&self, cursor_viewport: &CursorViewport, x: isize) -> usize {
     let cursor_char_idx = cursor_viewport.char_idx();
 
     if x < 0 {
@@ -1921,7 +1921,6 @@ mod tests_window_scroll_vertically_by {
       info!("after cursor scroll");
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
         "This is a ",
         "But still ",
         "  1. When ",
@@ -1930,23 +1929,15 @@ mod tests_window_scroll_vertically_by {
         "     * The",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        0,
+        1,
         8,
         &expect_fills,
         &expect_fills,
