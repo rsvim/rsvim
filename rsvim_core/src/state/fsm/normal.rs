@@ -1523,7 +1523,7 @@ mod tests_cursor_move_by {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveBy((lines[0].len(), 0));
+    let command = Command::CursorMoveBy((lines[0].len() as isize, 0));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
