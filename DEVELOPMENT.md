@@ -12,7 +12,7 @@ Please setup your development environment with:
 
   > Note: For windows development, please manually install all dependencies in the `mise.toml` file.
 
-- Link (or copy) `./git-hooks/pre-commit` to `./git/hooks/pre-commit` in your local git repository with `ln -s $PWD/git-hooks/pre-commit $PWD/.git/hooks/pre-commit`.
+- Link (or copy) `.pre-commit-hooks` to `./git/hooks/pre-commit` in your local git repository with `ln -s $PWD/.pre-commit-hooks $PWD/.git/hooks/pre-commit`.
 
 ## Rust
 
