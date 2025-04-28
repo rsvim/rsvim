@@ -246,7 +246,7 @@ impl NormalStateful {
     &self,
     viewport: &Viewport,
     base_line_idx: usize,
-    base_char_idx: usize,
+    _base_char_idx: usize,
     _buffer: &Buffer,
     y: isize,
   ) -> usize {
