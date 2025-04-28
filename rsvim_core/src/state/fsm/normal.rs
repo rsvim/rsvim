@@ -4374,5 +4374,260 @@ mod tests_window_scroll_to {
       );
     }
   }
+
+  #[test]
+  fn nowrap3() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "  3. If a single char needs multiple cells to display on the window, and it happens the char is at the end of the row, there can be multiple cases:\n",
+      "     * The char exactly ends at the end of the row, i.e. the last display column of the char is exactly the last column on the row. In this case, we are happy because the char can be put at the end of the row.\n",
+      "     * The char is too long to put at the end of the row, thus we will have to put the char to the beginning of the next row (because we don't cut a single char into pieces)\n",
+    ];
+    let (tree, state, bufs, buf) = make_tree(
+      U16Size::new(10, 5),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    // Before cursor scroll
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Scroll-1
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((4, 0)));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "o, RSVIM!\n",
+        " is a quit",
+        "still it c",
+        " When the ",
+        " When the ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Scroll-2
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((8, 0)));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "SVIM!\n",
+        "a quite si",
+        "l it conta",
+        "n the line",
+        "n the line",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Scroll-3
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((7, 0)));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "RSVIM!\n",
+        " a quite s",
+        "ll it cont",
+        "en the lin",
+        "en the lin",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Scroll-4
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((3, 0)));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "lo, RSVIM!",
+        "s is a qui",
+        " still it ",
+        ". When the",
+        ". When the",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Scroll-5
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((2, 0)));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    {
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "llo, RSVIM",
+        "is is a qu",
+        "t still it",
+        "1. When th",
+        "2. When th",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Scroll-6
+    let data_access =
+      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let stateful_machine = NormalStateful::default();
+    let next_stateful =
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 0)));
+    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+
+    let tree = data_access.tree.clone();
+    {
+      let viewport = get_viewport(tree);
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
 }
 // spellchecker:on
