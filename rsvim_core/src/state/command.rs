@@ -17,26 +17,6 @@ pub enum Command {
   /// window.
   CursorMoveBy((isize, isize)),
 
-  /// Move cursor left by offset `n` relatively, based on current cursor position.
-  ///
-  /// Same to [`Command::CursorMoveBy((-n,0))`](Command::CursorMoveBy).
-  CursorMoveLeftBy(usize),
-
-  /// Move cursor right by offset `n` relatively, based on current cursor position.
-  ///
-  /// Same to [`Command::CursorMoveBy((n,0))`](Command::CursorMoveBy).
-  CursorMoveRightBy(usize),
-
-  /// Move cursor up by offset `n` relatively, based on current cursor position.
-  ///
-  /// Same to [`Command::CursorMoveBy((0,-n))`](Command::CursorMoveBy).
-  CursorMoveUpBy(usize),
-
-  /// Move cursor down by offset `n` relatively, based on current cursor position.
-  ///
-  /// Same to [`Command::CursorMoveBy((0,n))`](Command::CursorMoveBy).
-  CursorMoveDownBy(usize),
-
   /// Similar to [`Command::CursorMoveBy`], except it moves cursor to an absolute position based on
   /// current buffer.
   ///
