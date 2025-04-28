@@ -89,15 +89,15 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  /// Cursor move in current window.
-  /// NOTE: This will not scroll the buffer if cursor reaches the window border.
-  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
-    StatefulValue::NormalMode(NormalStateful::default())
-  }
+  // /// Cursor move in current window.
+  // /// NOTE: This will not scroll the buffer if cursor reaches the window border.
+  // fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  //   StatefulValue::NormalMode(NormalStateful::default())
+  // }
 
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
-  fn _cursor_move_by(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
