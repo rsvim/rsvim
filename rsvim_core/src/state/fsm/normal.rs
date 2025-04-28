@@ -92,6 +92,12 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  /// Cursor move in current window.
+  /// NOTE: This will not scroll the buffer if cursor reaches the window border.
+  fn _cursor_move_by(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -155,11 +161,10 @@ impl NormalStateful {
     } else {
       let n = y as usize;
       let expected = cursor_line_idx.saturating_add(n);
-      let end_line_idx = viewport.end_line_idx();
-      let last_line_idx = end_line_idx.saturating_sub(1);
+      let last_line_idx = viewport.end_line_idx().saturating_sub(1);
       trace!(
-        "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
-        cursor_line_idx, expected, end_line_idx, last_line_idx
+        "cursor_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
+        cursor_line_idx, expected, last_line_idx
       );
       std::cmp::min(expected, last_line_idx)
     };
