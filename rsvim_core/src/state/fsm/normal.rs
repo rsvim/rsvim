@@ -137,35 +137,6 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  // NOTE: `y` is lines count.
-  fn _raw_cursor_move_y_by(
-    &self,
-    viewport: &Viewport,
-    cursor_line_idx: usize,
-    cursor_char_idx: usize,
-    _buffer: &Buffer,
-    y: isize,
-  ) -> Option<usize> {
-    let line_idx = if y < 0 {
-      let n = -y as usize;
-      cursor_line_idx.saturating_sub(n)
-    } else {
-      let n = y as usize;
-      let expected = cursor_line_idx.saturating_add(n);
-      let last_line_idx = viewport.end_line_idx().saturating_sub(1);
-      trace!(
-        "cursor_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
-        cursor_line_idx, expected, last_line_idx
-      );
-      std::cmp::min(expected, last_line_idx)
-    };
-    trace!(
-      "cursor:{}/{},line_idx:{}",
-      cursor_line_idx, cursor_char_idx, line_idx
-    );
-    Some(line_idx)
-  }
-
   // Returns the `line_idx`/`char_idx` for new cursor position.
   // NOTE: `y` is lines count.
   fn _cursor_move_y_by(
