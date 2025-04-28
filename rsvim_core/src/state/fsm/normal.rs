@@ -129,6 +129,7 @@ impl NormalStateful {
         let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
+
         let cursor_move_result = match converted_command {
           Command::CursorMoveBy((x, y)) => {
             self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y)
@@ -245,11 +246,11 @@ impl NormalStateful {
     &self,
     viewport: &Viewport,
     base_line_idx: usize,
-    base_char_idx: usize,
+    _base_char_idx: usize,
     _buffer: &Buffer,
     y: isize,
   ) -> usize {
-    let line_idx = if y < 0 {
+    if y < 0 {
       let n = -y as usize;
       base_line_idx.saturating_sub(n)
     } else {
@@ -261,12 +262,7 @@ impl NormalStateful {
         base_line_idx, expected_line_idx, last_line_idx
       );
       std::cmp::min(expected_line_idx, last_line_idx)
-    };
-    trace!(
-      "cursor:{}/{},line_idx:{}",
-      base_line_idx, base_char_idx, line_idx
-    );
-    line_idx
+    }
   }
 
   // // Returns the `line_idx`/`char_idx` for new cursor position.
@@ -324,7 +320,7 @@ impl NormalStateful {
     buffer: &Buffer,
     x: isize,
   ) -> usize {
-    let char_idx = if x < 0 {
+    if x < 0 {
       let n = -x as usize;
       base_char_idx.saturating_sub(n)
     } else {
@@ -344,12 +340,38 @@ impl NormalStateful {
           .unwrap()
       };
       std::cmp::min(expected, upper_bounded)
-    };
-    char_idx
+    }
   }
 
   /// Window scrolls buffer content.
   fn _window_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    let converted_command = match command {
+      Command::WindowScrollLeftBy(n) => Command::WindowScrollBy((-(n as isize), 0)),
+      Command::WindowScrollRightBy(n) => Command::WindowScrollBy((n as isize, 0)),
+      Command::WindowScrollUpBy(n) => Command::WindowScrollBy((0, -(n as isize))),
+      Command::WindowScrollDownBy(n) => Command::WindowScrollBy((0, n as isize)),
+      Command::WindowScrollBy((x, y)) => Command::WindowScrollBy((x, y)),
+      Command::WindowScrollTo((x, y)) => {
+        let tree = data_access.tree.clone();
+        let mut tree = lock!(tree);
+        if let Some(current_window_id) = tree.current_window_id() {
+          if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+            let viewport = current_window.viewport();
+            let viewport = lock!(viewport);
+            Command::WindowScrollBy((
+              (x as isize) - (viewport.start_line_idx() as isize),
+              (y as isize) - (viewport.start_column_idx() as isize),
+            ))
+          } else {
+            Command::WindowScrollBy((0, 0))
+          }
+        } else {
+          Command::WindowScrollBy((0, 0))
+        }
+      }
+      _ => unreachable!(),
+    };
+
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -360,23 +382,12 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        let cursor_scroll_result = {
-          match command {
-            Command::WindowScrollBy((x, y)) => {
-              if x != 0 {
-                debug_assert_eq!(y, 0);
-                self._window_scroll_x_by(&viewport, &buffer, x)
-              } else {
-                debug_assert_eq!(x, 0);
-                debug_assert_ne!(y, 0);
-                self._window_scroll_y_by(&viewport, &buffer, y)
-              }
-            }
-            _ => unreachable!(),
-          }
+        let window_scroll_result = match converted_command {
+          Command::WindowScrollBy((x, y)) => self._window_scroll_by(&viewport, &buffer, x, y),
+          _ => unreachable!(),
         };
 
-        if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {
+        if let Some((start_line_idx, start_column_idx)) = window_scroll_result {
           // Sync the viewport
           let window_actual_shape = current_window.window_content().actual_shape();
           let window_local_options = current_window.options();
@@ -396,28 +407,95 @@ impl NormalStateful {
   }
 
   /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-  /// NOTE: `y` is the lines count.
-  fn _window_scroll_y_by(
+  /// NOTE: `x` is the columns count, `y` is the lines count.
+  fn _window_scroll_by(
     &self,
     viewport: &Viewport,
     buffer: &Buffer,
+    x: isize,
     y: isize,
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
     let start_column_idx = viewport.start_column_idx();
     let buffer_len_lines = buffer.get_rope().len_lines();
+    debug_assert!(end_line_idx <= buffer_len_lines);
 
-    let line_idx = if y < 0 {
+    let mut line_idx = self._raw_window_scroll_y_by(start_line_idx, buffer, y);
+
+    // If viewport wants to scroll down (i.e. y > 0), and viewport already shows that last line in
+    // the buffer, then cannot scroll down anymore, just still keep the old `line_idx`.
+    if y > 0 && end_line_idx == buffer_len_lines {
+      line_idx = start_line_idx;
+    }
+
+    let column_idx = self._raw_window_scroll_x_by(start_column_idx, viewport, buffer, x);
+
+    // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
+    // there's no need to scroll anymore.
+    if line_idx == start_line_idx && column_idx == start_column_idx {
+      return None;
+    }
+
+    Some((line_idx, column_idx))
+  }
+
+  // /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
+  // /// NOTE: `y` is the lines count.
+  // fn _window_scroll_y_by(
+  //   &self,
+  //   viewport: &Viewport,
+  //   buffer: &Buffer,
+  //   y: isize,
+  // ) -> Option<(usize, usize)> {
+  //   let start_line_idx = viewport.start_line_idx();
+  //   let end_line_idx = viewport.end_line_idx();
+  //   let start_column_idx = viewport.start_column_idx();
+  //   let buffer_len_lines = buffer.get_rope().len_lines();
+  //
+  //   let line_idx = if y < 0 {
+  //     let n = -y as usize;
+  //     start_line_idx.saturating_sub(n)
+  //   } else {
+  //     let n = y as usize;
+  //     // Viewport already shows the last line of buffer, cannot scroll down anymore.
+  //     debug_assert!(end_line_idx <= buffer_len_lines);
+  //     if end_line_idx == buffer_len_lines {
+  //       return None;
+  //     }
+  //
+  //     // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
+  //     // line.
+  //     let expected_start_line = std::cmp::min(
+  //       start_line_idx.saturating_add(n),
+  //       buffer_len_lines.saturating_sub(1),
+  //     );
+  //
+  //     // If the expected (after scrolled) start line index is current start line index, then don't
+  //     // scroll.
+  //     if expected_start_line == start_line_idx {
+  //       return None;
+  //     }
+  //
+  //     trace!(
+  //       "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
+  //       start_line_idx, end_line_idx, expected_start_line
+  //     );
+  //     expected_start_line
+  //   };
+  //
+  //   Some((line_idx, start_column_idx))
+  // }
+
+  /// NOTE: `y` is the lines count.
+  fn _raw_window_scroll_y_by(&self, start_line_idx: usize, buffer: &Buffer, y: isize) -> usize {
+    let buffer_len_lines = buffer.get_rope().len_lines();
+
+    if y < 0 {
       let n = -y as usize;
       start_line_idx.saturating_sub(n)
     } else {
       let n = y as usize;
-      // Viewport already shows the last line of buffer, cannot scroll down anymore.
-      debug_assert!(end_line_idx <= buffer_len_lines);
-      if end_line_idx == buffer_len_lines {
-        return None;
-      }
 
       // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
       // line.
@@ -426,20 +504,12 @@ impl NormalStateful {
         buffer_len_lines.saturating_sub(1),
       );
 
-      // If the expected (after scrolled) start line index is current start line index, then don't
-      // scroll.
-      if expected_start_line == start_line_idx {
-        return None;
-      }
-
       trace!(
-        "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
-        start_line_idx, end_line_idx, expected_start_line
+        "start_line_idx:{:?},expected_start_line:{:?}",
+        start_line_idx, expected_start_line
       );
       expected_start_line
-    };
-
-    Some((line_idx, start_column_idx))
+    }
   }
 
   // Calculate how many columns that each line (in current viewport) need to scroll until
@@ -485,26 +555,56 @@ impl NormalStateful {
     max_scrolls
   }
 
-  /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
+  // /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
+  // /// NOTE: `x` is the columns count (not chars).
+  // fn _window_scroll_x_by(
+  //   &self,
+  //   viewport: &Viewport,
+  //   buffer: &Buffer,
+  //   x: isize,
+  // ) -> Option<(usize, usize)> {
+  //   let start_line_idx = viewport.start_line_idx();
+  //   let end_line_idx = viewport.end_line_idx();
+  //   let start_column_idx = viewport.start_column_idx();
+  //
+  //   if end_line_idx == start_line_idx {
+  //     return None;
+  //   }
+  //
+  //   debug_assert!(end_line_idx > start_line_idx);
+  //   debug_assert!(viewport.lines().contains_key(&start_line_idx));
+  //
+  //   let start_col = if x < 0 {
+  //     let n = -x as usize;
+  //     start_column_idx.saturating_sub(n)
+  //   } else {
+  //     let n = x as usize;
+  //     let expected = start_column_idx.saturating_add(n);
+  //     let max_scrolls = self._window_scroll_x_max_scrolls(viewport, buffer);
+  //     let upper_bounded = start_column_idx.saturating_add(max_scrolls);
+  //     trace!(
+  //       "max_scrolls:{},upper_bounded:{},expected:{}",
+  //       max_scrolls, upper_bounded, expected
+  //     );
+  //     std::cmp::min(expected, upper_bounded)
+  //   };
+  //
+  //   if start_col == start_column_idx {
+  //     return None;
+  //   }
+  //
+  //   Some((start_line_idx, start_col))
+  // }
+
   /// NOTE: `x` is the columns count (not chars).
-  fn _window_scroll_x_by(
+  fn _raw_window_scroll_x_by(
     &self,
+    start_column_idx: usize,
     viewport: &Viewport,
     buffer: &Buffer,
     x: isize,
-  ) -> Option<(usize, usize)> {
-    let start_line_idx = viewport.start_line_idx();
-    let end_line_idx = viewport.end_line_idx();
-    let start_column_idx = viewport.start_column_idx();
-
-    if end_line_idx == start_line_idx {
-      return None;
-    }
-
-    debug_assert!(end_line_idx > start_line_idx);
-    debug_assert!(viewport.lines().contains_key(&start_line_idx));
-
-    let start_col = if x < 0 {
+  ) -> usize {
+    if x < 0 {
       let n = -x as usize;
       start_column_idx.saturating_sub(n)
     } else {
@@ -517,13 +617,7 @@ impl NormalStateful {
         max_scrolls, upper_bounded, expected
       );
       std::cmp::min(expected, upper_bounded)
-    };
-
-    if start_col == start_column_idx {
-      return None;
     }
-
-    Some((start_line_idx, start_col))
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
@@ -726,7 +820,7 @@ mod tests_util {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_y {
+mod tests_cursor_move_y_by {
   use super::tests_util::*;
   use super::*;
 
@@ -1027,7 +1121,7 @@ mod tests_cursor_move_y {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_x {
+mod tests_cursor_move_x_by {
   use super::tests_util::*;
   use super::*;
 
@@ -1298,7 +1392,7 @@ mod tests_cursor_move_x {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move {
+mod tests_cursor_move_by {
   use super::tests_util::*;
   use super::*;
 
@@ -1351,7 +1445,7 @@ mod tests_cursor_move {
     // Step-1
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful = NormalStateful::default();
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveRightBy(5));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((5, 0)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1364,7 +1458,7 @@ mod tests_cursor_move {
       StatefulValue::NormalMode(s) => s,
       _ => unreachable!(),
     };
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveDownBy(1));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((0, 1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
@@ -1376,7 +1470,7 @@ mod tests_cursor_move {
       StatefulValue::NormalMode(s) => s,
       _ => unreachable!(),
     };
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveLeftBy(3));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((-3, 0)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
     let tree = data_access.tree.clone();
     let actual3 = get_cursor_viewport(tree);
@@ -1388,7 +1482,7 @@ mod tests_cursor_move {
       StatefulValue::NormalMode(s) => s,
       _ => unreachable!(),
     };
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveUpBy(1));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((0, -1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
     let tree = data_access.tree.clone();
     let actual4 = get_cursor_viewport(tree);
@@ -1434,10 +1528,10 @@ mod tests_cursor_move {
 
     for _ in 0..10 {
       let commands = [
-        Command::CursorMoveDownBy(2),
-        Command::CursorMoveRightBy(3),
-        Command::CursorMoveUpBy(2),
-        Command::CursorMoveLeftBy(3),
+        Command::CursorMoveBy((0, 2)),
+        Command::CursorMoveBy((3, 0)),
+        Command::CursorMoveBy((0, -2)),
+        Command::CursorMoveBy((-3, 0)),
       ];
       let data_access = StatefulDataAccess::new(
         state.clone(),
@@ -1458,10 +1552,10 @@ mod tests_cursor_move {
 
     for _ in 0..10 {
       let commands = [
-        Command::CursorMoveRightBy(5),
-        Command::CursorMoveDownBy(1),
-        Command::CursorMoveLeftBy(5),
-        Command::CursorMoveUpBy(1),
+        Command::CursorMoveBy((5, 0)),
+        Command::CursorMoveBy((0, 1)),
+        Command::CursorMoveBy((-5, 0)),
+        Command::CursorMoveBy((0, -1)),
       ];
       let data_access = StatefulDataAccess::new(
         state.clone(),
@@ -1523,7 +1617,7 @@ mod tests_cursor_move {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveRightBy(lines[0].len());
+    let command = Command::CursorMoveBy((lines[0].len() as isize, 0));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
@@ -1540,7 +1634,7 @@ mod tests_cursor_move {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveDownBy(1);
+    let command = Command::CursorMoveBy((0, 1));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
@@ -1554,7 +1648,7 @@ mod tests_cursor_move {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_window_scroll_y {
+mod tests_window_scroll_y_by {
   use super::tests_util::*;
   use super::*;
 
@@ -1614,8 +1708,7 @@ mod tests_window_scroll_y {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -1)));
+    let next_stateful = stateful_machine._window_scroll(&data_access, Command::WindowScrollUpBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1706,7 +1799,7 @@ mod tests_window_scroll_y {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 1)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1811,7 +1904,7 @@ mod tests_window_scroll_y {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 1)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1904,7 +1997,7 @@ mod tests_window_scroll_y {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 4)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1996,7 +2089,7 @@ mod tests_window_scroll_y {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 4)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2029,7 +2122,7 @@ mod tests_window_scroll_y {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 4)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2054,8 +2147,7 @@ mod tests_window_scroll_y {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -1)));
+    let next_stateful = stateful_machine._window_scroll(&data_access, Command::WindowScrollUpBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2080,8 +2172,7 @@ mod tests_window_scroll_y {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -4)));
+    let next_stateful = stateful_machine._window_scroll(&data_access, Command::WindowScrollUpBy(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2113,8 +2204,7 @@ mod tests_window_scroll_y {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -1)));
+    let next_stateful = stateful_machine._window_scroll(&data_access, Command::WindowScrollUpBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2146,8 +2236,7 @@ mod tests_window_scroll_y {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -3)));
+    let next_stateful = stateful_machine._window_scroll(&data_access, Command::WindowScrollUpBy(3));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2243,7 +2332,7 @@ mod tests_window_scroll_y {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 4)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2349,7 +2438,7 @@ mod tests_window_scroll_y {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 8)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(8));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2390,7 +2479,7 @@ mod tests_window_scroll_y {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 1)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2431,7 +2520,7 @@ mod tests_window_scroll_y {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, 3)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(3));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2471,8 +2560,7 @@ mod tests_window_scroll_y {
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((0, -2)));
+    let next_stateful = stateful_machine._window_scroll(&data_access, Command::WindowScrollUpBy(2));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2512,7 +2600,7 @@ mod tests_window_scroll_y {
 }
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_window_scroll_x {
+mod tests_window_scroll_x_by {
   use super::tests_util::*;
   use super::*;
 
@@ -2573,7 +2661,7 @@ mod tests_window_scroll_x {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((1, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2664,7 +2752,7 @@ mod tests_window_scroll_x {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((1, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2769,7 +2857,7 @@ mod tests_window_scroll_x {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-1, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollLeftBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2862,7 +2950,7 @@ mod tests_window_scroll_x {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((149, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(149));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2947,7 +3035,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((100, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(100));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -2975,7 +3063,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((10, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(10));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3003,7 +3091,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((50, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(50));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3031,7 +3119,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-10, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollLeftBy(10));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3117,7 +3205,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((4, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3150,7 +3238,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((4, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3183,7 +3271,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-1, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollLeftBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3216,7 +3304,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-4, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollLeftBy(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3249,7 +3337,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-1, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollLeftBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3282,7 +3370,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-3, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollLeftBy(3));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3378,7 +3466,7 @@ mod tests_window_scroll_x {
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((4, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(4));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3485,7 +3573,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((8, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(8));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3527,7 +3615,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((1, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3571,7 +3659,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((3, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollRightBy(3));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -3615,7 +3703,7 @@ mod tests_window_scroll_x {
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
     let stateful_machine = NormalStateful::default();
     let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollBy((-1, 0)));
+      stateful_machine._window_scroll(&data_access, Command::WindowScrollLeftBy(1));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
