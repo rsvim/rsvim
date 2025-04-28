@@ -97,17 +97,7 @@ impl NormalStateful {
       Command::CursorMoveRightBy(n) => Command::CursorMoveBy((n as isize, 0)),
       Command::CursorMoveUpBy(n) => Command::CursorMoveBy((0, -(n as isize))),
       Command::CursorMoveDownBy(n) => Command::CursorMoveBy((0, n as isize)),
-      Command::CursorMoveBy((x,y)) => Command::CursorMoveBy((x, y)),
-      // Command::CursorMoveBy((x, y)) => {
-      //   let mut cmds: Vec<Command> = vec![];
-      //   if x != 0 {
-      //     cmds.push(Command::CursorMoveBy((x, 0)));
-      //   }
-      //   if y != 0 {
-      //     cmds.push(Command::CursorMoveBy((0, y)));
-      //   }
-      //   cmds
-      // }
+      Command::CursorMoveBy((x, y)) => Command::CursorMoveBy((x, y)),
       _ => unreachable!(),
     };
 
@@ -181,57 +171,57 @@ impl NormalStateful {
     Some((line_idx, char_idx))
   }
 
-  // Returns the `line_idx`/`char_idx` for new cursor position.
-  // NOTE: `y` is lines count.
-  fn _cursor_move_y_by(
-    &self,
-    viewport: &Viewport,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    y: isize,
-  ) -> Option<(usize, usize)> {
-    let cursor_line_idx = cursor_viewport.line_idx();
-    let cursor_char_idx = cursor_viewport.char_idx();
-
-    let line_idx = if y < 0 {
-      let n = -y as usize;
-      cursor_line_idx.saturating_sub(n)
-    } else {
-      let n = y as usize;
-      let expected = cursor_line_idx.saturating_add(n);
-      let last_line_idx = viewport.end_line_idx().saturating_sub(1);
-      trace!(
-        "cursor_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
-        cursor_line_idx, expected, last_line_idx
-      );
-      std::cmp::min(expected, last_line_idx)
-    };
-    trace!(
-      "cursor:{}/{},line_idx:{}",
-      cursor_line_idx, cursor_char_idx, line_idx
-    );
-
-    // If line index doesn't change, early return.
-    if line_idx == cursor_line_idx {
-      return None;
-    }
-
-    match buffer.get_rope().get_line(line_idx) {
-      Some(line) => {
-        trace!("line.len_chars:{}", line.len_chars());
-        if line.len_chars() == 0 {
-          return None;
-        }
-      }
-      None => {
-        trace!("get_line not found:{}", line_idx);
-        return None;
-      }
-    }
-    let char_idx =
-      adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
-    Some((line_idx, char_idx))
-  }
+  // // Returns the `line_idx`/`char_idx` for new cursor position.
+  // // NOTE: `y` is lines count.
+  // fn _cursor_move_y_by(
+  //   &self,
+  //   viewport: &Viewport,
+  //   cursor_viewport: &CursorViewport,
+  //   buffer: &Buffer,
+  //   y: isize,
+  // ) -> Option<(usize, usize)> {
+  //   let cursor_line_idx = cursor_viewport.line_idx();
+  //   let cursor_char_idx = cursor_viewport.char_idx();
+  //
+  //   let line_idx = if y < 0 {
+  //     let n = -y as usize;
+  //     cursor_line_idx.saturating_sub(n)
+  //   } else {
+  //     let n = y as usize;
+  //     let expected = cursor_line_idx.saturating_add(n);
+  //     let last_line_idx = viewport.end_line_idx().saturating_sub(1);
+  //     trace!(
+  //       "cursor_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
+  //       cursor_line_idx, expected, last_line_idx
+  //     );
+  //     std::cmp::min(expected, last_line_idx)
+  //   };
+  //   trace!(
+  //     "cursor:{}/{},line_idx:{}",
+  //     cursor_line_idx, cursor_char_idx, line_idx
+  //   );
+  //
+  //   // If line index doesn't change, early return.
+  //   if line_idx == cursor_line_idx {
+  //     return None;
+  //   }
+  //
+  //   match buffer.get_rope().get_line(line_idx) {
+  //     Some(line) => {
+  //       trace!("line.len_chars:{}", line.len_chars());
+  //       if line.len_chars() == 0 {
+  //         return None;
+  //       }
+  //     }
+  //     None => {
+  //       trace!("get_line not found:{}", line_idx);
+  //       return None;
+  //     }
+  //   }
+  //   let char_idx =
+  //     adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
+  //   Some((line_idx, char_idx))
+  // }
 
   // NOTE: `y` is lines count.
   fn _raw_cursor_move_y_by(
@@ -262,51 +252,51 @@ impl NormalStateful {
     line_idx
   }
 
-  // Returns the `line_idx`/`char_idx` for new cursor position.
-  // NOTE: `x` is chars count.
-  fn _cursor_move_x_by(
-    &self,
-    viewport: &Viewport,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    x: isize,
-  ) -> Option<(usize, usize)> {
-    let cursor_line_idx = cursor_viewport.line_idx();
-    let cursor_char_idx = cursor_viewport.char_idx();
-
-    match buffer.get_rope().get_line(cursor_line_idx) {
-      Some(line) => {
-        if line.len_chars() == 0 {
-          return None;
-        }
-      }
-      None => return None,
-    }
-
-    let char_idx = if x < 0 {
-      let n = -x as usize;
-      cursor_char_idx.saturating_sub(n)
-    } else {
-      let n = x as usize;
-      let expected = cursor_char_idx.saturating_add(n);
-      let upper_bounded = {
-        debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
-        let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
-        let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-        let last_char_on_row = last_row_viewport.end_char_idx() - 1;
-        trace!(
-          "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
-          cursor_char_idx, expected, last_row_viewport, last_char_on_row
-        );
-        buffer
-          .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
-          .unwrap()
-      };
-      std::cmp::min(expected, upper_bounded)
-    };
-
-    Some((cursor_line_idx, char_idx))
-  }
+  // // Returns the `line_idx`/`char_idx` for new cursor position.
+  // // NOTE: `x` is chars count.
+  // fn _cursor_move_x_by(
+  //   &self,
+  //   viewport: &Viewport,
+  //   cursor_viewport: &CursorViewport,
+  //   buffer: &Buffer,
+  //   x: isize,
+  // ) -> Option<(usize, usize)> {
+  //   let cursor_line_idx = cursor_viewport.line_idx();
+  //   let cursor_char_idx = cursor_viewport.char_idx();
+  //
+  //   match buffer.get_rope().get_line(cursor_line_idx) {
+  //     Some(line) => {
+  //       if line.len_chars() == 0 {
+  //         return None;
+  //       }
+  //     }
+  //     None => return None,
+  //   }
+  //
+  //   let char_idx = if x < 0 {
+  //     let n = -x as usize;
+  //     cursor_char_idx.saturating_sub(n)
+  //   } else {
+  //     let n = x as usize;
+  //     let expected = cursor_char_idx.saturating_add(n);
+  //     let upper_bounded = {
+  //       debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
+  //       let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
+  //       let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+  //       let last_char_on_row = last_row_viewport.end_char_idx() - 1;
+  //       trace!(
+  //         "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
+  //         cursor_char_idx, expected, last_row_viewport, last_char_on_row
+  //       );
+  //       buffer
+  //         .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
+  //         .unwrap()
+  //     };
+  //     std::cmp::min(expected, upper_bounded)
+  //   };
+  //
+  //   Some((cursor_line_idx, char_idx))
+  // }
 
   // NOTE: `x` is chars count.
   fn _raw_cursor_move_x_by(
