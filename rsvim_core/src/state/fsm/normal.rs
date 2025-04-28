@@ -92,46 +92,72 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
-    let tree = data_access.tree.clone();
-    let mut tree = lock!(tree);
-
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let buffer = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer);
-        let viewport = current_window.viewport();
-        let viewport = lock!(viewport);
-        let cursor_viewport = current_window.cursor_viewport();
-        let cursor_viewport = lock!(cursor_viewport);
-        let cursor_move_result = match command {
-          Command::CursorMoveBy((x, y)) => {
-            if x != 0 {
-              debug_assert_eq!(y, 0);
-              self._cursor_move_x_by(&viewport, &cursor_viewport, &buffer, x)
-            } else {
-              debug_assert_eq!(x, 0);
-              debug_assert_ne!(y, 0);
-              self._cursor_move_y_by(&viewport, &cursor_viewport, &buffer, y)
-            }
-          }
-          _ => unreachable!(),
-        };
-
-        trace!("cursor_move_result:{:?}", cursor_move_result);
-        if let Some((line_idx, char_idx)) = cursor_move_result {
-          let moved_cursor_viewport =
-            CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
-          current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
-
-          let cursor_id = tree.cursor_id().unwrap();
-          tree.bounded_move_to(
-            cursor_id,
-            moved_cursor_viewport.column_idx() as isize,
-            moved_cursor_viewport.row_idx() as isize,
-          );
-          trace!("(after) cursor node position:{:?}", moved_cursor_viewport);
+    let converted_commands = match command {
+      Command::CursorMoveBy((x, y)) => {
+        let mut cmds: Vec<Command> = vec![];
+        if x != 0 {
+          cmds.push(Command::CursorMoveBy((x, 0)));
         }
-        // Or, just do nothing, stay at where you are
+        if y != 0 {
+          cmds.push(Command::CursorMoveBy((0, y)));
+        }
+        cmds
+      }
+      Command::CursorMoveBy((x, y)) => {
+        let mut cmds: Vec<Command> = vec![];
+        if x != 0 {
+          cmds.push(Command::CursorMoveBy((x, 0)));
+        }
+        if y != 0 {
+          cmds.push(Command::CursorMoveBy((0, y)));
+        }
+        cmds
+      }
+      _ => unreachable!(),
+    };
+
+    for cmd in converted_commands.into_iter() {
+      let tree = data_access.tree.clone();
+      let mut tree = lock!(tree);
+
+      if let Some(current_window_id) = tree.current_window_id() {
+        if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+          let buffer = current_window.buffer().upgrade().unwrap();
+          let buffer = lock!(buffer);
+          let viewport = current_window.viewport();
+          let viewport = lock!(viewport);
+          let cursor_viewport = current_window.cursor_viewport();
+          let cursor_viewport = lock!(cursor_viewport);
+          let cursor_move_result = match cmd {
+            Command::CursorMoveBy((x, y)) => {
+              if x != 0 {
+                debug_assert_eq!(y, 0);
+                self._cursor_move_x_by(&viewport, &cursor_viewport, &buffer, x)
+              } else {
+                debug_assert_eq!(x, 0);
+                debug_assert_ne!(y, 0);
+                self._cursor_move_y_by(&viewport, &cursor_viewport, &buffer, y)
+              }
+            }
+            _ => unreachable!(),
+          };
+
+          trace!("cursor_move_result:{:?}", cursor_move_result);
+          if let Some((line_idx, char_idx)) = cursor_move_result {
+            let moved_cursor_viewport =
+              CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
+            current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
+
+            let cursor_id = tree.cursor_id().unwrap();
+            tree.bounded_move_to(
+              cursor_id,
+              moved_cursor_viewport.column_idx() as isize,
+              moved_cursor_viewport.row_idx() as isize,
+            );
+            trace!("(after) cursor node position:{:?}", moved_cursor_viewport);
+          }
+          // Or, just do nothing, stay at where you are
+        }
       }
     }
     StatefulValue::NormalMode(NormalStateful::default())
