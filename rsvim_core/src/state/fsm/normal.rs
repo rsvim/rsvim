@@ -48,16 +48,16 @@ impl Stateful for NormalStateful {
         KeyEventKind::Press => {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
-              return self.cursor_move(&data_access, Command::CursorMoveBy((0, -1)));
+              return self.cursor_move(&data_access, Command::CursorMoveUpBy(1));
             }
             KeyCode::Down | KeyCode::Char('j') => {
-              return self.cursor_move(&data_access, Command::CursorMoveBy((0, 1)));
+              return self.cursor_move(&data_access, Command::CursorMoveDownBy(1));
             }
             KeyCode::Left | KeyCode::Char('h') => {
-              return self.cursor_move(&data_access, Command::CursorMoveBy((-1, 0)));
+              return self.cursor_move(&data_access, Command::CursorMoveLeftBy(1));
             }
             KeyCode::Right | KeyCode::Char('l') => {
-              return self.cursor_move(&data_access, Command::CursorMoveBy((1, 0)));
+              return self.cursor_move(&data_access, Command::CursorMoveRightBy(1));
             }
             KeyCode::Esc => {
               // quit loop
@@ -1523,7 +1523,7 @@ mod tests_cursor_move {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveBy((lines[0].len() as isize, 0));
+    let command = Command::CursorMoveRightBy(lines[0].len());
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
@@ -1540,7 +1540,7 @@ mod tests_cursor_move {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveBy((0, 1));
+    let command = Command::CursorMoveDownBy(1);
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
