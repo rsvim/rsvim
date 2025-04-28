@@ -93,24 +93,10 @@ impl NormalStateful {
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let converted_commands = match command {
-      Command::CursorMoveBy((x, y)) => {
-        let mut cmds: Vec<Command> = vec![];
-        if x != 0 {
-          if x < 0 {
-            cmds.push(Command::CursorMoveLeftBy(-x as usize));
-          } else {
-            cmds.push(Command::CursorMoveRightBy(x as usize));
-          }
-        }
-        if y != 0 {
-          if y < 0 {
-            cmds.push(Command::CursorMoveUpBy(-y as usize));
-          } else {
-            cmds.push(Command::CursorMoveDownBy(y as usize));
-          }
-        }
-        cmds
-      }
+      Command::CursorMoveLeftBy(n) => Command::CursorMoveBy((-(n as isize), 0)),
+      Command::CursorMoveRightBy(n) => Command::CursorMoveBy((n as isize, 0)),
+      Command::CursorMoveUpBy(n) => Command::CursorMoveBy((0, -(n as isize))),
+      Command::CursorMoveDownBy(n) => Command::CursorMoveBy((0, n as isize)),
       // Command::CursorMoveBy((x, y)) => {
       //   let mut cmds: Vec<Command> = vec![];
       //   if x != 0 {
@@ -124,53 +110,74 @@ impl NormalStateful {
       _ => unreachable!(),
     };
 
-    for cmd in converted_commands.into_iter() {
-      let tree = data_access.tree.clone();
-      let mut tree = lock!(tree);
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
 
-      if let Some(current_window_id) = tree.current_window_id() {
-        if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-          let buffer = current_window.buffer().upgrade().unwrap();
-          let buffer = lock!(buffer);
-          let viewport = current_window.viewport();
-          let viewport = lock!(viewport);
-          let cursor_viewport = current_window.cursor_viewport();
-          let cursor_viewport = lock!(cursor_viewport);
-          let cursor_move_result = match cmd {
-            Command::CursorMoveLeftBy(n) => {
-              self._cursor_move_x_by(&viewport, &cursor_viewport, &buffer, -(n as isize))
-            }
-            Command::CursorMoveRightBy(n) => {
-              self._cursor_move_x_by(&viewport, &cursor_viewport, &buffer, n as isize)
-            }
-            Command::CursorMoveUpBy(n) => {
-              self._cursor_move_y_by(&viewport, &cursor_viewport, &buffer, -(n as isize))
-            }
-            Command::CursorMoveDownBy(n) => {
-              self._cursor_move_y_by(&viewport, &cursor_viewport, &buffer, n as isize)
-            }
-            _ => unreachable!(),
-          };
-
-          trace!("cursor_move_result:{:?}", cursor_move_result);
-          if let Some((line_idx, char_idx)) = cursor_move_result {
-            let moved_cursor_viewport =
-              CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
-            current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
-
-            let cursor_id = tree.cursor_id().unwrap();
-            tree.bounded_move_to(
-              cursor_id,
-              moved_cursor_viewport.column_idx() as isize,
-              moved_cursor_viewport.row_idx() as isize,
-            );
-            trace!("(after) cursor node position:{:?}", moved_cursor_viewport);
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+        let buffer = current_window.buffer().upgrade().unwrap();
+        let buffer = lock!(buffer);
+        let viewport = current_window.viewport();
+        let viewport = lock!(viewport);
+        let cursor_viewport = current_window.cursor_viewport();
+        let cursor_viewport = lock!(cursor_viewport);
+        let cursor_move_result = match converted_commands {
+          Command::CursorMoveBy((x, y)) => {
+            self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y)
           }
-          // Or, just do nothing, stay at where you are
+          _ => unreachable!(),
+        };
+
+        trace!("cursor_move_result:{:?}", cursor_move_result);
+        if let Some((line_idx, char_idx)) = cursor_move_result {
+          let moved_cursor_viewport =
+            CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
+          current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
+
+          let cursor_id = tree.cursor_id().unwrap();
+          tree.bounded_move_to(
+            cursor_id,
+            moved_cursor_viewport.column_idx() as isize,
+            moved_cursor_viewport.row_idx() as isize,
+          );
+          trace!("(after) cursor node position:{:?}", moved_cursor_viewport);
         }
+        // Or, just do nothing, stay at where you are
       }
     }
     StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  // Returns the `line_idx`/`char_idx` for new cursor position.
+  // NOTE: `x` is chars count, `y` is lines count.
+  fn _cursor_move_by(
+    &self,
+    viewport: &Viewport,
+    cursor_viewport: &CursorViewport,
+    buffer: &Buffer,
+    x: isize,
+    y: isize,
+  ) -> Option<(usize, usize)> {
+    let cursor_line_idx = cursor_viewport.line_idx();
+    let cursor_char_idx = cursor_viewport.char_idx();
+    let line_idx =
+      self._raw_cursor_move_y_by(viewport, cursor_line_idx, cursor_char_idx, buffer, y);
+
+    // If `line_idx` doesn't exist, or line is empty.
+    match buffer.get_rope().get_line(line_idx) {
+      Some(line) => {
+        if line.len_chars() == 0 {
+          return None;
+        }
+      }
+      None => return None,
+    }
+
+    let char_idx =
+      adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
+    let char_idx = self._raw_cursor_move_x_by(viewport, line_idx, char_idx, buffer, x);
+
+    Some((line_idx, char_idx))
   }
 
   // Returns the `line_idx`/`char_idx` for new cursor position.
@@ -225,6 +232,35 @@ impl NormalStateful {
     Some((line_idx, char_idx))
   }
 
+  // NOTE: `y` is lines count.
+  fn _raw_cursor_move_y_by(
+    &self,
+    viewport: &Viewport,
+    base_line_idx: usize,
+    base_char_idx: usize,
+    _buffer: &Buffer,
+    y: isize,
+  ) -> usize {
+    let line_idx = if y < 0 {
+      let n = -y as usize;
+      base_line_idx.saturating_sub(n)
+    } else {
+      let n = y as usize;
+      let expected_line_idx = base_line_idx.saturating_add(n);
+      let last_line_idx = viewport.end_line_idx().saturating_sub(1);
+      trace!(
+        "base_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
+        base_line_idx, expected_line_idx, last_line_idx
+      );
+      std::cmp::min(expected_line_idx, last_line_idx)
+    };
+    trace!(
+      "cursor:{}/{},line_idx:{}",
+      base_line_idx, base_char_idx, line_idx
+    );
+    line_idx
+  }
+
   // Returns the `line_idx`/`char_idx` for new cursor position.
   // NOTE: `x` is chars count.
   fn _cursor_move_x_by(
@@ -269,6 +305,39 @@ impl NormalStateful {
     };
 
     Some((cursor_line_idx, char_idx))
+  }
+
+  // NOTE: `x` is chars count.
+  fn _raw_cursor_move_x_by(
+    &self,
+    viewport: &Viewport,
+    base_line_idx: usize,
+    base_char_idx: usize,
+    buffer: &Buffer,
+    x: isize,
+  ) -> usize {
+    let char_idx = if x < 0 {
+      let n = -x as usize;
+      base_char_idx.saturating_sub(n)
+    } else {
+      let n = x as usize;
+      let expected = base_char_idx.saturating_add(n);
+      let upper_bounded = {
+        debug_assert!(viewport.lines().contains_key(&base_line_idx));
+        let line_viewport = viewport.lines().get(&base_line_idx).unwrap();
+        let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+        let last_char_on_row = last_row_viewport.end_char_idx() - 1;
+        trace!(
+          "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
+          base_char_idx, expected, last_row_viewport, last_char_on_row
+        );
+        buffer
+          .last_visible_char_on_line_since(base_line_idx, last_char_on_row)
+          .unwrap()
+      };
+      std::cmp::min(expected, upper_bounded)
+    };
+    char_idx
   }
 
   /// Window scrolls buffer content.
