@@ -1461,7 +1461,7 @@ mod tests_cursor_move_by {
         Command::CursorMoveBy((5, 0)),
         Command::CursorMoveBy((0, 1)),
         Command::CursorMoveBy((-5, 0)),
-        Command::CursorMoveBy((-1, 0)),
+        Command::CursorMoveBy((0, -1)),
       ];
       let data_access = StatefulDataAccess::new(
         state.clone(),
