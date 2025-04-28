@@ -351,24 +351,24 @@ impl NormalStateful {
       Command::WindowScrollUpBy(n) => Command::WindowScrollBy((0, -(n as isize))),
       Command::WindowScrollDownBy(n) => Command::WindowScrollBy((0, n as isize)),
       Command::WindowScrollBy((x, y)) => Command::WindowScrollBy((x, y)),
-      // Command::CursorMoveTo((x, y)) => {
-      //   let tree = data_access.tree.clone();
-      //   let mut tree = lock!(tree);
-      //   if let Some(current_window_id) = tree.current_window_id() {
-      //     if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-      //       let cursor_viewport = current_window.cursor_viewport();
-      //       let cursor_viewport = lock!(cursor_viewport);
-      //       Command::CursorMoveBy((
-      //         (x as isize) - (cursor_viewport.line_idx() as isize),
-      //         (y as isize) - (cursor_viewport.char_idx() as isize),
-      //       ))
-      //     } else {
-      //       Command::CursorMoveBy((0, 0))
-      //     }
-      //   } else {
-      //     Command::CursorMoveBy((0, 0))
-      //   }
-      // }
+      Command::WindowScrollTo((x, y)) => {
+        let tree = data_access.tree.clone();
+        let mut tree = lock!(tree);
+        if let Some(current_window_id) = tree.current_window_id() {
+          if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+            let viewport = current_window.viewport();
+            let viewport = lock!(viewport);
+            Command::WindowScrollBy((
+              (x as isize) - (viewport.start_line_idx() as isize),
+              (y as isize) - (viewport.start_column_idx() as isize),
+            ))
+          } else {
+            Command::WindowScrollBy((0, 0))
+          }
+        } else {
+          Command::WindowScrollBy((0, 0))
+        }
+      }
       _ => unreachable!(),
     };
 
