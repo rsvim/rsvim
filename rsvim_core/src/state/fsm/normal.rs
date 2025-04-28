@@ -129,6 +129,7 @@ impl NormalStateful {
         let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
+
         let cursor_move_result = match converted_command {
           Command::CursorMoveBy((x, y)) => {
             self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y)
@@ -350,6 +351,33 @@ impl NormalStateful {
 
   /// Window scrolls buffer content.
   fn _window_scroll(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    let converted_command = match command {
+      Command::WindowScrollLeftBy(n) => Command::WindowScrollBy((-(n as isize), 0)),
+      Command::WindowScrollRightBy(n) => Command::WindowScrollBy((n as isize, 0)),
+      Command::WindowScrollUpBy(n) => Command::WindowScrollBy((0, -(n as isize))),
+      Command::WindowScrollDownBy(n) => Command::WindowScrollBy((0, n as isize)),
+      Command::WindowScrollBy((x, y)) => Command::WindowScrollBy((x, y)),
+      // Command::CursorMoveTo((x, y)) => {
+      //   let tree = data_access.tree.clone();
+      //   let mut tree = lock!(tree);
+      //   if let Some(current_window_id) = tree.current_window_id() {
+      //     if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+      //       let cursor_viewport = current_window.cursor_viewport();
+      //       let cursor_viewport = lock!(cursor_viewport);
+      //       Command::CursorMoveBy((
+      //         (x as isize) - (cursor_viewport.line_idx() as isize),
+      //         (y as isize) - (cursor_viewport.char_idx() as isize),
+      //       ))
+      //     } else {
+      //       Command::CursorMoveBy((0, 0))
+      //     }
+      //   } else {
+      //     Command::CursorMoveBy((0, 0))
+      //   }
+      // }
+      _ => unreachable!(),
+    };
+
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -360,23 +388,12 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        let cursor_scroll_result = {
-          match command {
-            Command::WindowScrollBy((x, y)) => {
-              if x != 0 {
-                debug_assert_eq!(y, 0);
-                self._window_scroll_x_by(&viewport, &buffer, x)
-              } else {
-                debug_assert_eq!(x, 0);
-                debug_assert_ne!(y, 0);
-                self._window_scroll_y_by(&viewport, &buffer, y)
-              }
-            }
-            _ => unreachable!(),
-          }
+        let window_scroll_result = match converted_command {
+          Command::WindowScrollBy((x, y)) => self._window_scroll_by(&viewport, &buffer, x, y),
+          _ => unreachable!(),
         };
 
-        if let Some((start_line_idx, start_column_idx)) = cursor_scroll_result {
+        if let Some((start_line_idx, start_column_idx)) = window_scroll_result {
           // Sync the viewport
           let window_actual_shape = current_window.window_content().actual_shape();
           let window_local_options = current_window.options();
