@@ -440,52 +440,52 @@ impl NormalStateful {
     Some((line_idx, column_idx))
   }
 
-  /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-  /// NOTE: `y` is the lines count.
-  fn _window_scroll_y_by(
-    &self,
-    viewport: &Viewport,
-    buffer: &Buffer,
-    y: isize,
-  ) -> Option<(usize, usize)> {
-    let start_line_idx = viewport.start_line_idx();
-    let end_line_idx = viewport.end_line_idx();
-    let start_column_idx = viewport.start_column_idx();
-    let buffer_len_lines = buffer.get_rope().len_lines();
-
-    let line_idx = if y < 0 {
-      let n = -y as usize;
-      start_line_idx.saturating_sub(n)
-    } else {
-      let n = y as usize;
-      // Viewport already shows the last line of buffer, cannot scroll down anymore.
-      debug_assert!(end_line_idx <= buffer_len_lines);
-      if end_line_idx == buffer_len_lines {
-        return None;
-      }
-
-      // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
-      // line.
-      let expected_start_line = std::cmp::min(
-        start_line_idx.saturating_add(n),
-        buffer_len_lines.saturating_sub(1),
-      );
-
-      // If the expected (after scrolled) start line index is current start line index, then don't
-      // scroll.
-      if expected_start_line == start_line_idx {
-        return None;
-      }
-
-      trace!(
-        "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
-        start_line_idx, end_line_idx, expected_start_line
-      );
-      expected_start_line
-    };
-
-    Some((line_idx, start_column_idx))
-  }
+  // /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
+  // /// NOTE: `y` is the lines count.
+  // fn _window_scroll_y_by(
+  //   &self,
+  //   viewport: &Viewport,
+  //   buffer: &Buffer,
+  //   y: isize,
+  // ) -> Option<(usize, usize)> {
+  //   let start_line_idx = viewport.start_line_idx();
+  //   let end_line_idx = viewport.end_line_idx();
+  //   let start_column_idx = viewport.start_column_idx();
+  //   let buffer_len_lines = buffer.get_rope().len_lines();
+  //
+  //   let line_idx = if y < 0 {
+  //     let n = -y as usize;
+  //     start_line_idx.saturating_sub(n)
+  //   } else {
+  //     let n = y as usize;
+  //     // Viewport already shows the last line of buffer, cannot scroll down anymore.
+  //     debug_assert!(end_line_idx <= buffer_len_lines);
+  //     if end_line_idx == buffer_len_lines {
+  //       return None;
+  //     }
+  //
+  //     // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
+  //     // line.
+  //     let expected_start_line = std::cmp::min(
+  //       start_line_idx.saturating_add(n),
+  //       buffer_len_lines.saturating_sub(1),
+  //     );
+  //
+  //     // If the expected (after scrolled) start line index is current start line index, then don't
+  //     // scroll.
+  //     if expected_start_line == start_line_idx {
+  //       return None;
+  //     }
+  //
+  //     trace!(
+  //       "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
+  //       start_line_idx, end_line_idx, expected_start_line
+  //     );
+  //     expected_start_line
+  //   };
+  //
+  //   Some((line_idx, start_column_idx))
+  // }
 
   /// NOTE: `y` is the lines count.
   fn _raw_window_scroll_y_by(&self, start_line_idx: usize, buffer: &Buffer, y: isize) -> usize {
@@ -555,46 +555,46 @@ impl NormalStateful {
     max_scrolls
   }
 
-  /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-  /// NOTE: `x` is the columns count (not chars).
-  fn _window_scroll_x_by(
-    &self,
-    viewport: &Viewport,
-    buffer: &Buffer,
-    x: isize,
-  ) -> Option<(usize, usize)> {
-    let start_line_idx = viewport.start_line_idx();
-    let end_line_idx = viewport.end_line_idx();
-    let start_column_idx = viewport.start_column_idx();
-
-    if end_line_idx == start_line_idx {
-      return None;
-    }
-
-    debug_assert!(end_line_idx > start_line_idx);
-    debug_assert!(viewport.lines().contains_key(&start_line_idx));
-
-    let start_col = if x < 0 {
-      let n = -x as usize;
-      start_column_idx.saturating_sub(n)
-    } else {
-      let n = x as usize;
-      let expected = start_column_idx.saturating_add(n);
-      let max_scrolls = self._window_scroll_x_max_scrolls(viewport, buffer);
-      let upper_bounded = start_column_idx.saturating_add(max_scrolls);
-      trace!(
-        "max_scrolls:{},upper_bounded:{},expected:{}",
-        max_scrolls, upper_bounded, expected
-      );
-      std::cmp::min(expected, upper_bounded)
-    };
-
-    if start_col == start_column_idx {
-      return None;
-    }
-
-    Some((start_line_idx, start_col))
-  }
+  // /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
+  // /// NOTE: `x` is the columns count (not chars).
+  // fn _window_scroll_x_by(
+  //   &self,
+  //   viewport: &Viewport,
+  //   buffer: &Buffer,
+  //   x: isize,
+  // ) -> Option<(usize, usize)> {
+  //   let start_line_idx = viewport.start_line_idx();
+  //   let end_line_idx = viewport.end_line_idx();
+  //   let start_column_idx = viewport.start_column_idx();
+  //
+  //   if end_line_idx == start_line_idx {
+  //     return None;
+  //   }
+  //
+  //   debug_assert!(end_line_idx > start_line_idx);
+  //   debug_assert!(viewport.lines().contains_key(&start_line_idx));
+  //
+  //   let start_col = if x < 0 {
+  //     let n = -x as usize;
+  //     start_column_idx.saturating_sub(n)
+  //   } else {
+  //     let n = x as usize;
+  //     let expected = start_column_idx.saturating_add(n);
+  //     let max_scrolls = self._window_scroll_x_max_scrolls(viewport, buffer);
+  //     let upper_bounded = start_column_idx.saturating_add(max_scrolls);
+  //     trace!(
+  //       "max_scrolls:{},upper_bounded:{},expected:{}",
+  //       max_scrolls, upper_bounded, expected
+  //     );
+  //     std::cmp::min(expected, upper_bounded)
+  //   };
+  //
+  //   if start_col == start_column_idx {
+  //     return None;
+  //   }
+  //
+  //   Some((start_line_idx, start_col))
+  // }
 
   /// NOTE: `x` is the columns count (not chars).
   fn _raw_window_scroll_x_by(
