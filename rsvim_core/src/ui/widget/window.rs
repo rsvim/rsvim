@@ -57,7 +57,7 @@ impl Window {
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport = Viewport::downward(&buffer, &window_root_actual_shape, local_options, 0, 0);
+      let viewport = Viewport::view(&buffer, &window_root_actual_shape, local_options, 0, 0);
       let cursor_viewport = CursorViewport::from_top_left(&viewport, &buffer);
       (viewport, cursor_viewport)
     };
