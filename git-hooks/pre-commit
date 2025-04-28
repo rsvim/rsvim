@@ -1,7 +1,0 @@
-#!/bin/bash
-
-cargo fmt &
-prettier *.md **/*.ts --write &
-tsc &
-
-wait
