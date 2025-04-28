@@ -57,6 +57,26 @@ pub enum Command {
   /// keep it still inside the window.
   WindowScrollBy((isize, isize)),
 
+  /// Scroll buffer left by offset `n` relatively, based on current window viewport.
+  ///
+  /// Same to [`Command::WindowScrollBy((-n,0))`](Command::WindowScrollBy).
+  WindowScrollLeftBy(usize),
+
+  /// Scroll buffer right by offset `n` relatively, based on current window viewport.
+  ///
+  /// Same to [`Command::WindowScrollBy((n,0))`](Command::WindowScrollBy).
+  WindowScrollRightBy(usize),
+
+  /// Scroll buffer up by offset `n` relatively, based on current window viewport.
+  ///
+  /// Same to [`Command::WindowScrollBy((0,-n))`](Command::WindowScrollBy).
+  WindowScrollUpBy(usize),
+
+  /// Scroll buffer down by offset `n` relatively, based on current window viewport.
+  ///
+  /// Same to [`Command::WindowScrollBy((0,n))`](Command::WindowScrollBy).
+  WindowScrollDownBy(usize),
+
   /// Similar to [`Command::WindowScrollBy`], except it scrolls window to an absolute position
   /// based on current buffer.
   ///

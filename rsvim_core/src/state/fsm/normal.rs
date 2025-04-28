@@ -396,6 +396,40 @@ impl NormalStateful {
   }
 
   /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
+  /// NOTE: `x` is the columns count, `y` is the lines count.
+  fn _window_scroll_by(
+    &self,
+    viewport: &Viewport,
+    buffer: &Buffer,
+    x: isize,
+    y: isize,
+  ) -> Option<(usize, usize)> {
+    let start_line_idx = viewport.start_line_idx();
+    let end_line_idx = viewport.end_line_idx();
+    let start_column_idx = viewport.start_column_idx();
+    let buffer_len_lines = buffer.get_rope().len_lines();
+    debug_assert!(end_line_idx <= buffer_len_lines);
+
+    let mut line_idx = self._raw_window_scroll_y_by(start_line_idx, buffer, y);
+
+    // If viewport wants to scroll down (i.e. y > 0), and viewport already shows that last line in
+    // the buffer, then cannot scroll down anymore, just still keep the old `line_idx`.
+    if y > 0 && end_line_idx == buffer_len_lines {
+      line_idx = start_line_idx;
+    }
+
+    let column_idx = self._raw_window_scroll_x_by(start_column_idx, viewport, buffer, x);
+
+    // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
+    // there's no need to scroll anymore.
+    if line_idx == start_line_idx && column_idx == start_column_idx {
+      return None;
+    }
+
+    Some((line_idx, column_idx))
+  }
+
+  /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
   /// NOTE: `y` is the lines count.
   fn _window_scroll_y_by(
     &self,
@@ -440,6 +474,33 @@ impl NormalStateful {
     };
 
     Some((line_idx, start_column_idx))
+  }
+
+  /// NOTE: `y` is the lines count.
+  fn _raw_window_scroll_y_by(&self, start_line_idx: usize, buffer: &Buffer, y: isize) -> usize {
+    let buffer_len_lines = buffer.get_rope().len_lines();
+
+    let line_idx = if y < 0 {
+      let n = -y as usize;
+      start_line_idx.saturating_sub(n)
+    } else {
+      let n = y as usize;
+
+      // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
+      // line.
+      let expected_start_line = std::cmp::min(
+        start_line_idx.saturating_add(n),
+        buffer_len_lines.saturating_sub(1),
+      );
+
+      trace!(
+        "start_line_idx:{:?},expected_start_line:{:?}",
+        start_line_idx, expected_start_line
+      );
+      expected_start_line
+    };
+
+    line_idx
   }
 
   // Calculate how many columns that each line (in current viewport) need to scroll until
@@ -524,6 +585,32 @@ impl NormalStateful {
     }
 
     Some((start_line_idx, start_col))
+  }
+
+  /// NOTE: `x` is the columns count (not chars).
+  fn _raw_window_scroll_x_by(
+    &self,
+    start_column_idx: usize,
+    viewport: &Viewport,
+    buffer: &Buffer,
+    x: isize,
+  ) -> usize {
+    let start_col = if x < 0 {
+      let n = -x as usize;
+      start_column_idx.saturating_sub(n)
+    } else {
+      let n = x as usize;
+      let expected = start_column_idx.saturating_add(n);
+      let max_scrolls = self._window_scroll_x_max_scrolls(viewport, buffer);
+      let upper_bounded = start_column_idx.saturating_add(max_scrolls);
+      trace!(
+        "max_scrolls:{},upper_bounded:{},expected:{}",
+        max_scrolls, upper_bounded, expected
+      );
+      std::cmp::min(expected, upper_bounded)
+    };
+
+    start_col
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
