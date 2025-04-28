@@ -46,8 +46,8 @@ impl ViewportLineRange {
   }
 }
 
-/// Calculate viewport with option `wrap=false` downward, from top to bottom.
-pub fn downward(
+/// Calculate viewport from top to bottom.
+pub fn sync(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   window_local_options: &WindowLocalOptions,
@@ -65,11 +65,9 @@ pub fn downward(
     window_local_options.wrap(),
     window_local_options.line_break(),
   ) {
-    (false, _) => downward_nowrap(buffer, window_actual_shape, start_line, start_column),
-    (true, false) => {
-      downward_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_column)
-    }
-    (true, true) => downward_wrap_linebreak(buffer, window_actual_shape, start_line, start_column),
+    (false, _) => sync_nowrap(buffer, window_actual_shape, start_line, start_column),
+    (true, false) => sync_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_column),
+    (true, true) => sync_wrap_linebreak(buffer, window_actual_shape, start_line, start_column),
   }
 }
 
@@ -135,7 +133,7 @@ fn end_char_and_prefills(
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`.
-fn process_line_nowrap(
+fn procline_nowrap(
   buffer: &Buffer,
   bufline: &RopeSlice,
   current_line: usize,
@@ -176,8 +174,8 @@ fn process_line_nowrap(
 }
 
 #[allow(clippy::explicit_counter_loop)]
-/// Implements [`downward`] with option `wrap=false`.
-fn downward_nowrap(
+/// Implements [`sync`] with option `wrap=false`.
+fn sync_nowrap(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   start_line: usize,
@@ -202,7 +200,7 @@ fn downward_nowrap(
     while current_row < height && current_line < buffer_len_lines {
       let bufline = buffer.get_rope().line(current_line);
 
-      let (rows, start_fills, end_fills) = process_line_nowrap(
+      let (rows, start_fills, end_fills) = procline_nowrap(
         buffer,
         &bufline,
         current_line,
@@ -288,7 +286,7 @@ fn downward_nowrap(
 // }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn process_line_wrap_nolinebreak(
+fn procline_wrap_nolinebreak(
   buffer: &Buffer,
   bufline: &RopeSlice,
   current_line: usize,
@@ -351,8 +349,8 @@ fn process_line_wrap_nolinebreak(
 }
 
 #[allow(unused_variables)]
-/// Implements [`from_top_left`] with option `wrap=true` and `line-break=false`.
-fn downward_wrap_nolinebreak(
+/// Implements [`sync`] with option `wrap=true` and `line-break=false`.
+fn sync_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   start_line: usize,
@@ -376,7 +374,7 @@ fn downward_wrap_nolinebreak(
     while current_row < height && current_line < buffer_len_lines {
       let bufline = buffer.get_rope().line(current_line);
 
-      let (rows, start_fills, end_fills, changed_current_row) = process_line_wrap_nolinebreak(
+      let (rows, start_fills, end_fills, changed_current_row) = procline_wrap_nolinebreak(
         buffer,
         &bufline,
         current_line,
@@ -502,7 +500,7 @@ fn cloned_line_max_len(window_height: u16, window_width: u16, start_column: usiz
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn process_line_wrap_linebreak(
+fn procline_wrap_linebreak(
   buffer: &Buffer,
   bufline: &RopeSlice,
   current_line: usize,
@@ -667,8 +665,8 @@ fn process_line_wrap_linebreak(
 }
 
 #[allow(unused_variables)]
-/// Implements [`from_top_left`] with option `wrap=true` and `line-break=true`.
-fn downward_wrap_linebreak(
+/// Implements [`sync`] with option `wrap=true` and `line-break=true`.
+fn sync_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   start_line: usize,
@@ -689,7 +687,7 @@ fn downward_wrap_linebreak(
     while current_row < height && current_line < buffer_len_lines {
       let bufline = buffer.get_rope().line(current_line);
 
-      let (rows, start_fills, end_fills, changed_current_row) = process_line_wrap_linebreak(
+      let (rows, start_fills, end_fills, changed_current_row) = procline_wrap_linebreak(
         buffer,
         &bufline,
         current_line,

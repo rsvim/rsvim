@@ -504,14 +504,14 @@ impl Viewport {
   ///
   /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a
   /// window.
-  pub fn downward(
+  pub fn view(
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     window_local_options: &WindowLocalOptions,
     start_line_idx: usize,
     start_column_idx: usize,
   ) -> Self {
-    let (line_idx_range, lines) = sync::downward(
+    let (line_idx_range, lines) = sync::sync(
       buffer,
       window_actual_shape,
       window_local_options,
@@ -1335,7 +1335,7 @@ mod tests_downward_nowrap_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 3);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -1400,7 +1400,7 @@ mod tests_downward_nowrap_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 6);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 6);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -1465,7 +1465,7 @@ mod tests_downward_nowrap_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 15);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 15);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -1530,7 +1530,7 @@ mod tests_downward_nowrap_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 60);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 60);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -1586,7 +1586,7 @@ mod tests_downward_nowrap_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 500);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 500);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -2408,7 +2408,7 @@ mod tests_downward_wrap_nolinebreak {
     ];
     let actual = {
       let buf = lock!(buf);
-      Viewport::downward(&buf, window.actual_shape(), &win_opts, 2, 0)
+      Viewport::view(&buf, window.actual_shape(), &win_opts, 2, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
@@ -2492,7 +2492,7 @@ mod tests_downward_wrap_nolinebreak {
     ];
     let actual = {
       let buf = lock!(buf);
-      Viewport::downward(&buf, window.actual_shape(), &win_opts, 6, 0)
+      Viewport::view(&buf, window.actual_shape(), &win_opts, 6, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
     assert_viewport(
@@ -2544,7 +2544,7 @@ mod tests_downward_wrap_nolinebreak {
     let expect = vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
     let actual = {
       let buf = lock!(buf);
-      Viewport::downward(&buf, window.actual_shape(), &win_opts, 1, 0)
+      Viewport::view(&buf, window.actual_shape(), &win_opts, 1, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
@@ -2612,7 +2612,7 @@ mod tests_downward_wrap_nolinebreak_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 3);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -2659,7 +2659,7 @@ mod tests_downward_wrap_nolinebreak_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 3);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -2711,7 +2711,7 @@ mod tests_downward_wrap_nolinebreak_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 15);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 15);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -2759,7 +2759,7 @@ mod tests_downward_wrap_nolinebreak_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 1, 60);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 1, 60);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -2796,7 +2796,7 @@ mod tests_downward_wrap_nolinebreak_startcol {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 13);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 13);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -3597,7 +3597,7 @@ mod tests_downward_wrap_linebreak_startcol {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 3);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -3655,7 +3655,7 @@ mod tests_downward_wrap_linebreak_startcol {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 6);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 6);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -3713,7 +3713,7 @@ mod tests_downward_wrap_linebreak_startcol {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 20);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 20);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -3771,7 +3771,7 @@ mod tests_downward_wrap_linebreak_startcol {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 60);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 60);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
@@ -3830,7 +3830,7 @@ mod tests_downward_wrap_linebreak_startcol {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
       let window_local_options = window.options();
-      let viewport = Viewport::downward(&buf, window_actual_shape, window_local_options, 0, 15);
+      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 15);
       window.set_viewport(Viewport::to_arc(viewport));
       lock!(window.viewport()).clone()
     };
