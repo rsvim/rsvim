@@ -97,16 +97,16 @@ impl NormalStateful {
         let mut cmds: Vec<Command> = vec![];
         if x != 0 {
           if x < 0 {
-            cmds.push(Command::CursorMoveLeftBy((-x as usize)));
+            cmds.push(Command::CursorMoveLeftBy(-x as usize));
           } else {
-            cmds.push(Command::CursorMoveRightBy((x as usize)));
+            cmds.push(Command::CursorMoveRightBy(x as usize));
           }
         }
         if y != 0 {
           if y < 0 {
-            cmds.push(Command::CursorMoveUpBy((-y as usize)));
+            cmds.push(Command::CursorMoveUpBy(-y as usize));
           } else {
-            cmds.push(Command::CursorMoveDownBy((y as usize)));
+            cmds.push(Command::CursorMoveDownBy(y as usize));
           }
         }
         cmds
