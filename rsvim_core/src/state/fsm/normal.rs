@@ -1843,6 +1843,7 @@ mod tests_cursor_move_to {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
+
     let terminal_size = U16Size::new(50, 50);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines.clone());
@@ -1866,6 +1867,8 @@ mod tests_cursor_move_to {
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
+    let first_line_len = lines[0].len();
+
     // step-1: Move to the end of line-1.
     let data_access = StatefulDataAccess::new(
       state.clone(),
@@ -1873,7 +1876,7 @@ mod tests_cursor_move_to {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveBy((lines[0].len() as isize, 0));
+    let command = Command::CursorMoveTo((first_line_len, 0));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
@@ -1890,7 +1893,7 @@ mod tests_cursor_move_to {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveBy((0, 1));
+    let command = Command::CursorMoveTo((first_line_len, 1));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
