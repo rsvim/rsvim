@@ -497,7 +497,7 @@ impl NormalStateful {
   fn _raw_window_scroll_y_by(&self, start_line_idx: usize, buffer: &Buffer, y: isize) -> usize {
     let buffer_len_lines = buffer.get_rope().len_lines();
 
-    let line_idx = if y < 0 {
+    if y < 0 {
       let n = -y as usize;
       start_line_idx.saturating_sub(n)
     } else {
@@ -515,9 +515,7 @@ impl NormalStateful {
         start_line_idx, expected_start_line
       );
       expected_start_line
-    };
-
-    line_idx
+    }
   }
 
   // Calculate how many columns that each line (in current viewport) need to scroll until
@@ -612,7 +610,7 @@ impl NormalStateful {
     buffer: &Buffer,
     x: isize,
   ) -> usize {
-    let start_col = if x < 0 {
+    if x < 0 {
       let n = -x as usize;
       start_column_idx.saturating_sub(n)
     } else {
@@ -625,9 +623,7 @@ impl NormalStateful {
         max_scrolls, upper_bounded, expected
       );
       std::cmp::min(expected, upper_bounded)
-    };
-
-    start_col
+    }
   }
 
   fn quit(&self, _data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
