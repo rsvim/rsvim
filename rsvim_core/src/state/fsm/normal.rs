@@ -98,12 +98,29 @@ impl NormalStateful {
       Command::CursorMoveUpBy(n) => Command::CursorMoveBy((0, -(n as isize))),
       Command::CursorMoveDownBy(n) => Command::CursorMoveBy((0, n as isize)),
       Command::CursorMoveBy((x, y)) => Command::CursorMoveBy((x, y)),
+      Command::CursorMoveTo((x, y)) => {
+        let tree = data_access.tree.clone();
+        let mut tree = lock!(tree);
+        if let Some(current_window_id) = tree.current_window_id() {
+          if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+            let cursor_viewport = current_window.cursor_viewport();
+            let cursor_viewport = lock!(cursor_viewport);
+            Command::CursorMoveBy((
+              (x as isize) - (cursor_viewport.line_idx() as isize),
+              (y as isize) - (cursor_viewport.char_idx() as isize),
+            ))
+          } else {
+            Command::CursorMoveBy((0, 0))
+          }
+        } else {
+          Command::CursorMoveBy((0, 0))
+        }
+      }
       _ => unreachable!(),
     };
 
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
         let buffer = current_window.buffer().upgrade().unwrap();
