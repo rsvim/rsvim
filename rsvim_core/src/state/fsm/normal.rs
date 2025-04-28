@@ -92,9 +92,35 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    let converted_command = match command {
+      Command::CursorMoveLeftBy(n) => Command::CursorMoveBy((-(n as isize), 0)),
+      Command::CursorMoveRightBy(n) => Command::CursorMoveBy((n as isize, 0)),
+      Command::CursorMoveUpBy(n) => Command::CursorMoveBy((0, -(n as isize))),
+      Command::CursorMoveDownBy(n) => Command::CursorMoveBy((0, n as isize)),
+      Command::CursorMoveBy((x, y)) => Command::CursorMoveBy((x, y)),
+      Command::CursorMoveTo((x, y)) => {
+        let tree = data_access.tree.clone();
+        let mut tree = lock!(tree);
+        if let Some(current_window_id) = tree.current_window_id() {
+          if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+            let cursor_viewport = current_window.cursor_viewport();
+            let cursor_viewport = lock!(cursor_viewport);
+            Command::CursorMoveBy((
+              (x as isize) - (cursor_viewport.line_idx() as isize),
+              (y as isize) - (cursor_viewport.char_idx() as isize),
+            ))
+          } else {
+            Command::CursorMoveBy((0, 0))
+          }
+        } else {
+          Command::CursorMoveBy((0, 0))
+        }
+      }
+      _ => unreachable!(),
+    };
+
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
         let buffer = current_window.buffer().upgrade().unwrap();
@@ -103,16 +129,9 @@ impl NormalStateful {
         let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
-        let cursor_move_result = match command {
+        let cursor_move_result = match converted_command {
           Command::CursorMoveBy((x, y)) => {
-            if x != 0 {
-              debug_assert_eq!(y, 0);
-              self._cursor_move_x_by(&viewport, &cursor_viewport, &buffer, x)
-            } else {
-              debug_assert_eq!(x, 0);
-              debug_assert_ne!(y, 0);
-              self._cursor_move_y_by(&viewport, &cursor_viewport, &buffer, y)
-            }
+            self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y)
           }
           _ => unreachable!(),
         };
@@ -138,71 +157,22 @@ impl NormalStateful {
   }
 
   // Returns the `line_idx`/`char_idx` for new cursor position.
-  // NOTE: `y` is lines count.
-  fn _cursor_move_y_by(
-    &self,
-    viewport: &Viewport,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    y: isize,
-  ) -> Option<(usize, usize)> {
-    let cursor_line_idx = cursor_viewport.line_idx();
-    let cursor_char_idx = cursor_viewport.char_idx();
-
-    let line_idx = if y < 0 {
-      let n = -y as usize;
-      cursor_line_idx.saturating_sub(n)
-    } else {
-      let n = y as usize;
-      let expected = cursor_line_idx.saturating_add(n);
-      let end_line_idx = viewport.end_line_idx();
-      let last_line_idx = end_line_idx.saturating_sub(1);
-      trace!(
-        "cursor_line_idx:{:?},expected:{:?},end_line_idx:{:?},last_line_idx:{:?}",
-        cursor_line_idx, expected, end_line_idx, last_line_idx
-      );
-      std::cmp::min(expected, last_line_idx)
-    };
-    trace!(
-      "cursor:{}/{},line_idx:{}",
-      cursor_line_idx, cursor_char_idx, line_idx
-    );
-
-    // If line index doesn't change, early return.
-    if line_idx == cursor_line_idx {
-      return None;
-    }
-
-    match buffer.get_rope().get_line(line_idx) {
-      Some(line) => {
-        trace!("line.len_chars:{}", line.len_chars());
-        if line.len_chars() == 0 {
-          return None;
-        }
-      }
-      None => {
-        trace!("get_line not found:{}", line_idx);
-        return None;
-      }
-    }
-    let char_idx =
-      adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
-    Some((line_idx, char_idx))
-  }
-
-  // Returns the `line_idx`/`char_idx` for new cursor position.
-  // NOTE: `x` is chars count.
-  fn _cursor_move_x_by(
+  // NOTE: `x` is chars count, `y` is lines count.
+  fn _cursor_move_by(
     &self,
     viewport: &Viewport,
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
     x: isize,
+    y: isize,
   ) -> Option<(usize, usize)> {
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
+    let line_idx =
+      self._raw_cursor_move_y_by(viewport, cursor_line_idx, cursor_char_idx, buffer, y);
 
-    match buffer.get_rope().get_line(cursor_line_idx) {
+    // If `line_idx` doesn't exist, or line is empty.
+    match buffer.get_rope().get_line(line_idx) {
       Some(line) => {
         if line.len_chars() == 0 {
           return None;
@@ -211,29 +181,171 @@ impl NormalStateful {
       None => return None,
     }
 
+    let char_idx =
+      adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
+    let char_idx = self._raw_cursor_move_x_by(viewport, line_idx, char_idx, buffer, x);
+
+    Some((line_idx, char_idx))
+  }
+
+  // // Returns the `line_idx`/`char_idx` for new cursor position.
+  // // NOTE: `y` is lines count.
+  // fn _cursor_move_y_by(
+  //   &self,
+  //   viewport: &Viewport,
+  //   cursor_viewport: &CursorViewport,
+  //   buffer: &Buffer,
+  //   y: isize,
+  // ) -> Option<(usize, usize)> {
+  //   let cursor_line_idx = cursor_viewport.line_idx();
+  //   let cursor_char_idx = cursor_viewport.char_idx();
+  //
+  //   let line_idx = if y < 0 {
+  //     let n = -y as usize;
+  //     cursor_line_idx.saturating_sub(n)
+  //   } else {
+  //     let n = y as usize;
+  //     let expected = cursor_line_idx.saturating_add(n);
+  //     let last_line_idx = viewport.end_line_idx().saturating_sub(1);
+  //     trace!(
+  //       "cursor_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
+  //       cursor_line_idx, expected, last_line_idx
+  //     );
+  //     std::cmp::min(expected, last_line_idx)
+  //   };
+  //   trace!(
+  //     "cursor:{}/{},line_idx:{}",
+  //     cursor_line_idx, cursor_char_idx, line_idx
+  //   );
+  //
+  //   // If line index doesn't change, early return.
+  //   if line_idx == cursor_line_idx {
+  //     return None;
+  //   }
+  //
+  //   match buffer.get_rope().get_line(line_idx) {
+  //     Some(line) => {
+  //       trace!("line.len_chars:{}", line.len_chars());
+  //       if line.len_chars() == 0 {
+  //         return None;
+  //       }
+  //     }
+  //     None => {
+  //       trace!("get_line not found:{}", line_idx);
+  //       return None;
+  //     }
+  //   }
+  //   let char_idx =
+  //     adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
+  //   Some((line_idx, char_idx))
+  // }
+
+  // NOTE: `y` is lines count.
+  fn _raw_cursor_move_y_by(
+    &self,
+    viewport: &Viewport,
+    base_line_idx: usize,
+    base_char_idx: usize,
+    _buffer: &Buffer,
+    y: isize,
+  ) -> usize {
+    let line_idx = if y < 0 {
+      let n = -y as usize;
+      base_line_idx.saturating_sub(n)
+    } else {
+      let n = y as usize;
+      let expected_line_idx = base_line_idx.saturating_add(n);
+      let last_line_idx = viewport.end_line_idx().saturating_sub(1);
+      trace!(
+        "base_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
+        base_line_idx, expected_line_idx, last_line_idx
+      );
+      std::cmp::min(expected_line_idx, last_line_idx)
+    };
+    trace!(
+      "cursor:{}/{},line_idx:{}",
+      base_line_idx, base_char_idx, line_idx
+    );
+    line_idx
+  }
+
+  // // Returns the `line_idx`/`char_idx` for new cursor position.
+  // // NOTE: `x` is chars count.
+  // fn _cursor_move_x_by(
+  //   &self,
+  //   viewport: &Viewport,
+  //   cursor_viewport: &CursorViewport,
+  //   buffer: &Buffer,
+  //   x: isize,
+  // ) -> Option<(usize, usize)> {
+  //   let cursor_line_idx = cursor_viewport.line_idx();
+  //   let cursor_char_idx = cursor_viewport.char_idx();
+  //
+  //   match buffer.get_rope().get_line(cursor_line_idx) {
+  //     Some(line) => {
+  //       if line.len_chars() == 0 {
+  //         return None;
+  //       }
+  //     }
+  //     None => return None,
+  //   }
+  //
+  //   let char_idx = if x < 0 {
+  //     let n = -x as usize;
+  //     cursor_char_idx.saturating_sub(n)
+  //   } else {
+  //     let n = x as usize;
+  //     let expected = cursor_char_idx.saturating_add(n);
+  //     let upper_bounded = {
+  //       debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
+  //       let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
+  //       let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
+  //       let last_char_on_row = last_row_viewport.end_char_idx() - 1;
+  //       trace!(
+  //         "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
+  //         cursor_char_idx, expected, last_row_viewport, last_char_on_row
+  //       );
+  //       buffer
+  //         .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
+  //         .unwrap()
+  //     };
+  //     std::cmp::min(expected, upper_bounded)
+  //   };
+  //
+  //   Some((cursor_line_idx, char_idx))
+  // }
+
+  // NOTE: `x` is chars count.
+  fn _raw_cursor_move_x_by(
+    &self,
+    viewport: &Viewport,
+    base_line_idx: usize,
+    base_char_idx: usize,
+    buffer: &Buffer,
+    x: isize,
+  ) -> usize {
     let char_idx = if x < 0 {
       let n = -x as usize;
-      cursor_char_idx.saturating_sub(n)
+      base_char_idx.saturating_sub(n)
     } else {
       let n = x as usize;
-      let expected = cursor_char_idx.saturating_add(n);
+      let expected = base_char_idx.saturating_add(n);
       let upper_bounded = {
-        debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
-        let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
+        debug_assert!(viewport.lines().contains_key(&base_line_idx));
+        let line_viewport = viewport.lines().get(&base_line_idx).unwrap();
         let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
         let last_char_on_row = last_row_viewport.end_char_idx() - 1;
         trace!(
           "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
-          cursor_char_idx, expected, last_row_viewport, last_char_on_row
+          base_char_idx, expected, last_row_viewport, last_char_on_row
         );
         buffer
-          .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
+          .last_visible_char_on_line_since(base_line_idx, last_char_on_row)
           .unwrap()
       };
       std::cmp::min(expected, upper_bounded)
     };
-
-    Some((cursor_line_idx, char_idx))
+    char_idx
   }
 
   /// Window scrolls buffer content.
