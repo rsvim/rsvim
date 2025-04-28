@@ -250,7 +250,7 @@ impl NormalStateful {
     _buffer: &Buffer,
     y: isize,
   ) -> usize {
-    let line_idx = if y < 0 {
+    if y < 0 {
       let n = -y as usize;
       base_line_idx.saturating_sub(n)
     } else {
@@ -262,12 +262,7 @@ impl NormalStateful {
         base_line_idx, expected_line_idx, last_line_idx
       );
       std::cmp::min(expected_line_idx, last_line_idx)
-    };
-    trace!(
-      "cursor:{}/{},line_idx:{}",
-      base_line_idx, base_char_idx, line_idx
-    );
-    line_idx
+    }
   }
 
   // // Returns the `line_idx`/`char_idx` for new cursor position.
@@ -325,7 +320,7 @@ impl NormalStateful {
     buffer: &Buffer,
     x: isize,
   ) -> usize {
-    let char_idx = if x < 0 {
+    if x < 0 {
       let n = -x as usize;
       base_char_idx.saturating_sub(n)
     } else {
@@ -345,8 +340,7 @@ impl NormalStateful {
           .unwrap()
       };
       std::cmp::min(expected, upper_bounded)
-    };
-    char_idx
+    }
   }
 
   /// Window scrolls buffer content.
