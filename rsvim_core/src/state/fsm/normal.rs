@@ -92,7 +92,7 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
-    let converted_commands = match command {
+    let converted_command = match command {
       Command::CursorMoveLeftBy(n) => Command::CursorMoveBy((-(n as isize), 0)),
       Command::CursorMoveRightBy(n) => Command::CursorMoveBy((n as isize, 0)),
       Command::CursorMoveUpBy(n) => Command::CursorMoveBy((0, -(n as isize))),
@@ -112,7 +112,7 @@ impl NormalStateful {
         let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
-        let cursor_move_result = match converted_commands {
+        let cursor_move_result = match converted_command {
           Command::CursorMoveBy((x, y)) => {
             self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y)
           }
