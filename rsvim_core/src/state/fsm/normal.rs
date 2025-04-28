@@ -726,7 +726,7 @@ mod tests_util {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_y {
+mod tests_cursor_move_y_by {
   use super::tests_util::*;
   use super::*;
 
@@ -1027,7 +1027,7 @@ mod tests_cursor_move_y {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_x {
+mod tests_cursor_move_x_by {
   use super::tests_util::*;
   use super::*;
 
@@ -1298,7 +1298,7 @@ mod tests_cursor_move_x {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move {
+mod tests_cursor_move_by {
   use super::tests_util::*;
   use super::*;
 
@@ -1351,7 +1351,7 @@ mod tests_cursor_move {
     // Step-1
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
     let stateful = NormalStateful::default();
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveRightBy(5));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((5, 0)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
 
     let tree = data_access.tree.clone();
@@ -1364,7 +1364,7 @@ mod tests_cursor_move {
       StatefulValue::NormalMode(s) => s,
       _ => unreachable!(),
     };
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveDownBy(1));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((0, 1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
@@ -1376,7 +1376,7 @@ mod tests_cursor_move {
       StatefulValue::NormalMode(s) => s,
       _ => unreachable!(),
     };
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveLeftBy(3));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((-3, 0)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
     let tree = data_access.tree.clone();
     let actual3 = get_cursor_viewport(tree);
@@ -1388,7 +1388,7 @@ mod tests_cursor_move {
       StatefulValue::NormalMode(s) => s,
       _ => unreachable!(),
     };
-    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveUpBy(1));
+    let next_stateful = stateful.cursor_move(&data_access, Command::CursorMoveBy((0, -1)));
     assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
     let tree = data_access.tree.clone();
     let actual4 = get_cursor_viewport(tree);
@@ -1434,10 +1434,10 @@ mod tests_cursor_move {
 
     for _ in 0..10 {
       let commands = [
-        Command::CursorMoveDownBy(2),
-        Command::CursorMoveRightBy(3),
-        Command::CursorMoveUpBy(2),
-        Command::CursorMoveLeftBy(3),
+        Command::CursorMoveBy((0, 2)),
+        Command::CursorMoveBy((3, 0)),
+        Command::CursorMoveBy((0, -2)),
+        Command::CursorMoveBy((-3, 0)),
       ];
       let data_access = StatefulDataAccess::new(
         state.clone(),
@@ -1458,10 +1458,10 @@ mod tests_cursor_move {
 
     for _ in 0..10 {
       let commands = [
-        Command::CursorMoveRightBy(5),
-        Command::CursorMoveDownBy(1),
-        Command::CursorMoveLeftBy(5),
-        Command::CursorMoveUpBy(1),
+        Command::CursorMoveBy((5, 0)),
+        Command::CursorMoveBy((0, 1)),
+        Command::CursorMoveBy((-5, 0)),
+        Command::CursorMoveBy((-1, 0)),
       ];
       let data_access = StatefulDataAccess::new(
         state.clone(),
@@ -1523,7 +1523,7 @@ mod tests_cursor_move {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveRightBy(lines[0].len());
+    let command = Command::CursorMoveBy((lines[0].len(), 0));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
@@ -1540,7 +1540,7 @@ mod tests_cursor_move {
       bufs.clone(),
       Event::Key(key_event),
     );
-    let command = Command::CursorMoveDownBy(1);
+    let command = Command::CursorMoveBy((0, 1));
     let stateful = NormalStateful::default();
     let next_stateful = stateful.cursor_move(&data_access, command);
 
