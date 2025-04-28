@@ -96,23 +96,31 @@ impl NormalStateful {
       Command::CursorMoveBy((x, y)) => {
         let mut cmds: Vec<Command> = vec![];
         if x != 0 {
-          cmds.push(Command::CursorMoveBy((x, 0)));
+          if x < 0 {
+            cmds.push(Command::CursorMoveLeftBy((-x as usize)));
+          } else {
+            cmds.push(Command::CursorMoveRightBy((x as usize)));
+          }
         }
         if y != 0 {
-          cmds.push(Command::CursorMoveBy((0, y)));
+          if y < 0 {
+            cmds.push(Command::CursorMoveUpBy((-y as usize)));
+          } else {
+            cmds.push(Command::CursorMoveDownBy((y as usize)));
+          }
         }
         cmds
       }
-      Command::CursorMoveBy((x, y)) => {
-        let mut cmds: Vec<Command> = vec![];
-        if x != 0 {
-          cmds.push(Command::CursorMoveBy((x, 0)));
-        }
-        if y != 0 {
-          cmds.push(Command::CursorMoveBy((0, y)));
-        }
-        cmds
-      }
+      // Command::CursorMoveBy((x, y)) => {
+      //   let mut cmds: Vec<Command> = vec![];
+      //   if x != 0 {
+      //     cmds.push(Command::CursorMoveBy((x, 0)));
+      //   }
+      //   if y != 0 {
+      //     cmds.push(Command::CursorMoveBy((0, y)));
+      //   }
+      //   cmds
+      // }
       _ => unreachable!(),
     };
 
@@ -129,15 +137,17 @@ impl NormalStateful {
           let cursor_viewport = current_window.cursor_viewport();
           let cursor_viewport = lock!(cursor_viewport);
           let cursor_move_result = match cmd {
-            Command::CursorMoveBy((x, y)) => {
-              if x != 0 {
-                debug_assert_eq!(y, 0);
-                self._cursor_move_x_by(&viewport, &cursor_viewport, &buffer, x)
-              } else {
-                debug_assert_eq!(x, 0);
-                debug_assert_ne!(y, 0);
-                self._cursor_move_y_by(&viewport, &cursor_viewport, &buffer, y)
-              }
+            Command::CursorMoveLeftBy(n) => {
+              self._cursor_move_x_by(&viewport, &cursor_viewport, &buffer, -(n as isize))
+            }
+            Command::CursorMoveRightBy(n) => {
+              self._cursor_move_x_by(&viewport, &cursor_viewport, &buffer, n as isize)
+            }
+            Command::CursorMoveUpBy(n) => {
+              self._cursor_move_y_by(&viewport, &cursor_viewport, &buffer, -(n as isize))
+            }
+            Command::CursorMoveDownBy(n) => {
+              self._cursor_move_y_by(&viewport, &cursor_viewport, &buffer, n as isize)
             }
             _ => unreachable!(),
           };
