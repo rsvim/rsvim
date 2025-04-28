@@ -97,6 +97,7 @@ impl NormalStateful {
       Command::CursorMoveRightBy(n) => Command::CursorMoveBy((n as isize, 0)),
       Command::CursorMoveUpBy(n) => Command::CursorMoveBy((0, -(n as isize))),
       Command::CursorMoveDownBy(n) => Command::CursorMoveBy((0, n as isize)),
+      Command::CursorMoveBy((x,y)) => Command::CursorMoveBy((x, y)),
       // Command::CursorMoveBy((x, y)) => {
       //   let mut cmds: Vec<Command> = vec![];
       //   if x != 0 {
