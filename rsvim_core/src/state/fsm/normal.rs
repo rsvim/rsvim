@@ -1784,10 +1784,10 @@ mod tests_cursor_move_to {
 
     for _ in 0..10 {
       let commands = [
-        Command::CursorMoveBy((0, 2)),
-        Command::CursorMoveBy((3, 0)),
-        Command::CursorMoveBy((0, -2)),
-        Command::CursorMoveBy((-3, 0)),
+        Command::CursorMoveTo((0, 2)),
+        Command::CursorMoveTo((3, 2)),
+        Command::CursorMoveTo((3, 0)),
+        Command::CursorMoveTo((0, 0)),
       ];
       let data_access = StatefulDataAccess::new(
         state.clone(),
@@ -1808,10 +1808,10 @@ mod tests_cursor_move_to {
 
     for _ in 0..10 {
       let commands = [
-        Command::CursorMoveBy((5, 0)),
-        Command::CursorMoveBy((0, 1)),
-        Command::CursorMoveBy((-5, 0)),
-        Command::CursorMoveBy((0, -1)),
+        Command::CursorMoveTo((5, 0)),
+        Command::CursorMoveTo((5, 1)),
+        Command::CursorMoveTo((5, 1)),
+        Command::CursorMoveTo((0, 0)),
       ];
       let data_access = StatefulDataAccess::new(
         state.clone(),
