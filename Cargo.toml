@@ -102,6 +102,11 @@ sourcemap = "9.1.2"
 [profile.dev.package.v8]
 opt-level = 1
 
+# Nightly
+[profile.nightly]
+inherits = "release"
+debug = true
+
 # Release
 [profile.release]
 lto = true
@@ -160,8 +165,3 @@ opt-level = 3
 opt-level = 3
 
 # NOTE: Crates size optimize keep the same with `deno` }
-
-# Nightly
-[profile.nightly]
-inherits = "release"
-debug = true
