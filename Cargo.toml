@@ -102,14 +102,16 @@ sourcemap = "9.1.2"
 [profile.dev.package.v8]
 opt-level = 1
 
-# Release {
+# Release
 [profile.release]
 lto = true
 strip = true
 codegen-units = 1
 opt-level = 'z'   # Optimize for size
 
-## Crates that don't optimize for size
+# NOTE: Crates size optimize keep the same with `deno` {
+
+# deno: https://github.com/denoland/deno/blob/v2.2.11/Cargo.toml
 [profile.release.package.base64-simd]
 opt-level = 3
 # [profile.release.package.brotli]
@@ -148,7 +150,8 @@ opt-level = 3
 opt-level = 3
 [profile.release.package.zstd-sys]
 opt-level = 3
-# Release }
+
+# NOTE: Crates size optimize keep the same with `deno` }
 
 # Nightly
 [profile.nightly]
