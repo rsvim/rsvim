@@ -112,10 +112,10 @@ codegen-units = 1
 ## Crates that don't optimize for size
 [profile.release.package.base64-simd]
 opt-level = 3
-[profile.release.package.brotli]
-opt-level = 3
-[profile.release.package.brotli-decompressor]
-opt-level = 3
+# [profile.release.package.brotli]
+# opt-level = 3
+# [profile.release.package.brotli-decompressor]
+# opt-level = 3
 [profile.release.package.bytes]
 opt-level = 3
 [profile.release.package.rand]
