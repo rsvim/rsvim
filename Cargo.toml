@@ -107,7 +107,7 @@ opt-level = 1
 lto = true
 strip = true
 codegen-units = 1
-opt-level = 'z'   # Optimize for size
+# opt-level = 'z'   # Optimize for size
 
 ## Crates that don't optimize for size
 [profile.release.package.base64-simd]
