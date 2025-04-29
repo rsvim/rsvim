@@ -297,7 +297,6 @@ mod tests_util {
     canvas
   }
 
-  #[allow(clippy::too_many_arguments)]
   pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
     let actual = actual
       .frame()

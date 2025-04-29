@@ -173,7 +173,6 @@ fn procline_nowrap(
   (rows, start_fills, end_fills)
 }
 
-#[allow(clippy::explicit_counter_loop)]
 /// Implements [`sync`] with option `wrap=false`.
 fn sync_nowrap(
   buffer: &Buffer,
