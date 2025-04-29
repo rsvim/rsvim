@@ -92,16 +92,6 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
-    let converted_command = match command {
-      Command::CursorMoveLeftBy(n) => Command::CursorMoveBy((-(n as isize), 0)),
-      Command::CursorMoveRightBy(n) => Command::CursorMoveBy((n as isize, 0)),
-      Command::CursorMoveUpBy(n) => Command::CursorMoveBy((0, -(n as isize))),
-      Command::CursorMoveDownBy(n) => Command::CursorMoveBy((0, n as isize)),
-      Command::CursorMoveBy((x, y)) => Command::CursorMoveBy((x, y)),
-      Command::CursorMoveTo((x, y)) => Command::CursorMoveTo((x, y)),
-      _ => unreachable!(),
-    };
-
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     if let Some(current_window_id) = tree.current_window_id() {
@@ -113,17 +103,21 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let cursor_move_result = match converted_command {
-          Command::CursorMoveBy((x, y)) => {
-            self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y)
-          }
+        let (x, y) = match command {
+          Command::CursorMoveLeftBy(n) => (-(n as isize), 0),
+          Command::CursorMoveRightBy(n) => (n as isize, 0),
+          Command::CursorMoveUpBy(n) => (0, -(n as isize)),
+          Command::CursorMoveDownBy(n) => (0, n as isize),
           Command::CursorMoveTo((x, y)) => {
             let x = (x as isize) - (cursor_viewport.char_idx() as isize);
             let y = (y as isize) - (cursor_viewport.line_idx() as isize);
-            self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y)
+            (x, y)
           }
+          Command::CursorMoveBy((x, y)) => (x, y),
           _ => unreachable!(),
         };
+
+        let cursor_move_result = self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y);
 
         trace!("cursor_move_result:{:?}", cursor_move_result);
         if let Some((line_idx, char_idx)) = cursor_move_result {
