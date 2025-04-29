@@ -8,6 +8,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::*;
 use crate::ui::widget::window::{CursorViewport, Viewport};
 
+use crossterm::cursor;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
@@ -132,11 +133,16 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn _cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
-    let x_y = {
+    // Get (window_scrolls, cursor_motions).
+    let scrolls_motions: (Option<(isize, isize)>, Option<(isize, isize)>) = {
       let tree = data_access.tree.clone();
       let mut tree = lock!(tree);
       if let Some(current_window_id) = tree.current_window_id() {
         if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+          let buffer = current_window.buffer().upgrade().unwrap();
+          let buffer = lock!(buffer);
+          let viewport = current_window.viewport();
+          let viewport = lock!(viewport);
           let cursor_viewport = current_window.cursor_viewport();
           let cursor_viewport = lock!(cursor_viewport);
           let (x, y) = convert_cursor_move_command_to_xy(
@@ -144,16 +150,55 @@ impl NormalStateful {
             cursor_viewport.char_idx(),
             cursor_viewport.line_idx(),
           );
-          Some((x, y))
+
+          if x == 0 && y == 0 {
+            (None, None)
+          } else {
+            if let Some((last_line_idx, last_line_viewport)) = viewport.lines().last_key_value() {
+              if y > 0 && cursor_viewport.line_idx() == *last_line_idx {
+                // If move down, and the cursor is already at bottom, scrolls.
+                (Some((0, y)), Some((x, y)))
+              } else {
+                (None, Some((x, y)))
+              }
+            } else if let Some((first_line_idx, first_line_viewport)) =
+              viewport.lines().first_key_value()
+            {
+              if y < 0 && cursor_viewport.line_idx() == *first_line_idx {
+                // If move up, and the cursor is already at top, scrolls.
+                (Some((0, y)), Some((x, y)))
+              } else {
+                (None, Some((x, y)))
+              }
+            } else if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
+              debug_assert!(
+                buffer
+                  .get_rope()
+                  .get_line(cursor_viewport.line_idx())
+                  .is_some()
+              );
+              let bufline = buffer.get_rope().line(cursor_viewport.line_idx());
+              let rows = line_viewport.rows();
+              if let Some((last_row_idx, last_row_viewport)) = rows.last_key_value() {
+                if x > 0
+                  && cursor_viewport.char_idx()
+                    == last_row_viewport.end_char_idx().saturating_sub(1)
+                  && bufline.len_chars() > 0
+                {}
+              }
+            } else {
+              (None, Some((x, y)))
+            }
+          }
         } else {
-          None
+          (None, None)
         }
       } else {
-        None
+        (None, None)
       }
     };
 
-    if let Some((x, y)) = x_y {}
+    if let Some((x, y)) = scrolls_motions {}
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
@@ -288,21 +333,21 @@ impl NormalStateful {
   fn _raw_cursor_move_y_by(
     &self,
     viewport: &Viewport,
-    base_line_idx: usize,
-    _base_char_idx: usize,
+    cursor_line_idx: usize,
+    _cursor_char_idx: usize,
     _buffer: &Buffer,
     y: isize,
   ) -> usize {
     if y < 0 {
       let n = -y as usize;
-      base_line_idx.saturating_sub(n)
+      cursor_line_idx.saturating_sub(n)
     } else {
       let n = y as usize;
-      let expected_line_idx = base_line_idx.saturating_add(n);
+      let expected_line_idx = cursor_line_idx.saturating_add(n);
       let last_line_idx = viewport.end_line_idx().saturating_sub(1);
       trace!(
         "base_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
-        base_line_idx, expected_line_idx, last_line_idx
+        cursor_line_idx, expected_line_idx, last_line_idx
       );
       std::cmp::min(expected_line_idx, last_line_idx)
     }
@@ -358,28 +403,28 @@ impl NormalStateful {
   fn _raw_cursor_move_x_by(
     &self,
     viewport: &Viewport,
-    base_line_idx: usize,
-    base_char_idx: usize,
+    cursor_line_idx: usize,
+    cursor_char_idx: usize,
     buffer: &Buffer,
     x: isize,
   ) -> usize {
     if x < 0 {
       let n = -x as usize;
-      base_char_idx.saturating_sub(n)
+      cursor_char_idx.saturating_sub(n)
     } else {
       let n = x as usize;
-      let expected = base_char_idx.saturating_add(n);
+      let expected = cursor_char_idx.saturating_add(n);
       let upper_bounded = {
-        debug_assert!(viewport.lines().contains_key(&base_line_idx));
-        let line_viewport = viewport.lines().get(&base_line_idx).unwrap();
+        debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
+        let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
         let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
         let last_char_on_row = last_row_viewport.end_char_idx() - 1;
         trace!(
           "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
-          base_char_idx, expected, last_row_viewport, last_char_on_row
+          cursor_char_idx, expected, last_row_viewport, last_char_on_row
         );
         buffer
-          .last_visible_char_on_line_since(base_line_idx, last_char_on_row)
+          .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
           .unwrap()
       };
       std::cmp::min(expected, upper_bounded)
