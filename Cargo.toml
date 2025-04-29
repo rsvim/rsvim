@@ -107,7 +107,7 @@ opt-level = 1
 lto = true
 strip = true
 codegen-units = 1
-# opt-level = 'z'   # Optimize for size
+opt-level = 'z'   # Optimize for size
 
 ## Crates that don't optimize for size
 [profile.release.package.base64-simd]
@@ -117,6 +117,20 @@ opt-level = 3
 # [profile.release.package.brotli-decompressor]
 # opt-level = 3
 [profile.release.package.bytes]
+opt-level = 3
+[profile.release.package.futures-util]
+opt-level = 3
+[profile.release.package.futures-io]
+opt-level = 3
+[profile.release.package.futures-channel]
+opt-level = 3
+[profile.release.package.futures-executor]
+opt-level = 3
+[profile.release.package.futures-sink]
+opt-level = 3
+[profile.release.package.futures-task]
+opt-level = 3
+[profile.release.package.futures-core]
 opt-level = 3
 [profile.release.package.rand]
 opt-level = 3
