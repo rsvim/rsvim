@@ -37,6 +37,46 @@ fn adjust_cursor_char_idx_on_vertical_motion(
   char_idx
 }
 
+fn convert_cursor_move_command_to_xy(
+  command: Command,
+  cursor_char_idx: usize,
+  cursor_line_idx: usize,
+) -> (isize, isize) {
+  match command {
+    Command::CursorMoveLeftBy(n) => (-(n as isize), 0),
+    Command::CursorMoveRightBy(n) => (n as isize, 0),
+    Command::CursorMoveUpBy(n) => (0, -(n as isize)),
+    Command::CursorMoveDownBy(n) => (0, n as isize),
+    Command::CursorMoveTo((x, y)) => {
+      let x = (x as isize) - (cursor_char_idx as isize);
+      let y = (y as isize) - (cursor_line_idx as isize);
+      (x, y)
+    }
+    Command::CursorMoveBy((x, y)) => (x, y),
+    _ => unreachable!(),
+  }
+}
+
+fn convert_window_scroll_command_to_xy(
+  command: Command,
+  viewport_start_column_idx: usize,
+  viewport_start_line_idx: usize,
+) -> (isize, isize) {
+  match command {
+    Command::WindowScrollLeftBy(n) => (-(n as isize), 0),
+    Command::WindowScrollRightBy(n) => (n as isize, 0),
+    Command::WindowScrollUpBy(n) => (0, -(n as isize)),
+    Command::WindowScrollDownBy(n) => (0, n as isize),
+    Command::WindowScrollTo((x, y)) => {
+      let x = (x as isize) - (viewport_start_column_idx as isize);
+      let y = (y as isize) - (viewport_start_line_idx as isize);
+      (x, y)
+    }
+    Command::WindowScrollBy((x, y)) => (x, y),
+    _ => unreachable!(),
+  }
+}
+
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
@@ -92,26 +132,18 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
-    let maybe_x_y = {
+    let x_y = {
       let tree = data_access.tree.clone();
       let mut tree = lock!(tree);
       if let Some(current_window_id) = tree.current_window_id() {
         if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
           let cursor_viewport = current_window.cursor_viewport();
           let cursor_viewport = lock!(cursor_viewport);
-          let (x, y) = match command {
-            Command::CursorMoveLeftBy(n) => (-(n as isize), 0),
-            Command::CursorMoveRightBy(n) => (n as isize, 0),
-            Command::CursorMoveUpBy(n) => (0, -(n as isize)),
-            Command::CursorMoveDownBy(n) => (0, n as isize),
-            Command::CursorMoveTo((x, y)) => {
-              let x = (x as isize) - (cursor_viewport.char_idx() as isize);
-              let y = (y as isize) - (cursor_viewport.line_idx() as isize);
-              (x, y)
-            }
-            Command::CursorMoveBy((x, y)) => (x, y),
-            _ => unreachable!(),
-          };
+          let (x, y) = convert_cursor_move_command_to_xy(
+            command,
+            cursor_viewport.char_idx(),
+            cursor_viewport.line_idx(),
+          );
           Some((x, y))
         } else {
           None
@@ -120,6 +152,8 @@ impl NormalStateful {
         None
       }
     };
+
+    if let Some((x, y)) = x_y {}
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
@@ -138,19 +172,11 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let (x, y) = match command {
-          Command::CursorMoveLeftBy(n) => (-(n as isize), 0),
-          Command::CursorMoveRightBy(n) => (n as isize, 0),
-          Command::CursorMoveUpBy(n) => (0, -(n as isize)),
-          Command::CursorMoveDownBy(n) => (0, n as isize),
-          Command::CursorMoveTo((x, y)) => {
-            let x = (x as isize) - (cursor_viewport.char_idx() as isize);
-            let y = (y as isize) - (cursor_viewport.line_idx() as isize);
-            (x, y)
-          }
-          Command::CursorMoveBy((x, y)) => (x, y),
-          _ => unreachable!(),
-        };
+        let (x, y) = convert_cursor_move_command_to_xy(
+          command,
+          cursor_viewport.char_idx(),
+          cursor_viewport.line_idx(),
+        );
 
         let cursor_move_result = self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y);
 
@@ -372,19 +398,11 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        let (x, y) = match command {
-          Command::WindowScrollLeftBy(n) => (-(n as isize), 0),
-          Command::WindowScrollRightBy(n) => (n as isize, 0),
-          Command::WindowScrollUpBy(n) => (0, -(n as isize)),
-          Command::WindowScrollDownBy(n) => (0, n as isize),
-          Command::WindowScrollTo((x, y)) => {
-            let x = (x as isize) - (viewport.start_column_idx() as isize);
-            let y = (y as isize) - (viewport.start_line_idx() as isize);
-            (x, y)
-          }
-          Command::WindowScrollBy((x, y)) => (x, y),
-          _ => unreachable!(),
-        };
+        let (x, y) = convert_window_scroll_command_to_xy(
+          command,
+          viewport.start_column_idx(),
+          viewport.start_line_idx(),
+        );
 
         let window_scroll_result = self._window_scroll_by(&viewport, &buffer, x, y);
 
