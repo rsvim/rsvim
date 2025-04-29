@@ -92,6 +92,41 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    let maybe_x_y = {
+      let tree = data_access.tree.clone();
+      let mut tree = lock!(tree);
+      if let Some(current_window_id) = tree.current_window_id() {
+        if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+          let cursor_viewport = current_window.cursor_viewport();
+          let cursor_viewport = lock!(cursor_viewport);
+          let (x, y) = match command {
+            Command::CursorMoveLeftBy(n) => (-(n as isize), 0),
+            Command::CursorMoveRightBy(n) => (n as isize, 0),
+            Command::CursorMoveUpBy(n) => (0, -(n as isize)),
+            Command::CursorMoveDownBy(n) => (0, n as isize),
+            Command::CursorMoveTo((x, y)) => {
+              let x = (x as isize) - (cursor_viewport.char_idx() as isize);
+              let y = (y as isize) - (cursor_viewport.line_idx() as isize);
+              (x, y)
+            }
+            Command::CursorMoveBy((x, y)) => (x, y),
+            _ => unreachable!(),
+          };
+          Some((x, y))
+        } else {
+          None
+        }
+      } else {
+        None
+      }
+    };
+
+    StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  /// Cursor move in current window.
+  /// NOTE: This will not scroll the buffer if cursor reaches the window border.
+  fn _cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     if let Some(current_window_id) = tree.current_window_id() {
