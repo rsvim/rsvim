@@ -100,9 +100,9 @@ impl NormalStateful {
       Command::CursorMoveBy((x, y)) => Command::CursorMoveBy((x, y)),
       Command::CursorMoveTo((x, y)) => {
         let tree = data_access.tree.clone();
-        let mut tree = lock!(tree);
+        let tree = lock!(tree);
         if let Some(current_window_id) = tree.current_window_id() {
-          if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+          if let Some(TreeNode::Window(current_window)) = tree.node(current_window_id) {
             let cursor_viewport = current_window.cursor_viewport();
             let cursor_viewport = lock!(cursor_viewport);
             Command::CursorMoveBy((
