@@ -204,104 +204,7 @@ impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     // Get (window_scroll_to, cursor_move_to).
-    let scrolls_moves = {
-      let tree = data_access.tree.clone();
-      let mut tree = lock!(tree);
-      if let Some(current_window_id) = tree.current_window_id() {
-        if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-          let buffer = current_window.buffer().upgrade().unwrap();
-          let buffer = lock!(buffer);
-          let viewport = current_window.viewport();
-          let viewport = lock!(viewport);
-          let cursor_viewport = current_window.cursor_viewport();
-          let cursor_viewport = lock!(cursor_viewport);
-          let (to_x, to_y) = normalize_as_cursor_move_to(
-            command,
-            cursor_viewport.char_idx(),
-            cursor_viewport.line_idx(),
-          );
-
-          // If move down, and the target cursor line > bottom line.
-          let goes_out_of_bottom = {
-            if let Some((last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
-              to_y > cursor_viewport.line_idx() && to_y > *last_line_idx
-            } else {
-              false
-            }
-          };
-
-          // If move up, and the target cursor line < top line.
-          let goes_out_of_top = {
-            if let Some((first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value()
-            {
-              to_y < cursor_viewport.line_idx() && to_y < *first_line_idx
-            } else {
-              false
-            }
-          };
-
-          // If move right, and the target cursor char > viewport's last char, and there's
-          // more chars at buffer line end.
-          let goes_out_of_right = {
-            if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
-              debug_assert!(
-                buffer
-                  .get_rope()
-                  .get_line(cursor_viewport.line_idx())
-                  .is_some()
-              );
-              let bufline = buffer.get_rope().line(cursor_viewport.line_idx());
-              let bufline_len_chars = bufline.len_chars();
-              let rows = line_viewport.rows();
-              if let Some((_last_row_idx, last_row_viewport)) = rows.last_key_value() {
-                to_x > last_row_viewport.end_char_idx().saturating_sub(1)
-                  && bufline_len_chars > last_row_viewport.end_char_idx()
-              } else {
-                false
-              }
-            } else {
-              false
-            }
-          };
-
-          // If move left, and the target cursor char < viewport's first char, and there's
-          // more chars at buffer line start.
-          let goes_out_of_left = {
-            if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
-              debug_assert!(
-                buffer
-                  .get_rope()
-                  .get_line(cursor_viewport.line_idx())
-                  .is_some()
-              );
-              let rows = line_viewport.rows();
-              if let Some((_first_row_idx, first_row_viewport)) = rows.first_key_value() {
-                to_x > first_row_viewport.start_char_idx()
-                  && first_row_viewport.start_char_idx() > 0
-              } else {
-                false
-              }
-            } else {
-              false
-            }
-          };
-
-          if goes_out_of_bottom || goes_out_of_top {
-            // Vertically
-            (Some((0, to_y)), Some((to_x, to_y)))
-          } else if goes_out_of_right || goes_out_of_left {
-            // Horizontally
-            (Some((to_x, 0)), Some((to_x, to_y)))
-          } else {
-            (None, Some((to_x, to_y)))
-          }
-        } else {
-          (None, None)
-        }
-      } else {
-        (None, None)
-      }
-    };
+    let scrolls_moves = self._expected_cursor_move_to_with_window_scroll_to(data_access, command);
 
     // First try window scroll.
     let scrolls = scrolls_moves.0;
@@ -319,6 +222,109 @@ impl NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  #[allow(clippy::type_complexity)]
+  // Get (window_scroll_to, cursor_move_to).
+  fn _expected_cursor_move_to_with_window_scroll_to(
+    &self,
+    data_access: &StatefulDataAccess,
+    command: Command,
+  ) -> (Option<(usize, usize)>, Option<(usize, usize)>) {
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+        let buffer = current_window.buffer().upgrade().unwrap();
+        let buffer = lock!(buffer);
+        let viewport = current_window.viewport();
+        let viewport = lock!(viewport);
+        let cursor_viewport = current_window.cursor_viewport();
+        let cursor_viewport = lock!(cursor_viewport);
+        let (to_x, to_y) = normalize_as_cursor_move_to(
+          command,
+          cursor_viewport.char_idx(),
+          cursor_viewport.line_idx(),
+        );
+
+        // If move down, and the target cursor line > bottom line.
+        let goes_out_of_bottom = {
+          if let Some((last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
+            to_y > cursor_viewport.line_idx() && to_y > *last_line_idx
+          } else {
+            false
+          }
+        };
+
+        // If move up, and the target cursor line < top line.
+        let goes_out_of_top = {
+          if let Some((first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value() {
+            to_y < cursor_viewport.line_idx() && to_y < *first_line_idx
+          } else {
+            false
+          }
+        };
+
+        // If move right, and the target cursor char > viewport's last char, and there's
+        // more chars at buffer line end.
+        let goes_out_of_right = {
+          if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
+            debug_assert!(
+              buffer
+                .get_rope()
+                .get_line(cursor_viewport.line_idx())
+                .is_some()
+            );
+            let bufline = buffer.get_rope().line(cursor_viewport.line_idx());
+            let bufline_len_chars = bufline.len_chars();
+            let rows = line_viewport.rows();
+            if let Some((_last_row_idx, last_row_viewport)) = rows.last_key_value() {
+              to_x > last_row_viewport.end_char_idx().saturating_sub(1)
+                && bufline_len_chars > last_row_viewport.end_char_idx()
+            } else {
+              false
+            }
+          } else {
+            false
+          }
+        };
+
+        // If move left, and the target cursor char < viewport's first char, and there's
+        // more chars at buffer line start.
+        let goes_out_of_left = {
+          if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
+            debug_assert!(
+              buffer
+                .get_rope()
+                .get_line(cursor_viewport.line_idx())
+                .is_some()
+            );
+            let rows = line_viewport.rows();
+            if let Some((_first_row_idx, first_row_viewport)) = rows.first_key_value() {
+              to_x > first_row_viewport.start_char_idx() && first_row_viewport.start_char_idx() > 0
+            } else {
+              false
+            }
+          } else {
+            false
+          }
+        };
+
+        if goes_out_of_bottom || goes_out_of_top {
+          // Vertically
+          (Some((0, to_y)), Some((to_x, to_y)))
+        } else if goes_out_of_right || goes_out_of_left {
+          // Horizontally
+          (Some((to_x, 0)), Some((to_x, to_y)))
+        } else {
+          (None, Some((to_x, to_y)))
+        }
+      } else {
+        (None, None)
+      }
+    } else {
+      (None, None)
+    }
   }
 
   /// Cursor move in current window.
