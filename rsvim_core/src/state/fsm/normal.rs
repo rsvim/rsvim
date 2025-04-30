@@ -306,7 +306,7 @@ impl NormalStateful {
     // First try window scroll.
     let scrolls = scrolls_moves.0;
     if let Some((scroll_to_x, scroll_to_y)) = scrolls {
-      let _ = self._window_scroll(
+      self._window_scroll(
         data_access,
         Command::WindowScrollTo((scroll_to_x, scroll_to_y)),
       );
@@ -315,7 +315,7 @@ impl NormalStateful {
     // Then try cursor move.
     let moves = scrolls_moves.1;
     if let Some((move_to_x, move_to_y)) = moves {
-      let _ = self._cursor_move(data_access, Command::CursorMoveTo((move_to_x, move_to_y)));
+      self._cursor_move(data_access, Command::CursorMoveTo((move_to_x, move_to_y)));
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
