@@ -15,6 +15,7 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
 )
 
 USE_MOLD_LINKER = False
+RECACHE_SCCACHE = False
 
 
 def set_env(command, name, value):
@@ -26,30 +27,35 @@ def set_env(command, name, value):
     return command.strip()
 
 
-def set_sccache(command, recache):
-    if recache:
+def set_sccache(command):
+    if RECACHE_SCCACHE:
         command = set_env(command, "SCCACHE_RECACHE", "1")
     command = set_env(command, "RUSTC_WRAPPER", "sccache")
     return command.strip()
 
 
 def set_mold(command):
+    if not USE_MOLD_LINKER:
+        return command
+
     if WINDOWS:
         logging.warning("'mold' is not supported on Windows")
         return command
     if not shutil.which("mold"):
         logging.warning("'mold' is not found")
         return command
-    if not shutil.which("clang"):
-        logging.warning("'clang' is not found for 'mold' linker")
-        return command
-    command = f"RUSTFLAGS='-C linker=clang -C link-arg=-fuse-ld=mold' {command}"
+    # if not shutil.which("clang"):
+    #     logging.warning("'clang' is not found for 'mold' linker")
+    #     return command
+    # command = f"RUSTFLAGS='-C linker=clang -C link-arg=-fuse-ld=mold' {command}"
+    command = f"RUSTFLAGS='-C link-arg=-fuse-ld=mold' {command}"
     return command.strip()
 
 
-def clippy(watch, recache):
+def clippy(watch):
     command = set_env("", "RUSTFLAGS", "-Dwarnings")
-    command = set_sccache(command, recache)
+    command = set_sccache(command)
+    command = set_mold(command)
 
     if watch:
         logging.info("Run 'clippy' as a service and watching file changes")
@@ -63,7 +69,7 @@ def clippy(watch, recache):
     os.system(command)
 
 
-def test(name, recache, miri):
+def test(name, miri):
     if len(name) == 0:
         name = None
         logging.info("Run 'test' for all cases")
@@ -71,7 +77,7 @@ def test(name, recache, miri):
         name = " ".join(list(dict.fromkeys(name)))
         logging.info(f"Run 'test' for '{name}'")
 
-    command = ""
+    command = set_mold("")
 
     if miri is not None:
         command = set_env(
@@ -82,7 +88,7 @@ def test(name, recache, miri):
         command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace")
-        command = set_sccache(command, recache)
+        command = set_sccache(command)
         if name is None:
             name = "--all"
         command = f"{command} cargo nextest run --no-capture {name}"
@@ -92,8 +98,9 @@ def test(name, recache, miri):
     os.system(command)
 
 
-def list_test(recache):
-    command = set_sccache("", recache)
+def list_test():
+    command = set_sccache("")
+    command = set_mold(command)
 
     command = f"{command} cargo nextest list"
 
@@ -102,8 +109,9 @@ def list_test(recache):
     os.system(command)
 
 
-def build(release, recache, features, all_features):
-    command = set_sccache("", recache)
+def build(release, features, all_features):
+    command = set_sccache("")
+    command = set_mold(command)
 
     feature_flags = ""
     if all_features:
@@ -164,6 +172,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "-m", "--mold", action="store_true", help="Build with `mold` linker"
     )
+    parser.add_argument(
+        "-r", "--recache", action="store_true", help="Build with `sccache` cache"
+    )
 
     subparsers = parser.add_subparsers(dest="subcommand")
 
@@ -177,11 +188,6 @@ if __name__ == "__main__":
         "--watch",
         action="store_true",
         help="Running clippy as a service and watching file changes, by default is false",
-    )
-    clippy_subparser.add_argument(
-        "--recache",
-        action="store_true",
-        help="Rebuild cache in `sccache`",
     )
 
     test_subparser = subparsers.add_parser(
@@ -201,11 +207,6 @@ if __name__ == "__main__":
         nargs="*",
         default=[],
         help="Multiple test names that need to run, by default is empty (runs all test cases)",
-    )
-    test_subparser.add_argument(
-        "--recache",
-        action="store_true",
-        help="Rebuild cache in `sccache`",
     )
     test_subparser.add_argument(
         "--miri",
@@ -234,11 +235,6 @@ if __name__ == "__main__":
         dest="all_features",
         action="store_true",
         help="Build with all features",
-    )
-    build_subparser.add_argument(
-        "--recache",
-        action="store_true",
-        help="Rebuild cache in `sccache`",
     )
 
     doc_subparser = subparsers.add_parser(
@@ -275,16 +271,18 @@ if __name__ == "__main__":
 
     if parser.mold:
         USE_MOLD_LINKER = True
+    if parser.recache:
+        RECACHE_SCCACHE = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
-        clippy(parser.watch, parser.recache)
+        clippy(parser.watch)
     elif parser.subcommand == "test" or parser.subcommand == "t":
         if parser.list_test:
-            list_test(parser.recache)
+            list_test()
         else:
-            test(parser.name, parser.recache, parser.miri)
+            test(parser.name, parser.miri)
     elif parser.subcommand == "build" or parser.subcommand == "b":
-        build(parser.release, parser.recache, parser.features, parser.all_features)
+        build(parser.release, parser.features, parser.all_features)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
         doc(parser.watch)
     elif parser.subcommand == "release" or parser.subcommand == "r":
