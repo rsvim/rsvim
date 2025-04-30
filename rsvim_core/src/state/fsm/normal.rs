@@ -201,8 +201,8 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn _cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
-    // Get (window_scrolls, cursor_motions).
-    let scrolls_motions: (Option<(isize, isize)>, Option<(isize, isize)>) = {
+    // Get (window_scroll_to, cursor_move_to).
+    let scrolls_moves: (Option<(usize, usize)>, Option<(usize, usize)>) = {
       let tree = data_access.tree.clone();
       let mut tree = lock!(tree);
       if let Some(current_window_id) = tree.current_window_id() {
@@ -213,32 +213,43 @@ impl NormalStateful {
           let viewport = lock!(viewport);
           let cursor_viewport = current_window.cursor_viewport();
           let cursor_viewport = lock!(cursor_viewport);
-          let (x, y) = normalize_as_cursor_move_by(
+          let (to_x, to_y) = normalize_as_cursor_move_to(
             command,
             cursor_viewport.char_idx(),
             cursor_viewport.line_idx(),
           );
 
-          if x == 0 && y == 0 {
-            (None, None)
-          } else {
+          // If move down, and the target cursor line > bottom line.
+          let goes_out_of_bottom = {
             if let Some((last_line_idx, last_line_viewport)) = viewport.lines().last_key_value() {
-              if y > 0 && cursor_viewport.line_idx() == *last_line_idx {
-                // If move down, and the cursor is already at bottom, scrolls.
-                (Some((0, y)), Some((x, y)))
+              if to_y > cursor_viewport.line_idx() && to_y > *last_line_idx {
+                true
               } else {
-                (None, Some((x, y)))
+                false
               }
-            } else if let Some((first_line_idx, first_line_viewport)) =
-              viewport.lines().first_key_value()
+            } else {
+              false
+            }
+          };
+
+          // If move up, and the target cursor line < top line.
+          let goes_out_of_top = {
+            if let Some((first_line_idx, first_line_viewport)) = viewport.lines().first_key_value()
             {
-              if y < 0 && cursor_viewport.line_idx() == *first_line_idx {
-                // If move up, and the cursor is already at top, scrolls.
-                (Some((0, y)), Some((x, y)))
+              if to_y < cursor_viewport.line_idx() && to_y < *first_line_idx {
+                true
               } else {
-                (None, Some((x, y)))
+                false
               }
-            } else if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
+            } else {
+              false
+            }
+          };
+
+          // If move right, and the target cursor char > viewport's last char, and there's
+          // more chars at buffer line end.
+          let goes_out_of_right = {
+            if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
               debug_assert!(
                 buffer
                   .get_rope()
@@ -246,17 +257,61 @@ impl NormalStateful {
                   .is_some()
               );
               let bufline = buffer.get_rope().line(cursor_viewport.line_idx());
+              let bufline_len_chars = bufline.len_chars();
               let rows = line_viewport.rows();
               if let Some((last_row_idx, last_row_viewport)) = rows.last_key_value() {
-                if x > 0
-                  && cursor_viewport.char_idx()
-                    == last_row_viewport.end_char_idx().saturating_sub(1)
-                  && bufline.len_chars() > 0
-                {}
+                if to_x > last_row_viewport.end_char_idx().saturating_sub(1)
+                  && bufline_len_chars > last_row_viewport.end_char_idx()
+                {
+                  true
+                } else {
+                  false
+                }
+              } else {
+                false
               }
             } else {
-              (None, Some((x, y)))
+              false
             }
+          };
+
+          // If move left, and the target cursor char < viewport's first char, and there's
+          // more chars at buffer line start.
+          let goes_out_of_left = {
+            if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
+              debug_assert!(
+                buffer
+                  .get_rope()
+                  .get_line(cursor_viewport.line_idx())
+                  .is_some()
+              );
+              let bufline = buffer.get_rope().line(cursor_viewport.line_idx());
+              let bufline_len_chars = bufline.len_chars();
+              let rows = line_viewport.rows();
+              if let Some((first_row_idx, first_row_viewport)) = rows.first_key_value() {
+                if to_x > first_row_viewport.start_char_idx()
+                  && first_row_viewport.start_char_idx() > 0
+                {
+                  true
+                } else {
+                  false
+                }
+              } else {
+                false
+              }
+            } else {
+              false
+            }
+          };
+
+          if goes_out_of_bottom || goes_out_of_top {
+            // Vertically
+            (Some((0, to_y)), Some((to_x, to_y)))
+          } else if goes_out_of_right || goes_out_of_left {
+            // Horizontally
+            (Some((to_x, 0)), Some((to_x, to_y)))
+          } else {
+            (None, Some((to_x, to_y)))
           }
         } else {
           (None, None)
@@ -266,20 +321,9 @@ impl NormalStateful {
       }
     };
 
-    if let Some((x, y)) = scrolls_motions {}
+    if let Some((x, y)) = scrolls_moves {}
 
     StatefulValue::NormalMode(NormalStateful::default())
-  }
-
-  // The `y` is lines count.
-  fn _expected_cursor_move_y_to(
-    &self,
-    viewport: &Viewport,
-    cursor_line_idx: usize,
-    _cursor_char_idx: usize,
-    _buffer: &Buffer,
-    y: isize,
-  ) -> usize {
   }
 
   /// Cursor move in current window.
