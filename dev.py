@@ -46,22 +46,21 @@ def set_mold(command):
     if shutil.which("mold") is None:
         logging.warning("'mold' is not found")
         return command
-
-    # if not shutil.which("clang"):
-    #     logging.warning("'clang' is not found for 'mold' linker")
-    #     return command
-    # command = f"RUSTFLAGS='-C linker=clang -C link-arg=-fuse-ld=mold' {command}"
+    if shutil.which("clang") is None:
+        logging.warning("'clang' is not found for 'mold' linker")
+        return command
 
     arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
     arch = [l.strip() for l in arch.splitlines()]
     host = [l for l in arch if l.startswith("host:")]
     host = host[0][5:].strip()
     logging.debug(f"host:{host}")
+    cargo_target_linker = f"CARGO_TARGET_{host.replace('-', '_').upper()}_LINKER"
     cargo_target_rustflags = f"CARGO_TARGET_{host.replace('-', '_').upper()}_RUSTFLAGS"
-    executable_path = shutil.which("mold")
-    command = (
-        f'{cargo_target_rustflags}="-C link-arg=-fuse-ld={executable_path}" {command}'
-    )
+    mold_executable = shutil.which("mold")
+
+    command = f'{cargo_target_rustflags}="-C link-arg=-fuse-ld={mold_executable}" {cargo_target_linker}="clang" {command}'
+
     return command.strip()
 
 
