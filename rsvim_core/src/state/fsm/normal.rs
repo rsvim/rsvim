@@ -204,7 +204,7 @@ impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     // Get (window_scroll_to, cursor_move_to).
-    let scrolls_moves = self._expected_cursor_move_to_with_window_scroll_to(data_access, command);
+    let scrolls_moves = self._expected_move_and_scroll(data_access, command);
 
     // First try window scroll.
     let scrolls = scrolls_moves.0;
@@ -226,7 +226,7 @@ impl NormalStateful {
 
   #[allow(clippy::type_complexity)]
   // Get (window_scroll_to, cursor_move_to).
-  fn _expected_cursor_move_to_with_window_scroll_to(
+  fn _expected_move_and_scroll(
     &self,
     data_access: &StatefulDataAccess,
     command: Command,
