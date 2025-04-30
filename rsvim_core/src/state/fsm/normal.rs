@@ -4335,10 +4335,8 @@ mod tests_window_scroll_to {
     // Scroll-5
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 2)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollTo((0, 2)));
 
     let tree = data_access.tree.clone();
     {
@@ -4368,10 +4366,8 @@ mod tests_window_scroll_to {
     // Scroll-6
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((0, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollTo((0, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -4458,10 +4454,8 @@ mod tests_window_scroll_to {
     // Scroll-1
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((4, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollTo((4, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -4491,10 +4485,8 @@ mod tests_window_scroll_to {
     // Scroll-2
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((8, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollTo((8, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -4524,10 +4516,8 @@ mod tests_window_scroll_to {
     // Scroll-3
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((7, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollTo((7, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -4557,10 +4547,8 @@ mod tests_window_scroll_to {
     // Scroll-4
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((3, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollTo((3, 0)));
 
     let tree = data_access.tree.clone();
     {
@@ -4590,10 +4578,8 @@ mod tests_window_scroll_to {
     // Scroll-5
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollTo((2, 0)));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollTo((2, 0)));
 
     let tree = data_access.tree.clone();
     {
