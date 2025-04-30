@@ -16,17 +16,30 @@ description = "The command line(s) for the RSVIM editor."
 
 [features]
 default = []
-jemalloc = ["dep:rsvim_allocator"]
+jemalloc = ["dep:tikv-jemallocator"]
 
 [dependencies]
 rsvim_core = { workspace = true }
-rsvim_allocator = { workspace = true, optional = true }
 tracing = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }
 toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
+
+# unix && !macos && !emscripten && feature=tikv-jemallocator
+# Feature 'background_threads' is unsupported on MacOS: <https://github.com/jemalloc/jemalloc/issues/843>.
+[target.'cfg(all(target_family = "unix", not(target_os = "macos"), not(target_os = "emscripten")))'.dependencies]
+tikv-jemallocator = { workspace = true, features = [
+  "disable_initial_exec_tls",
+  "background_threads",
+], optional = true }
+
+# unix && macos && feature=tikv-jemallocator
+[target.'cfg(all(target_family = "unix", target_os = "macos"))'.dependencies]
+tikv-jemallocator = { workspace = true, features = [
+  "disable_initial_exec_tls",
+], optional = true }
 
 [build-dependencies]
 rsvim_core = { workspace = true }
