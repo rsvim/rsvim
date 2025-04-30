@@ -14,8 +14,13 @@ categories.workspace = true
 exclude.workspace = true
 description = "The command line(s) for the RSVIM editor."
 
+[features]
+default = []
+jemalloc = ["dep:rsvim_allocator"]
+
 [dependencies]
 rsvim_core = { workspace = true }
+rsvim_allocator = { workspace = true, optional = true }
 tracing = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }

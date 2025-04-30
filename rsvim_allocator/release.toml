@@ -1,0 +1,8 @@
+allow-branch = ["main"]
+tag-message = "chore(release): {{version}}"
+tag-name = "v{{version}}"
+pre-release-commit-message = "chore(release): {{version}}"
+shared-version = true
+release = true
+tag = true
+
