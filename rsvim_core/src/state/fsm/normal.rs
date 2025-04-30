@@ -160,16 +160,16 @@ impl Stateful for NormalStateful {
         KeyEventKind::Press => {
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
-              return self._cursor_move(&data_access, Command::CursorMoveUpBy(1));
+              return self.cursor_move(&data_access, Command::CursorMoveUpBy(1));
             }
             KeyCode::Down | KeyCode::Char('j') => {
-              return self._cursor_move(&data_access, Command::CursorMoveDownBy(1));
+              return self.cursor_move(&data_access, Command::CursorMoveDownBy(1));
             }
             KeyCode::Left | KeyCode::Char('h') => {
-              return self._cursor_move(&data_access, Command::CursorMoveLeftBy(1));
+              return self.cursor_move(&data_access, Command::CursorMoveLeftBy(1));
             }
             KeyCode::Right | KeyCode::Char('l') => {
-              return self._cursor_move(&data_access, Command::CursorMoveRightBy(1));
+              return self.cursor_move(&data_access, Command::CursorMoveRightBy(1));
             }
             KeyCode::Esc => {
               // quit loop
@@ -201,8 +201,7 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  /// Cursor move in current window.
-  /// NOTE: This will not scroll the buffer if cursor reaches the window border.
+  /// Cursor move in current window, with buffer scroll.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     // Get (window_scroll_to, cursor_move_to).
     let scrolls_moves = {
