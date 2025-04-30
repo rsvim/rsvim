@@ -14,7 +14,6 @@ import subprocess
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
 )
-
 MACOS = platform.system().startswith("Darwin")
 
 USE_MOLD_LINKER = False
