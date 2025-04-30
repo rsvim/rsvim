@@ -8,7 +8,8 @@
     target_arch = "x86_64",
     target_arch = "aarch64",
     target_arch = "powerpc64"
-  )
+  ),
+  feature = "jemalloc"
 ))]
 #[global_allocator]
 static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
