@@ -328,7 +328,7 @@ impl NormalStateful {
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
     let line_idx =
-      self._raw_cursor_move_y_by(viewport, cursor_line_idx, cursor_char_idx, buffer, y);
+      self._bounded_cursor_move_y_by(viewport, cursor_line_idx, cursor_char_idx, buffer, y);
 
     // If `line_idx` doesn't exist, or line is empty.
     match buffer.get_rope().get_line(line_idx) {
@@ -342,7 +342,7 @@ impl NormalStateful {
 
     let char_idx =
       adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
-    let char_idx = self._raw_cursor_move_x_by(viewport, line_idx, char_idx, buffer, x);
+    let char_idx = self._bounded_cursor_move_x_by(viewport, line_idx, char_idx, buffer, x);
 
     Some((line_idx, char_idx))
   }
@@ -400,7 +400,7 @@ impl NormalStateful {
   // }
 
   // NOTE: `y` is lines count.
-  fn _raw_cursor_move_y_by(
+  fn _bounded_cursor_move_y_by(
     &self,
     viewport: &Viewport,
     cursor_line_idx: usize,
@@ -470,7 +470,7 @@ impl NormalStateful {
   // }
 
   // NOTE: `x` is chars count.
-  fn _raw_cursor_move_x_by(
+  fn _bounded_cursor_move_x_by(
     &self,
     viewport: &Viewport,
     cursor_line_idx: usize,
@@ -555,7 +555,7 @@ impl NormalStateful {
     let buffer_len_lines = buffer.get_rope().len_lines();
     debug_assert!(end_line_idx <= buffer_len_lines);
 
-    let mut line_idx = self._raw_window_scroll_y_by(start_line_idx, buffer, y);
+    let mut line_idx = self._bounded_window_scroll_y_by(start_line_idx, buffer, y);
 
     // If viewport wants to scroll down (i.e. y > 0), and viewport already shows that last line in
     // the buffer, then cannot scroll down anymore, just still keep the old `line_idx`.
@@ -563,7 +563,7 @@ impl NormalStateful {
       line_idx = start_line_idx;
     }
 
-    let column_idx = self._raw_window_scroll_x_by(start_column_idx, viewport, buffer, x);
+    let column_idx = self._bounded_window_scroll_x_by(start_column_idx, viewport, buffer, x);
 
     // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
     // there's no need to scroll anymore.
@@ -622,7 +622,7 @@ impl NormalStateful {
   // }
 
   /// NOTE: `y` is the lines count.
-  fn _raw_window_scroll_y_by(&self, start_line_idx: usize, buffer: &Buffer, y: isize) -> usize {
+  fn _bounded_window_scroll_y_by(&self, start_line_idx: usize, buffer: &Buffer, y: isize) -> usize {
     let buffer_len_lines = buffer.get_rope().len_lines();
 
     if y < 0 {
@@ -649,7 +649,7 @@ impl NormalStateful {
   // Calculate how many columns that each line (in current viewport) need to scroll until
   // their own line's end. This is the upper bound of the actual columns that could
   // scroll.
-  fn _window_scroll_x_max_scrolls(&self, viewport: &Viewport, buffer: &Buffer) -> usize {
+  fn _bounded_window_scroll_x_max_scrolls(&self, viewport: &Viewport, buffer: &Buffer) -> usize {
     let mut max_scrolls = 0_usize;
     for (line_idx, line_viewport) in viewport.lines().iter() {
       trace!("line_idx:{},line_viewport:{:?}", line_idx, line_viewport);
@@ -731,7 +731,7 @@ impl NormalStateful {
   // }
 
   /// NOTE: `x` is the columns count (not chars).
-  fn _raw_window_scroll_x_by(
+  fn _bounded_window_scroll_x_by(
     &self,
     start_column_idx: usize,
     viewport: &Viewport,
@@ -744,7 +744,7 @@ impl NormalStateful {
     } else {
       let n = x as usize;
       let expected = start_column_idx.saturating_add(n);
-      let max_scrolls = self._window_scroll_x_max_scrolls(viewport, buffer);
+      let max_scrolls = self._bounded_window_scroll_x_max_scrolls(viewport, buffer);
       let upper_bounded = start_column_idx.saturating_add(max_scrolls);
       trace!(
         "max_scrolls:{},upper_bounded:{},expected:{}",
