@@ -9,10 +9,13 @@ import os
 import pathlib
 import platform
 import shutil
+import subprocess
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
 )
+
+MACOS = platform.system().startswith("Darwin")
 
 USE_MOLD_LINKER = False
 RECACHE_SCCACHE = False
@@ -38,17 +41,28 @@ def set_mold(command):
     if not USE_MOLD_LINKER:
         return command
 
-    if WINDOWS:
-        logging.warning("'mold' is not supported on Windows")
+    if WINDOWS or MACOS:
+        logging.warning("'mold' is not supported on Windows/MacOS")
         return command
-    if not shutil.which("mold"):
+    if shutil.which("mold") is None:
         logging.warning("'mold' is not found")
         return command
+
     # if not shutil.which("clang"):
     #     logging.warning("'clang' is not found for 'mold' linker")
     #     return command
     # command = f"RUSTFLAGS='-C linker=clang -C link-arg=-fuse-ld=mold' {command}"
-    command = f"RUSTFLAGS='-C link-arg=-fuse-ld=mold' {command}"
+
+    arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
+    arch = [l.strip() for l in arch.splitlines()]
+    host = [l for l in arch if l.startswith("host:")]
+    host = host[0][5:].strip()
+    logging.debug(f"host:{host}")
+    cargo_target_rustflags = f"CARGO_TARGET_{host.replace('-', '_').upper()}_RUSTFLAGS"
+    executable_path = shutil.which("mold")
+    command = (
+        f'{cargo_target_rustflags}="-C link-arg=-fuse-ld={executable_path}" {command}'
+    )
     return command.strip()
 
 
