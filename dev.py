@@ -58,9 +58,7 @@ def set_mold(command):
     cargo_target_linker = f"CARGO_TARGET_{host.replace('-', '_').upper()}_LINKER"
     cargo_target_rustflags = f"CARGO_TARGET_{host.replace('-', '_').upper()}_RUSTFLAGS"
     mold_executable = shutil.which("mold")
-
     command = f'{cargo_target_rustflags}="-C link-arg=-fuse-ld={mold_executable}" {cargo_target_linker}="clang" {command}'
-
     return command.strip()
 
 
