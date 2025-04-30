@@ -8,7 +8,6 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::*;
 use crate::ui::widget::window::{CursorViewport, Viewport};
 
-use crossterm::cursor;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
@@ -113,6 +112,7 @@ fn normalize_as_window_scroll_by(
   }
 }
 
+#[allow(dead_code)]
 // Normalize WindowScroll* commands to WindowScrollTo((x,y))
 fn normalize_as_window_scroll_to(
   command: Command,
@@ -285,7 +285,6 @@ impl NormalStateful {
                   .get_line(cursor_viewport.line_idx())
                   .is_some()
               );
-              let bufline = buffer.get_rope().line(cursor_viewport.line_idx());
               let rows = line_viewport.rows();
               if let Some((_first_row_idx, first_row_viewport)) = rows.first_key_value() {
                 if to_x > first_row_viewport.start_char_idx()
@@ -322,24 +321,18 @@ impl NormalStateful {
 
     // First try window scroll.
     let scrolls = scrolls_moves.0;
-    let _ = match scrolls {
-      Some((scroll_to_x, scroll_to_y)) => {
-        self._window_scroll(
-          data_access,
-          Command::WindowScrollTo((scroll_to_x, scroll_to_y)),
-        );
-      }
-      _ => (),
-    };
+    if let Some((scroll_to_x, scroll_to_y)) = scrolls {
+      let _ = self._window_scroll(
+        data_access,
+        Command::WindowScrollTo((scroll_to_x, scroll_to_y)),
+      );
+    }
 
     // Then try cursor move.
     let moves = scrolls_moves.1;
-    let _ = match moves {
-      Some((move_to_x, move_to_y)) => {
-        self._cursor_move(data_access, Command::CursorMoveTo((move_to_x, move_to_y)));
-      }
-      _ => (),
-    };
+    if let Some((move_to_x, move_to_y)) = moves {
+      let _ = self._cursor_move(data_access, Command::CursorMoveTo((move_to_x, move_to_y)));
+    }
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
