@@ -27,19 +27,10 @@ toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
 
-# unix && !macos && !emscripten && feature=tikv-jemallocator
-# Feature 'background_threads' is unsupported on MacOS: <https://github.com/jemalloc/jemalloc/issues/843>.
-[target.'cfg(all(target_family = "unix", not(target_os = "macos"), not(target_os = "emscripten")))'.dependencies]
-tikv-jemallocator = { workspace = true, features = [
-  "disable_initial_exec_tls",
-  "background_threads",
-], optional = true }
+# !windows && !openbsd && !freebsd && (x86_64 || aarch64 || powerpc64)
+[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), not(target_os = "freebsd"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64")))'.dependencies]
+tikv-jemallocator = { workspace = true, optional = true }
 
-# unix && macos && feature=tikv-jemallocator
-[target.'cfg(all(target_family = "unix", target_os = "macos"))'.dependencies]
-tikv-jemallocator = { workspace = true, features = [
-  "disable_initial_exec_tls",
-], optional = true }
 
 [build-dependencies]
 rsvim_core = { workspace = true }
