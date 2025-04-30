@@ -22,14 +22,14 @@ jemalloc = ["dep:tikv-jemallocator"]
 
 # unix && !macos && !emscripten && feature=tikv-jemallocator
 # Feature 'background_threads' is unsupported on MacOS: <https://github.com/jemalloc/jemalloc/issues/843>.
-[target.'cfg(all(target_family = "unix", not(target_os = "macos"), not(target_os = "emscripten"), feature = "jemalloc"))'.dependencies]
+[target.'cfg(all(target_family = "unix", not(target_os = "macos"), not(target_os = "emscripten")))'.dependencies]
 tikv-jemallocator = { workspace = true, features = [
   "disable_initial_exec_tls",
   "background_threads",
 ], optional = true }
 
 # unix && macos && feature=tikv-jemallocator
-[target.'cfg(all(target_family = "unix", target_os = "macos", feature = "jemalloc"))'.dependencies]
+[target.'cfg(all(target_family = "unix", target_os = "macos"))'.dependencies]
 tikv-jemallocator = { workspace = true, features = [
   "disable_initial_exec_tls",
 ], optional = true }
