@@ -1984,19 +1984,12 @@ version = "0.1.1-alpha.8"
 dependencies = [
  "clap",
  "once_cell",
- "rsvim_allocator",
  "rsvim_core",
+ "tikv-jemallocator",
  "tokio",
  "toml",
  "tracing",
  "zstd",
-]
-
-[[package]]
-name = "rsvim_allocator"
-version = "0.1.1-alpha.8"
-dependencies = [
- "tikv-jemallocator",
 ]
 
 [[package]]
