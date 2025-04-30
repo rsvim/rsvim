@@ -200,7 +200,7 @@ impl Stateful for NormalStateful {
 impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
-  fn _cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     // Get (window_scroll_to, cursor_move_to).
     let scrolls_moves: (Option<(usize, usize)>, Option<(usize, usize)>) = {
       let tree = data_access.tree.clone();
@@ -221,7 +221,7 @@ impl NormalStateful {
 
           // If move down, and the target cursor line > bottom line.
           let goes_out_of_bottom = {
-            if let Some((last_line_idx, last_line_viewport)) = viewport.lines().last_key_value() {
+            if let Some((last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
               if to_y > cursor_viewport.line_idx() && to_y > *last_line_idx {
                 true
               } else {
@@ -234,7 +234,7 @@ impl NormalStateful {
 
           // If move up, and the target cursor line < top line.
           let goes_out_of_top = {
-            if let Some((first_line_idx, first_line_viewport)) = viewport.lines().first_key_value()
+            if let Some((first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value()
             {
               if to_y < cursor_viewport.line_idx() && to_y < *first_line_idx {
                 true
@@ -259,7 +259,7 @@ impl NormalStateful {
               let bufline = buffer.get_rope().line(cursor_viewport.line_idx());
               let bufline_len_chars = bufline.len_chars();
               let rows = line_viewport.rows();
-              if let Some((last_row_idx, last_row_viewport)) = rows.last_key_value() {
+              if let Some((_last_row_idx, last_row_viewport)) = rows.last_key_value() {
                 if to_x > last_row_viewport.end_char_idx().saturating_sub(1)
                   && bufline_len_chars > last_row_viewport.end_char_idx()
                 {
@@ -286,9 +286,8 @@ impl NormalStateful {
                   .is_some()
               );
               let bufline = buffer.get_rope().line(cursor_viewport.line_idx());
-              let bufline_len_chars = bufline.len_chars();
               let rows = line_viewport.rows();
-              if let Some((first_row_idx, first_row_viewport)) = rows.first_key_value() {
+              if let Some((_first_row_idx, first_row_viewport)) = rows.first_key_value() {
                 if to_x > first_row_viewport.start_char_idx()
                   && first_row_viewport.start_char_idx() > 0
                 {
@@ -321,14 +320,33 @@ impl NormalStateful {
       }
     };
 
-    if let Some((x, y)) = scrolls_moves {}
+    // First try window scroll.
+    let scrolls = scrolls_moves.0;
+    let _ = match scrolls {
+      Some((scroll_to_x, scroll_to_y)) => {
+        self._window_scroll(
+          data_access,
+          Command::WindowScrollTo((scroll_to_x, scroll_to_y)),
+        );
+      }
+      _ => (),
+    };
+
+    // Then try cursor move.
+    let moves = scrolls_moves.1;
+    let _ = match moves {
+      Some((move_to_x, move_to_y)) => {
+        self._cursor_move(data_access, Command::CursorMoveTo((move_to_x, move_to_y)));
+      }
+      _ => (),
+    };
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
-  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn _cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     if let Some(current_window_id) = tree.current_window_id() {
