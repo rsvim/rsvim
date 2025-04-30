@@ -1962,6 +1962,7 @@ mod tests_cursor_move_to {
       KeyEventKind::Press,
     );
 
+    let stateful = NormalStateful::default();
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
@@ -1976,10 +1977,8 @@ mod tests_cursor_move_to {
       Event::Key(key_event),
     );
     let command = Command::CursorMoveTo((first_line_len, 0));
-    let stateful = NormalStateful::default();
-    let next_stateful = stateful._cursor_move(&data_access, command);
+    stateful._cursor_move(&data_access, command);
 
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree.clone());
     assert_eq!(actual1.line_idx(), 0);
@@ -1993,10 +1992,8 @@ mod tests_cursor_move_to {
       Event::Key(key_event),
     );
     let command = Command::CursorMoveTo((first_line_len, 1));
-    let stateful = NormalStateful::default();
-    let next_stateful = stateful._cursor_move(&data_access, command);
+    stateful._cursor_move(&data_access, command);
 
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
@@ -2065,9 +2062,8 @@ mod tests_window_scroll_y_by {
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful = stateful_machine._window_scroll(&data_access, Command::WindowScrollUpBy(1));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollUpBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -2155,10 +2151,8 @@ mod tests_window_scroll_y_by {
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(1));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollDownBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -2260,10 +2254,8 @@ mod tests_window_scroll_y_by {
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(1));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollDownBy(1));
 
     let tree = data_access.tree.clone();
 
@@ -2353,10 +2345,8 @@ mod tests_window_scroll_y_by {
     }
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(4));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollDownBy(4));
 
     let tree = data_access.tree.clone();
 
@@ -2445,10 +2435,8 @@ mod tests_window_scroll_y_by {
     // Scroll-1
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(4));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollDownBy(4));
 
     let tree = data_access.tree.clone();
     {
