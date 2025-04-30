@@ -4,13 +4,17 @@
 # Formatted with black/isort.
 
 import argparse
+import logging
 import os
 import pathlib
 import platform
+import shutil
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
 )
+
+USE_MOLD_LINKER = False
 
 
 def set_env(command, name, value):
@@ -29,29 +33,43 @@ def set_sccache(command, recache):
     return command.strip()
 
 
+def set_mold(command):
+    if WINDOWS:
+        logging.warning("'mold' is not supported on Windows")
+        return command
+    if not shutil.which("mold"):
+        logging.warning("'mold' is not found")
+        return command
+    if not shutil.which("clang"):
+        logging.warning("'clang' is not found for 'mold' linker")
+        return command
+    command = f"RUSTFLAGS='-C linker=clang -C link-arg=-fuse-ld=mold' {command}"
+    return command.strip()
+
+
 def clippy(watch, recache):
     command = set_env("", "RUSTFLAGS", "-Dwarnings")
     command = set_sccache(command, recache)
 
     if watch:
-        print("Run 'clippy' as a service and watching file changes")
+        logging.info("Run 'clippy' as a service and watching file changes")
         command = f"{command} bacon -j clippy-all --headless --all-features"
     else:
-        print("Run 'clippy' only once")
+        logging.info("Run 'clippy' only once")
         command = f"{command} cargo clippy --workspace --all-features --all-targets"
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
 def test(name, recache, miri):
     if len(name) == 0:
         name = None
-        print("Run 'test' for all cases")
+        logging.info("Run 'test' for all cases")
     else:
         name = " ".join(list(dict.fromkeys(name)))
-        print(f"Run 'test' for '{name}'")
+        logging.info(f"Run 'test' for '{name}'")
 
     command = ""
 
@@ -70,7 +88,7 @@ def test(name, recache, miri):
         command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
@@ -80,7 +98,7 @@ def list_test(recache):
     command = f"{command} cargo nextest list"
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
@@ -96,27 +114,27 @@ def build(release, recache, features, all_features):
     fmt = lambda ff: "default features" if len(ff) == 0 else ff
 
     if release:
-        print(f"Run 'build' for 'release' with {fmt(feature_flags)}")
+        logging.info(f"Run 'build' for 'release' with {fmt(feature_flags)}")
         command = f"{command} cargo build --release {feature_flags}"
     else:
-        print(f"Run 'build' for 'debug' with {fmt(feature_flags)}")
+        logging.info(f"Run 'build' for 'debug' with {fmt(feature_flags)}")
         command = f"{command} cargo build {feature_flags}"
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
 def doc(watch):
     command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim --no-open"
     if watch:
-        print("Run 'doc' as a service and watching file changes")
+        logging.info("Run 'doc' as a service and watching file changes")
         command = f"cargo watch -s '{command}'"
     else:
-        print("Run 'doc' only once")
+        logging.info("Run 'doc' only once")
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
@@ -127,20 +145,26 @@ def release(level, execute):
 
     command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
     if execute:
-        print(f"Run 'release' with '--execute' (no dry run), level: {level}")
+        logging.info(f"Run 'release' with '--execute' (no dry run), level: {level}")
         command = f"{command} --execute --no-verify"
     else:
-        print(f"Run 'release' in dry run, level: {level}")
+        logging.info(f"Run 'release' in dry run, level: {level}")
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+
     parser = argparse.ArgumentParser(
         description="help running linter/tests when developing rsvim"
     )
+    parser.add_argument(
+        "-m", "--mold", action="store_true", help="Build with `mold` linker"
+    )
+
     subparsers = parser.add_subparsers(dest="subcommand")
 
     clippy_subparser = subparsers.add_parser(
@@ -247,7 +271,10 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    # print(parser)
+    logging.debug(parser)
+
+    if parser.mold:
+        USE_MOLD_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch, parser.recache)
@@ -263,4 +290,4 @@ if __name__ == "__main__":
     elif parser.subcommand == "release" or parser.subcommand == "r":
         release(parser.level, parser.execute)
     else:
-        print("Error: missing arguments, use -h/--help for more details.")
+        logging.error("Missing arguments, use -h/--help for more details.")
