@@ -201,8 +201,10 @@ impl NormalStateful {
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    type ScrollsAndMoves = (Option<(usize, usize)>, Option<(usize, usize)>);
+
     // Get (window_scroll_to, cursor_move_to).
-    let scrolls_moves: (Option<(usize, usize)>, Option<(usize, usize)>) = {
+    let scrolls_moves: ScrollsAndMoves = {
       let tree = data_access.tree.clone();
       let mut tree = lock!(tree);
       if let Some(current_window_id) = tree.current_window_id() {
@@ -222,11 +224,7 @@ impl NormalStateful {
           // If move down, and the target cursor line > bottom line.
           let goes_out_of_bottom = {
             if let Some((last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
-              if to_y > cursor_viewport.line_idx() && to_y > *last_line_idx {
-                true
-              } else {
-                false
-              }
+              to_y > cursor_viewport.line_idx() && to_y > *last_line_idx
             } else {
               false
             }
@@ -236,11 +234,7 @@ impl NormalStateful {
           let goes_out_of_top = {
             if let Some((first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value()
             {
-              if to_y < cursor_viewport.line_idx() && to_y < *first_line_idx {
-                true
-              } else {
-                false
-              }
+              to_y < cursor_viewport.line_idx() && to_y < *first_line_idx
             } else {
               false
             }
@@ -260,13 +254,8 @@ impl NormalStateful {
               let bufline_len_chars = bufline.len_chars();
               let rows = line_viewport.rows();
               if let Some((_last_row_idx, last_row_viewport)) = rows.last_key_value() {
-                if to_x > last_row_viewport.end_char_idx().saturating_sub(1)
+                to_x > last_row_viewport.end_char_idx().saturating_sub(1)
                   && bufline_len_chars > last_row_viewport.end_char_idx()
-                {
-                  true
-                } else {
-                  false
-                }
               } else {
                 false
               }
@@ -287,13 +276,8 @@ impl NormalStateful {
               );
               let rows = line_viewport.rows();
               if let Some((_first_row_idx, first_row_viewport)) = rows.first_key_value() {
-                if to_x > first_row_viewport.start_char_idx()
+                to_x > first_row_viewport.start_char_idx()
                   && first_row_viewport.start_char_idx() > 0
-                {
-                  true
-                } else {
-                  false
-                }
               } else {
                 false
               }
