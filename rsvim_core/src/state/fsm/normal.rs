@@ -39,7 +39,7 @@ fn adjust_cursor_char_idx_on_vertical_motion(
 }
 
 // Normalize CursorMove* commands to CursorMoveBy((x,y))
-fn normalize_as_cursor_move_by_xy(
+fn normalize_as_cursor_move_by(
   command: Command,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -60,7 +60,7 @@ fn normalize_as_cursor_move_by_xy(
 }
 
 // Normalize CursorMove* commands to CursorMoveTo((x,y))
-fn normalize_as_cursor_move_to_xy(
+fn normalize_as_cursor_move_to(
   command: Command,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -93,7 +93,7 @@ fn normalize_as_cursor_move_to_xy(
 }
 
 // Normalize WindowScroll* commands to WindowScrollBy((x,y))
-fn normalize_as_window_scroll_by_xy(
+fn normalize_as_window_scroll_by(
   command: Command,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -114,7 +114,7 @@ fn normalize_as_window_scroll_by_xy(
 }
 
 // Normalize WindowScroll* commands to WindowScrollTo((x,y))
-fn normalize_as_window_scroll_to_xy(
+fn normalize_as_window_scroll_to(
   command: Command,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -213,7 +213,7 @@ impl NormalStateful {
           let viewport = lock!(viewport);
           let cursor_viewport = current_window.cursor_viewport();
           let cursor_viewport = lock!(cursor_viewport);
-          let (x, y) = normalize_as_cursor_move_by_xy(
+          let (x, y) = normalize_as_cursor_move_by(
             command,
             cursor_viewport.char_idx(),
             cursor_viewport.line_idx(),
@@ -271,7 +271,16 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  fn _expect_cursor_move_y_to() -> usize {}
+  // The `y` is lines count.
+  fn _expected_cursor_move_y_to(
+    &self,
+    viewport: &Viewport,
+    cursor_line_idx: usize,
+    _cursor_char_idx: usize,
+    _buffer: &Buffer,
+    y: isize,
+  ) -> usize {
+  }
 
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
@@ -287,7 +296,7 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let (x, y) = normalize_as_cursor_move_by_xy(
+        let (x, y) = normalize_as_cursor_move_by(
           command,
           cursor_viewport.char_idx(),
           cursor_viewport.line_idx(),
@@ -399,7 +408,7 @@ impl NormalStateful {
   //   Some((line_idx, char_idx))
   // }
 
-  // NOTE: `y` is lines count.
+  // The `y` is lines count.
   fn _bounded_cursor_move_y_by(
     &self,
     viewport: &Viewport,
@@ -469,7 +478,7 @@ impl NormalStateful {
   //   Some((cursor_line_idx, char_idx))
   // }
 
-  // NOTE: `x` is chars count.
+  // The `x` is chars count.
   fn _bounded_cursor_move_x_by(
     &self,
     viewport: &Viewport,
@@ -513,7 +522,7 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        let (x, y) = normalize_as_window_scroll_by_xy(
+        let (x, y) = normalize_as_window_scroll_by(
           command,
           viewport.start_column_idx(),
           viewport.start_line_idx(),
@@ -621,7 +630,7 @@ impl NormalStateful {
   //   Some((line_idx, start_column_idx))
   // }
 
-  /// NOTE: `y` is the lines count.
+  /// The `y` is the lines count.
   fn _bounded_window_scroll_y_by(&self, start_line_idx: usize, buffer: &Buffer, y: isize) -> usize {
     let buffer_len_lines = buffer.get_rope().len_lines();
 
@@ -730,7 +739,7 @@ impl NormalStateful {
   //   Some((start_line_idx, start_col))
   // }
 
-  /// NOTE: `x` is the columns count (not chars).
+  /// The `x` is the columns count (not chars).
   fn _bounded_window_scroll_x_by(
     &self,
     start_column_idx: usize,
