@@ -2774,10 +2774,8 @@ mod tests_window_scroll_y_by {
 
     let data_access =
       StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    let next_stateful =
-      stateful_machine._window_scroll(&data_access, Command::WindowScrollDownBy(8));
-    assert!(matches!(next_stateful, StatefulValue::NormalMode(_)));
+    let stateful = NormalStateful::default();
+    stateful._window_scroll(&data_access, Command::WindowScrollDownBy(8));
 
     let tree = data_access.tree.clone();
 
