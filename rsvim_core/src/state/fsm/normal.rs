@@ -204,10 +204,10 @@ impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     // Get (window_scroll_to, cursor_move_to).
-    let scrolls_moves = self._expected_move_and_scroll(data_access, command);
+    let scrolls_and_moves = self._expected_move_and_scroll(data_access, command);
 
     // First try window scroll.
-    let scrolls = scrolls_moves.0;
+    let scrolls = scrolls_and_moves.0;
     if let Some((scroll_to_x, scroll_to_y)) = scrolls {
       self._window_scroll(
         data_access,
@@ -216,7 +216,7 @@ impl NormalStateful {
     }
 
     // Then try cursor move.
-    let moves = scrolls_moves.1;
+    let moves = scrolls_and_moves.1;
     if let Some((move_to_x, move_to_y)) = moves {
       self._cursor_move(data_access, Command::CursorMoveTo((move_to_x, move_to_y)));
     }
