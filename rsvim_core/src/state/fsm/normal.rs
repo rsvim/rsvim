@@ -38,7 +38,8 @@ fn adjust_cursor_char_idx_on_vertical_motion(
   char_idx
 }
 
-fn convert_cursor_move_command_to_xy(
+// Normalize CursorMove* commands to CursorMoveBy((x,y))
+fn normalize_as_cursor_move_by_xy(
   command: Command,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -58,7 +59,41 @@ fn convert_cursor_move_command_to_xy(
   }
 }
 
-fn convert_window_scroll_command_to_xy(
+// Normalize CursorMove* commands to CursorMoveTo((x,y))
+fn normalize_as_cursor_move_to_xy(
+  command: Command,
+  cursor_char_idx: usize,
+  cursor_line_idx: usize,
+) -> (usize, usize) {
+  match command {
+    Command::CursorMoveLeftBy(n) => {
+      let x = std::cmp::max(0, (cursor_char_idx as isize) - n as isize) as usize;
+      (x, 0)
+    }
+    Command::CursorMoveRightBy(n) => {
+      let x = std::cmp::max(0, (cursor_char_idx as isize) + n as isize) as usize;
+      (x, 0)
+    } // (n as isize, 0),
+    Command::CursorMoveUpBy(n) => {
+      let y = std::cmp::max(0, (cursor_line_idx as isize) - n as isize) as usize;
+      (0, y)
+    } // (0, -(n as isize)),
+    Command::CursorMoveDownBy(n) => {
+      let y = std::cmp::max(0, (cursor_line_idx as isize) + n as isize) as usize;
+      (0, y)
+    } // (0, n as isize),
+    Command::CursorMoveBy((x, y)) => {
+      let x = std::cmp::max(0, (cursor_char_idx as isize) + x) as usize;
+      let y = std::cmp::max(0, (cursor_line_idx as isize) + y) as usize;
+      (x, y)
+    }
+    Command::CursorMoveTo((x, y)) => (x, y),
+    _ => unreachable!(),
+  }
+}
+
+// Normalize WindowScroll* commands to WindowScrollBy((x,y))
+fn normalize_as_window_scroll_by_xy(
   command: Command,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -74,6 +109,39 @@ fn convert_window_scroll_command_to_xy(
       (x, y)
     }
     Command::WindowScrollBy((x, y)) => (x, y),
+    _ => unreachable!(),
+  }
+}
+
+// Normalize WindowScroll* commands to WindowScrollTo((x,y))
+fn normalize_as_window_scroll_to_xy(
+  command: Command,
+  viewport_start_column_idx: usize,
+  viewport_start_line_idx: usize,
+) -> (usize, usize) {
+  match command {
+    Command::WindowScrollLeftBy(n) => {
+      let x = std::cmp::max(0, (viewport_start_column_idx as isize) - n as isize) as usize;
+      (x, 0)
+    }
+    Command::WindowScrollRightBy(n) => {
+      let x = std::cmp::max(0, (viewport_start_column_idx as isize) + n as isize) as usize;
+      (x, 0)
+    } // (n as isize, 0),
+    Command::WindowScrollUpBy(n) => {
+      let y = std::cmp::max(0, (viewport_start_line_idx as isize) - n as isize) as usize;
+      (0, y)
+    } // (0, -(n as isize)),
+    Command::WindowScrollDownBy(n) => {
+      let y = std::cmp::max(0, (viewport_start_line_idx as isize) + n as isize) as usize;
+      (0, y)
+    } // (0, n as isize),
+    Command::WindowScrollBy((x, y)) => {
+      let x = std::cmp::max(0, (viewport_start_column_idx as isize) + x) as usize;
+      let y = std::cmp::max(0, (viewport_start_line_idx as isize) + y) as usize;
+      (x, y)
+    }
+    Command::WindowScrollTo((x, y)) => (x, y),
     _ => unreachable!(),
   }
 }
@@ -145,7 +213,7 @@ impl NormalStateful {
           let viewport = lock!(viewport);
           let cursor_viewport = current_window.cursor_viewport();
           let cursor_viewport = lock!(cursor_viewport);
-          let (x, y) = convert_cursor_move_command_to_xy(
+          let (x, y) = normalize_as_cursor_move_by_xy(
             command,
             cursor_viewport.char_idx(),
             cursor_viewport.line_idx(),
@@ -203,6 +271,8 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
+  fn _expect_cursor_move_y_to() -> usize {}
+
   /// Cursor move in current window.
   /// NOTE: This will not scroll the buffer if cursor reaches the window border.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
@@ -217,7 +287,7 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let (x, y) = convert_cursor_move_command_to_xy(
+        let (x, y) = normalize_as_cursor_move_by_xy(
           command,
           cursor_viewport.char_idx(),
           cursor_viewport.line_idx(),
@@ -443,7 +513,7 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        let (x, y) = convert_window_scroll_command_to_xy(
+        let (x, y) = normalize_as_window_scroll_by_xy(
           command,
           viewport.start_column_idx(),
           viewport.start_line_idx(),
