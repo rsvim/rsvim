@@ -4,6 +4,7 @@
   not(target_os = "windows"),
   not(target_os = "openbsd"),
   not(target_os = "freebsd"),
+  not(target_os = "linux"),
   not(target_family = "wasm"),
   any(
     target_arch = "x86_64",
