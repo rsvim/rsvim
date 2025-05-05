@@ -17,6 +17,7 @@ description = "The command line(s) for the RSVIM editor."
 [features]
 default = []
 jemalloc = ["dep:tikv-jemallocator"]
+mimalloc = ["dep:mimalloc-safe"]
 
 [dependencies]
 rsvim_core = { workspace = true }
@@ -27,9 +28,8 @@ toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
 
-# !windows && !openbsd && !freebsd && (x86_64 || aarch64 || powerpc64)
-[target.'cfg(all(not(target_os = "windows"), not(target_os = "openbsd"), not(target_os = "freebsd"), not(target_family = "wasm"), any(target_arch = "x86_64", target_arch = "aarch64", target_arch = "powerpc64")))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
+mimalloc-safe = { workspace = true, optional = true }
 
 
 [build-dependencies]

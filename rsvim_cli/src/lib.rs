@@ -1,16 +1,9 @@
 //! Common utils for rsvim executables.
 
-#[cfg(all(
-  not(target_os = "windows"),
-  not(target_os = "openbsd"),
-  not(target_os = "freebsd"),
-  not(target_family = "wasm"),
-  any(
-    target_arch = "x86_64",
-    target_arch = "aarch64",
-    target_arch = "powerpc64"
-  ),
-  feature = "jemalloc"
-))]
+#[cfg(feature = "jemalloc")]
 #[global_allocator]
-static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+static ALLOC: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
+
+#[cfg(feature = "mimalloc")]
+#[global_allocator]
+static ALLOC: mimalloc_safe::MiMalloc = mimalloc_safe::MiMalloc;
