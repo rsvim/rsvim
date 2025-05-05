@@ -19,8 +19,7 @@ static GLOBAL: tikv_jemallocator::Jemalloc = tikv_jemallocator::Jemalloc;
 #[cfg(all(
   target_os = "linux", 
   any(
-    target_arch = "x86_64", 
-    target_arch = "powerpc64"
+    target_arch = "x86_64", target_arch = "powerpc64"
   ),
   feature = "jemalloc"
 ))]
