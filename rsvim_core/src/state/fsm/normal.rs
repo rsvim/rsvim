@@ -5182,24 +5182,58 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "  2. When ",
+        "  1. When ",
         "the line i",
-        "s too long",
-        " to be com",
-        "pletely pu",
-        "t in a row",
-        " of the wi",
-        "ndow conte",
-        "nt widget,",
-        " there're ",
+        "s small en",
+        "ough to co",
+        "mpletely p",
+        "ut inside ",
+        "a row of t",
+        "he window ",
+        "content wi",
+        "dget, then",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
+        3,
         4,
-        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveRightBy(40));
+
+    // Move-5
+    {
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 3);
+      assert_eq!(actual2.char_idx(), 158);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "e a row of",
+        " the windo",
+        "w content ",
+        "widget, th",
+        "en the lin",
+        "e-wrap and",
+        " word-wrap",
+        " doesn't a",
+        "ffect the ",
+        "rendering.",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        3,
+        4,
         &expect_fills,
         &expect_fills,
       );
