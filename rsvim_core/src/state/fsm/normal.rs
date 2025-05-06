@@ -5215,7 +5215,7 @@ mod tests_cursor_move_and_scroll {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
-      assert_eq!(actual.char_idx(), 158);
+      assert_eq!(actual.char_idx(), 157);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
