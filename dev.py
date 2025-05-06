@@ -8,6 +8,7 @@ import os
 import pathlib
 import platform
 import shutil
+import subprocess
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
@@ -16,6 +17,14 @@ MACOS = platform.system().startswith("Darwin")
 
 SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
+LLD_FULLPATH = None
+if WINDOWS:
+    LLD_FULLPATH = shutil.which("lld-link")
+elif MACOS:
+    LLD_FULLPATH = shutil.which("ld64.lld")
+else:
+    LLD_FULLPATH = shutil.which("ld.lld")
+USE_LLD_LINKER = False
 
 
 def set_env(command, name, value):
@@ -36,9 +45,30 @@ def set_sccache(command):
     return command.strip()
 
 
+def set_lld(command):
+    if not USE_LLD_LINKER:
+        return command
+
+    if LLD_FULLPATH is None:
+        logging.warning("'lld' (ld.lld, ld64.lld, lld-link) is not found")
+        return command
+
+    arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
+    arch = [l.strip() for l in arch.splitlines()]
+    host = [l for l in arch if l.startswith("host:")]
+    host = host[0][5:].strip()
+    logging.debug(f"host:{host}")
+    cargo_target_rustflags = f"CARGO_TARGET_{host.replace('-', '_').upper()}_RUSTFLAGS"
+    command = (
+        f'{cargo_target_rustflags}="-C link-arg=-fuse-ld={LLD_FULLPATH}" {command}'
+    )
+    return command.strip()
+
+
 def clippy(watch):
     command = set_env("", "RUSTFLAGS", "-Dwarnings")
     command = set_sccache(command)
+    command = set_lld(command)
 
     if watch:
         logging.info("Run 'clippy' as a service and watching file changes")
@@ -64,12 +94,15 @@ def test(name, miri):
         command = set_env(
             "", "MIRIFLAGS", "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'"
         )
+        command = set_sccache(command)
+        command = set_lld(command)
         if name is None:
             name = ""
         command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command)
+        command = set_lld(command)
         if name is None:
             name = "--all"
         command = f"{command} cargo nextest run --no-capture {name}"
@@ -81,6 +114,7 @@ def test(name, miri):
 
 def list_test():
     command = set_sccache("")
+    command = set_lld(command)
 
     command = f"{command} cargo nextest list"
 
@@ -91,6 +125,7 @@ def list_test():
 
 def build(release, features, all_features):
     command = set_sccache("")
+    command = set_lld(command)
 
     feature_flags = ""
     if all_features:
@@ -149,7 +184,16 @@ if __name__ == "__main__":
         description="help running linter/tests when developing rsvim"
     )
     parser.add_argument(
-        "-r", "--recache", action="store_true", help="Build with `sccache` cache"
+        "-r",
+        "--recache",
+        action="store_true",
+        help="Build with `sccache` cache (if available)",
+    )
+    parser.add_argument(
+        "-l",
+        "--lld",
+        action="store_true",
+        help="Build with `lld` linker (if available)",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
@@ -247,6 +291,8 @@ if __name__ == "__main__":
 
     if parser.recache:
         RECACHE_SCCACHE = True
+    if parser.lld:
+        USE_LLD_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch)
