@@ -5036,7 +5036,7 @@ mod tests_cursor_move_and_scroll {
   }
 
   #[test]
-  fn wrap1() {
+  fn wrap2() {
     test_log_init();
 
     let lines = vec![
