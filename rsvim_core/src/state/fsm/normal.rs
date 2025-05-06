@@ -5074,9 +5074,9 @@ mod tests_cursor_move_and_scroll {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 3);
-      assert_eq!(actual1.char_idx(), 0);
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -5108,9 +5108,9 @@ mod tests_cursor_move_and_scroll {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual2.line_idx(), 3);
-      assert_eq!(actual2.char_idx(), 2);
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 2);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -5142,9 +5142,9 @@ mod tests_cursor_move_and_scroll {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual2.line_idx(), 3);
-      assert_eq!(actual2.char_idx(), 82);
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 82);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -5176,9 +5176,9 @@ mod tests_cursor_move_and_scroll {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual2.line_idx(), 3);
-      assert_eq!(actual2.char_idx(), 122);
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 122);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -5210,9 +5210,9 @@ mod tests_cursor_move_and_scroll {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual2.line_idx(), 3);
-      assert_eq!(actual2.char_idx(), 158);
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 158);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
