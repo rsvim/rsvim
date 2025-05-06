@@ -16,7 +16,6 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
 )
 MACOS = platform.system().startswith("Darwin")
 
-USE_MOLD_LINKER = False
 RECACHE_SCCACHE = False
 
 
@@ -38,36 +37,9 @@ def set_sccache(command):
     return command.strip()
 
 
-def set_mold(command):
-    if not USE_MOLD_LINKER:
-        return command
-
-    if WINDOWS or MACOS:
-        logging.warning("'mold' is not supported on Windows/MacOS")
-        return command
-    if shutil.which("mold") is None:
-        logging.warning("'mold' is not found")
-        return command
-    if shutil.which("clang") is None:
-        logging.warning("'clang' is not found for 'mold' linker")
-        return command
-
-    arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
-    arch = [l.strip() for l in arch.splitlines()]
-    host = [l for l in arch if l.startswith("host:")]
-    host = host[0][5:].strip()
-    # logging.debug(f"host:{host}")
-    cargo_target_linker = f"CARGO_TARGET_{host.replace('-', '_').upper()}_LINKER"
-    cargo_target_rustflags = f"CARGO_TARGET_{host.replace('-', '_').upper()}_RUSTFLAGS"
-    mold_executable = shutil.which("mold")
-    command = f'{cargo_target_rustflags}="-C link-arg=-fuse-ld={mold_executable}" {cargo_target_linker}="clang" {command}'
-    return command.strip()
-
-
 def clippy(watch):
     command = set_env("", "RUSTFLAGS", "-Dwarnings")
     command = set_sccache(command)
-    command = set_mold(command)
 
     if watch:
         logging.info("Run 'clippy' as a service and watching file changes")
@@ -88,8 +60,6 @@ def test(name, miri):
     else:
         name = " ".join(list(dict.fromkeys(name)))
         logging.info(f"Run 'test' for '{name}'")
-
-    command = set_mold("")
 
     if miri is not None:
         command = set_env(
@@ -112,7 +82,6 @@ def test(name, miri):
 
 def list_test():
     command = set_sccache("")
-    command = set_mold(command)
 
     command = f"{command} cargo nextest list"
 
@@ -123,7 +92,6 @@ def list_test():
 
 def build(release, features, all_features):
     command = set_sccache("")
-    command = set_mold(command)
 
     feature_flags = ""
     if all_features:
@@ -180,9 +148,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
         description="help running linter/tests when developing rsvim"
-    )
-    parser.add_argument(
-        "-m", "--mold", action="store_true", help="Build with `mold` linker"
     )
     parser.add_argument(
         "-r", "--recache", action="store_true", help="Build with `sccache` cache"
@@ -281,8 +246,6 @@ if __name__ == "__main__":
     parser = parser.parse_args()
     logging.debug(parser)
 
-    if parser.mold:
-        USE_MOLD_LINKER = True
     if parser.recache:
         RECACHE_SCCACHE = True
 
