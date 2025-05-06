@@ -58,7 +58,7 @@ def set_lld(command):
     arch = [l.strip() for l in arch.splitlines()]
     host = [l for l in arch if l.startswith("host:")]
     host = host[0][5:].strip()
-    logging.debug(f"host:{host}")
+    # logging.debug(f"host:{host}")
     cargo_target_rustflags = f"CARGO_TARGET_{host.replace('-', '_').upper()}_RUSTFLAGS"
     command = (
         f'{cargo_target_rustflags}="-C link-arg=-fuse-ld={LLD_FULLPATH}" {command}'
