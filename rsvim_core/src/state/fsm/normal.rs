@@ -4922,6 +4922,40 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
+        "But still ",
+        "it contain",
+        "s several ",
+        "things we ",
+        "want to te",
+        "st:\n",
+        "  1. When ",
+        "the line i",
+        "s small en",
+        "ough to co",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(2));
+
+    // Move-2
+    {
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
         "Hello, RSV",
         "This is a ",
         "But still ",
@@ -4954,9 +4988,9 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(5));
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(3));
 
-    // Move-2
+    // Move-3
     {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
