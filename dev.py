@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-# This is a simple shell script to help developing rsvim.
 # Formatted with black/isort.
 
 import argparse
