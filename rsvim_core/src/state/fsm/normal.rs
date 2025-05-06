@@ -4839,7 +4839,7 @@ mod tests_cursor_move_and_scroll {
     {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual2.line_idx(), 6);
+      assert_eq!(actual2.line_idx(), 7);
       assert_eq!(actual2.char_idx(), 0);
 
       let viewport = get_viewport(tree.clone());

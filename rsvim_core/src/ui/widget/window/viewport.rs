@@ -249,7 +249,7 @@ impl CursorViewport {
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
     } else {
       debug_assert!(line_viewport.rows().first_key_value().is_some());
-      let (first_row_idx, first_row_viewport) = line_viewport.rows().first_key_value().unwrap();
+      let (first_row_idx, _first_row_viewport) = line_viewport.rows().first_key_value().unwrap();
       CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
     }
   }
