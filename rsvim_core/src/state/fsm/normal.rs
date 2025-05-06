@@ -5275,6 +5275,74 @@ mod tests_cursor_move_and_scroll {
         &expect_fills,
       );
     }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveLeftBy(8));
+
+    // Move-7
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 149);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "e a row of",
+        " the windo",
+        "w content ",
+        "widget, th",
+        "en the lin",
+        "e-wrap and",
+        " word-wrap",
+        " doesn't a",
+        "ffect the ",
+        "rendering.",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        3,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveLeftBy(100));
+
+    // Move-8
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 49);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "e a row of",
+        " the windo",
+        "w content ",
+        "widget, th",
+        "en the lin",
+        "e-wrap and",
+        " word-wrap",
+        " doesn't a",
+        "ffect the ",
+        "rendering.",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        3,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
   }
 }
 // spellchecker:on
