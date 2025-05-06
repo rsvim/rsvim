@@ -15,6 +15,7 @@ WINDOWS = platform.system().startswith("Windows") or platform.system().startswit
 )
 MACOS = platform.system().startswith("Darwin")
 
+SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
 
 
@@ -28,11 +29,11 @@ def set_env(command, name, value):
 
 
 def set_sccache(command):
-    if shutil.which("sccache") is None:
+    if SCCACHE_FULLPATH is None:
         return command
     if RECACHE_SCCACHE:
         command = set_env(command, "SCCACHE_RECACHE", "1")
-    command = set_env(command, "RUSTC_WRAPPER", "sccache")
+    command = set_env(command, "RUSTC_WRAPPER", SCCACHE_FULLPATH)
     return command.strip()
 
 
