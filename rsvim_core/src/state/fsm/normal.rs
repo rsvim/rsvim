@@ -248,7 +248,7 @@ impl NormalStateful {
         );
 
         // If goes out of window bottom:
-        // - Curosr is moving down.
+        // - Cursor is moving down.
         // - The target cursor line > window's bottom line.
         // - Window's bottom line < buffer last line.
         let goes_out_of_bottom = {
