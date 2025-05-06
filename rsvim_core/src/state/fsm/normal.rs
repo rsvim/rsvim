@@ -5343,6 +5343,40 @@ mod tests_cursor_move_and_scroll {
         &expect_fills,
       );
     }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveLeftBy(100));
+
+    // Move-9
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "  1. When ",
+        "the line i",
+        "s small en",
+        "ough to co",
+        "mpletely p",
+        "ut inside ",
+        "a row of t",
+        "he window ",
+        "content wi",
+        "dget, then",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        3,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
   }
 }
 // spellchecker:on
