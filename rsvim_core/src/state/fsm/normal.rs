@@ -93,7 +93,6 @@ fn normalize_as_cursor_move_to(
   }
 }
 
-#[allow(dead_code)]
 // Normalize WindowScroll* commands to WindowScrollBy((x,y))
 fn normalize_as_window_scroll_by(
   command: Command,
@@ -584,6 +583,9 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
+        // TODO: The `(x,y)` in command is lines/chars, while the returned `(x,y)` is
+        // lines/columns. Since the lines/chars are user facing command, user moves their cursor by
+        // lines/chars instead of terminal rows/columns/cells.
         let (x, y) = normalize_as_window_scroll_by(
           command,
           viewport.start_column_idx(),
@@ -5389,8 +5391,8 @@ mod tests_cursor_move_and_scroll {
       "But still it contains several things we want to test:\n",
       "  1. When the line is small enough to completely put inside a row.\n",
       "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (tree, state, bufs, buf) = make_tree(
       U16Size::new(25, 7),
@@ -5422,7 +5424,7 @@ mod tests_cursor_move_and_scroll {
         "But still it contains sev",
         "eral things we want to te",
         "st:\n",
-        "  1. When the line is sma",
+        "\t1. When the line ",
       ];
       let expect_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -5450,21 +5452,54 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "  1. When the line is sma",
-        "ll enough to completely p",
-        "ut inside a row.\n",
-        "  2. When the line is too",
-        " long to be completely pu",
-        "t in a row of the window ",
-        "content widget, there're ",
+        "Hello, RSVIM!\n",
+        "This is a quite simple an",
+        "d small test lines.\n",
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\n",
+        "\t1. When the line ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        3,
-        5,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveRightBy(24));
+
+    // Move-2
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 17);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple an",
+        "d small test lines.\n",
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\n",
+        "\t1. When the line ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        4,
         &expect_fills,
         &expect_fills,
       );
