@@ -327,11 +327,13 @@ impl NormalStateful {
           }
         };
 
-        if goes_out_of_bottom || goes_out_of_top {
-          // Vertically
+        if goes_out_of_bottom {
           (Some((0, to_y)), Some((to_x, to_y)))
-        } else if goes_out_of_right || goes_out_of_left {
-          // Horizontally
+        } else if goes_out_of_top {
+          (Some((0, to_y)), Some((to_x, to_y)))
+        } else if goes_out_of_right {
+          (Some((to_x, 0)), Some((to_x, to_y)))
+        } else if goes_out_of_left {
           (Some((to_x, 0)), Some((to_x, to_y)))
         } else {
           (None, Some((to_x, to_y)))
