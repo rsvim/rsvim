@@ -9,7 +9,6 @@ import os
 import pathlib
 import platform
 import shutil
-import subprocess
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
