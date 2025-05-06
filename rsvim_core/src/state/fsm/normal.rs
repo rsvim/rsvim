@@ -247,26 +247,36 @@ impl NormalStateful {
           cursor_viewport.line_idx(),
         );
 
-        // If move down, and the target cursor line > bottom line.
+        // If goes out of window bottom:
+        // - Curosr is moving down.
+        // - The target cursor line > window's bottom line.
+        // - Window's bottom line < buffer last line.
         let goes_out_of_bottom = {
           if let Some((last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
-            to_y > cursor_viewport.line_idx() && to_y > *last_line_idx
+            to_y > cursor_viewport.line_idx()
+              && to_y > *last_line_idx
+              && *last_line_idx < buffer.get_rope().len_lines().saturating_sub(1)
           } else {
             false
           }
         };
 
-        // If move up, and the target cursor line < top line.
+        // If goes out of window top:
+        // - Cursor is moving up.
+        // - The target cursor line < window's top line.
+        // - Window's top line > buffer's first line, i.e. 0.
         let goes_out_of_top = {
           if let Some((first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value() {
-            to_y < cursor_viewport.line_idx() && to_y < *first_line_idx
+            to_y < cursor_viewport.line_idx() && to_y < *first_line_idx && *first_line_idx > 0
           } else {
             false
           }
         };
 
-        // If move right, and the target cursor char > viewport's last char, and there's
-        // more chars at buffer line end.
+        // If goes out of window right border:
+        // - Cursor is moving right.
+        // - The target cursor char > window's last char of the line.
+        // - Window's last char of the line < buffer's last visible char of the line.
         let goes_out_of_right = {
           if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
             debug_assert!(
@@ -289,8 +299,10 @@ impl NormalStateful {
           }
         };
 
-        // If move left, and the target cursor char < viewport's first char, and there's
-        // more chars at buffer line start.
+        // If goes out of window left border:
+        // - Cursor is moving left.
+        // - The target cursor char < window's first char of the line.
+        // - Windows's first char of the line > buffer's first char of the line, i.e. 0.
         let goes_out_of_left = {
           if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
             debug_assert!(
