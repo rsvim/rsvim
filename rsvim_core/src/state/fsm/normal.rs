@@ -5387,13 +5387,13 @@ mod tests_cursor_move_and_scroll {
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
       "But still it contains several things we want to test:\n",
-      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  1. When the line is small enough to completely put inside a row.",
       "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (tree, state, bufs, buf) = make_tree(
-      U16Size::new(20, 7),
+      U16Size::new(25, 7),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
         .build()
@@ -5438,7 +5438,7 @@ mod tests_cursor_move_and_scroll {
 
     let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
     let stateful = NormalStateful::default();
-    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(1));
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(3));
 
     // Move-1
     {
@@ -5448,21 +5448,13 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual.char_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "This is a quite simp",
-        "le and small test li",
-        "nes.\n",
-        "But still it contain",
-        "s several things we ",
-        "want to test:\n",
-        "  1. When the line i",
-      ];
+      let expect = vec!["  1. When the line i"];
       let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        1,
+        0,
         4,
         &expect_fills,
         &expect_fills,
