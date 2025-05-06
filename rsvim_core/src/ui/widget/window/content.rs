@@ -34,6 +34,10 @@ impl WindowContent {
       viewport,
     }
   }
+
+  pub fn set_viewport(&mut self, viewport: ViewportWk) {
+    self.viewport = viewport;
+  }
 }
 
 inode_impl!(WindowContent, base);
