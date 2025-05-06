@@ -68,24 +68,24 @@ fn normalize_as_cursor_move_to(
 ) -> (usize, usize) {
   match command {
     Command::CursorMoveLeftBy(n) => {
-      let x = std::cmp::max(0, (cursor_char_idx as isize) - n as isize) as usize;
-      (x, 0)
+      let x = cursor_char_idx.saturating_sub(n);
+      (x, cursor_line_idx)
     }
     Command::CursorMoveRightBy(n) => {
-      let x = std::cmp::max(0, (cursor_char_idx as isize) + n as isize) as usize;
-      (x, 0)
+      let x = cursor_char_idx.saturating_add(n);
+      (x, cursor_line_idx)
     } // (n as isize, 0),
     Command::CursorMoveUpBy(n) => {
-      let y = std::cmp::max(0, (cursor_line_idx as isize) - n as isize) as usize;
-      (0, y)
+      let y = cursor_line_idx.saturating_sub(n);
+      (cursor_char_idx, y)
     } // (0, -(n as isize)),
     Command::CursorMoveDownBy(n) => {
-      let y = std::cmp::max(0, (cursor_line_idx as isize) + n as isize) as usize;
-      (0, y)
+      let y = cursor_line_idx.saturating_add(n);
+      (cursor_char_idx, y)
     } // (0, n as isize),
     Command::CursorMoveBy((x, y)) => {
-      let x = std::cmp::max(0, (cursor_char_idx as isize) + x) as usize;
-      let y = std::cmp::max(0, (cursor_line_idx as isize) + y) as usize;
+      let x = cursor_char_idx.saturating_add_signed(x);
+      let y = cursor_line_idx.saturating_add_signed(y);
       (x, y)
     }
     Command::CursorMoveTo((x, y)) => (x, y),
@@ -124,24 +124,24 @@ fn normalize_as_window_scroll_to(
 ) -> (usize, usize) {
   match command {
     Command::WindowScrollLeftBy(n) => {
-      let x = std::cmp::max(0, (viewport_start_column_idx as isize) - n as isize) as usize;
+      let x = viewport_start_column_idx.saturating_sub(n);
       (x, 0)
     }
     Command::WindowScrollRightBy(n) => {
-      let x = std::cmp::max(0, (viewport_start_column_idx as isize) + n as isize) as usize;
+      let x = viewport_start_column_idx.saturating_add(n);
       (x, 0)
     } // (n as isize, 0),
     Command::WindowScrollUpBy(n) => {
-      let y = std::cmp::max(0, (viewport_start_line_idx as isize) - n as isize) as usize;
+      let y = viewport_start_line_idx.saturating_sub(n);
       (0, y)
     } // (0, -(n as isize)),
     Command::WindowScrollDownBy(n) => {
-      let y = std::cmp::max(0, (viewport_start_line_idx as isize) + n as isize) as usize;
+      let y = viewport_start_line_idx.saturating_add(n);
       (0, y)
     } // (0, n as isize),
     Command::WindowScrollBy((x, y)) => {
-      let x = std::cmp::max(0, (viewport_start_column_idx as isize) + x) as usize;
-      let y = std::cmp::max(0, (viewport_start_line_idx as isize) + y) as usize;
+      let x = viewport_start_column_idx.saturating_add_signed(x);
+      let y = viewport_start_line_idx.saturating_add_signed(y);
       (x, y)
     }
     Command::WindowScrollTo((x, y)) => (x, y),
