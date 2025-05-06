@@ -5003,6 +5003,40 @@ mod tests_cursor_move_and_scroll {
         &expect_fills,
       );
     }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveUpBy(3));
+
+    // Move-4
+    {
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 7);
+      assert_eq!(actual2.char_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "  2. When",
+        " the line",
+        " is too l",
+        "ong to be",
+        " complete",
+        "ly put in",
+        " a row of",
+        " the wind",
+        "ow conten",
+        "t widget,",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        4,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
   }
 }
 // spellchecker:on
