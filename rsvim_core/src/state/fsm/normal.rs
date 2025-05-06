@@ -4924,23 +4924,23 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "But still ",
-        "it contain",
-        "s several ",
-        "things we ",
-        "want to te",
-        "st:\n",
         "  1. When ",
         "the line i",
         "s small en",
         "ough to co",
+        "mpletely p",
+        "ut inside ",
+        "a row of t",
+        "he window ",
+        "content wi",
+        "dget, then",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        2,
+        3,
         4,
         &expect_fills,
         &expect_fills,
