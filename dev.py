@@ -17,13 +17,14 @@ MACOS = platform.system().startswith("Darwin")
 
 SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
-LLD_FULLPATH = None
+LLD_NAME = None
 if WINDOWS:
-    LLD_FULLPATH = shutil.which("lld-link")
+    LLD_NAME = "lld-link"
 elif MACOS:
-    LLD_FULLPATH = shutil.which("ld64.lld")
+    LLD_NAME = "ld64.lld"
 else:
-    LLD_FULLPATH = shutil.which("ld.lld")
+    LLD_NAME = "ld.lld"
+LLD_FULLPATH = shutil.which(LLD_NAME)
 USE_LLD_LINKER = False
 
 
@@ -50,7 +51,7 @@ def set_lld(command):
         return command
 
     if LLD_FULLPATH is None:
-        logging.warning("'lld' (ld.lld, ld64.lld, lld-link) is not found")
+        logging.warning(f"'lld' ({LLD_NAME}) is not found")
         return command
 
     arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
