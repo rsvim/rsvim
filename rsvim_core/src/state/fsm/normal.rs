@@ -404,7 +404,7 @@ impl NormalStateful {
     match buffer.get_rope().get_line(line_idx) {
       Some(line) => {
         if line.len_chars() == 0 {
-          return None;
+          return Some((line_idx, 0_usize));
         }
       }
       None => return None,
