@@ -5025,7 +5025,6 @@ mod tests_cursor_move_and_scroll {
         "ndow conte",
         "nt widget,",
         " there're ",
-        // "multiple cases:\n",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(4, 0)].into_iter().collect();
       assert_viewport_scroll(
