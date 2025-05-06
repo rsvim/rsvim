@@ -224,7 +224,7 @@ impl NormalStateful {
   }
 
   #[allow(clippy::type_complexity)]
-  // Get (window_scroll_to, cursor_move_to).
+  // Returns `(Command::WindowScrollTo((x,y)), Command::CursorMoveTo((x,y)))`.
   fn _expected_move_and_scroll(
     &self,
     data_access: &StatefulDataAccess,
@@ -247,32 +247,68 @@ impl NormalStateful {
         );
 
         // If goes out of window bottom:
+        //
+        // Condition-1
         // - Cursor is moving down.
         // - The target cursor line > window's bottom line.
         // - Window's bottom line < buffer last line.
+        //
+        // Condition-2
+        // - Cursor is moving down.
+        // - The target cursor line = window's bottom line.
+        // - Window's bottom line is not fully rendered, i.e. window's first char > 0 or window's
+        //   last char.
         let goes_out_of_bottom = {
-          if let Some((last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
-            to_y > cursor_viewport.line_idx()
-              && to_y > *last_line_idx
-              && *last_line_idx < buffer.get_rope().len_lines().saturating_sub(1)
+          if let Some((&last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
+            let cond1 = to_y > cursor_viewport.line_idx()
+              && to_y > last_line_idx
+              && last_line_idx < buffer.get_rope().len_lines().saturating_sub(1);
+
+            let cond2 = to_y > cursor_viewport.line_idx() && to_y == last_line_idx && {
+              let head_not_show = self._line_head_not_show(&viewport, last_line_idx);
+              let tail_not_show = self._line_tail_not_show(&viewport, &buffer, last_line_idx);
+              head_not_show || tail_not_show
+            };
+
+            cond1 || cond2
           } else {
             false
           }
         };
 
         // If goes out of window top:
+        //
+        // Condition-1
         // - Cursor is moving up.
         // - The target cursor line < window's top line.
         // - Window's top line > buffer's first line, i.e. 0.
+        //
+        // Condition-2
+        // - Cursor is moving up.
+        // - The target cursor line = window's top line.
+        // - Window's top line is not fully rendered, i.e. window's first char > 0 or window's last
+        //   char.
         let goes_out_of_top = {
-          if let Some((first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value() {
-            to_y < cursor_viewport.line_idx() && to_y < *first_line_idx && *first_line_idx > 0
+          if let Some((&first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value()
+          {
+            let cond1 =
+              to_y < cursor_viewport.line_idx() && to_y < first_line_idx && first_line_idx > 0;
+
+            let cond2 = to_y < cursor_viewport.line_idx() && to_y == first_line_idx && {
+              let head_not_show = self._line_head_not_show(&viewport, first_line_idx);
+              let tail_not_show = self._line_tail_not_show(&viewport, &buffer, first_line_idx);
+              head_not_show || tail_not_show
+            };
+
+            cond1 || cond2
           } else {
             false
           }
         };
 
         // If goes out of window right border:
+        //
+        // Group-1
         // - Cursor is moving right.
         // - The target cursor char > window's last char of the line.
         // - Window's last char of the line < buffer's last visible char of the line.
@@ -302,6 +338,8 @@ impl NormalStateful {
         };
 
         // If goes out of window left border:
+        //
+        // Group-1
         // - Cursor is moving left.
         // - The target cursor char < window's first char of the line.
         // - Windows's first char of the line > buffer's first char of the line, i.e. 0.
@@ -342,6 +380,29 @@ impl NormalStateful {
     } else {
       (None, None)
     }
+  }
+
+  fn _line_head_not_show(&self, viewport: &Viewport, line_idx: usize) -> bool {
+    debug_assert!(viewport.lines().contains_key(&line_idx));
+    let line_viewport = viewport.lines().get(&line_idx).unwrap();
+    let rows = line_viewport.rows();
+    debug_assert!(rows.first_key_value().is_some());
+    let (_first_row_idx, first_row_viewport) = rows.first_key_value().unwrap();
+    first_row_viewport.start_char_idx() > 0
+  }
+
+  fn _line_tail_not_show(&self, viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> bool {
+    debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+    let bufline_last_visible_char = buffer
+      .last_visible_char_on_line(line_idx)
+      .unwrap_or(0_usize);
+
+    debug_assert!(viewport.lines().contains_key(&line_idx));
+    let line_viewport = viewport.lines().get(&line_idx).unwrap();
+    let rows = line_viewport.rows();
+    debug_assert!(rows.last_key_value().is_some());
+    let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+    last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
   }
 
   /// Cursor move in current window.
