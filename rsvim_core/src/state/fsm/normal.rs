@@ -4738,5 +4738,54 @@ mod tests_cursor_move_and_scroll {
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
+
+  #[test]
+  fn nowrap3() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let (tree, state, bufs, _buf) = make_tree(
+      U16Size::new(10, 10),
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      lines,
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
+    let stateful = NormalStateful::default();
+    stateful._cursor_move(&data_access, Command::CursorMoveDownBy(3));
+
+    let tree = data_access.tree.clone();
+    let actual1 = get_cursor_viewport(tree);
+    assert_eq!(actual1.line_idx(), 3);
+    assert_eq!(actual1.char_idx(), 0);
+
+    stateful._cursor_move(&data_access, Command::CursorMoveUpBy(1));
+
+    let tree = data_access.tree.clone();
+    let actual2 = get_cursor_viewport(tree);
+    assert_eq!(actual2.line_idx(), 2);
+    assert_eq!(actual2.char_idx(), 0);
+  }
 }
 // spellchecker:on
