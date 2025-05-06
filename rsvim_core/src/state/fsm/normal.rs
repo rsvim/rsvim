@@ -285,12 +285,15 @@ impl NormalStateful {
                 .get_line(cursor_viewport.line_idx())
                 .is_some()
             );
-            let bufline = buffer.get_rope().line(cursor_viewport.line_idx());
-            let bufline_len_chars = bufline.len_chars();
+            let bufline_len_chars = buffer
+              .get_rope()
+              .line(cursor_viewport.line_idx())
+              .len_chars();
             let rows = line_viewport.rows();
             if let Some((_last_row_idx, last_row_viewport)) = rows.last_key_value() {
-              to_x > last_row_viewport.end_char_idx().saturating_sub(1)
-                && bufline_len_chars > last_row_viewport.end_char_idx()
+              to_x > cursor_viewport.char_idx()
+                && to_x > last_row_viewport.end_char_idx().saturating_sub(1)
+                && last_row_viewport.end_char_idx() < bufline_len_chars
             } else {
               false
             }
@@ -313,7 +316,9 @@ impl NormalStateful {
             );
             let rows = line_viewport.rows();
             if let Some((_first_row_idx, first_row_viewport)) = rows.first_key_value() {
-              to_x > first_row_viewport.start_char_idx() && first_row_viewport.start_char_idx() > 0
+              to_x < cursor_viewport.char_idx()
+                && to_x < first_row_viewport.start_char_idx()
+                && first_row_viewport.start_char_idx() > 0
             } else {
               false
             }
