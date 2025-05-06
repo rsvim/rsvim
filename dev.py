@@ -30,6 +30,8 @@ def set_env(command, name, value):
 
 
 def set_sccache(command):
+    if shutil.which("sccache") is None:
+        return command
     if RECACHE_SCCACHE:
         command = set_env(command, "SCCACHE_RECACHE", "1")
     command = set_env(command, "RUSTC_WRAPPER", "sccache")
@@ -54,7 +56,7 @@ def set_mold(command):
     arch = [l.strip() for l in arch.splitlines()]
     host = [l for l in arch if l.startswith("host:")]
     host = host[0][5:].strip()
-    logging.debug(f"host:{host}")
+    # logging.debug(f"host:{host}")
     cargo_target_linker = f"CARGO_TARGET_{host.replace('-', '_').upper()}_LINKER"
     cargo_target_rustflags = f"CARGO_TARGET_{host.replace('-', '_').upper()}_RUSTFLAGS"
     mold_executable = shutil.which("mold")
