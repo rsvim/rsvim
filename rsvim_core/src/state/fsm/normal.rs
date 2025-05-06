@@ -328,7 +328,10 @@ impl NormalStateful {
         };
 
         if goes_out_of_bottom || goes_out_of_top {
-          (Some((viewport.start_column_idx(), to_y)), Some((to_x, to_y)))
+          (
+            Some((viewport.start_column_idx(), to_y)),
+            Some((to_x, to_y)),
+          )
         } else if goes_out_of_right || goes_out_of_left {
           (Some((to_x, viewport.start_line_idx())), Some((to_x, to_y)))
         } else {
@@ -5182,16 +5185,16 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "  1. When ",
-        "the line i",
-        "s small en",
-        "ough to co",
-        "mpletely p",
-        "ut inside ",
-        "a row of t",
-        "he window ",
-        "content wi",
-        "dget, then",
+        "e a row of",
+        " the windo",
+        "w content ",
+        "widget, th",
+        "en the lin",
+        "e-wrap and",
+        " word-wrap",
+        " doesn't a",
+        "ffect the ",
+        "rendering.",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
