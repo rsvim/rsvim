@@ -8,6 +8,7 @@ Please setup your development environment with:
   - For Linux, please use builtin [GNU GCC](https://gcc.gnu.org/).
   - For macOS, please use [Xcode Clang](https://developer.apple.com/xcode/).
   - For Windows, please use [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
+- LLVM [lld](https://lld.llvm.org/) linker.
 - Latest stable version management tools [mise](https://github.com/jdx/mise) and [pipx](https://github.com/pypa/pipx), then install multiple command lines with `mise i`.
 
   > Note: For windows development, please manually install all dependencies in the `mise.toml` file.

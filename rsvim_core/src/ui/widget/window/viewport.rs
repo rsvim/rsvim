@@ -218,10 +218,10 @@ impl CursorViewport {
     line_idx: usize,
     char_idx: usize,
   ) -> Self {
-    let cursor_row = viewport
-      .lines()
-      .get(&line_idx)
-      .unwrap()
+    debug_assert!(viewport.lines().contains_key(&line_idx));
+    let line_viewport = viewport.lines().get(&line_idx).unwrap();
+
+    let cursor_row = line_viewport
       .rows()
       .iter()
       .filter(|(_row_idx, row_viewport)| {
@@ -237,15 +237,21 @@ impl CursorViewport {
       })
       .collect::<Vec<_>>();
 
-    debug_assert_eq!(cursor_row.len(), 1);
-    let (row_idx, row_viewport) = cursor_row[0];
+    if !cursor_row.is_empty() {
+      debug_assert_eq!(cursor_row.len(), 1);
+      let (row_idx, row_viewport) = cursor_row[0];
 
-    let row_start_width = buffer.width_before(line_idx, row_viewport.start_char_idx());
-    let char_start_width = buffer.width_before(line_idx, char_idx);
-    let col_idx = (char_start_width - row_start_width) as u16;
-    let row_idx = *row_idx;
+      let row_start_width = buffer.width_before(line_idx, row_viewport.start_char_idx());
+      let char_start_width = buffer.width_before(line_idx, char_idx);
+      let col_idx = (char_start_width - row_start_width) as u16;
+      let row_idx = *row_idx;
 
-    CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
+      CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
+    } else {
+      debug_assert!(line_viewport.rows().first_key_value().is_some());
+      let (first_row_idx, _first_row_viewport) = line_viewport.rows().first_key_value().unwrap();
+      CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+    }
   }
 }
 

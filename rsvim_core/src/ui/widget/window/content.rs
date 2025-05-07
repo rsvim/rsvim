@@ -34,6 +34,10 @@ impl WindowContent {
       viewport,
     }
   }
+
+  pub fn set_viewport(&mut self, viewport: ViewportWk) {
+    self.viewport = viewport;
+  }
 }
 
 inode_impl!(WindowContent, base);
@@ -297,7 +301,6 @@ mod tests_util {
     canvas
   }
 
-  #[allow(clippy::too_many_arguments)]
   pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
     let actual = actual
       .frame()

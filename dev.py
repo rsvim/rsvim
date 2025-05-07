@@ -1,91 +1,107 @@
 #!/usr/bin/env python3
 
-# This is a simple shell script to help developing rsvim.
 # Formatted with black/isort.
 
 import argparse
+import logging
 import os
 import pathlib
 import platform
+import shutil
+import subprocess
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
 )
+MACOS = platform.system().startswith("Darwin")
+
+SCCACHE_FULLPATH = shutil.which("sccache")
+RECACHE_SCCACHE = False
 
 
-def set_env(command, name, value):
+def set_env(command, name, value, vartype):
     assert isinstance(command, str)
     if WINDOWS:
         os.environ[name] = value
     else:
-        command = f"{command} {name}={value}"
+        if vartype is not None and vartype == "str":
+            command = f'{command} {name}="{value}"'
+        else:
+            command = f"{command} {name}={value}"
     return command.strip()
 
 
-def set_sccache(command, recache):
-    if recache:
-        command = set_env(command, "SCCACHE_RECACHE", "1")
-    command = set_env(command, "RUSTC_WRAPPER", "sccache")
+def set_sccache(command):
+    if SCCACHE_FULLPATH is None:
+        logging.warning(f"'sccache' not found!")
+        return command
+
+    if RECACHE_SCCACHE:
+        command = set_env(command, "SCCACHE_RECACHE", "1", None)
+
+    command = set_env(command, "RUSTC_WRAPPER", "sccache", "str")
     return command.strip()
 
 
-def clippy(watch, recache):
-    command = set_env("", "RUSTFLAGS", "-Dwarnings")
-    command = set_sccache(command, recache)
+def clippy(watch):
+    command = set_env("", "RUSTFLAGS", "-Dwarnings", "str")
+    command = set_sccache(command)
 
     if watch:
-        print("Run 'clippy' as a service and watching file changes")
+        logging.info("Run 'clippy' as a service and watching file changes")
         command = f"{command} bacon -j clippy-all --headless --all-features"
     else:
-        print("Run 'clippy' only once")
+        logging.info("Run 'clippy' only once")
         command = f"{command} cargo clippy --workspace --all-features --all-targets"
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
-def test(name, recache, miri):
+def test(name, miri):
     if len(name) == 0:
         name = None
-        print("Run 'test' for all cases")
+        logging.info("Run 'test' for all cases")
     else:
         name = " ".join(list(dict.fromkeys(name)))
-        print(f"Run 'test' for '{name}'")
-
-    command = ""
+        logging.info(f"Run 'test' for '{name}'")
 
     if miri is not None:
         command = set_env(
-            "", "MIRIFLAGS", "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'"
+            "",
+            "MIRIFLAGS",
+            "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'",
+            "str",
         )
+        command = set_sccache(command)
         if name is None:
             name = ""
         command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
-        command = set_env("", "RSVIM_LOG", "trace")
-        command = set_sccache(command, recache)
+        command = set_env("", "RSVIM_LOG", "trace", "str")
+        command = set_sccache(command)
         if name is None:
             name = "--all"
         command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
-def list_test(recache):
-    command = set_sccache("", recache)
+def list_test():
+    command = set_sccache("")
 
     command = f"{command} cargo nextest list"
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
-def build(release, recache, features, all_features):
-    command = set_sccache("", recache)
+def build(release, features, all_features):
+    command = set_sccache("")
 
     feature_flags = ""
     if all_features:
@@ -96,27 +112,27 @@ def build(release, recache, features, all_features):
     fmt = lambda ff: "default features" if len(ff) == 0 else ff
 
     if release:
-        print(f"Run 'build' for 'release' with {fmt(feature_flags)}")
+        logging.info(f"Run 'build' for 'release' with {fmt(feature_flags)}")
         command = f"{command} cargo build --release {feature_flags}"
     else:
-        print(f"Run 'build' for 'debug' with {fmt(feature_flags)}")
+        logging.info(f"Run 'build' for 'debug' with {fmt(feature_flags)}")
         command = f"{command} cargo build {feature_flags}"
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
 def doc(watch):
     command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim --no-open"
     if watch:
-        print("Run 'doc' as a service and watching file changes")
+        logging.info("Run 'doc' as a service and watching file changes")
         command = f"cargo watch -s '{command}'"
     else:
-        print("Run 'doc' only once")
+        logging.info("Run 'doc' only once")
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
@@ -127,20 +143,29 @@ def release(level, execute):
 
     command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
     if execute:
-        print(f"Run 'release' with '--execute' (no dry run), level: {level}")
+        logging.info(f"Run 'release' with '--execute' (no dry run), level: {level}")
         command = f"{command} --execute --no-verify"
     else:
-        print(f"Run 'release' in dry run, level: {level}")
+        logging.info(f"Run 'release' in dry run, level: {level}")
 
     command = command.strip()
-    print(command)
+    logging.info(command)
     os.system(command)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+
     parser = argparse.ArgumentParser(
         description="help running linter/tests when developing rsvim"
     )
+    parser.add_argument(
+        "-r",
+        "--recache",
+        action="store_true",
+        help="Rebuild all `sccache` caches",
+    )
+
     subparsers = parser.add_subparsers(dest="subcommand")
 
     clippy_subparser = subparsers.add_parser(
@@ -153,11 +178,6 @@ if __name__ == "__main__":
         "--watch",
         action="store_true",
         help="Running clippy as a service and watching file changes, by default is false",
-    )
-    clippy_subparser.add_argument(
-        "--recache",
-        action="store_true",
-        help="Rebuild cache in `sccache`",
     )
 
     test_subparser = subparsers.add_parser(
@@ -177,11 +197,6 @@ if __name__ == "__main__":
         nargs="*",
         default=[],
         help="Multiple test names that need to run, by default is empty (runs all test cases)",
-    )
-    test_subparser.add_argument(
-        "--recache",
-        action="store_true",
-        help="Rebuild cache in `sccache`",
     )
     test_subparser.add_argument(
         "--miri",
@@ -210,11 +225,6 @@ if __name__ == "__main__":
         dest="all_features",
         action="store_true",
         help="Build with all features",
-    )
-    build_subparser.add_argument(
-        "--recache",
-        action="store_true",
-        help="Rebuild cache in `sccache`",
     )
 
     doc_subparser = subparsers.add_parser(
@@ -247,20 +257,23 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    # print(parser)
+    logging.debug(parser)
+
+    if parser.recache:
+        RECACHE_SCCACHE = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
-        clippy(parser.watch, parser.recache)
+        clippy(parser.watch)
     elif parser.subcommand == "test" or parser.subcommand == "t":
         if parser.list_test:
-            list_test(parser.recache)
+            list_test()
         else:
-            test(parser.name, parser.recache, parser.miri)
+            test(parser.name, parser.miri)
     elif parser.subcommand == "build" or parser.subcommand == "b":
-        build(parser.release, parser.recache, parser.features, parser.all_features)
+        build(parser.release, parser.features, parser.all_features)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
         doc(parser.watch)
     elif parser.subcommand == "release" or parser.subcommand == "r":
         release(parser.level, parser.execute)
     else:
-        print("Error: missing arguments, use -h/--help for more details.")
+        logging.error("Missing arguments, use -h/--help for more details.")
