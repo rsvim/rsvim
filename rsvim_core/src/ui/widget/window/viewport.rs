@@ -854,7 +854,7 @@ mod tests_util {
 
 #[allow(unused_imports)]
 #[cfg(test)]
-mod tests_downward_nowrap {
+mod tests_view_nowrap {
   use super::tests_util::*;
   use super::*;
 
@@ -1313,7 +1313,7 @@ mod tests_downward_nowrap {
 
 #[allow(unused_imports)]
 #[cfg(test)]
-mod tests_downward_nowrap_startcol {
+mod tests_view_nowrap_startcol {
   use super::tests_util::*;
   use super::*;
 
@@ -1900,7 +1900,7 @@ mod tests_downward_nowrap_startcol {
 
 #[allow(unused_imports)]
 #[cfg(test)]
-mod tests_downward_wrap_nolinebreak {
+mod tests_view_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
 
@@ -2589,7 +2589,7 @@ mod tests_downward_wrap_nolinebreak {
 
 #[allow(unused_imports)]
 #[cfg(test)]
-mod tests_downward_wrap_nolinebreak_startcol {
+mod tests_view_wrap_nolinebreak_startcol {
   use super::tests_util::*;
   use super::*;
 
@@ -2844,7 +2844,7 @@ mod tests_downward_wrap_nolinebreak_startcol {
 
 #[allow(unused_imports)]
 #[cfg(test)]
-mod tests_downward_wrap_linebreak {
+mod tests_view_wrap_linebreak {
   use super::tests_util::*;
   use super::*;
 
@@ -3574,7 +3574,7 @@ mod tests_downward_wrap_linebreak {
 
 #[allow(unused_imports)]
 #[cfg(test)]
-mod tests_downward_wrap_linebreak_startcol {
+mod tests_view_wrap_linebreak_startcol {
   use super::tests_util::*;
   use super::*;
 
