@@ -133,7 +133,7 @@ fn end_char_and_prefills(
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`.
-fn procline_nowrap(
+pub fn sync_line_nowrap(
   buffer: &Buffer,
   bufline: &RopeSlice,
   current_line: usize,
@@ -199,7 +199,7 @@ fn sync_nowrap(
     while current_row < height && current_line < buffer_len_lines {
       let bufline = buffer.get_rope().line(current_line);
 
-      let (rows, start_fills, end_fills) = procline_nowrap(
+      let (rows, start_fills, end_fills) = sync_line_nowrap(
         buffer,
         &bufline,
         current_line,
@@ -285,7 +285,7 @@ fn sync_nowrap(
 // }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn procline_wrap_nolinebreak(
+pub fn sync_line_wrap_nolinebreak(
   buffer: &Buffer,
   bufline: &RopeSlice,
   current_line: usize,
@@ -373,7 +373,7 @@ fn sync_wrap_nolinebreak(
     while current_row < height && current_line < buffer_len_lines {
       let bufline = buffer.get_rope().line(current_line);
 
-      let (rows, start_fills, end_fills, changed_current_row) = procline_wrap_nolinebreak(
+      let (rows, start_fills, end_fills, changed_current_row) = sync_line_wrap_nolinebreak(
         buffer,
         &bufline,
         current_line,
@@ -499,7 +499,7 @@ fn cloned_line_max_len(window_height: u16, window_width: u16, start_column: usiz
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn procline_wrap_linebreak(
+pub fn sync_line_wrap_linebreak(
   buffer: &Buffer,
   bufline: &RopeSlice,
   current_line: usize,
@@ -686,7 +686,7 @@ fn sync_wrap_linebreak(
     while current_row < height && current_line < buffer_len_lines {
       let bufline = buffer.get_rope().line(current_line);
 
-      let (rows, start_fills, end_fills, changed_current_row) = procline_wrap_linebreak(
+      let (rows, start_fills, end_fills, changed_current_row) = sync_line_wrap_linebreak(
         buffer,
         &bufline,
         current_line,
