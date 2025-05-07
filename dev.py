@@ -70,7 +70,7 @@ def set_lld(command):
     # logging.debug(f"host:{host}")
     cargo_target_rustflags = f"CARGO_TARGET_{host}_RUSTFLAGS"
 
-    if CLANG_FULLPATH is not None:
+    if CLANG_FULLPATH is not None and not WINDOWS:
         command = set_env(
             command,
             cargo_target_rustflags,
