@@ -17,16 +17,6 @@ MACOS = platform.system().startswith("Darwin")
 
 SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
-LLD_NAME = None
-if WINDOWS:
-    LLD_NAME = "lld-link"
-elif MACOS:
-    LLD_NAME = "ld64.lld"
-else:
-    LLD_NAME = "ld.lld"
-LLD_FULLPATH = shutil.which(LLD_NAME)
-NO_LLD_LINKER = False
-CLANG_FULLPATH = shutil.which("clang")
 
 
 def set_env(command, name, value, vartype):
@@ -49,49 +39,13 @@ def set_sccache(command):
     if RECACHE_SCCACHE:
         command = set_env(command, "SCCACHE_RECACHE", "1", None)
 
-    command = set_env(command, "RUSTC_WRAPPER", SCCACHE_FULLPATH, "str")
-    return command.strip()
-
-
-def set_lld(command):
-    if NO_LLD_LINKER:
-        return command
-
-    if LLD_FULLPATH is None:
-        logging.warning(f"'lld' ({LLD_NAME}) not found!")
-        return command
-
-    arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
-    arch = [l.strip() for l in arch.splitlines()]
-    host = [l for l in arch if l.startswith("host:")]
-    host = host[0][5:].strip()
-    host = host.replace("-", "_").upper()
-
-    # logging.debug(f"host:{host}")
-    cargo_target_rustflags = f"CARGO_TARGET_{host}_RUSTFLAGS"
-
-    if CLANG_FULLPATH is not None and not WINDOWS and not MACOS:
-        command = set_env(
-            command,
-            cargo_target_rustflags,
-            f"-C link-arg=-fuse-ld={LLD_FULLPATH} -C linker={CLANG_FULLPATH}",
-            "str",
-        )
-    else:
-        command = set_env(
-            command,
-            cargo_target_rustflags,
-            f"-C link-arg=-fuse-ld={LLD_FULLPATH}",
-            "str",
-        )
-
+    command = set_env(command, "RUSTC_WRAPPER", "sccache", "str")
     return command.strip()
 
 
 def clippy(watch):
     command = set_env("", "RUSTFLAGS", "-Dwarnings", "str")
     command = set_sccache(command)
-    command = set_lld(command)
 
     if watch:
         logging.info("Run 'clippy' as a service and watching file changes")
@@ -121,14 +75,12 @@ def test(name, miri):
             "str",
         )
         command = set_sccache(command)
-        command = set_lld(command)
         if name is None:
             name = ""
         command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace", "str")
         command = set_sccache(command)
-        command = set_lld(command)
         if name is None:
             name = "--all"
         command = f"{command} cargo nextest run --no-capture {name}"
@@ -140,7 +92,6 @@ def test(name, miri):
 
 def list_test():
     command = set_sccache("")
-    command = set_lld(command)
 
     command = f"{command} cargo nextest list"
 
@@ -151,7 +102,6 @@ def list_test():
 
 def build(release, features, all_features):
     command = set_sccache("")
-    command = set_lld(command)
 
     feature_flags = ""
     if all_features:
