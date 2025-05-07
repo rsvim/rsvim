@@ -431,13 +431,14 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let (x, y) = normalize_as_cursor_move_by(
+        let (by_x, by_y) = normalize_as_cursor_move_by(
           command,
           cursor_viewport.char_idx(),
           cursor_viewport.line_idx(),
         );
 
-        let cursor_move_result = self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y);
+        let cursor_move_result =
+          self._cursor_move_by(&viewport, &cursor_viewport, &buffer, by_x, by_y);
 
         trace!("cursor_move_result:{:?}", cursor_move_result);
         if let Some((line_idx, char_idx)) = cursor_move_result {
