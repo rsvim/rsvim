@@ -199,7 +199,7 @@ if __name__ == "__main__":
         "-l",
         "--lld",
         action="store_true",
-        help="Build with nightly `rust-lld` linker",
+        help="Build with `lld` linker",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
