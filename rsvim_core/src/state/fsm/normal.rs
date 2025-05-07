@@ -1,7 +1,6 @@
 //! The normal mode.
 
 use crate::buf::Buffer;
-use crate::defaults::buf;
 use crate::lock;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
