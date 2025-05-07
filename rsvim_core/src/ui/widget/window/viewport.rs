@@ -535,13 +535,26 @@ impl Viewport {
     }
   }
 
+  /// Calculate line-wise viewport downward, from top to bottom, only for one line in the buffer.
+  ///
+  /// NOTE: This is a low-level viewport calculation api, mostly for calculating how one line in
+  /// the buffer renders in window rows/columns.
   pub fn view_line(
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     window_local_options: &WindowLocalOptions,
     start_line_idx: usize,
+    start_row_idx: u16,
     start_column_idx: usize,
   ) -> LineViewport {
+    sync::sync_line(
+      buffer,
+      window_actual_shape,
+      window_local_options,
+      start_line_idx,
+      start_row_idx,
+      start_column_idx,
+    )
   }
 
   // /// Calculate viewport upward, from bottom to top.
