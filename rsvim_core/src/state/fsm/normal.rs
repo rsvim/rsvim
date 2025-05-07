@@ -225,8 +225,11 @@ impl NormalStateful {
 
   #[allow(clippy::type_complexity)]
   // Returns `(Command::WindowScrollTo((x,y)), Command::CursorMoveTo((x,y)))`.
+  //
   // NOTE: Only allows move to 1 direction, i.e. up/down/left/right. Cannot move with a
   // 2D-position.
+  //
+  // FIXME: Calculate the expected `line_idx`/`char_idx` correctly.
   fn _expected_move_and_scroll(
     &self,
     data_access: &StatefulDataAccess,
