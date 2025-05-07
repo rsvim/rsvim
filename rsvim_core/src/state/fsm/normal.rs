@@ -203,11 +203,11 @@ impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     // Get (window_scroll_to, cursor_move_to).
-    let scrolls_and_moves = self._expected_move_and_scroll(data_access, command);
+    let scrolls_and_moves_to = self._expected_move_and_scroll(data_access, command);
 
     // First try window scroll.
-    let scrolls = scrolls_and_moves.0;
-    if let Some((scroll_to_x, scroll_to_y)) = scrolls {
+    let scrolls_to = scrolls_and_moves_to.0;
+    if let Some((scroll_to_x, scroll_to_y)) = scrolls_to {
       self._window_scroll(
         data_access,
         Command::WindowScrollTo((scroll_to_x, scroll_to_y)),
@@ -215,8 +215,8 @@ impl NormalStateful {
     }
 
     // Then try cursor move.
-    let moves = scrolls_and_moves.1;
-    if let Some((move_to_x, move_to_y)) = moves {
+    let moves_to = scrolls_and_moves_to.1;
+    if let Some((move_to_x, move_to_y)) = moves_to {
       self._cursor_move(data_access, Command::CursorMoveTo((move_to_x, move_to_y)));
     }
 
@@ -5186,9 +5186,31 @@ mod tests_cursor_move_and_scroll {
     }
 
     stateful.cursor_move(&data_access, Command::CursorMoveDownBy(2));
-    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(1));
 
     // Move-8
+    {
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["     * The", "     * The", "", "", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        5,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(1));
+
+    // Move-9
     {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
@@ -5196,7 +5218,7 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["     * The", "     * The", "", "", ""];
+      let expect = vec!["", "     * The", "", "", ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
