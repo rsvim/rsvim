@@ -165,13 +165,6 @@ if __name__ == "__main__":
         action="store_true",
         help="Rebuild all `sccache` caches",
     )
-    parser.add_argument(
-        "-n",
-        "--no-lld",
-        dest="no_lld",
-        action="store_true",
-        help="Disable `lld` linker",
-    )
 
     subparsers = parser.add_subparsers(dest="subcommand")
 
@@ -268,8 +261,6 @@ if __name__ == "__main__":
 
     if parser.recache:
         RECACHE_SCCACHE = True
-    if parser.no_lld:
-        NO_LLD_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch)
