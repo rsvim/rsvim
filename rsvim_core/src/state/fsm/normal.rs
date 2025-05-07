@@ -232,7 +232,7 @@ impl NormalStateful {
         //
         // Condition-2
         // - Cursor is moving down.
-        // - The target cursor line <= window's bottom line.
+        // - The target cursor line = window's bottom line.
         // - The target cursor line is not fully rendered, i.e. window's first char > 0 or window's
         //   last char.
         let goes_out_of_bottom = {
@@ -242,7 +242,7 @@ impl NormalStateful {
               && last_line_idx < buffer.get_rope().len_lines().saturating_sub(1);
 
             let cond2 =
-              to_line_idx > cursor_viewport.line_idx() && to_line_idx <= last_line_idx && {
+              to_line_idx > cursor_viewport.line_idx() && to_line_idx == last_line_idx && {
                 let head_not_show = self._line_head_not_show(&viewport, to_line_idx);
                 let tail_not_show = self._line_tail_not_show(&viewport, &buffer, to_line_idx);
                 head_not_show || tail_not_show
@@ -263,7 +263,7 @@ impl NormalStateful {
         //
         // Condition-2
         // - Cursor is moving up.
-        // - The target cursor line >= window's top line.
+        // - The target cursor line = window's top line.
         // - The target cursor line is not fully rendered, i.e. window's first char > 0 or window's last
         //   char.
         let goes_out_of_top = {
@@ -274,7 +274,7 @@ impl NormalStateful {
               && first_line_idx > 0;
 
             let cond2 =
-              to_line_idx < cursor_viewport.line_idx() && to_line_idx >= first_line_idx && {
+              to_line_idx < cursor_viewport.line_idx() && to_line_idx == first_line_idx && {
                 let head_not_show = self._line_head_not_show(&viewport, to_line_idx);
                 let tail_not_show = self._line_tail_not_show(&viewport, &buffer, to_line_idx);
                 head_not_show || tail_not_show
