@@ -535,6 +535,15 @@ impl Viewport {
     }
   }
 
+  pub fn view_line(
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    window_local_options: &WindowLocalOptions,
+    start_line_idx: usize,
+    start_column_idx: usize,
+  ) -> LineViewport {
+  }
+
   // /// Calculate viewport upward, from bottom to top.
   // ///
   // /// NOTE: The `end_line_idx` itself doesn't contain in the final calculation results. This is due

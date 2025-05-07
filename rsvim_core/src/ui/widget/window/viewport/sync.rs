@@ -71,6 +71,54 @@ pub fn sync(
   }
 }
 
+/// Calculate viewport from top to bottom.
+pub fn sync_line(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  window_local_options: &WindowLocalOptions,
+  current_line: usize,
+  current_row: u16,
+  start_column: usize,
+) -> LineViewport {
+  // If window is zero-sized.
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  if height == 0 || width == 0 {
+    return LineViewport::new(BTreeMap::new(), 0_usize, 0_usize);
+  }
+
+  let (rows, start_fills, end_fills, _) = match (
+    window_local_options.wrap(),
+    window_local_options.line_break(),
+  ) {
+    (false, _) => sync_line_nowrap(
+      buffer,
+      start_column,
+      current_line,
+      current_row,
+      height,
+      width,
+    ),
+    (true, false) => sync_line_wrap_nolinebreak(
+      buffer,
+      start_column,
+      current_line,
+      current_row,
+      height,
+      width,
+    ),
+    (true, true) => sync_line_wrap_linebreak(
+      buffer,
+      start_column,
+      current_line,
+      current_row,
+      height,
+      width,
+    ),
+  };
+  LineViewport::new(rows, start_fills, end_fills)
+}
+
 // /// Calculate viewport with option `wrap=false` upward, from bottom to top.
 // pub fn _upward(
 //   buffer: &Buffer,
@@ -132,16 +180,16 @@ fn end_char_and_prefills(
   }
 }
 
-/// Returns `rows`, `start_fills`, `end_fills`.
-pub fn sync_line_nowrap(
+/// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
+fn sync_line_nowrap(
   buffer: &Buffer,
-  bufline: &RopeSlice,
-  current_line: usize,
   start_column: usize,
+  current_line: usize,
   current_row: u16,
   _window_height: u16,
   window_width: u16,
-) -> (BTreeMap<u16, RowViewport>, usize, usize) {
+) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
+  let bufline = buffer.get_rope().line(current_line);
   let (start_char, start_fills, end_char, end_fills) = if bufline.len_chars() == 0 {
     (0_usize, 0_usize, 0_usize, 0_usize)
   } else {
@@ -154,7 +202,7 @@ pub fn sync_line_nowrap(
 
         let end_width = start_column + window_width as usize;
         let (end_char, end_fills) = match buffer.char_at(current_line, end_width) {
-          Some(c) => end_char_and_prefills(buffer, bufline, current_line, c, end_width),
+          Some(c) => end_char_and_prefills(buffer, &bufline, current_line, c, end_width),
           None => {
             // If the char not found, it means the `end_width` is too long than the whole line.
             // So the char next to the line's last char is the end char.
@@ -170,7 +218,7 @@ pub fn sync_line_nowrap(
 
   let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
   rows.insert(current_row, RowViewport::new(start_char..end_char));
-  (rows, start_fills, end_fills)
+  (rows, start_fills, end_fills, current_row)
 }
 
 /// Implements [`sync`] with option `wrap=false`.
@@ -197,13 +245,10 @@ fn sync_nowrap(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let bufline = buffer.get_rope().line(current_line);
-
-      let (rows, start_fills, end_fills) = sync_line_nowrap(
+      let (rows, start_fills, end_fills, _) = sync_line_nowrap(
         buffer,
-        &bufline,
-        current_line,
         start_column,
+        current_line,
         current_row,
         height,
         width,
@@ -285,15 +330,15 @@ fn sync_nowrap(
 // }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-pub fn sync_line_wrap_nolinebreak(
+fn sync_line_wrap_nolinebreak(
   buffer: &Buffer,
-  bufline: &RopeSlice,
-  current_line: usize,
   start_column: usize,
+  current_line: usize,
   mut current_row: u16,
   window_height: u16,
   window_width: u16,
 ) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
+  let bufline = buffer.get_rope().line(current_line);
   let bufline_len_chars = bufline.len_chars();
 
   if bufline_len_chars == 0 {
@@ -317,7 +362,7 @@ pub fn sync_line_wrap_nolinebreak(
         debug_assert!(current_row < window_height);
         while current_row < window_height {
           let (end_char, end_fills_result) = match buffer.char_at(current_line, end_width) {
-            Some(c) => end_char_and_prefills(buffer, bufline, current_line, c, end_width),
+            Some(c) => end_char_and_prefills(buffer, &bufline, current_line, c, end_width),
             None => {
               // If the char not found, it means the `end_width` is too long than the whole line.
               // So the char next to the line's last char is the end char.
@@ -371,13 +416,10 @@ fn sync_wrap_nolinebreak(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let bufline = buffer.get_rope().line(current_line);
-
       let (rows, start_fills, end_fills, changed_current_row) = sync_line_wrap_nolinebreak(
         buffer,
-        &bufline,
-        current_line,
         start_column,
+        current_line,
         current_row,
         height,
         width,
@@ -499,15 +541,15 @@ fn cloned_line_max_len(window_height: u16, window_width: u16, start_column: usiz
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-pub fn sync_line_wrap_linebreak(
+fn sync_line_wrap_linebreak(
   buffer: &Buffer,
-  bufline: &RopeSlice,
-  current_line: usize,
   start_column: usize,
+  current_line: usize,
   mut current_row: u16,
   window_height: u16,
   window_width: u16,
 ) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
+  let bufline = buffer.get_rope().line(current_line);
   if bufline.len_chars() == 0 {
     let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
     rows.insert(current_row, RowViewport::new(0..0));
@@ -592,7 +634,7 @@ pub fn sync_line_wrap_linebreak(
 
                         // If the char `c` width is greater than `end_width`, the `c` itself is
                         // the end char.
-                        end_char_and_prefills(buffer, bufline, current_line, c, end_width)
+                        end_char_and_prefills(buffer, &bufline, current_line, c, end_width)
                       } else {
                         // Part-2.2, the rest part of the word is not long.
                         // Thus we can go back to *normal* algorithm just like part-1.
@@ -601,7 +643,7 @@ pub fn sync_line_wrap_linebreak(
                           &words,
                           &words_end_char_idx,
                           buffer,
-                          bufline,
+                          &bufline,
                           current_line,
                           c,
                           end_width,
@@ -624,7 +666,7 @@ pub fn sync_line_wrap_linebreak(
                     &words,
                     &words_end_char_idx,
                     buffer,
-                    bufline,
+                    &bufline,
                     current_line,
                     c,
                     end_width,
@@ -684,13 +726,10 @@ fn sync_wrap_linebreak(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let bufline = buffer.get_rope().line(current_line);
-
       let (rows, start_fills, end_fills, changed_current_row) = sync_line_wrap_linebreak(
         buffer,
-        &bufline,
-        current_line,
         start_column,
+        current_line,
         current_row,
         height,
         width,
