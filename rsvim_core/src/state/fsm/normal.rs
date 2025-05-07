@@ -5196,13 +5196,13 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["     * The", "     * The", "", "", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
+      let expect = vec!["     * The", "", "", "", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(6, 0), (7, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        5,
+        6,
         8,
         &expect_fills,
         &expect_fills,
