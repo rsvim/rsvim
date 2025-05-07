@@ -37,7 +37,6 @@ fn adjust_cursor_char_idx_on_vertical_motion(
   char_idx
 }
 
-#[allow(dead_code)]
 // Normalize CursorMove* commands to CursorMoveBy((x,y))
 fn normalize_as_cursor_move_by(
   command: Command,
@@ -59,7 +58,6 @@ fn normalize_as_cursor_move_by(
   }
 }
 
-#[allow(dead_code)]
 // Normalize CursorMove* commands to CursorMoveTo((x,y))
 fn normalize_as_cursor_move_to(
   command: Command,
