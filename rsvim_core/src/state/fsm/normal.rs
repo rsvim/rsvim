@@ -225,6 +225,8 @@ impl NormalStateful {
 
   #[allow(clippy::type_complexity)]
   // Returns `(Command::WindowScrollTo((x,y)), Command::CursorMoveTo((x,y)))`.
+  // NOTE: Only allows move to 1 direction, i.e. up/down/left/right. Cannot move with a
+  // 2D-position.
   fn _expected_move_and_scroll(
     &self,
     data_access: &StatefulDataAccess,
@@ -240,6 +242,15 @@ impl NormalStateful {
         let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
+
+        match command {
+          Command::CursorMoveLeftBy(_) => { /* */ }
+          Command::CursorMoveRightBy(_) => { /* */ }
+          Command::CursorMoveUpBy(_) => { /* */ }
+          Command::CursorMoveDownBy(_) => { /* */ }
+          _ => unreachable!(),
+        }
+
         let (to_x, to_y) = normalize_as_cursor_move_to(
           command,
           cursor_viewport.char_idx(),
@@ -5718,7 +5729,8 @@ mod tests_cursor_move_and_scroll {
 
     let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
     let stateful = NormalStateful::default();
-    stateful.cursor_move(&data_access, Command::CursorMoveBy((50, 3)));
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(3));
+    stateful.cursor_move(&data_access, Command::CursorMoveRightBy(50));
 
     // Move-1
     {
@@ -5749,7 +5761,8 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    stateful.cursor_move(&data_access, Command::CursorMoveBy((24, 1)));
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(1));
+    stateful.cursor_move(&data_access, Command::CursorMoveRightBy(24));
 
     // Move-2
     {
@@ -5780,7 +5793,8 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    stateful.cursor_move(&data_access, Command::CursorMoveBy((-69, -4)));
+    stateful.cursor_move(&data_access, Command::CursorMoveUpBy(4));
+    stateful.cursor_move(&data_access, Command::CursorMoveLeftBy(69));
 
     // Move-3
     {
