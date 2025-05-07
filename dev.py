@@ -29,12 +29,15 @@ else:
 LLD_FULLPATH = shutil.which(LLD_NAME)
 
 
-def set_env(command, name, value):
+def set_env(command, name, value, is_string=False):
     assert isinstance(command, str)
     if WINDOWS:
         os.environ[name] = value
     else:
-        command = f"{command} {name}={value}"
+        if is_string is True:
+            command = f'{command} {name}="{value}"'
+        else:
+            command = f"{command} {name}={value}"
     return command.strip()
 
 
@@ -66,12 +69,14 @@ def set_lld(command):
 
     logging.debug(f"host:{host}")
     cargo_target_rustflags = f"CARGO_TARGET_{host}_RUSTFLAGS"
-    command = set_env(command, cargo_target_rustflags, '"-Clink-arg=-fuse-ld=lld"')
+    command = set_env(
+        command, cargo_target_rustflags, "-Clink-arg=-fuse-ld=lld", is_string=True
+    )
     return command
 
 
 def clippy(watch):
-    command = set_env("", "RUSTFLAGS", '"-Dwarnings"')
+    command = set_env("", "RUSTFLAGS", "-Dwarnings", is_string=True)
     command = set_sccache(command)
 
     if watch:
@@ -98,7 +103,8 @@ def test(name, miri):
         command = set_env(
             "",
             "MIRIFLAGS",
-            '"-Zmiri-disable-isolation -Zmiri-permissive-provenance"',
+            "-Zmiri-disable-isolation -Zmiri-permissive-provenance",
+            is_string=True,
         )
         command = set_sccache(command)
         command = set_lld(command)
