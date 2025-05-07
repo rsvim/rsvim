@@ -87,6 +87,14 @@ struct ExpectedMoveAndScroll {
   pub cursor_move_to: Option<(usize, usize)>,
 }
 
+#[derive(Debug, Copy, Clone)]
+enum OutOfWindow {
+  Top,
+  Bottom,
+  Left,
+  Right,
+}
+
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
@@ -161,6 +169,179 @@ impl NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
+  }
+
+  // Returns normalized cursor move to position `(char_idx,line_idx)`.
+  fn _normalized_move_to(
+    &self,
+    data_access: &StatefulDataAccess,
+    command: Command,
+  ) -> Option<(usize, usize, Option<OutOfWindow>)> {
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+        let buffer = current_window.buffer().upgrade().unwrap();
+        let buffer = lock!(buffer);
+        let viewport = current_window.viewport();
+        let _viewport = lock!(viewport);
+        let cursor_viewport = current_window.cursor_viewport();
+        let cursor_viewport = lock!(cursor_viewport);
+
+        match command {
+          Command::CursorMoveLeftBy(n) => {
+            let x = cursor_viewport.char_idx().saturating_sub(n);
+            let y = cursor_viewport.line_idx();
+            Some((x, y))
+          }
+          Command::CursorMoveRightBy(n) => {
+            debug_assert!(
+              buffer
+                .get_rope()
+                .get_line(cursor_viewport.line_idx())
+                .is_some()
+            );
+            let line = buffer.get_rope().line(cursor_viewport.line_idx());
+            let x = std::cmp::min(
+              cursor_viewport.char_idx().saturating_add(n),
+              line.len_chars().saturating_sub(1),
+            );
+            let y = cursor_viewport.line_idx();
+            Some((x, y))
+          }
+          Command::CursorMoveUpBy(n) => {
+            let x = cursor_viewport.char_idx();
+            let y = cursor_viewport.line_idx().saturating_sub(n);
+            Some((x, y))
+          }
+          Command::CursorMoveDownBy(n) => {
+            let x = cursor_viewport.char_idx();
+            let y = std::cmp::min(
+              cursor_viewport.line_idx().saturating_add(n),
+              buffer.get_rope().len_lines().saturating_sub(1),
+            );
+            Some((x, y))
+          }
+          _ => unreachable!(),
+        }
+      } else {
+        None
+      }
+    } else {
+      None
+    }
+  }
+
+  // Returns if the cursor goes out of window bottom:
+  //
+  // - Cursor is moving down.
+  // - The target cursor line > window's bottom line.
+  // - Window's bottom line < buffer last line.
+  fn _goes_out_of_bottom(
+    &self,
+    viewport: &Viewport,
+    cursor_viewport: &CursorViewport,
+    buffer: &Buffer,
+    _to_char: usize,
+    to_line: usize,
+  ) -> bool {
+    if let Some((&last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
+      to_line > cursor_viewport.line_idx()
+        && to_line > last_line_idx
+        && last_line_idx < buffer.get_rope().len_lines().saturating_sub(1)
+    } else {
+      false
+    }
+  }
+
+  // Returns if the cursor goes out of window top:
+  //
+  // - Cursor is moving up.
+  // - The target cursor line < window's top line.
+  // - Window's top line > buffer's first line, i.e. 0.
+  fn _goes_out_of_top(
+    &self,
+    viewport: &Viewport,
+    cursor_viewport: &CursorViewport,
+    _buffer: &Buffer,
+    _to_char: usize,
+    to_line: usize,
+  ) -> bool {
+    if let Some((&first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value() {
+      to_line < cursor_viewport.line_idx() && to_line < first_line_idx && first_line_idx > 0
+    } else {
+      false
+    }
+  }
+
+  // Returns if the cursor goes out of window right:
+  //
+  // - Cursor is moving right.
+  // - The target cursor char > window's last char of the line.
+  // - Window's last char of the line < buffer's last visible char of the line.
+  fn _goes_out_of_right(
+    &self,
+    viewport: &Viewport,
+    cursor_viewport: &CursorViewport,
+    buffer: &Buffer,
+    to_char: usize,
+    _to_line: usize,
+  ) -> bool {
+    if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
+      debug_assert!(
+        buffer
+          .get_rope()
+          .get_line(cursor_viewport.line_idx())
+          .is_some()
+      );
+      let bufline_len_chars = buffer
+        .get_rope()
+        .line(cursor_viewport.line_idx())
+        .len_chars();
+      let rows = line_viewport.rows();
+      if let Some((_last_row_idx, last_row_viewport)) = rows.last_key_value() {
+        to_char > cursor_viewport.char_idx()
+          && to_char > last_row_viewport.end_char_idx().saturating_sub(1)
+          && last_row_viewport.end_char_idx() < bufline_len_chars
+      } else {
+        false
+      }
+    } else {
+      false
+    }
+  }
+
+  // Returns if goes out of window left border:
+  //
+  // - Cursor is moving left.
+  // - The target cursor char < window's first char of the line.
+  // - Windows's first char of the line > buffer's first char of the line, i.e. 0.
+  fn _goes_out_of_left(
+    &self,
+    viewport: &Viewport,
+    cursor_viewport: &CursorViewport,
+    buffer: &Buffer,
+    to_char: usize,
+    _to_line: usize,
+  ) -> bool {
+    if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
+      debug_assert!(
+        buffer
+          .get_rope()
+          .get_line(cursor_viewport.line_idx())
+          .is_some()
+      );
+      let rows = line_viewport.rows();
+      if let Some((_first_row_idx, first_row_viewport)) = rows.first_key_value() {
+        to_char < cursor_viewport.char_idx()
+          && to_char < first_row_viewport.start_char_idx()
+          && first_row_viewport.start_char_idx() > 0
+      } else {
+        false
+      }
+    } else {
+      false
+    }
   }
 
   // Returns `(Command::WindowScrollTo((x,y)), Command::CursorMoveTo((x,y)))`.
