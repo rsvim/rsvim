@@ -8,7 +8,6 @@ import os
 import pathlib
 import platform
 import shutil
-import subprocess
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
@@ -19,15 +18,12 @@ SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
 
 
-def set_env(command, name, value, vartype):
+def set_env(command, name, value):
     assert isinstance(command, str)
     if WINDOWS:
         os.environ[name] = value
     else:
-        if vartype is not None and vartype == "str":
-            command = f'{command} {name}="{value}"'
-        else:
-            command = f"{command} {name}={value}"
+        command = f"{command} {name}={value}"
     return command.strip()
 
 
@@ -37,14 +33,14 @@ def set_sccache(command):
         return command
 
     if RECACHE_SCCACHE:
-        command = set_env(command, "SCCACHE_RECACHE", "1", None)
+        command = set_env(command, "SCCACHE_RECACHE", "1")
 
-    command = set_env(command, "RUSTC_WRAPPER", "sccache", "str")
+    command = set_env(command, "RUSTC_WRAPPER", "sccache")
     return command.strip()
 
 
 def clippy(watch):
-    command = set_env("", "RUSTFLAGS", "-Dwarnings", "str")
+    command = set_env("", "RUSTFLAGS", '"-Dwarnings"')
     command = set_sccache(command)
 
     if watch:
@@ -71,15 +67,14 @@ def test(name, miri):
         command = set_env(
             "",
             "MIRIFLAGS",
-            "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'",
-            "str",
+            '"-Zmiri-disable-isolation -Zmiri-permissive-provenance"',
         )
         command = set_sccache(command)
         if name is None:
             name = ""
         command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
-        command = set_env("", "RSVIM_LOG", "trace", "str")
+        command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command)
         if name is None:
             name = "--all"
