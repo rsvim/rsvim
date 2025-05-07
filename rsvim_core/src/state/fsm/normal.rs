@@ -4966,7 +4966,7 @@ mod tests_cursor_move_and_scroll {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (tree, state, bufs, buf) = make_tree(
-      U16Size::new(10, 10),
+      U16Size::new(10, 5),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
@@ -5002,28 +5002,16 @@ mod tests_cursor_move_and_scroll {
         "But still ",
         "  1. When ",
         "  2. When ",
-        "     * The",
-        "     * The",
-        "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -5045,28 +5033,16 @@ mod tests_cursor_move_and_scroll {
         "But still ",
         "  1. When ",
         "  2. When ",
-        "     * The",
-        "     * The",
-        "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -5088,28 +5064,16 @@ mod tests_cursor_move_and_scroll {
         "it contain",
         "the line i",
         "the line i",
-        " extra par",
-        " extra par",
-        "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -5131,28 +5095,16 @@ mod tests_cursor_move_and_scroll {
         "it contain",
         "the line i",
         "the line i",
-        " extra par",
-        " extra par",
-        "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -5168,34 +5120,16 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 20);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "",
-        "le and sma",
-        "s several ",
-        "s small en",
-        "s too long",
-        "ts are bee",
-        "ts are spl",
-        "",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect = vec!["", "le and sma", "s several ", "s small en", "s too long"];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -5211,34 +5145,16 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 31);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "",
-        "l test lin",
-        "hings we w",
-        "ugh to com",
-        "to be comp",
-        " truncated",
-        "t into the",
-        "",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect = vec!["", "l test lin", "hings we w", "ugh to com", "to be comp"];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        5,
         &expect_fills,
         &expect_fills,
       );
@@ -5254,25 +5170,41 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 151);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "dering.\n", "", "", " in the ne", ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect = vec!["", "", "", "dering.\n", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(3));
+
+    // Move-8
+    {
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 6);
+      assert_eq!(actual2.char_idx(), 151);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["", "dering.\n", "", "", " in the ne"];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        7,
         &expect_fills,
         &expect_fills,
       );
