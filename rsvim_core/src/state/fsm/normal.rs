@@ -319,7 +319,7 @@ impl NormalStateful {
 
         // If goes out of window right border:
         //
-        // Group-1
+        // Condition-1
         // - Cursor is moving right.
         // - The target cursor char > window's last char of the line.
         // - Window's last char of the line < buffer's last visible char of the line.
@@ -350,7 +350,7 @@ impl NormalStateful {
 
         // If goes out of window left border:
         //
-        // Group-1
+        // Condition-1
         // - Cursor is moving left.
         // - The target cursor char < window's first char of the line.
         // - Windows's first char of the line > buffer's first char of the line, i.e. 0.
