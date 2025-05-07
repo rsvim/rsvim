@@ -184,7 +184,7 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
         let viewport = current_window.viewport();
-        let _viewport = lock!(viewport);
+        let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
@@ -192,7 +192,14 @@ impl NormalStateful {
           Command::CursorMoveLeftBy(n) => {
             let x = cursor_viewport.char_idx().saturating_sub(n);
             let y = cursor_viewport.line_idx();
-            Some((x, y))
+            let goes_out_of_left =
+              self._goes_out_of_left(&viewport, &cursor_viewport, &buffer, x, y);
+            let goes_out_of_left = if goes_out_of_left {
+              Some(OutOfWindow::Left)
+            } else {
+              None
+            };
+            Some((x, y, goes_out_of_left))
           }
           Command::CursorMoveRightBy(n) => {
             debug_assert!(
@@ -207,12 +214,25 @@ impl NormalStateful {
               line.len_chars().saturating_sub(1),
             );
             let y = cursor_viewport.line_idx();
-            Some((x, y))
+            let goes_out_of_right =
+              self._goes_out_of_right(&viewport, &cursor_viewport, &buffer, x, y);
+            let goes_out_of_right = if goes_out_of_right {
+              Some(OutOfWindow::Right)
+            } else {
+              None
+            };
+            Some((x, y, goes_out_of_right))
           }
           Command::CursorMoveUpBy(n) => {
             let x = cursor_viewport.char_idx();
             let y = cursor_viewport.line_idx().saturating_sub(n);
-            Some((x, y))
+            let goes_out_of_top = self._goes_out_of_top(&viewport, &cursor_viewport, &buffer, x, y);
+            let goes_out_of_top = if goes_out_of_top {
+              Some(OutOfWindow::Top)
+            } else {
+              None
+            };
+            Some((x, y, goes_out_of_top))
           }
           Command::CursorMoveDownBy(n) => {
             let x = cursor_viewport.char_idx();
@@ -220,7 +240,14 @@ impl NormalStateful {
               cursor_viewport.line_idx().saturating_add(n),
               buffer.get_rope().len_lines().saturating_sub(1),
             );
-            Some((x, y))
+            let goes_out_of_bottom =
+              self._goes_out_of_bottom(&viewport, &cursor_viewport, &buffer, x, y);
+            let goes_out_of_bottom = if goes_out_of_bottom {
+              Some(OutOfWindow::Bottom)
+            } else {
+              None
+            };
+            Some((x, y, goes_out_of_bottom))
           }
           _ => unreachable!(),
         }
