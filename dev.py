@@ -8,6 +8,7 @@ import os
 import pathlib
 import platform
 import shutil
+import subprocess
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
@@ -16,6 +17,16 @@ MACOS = platform.system().startswith("Darwin")
 
 SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
+
+USE_LLD_LINKER = False
+LLD_NAME = None
+if WINDOWS:
+    LLD_NAME = "lld-link"
+elif MACOS:
+    LLD_NAME = "ld64.lld"
+else:
+    LLD_NAME = "ld.lld"
+LLD_FULLPATH = shutil.which(LLD_NAME)
 
 
 def set_env(command, name, value):
@@ -37,6 +48,26 @@ def set_sccache(command):
 
     command = set_env(command, "RUSTC_WRAPPER", "sccache")
     return command.strip()
+
+
+def set_lld(command):
+    if not USE_LLD_LINKER:
+        return command
+
+    if LLD_FULLPATH is None:
+        logging.warning(f"'lld' ({LLD_NAME}) not found!")
+        return command
+
+    arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
+    arch = [l.strip() for l in arch.splitlines()]
+    host = [l for l in arch if l.startswith("host:")]
+    host = host[0][5:].strip()
+    host = host.replace("-", "_").upper()
+
+    logging.debug(f"host:{host}")
+    cargo_target_rustflags = f"CARGO_TARGET_{host}_RUSTFLAGS"
+    command = set_env(command, cargo_target_rustflags, '"-Zlinker-features=+lld"')
+    return command
 
 
 def clippy(watch):
@@ -70,15 +101,20 @@ def test(name, miri):
             '"-Zmiri-disable-isolation -Zmiri-permissive-provenance"',
         )
         command = set_sccache(command)
+        command = set_lld(command)
         if name is None:
             name = ""
         command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command)
+        command = set_lld(command)
         if name is None:
             name = "--all"
-        command = f"{command} cargo nextest run --no-capture {name}"
+        if USE_LLD_LINKER:
+            command = f"{command} cargo +nightly nextest run --no-capture {name}"
+        else:
+            command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
     logging.info(command)
@@ -87,8 +123,12 @@ def test(name, miri):
 
 def list_test():
     command = set_sccache("")
+    command = set_lld(command)
 
-    command = f"{command} cargo nextest list"
+    if USE_LLD_LINKER:
+        command = f"{command} cargo +nightly nextest list"
+    else:
+        command = f"{command} cargo nextest list"
 
     command = command.strip()
     logging.info(command)
@@ -97,6 +137,7 @@ def list_test():
 
 def build(release, features, all_features):
     command = set_sccache("")
+    command = set_lld(command)
 
     feature_flags = ""
     if all_features:
@@ -106,12 +147,17 @@ def build(release, features, all_features):
 
     fmt = lambda ff: "default features" if len(ff) == 0 else ff
 
+    if USE_LLD_LINKER:
+        command = f"{command} cargo +nightly build"
+    else:
+        command = f"{command} cargo build"
+
     if release:
         logging.info(f"Run 'build' for 'release' with {fmt(feature_flags)}")
-        command = f"{command} cargo build --release {feature_flags}"
+        command = f"{command} --release {feature_flags}"
     else:
         logging.info(f"Run 'build' for 'debug' with {fmt(feature_flags)}")
-        command = f"{command} cargo build {feature_flags}"
+        command = f"{command} {feature_flags}"
 
     command = command.strip()
     logging.info(command)
@@ -159,6 +205,12 @@ if __name__ == "__main__":
         "--recache",
         action="store_true",
         help="Rebuild all `sccache` caches",
+    )
+    parser.add_argument(
+        "-l",
+        "--lld",
+        action="store_true",
+        help="Build with nightly `rust-lld` linker",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
@@ -256,6 +308,8 @@ if __name__ == "__main__":
 
     if parser.recache:
         RECACHE_SCCACHE = True
+    if parser.lld:
+        USE_LLD_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch)
