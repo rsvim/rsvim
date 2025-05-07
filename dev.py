@@ -26,14 +26,18 @@ else:
     LLD_NAME = "ld.lld"
 LLD_FULLPATH = shutil.which(LLD_NAME)
 NO_LLD_LINKER = False
+CLANG_FULLPATH = shutil.which("clang")
 
 
-def set_env(command, name, value):
+def set_env(command, name, value, vartype):
     assert isinstance(command, str)
     if WINDOWS:
         os.environ[name] = value
     else:
-        command = f"{command} {name}={value}"
+        if vartype is not None and vartype == "str":
+            command = f'{command} {name}="{value}"'
+        else:
+            command = f"{command} {name}={value}"
     return command.strip()
 
 
@@ -43,9 +47,9 @@ def set_sccache(command):
         return command
 
     if RECACHE_SCCACHE:
-        command = set_env(command, "SCCACHE_RECACHE", "1")
+        command = set_env(command, "SCCACHE_RECACHE", "1", None)
 
-    command = set_env(command, "RUSTC_WRAPPER", SCCACHE_FULLPATH)
+    command = set_env(command, "RUSTC_WRAPPER", SCCACHE_FULLPATH, "str")
     return command.strip()
 
 
@@ -61,16 +65,31 @@ def set_lld(command):
     arch = [l.strip() for l in arch.splitlines()]
     host = [l for l in arch if l.startswith("host:")]
     host = host[0][5:].strip()
+    host = host.replace("-", "_").upper()
+
     # logging.debug(f"host:{host}")
-    cargo_target_rustflags = f"CARGO_TARGET_{host.replace('-', '_').upper()}_RUSTFLAGS"
-    command = (
-        f'{cargo_target_rustflags}="-C link-arg=-fuse-ld={LLD_FULLPATH}" {command}'
-    )
+    cargo_target_rustflags = f"CARGO_TARGET_{host}_RUSTFLAGS"
+
+    if CLANG_FULLPATH is not None:
+        command = set_env(
+            command,
+            cargo_target_rustflags,
+            f"-C link-arg=-fuse-ld={LLD_FULLPATH} -C linker={CLANG_FULLPATH}",
+            "str",
+        )
+    else:
+        command = set_env(
+            command,
+            cargo_target_rustflags,
+            f"-C link-arg=-fuse-ld={LLD_FULLPATH}",
+            "str",
+        )
+
     return command.strip()
 
 
 def clippy(watch):
-    command = set_env("", "RUSTFLAGS", "-Dwarnings")
+    command = set_env("", "RUSTFLAGS", "-Dwarnings", "str")
     command = set_sccache(command)
     command = set_lld(command)
 
@@ -96,7 +115,10 @@ def test(name, miri):
 
     if miri is not None:
         command = set_env(
-            "", "MIRIFLAGS", "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'"
+            "",
+            "MIRIFLAGS",
+            "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'",
+            "str",
         )
         command = set_sccache(command)
         command = set_lld(command)
@@ -104,7 +126,7 @@ def test(name, miri):
             name = ""
         command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
-        command = set_env("", "RSVIM_LOG", "trace")
+        command = set_env("", "RSVIM_LOG", "trace", "str")
         command = set_sccache(command)
         command = set_lld(command)
         if name is None:
