@@ -66,7 +66,7 @@ def set_lld(command):
 
     logging.debug(f"host:{host}")
     cargo_target_rustflags = f"CARGO_TARGET_{host}_RUSTFLAGS"
-    command = set_env(command, cargo_target_rustflags, '"-Zlinker-features=+lld"')
+    command = set_env(command, cargo_target_rustflags, '"-Clink-arg=-fuse-ld=lld"')
     return command
 
 
@@ -111,10 +111,7 @@ def test(name, miri):
         command = set_lld(command)
         if name is None:
             name = "--all"
-        if USE_LLD_LINKER:
-            command = f"{command} cargo +nightly nextest run --no-capture {name}"
-        else:
-            command = f"{command} cargo nextest run --no-capture {name}"
+        command = f"{command} cargo nextest run --no-capture {name}"
 
     command = command.strip()
     logging.info(command)
@@ -125,10 +122,7 @@ def list_test():
     command = set_sccache("")
     command = set_lld(command)
 
-    if USE_LLD_LINKER:
-        command = f"{command} cargo +nightly nextest list"
-    else:
-        command = f"{command} cargo nextest list"
+    command = f"{command} cargo nextest list"
 
     command = command.strip()
     logging.info(command)
@@ -147,17 +141,12 @@ def build(release, features, all_features):
 
     fmt = lambda ff: "default features" if len(ff) == 0 else ff
 
-    if USE_LLD_LINKER:
-        command = f"{command} cargo +nightly build"
-    else:
-        command = f"{command} cargo build"
-
     if release:
         logging.info(f"Run 'build' for 'release' with {fmt(feature_flags)}")
-        command = f"{command} --release {feature_flags}"
+        command = f"{command} cargo build --release {feature_flags}"
     else:
         logging.info(f"Run 'build' for 'debug' with {fmt(feature_flags)}")
-        command = f"{command} {feature_flags}"
+        command = f"{command} cargo build {feature_flags}"
 
     command = command.strip()
     logging.info(command)
