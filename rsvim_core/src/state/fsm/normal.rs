@@ -5083,13 +5083,13 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
+        "IM!\n",
+        "quite simp",
+        "it contain",
+        "the line i",
+        "the line i",
+        " extra par",
+        " extra par",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
