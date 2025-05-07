@@ -5625,6 +5625,37 @@ mod tests_cursor_move_and_scroll {
         &expect_fills,
       );
     }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveUpBy(1));
+
+    // Move-5
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 65);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\n",
+        "  2. When the line is too",
+        " long to be completely pu",
+        "t in a row of the window ",
+        "content widget, there're ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        3,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
   }
 }
 // spellchecker:on

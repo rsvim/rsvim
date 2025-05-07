@@ -25,7 +25,7 @@ elif MACOS:
 else:
     LLD_NAME = "ld.lld"
 LLD_FULLPATH = shutil.which(LLD_NAME)
-USE_LLD_LINKER = False
+NO_LLD_LINKER = False
 
 
 def set_env(command, name, value):
@@ -39,19 +39,22 @@ def set_env(command, name, value):
 
 def set_sccache(command):
     if SCCACHE_FULLPATH is None:
+        logging.warning(f"'sccache' not found!")
         return command
+
     if RECACHE_SCCACHE:
         command = set_env(command, "SCCACHE_RECACHE", "1")
+
     command = set_env(command, "RUSTC_WRAPPER", SCCACHE_FULLPATH)
     return command.strip()
 
 
 def set_lld(command):
-    if not USE_LLD_LINKER:
+    if NO_LLD_LINKER:
         return command
 
     if LLD_FULLPATH is None:
-        logging.warning(f"'lld' ({LLD_NAME}) is not found")
+        logging.warning(f"'lld' ({LLD_NAME}) not found!")
         return command
 
     arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
@@ -188,13 +191,14 @@ if __name__ == "__main__":
         "-r",
         "--recache",
         action="store_true",
-        help="Build with `sccache` cache (if available)",
+        help="Rebuild all `sccache` caches",
     )
     parser.add_argument(
-        "-l",
-        "--lld",
+        "-n",
+        "--no-lld",
+        dest="no_lld",
         action="store_true",
-        help="Build with `lld` linker (if available)",
+        help="Disable `lld` linker",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
@@ -292,8 +296,8 @@ if __name__ == "__main__":
 
     if parser.recache:
         RECACHE_SCCACHE = True
-    if parser.lld:
-        USE_LLD_LINKER = True
+    if parser.no_lld:
+        NO_LLD_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch)
