@@ -630,7 +630,7 @@ impl NormalStateful {
         debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
         let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
         let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-        let last_char_on_row = last_row_viewport.end_char_idx() - 1;
+        let last_char_on_row = last_row_viewport.end_char_idx().saturating_sub(1);
         trace!(
           "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
           cursor_char_idx, expected, last_row_viewport, last_char_on_row
@@ -5170,7 +5170,7 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 151);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "dering.\n", ""];
+      let expect = vec!["", "", "", "rendering.", ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -5185,26 +5185,25 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(3));
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(2));
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(1));
 
     // Move-8
     {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
-      assert_eq!(actual2.char_idx(), 151);
+      assert_eq!(actual2.char_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "dering.\n", "", "", " in the ne"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-        .into_iter()
-        .collect();
+      let expect = vec!["     * The", "     * The", "", "", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        2,
-        7,
+        5,
+        8,
         &expect_fills,
         &expect_fills,
       );
