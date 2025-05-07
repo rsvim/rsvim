@@ -37,7 +37,6 @@ fn adjust_cursor_char_idx_on_vertical_motion(
   char_idx
 }
 
-#[allow(dead_code)]
 // Normalize CursorMove* commands to CursorMoveBy((x,y))
 fn normalize_as_cursor_move_by(
   command: Command,
@@ -55,40 +54,6 @@ fn normalize_as_cursor_move_by(
       (x, y)
     }
     Command::CursorMoveBy((x, y)) => (x, y),
-    _ => unreachable!(),
-  }
-}
-
-#[allow(dead_code)]
-// Normalize CursorMove* commands to CursorMoveTo((x,y))
-fn normalize_as_cursor_move_to(
-  command: Command,
-  cursor_char_idx: usize,
-  cursor_line_idx: usize,
-) -> (usize, usize) {
-  match command {
-    Command::CursorMoveLeftBy(n) => {
-      let x = cursor_char_idx.saturating_sub(n);
-      (x, cursor_line_idx)
-    }
-    Command::CursorMoveRightBy(n) => {
-      let x = cursor_char_idx.saturating_add(n);
-      (x, cursor_line_idx)
-    } // (n as isize, 0),
-    Command::CursorMoveUpBy(n) => {
-      let y = cursor_line_idx.saturating_sub(n);
-      (cursor_char_idx, y)
-    } // (0, -(n as isize)),
-    Command::CursorMoveDownBy(n) => {
-      let y = cursor_line_idx.saturating_add(n);
-      (cursor_char_idx, y)
-    } // (0, n as isize),
-    Command::CursorMoveBy((x, y)) => {
-      let x = cursor_char_idx.saturating_add_signed(x);
-      let y = cursor_line_idx.saturating_add_signed(y);
-      (x, y)
-    }
-    Command::CursorMoveTo((x, y)) => (x, y),
     _ => unreachable!(),
   }
 }
@@ -114,38 +79,12 @@ fn normalize_as_window_scroll_by(
   }
 }
 
-#[allow(dead_code)]
-// Normalize WindowScroll* commands to WindowScrollTo((x,y))
-fn normalize_as_window_scroll_to(
-  command: Command,
-  viewport_start_column_idx: usize,
-  viewport_start_line_idx: usize,
-) -> (usize, usize) {
-  match command {
-    Command::WindowScrollLeftBy(n) => {
-      let x = viewport_start_column_idx.saturating_sub(n);
-      (x, 0)
-    }
-    Command::WindowScrollRightBy(n) => {
-      let x = viewport_start_column_idx.saturating_add(n);
-      (x, 0)
-    } // (n as isize, 0),
-    Command::WindowScrollUpBy(n) => {
-      let y = viewport_start_line_idx.saturating_sub(n);
-      (0, y)
-    } // (0, -(n as isize)),
-    Command::WindowScrollDownBy(n) => {
-      let y = viewport_start_line_idx.saturating_add(n);
-      (0, y)
-    } // (0, n as isize),
-    Command::WindowScrollBy((x, y)) => {
-      let x = viewport_start_column_idx.saturating_add_signed(x);
-      let y = viewport_start_line_idx.saturating_add_signed(y);
-      (x, y)
-    }
-    Command::WindowScrollTo((x, y)) => (x, y),
-    _ => unreachable!(),
-  }
+#[derive(Debug, Copy, Clone)]
+struct ExpectedMoveAndScroll {
+  // Scroll window to column index and line index.
+  pub window_scroll_to: Option<(usize, usize)>,
+  // Move cursor to char index and line index.
+  pub cursor_move_to: Option<(usize, usize)>,
 }
 
 impl Stateful for NormalStateful {
@@ -203,38 +142,38 @@ impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     // Get (window_scroll_to, cursor_move_to).
-    let scrolls_and_moves_to = self._expected_move_and_scroll(data_access, command);
+    let scroll_and_move = self._expected_move_and_scroll_to(data_access, command);
 
     // First try window scroll.
-    let scrolls_to = scrolls_and_moves_to.0;
-    if let Some((scroll_to_x, scroll_to_y)) = scrolls_to {
+    if let Some((to_column_idx, to_line_idx)) = scroll_and_move.window_scroll_to {
       self._window_scroll(
         data_access,
-        Command::WindowScrollTo((scroll_to_x, scroll_to_y)),
+        Command::WindowScrollTo((to_column_idx, to_line_idx)),
       );
     }
 
     // Then try cursor move.
-    let moves_to = scrolls_and_moves_to.1;
-    if let Some((move_to_x, move_to_y)) = moves_to {
-      self._cursor_move(data_access, Command::CursorMoveTo((move_to_x, move_to_y)));
+    if let Some((to_char_idx, to_line_idx)) = scroll_and_move.cursor_move_to {
+      self._cursor_move(
+        data_access,
+        Command::CursorMoveTo((to_char_idx, to_line_idx)),
+      );
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  #[allow(clippy::type_complexity)]
   // Returns `(Command::WindowScrollTo((x,y)), Command::CursorMoveTo((x,y)))`.
   //
   // NOTE: Only allows move to 1 direction, i.e. up/down/left/right. Cannot move with a
   // 2D-position.
   //
   // FIXME: Calculate the expected `line_idx`/`char_idx` correctly.
-  fn _expected_move_and_scroll(
+  fn _expected_move_and_scroll_to(
     &self,
     data_access: &StatefulDataAccess,
     command: Command,
-  ) -> (Option<(usize, usize)>, Option<(usize, usize)>) {
+  ) -> ExpectedMoveAndScroll {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     if let Some(current_window_id) = tree.current_window_id() {
@@ -246,19 +185,42 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        match command {
-          Command::CursorMoveLeftBy(_) => { /* */ }
-          Command::CursorMoveRightBy(_) => { /* */ }
-          Command::CursorMoveUpBy(_) => { /* */ }
-          Command::CursorMoveDownBy(_) => { /* */ }
+        let (to_char_idx, to_line_idx) = match command {
+          Command::CursorMoveLeftBy(n) => {
+            let x = cursor_viewport.char_idx().saturating_sub(n);
+            let y = cursor_viewport.line_idx();
+            (x, y)
+          }
+          Command::CursorMoveRightBy(n) => {
+            debug_assert!(
+              buffer
+                .get_rope()
+                .get_line(cursor_viewport.line_idx())
+                .is_some()
+            );
+            let line = buffer.get_rope().line(cursor_viewport.line_idx());
+            let x = std::cmp::min(
+              cursor_viewport.char_idx().saturating_add(n),
+              line.len_chars().saturating_sub(1),
+            );
+            let y = cursor_viewport.line_idx();
+            (x, y)
+          }
+          Command::CursorMoveUpBy(n) => {
+            let x = cursor_viewport.char_idx();
+            let y = cursor_viewport.line_idx().saturating_sub(n);
+            (x, y)
+          }
+          Command::CursorMoveDownBy(n) => {
+            let x = cursor_viewport.char_idx();
+            let y = std::cmp::min(
+              cursor_viewport.line_idx().saturating_add(n),
+              buffer.get_rope().len_lines().saturating_sub(1),
+            );
+            (x, y)
+          }
           _ => unreachable!(),
-        }
-
-        let (to_x, to_y) = normalize_as_cursor_move_to(
-          command,
-          cursor_viewport.char_idx(),
-          cursor_viewport.line_idx(),
-        );
+        };
 
         // If goes out of window bottom:
         //
@@ -270,19 +232,20 @@ impl NormalStateful {
         // Condition-2
         // - Cursor is moving down.
         // - The target cursor line = window's bottom line.
-        // - Window's bottom line is not fully rendered, i.e. window's first char > 0 or window's
-        //   last char.
+        // - The target cursor line is not fully rendered, i.e. first char > 0 or last char <
+        //   buffer's last char.
         let goes_out_of_bottom = {
           if let Some((&last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
-            let cond1 = to_y > cursor_viewport.line_idx()
-              && to_y > last_line_idx
+            let cond1 = to_line_idx > cursor_viewport.line_idx()
+              && to_line_idx > last_line_idx
               && last_line_idx < buffer.get_rope().len_lines().saturating_sub(1);
 
-            let cond2 = to_y > cursor_viewport.line_idx() && to_y == last_line_idx && {
-              let head_not_show = self._line_head_not_show(&viewport, last_line_idx);
-              let tail_not_show = self._line_tail_not_show(&viewport, &buffer, last_line_idx);
-              head_not_show || tail_not_show
-            };
+            let cond2 =
+              to_line_idx > cursor_viewport.line_idx() && to_line_idx == last_line_idx && {
+                let head_not_show = self._line_head_not_show(&viewport, to_line_idx);
+                let tail_not_show = self._line_tail_not_show(&viewport, &buffer, to_line_idx);
+                head_not_show || tail_not_show
+              };
 
             cond1 || cond2
           } else {
@@ -300,19 +263,21 @@ impl NormalStateful {
         // Condition-2
         // - Cursor is moving up.
         // - The target cursor line = window's top line.
-        // - Window's top line is not fully rendered, i.e. window's first char > 0 or window's last
-        //   char.
+        // - The target cursor line is not fully rendered, i.e. first char > 0 or last char <
+        //   buffer's last char.
         let goes_out_of_top = {
           if let Some((&first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value()
           {
-            let cond1 =
-              to_y < cursor_viewport.line_idx() && to_y < first_line_idx && first_line_idx > 0;
+            let cond1 = to_line_idx < cursor_viewport.line_idx()
+              && to_line_idx < first_line_idx
+              && first_line_idx > 0;
 
-            let cond2 = to_y < cursor_viewport.line_idx() && to_y == first_line_idx && {
-              let head_not_show = self._line_head_not_show(&viewport, first_line_idx);
-              let tail_not_show = self._line_tail_not_show(&viewport, &buffer, first_line_idx);
-              head_not_show || tail_not_show
-            };
+            let cond2 =
+              to_line_idx < cursor_viewport.line_idx() && to_line_idx == first_line_idx && {
+                let head_not_show = self._line_head_not_show(&viewport, to_line_idx);
+                let tail_not_show = self._line_tail_not_show(&viewport, &buffer, to_line_idx);
+                head_not_show || tail_not_show
+              };
 
             cond1 || cond2
           } else {
@@ -340,8 +305,8 @@ impl NormalStateful {
               .len_chars();
             let rows = line_viewport.rows();
             if let Some((_last_row_idx, last_row_viewport)) = rows.last_key_value() {
-              to_x > cursor_viewport.char_idx()
-                && to_x > last_row_viewport.end_char_idx().saturating_sub(1)
+              to_char_idx > cursor_viewport.char_idx()
+                && to_char_idx > last_row_viewport.end_char_idx().saturating_sub(1)
                 && last_row_viewport.end_char_idx() < bufline_len_chars
             } else {
               false
@@ -367,8 +332,8 @@ impl NormalStateful {
             );
             let rows = line_viewport.rows();
             if let Some((_first_row_idx, first_row_viewport)) = rows.first_key_value() {
-              to_x < cursor_viewport.char_idx()
-                && to_x < first_row_viewport.start_char_idx()
+              to_char_idx < cursor_viewport.char_idx()
+                && to_char_idx < first_row_viewport.start_char_idx()
                 && first_row_viewport.start_char_idx() > 0
             } else {
               false
@@ -379,20 +344,32 @@ impl NormalStateful {
         };
 
         if goes_out_of_bottom || goes_out_of_top {
-          (
-            Some((viewport.start_column_idx(), to_y)),
-            Some((to_x, to_y)),
-          )
+          ExpectedMoveAndScroll {
+            window_scroll_to: Some((viewport.start_column_idx(), to_line_idx)),
+            cursor_move_to: Some((to_char_idx, to_line_idx)),
+          }
         } else if goes_out_of_right || goes_out_of_left {
-          (Some((to_x, viewport.start_line_idx())), Some((to_x, to_y)))
+          ExpectedMoveAndScroll {
+            window_scroll_to: Some((to_char_idx, viewport.start_line_idx())),
+            cursor_move_to: Some((to_char_idx, to_line_idx)),
+          }
         } else {
-          (None, Some((to_x, to_y)))
+          ExpectedMoveAndScroll {
+            window_scroll_to: None,
+            cursor_move_to: Some((to_char_idx, to_line_idx)),
+          }
         }
       } else {
-        (None, None)
+        ExpectedMoveAndScroll {
+          window_scroll_to: None,
+          cursor_move_to: None,
+        }
       }
     } else {
-      (None, None)
+      ExpectedMoveAndScroll {
+        window_scroll_to: None,
+        cursor_move_to: None,
+      }
     }
   }
 
@@ -433,13 +410,19 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let (x, y) = normalize_as_cursor_move_by(
+        let (by_chars_count, by_lines_count) = normalize_as_cursor_move_by(
           command,
           cursor_viewport.char_idx(),
           cursor_viewport.line_idx(),
         );
 
-        let cursor_move_result = self._cursor_move_by(&viewport, &cursor_viewport, &buffer, x, y);
+        let cursor_move_result = self._cursor_move_by(
+          &viewport,
+          &cursor_viewport,
+          &buffer,
+          by_chars_count,
+          by_lines_count,
+        );
 
         trace!("cursor_move_result:{:?}", cursor_move_result);
         if let Some((line_idx, char_idx)) = cursor_move_result {
@@ -461,19 +444,23 @@ impl NormalStateful {
   }
 
   // Returns the `line_idx`/`char_idx` for new cursor position.
-  // NOTE: `x` is chars count, `y` is lines count.
   fn _cursor_move_by(
     &self,
     viewport: &Viewport,
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
-    x: isize,
-    y: isize,
+    chars_count: isize,
+    lines_count: isize,
   ) -> Option<(usize, usize)> {
     let cursor_line_idx = cursor_viewport.line_idx();
     let cursor_char_idx = cursor_viewport.char_idx();
-    let line_idx =
-      self._bounded_cursor_move_y_by(viewport, cursor_line_idx, cursor_char_idx, buffer, y);
+    let line_idx = self._bounded_cursor_move_y_by(
+      viewport,
+      cursor_line_idx,
+      cursor_char_idx,
+      buffer,
+      lines_count,
+    );
 
     // If `line_idx` doesn't exist, or line is empty.
     match buffer.get_rope().get_line(line_idx) {
@@ -487,7 +474,8 @@ impl NormalStateful {
 
     let char_idx =
       adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
-    let char_idx = self._bounded_cursor_move_x_by(viewport, line_idx, char_idx, buffer, x);
+    let char_idx =
+      self._bounded_cursor_move_x_by(viewport, line_idx, char_idx, buffer, chars_count);
 
     Some((line_idx, char_idx))
   }
@@ -544,20 +532,19 @@ impl NormalStateful {
   //   Some((line_idx, char_idx))
   // }
 
-  // The `y` is lines count.
   fn _bounded_cursor_move_y_by(
     &self,
     viewport: &Viewport,
     cursor_line_idx: usize,
     _cursor_char_idx: usize,
     _buffer: &Buffer,
-    y: isize,
+    lines_count: isize,
   ) -> usize {
-    if y < 0 {
-      let n = -y as usize;
+    if lines_count < 0 {
+      let n = -lines_count as usize;
       cursor_line_idx.saturating_sub(n)
     } else {
-      let n = y as usize;
+      let n = lines_count as usize;
       let expected_line_idx = cursor_line_idx.saturating_add(n);
       let last_line_idx = viewport.end_line_idx().saturating_sub(1);
       trace!(
@@ -614,20 +601,19 @@ impl NormalStateful {
   //   Some((cursor_line_idx, char_idx))
   // }
 
-  // The `x` is chars count.
   fn _bounded_cursor_move_x_by(
     &self,
     viewport: &Viewport,
     cursor_line_idx: usize,
     cursor_char_idx: usize,
     buffer: &Buffer,
-    x: isize,
+    chars_count: isize,
   ) -> usize {
-    if x < 0 {
-      let n = -x as usize;
+    if chars_count < 0 {
+      let n = -chars_count as usize;
       cursor_char_idx.saturating_sub(n)
     } else {
-      let n = x as usize;
+      let n = chars_count as usize;
       let expected = cursor_char_idx.saturating_add(n);
       let upper_bounded = {
         debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
@@ -661,13 +647,14 @@ impl NormalStateful {
         // TODO: The `(x,y)` in command is lines/chars, while the returned `(x,y)` is
         // lines/columns. Since the lines/chars are user facing command, user moves their cursor by
         // lines/chars instead of terminal rows/columns/cells.
-        let (x, y) = normalize_as_window_scroll_by(
+        let (by_columns_count, by_lines_count) = normalize_as_window_scroll_by(
           command,
           viewport.start_column_idx(),
           viewport.start_line_idx(),
         );
 
-        let window_scroll_result = self._window_scroll_by(&viewport, &buffer, x, y);
+        let window_scroll_result =
+          self._window_scroll_by(&viewport, &buffer, by_columns_count, by_lines_count);
 
         if let Some((start_line_idx, start_column_idx)) = window_scroll_result {
           // Sync the viewport
@@ -687,13 +674,12 @@ impl NormalStateful {
   }
 
   /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-  /// NOTE: `x` is the columns count, `y` is the lines count.
   fn _window_scroll_by(
     &self,
     viewport: &Viewport,
     buffer: &Buffer,
-    x: isize,
-    y: isize,
+    columns_count: isize,
+    lines_count: isize,
   ) -> Option<(usize, usize)> {
     let start_line_idx = viewport.start_line_idx();
     let end_line_idx = viewport.end_line_idx();
@@ -701,15 +687,16 @@ impl NormalStateful {
     let buffer_len_lines = buffer.get_rope().len_lines();
     debug_assert!(end_line_idx <= buffer_len_lines);
 
-    let mut line_idx = self._bounded_window_scroll_y_by(start_line_idx, buffer, y);
+    let mut line_idx = self._bounded_window_scroll_y_by(start_line_idx, buffer, lines_count);
 
     // If viewport wants to scroll down (i.e. y > 0), and viewport already shows that last line in
     // the buffer, then cannot scroll down anymore, just still keep the old `line_idx`.
-    if y > 0 && end_line_idx == buffer_len_lines {
+    if lines_count > 0 && end_line_idx == buffer_len_lines {
       line_idx = start_line_idx;
     }
 
-    let column_idx = self._bounded_window_scroll_x_by(start_column_idx, viewport, buffer, x);
+    let column_idx =
+      self._bounded_window_scroll_x_by(start_column_idx, viewport, buffer, columns_count);
 
     // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
     // there's no need to scroll anymore.
@@ -767,15 +754,19 @@ impl NormalStateful {
   //   Some((line_idx, start_column_idx))
   // }
 
-  /// The `y` is the lines count.
-  fn _bounded_window_scroll_y_by(&self, start_line_idx: usize, buffer: &Buffer, y: isize) -> usize {
+  fn _bounded_window_scroll_y_by(
+    &self,
+    start_line_idx: usize,
+    buffer: &Buffer,
+    lines_count: isize,
+  ) -> usize {
     let buffer_len_lines = buffer.get_rope().len_lines();
 
-    if y < 0 {
-      let n = -y as usize;
+    if lines_count < 0 {
+      let n = -lines_count as usize;
       start_line_idx.saturating_sub(n)
     } else {
-      let n = y as usize;
+      let n = lines_count as usize;
 
       // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
       // line.
@@ -876,19 +867,18 @@ impl NormalStateful {
   //   Some((start_line_idx, start_col))
   // }
 
-  /// The `x` is the columns count (not chars).
   fn _bounded_window_scroll_x_by(
     &self,
     start_column_idx: usize,
     viewport: &Viewport,
     buffer: &Buffer,
-    x: isize,
+    columns_count: isize,
   ) -> usize {
-    if x < 0 {
-      let n = -x as usize;
+    if columns_count < 0 {
+      let n = -columns_count as usize;
       start_column_idx.saturating_sub(n)
     } else {
-      let n = x as usize;
+      let n = columns_count as usize;
       let expected = start_column_idx.saturating_add(n);
       let max_scrolls = self._bounded_window_scroll_x_max_scrolls(viewport, buffer);
       let upper_bounded = start_column_idx.saturating_add(max_scrolls);

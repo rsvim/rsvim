@@ -18,16 +18,23 @@ MACOS = platform.system().startswith("Darwin")
 SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
 
+USE_LLD_LINKER = False
+LLD_NAME = None
+if WINDOWS:
+    LLD_NAME = "lld-link"
+elif MACOS:
+    LLD_NAME = "ld64.lld"
+else:
+    LLD_NAME = "ld.lld"
+LLD_FULLPATH = shutil.which(LLD_NAME)
 
-def set_env(command, name, value, vartype):
+
+def set_env(command, name, value):
     assert isinstance(command, str)
     if WINDOWS:
         os.environ[name] = value
     else:
-        if vartype is not None and vartype == "str":
-            command = f'{command} {name}="{value}"'
-        else:
-            command = f"{command} {name}={value}"
+        command = f"{command} {name}={value}"
     return command.strip()
 
 
@@ -37,14 +44,34 @@ def set_sccache(command):
         return command
 
     if RECACHE_SCCACHE:
-        command = set_env(command, "SCCACHE_RECACHE", "1", None)
+        command = set_env(command, "SCCACHE_RECACHE", "1")
 
-    command = set_env(command, "RUSTC_WRAPPER", "sccache", "str")
+    command = set_env(command, "RUSTC_WRAPPER", "sccache")
     return command.strip()
 
 
+def set_lld(command):
+    if not USE_LLD_LINKER:
+        return command
+
+    if LLD_FULLPATH is None:
+        logging.warning(f"'lld' ({LLD_NAME}) not found!")
+        return command
+
+    arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
+    arch = [l.strip() for l in arch.splitlines()]
+    host = [l for l in arch if l.startswith("host:")]
+    host = host[0][5:].strip()
+    host = host.replace("-", "_").upper()
+
+    logging.debug(f"host:{host}")
+    cargo_target_rustflags = f"CARGO_TARGET_{host}_RUSTFLAGS"
+    command = set_env(command, cargo_target_rustflags, '"-Clink-arg=-fuse-ld=lld"')
+    return command
+
+
 def clippy(watch):
-    command = set_env("", "RUSTFLAGS", "-Dwarnings", "str")
+    command = set_env("", "RUSTFLAGS", '"-Dwarnings"')
     command = set_sccache(command)
 
     if watch:
@@ -71,16 +98,17 @@ def test(name, miri):
         command = set_env(
             "",
             "MIRIFLAGS",
-            "'-Zmiri-disable-isolation -Zmiri-permissive-provenance'",
-            "str",
+            '"-Zmiri-disable-isolation -Zmiri-permissive-provenance"',
         )
         command = set_sccache(command)
+        command = set_lld(command)
         if name is None:
             name = ""
         command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
-        command = set_env("", "RSVIM_LOG", "trace", "str")
+        command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command)
+        command = set_lld(command)
         if name is None:
             name = "--all"
         command = f"{command} cargo nextest run --no-capture {name}"
@@ -92,6 +120,7 @@ def test(name, miri):
 
 def list_test():
     command = set_sccache("")
+    command = set_lld(command)
 
     command = f"{command} cargo nextest list"
 
@@ -102,6 +131,7 @@ def list_test():
 
 def build(release, features, all_features):
     command = set_sccache("")
+    command = set_lld(command)
 
     feature_flags = ""
     if all_features:
@@ -164,6 +194,12 @@ if __name__ == "__main__":
         "--recache",
         action="store_true",
         help="Rebuild all `sccache` caches",
+    )
+    parser.add_argument(
+        "-l",
+        "--lld",
+        action="store_true",
+        help="Build with `lld` linker",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
@@ -261,6 +297,8 @@ if __name__ == "__main__":
 
     if parser.recache:
         RECACHE_SCCACHE = True
+    if parser.lld:
+        USE_LLD_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch)

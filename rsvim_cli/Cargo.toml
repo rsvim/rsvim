@@ -12,7 +12,7 @@ license.workspace = true
 keywords.workspace = true
 categories.workspace = true
 exclude.workspace = true
-description = "The RSVIM editor."
+description = "The RSVIM text editor."
 
 [dependencies]
 rsvim_core = { workspace = true }
