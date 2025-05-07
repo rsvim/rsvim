@@ -5794,14 +5794,14 @@ mod tests_cursor_move_and_scroll {
     }
 
     stateful.cursor_move(&data_access, Command::CursorMoveUpBy(4));
-    stateful.cursor_move(&data_access, Command::CursorMoveLeftBy(69));
+    stateful.cursor_move(&data_access, Command::CursorMoveLeftBy(4));
 
     // Move-3
     {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
-      assert_eq!(actual.char_idx(), 5);
+      assert_eq!(actual.char_idx(), 8);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
