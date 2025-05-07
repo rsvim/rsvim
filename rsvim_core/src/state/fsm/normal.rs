@@ -267,8 +267,8 @@ impl NormalStateful {
         //
         // Condition-2
         // - Cursor is moving down.
-        // - The target cursor line = window's bottom line.
-        // - Window's bottom line is not fully rendered, i.e. window's first char > 0 or window's
+        // - The target cursor line <= window's bottom line.
+        // - The target cursor line is not fully rendered, i.e. window's first char > 0 or window's
         //   last char.
         let goes_out_of_bottom = {
           if let Some((&last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
@@ -276,9 +276,9 @@ impl NormalStateful {
               && to_y > last_line_idx
               && last_line_idx < buffer.get_rope().len_lines().saturating_sub(1);
 
-            let cond2 = to_y > cursor_viewport.line_idx() && to_y == last_line_idx && {
-              let head_not_show = self._line_head_not_show(&viewport, last_line_idx);
-              let tail_not_show = self._line_tail_not_show(&viewport, &buffer, last_line_idx);
+            let cond2 = to_y > cursor_viewport.line_idx() && to_y <= last_line_idx && {
+              let head_not_show = self._line_head_not_show(&viewport, to_y);
+              let tail_not_show = self._line_tail_not_show(&viewport, &buffer, to_y);
               head_not_show || tail_not_show
             };
 
@@ -297,8 +297,8 @@ impl NormalStateful {
         //
         // Condition-2
         // - Cursor is moving up.
-        // - The target cursor line = window's top line.
-        // - Window's top line is not fully rendered, i.e. window's first char > 0 or window's last
+        // - The target cursor line >= window's top line.
+        // - The target cursor line is not fully rendered, i.e. window's first char > 0 or window's last
         //   char.
         let goes_out_of_top = {
           if let Some((&first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value()
@@ -306,9 +306,9 @@ impl NormalStateful {
             let cond1 =
               to_y < cursor_viewport.line_idx() && to_y < first_line_idx && first_line_idx > 0;
 
-            let cond2 = to_y < cursor_viewport.line_idx() && to_y == first_line_idx && {
-              let head_not_show = self._line_head_not_show(&viewport, first_line_idx);
-              let tail_not_show = self._line_tail_not_show(&viewport, &buffer, first_line_idx);
+            let cond2 = to_y < cursor_viewport.line_idx() && to_y >= first_line_idx && {
+              let head_not_show = self._line_head_not_show(&viewport, to_y);
+              let tail_not_show = self._line_tail_not_show(&viewport, &buffer, to_y);
               head_not_show || tail_not_show
             };
 
