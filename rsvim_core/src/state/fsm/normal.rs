@@ -72,21 +72,15 @@ fn normalize_as_cursor_move_to(
     Command::CursorMoveRightBy(n) => {
       let x = cursor_char_idx.saturating_add(n);
       (x, cursor_line_idx)
-    } // (n as isize, 0),
+    }
     Command::CursorMoveUpBy(n) => {
       let y = cursor_line_idx.saturating_sub(n);
       (cursor_char_idx, y)
-    } // (0, -(n as isize)),
+    }
     Command::CursorMoveDownBy(n) => {
       let y = cursor_line_idx.saturating_add(n);
       (cursor_char_idx, y)
-    } // (0, n as isize),
-    Command::CursorMoveBy((x, y)) => {
-      let x = cursor_char_idx.saturating_add_signed(x);
-      let y = cursor_line_idx.saturating_add_signed(y);
-      (x, y)
     }
-    Command::CursorMoveTo((x, y)) => (x, y),
     _ => unreachable!(),
   }
 }
@@ -201,7 +195,7 @@ impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     // Get (window_scroll_to, cursor_move_to).
-    let scrolls_and_moves_to = self._expected_move_and_scroll(data_access, command);
+    let scrolls_and_moves_to = self._expected_move_and_scroll_to(data_access, command);
 
     // First try window scroll.
     let scrolls_to = scrolls_and_moves_to.0;
@@ -228,7 +222,7 @@ impl NormalStateful {
   // 2D-position.
   //
   // FIXME: Calculate the expected `line_idx`/`char_idx` correctly.
-  fn _expected_move_and_scroll(
+  fn _expected_move_and_scroll_to(
     &self,
     data_access: &StatefulDataAccess,
     command: Command,
@@ -243,14 +237,6 @@ impl NormalStateful {
         let viewport = lock!(viewport);
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
-
-        match command {
-          Command::CursorMoveLeftBy(_) => { /* */ }
-          Command::CursorMoveRightBy(_) => { /* */ }
-          Command::CursorMoveUpBy(_) => { /* */ }
-          Command::CursorMoveDownBy(_) => { /* */ }
-          _ => unreachable!(),
-        }
 
         let (to_x, to_y) = normalize_as_cursor_move_to(
           command,
