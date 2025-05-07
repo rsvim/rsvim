@@ -58,33 +58,6 @@ fn normalize_as_cursor_move_by(
   }
 }
 
-// Normalize CursorMove* commands to CursorMoveTo((x,y))
-fn normalize_as_cursor_move_to(
-  command: Command,
-  cursor_char_idx: usize,
-  cursor_line_idx: usize,
-) -> (usize, usize) {
-  match command {
-    Command::CursorMoveLeftBy(n) => {
-      let x = cursor_char_idx.saturating_sub(n);
-      (x, cursor_line_idx)
-    }
-    Command::CursorMoveRightBy(n) => {
-      let x = cursor_char_idx.saturating_add(n);
-      (x, cursor_line_idx)
-    }
-    Command::CursorMoveUpBy(n) => {
-      let y = cursor_line_idx.saturating_sub(n);
-      (cursor_char_idx, y)
-    }
-    Command::CursorMoveDownBy(n) => {
-      let y = cursor_line_idx.saturating_add(n);
-      (cursor_char_idx, y)
-    }
-    _ => unreachable!(),
-  }
-}
-
 // Normalize WindowScroll* commands to WindowScrollBy((x,y))
 fn normalize_as_window_scroll_by(
   command: Command,
@@ -102,40 +75,6 @@ fn normalize_as_window_scroll_by(
       (x, y)
     }
     Command::WindowScrollBy((x, y)) => (x, y),
-    _ => unreachable!(),
-  }
-}
-
-#[allow(dead_code)]
-// Normalize WindowScroll* commands to WindowScrollTo((x,y))
-fn normalize_as_window_scroll_to(
-  command: Command,
-  viewport_start_column_idx: usize,
-  viewport_start_line_idx: usize,
-) -> (usize, usize) {
-  match command {
-    Command::WindowScrollLeftBy(n) => {
-      let x = viewport_start_column_idx.saturating_sub(n);
-      (x, 0)
-    }
-    Command::WindowScrollRightBy(n) => {
-      let x = viewport_start_column_idx.saturating_add(n);
-      (x, 0)
-    } // (n as isize, 0),
-    Command::WindowScrollUpBy(n) => {
-      let y = viewport_start_line_idx.saturating_sub(n);
-      (0, y)
-    } // (0, -(n as isize)),
-    Command::WindowScrollDownBy(n) => {
-      let y = viewport_start_line_idx.saturating_add(n);
-      (0, y)
-    } // (0, n as isize),
-    Command::WindowScrollBy((x, y)) => {
-      let x = viewport_start_column_idx.saturating_add_signed(x);
-      let y = viewport_start_line_idx.saturating_add_signed(y);
-      (x, y)
-    }
-    Command::WindowScrollTo((x, y)) => (x, y),
     _ => unreachable!(),
   }
 }
@@ -238,11 +177,25 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let (to_x, to_y) = normalize_as_cursor_move_to(
-          command,
-          cursor_viewport.char_idx(),
-          cursor_viewport.line_idx(),
-        );
+        let (to_x, to_y) = match command {
+          Command::CursorMoveLeftBy(n) => {
+            let x = cursor_viewport.char_idx().saturating_sub(n);
+            (x, cursor_viewport.line_idx())
+          }
+          Command::CursorMoveRightBy(n) => {
+            let x = cursor_viewport.char_idx().saturating_add(n);
+            (x, cursor_viewport.line_idx())
+          }
+          Command::CursorMoveUpBy(n) => {
+            let y = cursor_viewport.line_idx().saturating_sub(n);
+            (cursor_viewport.char_idx(), y)
+          }
+          Command::CursorMoveDownBy(n) => {
+            let y = cursor_viewport.line_idx().saturating_add(n);
+            (cursor_viewport.char_idx(), y)
+          }
+          _ => unreachable!(),
+        };
 
         // If goes out of window bottom:
         //
