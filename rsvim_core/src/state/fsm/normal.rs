@@ -232,8 +232,8 @@ impl NormalStateful {
         // Condition-2
         // - Cursor is moving down.
         // - The target cursor line = window's bottom line.
-        // - The target cursor line is not fully rendered, i.e. window's first char > 0 or window's
-        //   last char.
+        // - The target cursor line is not fully rendered, i.e. first char > 0 or last char <
+        //   buffer's last char.
         let goes_out_of_bottom = {
           if let Some((&last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
             let cond1 = to_line_idx > cursor_viewport.line_idx()
@@ -263,8 +263,8 @@ impl NormalStateful {
         // Condition-2
         // - Cursor is moving up.
         // - The target cursor line = window's top line.
-        // - The target cursor line is not fully rendered, i.e. window's first char > 0 or window's last
-        //   char.
+        // - The target cursor line is not fully rendered, i.e. first char > 0 or last char <
+        //   buffer's last char.
         let goes_out_of_top = {
           if let Some((&first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value()
           {
