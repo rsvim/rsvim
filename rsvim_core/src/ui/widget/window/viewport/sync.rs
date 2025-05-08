@@ -886,34 +886,32 @@ fn search_anchor_downward_nowrap(
 
   let viewport_end_column = viewport_start_column + width as usize;
 
-  // Target cursor char is on the left of the old target viewport.
-  let is_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
+  // If target cursor char is on the left of the old target viewport.
+  let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
     Some(c) => c > target_cursor_char,
     None => false,
   };
 
-  // let is_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
-  //   Some(c) => {
-  //     if c > target_cursor_char {
-  //       // Target cursor char is on the left of the old target viewport, We need to move viewport
-  //       // to left to show the cursor, to minimize the viewport adjustments, just put the cursor at
-  //       // the first left char in the new viewport.
-  //       let cursor_width = buffer.width_at(target_cursor_line, target_cursor_char);
-  //       let first_column = std::cmp::min(
-  //         cursor_width.saturating_sub(width as usize),
-  //         viewport_start_column,
-  //       );
-  //     }
-  //   }
-  //   None => {}
-  // }
+  if on_left_side {
+    // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
+    // just put the cursor at the first left char in the new viewport.
+    let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
+    return (current_line, start_column);
+  }
 
   // Target cursor line end.
-  let is_right_side =
-    match buffer.char_at(target_cursor_line, viewport_end_column.saturating_sub(1)) {
-      Some(c) => {}
-      None => {}
-    };
+  let on_right_side = match buffer.char_before(target_cursor_line, viewport_end_column) {
+    Some(c) => c < target_cursor_char,
+    None => false,
+  };
+
+  if on_right_side {
+    // Move viewport to right to show the cursor, just put the cursor at the last right char in the
+    // new viewport.
+    let end_column = buffer.width_at(target_cursor_line, target_cursor_char);
+    let start_column = end_column.saturating_sub(width as usize);
+    return (current_line, start_column);
+  }
 
   (current_line, viewport_start_column)
 }
@@ -921,12 +919,52 @@ fn search_anchor_downward_nowrap(
 fn search_anchor_downward_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  start_line: usize,
-  start_column: usize,
+  viewport_start_line: usize,
+  viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
   target_last_line: usize,
 ) -> (usize, usize) {
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  let buffer_len_lines = buffer.get_rope().len_lines();
+
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
+
+  let target_last_line = std::cmp::min(target_last_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .get_rope()
+      .line(target_cursor_line)
+      .len_chars()
+      .saturating_sub(1),
+  );
+
+  let mut n = 0_usize;
+  let mut current_line = target_last_line;
+
+  while n <= height as usize {
+    let current_row = 0_u16;
+    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
+      buffer,
+      viewport_start_column,
+      current_line,
+      current_row,
+      height,
+      width,
+    );
+    n += rows.len();
+
+    if current_line == 0 {
+      break;
+    }
+
+    current_line -= 1;
+  }
+
   (0, 0)
 }
 
