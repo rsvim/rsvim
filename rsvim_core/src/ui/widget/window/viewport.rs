@@ -565,24 +565,20 @@ impl Viewport {
   /// viewport will be adjusted to show target cursor correctly, with a minimal movement (for
   /// better user visuals).
   pub fn search_anchor_downward(
+    &self,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     window_local_options: &WindowLocalOptions,
-    viewport_start_line_idx: usize,
-    viewport_start_column_idx: usize,
     target_cursor_line_idx: usize,
     target_cursor_char_idx: usize,
-    target_viewport_last_line_idx: usize,
   ) -> (usize, usize) {
     sync::search_anchor_downward(
+      self,
       buffer,
       window_actual_shape,
       window_local_options,
-      viewport_start_line_idx,
-      viewport_start_column_idx,
       target_cursor_line_idx,
       target_cursor_char_idx,
-      target_viewport_last_line_idx,
     )
   }
 
