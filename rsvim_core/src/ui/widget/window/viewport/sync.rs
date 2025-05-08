@@ -754,6 +754,7 @@ fn sync_wrap_linebreak(
   }
 }
 
+#[allow(clippy::too_many_arguments)]
 // Returns `start_line`, `start_column` for a viewport.
 pub fn search_anchor_downward(
   buffer: &Buffer,
