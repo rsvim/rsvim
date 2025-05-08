@@ -855,6 +855,30 @@ fn search_anchor_downward_nowrap(
     current_line -= 1;
   }
 
+  // spellchecker:off
+  // If the new viewport is below, and the `target_cursor_line` is the 2nd line, which is not show
+  // in the new viewport:
+  //
+  // ```
+  //                                           |----------------------------------|
+  // This is the beginning of the very long lin|e, which only shows the beginning |part.
+  // This is the short line, it's not shown.   |                                  |
+  // This is the second very long line, which s|till shows in the viewport.       |
+  //                                           |----------------------------------|
+  // ```
+  //
+  // This is because old `viewport_start_column` is too big, and incase we need to place the target
+  // cursor in the new viewport correctly, so we will have to adjust the "start_column" for the new
+  // viewport.
+  //
+  // ```
+  //      |----------------------------------|
+  // This |is the beginning of the very long |line, which only shows the beginning part.
+  // This |is the short line, it's not shown.|
+  // This |is the second very long line, whic|h s|till shows in the viewport.
+  //      |----------------------------------|
+  // ```
+  // spellchecker:on
   (current_line, viewport_start_column)
 }
 
