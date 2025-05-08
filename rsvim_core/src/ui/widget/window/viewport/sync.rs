@@ -806,10 +806,101 @@ pub fn search_anchor_downward(
   }
 }
 
-fn search_anchor_downward_nowrap(
+// spellchecker:off
+// When searching the new viewport downward, the target cursor could be not shown in it.
+//
+// For example:
+//
+// ```
+//                                           |----------------------------------|
+// This is the beginning of the very long lin|e, which only shows the beginning |part.
+// This is the short line, it's not shown.   |                                  |
+// This is the second very long line, which s|till shows in the viewport.       |
+//                                           |----------------------------------|
+// ```
+//
+// If the target cursor is in the 2nd line, it will not be shown in the new viewport. This is
+// because old `viewport_start_column` is too big, and incase we need to place the target cursor in
+// the new viewport correctly, so we will have to move the new viewport to the left to allow cursor
+// show in it.
+//
+// ```
+//      |----------------------------------|
+// This |is the beginning of the very long |line, which only shows the beginning part.
+// This |is the short line, it's not shown.|
+// This |is the second very long line, whic|h s|till shows in the viewport.
+//      |----------------------------------|
+// ```
+//
+// There are 2 edge cases:
+// 1. The target cursor is on the left side.
+// 1. The target cursor is on the right side.
+// spellchecker:on
+//
+// Returns
+// 1. If target cursor is on the left side of viewport, and we need to adjust/move the viewport to
+//    left.
+// 2. If 1st is true, this is the new "start_column" after adjustments.
+fn leftside_downward(
+  buffer: &Buffer,
+  _window_actual_shape: &U16Rect,
+  _viewport_start_line: usize,
+  viewport_start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (bool, usize) {
+  // If target cursor char is on the left of the old target viewport.
+  let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
+    Some(c) => c > target_cursor_char,
+    None => false,
+  };
+
+  if on_left_side {
+    // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
+    // just put the cursor at the first left char in the new viewport.
+    let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
+    (true, start_column)
+  } else {
+    (false, 0_usize)
+  }
+}
+
+// Returns
+// 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
+//    right.
+// 2. If 1st is true, this is the new "start_column" after adjustments.
+fn rightside_downward(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   _viewport_start_line: usize,
+  viewport_start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (bool, usize) {
+  let width = window_actual_shape.width();
+  let viewport_end_column = viewport_start_column + width as usize;
+
+  // Target cursor line end.
+  let on_right_side = match buffer.char_before(target_cursor_line, viewport_end_column) {
+    Some(c) => c < target_cursor_char,
+    None => false,
+  };
+
+  if on_right_side {
+    // Move viewport to right to show the cursor, just put the cursor at the last right char in the
+    // new viewport.
+    let end_column = buffer.width_at(target_cursor_line, target_cursor_char);
+    let start_column = end_column.saturating_sub(width as usize);
+    (true, start_column)
+  } else {
+    (false, 0_usize)
+  }
+}
+
+fn search_anchor_downward_nowrap(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  viewport_start_line: usize,
   viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -855,62 +946,30 @@ fn search_anchor_downward_nowrap(
     current_line -= 1;
   }
 
-  // spellchecker:off
-  // If the new viewport is below, and the `target_cursor_line` is the 2nd line, which is not show
-  // in the new viewport:
-  //
-  // ```
-  //                                           |----------------------------------|
-  // This is the beginning of the very long lin|e, which only shows the beginning |part.
-  // This is the short line, it's not shown.   |                                  |
-  // This is the second very long line, which s|till shows in the viewport.       |
-  //                                           |----------------------------------|
-  // ```
-  //
-  // This is because old `viewport_start_column` is too big, and incase we need to place the target
-  // cursor in the new viewport correctly, so we will have to adjust the "start_column" for the new
-  // viewport.
-  //
-  // ```
-  //      |----------------------------------|
-  // This |is the beginning of the very long |line, which only shows the beginning part.
-  // This |is the short line, it's not shown.|
-  // This |is the second very long line, whic|h s|till shows in the viewport.
-  //      |----------------------------------|
-  // ```
-  //
-  // The edge cases are:
-  // 1. The target cursor is on the left side.
-  // 1. The target cursor is on the right side.
-  // spellchecker:on
-
-  let viewport_end_column = viewport_start_column + width as usize;
-
-  // If target cursor char is on the left of the old target viewport.
-  let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
-    Some(c) => c > target_cursor_char,
-    None => false,
-  };
+  let (on_left_side, left_side_start_column) = leftside_downward(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
 
   if on_left_side {
-    // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
-    // just put the cursor at the first left char in the new viewport.
-    let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
-    return (current_line, start_column);
+    return (current_line, left_side_start_column);
   }
 
-  // Target cursor line end.
-  let on_right_side = match buffer.char_before(target_cursor_line, viewport_end_column) {
-    Some(c) => c < target_cursor_char,
-    None => false,
-  };
+  let (on_right_side, right_side_start_column) = rightside_downward(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
 
   if on_right_side {
-    // Move viewport to right to show the cursor, just put the cursor at the last right char in the
-    // new viewport.
-    let end_column = buffer.width_at(target_cursor_line, target_cursor_char);
-    let start_column = end_column.saturating_sub(width as usize);
-    return (current_line, start_column);
+    return (current_line, right_side_start_column);
   }
 
   (current_line, viewport_start_column)
