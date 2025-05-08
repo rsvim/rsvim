@@ -886,19 +886,34 @@ fn search_anchor_downward_nowrap(
 
   let viewport_end_column = viewport_start_column + width as usize;
 
-  // Target cursor line start.
-  match buffer.char_at(target_cursor_line, viewport_start_column) {
-    Some(c) => {
-      let c_width = buffer.width_before(target_cursor_line, c);
-    }
-    None => {}
-  }
+  // Target cursor char is on the left of the old target viewport.
+  let is_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
+    Some(c) => c > target_cursor_char,
+    None => false,
+  };
+
+  // let is_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
+  //   Some(c) => {
+  //     if c > target_cursor_char {
+  //       // Target cursor char is on the left of the old target viewport, We need to move viewport
+  //       // to left to show the cursor, to minimize the viewport adjustments, just put the cursor at
+  //       // the first left char in the new viewport.
+  //       let cursor_width = buffer.width_at(target_cursor_line, target_cursor_char);
+  //       let first_column = std::cmp::min(
+  //         cursor_width.saturating_sub(width as usize),
+  //         viewport_start_column,
+  //       );
+  //     }
+  //   }
+  //   None => {}
+  // }
 
   // Target cursor line end.
-  match buffer.char_before(target_cursor_line, viewport_end_column) {
-    Some(c) => {}
-    None => {}
-  }
+  let is_right_side =
+    match buffer.char_at(target_cursor_line, viewport_end_column.saturating_sub(1)) {
+      Some(c) => {}
+      None => {}
+    };
 
   (current_line, viewport_start_column)
 }
