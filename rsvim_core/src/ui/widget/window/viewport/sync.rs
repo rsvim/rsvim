@@ -1024,19 +1024,111 @@ fn search_anchor_downward_wrap_nolinebreak(
     current_line -= 1;
   }
 
-  (0, 0)
+  let (on_left_side, left_side_start_column) = leftside_downward(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_left_side {
+    return (current_line, left_side_start_column);
+  }
+
+  let (on_right_side, right_side_start_column) = rightside_downward(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_right_side {
+    return (current_line, right_side_start_column);
+  }
+
+  (current_line, viewport_start_column)
 }
 
 fn search_anchor_downward_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  start_line: usize,
-  start_column: usize,
+  viewport_start_line: usize,
+  viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
   target_last_line: usize,
 ) -> (usize, usize) {
-  (0, 0)
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  let buffer_len_lines = buffer.get_rope().len_lines();
+
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
+
+  let target_last_line = std::cmp::min(target_last_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .get_rope()
+      .line(target_cursor_line)
+      .len_chars()
+      .saturating_sub(1),
+  );
+
+  let mut n = 0_usize;
+  let mut current_line = target_last_line;
+
+  while n <= height as usize {
+    let current_row = 0_u16;
+    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
+      buffer,
+      viewport_start_column,
+      current_line,
+      current_row,
+      height,
+      width,
+    );
+    n += rows.len();
+
+    if current_line == 0 {
+      break;
+    }
+
+    current_line -= 1;
+  }
+
+  let (on_left_side, left_side_start_column) = leftside_downward(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_left_side {
+    return (current_line, left_side_start_column);
+  }
+
+  let (on_right_side, right_side_start_column) = rightside_downward(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_right_side {
+    return (current_line, right_side_start_column);
+  }
+
+  (current_line, viewport_start_column)
 }
 
 #[allow(unused_imports)]
