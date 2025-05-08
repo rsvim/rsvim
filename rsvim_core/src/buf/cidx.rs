@@ -42,11 +42,13 @@ use std::collections::BTreeMap;
 ///
 /// For example:
 /// - The **current** char on width 8 is `<--HT-->` (column:7, char:7), the **current** char on
-///   width 10 is still `<--HT-->` (column:9, char:7).
+///   width 10 is still `<--HT-->` (column:9, char:7). The width on **current** char 7 is 16.
 /// - The **current** char on width 0 doesn't exist (because the width 0 actually don't have a char
-///   on it), the **current** char on width 1 is `T` (column:0, char:0).
+///   on it), the **current** char on width 1 is `T` (column:0, char:0). The width on **current**
+///   char 0 is 1.
 /// - The **current** char on width 26 is `.` (column:25, char:18). NOTE: The width 26 has 2 chars
-///   on it: `.` and `\n`, but here we always locate to the 1st char from the beginning.
+///   on it: `.` and `\n`, but here we always locate to the 1st char from the beginning. The width
+///   on **current** char 18 is 26.
 pub struct ColumnIndex {
   // Char index maps to its prefix display width.
   char2width: Vec<usize>,
