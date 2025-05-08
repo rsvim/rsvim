@@ -160,10 +160,9 @@ impl ColumnIndex {
     self._build_cache(options, buf_line, Some(char_idx), None);
   }
 
-  /// Get the prefix display width in char index range `[0,char_idx)`, left-inclusive and
-  /// right-exclusive.
+  /// Get the prefix display width in char index range `[0,char_idx)`.
   ///
-  /// NOTE: This is equivalent to `width_until(char_idx-1)`.
+  /// NOTE: This is equivalent to `width_at(char_idx-1)`.
   ///
   /// # Return
   ///
