@@ -993,12 +993,12 @@ fn search_anchor_downward_nowrap(
 fn search_anchor_downward_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  viewport_start_line: usize,
-  viewport_start_column: usize,
+  viewport: &Viewport,
   target_cursor_line: usize,
   target_cursor_char: usize,
-  target_last_line: usize,
 ) -> (usize, usize) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
@@ -1006,7 +1006,6 @@ fn search_anchor_downward_wrap_nolinebreak(
   debug_assert!(height > 0);
   debug_assert!(width > 0);
 
-  let target_last_line = std::cmp::min(target_last_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
@@ -1017,29 +1016,37 @@ fn search_anchor_downward_wrap_nolinebreak(
       .saturating_sub(1),
   );
 
-  let mut n = 0_usize;
-  let mut current_line = target_last_line;
+  debug_assert!(viewport.lines().last_key_value().is_some());
+  let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
 
-  while n <= height as usize {
-    let current_row = 0_u16;
-    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
-      buffer,
-      viewport_start_column,
-      current_line,
-      current_row,
-      height,
-      width,
-    );
-    n += rows.len();
+  let start_line = if target_cursor_line <= last_line {
+    viewport_start_line
+  } else {
+    let mut n = 0_usize;
+    let mut current_line = target_cursor_line;
 
-    if current_line == 0 {
-      break;
+    while n <= height as usize {
+      let current_row = 0_u16;
+      let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
+        buffer,
+        viewport_start_column,
+        current_line,
+        current_row,
+        height,
+        width,
+      );
+      n += rows.len();
+
+      if current_line == 0 {
+        break;
+      }
+
+      current_line -= 1;
     }
+    current_line
+  };
 
-    current_line -= 1;
-  }
-
-  let (on_left_side, left_side_start_column) = leftside_downward(
+  let (on_left_side, start_column_on_left_side) = leftside_downward(
     buffer,
     window_actual_shape,
     viewport_start_line,
@@ -1049,10 +1056,10 @@ fn search_anchor_downward_wrap_nolinebreak(
   );
 
   if on_left_side {
-    return (current_line, left_side_start_column);
+    return (start_line, start_column_on_left_side);
   }
 
-  let (on_right_side, right_side_start_column) = rightside_downward(
+  let (on_right_side, start_column_on_right_side) = rightside_downward(
     buffer,
     window_actual_shape,
     viewport_start_line,
@@ -1062,10 +1069,10 @@ fn search_anchor_downward_wrap_nolinebreak(
   );
 
   if on_right_side {
-    return (current_line, right_side_start_column);
+    return (start_line, start_column_on_right_side);
   }
 
-  (current_line, viewport_start_column)
+  (start_line, viewport_start_column)
 }
 
 fn search_anchor_downward_wrap_linebreak(
