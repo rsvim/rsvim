@@ -878,7 +878,19 @@ fn search_anchor_downward_nowrap(
   // This |is the second very long line, whic|h s|till shows in the viewport.
   //      |----------------------------------|
   // ```
+  //
+  // The edge cases are:
+  // 1. The target line is on the left side.
+  // 1. The target line is on the right side.
   // spellchecker:on
+
+  if viewport_start_column > 0 {
+    match buffer.char_at(target_cursor_line, viewport_start_column) {
+      Some(c) => {}
+      None => {}
+    }
+  }
+
   (current_line, viewport_start_column)
 }
 
