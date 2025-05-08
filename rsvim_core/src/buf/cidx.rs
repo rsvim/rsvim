@@ -233,9 +233,9 @@ impl ColumnIndex {
   /// Get the **previous** char index which the width is less than the specified width.
   ///
   /// NOTE: A unicode char's width can also be 0 (line-break), 2 (Chinese/Japanese/Korean char) and
-  /// 8 (default tab). The **current** char index is the one that its width range covers the
-  /// specified `width`. The **previous** char is the one before the **current**, the **next** char
-  /// is the one after the **current**.
+  /// 8 (tab). The **current** char index is the one that its width range covers the specified
+  /// `width`. The **previous** char is the one before the **current**, the **next** char is the
+  /// one after the **current**.
   ///
   /// # Return
   ///
