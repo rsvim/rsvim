@@ -91,7 +91,7 @@ pub fn sync_line(
     window_local_options.wrap(),
     window_local_options.line_break(),
   ) {
-    (false, _) => sync_line_nowrap(
+    (false, _) => proc_line_nowrap(
       buffer,
       start_column,
       current_line,
@@ -99,7 +99,7 @@ pub fn sync_line(
       height,
       width,
     ),
-    (true, false) => sync_line_wrap_nolinebreak(
+    (true, false) => proc_line_wrap_nolinebreak(
       buffer,
       start_column,
       current_line,
@@ -107,7 +107,7 @@ pub fn sync_line(
       height,
       width,
     ),
-    (true, true) => sync_line_wrap_linebreak(
+    (true, true) => proc_line_wrap_linebreak(
       buffer,
       start_column,
       current_line,
@@ -181,7 +181,7 @@ fn end_char_and_prefills(
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn sync_line_nowrap(
+fn proc_line_nowrap(
   buffer: &Buffer,
   start_column: usize,
   current_line: usize,
@@ -245,7 +245,7 @@ fn sync_nowrap(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let (rows, start_fills, end_fills, _) = sync_line_nowrap(
+      let (rows, start_fills, end_fills, _) = proc_line_nowrap(
         buffer,
         start_column,
         current_line,
@@ -330,7 +330,7 @@ fn sync_nowrap(
 // }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn sync_line_wrap_nolinebreak(
+fn proc_line_wrap_nolinebreak(
   buffer: &Buffer,
   start_column: usize,
   current_line: usize,
@@ -416,7 +416,7 @@ fn sync_wrap_nolinebreak(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let (rows, start_fills, end_fills, changed_current_row) = sync_line_wrap_nolinebreak(
+      let (rows, start_fills, end_fills, changed_current_row) = proc_line_wrap_nolinebreak(
         buffer,
         start_column,
         current_line,
@@ -541,7 +541,7 @@ fn cloned_line_max_len(window_height: u16, window_width: u16, start_column: usiz
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
-fn sync_line_wrap_linebreak(
+fn proc_line_wrap_linebreak(
   buffer: &Buffer,
   start_column: usize,
   current_line: usize,
@@ -726,7 +726,7 @@ fn sync_wrap_linebreak(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let (rows, start_fills, end_fills, changed_current_row) = sync_line_wrap_linebreak(
+      let (rows, start_fills, end_fills, changed_current_row) = proc_line_wrap_linebreak(
         buffer,
         start_column,
         current_line,
@@ -761,8 +761,8 @@ pub fn search_anchor_downward(
   window_local_options: &WindowLocalOptions,
   start_line: usize,
   start_column: usize,
-  cursor_line: usize,
-  cursor_char: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
   target_last_line: usize,
 ) -> (usize, usize) {
   (0, 0)
