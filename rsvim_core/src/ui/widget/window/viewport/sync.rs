@@ -765,6 +765,80 @@ pub fn search_anchor_downward(
   target_cursor_char: usize,
   target_last_line: usize,
 ) -> (usize, usize) {
+  // If window is zero-sized.
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  if height == 0 || width == 0 {
+    return (0, 0);
+  }
+
+  match (
+    window_local_options.wrap(),
+    window_local_options.line_break(),
+  ) {
+    (false, _) => search_anchor_downward_nowrap(
+      buffer,
+      window_actual_shape,
+      start_line,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+      target_last_line,
+    ),
+    (true, false) => search_anchor_downward_wrap_nolinebreak(
+      buffer,
+      window_actual_shape,
+      start_line,
+      start_column,
+      target_cursor_line,
+      target_cursor_line,
+      target_last_line,
+    ),
+    (true, true) => search_anchor_downward_wrap_linebreak(
+      buffer,
+      window_actual_shape,
+      start_line,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+      target_last_line,
+    ),
+  }
+}
+
+fn search_anchor_downward_nowrap(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  start_line: usize,
+  start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+  target_last_line: usize,
+) -> (usize, usize) {
+  (0, 0)
+}
+
+fn search_anchor_downward_wrap_nolinebreak(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  start_line: usize,
+  start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+  target_last_line: usize,
+) -> (usize, usize) {
+  (0, 0)
+}
+
+fn search_anchor_downward_wrap_linebreak(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  start_line: usize,
+  start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+  target_last_line: usize,
+) -> (usize, usize) {
   (0, 0)
 }
 
