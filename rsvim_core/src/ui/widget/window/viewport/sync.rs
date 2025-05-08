@@ -754,6 +754,20 @@ fn sync_wrap_linebreak(
   }
 }
 
+// Returns `start_line`, `start_column` for a viewport.
+pub fn search_anchor_downward(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  window_local_options: &WindowLocalOptions,
+  start_line: usize,
+  start_column: usize,
+  cursor_line: usize,
+  cursor_char: usize,
+  target_last_line: usize,
+) -> (usize, usize) {
+  (0, 0)
+}
+
 #[allow(unused_imports)]
 #[cfg(test)]
 mod tests {
