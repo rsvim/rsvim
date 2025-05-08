@@ -11,6 +11,9 @@ use std::collections::BTreeMap;
 /// Display width index (char-wise) for each unicode char in vim buffer. For each line, the
 /// char/column index starts from 0.
 ///
+/// A unicode char's width can also be 0 (line-break), 2 (Chinese/Japanese/Korean char) and
+/// 8 (tab). Thus we need to maintain the mappings between the char and its display width/column.
+///
 /// This structure is actually a prefix-sum tree structure. For example now we have a line:
 ///
 /// ```text
@@ -160,11 +163,12 @@ impl ColumnIndex {
     self._build_cache(options, buf_line, Some(char_idx), None);
   }
 
-  /// Get the prefix display width in char index range `[0,char_idx)`.
+  /// Get the prefix display width in of **previous** char by `char_idx`, i.e. width range is
+  /// `[0,char_idx)`.
   ///
   /// NOTE: This is equivalent to `width_at(char_idx-1)`.
   ///
-  /// # Return
+  /// # Returns
   ///
   /// 1. It returns 0 if the `char_idx` is out of the line, there're below cases:
   ///    - The `char_idx` is 0.
@@ -199,11 +203,11 @@ impl ColumnIndex {
     }
   }
 
-  /// Get the display width in char index range `[0,char_idx]`, both sides are inclusive.
+  /// Get the display width at **current** char by `char_idx`, i.e. width range is `[0,char_idx]`.
   ///
   /// NOTE: This is equivalent to `width_before(char_idx+1)`.
   ///
-  /// # Return
+  /// # Returns
   ///
   /// 1. It returns 0 if the `char_idx` is out of the line, there're below cases:
   ///    - The line is empty.
@@ -245,14 +249,9 @@ impl ColumnIndex {
     self._build_cache(options, buf_line, None, Some(width));
   }
 
-  /// Get the **previous** char index which the width is less than the specified width.
+  /// Get the **previous** char index before the char at `width`.
   ///
-  /// NOTE: A unicode char's width can also be 0 (line-break), 2 (Chinese/Japanese/Korean char) and
-  /// 8 (tab). The **current** char index is the one that its width range covers the specified
-  /// `width`. The **previous** char is the one before the **current**, the **next** char is the
-  /// one after the **current**.
-  ///
-  /// # Return
+  /// # Returns
   ///
   /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
@@ -297,9 +296,7 @@ impl ColumnIndex {
     }
   }
 
-  /// Get the **current** char index which the width range covers the specified `width`.
-  ///
-  /// NOTE: For the term **current**, please refer to [`ColumnIndex::char_before`].
+  /// Get the **current** char index at `width`.
   ///
   /// # Return
   ///
@@ -349,10 +346,7 @@ impl ColumnIndex {
     }
   }
 
-  /// Get the **next** char index which is next to (after) the **current** char, which the width
-  /// range covers the specified `width`.
-  ///
-  /// NOTE: For the term **next** and **current**, please refer to [`ColumnIndex::char_before`].
+  /// Get the **next** char index after the char at `width`.
   ///
   /// # Return
   ///
