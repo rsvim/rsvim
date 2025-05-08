@@ -3977,10 +3977,17 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let old_viewport = lock!(window.viewport()).clone();
-      let buf = lock!(buf);
-      let (start_line, start_column) =
-        old_viewport.search_anchor_downward(&buf, window.actual_shape(), window.options(), 2, 15);
+      let buffer = lock!(buf);
+      let (start_line, start_column) = old_viewport.search_anchor_downward(
+        &buffer,
+        window.actual_shape(),
+        window.options(),
+        2,
+        15,
+      );
 
+      assert_eq!(start_line, 0);
+      assert_eq!(start_column, 0);
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
