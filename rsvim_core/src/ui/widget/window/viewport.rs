@@ -557,26 +557,32 @@ impl Viewport {
     )
   }
 
-  /// Search for a new viewport with target cursor line/char position, when cursor moves downward.
+  #[allow(clippy::too_many_arguments)]
+  /// Search for a new viewport anchor (i.e. `start_line`/`start_column`) with target cursor
+  /// line/char position, when cursor moves downward.
   ///
   /// NOTE: If target cursor line/char position cannot be correctly shown in new viewport, the
   /// viewport will be adjusted to show target cursor correctly, with a minimal movement (for
   /// better user visuals).
-  pub fn search_view_downward(
+  pub fn search_anchor_downward(
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     window_local_options: &WindowLocalOptions,
-    start_line_idx: usize,
-    start_row_idx: u16,
-    start_column_idx: usize,
-  ) -> LineViewport {
-    sync::sync_line(
+    viewport_start_line_idx: usize,
+    viewport_start_column_idx: usize,
+    target_cursor_line_idx: usize,
+    target_cursor_char_idx: usize,
+    target_viewport_last_line_idx: usize,
+  ) -> (usize, usize) {
+    sync::search_anchor_downward(
       buffer,
       window_actual_shape,
       window_local_options,
-      start_line_idx,
-      start_row_idx,
-      start_column_idx,
+      viewport_start_line_idx,
+      viewport_start_column_idx,
+      target_cursor_line_idx,
+      target_cursor_char_idx,
+      target_viewport_last_line_idx,
     )
   }
 
