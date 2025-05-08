@@ -3895,7 +3895,7 @@ mod tests_search_anchor_nowrap {
   fn new1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = U16Size::new(17, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
@@ -3906,51 +3906,39 @@ mod tests_search_anchor_nowrap {
         "Hello, RSVIM!\n",
         "This is a quite simple and small test lines.\n",
         "But still it contains several things we want to test:\n",
-        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
-        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
-        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
-        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+        "\t1. When\tthe\tline\tis\tsmall\tenough\tto\tcompletely\tput\tinside.\n",
+        "\t2. When\tit\t\ttoo\tlong\tto\tcompletely\tput:\n",
+        "\t\t3. The extra parts are been truncated if\tboth\tline-wrap\tand\tword-wrap\toptions\tare\tnot\tset.\n",
+        "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
       ],
     );
 
     let expect = vec![
-      "Hello, RSV",
-      "This is a ",
-      "But still ",
-      "  1. When ",
-      "  2. When ",
-      "     * The",
-      "     * The",
-      "",
+      "Hello, RSVIM!\n",
+      "This is a quite s",
+      "But still it cont",
+      "\t1. When",
+      "\t2. When",
     ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = lock!(window.viewport()).clone();
-    let expect_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 0),
-      (5, 0),
-      (6, 0),
-      (7, 0),
-    ]
-    .into_iter()
-    .collect();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
     assert_viewport(
       buf.clone(),
       &actual,
       &expect,
       0,
-      8,
+      5,
       &expect_fills,
       &expect_fills,
     );
   }
 
   #[test]
-  fn new2() {
+  fn _new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 15);
@@ -4006,7 +3994,7 @@ mod tests_search_anchor_nowrap {
   }
 
   #[test]
-  fn new3() {
+  fn _new3() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
@@ -4051,7 +4039,7 @@ mod tests_search_anchor_nowrap {
   }
 
   #[test]
-  fn new4() {
+  fn _new4() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
@@ -4076,7 +4064,7 @@ mod tests_search_anchor_nowrap {
   }
 
   #[test]
-  fn new5() {
+  fn _new5() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 10);
@@ -4153,7 +4141,7 @@ mod tests_search_anchor_nowrap {
   }
 
   #[test]
-  fn new6() {
+  fn _new6() {
     test_log_init();
 
     let terminal_size = U16Size::new(27, 6);
@@ -4204,7 +4192,7 @@ mod tests_search_anchor_nowrap {
   }
 
   #[test]
-  fn new7() {
+  fn _new7() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
@@ -4229,7 +4217,7 @@ mod tests_search_anchor_nowrap {
   }
 
   #[test]
-  fn new8() {
+  fn _new8() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
@@ -4254,7 +4242,7 @@ mod tests_search_anchor_nowrap {
   }
 
   #[test]
-  fn new9() {
+  fn _new9() {
     test_log_init();
 
     let terminal_size = U16Size::new(20, 20);
@@ -4279,7 +4267,7 @@ mod tests_search_anchor_nowrap {
   }
 
   #[test]
-  fn new10() {
+  fn _new10() {
     test_log_init();
 
     let terminal_size = U16Size::new(13, 10);
