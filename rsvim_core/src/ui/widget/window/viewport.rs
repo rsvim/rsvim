@@ -3919,6 +3919,7 @@ mod tests_search_anchor_downward_nowrap {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
+  use crate::ui::tree::Inodeable;
 
   #[test]
   fn new1() {
@@ -3942,6 +3943,8 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+
     // Initialize
     {
       let expect = vec![
@@ -3952,7 +3955,6 @@ mod tests_search_anchor_downward_nowrap {
         "\t2. When",
       ];
 
-      let window = make_window(terminal_size, buf.clone(), &win_opts);
       let actual = lock!(window.viewport()).clone();
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
@@ -3978,14 +3980,25 @@ mod tests_search_anchor_downward_nowrap {
         "\t2. When",
       ];
 
-      let window = make_window(terminal_size, buf.clone(), &win_opts);
-      let actual = lock!(window.viewport()).clone();
+      let old_viewport = lock!(window.viewport()).clone();
+      let buf = lock!(buf);
+      let (start_line, start_column) = Viewport::search_anchor_downward(
+        &buf,
+        window.actual_shape(),
+        window.options(),
+        old_viewport.start_line_idx(),
+        old_viewport.start_column_idx(),
+        2,
+        15,
+        target_viewport_last_line_idx,
+      );
+
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
       assert_viewport(
         buf.clone(),
-        &actual,
+        &old_viewport,
         &expect,
         0,
         5,
