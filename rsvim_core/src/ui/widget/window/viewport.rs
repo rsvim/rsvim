@@ -557,6 +557,29 @@ impl Viewport {
     )
   }
 
+  /// Search for a new viewport with target cursor line/char position, when cursor moves downward.
+  ///
+  /// NOTE: If target cursor line/char position cannot be correctly shown in new viewport, the
+  /// viewport will be adjusted to show target cursor correctly, with a minimal movement (for
+  /// better user visuals).
+  pub fn search_view_downward(
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    window_local_options: &WindowLocalOptions,
+    start_line_idx: usize,
+    start_row_idx: u16,
+    start_column_idx: usize,
+  ) -> LineViewport {
+    sync::sync_line(
+      buffer,
+      window_actual_shape,
+      window_local_options,
+      start_line_idx,
+      start_row_idx,
+      start_column_idx,
+    )
+  }
+
   // /// Calculate viewport upward, from bottom to top.
   // ///
   // /// NOTE: The `end_line_idx` itself doesn't contain in the final calculation results. This is due
@@ -3913,28 +3936,57 @@ mod tests_search_anchor_nowrap {
       ],
     );
 
-    let expect = vec![
-      "Hello, RSVIM!\n",
-      "This is a quite s",
-      "But still it cont",
-      "\t1. When",
-      "\t2. When",
-    ];
+    // Initialize
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+      ];
 
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = lock!(window.viewport()).clone();
-    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-      .into_iter()
-      .collect();
-    assert_viewport(
-      buf.clone(),
-      &actual,
-      &expect,
-      0,
-      5,
-      &expect_fills,
-      &expect_fills,
-    );
+      let window = make_window(terminal_size, buf.clone(), &win_opts);
+      let actual = lock!(window.viewport()).clone();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Search-1
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+      ];
+
+      let window = make_window(terminal_size, buf.clone(), &win_opts);
+      let actual = lock!(window.viewport()).clone();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
   }
 
   #[test]
