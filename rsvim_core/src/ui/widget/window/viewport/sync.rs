@@ -880,15 +880,24 @@ fn search_anchor_downward_nowrap(
   // ```
   //
   // The edge cases are:
-  // 1. The target line is on the left side.
-  // 1. The target line is on the right side.
+  // 1. The target cursor is on the left side.
+  // 1. The target cursor is on the right side.
   // spellchecker:on
 
-  if viewport_start_column > 0 {
-    match buffer.char_at(target_cursor_line, viewport_start_column) {
-      Some(c) => {}
-      None => {}
+  let viewport_end_column = viewport_start_column + width as usize;
+
+  // Target cursor line start.
+  match buffer.char_at(target_cursor_line, viewport_start_column) {
+    Some(c) => {
+      let c_width = buffer.width_before(target_cursor_line, c);
     }
+    None => {}
+  }
+
+  // Target cursor line end.
+  match buffer.char_before(target_cursor_line, viewport_end_column) {
+    Some(c) => {}
+    None => {}
   }
 
   (current_line, viewport_start_column)
