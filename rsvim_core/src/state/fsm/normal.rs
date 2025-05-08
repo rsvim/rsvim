@@ -87,6 +87,7 @@ struct ExpectedMoveAndScroll {
   pub cursor_move_to: Option<(usize, usize)>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Copy, Clone)]
 enum OutOfWindow {
   Top,
