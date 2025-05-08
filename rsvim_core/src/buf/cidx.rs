@@ -383,7 +383,8 @@ impl ColumnIndex {
     None
   }
 
-  /// Get the last char index which the width is less than or equal to the specified `width`.
+  /// Get the **last** char index which has the biggest width, while still less than or equal to
+  /// the specified `width`.
   ///
   /// # Return
   ///
