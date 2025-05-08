@@ -14,6 +14,7 @@ use std::collections::BTreeMap;
 /// This structure is actually a prefix-sum tree structure. For example now we have a line:
 ///
 /// ```text
+/// column index:
 ///                           25
 /// 0      7       15       25|
 /// |      |       |         ||
@@ -21,6 +22,7 @@ use std::collections::BTreeMap;
 /// |      |                 ||
 /// 0      7                18|
 ///                           19
+/// char index:
 /// ```
 ///
 /// Here we have some facts:
@@ -33,6 +35,16 @@ use std::collections::BTreeMap;
 /// Here we have below terms:
 /// - **Prefix (Display) Width**: the display width from the first char to current char, inclusive
 ///   on both side.
+/// - **Column**: the column index is the its display width - 1.
+/// - **Current** char: the char index that its covers the display width.
+/// - **Previous** char: the char index before the **current** char.
+/// - **Next** char: the char index after the **current** char.
+///
+/// For example:
+/// - The **current** char on width 8 is `<--HT-->` (column:7, char:7), the **current** char on
+///   width 10 is still `<--HT-->` (column:9, char:7).
+/// - The **current** char on width 0 doesn't exist (because the width 0 actually don't have a char
+///   on it), the **current** char on width 1 is `T` (column:0, char:0).
 pub struct ColumnIndex {
   // Char index maps to its prefix display width.
   char2width: Vec<usize>,
