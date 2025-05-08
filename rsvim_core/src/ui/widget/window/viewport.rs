@@ -3909,7 +3909,7 @@ mod tests_view_wrap_linebreak_startcol {
 
 #[allow(unused_imports)]
 #[cfg(test)]
-mod tests_search_anchor_nowrap {
+mod tests_search_anchor_downward_nowrap {
   use super::tests_util::*;
   use super::*;
 
