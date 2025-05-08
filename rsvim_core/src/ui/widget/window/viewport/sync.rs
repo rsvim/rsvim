@@ -809,13 +809,53 @@ pub fn search_anchor_downward(
 fn search_anchor_downward_nowrap(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  start_line: usize,
-  start_column: usize,
+  _viewport_start_line: usize,
+  viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
   target_last_line: usize,
 ) -> (usize, usize) {
-  (0, 0)
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  let buffer_len_lines = buffer.get_rope().len_lines();
+
+  debug_assert!(height > 0);
+  debug_assert!(width > 0);
+
+  let target_last_line = std::cmp::min(target_last_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .get_rope()
+      .line(target_cursor_line)
+      .len_chars()
+      .saturating_sub(1),
+  );
+
+  let mut n = 0_usize;
+  let mut current_line = target_last_line;
+
+  while n <= height as usize {
+    let current_row = 0_u16;
+    let (rows, _start_fills, _end_fills, _) = proc_line_nowrap(
+      buffer,
+      viewport_start_column,
+      current_line,
+      current_row,
+      height,
+      width,
+    );
+    n += rows.len();
+
+    if current_line == 0 {
+      break;
+    }
+
+    current_line -= 1;
+  }
+
+  (current_line, viewport_start_column)
 }
 
 fn search_anchor_downward_wrap_nolinebreak(
