@@ -930,14 +930,14 @@ fn search_anchor_downward_nowrap(
     // to show the target cursor.
 
     let mut n = 0_usize;
-    let mut current_line = target_cursor_line;
+    let mut current_line = target_cursor_line as isize;
 
-    while n <= height as usize {
+    while (n < height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
       let (rows, _start_fills, _end_fills, _) = proc_line_nowrap(
         buffer,
         viewport_start_column,
-        current_line,
+        current_line as usize,
         current_row,
         height,
         width,
@@ -951,7 +951,7 @@ fn search_anchor_downward_nowrap(
       current_line -= 1;
     }
 
-    current_line
+    current_line as usize
   };
 
   let (on_left_side, start_column_on_left_side) = leftside_downward(
@@ -1016,14 +1016,14 @@ fn search_anchor_downward_wrap_nolinebreak(
     viewport_start_line
   } else {
     let mut n = 0_usize;
-    let mut current_line = target_cursor_line;
+    let mut current_line = target_cursor_line as isize;
 
-    while n <= height as usize {
+    while (n <= height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
       let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
         buffer,
         viewport_start_column,
-        current_line,
+        current_line as usize,
         current_row,
         height,
         width,
@@ -1036,7 +1036,7 @@ fn search_anchor_downward_wrap_nolinebreak(
 
       current_line -= 1;
     }
-    current_line
+    current_line as usize
   };
 
   let (on_left_side, start_column_on_left_side) = leftside_downward(
@@ -1101,14 +1101,14 @@ fn search_anchor_downward_wrap_linebreak(
     viewport_start_line
   } else {
     let mut n = 0_usize;
-    let mut current_line = target_cursor_line;
+    let mut current_line = target_cursor_line as isize;
 
-    while n <= height as usize {
+    while (n <= height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
       let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
         buffer,
         viewport_start_column,
-        current_line,
+        current_line as usize,
         current_row,
         height,
         width,
@@ -1121,7 +1121,7 @@ fn search_anchor_downward_wrap_linebreak(
 
       current_line -= 1;
     }
-    current_line
+    current_line as usize
   };
 
   let (on_left_side, start_column_on_left_side) = leftside_downward(
