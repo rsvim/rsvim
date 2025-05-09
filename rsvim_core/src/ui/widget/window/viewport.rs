@@ -3987,11 +3987,19 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = {
+        let target_cursor_line = 2;
+        let target_cursor_char = 15;
+
         let mut window = window.lock();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
-        let (start_line, start_column) =
-          old.search_anchor_downward(&buf, window.actual_shape(), window.options(), 2, 15);
+        let (start_line, start_column) = old.search_anchor_downward(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
         assert_eq!(start_line, 0);
         assert_eq!(start_column, 0);
 
@@ -4002,6 +4010,12 @@ mod tests_search_anchor_downward_nowrap {
           start_line,
           start_column,
         );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
         window.set_viewport(Viewport::to_arc(viewport));
         lock!(window.viewport()).clone()
       };
@@ -4034,12 +4048,20 @@ mod tests_search_anchor_downward_nowrap {
       ];
 
       let actual = {
+        let target_cursor_line = 5;
+        let target_cursor_char = 1;
+
         let mut window = window.lock();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
-        let (start_line, start_column) =
-          old.search_anchor_downward(&buf, window.actual_shape(), window.options(), 2, 15);
-        assert_eq!(start_line, 0);
+        let (start_line, start_column) = old.search_anchor_downward(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 1);
         assert_eq!(start_column, 0);
 
         let viewport = Viewport::view(
@@ -4053,18 +4075,18 @@ mod tests_search_anchor_downward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 2)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 2), (4, 2), (5, 0)]
         .into_iter()
         .collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        0,
-        5,
+        1,
+        6,
         &expect_start_fills,
         &expect_end_fills,
       );
