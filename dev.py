@@ -18,7 +18,7 @@ MACOS = platform.system().startswith("Darwin")
 SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
 
-USE_LLD_LINKER = False
+NO_LLD_LINKER = False
 LLD_NAME = None
 if WINDOWS:
     LLD_NAME = "lld-link"
@@ -48,15 +48,8 @@ def append_rustflags(opt):
     RUSTFLAGS.append(opt)
 
 
-def set_rustflags(command):
-    global RUSTFLAGS
-    rustflags = " ".join([f for f in RUSTFLAGS])
-    command = set_env(command, "RUSTFLAGS", rustflags, is_string=True)
-    return command.strip()
-
-
 def append_lld_rustflags():
-    if not USE_LLD_LINKER:
+    if NO_LLD_LINKER:
         return
 
     if LLD_FULLPATH is None:
@@ -64,6 +57,13 @@ def append_lld_rustflags():
         return
 
     append_rustflags("-Clink-arg=-fuse-ld=lld")
+
+
+def set_rustflags(command):
+    global RUSTFLAGS
+    rustflags = " ".join([f for f in RUSTFLAGS])
+    command = set_env(command, "RUSTFLAGS", rustflags, is_string=True)
+    return command.strip()
 
 
 def set_sccache(command):
@@ -215,9 +215,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-l",
-        "--lld",
+        "--no-lld",
+        dest="no_lld",
         action="store_true",
-        help="Build with `lld` linker",
+        help="Build without `lld` linker",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
@@ -315,8 +316,8 @@ if __name__ == "__main__":
 
     if parser.recache:
         RECACHE_SCCACHE = True
-    if parser.lld:
-        USE_LLD_LINKER = True
+    if parser.no_lld:
+        NO_LLD_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch)
