@@ -3917,8 +3917,8 @@ mod tests_search_anchor_downward_nowrap {
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Inodeable;
 
-  use parking_lot::Mutex;
-  use std::sync::Arc;
+  use std::cell::RefCell;
+  use std::rc::Rc;
 
   #[test]
   fn new1() {
@@ -3942,7 +3942,7 @@ mod tests_search_anchor_downward_nowrap {
       ],
     );
 
-    let window = Arc::new(Mutex::new(make_window(
+    let window = Rc::new(RefCell::new(make_window(
       terminal_size,
       buf.clone(),
       &win_opts,
@@ -3958,7 +3958,7 @@ mod tests_search_anchor_downward_nowrap {
         "\t2. When",
       ];
 
-      let actual = lock!(window.lock().viewport()).clone();
+      let actual = lock!(window.borrow().viewport()).clone();
       let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -3990,7 +3990,7 @@ mod tests_search_anchor_downward_nowrap {
         let target_cursor_line = 2;
         let target_cursor_char = 15;
 
-        let mut window = window.lock();
+        let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor_downward(
@@ -4051,7 +4051,7 @@ mod tests_search_anchor_downward_nowrap {
         let target_cursor_line = 5;
         let target_cursor_char = 1;
 
-        let mut window = window.lock();
+        let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor_downward(
@@ -4100,7 +4100,7 @@ mod tests_search_anchor_downward_nowrap {
         let target_cursor_line = 6;
         let target_cursor_char = 3;
 
-        let mut window = window.lock();
+        let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor_downward(
@@ -4149,7 +4149,7 @@ mod tests_search_anchor_downward_nowrap {
         let target_cursor_line = 7;
         let target_cursor_char = 3;
 
-        let mut window = window.lock();
+        let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor_downward(
