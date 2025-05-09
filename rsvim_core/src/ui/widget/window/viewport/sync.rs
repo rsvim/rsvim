@@ -836,7 +836,7 @@ pub fn search_anchor_downward(
 // 1. If target cursor is on the left side of viewport, and we need to adjust/move the viewport to
 //    left.
 // 2. If 1st is true, this is the new "start_column" after adjustments.
-fn leftside_downward(
+fn left_downward(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
   _viewport_start_line: usize,
@@ -864,7 +864,7 @@ fn leftside_downward(
 // 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
 //    right.
 // 2. If 1st is true, this is the new "start_column" after adjustments.
-fn rightside_downward(
+fn right_downward(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   _viewport_start_line: usize,
@@ -954,7 +954,7 @@ fn search_anchor_downward_nowrap(
     current_line as usize
   };
 
-  let (on_left_side, start_column_on_left_side) = leftside_downward(
+  let (on_left_side, start_column_on_left_side) = left_downward(
     buffer,
     window_actual_shape,
     viewport_start_line,
@@ -967,7 +967,7 @@ fn search_anchor_downward_nowrap(
     return (start_line, start_column_on_left_side);
   }
 
-  let (on_right_side, start_column_on_right_side) = rightside_downward(
+  let (on_right_side, start_column_on_right_side) = right_downward(
     buffer,
     window_actual_shape,
     viewport_start_line,
@@ -1039,7 +1039,7 @@ fn search_anchor_downward_wrap_nolinebreak(
     current_line as usize
   };
 
-  let (on_left_side, start_column_on_left_side) = leftside_downward(
+  let (on_left_side, start_column_on_left_side) = left_downward(
     buffer,
     window_actual_shape,
     viewport_start_line,
@@ -1052,7 +1052,7 @@ fn search_anchor_downward_wrap_nolinebreak(
     return (start_line, start_column_on_left_side);
   }
 
-  let (on_right_side, start_column_on_right_side) = rightside_downward(
+  let (on_right_side, start_column_on_right_side) = right_downward(
     buffer,
     window_actual_shape,
     viewport_start_line,
@@ -1124,7 +1124,7 @@ fn search_anchor_downward_wrap_linebreak(
     current_line as usize
   };
 
-  let (on_left_side, start_column_on_left_side) = leftside_downward(
+  let (on_left_side, start_column_on_left_side) = left_downward(
     buffer,
     window_actual_shape,
     viewport_start_line,
@@ -1137,7 +1137,7 @@ fn search_anchor_downward_wrap_linebreak(
     return (start_line, start_column_on_left_side);
   }
 
-  let (on_right_side, start_column_on_right_side) = rightside_downward(
+  let (on_right_side, start_column_on_right_side) = right_downward(
     buffer,
     window_actual_shape,
     viewport_start_line,
