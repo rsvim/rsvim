@@ -932,7 +932,7 @@ fn search_anchor_downward_nowrap(
     let mut n = 0_usize;
     let mut current_line = target_cursor_line as isize;
 
-    while (n < height as usize) && (current_line >= 0) {
+    while (n + 1 < height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
       let (rows, _start_fills, _end_fills, _) = proc_line_nowrap(
         buffer,
@@ -1018,7 +1018,7 @@ fn search_anchor_downward_wrap_nolinebreak(
     let mut n = 0_usize;
     let mut current_line = target_cursor_line as isize;
 
-    while (n <= height as usize) && (current_line >= 0) {
+    while (n + 1 < height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
       let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
         buffer,
@@ -1103,7 +1103,7 @@ fn search_anchor_downward_wrap_linebreak(
     let mut n = 0_usize;
     let mut current_line = target_cursor_line as isize;
 
-    while (n <= height as usize) && (current_line >= 0) {
+    while (n + 1 < height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
       let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
         buffer,
