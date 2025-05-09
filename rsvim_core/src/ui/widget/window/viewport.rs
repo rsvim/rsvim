@@ -820,21 +820,21 @@ mod tests_util {
 
       info!(
         "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
-        l, actual_line_idx, line_viewport
+        actual.start_line_idx() + l,
+        actual_line_idx,
+        line_viewport
       );
       info!(
-        "start_filled_cols expect:{:?}, actual:{}",
+        "l-{:?},start_filled_cols expect:{:?}, actual:{}, end_filled_cols expect:{:?}, actual:{}",
+        actual.start_line_idx() + l,
         expect_start_fills.get(&actual_line_idx),
-        line_viewport.start_filled_cols()
+        line_viewport.start_filled_cols(),
+        expect_end_fills.get(&actual_line_idx),
+        line_viewport.end_filled_cols()
       );
       assert_eq!(
         line_viewport.start_filled_cols(),
         *expect_start_fills.get(&actual_line_idx).unwrap()
-      );
-      info!(
-        "end_filled_cols expect:{:?}, actual:{}",
-        expect_end_fills.get(&actual_line_idx),
-        line_viewport.end_filled_cols()
       );
       assert_eq!(
         line_viewport.end_filled_cols(),
@@ -4127,7 +4127,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 7), (4, 7), (5, 7), (6, 7)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 3), (4, 3), (5, 0), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
@@ -4136,6 +4136,55 @@ mod tests_search_anchor_downward_nowrap {
         &expect,
         2,
         7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-4
+    {
+      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
+
+      let actual = {
+        let target_cursor_line = 7;
+        let target_cursor_char = 3;
+
+        let mut window = window.lock();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor_downward(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 3);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 2), (5, 0), (6, 0), (7, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        3,
+        8,
         &expect_start_fills,
         &expect_end_fills,
       );

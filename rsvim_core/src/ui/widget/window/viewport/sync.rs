@@ -846,7 +846,13 @@ fn left_downward(
 ) -> (bool, usize) {
   // If target cursor char is on the left of the old target viewport.
   let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
-    Some(c) => c > target_cursor_char,
+    Some(c) => {
+      trace!(
+        "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
+        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+      );
+      c > target_cursor_char
+    }
     None => false,
   };
 
@@ -876,8 +882,14 @@ fn right_downward(
   let viewport_end_column = viewport_start_column + width as usize;
 
   // Target cursor line end.
-  let on_right_side = match buffer.char_before(target_cursor_line, viewport_end_column) {
-    Some(c) => c < target_cursor_char,
+  let on_right_side = match buffer.char_at(target_cursor_line, viewport_end_column) {
+    Some(c) => {
+      trace!(
+        "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
+        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+      );
+      c < target_cursor_char
+    }
     None => false,
   };
 
