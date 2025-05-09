@@ -853,7 +853,7 @@ fn left_downward(
       );
       c > target_cursor_char
     }
-    None => false,
+    None => true,
   };
 
   if on_left_side {
