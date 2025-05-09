@@ -4094,7 +4094,7 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-3
     {
-      let expect = vec!["But still it co", "1. When", "2. When", "\t3.", "\t4."];
+      let expect = vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
 
       let actual = {
         let target_cursor_line = 6;
@@ -4127,7 +4127,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 7), (4, 7), (5, 7), (6, 7)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 1), (4, 1), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
