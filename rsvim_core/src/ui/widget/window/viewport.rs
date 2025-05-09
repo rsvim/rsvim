@@ -4040,11 +4040,11 @@ mod tests_search_anchor_downward_nowrap {
     // Search-2
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
         "This is a quite s",
         "But still it cont",
         "\t1. When",
         "\t2. When",
+        "\t\t3",
       ];
 
       let actual = {
