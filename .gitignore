@@ -26,8 +26,8 @@ generated-typedocs
 .DS_Store
 
 # Snapshot
-*snapshot.bin
-*SNAPSHOT.BIN
+RSVIM_SNAPSHOT.BIN
+RSVIM_VERSION.TXT
 
 # Tests/Benchmarks
 /tests_and_benchmarks
