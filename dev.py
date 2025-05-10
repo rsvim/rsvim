@@ -32,6 +32,7 @@ LLD_FULLPATH = shutil.which(LLD_NAME)
 def set_env(command, name, value, is_string=False):
     assert isinstance(command, str)
     if WINDOWS:
+        logging.info(f"Set env f{name}={value}")
         os.environ[name] = value
     else:
         if is_string is True:

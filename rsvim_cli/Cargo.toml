@@ -19,7 +19,6 @@ rsvim_core = { workspace = true }
 tracing = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }
-toml = { workspace = true }
 once_cell = { workspace = true, features = ["parking_lot"] }
 zstd = { workspace = true }
 
@@ -27,3 +26,4 @@ zstd = { workspace = true }
 rsvim_core = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 zstd = { workspace = true }
+toml = { workspace = true }

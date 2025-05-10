@@ -4,7 +4,7 @@
 
 use rsvim_core::cli::CliOpt;
 use rsvim_core::evloop::EventLoop;
-use rsvim_core::js::{SnapshotData, v8_version};
+use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
 
@@ -24,16 +24,8 @@ static RSVIM_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(|| {
 });
 
 static CLI_VERSION: Lazy<String> = Lazy::new(|| {
-  let cargo_toml_src = include_str!("../../../Cargo.toml");
-  let cargo_toml_meta = cargo_toml_src.parse::<toml::Table>().unwrap();
-  format!(
-    "rsvim {} (v8 {})",
-    cargo_toml_meta["workspace"]["package"]["version"]
-      .as_str()
-      .unwrap(),
-    v8_version(),
-  )
-  .to_string()
+  let version = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/RSVIM_VERSION.TXT"));
+  version.to_string()
 });
 
 fn main() -> IoResult<()> {
