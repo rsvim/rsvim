@@ -11,9 +11,13 @@ use std::collections::BTreeMap;
 /// Display width index (char-wise) for each unicode char in vim buffer. For each line, the
 /// char/column index starts from 0.
 ///
+/// A unicode char's width can also be 0 (line-break), 2 (Chinese/Japanese/Korean char) and
+/// 8 (tab). Thus we need to maintain the mappings between the char and its display width/column.
+///
 /// This structure is actually a prefix-sum tree structure. For example now we have a line:
 ///
 /// ```text
+/// column index:
 ///                           25
 /// 0      7       15       25|
 /// |      |       |         ||
@@ -21,6 +25,7 @@ use std::collections::BTreeMap;
 /// |      |                 ||
 /// 0      7                18|
 ///                           19
+/// char index:
 /// ```
 ///
 /// Here we have some facts:
@@ -33,6 +38,20 @@ use std::collections::BTreeMap;
 /// Here we have below terms:
 /// - **Prefix (Display) Width**: the display width from the first char to current char, inclusive
 ///   on both side.
+/// - **Column**: the column index is the its display width - 1.
+/// - **Current** char: the char index that its covers the display width.
+/// - **Previous** char: the char index before the **current** char.
+/// - **Next** char: the char index after the **current** char.
+///
+/// For example:
+/// - The **current** char on width 8 is `<--HT-->` (column:7, char:7), the **current** char on
+///   width 10 is still `<--HT-->` (column:9, char:7). The width on **current** char 7 is 16.
+/// - The **current** char on width 0 doesn't exist (because the width 0 actually don't have a char
+///   on it), the **current** char on width 1 is `T` (column:0, char:0). The width on **current**
+///   char 0 is 1.
+/// - The **current** char on width 26 is `.` (column:25, char:18). NOTE: The width 26 has 2 chars
+///   on it: `.` and `\n`, but here we always locate to the 1st char from the beginning. The width
+///   on **current** char 18 is 26.
 pub struct ColumnIndex {
   // Char index maps to its prefix display width.
   char2width: Vec<usize>,
@@ -144,12 +163,12 @@ impl ColumnIndex {
     self._build_cache(options, buf_line, Some(char_idx), None);
   }
 
-  /// Get the prefix display width in char index range `[0,char_idx)`, left-inclusive and
-  /// right-exclusive.
+  /// Get the prefix display width in of **previous** char by `char_idx`, i.e. width range is
+  /// `[0,char_idx)`.
   ///
-  /// NOTE: This is equivalent to `width_until(char_idx-1)`.
+  /// NOTE: This is equivalent to `width_at(char_idx-1)`.
   ///
-  /// # Return
+  /// # Returns
   ///
   /// 1. It returns 0 if the `char_idx` is out of the line, there're below cases:
   ///    - The `char_idx` is 0.
@@ -184,11 +203,11 @@ impl ColumnIndex {
     }
   }
 
-  /// Get the display width in char index range `[0,char_idx]`, both sides are inclusive.
+  /// Get the display width at **current** char by `char_idx`, i.e. width range is `[0,char_idx]`.
   ///
   /// NOTE: This is equivalent to `width_before(char_idx+1)`.
   ///
-  /// # Return
+  /// # Returns
   ///
   /// 1. It returns 0 if the `char_idx` is out of the line, there're below cases:
   ///    - The line is empty.
@@ -230,14 +249,9 @@ impl ColumnIndex {
     self._build_cache(options, buf_line, None, Some(width));
   }
 
-  /// Get the **previous** char index which the width is less than the specified width.
+  /// Get the **previous** char index before the char at `width`.
   ///
-  /// NOTE: A unicode char's width can also be 0 (line-break), 2 (Chinese/Japanese/Korean char) and
-  /// 8 (default tab). The **current** char index is the one that its width range covers the
-  /// specified `width`. The **previous** char is the one before the **current**, the **next** char
-  /// is the one after the **current**.
-  ///
-  /// # Return
+  /// # Returns
   ///
   /// 1. It returns None if the `width` is out of the line, there're below cases:
   ///    - The line is empty.
@@ -282,9 +296,7 @@ impl ColumnIndex {
     }
   }
 
-  /// Get the **current** char index which the width range covers the specified `width`.
-  ///
-  /// NOTE: For the term **current**, please refer to [`ColumnIndex::char_before`].
+  /// Get the **current** char index at `width`.
   ///
   /// # Return
   ///
@@ -292,7 +304,7 @@ impl ColumnIndex {
   ///    - The line is empty.
   ///    - The `width` is greater than the whole line's display width, thus there's no such char
   ///      exists.
-  ///    - The `width` is 0, and the 1st char is not 0-width char (e.g. line-break).
+  ///    - The `width` is 0, and the 1st (only) char is 0-width char (e.g. line-break).
   /// 2. It returns the **current** char index otherwise.
   pub fn char_at(
     &mut self,
@@ -334,10 +346,7 @@ impl ColumnIndex {
     }
   }
 
-  /// Get the **next** char index which is next to (after) the **current** char, which the width
-  /// range covers the specified `width`.
-  ///
-  /// NOTE: For the term **next** and **current**, please refer to [`ColumnIndex::char_before`].
+  /// Get the **next** char index after the char at `width`.
   ///
   /// # Return
   ///
@@ -374,7 +383,8 @@ impl ColumnIndex {
     None
   }
 
-  /// Get the last char index which the width is less than or equal to the specified `width`.
+  /// Get the **last** char index which has the biggest width, while still less than or equal to
+  /// the specified `width`.
   ///
   /// # Return
   ///

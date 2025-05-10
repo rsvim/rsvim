@@ -557,6 +557,31 @@ impl Viewport {
     )
   }
 
+  #[allow(clippy::too_many_arguments)]
+  /// Search for a new viewport anchor (i.e. `start_line`/`start_column`) with target cursor
+  /// line/char position, when cursor moves downward.
+  ///
+  /// NOTE: If target cursor line/char position cannot be correctly shown in new viewport, the
+  /// viewport will be adjusted to show target cursor correctly, with a minimal movement (for
+  /// better user visuals).
+  pub fn search_anchor_downward(
+    &self,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    window_local_options: &WindowLocalOptions,
+    target_cursor_line_idx: usize,
+    target_cursor_char_idx: usize,
+  ) -> (usize, usize) {
+    sync::search_anchor_downward(
+      self,
+      buffer,
+      window_actual_shape,
+      window_local_options,
+      target_cursor_line_idx,
+      target_cursor_char_idx,
+    )
+  }
+
   // /// Calculate viewport upward, from bottom to top.
   // ///
   // /// NOTE: The `end_line_idx` itself doesn't contain in the final calculation results. This is due
@@ -795,21 +820,21 @@ mod tests_util {
 
       info!(
         "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
-        l, actual_line_idx, line_viewport
+        actual.start_line_idx() + l,
+        actual_line_idx,
+        line_viewport
       );
       info!(
-        "start_filled_cols expect:{:?}, actual:{}",
+        "l-{:?},start_filled_cols expect:{:?}, actual:{}, end_filled_cols expect:{:?}, actual:{}",
+        actual.start_line_idx() + l,
         expect_start_fills.get(&actual_line_idx),
-        line_viewport.start_filled_cols()
+        line_viewport.start_filled_cols(),
+        expect_end_fills.get(&actual_line_idx),
+        line_viewport.end_filled_cols()
       );
       assert_eq!(
         line_viewport.start_filled_cols(),
         *expect_start_fills.get(&actual_line_idx).unwrap()
-      );
-      info!(
-        "end_filled_cols expect:{:?}, actual:{}",
-        expect_end_fills.get(&actual_line_idx),
-        line_viewport.end_filled_cols()
       );
       assert_eq!(
         line_viewport.end_filled_cols(),
@@ -3874,6 +3899,682 @@ mod tests_view_wrap_linebreak_startcol {
       4,
       &expect_start_fills,
       &expect_end_fills,
+    );
+  }
+}
+
+#[allow(unused_imports)]
+#[cfg(test)]
+mod tests_search_anchor_downward_nowrap {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::lock;
+  use crate::prelude::*;
+  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
+  #[allow(dead_code)]
+  use crate::test::log::init as test_log_init;
+  use crate::ui::tree::Inodeable;
+
+  use std::cell::RefCell;
+  use std::rc::Rc;
+
+  #[test]
+  fn new1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(17, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "\t1. When\tthe\tline\tis\tsmall\tenough\tto\tcompletely\tput\tinside.\n",
+        "\t2. When\tit\t\ttoo\tlong\tto\tcompletely\tput:\n",
+        "\t\t3. The extra parts are been truncated if\tboth\tline-wrap\tand\tword-wrap\toptions\tare\tnot\tset.\n",
+        "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+
+    let window = Rc::new(RefCell::new(make_window(
+      terminal_size,
+      buf.clone(),
+      &win_opts,
+    )));
+
+    // Initialize
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+      ];
+
+      let actual = lock!(window.borrow().viewport()).clone();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 2)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        5,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-1
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+      ];
+
+      let actual = {
+        let target_cursor_line = 2;
+        let target_cursor_char = 15;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor_downward(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 0);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 2)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        5,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-2
+    {
+      let expect = vec![
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 5;
+        let target_cursor_char = 1;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor_downward(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 1);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 2), (4, 2), (5, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        1,
+        6,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-3
+    {
+      let expect = vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 3;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor_downward(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 1);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 7), (4, 7), (5, 7), (6, 7)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 3), (4, 3), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-4
+    {
+      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
+
+      let actual = {
+        let target_cursor_line = 7;
+        let target_cursor_char = 3;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor_downward(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 3);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 2), (5, 0), (6, 0), (7, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        3,
+        8,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn _new2() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(27, 15);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and ",
+      "But still it contains sever",
+      "  1. When the line is small",
+      "  2. When the line is too l",
+      "     * The extra parts are ",
+      "     * The extra parts are ",
+      "",
+    ];
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = lock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+    ]
+    .into_iter()
+    .collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      8,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn _new3() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(31, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and smal",
+      "But still it contains several t",
+      "  1. When the line is small eno",
+      "  2. When the line is too long ",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = lock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      5,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn _new4() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(20, 20);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
+    let expect = vec![""];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = lock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn _new5() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 10);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello,\tRSVIM!\n",
+        "This\r",
+        "is a quite\tsimple and small test lines.\n",
+        "But still\\it\r",
+        "contains\tseveral things we want to test:\n",
+        "\t1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "\t\t* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "\t\t* The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+    let expect = vec![
+      "Hello,", // 4 fills for '\t'
+      "This\r",
+      "is a quite",
+      "But still\\",
+      "contains", // 2 fills for '\t'
+      "\t1.",
+      "\t2.",
+      "\t", // 2 fills for '\t'
+      "\t", // 2 fills for '\t'
+      "",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = lock!(window.viewport()).clone();
+    let expect_start_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+      (8, 0),
+      (9, 0),
+    ]
+    .into_iter()
+    .collect();
+    let expect_end_fills: BTreeMap<usize, usize> = vec![
+      (0, 4),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 2),
+      (5, 0),
+      (6, 0),
+      (7, 2),
+      (8, 2),
+      (9, 0),
+    ]
+    .into_iter()
+    .collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      10,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn _new6() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(27, 6);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "你好，\tRSVIM！\n",
+        "这是\ta quite 简单而且很小的测试文字内容行。\n",
+        "But still\\it\t包含了好几种我们想测试的情况：\n",
+        "\t1. 当那条线\tis small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line 特别长而无法完全 to put in a row of the window content widget, there're multiple cases:\n",
+        "\t* The extra\tparts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "  * The extra parts\tare split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+    let expect = vec![
+      "你好，\tRSVIM！\n",
+      "这是\ta quite 简单而",  // 1 fills for '且'
+      "But still\\it\t包含了", // 1 fills for '好'
+      "\t1. 当那条线\t",
+      "  2. When the line 特别长而",
+      "\t* The extra\t",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = lock!(window.viewport()).clone();
+    let expect_start_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+        .into_iter()
+        .collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 1), (2, 1), (3, 0), (4, 0), (5, 0)]
+        .into_iter()
+        .collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      6,
+      &expect_start_fills,
+      &expect_end_fills,
+    );
+  }
+
+  #[test]
+  fn _new7() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(20, 20);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![]);
+    let expect = vec![""];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = lock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn _new8() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(20, 20);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![""]);
+    let expect = vec![""];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = lock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn _new9() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(20, 20);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, vec![]);
+    let expect = vec![""];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = lock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      1,
+      &expect_fills,
+      &expect_fills,
+    );
+  }
+
+  #[test]
+  fn _new10() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(13, 10);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_nowrap();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+      ],
+    );
+
+    let expect = vec![
+      "Hello, RSVIM!",
+      "This is a qui",
+      "But still it ",
+      "  1. When the",
+      "  2. When the",
+      "     * The ex",
+      "     * The ex",
+      "",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = lock!(window.viewport()).clone();
+    let expect_fills: BTreeMap<usize, usize> = vec![
+      (0, 0),
+      (1, 0),
+      (2, 0),
+      (3, 0),
+      (4, 0),
+      (5, 0),
+      (6, 0),
+      (7, 0),
+    ]
+    .into_iter()
+    .collect();
+    assert_viewport(
+      buf.clone(),
+      &actual,
+      &expect,
+      0,
+      8,
+      &expect_fills,
+      &expect_fills,
     );
   }
 }
