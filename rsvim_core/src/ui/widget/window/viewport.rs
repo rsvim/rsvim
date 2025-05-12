@@ -5051,16 +5051,11 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-2
     {
       let expect = vec![
-        "\t1. When",
-        "\tthe",
-        "\tline",
-        "\tis",
-        "\tsmall",
-        "\tenough",
-        "\tto",
-        "\tcomplete",
-        "ly\tput",
-        "\tinside.\n",
+        "small\t",
+        "enough\t",
+        "to\tco",
+        "mpletely\tp",
+        "ut\tinside.\n",
       ];
 
       let actual = {
