@@ -4997,11 +4997,13 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-1
     {
       let expect = vec![
+        "This is a quite s",
+        "imple and small t",
+        "est lines.\n",
         "But still it cont",
         "ains several thin",
         "gs we want to tes",
         "t:\n",
-        "\t1. When",
       ];
 
       let actual = {
@@ -5018,7 +5020,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
           target_cursor_line,
           target_cursor_char,
         );
-        assert_eq!(start_line, 2);
+        assert_eq!(start_line, 1);
         assert_eq!(start_column, 0);
 
         let viewport = Viewport::view(
@@ -5038,13 +5040,13 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        0,
+        1,
         3,
         &expect_start_fills,
         &expect_end_fills,

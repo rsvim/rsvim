@@ -1067,7 +1067,7 @@ fn search_anchor_downward_wrap_nolinebreak(
   let target_cursor_line_not_fully_show = line_head_not_show(viewport, target_cursor_line)
     || line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let start_line = if target_cursor_line <= last_line && target_cursor_line_not_fully_show {
+  let start_line = if target_cursor_line <= last_line && !target_cursor_line_not_fully_show {
     viewport_start_line
   } else {
     let mut n = 0_usize;
@@ -1085,7 +1085,7 @@ fn search_anchor_downward_wrap_nolinebreak(
       );
       n += rows.len();
 
-      if current_line == 0 {
+      if current_line == 0 || n + 1 >= height as usize {
         break;
       }
 
@@ -1134,7 +1134,7 @@ fn search_anchor_downward_wrap_linebreak(
   let target_cursor_line_not_fully_show = line_head_not_show(viewport, target_cursor_line)
     || line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let start_line = if target_cursor_line <= last_line && target_cursor_line_not_fully_show {
+  let start_line = if target_cursor_line <= last_line && !target_cursor_line_not_fully_show {
     viewport_start_line
   } else {
     let mut n = 0_usize;
@@ -1152,7 +1152,7 @@ fn search_anchor_downward_wrap_linebreak(
       );
       n += rows.len();
 
-      if current_line == 0 {
+      if current_line == 0 || n + 1 >= height as usize {
         break;
       }
 
