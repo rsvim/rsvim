@@ -1096,10 +1096,8 @@ fn search_anchor_downward_wrap_linebreak(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .get_rope()
-      .line(target_cursor_line)
-      .len_chars()
-      .saturating_sub(1),
+      .last_visible_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize),
   );
 
   debug_assert!(viewport.lines().last_key_value().is_some());
