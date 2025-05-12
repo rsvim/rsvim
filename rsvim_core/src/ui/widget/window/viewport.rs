@@ -4310,7 +4310,7 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-2
     {
-      let expect = vec!["", "", "", "", "", ""];
+      let expect = vec!["", "", "", "ut\tinside.", ""];
 
       let actual = {
         let target_cursor_line = 3;
@@ -4343,7 +4343,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 2)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
       assert_viewport(
