@@ -5093,6 +5093,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 4)].into_iter().collect();
+      info!("actual:{:?}", actual);
       assert_viewport(
         buf.clone(),
         &actual,
