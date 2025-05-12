@@ -4408,7 +4408,7 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-4
     {
-      let expect = vec!["", "", "mpletely\tp", ":\n", "both\tline-wrap"];
+      let expect = vec!["", "", "", "", "not\tset."];
 
       let actual = {
         let target_cursor_line = 5;
@@ -4425,7 +4425,7 @@ mod tests_search_anchor_downward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
-        assert_eq!(start_column, 95);
+        assert_eq!(start_column, 145);
 
         let viewport = Viewport::view(
           &buf,
@@ -4438,10 +4438,10 @@ mod tests_search_anchor_downward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 2)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 2), (4, 2), (5, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
         .into_iter()
         .collect();
       assert_viewport(
@@ -4450,6 +4450,104 @@ mod tests_search_anchor_downward_nowrap {
         &expect,
         1,
         6,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-5
+    {
+      let expect = vec!["", "\tcompletel", "put:\n", "\tand", "if\teither"];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 50;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor_downward(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 85);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 7), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 6), (6, 1)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-6
+    {
+      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
+
+      let actual = {
+        let target_cursor_line = 7;
+        let target_cursor_char = 0;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor_downward(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 3);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 2), (5, 0), (6, 0), (7, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        3,
+        8,
         &expect_start_fills,
         &expect_end_fills,
       );
