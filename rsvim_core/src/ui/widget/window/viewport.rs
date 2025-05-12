@@ -4359,11 +4359,11 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-3
     {
-      let expect = vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
+      let expect = vec!["", "", "", "pletely\tpu", "\n"];
 
       let actual = {
-        let target_cursor_line = 6;
-        let target_cursor_char = 3;
+        let target_cursor_line = 4;
+        let target_cursor_char = 100;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -4375,8 +4375,8 @@ mod tests_search_anchor_downward_nowrap {
           target_cursor_line,
           target_cursor_char,
         );
-        assert_eq!(start_line, 2);
-        assert_eq!(start_column, 1);
+        assert_eq!(start_line, 0);
+        assert_eq!(start_column, 96);
 
         let viewport = Viewport::view(
           &buf,
@@ -4389,18 +4389,18 @@ mod tests_search_anchor_downward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 7), (4, 7), (5, 7), (6, 7)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 3), (4, 3), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        2,
-        7,
+        0,
+        5,
         &expect_start_fills,
         &expect_end_fills,
       );
