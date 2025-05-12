@@ -4771,11 +4771,11 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-4
     {
-      let expect = vec!["", "", "", "", "not\tset."];
+      let expect = vec!["", "", "inside.\n", "", "options\ta"];
 
       let actual = {
         let target_cursor_line = 5;
-        let target_cursor_char = 100;
+        let target_cursor_char = 80;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -4788,7 +4788,7 @@ mod tests_search_anchor_downward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
-        assert_eq!(start_column, 145);
+        assert_eq!(start_column, 120);
 
         let viewport = Viewport::view(
           &buf,
@@ -4801,7 +4801,7 @@ mod tests_search_anchor_downward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 2)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 2), (4, 0), (5, 1)]
         .into_iter()
         .collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
@@ -4820,11 +4820,17 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-5
     {
-      let expect = vec!["", "\tcompletel", "put:\n", "\tand", "if\teither"];
+      let expect = vec![
+        "l it contains sev",
+        "1. When\tth",
+        "2. When\tit",
+        "\t3. The ex",
+        "\t4. The ex",
+      ];
 
       let actual = {
         let target_cursor_line = 6;
-        let target_cursor_char = 50;
+        let target_cursor_char = 1;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -4837,7 +4843,7 @@ mod tests_search_anchor_downward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 85);
+        assert_eq!(start_column, 8);
 
         let viewport = Viewport::view(
           &buf,
@@ -4850,10 +4856,10 @@ mod tests_search_anchor_downward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 7), (5, 0), (6, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 6), (6, 1)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
