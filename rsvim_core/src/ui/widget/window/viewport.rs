@@ -4946,7 +4946,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(17, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size.height(),
@@ -5217,7 +5217,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(17, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size.height(),
@@ -5580,7 +5580,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     let terminal_size = U16Size::new(17, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = make_nowrap();
+    let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size.height(),
