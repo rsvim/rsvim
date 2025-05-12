@@ -41,11 +41,11 @@ const AFTER_ABOUT: &str = "Copyright © 2025 RSVIM, VIM LICENSE.\nPlease checkou
 )]
 /// Command line options.
 pub struct CliOpt {
-  #[arg(help = "Edit file(s)")]
-  file: Vec<String>,
-
   #[arg(short = 'V', long = "version", help = "Print version")]
   version: bool,
+
+  #[arg(help = "Edit file(s)")]
+  file: Vec<String>,
 }
 
 impl CliOpt {
