@@ -644,13 +644,10 @@ impl Viewport {
       last_line_idx = Some(*line_idx);
       let mut last_row_viewport: Option<RowViewport> = None;
       for (row_idx, row_viewport) in line_viewport.rows() {
-        //trace!(
-        //  "row_idx:{:?},last_row_idx:{:?},last_row_viewport:{:?}, row_viewport:{:?}",
-        //  row_idx,
-        //  last_row_idx,
-        //  last_row_viewport,
-        //  row_viewport
-        //);
+        trace!(
+          "line_idx:{:?},row_idx:{:?},last_row_idx:{:?},last_row_viewport:{:?},row_viewport:{:?}",
+          line_idx, row_idx, last_row_idx, last_row_viewport, row_viewport
+        );
         match last_row_idx {
           Some(last_row_idx1) => debug_assert_eq!(last_row_idx1 + 1, *row_idx),
           None => { /* Skip */ }
@@ -5054,16 +5051,21 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-2
     {
       let expect = vec![
-        "This is a quite s",
-        "But still it cont",
         "\t1. When",
-        "\t2. When",
-        "\t\t3",
+        "\tthe",
+        "\tline",
+        "\tis",
+        "\tsmall",
+        "\tenough",
+        "\tto",
+        "\tcomplete",
+        "ly\tput",
+        "\tinside.\n",
       ];
 
       let actual = {
-        let target_cursor_line = 5;
-        let target_cursor_char = 1;
+        let target_cursor_line = 3;
+        let target_cursor_char = 60;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -5075,8 +5077,8 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
           target_cursor_line,
           target_cursor_char,
         );
-        assert_eq!(start_line, 1);
-        assert_eq!(start_column, 0);
+        assert_eq!(start_line, 3);
+        assert_eq!(start_column, 112);
 
         let viewport = Viewport::view(
           &buf,
@@ -5089,18 +5091,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-        .into_iter()
-        .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 2), (4, 2), (5, 0)]
-        .into_iter()
-        .collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 4)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        1,
-        6,
+        3,
+        4,
         &expect_start_fills,
         &expect_end_fills,
       );

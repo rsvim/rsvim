@@ -789,7 +789,7 @@ pub fn search_anchor_downward(
       buffer,
       window_actual_shape,
       target_cursor_line,
-      target_cursor_line,
+      target_cursor_char,
     ),
     (true, true) => search_anchor_downward_wrap_linebreak(
       viewport,
