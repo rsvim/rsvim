@@ -904,6 +904,46 @@ fn right_downward(
   }
 }
 
+fn adjust_downward_horizontally(
+  viewport: &Viewport,
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+  start_line: usize,
+) -> (usize, usize) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
+
+  let (on_left_side, start_column_on_left_side) = left_downward(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_left_side {
+    return (start_line, start_column_on_left_side);
+  }
+
+  let (on_right_side, start_column_on_right_side) = right_downward(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_right_side {
+    return (start_line, start_column_on_right_side);
+  }
+
+  (start_line, viewport_start_column)
+}
+
 fn search_anchor_downward_nowrap(
   viewport: &Viewport,
   buffer: &Buffer,
@@ -964,33 +1004,14 @@ fn search_anchor_downward_nowrap(
     current_line as usize
   };
 
-  let (on_left_side, start_column_on_left_side) = left_downward(
+  adjust_downward_horizontally(
+    viewport,
     buffer,
     window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
     target_cursor_line,
     target_cursor_char,
-  );
-
-  if on_left_side {
-    return (start_line, start_column_on_left_side);
-  }
-
-  let (on_right_side, start_column_on_right_side) = right_downward(
-    buffer,
-    window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
-
-  if on_right_side {
-    return (start_line, start_column_on_right_side);
-  }
-
-  (start_line, viewport_start_column)
+    start_line,
+  )
 }
 
 fn search_anchor_downward_wrap_nolinebreak(
@@ -1047,33 +1068,37 @@ fn search_anchor_downward_wrap_nolinebreak(
     current_line as usize
   };
 
-  let (on_left_side, start_column_on_left_side) = left_downward(
+  adjust_downward_horizontally(
+    viewport,
     buffer,
     window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
     target_cursor_line,
     target_cursor_char,
-  );
+    start_line,
+  )
+}
 
-  if on_left_side {
-    return (start_line, start_column_on_left_side);
-  }
+fn line_head_not_show(viewport: &Viewport, line_idx: usize) -> bool {
+  debug_assert!(viewport.lines().contains_key(&line_idx));
+  let line_viewport = viewport.lines().get(&line_idx).unwrap();
+  let rows = line_viewport.rows();
+  debug_assert!(rows.first_key_value().is_some());
+  let (_first_row_idx, first_row_viewport) = rows.first_key_value().unwrap();
+  first_row_viewport.start_char_idx() > 0
+}
 
-  let (on_right_side, start_column_on_right_side) = right_downward(
-    buffer,
-    window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
+fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> bool {
+  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+  let bufline_last_visible_char = buffer
+    .last_visible_char_on_line(line_idx)
+    .unwrap_or(0_usize);
 
-  if on_right_side {
-    return (start_line, start_column_on_right_side);
-  }
-
-  (start_line, viewport_start_column)
+  debug_assert!(viewport.lines().contains_key(&line_idx));
+  let line_viewport = viewport.lines().get(&line_idx).unwrap();
+  let rows = line_viewport.rows();
+  debug_assert!(rows.last_key_value().is_some());
+  let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+  last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
 fn search_anchor_downward_wrap_linebreak(
@@ -1103,7 +1128,10 @@ fn search_anchor_downward_wrap_linebreak(
   debug_assert!(viewport.lines().last_key_value().is_some());
   let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
 
-  let start_line = if target_cursor_line <= last_line {
+  let target_cursor_line_not_fully_show = line_head_not_show(viewport, target_cursor_line)
+    || line_tail_not_show(viewport, buffer, target_cursor_line);
+
+  let start_line = if target_cursor_line <= last_line && target_cursor_line_not_fully_show {
     viewport_start_line
   } else {
     let mut n = 0_usize;
