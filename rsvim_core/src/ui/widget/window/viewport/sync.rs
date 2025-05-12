@@ -1014,6 +1014,29 @@ fn search_anchor_downward_nowrap(
   )
 }
 
+fn line_head_not_show(viewport: &Viewport, line_idx: usize) -> bool {
+  debug_assert!(viewport.lines().contains_key(&line_idx));
+  let line_viewport = viewport.lines().get(&line_idx).unwrap();
+  let rows = line_viewport.rows();
+  debug_assert!(rows.first_key_value().is_some());
+  let (_first_row_idx, first_row_viewport) = rows.first_key_value().unwrap();
+  first_row_viewport.start_char_idx() > 0
+}
+
+fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> bool {
+  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+  let bufline_last_visible_char = buffer
+    .last_visible_char_on_line(line_idx)
+    .unwrap_or(0_usize);
+
+  debug_assert!(viewport.lines().contains_key(&line_idx));
+  let line_viewport = viewport.lines().get(&line_idx).unwrap();
+  let rows = line_viewport.rows();
+  debug_assert!(rows.last_key_value().is_some());
+  let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+  last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
+}
+
 fn search_anchor_downward_wrap_nolinebreak(
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1041,7 +1064,10 @@ fn search_anchor_downward_wrap_nolinebreak(
   debug_assert!(viewport.lines().last_key_value().is_some());
   let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
 
-  let start_line = if target_cursor_line <= last_line {
+  let target_cursor_line_not_fully_show = line_head_not_show(viewport, target_cursor_line)
+    || line_tail_not_show(viewport, buffer, target_cursor_line);
+
+  let start_line = if target_cursor_line <= last_line && target_cursor_line_not_fully_show {
     viewport_start_line
   } else {
     let mut n = 0_usize;
@@ -1076,29 +1102,6 @@ fn search_anchor_downward_wrap_nolinebreak(
     target_cursor_char,
     start_line,
   )
-}
-
-fn line_head_not_show(viewport: &Viewport, line_idx: usize) -> bool {
-  debug_assert!(viewport.lines().contains_key(&line_idx));
-  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-  let rows = line_viewport.rows();
-  debug_assert!(rows.first_key_value().is_some());
-  let (_first_row_idx, first_row_viewport) = rows.first_key_value().unwrap();
-  first_row_viewport.start_char_idx() > 0
-}
-
-fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> bool {
-  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-  let bufline_last_visible_char = buffer
-    .last_visible_char_on_line(line_idx)
-    .unwrap_or(0_usize);
-
-  debug_assert!(viewport.lines().contains_key(&line_idx));
-  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-  let rows = line_viewport.rows();
-  debug_assert!(rows.last_key_value().is_some());
-  let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-  last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
 fn search_anchor_downward_wrap_linebreak(
