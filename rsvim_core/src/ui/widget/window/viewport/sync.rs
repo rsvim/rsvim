@@ -1037,6 +1037,40 @@ fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> 
   last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
+fn right_downward_wrap_nolinebreak(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  _viewport_start_line: usize,
+  viewport_start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (bool, usize) {
+  let width = window_actual_shape.width();
+  let viewport_end_column = viewport_start_column + width as usize;
+
+  // Target cursor line end.
+  let on_right_side = match buffer.char_at(target_cursor_line, viewport_end_column) {
+    Some(c) => {
+      trace!(
+        "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
+        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+      );
+      c < target_cursor_char
+    }
+    None => false,
+  };
+
+  if on_right_side {
+    // Move viewport to right to show the cursor, just put the cursor at the last right char in the
+    // new viewport.
+    let end_column = buffer.width_at(target_cursor_line, target_cursor_char);
+    let start_column = end_column.saturating_sub(width as usize);
+    (true, start_column)
+  } else {
+    (false, 0_usize)
+  }
+}
+
 fn adjust_downward_horizontally_wrap_nolinebreak(
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1061,7 +1095,7 @@ fn adjust_downward_horizontally_wrap_nolinebreak(
     return (start_line, start_column_on_left_side);
   }
 
-  let (on_right_side, start_column_on_right_side) = right_downward_nowrap(
+  let (on_right_side, start_column_on_right_side) = right_downward_wrap_nolinebreak(
     buffer,
     window_actual_shape,
     viewport_start_line,
