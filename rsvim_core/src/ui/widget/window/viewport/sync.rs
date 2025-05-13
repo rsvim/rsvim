@@ -1124,6 +1124,102 @@ fn search_anchor_downward_wrap_nolinebreak(
   )
 }
 
+/// Returns `start_column`
+fn revert_search_line_start_wrap_linebreak(
+  buffer: &Buffer,
+  line_idx: usize,
+  last_char: usize,
+  window_height: u16,
+  window_width: u16,
+) -> usize {
+  let bufline = buffer.get_rope().line(line_idx);
+  let bufline_len_chars = bufline.len_chars();
+  debug_assert!(bufline_len_chars > 0);
+
+  // Approximately calculate the beginning char of the line in window viewport, by directly
+  // subtract `window_width * window_height`.
+  let last_char_width = buffer.width_at(line_idx, last_char);
+  let approximate_start_width =
+    last_char_width.saturating_sub(window_width as usize * window_height as usize);
+  let mut start_char = buffer
+    .char_at(line_idx, approximate_start_width)
+    .unwrap_or(0_usize);
+  trace!(
+    "line_idx:{},last_char:{}({:?}),last_char_width:{},approximate_start_width:{},start_char:{}({:?})",
+    line_idx,
+    last_char,
+    bufline.char(last_char),
+    last_char_width,
+    approximate_start_width,
+    start_char,
+    bufline.char(start_char),
+  );
+
+  while start_char < bufline_len_chars {
+    let start_column = buffer.width_before(line_idx, start_char);
+    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
+      buffer,
+      start_column,
+      line_idx,
+      0_u16,
+      window_height,
+      window_width,
+    );
+    let (last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+    trace!(
+      "start_column:{},last_row_viewport.end_char:{}({:?}),last_row_idx:{}",
+      start_column,
+      last_row_viewport.end_char_idx(),
+      bufline.get_char(last_row_viewport.end_char_idx()),
+      last_row_idx
+    );
+    if last_char < last_row_viewport.end_char_idx() {
+      return start_column;
+    }
+    start_char += 1;
+  }
+
+  unreachable!()
+}
+
+fn right_downward_wrap_linebreak(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  _viewport_start_line: usize,
+  viewport_start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (bool, usize) {
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  let viewport_end_column = viewport_start_column + width as usize;
+
+  // Target cursor line end.
+  let on_right_side = match buffer.char_at(target_cursor_line, viewport_end_column) {
+    Some(c) => {
+      trace!(
+        "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
+        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+      );
+      c < target_cursor_char
+    }
+    None => false,
+  };
+
+  if on_right_side {
+    let start_column = revert_search_line_start_wrap_linebreak(
+      buffer,
+      target_cursor_line,
+      target_cursor_char,
+      height,
+      width,
+    );
+    (true, start_column)
+  } else {
+    (false, 0_usize)
+  }
+}
+
 fn search_anchor_downward_wrap_linebreak(
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1161,12 +1257,11 @@ fn search_anchor_downward_wrap_linebreak(
     let mut current_line = target_cursor_line as isize;
 
     while (n + 1 < height as usize) && (current_line >= 0) {
-      let current_row = 0_u16;
       let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
         buffer,
         viewport_start_column,
         current_line as usize,
-        current_row,
+        0_u16,
         height,
         width,
       );
@@ -1194,7 +1289,7 @@ fn search_anchor_downward_wrap_linebreak(
     return (start_line, start_column_on_left_side);
   }
 
-  let (on_right_side, start_column_on_right_side) = right_downward_nowrap(
+  let (on_right_side, start_column_on_right_side) = right_downward_wrap_linebreak(
     buffer,
     window_actual_shape,
     viewport_start_line,

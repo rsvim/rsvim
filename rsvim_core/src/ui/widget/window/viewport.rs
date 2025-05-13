@@ -5652,7 +5652,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     let terminal_size = U16Size::new(17, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size.height(),
@@ -5678,10 +5678,10 @@ mod tests_search_anchor_downward_wrap_linebreak {
     {
       let expect = vec![
         "Hello, RSVIM!\n",
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
+        "This is a quite ",
+        "simple and small ",
+        "test lines.\n",
+        "But still it ",
       ];
 
       let actual = lock!(window.borrow().viewport()).clone();
