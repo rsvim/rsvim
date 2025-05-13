@@ -905,22 +905,6 @@ fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> 
   last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
-fn start_char_and_prefills(
-  buffer: &Buffer,
-  _bline: &RopeSlice,
-  l: usize,
-  c: usize,
-  start_width: usize,
-) -> (usize, usize) {
-  let c_width = buffer.width_before(l, c);
-  if c_width < start_width {
-    let c_width_at = buffer.width_at(l, c);
-    (c, start_width.saturating_sub(c_width_at))
-  } else {
-    (c, 0_usize)
-  }
-}
-
 /// Returns `start_column`
 fn revert_search_line_start_wrap_nolinebreak(
   buffer: &Buffer,
@@ -941,14 +925,41 @@ fn revert_search_line_start_wrap_nolinebreak(
 
   while current_row >= 0 {
     let start_c = buffer.char_at(line_idx, start_column).unwrap();
+    trace!(
+      "current_row:{},start_column:{},start_fills:{},start_c:{}({:?})",
+      current_row,
+      start_column,
+      start_fills,
+      start_c,
+      buffer.get_rope().line(line_idx).char(start_c)
+    );
 
-    let (start_char, start_fills_result) =
-      start_char_and_prefills(buffer, &bufline, line_idx, start_c, start_column);
+    let (start_char, start_fills_result) = {
+      let c_width = buffer.width_at(line_idx, start_c);
+      if c_width < start_column {
+        let c_width_at = buffer.width_at(line_idx, start_c);
+        (start_c, start_column.saturating_sub(c_width_at))
+      } else {
+        (start_c, 0_usize)
+      }
+    };
 
     start_fills = start_fills_result;
     start_column = buffer
       .width_before(line_idx, start_char)
       .saturating_sub(window_width as usize);
+
+    trace!(
+      "current_row:{},start_column:{},start_fills:{},start_c:{}({:?}),start_char:{}({:?}),start_fills_result:{}",
+      current_row,
+      start_column,
+      start_fills,
+      start_c,
+      buffer.get_rope().line(line_idx).char(start_c),
+      start_char,
+      buffer.get_rope().line(line_idx).char(start_char),
+      start_fills_result,
+    );
 
     if start_char == 0 {
       break;
