@@ -883,6 +883,9 @@ fn search_anchor_downward_nowrap(
 }
 
 fn line_head_not_show(viewport: &Viewport, line_idx: usize) -> bool {
+  if viewport.start_line_idx() > line_idx || viewport.end_line_idx() <= line_idx {
+    return false;
+  }
   debug_assert!(viewport.lines().contains_key(&line_idx));
   let line_viewport = viewport.lines().get(&line_idx).unwrap();
   let rows = line_viewport.rows();
@@ -892,12 +895,16 @@ fn line_head_not_show(viewport: &Viewport, line_idx: usize) -> bool {
 }
 
 fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> bool {
+  if viewport.start_line_idx() > line_idx || viewport.end_line_idx() <= line_idx {
+    return false;
+  }
+
+  debug_assert!(viewport.lines().contains_key(&line_idx));
   debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
   let bufline_last_visible_char = buffer
     .last_visible_char_on_line(line_idx)
     .unwrap_or(0_usize);
 
-  debug_assert!(viewport.lines().contains_key(&line_idx));
   let line_viewport = viewport.lines().get(&line_idx).unwrap();
   let rows = line_viewport.rows();
   debug_assert!(rows.last_key_value().is_some());
@@ -1097,7 +1104,12 @@ fn search_anchor_downward_wrap_nolinebreak(
 
       current_line -= 1;
     }
-    current_line as usize
+
+    if (current_line as usize) < target_cursor_line && n > (height as usize) {
+      current_line as usize + 1
+    } else {
+      current_line as usize
+    }
   };
 
   adjust_downward_horizontally_wrap_nolinebreak(
