@@ -907,24 +907,17 @@ fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> 
 
 fn start_char_and_prefills(
   buffer: &Buffer,
-  bline: &RopeSlice,
+  _bline: &RopeSlice,
   l: usize,
   c: usize,
   start_width: usize,
 ) -> (usize, usize) {
-  let c_width = buffer.width_at(l, c);
-  if c_width > start_width {
-    let c_width_before = buffer.width_at(l, c);
-    (c, start_width.saturating_sub(c_width_before))
+  let c_width = buffer.width_before(l, c);
+  if c_width < start_width {
+    let c_width_at = buffer.width_at(l, c);
+    (c, start_width.saturating_sub(c_width_at))
   } else {
-    // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
-    debug_assert!(bline.len_chars() > 0);
-    let next_to_last_visible_char = buffer.last_visible_char_on_line(l).unwrap() + 1;
-
-    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
-    // char.
-    let c_next = std::cmp::min(c + 1, next_to_last_visible_char);
-    (c_next, 0_usize)
+    (c, 0_usize)
   }
 }
 
@@ -944,13 +937,15 @@ fn revert_search_line_start_wrap_nolinebreak(
 
   let last_char_width = buffer.width_at(line_idx, last_char);
   let mut start_column = last_char_width.saturating_sub(window_width as usize);
+  let mut start_fills = 0_usize;
 
   while current_row >= 0 {
     let start_c = buffer.char_at(line_idx, start_column).unwrap();
 
-    let (start_char, _) =
+    let (start_char, start_fills_result) =
       start_char_and_prefills(buffer, &bufline, line_idx, start_c, start_column);
 
+    start_fills = start_fills_result;
     start_column = buffer
       .width_before(line_idx, start_char)
       .saturating_sub(window_width as usize);
@@ -965,7 +960,7 @@ fn revert_search_line_start_wrap_nolinebreak(
     current_row -= 1;
   }
 
-  start_column
+  start_column.saturating_sub(start_fills)
 }
 
 fn right_downward_wrap_nolinebreak(
