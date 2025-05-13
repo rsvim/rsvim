@@ -5703,10 +5703,10 @@ mod tests_search_anchor_downward_wrap_linebreak {
     // Search-1
     {
       let expect = vec![
-        "But still it cont",
-        "ains several thin",
-        "gs we want to tes",
-        "t:\n",
+        "But still it ",
+        "contains several ",
+        "things we want to",
+        " test:\n",
         "\t1. When",
       ];
 
@@ -5745,7 +5745,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
       };
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
@@ -5759,13 +5759,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     // Search-2
     {
-      let expect = vec![
-        "small\tenou",
-        "gh\tto",
-        "\tcompletel",
-        "y\tput",
-        "\tinside.\n",
-      ];
+      let expect = vec!["enough\tto", "\t", "completely", "\tput", "\tinside.\n"];
 
       let actual = {
         let target_cursor_line = 3;
@@ -5782,7 +5776,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
-        assert_eq!(start_column, 56);
+        assert_eq!(start_column, 69);
 
         let viewport = Viewport::view(
           &buf,
