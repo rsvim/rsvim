@@ -5028,7 +5028,13 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-2
     {
-      let expect = vec!["line\tis", "\tsmall", "\tenough", "\tto", "\tcompletel"];
+      let expect = vec![
+        "small\tenou",
+        "gh\tto",
+        "\tcompletel",
+        "y\tput",
+        "\tinside.\n",
+      ];
 
       let actual = {
         let target_cursor_line = 3;
@@ -5045,7 +5051,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
-        assert_eq!(start_column, 34);
+        assert_eq!(start_column, 56);
 
         let viewport = Viewport::view(
           &buf,

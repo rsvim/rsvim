@@ -910,8 +910,6 @@ fn revert_search_line_start_wrap_nolinebreak(
   buffer: &Buffer,
   line_idx: usize,
   last_char: usize,
-  _viewport_start_line: usize,
-  viewport_start_column: usize,
   window_height: u16,
   window_width: u16,
 ) -> usize {
@@ -925,18 +923,35 @@ fn revert_search_line_start_wrap_nolinebreak(
   let approximate_start_width =
     last_char_width.saturating_sub(window_width as usize * window_height as usize);
   let mut start_char = buffer.char_at(line_idx, approximate_start_width).unwrap();
+  trace!(
+    "line_idx:{},last_char:{}({:?}),last_char_width:{},approximate_start_width:{},start_char:{}({:?})",
+    line_idx,
+    last_char,
+    bufline.char(last_char),
+    last_char_width,
+    approximate_start_width,
+    start_char,
+    bufline.char(start_char),
+  );
 
   while start_char < bufline_len_chars {
     let start_column = buffer.width_before(line_idx, start_char);
     let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
       buffer,
-      viewport_start_column,
+      start_column,
       line_idx,
       0_u16,
       window_height,
       window_width,
     );
-    let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+    let (last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+    trace!(
+      "start_column:{},last_row_viewport.end_char:{}({:?}),last_row_idx:{}",
+      start_column,
+      last_row_viewport.end_char_idx(),
+      bufline.get_char(last_row_viewport.end_char_idx()),
+      last_row_idx
+    );
     if last_char < last_row_viewport.end_char_idx() {
       return start_column;
     }
@@ -949,7 +964,7 @@ fn revert_search_line_start_wrap_nolinebreak(
 fn right_downward_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  viewport_start_line: usize,
+  _viewport_start_line: usize,
   viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -967,7 +982,7 @@ fn right_downward_wrap_nolinebreak(
     Some(c) => {
       trace!(
         "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, viewport_start_line, viewport_start_column, c
+        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
       );
       c < target_cursor_char
     }
@@ -979,8 +994,6 @@ fn right_downward_wrap_nolinebreak(
       buffer,
       target_cursor_line,
       target_cursor_char,
-      viewport_start_line,
-      viewport_start_column,
       height,
       width,
     );
