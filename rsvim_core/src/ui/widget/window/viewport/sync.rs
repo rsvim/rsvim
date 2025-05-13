@@ -1273,7 +1273,12 @@ fn search_anchor_downward_wrap_linebreak(
 
       current_line -= 1;
     }
-    current_line as usize
+
+    if (current_line as usize) < target_cursor_line && n > (height as usize) {
+      current_line as usize + 1
+    } else {
+      current_line as usize
+    }
   };
 
   let (on_left_side, start_column_on_left_side) = left_downward_nowrap(
