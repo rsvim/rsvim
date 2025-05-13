@@ -910,6 +910,8 @@ fn revert_search_line_start_wrap_nolinebreak(
   buffer: &Buffer,
   line_idx: usize,
   last_char: usize,
+  _viewport_start_line: usize,
+  viewport_start_column: usize,
   window_height: u16,
   window_width: u16,
 ) -> usize {
@@ -917,67 +919,37 @@ fn revert_search_line_start_wrap_nolinebreak(
   let bufline_len_chars = bufline.len_chars();
   debug_assert!(bufline_len_chars > 0);
 
-  let mut current_row: isize = window_height.saturating_sub(1) as isize;
-
+  // Approximately calculate the beginning char of the line in window viewport, by directly
+  // subtract `window_width * window_height`.
   let last_char_width = buffer.width_at(line_idx, last_char);
-  let mut start_column = last_char_width.saturating_sub(window_width as usize);
-  let mut start_fills = 0_usize;
+  let approximate_start_width =
+    last_char_width.saturating_sub(window_width as usize * window_height as usize);
+  let mut start_char = buffer.char_at(line_idx, approximate_start_width).unwrap();
 
-  while current_row >= 0 {
-    let start_c = buffer.char_at(line_idx, start_column).unwrap();
-    trace!(
-      "current_row:{},start_column:{},start_fills:{},start_c:{}({:?})",
-      current_row,
-      start_column,
-      start_fills,
-      start_c,
-      buffer.get_rope().line(line_idx).char(start_c)
+  while start_char < bufline_len_chars {
+    let start_column = buffer.width_before(line_idx, start_char);
+    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
+      buffer,
+      viewport_start_column,
+      line_idx,
+      0_u16,
+      window_height,
+      window_width,
     );
-
-    let (start_char, start_fills_result) = {
-      let c_width = buffer.width_at(line_idx, start_c);
-      if c_width < start_column {
-        let c_width_at = buffer.width_at(line_idx, start_c);
-        (start_c, start_column.saturating_sub(c_width_at))
-      } else {
-        (start_c, 0_usize)
-      }
-    };
-
-    start_fills = start_fills_result;
-    start_column = buffer
-      .width_before(line_idx, start_char)
-      .saturating_sub(window_width as usize);
-
-    trace!(
-      "current_row:{},start_column:{},start_fills:{},start_c:{}({:?}),start_char:{}({:?}),start_fills_result:{}",
-      current_row,
-      start_column,
-      start_fills,
-      start_c,
-      buffer.get_rope().line(line_idx).char(start_c),
-      start_char,
-      buffer.get_rope().line(line_idx).char(start_char),
-      start_fills_result,
-    );
-
-    if start_char == 0 {
-      break;
+    let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+    if last_char < last_row_viewport.end_char_idx() {
+      return start_column;
     }
-    if current_row == 0 {
-      break;
-    }
-
-    current_row -= 1;
+    start_char += 1;
   }
 
-  start_column.saturating_sub(start_fills)
+  unreachable!()
 }
 
 fn right_downward_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  _viewport_start_line: usize,
+  viewport_start_line: usize,
   viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -995,7 +967,7 @@ fn right_downward_wrap_nolinebreak(
     Some(c) => {
       trace!(
         "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+        target_cursor_line, target_cursor_char, viewport_start_line, viewport_start_column, c
       );
       c < target_cursor_char
     }
@@ -1007,6 +979,8 @@ fn right_downward_wrap_nolinebreak(
       buffer,
       target_cursor_line,
       target_cursor_char,
+      viewport_start_line,
+      viewport_start_column,
       height,
       width,
     );
