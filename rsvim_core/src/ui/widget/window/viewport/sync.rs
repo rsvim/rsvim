@@ -929,7 +929,9 @@ fn revert_search_line_start_wrap_nolinebreak(
   let last_char_width = buffer.width_at(line_idx, last_char);
   let approximate_start_width =
     last_char_width.saturating_sub(window_width as usize * window_height as usize);
-  let mut start_char = buffer.char_at(line_idx, approximate_start_width).unwrap();
+  let mut start_char = buffer
+    .char_at(line_idx, approximate_start_width)
+    .unwrap_or(0_usize);
   trace!(
     "line_idx:{},last_char:{}({:?}),last_char_width:{},approximate_start_width:{},start_char:{}({:?})",
     line_idx,
