@@ -1,5 +1,7 @@
 //! Logging utils.
 
+use std::str::FromStr;
+
 use jiff::Zoned;
 use tracing;
 use tracing_appender;
@@ -10,7 +12,8 @@ use tracing_subscriber::{self, EnvFilter};
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
 /// Defaults to `error`.
 pub fn init() {
-  let env_filter = EnvFilter::try_from_env("RSVIM_LOG").unwrap_or(EnvFilter::from_str("error"));
+  let env_filter =
+    EnvFilter::try_from_env("RSVIM_LOG").unwrap_or(EnvFilter::from_str("error").unwrap());
 
   if env_filter.max_level_hint().is_some()
     && env_filter.max_level_hint().unwrap() >= tracing::Level::TRACE
@@ -18,7 +21,7 @@ pub fn init() {
     // If trace/debug log is enabled, write logs into file.
     let now = Zoned::now();
     let log_name = format!(
-      "rsvim-{:0>4}{:0>2}{:0>2}-{:0>2}{:0>2}{:0>2}-{:0>3}.log",
+      "rsvim_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
       now.date().year(),
       now.date().month(),
       now.date().day(),
