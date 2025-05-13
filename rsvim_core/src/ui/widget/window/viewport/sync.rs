@@ -1126,30 +1126,15 @@ fn search_anchor_downward_wrap_nolinebreak(
   )
 }
 
-/// Returns `start_column`
-fn revert_search_line_start_wrap_linebreak(
+// For `wrap=true,linebreak=true`, the `start_char` have to start from a valid word
+// beginning, i.e. a unicode segment, not a arbitrary char index.
+fn find_start_char_by_word(
   buffer: &Buffer,
+  bufline: &RopeSlice,
   line_idx: usize,
-  last_char: usize,
-  window_height: u16,
-  window_width: u16,
+  start_char: usize,
 ) -> usize {
-  let bufline = buffer.get_rope().line(line_idx);
-  let bufline_len_chars = bufline.len_chars();
-  debug_assert!(bufline_len_chars > 0);
-
-  // Approximately calculate the beginning char of the line in window viewport, by directly
-  // subtract `window_width * window_height`.
-  let last_char_width = buffer.width_at(line_idx, last_char);
-  let approximate_start_width =
-    last_char_width.saturating_sub(window_width as usize * window_height as usize);
-  let start_char = buffer
-    .char_at(line_idx, approximate_start_width)
-    .unwrap_or(0_usize);
-
-  // For `wrap=true,linebreak=true`, the approximate `start_char` have to start from a valid word
-  // beginning, i.e. a unicode segment, not a arbitrary char index.
-  let mut start_char = if start_char > 0 {
+  if start_char > 0 {
     let last_segment_char = start_char;
     let mut start_segment_char = start_char;
     loop {
@@ -1196,7 +1181,64 @@ fn revert_search_line_start_wrap_linebreak(
     result
   } else {
     0_usize
+  }
+}
+
+fn left_downward_wrap_linebreak(
+  buffer: &Buffer,
+  _window_actual_shape: &U16Rect,
+  _viewport_start_line: usize,
+  viewport_start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (bool, usize) {
+  let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
+    Some(c) => {
+      trace!(
+        "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
+        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+      );
+      c > target_cursor_char
+    }
+    None => true,
   };
+
+  if on_left_side {
+    debug_assert!(buffer.get_rope().get_line(target_cursor_line).is_some());
+    let bufline = buffer.get_rope().line(target_cursor_line);
+    let start_char =
+      find_start_char_by_word(buffer, &bufline, target_cursor_line, target_cursor_char);
+    let start_column = buffer.width_before(target_cursor_line, start_char);
+    (true, start_column)
+  } else {
+    (false, 0_usize)
+  }
+}
+
+/// Returns `start_column`
+fn revert_search_line_start_wrap_linebreak(
+  buffer: &Buffer,
+  line_idx: usize,
+  last_char: usize,
+  window_height: u16,
+  window_width: u16,
+) -> usize {
+  let bufline = buffer.get_rope().line(line_idx);
+  let bufline_len_chars = bufline.len_chars();
+  debug_assert!(bufline_len_chars > 0);
+
+  // Approximately calculate the beginning char of the line in window viewport, by directly
+  // subtract `window_width * window_height`.
+  let last_char_width = buffer.width_at(line_idx, last_char);
+  let approximate_start_width =
+    last_char_width.saturating_sub(window_width as usize * window_height as usize);
+  let start_char = buffer
+    .char_at(line_idx, approximate_start_width)
+    .unwrap_or(0_usize);
+
+  // For `wrap=true,linebreak=true`, the approximate `start_char` have to start from a valid word
+  // beginning, i.e. a unicode segment, not a arbitrary char index.
+  let mut start_char = find_start_char_by_word(buffer, &bufline, line_idx, start_char);
 
   trace!(
     "line_idx:{},last_char:{}({:?}),last_char_width:{},approximate_start_width:{},start_char:{}({:?})",
@@ -1348,7 +1390,7 @@ fn search_anchor_downward_wrap_linebreak(
     adjust_current_line(current_line, target_cursor_line, height, n)
   };
 
-  let (on_left_side, start_column_on_left_side) = left_downward_nowrap(
+  let (on_left_side, start_column_on_left_side) = left_downward_wrap_linebreak(
     buffer,
     window_actual_shape,
     viewport_start_line,
