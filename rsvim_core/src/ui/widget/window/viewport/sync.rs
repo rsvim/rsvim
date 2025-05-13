@@ -73,54 +73,6 @@ pub fn sync(
   }
 }
 
-/// Calculate viewport from top to bottom.
-pub fn sync_line(
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
-  current_line: usize,
-  current_row: u16,
-  start_column: usize,
-) -> LineViewport {
-  // If window is zero-sized.
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
-  if height == 0 || width == 0 {
-    return LineViewport::new(BTreeMap::new(), 0_usize, 0_usize);
-  }
-
-  let (rows, start_fills, end_fills, _) = match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
-    (false, _) => proc_line_nowrap(
-      buffer,
-      start_column,
-      current_line,
-      current_row,
-      height,
-      width,
-    ),
-    (true, false) => proc_line_wrap_nolinebreak(
-      buffer,
-      start_column,
-      current_line,
-      current_row,
-      height,
-      width,
-    ),
-    (true, true) => proc_line_wrap_linebreak(
-      buffer,
-      start_column,
-      current_line,
-      current_row,
-      height,
-      width,
-    ),
-  };
-  LineViewport::new(rows, start_fills, end_fills)
-}
-
 // /// Calculate viewport with option `wrap=false` upward, from bottom to top.
 // pub fn _upward(
 //   buffer: &Buffer,
