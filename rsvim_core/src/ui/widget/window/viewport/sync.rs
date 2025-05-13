@@ -905,6 +905,70 @@ fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> 
   last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
+/// Returns `rows`, `start_fills`, `end_fills`
+fn revert_search_line_start_wrap_nolinebreak(
+  buffer: &Buffer,
+  start_column: usize,
+  current_line: usize,
+  mut current_row: isize,
+  window_height: u16,
+  window_width: u16,
+) -> (BTreeMap<u16, RowViewport>, usize, usize, isize) {
+  let bufline = buffer.get_rope().line(current_line);
+  let bufline_len_chars = bufline.len_chars();
+
+  if bufline_len_chars == 0 {
+    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+    rows.insert(current_row as u16, RowViewport::new(0..0));
+    (rows, 0_usize, 0_usize, current_row)
+  } else {
+    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+
+    // let mut start_char = buffer
+    match buffer.char_after(current_line, start_column) {
+      Some(mut start_char) => {
+        let start_fills = {
+          let width_before = buffer.width_before(current_line, start_char);
+          width_before.saturating_sub(start_column)
+        };
+
+        let mut end_width = start_column + window_width as usize;
+        let mut end_fills = 0_usize;
+
+        debug_assert!(current_row < window_height as isize);
+        debug_assert!(current_row >= 0);
+        while current_row >= 0 {
+          let (end_char, end_fills_result) = match buffer.char_at(current_line, end_width) {
+            Some(c) => end_char_and_prefills(buffer, &bufline, current_line, c, end_width),
+            None => {
+              // If the char not found, it means the `end_width` is too long than the whole line.
+              // So the char next to the line's last char is the end char.
+              (bufline_len_chars, 0_usize)
+            }
+          };
+          end_fills = end_fills_result;
+
+          rows.insert(current_row, RowViewport::new(start_char..end_char));
+
+          // Goes out of line.
+          debug_assert!(bufline.len_chars() > 0);
+          if end_char > buffer.last_visible_char_on_line(current_line).unwrap() {
+            break;
+          }
+
+          // Prepare next row.
+          current_row += 1;
+          start_char = end_char;
+          end_width = buffer.width_before(current_line, end_char) + window_width as usize;
+        }
+
+        (rows, start_fills, end_fills, current_row)
+      }
+      None => (rows, 0_usize, 0_usize, current_row),
+    }
+  }
+}
+
 fn right_downward_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -915,6 +979,10 @@ fn right_downward_wrap_nolinebreak(
 ) -> (bool, usize) {
   let width = window_actual_shape.width();
   let viewport_end_column = viewport_start_column + width as usize;
+
+  // NOTE: For `wrap=true, linebreak=false` case, if there's any head/tail not fully rendered, it
+  // means there will be only 1 line shows in current window viewport. Because the `wrap` will
+  // force the 2nd line wait to show until the **current** line fully rendered.
 
   // Target cursor line end.
   let on_right_side = match buffer.char_at(target_cursor_line, viewport_end_column) {
@@ -929,8 +997,6 @@ fn right_downward_wrap_nolinebreak(
   };
 
   if on_right_side {
-    // Move viewport to right to show the cursor, just put the cursor at the last right char in the
-    // new viewport.
     let end_column = buffer.width_at(target_cursor_line, target_cursor_char);
     let start_column = end_column.saturating_sub(width as usize);
     (true, start_column)
