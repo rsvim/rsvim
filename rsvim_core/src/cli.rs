@@ -41,6 +41,9 @@ pub struct CliOpt {
   #[arg(short = 'V', long = "version", help = "Print version")]
   version: bool,
 
+  #[arg(long = "dump-log", help = "Dump log to file")]
+  dump_log: bool,
+
   #[arg(help = "Edit file(s)")]
   file: Vec<String>,
 }
@@ -54,6 +57,11 @@ impl CliOpt {
   /// Version.
   pub fn version(&self) -> bool {
     self.version
+  }
+
+  /// If dump log to file.
+  pub fn dump_log(&self) -> bool {
+    self.dump_log
   }
 
   // /// Commands should be execute before loading any config.
@@ -103,14 +111,17 @@ mod tests {
       CliOpt {
         file: vec![],
         version: false,
+        dump_log: false,
       },
       CliOpt {
         file: vec![],
         version: true,
+        dump_log: false,
       },
       CliOpt {
         file: vec!["README.md".to_string()],
         version: false,
+        dump_log: false,
       },
     ];
 

@@ -29,8 +29,8 @@ static CLI_VERSION: Lazy<String> = Lazy::new(|| {
 });
 
 fn main() -> IoResult<()> {
-  log::init();
   let cli_opt = CliOpt::parse();
+  log::init(cli_opt.dump_log());
   trace!("cli_opt: {:?}", cli_opt);
 
   // Print version and exit
