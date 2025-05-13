@@ -1037,6 +1037,46 @@ fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> 
   last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
+fn adjust_downward_horizontally_wrap_nolinebreak(
+  viewport: &Viewport,
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+  start_line: usize,
+) -> (usize, usize) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
+
+  let (on_left_side, start_column_on_left_side) = left_downward_nowrap(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_left_side {
+    return (start_line, start_column_on_left_side);
+  }
+
+  let (on_right_side, start_column_on_right_side) = right_downward_nowrap(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_right_side {
+    return (start_line, start_column_on_right_side);
+  }
+
+  (start_line, viewport_start_column)
+}
+
 fn search_anchor_downward_wrap_nolinebreak(
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1094,7 +1134,7 @@ fn search_anchor_downward_wrap_nolinebreak(
     current_line as usize
   };
 
-  adjust_downward_horizontally_nowrap(
+  adjust_downward_horizontally_wrap_nolinebreak(
     viewport,
     buffer,
     window_actual_shape,
