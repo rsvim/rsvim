@@ -905,63 +905,67 @@ fn line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> 
   last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
-/// Returns `start_char`, `start_fills`
+fn start_char_and_prefills(
+  buffer: &Buffer,
+  bline: &RopeSlice,
+  l: usize,
+  c: usize,
+  start_width: usize,
+) -> (usize, usize) {
+  let c_width = buffer.width_at(l, c);
+  if c_width > start_width {
+    let c_width_before = buffer.width_at(l, c);
+    (c, start_width.saturating_sub(c_width_before))
+  } else {
+    // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
+    debug_assert!(bline.len_chars() > 0);
+    let next_to_last_visible_char = buffer.last_visible_char_on_line(l).unwrap() + 1;
+
+    // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
+    // char.
+    let c_next = std::cmp::min(c + 1, next_to_last_visible_char);
+    (c_next, 0_usize)
+  }
+}
+
+/// Returns `start_column`
 fn revert_search_line_start_wrap_nolinebreak(
   buffer: &Buffer,
-  start_column: usize,
-  current_line: usize,
+  line_idx: usize,
   last_char: usize,
   window_height: u16,
   window_width: u16,
-) -> (usize, usize) {
-  let bufline = buffer.get_rope().line(current_line);
+) -> usize {
+  let bufline = buffer.get_rope().line(line_idx);
   let bufline_len_chars = bufline.len_chars();
   debug_assert!(bufline_len_chars > 0);
 
-  let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+  let mut current_row: isize = window_height.saturating_sub(1) as isize;
 
-  // let mut start_char = buffer
-  match buffer.char_after(current_line, start_column) {
-    Some(mut start_char) => {
-      let start_fills = {
-        let width_before = buffer.width_before(current_line, start_char);
-        width_before.saturating_sub(start_column)
-      };
+  let last_char_width = buffer.width_at(line_idx, last_char);
+  let mut start_column = last_char_width.saturating_sub(window_width as usize);
 
-      let mut end_width = start_column + window_width as usize;
-      let mut end_fills = 0_usize;
+  while current_row >= 0 {
+    let start_c = buffer.char_at(line_idx, start_column).unwrap();
 
-      debug_assert!(current_row < window_height as isize);
-      debug_assert!(current_row >= 0);
-      while current_row >= 0 {
-        let (end_char, end_fills_result) = match buffer.char_at(current_line, end_width) {
-          Some(c) => end_char_and_prefills(buffer, &bufline, current_line, c, end_width),
-          None => {
-            // If the char not found, it means the `end_width` is too long than the whole line.
-            // So the char next to the line's last char is the end char.
-            (bufline_len_chars, 0_usize)
-          }
-        };
-        end_fills = end_fills_result;
+    let (start_char, _) =
+      start_char_and_prefills(buffer, &bufline, line_idx, start_c, start_column);
 
-        rows.insert(current_row, RowViewport::new(start_char..end_char));
+    start_column = buffer
+      .width_before(line_idx, start_char)
+      .saturating_sub(window_width as usize);
 
-        // Goes out of line.
-        debug_assert!(bufline.len_chars() > 0);
-        if end_char > buffer.last_visible_char_on_line(current_line).unwrap() {
-          break;
-        }
-
-        // Prepare next row.
-        current_row += 1;
-        start_char = end_char;
-        end_width = buffer.width_before(current_line, end_char) + window_width as usize;
-      }
-
-      (rows, start_fills, end_fills, current_row)
+    if start_char == 0 {
+      break;
     }
-    None => (rows, 0_usize, 0_usize, current_row),
+    if current_row == 0 {
+      break;
+    }
+
+    current_row -= 1;
   }
+
+  start_column
 }
 
 fn right_downward_wrap_nolinebreak(
@@ -972,6 +976,7 @@ fn right_downward_wrap_nolinebreak(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
+  let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let viewport_end_column = viewport_start_column + width as usize;
 
@@ -992,8 +997,13 @@ fn right_downward_wrap_nolinebreak(
   };
 
   if on_right_side {
-    let end_column = buffer.width_at(target_cursor_line, target_cursor_char);
-    let start_column = end_column.saturating_sub(width as usize);
+    let start_column = revert_search_line_start_wrap_nolinebreak(
+      buffer,
+      target_cursor_line,
+      target_cursor_char,
+      height,
+      width,
+    );
     (true, start_column)
   } else {
     (false, 0_usize)
