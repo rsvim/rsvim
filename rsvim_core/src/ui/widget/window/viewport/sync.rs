@@ -1052,6 +1052,23 @@ fn adjust_downward_horizontally_wrap_nolinebreak(
   (start_line, viewport_start_column)
 }
 
+fn adjust_current_line(
+  current_line: isize,
+  target_cursor_line: usize,
+  window_height: u16,
+  n: usize,
+) -> usize {
+  if (current_line as usize) < target_cursor_line {
+    if n > (window_height as usize) {
+      current_line as usize + 1
+    } else {
+      current_line as usize
+    }
+  } else {
+    current_line as usize
+  }
+}
+
 fn search_anchor_downward_wrap_nolinebreak(
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1060,7 +1077,7 @@ fn search_anchor_downward_wrap_nolinebreak(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
+  let _viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
@@ -1088,24 +1105,20 @@ fn search_anchor_downward_wrap_nolinebreak(
     let mut n = 0_usize;
     let mut current_line = target_cursor_line as isize;
 
-    while (n + 1 < height as usize) && (current_line >= 0) {
+    while (n < height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
       let (rows, _start_fills, _end_fills, _) =
         proc_line_wrap_nolinebreak(buffer, 0, current_line as usize, current_row, height, width);
       n += rows.len();
 
-      if current_line == 0 || n + 1 >= height as usize {
+      if current_line == 0 || n >= height as usize {
         break;
       }
 
       current_line -= 1;
     }
 
-    if (current_line as usize) < target_cursor_line && n > (height as usize) {
-      current_line as usize + 1
-    } else {
-      current_line as usize
-    }
+    adjust_current_line(current_line, target_cursor_line, height, n)
   };
 
   adjust_downward_horizontally_wrap_nolinebreak(
@@ -1262,11 +1275,7 @@ fn search_anchor_downward_wrap_linebreak(
       current_line -= 1;
     }
 
-    if (current_line as usize) < target_cursor_line && n > (height as usize) {
-      current_line as usize + 1
-    } else {
-      current_line as usize
-    }
+    adjust_current_line(current_line, target_cursor_line, height, n)
   };
 
   let (on_left_side, start_column_on_left_side) = left_downward_nowrap(
