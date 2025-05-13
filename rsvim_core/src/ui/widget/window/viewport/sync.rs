@@ -8,6 +8,7 @@ use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
+use tokio_util::bytes::buf;
 #[allow(unused_imports)]
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
@@ -1142,9 +1143,61 @@ fn revert_search_line_start_wrap_linebreak(
   let last_char_width = buffer.width_at(line_idx, last_char);
   let approximate_start_width =
     last_char_width.saturating_sub(window_width as usize * window_height as usize);
-  let mut start_char = buffer
+  let start_char = buffer
     .char_at(line_idx, approximate_start_width)
     .unwrap_or(0_usize);
+
+  // For `wrap=true,linebreak=true`, the approximate `start_char` have to start from a valid word
+  // beginning, i.e. a unicode segment, not a arbitrary char index.
+  let mut start_char = if start_char > 0 {
+    let last_segment_char = start_char;
+    let mut start_segment_char = start_char;
+    loop {
+      let c_value = bufline.char(start_segment_char);
+      if c_value.is_whitespace() {
+        break;
+      }
+      if start_segment_char == 0 {
+        break;
+      }
+      start_segment_char = start_segment_char.saturating_sub(1);
+    }
+    let cloned_segment = buffer
+      .clone_line(
+        line_idx,
+        start_segment_char,
+        last_segment_char.saturating_sub(start_segment_char) + 1,
+      )
+      .unwrap();
+    debug_assert!(!cloned_segment.is_empty());
+    let segment_words: Vec<&str> = cloned_segment.split_word_bounds().collect();
+    debug_assert!(!segment_words.is_empty());
+    // Word index => its (start char index, end char index)
+    let segment_words_char_idx = segment_words
+      .iter()
+      .enumerate()
+      .scan(start_segment_char, |state, (i, wd)| {
+        let old_state = *state;
+        *state += wd.chars().count();
+        Some((i, (old_state, *state)))
+      })
+      .collect::<HashMap<usize, (usize, usize)>>();
+    debug_assert!(!segment_words_char_idx.is_empty());
+    let mut result = last_segment_char;
+
+    for (w, _word) in segment_words.iter().rev().enumerate() {
+      let (word_start_char, _word_end_char) = segment_words_char_idx.get(&w).unwrap();
+      if *word_start_char <= last_segment_char {
+        result = *word_start_char;
+        break;
+      }
+    }
+
+    result
+  } else {
+    0_usize
+  };
+
   trace!(
     "line_idx:{},last_char:{}({:?}),last_char_width:{},approximate_start_width:{},start_char:{}({:?})",
     line_idx,
@@ -1155,6 +1208,30 @@ fn revert_search_line_start_wrap_linebreak(
     start_char,
     bufline.char(start_char),
   );
+
+  let cloned_line = buffer
+    .clone_line(
+      line_idx,
+      start_char,
+      cloned_line_max_len(
+        window_height,
+        window_width,
+        buffer.width_before(line_idx, start_char),
+      ),
+    )
+    .unwrap();
+  let words: Vec<&str> = cloned_line.split_word_bounds().collect();
+  // Word index => its (start char index, end char index)
+  let words_char_idx = words
+    .iter()
+    .enumerate()
+    .scan(start_char, |state, (i, wd)| {
+      let old_state = *state;
+      *state += wd.chars().count();
+      Some((i, (old_state, *state)))
+    })
+    .collect::<HashMap<usize, (usize, usize)>>();
+  let mut word_idx = 0_usize;
 
   while start_char < bufline_len_chars {
     let start_column = buffer.width_before(line_idx, start_char);
@@ -1177,7 +1254,11 @@ fn revert_search_line_start_wrap_linebreak(
     if last_char < last_row_viewport.end_char_idx() {
       return start_column;
     }
-    start_char += 1;
+
+    // Set `start_char` to next word beginning char index.
+    word_idx += 1;
+    let (next_word_start_char, _next_word_end_char) = words_char_idx.get(&word_idx).unwrap();
+    start_char = *next_word_start_char;
   }
 
   unreachable!()
