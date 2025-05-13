@@ -18,7 +18,7 @@ MACOS = platform.system().startswith("Darwin")
 SCCACHE_FULLPATH = shutil.which("sccache")
 RECACHE_SCCACHE = False
 
-USE_LLD_LINKER = False
+NO_LLD_LINKER = False
 LLD_NAME = None
 if WINDOWS:
     LLD_NAME = "lld-link"
@@ -27,6 +27,8 @@ elif MACOS:
 else:
     LLD_NAME = "ld.lld"
 LLD_FULLPATH = shutil.which(LLD_NAME)
+
+RUSTFLAGS = []
 
 
 def set_env(command, name, value, is_string=False):
@@ -42,6 +44,29 @@ def set_env(command, name, value, is_string=False):
     return command.strip()
 
 
+def append_rustflags(opt):
+    global RUSTFLAGS
+    RUSTFLAGS.append(opt)
+
+
+def append_lld_rustflags():
+    if NO_LLD_LINKER:
+        return
+
+    if LLD_FULLPATH is None:
+        logging.warning(f"'lld' ({LLD_NAME}) not found!")
+        return
+
+    append_rustflags("-Clink-arg=-fuse-ld=lld")
+
+
+def set_rustflags(command):
+    global RUSTFLAGS
+    rustflags = " ".join([f for f in RUSTFLAGS])
+    command = set_env(command, "RUSTFLAGS", rustflags, is_string=True)
+    return command.strip()
+
+
 def set_sccache(command):
     if SCCACHE_FULLPATH is None:
         logging.warning(f"'sccache' not found!")
@@ -54,30 +79,11 @@ def set_sccache(command):
     return command.strip()
 
 
-def set_lld(command):
-    if not USE_LLD_LINKER:
-        return command
-
-    if LLD_FULLPATH is None:
-        logging.warning(f"'lld' ({LLD_NAME}) not found!")
-        return command
-
-    arch = subprocess.check_output(["rustc", "--version", "--verbose"], text=True)
-    arch = [l.strip() for l in arch.splitlines()]
-    host = [l for l in arch if l.startswith("host:")]
-    host = host[0][5:].strip()
-    host = host.replace("-", "_").upper()
-
-    logging.debug(f"host:{host}")
-    cargo_target_rustflags = f"CARGO_TARGET_{host}_RUSTFLAGS"
-    command = set_env(
-        command, cargo_target_rustflags, "-Clink-arg=-fuse-ld=lld", is_string=True
-    )
-    return command
-
-
 def clippy(watch):
-    command = set_env("", "RUSTFLAGS", "-Dwarnings", is_string=True)
+    append_rustflags("-Dwarnings")
+    append_lld_rustflags()
+
+    command = set_rustflags("")
     command = set_sccache(command)
 
     if watch:
@@ -93,6 +99,8 @@ def clippy(watch):
 
 
 def test(name, miri):
+    append_lld_rustflags()
+
     if len(name) == 0:
         name = None
         logging.info("Run 'test' for all cases")
@@ -108,14 +116,14 @@ def test(name, miri):
             is_string=True,
         )
         command = set_sccache(command)
-        command = set_lld(command)
+        command = set_rustflags(command)
         if name is None:
             name = ""
         command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command)
-        command = set_lld(command)
+        command = set_rustflags(command)
         if name is None:
             name = "--all"
         command = f"{command} cargo nextest run --no-capture {name}"
@@ -126,8 +134,10 @@ def test(name, miri):
 
 
 def list_test():
+    append_lld_rustflags()
+
     command = set_sccache("")
-    command = set_lld(command)
+    command = set_rustflags(command)
 
     command = f"{command} cargo nextest list"
 
@@ -137,8 +147,10 @@ def list_test():
 
 
 def build(release, features, all_features):
+    append_lld_rustflags()
+
     command = set_sccache("")
-    command = set_lld(command)
+    command = set_rustflags(command)
 
     feature_flags = ""
     if all_features:
@@ -204,9 +216,10 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "-l",
-        "--lld",
+        "--no-lld",
+        dest="no_lld",
         action="store_true",
-        help="Build with `lld` linker",
+        help="Build without `lld` linker",
     )
 
     subparsers = parser.add_subparsers(dest="subcommand")
@@ -304,8 +317,8 @@ if __name__ == "__main__":
 
     if parser.recache:
         RECACHE_SCCACHE = True
-    if parser.lld:
-        USE_LLD_LINKER = True
+    if parser.no_lld:
+        NO_LLD_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
         clippy(parser.watch)

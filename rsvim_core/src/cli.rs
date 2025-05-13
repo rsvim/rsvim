@@ -29,23 +29,20 @@ use clap::Parser;
 // debug: bool,
 
 const ABOUT: &str = "The VIM editor reinvented in Rust+TypeScript.";
-const AFTER_ABOUT: &str = "Copyright © 2025 RSVIM, VIM LICENSE.\nPlease checkout https://rsvim.github.io for more documentation.";
 
 #[derive(Parser, Debug, Clone, Default)]
 #[command(
   disable_version_flag = true,
   about = ABOUT,
   long_about = ABOUT,
-  after_help = AFTER_ABOUT,
-  after_long_help = AFTER_ABOUT
 )]
 /// Command line options.
 pub struct CliOpt {
-  #[arg(help = "Edit file(s)")]
-  file: Vec<String>,
-
   #[arg(short = 'V', long = "version", help = "Print version")]
   version: bool,
+
+  #[arg(help = "Edit file(s)")]
+  file: Vec<String>,
 }
 
 impl CliOpt {

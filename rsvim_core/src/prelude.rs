@@ -1,5 +1,8 @@
 //! Prelude.
 
+// Re-export `tracing`.
+pub use tracing::{debug, error, info, trace, warn};
+
 // Re-export `coord`.
 pub use crate::coord::*;
 pub use crate::results::*;
