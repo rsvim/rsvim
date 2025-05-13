@@ -20,7 +20,10 @@ exclude = [".DS_Store"]
 rsvim_core = { version = "0.1.1-alpha.8", path = "./rsvim_core" }
 crossterm = { version = "0.29", features = ["event-stream"] }
 jiff = { version = "0.2.10", features = ["tzdb-bundle-always"] }
-tracing = "0.1"
+tracing = { version = "0.1", features = [
+  "max_level_trace",
+  "release_max_level_info",
+] }
 tracing-subscriber = { version = "0.3", features = [
   "env-filter",
   "parking_lot",

@@ -8,9 +8,9 @@ use tracing_subscriber::{self, EnvFilter};
 /// Initialize logging.
 ///
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
-/// Defaults to `INFO`.
+/// Defaults to `error`.
 pub fn init() {
-  let env_filter = EnvFilter::from_env("RSVIM_LOG");
+  let env_filter = EnvFilter::try_from_env("RSVIM_LOG").unwrap_or(EnvFilter::from_str("error"));
 
   if env_filter.max_level_hint().is_some()
     && env_filter.max_level_hint().unwrap() >= tracing::Level::TRACE
