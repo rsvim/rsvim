@@ -5080,7 +5080,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-3
     {
-      let expect = vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
+      let expect = vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
 
       let actual = {
         let target_cursor_line = 4;
@@ -5125,11 +5125,17 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-4
     {
-      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
+      let expect = vec![
+        "both\tline-",
+        "wrap\tand",
+        "\tword-wrap",
+        "\toptions",
+        "\tare",
+      ];
 
       let actual = {
-        let target_cursor_line = 7;
-        let target_cursor_char = 3;
+        let target_cursor_line = 5;
+        let target_cursor_char = 82;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -5141,8 +5147,8 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
           target_cursor_line,
           target_cursor_char,
         );
-        assert_eq!(start_line, 3);
-        assert_eq!(start_column, 0);
+        assert_eq!(start_line, 5);
+        assert_eq!(start_column, 64);
 
         let viewport = Viewport::view(
           &buf,
@@ -5155,18 +5161,14 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 2), (5, 0), (6, 0), (7, 0)]
-        .into_iter()
-        .collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(5, 6)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        3,
-        8,
+        5,
+        6,
         &expect_start_fills,
         &expect_end_fills,
       );
