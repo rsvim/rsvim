@@ -8,7 +8,6 @@ use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
-use tokio_util::bytes::buf;
 #[allow(unused_imports)]
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
@@ -1310,7 +1309,7 @@ fn right_downward_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   _viewport_start_line: usize,
-  viewport_start_column: usize,
+  _viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
