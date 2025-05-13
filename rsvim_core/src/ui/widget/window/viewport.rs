@@ -6254,8 +6254,8 @@ mod tests_search_anchor_downward_wrap_linebreak {
     // Search-5
     {
       let expect = vec![
-        "xtra parts are sp",
-        "lit into the",
+        " extra parts are ",
+        "split into the",
         "\tnext",
         "\trow,",
         "\tif",
