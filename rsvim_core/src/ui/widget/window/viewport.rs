@@ -6469,7 +6469,7 @@ mod tests_search_anchor_upward_nowrap {
 
     // Prepare
     {
-      let expect = vec!["\t1. ", "\t2. ", "\t\t3", "\t\t4", ""];
+      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = {
         let target_cursor_line = 7;
@@ -6509,7 +6509,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 2), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
       assert_viewport(
@@ -6525,13 +6525,7 @@ mod tests_search_anchor_upward_nowrap {
 
     // Search-1
     {
-      let expect = vec![
-        "This is a quite s",
-        "But still it cont",
-        "\t1. When",
-        "\t2. When",
-        "\t\t3",
-      ];
+      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = {
         let target_cursor_line = 6;
@@ -6549,7 +6543,7 @@ mod tests_search_anchor_upward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
-        assert_eq!(start_column, 0);
+        assert_eq!(start_column, 45);
 
         let viewport = Viewport::view(
           &buf,
@@ -6565,7 +6559,7 @@ mod tests_search_anchor_upward_nowrap {
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 2), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
       assert_viewport(
