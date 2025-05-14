@@ -6893,7 +6893,7 @@ mod tests_search_anchor_upward_nowrap {
   }
 
   #[test]
-  fn _new2() {
+  fn new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
@@ -6948,25 +6948,75 @@ mod tests_search_anchor_upward_nowrap {
       );
     }
 
-    // Search-1
+    // Prepare
     {
-      let expect = vec![
-        "",
-        "nd small test lin",
-        "veral things we w",
-        "he\tline",
-        "t\t\t",
-      ];
+      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
       let actual = {
-        let target_cursor_line = 2;
-        let target_cursor_char = 40;
+        let target_cursor_line = 7;
+        let target_cursor_char = 0;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Down,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 3);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 2), (5, 0), (6, 0), (7, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        3,
+        8,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-1
+    {
+      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 0;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Up,
           &buf,
           window.actual_shape(),
           window.options(),
