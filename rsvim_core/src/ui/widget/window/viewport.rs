@@ -7443,6 +7443,64 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       );
     }
 
+    // Prepare
+    {
+      let expect = vec![
+        "But still it cont",
+        "ains several thin",
+        "gs we want to tes",
+        "t:\n",
+        "\t1. When",
+      ];
+
+      let actual = {
+        let target_cursor_line = 7;
+        let target_cursor_char = 0;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Down,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        4,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
     // Search-1
     {
       let expect = vec![
@@ -7454,14 +7512,14 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = {
-        let target_cursor_line = 2;
-        let target_cursor_char = 15;
+        let target_cursor_line = 6;
+        let target_cursor_char = 280;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
+          ViewportSearchAnchorDirection::Up,
           &buf,
           window.actual_shape(),
           window.options(),
@@ -7512,14 +7570,14 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = {
-        let target_cursor_line = 3;
+        let target_cursor_line = 5;
         let target_cursor_char = 60;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
+          ViewportSearchAnchorDirection::Up,
           &buf,
           window.actual_shape(),
           window.options(),
@@ -7566,7 +7624,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
+          ViewportSearchAnchorDirection::Up,
           &buf,
           window.actual_shape(),
           window.options(),
@@ -7611,14 +7669,14 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = {
-        let target_cursor_line = 5;
+        let target_cursor_line = 3;
         let target_cursor_char = 82;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
+          ViewportSearchAnchorDirection::Up,
           &buf,
           window.actual_shape(),
           window.options(),
@@ -7663,7 +7721,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       ];
 
       let actual = {
-        let target_cursor_line = 6;
+        let target_cursor_line = 2;
         let target_cursor_char = 82;
 
         let mut window = window.borrow_mut();
@@ -7709,8 +7767,54 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       let expect = vec![""];
 
       let actual = {
-        let target_cursor_line = 7;
+        let target_cursor_line = 1;
         let target_cursor_char = 0;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Down,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 7);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(7, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(7, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        7,
+        8,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-7
+    {
+      let expect = vec![""];
+
+      let actual = {
+        let target_cursor_line = 0;
+        let target_cursor_char = 8;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -7752,7 +7856,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
   }
 
   #[test]
-  fn new2() {
+  fn _new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
