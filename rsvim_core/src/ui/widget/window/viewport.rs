@@ -6421,19 +6421,13 @@ mod tests_search_anchor_upwnward_nowrap {
       );
     }
 
-    // Search-1
+    // Prepare
     {
-      let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite s",
-        "But still it cont",
-        "\t1. When",
-        "\t2. When",
-      ];
+      let expect = vec!["\t1. ", "\t2. ", "\t\t3", "\t\t4", ""];
 
       let actual = {
-        let target_cursor_line = 2;
-        let target_cursor_char = 15;
+        let target_cursor_line = 7;
+        let target_cursor_char = 0;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
