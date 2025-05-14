@@ -1,10 +1,8 @@
 //! Logging utils.
 
-use std::str::FromStr;
-
 use jiff::Zoned;
 use tracing_appender;
-use tracing_subscriber::{self, EnvFilter, layer::Filter};
+use tracing_subscriber::{self, EnvFilter};
 
 /// Initialize logging.
 ///
