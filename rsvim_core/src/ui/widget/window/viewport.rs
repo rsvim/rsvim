@@ -6575,7 +6575,7 @@ mod tests_search_anchor_upward_nowrap {
 
     // Search-2
     {
-      let expect = vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
+      let expect = vec!["to\tcom", "etely\tput:", "e-wrap\tand", "if\te", ""];
 
       let actual = {
         let target_cursor_line = 5;
@@ -6606,10 +6606,10 @@ mod tests_search_anchor_upward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 1), (4, 7), (5, 0), (6, 0), (7, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 4), (4, 0), (5, 0), (6, 6), (7, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 1), (4, 6), (5, 6), (6, 0), (7, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
       assert_viewport(
