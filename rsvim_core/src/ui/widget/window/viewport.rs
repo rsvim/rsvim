@@ -6397,7 +6397,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 }
 #[allow(unused_imports)]
 #[cfg(test)]
-mod tests_search_anchor_upwnward_nowrap {
+mod tests_search_anchor_upward_nowrap {
   use super::tests_util::*;
   use super::*;
 
