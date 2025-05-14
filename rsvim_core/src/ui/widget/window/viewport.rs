@@ -7498,7 +7498,11 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-1
     {
       let expect = vec![
-        "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+        "nd again. This op",
+        "eration also eats",
+        " more rows in the",
+        " window, thus it ",
+        "may contains less",
       ];
 
       let actual = {
