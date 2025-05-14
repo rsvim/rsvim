@@ -624,7 +624,10 @@ fn sync_wrap_linebreak(
   }
 }
 
-// Returns `start_line`, `start_column` for a viewport.
+// Search a new viewport anchor (`start_line`, `start_column`) downward, i.e. when cursor moves
+// down, and possibly scrolling buffer if cursor reaches the window bottom.
+//
+// Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_downward(
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1417,24 +1420,49 @@ fn search_anchor_downward_wrap_linebreak(
   (start_line, viewport_start_column)
 }
 
-#[allow(unused_imports)]
-#[cfg(test)]
-mod tests {
-  use super::*;
+// Search a new viewport anchor (`start_line`, `start_column`) upward, i.e. when cursor moves up,
+// and possibly scrolling buffer if cursor reaches the window top.
+//
+// Returns `start_line`, `start_column` for the new viewport.
+pub fn search_anchor_upward(
+  viewport: &Viewport,
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  window_local_options: &WindowLocalOptions,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+  // If window is zero-sized.
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  if height == 0 || width == 0 {
+    return (0, 0);
+  }
 
-  use crate::test::log::init as test_log_init;
-  use std::ops::Range;
-  use tracing::info;
-
-  #[test]
-  fn default_range() {
-    test_log_init();
-
-    let r1: Range<usize> = Range::default();
-    info!("r1:{:?}", r1);
-    info!("r1.start:{:?}, r1.end:{:?}", r1.start, r1.end);
-    assert!(r1.is_empty());
-    assert!(r1.start == 0);
-    assert!(r1.end == 0);
+  match (
+    window_local_options.wrap(),
+    window_local_options.line_break(),
+  ) {
+    (false, _) => search_anchor_downward_nowrap(
+      viewport,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+    ),
+    (true, false) => search_anchor_downward_wrap_nolinebreak(
+      viewport,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+    ),
+    (true, true) => search_anchor_downward_wrap_linebreak(
+      viewport,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+    ),
   }
 }
