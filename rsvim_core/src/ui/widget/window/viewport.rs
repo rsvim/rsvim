@@ -6585,7 +6585,7 @@ mod tests_search_anchor_upward_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
+          ViewportSearchAnchorDirection::Up,
           &buf,
           window.actual_shape(),
           window.options(),
