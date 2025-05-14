@@ -7156,11 +7156,11 @@ mod tests_search_anchor_upward_nowrap {
 
     // Search-4
     {
-      let expect = vec!["put\tinsi", "", "wrap\toptio", "line-wrap\t", ""];
+      let expect = vec!["o\tcomplete", "\tput:\n", "p\tand", "if\teither", ""];
 
       let actual = {
         let target_cursor_line = 3;
-        let target_cursor_char = 55;
+        let target_cursor_char = 36;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -7174,7 +7174,7 @@ mod tests_search_anchor_upward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
-        assert_eq!(start_column, 109);
+        assert_eq!(start_column, 84);
 
         let viewport = Viewport::view(
           &buf,
@@ -7187,10 +7187,10 @@ mod tests_search_anchor_upward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 0), (5, 0), (6, 0), (7, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 1), (7, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 5), (6, 0), (7, 0)]
         .into_iter()
         .collect();
       assert_viewport(
