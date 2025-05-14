@@ -10,7 +10,7 @@ use tracing_subscriber::{self, EnvFilter};
 ///
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
 /// Defaults to `error`.
-pub fn init(dump_log: bool) {
+pub fn init() {
   let env_filter =
     EnvFilter::try_from_env("RSVIM_LOG").unwrap_or(EnvFilter::from_str("error").unwrap());
 
