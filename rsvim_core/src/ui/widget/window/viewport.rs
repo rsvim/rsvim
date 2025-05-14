@@ -6725,7 +6725,13 @@ mod tests_search_anchor_upward_nowrap {
 
     // Search-5
     {
-      let expect = vec!["things we want to", "line\ti", "\ttoo", "arts are been tru", "arts are split in"];
+      let expect = vec![
+        "things we want to",
+        "line\ti",
+        "\ttoo",
+        "arts are been tru",
+        "arts are split in",
+      ];
 
       let actual = {
         let target_cursor_line = 2;
@@ -6756,10 +6762,10 @@ mod tests_search_anchor_upward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2,0), (3, 4), (4, 3), (5, 0), (6, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 4), (4, 3), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2,0), (3, 0), (4, 3), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 3), (5, 0), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
