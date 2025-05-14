@@ -1491,10 +1491,10 @@ fn search_anchor_upward_nowrap(
       .unwrap_or(0_usize),
   );
 
-  debug_assert!(viewport.lines().last_key_value().is_some());
-  let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
+  debug_assert!(viewport.lines().first_key_value().is_some());
+  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
 
-  let start_line = if target_cursor_line <= last_line {
+  let start_line = if target_cursor_line <= first_line {
     // Target cursor line is still inside current viewport.
     // Still use the old viewport start line.
     viewport_start_line
