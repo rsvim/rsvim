@@ -1185,7 +1185,7 @@ fn find_start_char_by_word(
   }
 }
 
-fn left_downward_wrap_linebreak(
+fn adjust_left_wrap_linebreak(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
   _viewport_start_line: usize,
@@ -1307,7 +1307,7 @@ fn revert_search_line_start_wrap_linebreak(
   unreachable!()
 }
 
-fn right_downward_wrap_linebreak(
+fn adjust_right_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   _viewport_start_line: usize,
@@ -1338,6 +1338,46 @@ fn right_downward_wrap_linebreak(
   } else {
     (false, 0_usize)
   }
+}
+
+fn adjust_horizontally_wrap_linebreak(
+  viewport: &Viewport,
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+  start_line: usize,
+) -> (usize, usize) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
+
+  let (on_left_side, start_column_on_left_side) = adjust_left_wrap_linebreak(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_left_side {
+    return (start_line, start_column_on_left_side);
+  }
+
+  let (on_right_side, start_column_on_right_side) = adjust_right_wrap_linebreak(
+    buffer,
+    window_actual_shape,
+    viewport_start_line,
+    viewport_start_column,
+    target_cursor_line,
+    target_cursor_char,
+  );
+
+  if on_right_side {
+    return (start_line, start_column_on_right_side);
+  }
+
+  (start_line, viewport_start_column)
 }
 
 fn search_anchor_downward_wrap_linebreak(
@@ -1391,33 +1431,14 @@ fn search_anchor_downward_wrap_linebreak(
     adjust_current_line(current_line, target_cursor_line, height, n)
   };
 
-  let (on_left_side, start_column_on_left_side) = left_downward_wrap_linebreak(
+  adjust_horizontally_wrap_linebreak(
+    viewport,
     buffer,
     window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
     target_cursor_line,
     target_cursor_char,
-  );
-
-  if on_left_side {
-    return (start_line, start_column_on_left_side);
-  }
-
-  let (on_right_side, start_column_on_right_side) = right_downward_wrap_linebreak(
-    buffer,
-    window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
-
-  if on_right_side {
-    return (start_line, start_column_on_right_side);
-  }
-
-  (start_line, viewport_start_column)
+    start_line,
+  )
 }
 
 // Search a new viewport anchor (`start_line`, `start_column`) upward, i.e. when cursor moves up,
@@ -1569,7 +1590,7 @@ fn search_anchor_upward_wrap_linebreak(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
+  let _viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
@@ -1594,49 +1615,15 @@ fn search_anchor_upward_wrap_linebreak(
   let start_line = if target_cursor_line <= first_line && !target_cursor_line_not_fully_show {
     viewport_start_line
   } else {
-    let mut n = 0_usize;
-    let mut current_line = target_cursor_line as isize;
-
-    while (n < height as usize) && (current_line >= 0) {
-      let (rows, _start_fills, _end_fills, _) =
-        proc_line_wrap_linebreak(buffer, 0, current_line as usize, 0_u16, height, width);
-      n += rows.len();
-
-      if current_line == 0 || n >= height as usize {
-        break;
-      }
-
-      current_line -= 1;
-    }
-
-    adjust_current_line(current_line, target_cursor_line, height, n)
+    target_cursor_line
   };
 
-  let (on_left_side, start_column_on_left_side) = left_downward_wrap_linebreak(
+  adjust_horizontally_wrap_linebreak(
+    viewport,
     buffer,
     window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
     target_cursor_line,
     target_cursor_char,
-  );
-
-  if on_left_side {
-    return (start_line, start_column_on_left_side);
-  }
-
-  let (on_right_side, start_column_on_right_side) = right_downward_wrap_linebreak(
-    buffer,
-    window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
-
-  if on_right_side {
-    return (start_line, start_column_on_right_side);
-  }
-
-  (start_line, viewport_start_column)
+    start_line,
+  )
 }
