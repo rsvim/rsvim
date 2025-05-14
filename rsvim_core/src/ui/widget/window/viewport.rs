@@ -6578,8 +6578,8 @@ mod tests_search_anchor_upward_nowrap {
       let expect = vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
 
       let actual = {
-        let target_cursor_line = 6;
-        let target_cursor_char = 3;
+        let target_cursor_line = 5;
+        let target_cursor_char = 60;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -6592,8 +6592,8 @@ mod tests_search_anchor_upward_nowrap {
           target_cursor_line,
           target_cursor_char,
         );
-        assert_eq!(start_line, 2);
-        assert_eq!(start_column, 1);
+        assert_eq!(start_line, 3);
+        assert_eq!(start_column, 79);
 
         let viewport = Viewport::view(
           &buf,
@@ -6606,18 +6606,18 @@ mod tests_search_anchor_upward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 7), (4, 7), (5, 7), (6, 7)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 1), (4, 7), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 3), (4, 3), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 1), (4, 6), (5, 6), (6, 0), (7, 0)]
         .into_iter()
         .collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        2,
-        7,
+        3,
+        8,
         &expect_start_fills,
         &expect_end_fills,
       );
