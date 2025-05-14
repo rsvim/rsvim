@@ -12,7 +12,6 @@ pub struct PathConfig {
 }
 
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct CachedDirs {
   config_dir: PathBuf,
   home_dir: PathBuf,

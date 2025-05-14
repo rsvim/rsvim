@@ -37,7 +37,6 @@ pub mod msg;
 pub mod transpiler;
 
 #[derive(Debug, Default, Clone)]
-#[allow(dead_code)]
 pub struct JsRuntimeOptions {
   // // The seed used in Math.random() method.
   // pub seed: Option<i64>,

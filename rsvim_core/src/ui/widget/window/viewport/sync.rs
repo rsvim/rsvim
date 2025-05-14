@@ -73,15 +73,6 @@ pub fn sync(
   }
 }
 
-#[allow(dead_code)]
-fn slice2line(s: &RopeSlice) -> String {
-  let mut builder = String::new();
-  for chunk in s.chunks() {
-    builder.push_str(chunk);
-  }
-  builder
-}
-
 fn end_char_and_prefills(
   buffer: &Buffer,
   bline: &RopeSlice,

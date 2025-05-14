@@ -1,7 +1,5 @@
 //! The widget tree that manages all the widget components.
 
-#![allow(dead_code)]
-
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::widget::Widgetable;

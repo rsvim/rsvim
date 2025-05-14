@@ -488,7 +488,6 @@ impl CursorViewport {
 /// 3. Start from bottom left corner.
 /// 4. Start from bottom right corner.
 // spellchecker:on
-#[allow(dead_code)]
 pub struct Viewport {
   // Start line index (in the buffer), starts from 0.
   start_line_idx: usize,
@@ -504,6 +503,8 @@ pub struct Viewport {
 }
 
 arc_impl!(Viewport);
+
+pub struct ViewportSearchDirection {}
 
 impl Viewport {
   /// Calculate viewport downward, from top to bottom.
@@ -681,7 +682,7 @@ impl Viewport {
 }
 
 // spellchecker:off
-#[allow(unused_imports, dead_code)]
+#[allow(unused_imports)]
 #[cfg(test)]
 mod tests_util {
   use super::*;
@@ -690,7 +691,6 @@ mod tests_util {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
   use crate::ui::tree::*;
@@ -861,7 +861,6 @@ mod tests_view_nowrap {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
 
   #[test]
@@ -1320,7 +1319,6 @@ mod tests_view_nowrap_startcol {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Inodeable;
 
@@ -1650,7 +1648,6 @@ mod tests_view_nowrap_startcol {
 //   use crate::buf::BufferLocalOptionsBuilder;
 //   use crate::prelude::*;
 //   use crate::test::buf::make_buffer_from_lines;
-//   #[allow(dead_code)]
 //   use crate::test::log::init as test_log_init;
 //   use crate::ui::tree::*;
 //   use crate::wlock;
@@ -1907,7 +1904,6 @@ mod tests_view_wrap_nolinebreak {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::*;
 
@@ -2596,7 +2592,6 @@ mod tests_view_wrap_nolinebreak_startcol {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::*;
 
@@ -2851,7 +2846,6 @@ mod tests_view_wrap_linebreak {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
 
   #[test]
@@ -3581,7 +3575,6 @@ mod tests_view_wrap_linebreak_startcol {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Inodeable;
 
@@ -3887,7 +3880,6 @@ mod tests_search_anchor_downward_nowrap {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Inodeable;
 
@@ -4907,7 +4899,6 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Inodeable;
 
@@ -5638,7 +5629,6 @@ mod tests_search_anchor_downward_wrap_linebreak {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Inodeable;
 
@@ -6357,7 +6347,6 @@ mod tests_search_anchor_upwnward_nowrap {
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Inodeable;
 
