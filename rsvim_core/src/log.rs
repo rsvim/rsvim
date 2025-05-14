@@ -4,18 +4,17 @@ use std::str::FromStr;
 
 use jiff::Zoned;
 use tracing_appender;
-use tracing_subscriber::{self, EnvFilter};
+use tracing_subscriber::{self, EnvFilter, layer::Filter};
 
 /// Initialize logging.
 ///
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
 /// Defaults to `error`.
 pub fn init() {
-  let env_filter =
-    EnvFilter::try_from_env("RSVIM_LOG").unwrap_or(EnvFilter::from_str("error").unwrap());
+  let env_filter = EnvFilter::from_env("RSVIM_LOG");
 
-  if dump_log {
-    // If write logs into file.
+  if env_filter.max_level_hint().unwrap() >= tracing::Level::DEBUG {
+    // Only create file logs for debug level.
     let now = Zoned::now();
     let log_name = format!(
       "rsvim_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
@@ -42,7 +41,7 @@ pub fn init() {
     tracing_subscriber::FmtSubscriber::builder()
       .with_file(true)
       .with_line_number(true)
-      .with_thread_ids(true)
+      .with_thread_ids(false)
       .with_thread_names(false)
       .with_level(true)
       .with_ansi(false)
