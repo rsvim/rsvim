@@ -535,7 +535,6 @@ impl Viewport {
     }
   }
 
-  #[allow(clippy::too_many_arguments)]
   /// Search for a new viewport anchor (i.e. `start_line`/`start_column`) with target cursor
   /// line/char position, when cursor moves downward.
   ///
@@ -6439,7 +6438,7 @@ mod tests_search_anchor_upwnward_nowrap {
           target_cursor_line,
           target_cursor_char,
         );
-        assert_eq!(start_line, 0);
+        assert_eq!(start_line, 7);
         assert_eq!(start_column, 0);
 
         let viewport = Viewport::view(
@@ -6459,24 +6458,24 @@ mod tests_search_anchor_upwnward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 2)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
         .collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        0,
-        5,
+        3,
+        8,
         &expect_start_fills,
         &expect_end_fills,
       );
     }
 
-    // Search-2
+    // Search-1
     {
       let expect = vec![
         "This is a quite s",

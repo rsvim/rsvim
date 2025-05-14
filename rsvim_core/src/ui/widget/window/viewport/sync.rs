@@ -1388,7 +1388,7 @@ fn search_anchor_downward_wrap_linebreak(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
+  let _viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
