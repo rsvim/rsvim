@@ -1,24 +1,22 @@
 //! Logging utils.
 
 use jiff::Zoned;
-use tracing;
 use tracing_appender;
 use tracing_subscriber::{self, EnvFilter};
 
 /// Initialize logging.
 ///
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
-/// Defaults to `INFO`.
+/// Defaults to `error`. The logs are written into file if log level >= `INFO`, otherwise it prints
+/// to terminal.
 pub fn init() {
   let env_filter = EnvFilter::from_env("RSVIM_LOG");
 
-  if env_filter.max_level_hint().is_some()
-    && env_filter.max_level_hint().unwrap() >= tracing::Level::TRACE
-  {
-    // If trace/debug log is enabled, write logs into file.
+  if env_filter.max_level_hint().unwrap() >= tracing::Level::INFO {
+    // Only create file logs for debug level.
     let now = Zoned::now();
     let log_name = format!(
-      "rsvim-{:0>4}{:0>2}{:0>2}-{:0>2}{:0>2}{:0>2}-{:0>3}.log",
+      "rsvim_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
       now.date().year(),
       now.date().month(),
       now.date().day(),
@@ -27,7 +25,7 @@ pub fn init() {
       now.time().second(),
       now.time().millisecond(),
     );
-    let subscriber = tracing_subscriber::FmtSubscriber::builder()
+    tracing_subscriber::FmtSubscriber::builder()
       .with_file(true)
       .with_line_number(true)
       .with_thread_ids(true)
@@ -36,20 +34,18 @@ pub fn init() {
       .with_ansi(false)
       .with_env_filter(env_filter)
       .with_writer(tracing_appender::rolling::never(".", log_name))
-      .finish();
-    tracing::subscriber::set_global_default(subscriber).unwrap();
+      .init();
   } else {
-    // If trace/debug log is disabled, write logs into stderr.
-    let subscriber = tracing_subscriber::FmtSubscriber::builder()
+    // Otherwise print logs to terminal.
+    tracing_subscriber::FmtSubscriber::builder()
       .with_file(true)
       .with_line_number(true)
-      .with_thread_ids(true)
-      .with_thread_names(true)
+      .with_thread_ids(false)
+      .with_thread_names(false)
       .with_level(true)
       .with_ansi(false)
       .with_env_filter(env_filter)
       .with_writer(std::io::stderr)
-      .finish();
-    tracing::subscriber::set_global_default(subscriber).unwrap();
+      .init();
   }
 }

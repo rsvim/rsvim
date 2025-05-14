@@ -16,7 +16,10 @@ description = "The RSVIM text editor."
 
 [dependencies]
 rsvim_core = { workspace = true }
-tracing = { workspace = true }
+tracing = { workspace = true, features = [
+  "max_level_trace",
+  "release_max_level_info",
+] }
 tokio = { workspace = true, features = ["full"] }
 clap = { workspace = true, features = ["derive", "unicode"] }
 once_cell = { workspace = true, features = ["parking_lot"] }
