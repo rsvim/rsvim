@@ -7,11 +7,12 @@ use tracing_subscriber::{self, EnvFilter};
 /// Initialize logging.
 ///
 /// It uses `RSVIM_LOG` environment variable to control the logging level.
-/// Defaults to `error`.
+/// Defaults to `error`. The logs are written into file if log level >= `INFO`, otherwise it prints
+/// to terminal.
 pub fn init() {
   let env_filter = EnvFilter::from_env("RSVIM_LOG");
 
-  if env_filter.max_level_hint().unwrap() >= tracing::Level::DEBUG {
+  if env_filter.max_level_hint().unwrap() >= tracing::Level::INFO {
     // Only create file logs for debug level.
     let now = Zoned::now();
     let log_name = format!(
