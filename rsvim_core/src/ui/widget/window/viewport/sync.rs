@@ -956,7 +956,7 @@ fn _revert_search_line_start_wrap_nolinebreak(
   unreachable!()
 }
 
-fn _adjust_left_wrap_onlinebreak(
+fn _move_more_to_left_wrap_onlinebreak(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
   viewport_start_column: usize,
@@ -985,7 +985,7 @@ fn _adjust_left_wrap_onlinebreak(
   (false, 0_usize)
 }
 
-fn _adjust_right_wrap_nolinebreak(
+fn _move_more_to_right_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   _viewport_start_column: usize,
@@ -1025,7 +1025,7 @@ fn _adjust_horizontally_wrap_nolinebreak(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  let (on_left_side, start_column_on_left_side) = _adjust_left_wrap_onlinebreak(
+  let (on_left_side, start_column_on_left_side) = _move_more_to_left_wrap_onlinebreak(
     buffer,
     window_actual_shape,
     start_column,
@@ -1037,7 +1037,7 @@ fn _adjust_horizontally_wrap_nolinebreak(
     return (start_line, start_column_on_left_side);
   }
 
-  let (on_right_side, start_column_on_right_side) = _adjust_right_wrap_nolinebreak(
+  let (on_right_side, start_column_on_right_side) = _move_more_to_right_wrap_nolinebreak(
     buffer,
     window_actual_shape,
     start_column,
@@ -1216,7 +1216,7 @@ fn _find_start_char_by_word(
   }
 }
 
-fn _adjust_left_wrap_linebreak(
+fn _move_more_to_left_wrap_linebreak(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
   viewport_start_column: usize,
@@ -1337,7 +1337,7 @@ fn _revert_search_line_start_wrap_linebreak(
   unreachable!()
 }
 
-fn _adjust_right_wrap_linebreak(
+fn _move_more_to_right_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   _viewport_start_column: usize,
@@ -1377,7 +1377,7 @@ fn _adjust_horizontally_wrap_linebreak(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  let (on_left_side, start_column_on_left_side) = _adjust_left_wrap_linebreak(
+  let (on_left_side, start_column_on_left_side) = _move_more_to_left_wrap_linebreak(
     buffer,
     window_actual_shape,
     start_column,
@@ -1389,7 +1389,7 @@ fn _adjust_horizontally_wrap_linebreak(
     return (start_line, start_column_on_left_side);
   }
 
-  let (on_right_side, start_column_on_right_side) = _adjust_right_wrap_linebreak(
+  let (on_right_side, start_column_on_right_side) = _move_more_to_right_wrap_linebreak(
     buffer,
     window_actual_shape,
     start_column,
