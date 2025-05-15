@@ -963,9 +963,36 @@ fn _revert_search_line_start_wrap_nolinebreak(
   unreachable!()
 }
 
-// NOTE: For `wrap=true, linebreak=false`, if there's any head/tail not fully rendered, it means
-// there will be only 1 line shows in current window viewport. Because the `wrap` will force the
-// 2nd line wait to show until the **current** line get fully rendered.
+fn _adjust_left_wrap_onlinebreak(
+  buffer: &Buffer,
+  _window_actual_shape: &U16Rect,
+  _viewport_start_line: usize,
+  viewport_start_column: usize,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (bool, usize) {
+  // If target cursor char is on the left of the old target viewport.
+  let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
+    Some(c) => {
+      trace!(
+        "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
+        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+      );
+      c > target_cursor_char
+    }
+    None => true,
+  };
+
+  if on_left_side {
+    // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
+    // just put the cursor at the first left char in the new viewport.
+    let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
+    return (true, start_column);
+  }
+
+  (false, 0_usize)
+}
+
 fn _adjust_right_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1010,7 +1037,7 @@ fn _adjust_horizontally_wrap_nolinebreak(
   let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
 
-  let (on_left_side, start_column_on_left_side) = _adjust_left_nowrap(
+  let (on_left_side, start_column_on_left_side) = _adjust_left_wrap_onlinebreak(
     buffer,
     window_actual_shape,
     viewport_start_line,
@@ -1079,16 +1106,16 @@ fn search_anchor_downward_wrap_nolinebreak(
   debug_assert!(viewport.lines().last_key_value().is_some());
   let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
 
+  // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only
+  // only 1 line shows in current window viewport. Because the `wrap` will force the 2nd line
+  // wait to show until the **current** line get fully rendered.
+
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
 
   let start_line = if target_cursor_line <= last_line && !target_cursor_line_not_fully_show {
     viewport_start_line
   } else {
-    // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only
-    // only 1 line shows in current window viewport. Because the `wrap` will force the 2nd line
-    // wait to show until the **current** line get fully rendered.
-
     // Try fill the viewport with `start_column=0`, and we can know how many rows the
     // `target_cursor_line` needs to fill into current viewport.
     let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
