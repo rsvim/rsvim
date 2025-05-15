@@ -7637,7 +7637,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
       };
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 6)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
