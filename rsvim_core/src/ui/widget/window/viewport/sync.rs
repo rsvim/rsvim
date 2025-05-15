@@ -667,7 +667,7 @@ pub fn search_anchor_downward(
 //
 // For example:
 //
-// ```
+// ```text
 //                                           |----------------------------------|
 // This is the beginning of the very long lin|e, which only shows the beginning |part.
 // This is the short line, it's not shown.   |                                  |
@@ -680,7 +680,7 @@ pub fn search_anchor_downward(
 // the new viewport correctly, so we will have to move the new viewport to the left to allow cursor
 // show in it.
 //
-// ```
+// ```text
 //      |----------------------------------|
 // This |is the beginning of the very long |line, which only shows the beginning part.
 // This |is the short line, it's not shown.|
@@ -700,16 +700,16 @@ pub fn search_anchor_downward(
 fn _move_more_to_left_nowrap(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
-  viewport_start_column: usize,
+  target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
   // If target cursor char is on the left of the old target viewport.
-  let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
+  let on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
     Some(c) => {
       trace!(
         "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, viewport_start_column, c
+        target_cursor_line, target_cursor_char, target_viewport_start_column, c
       );
       c > target_cursor_char
     }
@@ -733,19 +733,19 @@ fn _move_more_to_left_nowrap(
 fn _move_more_to_right_nowrap(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  viewport_start_column: usize,
+  target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
   let width = window_actual_shape.width();
-  let viewport_end_column = viewport_start_column + width as usize;
+  let viewport_end_column = target_viewport_start_column + width as usize;
 
   // Target cursor line end.
   let on_right_side = match buffer.char_at(target_cursor_line, viewport_end_column) {
     Some(c) => {
       trace!(
         "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, viewport_start_column, c
+        target_cursor_line, target_cursor_char, target_viewport_start_column, c
       );
       c < target_cursor_char
     }
@@ -958,17 +958,19 @@ fn _revert_search_line_start_wrap_nolinebreak(
 
 fn _move_more_to_left_wrap_onlinebreak(
   buffer: &Buffer,
-  _window_actual_shape: &U16Rect,
-  viewport_start_column: usize,
+  window_actual_shape: &U16Rect,
+  target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
+  let mut start_column = target_viewport_start_column;
+
   // If target cursor char is on the left of the old target viewport.
-  let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
+  let mut on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
     Some(c) => {
       trace!(
         "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, viewport_start_column, c
+        target_cursor_line, target_cursor_char, target_viewport_start_column, c
       );
       c > target_cursor_char
     }
@@ -978,17 +980,60 @@ fn _move_more_to_left_wrap_onlinebreak(
   if on_left_side {
     // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
     // just put the cursor at the first left char in the new viewport.
-    let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
-    return (true, start_column);
+    start_column = buffer.width_before(target_cursor_line, target_cursor_char);
   }
 
-  (false, 0_usize)
+  // If `target_cursor_line` doesn't show its head (i.e. the `target_viewport_start_column` > 0,
+  // and the viewport only contains 1 line, and the line is just too lone to fully show), and the
+  // `target_cursor_line`'s end char is not at the bottom-right corner of the viewport. For
+  // example:
+  //
+  // ```text
+  //                                           |----------------------------------|
+  // This is the beginning of the very long lin|e, which only shows the beginning |
+  //                                           |part.                             |
+  //                                           |                                  |
+  //                                           |----------------------------------|
+  // ```
+  //
+  // Apparently we can move the `target_viewport_start_column` more to left, thus the
+  // `target_cursor_line` can be put in this way:
+  //
+  // ```text
+  // |----------------------------------|
+  // |This is the beginning of the very |
+  // |long lin|e, which only shows the b|
+  // |eginning part.                    |
+  // |----------------------------------|
+  // ```
+  //
+  // Which is much better for `wrap=true`.
+
+  let last_visible_char_width = buffer.width_at(
+    target_cursor_line,
+    buffer
+      .last_visible_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+  let start_column_diff = last_visible_char_width.saturating_sub(
+    (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
+  );
+  if start_column_diff < start_column {
+    start_column = start_column_diff;
+    on_left_side = true;
+  }
+
+  if on_left_side {
+    (true, start_column)
+  } else {
+    (false, 0_usize)
+  }
 }
 
 fn _move_more_to_right_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  _viewport_start_column: usize,
+  _target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
@@ -1219,15 +1264,15 @@ fn _find_start_char_by_word(
 fn _move_more_to_left_wrap_linebreak(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
-  viewport_start_column: usize,
+  target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
-  let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
+  let on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
     Some(c) => {
       trace!(
         "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, viewport_start_column, c
+        target_cursor_line, target_cursor_char, target_viewport_start_column, c
       );
       c > target_cursor_char
     }
@@ -1340,7 +1385,7 @@ fn _revert_search_line_start_wrap_linebreak(
 fn _move_more_to_right_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  _viewport_start_column: usize,
+  _target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
