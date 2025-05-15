@@ -1060,7 +1060,7 @@ fn search_anchor_downward_wrap_nolinebreak(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
-  let _viewport_start_column = viewport.start_column_idx();
+  let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
@@ -1085,13 +1085,40 @@ fn search_anchor_downward_wrap_nolinebreak(
   let start_line = if target_cursor_line <= last_line && !target_cursor_line_not_fully_show {
     viewport_start_line
   } else {
+    // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only
+    // only 1 line shows in current window viewport. Because the `wrap` will force the 2nd line
+    // wait to show until the **current** line get fully rendered.
+
+    // Try fill the viewport with `start_column=0`, and we can know how many rows the
+    // `target_cursor_line` needs to fill into current viewport.
+    let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+      proc_line_wrap_nolinebreak(buffer, 0, target_cursor_line, 0_u16, height, width);
+
+    // 1. If the `target_cursor_line` can fully show in current viewport, then we force the
+    // `start_column` to 0.
+    //
+    // 2. Otherwise it means the current viewport can only contains 1 line, i.e. the
+    // `target_cursor_line`, and it is still possible to add some `start_column` if the line is too
+    // long.
+    let target_cursor_line_can_fully_show = target_cursor_rows.len() <= height as usize;
+    let start_column = if target_cursor_line_can_fully_show {
+      0_usize
+    } else {
+      viewport_start_column
+    };
+
     let mut n = 0_usize;
     let mut current_line = target_cursor_line as isize;
 
     while (n < height as usize) && (current_line >= 0) {
-      let current_row = 0_u16;
-      let (rows, _start_fills, _end_fills, _) =
-        proc_line_wrap_nolinebreak(buffer, 0, current_line as usize, current_row, height, width);
+      let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
+        buffer,
+        start_column,
+        current_line as usize,
+        0_u16,
+        height,
+        width,
+      );
       n += rows.len();
 
       if current_line == 0 || n >= height as usize {
