@@ -1324,12 +1324,10 @@ fn _move_more_to_left_wrap_linebreak(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
-  let mut start_column = target_viewport_start_column;
-
   let mut on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
     Some(c) => {
       trace!(
-        "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
+        "target_cursor_line:{},target_cursor_char:{},target_viewport_start_column:{},c:{}",
         target_cursor_line, target_cursor_char, target_viewport_start_column, c
       );
       c > target_cursor_char
@@ -1337,6 +1335,7 @@ fn _move_more_to_left_wrap_linebreak(
     None => true,
   };
 
+  let mut start_column = target_viewport_start_column;
   if on_left_side {
     debug_assert!(buffer.get_rope().get_line(target_cursor_line).is_some());
     let bufline = buffer.get_rope().line(target_cursor_line);
@@ -1364,12 +1363,15 @@ fn _move_more_to_left_wrap_linebreak(
     let approximate_start_column_diff = last_visible_char_width.saturating_sub(
       (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
     );
+    let approximate_start_char_diff = buffer
+      .char_at(target_cursor_line, approximate_start_column_diff)
+      .unwrap();
     let bufline = buffer.get_rope().line(target_cursor_line);
     let start_search_char = _find_start_char_by_word(
       buffer,
       &bufline,
       target_cursor_line,
-      approximate_start_column_diff,
+      approximate_start_char_diff,
     );
     let mut result_char = start_search_char;
     let result_column = {
@@ -1431,10 +1433,82 @@ fn _move_more_to_left_wrap_linebreak(
   }
 
   if on_left_side {
-    (true, start_column)
-  } else {
-    (false, 0_usize)
+    return (true, start_column);
   }
+
+  // Check if `target_viewport_start_column` breaks the first word.
+  let bufline = buffer.get_rope().line(target_cursor_line);
+  let target_viewport_start_char = buffer
+    .char_after(target_cursor_line, target_viewport_start_column)
+    .unwrap();
+
+  let start_search_char = _find_start_char_by_word(
+    buffer,
+    &bufline,
+    target_cursor_line,
+    target_viewport_start_char,
+  );
+
+  if start_search_char < target_viewport_start_char {
+    let mut result_char = start_search_char;
+    let result_column = {
+      let mut col = start_column;
+
+      let cloned_line = buffer
+        .clone_line(
+          target_cursor_line,
+          result_char,
+          _cloned_line_max_len(
+            window_actual_shape.height(),
+            window_actual_shape.width(),
+            buffer.width_before(target_cursor_line, result_char),
+          ),
+        )
+        .unwrap();
+      let words: Vec<&str> = cloned_line.split_word_bounds().collect();
+      // Word index => its (start char index, end char index)
+      let words_char_idx = words
+        .iter()
+        .enumerate()
+        .scan(result_char, |state, (i, wd)| {
+          let old_state = *state;
+          *state += wd.chars().count();
+          Some((i, (old_state, *state)))
+        })
+        .collect::<HashMap<usize, (usize, usize)>>();
+      let mut word_idx = 0_usize;
+
+      let bufline_len_chars = bufline.len_chars();
+      while result_char < bufline_len_chars {
+        let start_search_column = buffer.width_before(target_cursor_line, result_char);
+        let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
+          buffer,
+          start_search_column,
+          target_cursor_line,
+          0_u16,
+          window_actual_shape.height(),
+          window_actual_shape.width(),
+        );
+        let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+        if target_cursor_char < last_row_viewport.end_char_idx() {
+          col = start_search_column;
+          break;
+        }
+
+        word_idx += 1;
+        let (next_word_start_char, _next_word_end_char) = words_char_idx.get(&word_idx).unwrap();
+        result_char = *next_word_start_char;
+      }
+
+      col
+    };
+
+    if result_column < target_viewport_start_column {
+      return (true, result_column);
+    }
+  }
+
+  (false, 0_usize)
 }
 
 /// Returns `start_column`
