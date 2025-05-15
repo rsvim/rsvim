@@ -733,7 +733,6 @@ fn _adjust_left_nowrap(
 fn _adjust_right_nowrap(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  _viewport_start_line: usize,
   viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -745,8 +744,8 @@ fn _adjust_right_nowrap(
   let on_right_side = match buffer.char_at(target_cursor_line, viewport_end_column) {
     Some(c) => {
       trace!(
-        "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+        "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
+        target_cursor_line, target_cursor_char, viewport_start_column, c
       );
       c < target_cursor_char
     }
@@ -765,20 +764,17 @@ fn _adjust_right_nowrap(
 }
 
 fn _adjust_horizontally_nowrap(
-  viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
+  target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
   start_line: usize,
 ) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-
   let (on_left_side, start_column_on_left_side) = _adjust_left_nowrap(
     buffer,
     window_actual_shape,
-    viewport_start_column,
+    target_viewport_start_column,
     target_cursor_line,
     target_cursor_char,
   );
@@ -790,8 +786,7 @@ fn _adjust_horizontally_nowrap(
   let (on_right_side, start_column_on_right_side) = _adjust_right_nowrap(
     buffer,
     window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
+    target_viewport_start_column,
     target_cursor_line,
     target_cursor_char,
   );
@@ -800,7 +795,7 @@ fn _adjust_horizontally_nowrap(
     return (start_line, start_column_on_right_side);
   }
 
-  (start_line, viewport_start_column)
+  (start_line, target_viewport_start_column)
 }
 
 fn search_anchor_downward_nowrap(
@@ -864,9 +859,9 @@ fn search_anchor_downward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
-    viewport,
     buffer,
     window_actual_shape,
+    viewport.start_column_idx(),
     target_cursor_line,
     target_cursor_char,
     start_line,
@@ -1566,9 +1561,9 @@ fn search_anchor_upward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
-    viewport,
     buffer,
     window_actual_shape,
+    viewport.start_column_idx(),
     target_cursor_line,
     target_cursor_char,
     start_line,
