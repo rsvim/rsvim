@@ -1311,12 +1311,15 @@ fn _find_start_char_by_word(
 
 fn _move_more_to_left_wrap_linebreak(
   buffer: &Buffer,
-  _window_actual_shape: &U16Rect,
+  window_actual_shape: &U16Rect,
+  only_contains_target_cursor_line: bool,
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
-  let on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
+  let mut start_column = target_viewport_start_column;
+
+  let mut on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
     Some(c) => {
       trace!(
         "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
@@ -1332,7 +1335,31 @@ fn _move_more_to_left_wrap_linebreak(
     let bufline = buffer.get_rope().line(target_cursor_line);
     let start_char =
       _find_start_char_by_word(buffer, &bufline, target_cursor_line, target_cursor_char);
-    let start_column = buffer.width_before(target_cursor_line, start_char);
+    start_column = buffer.width_before(target_cursor_line, start_char);
+  }
+
+  if only_contains_target_cursor_line {
+    let last_visible_char = buffer
+      .last_visible_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize);
+    let last_visible_char_width = buffer.width_at(target_cursor_line, last_visible_char);
+    let approximate_start_column_diff = last_visible_char_width.saturating_sub(
+      (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
+    );
+    let bufline = buffer.get_rope().line(target_cursor_line);
+    let start_column_diff = _find_start_char_by_word(
+      buffer,
+      &bufline,
+      target_cursor_line,
+      approximate_start_column_diff,
+    );
+    if start_column_diff < start_column {
+      start_column = start_column_diff;
+      on_left_side = true;
+    }
+  }
+
+  if on_left_side {
     (true, start_column)
   } else {
     (false, 0_usize)
@@ -1465,6 +1492,7 @@ fn _move_more_to_right_wrap_linebreak(
 fn _adjust_horizontally_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
+  only_contains_target_cursor_line: bool,
   target_cursor_line: usize,
   target_cursor_char: usize,
   start_line: usize,
@@ -1473,6 +1501,7 @@ fn _adjust_horizontally_wrap_linebreak(
   let (on_left_side, start_column_on_left_side) = _move_more_to_left_wrap_linebreak(
     buffer,
     window_actual_shape,
+    only_contains_target_cursor_line,
     start_column,
     target_cursor_line,
     target_cursor_char,
@@ -1505,7 +1534,7 @@ fn search_anchor_downward_wrap_linebreak(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
-  let _viewport_start_column = viewport.start_column_idx();
+  let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
@@ -1524,37 +1553,59 @@ fn search_anchor_downward_wrap_linebreak(
   debug_assert!(viewport.lines().last_key_value().is_some());
   let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
 
+  // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only 1
+  // line shows in current window viewport. Because the `wrap` will force the 2nd line wait to show
+  // until the **current** line get fully rendered.
+
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let start_line = if target_cursor_line <= last_line && !target_cursor_line_not_fully_show {
-    viewport_start_line
-  } else {
-    let mut n = 0_usize;
-    let mut current_line = target_cursor_line as isize;
+  let (start_line, start_column, only_contains_target_cursor_line) =
+    if target_cursor_line <= last_line && !target_cursor_line_not_fully_show {
+      (viewport_start_line, viewport_start_column, false)
+    } else {
+      // Try to fill the viewport with `start_column=0`, and we can know how many rows the
+      // `target_cursor_line` needs to fill into current viewport.
+      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+        proc_line_wrap_linebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
 
-    while (n < height as usize) && (current_line >= 0) {
-      let (rows, _start_fills, _end_fills, _) =
-        proc_line_wrap_linebreak(buffer, 0, current_line as usize, 0_u16, height, width);
-      n += rows.len();
+      let target_cursor_line_can_fully_show = target_cursor_rows.len() <= height as usize;
+      let (only_contains_target_cursor_line, start_column) = if target_cursor_line_can_fully_show {
+        (true, 0_usize)
+      } else {
+        (false, viewport_start_column)
+      };
 
-      if current_line == 0 || n >= height as usize {
-        break;
+      let mut n = 0_usize;
+      let mut current_line = target_cursor_line as isize;
+
+      while (n < height as usize) && (current_line >= 0) {
+        let (rows, _start_fills, _end_fills, _) =
+          proc_line_wrap_linebreak(buffer, 0, current_line as usize, 0_u16, height, width);
+        n += rows.len();
+
+        if current_line == 0 || n >= height as usize {
+          break;
+        }
+
+        current_line -= 1;
       }
 
-      current_line -= 1;
-    }
-
-    _adjust_current_line(current_line, target_cursor_line, height, n)
-  };
+      (
+        _adjust_current_line(current_line, target_cursor_line, height, n),
+        start_column,
+        only_contains_target_cursor_line,
+      )
+    };
 
   _adjust_horizontally_wrap_linebreak(
     buffer,
     window_actual_shape,
+    only_contains_target_cursor_line,
     target_cursor_line,
     target_cursor_char,
     start_line,
-    viewport.start_column_idx(),
+    start_column,
   )
 }
 
@@ -1739,6 +1790,7 @@ fn search_anchor_upward_wrap_linebreak(
   _adjust_horizontally_wrap_linebreak(
     buffer,
     window_actual_shape,
+    false,
     target_cursor_line,
     target_cursor_char,
     start_line,
