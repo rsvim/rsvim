@@ -1219,7 +1219,6 @@ fn _find_start_char_by_word(
 fn _adjust_left_wrap_linebreak(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
-  _viewport_start_line: usize,
   viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1227,8 +1226,8 @@ fn _adjust_left_wrap_linebreak(
   let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
     Some(c) => {
       trace!(
-        "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+        "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
+        target_cursor_line, target_cursor_char, viewport_start_column, c
       );
       c > target_cursor_char
     }
@@ -1341,7 +1340,6 @@ fn _revert_search_line_start_wrap_linebreak(
 fn _adjust_right_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  _viewport_start_line: usize,
   _viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1372,21 +1370,17 @@ fn _adjust_right_wrap_linebreak(
 }
 
 fn _adjust_horizontally_wrap_linebreak(
-  viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
   start_line: usize,
+  start_column: usize,
 ) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-
   let (on_left_side, start_column_on_left_side) = _adjust_left_wrap_linebreak(
     buffer,
     window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
+    start_column,
     target_cursor_line,
     target_cursor_char,
   );
@@ -1398,8 +1392,7 @@ fn _adjust_horizontally_wrap_linebreak(
   let (on_right_side, start_column_on_right_side) = _adjust_right_wrap_linebreak(
     buffer,
     window_actual_shape,
-    viewport_start_line,
-    viewport_start_column,
+    start_column,
     target_cursor_line,
     target_cursor_char,
   );
@@ -1408,7 +1401,7 @@ fn _adjust_horizontally_wrap_linebreak(
     return (start_line, start_column_on_right_side);
   }
 
-  (start_line, viewport_start_column)
+  (start_line, start_column)
 }
 
 fn search_anchor_downward_wrap_linebreak(
@@ -1463,12 +1456,12 @@ fn search_anchor_downward_wrap_linebreak(
   };
 
   _adjust_horizontally_wrap_linebreak(
-    viewport,
     buffer,
     window_actual_shape,
     target_cursor_line,
     target_cursor_char,
     start_line,
+    viewport.start_column_idx(),
   )
 }
 
@@ -1650,11 +1643,11 @@ fn search_anchor_upward_wrap_linebreak(
   };
 
   _adjust_horizontally_wrap_linebreak(
-    viewport,
     buffer,
     window_actual_shape,
     target_cursor_line,
     target_cursor_char,
     start_line,
+    viewport.start_column_idx(),
   )
 }
