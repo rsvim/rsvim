@@ -5997,7 +5997,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     // Search-3
     {
-      let expect = vec!["too\tlong", "\tto", "\t", "completely", "\tput:\n"];
+      let expect = vec!["When\tit", "\t\t", "too\tlong", "\tto", "\t"];
 
       let actual = {
         let target_cursor_line = 4;
@@ -6015,7 +6015,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 4);
-        assert_eq!(start_column, 41);
+        assert_eq!(start_column, 13);
 
         let viewport = Viewport::view(
           &buf,

@@ -1345,7 +1345,18 @@ fn _move_more_to_left_wrap_linebreak(
     start_column = buffer.width_before(target_cursor_line, start_char);
   }
 
-  if only_contains_target_cursor_line {
+  let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+    proc_line_wrap_linebreak(
+      buffer,
+      start_column,
+      target_cursor_line,
+      0_u16,
+      window_actual_shape.height(),
+      window_actual_shape.width(),
+    );
+  if only_contains_target_cursor_line
+    && target_cursor_rows.len() < window_actual_shape.height() as usize
+  {
     let last_visible_char = buffer
       .last_visible_char_on_line(target_cursor_line)
       .unwrap_or(0_usize);
@@ -1354,14 +1365,62 @@ fn _move_more_to_left_wrap_linebreak(
       (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
     );
     let bufline = buffer.get_rope().line(target_cursor_line);
-    let start_column_diff = _find_start_char_by_word(
+    let start_search_char = _find_start_char_by_word(
       buffer,
       &bufline,
       target_cursor_line,
       approximate_start_column_diff,
     );
-    if start_column_diff < start_column {
-      start_column = start_column_diff;
+    let mut result = start_search_char;
+
+    let cloned_line = buffer
+      .clone_line(
+        target_cursor_line,
+        result,
+        _cloned_line_max_len(
+          window_actual_shape.height(),
+          window_actual_shape.width(),
+          buffer.width_before(target_cursor_line, result),
+        ),
+      )
+      .unwrap();
+    let words: Vec<&str> = cloned_line.split_word_bounds().collect();
+    // Word index => its (start char index, end char index)
+    let words_char_idx = words
+      .iter()
+      .enumerate()
+      .scan(result, |state, (i, wd)| {
+        let old_state = *state;
+        *state += wd.chars().count();
+        Some((i, (old_state, *state)))
+      })
+      .collect::<HashMap<usize, (usize, usize)>>();
+    let mut word_idx = 0_usize;
+
+    let bufline_len_chars = bufline.len_chars();
+    while result < bufline_len_chars {
+      let start_search_column = buffer.width_before(target_cursor_line, result);
+      let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
+        buffer,
+        start_search_column,
+        target_cursor_line,
+        0_u16,
+        window_actual_shape.height(),
+        window_actual_shape.width(),
+      );
+      let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+      if last_visible_char < last_row_viewport.end_char_idx() {
+        start_column = start_search_column;
+        break;
+      }
+
+      word_idx += 1;
+      let (next_word_start_char, _next_word_end_char) = words_char_idx.get(&word_idx).unwrap();
+      result = *next_word_start_char;
+    }
+
+    if result < start_column {
+      start_column = result;
       on_left_side = true;
     }
   }
@@ -1576,8 +1635,8 @@ fn search_anchor_downward_wrap_linebreak(
       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
         proc_line_wrap_linebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
 
-      let target_cursor_line_can_fully_show = target_cursor_rows.len() <= height as usize;
-      if target_cursor_line_can_fully_show {
+      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
+      let (start_line, start_column) = if !only_contains_target_cursor_line {
         let mut n = 0_usize;
         let mut current_line = target_cursor_line as isize;
 
@@ -1596,11 +1655,12 @@ fn search_anchor_downward_wrap_linebreak(
         (
           _adjust_current_line(current_line, target_cursor_line, height, n),
           0_usize,
-          false,
         )
       } else {
-        (target_cursor_line, viewport_start_column, true)
-      }
+        (target_cursor_line, viewport_start_column)
+      };
+
+      (start_line, start_column, only_contains_target_cursor_line)
     };
 
   _adjust_horizontally_wrap_linebreak(
