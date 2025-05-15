@@ -1137,9 +1137,9 @@ fn search_anchor_downward_wrap_nolinebreak(
   debug_assert!(viewport.lines().last_key_value().is_some());
   let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
 
-  // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only
-  // only 1 line shows in current window viewport. Because the `wrap` will force the 2nd line
-  // wait to show until the **current** line get fully rendered.
+  // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only 1
+  // line shows in current window viewport. Because the `wrap` will force the 2nd line wait to show
+  // until the **current** line get fully rendered.
 
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
@@ -1151,7 +1151,7 @@ fn search_anchor_downward_wrap_nolinebreak(
       // Try fill the viewport with `start_column=0`, and we can know how many rows the
       // `target_cursor_line` needs to fill into current viewport.
       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
-        proc_line_wrap_nolinebreak(buffer, 0, target_cursor_line, 0_u16, height, width);
+        proc_line_wrap_nolinebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
 
       // 1. If the `target_cursor_line` can fully show in current viewport, then we force the
       // `start_column` to 0.
