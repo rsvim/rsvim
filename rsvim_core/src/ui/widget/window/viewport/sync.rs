@@ -1856,7 +1856,7 @@ fn search_anchor_upward_wrap_nolinebreak(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
-  let _viewport_start_column = viewport.start_column_idx();
+  let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
@@ -1878,20 +1878,31 @@ fn search_anchor_upward_wrap_nolinebreak(
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let start_line = if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-    viewport_start_line
-  } else {
-    target_cursor_line
-  };
+  let (start_line, start_column, only_contains_target_cursor_line) =
+    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
+      (viewport_start_line, viewport_start_column, false)
+    } else {
+      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+        proc_line_wrap_nolinebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
+
+      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
+      let (start_line, start_column) = if !only_contains_target_cursor_line {
+        (target_cursor_line, 0_usize)
+      } else {
+        (target_cursor_line, viewport_start_column)
+      };
+
+      (start_line, start_column, only_contains_target_cursor_line)
+    };
 
   _adjust_horizontally_wrap_nolinebreak(
     buffer,
     window_actual_shape,
-    false,
+    only_contains_target_cursor_line,
     target_cursor_line,
     target_cursor_char,
     start_line,
-    viewport.start_column_idx(),
+    start_column,
   )
 }
 

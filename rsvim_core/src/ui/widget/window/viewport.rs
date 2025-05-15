@@ -8051,10 +8051,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-3
     {
-      let expect = vec![
-        "\tput:\n",
-        "\t2. When\tit\t\ttoo\tlong\tto\tcompletely\tput:\n",
-      ];
+      let expect = vec!["\tput:\n"];
 
       let actual = {
         let target_cursor_line = 4;
