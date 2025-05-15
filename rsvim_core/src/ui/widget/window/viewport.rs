@@ -5488,7 +5488,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 4);
-        assert_eq!(start_column, 11);
+        assert_eq!(start_column, 8);
 
         let viewport = Viewport::view(
           &buf,
