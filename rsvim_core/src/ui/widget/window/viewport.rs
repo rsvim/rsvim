@@ -5997,7 +5997,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     // Search-3
     {
-      let expect = vec!["When\tit", "\t\t", "too\tlong", "\tto", "\t"];
+      let expect = vec!["too\tlong", "\tto", "\t", "completely", "\tput:\n"];
 
       let actual = {
         let target_cursor_line = 4;
