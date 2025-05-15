@@ -694,10 +694,10 @@ pub fn search_anchor_downward(
 // spellchecker:on
 //
 // Returns
-// 1. If target cursor is on the left side of viewport, and we need to adjust/move the viewport to
-//    left.
+// 1. If target cursor is on the left side of viewport, and we need to move the viewport more to
+//    the left side.
 // 2. If 1st is true, this is the new "start_column" after adjustments.
-fn _adjust_left_nowrap(
+fn _move_more_to_left_nowrap(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
   viewport_start_column: usize,
@@ -730,7 +730,7 @@ fn _adjust_left_nowrap(
 // 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
 //    right.
 // 2. If 1st is true, this is the new "start_column" after adjustments.
-fn _adjust_right_nowrap(
+fn _move_more_to_right_nowrap(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   viewport_start_column: usize,
@@ -771,7 +771,7 @@ fn _adjust_horizontally_nowrap(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  let (on_left_side, start_column_on_left_side) = _adjust_left_nowrap(
+  let (on_left_side, start_column_on_left_side) = _move_more_to_left_nowrap(
     buffer,
     window_actual_shape,
     start_column,
@@ -783,7 +783,7 @@ fn _adjust_horizontally_nowrap(
     return (start_line, start_column_on_left_side);
   }
 
-  let (on_right_side, start_column_on_right_side) = _adjust_right_nowrap(
+  let (on_right_side, start_column_on_right_side) = _move_more_to_right_nowrap(
     buffer,
     window_actual_shape,
     start_column,
