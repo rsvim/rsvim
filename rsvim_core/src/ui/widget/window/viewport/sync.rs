@@ -959,26 +959,33 @@ fn _revert_search_line_start_wrap_nolinebreak(
 // For `wrap=true,linebreak=false`
 fn _find_start_char_by_size(
   buffer: &Buffer,
-  line_idx: usize,
-  start_char: usize,
+  window_actual_shape: &U16Rect,
+  target_cursor_line: usize,
   target_cursor_char: usize,
-  window_height: u16,
-  window_width: u16,
+  start_column: usize,
 ) -> usize {
-  if start_char > 0 {
-    let mut result = start_char;
+  if start_column > 0 {
+    let bufline = buffer.get_rope().line(target_cursor_line);
+    let bufline_len_char = bufline.len_chars();
+    let mut result = start_column;
 
-    loop {
-      let (rows, _start_fills, _end_fills, _) =
-        proc_line_wrap_nolinebreak(buffer, result, line_idx, 0_u16, window_height, window_width);
+    while result < bufline_len_char {
+      let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
+        buffer,
+        result,
+        target_cursor_line,
+        0_u16,
+        window_actual_shape.height(),
+        window_actual_shape.width(),
+      );
       let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-      if last_row_viewport.end_char_idx() > target_cursor_char {
+      if last_row_viewport.end_char_idx() <= target_cursor_char {
         break;
       }
-      if result == 0 {
+      if result + 1 >= bufline_len_char {
         break;
       }
-      result -= 1;
+      result += 1;
     }
 
     result
@@ -987,7 +994,7 @@ fn _find_start_char_by_size(
   }
 }
 
-fn _move_more_to_left_wrap_onlinebreak(
+fn _move_more_to_left_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_viewport_start_column: usize,
@@ -1051,11 +1058,10 @@ fn _move_more_to_left_wrap_onlinebreak(
   );
   let start_column_diff = _find_start_char_by_size(
     buffer,
+    window_actual_shape,
     target_cursor_line,
-    approximate_start_column_diff,
     target_cursor_char,
-    window_actual_shape.height(),
-    window_actual_shape.width(),
+    approximate_start_column_diff,
   );
   if start_column_diff < start_column {
     start_column = start_column_diff;
@@ -1109,7 +1115,7 @@ fn _adjust_horizontally_wrap_nolinebreak(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  let (on_left_side, start_column_on_left_side) = _move_more_to_left_wrap_onlinebreak(
+  let (on_left_side, start_column_on_left_side) = _move_more_to_left_wrap_nolinebreak(
     buffer,
     window_actual_shape,
     start_column,
