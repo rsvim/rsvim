@@ -1148,7 +1148,7 @@ fn search_anchor_downward_wrap_nolinebreak(
     if target_cursor_line <= last_line && !target_cursor_line_not_fully_show {
       (viewport_start_line, viewport_start_column)
     } else {
-      // Try fill the viewport with `start_column=0`, and we can know how many rows the
+      // Try to fill the viewport with `start_column=0`, and we can know how many rows the
       // `target_cursor_line` needs to fill into current viewport.
       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
         proc_line_wrap_nolinebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
