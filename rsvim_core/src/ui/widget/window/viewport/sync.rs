@@ -993,6 +993,7 @@ fn _find_start_char_by_size(
 fn _move_more_to_left_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
+  only_contains_target_cursor_line: bool,
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1054,7 +1055,9 @@ fn _move_more_to_left_wrap_nolinebreak(
       window_actual_shape.height(),
       window_actual_shape.width(),
     );
-  if target_cursor_rows.len() < window_actual_shape.height() as usize {
+  if only_contains_target_cursor_line
+    && target_cursor_rows.len() < window_actual_shape.height() as usize
+  {
     let last_visible_char = buffer
       .last_visible_char_on_line(target_cursor_line)
       .unwrap_or(0_usize);
@@ -1117,6 +1120,7 @@ fn _move_more_to_right_wrap_nolinebreak(
 fn _adjust_horizontally_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
+  only_contains_target_cursor_line: bool,
   target_cursor_line: usize,
   target_cursor_char: usize,
   start_line: usize,
@@ -1125,6 +1129,7 @@ fn _adjust_horizontally_wrap_nolinebreak(
   let (on_left_side, start_column_on_left_side) = _move_more_to_left_wrap_nolinebreak(
     buffer,
     window_actual_shape,
+    only_contains_target_cursor_line,
     start_column,
     target_cursor_line,
     target_cursor_char,
@@ -1196,10 +1201,11 @@ fn search_anchor_downward_wrap_nolinebreak(
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let (start_line, start_column) = if target_cursor_line <= last_line
+  let (start_line, start_column, only_contains_target_cursor_line) = if target_cursor_line
+    <= last_line
     && !target_cursor_line_not_fully_show
   {
-    (viewport_start_line, viewport_start_column)
+    (viewport_start_line, viewport_start_column, false)
   } else {
     // Try to fill the viewport with `start_column=0`, and we can know how many rows the
     // `target_cursor_line` needs to fill into current viewport.
@@ -1238,12 +1244,13 @@ fn search_anchor_downward_wrap_nolinebreak(
       (target_cursor_line, viewport_start_column)
     };
 
-    (start_line, start_column)
+    (start_line, start_column, only_contains_target_cursor_line)
   };
 
   _adjust_horizontally_wrap_nolinebreak(
     buffer,
     window_actual_shape,
+    only_contains_target_cursor_line,
     target_cursor_line,
     target_cursor_char,
     start_line,
@@ -1741,6 +1748,7 @@ fn search_anchor_upward_wrap_nolinebreak(
   _adjust_horizontally_wrap_nolinebreak(
     buffer,
     window_actual_shape,
+    false,
     target_cursor_line,
     target_cursor_char,
     start_line,
