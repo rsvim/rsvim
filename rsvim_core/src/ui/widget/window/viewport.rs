@@ -7847,7 +7847,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
   }
 
   #[test]
-  fn _new2() {
+  fn new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
