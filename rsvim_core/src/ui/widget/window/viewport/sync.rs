@@ -700,7 +700,6 @@ pub fn search_anchor_downward(
 fn _adjust_left_nowrap(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
-  _viewport_start_line: usize,
   viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -709,8 +708,8 @@ fn _adjust_left_nowrap(
   let on_left_side = match buffer.char_after(target_cursor_line, viewport_start_column) {
     Some(c) => {
       trace!(
-        "target_cursor_line:{},target_cursor_char:{},viewport_start_line:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, _viewport_start_line, viewport_start_column, c
+        "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
+        target_cursor_line, target_cursor_char, viewport_start_column, c
       );
       c > target_cursor_char
     }
@@ -779,7 +778,6 @@ fn _adjust_horizontally_nowrap(
   let (on_left_side, start_column_on_left_side) = _adjust_left_nowrap(
     buffer,
     window_actual_shape,
-    viewport_start_line,
     viewport_start_column,
     target_cursor_line,
     target_cursor_char,
