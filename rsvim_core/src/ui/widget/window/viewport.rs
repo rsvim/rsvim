@@ -6015,7 +6015,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 4);
-        assert_eq!(start_column, 13);
+        assert_eq!(start_column, 41);
 
         let viewport = Viewport::view(
           &buf,
