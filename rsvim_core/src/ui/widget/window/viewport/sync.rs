@@ -993,7 +993,6 @@ fn _find_start_char_by_size(
 fn _move_more_to_left_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  only_contains_target_cursor_line: bool,
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1001,7 +1000,7 @@ fn _move_more_to_left_wrap_nolinebreak(
   let mut start_column = target_viewport_start_column;
 
   // If target cursor char is on the left of the old target viewport.
-  let mut on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
+  let mut on_left_side = match buffer.char_after(target_cursor_line, start_column) {
     Some(c) => {
       trace!(
         "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
@@ -1046,7 +1045,16 @@ fn _move_more_to_left_wrap_nolinebreak(
   // Which is much better for `wrap=true`.
   // spellchecker:on
 
-  if only_contains_target_cursor_line {
+  let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+    proc_line_wrap_nolinebreak(
+      buffer,
+      start_column,
+      target_cursor_line,
+      0_u16,
+      window_actual_shape.height(),
+      window_actual_shape.width(),
+    );
+  if target_cursor_rows.len() < window_actual_shape.height() as usize {
     let last_visible_char = buffer
       .last_visible_char_on_line(target_cursor_line)
       .unwrap_or(0_usize);
@@ -1109,7 +1117,6 @@ fn _move_more_to_right_wrap_nolinebreak(
 fn _adjust_horizontally_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  only_contains_target_cursor_line: bool,
   target_cursor_line: usize,
   target_cursor_char: usize,
   start_line: usize,
@@ -1118,7 +1125,6 @@ fn _adjust_horizontally_wrap_nolinebreak(
   let (on_left_side, start_column_on_left_side) = _move_more_to_left_wrap_nolinebreak(
     buffer,
     window_actual_shape,
-    only_contains_target_cursor_line,
     start_column,
     target_cursor_line,
     target_cursor_char,
@@ -1190,11 +1196,10 @@ fn search_anchor_downward_wrap_nolinebreak(
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let (start_line, start_column, only_contains_target_cursor_line) = if target_cursor_line
-    <= last_line
+  let (start_line, start_column) = if target_cursor_line <= last_line
     && !target_cursor_line_not_fully_show
   {
-    (viewport_start_line, viewport_start_column, false)
+    (viewport_start_line, viewport_start_column)
   } else {
     // Try to fill the viewport with `start_column=0`, and we can know how many rows the
     // `target_cursor_line` needs to fill into current viewport.
@@ -1208,8 +1213,8 @@ fn search_anchor_downward_wrap_nolinebreak(
     // `target_cursor_line`, and it is still possible to add some `start_column` if the line is too
     // long. And in such case, the `start_line` will always be the `target_cursor_line` because
     // the line is too big to show in current viewport, and we don't need other lines.
-    let target_cursor_line_can_fully_show = target_cursor_rows.len() <= height as usize;
-    if target_cursor_line_can_fully_show {
+    let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
+    let (start_line, start_column) = if !only_contains_target_cursor_line {
       let mut n = 0_usize;
       let mut current_line = target_cursor_line as isize;
 
@@ -1228,17 +1233,17 @@ fn search_anchor_downward_wrap_nolinebreak(
       (
         _adjust_current_line(current_line, target_cursor_line, height, n),
         0_usize,
-        true,
       )
     } else {
-      (target_cursor_line, viewport_start_column, false)
-    }
+      (target_cursor_line, viewport_start_column)
+    };
+
+    (start_line, start_column)
   };
 
   _adjust_horizontally_wrap_nolinebreak(
     buffer,
     window_actual_shape,
-    only_contains_target_cursor_line,
     target_cursor_line,
     target_cursor_char,
     start_line,
@@ -1584,10 +1589,10 @@ fn search_anchor_downward_wrap_linebreak(
         (
           _adjust_current_line(current_line, target_cursor_line, height, n),
           0_usize,
-          true,
+          false,
         )
       } else {
-        (target_cursor_line, viewport_start_column, false)
+        (target_cursor_line, viewport_start_column, true)
       }
     };
 
@@ -1736,7 +1741,6 @@ fn search_anchor_upward_wrap_nolinebreak(
   _adjust_horizontally_wrap_nolinebreak(
     buffer,
     window_actual_shape,
-    false,
     target_cursor_line,
     target_cursor_char,
     start_line,
