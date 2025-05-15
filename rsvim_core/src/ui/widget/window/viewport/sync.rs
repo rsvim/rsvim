@@ -956,6 +956,37 @@ fn _revert_search_line_start_wrap_nolinebreak(
   unreachable!()
 }
 
+// For `wrap=true,linebreak=false`
+fn _find_start_char_by_size(
+  buffer: &Buffer,
+  line_idx: usize,
+  start_char: usize,
+  target_cursor_char: usize,
+  window_height: u16,
+  window_width: u16,
+) -> usize {
+  if start_char > 0 {
+    let mut result = start_char;
+
+    loop {
+      let (rows, _start_fills, _end_fills, _) =
+        proc_line_wrap_nolinebreak(buffer, result, line_idx, 0_u16, window_height, window_width);
+      let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+      if last_row_viewport.end_char_idx() > target_cursor_char {
+        break;
+      }
+      if result == 0 {
+        break;
+      }
+      result -= 1;
+    }
+
+    result
+  } else {
+    0_usize
+  }
+}
+
 fn _move_more_to_left_wrap_onlinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1015,8 +1046,16 @@ fn _move_more_to_left_wrap_onlinebreak(
       .last_visible_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
-  let start_column_diff = last_visible_char_width.saturating_sub(
+  let approximate_start_column_diff = last_visible_char_width.saturating_sub(
     (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
+  );
+  let start_column_diff = _find_start_char_by_size(
+    buffer,
+    target_cursor_line,
+    approximate_start_column_diff,
+    target_cursor_char,
+    window_actual_shape.height(),
+    window_actual_shape.width(),
   );
   if start_column_diff < start_column {
     start_column = start_column_diff;
