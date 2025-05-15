@@ -5677,8 +5677,6 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
       terminal_size.height(),
       buf_opts,
       vec![
-        "Hello, RSVIM!\n",
-        "This is a quite simple and small test lines.\n",
         "But still it contains several things we want to test:\n",
         "\t1. When\tthe\tline\tis\tsmall\tenough\tto\tcompletely\tput\tinside.\n",
         "\t2. When\tit\t\ttoo\tlong\tto\tcompletely\tput:\n",
@@ -5696,18 +5694,16 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Initialize
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
         "But still it cont",
+        "ains several thin",
+        "gs we want to tes",
+        "t:\n",
+        "\t1. When",
       ];
 
       let actual = lock!(window.borrow().viewport()).clone();
-      let expect_start_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 2)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,

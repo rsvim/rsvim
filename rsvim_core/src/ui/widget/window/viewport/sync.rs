@@ -1018,6 +1018,7 @@ fn _move_more_to_left_wrap_nolinebreak(
     start_column = buffer.width_before(target_cursor_line, target_cursor_char);
   }
 
+  // spellchecker:off
   // If `target_cursor_line` doesn't show its head (i.e. the `target_viewport_start_column` > 0,
   // and the viewport only contains 1 line, and the line is just too lone to fully show), and the
   // `target_cursor_line`'s end char is not at the bottom-right corner of the viewport. For
@@ -1043,6 +1044,7 @@ fn _move_more_to_left_wrap_nolinebreak(
   // ```
   //
   // Which is much better for `wrap=true`.
+  // spellchecker:on
 
   if only_contains_target_cursor_line {
     let last_visible_char = buffer
