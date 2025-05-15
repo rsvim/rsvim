@@ -462,7 +462,6 @@ mod tests {
 
   use crate::buf::BufferLocalOptionsBuilder;
   use crate::test::buf::{make_buffer_from_rope, make_rope_from_lines, print_buffer_line_details};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
 
   use ropey::Rope;

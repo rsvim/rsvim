@@ -98,7 +98,7 @@ def clippy(watch):
     os.system(command)
 
 
-def test(name, miri):
+def test(name, miri, jobs):
     append_lld_rustflags()
 
     if len(name) == 0:
@@ -107,6 +107,11 @@ def test(name, miri):
     else:
         name = " ".join(list(dict.fromkeys(name)))
         logging.info(f"Run 'test' for '{name}'")
+
+    if jobs is None:
+        jobs = ""
+    else:
+        jobs = f" -j {jobs[0]}"
 
     if miri is not None:
         command = set_env(
@@ -119,14 +124,14 @@ def test(name, miri):
         command = set_rustflags(command)
         if name is None:
             name = ""
-        command = f"{command} cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {miri} {name}"
+        command = f"{command} cargo +nightly miri nextest run{jobs} -F unicode_lines --no-default-features -p {miri} {name}"
     else:
         command = set_env("", "RSVIM_LOG", "trace")
         command = set_sccache(command)
         command = set_rustflags(command)
         if name is None:
             name = "--all"
-        command = f"{command} cargo nextest run --no-capture {name}"
+        command = f"{command} cargo nextest run{jobs} --no-capture {name}"
 
     command = command.strip()
     logging.info(command)
@@ -259,6 +264,13 @@ if __name__ == "__main__":
         metavar="PACKAGE",
         help="Run `cargo +nightly miri test` on specified [PACKAGE]",
     )
+    test_subparser.add_argument(
+        "-j",
+        "--job",
+        nargs=1,
+        metavar="N",
+        help="Run `cargo nextest run` with N threads",
+    )
 
     build_subparser = subparsers.add_parser(
         "build",
@@ -313,7 +325,7 @@ if __name__ == "__main__":
     )
 
     parser = parser.parse_args()
-    logging.debug(parser)
+    # print(parser)
 
     if parser.recache:
         RECACHE_SCCACHE = True
@@ -326,7 +338,7 @@ if __name__ == "__main__":
         if parser.list_test:
             list_test()
         else:
-            test(parser.name, parser.miri)
+            test(parser.name, parser.miri, parser.job)
     elif parser.subcommand == "build" or parser.subcommand == "b":
         build(parser.release, parser.features, parser.all_features)
     elif parser.subcommand == "doc" or parser.subcommand == "d":

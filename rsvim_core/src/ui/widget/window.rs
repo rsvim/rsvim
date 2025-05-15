@@ -21,7 +21,6 @@ pub mod opt;
 pub mod root;
 pub mod viewport;
 
-#[allow(dead_code)]
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
@@ -354,7 +353,6 @@ mod tests {
   use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  #[allow(dead_code)]
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
 

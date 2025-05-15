@@ -1,7 +1,5 @@
 //! Basic unit of canvas frame.
 
-#![allow(dead_code)]
-
 use compact_str::{CompactString, ToCompactString};
 use crossterm::style::{Attributes, Color};
 
