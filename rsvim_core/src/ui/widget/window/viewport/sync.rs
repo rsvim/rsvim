@@ -1580,8 +1580,14 @@ fn search_anchor_downward_wrap_linebreak(
       let mut current_line = target_cursor_line as isize;
 
       while (n < height as usize) && (current_line >= 0) {
-        let (rows, _start_fills, _end_fills, _) =
-          proc_line_wrap_linebreak(buffer, 0, current_line as usize, 0_u16, height, width);
+        let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
+          buffer,
+          start_column,
+          current_line as usize,
+          0_u16,
+          height,
+          width,
+        );
         n += rows.len();
 
         if current_line == 0 || n >= height as usize {
