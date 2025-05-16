@@ -548,6 +548,8 @@ impl Viewport {
   /// NOTE: If target cursor line/char position cannot be correctly shown in new viewport, the
   /// viewport will be adjusted to show target cursor correctly, with a minimal movement (for
   /// better user visuals).
+  ///
+  /// Returns `start_line` and `start_column` for new viewport.
   pub fn search_anchor(
     &self,
     direction: ViewportSearchAnchorDirection,
