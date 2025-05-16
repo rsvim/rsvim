@@ -1748,13 +1748,10 @@ fn search_anchor_upward_wrap_linebreak(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
-  let _viewport_start_column = viewport.start_column_idx();
+  let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
-
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
 
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
@@ -1770,20 +1767,26 @@ fn search_anchor_upward_wrap_linebreak(
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let start_line = if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-    viewport_start_line
-  } else {
-    target_cursor_line
-  };
+  let (start_line, only_contains_target_cursor_line) =
+    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
+      (viewport_start_line, false)
+    } else {
+      // Try to fill the viewport with `start_column=0`, and we can know how many rows the
+      // `target_cursor_line` needs to fill into current viewport.
+      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+        proc_line_wrap_linebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
+      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
+      (target_cursor_line, only_contains_target_cursor_line)
+    };
 
   _adjust_horizontally_wrap_linebreak(
     buffer,
     window_actual_shape,
-    false,
+    only_contains_target_cursor_line,
     target_cursor_line,
     target_cursor_char,
     start_line,
-    viewport.start_column_idx(),
+    viewport_start_column,
   )
 }
 
@@ -1864,6 +1867,45 @@ fn search_anchor_leftward_wrap_nolinebreak(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  let buffer_len_lines = buffer.get_rope().len_lines();
+
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_visible_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
+  debug_assert!(viewport.lines().first_key_value().is_some());
+  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
+
+  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
+    || _line_tail_not_show(viewport, buffer, target_cursor_line);
+
+  let only_contains_target_cursor_line =
+    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
+      false
+    } else {
+      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+        proc_line_wrap_nolinebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
+      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
+      only_contains_target_cursor_line
+    };
+
+  _adjust_horizontally_wrap_nolinebreak(
+    buffer,
+    window_actual_shape,
+    only_contains_target_cursor_line,
+    target_cursor_line,
+    target_cursor_char,
+    viewport_start_line,
+    viewport_start_column,
+  )
 }
 
 fn search_anchor_leftward_wrap_linebreak(
@@ -1873,4 +1915,45 @@ fn search_anchor_leftward_wrap_linebreak(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  let viewport_start_line = viewport.start_line_idx();
+  let viewport_start_column = viewport.start_column_idx();
+  let height = window_actual_shape.height();
+  let width = window_actual_shape.width();
+  let buffer_len_lines = buffer.get_rope().len_lines();
+
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_visible_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
+  debug_assert!(viewport.lines().first_key_value().is_some());
+  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
+
+  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
+    || _line_tail_not_show(viewport, buffer, target_cursor_line);
+
+  let only_contains_target_cursor_line =
+    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
+      false
+    } else {
+      // Try to fill the viewport with `start_column=0`, and we can know how many rows the
+      // `target_cursor_line` needs to fill into current viewport.
+      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+        proc_line_wrap_linebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
+      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
+      only_contains_target_cursor_line
+    };
+
+  _adjust_horizontally_wrap_linebreak(
+    buffer,
+    window_actual_shape,
+    only_contains_target_cursor_line,
+    target_cursor_line,
+    target_cursor_char,
+    viewport_start_line,
+    viewport_start_column,
+  )
 }
