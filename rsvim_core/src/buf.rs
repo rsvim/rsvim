@@ -296,7 +296,9 @@ impl Buffer {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, ColumnIndex::new)
+      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+        ColumnIndex::with_capacity(rope_line.len_chars())
+      })
       .width_before(&self.options, &rope_line, char_idx)
   }
 
@@ -310,7 +312,9 @@ impl Buffer {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, ColumnIndex::new)
+      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+        ColumnIndex::with_capacity(rope_line.len_chars())
+      })
       .width_until(&self.options, &rope_line, char_idx)
   }
 
@@ -324,7 +328,9 @@ impl Buffer {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, ColumnIndex::new)
+      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+        ColumnIndex::with_capacity(rope_line.len_chars())
+      })
       .char_before(&self.options, &rope_line, width)
   }
 
@@ -338,7 +344,9 @@ impl Buffer {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, ColumnIndex::new)
+      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+        ColumnIndex::with_capacity(rope_line.len_chars())
+      })
       .char_at(&self.options, &rope_line, width)
   }
 
@@ -352,7 +360,9 @@ impl Buffer {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, ColumnIndex::new)
+      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+        ColumnIndex::with_capacity(rope_line.len_chars())
+      })
       .char_after(&self.options, &rope_line, width)
   }
 
@@ -366,7 +376,9 @@ impl Buffer {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, ColumnIndex::new)
+      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+        ColumnIndex::with_capacity(rope_line.len_chars())
+      })
       .last_char_until(&self.options, &rope_line, width)
   }
 
@@ -375,7 +387,10 @@ impl Buffer {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, ColumnIndex::new)
+      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+        let rope_line = self.rope.line(line_idx);
+        ColumnIndex::with_capacity(rope_line.len_chars())
+      })
       .truncate_since_char(char_idx)
   }
 
@@ -384,7 +399,10 @@ impl Buffer {
     self
       .cached_lines_width
       .borrow_mut()
-      .get_or_insert_mut(line_idx, ColumnIndex::new)
+      .get_or_insert_mut(line_idx, || -> ColumnIndex {
+        let rope_line = self.rope.line(line_idx);
+        ColumnIndex::with_capacity(rope_line.len_chars())
+      })
       .truncate_since_width(width)
   }
 
