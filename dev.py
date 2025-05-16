@@ -177,6 +177,24 @@ def build(release, features, all_features):
     os.system(command)
 
 
+def fmt():
+    command = "cargo fmt"
+    logging.info(command)
+    os.system(command)
+
+    command = "taplo fmt"
+    logging.info(command)
+    os.system(command)
+
+    command = "prettier --write *.md **/*.ts"
+    logging.info(command)
+    os.system(command)
+
+    command = "tsc"
+    logging.info(command)
+    os.system(command)
+
+
 def doc(watch):
     command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim --no-open"
     if watch:
