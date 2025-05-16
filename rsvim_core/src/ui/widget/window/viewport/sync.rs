@@ -1273,6 +1273,101 @@ fn _find_start_char_by_word(
   }
 }
 
+// For `wrap=true,linebreak=true`, when the whole viewport only contains 1 line and the line
+// cannot fully show (i.e. the line head/tail are been truncated), and also we have confirmed the
+// last char index.
+// In such case, we needs to calculate the `start_column`.
+// The difference from `linebreak=false` is: we need to iterate chars by words segments, instead of
+// simply chars.
+fn _revert_search_start_column_wrap_linebreak(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  line_idx: usize,
+  last_char: usize,
+) -> usize {
+  let bufline = buffer.get_rope().line(line_idx);
+  let bufline_len_chars = bufline.len_chars();
+  debug_assert!(bufline_len_chars > 0);
+
+  // Approximately calculate the beginning char of the line in window viewport, by directly
+  // subtract `window_width * window_height`.
+  let last_char_width = buffer.width_at(line_idx, last_char);
+  let approximate_start_width = last_char_width
+    .saturating_sub(window_actual_shape.width() as usize * window_actual_shape.height() as usize);
+  let start_char = buffer
+    .char_at(line_idx, approximate_start_width)
+    .unwrap_or(0_usize);
+
+  // For `wrap=true,linebreak=true`, the approximate `start_char` have to start from a valid word
+  // beginning, i.e. a unicode segment, not a arbitrary char index.
+  let mut start_char = _find_start_char_by_word(buffer, &bufline, line_idx, start_char);
+
+  trace!(
+    "line_idx:{},last_char:{}({:?}),last_char_width:{},approximate_start_width:{},start_char:{}({:?})",
+    line_idx,
+    last_char,
+    bufline.char(last_char),
+    last_char_width,
+    approximate_start_width,
+    start_char,
+    bufline.char(start_char),
+  );
+
+  let cloned_line = buffer
+    .clone_line(
+      line_idx,
+      start_char,
+      _cloned_line_max_len(
+        window_actual_shape.height(),
+        window_actual_shape.width(),
+        buffer.width_before(line_idx, start_char),
+      ),
+    )
+    .unwrap();
+  let words: Vec<&str> = cloned_line.split_word_bounds().collect();
+  // Word index => its (start char index, end char index)
+  let words_char_idx = words
+    .iter()
+    .enumerate()
+    .scan(start_char, |state, (i, wd)| {
+      let old_state = *state;
+      *state += wd.chars().count();
+      Some((i, (old_state, *state)))
+    })
+    .collect::<HashMap<usize, (usize, usize)>>();
+  let mut word_idx = 0_usize;
+
+  while start_char < bufline_len_chars {
+    let start_column = buffer.width_before(line_idx, start_char);
+    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
+      buffer,
+      start_column,
+      line_idx,
+      0_u16,
+      window_actual_shape.height(),
+      window_actual_shape.width(),
+    );
+    let (last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+    trace!(
+      "start_column:{},last_row_viewport.end_char:{}({:?}),last_row_idx:{}",
+      start_column,
+      last_row_viewport.end_char_idx(),
+      bufline.get_char(last_row_viewport.end_char_idx()),
+      last_row_idx
+    );
+    if last_char < last_row_viewport.end_char_idx() {
+      return start_column;
+    }
+
+    // Set `start_char` to next word beginning char index.
+    word_idx += 1;
+    let (next_word_start_char, _next_word_end_char) = words_char_idx.get(&word_idx).unwrap();
+    start_char = *next_word_start_char;
+  }
+
+  unreachable!()
+}
+
 fn _move_more_to_left_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1466,101 +1561,6 @@ fn _move_more_to_left_wrap_linebreak(
   }
 
   (false, 0_usize)
-}
-
-// For `wrap=true,linebreak=true`, when the whole viewport only contains 1 line and the line
-// cannot fully show (i.e. the line head/tail are been truncated), and also we have confirmed the
-// last char index.
-// In such case, we needs to calculate the `start_column`.
-// The difference from `linebreak=false` is: we need to iterate chars by words segments, instead of
-// simply chars.
-fn _revert_search_start_column_wrap_linebreak(
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  line_idx: usize,
-  last_char: usize,
-) -> usize {
-  let bufline = buffer.get_rope().line(line_idx);
-  let bufline_len_chars = bufline.len_chars();
-  debug_assert!(bufline_len_chars > 0);
-
-  // Approximately calculate the beginning char of the line in window viewport, by directly
-  // subtract `window_width * window_height`.
-  let last_char_width = buffer.width_at(line_idx, last_char);
-  let approximate_start_width = last_char_width
-    .saturating_sub(window_actual_shape.width() as usize * window_actual_shape.height() as usize);
-  let start_char = buffer
-    .char_at(line_idx, approximate_start_width)
-    .unwrap_or(0_usize);
-
-  // For `wrap=true,linebreak=true`, the approximate `start_char` have to start from a valid word
-  // beginning, i.e. a unicode segment, not a arbitrary char index.
-  let mut start_char = _find_start_char_by_word(buffer, &bufline, line_idx, start_char);
-
-  trace!(
-    "line_idx:{},last_char:{}({:?}),last_char_width:{},approximate_start_width:{},start_char:{}({:?})",
-    line_idx,
-    last_char,
-    bufline.char(last_char),
-    last_char_width,
-    approximate_start_width,
-    start_char,
-    bufline.char(start_char),
-  );
-
-  let cloned_line = buffer
-    .clone_line(
-      line_idx,
-      start_char,
-      _cloned_line_max_len(
-        window_actual_shape.height(),
-        window_actual_shape.width(),
-        buffer.width_before(line_idx, start_char),
-      ),
-    )
-    .unwrap();
-  let words: Vec<&str> = cloned_line.split_word_bounds().collect();
-  // Word index => its (start char index, end char index)
-  let words_char_idx = words
-    .iter()
-    .enumerate()
-    .scan(start_char, |state, (i, wd)| {
-      let old_state = *state;
-      *state += wd.chars().count();
-      Some((i, (old_state, *state)))
-    })
-    .collect::<HashMap<usize, (usize, usize)>>();
-  let mut word_idx = 0_usize;
-
-  while start_char < bufline_len_chars {
-    let start_column = buffer.width_before(line_idx, start_char);
-    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
-      buffer,
-      start_column,
-      line_idx,
-      0_u16,
-      window_actual_shape.height(),
-      window_actual_shape.width(),
-    );
-    let (last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-    trace!(
-      "start_column:{},last_row_viewport.end_char:{}({:?}),last_row_idx:{}",
-      start_column,
-      last_row_viewport.end_char_idx(),
-      bufline.get_char(last_row_viewport.end_char_idx()),
-      last_row_idx
-    );
-    if last_char < last_row_viewport.end_char_idx() {
-      return start_column;
-    }
-
-    // Set `start_char` to next word beginning char index.
-    word_idx += 1;
-    let (next_word_start_char, _next_word_end_char) = words_char_idx.get(&word_idx).unwrap();
-    start_char = *next_word_start_char;
-  }
-
-  unreachable!()
 }
 
 fn _move_more_to_right_wrap_linebreak(
