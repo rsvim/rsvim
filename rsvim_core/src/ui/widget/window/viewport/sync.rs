@@ -1648,12 +1648,7 @@ fn search_anchor_upward_nowrap(
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
   let _viewport_start_column = viewport.start_column_idx();
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
-
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
 
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
@@ -1842,6 +1837,24 @@ fn search_anchor_leftward_nowrap(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  let buffer_len_lines = buffer.get_rope().len_lines();
+
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_visible_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
+  _adjust_horizontally_nowrap(
+    buffer,
+    window_actual_shape,
+    target_cursor_line,
+    target_cursor_char,
+    viewport.start_line_idx(),
+    viewport.start_column_idx(),
+  )
 }
 
 fn search_anchor_leftward_wrap_nolinebreak(
