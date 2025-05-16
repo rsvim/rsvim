@@ -583,6 +583,22 @@ impl Viewport {
         target_cursor_line_idx,
         target_cursor_char_idx,
       ),
+      ViewportSearchAnchorDirection::Left => sync::search_anchor_leftward(
+        self,
+        buffer,
+        window_actual_shape,
+        window_local_options,
+        target_cursor_line_idx,
+        target_cursor_char_idx,
+      ),
+      ViewportSearchAnchorDirection::Right => sync::search_anchor_rightward(
+        self,
+        buffer,
+        window_actual_shape,
+        window_local_options,
+        target_cursor_line_idx,
+        target_cursor_char_idx,
+      ),
       _ => unimplemented!(),
     }
   }
