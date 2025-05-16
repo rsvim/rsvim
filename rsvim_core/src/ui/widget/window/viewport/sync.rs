@@ -8,7 +8,6 @@ use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
-use std::thread::current;
 #[allow(unused_imports)]
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
@@ -1509,8 +1508,8 @@ fn _revert_search_start_column_wrap_linebreak(
       line_idx,
       start_char,
       _cloned_line_max_len(
-        window_height,
-        window_width,
+        window_actual_shape.height(),
+        window_actual_shape.width(),
         buffer.width_before(line_idx, start_char),
       ),
     )
@@ -1535,8 +1534,8 @@ fn _revert_search_start_column_wrap_linebreak(
       start_column,
       line_idx,
       0_u16,
-      window_height,
-      window_width,
+      window_actual_shape.height(),
+      window_actual_shape.width(),
     );
     let (last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
     trace!(
