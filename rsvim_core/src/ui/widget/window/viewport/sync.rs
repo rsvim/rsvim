@@ -148,10 +148,6 @@ fn sync_nowrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
-  // trace!("buffer.len_lines:{:?}", buffer_len_lines);
-
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
@@ -264,9 +260,6 @@ fn sync_wrap_nolinebreak(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
-
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
 
   let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
 
@@ -627,9 +620,6 @@ pub fn search_anchor_downward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  debug_assert!(window_actual_shape.height() > 0);
-  debug_assert!(window_actual_shape.width() > 0);
-
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -806,9 +796,6 @@ fn search_anchor_downward_nowrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
-
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
 
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
@@ -1132,9 +1119,6 @@ fn search_anchor_downward_wrap_nolinebreak(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
-
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
 
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
@@ -1527,9 +1511,6 @@ fn search_anchor_downward_wrap_linebreak(
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
-
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
@@ -1608,9 +1589,6 @@ pub fn search_anchor_upward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  debug_assert!(window_actual_shape.height() > 0);
-  debug_assert!(window_actual_shape.width() > 0);
-
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -1694,9 +1672,6 @@ fn search_anchor_upward_wrap_nolinebreak(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
-
-  debug_assert!(height > 0);
-  debug_assert!(width > 0);
 
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
@@ -1802,9 +1777,6 @@ pub fn search_anchor_leftward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  debug_assert!(window_actual_shape.height() > 0);
-  debug_assert!(window_actual_shape.width() > 0);
-
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
