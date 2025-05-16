@@ -997,17 +997,17 @@ fn _find_start_char_by_size(
 fn _revert_search_start_column_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  target_cursor_line: usize,
+  line_idx: usize,
   last_char: usize,
 ) -> usize {
-  let last_char_width = buffer.width_at(target_cursor_line, last_char);
+  let last_char_width = buffer.width_at(line_idx, last_char);
   let approximate_start_column = last_char_width.saturating_sub(
     (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
   );
   _find_start_char_by_size(
     buffer,
     window_actual_shape,
-    target_cursor_line,
+    line_idx,
     last_char,
     approximate_start_column,
   )
@@ -1530,12 +1530,11 @@ fn _move_more_to_left_wrap_linebreak(
 }
 
 /// Returns `start_column`
-fn _revert_search_line_start_wrap_linebreak(
+fn _revert_search_start_column_wrap_linebreak(
   buffer: &Buffer,
+  window_actual_shape: &U16Rect,
   line_idx: usize,
   last_char: usize,
-  window_height: u16,
-  window_width: u16,
 ) -> usize {
   let bufline = buffer.get_rope().line(line_idx);
   let bufline_len_chars = bufline.len_chars();
@@ -1544,8 +1543,8 @@ fn _revert_search_line_start_wrap_linebreak(
   // Approximately calculate the beginning char of the line in window viewport, by directly
   // subtract `window_width * window_height`.
   let last_char_width = buffer.width_at(line_idx, last_char);
-  let approximate_start_width =
-    last_char_width.saturating_sub(window_width as usize * window_height as usize);
+  let approximate_start_width = last_char_width
+    .saturating_sub(window_actual_shape.width() as usize * window_actual_shape.height() as usize);
   let start_char = buffer
     .char_at(line_idx, approximate_start_width)
     .unwrap_or(0_usize);
@@ -1639,7 +1638,7 @@ fn _move_more_to_right_wrap_linebreak(
   let on_right_side = target_cursor_char >= last_row_viewport.end_char_idx();
 
   if on_right_side {
-    let start_column = _revert_search_line_start_wrap_linebreak(
+    let start_column = _revert_search_start_column_wrap_linebreak(
       buffer,
       target_cursor_line,
       target_cursor_char,
