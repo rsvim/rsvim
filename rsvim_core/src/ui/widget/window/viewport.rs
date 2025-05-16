@@ -9237,7 +9237,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     let terminal_size = U16Size::new(17, 5);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let win_opts = make_wrap_nolinebreak();
+    let win_opts = make_wrap_linebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size.height(),
@@ -9263,10 +9263,10 @@ mod tests_search_anchor_upward_wrap_linebreak {
     {
       let expect = vec![
         "Hello, RSVIM!\n",
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
+        "This is a quite ",
+        "simple and small ",
+        "test lines.\n",
+        "But still it ",
       ];
 
       let actual = lock!(window.borrow().viewport()).clone();
@@ -9371,7 +9371,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       };
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 7)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
@@ -9423,7 +9423,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       };
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(5, 6)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
@@ -9437,7 +9437,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-3
     {
-      let expect = vec!["t\t\t", "too\tlong", "\tto", "\tcompletel", "y\tput:\n"];
+      let expect = vec!["too\tlong", "\tto", "\t", "completely", "\tput:\n"];
 
       let actual = {
         let target_cursor_line = 4;
@@ -9455,7 +9455,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 4);
-        assert_eq!(start_column, 24);
+        assert_eq!(start_column, 41);
 
         let viewport = Viewport::view(
           &buf,
@@ -9483,7 +9483,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-4
     {
-      let expect = vec!["line\tis", "\tsmall", "\tenough", "\tto", "\tcompletel"];
+      let expect = vec!["\tis", "\tsmall", "\tenough", "\tto", "\t"];
 
       let actual = {
         let target_cursor_line = 3;
@@ -9501,7 +9501,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
-        assert_eq!(start_column, 34);
+        assert_eq!(start_column, 38);
 
         let viewport = Viewport::view(
           &buf,
@@ -9530,10 +9530,10 @@ mod tests_search_anchor_upward_wrap_linebreak {
     // Search-5
     {
       let expect = vec![
-        "But still it cont",
-        "ains several thin",
-        "gs we want to tes",
-        "t:\n",
+        "But still it ",
+        "contains several ",
+        "things we want to",
+        " test:\n",
         "\t1. When",
       ];
 
@@ -9567,7 +9567,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
       };
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
@@ -9582,11 +9582,11 @@ mod tests_search_anchor_upward_wrap_linebreak {
     // Search-6
     {
       let expect = vec![
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
-        "ains several thin",
+        "This is a quite ",
+        "simple and small ",
+        "test lines.\n",
+        "But still it ",
+        "contains several ",
       ];
 
       let actual = {
@@ -9635,10 +9635,10 @@ mod tests_search_anchor_upward_wrap_linebreak {
     {
       let expect = vec![
         "Hello, RSVIM!\n",
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
+        "This is a quite ",
+        "simple and small ",
+        "test lines.\n",
+        "But still it ",
       ];
 
       let actual = {
