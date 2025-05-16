@@ -1271,7 +1271,7 @@ fn _find_start_char_by_word(buffer: &Buffer, line_idx: usize, start_char: usize)
   }
 }
 
-fn _revert_search_start_column_with_start_char_wrap_linebreak(
+fn _impl_revert_search_start_column_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   line_idx: usize,
@@ -1361,7 +1361,7 @@ fn _revert_search_start_column_wrap_linebreak(
   // For `wrap=true,linebreak=true`, the approximate `start_char` have to start from a valid word
   // beginning, i.e. a unicode segment, not a arbitrary char index.
   let start_char = _find_start_char_by_word(buffer, line_idx, start_char);
-  _revert_search_start_column_with_start_char_wrap_linebreak(
+  _impl_revert_search_start_column_wrap_linebreak(
     buffer,
     window_actual_shape,
     line_idx,
@@ -1435,14 +1435,13 @@ fn _move_more_to_left_wrap_linebreak(
     _find_start_char_by_word(buffer, target_cursor_line, target_viewport_start_char);
 
   if viewport_start_char < target_viewport_start_char {
-    let start_column_included_target_cursor_char =
-      _revert_search_start_column_with_start_char_wrap_linebreak(
-        buffer,
-        window_actual_shape,
-        target_cursor_line,
-        viewport_start_char,
-        target_cursor_char,
-      );
+    let start_column_included_target_cursor_char = _impl_revert_search_start_column_wrap_linebreak(
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      viewport_start_char,
+      target_cursor_char,
+    );
     if start_column_included_target_cursor_char < target_viewport_start_column {
       return (true, start_column_included_target_cursor_char);
     }
