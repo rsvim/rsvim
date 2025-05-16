@@ -794,8 +794,8 @@ impl NormalStateful {
       if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
         let max_scrolls_on_line = match buffer.last_visible_char_on_line(*line_idx) {
           Some(last_visible_c) => {
-            let last_visible_col = buffer.width_at(*line_idx, last_visible_c);
-            let last_col_on_row = buffer.width_at(
+            let last_visible_col = buffer.width_until(*line_idx, last_visible_c);
+            let last_col_on_row = buffer.width_until(
               *line_idx,
               last_row_viewport.end_char_idx().saturating_sub(1),
             );

@@ -80,7 +80,7 @@ fn _end_char_and_prefills(
   c: usize,
   end_width: usize,
 ) -> (usize, usize) {
-  let c_width = buffer.width_at(l, c);
+  let c_width = buffer.width_until(l, c);
   if c_width > end_width {
     // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
     let c_width_before = buffer.width_before(l, c);
@@ -755,7 +755,7 @@ fn _move_more_to_right_nowrap(
   if on_right_side {
     // Move viewport to right to show the cursor, just put the cursor at the last right char in the
     // new viewport.
-    let end_column = buffer.width_at(target_cursor_line, target_cursor_char);
+    let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
     let start_column = end_column.saturating_sub(width as usize);
     (true, start_column)
   } else {
@@ -940,7 +940,7 @@ fn _revert_search_start_column_wrap_nolinebreak(
   line_idx: usize,
   last_char: usize,
 ) -> usize {
-  let last_char_width = buffer.width_at(line_idx, last_char);
+  let last_char_width = buffer.width_until(line_idx, last_char);
   let approximate_start_column = last_char_width.saturating_sub(
     (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
   );
@@ -1351,7 +1351,7 @@ fn _revert_search_start_column_wrap_linebreak(
 ) -> usize {
   // Approximately calculate the beginning char of the line in window viewport, by directly
   // subtract `window_width * window_height`.
-  let last_char_width = buffer.width_at(line_idx, last_char);
+  let last_char_width = buffer.width_until(line_idx, last_char);
   let approximate_start_width = last_char_width
     .saturating_sub(window_actual_shape.width() as usize * window_actual_shape.height() as usize);
   let start_char = buffer

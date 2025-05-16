@@ -305,13 +305,13 @@ impl Buffer {
   /// # Panics
   ///
   /// It panics if the `line_idx` doesn't exist in rope.
-  pub fn width_at(&self, line_idx: usize, char_idx: usize) -> usize {
+  pub fn width_until(&self, line_idx: usize, char_idx: usize) -> usize {
     let rope_line = self.rope.line(line_idx);
     self
       .cached_lines_width
       .borrow_mut()
       .get_or_insert_mut(line_idx, ColumnIndex::new)
-      .width_at(&self.options, &rope_line, char_idx)
+      .width_until(&self.options, &rope_line, char_idx)
   }
 
   /// See [`ColumnIndex::char_before`].
