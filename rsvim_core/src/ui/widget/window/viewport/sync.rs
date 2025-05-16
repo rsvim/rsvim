@@ -1468,7 +1468,12 @@ fn _move_more_to_left_wrap_linebreak(
   (false, 0_usize)
 }
 
-/// Returns `start_column`
+// For `wrap=true,linebreak=true`, when the whole viewport only contains 1 line and the line
+// cannot fully show (i.e. the line head/tail are been truncated), and also we have confirmed the
+// last char index.
+// In such case, we needs to calculate the `start_column`.
+// The difference from `linebreak=false` is: we need to iterate chars by words segments, instead of
+// simply chars.
 fn _revert_search_start_column_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
