@@ -559,6 +559,13 @@ impl Viewport {
     target_cursor_line_idx: usize,
     target_cursor_char_idx: usize,
   ) -> (usize, usize) {
+    // If window is zero-sized.
+    let height = window_actual_shape.height();
+    let width = window_actual_shape.width();
+    if height == 0 || width == 0 {
+      return (0, 0);
+    }
+
     match direction {
       ViewportSearchAnchorDirection::Down => sync::search_anchor_downward(
         self,

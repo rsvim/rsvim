@@ -627,12 +627,8 @@ pub fn search_anchor_downward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  // If window is zero-sized.
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
-  if height == 0 || width == 0 {
-    return (0, 0);
-  }
+  debug_assert!(window_actual_shape.height() > 0);
+  debug_assert!(window_actual_shape.width() > 0);
 
   match (
     window_local_options.wrap(),
@@ -1612,12 +1608,8 @@ pub fn search_anchor_upward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  // If window is zero-sized.
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
-  if height == 0 || width == 0 {
-    return (0, 0);
-  }
+  debug_assert!(window_actual_shape.height() > 0);
+  debug_assert!(window_actual_shape.width() > 0);
 
   match (
     window_local_options.wrap(),
@@ -1798,4 +1790,74 @@ fn search_anchor_upward_wrap_linebreak(
     start_line,
     viewport.start_column_idx(),
   )
+}
+
+// Search a new viewport anchor (`start_line`, `start_column`) leftward, i.e. when cursor moves
+// left, and possibly scrolling buffer if cursor reaches the window left border.
+//
+// Returns `start_line`, `start_column` for the new viewport.
+pub fn search_anchor_leftward(
+  viewport: &Viewport,
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  window_local_options: &WindowLocalOptions,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+  debug_assert!(window_actual_shape.height() > 0);
+  debug_assert!(window_actual_shape.width() > 0);
+
+  match (
+    window_local_options.wrap(),
+    window_local_options.line_break(),
+  ) {
+    (false, _) => search_anchor_leftward_nowrap(
+      viewport,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+    ),
+    (true, false) => search_anchor_leftward_wrap_nolinebreak(
+      viewport,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+    ),
+    (true, true) => search_anchor_leftward_wrap_linebreak(
+      viewport,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+    ),
+  }
+}
+
+fn search_anchor_leftward_nowrap(
+  viewport: &Viewport,
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn search_anchor_leftward_wrap_nolinebreak(
+  viewport: &Viewport,
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
+}
+
+fn search_anchor_leftward_wrap_linebreak(
+  viewport: &Viewport,
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> (usize, usize) {
 }
