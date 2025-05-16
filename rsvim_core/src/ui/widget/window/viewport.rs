@@ -599,7 +599,6 @@ impl Viewport {
         target_cursor_line_idx,
         target_cursor_char_idx,
       ),
-      _ => unimplemented!(),
     }
   }
 
