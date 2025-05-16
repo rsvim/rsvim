@@ -69,6 +69,14 @@ pub struct ColumnIndex {
 
 impl ColumnIndex {
   /// Create new index.
+  pub fn with_capacity(size: usize) -> Self {
+    Self {
+      char2width: Vec::with_capacity(size),
+      width2char: BTreeMap::new(),
+    }
+  }
+
+  /// Create new index.
   pub fn new() -> Self {
     Self {
       char2width: Vec::new(),
@@ -203,7 +211,8 @@ impl ColumnIndex {
     }
   }
 
-  /// Get the display width at **current** char by `char_idx`, i.e. width range is `[0,char_idx]`.
+  /// Get the display width until **current** char by `char_idx`, i.e. width range is
+  /// `[0,char_idx]`.
   ///
   /// NOTE: This is equivalent to `width_before(char_idx+1)`.
   ///
@@ -214,7 +223,7 @@ impl ColumnIndex {
   /// 2. It returns the prefix display width if `char_idx` is inside the line.
   /// 3. It returns the whole display width of the line if `char_idx` is greater than or equal to
   ///    the line length.
-  pub fn width_at(
+  pub fn width_until(
     &mut self,
     options: &BufferLocalOptions,
     buf_line: &RopeSlice,
@@ -474,7 +483,7 @@ mod tests {
     expect: &[usize],
   ) {
     for (i, e) in expect.iter().enumerate() {
-      let a = actual.width_at(options, buf_line, i);
+      let a = actual.width_until(options, buf_line, i);
       info!("width_at:{i} actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -487,7 +496,7 @@ mod tests {
     expect: &[(usize, usize)],
   ) {
     for (e, i) in expect.iter() {
-      let a = actual.width_at(options, buf_line, *i);
+      let a = actual.width_until(options, buf_line, *i);
       info!("width_at_rev:{i}, actual:{a:?}, expect:{e:?}");
       assert_eq!(a, *e);
     }
@@ -528,7 +537,7 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width1");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     let expect: Vec<usize> =
       [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
@@ -564,10 +573,10 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width2");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 5), 5);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 43), 44);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 43), 44);
 
     let expect: Vec<usize> = [(1..=44).collect(), vec![44, 44, 44, 44]].concat();
 
@@ -604,7 +613,7 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width3");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     let expect: Vec<usize> = [
       (1..=9).collect(),
@@ -662,10 +671,10 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width4");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 11), 11);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 10), 11);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 11);
 
     let expect: Vec<usize> = [(1..=13).collect(), vec![13, 13, 13, 13]].concat();
     assert_width_at(&options, &rope.line(0), &mut actual, &expect);
@@ -702,7 +711,7 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width5");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     let expect: Vec<usize> = [
       (1..=18).map(|i| i * 2).collect(),
@@ -764,11 +773,11 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width6");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 8);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 16);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 2), 17);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 17);
 
     let expect: Vec<usize> = [vec![8, 16], (17..=129).collect(), vec![129, 129, 129, 129]].concat();
 
@@ -802,40 +811,40 @@ mod tests {
     let options = BufferLocalOptionsBuilder::default().build().unwrap();
     let rope = Rope::new();
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 10), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 0), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 1), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 2), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 10), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
 
     let rope = make_rope_from_lines(vec![]);
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 10), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 0), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 1), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 2), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 10), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
 
     let rope = make_rope_from_lines(vec![""]);
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 10), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 0), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 1), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 2), 0);
-    assert_eq!(actual.width_at(&options, &rope.line(0), 10), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 0), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 1), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 2), 0);
+    assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
   }
 
   fn assert_char_before(
@@ -849,7 +858,7 @@ mod tests {
       info!("char_before expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_at(options, buf_line, c.unwrap());
+        let actual = widx.width_until(options, buf_line, c.unwrap());
         info!("width_at-1 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual < *w);
       }
@@ -867,7 +876,7 @@ mod tests {
       info!("char_at expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_at(options, buf_line, c.unwrap());
+        let actual = widx.width_until(options, buf_line, c.unwrap());
         info!("width_at-2 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual >= *w);
       } else {
@@ -887,7 +896,7 @@ mod tests {
       info!("char_after expect char:{c:?} width:{w:?}, actual char:{actual:?}");
       assert_eq!(actual, *c);
       if c.is_some() {
-        let actual = widx.width_at(options, buf_line, c.unwrap());
+        let actual = widx.width_until(options, buf_line, c.unwrap());
         info!("width_at-3 char:{c:?} expect width:{w:?}, actual width:{actual:?}");
         assert!(actual >= *w);
       }
@@ -1157,7 +1166,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["\n"]);
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "char3");
-    let mut widx = ColumnIndex::new();
+    let mut widx = ColumnIndex::with_capacity(10);
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
       (0, None),
@@ -1284,7 +1293,7 @@ mod tests {
       [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
 
     for (c, w) in expect_at.iter().enumerate() {
-      let actual = widx.width_at(&options, &rope.line(0), c);
+      let actual = widx.width_until(&options, &rope.line(0), c);
       info!("truncate1-width_at expect width:{w:?}, char:{c:}, actual width:{actual:?}");
       assert_eq!(actual, *w);
       widx.truncate_since_char(c);
@@ -1309,7 +1318,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "truncate2");
-    let mut widx = ColumnIndex::new();
+    let mut widx = ColumnIndex::with_capacity(10);
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
       (0, None),
