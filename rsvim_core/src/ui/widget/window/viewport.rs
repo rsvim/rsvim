@@ -9879,7 +9879,14 @@ mod tests_search_anchor_horizontally_nowrap {
 
     // Search-3
     {
-      let expect = vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
 
       let actual = {
         let target_cursor_line = 0;
