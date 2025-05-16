@@ -10105,19 +10105,19 @@ mod tests_search_anchor_horizontally_nowrap {
       );
     }
 
-    // Search-1
+    // Prepare
     {
       let expect = vec![
-        "",
-        "nd small test lin",
-        "veral things we w",
-        "he\tline",
-        "t\t\t",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+        "\t\t4",
       ];
 
       let actual = {
-        let target_cursor_line = 2;
-        let target_cursor_char = 40;
+        let target_cursor_line = 6;
+        let target_cursor_char = 0;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -10130,8 +10130,8 @@ mod tests_search_anchor_horizontally_nowrap {
           target_cursor_line,
           target_cursor_char,
         );
-        assert_eq!(start_line, 0);
-        assert_eq!(start_column, 24);
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
 
         let viewport = Viewport::view(
           &buf,
@@ -10150,18 +10150,80 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 3), (4, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        0,
-        5,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-1
+    {
+      let expect = vec![
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+        "\t\t4",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 1;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Right,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
         &expect_start_fills,
         &expect_end_fills,
       );
@@ -10169,161 +10231,17 @@ mod tests_search_anchor_horizontally_nowrap {
 
     // Search-2
     {
-      let expect = vec!["", "", "", "ut\tinside.", ""];
-
-      let actual = {
-        let target_cursor_line = 3;
-        let target_cursor_char = 130;
-
-        let mut window = window.borrow_mut();
-        let old = lock!(window.viewport()).clone();
-        let buf = lock!(buf);
-        let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          target_cursor_line,
-          target_cursor_char,
-        );
-        assert_eq!(start_line, 0);
-        assert_eq!(start_column, 112);
-
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
-        window.set_viewport(Viewport::to_arc(viewport));
-        lock!(window.viewport()).clone()
-      };
-
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
-      assert_viewport(
-        buf.clone(),
-        &actual,
-        &expect,
-        0,
-        5,
-        &expect_start_fills,
-        &expect_end_fills,
-      );
-    }
-
-    // Search-3
-    {
-      let expect = vec!["", "", "", "mpletely\tp", ":\n"];
-
-      let actual = {
-        let target_cursor_line = 4;
-        let target_cursor_char = 100;
-
-        let mut window = window.borrow_mut();
-        let old = lock!(window.viewport()).clone();
-        let buf = lock!(buf);
-        let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          target_cursor_line,
-          target_cursor_char,
-        );
-        assert_eq!(start_line, 0);
-        assert_eq!(start_column, 95);
-
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
-        window.set_viewport(Viewport::to_arc(viewport));
-        lock!(window.viewport()).clone()
-      };
-
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
-      assert_viewport(
-        buf.clone(),
-        &actual,
-        &expect,
-        0,
-        5,
-        &expect_start_fills,
-        &expect_end_fills,
-      );
-    }
-
-    // Search-4
-    {
-      let expect = vec!["", "", "", "", "not\tset."];
-
-      let actual = {
-        let target_cursor_line = 5;
-        let target_cursor_char = 100;
-
-        let mut window = window.borrow_mut();
-        let old = lock!(window.viewport()).clone();
-        let buf = lock!(buf);
-        let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          target_cursor_line,
-          target_cursor_char,
-        );
-        assert_eq!(start_line, 1);
-        assert_eq!(start_column, 145);
-
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
-        window.set_viewport(Viewport::to_arc(viewport));
-        lock!(window.viewport()).clone()
-      };
-
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 2)]
-        .into_iter()
-        .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-        .into_iter()
-        .collect();
-      assert_viewport(
-        buf.clone(),
-        &actual,
-        &expect,
-        1,
-        6,
-        &expect_start_fills,
-        &expect_end_fills,
-      );
-    }
-
-    // Search-5
-    {
-      let expect = vec!["", "\tcompletel", "put:\n", "\tand", "if\teither"];
+      let expect = vec![
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+        "\t\t4",
+      ];
 
       let actual = {
         let target_cursor_line = 6;
-        let target_cursor_char = 50;
+        let target_cursor_char = 3;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -10337,7 +10255,7 @@ mod tests_search_anchor_horizontally_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 85);
+        assert_eq!(start_column, 0);
 
         let viewport = Viewport::view(
           &buf,
@@ -10350,10 +10268,181 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 7), (5, 0), (6, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 6), (6, 1)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-3
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 38;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Right,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-4
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 39;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Right,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-5
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 40;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Right,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
@@ -10369,24 +10458,31 @@ mod tests_search_anchor_horizontally_nowrap {
 
     // Search-6
     {
-      let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
 
       let actual = {
-        let target_cursor_line = 7;
-        let target_cursor_char = 0;
+        let target_cursor_line = 6;
+        let target_cursor_char = 41;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
+          ViewportSearchAnchorDirection::Right,
           &buf,
           window.actual_shape(),
           window.options(),
           target_cursor_line,
           target_cursor_char,
         );
-        assert_eq!(start_line, 3);
+        assert_eq!(start_line, 2);
         assert_eq!(start_column, 0);
 
         let viewport = Viewport::view(
@@ -10400,18 +10496,417 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 2), (5, 0), (6, 0), (7, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        3,
-        8,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-7
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 40;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-8
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 39;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-9
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 38;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-10
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 37;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-11
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 2;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-12
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 1;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-13
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite s",
+        "But still it cont",
+        "\t1. When",
+        "\t2. When",
+        "\t\t3",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 0;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 2);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        2,
+        7,
         &expect_start_fills,
         &expect_end_fills,
       );
