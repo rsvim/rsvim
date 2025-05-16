@@ -9074,7 +9074,13 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-5
     {
-      let expect = vec![" test:\n", "\t1. When", "\tthe", "\tline", "\tis"];
+      let expect = vec![
+        "But still it ",
+        "contains several ",
+        "things we want to",
+        " test:\n",
+        "\t1. When",
+      ];
 
       let actual = {
         let target_cursor_line = 2;
@@ -9092,7 +9098,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 47);
+        assert_eq!(start_column, 0);
 
         let viewport = Viewport::view(
           &buf,
@@ -9121,11 +9127,11 @@ mod tests_search_anchor_upward_wrap_linebreak {
     // Search-6
     {
       let expect = vec![
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
-        "ains several thin",
+        "This is a quite ",
+        "simple and small ",
+        "test lines.\n",
+        "But still it ",
+        "contains several ",
       ];
 
       let actual = {
@@ -9174,10 +9180,10 @@ mod tests_search_anchor_upward_wrap_linebreak {
     {
       let expect = vec![
         "Hello, RSVIM!\n",
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
+        "This is a quite ",
+        "simple and small ",
+        "test lines.\n",
+        "But still it ",
       ];
 
       let actual = {
