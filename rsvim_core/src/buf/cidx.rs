@@ -69,6 +69,14 @@ pub struct ColumnIndex {
 
 impl ColumnIndex {
   /// Create new index.
+  pub fn with_capacity(size: usize) -> Self {
+    Self {
+      char2width: Vec::with_capacity(size),
+      width2char: BTreeMap::new(),
+    }
+  }
+
+  /// Create new index.
   pub fn new() -> Self {
     Self {
       char2width: Vec::new(),
@@ -529,7 +537,7 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width1");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     let expect: Vec<usize> =
       [(1..=6).collect(), (14..=20).collect(), vec![20, 20, 20, 20]].concat();
@@ -565,7 +573,7 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width2");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 5), 5);
     assert_eq!(actual.width_until(&options, &rope.line(0), 43), 44);
@@ -605,7 +613,7 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width3");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     let expect: Vec<usize> = [
       (1..=9).collect(),
@@ -663,7 +671,7 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width4");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 11), 11);
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 11);
@@ -703,7 +711,7 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width5");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     let expect: Vec<usize> = [
       (1..=18).map(|i| i * 2).collect(),
@@ -765,7 +773,7 @@ mod tests {
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "width6");
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 8);
     assert_eq!(actual.width_before(&options, &rope.line(0), 2), 16);
@@ -803,7 +811,7 @@ mod tests {
     let options = BufferLocalOptionsBuilder::default().build().unwrap();
     let rope = Rope::new();
 
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
@@ -815,7 +823,7 @@ mod tests {
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
 
     let rope = make_rope_from_lines(vec![]);
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
@@ -827,7 +835,7 @@ mod tests {
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 0);
 
     let rope = make_rope_from_lines(vec![""]);
-    let mut actual = ColumnIndex::new();
+    let mut actual = ColumnIndex::with_capacity(10);
 
     assert_eq!(actual.width_before(&options, &rope.line(0), 0), 0);
     assert_eq!(actual.width_before(&options, &rope.line(0), 1), 0);
@@ -1158,7 +1166,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["\n"]);
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "char3");
-    let mut widx = ColumnIndex::new();
+    let mut widx = ColumnIndex::with_capacity(10);
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
       (0, None),
@@ -1310,7 +1318,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
     let buffer = make_buffer_from_rope(10, options, rope.clone());
     print_buffer_line_details(buffer.clone(), 0, "truncate2");
-    let mut widx = ColumnIndex::new();
+    let mut widx = ColumnIndex::with_capacity(10);
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
       (0, None),
