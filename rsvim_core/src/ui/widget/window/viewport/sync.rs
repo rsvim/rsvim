@@ -990,6 +990,29 @@ fn _find_start_char_by_size(
   result
 }
 
+// For `wrap=true,linebreak=false`, when the whole viewport only contains 1 line and the line
+// cannot fully show (i.e. the line head/tail are been truncated), and also we have confirmed the
+// last char index.
+// In such case, we needs to calculate the `start_column`.
+fn _revert_search_start_column_wrap_nolinebreak(
+  buffer: &Buffer,
+  window_actual_shape: &U16Rect,
+  target_cursor_line: usize,
+  last_char: usize,
+) -> usize {
+  let last_char_width = buffer.width_at(target_cursor_line, last_char);
+  let approximate_start_column = last_char_width.saturating_sub(
+    (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
+  );
+  _find_start_char_by_size(
+    buffer,
+    window_actual_shape,
+    target_cursor_line,
+    last_char,
+    approximate_start_column,
+  )
+}
+
 fn _move_more_to_left_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1061,19 +1084,14 @@ fn _move_more_to_left_wrap_nolinebreak(
     let last_visible_char = buffer
       .last_visible_char_on_line(target_cursor_line)
       .unwrap_or(0_usize);
-    let last_visible_char_width = buffer.width_at(target_cursor_line, last_visible_char);
-    let approximate_start_column_diff = last_visible_char_width.saturating_sub(
-      (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
-    );
-    let start_column_diff = _find_start_char_by_size(
+    let start_column_included_last_visible_char = _revert_search_start_column_wrap_nolinebreak(
       buffer,
       window_actual_shape,
       target_cursor_line,
       last_visible_char,
-      approximate_start_column_diff,
     );
-    if start_column_diff < start_column {
-      start_column = start_column_diff;
+    if start_column > start_column_included_last_visible_char {
+      start_column = start_column_included_last_visible_char;
       on_left_side = true;
     }
   }
