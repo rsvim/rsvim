@@ -1580,10 +1580,9 @@ fn _move_more_to_right_wrap_linebreak(
   if on_right_side {
     let start_column = _revert_search_start_column_wrap_linebreak(
       buffer,
+      window_actual_shape,
       target_cursor_line,
       target_cursor_char,
-      height,
-      width,
     );
     (true, start_column)
   } else {
