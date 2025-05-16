@@ -8,6 +8,7 @@ use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
+use std::thread::current;
 #[allow(unused_imports)]
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
@@ -898,96 +899,36 @@ fn _line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) ->
   last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
-/// Returns `start_column`
-fn _revert_search_line_start_wrap_nolinebreak(
-  buffer: &Buffer,
-  line_idx: usize,
-  last_char: usize,
-  window_height: u16,
-  window_width: u16,
-) -> usize {
-  let bufline = buffer.get_rope().line(line_idx);
-  let bufline_len_chars = bufline.len_chars();
-  debug_assert!(bufline_len_chars > 0);
-
-  // Approximately calculate the beginning char of the line in window viewport, by directly
-  // subtract `window_width * window_height`.
-  let last_char_width = buffer.width_at(line_idx, last_char);
-  let approximate_start_width =
-    last_char_width.saturating_sub(window_width as usize * window_height as usize);
-  let mut start_char = buffer
-    .char_at(line_idx, approximate_start_width)
-    .unwrap_or(0_usize);
-  trace!(
-    "line_idx:{},last_char:{}({:?}),last_char_width:{},approximate_start_width:{},start_char:{}({:?})",
-    line_idx,
-    last_char,
-    bufline.char(last_char),
-    last_char_width,
-    approximate_start_width,
-    start_char,
-    bufline.char(start_char),
-  );
-
-  while start_char < bufline_len_chars {
-    let start_column = buffer.width_before(line_idx, start_char);
-    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
-      buffer,
-      start_column,
-      line_idx,
-      0_u16,
-      window_height,
-      window_width,
-    );
-    let (last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-    trace!(
-      "start_column:{},last_row_viewport.end_char:{}({:?}),last_row_idx:{}",
-      start_column,
-      last_row_viewport.end_char_idx(),
-      bufline.get_char(last_row_viewport.end_char_idx()),
-      last_row_idx
-    );
-    if last_char < last_row_viewport.end_char_idx() {
-      return start_column;
-    }
-    start_char += 1;
-  }
-
-  unreachable!()
-}
-
 // For `wrap=true,linebreak=false`
 fn _find_start_char_by_size(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  target_cursor_line: usize,
+  line_idx: usize,
   last_char: usize,
   start_column: usize,
 ) -> usize {
-  let bufline = buffer.get_rope().line(target_cursor_line);
+  let bufline = buffer.get_rope().line(line_idx);
   let bufline_len_char = bufline.len_chars();
-  let mut result = start_column;
+  let mut start_char = buffer.char_at(line_idx, start_column).unwrap_or(0_usize);
 
-  while result < bufline_len_char {
+  while start_char < bufline_len_char {
+    let current_start_column = buffer.width_before(line_idx, start_char);
     let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
       buffer,
-      result,
-      target_cursor_line,
+      current_start_column,
+      line_idx,
       0_u16,
       window_actual_shape.height(),
       window_actual_shape.width(),
     );
     let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
     if last_row_viewport.end_char_idx() > last_char {
-      break;
+      return current_start_column;
     }
-    if result + 1 >= bufline_len_char {
-      break;
-    }
-    result += 1;
+    start_char += 1;
   }
 
-  result
+  unreachable!()
 }
 
 // For `wrap=true,linebreak=false`, when the whole viewport only contains 1 line and the line
@@ -1122,12 +1063,11 @@ fn _move_more_to_right_wrap_nolinebreak(
   let on_right_side = target_cursor_char >= last_row_viewport.end_char_idx();
 
   if on_right_side {
-    let start_column = _revert_search_line_start_wrap_nolinebreak(
+    let start_column = _revert_search_start_column_wrap_nolinebreak(
       buffer,
+      window_actual_shape,
       target_cursor_line,
       target_cursor_char,
-      height,
-      width,
     );
     (true, start_column)
   } else {
