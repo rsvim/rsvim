@@ -6,7 +6,7 @@ Please setup your development environment with:
 
 - Latest C++ toolchain:
   - For Linux, install [GNU GCC](https://gcc.gnu.org/).
-  - For macOS,  install [Xcode Clang](https://developer.apple.com/xcode/).
+  - For macOS, install [Xcode Clang](https://developer.apple.com/xcode/).
   - For Windows, install [Visual Studio with C++/C# Desktop Components](https://visualstudio.microsoft.com/).
 - LLVM [lld](https://lld.llvm.org/) linker.
 - Version management tool [mise](https://github.com/jdx/mise), then run `mise i`.
