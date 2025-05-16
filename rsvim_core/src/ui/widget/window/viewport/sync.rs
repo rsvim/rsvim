@@ -1915,8 +1915,7 @@ fn search_anchor_leftward_wrap_linebreak(
       // `target_cursor_line` needs to fill into current viewport.
       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
         proc_line_wrap_linebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
-      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
-      only_contains_target_cursor_line
+      target_cursor_rows.len() >= height as usize
     };
 
   _adjust_horizontally_wrap_linebreak(
@@ -2080,8 +2079,7 @@ fn search_anchor_rightward_wrap_linebreak(
       // `target_cursor_line` needs to fill into current viewport.
       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
         proc_line_wrap_linebreak(buffer, 0, target_cursor_line, 0_u16, u16::MAX, width);
-      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
-      only_contains_target_cursor_line
+      target_cursor_rows.len() >= height as usize
     };
 
   _adjust_horizontally_wrap_linebreak(
