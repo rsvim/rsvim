@@ -325,6 +325,12 @@ if __name__ == "__main__":
         help="Running cargo doc as a service and watching file changes, by default is false",
     )
 
+    fmt_subparser = subparsers.add_parser(
+        "fmt",
+        aliases=["f"],
+        help="Run multiple formatters and code-generator: `cargo fmt`, `taplo fmt`, `prettier`, `tsc`",
+    )
+
     release_subparser = subparsers.add_parser(
         "release",
         aliases=["r"],
@@ -361,6 +367,8 @@ if __name__ == "__main__":
         build(parser.release, parser.features, parser.all_features)
     elif parser.subcommand == "doc" or parser.subcommand == "d":
         doc(parser.watch)
+    elif parser.subcommand == "fmt" or parser.subcommand == "f":
+        fmt()
     elif parser.subcommand == "release" or parser.subcommand == "r":
         release(parser.level, parser.execute)
     else:
