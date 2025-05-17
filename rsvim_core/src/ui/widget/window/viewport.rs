@@ -5709,7 +5709,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-1
     {
-      let expect = vec!["line\tis", "\tsmall", "\tenough", "\tto", "\tcompletel"];
+      let expect = vec!["line\t", "is\tsmall", "\tenough", "\tto", "\tcompletel"];
 
       let actual = {
         let target_cursor_line = 1;
@@ -5727,7 +5727,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
-        assert_eq!(start_column, 34);
+        assert_eq!(start_column, 29);
 
         let viewport = Viewport::view(
           &buf,
@@ -5746,7 +5746,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 5)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
