@@ -9839,7 +9839,7 @@ mod tests_search_anchor_horizontally_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
+          ViewportSearchAnchorDirection::Right,
           &buf,
           window.actual_shape(),
           window.options(),
@@ -10247,7 +10247,7 @@ mod tests_search_anchor_horizontally_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          ViewportSearchAnchorDirection::Down,
+          ViewportSearchAnchorDirection::Right,
           &buf,
           window.actual_shape(),
           window.options(),
@@ -10255,7 +10255,7 @@ mod tests_search_anchor_horizontally_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 0);
+        assert_eq!(start_column, 1);
 
         let viewport = Viewport::view(
           &buf,

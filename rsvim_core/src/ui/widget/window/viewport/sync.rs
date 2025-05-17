@@ -887,17 +887,16 @@ fn _find_start_char_by_size(
   window_actual_shape: &U16Rect,
   line_idx: usize,
   last_char: usize,
-  start_column: usize,
+  mut start_column: usize,
 ) -> usize {
   let bufline = buffer.get_rope().line(line_idx);
   let bufline_len_char = bufline.len_chars();
-  let mut start_char = buffer.char_at(line_idx, start_column).unwrap_or(0_usize);
+  let bufline_chars_width = buffer.width_until(line_idx, bufline_len_char);
 
-  while start_char < bufline_len_char {
-    let current_start_column = buffer.width_before(line_idx, start_char);
+  while start_column < bufline_chars_width {
     let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
       buffer,
-      current_start_column,
+      start_column,
       line_idx,
       0_u16,
       window_actual_shape.height(),
@@ -905,9 +904,9 @@ fn _find_start_char_by_size(
     );
     let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
     if last_row_viewport.end_char_idx() > last_char {
-      return current_start_column;
+      return start_column;
     }
-    start_char += 1;
+    start_column += 1;
   }
 
   unreachable!()
@@ -1199,56 +1198,56 @@ fn search_anchor_downward_wrap_nolinebreak(
 // beginning, i.e. a unicode segment, not a arbitrary char index.
 fn _find_start_char_by_word(buffer: &Buffer, line_idx: usize, start_char: usize) -> usize {
   debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-  if start_char > 0 {
-    let bufline = buffer.get_rope().line(line_idx);
-
-    let last_segment_char = start_char;
-    let mut start_segment_char = start_char;
-    loop {
-      let c_value = bufline.char(start_segment_char);
-      if c_value.is_whitespace() {
-        break;
-      }
-      if start_segment_char == 0 {
-        break;
-      }
-      start_segment_char = start_segment_char.saturating_sub(1);
-    }
-    let cloned_segment = buffer
-      .clone_line(
-        line_idx,
-        start_segment_char,
-        last_segment_char.saturating_sub(start_segment_char) + 1,
-      )
-      .unwrap();
-    debug_assert!(!cloned_segment.is_empty());
-    let segment_words: Vec<&str> = cloned_segment.split_word_bounds().collect();
-    debug_assert!(!segment_words.is_empty());
-    // Word index => its (start char index, end char index)
-    let segment_words_char_idx = segment_words
-      .iter()
-      .enumerate()
-      .scan(start_segment_char, |state, (i, wd)| {
-        let old_state = *state;
-        *state += wd.chars().count();
-        Some((i, (old_state, *state)))
-      })
-      .collect::<HashMap<usize, (usize, usize)>>();
-    debug_assert!(!segment_words_char_idx.is_empty());
-    let mut result = last_segment_char;
-
-    for (w, _word) in segment_words.iter().rev().enumerate() {
-      let (word_start_char, _word_end_char) = segment_words_char_idx.get(&w).unwrap();
-      if *word_start_char <= last_segment_char {
-        result = *word_start_char;
-        break;
-      }
-    }
-
-    result
-  } else {
-    0_usize
+  if start_char == 0 {
+    return 0_usize;
   }
+
+  let bufline = buffer.get_rope().line(line_idx);
+
+  let last_segment_char = start_char;
+  let mut start_segment_char = start_char;
+  loop {
+    let c_value = bufline.char(start_segment_char);
+    if c_value.is_whitespace() {
+      break;
+    }
+    if start_segment_char == 0 {
+      break;
+    }
+    start_segment_char = start_segment_char.saturating_sub(1);
+  }
+  let cloned_segment = buffer
+    .clone_line(
+      line_idx,
+      start_segment_char,
+      last_segment_char.saturating_sub(start_segment_char) + 1,
+    )
+    .unwrap();
+  debug_assert!(!cloned_segment.is_empty());
+  let segment_words: Vec<&str> = cloned_segment.split_word_bounds().collect();
+  debug_assert!(!segment_words.is_empty());
+  // Word index => its (start char index, end char index)
+  let segment_words_char_idx = segment_words
+    .iter()
+    .enumerate()
+    .scan(start_segment_char, |state, (i, wd)| {
+      let old_state = *state;
+      *state += wd.chars().count();
+      Some((i, (old_state, *state)))
+    })
+    .collect::<HashMap<usize, (usize, usize)>>();
+  debug_assert!(!segment_words_char_idx.is_empty());
+  let mut result = last_segment_char;
+
+  for (w, _word) in segment_words.iter().rev().enumerate() {
+    let (word_start_char, _word_end_char) = segment_words_char_idx.get(&w).unwrap();
+    if *word_start_char <= last_segment_char {
+      result = *word_start_char;
+      break;
+    }
+  }
+
+  result
 }
 
 fn _impl_revert_search_start_column_wrap_linebreak(
