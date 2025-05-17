@@ -10338,12 +10338,11 @@ mod tests_search_anchor_horizontally_nowrap {
     // Search-4
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite s",
-        "But still it cont",
-        "\t1. When",
-        "\t2. When",
-        "\t\t3",
+        " to test:\n",
+        "is\tsmall",
+        "\tlong",
+        "truncated if",
+        " into the\t",
       ];
 
       let actual = {
@@ -10362,7 +10361,7 @@ mod tests_search_anchor_horizontally_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 0);
+        assert_eq!(start_column, 44);
 
         let viewport = Viewport::view(
           &buf,
@@ -10375,10 +10374,10 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 0), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 5), (5, 5), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
@@ -10395,11 +10394,11 @@ mod tests_search_anchor_horizontally_nowrap {
     // Search-5
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite s",
-        "But still it cont",
-        "\t1. When",
-        "\t2. When",
+        "to test:\n",
+        "is\tsmall",
+        "long",
+        "runcated if",
+        "into the\tn",
         "\t\t3",
       ];
 
@@ -10419,7 +10418,7 @@ mod tests_search_anchor_horizontally_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 0);
+        assert_eq!(start_column, 45);
 
         let viewport = Viewport::view(
           &buf,
@@ -10432,10 +10431,10 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 1), (4, 7), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 1), (4, 6), (5, 6), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
@@ -10452,12 +10451,11 @@ mod tests_search_anchor_horizontally_nowrap {
     // Search-6
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite s",
-        "But still it cont",
-        "\t1. When",
-        "\t2. When",
-        "\t\t3",
+        "o test:\n",
+        "is\tsmall",
+        "long",
+        "uncated if",
+        "nto the\tne",
       ];
 
       let actual = {
@@ -10476,7 +10474,7 @@ mod tests_search_anchor_horizontally_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 0);
+        assert_eq!(start_column, 46);
 
         let viewport = Viewport::view(
           &buf,
@@ -10489,10 +10487,10 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 6), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 7), (5, 7), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
@@ -10509,12 +10507,11 @@ mod tests_search_anchor_horizontally_nowrap {
     // Search-7
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite s",
-        "But still it cont",
-        "\t1. When",
-        "\t2. When",
-        "\t\t3",
+        "o test:\n",
+        "is\tsmall",
+        "long",
+        "uncated if",
+        "nto the\tne",
       ];
 
       let actual = {
@@ -10533,7 +10530,7 @@ mod tests_search_anchor_horizontally_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 0);
+        assert_eq!(start_column, 46);
 
         let viewport = Viewport::view(
           &buf,
@@ -10546,10 +10543,10 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 6), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 7), (5, 7), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
@@ -10566,12 +10563,11 @@ mod tests_search_anchor_horizontally_nowrap {
     // Search-8
     {
       let expect = vec![
-        "Hello, RSVIM!\n",
-        "This is a quite s",
-        "But still it cont",
-        "\t1. When",
-        "\t2. When",
-        "\t\t3",
+        "o test:\n",
+        "is\tsmall",
+        "long",
+        "uncated if",
+        "nto the\tne",
       ];
 
       let actual = {
@@ -10590,7 +10586,7 @@ mod tests_search_anchor_horizontally_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 0);
+        assert_eq!(start_column, 46);
 
         let viewport = Viewport::view(
           &buf,
@@ -10603,10 +10599,10 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 6), (5, 0), (6, 0)]
         .into_iter()
         .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 2), (5, 0), (6, 0)]
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 2), (4, 7), (5, 7), (6, 0)]
         .into_iter()
         .collect();
       assert_viewport(
