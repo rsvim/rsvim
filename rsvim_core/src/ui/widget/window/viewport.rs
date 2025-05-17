@@ -8090,8 +8090,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-4
     {
       let expect = vec![
-        "small\tenou",
-        "gh\tto",
+        "small\t",
+        "enough\tto",
         "\tcompletel",
         "y\tput",
         "\tinside.\n",
@@ -8113,7 +8113,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
-        assert_eq!(start_column, 56);
+        assert_eq!(start_column, 52);
 
         let viewport = Viewport::view(
           &buf,
@@ -8126,7 +8126,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 4)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
@@ -8406,7 +8406,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-1
     {
-      let expect = vec!["next\trow,", "\tif", "\teither", "\tline-wrap", "\tor"];
+      let expect = vec!["next\t", "row,\tif", "\teither", "\tline-wrap", "\tor"];
 
       let actual = {
         let target_cursor_line = 6;
@@ -8424,7 +8424,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 61);
+        assert_eq!(start_column, 56);
 
         let viewport = Viewport::view(
           &buf,
@@ -8437,7 +8437,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 5)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 7)].into_iter().collect();
       assert_viewport(
         buf.clone(),
@@ -8453,11 +8453,11 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     // Search-2
     {
       let expect = vec![
-        "both\tline-",
-        "wrap\tand",
-        "\tword-wrap",
-        "\toptions",
-        "\tare",
+        "both\t",
+        "line-wrap\t",
+        "and\tword-w",
+        "rap\toption",
+        "s\tare",
       ];
 
       let actual = {
@@ -8476,7 +8476,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 5);
-        assert_eq!(start_column, 64);
+        assert_eq!(start_column, 59);
 
         let viewport = Viewport::view(
           &buf,
@@ -8489,8 +8489,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(5, 6)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(5, 5)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(5, 5)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
@@ -8550,7 +8550,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 
     // Search-4
     {
-      let expect = vec!["line\tis", "\tsmall", "\tenough", "\tto", "\tcompletel"];
+      let expect = vec!["line\t", "is\tsmall", "\tenough", "\tto", "\tcompletel"];
 
       let actual = {
         let target_cursor_line = 3;
@@ -8568,7 +8568,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
-        assert_eq!(start_column, 34);
+        assert_eq!(start_column, 29);
 
         let viewport = Viewport::view(
           &buf,
@@ -8581,7 +8581,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 5)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
