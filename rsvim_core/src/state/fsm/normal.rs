@@ -6,7 +6,7 @@ use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::*;
-use crate::ui::widget::window::{CursorViewport, Viewport};
+use crate::ui::widget::window::{CursorViewport, Viewport, ViewportSearchAnchorDirection};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -167,8 +167,6 @@ impl NormalStateful {
   //
   // NOTE: Only allows move to 1 direction, i.e. up/down/left/right. Cannot move with a
   // 2D-position.
-  //
-  // FIXME: Calculate the expected `line_idx`/`char_idx` correctly.
   fn _expected_move_and_scroll_to(
     &self,
     data_access: &StatefulDataAccess,
@@ -185,11 +183,11 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let (to_char_idx, to_line_idx) = match command {
+        let (target_cursor_char, target_cursor_line, search_direction) = match command {
           Command::CursorMoveLeftBy(n) => {
             let x = cursor_viewport.char_idx().saturating_sub(n);
             let y = cursor_viewport.line_idx();
-            (x, y)
+            (x, y, ViewportSearchAnchorDirection::Left)
           }
           Command::CursorMoveRightBy(n) => {
             debug_assert!(
@@ -204,12 +202,12 @@ impl NormalStateful {
               line.len_chars().saturating_sub(1),
             );
             let y = cursor_viewport.line_idx();
-            (x, y)
+            (x, y, ViewportSearchAnchorDirection::Right)
           }
           Command::CursorMoveUpBy(n) => {
             let x = cursor_viewport.char_idx();
             let y = cursor_viewport.line_idx().saturating_sub(n);
-            (x, y)
+            (x, y, ViewportSearchAnchorDirection::Up)
           }
           Command::CursorMoveDownBy(n) => {
             let x = cursor_viewport.char_idx();
@@ -217,147 +215,31 @@ impl NormalStateful {
               cursor_viewport.line_idx().saturating_add(n),
               buffer.get_rope().len_lines().saturating_sub(1),
             );
-            (x, y)
+            (x, y, ViewportSearchAnchorDirection::Down)
           }
           _ => unreachable!(),
         };
 
-        // If goes out of window bottom:
-        //
-        // Condition-1
-        // - Cursor is moving down.
-        // - The target cursor line > window's bottom line.
-        // - Window's bottom line < buffer last line.
-        //
-        // Condition-2
-        // - Cursor is moving down.
-        // - The target cursor line = window's bottom line.
-        // - The target cursor line is not fully rendered, i.e. first char > 0 or last char <
-        //   buffer's last char.
-        let goes_out_of_bottom = {
-          if let Some((&last_line_idx, _last_line_viewport)) = viewport.lines().last_key_value() {
-            let cond1 = to_line_idx > cursor_viewport.line_idx()
-              && to_line_idx > last_line_idx
-              && last_line_idx < buffer.get_rope().len_lines().saturating_sub(1);
+        let (start_line, start_column) = viewport.search_anchor(
+          search_direction,
+          &buffer,
+          current_window.actual_shape(),
+          current_window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
 
-            let cond2 =
-              to_line_idx > cursor_viewport.line_idx() && to_line_idx == last_line_idx && {
-                let head_not_show = self._line_head_not_show(&viewport, to_line_idx);
-                let tail_not_show = self._line_tail_not_show(&viewport, &buffer, to_line_idx);
-                head_not_show || tail_not_show
-              };
-
-            cond1 || cond2
-          } else {
-            false
-          }
-        };
-
-        // If goes out of window top:
-        //
-        // Condition-1
-        // - Cursor is moving up.
-        // - The target cursor line < window's top line.
-        // - Window's top line > buffer's first line, i.e. 0.
-        //
-        // Condition-2
-        // - Cursor is moving up.
-        // - The target cursor line = window's top line.
-        // - The target cursor line is not fully rendered, i.e. first char > 0 or last char <
-        //   buffer's last char.
-        let goes_out_of_top = {
-          if let Some((&first_line_idx, _first_line_viewport)) = viewport.lines().first_key_value()
-          {
-            let cond1 = to_line_idx < cursor_viewport.line_idx()
-              && to_line_idx < first_line_idx
-              && first_line_idx > 0;
-
-            let cond2 =
-              to_line_idx < cursor_viewport.line_idx() && to_line_idx == first_line_idx && {
-                let head_not_show = self._line_head_not_show(&viewport, to_line_idx);
-                let tail_not_show = self._line_tail_not_show(&viewport, &buffer, to_line_idx);
-                head_not_show || tail_not_show
-              };
-
-            cond1 || cond2
-          } else {
-            false
-          }
-        };
-
-        // If goes out of window right border:
-        //
-        // Condition-1
-        // - Cursor is moving right.
-        // - The target cursor char > window's last char of the line.
-        // - Window's last char of the line < buffer's last visible char of the line.
-        let goes_out_of_right = {
-          if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
-            debug_assert!(
-              buffer
-                .get_rope()
-                .get_line(cursor_viewport.line_idx())
-                .is_some()
-            );
-            let bufline_len_chars = buffer
-              .get_rope()
-              .line(cursor_viewport.line_idx())
-              .len_chars();
-            let rows = line_viewport.rows();
-            if let Some((_last_row_idx, last_row_viewport)) = rows.last_key_value() {
-              to_char_idx > cursor_viewport.char_idx()
-                && to_char_idx > last_row_viewport.end_char_idx().saturating_sub(1)
-                && last_row_viewport.end_char_idx() < bufline_len_chars
-            } else {
-              false
-            }
-          } else {
-            false
-          }
-        };
-
-        // If goes out of window left border:
-        //
-        // Condition-1
-        // - Cursor is moving left.
-        // - The target cursor char < window's first char of the line.
-        // - Windows's first char of the line > buffer's first char of the line, i.e. 0.
-        let goes_out_of_left = {
-          if let Some(line_viewport) = viewport.lines().get(&cursor_viewport.line_idx()) {
-            debug_assert!(
-              buffer
-                .get_rope()
-                .get_line(cursor_viewport.line_idx())
-                .is_some()
-            );
-            let rows = line_viewport.rows();
-            if let Some((_first_row_idx, first_row_viewport)) = rows.first_key_value() {
-              to_char_idx < cursor_viewport.char_idx()
-                && to_char_idx < first_row_viewport.start_char_idx()
-                && first_row_viewport.start_char_idx() > 0
-            } else {
-              false
-            }
-          } else {
-            false
-          }
-        };
-
-        if goes_out_of_bottom || goes_out_of_top {
-          ExpectedMoveAndScroll {
-            window_scroll_to: Some((viewport.start_column_idx(), to_line_idx)),
-            cursor_move_to: Some((to_char_idx, to_line_idx)),
-          }
-        } else if goes_out_of_right || goes_out_of_left {
-          ExpectedMoveAndScroll {
-            window_scroll_to: Some((to_char_idx, viewport.start_line_idx())),
-            cursor_move_to: Some((to_char_idx, to_line_idx)),
-          }
+        let window_scroll_to = if start_line == viewport.start_line_idx()
+          && start_column == viewport.start_column_idx()
+        {
+          None
         } else {
-          ExpectedMoveAndScroll {
-            window_scroll_to: None,
-            cursor_move_to: Some((to_char_idx, to_line_idx)),
-          }
+          Some((start_line, start_column))
+        };
+
+        ExpectedMoveAndScroll {
+          window_scroll_to,
+          cursor_move_to: Some((target_cursor_line, target_cursor_char)),
         }
       } else {
         ExpectedMoveAndScroll {
@@ -371,29 +253,6 @@ impl NormalStateful {
         cursor_move_to: None,
       }
     }
-  }
-
-  fn _line_head_not_show(&self, viewport: &Viewport, line_idx: usize) -> bool {
-    debug_assert!(viewport.lines().contains_key(&line_idx));
-    let line_viewport = viewport.lines().get(&line_idx).unwrap();
-    let rows = line_viewport.rows();
-    debug_assert!(rows.first_key_value().is_some());
-    let (_first_row_idx, first_row_viewport) = rows.first_key_value().unwrap();
-    first_row_viewport.start_char_idx() > 0
-  }
-
-  fn _line_tail_not_show(&self, viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> bool {
-    debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-    let bufline_last_visible_char = buffer
-      .last_visible_char_on_line(line_idx)
-      .unwrap_or(0_usize);
-
-    debug_assert!(viewport.lines().contains_key(&line_idx));
-    let line_viewport = viewport.lines().get(&line_idx).unwrap();
-    let rows = line_viewport.rows();
-    debug_assert!(rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-    last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
   }
 
   /// Cursor move in current window.
