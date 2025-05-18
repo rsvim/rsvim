@@ -731,7 +731,15 @@ fn _move_more_to_right_nowrap(
     Some(c) => {
       trace!(
         "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},c:{}({:?})",
-        target_cursor_line, target_cursor_char, buffer.get_rope().line(target_cursor_line).char(target_cursor_char), target_viewport_start_column, c, buffer.get_rope().line(target_cursor_line).char(c),
+        target_cursor_line,
+        target_cursor_char,
+        buffer
+          .get_rope()
+          .line(target_cursor_line)
+          .char(target_cursor_char),
+        target_viewport_start_column,
+        c,
+        buffer.get_rope().line(target_cursor_line).char(c),
       );
       c <= target_cursor_char
     }
