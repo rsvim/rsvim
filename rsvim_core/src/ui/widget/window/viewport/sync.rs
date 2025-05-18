@@ -724,14 +724,14 @@ fn _move_more_to_right_nowrap(
   target_cursor_char: usize,
 ) -> (bool, usize) {
   let width = window_actual_shape.width();
-  let viewport_end_column = target_viewport_start_column + width as usize;
+  let viewport_last_column = target_viewport_start_column + (width.saturating_sub(1) as usize);
 
   // Target cursor line end.
-  let on_right_side = match buffer.char_at(target_cursor_line, viewport_end_column) {
+  let on_right_side = match buffer.char_at(target_cursor_line, viewport_last_column) {
     Some(c) => {
       trace!(
-        "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, target_viewport_start_column, c
+        "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},c:{}({:?})",
+        target_cursor_line, target_cursor_char, buffer.get_rope().line(target_cursor_line).char(target_cursor_char), target_viewport_start_column, c, buffer.get_rope().line(target_cursor_line).char(c),
       );
       c < target_cursor_char
     }
@@ -742,7 +742,7 @@ fn _move_more_to_right_nowrap(
     // Move viewport to right to show the cursor, just put the cursor at the last right char in the
     // new viewport.
     let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
-    let start_column = end_column.saturating_sub(width as usize);
+    let start_column = end_column.saturating_sub(width.saturating_sub(1) as usize);
     (true, start_column)
   } else {
     (false, 0_usize)
