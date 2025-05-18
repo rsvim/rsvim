@@ -741,8 +741,8 @@ fn _move_more_to_right_nowrap(
   if on_right_side {
     // Move viewport to right to show the cursor, just put the cursor at the last right char in the
     // new viewport.
-    let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
-    let start_column = end_column.saturating_sub(width.saturating_sub(1) as usize);
+    let last_column = buffer.width_until(target_cursor_line, target_cursor_char);
+    let start_column = last_column.saturating_sub(width.saturating_sub(1) as usize);
     (true, start_column)
   } else {
     (false, 0_usize)
