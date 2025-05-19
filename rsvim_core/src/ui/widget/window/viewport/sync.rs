@@ -1907,14 +1907,34 @@ fn search_anchor_leftward_nowrap(
       .unwrap_or(0_usize),
   );
 
-  _adjust_horizontally_nowrap(
+  // adjust horizontally
+  let start_line = viewport.start_line_idx();
+  let start_column = viewport.start_column_idx();
+
+  let start_column_on_left_side = _move_more_to_left_nowrap(
     buffer,
     window_actual_shape,
+    start_column,
     target_cursor_line,
     target_cursor_char,
-    viewport.start_line_idx(),
-    viewport.start_column_idx(),
-  )
+  );
+
+  if let Some(start_column_left) = start_column_on_left_side {
+    return (start_line, start_column_left);
+  }
+
+  if cfg!(debug_assertions) {
+    let start_column_on_right_side = _move_more_to_right_nowrap(
+      buffer,
+      window_actual_shape,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    );
+    debug_assert!(start_column_on_right_side.is_none());
+  }
+
+  (start_line, start_column)
 }
 
 fn search_anchor_leftward_wrap_nolinebreak(
@@ -1953,15 +1973,36 @@ fn search_anchor_leftward_wrap_nolinebreak(
       target_cursor_rows.len() >= height as usize
     };
 
-  _adjust_horizontally_wrap_nolinebreak(
+  // adjust horizontally
+  let start_line = viewport_start_line;
+  let start_column = viewport_start_column;
+
+  let start_column_on_left_side = _move_more_to_left_wrap_nolinebreak(
     buffer,
     window_actual_shape,
     only_contains_target_cursor_line,
+    start_column,
     target_cursor_line,
     target_cursor_char,
-    viewport_start_line,
-    viewport_start_column,
-  )
+  );
+
+  if let Some(start_column_left) = start_column_on_left_side {
+    return (start_line, start_column_left);
+  }
+
+  if cfg!(debug_assertions) {
+    let start_column_on_right_side = _move_more_to_right_wrap_nolinebreak(
+      buffer,
+      window_actual_shape,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    );
+
+    debug_assert!(start_column_on_right_side.is_none());
+  }
+
+  (start_line, start_column)
 }
 
 fn search_anchor_leftward_wrap_linebreak(
