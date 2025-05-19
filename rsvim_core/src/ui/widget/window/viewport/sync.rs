@@ -1274,6 +1274,10 @@ fn search_anchor_downward_wrap_nolinebreak(
 
 // For `wrap=true,linebreak=true`, the `start_char` have to start from a valid word
 // beginning, i.e. a unicode segment, not a arbitrary char index.
+//
+// NOTE: Recall back the **too long word** handling in [`sync_wrap_linebreak`] api, we also need to
+// implement a similar method to handle such case, i.e. if a word is too long to put completely in
+// a window row, we fallback to a `linebreak=false` behavior.
 fn _find_start_char_wrap_linebreak(buffer: &Buffer, line_idx: usize, start_char: usize) -> usize {
   debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
   if start_char == 0 {
