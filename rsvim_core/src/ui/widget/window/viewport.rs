@@ -11861,7 +11861,7 @@ mod tests_search_anchor_horizontally_nowrap {
 
     // Search-18
     {
-      let expect = vec!["", "", "", "all\tenough", "to\tc"];
+      let expect = vec!["", "", "", "mall\tenoug", "to\t"];
 
       let actual = {
         let target_cursor_line = 3;
@@ -11892,7 +11892,7 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 6)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 7)]
         .into_iter()
         .collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
@@ -11961,7 +11961,7 @@ mod tests_search_anchor_horizontally_nowrap {
 
     // Search-20
     {
-      let expect = vec!["", "", "", "all\tenough", "to\tc"];
+      let expect = vec!["", "", "", "enough\t", "to\tc"];
 
       let actual = {
         let target_cursor_line = 3;
@@ -11979,7 +11979,7 @@ mod tests_search_anchor_horizontally_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 0);
-        assert_eq!(start_column, 58);
+        assert_eq!(start_column, 66);
 
         let viewport = Viewport::view(
           &buf,
@@ -11992,7 +11992,7 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 6)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 3), (4, 6)]
         .into_iter()
         .collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]

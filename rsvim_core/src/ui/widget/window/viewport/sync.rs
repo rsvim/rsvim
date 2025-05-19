@@ -690,17 +690,30 @@ fn _move_more_to_left_nowrap(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (bool, usize) {
-  // If target cursor char is on the left of the old target viewport.
-  let on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
-    Some(c) => {
-      trace!(
-        "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, target_viewport_start_column, c
-      );
-      c > target_cursor_char
-    }
-    None => true,
-  };
+  let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+  let on_left_side = target_cursor_width < target_viewport_start_column;
+
+  if cfg!(debug_assertions) {
+    let target_viewport_start_char = buffer
+      .char_at(target_cursor_line, target_viewport_start_column)
+      .unwrap();
+    trace!(
+      "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+      target_cursor_line,
+      target_cursor_char,
+      buffer
+        .get_rope()
+        .line(target_cursor_line)
+        .char(target_cursor_char),
+      target_cursor_width,
+      target_viewport_start_column,
+      target_viewport_start_char,
+      buffer
+        .get_rope()
+        .line(target_cursor_line)
+        .char(target_viewport_start_char)
+    );
+  }
 
   if on_left_side {
     // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
@@ -725,26 +738,39 @@ fn _move_more_to_right_nowrap(
 ) -> (bool, usize) {
   let width = window_actual_shape.width();
   let viewport_end_column = target_viewport_start_column + width as usize;
+  let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
+  let on_right_side = target_cursor_width > viewport_end_column;
 
-  // Target cursor line end.
-  let on_right_side = match buffer.char_at(target_cursor_line, viewport_end_column) {
-    Some(c) => {
-      trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},c:{}({:?})",
-        target_cursor_line,
-        target_cursor_char,
-        buffer
-          .get_rope()
-          .line(target_cursor_line)
-          .char(target_cursor_char),
-        target_viewport_start_column,
-        c,
-        buffer.get_rope().line(target_cursor_line).char(c),
-      );
-      c <= target_cursor_char
-    }
-    None => false,
-  };
+  if cfg!(debug_assertions) {
+    let target_viewport_start_char = buffer
+      .char_after(target_cursor_line, target_viewport_start_column)
+      .unwrap();
+    let viewport_end_char = buffer
+      .char_at(target_cursor_line, viewport_end_column)
+      .unwrap();
+    trace!(
+      "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?}),viewport_end_column:{},viewport_end_char:{}({:?})",
+      target_cursor_line,
+      target_cursor_char,
+      buffer
+        .get_rope()
+        .line(target_cursor_line)
+        .char(target_cursor_char),
+      target_cursor_width,
+      target_viewport_start_column,
+      target_viewport_start_char,
+      buffer
+        .get_rope()
+        .line(target_cursor_line)
+        .char(target_viewport_start_char),
+      viewport_end_column,
+      viewport_end_char,
+      buffer
+        .get_rope()
+        .line(target_cursor_line)
+        .char(viewport_end_char),
+    );
+  }
 
   if on_right_side {
     // Move viewport to right to show the cursor, just put the cursor at the last right char in the
