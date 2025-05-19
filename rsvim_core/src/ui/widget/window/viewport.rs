@@ -15828,8 +15828,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     {
       let expect = vec![
         "The extra parts ",
-        "are split into the",
-        "\tnext",
+        "are split into ",
+        "the\tnext",
         "\trow,",
         "\tif",
       ];
@@ -15851,6 +15851,162 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
         );
         assert_eq!(start_line, 6);
         assert_eq!(start_column, 19);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        6,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-15
+    {
+      let expect = vec![
+        "The extra parts ",
+        "are split into ",
+        "the\tnext",
+        "\trow,",
+        "\tif",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 6;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 6);
+        assert_eq!(start_column, 19);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        6,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-16
+    {
+      let expect = vec![
+        "The extra parts ",
+        "are split into ",
+        "the\tnext",
+        "\trow,",
+        "\tif",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 5;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 6);
+        assert_eq!(start_column, 19);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        6,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-17
+    {
+      let expect = vec![
+        "The extra parts ",
+        "are split into ",
+        "the\tnext",
+        "\trow,",
+        "\tif",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 4;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Left,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 6);
+        assert_eq!(start_column, 18);
 
         let viewport = Viewport::view(
           &buf,
