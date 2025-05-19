@@ -992,17 +992,40 @@ fn _move_more_to_left_wrap_nolinebreak(
 ) -> (bool, usize) {
   let mut start_column = target_viewport_start_column;
 
-  // If target cursor char is on the left of the old target viewport.
-  let mut on_left_side = match buffer.char_after(target_cursor_line, start_column) {
-    Some(c) => {
-      trace!(
-        "target_cursor_line:{},target_cursor_char:{},viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, target_viewport_start_column, c
-      );
-      c > target_cursor_char
+  let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+  let mut on_left_side = target_cursor_width < start_column;
+
+  if cfg!(debug_assertions) {
+    match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+      Some(target_viewport_start_char) => trace!(
+        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+        target_cursor_line,
+        target_cursor_char,
+        buffer
+          .get_rope()
+          .line(target_cursor_line)
+          .char(target_cursor_char),
+        target_cursor_width,
+        target_viewport_start_column,
+        target_viewport_start_char,
+        buffer
+          .get_rope()
+          .line(target_cursor_line)
+          .char(target_viewport_start_char)
+      ),
+      None => trace!(
+        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+        target_cursor_line,
+        target_cursor_char,
+        buffer
+          .get_rope()
+          .line(target_cursor_line)
+          .char(target_cursor_char),
+        target_cursor_width,
+        target_viewport_start_column,
+      ),
     }
-    None => true,
-  };
+  }
 
   if on_left_side {
     // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
