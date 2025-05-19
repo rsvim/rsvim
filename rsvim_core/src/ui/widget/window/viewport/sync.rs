@@ -1310,7 +1310,8 @@ fn _find_start_char_by_word(buffer: &Buffer, line_idx: usize, start_char: usize)
   let mut result = last_segment_char;
 
   for (w, _word) in segment_words.iter().rev().enumerate() {
-    let (word_start_char, _word_end_char) = segment_words_char_idx.get(&w).unwrap();
+    let w_idx = segment_words.len() - 1 - w;
+    let (word_start_char, _word_end_char) = segment_words_char_idx.get(&w_idx).unwrap();
     if *word_start_char <= last_segment_char {
       result = *word_start_char;
       break;
