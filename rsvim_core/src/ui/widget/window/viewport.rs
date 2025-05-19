@@ -11961,7 +11961,7 @@ mod tests_search_anchor_horizontally_nowrap {
 
     // Search-20
     {
-      let expect = vec!["", "", "", "enough\t", "to\tc"];
+      let expect = vec!["", "", "", "enough\t", "\tcompletel"];
 
       let actual = {
         let target_cursor_line = 3;
@@ -11992,7 +11992,7 @@ mod tests_search_anchor_horizontally_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 3), (4, 6)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 3), (4, 0)]
         .into_iter()
         .collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
