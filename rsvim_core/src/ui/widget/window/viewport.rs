@@ -12008,6 +12008,56 @@ mod tests_search_anchor_horizontally_nowrap {
         &expect_end_fills,
       );
     }
+
+    // Search-21
+    {
+      let expect = vec!["", "", "", "enough\tt", "completely"];
+
+      let actual = {
+        let target_cursor_line = 3;
+        let target_cursor_char = 34;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Right,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 0);
+        assert_eq!(start_column, 67);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 7)]
+        .into_iter()
+        .collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        5,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
   }
 }
 #[allow(unused_imports)]
