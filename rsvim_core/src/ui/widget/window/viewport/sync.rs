@@ -816,8 +816,8 @@ fn _adjust_horizontally_nowrap(
     target_cursor_char,
   );
 
-  if start_column_on_left_side.is_some() {
-    return (start_line, start_column_on_left_side.unwrap());
+  if let Some(start_column_left) = start_column_on_left_side {
+    return (start_line, start_column_left);
   }
 
   let start_column_on_right_side = _move_more_to_right_nowrap(
@@ -828,8 +828,8 @@ fn _adjust_horizontally_nowrap(
     target_cursor_char,
   );
 
-  if start_column_on_right_side.is_some() {
-    return (start_line, start_column_on_right_side.unwrap());
+  if let Some(start_column_right) = start_column_on_right_side {
+    return (start_line, start_column_right);
   }
 
   (start_line, start_column)
@@ -1152,8 +1152,8 @@ fn _adjust_horizontally_wrap_nolinebreak(
     target_cursor_char,
   );
 
-  if start_column_on_left_side.is_some() {
-    return (start_line, start_column_on_left_side.unwrap());
+  if let Some(start_column_left) = start_column_on_left_side {
+    return (start_line, start_column_left);
   }
 
   let start_column_on_right_side = _move_more_to_right_wrap_nolinebreak(
@@ -1164,8 +1164,8 @@ fn _adjust_horizontally_wrap_nolinebreak(
     target_cursor_char,
   );
 
-  if start_column_on_right_side.is_some() {
-    return (start_line, start_column_on_right_side.unwrap());
+  if let Some(start_column_right) = start_column_on_right_side {
+    return (start_line, start_column_right);
   }
 
   (start_line, start_column)
@@ -1557,8 +1557,8 @@ fn _adjust_horizontally_wrap_linebreak(
     target_cursor_char,
   );
 
-  if start_column_on_left_side.is_some() {
-    return (start_line, start_column_on_left_side.unwrap());
+  if let Some(start_column_left) = start_column_on_left_side {
+    return (start_line, start_column_left);
   }
 
   let start_column_on_right_side = _move_more_to_right_wrap_linebreak(
@@ -1569,8 +1569,8 @@ fn _adjust_horizontally_wrap_linebreak(
     target_cursor_char,
   );
 
-  if start_column_on_right_side.is_some() {
-    return (start_line, start_column_on_right_side.unwrap());
+  if let Some(start_column_right) = start_column_on_right_side {
+    return (start_line, start_column_right);
   }
 
   (start_line, start_column)
