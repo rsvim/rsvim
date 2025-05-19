@@ -8935,7 +8935,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-2
     {
-      let expect = vec!["\tand", "\tword-wrap", "\toptions", "\tare", "\tnot"];
+      let expect = vec!["and\tword-", "wrap\t", "options\t", "are\tnot", "\tset.\n"];
 
       let actual = {
         let target_cursor_line = 5;
@@ -8953,7 +8953,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 5);
-        assert_eq!(start_column, 85);
+        assert_eq!(start_column, 93);
 
         let viewport = Viewport::view(
           &buf,
@@ -9483,7 +9483,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-4
     {
-      let expect = vec!["\tis", "\tsmall", "\tenough", "\tto", "\t"];
+      let expect = vec!["line\tis", "\tsmall", "\tenough", "\tto", "\t"];
 
       let actual = {
         let target_cursor_line = 3;
@@ -9501,7 +9501,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
-        assert_eq!(start_column, 38);
+        assert_eq!(start_column, 34);
 
         let viewport = Viewport::view(
           &buf,
