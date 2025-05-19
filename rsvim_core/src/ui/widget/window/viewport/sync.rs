@@ -694,25 +694,35 @@ fn _move_more_to_left_nowrap(
   let on_left_side = target_cursor_width < target_viewport_start_column;
 
   if cfg!(debug_assertions) {
-    let target_viewport_start_char = buffer
-      .char_at(target_cursor_line, target_viewport_start_column)
-      .unwrap();
-    trace!(
-      "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
-      target_cursor_line,
-      target_cursor_char,
-      buffer
-        .get_rope()
-        .line(target_cursor_line)
-        .char(target_cursor_char),
-      target_cursor_width,
-      target_viewport_start_column,
-      target_viewport_start_char,
-      buffer
-        .get_rope()
-        .line(target_cursor_line)
-        .char(target_viewport_start_char)
-    );
+    match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+      Some(target_viewport_start_char) => trace!(
+        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+        target_cursor_line,
+        target_cursor_char,
+        buffer
+          .get_rope()
+          .line(target_cursor_line)
+          .char(target_cursor_char),
+        target_cursor_width,
+        target_viewport_start_column,
+        target_viewport_start_char,
+        buffer
+          .get_rope()
+          .line(target_cursor_line)
+          .char(target_viewport_start_char)
+      ),
+      None => trace!(
+        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+        target_cursor_line,
+        target_cursor_char,
+        buffer
+          .get_rope()
+          .line(target_cursor_line)
+          .char(target_cursor_char),
+        target_cursor_width,
+        target_viewport_start_column,
+      ),
+    }
   }
 
   if on_left_side {
@@ -742,14 +752,25 @@ fn _move_more_to_right_nowrap(
   let on_right_side = target_cursor_width > viewport_end_column;
 
   if cfg!(debug_assertions) {
-    let target_viewport_start_char = buffer
-      .char_after(target_cursor_line, target_viewport_start_column)
-      .unwrap();
-    let viewport_end_char = buffer
-      .char_at(target_cursor_line, viewport_end_column)
-      .unwrap();
+    let target_viewport_start_char =
+      match buffer.char_after(target_cursor_line, target_viewport_start_column) {
+        Some(c) => format!(
+          "{}({:?})",
+          c,
+          buffer.get_rope().line(target_cursor_line).char(c)
+        ),
+        None => format!("None"),
+      };
+    let viewport_end_char = match buffer.char_at(target_cursor_line, viewport_end_column) {
+      Some(c) => format!(
+        "{}({:?})",
+        c,
+        buffer.get_rope().line(target_cursor_line).char(c)
+      ),
+      None => format!("None"),
+    };
     trace!(
-      "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?}),viewport_end_column:{},viewport_end_char:{}({:?})",
+      "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{},viewport_end_column:{},viewport_end_char:{}",
       target_cursor_line,
       target_cursor_char,
       buffer
@@ -759,16 +780,8 @@ fn _move_more_to_right_nowrap(
       target_cursor_width,
       target_viewport_start_column,
       target_viewport_start_char,
-      buffer
-        .get_rope()
-        .line(target_cursor_line)
-        .char(target_viewport_start_char),
       viewport_end_column,
       viewport_end_char,
-      buffer
-        .get_rope()
-        .line(target_cursor_line)
-        .char(viewport_end_char),
     );
   }
 
