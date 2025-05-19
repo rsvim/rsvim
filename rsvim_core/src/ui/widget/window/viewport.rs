@@ -13509,7 +13509,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
   }
 
   #[test]
-  fn _new3() {
+  fn new3() {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
@@ -13541,24 +13541,22 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
       let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite s",
+        "imple and small t",
+        "est lines.\n",
         "But still it cont",
-        "\t1. When",
-        "\t2. When",
       ];
 
       let actual = lock!(window.borrow().viewport()).clone();
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-        .into_iter()
-        .collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 2)]
-        .into_iter()
-        .collect();
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
         0,
-        5,
+        3,
         &expect_start_fills,
         &expect_end_fills,
       );
