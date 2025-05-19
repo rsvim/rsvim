@@ -6446,7 +6446,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
     // Search-5
     {
       let expect = vec![
-        " extra parts are ",
+        "extra parts are ",
         "split into the",
         "\tnext",
         "\trow,",
@@ -6469,7 +6469,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 22);
+        assert_eq!(start_column, 23);
 
         let viewport = Viewport::view(
           &buf,
@@ -6646,7 +6646,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     // Search-2
     {
-      let expect = vec!["\tlong", "\tto", "\t", "completely", "\tput:\n"];
+      let expect = vec!["too\tlong", "\tto", "\t", "completely", "\tput:\n"];
 
       let actual = {
         let target_cursor_line = 2;
@@ -6664,7 +6664,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
-        assert_eq!(start_column, 44);
+        assert_eq!(start_column, 41);
 
         let viewport = Viewport::view(
           &buf,
@@ -6694,7 +6694,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
     // Search-3
     {
       let expect = vec![
-        " truncated if",
+        "been truncated if",
         "\tboth",
         "\tline-wrap",
         "\tand",
@@ -6717,7 +6717,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
-        assert_eq!(start_column, 43);
+        assert_eq!(start_column, 39);
 
         let viewport = Viewport::view(
           &buf,
@@ -6745,7 +6745,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     // Search-4
     {
-      let expect = vec![" split into the", "\tnext", "\trow,", "\tif", "\teither"];
+      let expect = vec!["split into the", "\tnext", "\trow,", "\tif", "\teither"];
 
       let actual = {
         let target_cursor_line = 4;
@@ -6763,7 +6763,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 4);
-        assert_eq!(start_column, 38);
+        assert_eq!(start_column, 39);
 
         let viewport = Viewport::view(
           &buf,
