@@ -759,7 +759,7 @@ fn _move_more_to_right_nowrap(
           c,
           buffer.get_rope().line(target_cursor_line).char(c)
         ),
-        None => format!("None"),
+        None => "None".to_string(),
       };
     let viewport_end_char = match buffer.char_at(target_cursor_line, viewport_end_column) {
       Some(c) => format!(
@@ -767,7 +767,7 @@ fn _move_more_to_right_nowrap(
         c,
         buffer.get_rope().line(target_cursor_line).char(c)
       ),
-      None => format!("None"),
+      None => "None".to_string(),
     };
     trace!(
       "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{},viewport_end_column:{},viewport_end_char:{}",
