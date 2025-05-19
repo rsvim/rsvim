@@ -4921,11 +4921,12 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "IM!\n",
-        "quite simp",
-        "it contain",
-        "the line i",
-        "the line i",
+        "ello, RSVI",
+        "his is a q",
+        "ut still i",
+        " 1. When t",
+        " 2. When t",
+        "    * The ",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
@@ -4952,11 +4953,11 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "IM!\n",
-        "quite simp",
-        "it contain",
-        "the line i",
-        "the line i",
+        " RSVIM!\n",
+        "s a quite ",
+        "ill it con",
+        "hen the li",
+        "hen the li",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
@@ -4982,7 +4983,13 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 20);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "le and sma", "s several ", "s small en", "s too long"];
+      let expect = vec![
+        "M!\n",
+        "uite simpl",
+        "t contains",
+        "he line is",
+        "he line is",
+      ];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -5007,7 +5014,7 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 31);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "l test lin", "hings we w", "ugh to com", "to be comp"];
+      let expect = vec!["", " and small", "several th", "small enou", "too long t"];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -5032,7 +5039,7 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 151);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "rendering.", ""];
+      let expect = vec!["", "", "", "t the rend", ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -5047,51 +5054,55 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    // stateful.cursor_move(&data_access, Command::CursorMoveDownBy(2));
-    //
-    // // Move-8
-    // {
-    //   let tree = data_access.tree.clone();
-    //   let actual2 = get_cursor_viewport(tree.clone());
-    //   assert_eq!(actual2.line_idx(), 5);
-    //   assert_eq!(actual2.char_idx(), 0);
-    //
-    //   let viewport = get_viewport(tree.clone());
-    //   let expect = vec!["     * The", "     * The", "", "", ""];
-    //   let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
-    //   assert_viewport_scroll(
-    //     buf.clone(),
-    //     &viewport,
-    //     &expect,
-    //     5,
-    //     8,
-    //     &expect_fills,
-    //     &expect_fills,
-    //   );
-    // }
-    //
-    // stateful.cursor_move(&data_access, Command::CursorMoveDownBy(1));
-    //
-    // // Move-9
-    // {
-    //   let tree = data_access.tree.clone();
-    //   let actual2 = get_cursor_viewport(tree.clone());
-    //   assert_eq!(actual2.line_idx(), 6);
-    //   assert_eq!(actual2.char_idx(), 0);
-    //
-    //   let viewport = get_viewport(tree.clone());
-    //   let expect = vec!["", "     * The", "", "", ""];
-    //   let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0)].into_iter().collect();
-    //   assert_viewport_scroll(
-    //     buf.clone(),
-    //     &viewport,
-    //     &expect,
-    //     5,
-    //     8,
-    //     &expect_fills,
-    //     &expect_fills,
-    //   );
-    // }
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(2));
+
+    // Move-8
+    {
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 93);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["", "", "t, then th", "ere're mul", ".\n"];
+      let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        1,
+        6,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Command::CursorMoveDownBy(1));
+
+    // Move-9
+    {
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 6);
+      assert_eq!(actual2.char_idx(), 93);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["", "t, then th", "ere're mul", ".\n", "are been s"];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        7,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
   }
 
   #[test]
