@@ -80,11 +80,21 @@ fn normalize_as_window_scroll_by(
 }
 
 #[derive(Debug, Copy, Clone)]
-struct ExpectedMoveAndScroll {
-  // Scroll window to column index and line index.
-  pub window_scroll_to: Option<(usize, usize)>,
-  // Move cursor to char index and line index.
-  pub cursor_move_to: Option<(usize, usize)>,
+struct ExpectedWindowScrollTo {
+  pub start_line: usize,
+  pub start_column: usize,
+}
+
+#[derive(Debug, Copy, Clone)]
+struct ExpectedCursorMoveTo {
+  pub to_line: usize,
+  pub to_char: usize,
+}
+
+#[derive(Debug, Copy, Clone)]
+struct ExpectedWindowScrollAndCursorMove {
+  pub window_scroll_to: Option<ExpectedWindowScrollTo>,
+  pub cursor_move_to: Option<ExpectedCursorMoveTo>,
 }
 
 impl Stateful for NormalStateful {
@@ -145,19 +155,20 @@ impl NormalStateful {
     let scroll_and_move = self._expected_move_and_scroll_to(data_access, command);
 
     // First try window scroll.
-    if let Some((to_column_idx, to_line_idx)) = scroll_and_move.window_scroll_to {
+    if let Some(ExpectedWindowScrollTo {
+      start_line,
+      start_column,
+    }) = scroll_and_move.window_scroll_to
+    {
       self._raw_window_scroll(
         data_access,
-        Command::__WindowScrollTo((to_column_idx, to_line_idx)),
+        Command::__WindowScrollTo((start_column, start_line)),
       );
     }
 
     // Then try cursor move.
-    if let Some((to_char_idx, to_line_idx)) = scroll_and_move.cursor_move_to {
-      self._raw_cursor_move(
-        data_access,
-        Command::__CursorMoveTo((to_char_idx, to_line_idx)),
-      );
+    if let Some(ExpectedCursorMoveTo { to_line, to_char }) = scroll_and_move.cursor_move_to {
+      self._raw_cursor_move(data_access, Command::__CursorMoveTo((to_char, to_line)));
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
@@ -171,7 +182,7 @@ impl NormalStateful {
     &self,
     data_access: &StatefulDataAccess,
     command: Command,
-  ) -> ExpectedMoveAndScroll {
+  ) -> ExpectedWindowScrollAndCursorMove {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     if let Some(current_window_id) = tree.current_window_id() {
@@ -234,21 +245,27 @@ impl NormalStateful {
         {
           None
         } else {
-          Some((start_line, start_column))
+          Some(ExpectedWindowScrollTo {
+            start_line,
+            start_column,
+          })
         };
 
-        ExpectedMoveAndScroll {
+        ExpectedWindowScrollAndCursorMove {
           window_scroll_to,
-          cursor_move_to: Some((target_cursor_line, target_cursor_char)),
+          cursor_move_to: Some(ExpectedCursorMoveTo {
+            to_line: target_cursor_line,
+            to_char: target_cursor_char,
+          }),
         }
       } else {
-        ExpectedMoveAndScroll {
+        ExpectedWindowScrollAndCursorMove {
           window_scroll_to: None,
           cursor_move_to: None,
         }
       }
     } else {
-      ExpectedMoveAndScroll {
+      ExpectedWindowScrollAndCursorMove {
         window_scroll_to: None,
         cursor_move_to: None,
       }
