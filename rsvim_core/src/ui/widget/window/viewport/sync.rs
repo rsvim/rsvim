@@ -2270,7 +2270,6 @@ fn search_anchor_rightward_wrap_linebreak(
     };
 
   // adjust horizontally
-
   let start_line = viewport_start_line;
   let start_column = viewport_start_column;
 
