@@ -15025,7 +15025,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
   }
 
   #[test]
-  fn _new2() {
+  fn new2() {
     test_log_init();
 
     let terminal_size = U16Size::new(17, 5);
@@ -15056,10 +15056,10 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     {
       let expect = vec![
         "Hello, RSVIM!\n",
-        "This is a quite s",
-        "imple and small t",
-        "est lines.\n",
-        "But still it cont",
+        "This is a quite ",
+        "simple and small ",
+        "test lines.\n",
+        "But still it ",
       ];
 
       let actual = lock!(window.borrow().viewport()).clone();
