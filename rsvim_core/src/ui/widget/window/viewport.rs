@@ -16287,7 +16287,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
       );
     }
 
-    // Prepare
+    // Search-1
     {
       let expect = vec![
         "Hello, RSVIM! ",
@@ -16332,14 +16332,14 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
         &expect,
-        6,
-        7,
+        0,
+        1,
         &expect_start_fills,
         &expect_end_fills,
       );
