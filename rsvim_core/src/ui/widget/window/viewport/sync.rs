@@ -1004,14 +1004,14 @@ fn _move_more_to_left_wrap_nolinebreak(
         buffer
           .get_rope()
           .line(target_cursor_line)
-          .char(target_cursor_char),
+          .get_char(target_cursor_char).unwrap_or('?'),
         target_cursor_width,
         target_viewport_start_column,
         target_viewport_start_char,
         buffer
           .get_rope()
           .line(target_cursor_line)
-          .char(target_viewport_start_char)
+          .get_char(target_viewport_start_char).unwrap_or('?')
       ),
       None => trace!(
         "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
@@ -1020,7 +1020,7 @@ fn _move_more_to_left_wrap_nolinebreak(
         buffer
           .get_rope()
           .line(target_cursor_line)
-          .char(target_cursor_char),
+          .get_char(target_cursor_char).unwrap_or('?'),
         target_cursor_width,
         target_viewport_start_column,
       ),
