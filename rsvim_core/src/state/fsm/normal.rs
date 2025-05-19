@@ -5412,16 +5412,16 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "e a row of",
-        " the windo",
-        "w content ",
-        "widget, th",
-        "en the lin",
-        "e-wrap and",
-        " word-wrap",
-        " doesn't a",
-        "ffect the ",
-        "rendering.",
+        "mall enoug",
+        "h to compl",
+        "etely put ",
+        "inside a r",
+        "ow of the ",
+        "window con",
+        "tent widge",
+        "t, then th",
+        "e line-wra",
+        "p and word",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -5514,16 +5514,16 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "e a row of",
-        " the windo",
-        "w content ",
-        "widget, th",
-        "en the lin",
-        "e-wrap and",
-        " word-wrap",
-        " doesn't a",
-        "ffect the ",
-        "rendering.",
+        "ut inside ",
+        "a row of t",
+        "he window ",
+        "content wi",
+        "dget, then",
+        " the line-",
+        "wrap and w",
+        "ord-wrap d",
+        "oesn't aff",
+        "ect the re",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -5677,20 +5677,20 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\n",
         "  1. When the line is sma",
         "ll enough to completely p",
         "ut inside a row.\n",
         "  2. When the line is too",
-        " long to be completely pu",
-        "t in a row of the window ",
-        "content widget, there're ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        3,
+        2,
         5,
         &expect_fills,
         &expect_fills,
@@ -5708,20 +5708,20 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\n",
         "  1. When the line is sma",
         "ll enough to completely p",
         "ut inside a row.\n",
         "  2. When the line is too",
-        " long to be completely pu",
-        "t in a row of the window ",
-        "content widget, there're ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        3,
+        2,
         5,
         &expect_fills,
         &expect_fills,
@@ -5739,20 +5739,20 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\n",
         "  1. When the line is sma",
         "ll enough to completely p",
         "ut inside a row.\n",
         "  2. When the line is too",
-        " long to be completely pu",
-        "t in a row of the window ",
-        "content widget, there're ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        3,
+        2,
         5,
         &expect_fills,
         &expect_fills,
@@ -5894,20 +5894,20 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\n",
         "  1. When the line is sma",
         "ll enough to completely p",
         "ut inside a row.\n",
         "  2. When the line is too",
-        " long to be completely pu",
-        "t in a row of the window ",
-        "content widget, there're ",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        3,
+        2,
         5,
         &expect_fills,
         &expect_fills,
