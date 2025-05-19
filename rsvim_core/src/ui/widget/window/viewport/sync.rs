@@ -689,7 +689,7 @@ fn _move_more_to_left_nowrap(
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> (bool, usize) {
+) -> Option<usize> {
   let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
   let on_left_side = target_cursor_width < target_viewport_start_column;
 
@@ -732,9 +732,9 @@ fn _move_more_to_left_nowrap(
     // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
     // just put the cursor at the first left char in the new viewport.
     let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
-    (true, start_column)
+    Some(start_column)
   } else {
-    (false, 0_usize)
+    None
   }
 }
 
@@ -748,7 +748,7 @@ fn _move_more_to_right_nowrap(
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> (bool, usize) {
+) -> Option<usize> {
   let width = window_actual_shape.width();
   let viewport_end_column = target_viewport_start_column + width as usize;
   let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
@@ -794,9 +794,9 @@ fn _move_more_to_right_nowrap(
     // new viewport.
     let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
     let start_column = end_column.saturating_sub(width as usize);
-    (true, start_column)
+    Some(start_column)
   } else {
-    (false, 0_usize)
+    None
   }
 }
 
@@ -808,7 +808,7 @@ fn _adjust_horizontally_nowrap(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  let (on_left_side, start_column_on_left_side) = _move_more_to_left_nowrap(
+  let start_column_on_left_side = _move_more_to_left_nowrap(
     buffer,
     window_actual_shape,
     start_column,
@@ -816,11 +816,11 @@ fn _adjust_horizontally_nowrap(
     target_cursor_char,
   );
 
-  if on_left_side {
-    return (start_line, start_column_on_left_side);
+  if start_column_on_left_side.is_some() {
+    return (start_line, start_column_on_left_side.unwrap());
   }
 
-  let (on_right_side, start_column_on_right_side) = _move_more_to_right_nowrap(
+  let start_column_on_right_side = _move_more_to_right_nowrap(
     buffer,
     window_actual_shape,
     start_column,
@@ -828,8 +828,8 @@ fn _adjust_horizontally_nowrap(
     target_cursor_char,
   );
 
-  if on_right_side {
-    return (start_line, start_column_on_right_side);
+  if start_column_on_right_side.is_some() {
+    return (start_line, start_column_on_right_side.unwrap());
   }
 
   (start_line, start_column)
@@ -993,7 +993,7 @@ fn _move_more_to_left_wrap_nolinebreak(
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> (bool, usize) {
+) -> Option<usize> {
   let mut start_column = target_viewport_start_column;
 
   let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
@@ -1096,9 +1096,9 @@ fn _move_more_to_left_wrap_nolinebreak(
   }
 
   if on_left_side {
-    (true, start_column)
+    Some(start_column)
   } else {
-    (false, 0_usize)
+    None
   }
 }
 
@@ -1108,7 +1108,7 @@ fn _move_more_to_right_wrap_nolinebreak(
   _target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> (bool, usize) {
+) -> Option<usize> {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
@@ -1128,9 +1128,9 @@ fn _move_more_to_right_wrap_nolinebreak(
       target_cursor_line,
       target_cursor_char,
     );
-    (true, start_column)
+    Some(start_column)
   } else {
-    (false, 0_usize)
+    None
   }
 }
 
@@ -1143,7 +1143,7 @@ fn _adjust_horizontally_wrap_nolinebreak(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  let (on_left_side, start_column_on_left_side) = _move_more_to_left_wrap_nolinebreak(
+  let start_column_on_left_side = _move_more_to_left_wrap_nolinebreak(
     buffer,
     window_actual_shape,
     only_contains_target_cursor_line,
@@ -1152,11 +1152,11 @@ fn _adjust_horizontally_wrap_nolinebreak(
     target_cursor_char,
   );
 
-  if on_left_side {
-    return (start_line, start_column_on_left_side);
+  if start_column_on_left_side.is_some() {
+    return (start_line, start_column_on_left_side.unwrap());
   }
 
-  let (on_right_side, start_column_on_right_side) = _move_more_to_right_wrap_nolinebreak(
+  let start_column_on_right_side = _move_more_to_right_wrap_nolinebreak(
     buffer,
     window_actual_shape,
     start_column,
@@ -1164,8 +1164,8 @@ fn _adjust_horizontally_wrap_nolinebreak(
     target_cursor_char,
   );
 
-  if on_right_side {
-    return (start_line, start_column_on_right_side);
+  if start_column_on_right_side.is_some() {
+    return (start_line, start_column_on_right_side.unwrap());
   }
 
   (start_line, start_column)
@@ -1435,7 +1435,7 @@ fn _move_more_to_left_wrap_linebreak(
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> (bool, usize) {
+) -> Option<usize> {
   let mut on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
     Some(c) => {
       trace!(
@@ -1481,7 +1481,7 @@ fn _move_more_to_left_wrap_linebreak(
   }
 
   if on_left_side {
-    return (true, start_column);
+    return Some(start_column);
   }
 
   // Check if `target_viewport_start_column` breaks the first word.
@@ -1501,11 +1501,11 @@ fn _move_more_to_left_wrap_linebreak(
       target_cursor_char,
     );
     if start_column_included_target_cursor_char < target_viewport_start_column {
-      return (true, start_column_included_target_cursor_char);
+      return Some(start_column_included_target_cursor_char);
     }
   }
 
-  (false, 0_usize)
+  None
 }
 
 fn _move_more_to_right_wrap_linebreak(
@@ -1514,7 +1514,7 @@ fn _move_more_to_right_wrap_linebreak(
   _target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> (bool, usize) {
+) -> Option<usize> {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
@@ -1533,9 +1533,9 @@ fn _move_more_to_right_wrap_linebreak(
       target_cursor_line,
       target_cursor_char,
     );
-    (true, start_column)
+    Some(start_column)
   } else {
-    (false, 0_usize)
+    None
   }
 }
 
@@ -1548,7 +1548,7 @@ fn _adjust_horizontally_wrap_linebreak(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  let (on_left_side, start_column_on_left_side) = _move_more_to_left_wrap_linebreak(
+  let start_column_on_left_side = _move_more_to_left_wrap_linebreak(
     buffer,
     window_actual_shape,
     only_contains_target_cursor_line,
@@ -1557,11 +1557,11 @@ fn _adjust_horizontally_wrap_linebreak(
     target_cursor_char,
   );
 
-  if on_left_side {
-    return (start_line, start_column_on_left_side);
+  if start_column_on_left_side.is_some() {
+    return (start_line, start_column_on_left_side.unwrap());
   }
 
-  let (on_right_side, start_column_on_right_side) = _move_more_to_right_wrap_linebreak(
+  let start_column_on_right_side = _move_more_to_right_wrap_linebreak(
     buffer,
     window_actual_shape,
     start_column,
@@ -1569,8 +1569,8 @@ fn _adjust_horizontally_wrap_linebreak(
     target_cursor_char,
   );
 
-  if on_right_side {
-    return (start_line, start_column_on_right_side);
+  if start_column_on_right_side.is_some() {
+    return (start_line, start_column_on_right_side.unwrap());
   }
 
   (start_line, start_column)
