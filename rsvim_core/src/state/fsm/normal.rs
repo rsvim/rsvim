@@ -329,6 +329,7 @@ impl NormalStateful {
     // Or, just do nothing, stay at where you are
   }
 
+  #[cfg(test)]
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, command: Command) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
@@ -573,6 +574,7 @@ impl NormalStateful {
     }
   }
 
+  #[cfg(test)]
   fn __test_raw_window_scroll(&self, data_access: &StatefulDataAccess, command: Command) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
