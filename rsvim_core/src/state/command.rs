@@ -7,14 +7,13 @@
 /// Editor operations.
 ///
 /// NOTE:
-/// 1. The enum name is following the `Subject-Predicate-Object` English grammar.
-/// 2. For those enums starts with `__`, they are private enums and should not used by users.
+/// - The enum name is following the `Subject-Predicate-Object` English grammar.
 pub enum Command {
-  /// Move cursor by offset `(x,y)` relatively, based on current cursor position.
+  /// Move cursor by offset `(chars,lines)` relatively, based on current cursor position.
   ///
-  /// - The `x` is chars count, when negative it moves to left, when positive it moves to right.
-  /// - The `y` is lines count, when negative it moves to up, when positive it moves to down.
-  __CursorMoveBy((isize, isize)),
+  /// - For `chars`, when negative it moves to left, when positive it moves to right.
+  /// - For `lines`, when negative it moves to up, when positive it moves to down.
+  CursorMoveBy((/* chars */ isize, /* lines */ isize)),
 
   /// Move cursor left by `n` chars relatively, based on current cursor position.
   CursorMoveLeftBy(usize),
@@ -28,19 +27,16 @@ pub enum Command {
   /// Move cursor down by `n` lines relatively, based on current cursor position.
   CursorMoveDownBy(usize),
 
-  /// Similar to [`Command::__CursorMoveBy`], except it moves cursor to an absolute position based on
-  /// current buffer.
-  ///
-  /// - The `x` is char index on the buffer.
-  /// - The `y` is line index on the buffer.
-  __CursorMoveTo((usize, usize)),
+  /// Similar to [`Command::CursorMoveBy`], except it moves cursor to absolute position
+  /// `(char_idx,line_idx)`, based on current buffer.
+  CursorMoveTo((/* char_idx */ usize, /* lines_idx */ usize)),
 
-  /// Scroll buffer by offset `(x,y)` relatively, based on current window.
+  /// Scroll buffer by offset `(columns,lines)` relatively, based on current window.
   ///
-  /// - The `x` is columns (not chars) count, when negative it moves to left, when positive it
+  /// - For `columns` (NOTE: not chars!), when negative it moves to left, when positive it
   ///   moves to right.
-  /// - The `y` is lines count, when negative it moves to up, when positive it moves to down.
-  __WindowScrollBy((isize, isize)),
+  /// - For `lines`, when negative it moves to up, when positive it moves to down.
+  WindowScrollBy((/* columns */ isize, /* lines */ isize)),
 
   /// Scroll buffer left by `n` columns relatively, based on current window viewport.
   ///
@@ -58,13 +54,9 @@ pub enum Command {
   /// Scroll buffer down by `n` lines relatively, based on current window viewport.
   WindowScrollDownBy(usize),
 
-  /// Similar to [`Command::__WindowScrollBy`], except it scrolls window to an absolute position
-  /// based on current buffer.
-  ///
-  /// - The `x` is column (not char) index on the buffer.
-  /// - The `y` is line index on the buffer.
-  /// - The `(x,y)` is the top-left anchor of the window viewport.
-  __WindowScrollTo((usize, usize)),
+  /// Similar to [`Command::WindowScrollBy`], except it scrolls window to an absolute position
+  /// `(column_idx,line_idx)` based on current buffer.
+  WindowScrollTo((/* column_idx */ usize, /* line_idx */ usize)),
 
   /// Quit editor
   EditorQuit,
