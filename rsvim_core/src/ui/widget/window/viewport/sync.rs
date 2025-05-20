@@ -1105,15 +1105,21 @@ fn _move_more_to_left_wrap_nolinebreak(
 fn _move_more_to_right_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  _target_viewport_start_column: usize,
+  target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> Option<usize> {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  let (rows, _start_fills, _end_fills, _) =
-    proc_line_wrap_nolinebreak(buffer, 0, target_cursor_line, 0_u16, height, width);
+  let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
+    buffer,
+    target_viewport_start_column,
+    target_cursor_line,
+    0_u16,
+    height,
+    width,
+  );
 
   debug_assert!(rows.last_key_value().is_some());
   let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
@@ -1522,15 +1528,21 @@ fn _move_more_to_left_wrap_linebreak(
 fn _move_more_to_right_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  _target_viewport_start_column: usize,
+  target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> Option<usize> {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  let (rows, _start_fills, _end_fills, _) =
-    proc_line_wrap_linebreak(buffer, 0, target_cursor_line, 0_u16, height, width);
+  let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
+    buffer,
+    target_viewport_start_column,
+    target_cursor_line,
+    0_u16,
+    height,
+    width,
+  );
 
   debug_assert!(rows.last_key_value().is_some());
   let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
