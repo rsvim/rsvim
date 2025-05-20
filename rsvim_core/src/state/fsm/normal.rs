@@ -152,24 +152,6 @@ fn normalize_as_window_scroll_by(
   }
 }
 
-#[derive(Debug, Copy, Clone)]
-struct ExpectedWindowScrollTo {
-  pub start_line: usize,
-  pub start_column: usize,
-}
-
-#[derive(Debug, Copy, Clone)]
-struct ExpectedCursorMoveTo {
-  pub to_line: usize,
-  pub to_char: usize,
-}
-
-#[derive(Debug, Copy, Clone)]
-struct ExpectedWindowScrollAndCursorMove {
-  pub window_scroll_to: Option<ExpectedWindowScrollTo>,
-  pub cursor_move_to: Option<ExpectedCursorMoveTo>,
-}
-
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
@@ -311,79 +293,6 @@ impl NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
-  }
-
-  // Returns `(Command::WindowScrollTo((x,y)), Command::CursorMoveTo((x,y)))`.
-  //
-  // NOTE: Only allows move to 1 direction, i.e. up/down/left/right. Cannot move with a
-  // 2D-position.
-  fn _expected_move_and_scroll_to(
-    &self,
-    data_access: &StatefulDataAccess,
-    command: Command,
-  ) -> ExpectedWindowScrollAndCursorMove {
-    let tree = data_access.tree.clone();
-    let mut tree = lock!(tree);
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let buffer = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer);
-        let viewport = current_window.viewport();
-        let viewport = lock!(viewport);
-        let cursor_viewport = current_window.cursor_viewport();
-        let cursor_viewport = lock!(cursor_viewport);
-
-        let (target_cursor_char, target_cursor_line, move_direction) = normalize_as_cursor_move_to(
-          command,
-          cursor_viewport.char_idx(),
-          cursor_viewport.line_idx(),
-        );
-        let search_direction = match move_direction {
-          CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
-          CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
-          CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
-          CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
-        };
-
-        let (start_line, start_column) = viewport.search_anchor(
-          search_direction,
-          &buffer,
-          current_window.actual_shape(),
-          current_window.options(),
-          target_cursor_line,
-          target_cursor_char,
-        );
-
-        let window_scroll_to = if start_line == viewport.start_line_idx()
-          && start_column == viewport.start_column_idx()
-        {
-          None
-        } else {
-          Some(ExpectedWindowScrollTo {
-            start_line,
-            start_column,
-          })
-        };
-
-        ExpectedWindowScrollAndCursorMove {
-          window_scroll_to,
-          cursor_move_to: Some(ExpectedCursorMoveTo {
-            to_line: target_cursor_line,
-            to_char: target_cursor_char,
-          }),
-        }
-      } else {
-        ExpectedWindowScrollAndCursorMove {
-          window_scroll_to: None,
-          cursor_move_to: None,
-        }
-      }
-    } else {
-      ExpectedWindowScrollAndCursorMove {
-        window_scroll_to: None,
-        cursor_move_to: None,
-      }
-    }
   }
 
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, command: Command) {
