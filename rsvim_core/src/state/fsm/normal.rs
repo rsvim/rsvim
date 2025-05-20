@@ -312,6 +312,8 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
+  fn _raw_cursor_move() {}
+
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, command: Command) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
@@ -532,6 +534,33 @@ impl NormalStateful {
           .unwrap()
       };
       std::cmp::min(expected, upper_bounded)
+    }
+  }
+
+  fn _raw_window_scroll(command: Command) -> Option<ViewportArc> {
+    let (by_columns, by_lines) = normalize_as_window_scroll_by(
+      command,
+      viewport.start_column_idx(),
+      viewport.start_line_idx(),
+    );
+
+    let window_scroll_result = self._raw_window_scroll_by(&viewport, &buffer, by_columns, by_lines);
+
+    if let Some((start_line_idx, start_column_idx)) = window_scroll_result {
+      // Sync the viewport
+      let window_actual_shape = current_window.window_content().actual_shape();
+      let window_local_options = current_window.options();
+      let new_viewport = Viewport::to_arc(Viewport::view(
+        &buffer,
+        window_actual_shape,
+        window_local_options,
+        start_line_idx,
+        start_column_idx,
+      ));
+      current_window.set_viewport(new_viewport.clone());
+      Some(new_viewport)
+    } else {
+      None
     }
   }
 
