@@ -16209,14 +16209,14 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-11
     {
       let expect = vec![
-        "wewillhavetofallb",
-        "acktonolinebreakb",
-        "ehaviorandthustry",
-        "togetmoresmoothbe",
+        "havetofallbackton",
+        "olinebreakbehavio",
+        "randthustrytogetm",
+        "oresmoothbehavior",
       ];
       let actual = {
         let target_cursor_line = 0;
-        let target_cursor_char = 137;
+        let target_cursor_char = 142;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
@@ -16230,7 +16230,119 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 0);
-        assert_eq!(start_column, 69);
+        assert_eq!(start_column, 75);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        1,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-12
+    {
+      let expect = vec![
+        "avetofallbacktono",
+        "linebreakbehavior",
+        "andthustrytogetmo",
+        "resmoothbehavior ",
+      ];
+      let actual = {
+        let target_cursor_line = 0;
+        let target_cursor_char = 143;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Right,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 0);
+        assert_eq!(start_column, 76);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        1,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-13
+    {
+      let expect = vec![
+        "ofallbacktonoline",
+        "breakbehaviorandt",
+        "hustrytogetmoresm",
+        "oothbehavior thus",
+      ];
+      let actual = {
+        let target_cursor_line = 0;
+        let target_cursor_char = 144;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Right,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 0);
+        assert_eq!(start_column, 80);
 
         let viewport = Viewport::view(
           &buf,
