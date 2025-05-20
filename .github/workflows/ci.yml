@@ -17,8 +17,8 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
-  check:
-    name: Check
+  pr:
+    name: PR Check
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -27,9 +27,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: crate-ci/typos@master
-      - uses: actions/setup-node@v4
-        with:
-          node-version: latest
       - name: Prettier
         run: |
           npm install -g prettier
@@ -37,6 +34,14 @@ jobs:
           echo "show PWD=${PWD}"
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
+  check:
+    name: Check
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: latest
       - name: Tsc
         run: |
           npm install -g typescript
