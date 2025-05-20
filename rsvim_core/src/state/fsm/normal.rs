@@ -6,7 +6,9 @@ use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::*;
-use crate::ui::widget::window::{CursorViewport, Viewport, ViewportSearchAnchorDirection};
+use crate::ui::widget::window::{
+  CursorViewport, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -210,12 +212,11 @@ impl NormalStateful {
     let mut tree = lock!(tree);
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let buffer = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer);
-        let viewport = current_window.viewport();
-        let viewport = lock!(viewport);
-        let cursor_viewport = current_window.cursor_viewport();
-        let cursor_viewport = lock!(cursor_viewport);
+        let buffer_arc = current_window.buffer().upgrade().unwrap();
+        let buffer = lock!(buffer_arc);
+        let viewport_arc = current_window.viewport();
+        let cursor_viewport_arc = current_window.cursor_viewport();
+        let cursor_viewport = lock!(cursor_viewport_arc);
 
         let (target_cursor_char, target_cursor_line, move_direction) = normalize_as_cursor_move_to(
           command,
@@ -229,42 +230,58 @@ impl NormalStateful {
           CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
         };
 
-        let (start_line, start_column) = viewport.search_anchor(
-          search_direction,
-          &buffer,
-          current_window.actual_shape(),
-          current_window.options(),
-          target_cursor_line,
-          target_cursor_char,
-        );
-
-        // First try window scroll.
-        if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx() {
-          let (by_columns, by_lines) = normalize_as_window_scroll_by(
-            Command::WindowScrollTo((start_column, start_line)),
-            viewport.start_column_idx(),
-            viewport.start_line_idx(),
+        let new_viewport_arc: Option<ViewportArc> = {
+          let viewport = lock!(viewport_arc);
+          let (start_line, start_column) = viewport.search_anchor(
+            search_direction,
+            &buffer,
+            current_window.actual_shape(),
+            current_window.options(),
+            target_cursor_line,
+            target_cursor_char,
           );
 
-          let window_scroll_result =
-            self._raw_window_scroll_by(&viewport, &buffer, by_columns, by_lines);
+          // First try window scroll.
+          if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx()
+          {
+            let (by_columns, by_lines) = normalize_as_window_scroll_by(
+              Command::WindowScrollTo((start_column, start_line)),
+              viewport.start_column_idx(),
+              viewport.start_line_idx(),
+            );
 
-          if let Some((start_line_idx, start_column_idx)) = window_scroll_result {
-            // Sync the viewport
-            let window_actual_shape = current_window.window_content().actual_shape();
-            let window_local_options = current_window.options();
-            current_window.set_viewport(Viewport::to_arc(Viewport::view(
-              &buffer,
-              window_actual_shape,
-              window_local_options,
-              start_line_idx,
-              start_column_idx,
-            )));
+            let window_scroll_result =
+              self._raw_window_scroll_by(&viewport, &buffer, by_columns, by_lines);
+
+            if let Some((start_line_idx, start_column_idx)) = window_scroll_result {
+              // Sync the viewport
+              let window_actual_shape = current_window.window_content().actual_shape();
+              let window_local_options = current_window.options();
+              let new_viewport = Viewport::to_arc(Viewport::view(
+                &buffer,
+                window_actual_shape,
+                window_local_options,
+                start_line_idx,
+                start_column_idx,
+              ));
+              current_window.set_viewport(new_viewport.clone());
+              Some(new_viewport)
+            } else {
+              None
+            }
+          } else {
+            None
           }
-        }
+        };
 
         // Then try cursor move.
         {
+          let viewport_arc = match new_viewport_arc {
+            Some(v1) => v1,
+            None => viewport_arc,
+          };
+          let viewport = lock!(viewport_arc);
+
           let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
             Command::CursorMoveTo((target_cursor_char, target_cursor_line)),
             cursor_viewport.char_idx(),
