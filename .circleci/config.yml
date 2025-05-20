@@ -17,3 +17,7 @@ jobs:
           key: cargo-{{ checksum "Cargo.lock" }}
           paths:
             - ~/.cargo
+workflows:
+  ci:
+    jobs:
+      - nightly-miri
