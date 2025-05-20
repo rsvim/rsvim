@@ -64,35 +64,35 @@ paste = "1.0.15"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
-# deno: https://github.com/denoland/deno/blob/v2.3.1/Cargo.toml
-# deno_core: https://github.com/denoland/deno_core/blob/0.344.0/Cargo.toml
-# deno_ast: https://github.com/denoland/deno_ast/blob/0.46.6/Cargo.toml
+# deno: https://github.com/denoland/deno/blob/v2.3.3/Cargo.toml
+# deno_core: https://github.com/denoland/deno_core/blob/0.347.0/Cargo.toml
+# deno_ast: https://github.com/denoland/deno_ast/blob/0.47.0/Cargo.toml
 
-v8 = { version = "=135.1.0", default-features = false }
+v8 = { version = "=137.1.0", default-features = false }
 swc_atoms = "=5.0.0"
-swc_common = "=8.1.1"
-swc_config = "=2.0.0"
+swc_common = "=9.2.0"
+swc_config = "=3.0.0"
 swc_config_macro = "=1.0.0"
-swc_ecma_ast = "=8.1.2"
-swc_ecma_codegen = "=10.0.0"
+swc_ecma_ast = "=9.0.0"
+swc_ecma_codegen = "=11.0.0"
 swc_ecma_codegen_macros = "=2.0.0"
-swc_ecma_loader = "=8.0.0"
-swc_ecma_parser = "=11.1.3"
-swc_ecma_transforms_base = "=12.2.0"
-swc_ecma_transforms_classes = "=12.0.0"
-swc_ecma_transforms_compat = "=13.0.0"
+swc_ecma_loader = "=9.0.0"
+swc_ecma_parser = "=12.0.0"
+swc_ecma_transforms_base = "=13.0.0"
+swc_ecma_transforms_classes = "=13.0.0"
+swc_ecma_transforms_compat = "=15.0.0"
 swc_ecma_transforms_macros = "=1.0.0"
-swc_ecma_transforms_optimization = "=12.0.0"
-swc_ecma_transforms_proposal = "=12.0.2"
-swc_ecma_transforms_react = "=13.0.1"
-swc_ecma_transforms_typescript = "=13.0.0"
-swc_ecma_utils = "=12.0.1"
-swc_ecma_visit = "=8.0.0"
+swc_ecma_transforms_optimization = "=14.0.0"
+swc_ecma_transforms_proposal = "=13.0.0"
+swc_ecma_transforms_react = "=15.0.0"
+swc_ecma_transforms_typescript = "=15.0.0"
+swc_ecma_utils = "=13.1.0"
+swc_ecma_visit = "=9.0.0"
 swc_eq_ignore_macros = "=1.0.0"
-# swc_bundler = "=15.0.0"
-# swc_graph_analyzer = "=9.0.0"
+# swc_bundler = "=17.0.0"
+# swc_graph_analyzer = "=10.0.0"
 swc_macros_common = "=1.0.0"
-swc_trace_macro = "=2.0.0"
+swc_trace_macro = "=2.0.1"
 swc_visit = "=2.0.0"
 swc_visit_macros = "=0.5.13"
 sourcemap = "9.1.2"
