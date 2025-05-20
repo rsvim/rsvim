@@ -266,6 +266,9 @@ impl NormalStateful {
           };
           let viewport = lock!(viewport_arc);
 
+          // NOTE: This code block is exactly same with the `_raw_cursor_move` method, but it
+          // requires `unsafe` and `NonNull` which I want to avoid.
+
           let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
             Command::CursorMoveTo((target_cursor_char, target_cursor_line)),
             cursor_viewport.char_idx(),
