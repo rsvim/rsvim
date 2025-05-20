@@ -7,12 +7,10 @@ use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::tree::*;
 use crate::ui::widget::window::{
-  CursorViewport, Viewport, ViewportArc, ViewportSearchAnchorDirection, Window,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection, Window,
 };
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
-#[cfg(test)]
-use std::ptr::NonNull;
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -266,29 +264,16 @@ impl NormalStateful {
           };
           let viewport = lock!(viewport_arc);
 
-          // NOTE: This code block is exactly same with the `_raw_cursor_move` method, but it
-          // requires `unsafe` and `NonNull` which I want to avoid.
-
-          let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
+          let maybe_new_cursor_viewport = self._raw_cursor_move(
+            &viewport,
+            &cursor_viewport,
+            current_window,
+            &buffer,
             Command::CursorMoveTo((target_cursor_char, target_cursor_line)),
-            cursor_viewport.char_idx(),
-            cursor_viewport.line_idx(),
           );
 
-          let cursor_move_result =
-            self._raw_cursor_move_by(&viewport, &cursor_viewport, &buffer, by_chars, by_lines);
-
-          if let Some((line_idx, char_idx)) = cursor_move_result {
-            let moved_cursor_viewport =
-              CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
-            current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
-
-            let cursor_id = tree.cursor_id().unwrap();
-            tree.bounded_move_to(
-              cursor_id,
-              moved_cursor_viewport.column_idx() as isize,
-              moved_cursor_viewport.row_idx() as isize,
-            );
+          if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
+            self._raw_cursor_move2(&mut tree, new_cursor_viewport);
           }
         }
       }
@@ -297,16 +282,14 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  #[cfg(test)]
-  unsafe fn _raw_cursor_move(
+  fn _raw_cursor_move(
     &self,
     viewport: &Viewport,
     cursor_viewport: &CursorViewport,
     current_window: &mut Window,
-    mut raw_tree: NonNull<Tree>,
     buffer: &Buffer,
     command: Command,
-  ) {
+  ) -> Option<CursorViewportArc> {
     let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
       command,
       cursor_viewport.char_idx(),
@@ -317,45 +300,49 @@ impl NormalStateful {
       self._raw_cursor_move_by(viewport, cursor_viewport, buffer, by_chars, by_lines);
 
     if let Some((line_idx, char_idx)) = cursor_move_result {
-      let moved_cursor_viewport =
-        CursorViewport::from_position(viewport, buffer, line_idx, char_idx);
-      current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
-
-      unsafe {
-        let cursor_id = raw_tree.as_ref().cursor_id().unwrap();
-        raw_tree.as_mut().bounded_move_to(
-          cursor_id,
-          moved_cursor_viewport.column_idx() as isize,
-          moved_cursor_viewport.row_idx() as isize,
-        );
-      }
+      let new_cursor_viewport = CursorViewport::from_position(viewport, buffer, line_idx, char_idx);
+      let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
+      current_window.set_cursor_viewport(new_cursor_viewport.clone());
+      Some(new_cursor_viewport)
+    } else {
+      // Or, just do nothing, stay at where you are
+      None
     }
-    // Or, just do nothing, stay at where you are
+  }
+
+  fn _raw_cursor_move2(&self, tree: &mut Tree, cursor_viewport: CursorViewportArc) {
+    let cursor_id = tree.cursor_id().unwrap();
+    let cursor_viewport = lock!(cursor_viewport);
+    tree.bounded_move_to(
+      cursor_id,
+      cursor_viewport.column_idx() as isize,
+      cursor_viewport.row_idx() as isize,
+    );
   }
 
   #[cfg(test)]
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, command: Command) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    unsafe {
-      let raw_tree = NonNull::new(&mut *tree as *mut Tree).unwrap();
-      if let Some(current_window_id) = tree.current_window_id() {
-        if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-          let buffer = current_window.buffer().upgrade().unwrap();
-          let buffer = lock!(buffer);
-          let viewport = current_window.viewport();
-          let viewport = lock!(viewport);
-          let cursor_viewport = current_window.cursor_viewport();
-          let cursor_viewport = lock!(cursor_viewport);
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+        let buffer = current_window.buffer().upgrade().unwrap();
+        let buffer = lock!(buffer);
+        let viewport = current_window.viewport();
+        let viewport = lock!(viewport);
+        let cursor_viewport = current_window.cursor_viewport();
+        let cursor_viewport = lock!(cursor_viewport);
 
-          self._raw_cursor_move(
-            &viewport,
-            &cursor_viewport,
-            current_window,
-            raw_tree,
-            &buffer,
-            command,
-          );
+        let new_cursor_viewport_arc = self._raw_cursor_move(
+          &viewport,
+          &cursor_viewport,
+          current_window,
+          &buffer,
+          command,
+        );
+
+        if let Some(new_cursor_viewport) = new_cursor_viewport_arc {
+          self._raw_cursor_move2(&mut tree, new_cursor_viewport);
         }
       }
     }
@@ -392,58 +379,6 @@ impl NormalStateful {
     Some((line_idx, char_idx))
   }
 
-  // // Returns the `line_idx`/`char_idx` for new cursor position.
-  // // NOTE: `y` is lines count.
-  // fn _cursor_move_y_by(
-  //   &self,
-  //   viewport: &Viewport,
-  //   cursor_viewport: &CursorViewport,
-  //   buffer: &Buffer,
-  //   y: isize,
-  // ) -> Option<(usize, usize)> {
-  //   let cursor_line_idx = cursor_viewport.line_idx();
-  //   let cursor_char_idx = cursor_viewport.char_idx();
-  //
-  //   let line_idx = if y < 0 {
-  //     let n = -y as usize;
-  //     cursor_line_idx.saturating_sub(n)
-  //   } else {
-  //     let n = y as usize;
-  //     let expected = cursor_line_idx.saturating_add(n);
-  //     let last_line_idx = viewport.end_line_idx().saturating_sub(1);
-  //     trace!(
-  //       "cursor_line_idx:{:?},expected:{:?},last_line_idx:{:?}",
-  //       cursor_line_idx, expected, last_line_idx
-  //     );
-  //     std::cmp::min(expected, last_line_idx)
-  //   };
-  //   trace!(
-  //     "cursor:{}/{},line_idx:{}",
-  //     cursor_line_idx, cursor_char_idx, line_idx
-  //   );
-  //
-  //   // If line index doesn't change, early return.
-  //   if line_idx == cursor_line_idx {
-  //     return None;
-  //   }
-  //
-  //   match buffer.get_rope().get_line(line_idx) {
-  //     Some(line) => {
-  //       trace!("line.len_chars:{}", line.len_chars());
-  //       if line.len_chars() == 0 {
-  //         return None;
-  //       }
-  //     }
-  //     None => {
-  //       trace!("get_line not found:{}", line_idx);
-  //       return None;
-  //     }
-  //   }
-  //   let char_idx =
-  //     adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
-  //   Some((line_idx, char_idx))
-  // }
-
   fn _bounded_raw_cursor_move_y_by(
     &self,
     viewport: &Viewport,
@@ -466,52 +401,6 @@ impl NormalStateful {
       std::cmp::min(expected_line_idx, last_line_idx)
     }
   }
-
-  // // Returns the `line_idx`/`char_idx` for new cursor position.
-  // // NOTE: `x` is chars count.
-  // fn _cursor_move_x_by(
-  //   &self,
-  //   viewport: &Viewport,
-  //   cursor_viewport: &CursorViewport,
-  //   buffer: &Buffer,
-  //   x: isize,
-  // ) -> Option<(usize, usize)> {
-  //   let cursor_line_idx = cursor_viewport.line_idx();
-  //   let cursor_char_idx = cursor_viewport.char_idx();
-  //
-  //   match buffer.get_rope().get_line(cursor_line_idx) {
-  //     Some(line) => {
-  //       if line.len_chars() == 0 {
-  //         return None;
-  //       }
-  //     }
-  //     None => return None,
-  //   }
-  //
-  //   let char_idx = if x < 0 {
-  //     let n = -x as usize;
-  //     cursor_char_idx.saturating_sub(n)
-  //   } else {
-  //     let n = x as usize;
-  //     let expected = cursor_char_idx.saturating_add(n);
-  //     let upper_bounded = {
-  //       debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
-  //       let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
-  //       let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-  //       let last_char_on_row = last_row_viewport.end_char_idx() - 1;
-  //       trace!(
-  //         "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
-  //         cursor_char_idx, expected, last_row_viewport, last_char_on_row
-  //       );
-  //       buffer
-  //         .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
-  //         .unwrap()
-  //     };
-  //     std::cmp::min(expected, upper_bounded)
-  //   };
-  //
-  //   Some((cursor_line_idx, char_idx))
-  // }
 
   fn _bounded_raw_cursor_move_x_by(
     &self,
@@ -629,53 +518,6 @@ impl NormalStateful {
     Some((line_idx, column_idx))
   }
 
-  // /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-  // /// NOTE: `y` is the lines count.
-  // fn _window_scroll_y_by(
-  //   &self,
-  //   viewport: &Viewport,
-  //   buffer: &Buffer,
-  //   y: isize,
-  // ) -> Option<(usize, usize)> {
-  //   let start_line_idx = viewport.start_line_idx();
-  //   let end_line_idx = viewport.end_line_idx();
-  //   let start_column_idx = viewport.start_column_idx();
-  //   let buffer_len_lines = buffer.get_rope().len_lines();
-  //
-  //   let line_idx = if y < 0 {
-  //     let n = -y as usize;
-  //     start_line_idx.saturating_sub(n)
-  //   } else {
-  //     let n = y as usize;
-  //     // Viewport already shows the last line of buffer, cannot scroll down anymore.
-  //     debug_assert!(end_line_idx <= buffer_len_lines);
-  //     if end_line_idx == buffer_len_lines {
-  //       return None;
-  //     }
-  //
-  //     // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
-  //     // line.
-  //     let expected_start_line = std::cmp::min(
-  //       start_line_idx.saturating_add(n),
-  //       buffer_len_lines.saturating_sub(1),
-  //     );
-  //
-  //     // If the expected (after scrolled) start line index is current start line index, then don't
-  //     // scroll.
-  //     if expected_start_line == start_line_idx {
-  //       return None;
-  //     }
-  //
-  //     trace!(
-  //       "start_line_idx:{:?},end_line_idx:{:?},expected_start_line:{:?}",
-  //       start_line_idx, end_line_idx, expected_start_line
-  //     );
-  //     expected_start_line
-  //   };
-  //
-  //   Some((line_idx, start_column_idx))
-  // }
-
   fn _bounded_raw_window_scroll_y_by(
     &self,
     start_line_idx: usize,
@@ -751,47 +593,6 @@ impl NormalStateful {
     }
     max_scrolls
   }
-
-  // /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-  // /// NOTE: `x` is the columns count (not chars).
-  // fn _window_scroll_x_by(
-  //   &self,
-  //   viewport: &Viewport,
-  //   buffer: &Buffer,
-  //   x: isize,
-  // ) -> Option<(usize, usize)> {
-  //   let start_line_idx = viewport.start_line_idx();
-  //   let end_line_idx = viewport.end_line_idx();
-  //   let start_column_idx = viewport.start_column_idx();
-  //
-  //   if end_line_idx == start_line_idx {
-  //     return None;
-  //   }
-  //
-  //   debug_assert!(end_line_idx > start_line_idx);
-  //   debug_assert!(viewport.lines().contains_key(&start_line_idx));
-  //
-  //   let start_col = if x < 0 {
-  //     let n = -x as usize;
-  //     start_column_idx.saturating_sub(n)
-  //   } else {
-  //     let n = x as usize;
-  //     let expected = start_column_idx.saturating_add(n);
-  //     let max_scrolls = self._window_scroll_x_max_scrolls(viewport, buffer);
-  //     let upper_bounded = start_column_idx.saturating_add(max_scrolls);
-  //     trace!(
-  //       "max_scrolls:{},upper_bounded:{},expected:{}",
-  //       max_scrolls, upper_bounded, expected
-  //     );
-  //     std::cmp::min(expected, upper_bounded)
-  //   };
-  //
-  //   if start_col == start_column_idx {
-  //     return None;
-  //   }
-  //
-  //   Some((start_line_idx, start_col))
-  // }
 
   fn _bounded_raw_window_scroll_x_by(
     &self,
