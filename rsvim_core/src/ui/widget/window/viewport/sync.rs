@@ -249,7 +249,6 @@ fn proc_line_wrap_nolinebreak(
   }
 }
 
-#[allow(unused_variables)]
 /// Implements [`sync`] with option `wrap=true` and `line-break=false`.
 fn sync_wrap_nolinebreak(
   buffer: &Buffer,
@@ -559,7 +558,6 @@ fn proc_line_wrap_linebreak(
   }
 }
 
-#[allow(unused_variables)]
 /// Implements [`sync`] with option `wrap=true` and `line-break=true`.
 fn sync_wrap_linebreak(
   buffer: &Buffer,
@@ -933,7 +931,7 @@ fn _line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) ->
 }
 
 // For `wrap=true,linebreak=false`
-fn _find_start_char_by_size(
+fn _find_start_char_wrap_nolinebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   line_idx: usize,
@@ -977,7 +975,7 @@ fn _revert_search_start_column_wrap_nolinebreak(
   let approximate_start_column = last_char_width.saturating_sub(
     (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
   );
-  _find_start_char_by_size(
+  _find_start_char_wrap_nolinebreak(
     buffer,
     window_actual_shape,
     line_idx,
@@ -1289,100 +1287,18 @@ fn search_anchor_downward_wrap_nolinebreak(
   )
 }
 
-// For `wrap=true,linebreak=true`, the `start_char` have to start from a valid word
-// beginning, i.e. a unicode segment, not a arbitrary char index.
-fn _find_start_char_by_word(buffer: &Buffer, line_idx: usize, start_char: usize) -> usize {
-  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-  if start_char == 0 {
-    return 0_usize;
-  }
-
-  let bufline = buffer.get_rope().line(line_idx);
-
-  let last_segment_char = start_char;
-  let mut start_segment_char = start_char;
-  loop {
-    let c_value = bufline.char(start_segment_char);
-    if c_value.is_whitespace() {
-      break;
-    }
-    if start_segment_char == 0 {
-      break;
-    }
-    start_segment_char = start_segment_char.saturating_sub(1);
-  }
-  let cloned_segment = buffer
-    .clone_line(
-      line_idx,
-      start_segment_char,
-      last_segment_char.saturating_sub(start_segment_char) + 1,
-    )
-    .unwrap();
-  debug_assert!(!cloned_segment.is_empty());
-  let segment_words: Vec<&str> = cloned_segment.split_word_bounds().collect();
-  debug_assert!(!segment_words.is_empty());
-  // Word index => its (start char index, end char index)
-  let segment_words_char_idx = segment_words
-    .iter()
-    .enumerate()
-    .scan(start_segment_char, |state, (i, wd)| {
-      let old_state = *state;
-      *state += wd.chars().count();
-      Some((i, (old_state, *state)))
-    })
-    .collect::<HashMap<usize, (usize, usize)>>();
-  debug_assert!(!segment_words_char_idx.is_empty());
-  let mut result = last_segment_char;
-
-  for (w, _word) in segment_words.iter().rev().enumerate() {
-    let w_idx = segment_words.len() - 1 - w;
-    let (word_start_char, _word_end_char) = segment_words_char_idx.get(&w_idx).unwrap();
-    if *word_start_char <= last_segment_char {
-      result = *word_start_char;
-      break;
-    }
-  }
-
-  result
-}
-
-fn _impl_revert_search_start_column_wrap_linebreak(
+fn _find_start_char_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   line_idx: usize,
-  start_char: usize,
   last_char: usize,
+  mut start_column: usize,
 ) -> usize {
-  let mut start_char = _find_start_char_by_word(buffer, line_idx, start_char);
-
-  let cloned_line = buffer
-    .clone_line(
-      line_idx,
-      start_char,
-      _cloned_line_max_len(
-        window_actual_shape.height(),
-        window_actual_shape.width(),
-        buffer.width_before(line_idx, start_char),
-      ),
-    )
-    .unwrap();
-  let words: Vec<&str> = cloned_line.split_word_bounds().collect();
-  // Word index => its (start char index, end char index)
-  let words_char_idx = words
-    .iter()
-    .enumerate()
-    .scan(start_char, |state, (i, wd)| {
-      let old_state = *state;
-      *state += wd.chars().count();
-      Some((i, (old_state, *state)))
-    })
-    .collect::<HashMap<usize, (usize, usize)>>();
-  let mut word_idx = 0_usize;
-
   let bufline = buffer.get_rope().line(line_idx);
-  let bufline_len_chars = bufline.len_chars();
-  while start_char < bufline_len_chars {
-    let start_column = buffer.width_before(line_idx, start_char);
+  let bufline_len_char = bufline.len_chars();
+  let bufline_chars_width = buffer.width_until(line_idx, bufline_len_char);
+
+  while start_column < bufline_chars_width {
     let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
       buffer,
       start_column,
@@ -1391,57 +1307,32 @@ fn _impl_revert_search_start_column_wrap_linebreak(
       window_actual_shape.height(),
       window_actual_shape.width(),
     );
-    let (last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-    trace!(
-      "start_column:{},last_row_viewport.end_char:{}({:?}),last_row_idx:{}",
-      start_column,
-      last_row_viewport.end_char_idx(),
-      bufline.get_char(last_row_viewport.end_char_idx()),
-      last_row_idx
-    );
-    if last_char < last_row_viewport.end_char_idx() {
+    let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+    if last_row_viewport.end_char_idx() > last_char {
       return start_column;
     }
-
-    // Set `start_char` to next word beginning char index.
-    word_idx += 1;
-    let (next_word_start_char, _next_word_end_char) = words_char_idx.get(&word_idx).unwrap();
-    start_char = *next_word_start_char;
+    start_column += 1;
   }
 
   unreachable!()
 }
 
-// For `wrap=true,linebreak=true`, when the whole viewport only contains 1 line and the line
-// cannot fully show (i.e. the line head/tail are been truncated), and also we have confirmed the
-// last char index.
-// In such case, we needs to calculate the `start_column`.
-// The difference from `linebreak=false` is: we need to iterate chars by words segments, instead of
-// simply chars.
 fn _revert_search_start_column_wrap_linebreak(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   line_idx: usize,
   last_char: usize,
 ) -> usize {
-  // Approximately calculate the beginning char of the line in window viewport, by directly
-  // subtract `window_width * window_height`.
   let last_char_width = buffer.width_until(line_idx, last_char);
-  let approximate_start_width = last_char_width
-    .saturating_sub(window_actual_shape.width() as usize * window_actual_shape.height() as usize);
-  let start_char = buffer
-    .char_at(line_idx, approximate_start_width)
-    .unwrap_or(0_usize);
-
-  // For `wrap=true,linebreak=true`, the approximate `start_char` have to start from a valid word
-  // beginning, i.e. a unicode segment, not a arbitrary char index.
-  let start_char = _find_start_char_by_word(buffer, line_idx, start_char);
-  _impl_revert_search_start_column_wrap_linebreak(
+  let approximate_start_column = last_char_width.saturating_sub(
+    (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
+  );
+  _find_start_char_wrap_linebreak(
     buffer,
     window_actual_shape,
     line_idx,
-    start_char,
     last_char,
+    approximate_start_column,
   )
 }
 
@@ -1453,21 +1344,13 @@ fn _move_more_to_left_wrap_linebreak(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> Option<usize> {
-  let mut on_left_side = match buffer.char_after(target_cursor_line, target_viewport_start_column) {
-    Some(c) => {
-      trace!(
-        "target_cursor_line:{},target_cursor_char:{},target_viewport_start_column:{},c:{}",
-        target_cursor_line, target_cursor_char, target_viewport_start_column, c
-      );
-      c > target_cursor_char
-    }
-    None => true,
-  };
-
   let mut start_column = target_viewport_start_column;
+
+  let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+  let mut on_left_side = target_cursor_width < start_column;
+
   if on_left_side {
-    let start_char = _find_start_char_by_word(buffer, target_cursor_line, target_cursor_char);
-    start_column = buffer.width_before(target_cursor_line, start_char);
+    start_column = buffer.width_before(target_cursor_line, target_cursor_char);
   }
 
   let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
@@ -1498,31 +1381,10 @@ fn _move_more_to_left_wrap_linebreak(
   }
 
   if on_left_side {
-    return Some(start_column);
+    Some(start_column)
+  } else {
+    None
   }
-
-  // Check if `target_viewport_start_column` breaks the first word.
-  let target_viewport_start_char = buffer
-    .char_after(target_cursor_line, target_viewport_start_column)
-    .unwrap();
-
-  let viewport_start_char =
-    _find_start_char_by_word(buffer, target_cursor_line, target_viewport_start_char);
-
-  if viewport_start_char < target_viewport_start_char {
-    let start_column_included_target_cursor_char = _impl_revert_search_start_column_wrap_linebreak(
-      buffer,
-      window_actual_shape,
-      target_cursor_line,
-      viewport_start_char,
-      target_cursor_char,
-    );
-    if start_column_included_target_cursor_char < target_viewport_start_column {
-      return Some(start_column_included_target_cursor_char);
-    }
-  }
-
-  None
 }
 
 fn _move_more_to_right_wrap_linebreak(
@@ -1547,7 +1409,8 @@ fn _move_more_to_right_wrap_linebreak(
   debug_assert!(rows.last_key_value().is_some());
   let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
 
-  let on_right_side = target_cursor_char >= last_row_viewport.end_char_idx();
+  let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+    && target_cursor_char >= last_row_viewport.end_char_idx();
 
   if on_right_side {
     let start_column = _revert_search_start_column_wrap_linebreak(
