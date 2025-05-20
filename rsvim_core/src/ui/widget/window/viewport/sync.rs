@@ -1409,7 +1409,8 @@ fn _move_more_to_right_wrap_linebreak(
   debug_assert!(rows.last_key_value().is_some());
   let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
 
-  let on_right_side = target_cursor_char >= last_row_viewport.end_char_idx();
+  let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+    && target_cursor_char >= last_row_viewport.end_char_idx();
 
   if on_right_side {
     let start_column = _revert_search_start_column_wrap_linebreak(
