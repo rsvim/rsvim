@@ -11,6 +11,7 @@ use crate::ui::widget::window::{
 };
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
+use std::ptr::NonNull;
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -210,81 +211,75 @@ impl NormalStateful {
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let buffer_arc = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer_arc);
-        let viewport_arc = current_window.viewport();
-        let cursor_viewport_arc = current_window.cursor_viewport();
-        let cursor_viewport = lock!(cursor_viewport_arc);
+    unsafe {
+      // Fix multiple mutable references.
+      let raw_tree = NonNull::new(&mut *tree as *mut Tree).unwrap();
 
-        let (target_cursor_char, target_cursor_line, move_direction) = normalize_as_cursor_move_to(
-          command,
-          cursor_viewport.char_idx(),
-          cursor_viewport.line_idx(),
-        );
-        let search_direction = match move_direction {
-          CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
-          CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
-          CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
-          CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
-        };
-
-        let new_viewport_arc: Option<ViewportArc> = {
-          let viewport = lock!(viewport_arc);
-          let (start_line, start_column) = viewport.search_anchor(
-            search_direction,
-            &buffer,
-            current_window.actual_shape(),
-            current_window.options(),
-            target_cursor_line,
-            target_cursor_char,
-          );
-
-          // First try window scroll.
-          if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx()
-          {
-            self._raw_window_scroll(
-              &viewport,
-              current_window,
-              &buffer,
-              Command::WindowScrollTo((start_column, start_line)),
-            )
-          } else {
-            None
-          }
-        };
-
-        // Then try cursor move.
+      if let Some(current_window_id) = tree.current_window_id() {
+        if let Some(TreeNode::Window(current_window)) =
+          raw_tree.as_mut().node_mut(current_window_id)
         {
-          let viewport_arc = match new_viewport_arc {
-            Some(v1) => v1,
-            None => viewport_arc,
-          };
-          let viewport = lock!(viewport_arc);
+          let buffer_arc = current_window.buffer().upgrade().unwrap();
+          let buffer = lock!(buffer_arc);
+          let viewport_arc = current_window.viewport();
+          let cursor_viewport_arc = current_window.cursor_viewport();
+          let cursor_viewport = lock!(cursor_viewport_arc);
 
-          let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
-            Command::CursorMoveTo((target_cursor_char, target_cursor_line)),
-            cursor_viewport.char_idx(),
-            cursor_viewport.line_idx(),
-          );
-
-          let cursor_move_result =
-            self._raw_cursor_move_by(&viewport, &cursor_viewport, &buffer, by_chars, by_lines);
-
-          trace!("cursor_move_result:{:?}", cursor_move_result);
-          if let Some((line_idx, char_idx)) = cursor_move_result {
-            let moved_cursor_viewport =
-              CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
-            current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
-
-            let cursor_id = tree.cursor_id().unwrap();
-            tree.bounded_move_to(
-              cursor_id,
-              moved_cursor_viewport.column_idx() as isize,
-              moved_cursor_viewport.row_idx() as isize,
+          let (target_cursor_char, target_cursor_line, move_direction) =
+            normalize_as_cursor_move_to(
+              command,
+              cursor_viewport.char_idx(),
+              cursor_viewport.line_idx(),
             );
-            trace!("(after) cursor node position:{:?}", moved_cursor_viewport);
+          let search_direction = match move_direction {
+            CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
+            CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
+            CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
+            CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
+          };
+
+          let new_viewport_arc: Option<ViewportArc> = {
+            let viewport = lock!(viewport_arc);
+            let (start_line, start_column) = viewport.search_anchor(
+              search_direction,
+              &buffer,
+              current_window.actual_shape(),
+              current_window.options(),
+              target_cursor_line,
+              target_cursor_char,
+            );
+
+            // First try window scroll.
+            if start_line != viewport.start_line_idx()
+              || start_column != viewport.start_column_idx()
+            {
+              self._raw_window_scroll(
+                &viewport,
+                current_window,
+                &buffer,
+                Command::WindowScrollTo((start_column, start_line)),
+              )
+            } else {
+              None
+            }
+          };
+
+          // Then try cursor move.
+          {
+            let viewport_arc = match new_viewport_arc {
+              Some(v1) => v1,
+              None => viewport_arc,
+            };
+            let viewport = lock!(viewport_arc);
+
+            self._raw_cursor_move(
+              &viewport,
+              &cursor_viewport,
+              current_window,
+              raw_tree,
+              &buffer,
+              command,
+            );
           }
         }
       }
@@ -293,44 +288,64 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  fn _raw_cursor_move() {}
+  unsafe fn _raw_cursor_move(
+    &self,
+    viewport: &Viewport,
+    cursor_viewport: &CursorViewport,
+    current_window: &mut Window,
+    raw_tree: NonNull<Tree>,
+    buffer: &Buffer,
+    command: Command,
+  ) {
+    let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
+      command,
+      cursor_viewport.char_idx(),
+      cursor_viewport.line_idx(),
+    );
+
+    let cursor_move_result =
+      self._raw_cursor_move_by(&viewport, &cursor_viewport, &buffer, by_chars, by_lines);
+
+    if let Some((line_idx, char_idx)) = cursor_move_result {
+      let moved_cursor_viewport =
+        CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
+      current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
+
+      unsafe {
+        let cursor_id = raw_tree.as_ptr().cursor_id().unwrap();
+        raw_tree.as_mut().bounded_move_to(
+          cursor_id,
+          moved_cursor_viewport.column_idx() as isize,
+          moved_cursor_viewport.row_idx() as isize,
+        );
+      }
+    }
+    // Or, just do nothing, stay at where you are
+  }
 
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, command: Command) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let buffer = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer);
-        let viewport = current_window.viewport();
-        let viewport = lock!(viewport);
-        let cursor_viewport = current_window.cursor_viewport();
-        let cursor_viewport = lock!(cursor_viewport);
+    unsafe {
+      let raw_tree = NonNull::new(&mut *tree as *mut Tree).unwrap();
+      if let Some(current_window_id) = tree.current_window_id() {
+        if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+          let buffer = current_window.buffer().upgrade().unwrap();
+          let buffer = lock!(buffer);
+          let viewport = current_window.viewport();
+          let viewport = lock!(viewport);
+          let cursor_viewport = current_window.cursor_viewport();
+          let cursor_viewport = lock!(cursor_viewport);
 
-        let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
-          command,
-          cursor_viewport.char_idx(),
-          cursor_viewport.line_idx(),
-        );
-
-        let cursor_move_result =
-          self._raw_cursor_move_by(&viewport, &cursor_viewport, &buffer, by_chars, by_lines);
-
-        trace!("cursor_move_result:{:?}", cursor_move_result);
-        if let Some((line_idx, char_idx)) = cursor_move_result {
-          let moved_cursor_viewport =
-            CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
-          current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
-
-          let cursor_id = tree.cursor_id().unwrap();
-          tree.bounded_move_to(
-            cursor_id,
-            moved_cursor_viewport.column_idx() as isize,
-            moved_cursor_viewport.row_idx() as isize,
+          self._raw_cursor_move(
+            &viewport,
+            &cursor_viewport,
+            current_window,
+            raw_tree,
+            &buffer,
+            command,
           );
-          trace!("(after) cursor node position:{:?}", moved_cursor_viewport);
         }
-        // Or, just do nothing, stay at where you are
       }
     }
   }
