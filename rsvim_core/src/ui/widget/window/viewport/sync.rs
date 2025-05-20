@@ -374,7 +374,7 @@ fn _part1(
       _end_char_and_prefills(buffer, bline, l, start_c_of_wd - 1, end_width)
     } else {
       // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
-      debug_assert_eq!(start_c_of_wd, start_char);
+      debug_assert!(start_c_of_wd <= start_char);
       // Record the position (c) where we cut the words into pieces.
       *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
 
