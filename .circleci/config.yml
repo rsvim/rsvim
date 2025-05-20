@@ -11,6 +11,9 @@ jobs:
           key: cargo-{{ checksum "Cargo.lock" }}
       - run:
           command: |
+            rustup toolchain install nightly
+            rustup +nightly component add miri
+            rustup +nightly component add rust-src
             cargo +nightly install --locked cargo-nextest
             MIRIFLAGS="-Zmiri-disable-isolation -Zmiri-permissive-provenance" cargo +nightly miri nextest run -p rsvim_core -F unicode_lines --no-default-features
       - save_cache:
