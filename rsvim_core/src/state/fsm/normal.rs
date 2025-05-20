@@ -11,6 +11,7 @@ use crate::ui::widget::window::{
 };
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
+#[cfg(test)]
 use std::ptr::NonNull;
 use tracing::trace;
 
