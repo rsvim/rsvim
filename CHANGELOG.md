@@ -1,6 +1,173 @@
-## [0.1.1-alpha.8](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.5..0.1.1-alpha.8) - 2024-10-19
+## [0.1.1-alpha.9](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.8..0.1.1-alpha.9) - 2025-05-20
 
-[6e6c03c7](https://github.com/rsvim/rsvim/commit/6e6c03c7f828a5acbfae029370d061b5e907dd1e)...[4e4138a1](https://github.com/rsvim/rsvim/commit/4e4138a1736feed90fef9daf329f827d61c8d930)
+[feafb680](https://github.com/rsvim/rsvim/commit/feafb680893ffdece400e1b17b7cb02b18a3ffc8)...[0ea752cb](https://github.com/rsvim/rsvim/commit/0ea752cbf11f840c4bcc8e30559c8c055de23752)
+
+### <!-- 0 -->Features
+
+- *(cli)* Provide v8 js engine version info in cli version (#210) ([9cb3cbc1](https://github.com/rsvim/rsvim/commit/9cb3cbc15e6f9f50452fb9a7eacc1305d71f8e60)) by @linrongbin16 ([#210](https://github.com/rsvim/rsvim/pull/210))
+
+- *(ui)* Add viewport for better mapping buffer to window (#217) ([fbed93eb](https://github.com/rsvim/rsvim/commit/fbed93eb39483cbb5c0e5dce93159ded3c33b8be)) by @linrongbin16 ([#217](https://github.com/rsvim/rsvim/pull/217))
+
+- *(buf)* Add "tabstop" local options for buffer (#217) ([fbed93eb](https://github.com/rsvim/rsvim/commit/fbed93eb39483cbb5c0e5dce93159ded3c33b8be)) by @linrongbin16 ([#217](https://github.com/rsvim/rsvim/pull/217))
+
+- *(grapheme)* Add ascii control codes (#217) ([fbed93eb](https://github.com/rsvim/rsvim/commit/fbed93eb39483cbb5c0e5dce93159ded3c33b8be)) by @linrongbin16 ([#217](https://github.com/rsvim/rsvim/pull/217))
+
+- *(unicode)* Add char display width calculation (#217) ([fbed93eb](https://github.com/rsvim/rsvim/commit/fbed93eb39483cbb5c0e5dce93159ded3c33b8be)) by @linrongbin16 ([#217](https://github.com/rsvim/rsvim/pull/217))
+
+- *(ui)* Drop "breakat" option (#217) ([fbed93eb](https://github.com/rsvim/rsvim/commit/fbed93eb39483cbb5c0e5dce93159ded3c33b8be)) by @linrongbin16 ([#217](https://github.com/rsvim/rsvim/pull/217))
+
+- *(ui)* Render "wrap" and "linebreak" in viewport (#218) ([c0dca1a2](https://github.com/rsvim/rsvim/commit/c0dca1a2e8939ed4ae14a7a845d19e731a2145e5)) by @linrongbin16 ([#218](https://github.com/rsvim/rsvim/pull/218))
+
+- *(buf)* Impl "new file" edit operation for buffers (#229) ([cad5833f](https://github.com/rsvim/rsvim/commit/cad5833f7c7f35c16d84747d98769542f1a21a1d)) by @linrongbin16 ([#229](https://github.com/rsvim/rsvim/pull/229))
+
+- *(ui)* Maps every char index to its display boundary columns in viewport (#244) ([4ce805f1](https://github.com/rsvim/rsvim/commit/4ce805f113f896b90c4be1f694d73db94a388c97)) by @linrongbin16 ([#244](https://github.com/rsvim/rsvim/pull/244))
+
+- *(cursor)* Impl cursor movement in normal editing mode - part 1 (#277) ([94af6e19](https://github.com/rsvim/rsvim/commit/94af6e19d138845c41170f39b9e5a6b93696f079)) by @linrongbin16 ([#277](https://github.com/rsvim/rsvim/pull/277))
+
+- *(cursor)* Add widget node motion api (#296) ([8311468f](https://github.com/rsvim/rsvim/commit/8311468f923aca3e3db7036e9aa61d022d8c95a2)) by @linrongbin16 ([#296](https://github.com/rsvim/rsvim/pull/296))
+
+- *(cursor)* Impl cursor motion in normal mode - part 3 (#297) ([91810bd7](https://github.com/rsvim/rsvim/commit/91810bd7d63fcea9ab3ba6eaf52e6261be6eb8af)) by @linrongbin16 ([#297](https://github.com/rsvim/rsvim/pull/297))
+
+- *(win)* Impl line-break/word-wrap window rendering (again) (#312) ([89f28077](https://github.com/rsvim/rsvim/commit/89f28077228192bb1b1dc11ef1e8092bff8a96d4)) by @linrongbin16 ([#312](https://github.com/rsvim/rsvim/pull/312))
+
+- *(cursor)* Scroll buffer when cursor reaches window top/bottom (nowrap) (#322) ([31711f21](https://github.com/rsvim/rsvim/commit/31711f215fd19c60c16d98588a8a65e41a476b2e)) by @linrongbin16 ([#322](https://github.com/rsvim/rsvim/pull/322))
+
+- *(cursor)* Impl cursor horizontal scroll when reaches window border (#342) ([7f6bdd4a](https://github.com/rsvim/rsvim/commit/7f6bdd4a7961b2182ae08c2ffbe2773f2670d9ee)) by @linrongbin16 ([#342](https://github.com/rsvim/rsvim/pull/342))
+
+- *(cursor)* Add more cursor motions and enable 2D position in a single move (#348) ([f3586c9a](https://github.com/rsvim/rsvim/commit/f3586c9a9153aa95bda24ecba5bf668351dd447b)) by @linrongbin16 ([#348](https://github.com/rsvim/rsvim/pull/348))
+
+- *(cursor)* Impl cursor motion with buffer scrolling when reaches window border (#354) ([2045529d](https://github.com/rsvim/rsvim/commit/2045529d5104de14861d97a082a447c88887a6f5)) by @linrongbin16 ([#354](https://github.com/rsvim/rsvim/pull/354))
+
+- *(viewport)* Add search new viewport anchor(start line/column) downward api (#365) ([40d8729b](https://github.com/rsvim/rsvim/commit/40d8729bca08e0f01cf9b6e1e57deed1b045a633)) by @linrongbin16 ([#365](https://github.com/rsvim/rsvim/pull/365))
+
+- *(cursor)* Add search viewport anchor upward api (#369) ([f231a899](https://github.com/rsvim/rsvim/commit/f231a8996cf5356e9550dbfb432b9cefa384d504)) by @linrongbin16 ([#369](https://github.com/rsvim/rsvim/pull/369))
+
+- *(viewport)* Add search viewport anchor leftward/rightward (#373) ([6d803f74](https://github.com/rsvim/rsvim/commit/6d803f74483c9440bcff3addfee9efbd1e4f13e2)) by @linrongbin16 ([#373](https://github.com/rsvim/rsvim/pull/373))
+
+
+### <!-- 1 -->Bug Fixes
+
+- *(ui)* Fix viewport about display column of buffer chars (#223) ([1f80e0c2](https://github.com/rsvim/rsvim/commit/1f80e0c2b7ca2df94a4731fc6dbd1f85f14c0de0)) by @linrongbin16 ([#223](https://github.com/rsvim/rsvim/pull/223))
+
+- *(ui)* Fix viewport with "display column" index instead of char index (#226) ([504f22b7](https://github.com/rsvim/rsvim/commit/504f22b793554fd57c22a175ecb611bfba2a9b86)) by @linrongbin16 ([#226](https://github.com/rsvim/rsvim/pull/226))
+
+- *(cursor)* Fix tui cursor initialization for win (#319) ([65ebef96](https://github.com/rsvim/rsvim/commit/65ebef96089c7d6f1bafabfdf2ee76b577f92c18)) by @linrongbin16 ([#319](https://github.com/rsvim/rsvim/pull/319))
+
+- *(cursor)* Fix cursor position at eol when move vertically (#321) ([1b63b313](https://github.com/rsvim/rsvim/commit/1b63b313625afb5fa5a4dc71c01aa9b4c23c39d7)) by @linrongbin16 ([#321](https://github.com/rsvim/rsvim/pull/321))
+
+- *(cursor)* Fix cursor/viewport at buffer last line and window top/bottom (#333) ([0a6cae88](https://github.com/rsvim/rsvim/commit/0a6cae88624a825d4aaca3fb212d6ac9a82f0d96)) by @linrongbin16 ([#333](https://github.com/rsvim/rsvim/pull/333))
+
+- *(miri)* Fix potential memory safety issue previously detected by cargo miri (#334) ([dcfd9bc6](https://github.com/rsvim/rsvim/commit/dcfd9bc6a0f5080a1f091cc11fe69d3715686066)) by @linrongbin16 ([#334](https://github.com/rsvim/rsvim/pull/334))
+
+- *(viewport)* Fix rendering when start column>0 and wrap=false (#339) ([0b9629f1](https://github.com/rsvim/rsvim/commit/0b9629f1638de168be84f4cd38593b8aed8bb2ea)) by @linrongbin16 ([#339](https://github.com/rsvim/rsvim/pull/339))
+
+- *(viewport)* Fix rendering when start column>0 and wrap=true (#340) ([49047ed5](https://github.com/rsvim/rsvim/commit/49047ed59974fc101dd5314c1790775f2c05d506)) by @linrongbin16 ([#340](https://github.com/rsvim/rsvim/pull/340))
+
+- *(viewport)* Fix extra new line at the invisible eol char (#341) ([618f1751](https://github.com/rsvim/rsvim/commit/618f17511c426774ade6ac37524d03a78259bae2)) by @linrongbin16 ([#341](https://github.com/rsvim/rsvim/pull/341))
+
+- *(cursor)* Fix CursorMoveTo/WindowScrollTo operation commands (#351) ([01ddb1b5](https://github.com/rsvim/rsvim/commit/01ddb1b55961ff3f5e6954f006c2aa8596c1357f)) by @linrongbin16 ([#351](https://github.com/rsvim/rsvim/pull/351))
+
+- *(viewport)* Fix leftward/rightward anchor searching for super long line (#377) ([75a825cc](https://github.com/rsvim/rsvim/commit/75a825ccb2018be02437965eb27b83dc4bed72aa)) by @linrongbin16 ([#377](https://github.com/rsvim/rsvim/pull/377))
+
+- *(viewport)* Fix super long word issues when 'linebreak=true' (#380) ([99b9390d](https://github.com/rsvim/rsvim/commit/99b9390da47073ca64e6a5bf1647ac471cf7cc3c)) by @linrongbin16 ([#380](https://github.com/rsvim/rsvim/pull/380))
+
+
+### <!-- 2 -->Performance Improvements
+
+- *(start)* Move built-in runtime modules evaluation to snapshot phase (#211) ([8003a3e4](https://github.com/rsvim/rsvim/commit/8003a3e47153ea1e6fc208c8934eb256c2fe119f)) by @linrongbin16 ([#211](https://github.com/rsvim/rsvim/pull/211))
+
+- *(hash)* Use ahash instead of std lib (#236) ([c5d58b66](https://github.com/rsvim/rsvim/commit/c5d58b6679fb09cfbeae9ba4dd9e12ad352ab307)) by @linrongbin16 ([#236](https://github.com/rsvim/rsvim/pull/236))
+
+- *(buf)* Cache line-wise chars index and display width (#303) ([b97c52e1](https://github.com/rsvim/rsvim/commit/b97c52e18b28fbb71e23a73da6d098fbc3a69075)) by @linrongbin16 ([#303](https://github.com/rsvim/rsvim/pull/303))
+
+- *(cursor)* Reduce lock in moving cursor and scrolling window motion (#352) ([3935cc8b](https://github.com/rsvim/rsvim/commit/3935cc8b145ea26b4f6a6115b7d43288cc16cf6a)) by @linrongbin16 ([#352](https://github.com/rsvim/rsvim/pull/352))
+
+- *(size)* Move version string to build.rs to reduce binary size (#366) ([048daef0](https://github.com/rsvim/rsvim/commit/048daef050552c6ba8dbc70403d31c126cb5c943)) by @linrongbin16 ([#366](https://github.com/rsvim/rsvim/pull/366))
+
+
+### <!-- 3 -->Code Refactoring
+
+- *(js)* Clean up not used code (#215) ([1e0e0351](https://github.com/rsvim/rsvim/commit/1e0e0351f8b732299a34f365f2a190f6dc2ce873)) by @linrongbin16 ([#215](https://github.com/rsvim/rsvim/pull/215))
+
+- *(cli)* Adjust initialize sequence in main loop (#215) ([1e0e0351](https://github.com/rsvim/rsvim/commit/1e0e0351f8b732299a34f365f2a190f6dc2ce873)) by @linrongbin16 ([#215](https://github.com/rsvim/rsvim/pull/215))
+
+- *(ui)* Rename module "tree::util" to "tree::ptr" (#215) ([1e0e0351](https://github.com/rsvim/rsvim/commit/1e0e0351f8b732299a34f365f2a190f6dc2ce873)) by @linrongbin16 ([#215](https://github.com/rsvim/rsvim/pull/215))
+
+- *(env)* Rename glovar to envar (#216) ([9744c693](https://github.com/rsvim/rsvim/commit/9744c693acf3fe0ce012c39f1d9dee4cebc46b82)) by @linrongbin16 ([#216](https://github.com/rsvim/rsvim/pull/216))
+
+- *(ui)* Add "sync_from_top_left" and other APIs (#227) ([f1529186](https://github.com/rsvim/rsvim/commit/f15291861c120a45feae1185785b06047ae19a99)) by @linrongbin16 ([#227](https://github.com/rsvim/rsvim/pull/227))
+
+- *(ui)* Migrate window content rendering to viewport (#228) ([697ed5a0](https://github.com/rsvim/rsvim/commit/697ed5a0965fc62c5969cef1249ecaf00ec19fac)) by @linrongbin16 ([#228](https://github.com/rsvim/rsvim/pull/228))
+
+- *(buf)* Add line-wise char/column index (#253) ([826d77f6](https://github.com/rsvim/rsvim/commit/826d77f6371f8e6b61aa74a105abe04c8ecaf094)) by @linrongbin16 ([#253](https://github.com/rsvim/rsvim/pull/253))
+
+- *(macros)* Embed "$crate" in macros to remove extra "use" dependencies (#271) ([33709d9c](https://github.com/rsvim/rsvim/commit/33709d9c6cb5e76596df8dfe11036a0296efa1ca)) by @linrongbin16 ([#271](https://github.com/rsvim/rsvim/pull/271))
+
+- *(cursor)* Rename multiple struct names to avoid confliction (#273) ([a17eb56b](https://github.com/rsvim/rsvim/commit/a17eb56b784a603afdea58e7174fe926da6c7408)) by @linrongbin16 ([#273](https://github.com/rsvim/rsvim/pull/273))
+
+- *(cursor)* Small refactors for cursor style (#276) ([f8adb3c9](https://github.com/rsvim/rsvim/commit/f8adb3c99e7304aec39f483a906c64ab63ea3d5d)) by @linrongbin16 ([#276](https://github.com/rsvim/rsvim/pull/276))
+
+- *(coord)* Rename module 'cart' to 'coord' and import all types with '*' (#288) ([9534e5ae](https://github.com/rsvim/rsvim/commit/9534e5ae43f244482fcaffd1f9ac505e25fc7a2e)) by @linrongbin16 ([#288](https://github.com/rsvim/rsvim/pull/288))
+
+- *(opts)* Refactor global/local/global-local options (#290) ([0647d4a9](https://github.com/rsvim/rsvim/commit/0647d4a9cd3b81141eee4e60ba598fe140424fc1)) by @linrongbin16 ([#290](https://github.com/rsvim/rsvim/pull/290))
+
+- *(config)* Migrate crate 'directories' to 'dirs' (#291) ([828eba92](https://github.com/rsvim/rsvim/commit/828eba92d9c0b11269a7524143541fb100b8efd8)) by @linrongbin16 ([#291](https://github.com/rsvim/rsvim/pull/291))
+
+- *(mod)* Refactor pub mod for easier imports (#293) ([790f2452](https://github.com/rsvim/rsvim/commit/790f2452aeee097c081b4b53749feee0ca1f3451)) by @linrongbin16 ([#293](https://github.com/rsvim/rsvim/pull/293))
+
+- *(log)* Rename log envfilter to 'RSVIM_LOG' (#295) ([0e03f2f0](https://github.com/rsvim/rsvim/commit/0e03f2f0cad3462160ed2932f2e87fd2c1ca6a6b)) by @linrongbin16 ([#295](https://github.com/rsvim/rsvim/pull/295))
+
+- *(prelude)* Add prelude and refactor other misc (#298) ([b4a8ab7b](https://github.com/rsvim/rsvim/commit/b4a8ab7beaf99cb6e6ce5b861763d7082ff6d0ed)) by @linrongbin16 ([#298](https://github.com/rsvim/rsvim/pull/298))
+
+- *(prelude)* Pub use `geo` crate (#300) ([148e934b](https://github.com/rsvim/rsvim/commit/148e934b881bfa990512336b731dcd2e673e6fec)) by @linrongbin16 ([#300](https://github.com/rsvim/rsvim/pull/300))
+
+- *(opts)* Simplify options builder with derived_builder (#302) ([79e4844a](https://github.com/rsvim/rsvim/commit/79e4844a82dee1461036bc355275d36edadb2165)) by @linrongbin16 ([#302](https://github.com/rsvim/rsvim/pull/302))
+
+- *(buf)* Add 'resize_cached_lines' api for buffer cache (#305) ([8ef0d9e8](https://github.com/rsvim/rsvim/commit/8ef0d9e888def523968fc245ea5202032b50f287)) by @linrongbin16 ([#305](https://github.com/rsvim/rsvim/pull/305))
+
+- *(lock)* Simplify lock definitions (#313) ([ec242f6e](https://github.com/rsvim/rsvim/commit/ec242f6ed91d1a1466c7e428c3c6eda6e696da3c)) by @linrongbin16 ([#313](https://github.com/rsvim/rsvim/pull/313))
+
+- *(viewport)* Refactor viewport and fix potential memory safety (#328) ([08bb79fb](https://github.com/rsvim/rsvim/commit/08bb79fb46e598fda8b9f0a9e7df380ff9a9f080)) by @linrongbin16 ([#328](https://github.com/rsvim/rsvim/pull/328))
+
+- *(debug)* Migrate 'assert' to 'debug_assert' (#330) ([718d776b](https://github.com/rsvim/rsvim/commit/718d776b20b0af6d157e6aedb20a47b664ec02d9)) by @linrongbin16 ([#330](https://github.com/rsvim/rsvim/pull/330))
+
+- *(viewport)* Extract line-wise viewport calculation to single function (#331) ([d1a862b2](https://github.com/rsvim/rsvim/commit/d1a862b2aad0ffc012873a58da5cefb4c50ec048)) by @linrongbin16 ([#331](https://github.com/rsvim/rsvim/pull/331))
+
+- *(js)* Add 'useDefineForClassFields' for tsconfig (#332) ([72646836](https://github.com/rsvim/rsvim/commit/72646836d79a51617ab100149d343ca3b452dc74)) by @linrongbin16 ([#332](https://github.com/rsvim/rsvim/pull/332))
+
+- *(lock)* Mirgrate 'RwLock' to 'Mutex' (#336) ([43990f31](https://github.com/rsvim/rsvim/commit/43990f31aa07d1d05ee8e6c3cd6790d45e9fde7b)) by @linrongbin16 ([#336](https://github.com/rsvim/rsvim/pull/336))
+
+- *(viewport)* Remove 'unsafe' code block with rc/refcell (#337) ([cc163c76](https://github.com/rsvim/rsvim/commit/cc163c76a5a04e2f1fcf47732d7bb426e0c39677)) by @linrongbin16 ([#337](https://github.com/rsvim/rsvim/pull/337))
+
+- *(ui)* Rewrite ui tree and remove 'unsfe' code block (#338) ([c56eafcc](https://github.com/rsvim/rsvim/commit/c56eafcc22ee751c34ba376627a9e2d520ccc3df)) by @linrongbin16 ([#338](https://github.com/rsvim/rsvim/pull/338))
+
+- *(buf)* Add 'last_visible_char_on_line_since' api (#345) ([87bf8bf0](https://github.com/rsvim/rsvim/commit/87bf8bf055fc80bde7b43097426e7091c0343c1f)) by @linrongbin16 ([#345](https://github.com/rsvim/rsvim/pull/345))
+
+- *(cursor)* Refactor editor operations command (#346) ([0000b849](https://github.com/rsvim/rsvim/commit/0000b849b10c396062118d1619648937db128925)) by @linrongbin16 ([#346](https://github.com/rsvim/rsvim/pull/346))
+
+- *(cursor)* Add more test cases for cursor movement (#349) ([36ed4ba8](https://github.com/rsvim/rsvim/commit/36ed4ba8d7b7aef151a03d9b6f1ccf56b585914e)) by @linrongbin16 ([#349](https://github.com/rsvim/rsvim/pull/349))
+
+- *(cursor)* Enable 2D window scroll in a single command (#350) ([a013738f](https://github.com/rsvim/rsvim/commit/a013738f3e66274bd823f68ab1a75e4eb69b0923)) by @linrongbin16 ([#350](https://github.com/rsvim/rsvim/pull/350))
+
+- *(cursor)* Refactor operation command conversions (#353) ([4628f0ad](https://github.com/rsvim/rsvim/commit/4628f0ad03bc4a5480b24fa80de7fede27ea30f7)) by @linrongbin16 ([#353](https://github.com/rsvim/rsvim/pull/353))
+
+- *(cursor)* Rename `x`, `y` variable names to lines/chars/columns for readability (#362) ([d1b5eff7](https://github.com/rsvim/rsvim/commit/d1b5eff7db34befcf31442ff31b76cabbf4c23b8)) by @linrongbin16 ([#362](https://github.com/rsvim/rsvim/pull/362))
+
+- *(viewport)* Export low-level line wise viewport calculation api (#363) ([28daeb02](https://github.com/rsvim/rsvim/commit/28daeb026087f68467c63d066df379a5dabb9392)) by @linrongbin16 ([#363](https://github.com/rsvim/rsvim/pull/363))
+
+- *(viewport)* Refactor internal viewport revert search functions (#370) ([7deaeb04](https://github.com/rsvim/rsvim/commit/7deaeb04cde3cd76bcfa30331da4c6908338f913)) by @linrongbin16 ([#370](https://github.com/rsvim/rsvim/pull/370))
+
+- *(viewport)* Refactor internal viewport revert searching functions 2 (#371) ([8d3e4b3e](https://github.com/rsvim/rsvim/commit/8d3e4b3e9636e4d6e0c4e7be968ce42756952887)) by @linrongbin16 ([#371](https://github.com/rsvim/rsvim/pull/371))
+
+- *(buf)* Improve allocation for column index (#372) ([5153dd0d](https://github.com/rsvim/rsvim/commit/5153dd0d3fbbdff205491a032c4211c4b02b149c)) by @linrongbin16 ([#372](https://github.com/rsvim/rsvim/pull/372))
+
+- *(viewport)* Use 'Option' as function result for better readibility (#376) ([0d620df3](https://github.com/rsvim/rsvim/commit/0d620df35d8d5170711a6b0783a64544f629d21c)) by @linrongbin16 ([#376](https://github.com/rsvim/rsvim/pull/376))
+
+- *(viewport)* More practical algorithm for 'linebreak=true' (#379) ([d48a9ea4](https://github.com/rsvim/rsvim/commit/d48a9ea40b77b82950efba3db063e8899caf5460)) by @linrongbin16 ([#379](https://github.com/rsvim/rsvim/pull/379))
+
+## [0.1.1-alpha.8](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.5..v0.1.1-alpha.8) - 2024-10-19
+
+[6e6c03c7](https://github.com/rsvim/rsvim/commit/6e6c03c7f828a5acbfae029370d061b5e907dd1e)...[feafb680](https://github.com/rsvim/rsvim/commit/feafb680893ffdece400e1b17b7cb02b18a3ffc8)
 
 ### <!-- 0 -->Features
 
