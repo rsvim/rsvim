@@ -224,24 +224,90 @@ impl Stateful for NormalStateful {
 impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
   fn cursor_move(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
-    // Get (window_scroll_to, cursor_move_to).
-    let scroll_and_move = self._expected_move_and_scroll_to(data_access, command);
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+        let buffer = current_window.buffer().upgrade().unwrap();
+        let buffer = lock!(buffer);
+        let viewport = current_window.viewport();
+        let viewport = lock!(viewport);
+        let cursor_viewport = current_window.cursor_viewport();
+        let cursor_viewport = lock!(cursor_viewport);
 
-    // First try window scroll.
-    if let Some(ExpectedWindowScrollTo {
-      start_line,
-      start_column,
-    }) = scroll_and_move.window_scroll_to
-    {
-      self.__test_raw_window_scroll(
-        data_access,
-        Command::WindowScrollTo((start_column, start_line)),
-      );
-    }
+        let (target_cursor_char, target_cursor_line, move_direction) = normalize_as_cursor_move_to(
+          command,
+          cursor_viewport.char_idx(),
+          cursor_viewport.line_idx(),
+        );
+        let search_direction = match move_direction {
+          CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
+          CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
+          CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
+          CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
+        };
 
-    // Then try cursor move.
-    if let Some(ExpectedCursorMoveTo { to_line, to_char }) = scroll_and_move.cursor_move_to {
-      self.__test_raw_cursor_move(data_access, Command::CursorMoveTo((to_char, to_line)));
+        let (start_line, start_column) = viewport.search_anchor(
+          search_direction,
+          &buffer,
+          current_window.actual_shape(),
+          current_window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+
+        // First try window scroll.
+        if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx() {
+          let (by_columns, by_lines) = normalize_as_window_scroll_by(
+            Command::WindowScrollTo((start_column, start_line)),
+            viewport.start_column_idx(),
+            viewport.start_line_idx(),
+          );
+
+          let window_scroll_result =
+            self._raw_window_scroll_by(&viewport, &buffer, by_columns, by_lines);
+
+          if let Some((start_line_idx, start_column_idx)) = window_scroll_result {
+            // Sync the viewport
+            let window_actual_shape = current_window.window_content().actual_shape();
+            let window_local_options = current_window.options();
+            current_window.set_viewport(Viewport::to_arc(Viewport::view(
+              &buffer,
+              window_actual_shape,
+              window_local_options,
+              start_line_idx,
+              start_column_idx,
+            )));
+          }
+        }
+
+        // Then try cursor move.
+        {
+          let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
+            Command::CursorMoveTo((target_cursor_char, target_cursor_line)),
+            cursor_viewport.char_idx(),
+            cursor_viewport.line_idx(),
+          );
+
+          let cursor_move_result =
+            self._raw_cursor_move_by(&viewport, &cursor_viewport, &buffer, by_chars, by_lines);
+
+          trace!("cursor_move_result:{:?}", cursor_move_result);
+          if let Some((line_idx, char_idx)) = cursor_move_result {
+            let moved_cursor_viewport =
+              CursorViewport::from_position(&viewport, &buffer, line_idx, char_idx);
+            current_window.set_cursor_viewport(CursorViewport::to_arc(moved_cursor_viewport));
+
+            let cursor_id = tree.cursor_id().unwrap();
+            tree.bounded_move_to(
+              cursor_id,
+              moved_cursor_viewport.column_idx() as isize,
+              moved_cursor_viewport.row_idx() as isize,
+            );
+            trace!("(after) cursor node position:{:?}", moved_cursor_viewport);
+          }
+        }
+      }
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
@@ -554,9 +620,6 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        // TODO: The `(x,y)` in command is lines/chars, while the returned `(x,y)` is
-        // lines/columns. Since the lines/chars are user facing command, user moves their cursor by
-        // lines/chars instead of terminal rows/columns/cells.
         let (by_columns, by_lines) = normalize_as_window_scroll_by(
           command,
           viewport.start_column_idx(),
