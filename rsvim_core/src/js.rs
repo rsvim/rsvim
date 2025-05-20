@@ -396,7 +396,7 @@ impl JsRuntime {
 
     let mut isolate = {
       let create_params = v8::CreateParams::default();
-      let create_params = create_params.snapshot_blob(snapshot.value);
+      let create_params = create_params.snapshot_blob(snapshot.value.into());
       v8::Isolate::new(create_params)
     };
 
