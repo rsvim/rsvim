@@ -6739,13 +6739,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
     // Search-4
     {
-      let expect = vec![
-        "split into the",
-        "\tnext",
-        "\trow,",
-        "\tif",
-        "\teither",
-      ];
+      let expect = vec!["split into the", "\tnext", "\trow,", "\tif", "\teither"];
 
       let actual = {
         let target_cursor_line = 4;
