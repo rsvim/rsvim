@@ -31,8 +31,8 @@ body = """
 - {% if commit.scope %}*({{commit.scope}})* {% endif -%}\
   {% if commit.breaking %} [**breaking**]{% endif -%}\
   {{ commit.message | upper_first | trim }} ({{ self::makecommitid(commit_id=commit.id) }})\
-  {% if commit.github.username %} by @{{ commit.github.username }}{%- endif -%}\
-  {% if commit.github.pr_number %} ([#{{ commit.github.pr_number }}]($REPO/pull/{{ commit.github.pr_number }})){%- endif %}\
+  {% if commit.remote.username %} by @{{ commit.remote.username }}{%- endif -%}\
+  {% if commit.remote.pr_number %} ([#{{ commit.remote.pr_number }}]($REPO/pull/{{ commit.remote.pr_number }})){%- endif %}\
 {% if commit.body %}
   {{ '  ' }}````text
   {% for bod in commit.body | split(pat="\n") -%}\
