@@ -14675,8 +14675,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-5
     {
       let expect = vec![
-        "4. The extra ",
-        "parts are split ",
+        "4. The extra",
+        " parts are split ",
         "into the\t",
         "next\trow,",
         "\tif",
@@ -14698,7 +14698,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 16);
+        assert_eq!(start_column, 11);
 
         let viewport = Viewport::view(
           &buf,
@@ -14711,7 +14711,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 5)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
@@ -14727,8 +14727,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-6
     {
       let expect = vec![
-        "4. The extra ",
-        "parts are split ",
+        "4. The extra",
+        " parts are split ",
         "into the\t",
         "next\trow,",
         "\tif",
@@ -14750,7 +14750,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 16);
+        assert_eq!(start_column, 11);
 
         let viewport = Viewport::view(
           &buf,
@@ -14763,7 +14763,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 5)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
@@ -14779,8 +14779,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-7
     {
       let expect = vec![
-        "4. The extra ",
-        "parts are split ",
+        "4. The extra",
+        " parts are split ",
         "into the\t",
         "next\trow,",
         "\tif",
@@ -14802,7 +14802,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 16);
+        assert_eq!(start_column, 11);
 
         let viewport = Viewport::view(
           &buf,
@@ -14815,7 +14815,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 5)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
@@ -14831,8 +14831,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-8, Center
     {
       let expect = vec![
-        " parts are split ",
-        "into the\t",
+        "a parts are split",
+        " into the\t",
         "next\trow,",
         "\tif",
         "\teither",
@@ -14854,7 +14854,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 28);
+        assert_eq!(start_column, 27);
 
         let viewport = Viewport::view(
           &buf,
@@ -14883,8 +14883,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-9
     {
       let expect = vec![
-        " parts are split ",
-        "into the\t",
+        "a parts are split",
+        " into the\t",
         "next\trow,",
         "\tif",
         "\teither",
@@ -14906,7 +14906,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 28);
+        assert_eq!(start_column, 27);
 
         let viewport = Viewport::view(
           &buf,
@@ -14935,8 +14935,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-10
     {
       let expect = vec![
-        " parts are split ",
-        "into the\t",
+        "a parts are split",
+        " into the\t",
         "next\trow,",
         "\tif",
         "\teither",
@@ -14958,7 +14958,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 28);
+        assert_eq!(start_column, 27);
 
         let viewport = Viewport::view(
           &buf,
@@ -14987,11 +14987,11 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-11
     {
       let expect = vec![
-        "extra parts are ",
-        "split into the",
-        "\tnext",
-        "\trow,",
+        "a parts are split",
+        " into the\t",
+        "next\trow,",
         "\tif",
+        "\teither",
       ];
 
       let actual = {
@@ -15010,7 +15010,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 23);
+        assert_eq!(start_column, 27);
 
         let viewport = Viewport::view(
           &buf,
@@ -15143,9 +15143,9 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-14
     {
       let expect = vec![
-        "The extra parts ",
-        "are split into ",
-        "the\tnext",
+        "e extra parts are",
+        " split into the",
+        "\tnext",
         "\trow,",
         "\tif",
       ];
@@ -15166,7 +15166,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 19);
+        assert_eq!(start_column, 21);
 
         let viewport = Viewport::view(
           &buf,
@@ -15195,7 +15195,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
     // Search-15
     {
       let expect = vec![
-        "The extra parts ",
+        "he extra parts ",
         "are split into ",
         "the\tnext",
         "\trow,",
@@ -15218,7 +15218,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 6);
-        assert_eq!(start_column, 19);
+        assert_eq!(start_column, 20);
 
         let viewport = Viewport::view(
           &buf,
