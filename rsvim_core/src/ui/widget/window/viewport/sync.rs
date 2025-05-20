@@ -1996,8 +1996,6 @@ fn search_anchor_leftward_wrap_nolinebreak(
     if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
       (viewport_start_column, false)
     } else {
-      // Try to fill the viewport with `start_column=0`, and we can know how many rows the
-      // `target_cursor_line` needs to fill into current viewport.
       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
         proc_line_wrap_nolinebreak(
           buffer,
@@ -2075,12 +2073,10 @@ fn search_anchor_leftward_wrap_linebreak(
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let only_contains_target_cursor_line =
+  let (start_column, only_contains_target_cursor_line) =
     if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      false
+      (viewport_start_column, false)
     } else {
-      // Try to fill the viewport with `start_column=0`, and we can know how many rows the
-      // `target_cursor_line` needs to fill into current viewport.
       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
         proc_line_wrap_linebreak(
           buffer,
@@ -2090,12 +2086,19 @@ fn search_anchor_leftward_wrap_linebreak(
           height.saturating_add(10),
           width,
         );
-      target_cursor_rows.len() >= height as usize
+
+      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
+      let start_column = if !only_contains_target_cursor_line {
+        0_usize
+      } else {
+        viewport_start_column
+      };
+
+      (start_column, only_contains_target_cursor_line)
     };
 
   // adjust horizontally
   let start_line = viewport_start_line;
-  let start_column = viewport_start_column;
 
   let start_column_on_left_side = _move_more_to_left_wrap_linebreak(
     buffer,
@@ -2240,9 +2243,9 @@ fn search_anchor_rightward_wrap_nolinebreak(
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let only_contains_target_cursor_line =
+  let (start_column, only_contains_target_cursor_line) =
     if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      false
+      (viewport_start_column, false)
     } else {
       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
         proc_line_wrap_nolinebreak(
@@ -2253,12 +2256,18 @@ fn search_anchor_rightward_wrap_nolinebreak(
           height.saturating_add(10),
           width,
         );
-      target_cursor_rows.len() >= height as usize
+      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
+      let start_column = if !only_contains_target_cursor_line {
+        0_usize
+      } else {
+        viewport_start_column
+      };
+
+      (start_column, only_contains_target_cursor_line)
     };
 
   // adjust horizontally
   let start_line = viewport_start_line;
-  let start_column = viewport_start_column;
 
   if cfg!(debug_assertions) {
     let start_column_on_left_side = _move_more_to_left_wrap_nolinebreak(
@@ -2315,12 +2324,10 @@ fn search_anchor_rightward_wrap_linebreak(
   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
     || _line_tail_not_show(viewport, buffer, target_cursor_line);
 
-  let only_contains_target_cursor_line =
+  let (start_column, only_contains_target_cursor_line) =
     if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      false
+      (viewport_start_column, false)
     } else {
-      // Try to fill the viewport with `start_column=0`, and we can know how many rows the
-      // `target_cursor_line` needs to fill into current viewport.
       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
         proc_line_wrap_linebreak(
           buffer,
@@ -2330,12 +2337,19 @@ fn search_anchor_rightward_wrap_linebreak(
           height.saturating_add(10),
           width,
         );
-      target_cursor_rows.len() >= height as usize
+
+      let only_contains_target_cursor_line = target_cursor_rows.len() >= height as usize;
+      let start_column = if !only_contains_target_cursor_line {
+        0_usize
+      } else {
+        viewport_start_column
+      };
+
+      (start_column, only_contains_target_cursor_line)
     };
 
   // adjust horizontally
   let start_line = viewport_start_line;
-  let start_column = viewport_start_column;
 
   if cfg!(debug_assertions) {
     let start_column_on_left_side = _move_more_to_left_wrap_linebreak(
