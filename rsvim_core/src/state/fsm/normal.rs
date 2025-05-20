@@ -37,7 +37,7 @@ fn adjust_cursor_char_idx_on_vertical_motion(
   char_idx
 }
 
-#[derive(Debug, Copy)]
+#[derive(Debug, Copy, Clone)]
 enum CursorMoveDirection {
   Up,
   Down,
@@ -56,12 +56,10 @@ fn normalize_as_cursor_move_by(
       CursorMoveDirection::Down
     } else if by_y < 0 {
       CursorMoveDirection::Up
+    } else if by_x > 0 {
+      CursorMoveDirection::Right
     } else {
-      if by_x > 0 {
-        CursorMoveDirection::Right
-      } else {
-        CursorMoveDirection::Left
-      }
+      CursorMoveDirection::Left
     }
   };
 
@@ -91,12 +89,10 @@ fn normalize_as_cursor_move_to(
       CursorMoveDirection::Down
     } else if by_y < 0 {
       CursorMoveDirection::Up
+    } else if by_x > 0 {
+      CursorMoveDirection::Right
     } else {
-      if by_x > 0 {
-        CursorMoveDirection::Right
-      } else {
-        CursorMoveDirection::Left
-      }
+      CursorMoveDirection::Left
     }
   };
 
@@ -338,7 +334,7 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let (by_chars, by_lines) = normalize_as_cursor_move_by(
+        let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
           command,
           cursor_viewport.char_idx(),
           cursor_viewport.line_idx(),
