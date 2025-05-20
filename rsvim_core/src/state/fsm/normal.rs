@@ -5514,16 +5514,16 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "ut inside ",
-        "a row of t",
-        "he window ",
-        "content wi",
-        "dget, then",
-        " the line-",
-        "wrap and w",
-        "ord-wrap d",
-        "oesn't aff",
-        "ect the re",
+        "e a row of",
+        " the windo",
+        "w content ",
+        "widget, th",
+        "en the lin",
+        "e-wrap and",
+        " word-wrap",
+        " doesn't a",
+        "ffect the ",
+        "rendering.",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -6392,8 +6392,8 @@ mod tests_cursor_move_and_scroll {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "the window",
-        " content ",
+        "window ",
+        "content ",
         "widget, ",
         "then the ",
         "line-wrap ",
