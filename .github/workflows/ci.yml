@@ -14,7 +14,7 @@ env:
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   CARGO_NET_RETRY: 3
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-Dwarnings"
+  RUSTFLAGS: "-Dwarnings -Clink-arg=-fuse-ld=lld"
   RUST_BACKTRACE: "full"
 jobs:
   check:
@@ -46,6 +46,9 @@ jobs:
           tsc
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "20.1"
       - uses: dtolnay/rust-toolchain@stable
       - uses: cargo-bins/cargo-binstall@main
       - name: Rustfmt
@@ -103,6 +106,9 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "20.1"
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/checkout@v4
       - name: Cargo test
