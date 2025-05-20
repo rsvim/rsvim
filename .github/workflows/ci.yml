@@ -17,8 +17,8 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
-  pr:
-    name: PR Check
+  softcheck:
+    name: Soft Check
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
