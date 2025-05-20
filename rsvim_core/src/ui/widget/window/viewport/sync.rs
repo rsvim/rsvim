@@ -249,7 +249,6 @@ fn proc_line_wrap_nolinebreak(
   }
 }
 
-#[allow(unused_variables)]
 /// Implements [`sync`] with option `wrap=true` and `line-break=false`.
 fn sync_wrap_nolinebreak(
   buffer: &Buffer,
@@ -559,7 +558,6 @@ fn proc_line_wrap_linebreak(
   }
 }
 
-#[allow(unused_variables)]
 /// Implements [`sync`] with option `wrap=true` and `line-break=true`.
 fn sync_wrap_linebreak(
   buffer: &Buffer,
