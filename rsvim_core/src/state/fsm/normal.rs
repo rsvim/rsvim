@@ -191,16 +191,6 @@ impl Stateful for NormalStateful {
       Event::Resize(_columns, _rows) => {}
     }
 
-    // if event == Event::Key(KeyCode::Char('c').into()) {
-    //   println!("Cursor position: {:?}\r", crossterm::cursor::position());
-    // }
-
-    // // quit loop
-    // if event == Event::Key(KeyCode::Esc.into()) {
-    //   // println!("ESC: {:?}\r", crossterm::cursor::position());
-    //   return StateMachine::QuitState(QuitStateful::default());
-    // }
-
     StatefulValue::NormalMode(NormalStateful::default())
   }
 }
