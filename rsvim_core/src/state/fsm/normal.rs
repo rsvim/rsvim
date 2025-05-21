@@ -346,8 +346,6 @@ impl NormalStateful {
 
   #[cfg(test)]
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, command: Command) {
-    use std::intrinsics::unreachable;
-
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     if let Some(current_window_id) = tree.current_window_id() {
