@@ -54,6 +54,9 @@ pub enum Command {
   /// `(column_idx,line_idx)` based on current buffer.
   WindowScrollTo((/* column_idx */ usize, /* line_idx */ usize)),
 
+  /// Goto insert mode.
+  GotoInsertMode,
+
   /// Quit editor
   EditorQuit,
 }

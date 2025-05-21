@@ -7,6 +7,7 @@ use crate::lock;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection, Window,
@@ -186,7 +187,7 @@ impl Stateful for NormalStateful {
               return self.cursor_move(&data_access, Command::CursorMoveRightBy(usize::MAX));
             }
             KeyCode::Char('i') => {
-              return self.cursor_move(&data_access, Command::CursorMoveRightBy(1));
+              return self.goto_insert_mode(&data_access, Command::GotoInsertMode);
             }
             KeyCode::Esc => {
               // quit loop
@@ -208,11 +209,14 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  fn goto_insert_mode(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+  fn goto_insert_mode(&self, data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
+    debug_assert!(matches!(_command, Command::GotoInsertMode));
+
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let cursor_id = tree.cursor_id().unwrap();
     if let Some(TreeNode::Cursor(cursor)) = tree.node_mut(cursor_id) {
+      cursor.set_style(&CursorStyle::SteadyBar);
     } else {
       unreachable!()
     }
