@@ -1,7 +1,5 @@
 //! The normal mode.
 
-use std::usize;
-
 use crate::buf::Buffer;
 use crate::lock;
 use crate::state::command::Command;
