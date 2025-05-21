@@ -30,8 +30,7 @@ pub enum Command {
 
   /// Scroll buffer by offset `(columns,lines)` relatively, based on current window.
   ///
-  /// - For `columns` (NOTE: not chars!), when negative it moves to left, when positive it
-  ///   moves to right.
+  /// - For `columns` (not chars!), when negative it moves to left, when positive it moves to right.
   /// - For `lines`, when negative it moves to up, when positive it moves to down.
   WindowScrollBy((/* columns */ isize, /* lines */ isize)),
 
