@@ -1,7 +1,4 @@
-//! An abstract layer between terminal events and editor operations.
-//!
-//! This is the low-level commands between terminal keyboard/mouse events and the behaviors that we
-//! want editor to do.
+//! Abstract low-level commands between terminal keyboard/mouse events and editor operations.
 
 #[derive(Debug, Copy, Clone)]
 /// Editor operations.
