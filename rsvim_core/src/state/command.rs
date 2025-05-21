@@ -1,6 +1,6 @@
 //! Abstract low-level commands between terminal keyboard/mouse events and editor operations.
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// Editor operations.
 ///
 /// NOTE:
