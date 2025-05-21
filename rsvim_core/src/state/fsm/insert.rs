@@ -49,7 +49,7 @@ impl Stateful for InsertStateful {
             //   return self.goto_insert_mode(&data_access, Command::GotoInsertMode);
             // }
             KeyCode::Esc => {
-              return self.goto_normal_mode(&data_access, Command::EditorQuit);
+              return self.goto_normal_mode(&data_access, Command::GotoNormalMode);
             }
             _ => { /* Skip */ }
           }
