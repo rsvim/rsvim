@@ -5,9 +5,9 @@ use crate::state::command::Command;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection, Window,
-};
+// use crate::ui::widget::window::{
+//   CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection, Window,
+// };
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -45,12 +45,11 @@ impl Stateful for InsertStateful {
             // KeyCode::End => {
             //   return self.cursor_move(&data_access, Command::CursorMoveRightBy(usize::MAX));
             // }
-            KeyCode::Char('i') => {
-              return self.goto_insert_mode(&data_access, Command::GotoInsertMode);
-            }
+            // KeyCode::Char('i') => {
+            //   return self.goto_insert_mode(&data_access, Command::GotoInsertMode);
+            // }
             KeyCode::Esc => {
-              // quit loop
-              return self.quit(&data_access, Command::EditorQuit);
+              return self.goto_normal_mode(&data_access, Command::EditorQuit);
             }
             _ => { /* Skip */ }
           }
