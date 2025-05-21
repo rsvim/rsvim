@@ -1,9 +1,6 @@
-//! An abstract layer between terminal events and editor operations.
-//!
-//! This is the low-level commands between terminal keyboard/mouse events and the behaviors that we
-//! want editor to do.
+//! Abstract low-level commands between terminal keyboard/mouse events and editor operations.
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// Editor operations.
 ///
 /// NOTE:
@@ -33,8 +30,7 @@ pub enum Command {
 
   /// Scroll buffer by offset `(columns,lines)` relatively, based on current window.
   ///
-  /// - For `columns` (NOTE: not chars!), when negative it moves to left, when positive it
-  ///   moves to right.
+  /// - For `columns` (not chars!), when negative it moves to left, when positive it moves to right.
   /// - For `lines`, when negative it moves to up, when positive it moves to down.
   WindowScrollBy((/* columns */ isize, /* lines */ isize)),
 
@@ -57,6 +53,12 @@ pub enum Command {
   /// Similar to [`Command::WindowScrollBy`], except it scrolls window to an absolute position
   /// `(column_idx,line_idx)` based on current buffer.
   WindowScrollTo((/* column_idx */ usize, /* line_idx */ usize)),
+
+  /// Goto insert mode.
+  GotoInsertMode,
+
+  /// Goto normal mode.
+  GotoNormalMode,
 
   /// Quit editor
   EditorQuit,

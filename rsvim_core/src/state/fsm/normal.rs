@@ -5,6 +5,7 @@ use crate::lock;
 use crate::state::command::Command;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection, Window,
@@ -163,6 +164,7 @@ impl Stateful for NormalStateful {
       Event::FocusLost => {}
       Event::Key(key_event) => match key_event.kind {
         KeyEventKind::Press => {
+          trace!("Event::key:{:?}", key_event);
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
               return self.cursor_move(&data_access, Command::CursorMoveUpBy(1));
@@ -175,6 +177,15 @@ impl Stateful for NormalStateful {
             }
             KeyCode::Right | KeyCode::Char('l') => {
               return self.cursor_move(&data_access, Command::CursorMoveRightBy(1));
+            }
+            KeyCode::Home => {
+              return self.cursor_move(&data_access, Command::CursorMoveLeftBy(usize::MAX));
+            }
+            KeyCode::End => {
+              return self.cursor_move(&data_access, Command::CursorMoveRightBy(usize::MAX));
+            }
+            KeyCode::Char('i') => {
+              return self.goto_insert_mode(&data_access, Command::GotoInsertMode);
             }
             KeyCode::Esc => {
               // quit loop
@@ -191,17 +202,24 @@ impl Stateful for NormalStateful {
       Event::Resize(_columns, _rows) => {}
     }
 
-    // if event == Event::Key(KeyCode::Char('c').into()) {
-    //   println!("Cursor position: {:?}\r", crossterm::cursor::position());
-    // }
-
-    // // quit loop
-    // if event == Event::Key(KeyCode::Esc.into()) {
-    //   // println!("ESC: {:?}\r", crossterm::cursor::position());
-    //   return StateMachine::QuitState(QuitStateful::default());
-    // }
-
     StatefulValue::NormalMode(NormalStateful::default())
+  }
+}
+
+impl NormalStateful {
+  fn goto_insert_mode(&self, data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
+    debug_assert!(matches!(_command, Command::GotoInsertMode));
+
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    let cursor_id = tree.cursor_id().unwrap();
+    if let Some(TreeNode::Cursor(cursor)) = tree.node_mut(cursor_id) {
+      cursor.set_style(&CursorStyle::SteadyBar);
+    } else {
+      unreachable!()
+    }
+
+    StatefulValue::InsertMode(super::InsertStateful::default())
   }
 }
 
@@ -276,7 +294,11 @@ impl NormalStateful {
             self._raw_cursor_move2(&mut tree, new_cursor_viewport);
           }
         }
+      } else {
+        unreachable!()
       }
+    } else {
+      unreachable!()
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
@@ -344,7 +366,11 @@ impl NormalStateful {
         if let Some(new_cursor_viewport) = new_cursor_viewport_arc {
           self._raw_cursor_move2(&mut tree, new_cursor_viewport);
         }
+      } else {
+        unreachable!()
       }
+    } else {
+      unreachable!()
     }
   }
 
