@@ -57,6 +57,9 @@ pub enum Command {
   /// Goto insert mode.
   GotoInsertMode,
 
+  /// Goto normal mode.
+  GotoNormalMode,
+
   /// Quit editor
   EditorQuit,
 }
