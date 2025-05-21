@@ -1,5 +1,7 @@
 //! The normal mode.
 
+use std::usize;
+
 use crate::buf::Buffer;
 use crate::lock;
 use crate::state::command::Command;
@@ -163,6 +165,7 @@ impl Stateful for NormalStateful {
       Event::FocusLost => {}
       Event::Key(key_event) => match key_event.kind {
         KeyEventKind::Press => {
+          trace!("Event::key:{:?}", key_event);
           match key_event.code {
             KeyCode::Up | KeyCode::Char('k') => {
               return self.cursor_move(&data_access, Command::CursorMoveUpBy(1));
@@ -174,6 +177,15 @@ impl Stateful for NormalStateful {
               return self.cursor_move(&data_access, Command::CursorMoveLeftBy(1));
             }
             KeyCode::Right | KeyCode::Char('l') => {
+              return self.cursor_move(&data_access, Command::CursorMoveRightBy(1));
+            }
+            KeyCode::Home => {
+              return self.cursor_move(&data_access, Command::CursorMoveLeftBy(usize::MAX));
+            }
+            KeyCode::End => {
+              return self.cursor_move(&data_access, Command::CursorMoveRightBy(usize::MAX));
+            }
+            KeyCode::Char('i') => {
               return self.cursor_move(&data_access, Command::CursorMoveRightBy(1));
             }
             KeyCode::Esc => {
@@ -192,6 +204,20 @@ impl Stateful for NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
+  }
+}
+
+impl NormalStateful {
+  fn goto_insert_mode(&self, data_access: &StatefulDataAccess, command: Command) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    let cursor_id = tree.cursor_id().unwrap();
+    if let Some(TreeNode::Cursor(cursor)) = tree.node_mut(cursor_id) {
+    } else {
+      unreachable!()
+    }
+
+    StatefulValue::InsertMode(super::InsertStateful::default())
   }
 }
 
@@ -266,7 +292,11 @@ impl NormalStateful {
             self._raw_cursor_move2(&mut tree, new_cursor_viewport);
           }
         }
+      } else {
+        unreachable!()
       }
+    } else {
+      unreachable!()
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
@@ -312,6 +342,8 @@ impl NormalStateful {
 
   #[cfg(test)]
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, command: Command) {
+    use std::intrinsics::unreachable;
+
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     if let Some(current_window_id) = tree.current_window_id() {
@@ -334,7 +366,11 @@ impl NormalStateful {
         if let Some(new_cursor_viewport) = new_cursor_viewport_arc {
           self._raw_cursor_move2(&mut tree, new_cursor_viewport);
         }
+      } else {
+        unreachable!()
       }
+    } else {
+      unreachable!()
     }
   }
 

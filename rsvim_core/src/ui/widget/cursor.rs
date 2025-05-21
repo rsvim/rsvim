@@ -36,6 +36,30 @@ impl Cursor {
       style: CursorStyle::SteadyBlock,
     }
   }
+
+  pub fn blinking(&self) -> bool {
+    self.blinking
+  }
+
+  pub fn set_blinking(&mut self, value: bool) {
+    self.blinking = value;
+  }
+
+  pub fn hidden(&self) -> bool {
+    self.hidden
+  }
+
+  pub fn set_hidden(&mut self, value: bool) {
+    self.hidden = value;
+  }
+
+  pub fn style(&self) -> &CursorStyle {
+    &self.style
+  }
+
+  pub fn set_style(&mut self, value: &CursorStyle) {
+    self.style = *value;
+  }
 }
 
 inode_impl!(Cursor, base);
