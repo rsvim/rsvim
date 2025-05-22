@@ -4,8 +4,7 @@
 /// A set of low-level editor operations between terminal keyboard/mouse events and editor
 /// operations.
 ///
-/// NOTE:
-/// - The enum name follows the `Subject-Predicate-Object` English grammar.
+/// NOTE: The enum name follows the `Subject-Predicate-Object` English grammar.
 pub enum Command {
   /// Move cursor by offset `(chars,lines)` relatively, based on current cursor position.
   ///
