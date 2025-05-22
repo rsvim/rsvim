@@ -1,11 +1,13 @@
-//! Abstract low-level commands between terminal keyboard/mouse events and editor operations.
+//! The low-level editor operations.
+
+pub mod cursor_ops;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
-/// Editor operations.
+/// A set of low-level editor operations between terminal keyboard/mouse events and editor
+/// operations.
 ///
-/// NOTE:
-/// - The enum name is following the `Subject-Predicate-Object` English grammar.
-pub enum Command {
+/// NOTE: The enum name follows the `Subject-Predicate-Object` English grammar.
+pub enum Operation {
   /// Move cursor by offset `(chars,lines)` relatively, based on current cursor position.
   ///
   /// - For `chars`, when negative it moves to left, when positive it moves to right.

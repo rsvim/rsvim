@@ -6,9 +6,9 @@ use crate::state::mode::Mode;
 
 use paste::paste;
 
-pub mod command;
 pub mod fsm;
 pub mod mode;
+pub mod ops;
 
 #[derive(Debug, Clone)]
 pub struct State {
