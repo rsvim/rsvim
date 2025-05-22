@@ -35,6 +35,7 @@ use tracing::{error, trace};
 
 pub mod msg;
 pub mod task;
+pub mod tui;
 
 // #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop will spawn them in
@@ -235,24 +236,6 @@ impl EventLoop {
         .execute_module(config_file.to_str().unwrap(), None)
         .unwrap();
     }
-    Ok(())
-  }
-
-  /// Initialize TUI.
-  pub fn init_tui(&self) -> IoResult<()> {
-    if !crossterm::terminal::is_raw_mode_enabled()? {
-      crossterm::terminal::enable_raw_mode()?;
-    }
-
-    let mut out = std::io::stdout();
-    execute!(
-      out,
-      crossterm::terminal::EnterAlternateScreen,
-      crossterm::terminal::Clear(crossterm::terminal::ClearType::All),
-      EnableMouseCapture,
-      EnableFocusChange,
-    )?;
-
     Ok(())
   }
 
@@ -539,23 +522,6 @@ impl EventLoop {
         ShaderCommand::TerminalScrollUp(command) => queue!(self.writer, command)?,
         ShaderCommand::TerminalSetSize(command) => queue!(self.writer, command)?,
       }
-    }
-
-    Ok(())
-  }
-
-  /// Shutdown TUI.
-  pub fn shutdown_tui(&self) -> IoResult<()> {
-    let mut out = std::io::stdout();
-    execute!(
-      out,
-      DisableMouseCapture,
-      DisableFocusChange,
-      crossterm::terminal::LeaveAlternateScreen,
-    )?;
-
-    if crossterm::terminal::is_raw_mode_enabled()? {
-      crossterm::terminal::disable_raw_mode()?;
     }
 
     Ok(())

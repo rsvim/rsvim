@@ -3,7 +3,7 @@
 //! See [rsvim_core] for more details.
 
 use rsvim_core::cli::CliOpt;
-use rsvim_core::evloop::EventLoop;
+use rsvim_core::evloop::{self, EventLoop};
 use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 use rsvim_core::prelude::*;
@@ -57,8 +57,8 @@ fn main() -> IoResult<()> {
     // Initialize user config.
     event_loop.init_config()?;
 
-    // Initialize terminal.
-    event_loop.init_tui()?;
+    // Enter terminal raw mode.
+    evloop::tui::initialize_raw_mode(true)?;
 
     // Initialize buffers and windows.
     event_loop.init_buffers()?;
@@ -70,7 +70,7 @@ fn main() -> IoResult<()> {
     // Run loop.
     event_loop.run().await?;
 
-    // Shutdown.
-    event_loop.shutdown_tui()
+    // Shutdown terminal raw mode.
+    evloop::tui::shutdown_raw_mode()
   })
 }
