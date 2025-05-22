@@ -49,7 +49,6 @@ impl Stateful for NormalStateful {
               return self.goto_insert_mode(&data_access, Operation::GotoInsertMode);
             }
             KeyCode::Esc => {
-              // quit loop
               return self.quit(&data_access, Operation::EditorQuit);
             }
             _ => { /* Skip */ }
@@ -68,12 +67,8 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  fn goto_insert_mode(
-    &self,
-    data_access: &StatefulDataAccess,
-    _command: Operation,
-  ) -> StatefulValue {
-    debug_assert!(matches!(_command, Operation::GotoInsertMode));
+  fn goto_insert_mode(&self, data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
+    debug_assert!(matches!(_op, Operation::GotoInsertMode));
 
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
@@ -90,7 +85,7 @@ impl NormalStateful {
 
 impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
-  fn cursor_move(&self, data_access: &StatefulDataAccess, command: Operation) -> StatefulValue {
+  fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -104,7 +99,7 @@ impl NormalStateful {
 
         let (target_cursor_char, target_cursor_line, move_direction) =
           cursor_ops::normalize_as_cursor_move_to(
-            command,
+            op,
             cursor_viewport.char_idx(),
             cursor_viewport.line_idx(),
           );
@@ -181,7 +176,7 @@ impl NormalStateful {
   }
 
   #[cfg(test)]
-  fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, command: Operation) {
+  fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     if let Some(current_window_id) = tree.current_window_id() {
@@ -194,7 +189,7 @@ impl NormalStateful {
         let cursor_viewport = lock!(cursor_viewport);
 
         let maybe_new_cursor_viewport =
-          cursor_ops::cursor_move(&viewport, &cursor_viewport, &buffer, command);
+          cursor_ops::cursor_move(&viewport, &cursor_viewport, &buffer, op);
 
         if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
           current_window.set_cursor_viewport(new_cursor_viewport.clone());
@@ -215,7 +210,7 @@ impl NormalStateful {
   }
 
   #[cfg(test)]
-  fn __test_raw_window_scroll(&self, data_access: &StatefulDataAccess, command: Operation) {
+  fn __test_raw_window_scroll(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -227,7 +222,7 @@ impl NormalStateful {
         let buffer = lock!(buffer);
 
         let maybe_new_viewport_arc =
-          cursor_ops::window_scroll(&viewport, current_window, &buffer, command);
+          cursor_ops::window_scroll(&viewport, current_window, &buffer, op);
         if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
           current_window.set_viewport(new_viewport_arc.clone());
         }
@@ -235,7 +230,8 @@ impl NormalStateful {
     }
   }
 
-  fn quit(&self, _data_access: &StatefulDataAccess, _command: Operation) -> StatefulValue {
+  fn quit(&self, _data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
+    debug_assert!(matches!(_op, Operation::EditorQuit));
     StatefulValue::QuitState(QuitStateful::default())
   }
 }
