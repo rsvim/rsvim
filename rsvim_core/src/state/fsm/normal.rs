@@ -254,7 +254,9 @@ mod tests_util {
   use crate::test::log::init as test_log_init;
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
-  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::widget::window::{
+    CursorViewport, Viewport, WindowLocalOptions, WindowLocalOptionsBuilder,
+  };
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
