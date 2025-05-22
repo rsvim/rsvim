@@ -4,7 +4,7 @@ use crate::buf::Buffer;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Operation;
+use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{
@@ -286,16 +286,22 @@ impl NormalStateful {
           };
           let viewport = lock!(viewport_arc);
 
-          let maybe_new_cursor_viewport = self._raw_cursor_move(
+          let maybe_new_cursor_viewport = cursor_ops::cursor_move(
             &viewport,
             &cursor_viewport,
-            current_window,
             &buffer,
             Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
           );
 
           if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
-            self._raw_cursor_move2(&mut tree, new_cursor_viewport);
+            current_window.set_cursor_viewport(new_cursor_viewport.clone());
+            let cursor_id = tree.cursor_id().unwrap();
+            let new_cursor_viewport = lock!(new_cursor_viewport);
+            tree.bounded_move_to(
+              cursor_id,
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
+            );
           }
         }
       } else {
@@ -306,44 +312,6 @@ impl NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
-  }
-
-  fn _raw_cursor_move(
-    &self,
-    viewport: &Viewport,
-    cursor_viewport: &CursorViewport,
-    current_window: &mut Window,
-    buffer: &Buffer,
-    command: Operation,
-  ) -> Option<CursorViewportArc> {
-    let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
-      command,
-      cursor_viewport.char_idx(),
-      cursor_viewport.line_idx(),
-    );
-
-    let cursor_move_result =
-      self._raw_cursor_move_by(viewport, cursor_viewport, buffer, by_chars, by_lines);
-
-    if let Some((line_idx, char_idx)) = cursor_move_result {
-      let new_cursor_viewport = CursorViewport::from_position(viewport, buffer, line_idx, char_idx);
-      let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
-      current_window.set_cursor_viewport(new_cursor_viewport.clone());
-      Some(new_cursor_viewport)
-    } else {
-      // Or, just do nothing, stay at where you are
-      None
-    }
-  }
-
-  fn _raw_cursor_move2(&self, tree: &mut Tree, cursor_viewport: CursorViewportArc) {
-    let cursor_id = tree.cursor_id().unwrap();
-    let cursor_viewport = lock!(cursor_viewport);
-    tree.bounded_move_to(
-      cursor_id,
-      cursor_viewport.column_idx() as isize,
-      cursor_viewport.row_idx() as isize,
-    );
   }
 
   #[cfg(test)]
@@ -359,16 +327,18 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let new_cursor_viewport_arc = self._raw_cursor_move(
-          &viewport,
-          &cursor_viewport,
-          current_window,
-          &buffer,
-          command,
-        );
+        let maybe_new_cursor_viewport =
+          cursor_ops::cursor_move(&viewport, &cursor_viewport, &buffer, command);
 
-        if let Some(new_cursor_viewport) = new_cursor_viewport_arc {
-          self._raw_cursor_move2(&mut tree, new_cursor_viewport);
+        if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
+          current_window.set_cursor_viewport(new_cursor_viewport.clone());
+          let cursor_id = tree.cursor_id().unwrap();
+          let new_cursor_viewport = lock!(new_cursor_viewport);
+          tree.bounded_move_to(
+            cursor_id,
+            new_cursor_viewport.column_idx() as isize,
+            new_cursor_viewport.row_idx() as isize,
+          );
         }
       } else {
         unreachable!()

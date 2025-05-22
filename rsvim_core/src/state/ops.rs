@@ -1,5 +1,7 @@
 //! The low-level editor operations.
 
+pub mod cursor_ops;
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// A set of low-level editor operations between terminal keyboard/mouse events and editor
 /// operations.
