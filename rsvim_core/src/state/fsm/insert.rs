@@ -2,7 +2,7 @@
 
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Command;
+use crate::state::ops::Operation;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 // use crate::ui::widget::window::{
@@ -49,7 +49,7 @@ impl Stateful for InsertStateful {
             //   return self.goto_insert_mode(&data_access, Command::GotoInsertMode);
             // }
             KeyCode::Esc => {
-              return self.goto_normal_mode(&data_access, Command::GotoNormalMode);
+              return self.goto_normal_mode(&data_access, Operation::GotoNormalMode);
             }
             _ => { /* Skip */ }
           }
@@ -67,8 +67,12 @@ impl Stateful for InsertStateful {
 }
 
 impl InsertStateful {
-  fn goto_normal_mode(&self, data_access: &StatefulDataAccess, _command: Command) -> StatefulValue {
-    debug_assert!(matches!(_command, Command::GotoNormalMode));
+  fn goto_normal_mode(
+    &self,
+    data_access: &StatefulDataAccess,
+    _command: Operation,
+  ) -> StatefulValue {
+    debug_assert!(matches!(_command, Operation::GotoNormalMode));
 
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);

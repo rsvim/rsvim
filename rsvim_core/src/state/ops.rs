@@ -5,7 +5,7 @@
 /// operations.
 ///
 /// NOTE: The enum name follows the `Subject-Predicate-Object` English grammar.
-pub enum Command {
+pub enum Operation {
   /// Move cursor by offset `(chars,lines)` relatively, based on current cursor position.
   ///
   /// - For `chars`, when negative it moves to left, when positive it moves to right.
