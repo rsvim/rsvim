@@ -6,6 +6,7 @@ use crossterm::event::{
   DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture,
 };
 use crossterm::{self, execute};
+use std::io::Write;
 
 /// Initialize terminal raw mode.
 pub fn initialize_raw_mode() -> IoResult<()> {
@@ -39,4 +40,41 @@ pub fn shutdown_raw_mode() -> IoResult<()> {
   }
 
   Ok(())
+}
+
+/// Shutdown terminal raw mode when panic, and dump backtrace.
+pub fn shutdown_raw_mode_on_panic() {
+  std::panic::set_hook(Box::new(|panic_hook_info| {
+    // Recover terminal mode.
+    if shutdown_raw_mode().is_err() {
+      eprintln!("FATAL! Failed to recover terminal!");
+    }
+
+    let now = jiff::Zoned::now();
+    let btrace = std::backtrace::Backtrace::force_capture();
+    println!("FATAL! Rsvim panics at {now}!");
+    println!("{:?}", panic_hook_info);
+    println!("{}", btrace);
+    let log_name = format!(
+      "rsvim_coredump_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
+      now.date().year(),
+      now.date().month(),
+      now.date().day(),
+      now.time().hour(),
+      now.time().minute(),
+      now.time().second(),
+      now.time().millisecond(),
+    );
+    let log_path = std::path::Path::new(log_name.as_str());
+    if let Ok(mut f) = std::fs::File::create(log_path) {
+      if f
+        .write_all(format!("FATAL! Rsvim panics!\n{:?}\n{}", panic_hook_info, btrace).as_bytes())
+        .is_err()
+      {
+        eprintln!("FATAL! Failed to write rsvim coredump!");
+      }
+    } else {
+      eprintln!("FATAL! Failed to create rsvim coredump!");
+    }
+  }));
 }

@@ -242,39 +242,7 @@ impl EventLoop {
 
     // Register panic hook to shutdown terminal raw mode, this helps recover normal terminal
     // command line for users, if any exceptions been thrown.
-    std::panic::set_hook(Box::new(|panic_hook_info| {
-      // Recover terminal mode.
-      if tui::shutdown_raw_mode().is_err() {
-        eprintln!("FATAL! Failed to recover terminal!");
-      }
-
-      let now = jiff::Zoned::now();
-      let btrace = std::backtrace::Backtrace::force_capture();
-      println!("FATAL! Rsvim panics at {now}!");
-      println!("{:?}", panic_hook_info);
-      println!("{}", btrace);
-      let log_name = format!(
-        "rsvim_coredump_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
-        now.date().year(),
-        now.date().month(),
-        now.date().day(),
-        now.time().hour(),
-        now.time().minute(),
-        now.time().second(),
-        now.time().millisecond(),
-      );
-      let log_path = std::path::Path::new(log_name.as_str());
-      if let Ok(mut f) = std::fs::File::create(log_path) {
-        if f
-          .write_all(format!("FATAL! Rsvim panics!\n{:?}\n{}", panic_hook_info, btrace).as_bytes())
-          .is_err()
-        {
-          eprintln!("FATAL! Failed to write rsvim coredump!");
-        }
-      } else {
-        eprintln!("FATAL! Failed to create rsvim coredump!");
-      }
-    }));
+    tui::shutdown_raw_mode_on_panic();
 
     Ok(())
   }
