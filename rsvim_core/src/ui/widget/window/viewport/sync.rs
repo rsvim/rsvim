@@ -1052,7 +1052,8 @@ fn _move_more_to_right_wrap(
   }
 }
 
-fn _adjust_horizontally_wrap_nolinebreak(
+fn _adjust_horizontally_wrap(
+  proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   cannot_fully_contains_target_cursor_line: bool,
@@ -1194,45 +1195,45 @@ fn _adjust_current_line(
 //     None
 //   }
 // }
-
-fn _adjust_horizontally_wrap_linebreak(
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  cannot_fully_contains_target_cursor_line: bool,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-  start_line: usize,
-  start_column: usize,
-) -> (usize, usize) {
-  let start_column_on_left_side = _move_more_to_left_wrap(
-    proc_line_wrap_linebreak,
-    buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
-    start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
-
-  if let Some(start_column_left) = start_column_on_left_side {
-    return (start_line, start_column_left);
-  }
-
-  let start_column_on_right_side = _move_more_to_right_wrap(
-    proc_line_wrap_linebreak,
-    buffer,
-    window_actual_shape,
-    start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
-
-  if let Some(start_column_right) = start_column_on_right_side {
-    return (start_line, start_column_right);
-  }
-
-  (start_line, start_column)
-}
+//
+// fn _adjust_horizontally_wrap_linebreak(
+//   buffer: &Buffer,
+//   window_actual_shape: &U16Rect,
+//   cannot_fully_contains_target_cursor_line: bool,
+//   target_cursor_line: usize,
+//   target_cursor_char: usize,
+//   start_line: usize,
+//   start_column: usize,
+// ) -> (usize, usize) {
+//   let start_column_on_left_side = _move_more_to_left_wrap(
+//     proc_line_wrap_linebreak,
+//     buffer,
+//     window_actual_shape,
+//     cannot_fully_contains_target_cursor_line,
+//     start_column,
+//     target_cursor_line,
+//     target_cursor_char,
+//   );
+//
+//   if let Some(start_column_left) = start_column_on_left_side {
+//     return (start_line, start_column_left);
+//   }
+//
+//   let start_column_on_right_side = _move_more_to_right_wrap(
+//     proc_line_wrap_linebreak,
+//     buffer,
+//     window_actual_shape,
+//     start_column,
+//     target_cursor_line,
+//     target_cursor_char,
+//   );
+//
+//   if let Some(start_column_right) = start_column_on_right_side {
+//     return (start_line, start_column_right);
+//   }
+//
+//   (start_line, start_column)
+// }
 
 // Search a new viewport anchor (`start_line`, `start_column`) downward, i.e. when cursor moves
 // down, and possibly scrolling buffer if cursor reaches the window bottom.
@@ -1429,7 +1430,8 @@ fn search_anchor_downward_wrap_nolinebreak(
     )
   };
 
-  _adjust_horizontally_wrap_nolinebreak(
+  _adjust_horizontally_wrap(
+    proc_line_wrap_nolinebreak,
     buffer,
     window_actual_shape,
     cannot_fully_contains_target_cursor_line,
@@ -1519,7 +1521,8 @@ fn search_anchor_downward_wrap_linebreak(
       )
     };
 
-  _adjust_horizontally_wrap_linebreak(
+  _adjust_horizontally_wrap(
+    proc_line_wrap_linebreak,
     buffer,
     window_actual_shape,
     cannot_fully_contains_target_cursor_line,
@@ -1668,7 +1671,8 @@ fn search_anchor_upward_wrap_nolinebreak(
       )
     };
 
-  _adjust_horizontally_wrap_nolinebreak(
+  _adjust_horizontally_wrap(
+    proc_line_wrap_nolinebreak,
     buffer,
     window_actual_shape,
     cannot_fully_contains_target_cursor_line,
@@ -1736,7 +1740,8 @@ fn search_anchor_upward_wrap_linebreak(
       )
     };
 
-  _adjust_horizontally_wrap_linebreak(
+  _adjust_horizontally_wrap(
+    proc_line_wrap_linebreak,
     buffer,
     window_actual_shape,
     cannot_fully_contains_target_cursor_line,
