@@ -823,8 +823,24 @@ fn _line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) ->
   last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
-// For `wrap=true,linebreak=false`
-fn _find_start_char_wrap_nolinebreak(
+// Type alias for `proc_line_*` functions.
+type ProcessLineFn = fn(
+  /* buffer */ &Buffer,
+  /* start_column */ usize,
+  /* current_line */ usize,
+  /* mut current_row */ u16,
+  /* window_height */ u16,
+  /* window_width */ u16,
+) -> (
+  /* rows */ BTreeMap<u16, RowViewport>,
+  /* start_fills */ usize,
+  /* end_fills */ usize,
+  /* next_current_row */ u16,
+);
+
+// For `wrap=true`.
+fn _find_start_char_wrap(
+  proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   line_idx: usize,
@@ -836,7 +852,7 @@ fn _find_start_char_wrap_nolinebreak(
   let bufline_chars_width = buffer.width_until(line_idx, bufline_len_char);
 
   while start_column < bufline_chars_width {
-    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_nolinebreak(
+    let (rows, _start_fills, _end_fills, _) = proc(
       buffer,
       start_column,
       line_idx,
@@ -858,7 +874,8 @@ fn _find_start_char_wrap_nolinebreak(
 // cannot fully show (i.e. the line head/tail are been truncated), and also we have confirmed the
 // last char index.
 // In such case, we needs to calculate the `start_column`.
-fn _revert_search_start_column_wrap_nolinebreak(
+fn _revert_search_start_column_wrap(
+  proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   line_idx: usize,
@@ -868,7 +885,8 @@ fn _revert_search_start_column_wrap_nolinebreak(
   let approximate_start_column = last_char_width.saturating_sub(
     (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
   );
-  _find_start_char_wrap_nolinebreak(
+  _find_start_char_wrap(
+    proc,
     buffer,
     window_actual_shape,
     line_idx,
@@ -974,7 +992,8 @@ fn _move_more_to_left_wrap_nolinebreak(
     let last_visible_char = buffer
       .last_visible_char_on_line(target_cursor_line)
       .unwrap_or(0_usize);
-    let start_column_included_last_visible_char = _revert_search_start_column_wrap_nolinebreak(
+    let start_column_included_last_visible_char = _revert_search_start_column_wrap(
+      proc_line_wrap_nolinebreak,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1019,7 +1038,8 @@ fn _move_more_to_right_wrap_nolinebreak(
     && target_cursor_char >= last_row_viewport.end_char_idx();
 
   if on_right_side {
-    let start_column = _revert_search_start_column_wrap_nolinebreak(
+    let start_column = _revert_search_start_column_wrap(
+      proc_line_wrap_nolinebreak,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1081,54 +1101,54 @@ fn _adjust_current_line(
   }
 }
 
-fn _find_start_char_wrap_linebreak(
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  line_idx: usize,
-  last_char: usize,
-  mut start_column: usize,
-) -> usize {
-  let bufline = buffer.get_rope().line(line_idx);
-  let bufline_len_char = bufline.len_chars();
-  let bufline_chars_width = buffer.width_until(line_idx, bufline_len_char);
-
-  while start_column < bufline_chars_width {
-    let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
-      buffer,
-      start_column,
-      line_idx,
-      0_u16,
-      window_actual_shape.height(),
-      window_actual_shape.width(),
-    );
-    let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-    if last_row_viewport.end_char_idx() > last_char {
-      return start_column;
-    }
-    start_column += 1;
-  }
-
-  unreachable!()
-}
-
-fn _revert_search_start_column_wrap_linebreak(
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  line_idx: usize,
-  last_char: usize,
-) -> usize {
-  let last_char_width = buffer.width_until(line_idx, last_char);
-  let approximate_start_column = last_char_width.saturating_sub(
-    (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
-  );
-  _find_start_char_wrap_linebreak(
-    buffer,
-    window_actual_shape,
-    line_idx,
-    last_char,
-    approximate_start_column,
-  )
-}
+// fn _find_start_char_wrap_linebreak(
+//   buffer: &Buffer,
+//   window_actual_shape: &U16Rect,
+//   line_idx: usize,
+//   last_char: usize,
+//   mut start_column: usize,
+// ) -> usize {
+//   let bufline = buffer.get_rope().line(line_idx);
+//   let bufline_len_char = bufline.len_chars();
+//   let bufline_chars_width = buffer.width_until(line_idx, bufline_len_char);
+//
+//   while start_column < bufline_chars_width {
+//     let (rows, _start_fills, _end_fills, _) = proc_line_wrap_linebreak(
+//       buffer,
+//       start_column,
+//       line_idx,
+//       0_u16,
+//       window_actual_shape.height(),
+//       window_actual_shape.width(),
+//     );
+//     let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+//     if last_row_viewport.end_char_idx() > last_char {
+//       return start_column;
+//     }
+//     start_column += 1;
+//   }
+//
+//   unreachable!()
+// }
+//
+// fn _revert_search_start_column_wrap_linebreak(
+//   buffer: &Buffer,
+//   window_actual_shape: &U16Rect,
+//   line_idx: usize,
+//   last_char: usize,
+// ) -> usize {
+//   let last_char_width = buffer.width_until(line_idx, last_char);
+//   let approximate_start_column = last_char_width.saturating_sub(
+//     (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
+//   );
+//   _find_start_char_wrap_linebreak(
+//     buffer,
+//     window_actual_shape,
+//     line_idx,
+//     last_char,
+//     approximate_start_column,
+//   )
+// }
 
 fn _move_more_to_left_wrap_linebreak(
   buffer: &Buffer,
@@ -1162,7 +1182,8 @@ fn _move_more_to_left_wrap_linebreak(
     let last_visible_char = buffer
       .last_visible_char_on_line(target_cursor_line)
       .unwrap_or(0_usize);
-    let start_column_included_last_visible_char = _revert_search_start_column_wrap_linebreak(
+    let start_column_included_last_visible_char = _revert_search_start_column_wrap(
+      proc_line_wrap_linebreak,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1207,7 +1228,8 @@ fn _move_more_to_right_wrap_linebreak(
     && target_cursor_char >= last_row_viewport.end_char_idx();
 
   if on_right_side {
-    let start_column = _revert_search_start_column_wrap_linebreak(
+    let start_column = _revert_search_start_column_wrap(
+      proc_line_wrap_linebreak,
       buffer,
       window_actual_shape,
       target_cursor_line,
