@@ -3,7 +3,7 @@
 //! See [rsvim_core] for more details.
 
 use rsvim_core::cli::CliOpt;
-use rsvim_core::evloop::{self, EventLoop};
+use rsvim_core::evloop::EventLoop;
 use rsvim_core::js::SnapshotData;
 use rsvim_core::log;
 use rsvim_core::prelude::*;

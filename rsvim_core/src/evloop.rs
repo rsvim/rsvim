@@ -35,7 +35,6 @@ use tracing::{error, trace};
 
 pub mod msg;
 pub mod task;
-pub mod tui;
 
 // #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop will spawn them in
