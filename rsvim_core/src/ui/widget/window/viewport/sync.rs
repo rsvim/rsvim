@@ -1258,14 +1258,16 @@ pub fn search_anchor_downward(
       target_cursor_line,
       target_cursor_char,
     ),
-    (true, false) => search_anchor_downward_wrap_nolinebreak(
+    (true, false) => search_anchor_downward_wrap(
+      proc_line_wrap_nolinebreak,
       viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
     ),
-    (true, true) => search_anchor_downward_wrap_linebreak(
+    (true, true) => search_anchor_downward_wrap(
+      proc_line_wrap_linebreak,
       viewport,
       buffer,
       window_actual_shape,
@@ -1342,107 +1344,8 @@ fn search_anchor_downward_nowrap(
   )
 }
 
-fn search_anchor_downward_wrap_nolinebreak(
-  viewport: &Viewport,
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_visible_char_on_line(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
-
-  debug_assert!(viewport.lines().last_key_value().is_some());
-  let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
-
-  // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only 1
-  // line shows in current window viewport. Because the `wrap` will force the 2nd line wait to show
-  // until the **current** line get fully rendered.
-
-  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-    || _line_tail_not_show(viewport, buffer, target_cursor_line);
-
-  let (start_line, start_column, cannot_fully_contains_target_cursor_line) = if target_cursor_line
-    <= last_line
-    && !target_cursor_line_not_fully_show
-  {
-    (viewport_start_line, viewport_start_column, false)
-  } else {
-    // Try to fill the viewport with `start_column=0`, and we can know how many rows the
-    // `target_cursor_line` needs to fill into current viewport.
-    let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
-      proc_line_wrap_nolinebreak(
-        buffer,
-        0,
-        target_cursor_line,
-        0_u16,
-        height.saturating_add(10),
-        width,
-      );
-
-    // 1. If the `target_cursor_line` can fully show in current viewport, then we force the
-    // `start_column` to 0.
-    //
-    // 2. Otherwise it means the current viewport can only contains 1 line, i.e. the
-    // `target_cursor_line`, and it is still possible to add some `start_column` if the line is too
-    // long. And in such case, the `start_line` will always be the `target_cursor_line` because
-    // the line is too big to show in current viewport, and we don't need other lines.
-    let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-    let (start_line, start_column) = if !cannot_fully_contains_target_cursor_line {
-      let mut n = 0_usize;
-      let mut current_line = target_cursor_line as isize;
-
-      while (n < height as usize) && (current_line >= 0) {
-        let (rows, _start_fills, _end_fills, _) =
-          proc_line_wrap_nolinebreak(buffer, 0_usize, current_line as usize, 0_u16, height, width);
-        n += rows.len();
-
-        if current_line == 0 || n >= height as usize {
-          break;
-        }
-
-        current_line -= 1;
-      }
-
-      (
-        _adjust_current_line(current_line, target_cursor_line, height, n),
-        0_usize,
-      )
-    } else {
-      (target_cursor_line, viewport_start_column)
-    };
-
-    (
-      start_line,
-      start_column,
-      cannot_fully_contains_target_cursor_line,
-    )
-  };
-
-  _adjust_horizontally_wrap(
-    proc_line_wrap_nolinebreak,
-    buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
-    target_cursor_line,
-    target_cursor_char,
-    start_line,
-    start_column,
-  )
-}
-
-fn search_anchor_downward_wrap_linebreak(
+fn search_anchor_downward_wrap(
+  proc: ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1479,16 +1382,22 @@ fn search_anchor_downward_wrap_linebreak(
     } else {
       // Try to fill the viewport with `start_column=0`, and we can know how many rows the
       // `target_cursor_line` needs to fill into current viewport.
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
-        proc_line_wrap_linebreak(
-          buffer,
-          0,
-          target_cursor_line,
-          0_u16,
-          height.saturating_add(10),
-          width,
-        );
+      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
+        buffer,
+        0,
+        target_cursor_line,
+        0_u16,
+        height.saturating_add(10),
+        width,
+      );
 
+      // 1. If the `target_cursor_line` can fully show in current viewport, then we force the
+      // `start_column` to 0.
+      //
+      // 2. Otherwise it means the current viewport can only contains 1 line, i.e. the
+      // `target_cursor_line`, and it is still possible to add some `start_column` if the line is too
+      // long. And in such case, the `start_line` will always be the `target_cursor_line` because
+      // the line is too big to show in current viewport, and we don't need other lines.
       let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
       let (start_line, start_column) = if !cannot_fully_contains_target_cursor_line {
         let mut n = 0_usize;
@@ -1496,7 +1405,7 @@ fn search_anchor_downward_wrap_linebreak(
 
         while (n < height as usize) && (current_line >= 0) {
           let (rows, _start_fills, _end_fills, _) =
-            proc_line_wrap_linebreak(buffer, 0_usize, current_line as usize, 0_u16, height, width);
+            proc(buffer, 0_usize, current_line as usize, 0_u16, height, width);
           n += rows.len();
 
           if current_line == 0 || n >= height as usize {
@@ -1522,7 +1431,7 @@ fn search_anchor_downward_wrap_linebreak(
     };
 
   _adjust_horizontally_wrap(
-    proc_line_wrap_linebreak,
+    proc,
     buffer,
     window_actual_shape,
     cannot_fully_contains_target_cursor_line,
@@ -1532,6 +1441,97 @@ fn search_anchor_downward_wrap_linebreak(
     start_column,
   )
 }
+
+// fn search_anchor_downward_wrap_linebreak(
+//   viewport: &Viewport,
+//   buffer: &Buffer,
+//   window_actual_shape: &U16Rect,
+//   target_cursor_line: usize,
+//   target_cursor_char: usize,
+// ) -> (usize, usize) {
+//   let viewport_start_line = viewport.start_line_idx();
+//   let viewport_start_column = viewport.start_column_idx();
+//   let height = window_actual_shape.height();
+//   let width = window_actual_shape.width();
+//   let buffer_len_lines = buffer.get_rope().len_lines();
+//
+//   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+//   let target_cursor_char = std::cmp::min(
+//     target_cursor_char,
+//     buffer
+//       .last_visible_char_on_line(target_cursor_line)
+//       .unwrap_or(0_usize),
+//   );
+//
+//   debug_assert!(viewport.lines().last_key_value().is_some());
+//   let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
+//
+//   // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only 1
+//   // line shows in current window viewport. Because the `wrap` will force the 2nd line wait to show
+//   // until the **current** line get fully rendered.
+//
+//   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
+//     || _line_tail_not_show(viewport, buffer, target_cursor_line);
+//
+//   let (start_line, start_column, cannot_fully_contains_target_cursor_line) =
+//     if target_cursor_line <= last_line && !target_cursor_line_not_fully_show {
+//       (viewport_start_line, viewport_start_column, false)
+//     } else {
+//       // Try to fill the viewport with `start_column=0`, and we can know how many rows the
+//       // `target_cursor_line` needs to fill into current viewport.
+//       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+//         proc_line_wrap_linebreak(
+//           buffer,
+//           0,
+//           target_cursor_line,
+//           0_u16,
+//           height.saturating_add(10),
+//           width,
+//         );
+//
+//       let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
+//       let (start_line, start_column) = if !cannot_fully_contains_target_cursor_line {
+//         let mut n = 0_usize;
+//         let mut current_line = target_cursor_line as isize;
+//
+//         while (n < height as usize) && (current_line >= 0) {
+//           let (rows, _start_fills, _end_fills, _) =
+//             proc_line_wrap_linebreak(buffer, 0_usize, current_line as usize, 0_u16, height, width);
+//           n += rows.len();
+//
+//           if current_line == 0 || n >= height as usize {
+//             break;
+//           }
+//
+//           current_line -= 1;
+//         }
+//
+//         (
+//           _adjust_current_line(current_line, target_cursor_line, height, n),
+//           0_usize,
+//         )
+//       } else {
+//         (target_cursor_line, viewport_start_column)
+//       };
+//
+//       (
+//         start_line,
+//         start_column,
+//         cannot_fully_contains_target_cursor_line,
+//       )
+//     };
+//
+//   _adjust_horizontally_wrap(
+//     proc_line_wrap_linebreak,
+//     buffer,
+//     window_actual_shape,
+//     cannot_fully_contains_target_cursor_line,
+//     target_cursor_line,
+//     target_cursor_char,
+//     start_line,
+//     start_column,
+//   )
+// }
 
 // Search a new viewport anchor (`start_line`, `start_column`) upward, i.e. when cursor moves up,
 // and possibly scrolling buffer if cursor reaches the window top.
