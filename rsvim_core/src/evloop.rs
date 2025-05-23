@@ -244,9 +244,7 @@ impl EventLoop {
     // command line for users, if any exceptions been thrown.
     std::panic::set_hook(Box::new(|panic_hook_info| {
       // Recover terminal mode.
-      if let Ok(_) = tui::shutdown_raw_mode() {
-        /* do nothing */
-      } else {
+      if tui::shutdown_raw_mode().is_err() {
         eprintln!("FATAL! Failed to recover terminal!");
       }
 
@@ -267,11 +265,10 @@ impl EventLoop {
       );
       let log_path = std::path::Path::new(log_name.as_str());
       if let Ok(mut f) = std::fs::File::create(log_path) {
-        if let Ok(_) =
-          f.write_all(format!("FATAL! Rsvim panics!\n{:?}\n{}", panic_hook_info, btrace).as_bytes())
+        if f
+          .write_all(format!("FATAL! Rsvim panics!\n{:?}\n{}", panic_hook_info, btrace).as_bytes())
+          .is_err()
         {
-          /* do nothing */
-        } else {
           eprintln!("FATAL! Failed to write rsvim coredump!");
         }
       } else {
