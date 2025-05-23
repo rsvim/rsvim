@@ -1,5 +1,7 @@
 //! Internal implementations for Viewport.
 
+#![allow(clippy::too_many_arguments)]
+
 use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::ui::widget::window::viewport::RowViewport;
