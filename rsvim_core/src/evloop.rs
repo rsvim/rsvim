@@ -239,6 +239,71 @@ impl EventLoop {
     Ok(())
   }
 
+  /// Initialize terminal raw mode.
+  pub fn init_tui(&self) -> IoResult<()> {
+    if !crossterm::terminal::is_raw_mode_enabled()? {
+      crossterm::terminal::enable_raw_mode()?;
+    }
+
+    let mut out = std::io::stdout();
+    execute!(
+      out,
+      crossterm::terminal::EnterAlternateScreen,
+      crossterm::terminal::Clear(crossterm::terminal::ClearType::All),
+      EnableMouseCapture,
+      EnableFocusChange,
+    )?;
+
+    Ok(())
+  }
+
+  /// First flush TUI to terminal.
+  pub fn init_tui_complete(&mut self) -> IoResult<()> {
+    // Initialize cursor
+    let cursor = {
+      let canvas = lock!(self.canvas);
+      *canvas.frame().cursor()
+    };
+
+    if cursor.blinking() {
+      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
+    }
+    if cursor.hidden() {
+      queue!(self.writer, crossterm::cursor::Hide)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::Show)?;
+    }
+
+    queue!(self.writer, cursor.style())?;
+    queue!(
+      self.writer,
+      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
+    )?;
+
+    self.render()?;
+
+    Ok(())
+  }
+
+  /// Shutdown terminal raw mode.
+  pub fn shutdown_tui(&self) -> IoResult<()> {
+    let mut out = std::io::stdout();
+    execute!(
+      out,
+      DisableMouseCapture,
+      DisableFocusChange,
+      crossterm::terminal::LeaveAlternateScreen,
+    )?;
+
+    if crossterm::terminal::is_raw_mode_enabled()? {
+      crossterm::terminal::disable_raw_mode()?;
+    }
+
+    Ok(())
+  }
+
   /// Initialize buffers.
   pub fn init_buffers(&mut self) -> IoResult<()> {
     let canvas_size = lock!(self.canvas).size();
@@ -305,36 +370,6 @@ impl EventLoop {
     );
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(window_id, cursor_node);
-
-    Ok(())
-  }
-
-  /// First flush TUI to terminal.
-  pub fn init_tui_done(&mut self) -> IoResult<()> {
-    // Initialize cursor
-    let cursor = {
-      let canvas = lock!(self.canvas);
-      *canvas.frame().cursor()
-    };
-
-    if cursor.blinking() {
-      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
-    } else {
-      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
-    }
-    if cursor.hidden() {
-      queue!(self.writer, crossterm::cursor::Hide)?;
-    } else {
-      queue!(self.writer, crossterm::cursor::Show)?;
-    }
-
-    queue!(self.writer, cursor.style())?;
-    queue!(
-      self.writer,
-      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
-    )?;
-
-    self.render()?;
 
     Ok(())
   }
