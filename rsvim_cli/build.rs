@@ -3,18 +3,14 @@ use std::io::Write;
 use std::path::Path;
 
 fn version() {
-  let cargo_toml_src = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../Cargo.toml"));
-  let cargo_toml_meta = cargo_toml_src.parse::<toml::Table>().unwrap();
   let output_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
   eprintln!(
     "[RSVIM] Writing version into {:?}...",
     output_path.as_path()
   );
-  let rsvim_version = cargo_toml_meta["workspace"]["package"]["version"]
-    .as_str()
-    .unwrap();
+  let pkg_version = env!("CARGO_PKG_VERSION");
   let mut f = std::fs::File::create(output_path).unwrap();
-  write!(&mut f, "rsvim {} (v8 {})", rsvim_version, v8_version()).unwrap();
+  write!(&mut f, "rsvim {} (v8 {})", pkg_version, v8_version()).unwrap();
 }
 
 fn snapshot() {
