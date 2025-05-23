@@ -251,8 +251,10 @@ impl EventLoop {
       }
 
       let now = jiff::Zoned::now();
-      println!("FATAL! Rsvim panics at {now}");
+      let btrace = std::backtrace::Backtrace::force_capture();
+      println!("FATAL! Rsvim panics at {now}!");
       println!("{:?}", panic_hook_info);
+      println!("{}", btrace);
       let log_name = format!(
         "rsvim_coredump_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
         now.date().year(),
@@ -266,7 +268,7 @@ impl EventLoop {
       let log_path = std::path::Path::new(log_name.as_str());
       if let Ok(mut f) = std::fs::File::create(log_path) {
         if let Ok(_) =
-          f.write_all(format!("FATAL! Rsvim panics:\n{:?}", panic_hook_info).as_bytes())
+          f.write_all(format!("FATAL! Rsvim panics!\n{:?}\n{}", panic_hook_info, btrace).as_bytes())
         {
           /* do nothing */
         } else {

@@ -18,6 +18,7 @@ pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+    debug_assert!(false);
     let event = data_access.event.clone();
 
     match event {
