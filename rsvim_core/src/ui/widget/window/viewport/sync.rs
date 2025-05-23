@@ -1777,14 +1777,16 @@ pub fn search_anchor_leftward(
       target_cursor_line,
       target_cursor_char,
     ),
-    (true, false) => search_anchor_leftward_wrap_nolinebreak(
+    (true, false) => search_anchor_leftward_wrap(
+      proc_line_wrap_nolinebreak,
       viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
     ),
-    (true, true) => search_anchor_leftward_wrap_linebreak(
+    (true, true) => search_anchor_leftward_wrap(
+      proc_line_wrap_linebreak,
       viewport,
       buffer,
       window_actual_shape,
@@ -1841,7 +1843,8 @@ fn search_anchor_leftward_nowrap(
   (start_line, start_column)
 }
 
-fn search_anchor_leftward_wrap_nolinebreak(
+fn search_anchor_leftward_wrap(
+  proc: ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1872,15 +1875,14 @@ fn search_anchor_leftward_wrap_nolinebreak(
     if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
       (viewport_start_column, false)
     } else {
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
-        proc_line_wrap_nolinebreak(
-          buffer,
-          0,
-          target_cursor_line,
-          0_u16,
-          height.saturating_add(10),
-          width,
-        );
+      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
+        buffer,
+        0,
+        target_cursor_line,
+        0_u16,
+        height.saturating_add(10),
+        width,
+      );
       let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
       let start_column = if !cannot_fully_contains_target_cursor_line {
         0_usize
@@ -1895,7 +1897,7 @@ fn search_anchor_leftward_wrap_nolinebreak(
   let start_line = viewport_start_line;
 
   let start_column_on_left_side = _move_more_to_left_wrap(
-    proc_line_wrap_nolinebreak,
+    proc,
     buffer,
     window_actual_shape,
     cannot_fully_contains_target_cursor_line,
@@ -1910,7 +1912,7 @@ fn search_anchor_leftward_wrap_nolinebreak(
 
   if cfg!(debug_assertions) {
     let start_column_on_right_side = _move_more_to_right_wrap(
-      proc_line_wrap_nolinebreak,
+      proc,
       buffer,
       window_actual_shape,
       start_column,
@@ -1924,89 +1926,89 @@ fn search_anchor_leftward_wrap_nolinebreak(
   (start_line, start_column)
 }
 
-fn search_anchor_leftward_wrap_linebreak(
-  viewport: &Viewport,
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_visible_char_on_line(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
-
-  debug_assert!(viewport.lines().first_key_value().is_some());
-  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
-
-  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-    || _line_tail_not_show(viewport, buffer, target_cursor_line);
-
-  let (start_column, cannot_fully_contains_target_cursor_line) =
-    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      (viewport_start_column, false)
-    } else {
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
-        proc_line_wrap_linebreak(
-          buffer,
-          0,
-          target_cursor_line,
-          0_u16,
-          height.saturating_add(10),
-          width,
-        );
-
-      let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-      let start_column = if !cannot_fully_contains_target_cursor_line {
-        0_usize
-      } else {
-        viewport_start_column
-      };
-
-      (start_column, cannot_fully_contains_target_cursor_line)
-    };
-
-  // adjust horizontally
-  let start_line = viewport_start_line;
-
-  let start_column_on_left_side = _move_more_to_left_wrap(
-    proc_line_wrap_linebreak,
-    buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
-    start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
-
-  if let Some(start_column_left) = start_column_on_left_side {
-    return (start_line, start_column_left);
-  }
-
-  if cfg!(debug_assertions) {
-    let start_column_on_right_side = _move_more_to_right_wrap(
-      proc_line_wrap_linebreak,
-      buffer,
-      window_actual_shape,
-      start_column,
-      target_cursor_line,
-      target_cursor_char,
-    );
-
-    debug_assert!(start_column_on_right_side.is_none());
-  }
-
-  (start_line, start_column)
-}
+// fn search_anchor_leftward_wrap_linebreak(
+//   viewport: &Viewport,
+//   buffer: &Buffer,
+//   window_actual_shape: &U16Rect,
+//   target_cursor_line: usize,
+//   target_cursor_char: usize,
+// ) -> (usize, usize) {
+//   let viewport_start_line = viewport.start_line_idx();
+//   let viewport_start_column = viewport.start_column_idx();
+//   let height = window_actual_shape.height();
+//   let width = window_actual_shape.width();
+//   let buffer_len_lines = buffer.get_rope().len_lines();
+//
+//   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+//   let target_cursor_char = std::cmp::min(
+//     target_cursor_char,
+//     buffer
+//       .last_visible_char_on_line(target_cursor_line)
+//       .unwrap_or(0_usize),
+//   );
+//
+//   debug_assert!(viewport.lines().first_key_value().is_some());
+//   let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
+//
+//   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
+//     || _line_tail_not_show(viewport, buffer, target_cursor_line);
+//
+//   let (start_column, cannot_fully_contains_target_cursor_line) =
+//     if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
+//       (viewport_start_column, false)
+//     } else {
+//       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+//         proc_line_wrap_linebreak(
+//           buffer,
+//           0,
+//           target_cursor_line,
+//           0_u16,
+//           height.saturating_add(10),
+//           width,
+//         );
+//
+//       let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
+//       let start_column = if !cannot_fully_contains_target_cursor_line {
+//         0_usize
+//       } else {
+//         viewport_start_column
+//       };
+//
+//       (start_column, cannot_fully_contains_target_cursor_line)
+//     };
+//
+//   // adjust horizontally
+//   let start_line = viewport_start_line;
+//
+//   let start_column_on_left_side = _move_more_to_left_wrap(
+//     proc_line_wrap_linebreak,
+//     buffer,
+//     window_actual_shape,
+//     cannot_fully_contains_target_cursor_line,
+//     start_column,
+//     target_cursor_line,
+//     target_cursor_char,
+//   );
+//
+//   if let Some(start_column_left) = start_column_on_left_side {
+//     return (start_line, start_column_left);
+//   }
+//
+//   if cfg!(debug_assertions) {
+//     let start_column_on_right_side = _move_more_to_right_wrap(
+//       proc_line_wrap_linebreak,
+//       buffer,
+//       window_actual_shape,
+//       start_column,
+//       target_cursor_line,
+//       target_cursor_char,
+//     );
+//
+//     debug_assert!(start_column_on_right_side.is_none());
+//   }
+//
+//   (start_line, start_column)
+// }
 
 // Search a new viewport anchor (`start_line`, `start_column`) rightward, i.e. when cursor moves
 // left, and possibly scrolling buffer if cursor reaches the window left border.
@@ -2031,14 +2033,16 @@ pub fn search_anchor_rightward(
       target_cursor_line,
       target_cursor_char,
     ),
-    (true, false) => search_anchor_rightward_wrap_nolinebreak(
+    (true, false) => search_anchor_rightward_wrap(
+      proc_line_wrap_nolinebreak,
       viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
     ),
-    (true, true) => search_anchor_rightward_wrap_linebreak(
+    (true, true) => search_anchor_rightward_wrap(
+      proc_line_wrap_linebreak,
       viewport,
       buffer,
       window_actual_shape,
@@ -2096,7 +2100,8 @@ fn search_anchor_rightward_nowrap(
   (start_line, start_column)
 }
 
-fn search_anchor_rightward_wrap_nolinebreak(
+fn search_anchor_rightward_wrap(
+  proc: ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -2127,15 +2132,14 @@ fn search_anchor_rightward_wrap_nolinebreak(
     if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
       (viewport_start_column, false)
     } else {
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
-        proc_line_wrap_nolinebreak(
-          buffer,
-          0,
-          target_cursor_line,
-          0_u16,
-          height.saturating_add(10),
-          width,
-        );
+      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
+        buffer,
+        0,
+        target_cursor_line,
+        0_u16,
+        height.saturating_add(10),
+        width,
+      );
       let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
       let start_column = if !cannot_fully_contains_target_cursor_line {
         0_usize
@@ -2151,7 +2155,7 @@ fn search_anchor_rightward_wrap_nolinebreak(
 
   if cfg!(debug_assertions) {
     let start_column_on_left_side = _move_more_to_left_wrap(
-      proc_line_wrap_nolinebreak,
+      proc,
       buffer,
       window_actual_shape,
       cannot_fully_contains_target_cursor_line,
@@ -2164,7 +2168,7 @@ fn search_anchor_rightward_wrap_nolinebreak(
   }
 
   let start_column_on_right_side = _move_more_to_right_wrap(
-    proc_line_wrap_nolinebreak,
+    proc,
     buffer,
     window_actual_shape,
     start_column,
@@ -2179,86 +2183,86 @@ fn search_anchor_rightward_wrap_nolinebreak(
   (start_line, start_column)
 }
 
-fn search_anchor_rightward_wrap_linebreak(
-  viewport: &Viewport,
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
-  let viewport_start_column = viewport.start_column_idx();
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_visible_char_on_line(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
-
-  debug_assert!(viewport.lines().first_key_value().is_some());
-  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
-
-  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-    || _line_tail_not_show(viewport, buffer, target_cursor_line);
-
-  let (start_column, cannot_fully_contains_target_cursor_line) =
-    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      (viewport_start_column, false)
-    } else {
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
-        proc_line_wrap_linebreak(
-          buffer,
-          0,
-          target_cursor_line,
-          0_u16,
-          height.saturating_add(10),
-          width,
-        );
-
-      let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-      let start_column = if !cannot_fully_contains_target_cursor_line {
-        0_usize
-      } else {
-        viewport_start_column
-      };
-
-      (start_column, cannot_fully_contains_target_cursor_line)
-    };
-
-  // adjust horizontally
-  let start_line = viewport_start_line;
-
-  if cfg!(debug_assertions) {
-    let start_column_on_left_side = _move_more_to_left_wrap(
-      proc_line_wrap_linebreak,
-      buffer,
-      window_actual_shape,
-      cannot_fully_contains_target_cursor_line,
-      start_column,
-      target_cursor_line,
-      target_cursor_char,
-    );
-
-    debug_assert!(start_column_on_left_side.is_none());
-  }
-
-  let start_column_on_right_side = _move_more_to_right_wrap(
-    proc_line_wrap_linebreak,
-    buffer,
-    window_actual_shape,
-    start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
-
-  if let Some(start_column_right) = start_column_on_right_side {
-    return (start_line, start_column_right);
-  }
-
-  (start_line, start_column)
-}
+// fn search_anchor_rightward_wrap_linebreak(
+//   viewport: &Viewport,
+//   buffer: &Buffer,
+//   window_actual_shape: &U16Rect,
+//   target_cursor_line: usize,
+//   target_cursor_char: usize,
+// ) -> (usize, usize) {
+//   let viewport_start_line = viewport.start_line_idx();
+//   let viewport_start_column = viewport.start_column_idx();
+//   let height = window_actual_shape.height();
+//   let width = window_actual_shape.width();
+//   let buffer_len_lines = buffer.get_rope().len_lines();
+//
+//   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+//   let target_cursor_char = std::cmp::min(
+//     target_cursor_char,
+//     buffer
+//       .last_visible_char_on_line(target_cursor_line)
+//       .unwrap_or(0_usize),
+//   );
+//
+//   debug_assert!(viewport.lines().first_key_value().is_some());
+//   let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
+//
+//   let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
+//     || _line_tail_not_show(viewport, buffer, target_cursor_line);
+//
+//   let (start_column, cannot_fully_contains_target_cursor_line) =
+//     if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
+//       (viewport_start_column, false)
+//     } else {
+//       let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) =
+//         proc_line_wrap_linebreak(
+//           buffer,
+//           0,
+//           target_cursor_line,
+//           0_u16,
+//           height.saturating_add(10),
+//           width,
+//         );
+//
+//       let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
+//       let start_column = if !cannot_fully_contains_target_cursor_line {
+//         0_usize
+//       } else {
+//         viewport_start_column
+//       };
+//
+//       (start_column, cannot_fully_contains_target_cursor_line)
+//     };
+//
+//   // adjust horizontally
+//   let start_line = viewport_start_line;
+//
+//   if cfg!(debug_assertions) {
+//     let start_column_on_left_side = _move_more_to_left_wrap(
+//       proc_line_wrap_linebreak,
+//       buffer,
+//       window_actual_shape,
+//       cannot_fully_contains_target_cursor_line,
+//       start_column,
+//       target_cursor_line,
+//       target_cursor_char,
+//     );
+//
+//     debug_assert!(start_column_on_left_side.is_none());
+//   }
+//
+//   let start_column_on_right_side = _move_more_to_right_wrap(
+//     proc_line_wrap_linebreak,
+//     buffer,
+//     window_actual_shape,
+//     start_column,
+//     target_cursor_line,
+//     target_cursor_char,
+//   );
+//
+//   if let Some(start_column_right) = start_column_on_right_side {
+//     return (start_line, start_column_right);
+//   }
+//
+//   (start_line, start_column)
+// }
