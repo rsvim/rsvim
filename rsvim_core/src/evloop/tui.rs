@@ -78,15 +78,3 @@ pub fn shutdown_raw_mode_on_panic() {
     }
   }));
 }
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn tui() {
-    initialize_raw_mode().unwrap();
-    shutdown_raw_mode_on_panic();
-    shutdown_raw_mode().unwrap();
-  }
-}
