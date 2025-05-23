@@ -1063,7 +1063,7 @@ fn _adjust_horizontally_wrap(
   start_column: usize,
 ) -> (usize, usize) {
   let start_column_on_left_side = _move_more_to_left_wrap(
-    proc_line_wrap_nolinebreak,
+    proc,
     buffer,
     window_actual_shape,
     cannot_fully_contains_target_cursor_line,
@@ -1077,7 +1077,7 @@ fn _adjust_horizontally_wrap(
   }
 
   let start_column_on_right_side = _move_more_to_right_wrap(
-    proc_line_wrap_nolinebreak,
+    proc,
     buffer,
     window_actual_shape,
     start_column,
