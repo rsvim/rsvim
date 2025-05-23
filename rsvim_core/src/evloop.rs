@@ -15,11 +15,8 @@ use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
-use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
-  EventStream,
-};
-use crossterm::{self, execute, queue};
+use crossterm::event::{Event, EventStream};
+use crossterm::{self, queue};
 use futures::StreamExt;
 use parking_lot::Mutex;
 use std::path::{Path, PathBuf};
@@ -35,6 +32,7 @@ use tracing::{error, trace};
 
 pub mod msg;
 pub mod task;
+pub mod tui;
 
 // #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop will spawn them in
@@ -238,22 +236,50 @@ impl EventLoop {
     Ok(())
   }
 
-  /// Initialize TUI.
+  /// Initialize terminal raw mode.
   pub fn init_tui(&self) -> IoResult<()> {
-    if !crossterm::terminal::is_raw_mode_enabled()? {
-      crossterm::terminal::enable_raw_mode()?;
-    }
+    tui::initialize_raw_mode()?;
 
-    let mut out = std::io::stdout();
-    execute!(
-      out,
-      crossterm::terminal::EnterAlternateScreen,
-      crossterm::terminal::Clear(crossterm::terminal::ClearType::All),
-      EnableMouseCapture,
-      EnableFocusChange,
-    )?;
+    // Register panic hook to shutdown terminal raw mode, this helps recover normal terminal
+    // command line for users, if any exceptions been thrown.
+    tui::shutdown_raw_mode_on_panic();
 
     Ok(())
+  }
+
+  /// First flush TUI to terminal.
+  pub fn init_tui_complete(&mut self) -> IoResult<()> {
+    // Initialize cursor
+    let cursor = {
+      let canvas = lock!(self.canvas);
+      *canvas.frame().cursor()
+    };
+
+    if cursor.blinking() {
+      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
+    }
+    if cursor.hidden() {
+      queue!(self.writer, crossterm::cursor::Hide)?;
+    } else {
+      queue!(self.writer, crossterm::cursor::Show)?;
+    }
+
+    queue!(self.writer, cursor.style())?;
+    queue!(
+      self.writer,
+      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
+    )?;
+
+    self.render()?;
+
+    Ok(())
+  }
+
+  /// Shutdown terminal raw mode.
+  pub fn shutdown_tui(&self) -> IoResult<()> {
+    tui::shutdown_raw_mode()
   }
 
   /// Initialize buffers.
@@ -322,36 +348,6 @@ impl EventLoop {
     );
     let cursor_node = TreeNode::Cursor(cursor);
     tree.bounded_insert(window_id, cursor_node);
-
-    Ok(())
-  }
-
-  /// First flush TUI to terminal.
-  pub fn init_tui_done(&mut self) -> IoResult<()> {
-    // Initialize cursor
-    let cursor = {
-      let canvas = lock!(self.canvas);
-      *canvas.frame().cursor()
-    };
-
-    if cursor.blinking() {
-      queue!(self.writer, crossterm::cursor::EnableBlinking)?;
-    } else {
-      queue!(self.writer, crossterm::cursor::DisableBlinking)?;
-    }
-    if cursor.hidden() {
-      queue!(self.writer, crossterm::cursor::Hide)?;
-    } else {
-      queue!(self.writer, crossterm::cursor::Show)?;
-    }
-
-    queue!(self.writer, cursor.style())?;
-    queue!(
-      self.writer,
-      crossterm::cursor::MoveTo(cursor.pos().x(), cursor.pos().y())
-    )?;
-
-    self.render()?;
 
     Ok(())
   }
@@ -539,23 +535,6 @@ impl EventLoop {
         ShaderCommand::TerminalScrollUp(command) => queue!(self.writer, command)?,
         ShaderCommand::TerminalSetSize(command) => queue!(self.writer, command)?,
       }
-    }
-
-    Ok(())
-  }
-
-  /// Shutdown TUI.
-  pub fn shutdown_tui(&self) -> IoResult<()> {
-    let mut out = std::io::stdout();
-    execute!(
-      out,
-      DisableMouseCapture,
-      DisableFocusChange,
-      crossterm::terminal::LeaveAlternateScreen,
-    )?;
-
-    if crossterm::terminal::is_raw_mode_enabled()? {
-      crossterm::terminal::disable_raw_mode()?;
     }
 
     Ok(())

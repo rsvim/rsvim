@@ -57,7 +57,7 @@ fn main() -> IoResult<()> {
     // Initialize user config.
     event_loop.init_config()?;
 
-    // Initialize terminal.
+    // Finish initialize terminal.
     event_loop.init_tui()?;
 
     // Initialize buffers and windows.
@@ -65,12 +65,12 @@ fn main() -> IoResult<()> {
     event_loop.init_windows()?;
 
     // Finish initialize terminal.
-    event_loop.init_tui_done()?;
+    event_loop.init_tui_complete()?;
 
     // Run loop.
     event_loop.run().await?;
 
-    // Shutdown.
+    // Shutdown terminal raw mode.
     event_loop.shutdown_tui()
   })
 }
