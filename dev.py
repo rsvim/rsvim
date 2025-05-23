@@ -8,7 +8,6 @@ import os
 import pathlib
 import platform
 import shutil
-import subprocess
 
 WINDOWS = platform.system().startswith("Windows") or platform.system().startswith(
     "CYGWIN_NT"
@@ -69,7 +68,7 @@ def set_rustflags(command):
 
 def set_sccache(command):
     if SCCACHE_FULLPATH is None:
-        logging.warning(f"'sccache' not found!")
+        logging.warning("'sccache' not found!")
         return command
 
     if RECACHE_SCCACHE:
