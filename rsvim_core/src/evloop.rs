@@ -255,6 +255,33 @@ impl EventLoop {
 
     // Register panic hook to shutdown terminal raw mode, this helps recover normal terminal
     // command line for users, if any exceptions been thrown.
+    std::panic::set_hook(Box::new(|panic_hook_info| {
+      let now = jiff::Zoned::now();
+      println!("FATAL! Rsvim panics at {now}");
+      println!("{:?}", panic_hook_info);
+      let log_name = format!(
+        "rsvim_coredump_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
+        now.date().year(),
+        now.date().month(),
+        now.date().day(),
+        now.time().hour(),
+        now.time().minute(),
+        now.time().second(),
+        now.time().millisecond(),
+      );
+      let log_path = std::path::Path::new(log_name.as_str());
+      if let Ok(mut f) = std::fs::File::create(log_path) {
+        if let Ok(_) =
+          f.write_all(format!("FATAL! Rsvim panics:\n{:?}", panic_hook_info).as_bytes())
+        {
+          /* do nothing */
+        } else {
+          eprintln!("FATAL! Failed to write rsvim coredump!");
+        }
+      } else {
+        eprintln!("FATAL! Failed to create rsvim coredump!");
+      }
+    }));
 
     Ok(())
   }
