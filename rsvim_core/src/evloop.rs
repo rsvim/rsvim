@@ -15,11 +15,8 @@ use crate::ui::tree::*;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
-use crossterm::event::{
-  DisableFocusChange, DisableMouseCapture, EnableFocusChange, EnableMouseCapture, Event,
-  EventStream,
-};
-use crossterm::{self, execute, queue};
+use crossterm::event::{Event, EventStream};
+use crossterm::{self, queue};
 use futures::StreamExt;
 use parking_lot::Mutex;
 use std::path::{Path, PathBuf};
@@ -35,6 +32,7 @@ use tracing::{error, trace};
 
 pub mod msg;
 pub mod task;
+pub mod tui;
 
 // #[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop will spawn them in
@@ -240,22 +238,18 @@ impl EventLoop {
 
   /// Initialize terminal raw mode.
   pub fn init_tui(&self) -> IoResult<()> {
-    if !crossterm::terminal::is_raw_mode_enabled()? {
-      crossterm::terminal::enable_raw_mode()?;
-    }
-
-    let mut out = std::io::stdout();
-    execute!(
-      out,
-      crossterm::terminal::EnterAlternateScreen,
-      crossterm::terminal::Clear(crossterm::terminal::ClearType::All),
-      EnableMouseCapture,
-      EnableFocusChange,
-    )?;
+    tui::initialize_raw_mode()?;
 
     // Register panic hook to shutdown terminal raw mode, this helps recover normal terminal
     // command line for users, if any exceptions been thrown.
     std::panic::set_hook(Box::new(|panic_hook_info| {
+      // Recover terminal mode.
+      if let Ok(_) = tui::shutdown_raw_mode() {
+        /* do nothing */
+      } else {
+        eprintln!("FATAL! Failed to recover terminal!");
+      }
+
       let now = jiff::Zoned::now();
       println!("FATAL! Rsvim panics at {now}");
       println!("{:?}", panic_hook_info);
@@ -318,19 +312,7 @@ impl EventLoop {
 
   /// Shutdown terminal raw mode.
   pub fn shutdown_tui(&self) -> IoResult<()> {
-    let mut out = std::io::stdout();
-    execute!(
-      out,
-      DisableMouseCapture,
-      DisableFocusChange,
-      crossterm::terminal::LeaveAlternateScreen,
-    )?;
-
-    if crossterm::terminal::is_raw_mode_enabled()? {
-      crossterm::terminal::disable_raw_mode()?;
-    }
-
-    Ok(())
+    tui::shutdown_raw_mode()
   }
 
   /// Initialize buffers.
