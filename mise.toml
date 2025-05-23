@@ -13,8 +13,6 @@ rust = "latest"
 "cargo:typos-cli" = "latest"
 
 python = "latest"
-uv = "latest"
-"pipx:astral-sh/ruff" = "latest"
 
 node = "latest"
 "npm:prettier" = "latest"
