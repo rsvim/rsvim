@@ -253,6 +253,9 @@ impl EventLoop {
       EnableFocusChange,
     )?;
 
+    // Register panic hook to shutdown terminal raw mode, this helps recover normal terminal
+    // command line for users, if any exceptions been thrown.
+
     Ok(())
   }
 

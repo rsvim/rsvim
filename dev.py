@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Formatted with black/isort.
+# Formatted with ruff.
 
 import argparse
 import logging
