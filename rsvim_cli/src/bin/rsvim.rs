@@ -57,20 +57,20 @@ fn main() -> IoResult<()> {
     // Initialize user config.
     event_loop.init_config()?;
 
-    // Enter terminal raw mode.
-    evloop::tui::initialize_raw_mode(true)?;
+    // Finish initialize terminal.
+    event_loop.init_tui()?;
 
     // Initialize buffers and windows.
     event_loop.init_buffers()?;
     event_loop.init_windows()?;
 
     // Finish initialize terminal.
-    event_loop.init_tui_done()?;
+    event_loop.init_tui_complete()?;
 
     // Run loop.
     event_loop.run().await?;
 
     // Shutdown terminal raw mode.
-    evloop::tui::shutdown_raw_mode()
+    event_loop.shutdown_tui()
   })
 }
