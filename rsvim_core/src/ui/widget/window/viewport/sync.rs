@@ -561,6 +561,14 @@ fn proc_line_wrap_linebreak(
   }
 }
 
+fn _last_x_char_on_line(allow_line_end: bool, buffer: &Buffer, line_idx: usize) -> Option<usize> {
+  if allow_line_end {
+    buffer.last_char_on_line(line_idx)
+  } else {
+    buffer.last_visible_char_on_line(line_idx)
+  }
+}
+
 /// Implements [`sync`] with option `wrap=true` and `line-break=true`.
 fn sync_wrap_linebreak(
   buffer: &Buffer,
@@ -1805,9 +1813,7 @@ fn search_anchor_rightward_nowrap(
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
-    buffer
-      .last_visible_char_on_line(target_cursor_line)
-      .unwrap_or(0_usize),
+    _last_x_char_on_line(opts.allow_line_end, buffer, target_cursor_line).unwrap_or(0_usize),
   );
 
   // adjust horizontally
