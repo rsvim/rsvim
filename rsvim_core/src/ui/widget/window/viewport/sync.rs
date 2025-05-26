@@ -1061,10 +1061,7 @@ struct AdjustHorizontallyWrapOptions {
   pub disable_move_more_to_left: bool,
 
   #[builder(default = false)]
-  disable_move_more_to_right: bool,
-
-  #[builder(default = false)]
-  enable_line_end: bool,
+  pub disable_move_more_to_right: bool,
 }
 
 fn _adjust_horizontally_wrap(
