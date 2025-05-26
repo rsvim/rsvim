@@ -65,11 +65,6 @@ jobs:
           taplo check
           echo "Info: taplo fmt --check"
           taplo fmt --check
-      - name: Clippy
-        env:
-          RUSTC_WRAPPER: "sccache"
-          SCCACHE_GHA_ENABLED: "true"
-        run: cargo clippy --all-targets --all-features
       - name: MSRV
         run: |
           mkdir ~/.cargo-msrv
@@ -93,6 +88,11 @@ jobs:
           cargo msrv verify
           echo "Info: cd SAVED_PWD=${SAVED_PWD}"
           cd "${SAVED_PWD}"
+      - name: Clippy
+        env:
+          RUSTC_WRAPPER: "sccache"
+          SCCACHE_GHA_ENABLED: "true"
+        run: cargo clippy --all-targets --all-features
       - name: Docs
         run: |
           echo "Info: cargo doc --workspace"
