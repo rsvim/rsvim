@@ -15,7 +15,7 @@ use std::ops::Range;
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
 
-use super::Viewport;
+use super::{Viewport, ViewportSearchAnchorOptions};
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq)]
 /// Lines index inside the viewport.
@@ -1206,12 +1206,6 @@ fn _adjust_current_line(
   } else {
     current_line as usize
   }
-}
-
-#[derive(Debug, Copy, Clone, Builder)]
-pub struct ViewportSearchAnchorOptions {
-  #[builder(default = false)]
-  pub allow_line_end: bool,
 }
 
 // Search a new viewport anchor (`start_line`, `start_column`) downward, i.e. when cursor moves
