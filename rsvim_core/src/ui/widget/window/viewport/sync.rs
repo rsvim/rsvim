@@ -7,6 +7,7 @@ use crate::prelude::*;
 use crate::ui::widget::window::viewport::RowViewport;
 use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 
+use derive_builder::Builder;
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
@@ -1054,7 +1055,20 @@ fn _move_more_to_right_wrap(
   }
 }
 
+#[derive(Debug, Copy, Clone, Builder)]
+struct AdjustHorizontallyWrapOptions {
+  #[builder(default = false)]
+  pub disable_move_more_to_left: bool,
+
+  #[builder(default = false)]
+  disable_move_more_to_right: bool,
+
+  #[builder(default = false)]
+  enable_line_end: bool,
+}
+
 fn _adjust_horizontally_wrap(
+  opts: AdjustHorizontallyWrapOptions,
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1064,18 +1078,40 @@ fn _adjust_horizontally_wrap(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  let start_column_on_left_side = _move_more_to_left_wrap(
-    proc,
-    buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
-    start_column,
-    target_cursor_line,
-    target_cursor_char,
+  debug_assert_ne!(
+    opts.disable_move_more_to_left,
+    opts.disable_move_more_to_right
   );
 
-  if let Some(start_column_left) = start_column_on_left_side {
-    return (start_line, start_column_left);
+  if opts.disable_move_more_to_left {
+    if cfg!(debug_assertions) {
+      debug_assert!(
+        _move_more_to_left_wrap(
+          proc,
+          buffer,
+          window_actual_shape,
+          cannot_fully_contains_target_cursor_line,
+          start_column,
+          target_cursor_line,
+          target_cursor_char,
+        )
+        .is_none()
+      );
+    }
+  } else {
+    let start_column_on_left_side = _move_more_to_left_wrap(
+      proc,
+      buffer,
+      window_actual_shape,
+      cannot_fully_contains_target_cursor_line,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    );
+
+    if let Some(start_column_left) = start_column_on_left_side {
+      return (start_line, start_column_left);
+    }
   }
 
   let start_column_on_right_side = _move_more_to_right_wrap(
