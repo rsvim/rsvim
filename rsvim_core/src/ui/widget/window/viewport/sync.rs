@@ -1078,10 +1078,7 @@ fn _adjust_horizontally_wrap(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  debug_assert_ne!(
-    opts.disable_move_more_to_left,
-    opts.disable_move_more_to_right
-  );
+  debug_assert!(!(opts.disable_move_more_to_left && opts.disable_move_more_to_right));
 
   if opts.disable_move_more_to_left {
     if cfg!(debug_assertions) {
@@ -1663,37 +1660,20 @@ fn search_anchor_leftward_wrap(
       (start_column, cannot_fully_contains_target_cursor_line)
     };
 
-  // adjust horizontally
-  let start_line = viewport_start_line;
-
-  let start_column_on_left_side = _move_more_to_left_wrap(
+  _adjust_horizontally_wrap(
+    AdjustHorizontallyWrapOptionsBuilder::default()
+      .disable_move_more_to_right(true)
+      .build()
+      .unwrap(),
     proc,
     buffer,
     window_actual_shape,
     cannot_fully_contains_target_cursor_line,
-    start_column,
     target_cursor_line,
     target_cursor_char,
-  );
-
-  if let Some(start_column_left) = start_column_on_left_side {
-    return (start_line, start_column_left);
-  }
-
-  if cfg!(debug_assertions) {
-    let start_column_on_right_side = _move_more_to_right_wrap(
-      proc,
-      buffer,
-      window_actual_shape,
-      start_column,
-      target_cursor_line,
-      target_cursor_char,
-    );
-
-    debug_assert!(start_column_on_right_side.is_none());
-  }
-
-  (start_line, start_column)
+    viewport_start_line,
+    start_column,
+  )
 }
 
 // Search a new viewport anchor (`start_line`, `start_column`) rightward, i.e. when cursor moves
@@ -1837,34 +1817,18 @@ fn search_anchor_rightward_wrap(
     };
 
   // adjust horizontally
-  let start_line = viewport_start_line;
-
-  if cfg!(debug_assertions) {
-    let start_column_on_left_side = _move_more_to_left_wrap(
-      proc,
-      buffer,
-      window_actual_shape,
-      cannot_fully_contains_target_cursor_line,
-      start_column,
-      target_cursor_line,
-      target_cursor_char,
-    );
-
-    debug_assert!(start_column_on_left_side.is_none());
-  }
-
-  let start_column_on_right_side = _move_more_to_right_wrap(
+  _adjust_horizontally_wrap(
+    AdjustHorizontallyWrapOptionsBuilder::default()
+      .disable_move_more_to_left(true)
+      .build()
+      .unwrap(),
     proc,
     buffer,
     window_actual_shape,
-    start_column,
+    cannot_fully_contains_target_cursor_line,
     target_cursor_line,
     target_cursor_char,
-  );
-
-  if let Some(start_column_right) = start_column_on_right_side {
-    return (start_line, start_column_right);
-  }
-
-  (start_line, start_column)
+    viewport_start_line,
+    start_column,
+  )
 }
