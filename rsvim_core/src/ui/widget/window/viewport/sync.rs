@@ -761,7 +761,17 @@ fn _move_more_to_right_nowrap(
   }
 }
 
+#[derive(Debug, Copy, Clone, Builder)]
+struct AdjustHorizontallyOptions {
+  #[builder(default = false)]
+  pub disable_detect_leftside: bool,
+
+  #[builder(default = false)]
+  pub disable_detect_rightside: bool,
+}
+
 fn _adjust_horizontally_nowrap(
+  opts: AdjustHorizontallyOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
@@ -769,28 +779,60 @@ fn _adjust_horizontally_nowrap(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  let start_column_on_left_side = _move_more_to_left_nowrap(
-    buffer,
-    window_actual_shape,
-    start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
+  debug_assert!(!(opts.disable_detect_leftside && opts.disable_detect_rightside));
 
-  if let Some(start_column_left) = start_column_on_left_side {
-    return (start_line, start_column_left);
+  if opts.disable_detect_leftside {
+    if cfg!(debug_assertions) {
+      debug_assert!(
+        _move_more_to_left_nowrap(
+          buffer,
+          window_actual_shape,
+          start_column,
+          target_cursor_line,
+          target_cursor_char,
+        )
+        .is_none()
+      );
+    }
+  } else {
+    let start_column_on_left_side = _move_more_to_left_nowrap(
+      buffer,
+      window_actual_shape,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    );
+
+    if let Some(start_column_left) = start_column_on_left_side {
+      return (start_line, start_column_left);
+    }
   }
 
-  let start_column_on_right_side = _move_more_to_right_nowrap(
-    buffer,
-    window_actual_shape,
-    start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
+  if opts.disable_detect_rightside {
+    if cfg!(debug_assertions) {
+      debug_assert!(
+        _move_more_to_right_nowrap(
+          buffer,
+          window_actual_shape,
+          start_column,
+          target_cursor_line,
+          target_cursor_char,
+        )
+        .is_none()
+      );
+    }
+  } else {
+    let start_column_on_right_side = _move_more_to_right_nowrap(
+      buffer,
+      window_actual_shape,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    );
 
-  if let Some(start_column_right) = start_column_on_right_side {
-    return (start_line, start_column_right);
+    if let Some(start_column_right) = start_column_on_right_side {
+      return (start_line, start_column_right);
+    }
   }
 
   (start_line, start_column)
@@ -1055,17 +1097,8 @@ fn _move_more_to_right_wrap(
   }
 }
 
-#[derive(Debug, Copy, Clone, Builder)]
-struct AdjustHorizontallyWrapOptions {
-  #[builder(default = false)]
-  pub disable_move_more_to_left: bool,
-
-  #[builder(default = false)]
-  pub disable_move_more_to_right: bool,
-}
-
 fn _adjust_horizontally_wrap(
-  opts: AdjustHorizontallyWrapOptions,
+  opts: AdjustHorizontallyOptions,
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1075,9 +1108,9 @@ fn _adjust_horizontally_wrap(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  debug_assert!(!(opts.disable_move_more_to_left && opts.disable_move_more_to_right));
+  debug_assert!(!(opts.disable_detect_leftside && opts.disable_detect_rightside));
 
-  if opts.disable_move_more_to_left {
+  if opts.disable_detect_leftside {
     if cfg!(debug_assertions) {
       debug_assert!(
         _move_more_to_left_wrap(
@@ -1108,7 +1141,7 @@ fn _adjust_horizontally_wrap(
     }
   }
 
-  if opts.disable_move_more_to_right {
+  if opts.disable_detect_rightside {
     if cfg!(debug_assertions) {
       debug_assert!(
         _move_more_to_right_wrap(
@@ -1253,6 +1286,7 @@ fn search_anchor_downward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
+    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1349,9 +1383,7 @@ fn search_anchor_downward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyWrapOptionsBuilder::default()
-      .build()
-      .unwrap(),
+    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
     proc,
     buffer,
     window_actual_shape,
@@ -1439,6 +1471,7 @@ fn search_anchor_upward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
+    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1504,9 +1537,7 @@ fn search_anchor_upward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyWrapOptionsBuilder::default()
-      .build()
-      .unwrap(),
+    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
     proc,
     buffer,
     window_actual_shape,
@@ -1581,30 +1612,18 @@ fn search_anchor_leftward_nowrap(
   let start_line = viewport.start_line_idx();
   let start_column = viewport.start_column_idx();
 
-  let start_column_on_left_side = _move_more_to_left_nowrap(
+  _adjust_horizontally_nowrap(
+    AdjustHorizontallyOptionsBuilder::default()
+      .disable_detect_rightside(true)
+      .build()
+      .unwrap(),
     buffer,
     window_actual_shape,
-    start_column,
     target_cursor_line,
     target_cursor_char,
-  );
-
-  if let Some(start_column_left) = start_column_on_left_side {
-    return (start_line, start_column_left);
-  }
-
-  if cfg!(debug_assertions) {
-    let start_column_on_right_side = _move_more_to_right_nowrap(
-      buffer,
-      window_actual_shape,
-      start_column,
-      target_cursor_line,
-      target_cursor_char,
-    );
-    debug_assert!(start_column_on_right_side.is_none());
-  }
-
-  (start_line, start_column)
+    start_line,
+    start_column,
+  )
 }
 
 fn search_anchor_leftward_wrap(
@@ -1658,8 +1677,8 @@ fn search_anchor_leftward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyWrapOptionsBuilder::default()
-      .disable_move_more_to_right(true)
+    AdjustHorizontallyOptionsBuilder::default()
+      .disable_detect_rightside(true)
       .build()
       .unwrap(),
     proc,
@@ -1736,31 +1755,18 @@ fn search_anchor_rightward_nowrap(
   let start_line = viewport.start_line_idx();
   let start_column = viewport.start_column_idx();
 
-  if cfg!(debug_assertions) {
-    let start_column_on_left_side = _move_more_to_left_nowrap(
-      buffer,
-      window_actual_shape,
-      start_column,
-      target_cursor_line,
-      target_cursor_char,
-    );
-
-    debug_assert!(start_column_on_left_side.is_none());
-  }
-
-  let start_column_on_right_side = _move_more_to_right_nowrap(
+  _adjust_horizontally_nowrap(
+    AdjustHorizontallyOptionsBuilder::default()
+      .disable_detect_leftside(true)
+      .build()
+      .unwrap(),
     buffer,
     window_actual_shape,
-    start_column,
     target_cursor_line,
     target_cursor_char,
-  );
-
-  if let Some(start_column_right) = start_column_on_right_side {
-    return (start_line, start_column_right);
-  }
-
-  (start_line, start_column)
+    start_line,
+    start_column,
+  )
 }
 
 fn search_anchor_rightward_wrap(
@@ -1815,8 +1821,8 @@ fn search_anchor_rightward_wrap(
 
   // adjust horizontally
   _adjust_horizontally_wrap(
-    AdjustHorizontallyWrapOptionsBuilder::default()
-      .disable_move_more_to_left(true)
+    AdjustHorizontallyOptionsBuilder::default()
+      .disable_detect_leftside(true)
       .build()
       .unwrap(),
     proc,
