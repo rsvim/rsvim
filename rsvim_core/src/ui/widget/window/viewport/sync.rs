@@ -561,7 +561,11 @@ fn proc_line_wrap_linebreak(
   }
 }
 
-fn _last_x_char_on_line(allow_line_end: bool, buffer: &Buffer, line_idx: usize) -> Option<usize> {
+fn _last_char_allow_line_end(
+  allow_line_end: bool,
+  buffer: &Buffer,
+  line_idx: usize,
+) -> Option<usize> {
   if allow_line_end {
     buffer.last_char_on_line(line_idx)
   } else {
@@ -707,6 +711,24 @@ fn _move_more_to_left_nowrap(
   }
 }
 
+fn _if_target_char_is_at_line_end(
+  opts: AdjustHorizontallyOptions,
+  buffer: &Buffer,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> bool {
+  let bufline = buffer.get_rope().line(target_cursor_line);
+  let char_at_eol = target_cursor_char == bufline.len_chars().saturating_sub(1);
+
+  // If allow line end, and `target_cursor_char` is happened to be the line end.
+  if opts.allow_line_end && char_at_eol {
+    debug_assert_eq!(buffer.char_width(bufline.char(target_cursor_char)), 0_usize);
+    true
+  } else {
+    false
+  }
+}
+
 // Returns
 // 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
 //    right.
@@ -723,12 +745,11 @@ fn _move_more_to_right_nowrap(
   let viewport_end_column = target_viewport_start_column + width as usize;
   let mut target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
 
-  let bufline = buffer.get_rope().line(target_cursor_line);
-  let target_cursor_at_line_end = target_cursor_char == bufline.len_chars().saturating_sub(1);
+  let target_cursor_char_is_at_line_end =
+    _if_target_char_is_at_line_end(opts, buffer, target_cursor_line, target_cursor_char);
 
   // If allow line end, and `target_cursor_char` is happened to be the line end.
-  if opts.allow_line_end && target_cursor_at_line_end {
-    debug_assert_eq!(buffer.char_width(bufline.char(target_cursor_char)), 0_usize);
+  if target_cursor_char_is_at_line_end {
     target_cursor_width += 1;
   }
 
@@ -774,8 +795,7 @@ fn _move_more_to_right_nowrap(
     // new viewport.
     let mut end_column = buffer.width_until(target_cursor_line, target_cursor_char);
 
-    if opts.allow_line_end && target_cursor_at_line_end {
-      debug_assert_eq!(buffer.char_width(bufline.char(target_cursor_char)), 0_usize);
+    if target_cursor_char_is_at_line_end {
       end_column += 1;
     }
 
@@ -1813,7 +1833,7 @@ fn search_anchor_rightward_nowrap(
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
-    _last_x_char_on_line(opts.allow_line_end, buffer, target_cursor_line).unwrap_or(0_usize),
+    _last_char_allow_line_end(opts.allow_line_end, buffer, target_cursor_line).unwrap_or(0_usize),
   );
 
   // adjust horizontally
