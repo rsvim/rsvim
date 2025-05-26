@@ -12016,7 +12016,7 @@ mod tests_search_anchor_horizontally_nowrap_allow_line_end {
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 2)].into_iter().collect();
+        vec![(0, 0), (1, 0), (2, 2), (3, 2)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,

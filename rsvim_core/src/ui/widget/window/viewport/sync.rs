@@ -1208,11 +1208,18 @@ fn _adjust_current_line(
   }
 }
 
+#[derive(Debug, Copy, Clone, Builder)]
+pub struct ViewportSearchAnchorOptions {
+  #[builder(default = false)]
+  pub allow_line_end: bool,
+}
+
 // Search a new viewport anchor (`start_line`, `start_column`) downward, i.e. when cursor moves
 // down, and possibly scrolling buffer if cursor reaches the window bottom.
 //
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_downward(
+  opts: ViewportSearchAnchorOptions,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1225,6 +1232,7 @@ pub fn search_anchor_downward(
     window_local_options.line_break(),
   ) {
     (false, _) => search_anchor_downward_nowrap(
+      opts,
       viewport,
       buffer,
       window_actual_shape,
@@ -1232,6 +1240,7 @@ pub fn search_anchor_downward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_downward_wrap(
+      opts,
       proc_line_wrap_nolinebreak,
       viewport,
       buffer,
@@ -1240,6 +1249,7 @@ pub fn search_anchor_downward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_downward_wrap(
+      opts,
       proc_line_wrap_linebreak,
       viewport,
       buffer,
@@ -1251,6 +1261,7 @@ pub fn search_anchor_downward(
 }
 
 fn search_anchor_downward_nowrap(
+  opts: ViewportSearchAnchorOptions,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1308,7 +1319,10 @@ fn search_anchor_downward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustHorizontallyOptionsBuilder::default()
+      .allow_line_end(opts.allow_line_end)
+      .build()
+      .unwrap(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1319,6 +1333,7 @@ fn search_anchor_downward_nowrap(
 }
 
 fn search_anchor_downward_wrap(
+  opts: ViewportSearchAnchorOptions,
   proc: ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1405,7 +1420,10 @@ fn search_anchor_downward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustHorizontallyOptionsBuilder::default()
+      .allow_line_end(opts.allow_line_end)
+      .build()
+      .unwrap(),
     proc,
     buffer,
     window_actual_shape,
@@ -1422,6 +1440,7 @@ fn search_anchor_downward_wrap(
 //
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_upward(
+  opts: ViewportSearchAnchorOptions,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1434,6 +1453,7 @@ pub fn search_anchor_upward(
     window_local_options.line_break(),
   ) {
     (false, _) => search_anchor_upward_nowrap(
+      opts,
       viewport,
       buffer,
       window_actual_shape,
@@ -1441,6 +1461,7 @@ pub fn search_anchor_upward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_upward_wrap(
+      opts,
       proc_line_wrap_nolinebreak,
       viewport,
       buffer,
@@ -1449,6 +1470,7 @@ pub fn search_anchor_upward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_upward_wrap(
+      opts,
       proc_line_wrap_linebreak,
       viewport,
       buffer,
@@ -1460,6 +1482,7 @@ pub fn search_anchor_upward(
 }
 
 fn search_anchor_upward_nowrap(
+  opts: ViewportSearchAnchorOptions,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1493,7 +1516,10 @@ fn search_anchor_upward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustHorizontallyOptionsBuilder::default()
+      .allow_line_end(opts.allow_line_end)
+      .build()
+      .unwrap(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1504,6 +1530,7 @@ fn search_anchor_upward_nowrap(
 }
 
 fn search_anchor_upward_wrap(
+  opts: ViewportSearchAnchorOptions,
   proc: ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1559,7 +1586,10 @@ fn search_anchor_upward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustHorizontallyOptionsBuilder::default()
+      .allow_line_end(opts.allow_line_end)
+      .build()
+      .unwrap(),
     proc,
     buffer,
     window_actual_shape,
@@ -1576,6 +1606,7 @@ fn search_anchor_upward_wrap(
 //
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_leftward(
+  opts: ViewportSearchAnchorOptions,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1588,6 +1619,7 @@ pub fn search_anchor_leftward(
     window_local_options.line_break(),
   ) {
     (false, _) => search_anchor_leftward_nowrap(
+      opts,
       viewport,
       buffer,
       window_actual_shape,
@@ -1595,6 +1627,7 @@ pub fn search_anchor_leftward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_leftward_wrap(
+      opts,
       proc_line_wrap_nolinebreak,
       viewport,
       buffer,
@@ -1603,6 +1636,7 @@ pub fn search_anchor_leftward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_leftward_wrap(
+      opts,
       proc_line_wrap_linebreak,
       viewport,
       buffer,
@@ -1614,6 +1648,7 @@ pub fn search_anchor_leftward(
 }
 
 fn search_anchor_leftward_nowrap(
+  opts: ViewportSearchAnchorOptions,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1636,6 +1671,7 @@ fn search_anchor_leftward_nowrap(
 
   _adjust_horizontally_nowrap(
     AdjustHorizontallyOptionsBuilder::default()
+      .allow_line_end(opts.allow_line_end)
       .disable_detect_rightward(true)
       .build()
       .unwrap(),
@@ -1649,6 +1685,7 @@ fn search_anchor_leftward_nowrap(
 }
 
 fn search_anchor_leftward_wrap(
+  opts: ViewportSearchAnchorOptions,
   proc: ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1700,6 +1737,7 @@ fn search_anchor_leftward_wrap(
 
   _adjust_horizontally_wrap(
     AdjustHorizontallyOptionsBuilder::default()
+      .allow_line_end(opts.allow_line_end)
       .disable_detect_rightward(true)
       .build()
       .unwrap(),
@@ -1719,6 +1757,7 @@ fn search_anchor_leftward_wrap(
 //
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_rightward(
+  opts: ViewportSearchAnchorOptions,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1731,6 +1770,7 @@ pub fn search_anchor_rightward(
     window_local_options.line_break(),
   ) {
     (false, _) => search_anchor_rightward_nowrap(
+      opts,
       viewport,
       buffer,
       window_actual_shape,
@@ -1738,6 +1778,7 @@ pub fn search_anchor_rightward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_rightward_wrap(
+      opts,
       proc_line_wrap_nolinebreak,
       viewport,
       buffer,
@@ -1746,6 +1787,7 @@ pub fn search_anchor_rightward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_rightward_wrap(
+      opts,
       proc_line_wrap_linebreak,
       viewport,
       buffer,
@@ -1757,6 +1799,7 @@ pub fn search_anchor_rightward(
 }
 
 fn search_anchor_rightward_nowrap(
+  opts: ViewportSearchAnchorOptions,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1779,6 +1822,7 @@ fn search_anchor_rightward_nowrap(
 
   _adjust_horizontally_nowrap(
     AdjustHorizontallyOptionsBuilder::default()
+      .allow_line_end(opts.allow_line_end)
       .disable_detect_leftward(true)
       .build()
       .unwrap(),
@@ -1792,6 +1836,7 @@ fn search_anchor_rightward_nowrap(
 }
 
 fn search_anchor_rightward_wrap(
+  opts: ViewportSearchAnchorOptions,
   proc: ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1844,6 +1889,7 @@ fn search_anchor_rightward_wrap(
   // adjust horizontally
   _adjust_horizontally_wrap(
     AdjustHorizontallyOptionsBuilder::default()
+      .allow_line_end(opts.allow_line_end)
       .disable_detect_leftward(true)
       .build()
       .unwrap(),
