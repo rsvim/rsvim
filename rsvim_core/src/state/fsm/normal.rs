@@ -7,7 +7,9 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{ViewportArc, ViewportSearchAnchorDirection};
+use crate::ui::widget::window::{
+  ViewportArc, ViewportSearchAnchorDirection, ViewportSearchAnchorOptionsBuilder,
+};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -113,7 +115,10 @@ impl NormalStateful {
         let new_viewport_arc: Option<ViewportArc> = {
           let viewport = lock!(viewport_arc);
           let (start_line, start_column) = viewport.search_anchor(
-            search_direction,
+            ViewportSearchAnchorOptionsBuilder::default()
+              .direction(search_direction)
+              .build()
+              .unwrap(),
             &buffer,
             current_window.actual_shape(),
             current_window.options(),
