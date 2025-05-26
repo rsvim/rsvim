@@ -57,7 +57,8 @@ jobs:
         run: cargo fmt --check
       - name: Taplo
         run: |
-          cargo binstall --force --no-confirm taplo-cli
+          curl -fsSL https://github.com/tamasfe/taplo/releases/latest/download/taplo-linux-x86_64.gz | gzip -d - | install -m 755 /dev/stdin /usr/local/bin/taplo
+          # cargo binstall --force --no-confirm taplo-cli
           echo "Info: taplo --version"
           taplo --version
           echo "Info: taplo check"
@@ -71,7 +72,8 @@ jobs:
         run: cargo clippy --all-targets --all-features
       - name: MSRV
         run: |
-          cargo binstall --force --no-confirm cargo-msrv
+          curl -fsSL https://github.com/foresterre/cargo-msrv/releases/download/v0.18.4/cargo-msrv-x86_64-unknown-linux-gnu-v0.18.4.tgz | gzip -d - | install -m 755 /dev/stdin ~/.cargo/bin/cargo-msrv
+          # cargo binstall --force --no-confirm cargo-msrv
           echo "Info: cargo msrv --version"
           cargo msrv --version
           echo "Info: PWD=${PWD}"
