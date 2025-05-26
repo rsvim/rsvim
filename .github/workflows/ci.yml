@@ -68,13 +68,17 @@ jobs:
       - name: MSRV
         run: |
           mkdir ~/.cargo-msrv
-          curl --output ~/.cargo-msrv/cargo-msrv.tgz -fsSL https://github.com/foresterre/cargo-msrv/releases/download/v0.18.4/cargo-msrv-x86_64-unknown-linux-gnu-v0.18.4.tgz
+          CARGO_MSRV_DIR="cargo-msrv-x86_64-unknown-linux-gnu-v0.18.4"
+          curl --output ~/.cargo-msrv/cargo-msrv.tgz -fsSL https://github.com/foresterre/cargo-msrv/releases/download/v0.18.4/$CARGO_MSRV_DIR.tgz
           tar -xvzf ~/.cargo-msrv/cargo-msrv.tgz -C ~/.cargo-msrv
           echo "Info: ~/.cargo-msrv"
           ls -l ~/.cargo-msrv
-          echo "Info: ~/.cargo-msrv/cargo-msrv-x86_64-unknown-linux-gnu-v0.18.4"
-          ls -l ~/.cargo-msrv/cargo-msrv-x86_64-unknown-linux-gnu-v0.18.4
+          echo "Info: ~/.cargo-msrv/$CARGO_MSRV_DIR"
+          ls -l ~/.cargo-msrv/$CARGO_MSRV_DIR
+          mv ~/.cargo-msrv/$CARGO_MSRV_DIR/cargo-msrv ~/.cargo/bin
           chmod 755 ~/.cargo/bin/cargo-msrv
+          echo "Info: ~/.cargo/bin"
+          ls -l ~/.cargo/bin
           # cargo binstall --force --no-confirm cargo-msrv
           echo "Info: cargo msrv --version"
           cargo msrv --version
