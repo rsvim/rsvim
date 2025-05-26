@@ -10948,8 +10948,7 @@ mod tests_search_anchor_horizontally_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          search_down(),
-          ViewportSearchAnchorDirection::Left,
+          search_left(),
           &buf,
           window.actual_shape(),
           window.options(),
@@ -10999,8 +10998,7 @@ mod tests_search_anchor_horizontally_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          search_down(),
-          ViewportSearchAnchorDirection::Left,
+          search_left(),
           &buf,
           window.actual_shape(),
           window.options(),
@@ -11050,8 +11048,7 @@ mod tests_search_anchor_horizontally_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          search_down(),
-          ViewportSearchAnchorDirection::Left,
+          search_left(),
           &buf,
           window.actual_shape(),
           window.options(),
@@ -11101,8 +11098,7 @@ mod tests_search_anchor_horizontally_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          search_down(),
-          ViewportSearchAnchorDirection::Left,
+          search_left(),
           &buf,
           window.actual_shape(),
           window.options(),
@@ -11152,8 +11148,7 @@ mod tests_search_anchor_horizontally_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
-          search_down(),
-          ViewportSearchAnchorDirection::Left,
+          search_left(),
           &buf,
           window.actual_shape(),
           window.options(),
