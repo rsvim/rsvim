@@ -4848,6 +4848,7 @@ mod tests_search_anchor_downward_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
+          search_opts(),
           ViewportSearchAnchorDirection::Down,
           &buf,
           window.actual_shape(),
@@ -4904,6 +4905,7 @@ mod tests_search_anchor_downward_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
+          search_opts(),
           ViewportSearchAnchorDirection::Down,
           &buf,
           window.actual_shape(),
@@ -4954,6 +4956,7 @@ mod tests_search_anchor_downward_nowrap {
         let old = lock!(window.viewport()).clone();
         let buf = lock!(buf);
         let (start_line, start_column) = old.search_anchor(
+          search_opts(),
           ViewportSearchAnchorDirection::Down,
           &buf,
           window.actual_shape(),
