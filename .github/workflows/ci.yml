@@ -77,6 +77,8 @@ jobs:
           tar -xvzf ~/.cargo-msrv/cargo-msrv.tgz -C ~/.cargo-msrv
           echo "Info: ~/.cargo-msrv"
           ls -l ~/.cargo-msrv
+          echo "Info: ~/.cargo-msrv/cargo-msrv-x86_64-unknown-linux-gnu-v0.18.4"
+          ls -l ~/.cargo-msrv/cargo-msrv-x86_64-unknown-linux-gnu-v0.18.4
           chmod 755 ~/.cargo/bin/cargo-msrv
           # cargo binstall --force --no-confirm cargo-msrv
           echo "Info: cargo msrv --version"
