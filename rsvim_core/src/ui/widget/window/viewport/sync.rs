@@ -704,6 +704,7 @@ fn _move_more_to_left_nowrap(
 //    right.
 // 2. If 1st is true, this is the new "start_column" after adjustments.
 fn _move_more_to_right_nowrap(
+  opts: AdjustHorizontallyOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_viewport_start_column: usize,
@@ -712,7 +713,17 @@ fn _move_more_to_right_nowrap(
 ) -> Option<usize> {
   let width = window_actual_shape.width();
   let viewport_end_column = target_viewport_start_column + width as usize;
-  let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
+  let mut target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
+
+  let bufline = buffer.get_rope().line(target_cursor_line);
+  let target_cursor_at_line_end = target_cursor_char == bufline.len_chars().saturating_sub(1);
+
+  // If allow line end, and `target_cursor_char` is happened to be the line end.
+  if opts.allow_line_end && target_cursor_at_line_end {
+    debug_assert_eq!(buffer.char_width(bufline.char(target_cursor_char)), 0_usize);
+    target_cursor_width += 1;
+  }
+
   let on_right_side = target_cursor_width > viewport_end_column;
 
   if cfg!(debug_assertions) {
@@ -753,7 +764,13 @@ fn _move_more_to_right_nowrap(
   if on_right_side {
     // Move viewport to right to show the cursor, just put the cursor at the last right char in the
     // new viewport.
-    let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
+    let mut end_column = buffer.width_until(target_cursor_line, target_cursor_char);
+
+    if opts.allow_line_end && target_cursor_at_line_end {
+      debug_assert_eq!(buffer.char_width(bufline.char(target_cursor_char)), 0_usize);
+      end_column += 1;
+    }
+
     let start_column = end_column.saturating_sub(width as usize);
     Some(start_column)
   } else {
@@ -768,6 +785,9 @@ struct AdjustHorizontallyOptions {
 
   #[builder(default = false)]
   pub disable_detect_rightward: bool,
+
+  #[builder(default = false)]
+  pub allow_line_end: bool,
 }
 
 fn _adjust_horizontally_nowrap(
@@ -812,6 +832,7 @@ fn _adjust_horizontally_nowrap(
     if cfg!(debug_assertions) {
       debug_assert!(
         _move_more_to_right_nowrap(
+          opts,
           buffer,
           window_actual_shape,
           start_column,
@@ -823,6 +844,7 @@ fn _adjust_horizontally_nowrap(
     }
   } else {
     let start_column_on_right_side = _move_more_to_right_nowrap(
+      opts,
       buffer,
       window_actual_shape,
       start_column,
