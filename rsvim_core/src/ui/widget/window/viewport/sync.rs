@@ -1114,17 +1114,33 @@ fn _adjust_horizontally_wrap(
     }
   }
 
-  let start_column_on_right_side = _move_more_to_right_wrap(
-    proc,
-    buffer,
-    window_actual_shape,
-    start_column,
-    target_cursor_line,
-    target_cursor_char,
-  );
+  if opts.disable_move_more_to_right {
+    if cfg!(debug_assertions) {
+      debug_assert!(
+        _move_more_to_right_wrap(
+          proc,
+          buffer,
+          window_actual_shape,
+          start_column,
+          target_cursor_line,
+          target_cursor_char,
+        )
+        .is_none()
+      );
+    }
+  } else {
+    let start_column_on_right_side = _move_more_to_right_wrap(
+      proc,
+      buffer,
+      window_actual_shape,
+      start_column,
+      target_cursor_line,
+      target_cursor_char,
+    );
 
-  if let Some(start_column_right) = start_column_on_right_side {
-    return (start_line, start_column_right);
+    if let Some(start_column_right) = start_column_on_right_side {
+      return (start_line, start_column_right);
+    }
   }
 
   (start_line, start_column)
@@ -1339,6 +1355,9 @@ fn search_anchor_downward_wrap(
     };
 
   _adjust_horizontally_wrap(
+    AdjustHorizontallyWrapOptionsBuilder::default()
+      .build()
+      .unwrap(),
     proc,
     buffer,
     window_actual_shape,
@@ -1491,6 +1510,9 @@ fn search_anchor_upward_wrap(
     };
 
   _adjust_horizontally_wrap(
+    AdjustHorizontallyWrapOptionsBuilder::default()
+      .build()
+      .unwrap(),
     proc,
     buffer,
     window_actual_shape,
