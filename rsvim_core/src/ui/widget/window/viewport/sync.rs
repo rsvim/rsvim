@@ -764,10 +764,10 @@ fn _move_more_to_right_nowrap(
 #[derive(Debug, Copy, Clone, Builder)]
 struct AdjustHorizontallyOptions {
   #[builder(default = false)]
-  pub disable_detect_leftside: bool,
+  pub disable_detect_leftward: bool,
 
   #[builder(default = false)]
-  pub disable_detect_rightside: bool,
+  pub disable_detect_rightward: bool,
 }
 
 fn _adjust_horizontally_nowrap(
@@ -779,9 +779,9 @@ fn _adjust_horizontally_nowrap(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  debug_assert!(!(opts.disable_detect_leftside && opts.disable_detect_rightside));
+  debug_assert!(!(opts.disable_detect_leftward && opts.disable_detect_rightward));
 
-  if opts.disable_detect_leftside {
+  if opts.disable_detect_leftward {
     if cfg!(debug_assertions) {
       debug_assert!(
         _move_more_to_left_nowrap(
@@ -808,7 +808,7 @@ fn _adjust_horizontally_nowrap(
     }
   }
 
-  if opts.disable_detect_rightside {
+  if opts.disable_detect_rightward {
     if cfg!(debug_assertions) {
       debug_assert!(
         _move_more_to_right_nowrap(
@@ -1108,9 +1108,9 @@ fn _adjust_horizontally_wrap(
   start_line: usize,
   start_column: usize,
 ) -> (usize, usize) {
-  debug_assert!(!(opts.disable_detect_leftside && opts.disable_detect_rightside));
+  debug_assert!(!(opts.disable_detect_leftward && opts.disable_detect_rightward));
 
-  if opts.disable_detect_leftside {
+  if opts.disable_detect_leftward {
     if cfg!(debug_assertions) {
       debug_assert!(
         _move_more_to_left_wrap(
@@ -1141,7 +1141,7 @@ fn _adjust_horizontally_wrap(
     }
   }
 
-  if opts.disable_detect_rightside {
+  if opts.disable_detect_rightward {
     if cfg!(debug_assertions) {
       debug_assert!(
         _move_more_to_right_wrap(
@@ -1614,7 +1614,7 @@ fn search_anchor_leftward_nowrap(
 
   _adjust_horizontally_nowrap(
     AdjustHorizontallyOptionsBuilder::default()
-      .disable_detect_rightside(true)
+      .disable_detect_rightward(true)
       .build()
       .unwrap(),
     buffer,
@@ -1678,7 +1678,7 @@ fn search_anchor_leftward_wrap(
 
   _adjust_horizontally_wrap(
     AdjustHorizontallyOptionsBuilder::default()
-      .disable_detect_rightside(true)
+      .disable_detect_rightward(true)
       .build()
       .unwrap(),
     proc,
@@ -1757,7 +1757,7 @@ fn search_anchor_rightward_nowrap(
 
   _adjust_horizontally_nowrap(
     AdjustHorizontallyOptionsBuilder::default()
-      .disable_detect_leftside(true)
+      .disable_detect_leftward(true)
       .build()
       .unwrap(),
     buffer,
@@ -1822,7 +1822,7 @@ fn search_anchor_rightward_wrap(
   // adjust horizontally
   _adjust_horizontally_wrap(
     AdjustHorizontallyOptionsBuilder::default()
-      .disable_detect_leftside(true)
+      .disable_detect_leftward(true)
       .build()
       .unwrap(),
     proc,
