@@ -92,6 +92,12 @@ jobs:
           cargo msrv verify
           echo "Info: cd SAVED_PWD=${SAVED_PWD}"
           cd "${SAVED_PWD}"
+      - uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          command: check advisories --allow unmaintained
       - name: Clippy
         env:
           RUSTC_WRAPPER: "sccache"
@@ -101,14 +107,6 @@ jobs:
         run: |
           echo "Info: cargo doc --workspace"
           cargo doc --workspace
-      - name: Security Audit
-        uses: rustsec/audit-check@v2.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Security Advisory
-        uses: EmbarkStudios/cargo-deny-action@v2
-        with:
-          command: check advisories --allow unmaintained
   unit_test:
     name: Unit Test
     strategy:
