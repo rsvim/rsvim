@@ -233,10 +233,16 @@ impl Buffer {
   /// empty/blank.
   pub fn last_char_on_line_no_eol(&self, line_idx: usize) -> Option<usize> {
     match self.rope.get_line(line_idx) {
-      Some(line) => {
-        let line_len_chars = line.len_chars();
-        Some(line_len_chars.saturating_sub(2))
-      }
+      Some(line) => match self.last_char_on_line(line_idx) {
+        Some(last_char) => {
+          if self.char_width(line.char(last_char)) == 0 {
+            Some(last_char.saturating_sub(1))
+          } else {
+            Some(last_char)
+          }
+        }
+        None => None,
+      },
       None => None,
     }
   }
