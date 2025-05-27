@@ -238,9 +238,18 @@ fn _bounded_raw_cursor_move_x_by(
         "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
         cursor_char_idx, expected, last_row_viewport, last_char_on_row
       );
-      buffer
-        .last_char_on_line_no_eol_since(cursor_line_idx, last_char_on_row)
-        .unwrap()
+
+      let bufline = buffer.get_rope().line(cursor_line_idx);
+      let bufline_len_chars = bufline.len_chars();
+      if bufline_len_chars > 0 && last_char_on_row == bufline_len_chars.saturating_sub(1) {
+        last_char_on_row.saturating_sub(1)
+      } else {
+        last_char_on_row
+      }
+      //
+      // buffer
+      //   .last_char_on_line_no_eol_since(cursor_line_idx, last_char_on_row)
+      //   .unwrap()
     };
     std::cmp::min(expected, upper_bounded)
   }
