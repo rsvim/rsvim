@@ -1284,7 +1284,7 @@ fn search_anchor_downward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustOptionsBuilder::default().build().unwrap(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1381,7 +1381,7 @@ fn search_anchor_downward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustOptionsBuilder::default().build().unwrap(),
     proc,
     buffer,
     window_actual_shape,
@@ -1469,7 +1469,7 @@ fn search_anchor_upward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustOptionsBuilder::default().build().unwrap(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1535,7 +1535,7 @@ fn search_anchor_upward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustOptionsBuilder::default().build().unwrap(),
     proc,
     buffer,
     window_actual_shape,
@@ -1611,7 +1611,7 @@ fn search_anchor_leftward_nowrap(
   let start_column = viewport.start_column_idx();
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default()
+    AdjustOptionsBuilder::default()
       .disable_detect_rightward(true)
       .build()
       .unwrap(),
@@ -1675,7 +1675,7 @@ fn search_anchor_leftward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default()
+    AdjustOptionsBuilder::default()
       .disable_detect_rightward(true)
       .build()
       .unwrap(),
@@ -1754,7 +1754,7 @@ fn search_anchor_rightward_nowrap(
   let start_column = viewport.start_column_idx();
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default()
+    AdjustOptionsBuilder::default()
       .disable_detect_leftward(true)
       .build()
       .unwrap(),
@@ -1819,7 +1819,7 @@ fn search_anchor_rightward_wrap(
 
   // adjust horizontally
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default()
+    AdjustOptionsBuilder::default()
       .disable_detect_leftward(true)
       .build()
       .unwrap(),
