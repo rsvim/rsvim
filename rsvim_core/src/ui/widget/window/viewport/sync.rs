@@ -1090,7 +1090,7 @@ fn _adjust_right_wrap(
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  cannot_fully_contains_target_cursor_line: bool,
+  _cannot_fully_contains_target_cursor_line: bool,
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
