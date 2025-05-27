@@ -613,7 +613,8 @@ fn _target_cursor_is_at_eol(
   buffer: &Buffer,
   target_cursor_line: usize,
   target_cursor_char: usize,
-) -> usize {
+) -> bool {
+  true
 }
 
 // spellchecker:off
