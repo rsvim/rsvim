@@ -644,7 +644,7 @@ fn sync_wrap_linebreak(
 // 1. If target cursor is on the left side of viewport, and we need to move the viewport more to
 //    the left side.
 // 2. If 1st is true, this is the new "start_column" after adjustments.
-fn _move_more_to_left_nowrap(
+fn _adjust_left_nowrap(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
   target_viewport_start_column: usize,
@@ -703,7 +703,7 @@ fn _move_more_to_left_nowrap(
 // 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
 //    right.
 // 2. If 1st is true, this is the new "start_column" after adjustments.
-fn _move_more_to_right_nowrap(
+fn _adjust_right_nowrap(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_viewport_start_column: usize,
@@ -762,7 +762,7 @@ fn _move_more_to_right_nowrap(
 }
 
 #[derive(Debug, Copy, Clone, Builder)]
-struct AdjustHorizontallyOptions {
+struct AdjustOptions {
   #[builder(default = false)]
   pub disable_detect_leftward: bool,
 
@@ -771,7 +771,7 @@ struct AdjustHorizontallyOptions {
 }
 
 fn _adjust_horizontally_nowrap(
-  opts: AdjustHorizontallyOptions,
+  opts: AdjustOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
@@ -784,7 +784,7 @@ fn _adjust_horizontally_nowrap(
   if opts.disable_detect_leftward {
     if cfg!(debug_assertions) {
       debug_assert!(
-        _move_more_to_left_nowrap(
+        _adjust_left_nowrap(
           buffer,
           window_actual_shape,
           start_column,
@@ -795,7 +795,7 @@ fn _adjust_horizontally_nowrap(
       );
     }
   } else {
-    let start_column_on_left_side = _move_more_to_left_nowrap(
+    let start_column_on_left_side = _adjust_left_nowrap(
       buffer,
       window_actual_shape,
       start_column,
@@ -811,7 +811,7 @@ fn _adjust_horizontally_nowrap(
   if opts.disable_detect_rightward {
     if cfg!(debug_assertions) {
       debug_assert!(
-        _move_more_to_right_nowrap(
+        _adjust_right_nowrap(
           buffer,
           window_actual_shape,
           start_column,
@@ -822,7 +822,7 @@ fn _adjust_horizontally_nowrap(
       );
     }
   } else {
-    let start_column_on_right_side = _move_more_to_right_nowrap(
+    let start_column_on_right_side = _adjust_right_nowrap(
       buffer,
       window_actual_shape,
       start_column,
@@ -938,7 +938,7 @@ fn _revert_search_start_column_wrap(
   )
 }
 
-fn _move_more_to_left_wrap(
+fn _adjust_left_wrap(
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1055,7 +1055,7 @@ fn _move_more_to_left_wrap(
   }
 }
 
-fn _move_more_to_right_wrap(
+fn _adjust_right_wrap(
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1096,7 +1096,7 @@ fn _move_more_to_right_wrap(
 }
 
 fn _adjust_horizontally_wrap(
-  opts: AdjustHorizontallyOptions,
+  opts: AdjustOptions,
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1111,7 +1111,7 @@ fn _adjust_horizontally_wrap(
   if opts.disable_detect_leftward {
     if cfg!(debug_assertions) {
       debug_assert!(
-        _move_more_to_left_wrap(
+        _adjust_left_wrap(
           proc,
           buffer,
           window_actual_shape,
@@ -1124,7 +1124,7 @@ fn _adjust_horizontally_wrap(
       );
     }
   } else {
-    let start_column_on_left_side = _move_more_to_left_wrap(
+    let start_column_on_left_side = _adjust_left_wrap(
       proc,
       buffer,
       window_actual_shape,
@@ -1142,7 +1142,7 @@ fn _adjust_horizontally_wrap(
   if opts.disable_detect_rightward {
     if cfg!(debug_assertions) {
       debug_assert!(
-        _move_more_to_right_wrap(
+        _adjust_right_wrap(
           proc,
           buffer,
           window_actual_shape,
@@ -1154,7 +1154,7 @@ fn _adjust_horizontally_wrap(
       );
     }
   } else {
-    let start_column_on_right_side = _move_more_to_right_wrap(
+    let start_column_on_right_side = _adjust_right_wrap(
       proc,
       buffer,
       window_actual_shape,
