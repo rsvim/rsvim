@@ -948,6 +948,7 @@ fn _adjust_left_wrap(
   target_cursor_char: usize,
 ) -> Option<usize> {
   let mut start_column = target_viewport_start_column;
+
   let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
   let mut on_left_side = target_cursor_width < start_column;
 
@@ -1058,7 +1059,6 @@ fn _adjust_right_wrap(
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  _cannot_fully_contains_target_cursor_line: bool,
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1171,7 +1171,6 @@ fn _adjust_horizontally_wrap(
           proc,
           buffer,
           window_actual_shape,
-          cannot_fully_contains_target_cursor_line,
           start_column,
           target_cursor_line,
           target_cursor_char,
@@ -1184,7 +1183,6 @@ fn _adjust_horizontally_wrap(
       proc,
       buffer,
       window_actual_shape,
-      cannot_fully_contains_target_cursor_line,
       start_column,
       target_cursor_line,
       target_cursor_char,
