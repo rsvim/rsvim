@@ -253,17 +253,10 @@ impl Buffer {
     match self.rope.get_line(line_idx) {
       Some(line) => {
         let line_len_chars = line.len_chars();
-        if line_len_chars > char_idx {
-          let mut c = char_idx;
-          while self.char_width(line.get_char(c).unwrap()) == 0 {
-            c = c.saturating_sub(1);
-            if c == 0 {
-              break;
-            }
-          }
-          Some(c)
+        if line_len_chars > char_idx && self.char_width(line.char(char_idx)) == 0 {
+          Some(char_idx.saturating_sub(1))
         } else {
-          None
+          Some(char_idx)
         }
       }
       None => None,
