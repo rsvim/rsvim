@@ -154,7 +154,7 @@ fn _adjust_cursor_char_idx_on_vertical_motion(
     None => {
       debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
       debug_assert!(buffer.get_rope().line(line_idx).len_chars() > 0);
-      buffer.last_visible_char_on_line(line_idx).unwrap()
+      buffer.last_char_on_line_no_eol(line_idx).unwrap()
     }
   };
   trace!(
@@ -238,9 +238,10 @@ fn _bounded_raw_cursor_move_x_by(
         "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
         cursor_char_idx, expected, last_row_viewport, last_char_on_row
       );
-      buffer
-        .last_visible_char_on_line_since(cursor_line_idx, last_char_on_row)
-        .unwrap()
+      match buffer.last_char_on_line_no_eol(cursor_line_idx) {
+        Some(last_char) => std::cmp::min(last_char_on_row, last_char),
+        None => last_char_on_row,
+      }
     };
     std::cmp::min(expected, upper_bounded)
   }
@@ -350,7 +351,7 @@ fn _bounded_raw_window_scroll_x_max_scrolls(viewport: &Viewport, buffer: &Buffer
     debug_assert!(buffer.get_rope().get_line(*line_idx).is_some());
     // If `last_row_viewport` is empty, i.e. the `end_char_idx == start_char_idx`, the scrolls is 0.
     if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
-      let max_scrolls_on_line = match buffer.last_visible_char_on_line(*line_idx) {
+      let max_scrolls_on_line = match buffer.last_char_on_line_no_eol(*line_idx) {
         Some(last_visible_c) => {
           let last_visible_col = buffer.width_until(*line_idx, last_visible_c);
           let last_col_on_row = buffer.width_until(

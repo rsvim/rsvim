@@ -91,7 +91,7 @@ fn _end_char_and_prefills(
   } else {
     // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
     debug_assert!(bline.len_chars() > 0);
-    let next_to_last_visible_char = buffer.last_visible_char_on_line(l).unwrap() + 1;
+    let next_to_last_visible_char = buffer.last_char_on_line_no_eol(l).unwrap() + 1;
 
     // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
     // char.
@@ -235,7 +235,7 @@ fn proc_line_wrap_nolinebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > buffer.last_visible_char_on_line(current_line).unwrap() {
+          if end_char > buffer.last_char_on_line_no_eol(current_line).unwrap() {
             break;
           }
 
@@ -544,7 +544,7 @@ fn proc_line_wrap_linebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > buffer.last_visible_char_on_line(current_line).unwrap() {
+          if end_char > buffer.last_char_on_line_no_eol(current_line).unwrap() {
             break;
           }
 
@@ -644,7 +644,7 @@ fn sync_wrap_linebreak(
 // 1. If target cursor is on the left side of viewport, and we need to move the viewport more to
 //    the left side.
 // 2. If 1st is true, this is the new "start_column" after adjustments.
-fn _move_more_to_left_nowrap(
+fn _adjust_left_nowrap(
   buffer: &Buffer,
   _window_actual_shape: &U16Rect,
   target_viewport_start_column: usize,
@@ -703,7 +703,7 @@ fn _move_more_to_left_nowrap(
 // 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
 //    right.
 // 2. If 1st is true, this is the new "start_column" after adjustments.
-fn _move_more_to_right_nowrap(
+fn _adjust_right_nowrap(
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_viewport_start_column: usize,
@@ -762,7 +762,7 @@ fn _move_more_to_right_nowrap(
 }
 
 #[derive(Debug, Copy, Clone, Builder)]
-struct AdjustHorizontallyOptions {
+struct AdjustOptions {
   #[builder(default = false)]
   pub disable_detect_leftward: bool,
 
@@ -771,7 +771,7 @@ struct AdjustHorizontallyOptions {
 }
 
 fn _adjust_horizontally_nowrap(
-  opts: AdjustHorizontallyOptions,
+  opts: AdjustOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
@@ -784,7 +784,7 @@ fn _adjust_horizontally_nowrap(
   if opts.disable_detect_leftward {
     if cfg!(debug_assertions) {
       debug_assert!(
-        _move_more_to_left_nowrap(
+        _adjust_left_nowrap(
           buffer,
           window_actual_shape,
           start_column,
@@ -795,7 +795,7 @@ fn _adjust_horizontally_nowrap(
       );
     }
   } else {
-    let start_column_on_left_side = _move_more_to_left_nowrap(
+    let start_column_on_left_side = _adjust_left_nowrap(
       buffer,
       window_actual_shape,
       start_column,
@@ -811,7 +811,7 @@ fn _adjust_horizontally_nowrap(
   if opts.disable_detect_rightward {
     if cfg!(debug_assertions) {
       debug_assert!(
-        _move_more_to_right_nowrap(
+        _adjust_right_nowrap(
           buffer,
           window_actual_shape,
           start_column,
@@ -822,7 +822,7 @@ fn _adjust_horizontally_nowrap(
       );
     }
   } else {
-    let start_column_on_right_side = _move_more_to_right_nowrap(
+    let start_column_on_right_side = _adjust_right_nowrap(
       buffer,
       window_actual_shape,
       start_column,
@@ -857,9 +857,7 @@ fn _line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) ->
 
   debug_assert!(viewport.lines().contains_key(&line_idx));
   debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-  let bufline_last_visible_char = buffer
-    .last_visible_char_on_line(line_idx)
-    .unwrap_or(0_usize);
+  let bufline_last_visible_char = buffer.last_char_on_line_no_eol(line_idx).unwrap_or(0_usize);
 
   let line_viewport = viewport.lines().get(&line_idx).unwrap();
   let rows = line_viewport.rows();
@@ -940,7 +938,7 @@ fn _revert_search_start_column_wrap(
   )
 }
 
-fn _move_more_to_left_wrap(
+fn _adjust_left_wrap(
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1035,7 +1033,7 @@ fn _move_more_to_left_wrap(
     && target_cursor_rows.len() < window_actual_shape.height() as usize
   {
     let last_visible_char = buffer
-      .last_visible_char_on_line(target_cursor_line)
+      .last_char_on_line_no_eol(target_cursor_line)
       .unwrap_or(0_usize);
     let start_column_included_last_visible_char = _revert_search_start_column_wrap(
       proc,
@@ -1057,7 +1055,7 @@ fn _move_more_to_left_wrap(
   }
 }
 
-fn _move_more_to_right_wrap(
+fn _adjust_right_wrap(
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1080,6 +1078,7 @@ fn _move_more_to_right_wrap(
   debug_assert!(rows.last_key_value().is_some());
   let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
 
+  // NOTE: If out of viewport, the viewport must only contains 1 line.
   let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
     && target_cursor_char >= last_row_viewport.end_char_idx();
 
@@ -1098,7 +1097,7 @@ fn _move_more_to_right_wrap(
 }
 
 fn _adjust_horizontally_wrap(
-  opts: AdjustHorizontallyOptions,
+  opts: AdjustOptions,
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1113,7 +1112,7 @@ fn _adjust_horizontally_wrap(
   if opts.disable_detect_leftward {
     if cfg!(debug_assertions) {
       debug_assert!(
-        _move_more_to_left_wrap(
+        _adjust_left_wrap(
           proc,
           buffer,
           window_actual_shape,
@@ -1126,7 +1125,7 @@ fn _adjust_horizontally_wrap(
       );
     }
   } else {
-    let start_column_on_left_side = _move_more_to_left_wrap(
+    let start_column_on_left_side = _adjust_left_wrap(
       proc,
       buffer,
       window_actual_shape,
@@ -1144,7 +1143,7 @@ fn _adjust_horizontally_wrap(
   if opts.disable_detect_rightward {
     if cfg!(debug_assertions) {
       debug_assert!(
-        _move_more_to_right_wrap(
+        _adjust_right_wrap(
           proc,
           buffer,
           window_actual_shape,
@@ -1156,7 +1155,7 @@ fn _adjust_horizontally_wrap(
       );
     }
   } else {
-    let start_column_on_right_side = _move_more_to_right_wrap(
+    let start_column_on_right_side = _adjust_right_wrap(
       proc,
       buffer,
       window_actual_shape,
@@ -1245,7 +1244,7 @@ fn search_anchor_downward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_visible_char_on_line(target_cursor_line)
+      .last_char_on_line_no_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1286,7 +1285,7 @@ fn search_anchor_downward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustOptionsBuilder::default().build().unwrap(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1314,7 +1313,7 @@ fn search_anchor_downward_wrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_visible_char_on_line(target_cursor_line)
+      .last_char_on_line_no_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1383,7 +1382,7 @@ fn search_anchor_downward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustOptionsBuilder::default().build().unwrap(),
     proc,
     buffer,
     window_actual_shape,
@@ -1452,7 +1451,7 @@ fn search_anchor_upward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_visible_char_on_line(target_cursor_line)
+      .last_char_on_line_no_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1471,7 +1470,7 @@ fn search_anchor_upward_nowrap(
   };
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustOptionsBuilder::default().build().unwrap(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1499,7 +1498,7 @@ fn search_anchor_upward_wrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_visible_char_on_line(target_cursor_line)
+      .last_char_on_line_no_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1537,7 +1536,7 @@ fn search_anchor_upward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default().build().unwrap(),
+    AdjustOptionsBuilder::default().build().unwrap(),
     proc,
     buffer,
     window_actual_shape,
@@ -1604,7 +1603,7 @@ fn search_anchor_leftward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_visible_char_on_line(target_cursor_line)
+      .last_char_on_line_no_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1613,7 +1612,7 @@ fn search_anchor_leftward_nowrap(
   let start_column = viewport.start_column_idx();
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default()
+    AdjustOptionsBuilder::default()
       .disable_detect_rightward(true)
       .build()
       .unwrap(),
@@ -1644,7 +1643,7 @@ fn search_anchor_leftward_wrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_visible_char_on_line(target_cursor_line)
+      .last_char_on_line_no_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1677,7 +1676,7 @@ fn search_anchor_leftward_wrap(
     };
 
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default()
+    AdjustOptionsBuilder::default()
       .disable_detect_rightward(true)
       .build()
       .unwrap(),
@@ -1747,7 +1746,7 @@ fn search_anchor_rightward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_visible_char_on_line(target_cursor_line)
+      .last_char_on_line_no_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1756,7 +1755,7 @@ fn search_anchor_rightward_nowrap(
   let start_column = viewport.start_column_idx();
 
   _adjust_horizontally_nowrap(
-    AdjustHorizontallyOptionsBuilder::default()
+    AdjustOptionsBuilder::default()
       .disable_detect_leftward(true)
       .build()
       .unwrap(),
@@ -1787,7 +1786,7 @@ fn search_anchor_rightward_wrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_visible_char_on_line(target_cursor_line)
+      .last_char_on_line_no_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1821,7 +1820,7 @@ fn search_anchor_rightward_wrap(
 
   // adjust horizontally
   _adjust_horizontally_wrap(
-    AdjustHorizontallyOptionsBuilder::default()
+    AdjustOptionsBuilder::default()
       .disable_detect_leftward(true)
       .build()
       .unwrap(),
