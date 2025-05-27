@@ -246,28 +246,6 @@ impl Buffer {
       None => None,
     }
   }
-
-  /// Get last visible char index on line, starts from `char_idx` instead of the last char of the
-  /// line.
-  ///
-  /// NOTE: This function iterates each char from `char_idx` of the line to the beginning of the
-  /// line.
-  ///
-  /// It returns the char index if exists, returns `None` if line not exists or line is
-  /// empty/blank, or the `char_idx` is out of line length.
-  pub fn last_char_on_line_no_eol_since(&self, line_idx: usize, char_idx: usize) -> Option<usize> {
-    match self.rope.get_line(line_idx) {
-      Some(line) => {
-        let line_len_chars = line.len_chars();
-        if line_len_chars > char_idx && self.char_width(line.char(char_idx)) == 0 {
-          Some(char_idx.saturating_sub(1))
-        } else {
-          Some(char_idx)
-        }
-      }
-      None => None,
-    }
-  }
 }
 // Rope }
 
