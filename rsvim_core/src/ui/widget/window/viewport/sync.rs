@@ -609,14 +609,6 @@ fn sync_wrap_linebreak(
   }
 }
 
-fn _target_cursor_is_at_eol(
-  buffer: &Buffer,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> bool {
-  true
-}
-
 // spellchecker:off
 // When searching the new viewport downward, the target cursor could be not shown in it.
 //
@@ -707,6 +699,17 @@ fn _adjust_left_nowrap(
   }
 }
 
+fn _target_cursor_is_at_eol(
+  buffer: &Buffer,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> bool {
+  match buffer.get_rope().get_line(target_cursor_line) {
+    Some(bufline) => target_cursor_char == bufline.len_chars().saturating_sub(1),
+    None => false,
+  }
+}
+
 // Returns
 // 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
 //    right.
@@ -721,7 +724,6 @@ fn _adjust_right_nowrap(
   let width = window_actual_shape.width();
   let viewport_end_column = target_viewport_start_column + width as usize;
   let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
-  let on_right_side = target_cursor_width > viewport_end_column;
 
   if cfg!(debug_assertions) {
     let target_viewport_start_char =
@@ -758,15 +760,26 @@ fn _adjust_right_nowrap(
     );
   }
 
-  if on_right_side {
+  let out_of_viewport_end = target_cursor_width > viewport_end_column;
+  if out_of_viewport_end {
     // Move viewport to right to show the cursor, just put the cursor at the last right char in the
     // new viewport.
     let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
     let start_column = end_column.saturating_sub(width as usize);
-    Some(start_column)
-  } else {
-    None
+    return Some(start_column);
   }
+
+  let eol_at_viewport_end =
+    _target_cursor_is_at_eol(buffer, target_cursor_line, target_cursor_char)
+      && target_cursor_width == viewport_end_column;
+  if eol_at_viewport_end {
+    // For end-of-line, we need to add 1 extra column.
+    let end_column = buffer.width_until(target_cursor_line, target_cursor_char) + 1;
+    let start_column = end_column.saturating_sub(width as usize);
+    return Some(start_column);
+  }
+
+  None
 }
 
 #[derive(Debug, Copy, Clone, Builder)]
