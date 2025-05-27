@@ -1079,10 +1079,10 @@ fn _adjust_right_wrap(
   let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
 
   // NOTE: If out of viewport, the viewport must only contains 1 line.
-  let out_of_viewport = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+  let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
     && target_cursor_char >= last_row_viewport.end_char_idx();
 
-  if out_of_viewport {
+  if on_right_side {
     let start_column = _revert_search_start_column_wrap(
       proc,
       buffer,
@@ -1090,34 +1090,10 @@ fn _adjust_right_wrap(
       target_cursor_line,
       target_cursor_char,
     );
-    return Some(start_column);
-  }
-
-  let last_row_width = if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
-    0_usize
+    Some(start_column)
   } else {
-    let last_start_column =
-      buffer.width_before(target_cursor_line, last_row_viewport.start_char_idx());
-    buffer
-      .width_until(target_cursor_line, target_cursor_char)
-      .saturating_sub(last_start_column)
-  };
-  let eol_at_viewport_end =
-    _target_cursor_is_at_eol(buffer, target_cursor_line, target_cursor_char)
-      && last_row_width == width as usize;
-
-  if eol_at_viewport_end {
-    let start_column = _revert_search_start_column_wrap(
-      proc,
-      buffer,
-      window_actual_shape,
-      target_cursor_line,
-      target_cursor_char,
-    );
-    return Some(start_column);
+    None
   }
-
-  None
 }
 
 fn _adjust_horizontally_wrap(
