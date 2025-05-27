@@ -52,26 +52,34 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
       - uses: dtolnay/rust-toolchain@stable
-      - uses: cargo-bins/cargo-binstall@main
+      # - uses: cargo-bins/cargo-binstall@main
       - name: Rustfmt
         run: cargo fmt --check
       - name: Taplo
         run: |
-          cargo binstall --force --no-confirm taplo-cli
+          curl -fsSL https://github.com/tamasfe/taplo/releases/latest/download/taplo-linux-x86_64.gz | gzip -d - | install -m 755 /dev/stdin /usr/local/bin/taplo
+          # cargo binstall --force --no-confirm taplo-cli
           echo "Info: taplo --version"
           taplo --version
           echo "Info: taplo check"
           taplo check
           echo "Info: taplo fmt --check"
           taplo fmt --check
-      - name: Clippy
-        env:
-          RUSTC_WRAPPER: "sccache"
-          SCCACHE_GHA_ENABLED: "true"
-        run: cargo clippy --all-targets --all-features
       - name: MSRV
         run: |
-          cargo binstall --force --no-confirm cargo-msrv
+          mkdir ~/.cargo-msrv
+          CARGO_MSRV_DIR="cargo-msrv-x86_64-unknown-linux-gnu-v0.18.4"
+          curl --output ~/.cargo-msrv/cargo-msrv.tgz -fsSL https://github.com/foresterre/cargo-msrv/releases/download/v0.18.4/$CARGO_MSRV_DIR.tgz
+          tar -xvzf ~/.cargo-msrv/cargo-msrv.tgz -C ~/.cargo-msrv
+          echo "Info: ~/.cargo-msrv"
+          ls -l ~/.cargo-msrv
+          echo "Info: ~/.cargo-msrv/$CARGO_MSRV_DIR"
+          ls -l ~/.cargo-msrv/$CARGO_MSRV_DIR
+          mv ~/.cargo-msrv/$CARGO_MSRV_DIR/cargo-msrv ~/.cargo/bin
+          chmod 755 ~/.cargo/bin/cargo-msrv
+          echo "Info: ~/.cargo/bin"
+          ls -l ~/.cargo/bin
+          # cargo binstall --force --no-confirm cargo-msrv
           echo "Info: cargo msrv --version"
           cargo msrv --version
           echo "Info: PWD=${PWD}"
@@ -84,6 +92,11 @@ jobs:
           cargo msrv verify
           echo "Info: cd SAVED_PWD=${SAVED_PWD}"
           cd "${SAVED_PWD}"
+      - name: Clippy
+        env:
+          RUSTC_WRAPPER: "sccache"
+          SCCACHE_GHA_ENABLED: "true"
+        run: cargo clippy --all-targets --all-features
       - name: Docs
         run: |
           echo "Info: cargo doc --workspace"
