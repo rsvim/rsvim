@@ -609,6 +609,13 @@ fn sync_wrap_linebreak(
   }
 }
 
+fn _target_cursor_is_at_eol(
+  buffer: &Buffer,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> usize {
+}
+
 // spellchecker:off
 // When searching the new viewport downward, the target cursor could be not shown in it.
 //
