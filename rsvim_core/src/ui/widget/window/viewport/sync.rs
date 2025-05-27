@@ -11,6 +11,7 @@ use derive_builder::Builder;
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
+use tokio_util::bytes::buf;
 #[allow(unused_imports)]
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
@@ -760,8 +761,8 @@ fn _adjust_right_nowrap(
     );
   }
 
-  let out_of_viewport_end = target_cursor_width > viewport_end_column;
-  if out_of_viewport_end {
+  let out_of_viewport = target_cursor_width > viewport_end_column;
+  if out_of_viewport {
     // Move viewport to right to show the cursor, just put the cursor at the last right char in the
     // new viewport.
     let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
@@ -926,7 +927,17 @@ fn _find_start_char_wrap(
     );
     let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
     if last_row_viewport.end_char_idx() > last_char {
-      return start_column;
+      let last_row_width = buffer
+        .width_until(line_idx, last_char)
+        .saturating_sub(start_column);
+      let eol_at_viewport_end = _target_cursor_is_at_eol(buffer, line_idx, last_char)
+        && last_row_width == window_actual_shape.width() as usize;
+
+      if eol_at_viewport_end {
+        return start_column + 1;
+      } else {
+        return start_column;
+      }
     }
     start_column += 1;
   }
@@ -1080,6 +1091,7 @@ fn _adjust_right_wrap(
   proc: ProcessLineFn,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
+  cannot_fully_contains_target_cursor_line: bool,
   target_viewport_start_column: usize,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1099,10 +1111,13 @@ fn _adjust_right_wrap(
   debug_assert!(rows.last_key_value().is_some());
   let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
 
-  let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+  let cursor_is_at_eol = _target_cursor_is_at_eol(buffer, target_cursor_line, target_cursor_char);
+
+  // NOTE: If out of viewport, the viewport must only contains 1 line.
+  let out_of_viewport = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
     && target_cursor_char >= last_row_viewport.end_char_idx();
 
-  if on_right_side {
+  if out_of_viewport {
     let start_column = _revert_search_start_column_wrap(
       proc,
       buffer,
@@ -1110,10 +1125,14 @@ fn _adjust_right_wrap(
       target_cursor_line,
       target_cursor_char,
     );
-    Some(start_column)
-  } else {
-    None
+    return Some(start_column);
   }
+
+  let eol_at_viewport_end =
+    _target_cursor_is_at_eol(buffer, target_cursor_line, target_cursor_char)
+      && target_cursor_char == viewport_end_column;
+
+  None
 }
 
 fn _adjust_horizontally_wrap(
@@ -1167,6 +1186,7 @@ fn _adjust_horizontally_wrap(
           proc,
           buffer,
           window_actual_shape,
+          cannot_fully_contains_target_cursor_line,
           start_column,
           target_cursor_line,
           target_cursor_char,
@@ -1179,6 +1199,7 @@ fn _adjust_horizontally_wrap(
       proc,
       buffer,
       window_actual_shape,
+      cannot_fully_contains_target_cursor_line,
       start_column,
       target_cursor_line,
       target_cursor_char,
