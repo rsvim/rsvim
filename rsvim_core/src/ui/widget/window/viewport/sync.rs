@@ -949,6 +949,7 @@ fn _adjust_left_wrap(
 ) -> Option<usize> {
   let mut start_column = target_viewport_start_column;
   let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+  let mut on_left_side = target_cursor_width < start_column;
 
   if cfg!(debug_assertions) {
     match buffer.char_at(target_cursor_line, target_viewport_start_column) {
@@ -984,8 +985,6 @@ fn _adjust_left_wrap(
       ),
     }
   }
-
-  let mut on_left_side = target_cursor_width < start_column;
 
   if on_left_side {
     // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
