@@ -235,7 +235,7 @@ impl Buffer {
     match self.rope.get_line(line_idx) {
       Some(line) => {
         let line_len_chars = line.len_chars();
-        Some(line_len_chars.saturating_sub(1))
+        Some(line_len_chars.saturating_sub(2))
       }
       None => None,
     }
