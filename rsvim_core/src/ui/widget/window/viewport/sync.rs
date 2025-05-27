@@ -699,17 +699,6 @@ fn _adjust_left_nowrap(
   }
 }
 
-fn _target_cursor_is_at_eol(
-  buffer: &Buffer,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> bool {
-  match buffer.get_rope().get_line(target_cursor_line) {
-    Some(bufline) => target_cursor_char == bufline.len_chars().saturating_sub(1),
-    None => false,
-  }
-}
-
 // Returns
 // 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
 //    right.
@@ -916,17 +905,7 @@ fn _find_start_char_wrap(
     );
     let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
     if last_row_viewport.end_char_idx() > last_char {
-      let last_row_width = buffer
-        .width_until(line_idx, last_char)
-        .saturating_sub(start_column);
-      let eol_at_viewport_end = _target_cursor_is_at_eol(buffer, line_idx, last_char)
-        && last_row_width == window_actual_shape.width() as usize;
-
-      if eol_at_viewport_end {
-        return start_column + 1;
-      } else {
-        return start_column;
-      }
+      return start_column;
     }
     start_column += 1;
   }
