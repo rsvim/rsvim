@@ -11,7 +11,6 @@ use derive_builder::Builder;
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
-use tokio_util::bytes::buf;
 #[allow(unused_imports)]
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
@@ -1111,8 +1110,6 @@ fn _adjust_right_wrap(
   debug_assert!(rows.last_key_value().is_some());
   let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
 
-  let cursor_is_at_eol = _target_cursor_is_at_eol(buffer, target_cursor_line, target_cursor_char);
-
   // NOTE: If out of viewport, the viewport must only contains 1 line.
   let out_of_viewport = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
     && target_cursor_char >= last_row_viewport.end_char_idx();
@@ -1128,9 +1125,29 @@ fn _adjust_right_wrap(
     return Some(start_column);
   }
 
+  let last_row_width = if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
+    0_usize
+  } else {
+    let last_start_column =
+      buffer.width_before(target_cursor_line, last_row_viewport.start_char_idx());
+    buffer
+      .width_until(target_cursor_line, target_cursor_char)
+      .saturating_sub(last_start_column)
+  };
   let eol_at_viewport_end =
     _target_cursor_is_at_eol(buffer, target_cursor_line, target_cursor_char)
-      && target_cursor_char == viewport_end_column;
+      && last_row_width == width as usize;
+
+  if eol_at_viewport_end {
+    let start_column = _revert_search_start_column_wrap(
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+    );
+    return Some(start_column);
+  }
 
   None
 }
