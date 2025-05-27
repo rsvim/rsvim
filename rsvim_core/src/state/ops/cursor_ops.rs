@@ -242,10 +242,6 @@ fn _bounded_raw_cursor_move_x_by(
         Some(last_char) => std::cmp::min(last_char_on_row, last_char),
         None => last_char_on_row,
       }
-      //
-      // buffer
-      //   .last_char_on_line_no_eol_since(cursor_line_idx, last_char_on_row)
-      //   .unwrap()
     };
     std::cmp::min(expected, upper_bounded)
   }
