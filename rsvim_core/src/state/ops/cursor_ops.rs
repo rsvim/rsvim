@@ -239,13 +239,7 @@ fn _bounded_raw_cursor_move_x_by(
         cursor_char_idx, expected, last_row_viewport, last_char_on_row
       );
       match buffer.last_char_on_line_no_eol(cursor_line_idx) {
-        Some(last_char) => {
-          if last_char_on_row > last_char {
-            last_char
-          } else {
-            last_char_on_row
-          }
-        }
+        Some(last_char) => std::cmp::min(last_char_on_row, last_char),
         None => last_char_on_row,
       }
       //
