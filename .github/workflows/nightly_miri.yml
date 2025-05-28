@@ -17,7 +17,7 @@ env:
   RUST_BACKTRACE: "full"
   RUSTUP_MAX_RETRIES: 3
   GH_TOKEN: ${{ github.token }}
-  TESTS_LIST: "~/.tests_list.txt"
+  TESTS_LIST: ".tests_list.txt"
 defaults:
   run:
     shell: bash
