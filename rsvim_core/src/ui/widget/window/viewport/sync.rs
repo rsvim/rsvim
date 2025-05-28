@@ -1340,7 +1340,23 @@ fn search_anchor_downward_wrap(
   );
 
   debug_assert!(viewport.lines().last_key_value().is_some());
-  let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
+  let (&last_line, last_line_viewport) = viewport.lines().last_key_value().unwrap();
+
+  // NOTE: Split the algorithm into below use cases:
+  // 1. The viewport cannot fully contain the target cursor line, i.e. the line is too long and
+  //    have to be truncated to place in the viewport.
+  // 2. The viewport can contain the target cursor line, i.e. the line is not too long. And future
+  //    we can split this into below sub cases:
+  //    2.1 The viewport only contains the target cursor line. And we have a very specific edge
+  //      case when considering the empty eol:
+  //        a) The last visible char of target cursor line is at the bottom-right corner of the
+  //        viewport, and thus the empty eol is actually out of viewport.
+  //        b) Otherwise the empty eol of target cursor line is not out of viewport.
+  //    2.2 The viewport not only contains the target cursor line, i.e. it contains at least 2
+  //      lines. And we have a very specific edge case for empty eol:
+  //        a) The target cursor line is the last line in viewport, and its last visible char is at
+  //        the bottom-right corner, and thus the empty eol is out of viewport.
+  //        b) Otherwise the empty eol of target cursor line is not out of viewport.
 
   // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only 1
   // line shows in current window viewport. Because the `wrap` will force the 2nd line wait to show
