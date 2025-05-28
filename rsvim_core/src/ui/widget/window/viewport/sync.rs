@@ -2231,45 +2231,70 @@ fn search_anchor_leftward_wrap(
       .unwrap_or(0_usize),
   );
 
-  debug_assert!(viewport.lines().first_key_value().is_some());
-  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
-
-  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-    || _line_tail_not_show(viewport, buffer, target_cursor_line);
-
-  let (start_column, cannot_fully_contains_target_cursor_line) =
-    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      (viewport_start_column, false)
-    } else {
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
-        buffer,
-        0,
-        target_cursor_line,
-        0_u16,
-        height.saturating_add(10),
-        width,
-      );
-      let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-      let start_column = if !cannot_fully_contains_target_cursor_line {
-        0_usize
-      } else {
-        viewport_start_column
-      };
-
-      (start_column, cannot_fully_contains_target_cursor_line)
-    };
-
-  wrap_detail::adjust_wrap(
-    detail::AdjustOptions::no_rightward(),
-    proc,
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
+    0,
     target_cursor_line,
-    target_cursor_char,
-    viewport_start_line,
-    start_column,
-  )
+    0_u16,
+    wrap_detail::maximized_viewport_height(height),
+    width,
+  );
+  let cannot_fully_contains_target_cursor_line = preview_target_rows.len() > height as usize;
+  let only_contains_target_cursor_line = preview_target_rows.len() == height as usize;
+
+  if cannot_fully_contains_target_cursor_line {
+    // Case-1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
+    let start_line = target_cursor_line;
+    let start_column = viewport_start_column;
+    wrap_detail::adjust_wrap_1(
+      detail::AdjustOptions::no_rightward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else if only_contains_target_cursor_line {
+    // Case-2.1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // Force `start_column` to be 0, because viewport can contains this line.
+    let start_line = target_cursor_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_1(
+      detail::AdjustOptions::no_rightward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else {
+    // Case-2.2
+    // For `start_line`, simply force it to be the old `viewport_start_line` because we are not
+    // going to move viewport upward/downward (only leftward/rightward). Thus the value won't
+    // change.
+    // Force `start_column` to be 0, because viewport can contains the line.
+    let start_line = viewport_start_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_2(
+      detail::AdjustOptions::no_rightward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  }
 }
 
 // Search a new viewport anchor (`start_line`, `start_column`) rightward, i.e. when cursor moves
@@ -2368,43 +2393,108 @@ fn search_anchor_rightward_wrap(
       .unwrap_or(0_usize),
   );
 
-  debug_assert!(viewport.lines().first_key_value().is_some());
-  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
+  // debug_assert!(viewport.lines().first_key_value().is_some());
+  // let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
+  //
+  // let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
+  //   || _line_tail_not_show(viewport, buffer, target_cursor_line);
+  //
+  // let (start_column, cannot_fully_contains_target_cursor_line) =
+  //   if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
+  //     (viewport_start_column, false)
+  //   } else {
+  //     let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
+  //       buffer,
+  //       0,
+  //       target_cursor_line,
+  //       0_u16,
+  //       height.saturating_add(10),
+  //       width,
+  //     );
+  //     let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
+  //     let start_column = if !cannot_fully_contains_target_cursor_line {
+  //       0_usize
+  //     } else {
+  //       viewport_start_column
+  //     };
+  //
+  //     (start_column, cannot_fully_contains_target_cursor_line)
+  //   };
+  //
+  // wrap_detail::adjust_wrap(
+  //   detail::AdjustOptions::no_leftward(),
+  //   proc,
+  //   buffer,
+  //   window_actual_shape,
+  //   cannot_fully_contains_target_cursor_line,
+  //   target_cursor_line,
+  //   target_cursor_char,
+  //   viewport_start_line,
+  //   start_column,
+  // )
 
-  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-    || _line_tail_not_show(viewport, buffer, target_cursor_line);
-
-  let (start_column, cannot_fully_contains_target_cursor_line) =
-    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      (viewport_start_column, false)
-    } else {
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
-        buffer,
-        0,
-        target_cursor_line,
-        0_u16,
-        height.saturating_add(10),
-        width,
-      );
-      let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-      let start_column = if !cannot_fully_contains_target_cursor_line {
-        0_usize
-      } else {
-        viewport_start_column
-      };
-
-      (start_column, cannot_fully_contains_target_cursor_line)
-    };
-
-  wrap_detail::adjust_wrap(
-    detail::AdjustOptions::no_leftward(),
-    proc,
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
+    0,
     target_cursor_line,
-    target_cursor_char,
-    viewport_start_line,
-    start_column,
-  )
+    0_u16,
+    wrap_detail::maximized_viewport_height(height),
+    width,
+  );
+  let cannot_fully_contains_target_cursor_line = preview_target_rows.len() > height as usize;
+  let only_contains_target_cursor_line = preview_target_rows.len() == height as usize;
+
+  if cannot_fully_contains_target_cursor_line {
+    // Case-1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
+    let start_line = target_cursor_line;
+    let start_column = viewport_start_column;
+    wrap_detail::adjust_wrap_1(
+      detail::AdjustOptions::no_rightward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else if only_contains_target_cursor_line {
+    // Case-2.1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // Force `start_column` to be 0, because viewport can contains this line.
+    let start_line = target_cursor_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_1(
+      detail::AdjustOptions::no_rightward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else {
+    // Case-2.2
+    // For `start_line`, simply force it to be the old `viewport_start_line` because we are not
+    // going to move viewport upward/downward (only leftward/rightward). Thus the value won't
+    // change.
+    // Force `start_column` to be 0, because viewport can contains the line.
+    let start_line = viewport_start_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_2(
+      detail::AdjustOptions::no_rightward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  }
 }
