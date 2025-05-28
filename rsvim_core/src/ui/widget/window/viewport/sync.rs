@@ -609,6 +609,26 @@ fn sync_wrap_linebreak(
   }
 }
 
+fn _target_is_empty_eol(
+  buffer: &Buffer,
+  target_cursor_line: usize,
+  target_cursor_char: usize,
+) -> bool {
+  match buffer.get_rope().get_line(target_cursor_line) {
+    Some(bufline) => {
+      if target_cursor_char != bufline.len_chars().saturating_sub(1) {
+        false
+      } else {
+        match bufline.get_char(target_cursor_char) {
+          Some(c) => buffer.char_width(c) == 0,
+          None => false,
+        }
+      }
+    }
+    None => false,
+  }
+}
+
 // spellchecker:off
 // When searching the new viewport downward, the target cursor could be not shown in it.
 //
