@@ -2495,46 +2495,6 @@ fn search_anchor_rightward_wrap(
       .unwrap_or(0_usize),
   );
 
-  // debug_assert!(viewport.lines().first_key_value().is_some());
-  // let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
-  //
-  // let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-  //   || _line_tail_not_show(viewport, buffer, target_cursor_line);
-  //
-  // let (start_column, cannot_fully_contains_target_cursor_line) =
-  //   if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-  //     (viewport_start_column, false)
-  //   } else {
-  //     let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
-  //       buffer,
-  //       0,
-  //       target_cursor_line,
-  //       0_u16,
-  //       height.saturating_add(10),
-  //       width,
-  //     );
-  //     let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-  //     let start_column = if !cannot_fully_contains_target_cursor_line {
-  //       0_usize
-  //     } else {
-  //       viewport_start_column
-  //     };
-  //
-  //     (start_column, cannot_fully_contains_target_cursor_line)
-  //   };
-  //
-  // wrap_detail::adjust_wrap(
-  //   detail::AdjustOptions::no_leftward(),
-  //   proc,
-  //   buffer,
-  //   window_actual_shape,
-  //   cannot_fully_contains_target_cursor_line,
-  //   target_cursor_line,
-  //   target_cursor_char,
-  //   viewport_start_line,
-  //   start_column,
-  // )
-
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
     0,
