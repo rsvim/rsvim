@@ -1078,27 +1078,45 @@ mod wrap_detail {
       start_column,
       target_cursor_line,
       0_u16,
-      window_actual_shape.height(),
+      maximized_viewport_height(window_actual_shape.height()),
       window_actual_shape.width(),
     );
     let not_fully_use_viewport_rows =
       preview_target_rows.len() < window_actual_shape.height() as usize;
+    let can_over_use_viewport_rows =
+      preview_target_rows.len() > window_actual_shape.height() as usize;
     let not_fully_use_viewport_last_row = {
       if not_fully_use_viewport_rows {
         true
+      } else if can_over_use_viewport_rows {
+        // Start with `start_column`, the viewport still cannot fully contains the target cursor
+        // line, i.e. the viewport last row and its tail are been fully used, no extra spaces have
+        // been left.
+        false
       } else {
         match preview_target_rows.last_key_value() {
           Some((last_row_idx, last_row_viewport)) => {
             debug_assert_eq!(last_row_idx + 1, window_actual_shape.height());
-            if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
+            debug_assert!(last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx());
+
+            // In last row, the tail (last visible char) is already the tail of target cursor line.
+            if last_row_viewport.end_char_idx()
+              > buffer
+                .last_char_on_line_no_empty_eol(target_cursor_line)
+                .unwrap()
+            {
               let last_row_end_width =
                 buffer.width_before(target_cursor_line, last_row_viewport.end_char_idx());
               let last_row_start_width =
                 buffer.width_before(target_cursor_line, last_row_viewport.start_char_idx());
               let last_row_width = last_row_end_width.saturating_sub(last_row_start_width);
+              // If the last row fully uses all the window width, then there is no extra spaces.
               last_row_width < window_actual_shape.width() as usize
             } else {
-              true
+              // In last row, the tail (last visible char) is not the tail of target cursor line,
+              // there are more chars out of viewport on the right side. Thus there is no extra
+              // spaces.
+              false
             }
           }
           None => false,
