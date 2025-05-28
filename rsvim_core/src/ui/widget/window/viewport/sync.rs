@@ -91,7 +91,7 @@ fn _end_char_and_prefills(
   } else {
     // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
     debug_assert!(bline.len_chars() > 0);
-    let next_to_last_visible_char = buffer.last_char_on_line_no_eol(l).unwrap() + 1;
+    let next_to_last_visible_char = buffer.last_char_on_line_no_empty_eol(l).unwrap() + 1;
 
     // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
     // char.
@@ -235,7 +235,7 @@ fn proc_line_wrap_nolinebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > buffer.last_char_on_line_no_eol(current_line).unwrap() {
+          if end_char > buffer.last_char_on_line_no_empty_eol(current_line).unwrap() {
             break;
           }
 
@@ -544,7 +544,7 @@ fn proc_line_wrap_linebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > buffer.last_char_on_line_no_eol(current_line).unwrap() {
+          if end_char > buffer.last_char_on_line_no_empty_eol(current_line).unwrap() {
             break;
           }
 
@@ -857,7 +857,9 @@ fn _line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) ->
 
   debug_assert!(viewport.lines().contains_key(&line_idx));
   debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-  let bufline_last_visible_char = buffer.last_char_on_line_no_eol(line_idx).unwrap_or(0_usize);
+  let bufline_last_visible_char = buffer
+    .last_char_on_line_no_empty_eol(line_idx)
+    .unwrap_or(0_usize);
 
   let line_viewport = viewport.lines().get(&line_idx).unwrap();
   let rows = line_viewport.rows();
@@ -1033,7 +1035,7 @@ fn _adjust_left_wrap(
     && target_cursor_rows.len() < window_actual_shape.height() as usize
   {
     let last_visible_char = buffer
-      .last_char_on_line_no_eol(target_cursor_line)
+      .last_char_on_line_no_empty_eol(target_cursor_line)
       .unwrap_or(0_usize);
     let start_column_included_last_visible_char = _revert_search_start_column_wrap(
       proc,
@@ -1244,7 +1246,7 @@ fn search_anchor_downward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_eol(target_cursor_line)
+      .last_char_on_line_no_empty_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1313,7 +1315,7 @@ fn search_anchor_downward_wrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_eol(target_cursor_line)
+      .last_char_on_line_no_empty_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1451,7 +1453,7 @@ fn search_anchor_upward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_eol(target_cursor_line)
+      .last_char_on_line_no_empty_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1498,7 +1500,7 @@ fn search_anchor_upward_wrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_eol(target_cursor_line)
+      .last_char_on_line_no_empty_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1603,7 +1605,7 @@ fn search_anchor_leftward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_eol(target_cursor_line)
+      .last_char_on_line_no_empty_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1643,7 +1645,7 @@ fn search_anchor_leftward_wrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_eol(target_cursor_line)
+      .last_char_on_line_no_empty_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1746,7 +1748,7 @@ fn search_anchor_rightward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_eol(target_cursor_line)
+      .last_char_on_line_no_empty_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1786,7 +1788,7 @@ fn search_anchor_rightward_wrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_eol(target_cursor_line)
+      .last_char_on_line_no_empty_eol(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
