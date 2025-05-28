@@ -101,3 +101,9 @@ sourcemap = { workspace = true }
 
 [dev-dependencies]
 assert_fs = "1.1.2"
+
+# Unit tests
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+  'cfg(coverage,coverage_nightly)',
+] }
