@@ -1146,8 +1146,8 @@ mod wrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> Option<usize> {
+    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
     if cfg!(debug_assertions) {
-      let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
       match buffer.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
           "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
@@ -1182,7 +1182,9 @@ mod wrap_detail {
       }
     }
 
+    let on_left_side = target_cursor_width < target_viewport_start_column;
     debug_assert_eq!(target_viewport_start_column, 0_usize);
+    debug_assert!(!on_left_side);
     None
   }
 
@@ -1213,18 +1215,8 @@ mod wrap_detail {
     debug_assert!(last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx());
     let on_right_side = target_cursor_char >= last_row_viewport.end_char_idx();
 
-    if on_right_side {
-      let start_column = reverse_search_start_column(
-        proc,
-        buffer,
-        window_actual_shape,
-        target_cursor_line,
-        target_cursor_char,
-      );
-      Some(start_column)
-    } else {
-      None
-    }
+    debug_assert!(!on_right_side);
+    None
   }
 
   // For case-2.1
