@@ -989,9 +989,9 @@ mod wrap_detail {
 
   // For case-1
   fn to_left_1(
-    _proc: ProcessLineFn,
+    proc: ProcessLineFn,
     buffer: &Buffer,
-    _window_actual_shape: &U16Rect,
+    window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -1034,15 +1034,99 @@ mod wrap_detail {
       }
     }
 
-    let on_left_side = target_cursor_width < start_column;
+    // If `target_cursor_char` is out of viewport, on the leftside, we need to move viewport to left
+    // to include the `target_cursor_char`.
+    let mut on_left_side = target_cursor_width < start_column;
     if on_left_side {
-      // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
-      // just put the cursor at the first left char in the new viewport.
       start_column = buffer.width_before(target_cursor_line, target_cursor_char);
-      Some(start_column)
-    } else {
-      None
     }
+
+    // spellchecker:off
+    //
+    // If we met such edge case:
+    // 1. The target cursor line doesn't show its head, i.e. the `target_viewport_start_column` > 0,
+    //    and the line is just too lone to fully show in the viewport.
+    // 2. The tail of target cursor line doesn't fully use the spaces at the bottom-right corner of
+    //    the viewport, i.e. there are some spaces left empty in viewport while the line's head is
+    //    not show.
+    //
+    // This is not good because we didn't make full use of the viewport. Thus we should try to mov
+    // viewport to left side to use all of the spaces in the viewport. For example:
+    //
+    // ```text
+    //                                           |----------------------------------|
+    // This is the beginning of the very long lin|e, which only shows the beginning |
+    //                                           |part.                             |
+    //                                           |----------------------------------|
+    // ```
+    //
+    // Apparently we can move viewport to left to use more spaces, like this:
+    //
+    // ```text
+    //              |----------------------------------|
+    // This is the b|eginning of the very long line, wh|
+    //              |ich only shows the beginning part.|
+    //              |----------------------------------|
+    // ```
+    //
+    // Which is a much better algorithm.
+    //
+    // spellchecker:on
+
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+      buffer,
+      start_column,
+      target_cursor_line,
+      0_u16,
+      window_actual_shape.height(),
+      window_actual_shape.width(),
+    );
+    let not_fully_use_viewport_rows =
+      preview_target_rows.len() < window_actual_shape.height() as usize;
+    let not_fully_use_viewport_last_row = {
+      if not_fully_use_viewport_rows {
+        true
+      } else {
+        match preview_target_rows.last_key_value() {
+          Some((last_row_idx, last_row_viewport)) => {
+            debug_assert_eq!(last_row_idx + 1, window_actual_shape.height());
+            if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
+              let last_row_end_width =
+                buffer.width_before(target_cursor_line, last_row_viewport.end_char_idx());
+              let last_row_start_width =
+                buffer.width_before(target_cursor_line, last_row_viewport.start_char_idx());
+              let last_row_width = last_row_end_width.saturating_sub(last_row_start_width);
+              last_row_width < window_actual_shape.width() as usize
+            } else {
+              true
+            }
+          }
+          None => false,
+        }
+      }
+    };
+    if not_fully_use_viewport_rows || not_fully_use_viewport_last_row {
+      let last_visible_char = buffer
+        .last_char_on_line_no_empty_eol(target_cursor_line)
+        .unwrap_or(0_usize);
+      let start_column_included_last_visible_char = reverse_search_start_column(
+        proc,
+        buffer,
+        window_actual_shape,
+        target_cursor_line,
+        last_visible_char,
+      );
+      if start_column > start_column_included_last_visible_char {
+        start_column = start_column_included_last_visible_char;
+        on_left_side = true;
+      }
+    }
+
+    if on_left_side {
+      return Some(start_column);
+    }
+
+    None
   }
 
   fn to_right_1(
