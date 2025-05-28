@@ -2554,7 +2554,7 @@ fn search_anchor_rightward_wrap(
     let start_line = target_cursor_line;
     let start_column = viewport_start_column;
     wrap_detail::adjust_wrap_1(
-      detail::AdjustOptions::no_rightward(),
+      detail::AdjustOptions::no_leftward(),
       proc,
       buffer,
       window_actual_shape,
@@ -2571,7 +2571,7 @@ fn search_anchor_rightward_wrap(
     let start_line = target_cursor_line;
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_1(
-      detail::AdjustOptions::no_rightward(),
+      detail::AdjustOptions::no_leftward(),
       proc,
       buffer,
       window_actual_shape,
@@ -2589,7 +2589,7 @@ fn search_anchor_rightward_wrap(
     let start_line = viewport_start_line;
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_2(
-      detail::AdjustOptions::no_rightward(),
+      detail::AdjustOptions::no_leftward(),
       proc,
       buffer,
       window_actual_shape,
