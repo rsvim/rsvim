@@ -694,6 +694,7 @@ impl Viewport {
 // spellchecker:off
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_util {
   use super::*;
 
@@ -863,6 +864,7 @@ mod tests_util {
 
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_view_nowrap {
   use super::tests_util::*;
   use super::*;
@@ -1321,6 +1323,7 @@ mod tests_view_nowrap {
 
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_view_nowrap_startcol {
   use super::tests_util::*;
   use super::*;
@@ -1906,6 +1909,7 @@ mod tests_view_nowrap_startcol {
 
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_view_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
@@ -2594,6 +2598,7 @@ mod tests_view_wrap_nolinebreak {
 
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_view_wrap_nolinebreak_startcol {
   use super::tests_util::*;
   use super::*;
@@ -2848,6 +2853,7 @@ mod tests_view_wrap_nolinebreak_startcol {
 
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_view_wrap_linebreak {
   use super::tests_util::*;
   use super::*;
@@ -3577,6 +3583,7 @@ mod tests_view_wrap_linebreak {
 
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_view_wrap_linebreak_startcol {
   use super::tests_util::*;
   use super::*;
@@ -3926,6 +3933,7 @@ mod tests_view_wrap_linebreak_startcol {
 
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_search_anchor_downward_nowrap {
   use super::tests_util::*;
   use super::*;
@@ -4961,6 +4969,7 @@ mod tests_search_anchor_downward_nowrap {
 }
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_search_anchor_downward_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
@@ -5858,6 +5867,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 }
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_search_anchor_downward_wrap_linebreak {
   use super::tests_util::*;
   use super::*;
@@ -6876,6 +6886,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
 }
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_search_anchor_upward_nowrap {
   use super::tests_util::*;
   use super::*;
@@ -7854,6 +7865,7 @@ mod tests_search_anchor_upward_nowrap {
 }
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_search_anchor_upward_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
@@ -8793,6 +8805,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 }
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_search_anchor_upward_wrap_linebreak {
   use super::tests_util::*;
   use super::*;
@@ -9726,6 +9739,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
 }
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_search_anchor_horizontally_nowrap {
   use super::tests_util::*;
   use super::*;
@@ -11903,6 +11917,7 @@ mod tests_search_anchor_horizontally_nowrap {
 }
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_search_anchor_horizontally_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
@@ -14015,6 +14030,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
 }
 #[allow(unused_imports)]
 #[cfg(test)]
+#[cfg_attr(coverage_nightly, coverage(off))]
 mod tests_search_anchor_horizontally_wrap_linebreak {
   use super::tests_util::*;
   use super::*;

@@ -99,6 +99,12 @@ sourcemap = "9.1.2"
 
 # NOTE: Javascript dependencies always keep the same with `deno` }
 
+# Unit tests
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+  'cfg(coverage,coverage_nightly)',
+] }
+
 # Profiles
 
 # Debug
