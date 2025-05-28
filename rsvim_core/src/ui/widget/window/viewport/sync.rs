@@ -1961,11 +1961,11 @@ fn search_anchor_downward_nowrap(
   )
 }
 
-// NOTE: For `wrap=true` algorithm, we split it into below use cases:
+// NOTE: For `wrap=true` algorithm, we split it into several cases:
 // 1. The viewport cannot fully contain the target cursor line, i.e. the line is too long and
 //    have to be truncated to place in the viewport.
-// 2. The viewport can contain the target cursor line, i.e. the line is not too long. And future
-//    we can split this into below sub cases:
+// 2. The viewport can contain the target cursor line, i.e. the line is not too long. And further
+//    we can split this into more sub cases:
 //    2.1 The viewport only contains the target cursor line. And we have a very specific edge
 //      case when considering the empty eol:
 //        a) The last visible char of target cursor line is at the bottom-right corner of the
