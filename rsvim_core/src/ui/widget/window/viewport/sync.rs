@@ -7,7 +7,6 @@ use crate::prelude::*;
 use crate::ui::widget::window::viewport::RowViewport;
 use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 
-use derive_builder::Builder;
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
@@ -632,13 +631,31 @@ mod detail {
     }
   }
 
-  #[derive(Debug, Copy, Clone, Builder)]
+  #[derive(Debug, Copy, Clone)]
   pub struct AdjustOptions {
-    #[builder(default = false)]
-    pub disable_detect_leftward: bool,
+    pub no_leftward: bool,
+    pub no_rightward: bool,
+  }
 
-    #[builder(default = false)]
-    pub disable_detect_rightward: bool,
+  impl AdjustOptions {
+    pub fn no_leftward() -> Self {
+      Self {
+        no_leftward: true,
+        no_rightward: false,
+      }
+    }
+    pub fn no_rightward() -> Self {
+      Self {
+        no_leftward: false,
+        no_rightward: true,
+      }
+    }
+    pub fn all() -> Self {
+      Self {
+        no_leftward: false,
+        no_rightward: false,
+      }
+    }
   }
 }
 
@@ -806,9 +823,9 @@ mod nowrap_detail {
     start_line: usize,
     start_column: usize,
   ) -> (usize, usize) {
-    debug_assert!(!(opts.disable_detect_leftward && opts.disable_detect_rightward));
+    debug_assert!(!(opts.no_leftward && opts.no_rightward));
 
-    if opts.disable_detect_leftward {
+    if opts.no_leftward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_left(
@@ -835,7 +852,7 @@ mod nowrap_detail {
       }
     }
 
-    if opts.disable_detect_rightward {
+    if opts.no_rightward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_right(
@@ -913,6 +930,10 @@ mod wrap_detail {
     /* end_fills */ usize,
     /* next_current_row */ u16,
   );
+
+  pub fn maximized_viewport_height(height: u16) -> u16 {
+    height.saturating_add(3)
+  }
 
   fn find_start_char(
     proc: ProcessLineFn,
@@ -1075,9 +1096,9 @@ mod wrap_detail {
     start_line: usize,
     start_column: usize,
   ) -> (usize, usize) {
-    debug_assert!(!(opts.disable_detect_leftward && opts.disable_detect_rightward));
+    debug_assert!(!(opts.no_leftward && opts.no_rightward));
 
-    if opts.disable_detect_leftward {
+    if opts.no_leftward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_left_1(
@@ -1106,7 +1127,7 @@ mod wrap_detail {
       }
     }
 
-    if opts.disable_detect_rightward {
+    if opts.no_rightward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_right_1(
@@ -1230,9 +1251,9 @@ mod wrap_detail {
     start_line: usize,
     start_column: usize,
   ) -> (usize, usize) {
-    debug_assert!(!(opts.disable_detect_leftward && opts.disable_detect_rightward));
+    debug_assert!(!(opts.no_leftward && opts.no_rightward));
 
-    if opts.disable_detect_leftward {
+    if opts.no_leftward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_left_2_1(
@@ -1261,7 +1282,7 @@ mod wrap_detail {
       }
     }
 
-    if opts.disable_detect_rightward {
+    if opts.no_rightward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_right_2_1(
@@ -1386,9 +1407,9 @@ mod wrap_detail {
     start_line: usize,
     start_column: usize,
   ) -> (usize, usize) {
-    debug_assert!(!(opts.disable_detect_leftward && opts.disable_detect_rightward));
+    debug_assert!(!(opts.no_leftward && opts.no_rightward));
 
-    if opts.disable_detect_leftward {
+    if opts.no_leftward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_left_2_2(
@@ -1417,7 +1438,7 @@ mod wrap_detail {
       }
     }
 
-    if opts.disable_detect_rightward {
+    if opts.no_rightward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_right_2_2(
@@ -1618,9 +1639,9 @@ mod wrap_detail {
     start_line: usize,
     start_column: usize,
   ) -> (usize, usize) {
-    debug_assert!(!(opts.disable_detect_leftward && opts.disable_detect_rightward));
+    debug_assert!(!(opts.no_leftward && opts.no_rightward));
 
-    if opts.disable_detect_leftward {
+    if opts.no_leftward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_left(
@@ -1651,7 +1672,7 @@ mod wrap_detail {
       }
     }
 
-    if opts.disable_detect_rightward {
+    if opts.no_rightward {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_right(
@@ -1828,7 +1849,7 @@ fn search_anchor_downward_nowrap(
   };
 
   nowrap_detail::adjust_nowrap(
-    detail::AdjustOptionsBuilder::default().build().unwrap(),
+    detail::AdjustOptions::all(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1880,7 +1901,7 @@ fn search_anchor_downward_wrap(
     0,
     target_cursor_line,
     0_u16,
-    height.saturating_add(3),
+    wrap_detail::maximized_viewport_height(height),
     width,
   );
   let cannot_fully_contains_target_cursor_line = preview_target_rows.len() > height as usize;
@@ -1894,7 +1915,7 @@ fn search_anchor_downward_wrap(
     let start_line = target_cursor_line;
     let start_column = viewport_start_column;
     wrap_detail::adjust_wrap_1(
-      detail::AdjustOptionsBuilder::default().build().unwrap(),
+      detail::AdjustOptions::all(),
       proc,
       buffer,
       window_actual_shape,
@@ -1911,7 +1932,7 @@ fn search_anchor_downward_wrap(
     let start_line = target_cursor_line;
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_1(
-      detail::AdjustOptionsBuilder::default().build().unwrap(),
+      detail::AdjustOptions::all(),
       proc,
       buffer,
       window_actual_shape,
@@ -1929,7 +1950,7 @@ fn search_anchor_downward_wrap(
       wrap_detail::reverse_search_start_line(proc, buffer, window_actual_shape, target_cursor_line);
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_2(
-      detail::AdjustOptionsBuilder::default().build().unwrap(),
+      detail::AdjustOptions::all(),
       proc,
       buffer,
       window_actual_shape,
@@ -2017,7 +2038,7 @@ fn search_anchor_upward_nowrap(
   };
 
   nowrap_detail::adjust_nowrap(
-    detail::AdjustOptionsBuilder::default().build().unwrap(),
+    detail::AdjustOptions::all(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -2082,17 +2103,69 @@ fn search_anchor_upward_wrap(
       )
     };
 
-  wrap_detail::adjust_wrap(
-    detail::AdjustOptionsBuilder::default().build().unwrap(),
-    proc,
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
+    0,
     target_cursor_line,
-    target_cursor_char,
-    start_line,
-    start_column,
-  )
+    0_u16,
+    wrap_detail::maximized_viewport_height(height),
+    width,
+  );
+  let cannot_fully_contains_target_cursor_line = preview_target_rows.len() > height as usize;
+  let only_contains_target_cursor_line = preview_target_rows.len() == height as usize;
+
+  if cannot_fully_contains_target_cursor_line {
+    // Case-1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
+    let start_line = target_cursor_line;
+    let start_column = viewport_start_column;
+    wrap_detail::adjust_wrap_1(
+      detail::AdjustOptions::all(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else if only_contains_target_cursor_line {
+    // Case-2.1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // Force `start_column` to be 0, because viewport can contains this line.
+    let start_line = target_cursor_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_1(
+      detail::AdjustOptions::all(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else {
+    // Case-2.2
+    // For `start_line`, simply force it to be `target_cursor_line` because we are moving viewport
+    // to upper, thus the `target_cursor_line` must be the 1st line in viewport.
+    // Force `start_column` to be 0, because viewport can contains the line.
+    let start_line = target_cursor_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_2(
+      detail::AdjustOptions::all(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  }
 }
 
 // Search a new viewport anchor (`start_line`, `start_column`) leftward, i.e. when cursor moves
@@ -2159,10 +2232,7 @@ fn search_anchor_leftward_nowrap(
   let start_column = viewport.start_column_idx();
 
   nowrap_detail::adjust_nowrap(
-    detail::AdjustOptionsBuilder::default()
-      .disable_detect_rightward(true)
-      .build()
-      .unwrap(),
+    detail::AdjustOptions::no_rightward(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -2223,10 +2293,7 @@ fn search_anchor_leftward_wrap(
     };
 
   wrap_detail::adjust_wrap(
-    detail::AdjustOptionsBuilder::default()
-      .disable_detect_rightward(true)
-      .build()
-      .unwrap(),
+    detail::AdjustOptions::no_rightward(),
     proc,
     buffer,
     window_actual_shape,
@@ -2302,10 +2369,7 @@ fn search_anchor_rightward_nowrap(
   let start_column = viewport.start_column_idx();
 
   nowrap_detail::adjust_nowrap(
-    detail::AdjustOptionsBuilder::default()
-      .disable_detect_leftward(true)
-      .build()
-      .unwrap(),
+    detail::AdjustOptions::no_leftward(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -2366,10 +2430,7 @@ fn search_anchor_rightward_wrap(
     };
 
   wrap_detail::adjust_wrap(
-    detail::AdjustOptionsBuilder::default()
-      .disable_detect_leftward(true)
-      .build()
-      .unwrap(),
+    detail::AdjustOptions::no_leftward(),
     proc,
     buffer,
     window_actual_shape,
