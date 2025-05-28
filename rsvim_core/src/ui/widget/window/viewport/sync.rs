@@ -7,7 +7,6 @@ use crate::prelude::*;
 use crate::ui::widget::window::viewport::RowViewport;
 use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 
-use derive_builder::Builder;
 use ropey::RopeSlice;
 use std::collections::BTreeMap;
 use std::ops::Range;
@@ -609,54 +608,185 @@ fn sync_wrap_linebreak(
   }
 }
 
-// spellchecker:off
-// When searching the new viewport downward, the target cursor could be not shown in it.
-//
-// For example:
-//
-// ```text
-//                                           |----------------------------------|
-// This is the beginning of the very long lin|e, which only shows the beginning |part.
-// This is the short line, it's not shown.   |                                  |
-// This is the second very long line, which s|till shows in the viewport.       |
-//                                           |----------------------------------|
-// ```
-//
-// If the target cursor is in the 2nd line, it will not be shown in the new viewport. This is
-// because old `viewport_start_column` is too big, and incase we need to place the target cursor in
-// the new viewport correctly, so we will have to move the new viewport to the left to allow cursor
-// show in it.
-//
-// ```text
-//      |----------------------------------|
-// This |is the beginning of the very long |line, which only shows the beginning part.
-// This |is the short line, it's not shown.|
-// This |is the second very long line, whic|h s|till shows in the viewport.
-//      |----------------------------------|
-// ```
-//
-// There are 2 edge cases:
-// 1. The target cursor is on the left side.
-// 1. The target cursor is on the right side.
-// spellchecker:on
-//
-// Returns
-// 1. If target cursor is on the left side of viewport, and we need to move the viewport more to
-//    the left side.
-// 2. If 1st is true, this is the new "start_column" after adjustments.
-fn _adjust_left_nowrap(
-  buffer: &Buffer,
-  _window_actual_shape: &U16Rect,
-  target_viewport_start_column: usize,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> Option<usize> {
-  let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+mod detail {
+  use super::*;
 
-  if cfg!(debug_assertions) {
-    match buffer.char_at(target_cursor_line, target_viewport_start_column) {
-      Some(target_viewport_start_char) => trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+  pub fn _target_is_empty_eol(
+    buffer: &Buffer,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> bool {
+    match buffer.get_rope().get_line(target_cursor_line) {
+      Some(bufline) => {
+        if target_cursor_char != bufline.len_chars().saturating_sub(1) {
+          false
+        } else {
+          match bufline.get_char(target_cursor_char) {
+            Some(c) => buffer.char_width(c) == 0,
+            None => false,
+          }
+        }
+      }
+      None => false,
+    }
+  }
+
+  #[derive(Debug, Copy, Clone)]
+  pub struct AdjustOptions {
+    pub no_leftward: bool,
+    pub no_rightward: bool,
+  }
+
+  impl AdjustOptions {
+    pub fn no_leftward() -> Self {
+      Self {
+        no_leftward: true,
+        no_rightward: false,
+      }
+    }
+    pub fn no_rightward() -> Self {
+      Self {
+        no_leftward: false,
+        no_rightward: true,
+      }
+    }
+    pub fn all() -> Self {
+      Self {
+        no_leftward: false,
+        no_rightward: false,
+      }
+    }
+  }
+}
+
+mod nowrap_detail {
+  use super::*;
+
+  // spellchecker:off
+  // When searching the new viewport downward, the target cursor could be not shown in it.
+  //
+  // For example:
+  //
+  // ```text
+  //                                           |----------------------------------|
+  // This is the beginning of the very long lin|e, which only shows the beginning |part.
+  // This is the short line, it's not shown.   |                                  |
+  // This is the second very long line, which s|till shows in the viewport.       |
+  //                                           |----------------------------------|
+  // ```
+  //
+  // If the target cursor is in the 2nd line, it will not be shown in the new viewport. This is
+  // because old `viewport_start_column` is too big, and incase we need to place the target cursor in
+  // the new viewport correctly, so we will have to move the new viewport to the left to allow cursor
+  // show in it.
+  //
+  // ```text
+  //      |----------------------------------|
+  // This |is the beginning of the very long |line, which only shows the beginning part.
+  // This |is the short line, it's not shown.|
+  // This |is the second very long line, whic|h s|till shows in the viewport.
+  //      |----------------------------------|
+  // ```
+  //
+  // There are 2 edge cases:
+  // 1. The target cursor is on the left side.
+  // 1. The target cursor is on the right side.
+  // spellchecker:on
+  //
+  // Returns
+  // 1. If target cursor is on the left side of viewport, and we need to move the viewport more to
+  //    the left side.
+  // 2. If 1st is true, this is the new "start_column" after adjustments.
+  fn to_left(
+    buffer: &Buffer,
+    _window_actual_shape: &U16Rect,
+    target_viewport_start_column: usize,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> Option<usize> {
+    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+
+    if cfg!(debug_assertions) {
+      match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+        Some(target_viewport_start_char) => trace!(
+          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+          target_cursor_line,
+          target_cursor_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_cursor_char)
+            .unwrap_or('?'),
+          target_cursor_width,
+          target_viewport_start_column,
+          target_viewport_start_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_viewport_start_char)
+            .unwrap_or('?')
+        ),
+        None => trace!(
+          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+          target_cursor_line,
+          target_cursor_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_cursor_char)
+            .unwrap_or('?'),
+          target_cursor_width,
+          target_viewport_start_column,
+        ),
+      }
+    }
+
+    let on_left_side = target_cursor_width < target_viewport_start_column;
+    if on_left_side {
+      // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
+      // just put the cursor at the first left char in the new viewport.
+      let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
+      Some(start_column)
+    } else {
+      None
+    }
+  }
+
+  // Returns
+  // 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
+  //    right.
+  // 2. If 1st is true, this is the new "start_column" after adjustments.
+  fn to_right(
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_viewport_start_column: usize,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> Option<usize> {
+    let width = window_actual_shape.width();
+    let viewport_end_column = target_viewport_start_column + width as usize;
+    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
+
+    if cfg!(debug_assertions) {
+      let target_viewport_start_char =
+        match buffer.char_after(target_cursor_line, target_viewport_start_column) {
+          Some(c) => format!(
+            "{}({:?})",
+            c,
+            buffer.get_rope().line(target_cursor_line).char(c)
+          ),
+          None => "None".to_string(),
+        };
+      let viewport_end_char = match buffer.char_at(target_cursor_line, viewport_end_column) {
+        Some(c) => format!(
+          "{}({:?})",
+          c,
+          buffer.get_rope().line(target_cursor_line).char(c)
+        ),
+        None => "None".to_string(),
+      };
+      trace!(
+        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{},viewport_end_column:{},viewport_end_char:{}",
         target_cursor_line,
         target_cursor_char,
         buffer
@@ -667,175 +797,90 @@ fn _adjust_left_nowrap(
         target_cursor_width,
         target_viewport_start_column,
         target_viewport_start_char,
-        buffer
-          .get_rope()
-          .line(target_cursor_line)
-          .get_char(target_viewport_start_char)
-          .unwrap_or('?')
-      ),
-      None => trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+        viewport_end_column,
+        viewport_end_char,
+      );
+    }
+
+    let on_right_side = target_cursor_width > viewport_end_column;
+    if on_right_side {
+      // Move viewport to right to show the cursor, just put the cursor at the last right char in the
+      // new viewport.
+      let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
+      let start_column = end_column.saturating_sub(width as usize);
+      Some(start_column)
+    } else {
+      None
+    }
+  }
+
+  pub fn adjust_nowrap(
+    opts: detail::AdjustOptions,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+    start_line: usize,
+    start_column: usize,
+  ) -> (usize, usize) {
+    debug_assert!(!(opts.no_leftward && opts.no_rightward));
+
+    if opts.no_leftward {
+      if cfg!(debug_assertions) {
+        debug_assert!(
+          to_left(
+            buffer,
+            window_actual_shape,
+            start_column,
+            target_cursor_line,
+            target_cursor_char,
+          )
+          .is_none()
+        );
+      }
+    } else {
+      let start_column_on_left_side = to_left(
+        buffer,
+        window_actual_shape,
+        start_column,
         target_cursor_line,
         target_cursor_char,
-        buffer
-          .get_rope()
-          .line(target_cursor_line)
-          .get_char(target_cursor_char)
-          .unwrap_or('?'),
-        target_cursor_width,
-        target_viewport_start_column,
-      ),
-    }
-  }
-
-  let on_left_side = target_cursor_width < target_viewport_start_column;
-  if on_left_side {
-    // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
-    // just put the cursor at the first left char in the new viewport.
-    let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
-    Some(start_column)
-  } else {
-    None
-  }
-}
-
-// Returns
-// 1. If target cursor is on the right side of viewport, and we need to adjust/move the viewport to
-//    right.
-// 2. If 1st is true, this is the new "start_column" after adjustments.
-fn _adjust_right_nowrap(
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  target_viewport_start_column: usize,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> Option<usize> {
-  let width = window_actual_shape.width();
-  let viewport_end_column = target_viewport_start_column + width as usize;
-  let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
-
-  if cfg!(debug_assertions) {
-    let target_viewport_start_char =
-      match buffer.char_after(target_cursor_line, target_viewport_start_column) {
-        Some(c) => format!(
-          "{}({:?})",
-          c,
-          buffer.get_rope().line(target_cursor_line).char(c)
-        ),
-        None => "None".to_string(),
-      };
-    let viewport_end_char = match buffer.char_at(target_cursor_line, viewport_end_column) {
-      Some(c) => format!(
-        "{}({:?})",
-        c,
-        buffer.get_rope().line(target_cursor_line).char(c)
-      ),
-      None => "None".to_string(),
-    };
-    trace!(
-      "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{},viewport_end_column:{},viewport_end_char:{}",
-      target_cursor_line,
-      target_cursor_char,
-      buffer
-        .get_rope()
-        .line(target_cursor_line)
-        .get_char(target_cursor_char)
-        .unwrap_or('?'),
-      target_cursor_width,
-      target_viewport_start_column,
-      target_viewport_start_char,
-      viewport_end_column,
-      viewport_end_char,
-    );
-  }
-
-  let on_right_side = target_cursor_width > viewport_end_column;
-  if on_right_side {
-    // Move viewport to right to show the cursor, just put the cursor at the last right char in the
-    // new viewport.
-    let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
-    let start_column = end_column.saturating_sub(width as usize);
-    Some(start_column)
-  } else {
-    None
-  }
-}
-
-#[derive(Debug, Copy, Clone, Builder)]
-struct AdjustOptions {
-  #[builder(default = false)]
-  pub disable_detect_leftward: bool,
-
-  #[builder(default = false)]
-  pub disable_detect_rightward: bool,
-}
-
-fn _adjust_horizontally_nowrap(
-  opts: AdjustOptions,
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-  start_line: usize,
-  start_column: usize,
-) -> (usize, usize) {
-  debug_assert!(!(opts.disable_detect_leftward && opts.disable_detect_rightward));
-
-  if opts.disable_detect_leftward {
-    if cfg!(debug_assertions) {
-      debug_assert!(
-        _adjust_left_nowrap(
-          buffer,
-          window_actual_shape,
-          start_column,
-          target_cursor_line,
-          target_cursor_char,
-        )
-        .is_none()
       );
-    }
-  } else {
-    let start_column_on_left_side = _adjust_left_nowrap(
-      buffer,
-      window_actual_shape,
-      start_column,
-      target_cursor_line,
-      target_cursor_char,
-    );
 
-    if let Some(start_column_left) = start_column_on_left_side {
-      return (start_line, start_column_left);
+      if let Some(start_column_left) = start_column_on_left_side {
+        return (start_line, start_column_left);
+      }
     }
-  }
 
-  if opts.disable_detect_rightward {
-    if cfg!(debug_assertions) {
-      debug_assert!(
-        _adjust_right_nowrap(
-          buffer,
-          window_actual_shape,
-          start_column,
-          target_cursor_line,
-          target_cursor_char,
-        )
-        .is_none()
+    if opts.no_rightward {
+      if cfg!(debug_assertions) {
+        debug_assert!(
+          to_right(
+            buffer,
+            window_actual_shape,
+            start_column,
+            target_cursor_line,
+            target_cursor_char,
+          )
+          .is_none()
+        );
+      }
+    } else {
+      let start_column_on_right_side = to_right(
+        buffer,
+        window_actual_shape,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
       );
-    }
-  } else {
-    let start_column_on_right_side = _adjust_right_nowrap(
-      buffer,
-      window_actual_shape,
-      start_column,
-      target_cursor_line,
-      target_cursor_char,
-    );
 
-    if let Some(start_column_right) = start_column_on_right_side {
-      return (start_line, start_column_right);
+      if let Some(start_column_right) = start_column_on_right_side {
+        return (start_line, start_column_right);
+      }
     }
+
+    (start_line, start_column)
   }
-
-  (start_line, start_column)
 }
 
 fn _line_head_not_show(viewport: &Viewport, line_idx: usize) -> bool {
@@ -868,322 +913,941 @@ fn _line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) ->
   last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
 }
 
-// Type alias for `proc_line_*` functions.
-type ProcessLineFn = fn(
-  /* buffer */ &Buffer,
-  /* start_column */ usize,
-  /* current_line */ usize,
-  /* mut current_row */ u16,
-  /* window_height */ u16,
-  /* window_width */ u16,
-) -> (
-  /* rows */ BTreeMap<u16, RowViewport>,
-  /* start_fills */ usize,
-  /* end_fills */ usize,
-  /* next_current_row */ u16,
-);
+mod wrap_detail {
+  use super::*;
 
-// For `wrap=true`.
-fn _find_start_char_wrap(
-  proc: ProcessLineFn,
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  line_idx: usize,
-  last_char: usize,
-  mut start_column: usize,
-) -> usize {
-  let bufline = buffer.get_rope().line(line_idx);
-  let bufline_len_char = bufline.len_chars();
-  let bufline_chars_width = buffer.width_until(line_idx, bufline_len_char);
+  // Type alias for `proc_line_*` functions.
+  pub type ProcessLineFn = fn(
+    /* buffer */ &Buffer,
+    /* start_column */ usize,
+    /* current_line */ usize,
+    /* mut current_row */ u16,
+    /* window_height */ u16,
+    /* window_width */ u16,
+  ) -> (
+    /* rows */ BTreeMap<u16, RowViewport>,
+    /* start_fills */ usize,
+    /* end_fills */ usize,
+    /* next_current_row */ u16,
+  );
 
-  while start_column < bufline_chars_width {
-    let (rows, _start_fills, _end_fills, _) = proc(
+  pub fn maximized_viewport_height(height: u16) -> u16 {
+    height.saturating_add(3)
+  }
+
+  fn find_start_char(
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+    mut start_column: usize,
+  ) -> usize {
+    let bufline = buffer.get_rope().line(target_cursor_line);
+    let bufline_len_char = bufline.len_chars();
+    let bufline_chars_width = buffer.width_until(target_cursor_line, bufline_len_char);
+
+    while start_column < bufline_chars_width {
+      let (rows, _start_fills, _end_fills, _) = proc(
+        buffer,
+        start_column,
+        target_cursor_line,
+        0_u16,
+        window_actual_shape.height(),
+        window_actual_shape.width(),
+      );
+      let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+      if last_row_viewport.end_char_idx() > target_cursor_char {
+        return start_column;
+      }
+      start_column += 1;
+    }
+
+    unreachable!()
+  }
+
+  fn reverse_search_start_column(
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> usize {
+    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
+    let approximate_start_column = target_cursor_width.saturating_sub(
+      (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
+    );
+    find_start_char(
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      approximate_start_column,
+    )
+  }
+
+  // For case-1
+  fn to_left_1(
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_viewport_start_column: usize,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> Option<usize> {
+    let mut start_column = target_viewport_start_column;
+    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+
+    if cfg!(debug_assertions) {
+      match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+        Some(target_viewport_start_char) => trace!(
+          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+          target_cursor_line,
+          target_cursor_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_cursor_char)
+            .unwrap_or('?'),
+          target_cursor_width,
+          target_viewport_start_column,
+          target_viewport_start_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_viewport_start_char)
+            .unwrap_or('?')
+        ),
+        None => trace!(
+          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+          target_cursor_line,
+          target_cursor_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_cursor_char)
+            .unwrap_or('?'),
+          target_cursor_width,
+          target_viewport_start_column,
+        ),
+      }
+    }
+
+    // If `target_cursor_char` is out of viewport, on the leftside, we need to move viewport to left
+    // to include the `target_cursor_char`.
+    let mut on_left_side = target_cursor_width < start_column;
+    if on_left_side {
+      start_column = buffer.width_before(target_cursor_line, target_cursor_char);
+    }
+
+    // spellchecker:off
+    //
+    // If we met such edge case:
+    // 1. The target cursor line doesn't show its head, i.e. the `target_viewport_start_column` > 0,
+    //    and the line is just too lone to fully show in the viewport.
+    // 2. The tail of target cursor line doesn't fully use the spaces at the bottom-right corner of
+    //    the viewport, i.e. there are some spaces left empty in viewport while the line's head is
+    //    not show.
+    //
+    // This is not good because we didn't make full use of the viewport. Thus we should try to mov
+    // viewport to left side to use all of the spaces in the viewport. For example:
+    //
+    // ```text
+    //                                           |----------------------------------|
+    // This is the beginning of the very long lin|e, which only shows the beginning |
+    //                                           |part.                             |
+    //                                           |----------------------------------|
+    // ```
+    //
+    // Apparently we can move viewport to left to use more spaces, like this:
+    //
+    // ```text
+    //              |----------------------------------|
+    // This is the b|eginning of the very long line, wh|
+    //              |ich only shows the beginning part.|
+    //              |----------------------------------|
+    // ```
+    //
+    // Which is a much better algorithm.
+    //
+    // spellchecker:on
+
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
       buffer,
       start_column,
-      line_idx,
+      target_cursor_line,
       0_u16,
-      window_actual_shape.height(),
+      maximized_viewport_height(window_actual_shape.height()),
       window_actual_shape.width(),
     );
-    let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-    if last_row_viewport.end_char_idx() > last_char {
-      return start_column;
-    }
-    start_column += 1;
-  }
+    let not_fully_use_viewport_rows =
+      preview_target_rows.len() < window_actual_shape.height() as usize;
+    let can_over_use_viewport_rows =
+      preview_target_rows.len() > window_actual_shape.height() as usize;
+    let not_fully_use_viewport_last_row = {
+      if not_fully_use_viewport_rows {
+        true
+      } else if can_over_use_viewport_rows {
+        // Start with `start_column`, the viewport still cannot fully contains the target cursor
+        // line, i.e. the viewport last row and its tail are been fully used, no extra spaces have
+        // been left.
+        false
+      } else {
+        match preview_target_rows.last_key_value() {
+          Some((last_row_idx, last_row_viewport)) => {
+            debug_assert_eq!(last_row_idx + 1, window_actual_shape.height());
+            debug_assert!(last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx());
 
-  unreachable!()
-}
-
-// For `wrap=true,linebreak=false`, when the whole viewport only contains 1 line and the line
-// cannot fully show (i.e. the line head/tail are been truncated), and also we have confirmed the
-// last char index.
-// In such case, we needs to calculate the `start_column`.
-fn _revert_search_start_column_wrap(
-  proc: ProcessLineFn,
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  line_idx: usize,
-  last_char: usize,
-) -> usize {
-  let last_char_width = buffer.width_until(line_idx, last_char);
-  let approximate_start_column = last_char_width.saturating_sub(
-    (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
-  );
-  _find_start_char_wrap(
-    proc,
-    buffer,
-    window_actual_shape,
-    line_idx,
-    last_char,
-    approximate_start_column,
-  )
-}
-
-fn _adjust_left_wrap(
-  proc: ProcessLineFn,
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  cannot_fully_contains_target_cursor_line: bool,
-  target_viewport_start_column: usize,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> Option<usize> {
-  let mut start_column = target_viewport_start_column;
-
-  let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
-  let mut on_left_side = target_cursor_width < start_column;
-
-  if cfg!(debug_assertions) {
-    match buffer.char_at(target_cursor_line, target_viewport_start_column) {
-      Some(target_viewport_start_char) => trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+            // In last row, the tail (last visible char) is already the tail of target cursor line.
+            if last_row_viewport.end_char_idx()
+              > buffer
+                .last_char_on_line_no_empty_eol(target_cursor_line)
+                .unwrap()
+            {
+              let last_row_end_width =
+                buffer.width_before(target_cursor_line, last_row_viewport.end_char_idx());
+              let last_row_start_width =
+                buffer.width_before(target_cursor_line, last_row_viewport.start_char_idx());
+              let last_row_width = last_row_end_width.saturating_sub(last_row_start_width);
+              // If the last row fully uses all the window width, then there is no extra spaces.
+              last_row_width < window_actual_shape.width() as usize
+            } else {
+              // In last row, the tail (last visible char) is not the tail of target cursor line,
+              // there are more chars out of viewport on the right side. Thus there is no extra
+              // spaces.
+              false
+            }
+          }
+          None => false,
+        }
+      }
+    };
+    if not_fully_use_viewport_rows || not_fully_use_viewport_last_row {
+      let last_visible_char = buffer
+        .last_char_on_line_no_empty_eol(target_cursor_line)
+        .unwrap_or(0_usize);
+      let start_column_included_last_visible_char = reverse_search_start_column(
+        proc,
+        buffer,
+        window_actual_shape,
         target_cursor_line,
-        target_cursor_char,
-        buffer
-          .get_rope()
-          .line(target_cursor_line)
-          .get_char(target_cursor_char)
-          .unwrap_or('?'),
-        target_cursor_width,
-        target_viewport_start_column,
-        target_viewport_start_char,
-        buffer
-          .get_rope()
-          .line(target_cursor_line)
-          .get_char(target_viewport_start_char)
-          .unwrap_or('?')
-      ),
-      None => trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
-        target_cursor_line,
-        target_cursor_char,
-        buffer
-          .get_rope()
-          .line(target_cursor_line)
-          .get_char(target_cursor_char)
-          .unwrap_or('?'),
-        target_cursor_width,
-        target_viewport_start_column,
-      ),
+        last_visible_char,
+      );
+      if start_column > start_column_included_last_visible_char {
+        start_column = start_column_included_last_visible_char;
+        on_left_side = true;
+      }
     }
-  }
 
-  if on_left_side {
-    // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
-    // just put the cursor at the first left char in the new viewport.
-    start_column = buffer.width_before(target_cursor_line, target_cursor_char);
-  }
-
-  // spellchecker:off
-  // If `target_cursor_line` doesn't show its head (i.e. the `target_viewport_start_column` > 0,
-  // and the viewport only contains 1 line, and the line is just too lone to fully show), and the
-  // `target_cursor_line`'s end char is not at the bottom-right corner of the viewport. For
-  // example:
-  //
-  // ```text
-  //                                           |----------------------------------|
-  // This is the beginning of the very long lin|e, which only shows the beginning |
-  //                                           |part.                             |
-  //                                           |                                  |
-  //                                           |----------------------------------|
-  // ```
-  //
-  // Apparently we can move the `target_viewport_start_column` more to left, thus the
-  // `target_cursor_line` can be put in this way:
-  //
-  // ```text
-  // |----------------------------------|
-  // |This is the beginning of the very |
-  // |long lin|e, which only shows the b|
-  // |eginning part.                    |
-  // |----------------------------------|
-  // ```
-  //
-  // Which is much better for `wrap=true`.
-  // spellchecker:on
-
-  let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
-    buffer,
-    start_column,
-    target_cursor_line,
-    0_u16,
-    window_actual_shape.height(),
-    window_actual_shape.width(),
-  );
-  if cannot_fully_contains_target_cursor_line
-    && target_cursor_rows.len() < window_actual_shape.height() as usize
-  {
-    let last_visible_char = buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize);
-    let start_column_included_last_visible_char = _revert_search_start_column_wrap(
-      proc,
-      buffer,
-      window_actual_shape,
-      target_cursor_line,
-      last_visible_char,
-    );
-    if start_column > start_column_included_last_visible_char {
-      start_column = start_column_included_last_visible_char;
-      on_left_side = true;
+    if on_left_side {
+      return Some(start_column);
     }
-  }
 
-  if on_left_side {
-    Some(start_column)
-  } else {
     None
   }
-}
 
-fn _adjust_right_wrap(
-  proc: ProcessLineFn,
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  target_viewport_start_column: usize,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-) -> Option<usize> {
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
+  fn to_right_1(
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_viewport_start_column: usize,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> Option<usize> {
+    let height = window_actual_shape.height();
+    let width = window_actual_shape.width();
 
-  let (rows, _start_fills, _end_fills, _) = proc(
-    buffer,
-    target_viewport_start_column,
-    target_cursor_line,
-    0_u16,
-    height,
-    width,
-  );
-
-  debug_assert!(rows.last_key_value().is_some());
-  let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-
-  // NOTE: If out of viewport, the viewport must only contains 1 line.
-  let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-    && target_cursor_char >= last_row_viewport.end_char_idx();
-
-  if on_right_side {
-    let start_column = _revert_search_start_column_wrap(
-      proc,
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
       buffer,
-      window_actual_shape,
+      target_viewport_start_column,
       target_cursor_line,
-      target_cursor_char,
+      0_u16,
+      height,
+      width,
     );
-    Some(start_column)
-  } else {
+
+    debug_assert!(preview_target_rows.last_key_value().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
+
+    if on_right_side {
+      let start_column = reverse_search_start_column(
+        proc,
+        buffer,
+        window_actual_shape,
+        target_cursor_line,
+        target_cursor_char,
+      );
+      Some(start_column)
+    } else {
+      None
+    }
+  }
+
+  // For case-1: cannot fully contains target cursor line.
+  pub fn adjust_wrap_1(
+    opts: detail::AdjustOptions,
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+    start_line: usize,
+    start_column: usize,
+  ) -> (usize, usize) {
+    debug_assert!(!(opts.no_leftward && opts.no_rightward));
+
+    if opts.no_leftward {
+      if cfg!(debug_assertions) {
+        debug_assert!(
+          to_left_1(
+            proc,
+            buffer,
+            window_actual_shape,
+            start_column,
+            target_cursor_line,
+            target_cursor_char,
+          )
+          .is_none()
+        );
+      }
+    } else {
+      let start_column_on_left_side = to_left_1(
+        proc,
+        buffer,
+        window_actual_shape,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      );
+
+      if let Some(start_column_left) = start_column_on_left_side {
+        return (start_line, start_column_left);
+      }
+    }
+
+    if opts.no_rightward {
+      if cfg!(debug_assertions) {
+        debug_assert!(
+          to_right_1(
+            proc,
+            buffer,
+            window_actual_shape,
+            start_column,
+            target_cursor_line,
+            target_cursor_char,
+          )
+          .is_none()
+        );
+      }
+    } else {
+      let start_column_on_right_side = to_right_1(
+        proc,
+        buffer,
+        window_actual_shape,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      );
+
+      if let Some(start_column_right) = start_column_on_right_side {
+        return (start_line, start_column_right);
+      }
+    }
+
+    (start_line, start_column)
+  }
+
+  fn to_left_2_1(
+    _proc: ProcessLineFn,
+    buffer: &Buffer,
+    _window_actual_shape: &U16Rect,
+    target_viewport_start_column: usize,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> Option<usize> {
+    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+    if cfg!(debug_assertions) {
+      match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+        Some(target_viewport_start_char) => trace!(
+          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+          target_cursor_line,
+          target_cursor_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_cursor_char)
+            .unwrap_or('?'),
+          target_cursor_width,
+          target_viewport_start_column,
+          target_viewport_start_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_viewport_start_char)
+            .unwrap_or('?')
+        ),
+        None => trace!(
+          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+          target_cursor_line,
+          target_cursor_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_cursor_char)
+            .unwrap_or('?'),
+          target_cursor_width,
+          target_viewport_start_column,
+        ),
+      }
+    }
+
+    let on_left_side = target_cursor_width < target_viewport_start_column;
+    debug_assert_eq!(target_viewport_start_column, 0_usize);
+    debug_assert!(!on_left_side);
     None
   }
-}
 
-fn _adjust_horizontally_wrap(
-  opts: AdjustOptions,
-  proc: ProcessLineFn,
-  buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  cannot_fully_contains_target_cursor_line: bool,
-  target_cursor_line: usize,
-  target_cursor_char: usize,
-  start_line: usize,
-  start_column: usize,
-) -> (usize, usize) {
-  debug_assert!(!(opts.disable_detect_leftward && opts.disable_detect_rightward));
+  fn to_right_2_1(
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_viewport_start_column: usize,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> Option<usize> {
+    debug_assert_eq!(target_viewport_start_column, 0_usize);
+    let height = window_actual_shape.height();
+    let width = window_actual_shape.width();
 
-  if opts.disable_detect_leftward {
-    if cfg!(debug_assertions) {
-      debug_assert!(
-        _adjust_left_wrap(
-          proc,
-          buffer,
-          window_actual_shape,
-          cannot_fully_contains_target_cursor_line,
-          start_column,
-          target_cursor_line,
-          target_cursor_char,
-        )
-        .is_none()
-      );
-    }
-  } else {
-    let start_column_on_left_side = _adjust_left_wrap(
-      proc,
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
       buffer,
-      window_actual_shape,
-      cannot_fully_contains_target_cursor_line,
-      start_column,
+      target_viewport_start_column,
       target_cursor_line,
-      target_cursor_char,
+      0_u16,
+      height,
+      width,
     );
 
-    if let Some(start_column_left) = start_column_on_left_side {
-      return (start_line, start_column_left);
-    }
+    debug_assert!(preview_target_rows.last_key_value().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
+
+    debug_assert!(!on_right_side);
+    None
   }
 
-  if opts.disable_detect_rightward {
+  // For case-2.1: only contains target cursor line.
+  pub fn adjust_wrap_2_1(
+    opts: detail::AdjustOptions,
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+    start_line: usize,
+    start_column: usize,
+  ) -> (usize, usize) {
+    debug_assert!(!(opts.no_leftward && opts.no_rightward));
+
+    if opts.no_leftward {
+      if cfg!(debug_assertions) {
+        debug_assert!(
+          to_left_2_1(
+            proc,
+            buffer,
+            window_actual_shape,
+            start_column,
+            target_cursor_line,
+            target_cursor_char,
+          )
+          .is_none()
+        );
+      }
+    } else {
+      let start_column_on_left_side = to_left_2_1(
+        proc,
+        buffer,
+        window_actual_shape,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      );
+
+      if let Some(start_column_left) = start_column_on_left_side {
+        return (start_line, start_column_left);
+      }
+    }
+
+    if opts.no_rightward {
+      if cfg!(debug_assertions) {
+        debug_assert!(
+          to_right_2_1(
+            proc,
+            buffer,
+            window_actual_shape,
+            start_column,
+            target_cursor_line,
+            target_cursor_char,
+          )
+          .is_none()
+        );
+      }
+    } else {
+      let start_column_on_right_side = to_right_2_1(
+        proc,
+        buffer,
+        window_actual_shape,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      );
+
+      if let Some(start_column_right) = start_column_on_right_side {
+        return (start_line, start_column_right);
+      }
+    }
+
+    (start_line, start_column)
+  }
+
+  fn to_left_2_2(
+    _proc: ProcessLineFn,
+    buffer: &Buffer,
+    _window_actual_shape: &U16Rect,
+    target_viewport_start_column: usize,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> Option<usize> {
+    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+
     if cfg!(debug_assertions) {
-      debug_assert!(
-        _adjust_right_wrap(
-          proc,
-          buffer,
-          window_actual_shape,
-          start_column,
+      match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+        Some(target_viewport_start_char) => trace!(
+          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
-        )
-        .is_none()
-      );
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_cursor_char)
+            .unwrap_or('?'),
+          target_cursor_width,
+          target_viewport_start_column,
+          target_viewport_start_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_viewport_start_char)
+            .unwrap_or('?')
+        ),
+        None => trace!(
+          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+          target_cursor_line,
+          target_cursor_char,
+          buffer
+            .get_rope()
+            .line(target_cursor_line)
+            .get_char(target_cursor_char)
+            .unwrap_or('?'),
+          target_cursor_width,
+          target_viewport_start_column,
+        ),
+      }
     }
-  } else {
-    let start_column_on_right_side = _adjust_right_wrap(
-      proc,
-      buffer,
-      window_actual_shape,
-      start_column,
-      target_cursor_line,
-      target_cursor_char,
-    );
 
-    if let Some(start_column_right) = start_column_on_right_side {
-      return (start_line, start_column_right);
-    }
+    let on_left_side = target_cursor_width < target_viewport_start_column;
+    debug_assert_eq!(target_viewport_start_column, 0_usize);
+    debug_assert!(!on_left_side);
+    None
   }
 
-  (start_line, start_column)
-}
+  fn to_right_2_2(
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_viewport_start_column: usize,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> Option<usize> {
+    debug_assert_eq!(target_viewport_start_column, 0_usize);
+    let height = window_actual_shape.height();
+    let width = window_actual_shape.width();
 
-fn _adjust_current_line(
-  current_line: isize,
-  target_cursor_line: usize,
-  window_height: u16,
-  n: usize,
-) -> usize {
-  if (current_line as usize) < target_cursor_line && n > (window_height as usize) {
-    current_line as usize + 1
-  } else {
-    current_line as usize
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+      buffer,
+      target_viewport_start_column,
+      target_cursor_line,
+      0_u16,
+      height,
+      width,
+    );
+
+    debug_assert!(preview_target_rows.last_key_value().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
+
+    debug_assert!(!on_right_side);
+    None
+  }
+
+  // For case-2.2: contains multiple lines, include target cursor line.
+  pub fn adjust_wrap_2_2(
+    opts: detail::AdjustOptions,
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+    start_line: usize,
+    start_column: usize,
+  ) -> (usize, usize) {
+    debug_assert!(!(opts.no_leftward && opts.no_rightward));
+
+    if opts.no_leftward {
+      if cfg!(debug_assertions) {
+        debug_assert!(
+          to_left_2_2(
+            proc,
+            buffer,
+            window_actual_shape,
+            start_column,
+            target_cursor_line,
+            target_cursor_char,
+          )
+          .is_none()
+        );
+      }
+    } else {
+      let start_column_on_left_side = to_left_2_2(
+        proc,
+        buffer,
+        window_actual_shape,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      );
+
+      if let Some(start_column_left) = start_column_on_left_side {
+        return (start_line, start_column_left);
+      }
+    }
+
+    if opts.no_rightward {
+      if cfg!(debug_assertions) {
+        debug_assert!(
+          to_right_2_2(
+            proc,
+            buffer,
+            window_actual_shape,
+            start_column,
+            target_cursor_line,
+            target_cursor_char,
+          )
+          .is_none()
+        );
+      }
+    } else {
+      let start_column_on_right_side = to_right_2_2(
+        proc,
+        buffer,
+        window_actual_shape,
+        start_column,
+        target_cursor_line,
+        target_cursor_char,
+      );
+
+      if let Some(start_column_right) = start_column_on_right_side {
+        return (start_line, start_column_right);
+      }
+    }
+
+    (start_line, start_column)
+  }
+
+  // fn to_left(
+  //   proc: ProcessLineFn,
+  //   buffer: &Buffer,
+  //   window_actual_shape: &U16Rect,
+  //   cannot_fully_contains_target_cursor_line: bool,
+  //   target_viewport_start_column: usize,
+  //   target_cursor_line: usize,
+  //   target_cursor_char: usize,
+  // ) -> Option<usize> {
+  //   let mut start_column = target_viewport_start_column;
+  //
+  //   let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+  //   let mut on_left_side = target_cursor_width < start_column;
+  //
+  //   if cfg!(debug_assertions) {
+  //     match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+  //       Some(target_viewport_start_char) => trace!(
+  //         "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+  //         target_cursor_line,
+  //         target_cursor_char,
+  //         buffer
+  //           .get_rope()
+  //           .line(target_cursor_line)
+  //           .get_char(target_cursor_char)
+  //           .unwrap_or('?'),
+  //         target_cursor_width,
+  //         target_viewport_start_column,
+  //         target_viewport_start_char,
+  //         buffer
+  //           .get_rope()
+  //           .line(target_cursor_line)
+  //           .get_char(target_viewport_start_char)
+  //           .unwrap_or('?')
+  //       ),
+  //       None => trace!(
+  //         "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+  //         target_cursor_line,
+  //         target_cursor_char,
+  //         buffer
+  //           .get_rope()
+  //           .line(target_cursor_line)
+  //           .get_char(target_cursor_char)
+  //           .unwrap_or('?'),
+  //         target_cursor_width,
+  //         target_viewport_start_column,
+  //       ),
+  //     }
+  //   }
+  //
+  //   if on_left_side {
+  //     // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
+  //     // just put the cursor at the first left char in the new viewport.
+  //     start_column = buffer.width_before(target_cursor_line, target_cursor_char);
+  //   }
+  //
+  //   // spellchecker:off
+  //   // If `target_cursor_line` doesn't show its head (i.e. the `target_viewport_start_column` > 0,
+  //   // and the viewport only contains 1 line, and the line is just too lone to fully show), and the
+  //   // `target_cursor_line`'s end char is not at the bottom-right corner of the viewport. For
+  //   // example:
+  //   //
+  //   // ```text
+  //   //                                           |----------------------------------|
+  //   // This is the beginning of the very long lin|e, which only shows the beginning |
+  //   //                                           |part.                             |
+  //   //                                           |                                  |
+  //   //                                           |----------------------------------|
+  //   // ```
+  //   //
+  //   // Apparently we can move the `target_viewport_start_column` more to left, thus the
+  //   // `target_cursor_line` can be put in this way:
+  //   //
+  //   // ```text
+  //   // |----------------------------------|
+  //   // |This is the beginning of the very |
+  //   // |long lin|e, which only shows the b|
+  //   // |eginning part.                    |
+  //   // |----------------------------------|
+  //   // ```
+  //   //
+  //   // Which is much better for `wrap=true`.
+  //   // spellchecker:on
+  //
+  //   let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
+  //     buffer,
+  //     start_column,
+  //     target_cursor_line,
+  //     0_u16,
+  //     window_actual_shape.height(),
+  //     window_actual_shape.width(),
+  //   );
+  //   if cannot_fully_contains_target_cursor_line
+  //     && target_cursor_rows.len() < window_actual_shape.height() as usize
+  //   {
+  //     let last_visible_char = buffer
+  //       .last_char_on_line_no_empty_eol(target_cursor_line)
+  //       .unwrap_or(0_usize);
+  //     let start_column_included_last_visible_char = reverse_search_start_column(
+  //       proc,
+  //       buffer,
+  //       window_actual_shape,
+  //       target_cursor_line,
+  //       last_visible_char,
+  //     );
+  //     if start_column > start_column_included_last_visible_char {
+  //       start_column = start_column_included_last_visible_char;
+  //       on_left_side = true;
+  //     }
+  //   }
+  //
+  //   if on_left_side {
+  //     Some(start_column)
+  //   } else {
+  //     None
+  //   }
+  // }
+  //
+  // fn to_right(
+  //   proc: ProcessLineFn,
+  //   buffer: &Buffer,
+  //   window_actual_shape: &U16Rect,
+  //   target_viewport_start_column: usize,
+  //   target_cursor_line: usize,
+  //   target_cursor_char: usize,
+  // ) -> Option<usize> {
+  //   let height = window_actual_shape.height();
+  //   let width = window_actual_shape.width();
+  //
+  //   let (rows, _start_fills, _end_fills, _) = proc(
+  //     buffer,
+  //     target_viewport_start_column,
+  //     target_cursor_line,
+  //     0_u16,
+  //     height,
+  //     width,
+  //   );
+  //
+  //   debug_assert!(rows.last_key_value().is_some());
+  //   let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+  //
+  //   // NOTE: If out of viewport, the viewport must only contains 1 line.
+  //   let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+  //     && target_cursor_char >= last_row_viewport.end_char_idx();
+  //
+  //   if on_right_side {
+  //     let start_column = reverse_search_start_column(
+  //       proc,
+  //       buffer,
+  //       window_actual_shape,
+  //       target_cursor_line,
+  //       target_cursor_char,
+  //     );
+  //     Some(start_column)
+  //   } else {
+  //     None
+  //   }
+  // }
+  //
+  // pub fn adjust_wrap(
+  //   opts: detail::AdjustOptions,
+  //   proc: ProcessLineFn,
+  //   buffer: &Buffer,
+  //   window_actual_shape: &U16Rect,
+  //   cannot_fully_contains_target_cursor_line: bool,
+  //   target_cursor_line: usize,
+  //   target_cursor_char: usize,
+  //   start_line: usize,
+  //   start_column: usize,
+  // ) -> (usize, usize) {
+  //   debug_assert!(!(opts.no_leftward && opts.no_rightward));
+  //
+  //   if opts.no_leftward {
+  //     if cfg!(debug_assertions) {
+  //       debug_assert!(
+  //         to_left(
+  //           proc,
+  //           buffer,
+  //           window_actual_shape,
+  //           cannot_fully_contains_target_cursor_line,
+  //           start_column,
+  //           target_cursor_line,
+  //           target_cursor_char,
+  //         )
+  //         .is_none()
+  //       );
+  //     }
+  //   } else {
+  //     let start_column_on_left_side = to_left(
+  //       proc,
+  //       buffer,
+  //       window_actual_shape,
+  //       cannot_fully_contains_target_cursor_line,
+  //       start_column,
+  //       target_cursor_line,
+  //       target_cursor_char,
+  //     );
+  //
+  //     if let Some(start_column_left) = start_column_on_left_side {
+  //       return (start_line, start_column_left);
+  //     }
+  //   }
+  //
+  //   if opts.no_rightward {
+  //     if cfg!(debug_assertions) {
+  //       debug_assert!(
+  //         to_right(
+  //           proc,
+  //           buffer,
+  //           window_actual_shape,
+  //           start_column,
+  //           target_cursor_line,
+  //           target_cursor_char,
+  //         )
+  //         .is_none()
+  //       );
+  //     }
+  //   } else {
+  //     let start_column_on_right_side = to_right(
+  //       proc,
+  //       buffer,
+  //       window_actual_shape,
+  //       start_column,
+  //       target_cursor_line,
+  //       target_cursor_char,
+  //     );
+  //
+  //     if let Some(start_column_right) = start_column_on_right_side {
+  //       return (start_line, start_column_right);
+  //     }
+  //   }
+  //
+  //   (start_line, start_column)
+  // }
+  //
+  // pub fn adjust_line(
+  //   current_line: isize,
+  //   target_cursor_line: usize,
+  //   window_height: u16,
+  //   n: usize,
+  // ) -> usize {
+  //   if (current_line as usize) < target_cursor_line && n > (window_height as usize) {
+  //     current_line as usize + 1
+  //   } else {
+  //     current_line as usize
+  //   }
+  // }
+
+  pub fn reverse_search_start_line(
+    proc: ProcessLineFn,
+    buffer: &Buffer,
+    window_actual_shape: &U16Rect,
+    target_cursor_line: usize,
+  ) -> usize {
+    let height = window_actual_shape.height();
+    let width = window_actual_shape.width();
+
+    let mut n = 0_usize;
+    let mut current_line = target_cursor_line as isize;
+
+    while (n < height as usize) && (current_line >= 0) {
+      let (rows, _start_fills, _end_fills, _) =
+        proc(buffer, 0_usize, current_line as usize, 0_u16, height, width);
+      n += rows.len();
+
+      if current_line == 0 || n >= height as usize {
+        break;
+      }
+
+      current_line -= 1;
+    }
+
+    if (current_line as usize) < target_cursor_line && n > (height as usize) {
+      current_line as usize + 1
+    } else {
+      current_line as usize
+    }
   }
 }
 
@@ -1286,8 +1950,8 @@ fn search_anchor_downward_nowrap(
     current_line as usize
   };
 
-  _adjust_horizontally_nowrap(
-    AdjustOptionsBuilder::default().build().unwrap(),
+  nowrap_detail::adjust_nowrap(
+    detail::AdjustOptions::all(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1297,15 +1961,30 @@ fn search_anchor_downward_nowrap(
   )
 }
 
+// NOTE: For `wrap=true` algorithm, we split it into below use cases:
+// 1. The viewport cannot fully contain the target cursor line, i.e. the line is too long and
+//    have to be truncated to place in the viewport.
+// 2. The viewport can contain the target cursor line, i.e. the line is not too long. And future
+//    we can split this into below sub cases:
+//    2.1 The viewport only contains the target cursor line. And we have a very specific edge
+//      case when considering the empty eol:
+//        a) The last visible char of target cursor line is at the bottom-right corner of the
+//        viewport, and thus the empty eol is actually out of viewport.
+//        b) Otherwise the empty eol of target cursor line is not out of viewport.
+//    2.2 The viewport not only contains the target cursor line, i.e. it contains at least 2
+//      lines. And we have a very specific edge case for empty eol:
+//        a) The target cursor line is the last line in viewport, and its last visible char is at
+//        the bottom-right corner, and thus the empty eol is out of viewport.
+//        b) Otherwise the empty eol of target cursor line is not out of viewport.
 fn search_anchor_downward_wrap(
-  proc: ProcessLineFn,
+  proc: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
+  let _viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
@@ -1319,81 +1998,70 @@ fn search_anchor_downward_wrap(
       .unwrap_or(0_usize),
   );
 
-  debug_assert!(viewport.lines().last_key_value().is_some());
-  let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
-
-  // NOTE: For `wrap=true`, if a line's head/tail not fully rendered, it means there will be only 1
-  // line shows in current window viewport. Because the `wrap` will force the 2nd line wait to show
-  // until the **current** line get fully rendered.
-
-  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-    || _line_tail_not_show(viewport, buffer, target_cursor_line);
-
-  let (start_line, start_column, cannot_fully_contains_target_cursor_line) =
-    if target_cursor_line <= last_line && !target_cursor_line_not_fully_show {
-      (viewport_start_line, viewport_start_column, false)
-    } else {
-      // Try to fill the viewport with `start_column=0`, and we can know how many rows the
-      // `target_cursor_line` needs to fill into current viewport.
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
-        buffer,
-        0,
-        target_cursor_line,
-        0_u16,
-        height.saturating_add(10),
-        width,
-      );
-
-      // 1. If the `target_cursor_line` can fully show in current viewport, then we force the
-      // `start_column` to 0.
-      //
-      // 2. Otherwise it means the current viewport can only contains 1 line, i.e. the
-      // `target_cursor_line`, and it is still possible to add some `start_column` if the line is too
-      // long. And in such case, the `start_line` will always be the `target_cursor_line` because
-      // the line is too big to show in current viewport, and we don't need other lines.
-      let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-      let (start_line, start_column) = if !cannot_fully_contains_target_cursor_line {
-        let mut n = 0_usize;
-        let mut current_line = target_cursor_line as isize;
-
-        while (n < height as usize) && (current_line >= 0) {
-          let (rows, _start_fills, _end_fills, _) =
-            proc(buffer, 0_usize, current_line as usize, 0_u16, height, width);
-          n += rows.len();
-
-          if current_line == 0 || n >= height as usize {
-            break;
-          }
-
-          current_line -= 1;
-        }
-
-        (
-          _adjust_current_line(current_line, target_cursor_line, height, n),
-          0_usize,
-        )
-      } else {
-        (target_cursor_line, viewport_start_column)
-      };
-
-      (
-        start_line,
-        start_column,
-        cannot_fully_contains_target_cursor_line,
-      )
-    };
-
-  _adjust_horizontally_wrap(
-    AdjustOptionsBuilder::default().build().unwrap(),
-    proc,
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
+    0,
     target_cursor_line,
-    target_cursor_char,
-    start_line,
-    start_column,
-  )
+    0_u16,
+    wrap_detail::maximized_viewport_height(height),
+    width,
+  );
+  let cannot_fully_contains_target_cursor_line = preview_target_rows.len() > height as usize;
+  let only_contains_target_cursor_line = preview_target_rows.len() == height as usize;
+
+  if cannot_fully_contains_target_cursor_line {
+    // Case-1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
+    let start_line = target_cursor_line;
+    let start_column = viewport_start_column;
+    wrap_detail::adjust_wrap_1(
+      detail::AdjustOptions::all(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else if only_contains_target_cursor_line {
+    // Case-2.1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // Force `start_column` to be 0, because viewport can contains this line.
+    let start_line = target_cursor_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_1(
+      detail::AdjustOptions::all(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else {
+    // Case-2.2
+    // For `start_line`, reversely iterate from `target_cursor_line` from bottom to top, and find
+    // the 1st line in viewport.
+    // Force `start_column` to be 0, because viewport can contains the line.
+    let start_line =
+      wrap_detail::reverse_search_start_line(proc, buffer, window_actual_shape, target_cursor_line);
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_2(
+      detail::AdjustOptions::all(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  }
 }
 
 // Search a new viewport anchor (`start_line`, `start_column`) upward, i.e. when cursor moves up,
@@ -1471,8 +2139,8 @@ fn search_anchor_upward_nowrap(
     target_cursor_line
   };
 
-  _adjust_horizontally_nowrap(
-    AdjustOptionsBuilder::default().build().unwrap(),
+  nowrap_detail::adjust_nowrap(
+    detail::AdjustOptions::all(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1483,14 +2151,14 @@ fn search_anchor_upward_nowrap(
 }
 
 fn search_anchor_upward_wrap(
-  proc: ProcessLineFn,
+  proc: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let viewport_start_line = viewport.start_line_idx();
+  let _viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
@@ -1504,50 +2172,69 @@ fn search_anchor_upward_wrap(
       .unwrap_or(0_usize),
   );
 
-  debug_assert!(viewport.lines().first_key_value().is_some());
-  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
-
-  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-    || _line_tail_not_show(viewport, buffer, target_cursor_line);
-
-  let (start_line, start_column, cannot_fully_contains_target_cursor_line) =
-    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      (viewport_start_line, viewport_start_column, false)
-    } else {
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
-        buffer,
-        0,
-        target_cursor_line,
-        0_u16,
-        height.saturating_add(10),
-        width,
-      );
-
-      let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-      let (start_line, start_column) = if !cannot_fully_contains_target_cursor_line {
-        (target_cursor_line, 0_usize)
-      } else {
-        (target_cursor_line, viewport_start_column)
-      };
-
-      (
-        start_line,
-        start_column,
-        cannot_fully_contains_target_cursor_line,
-      )
-    };
-
-  _adjust_horizontally_wrap(
-    AdjustOptionsBuilder::default().build().unwrap(),
-    proc,
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
+    0,
     target_cursor_line,
-    target_cursor_char,
-    start_line,
-    start_column,
-  )
+    0_u16,
+    wrap_detail::maximized_viewport_height(height),
+    width,
+  );
+  let cannot_fully_contains_target_cursor_line = preview_target_rows.len() > height as usize;
+  let only_contains_target_cursor_line = preview_target_rows.len() == height as usize;
+
+  if cannot_fully_contains_target_cursor_line {
+    // Case-1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
+    let start_line = target_cursor_line;
+    let start_column = viewport_start_column;
+    wrap_detail::adjust_wrap_1(
+      detail::AdjustOptions::all(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else if only_contains_target_cursor_line {
+    // Case-2.1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // Force `start_column` to be 0, because viewport can contains this line.
+    let start_line = target_cursor_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_1(
+      detail::AdjustOptions::all(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else {
+    // Case-2.2
+    // For `start_line`, simply force it to be `target_cursor_line` because we are moving viewport
+    // to upper, thus the `target_cursor_line` must be the 1st line in viewport.
+    // Force `start_column` to be 0, because viewport can contains the line.
+    let start_line = target_cursor_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_2(
+      detail::AdjustOptions::all(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  }
 }
 
 // Search a new viewport anchor (`start_line`, `start_column`) leftward, i.e. when cursor moves
@@ -1613,11 +2300,8 @@ fn search_anchor_leftward_nowrap(
   let start_line = viewport.start_line_idx();
   let start_column = viewport.start_column_idx();
 
-  _adjust_horizontally_nowrap(
-    AdjustOptionsBuilder::default()
-      .disable_detect_rightward(true)
-      .build()
-      .unwrap(),
+  nowrap_detail::adjust_nowrap(
+    detail::AdjustOptions::no_rightward(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1628,7 +2312,7 @@ fn search_anchor_leftward_nowrap(
 }
 
 fn search_anchor_leftward_wrap(
-  proc: ProcessLineFn,
+  proc: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1649,48 +2333,70 @@ fn search_anchor_leftward_wrap(
       .unwrap_or(0_usize),
   );
 
-  debug_assert!(viewport.lines().first_key_value().is_some());
-  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
-
-  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-    || _line_tail_not_show(viewport, buffer, target_cursor_line);
-
-  let (start_column, cannot_fully_contains_target_cursor_line) =
-    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      (viewport_start_column, false)
-    } else {
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
-        buffer,
-        0,
-        target_cursor_line,
-        0_u16,
-        height.saturating_add(10),
-        width,
-      );
-      let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-      let start_column = if !cannot_fully_contains_target_cursor_line {
-        0_usize
-      } else {
-        viewport_start_column
-      };
-
-      (start_column, cannot_fully_contains_target_cursor_line)
-    };
-
-  _adjust_horizontally_wrap(
-    AdjustOptionsBuilder::default()
-      .disable_detect_rightward(true)
-      .build()
-      .unwrap(),
-    proc,
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
+    0,
     target_cursor_line,
-    target_cursor_char,
-    viewport_start_line,
-    start_column,
-  )
+    0_u16,
+    wrap_detail::maximized_viewport_height(height),
+    width,
+  );
+  let cannot_fully_contains_target_cursor_line = preview_target_rows.len() > height as usize;
+  let only_contains_target_cursor_line = preview_target_rows.len() == height as usize;
+
+  if cannot_fully_contains_target_cursor_line {
+    // Case-1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
+    let start_line = target_cursor_line;
+    let start_column = viewport_start_column;
+    wrap_detail::adjust_wrap_1(
+      detail::AdjustOptions::no_rightward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else if only_contains_target_cursor_line {
+    // Case-2.1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // Force `start_column` to be 0, because viewport can contains this line.
+    let start_line = target_cursor_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_1(
+      detail::AdjustOptions::no_rightward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else {
+    // Case-2.2
+    // For `start_line`, simply force it to be the old `viewport_start_line` because we are not
+    // going to move viewport upward/downward (only leftward/rightward). Thus the value won't
+    // change.
+    // Force `start_column` to be 0, because viewport can contains the line.
+    let start_line = viewport_start_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_2(
+      detail::AdjustOptions::no_rightward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  }
 }
 
 // Search a new viewport anchor (`start_line`, `start_column`) rightward, i.e. when cursor moves
@@ -1756,11 +2462,8 @@ fn search_anchor_rightward_nowrap(
   let start_line = viewport.start_line_idx();
   let start_column = viewport.start_column_idx();
 
-  _adjust_horizontally_nowrap(
-    AdjustOptionsBuilder::default()
-      .disable_detect_leftward(true)
-      .build()
-      .unwrap(),
+  nowrap_detail::adjust_nowrap(
+    detail::AdjustOptions::no_leftward(),
     buffer,
     window_actual_shape,
     target_cursor_line,
@@ -1771,7 +2474,7 @@ fn search_anchor_rightward_nowrap(
 }
 
 fn search_anchor_rightward_wrap(
-  proc: ProcessLineFn,
+  proc: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1792,47 +2495,68 @@ fn search_anchor_rightward_wrap(
       .unwrap_or(0_usize),
   );
 
-  debug_assert!(viewport.lines().first_key_value().is_some());
-  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
-
-  let target_cursor_line_not_fully_show = _line_head_not_show(viewport, target_cursor_line)
-    || _line_tail_not_show(viewport, buffer, target_cursor_line);
-
-  let (start_column, cannot_fully_contains_target_cursor_line) =
-    if target_cursor_line >= first_line && !target_cursor_line_not_fully_show {
-      (viewport_start_column, false)
-    } else {
-      let (target_cursor_rows, _target_cursor_start_fills, _target_cursor_end_fills, _) = proc(
-        buffer,
-        0,
-        target_cursor_line,
-        0_u16,
-        height.saturating_add(10),
-        width,
-      );
-      let cannot_fully_contains_target_cursor_line = target_cursor_rows.len() > height as usize;
-      let start_column = if !cannot_fully_contains_target_cursor_line {
-        0_usize
-      } else {
-        viewport_start_column
-      };
-
-      (start_column, cannot_fully_contains_target_cursor_line)
-    };
-
-  // adjust horizontally
-  _adjust_horizontally_wrap(
-    AdjustOptionsBuilder::default()
-      .disable_detect_leftward(true)
-      .build()
-      .unwrap(),
-    proc,
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
-    window_actual_shape,
-    cannot_fully_contains_target_cursor_line,
+    0,
     target_cursor_line,
-    target_cursor_char,
-    viewport_start_line,
-    start_column,
-  )
+    0_u16,
+    wrap_detail::maximized_viewport_height(height),
+    width,
+  );
+  let cannot_fully_contains_target_cursor_line = preview_target_rows.len() > height as usize;
+  let only_contains_target_cursor_line = preview_target_rows.len() == height as usize;
+
+  if cannot_fully_contains_target_cursor_line {
+    // Case-1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
+    let start_line = target_cursor_line;
+    let start_column = viewport_start_column;
+    wrap_detail::adjust_wrap_1(
+      detail::AdjustOptions::no_leftward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else if only_contains_target_cursor_line {
+    // Case-2.1
+    // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
+    // line.
+    // Force `start_column` to be 0, because viewport can contains this line.
+    let start_line = target_cursor_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_1(
+      detail::AdjustOptions::no_leftward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  } else {
+    // Case-2.2
+    // For `start_line`, simply force it to be the old `viewport_start_line` because we are not
+    // going to move viewport upward/downward (only leftward/rightward). Thus the value won't
+    // change.
+    // Force `start_column` to be 0, because viewport can contains the line.
+    let start_line = viewport_start_line;
+    let start_column = 0_usize;
+    wrap_detail::adjust_wrap_2_2(
+      detail::AdjustOptions::no_leftward(),
+      proc,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+      start_line,
+      start_column,
+    )
+  }
 }
