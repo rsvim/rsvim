@@ -1152,8 +1152,8 @@ mod wrap_detail {
     debug_assert!(preview_target_rows.last_key_value().is_some());
     let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
 
-    debug_assert!(last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx());
-    let on_right_side = target_cursor_char >= last_row_viewport.end_char_idx();
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
 
     if on_right_side {
       let start_column = reverse_search_start_column(
@@ -1317,8 +1317,8 @@ mod wrap_detail {
     debug_assert!(preview_target_rows.last_key_value().is_some());
     let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
 
-    debug_assert!(last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx());
-    let on_right_side = target_cursor_char >= last_row_viewport.end_char_idx();
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
 
     debug_assert!(!on_right_side);
     None
@@ -1473,8 +1473,8 @@ mod wrap_detail {
     debug_assert!(preview_target_rows.last_key_value().is_some());
     let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
 
-    debug_assert!(last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx());
-    let on_right_side = target_cursor_char >= last_row_viewport.end_char_idx();
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
 
     debug_assert!(!on_right_side);
     None
