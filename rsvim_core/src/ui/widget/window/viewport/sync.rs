@@ -652,7 +652,6 @@ fn _adjust_left_nowrap(
   target_cursor_char: usize,
 ) -> Option<usize> {
   let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
-  let on_left_side = target_cursor_width < target_viewport_start_column;
 
   if cfg!(debug_assertions) {
     match buffer.char_at(target_cursor_line, target_viewport_start_column) {
@@ -689,6 +688,7 @@ fn _adjust_left_nowrap(
     }
   }
 
+  let on_left_side = target_cursor_width < target_viewport_start_column;
   if on_left_side {
     // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
     // just put the cursor at the first left char in the new viewport.
@@ -713,7 +713,6 @@ fn _adjust_right_nowrap(
   let width = window_actual_shape.width();
   let viewport_end_column = target_viewport_start_column + width as usize;
   let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
-  let on_right_side = target_cursor_width > viewport_end_column;
 
   if cfg!(debug_assertions) {
     let target_viewport_start_char =
@@ -750,6 +749,7 @@ fn _adjust_right_nowrap(
     );
   }
 
+  let on_right_side = target_cursor_width > viewport_end_column;
   if on_right_side {
     // Move viewport to right to show the cursor, just put the cursor at the last right char in the
     // new viewport.
