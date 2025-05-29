@@ -800,8 +800,9 @@ mod nowrap_detail {
       );
     }
 
-    let target_at_empty_eol = detail::is_empty_eol(buffer, target_cursor_line, target_cursor_char);
-    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = detail::is_empty_eol(buffer, target_cursor_line, target_cursor_char);
+    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char)
+      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
     let on_right_side = target_cursor_width > viewport_end_column;
 
     if on_right_side {
