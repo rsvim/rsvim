@@ -1285,25 +1285,29 @@ mod wrap_detail {
     target_cursor_char: usize,
   ) -> Option<usize> {
     debug_assert_eq!(target_viewport_start_column, 0_usize);
-    let height = window_actual_shape.height();
-    let width = window_actual_shape.width();
 
-    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
-      buffer,
-      target_viewport_start_column,
-      target_cursor_line,
-      0_u16,
-      height,
-      width,
-    );
+    if cfg!(debug_assertions) {
+      let height = window_actual_shape.height();
+      let width = window_actual_shape.width();
 
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+      let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+        buffer,
+        target_viewport_start_column,
+        target_cursor_line,
+        0_u16,
+        height,
+        width,
+      );
 
-    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-      && target_cursor_char >= last_row_viewport.end_char_idx();
+      debug_assert!(preview_target_rows.last_key_value().is_some());
+      let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
 
-    debug_assert!(!on_right_side);
+      let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+        && target_cursor_char >= last_row_viewport.end_char_idx();
+
+      debug_assert!(!on_right_side);
+    }
+
     None
   }
 
@@ -1439,25 +1443,29 @@ mod wrap_detail {
     target_cursor_char: usize,
   ) -> Option<usize> {
     debug_assert_eq!(target_viewport_start_column, 0_usize);
-    let height = window_actual_shape.height();
-    let width = window_actual_shape.width();
 
-    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
-      buffer,
-      target_viewport_start_column,
-      target_cursor_line,
-      0_u16,
-      height,
-      width,
-    );
+    if cfg!(debug_assertions) {
+      let height = window_actual_shape.height();
+      let width = window_actual_shape.width();
 
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+      let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+        buffer,
+        target_viewport_start_column,
+        target_cursor_line,
+        0_u16,
+        height,
+        width,
+      );
 
-    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-      && target_cursor_char >= last_row_viewport.end_char_idx();
+      debug_assert!(preview_target_rows.last_key_value().is_some());
+      let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
 
-    debug_assert!(!on_right_side);
+      let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+        && target_cursor_char >= last_row_viewport.end_char_idx();
+
+      debug_assert!(!on_right_side);
+    }
+
     None
   }
 
