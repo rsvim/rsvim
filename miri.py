@@ -33,11 +33,11 @@ def start(tests_list, job_index, package):
             for i, t in enumerate(tests_list)
             if i >= start_job_index and i < end_job_index
         ]
+    tests_list = " ".join(tests_list)
     logging.debug(f"filtered tests_list:{tests_list}")
-    for t in tests_list:
-        command = f"cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {package} {t}"
-        logging.info(command)
-        os.system(command)
+    command = f"cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {package} {tests_list}"
+    logging.info(command)
+    os.system(command)
 
 
 def generate():
