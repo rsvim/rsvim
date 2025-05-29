@@ -765,7 +765,6 @@ mod nowrap_detail {
   ) -> Option<usize> {
     let width = window_actual_shape.width();
     let viewport_end_column = target_viewport_start_column + width as usize;
-    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
 
     if cfg!(debug_assertions) {
       let target_viewport_start_char =
@@ -786,7 +785,7 @@ mod nowrap_detail {
         None => "None".to_string(),
       };
       trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{},viewport_end_column:{},viewport_end_char:{}",
+        "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{},viewport_end_column:{},viewport_end_char:{}",
         target_cursor_line,
         target_cursor_char,
         buffer
@@ -794,7 +793,6 @@ mod nowrap_detail {
           .line(target_cursor_line)
           .get_char(target_cursor_char)
           .unwrap_or('?'),
-        target_cursor_width,
         target_viewport_start_column,
         target_viewport_start_char,
         viewport_end_column,
@@ -802,11 +800,12 @@ mod nowrap_detail {
       );
     }
 
+    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
     let on_right_side = target_cursor_width > viewport_end_column;
     if on_right_side {
       // Move viewport to right to show the cursor, just put the cursor at the last right char in the
       // new viewport.
-      let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
+      let end_column = target_cursor_width;
       let start_column = end_column.saturating_sub(width as usize);
       Some(start_column)
     } else {
