@@ -1,4 +1,4 @@
-name: Cargo Miri
+name: (Experimental) Cargo Miri
 permissions:
   contents: write
 on:
@@ -21,9 +21,32 @@ defaults:
   run:
     shell: bash
 jobs:
-  miri:
-    name: (Experimental) Cargo Miri
+  prepare:
+    name: Collect tests
     runs-on: ubuntu-22.04
+    outputs:
+      tests_list: ${{ steps.collect_all_tests.outputs.tests_list }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: miri,rust-src
+      - uses: taiki-e/install-action@cargo-nextest
+      - name: Collect
+        id: collect_all_tests
+        env:
+          RUSTC_WRAPPER: "sccache"
+          SCCACHE_GHA_ENABLED: "true"
+        run: |
+          tests_list=$(./miri.py --generate)
+          echo "tests_list:$tests_list"
+          echo "tests_list=$tests_list" >> $GITHUB_OUTPUT
+  miri-0:
+    name: Cargo Miri-0
+    runs-on: ubuntu-22.04
+    needs: prepare
     steps:
       - uses: actions/checkout@v4
       - uses: Swatinem/rust-cache@v2
@@ -37,5 +60,7 @@ jobs:
           MIRIFLAGS: "-Zmiri-disable-isolation -Zmiri-permissive-provenance"
           RUSTC_WRAPPER: "sccache"
           SCCACHE_GHA_ENABLED: "true"
+          TESTS_LIST: ${{ needs.prepare.outputs.tests_list }}
         run: |
-          cargo +nightly miri nextest run -p rsvim_core -F unicode_lines --no-default-features
+          echo $TESTS_LIST >tests_list.txt
+          ./miri.py --job 0 --package rsvim_core --dump tests_list.txt
