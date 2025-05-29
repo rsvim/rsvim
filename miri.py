@@ -7,7 +7,7 @@ import argparse
 import logging
 import subprocess
 
-LOGGING_LEVEL = logging.DEBUG
+LOGGING_LEVEL = logging.INFO
 TOTAL_JOBS = 10
 
 
@@ -42,7 +42,7 @@ def start(tests_list, job_index, package):
 
 def generate():
     command_args = ["cargo", "+nightly", "nextest", "list"]
-    logging.info(command_args)
+    logging.debug(command_args)
     tests_list_result = subprocess.run(command_args, capture_output=True, text=True)
     tests_list = tests_list_result.stdout.splitlines()
     tests_list = [
