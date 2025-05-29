@@ -11,33 +11,33 @@ LOGGING_LEVEL = logging.ERROR
 TOTAL_JOBS = 10
 
 
-def start(tests_list_dumpfile, job_index, package):
+def start(tests_list, job_index, package):
     job_index = int(job_index)
-    with open(tests_list_dumpfile, "r") as f:
-        tests_list = f.readlines()
-        tests_list = [t.strip() for t in tests_list if len(t.strip()) > 0]
-        logging.debug(f"tests_list:{tests_list}")
-        total_tests = len(tests_list)
-        tests_per_job = total_tests // TOTAL_JOBS
-        start_job_index = job_index * tests_per_job
-        end_job_index = (job_index + 1) * tests_per_job
-        is_last_job = job_index == TOTAL_JOBS - 1
-        logging.info(
-            f"total_tests:{total_tests}, tests_per_job:{tests_per_job}, is_last_job:{is_last_job} start_job_index:{start_job_index}, end_job_index:{end_job_index}"
-        )
-        if is_last_job:
-            tests_list = [t for i, t in enumerate(tests_list) if i >= start_job_index]
-        else:
-            tests_list = [
-                t
-                for i, t in enumerate(tests_list)
-                if i >= start_job_index and i < end_job_index
-            ]
-        logging.debug(f"filtered tests_list:{tests_list}")
-        tests_list = " ".join(tests_list)
-        command = f"cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {package} {tests_list}"
-        logging.debug(command)
-        os.system(command)
+    tests_list = tests_list.split(",")
+    tests_list = [t.strip() for t in tests_list if len(t.strip()) > 0]
+    logging.debug(f"tests_list:{tests_list}")
+
+    total_tests = len(tests_list)
+    tests_per_job = total_tests // TOTAL_JOBS
+    start_job_index = job_index * tests_per_job
+    end_job_index = (job_index + 1) * tests_per_job
+    is_last_job = job_index == TOTAL_JOBS - 1
+    logging.info(
+        f"total_tests:{total_tests}, tests_per_job:{tests_per_job}, is_last_job:{is_last_job} start_job_index:{start_job_index}, end_job_index:{end_job_index}"
+    )
+    if is_last_job:
+        tests_list = [t for i, t in enumerate(tests_list) if i >= start_job_index]
+    else:
+        tests_list = [
+            t
+            for i, t in enumerate(tests_list)
+            if i >= start_job_index and i < end_job_index
+        ]
+    logging.debug(f"filtered tests_list:{tests_list}")
+    tests_list = " ".join(tests_list)
+    command = f"cargo +nightly miri nextest run -F unicode_lines --no-default-features -p {package} {tests_list}"
+    logging.debug(command)
+    os.system(command)
 
 
 def generate():
@@ -48,9 +48,8 @@ def generate():
     tests_list = [
         t.strip() for i, t in enumerate(tests_list) if i > 0 and len(t.strip()) > 0
     ]
-    logging.debug(f"tests_list:{tests_list}")
-    for t in tests_list:
-        print(t)
+    tests_list = ",".join(tests_list)
+    print(tests_list)
 
 
 if __name__ == "__main__":
@@ -70,11 +69,11 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--package",
-        help="Run cargo miri tests job with [PACKAGE]",
+        help="Run cargo miri tests job with [PACKAGE] name",
     )
     parser.add_argument(
-        "--dump",
-        help="Run cargo miri tests job with [DUMP] file",
+        "--tests",
+        help="Run cargo miri tests job with [TESTS] list",
     )
 
     parser = parser.parse_args()
@@ -83,6 +82,6 @@ if __name__ == "__main__":
     if parser.generate:
         generate()
     elif parser.job:
-        start(parser.dump, parser.job, parser.package)
+        start(parser.tests, parser.job, parser.package)
     else:
         logging.error("Missing arguments, use -h/--help for more details.")
