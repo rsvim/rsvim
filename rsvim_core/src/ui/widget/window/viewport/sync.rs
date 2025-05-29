@@ -1042,16 +1042,13 @@ mod wrap_detail {
     }
 
     // spellchecker:off
+    // NOTE: The `cannot_fully_contains_target_cursor_line` in caller functions is calculated with
+    // `start_column=0`, but here the `start_column` actually belongs to the old viewport, which
+    // can be greater than 0. If the tail of target cursor line doesn't fully use the spaces of the
+    // viewport, this is not good because we didn't make full use of the viewport. Thus we should
+    // try to mov viewport to left side to use all of the spaces in the viewport.
     //
-    // If we met such edge case:
-    // 1. The target cursor line doesn't show its head, i.e. the `target_viewport_start_column` > 0,
-    //    and the line is just too lone to fully show in the viewport.
-    // 2. The tail of target cursor line doesn't fully use the spaces at the bottom-right corner of
-    //    the viewport, i.e. there are some spaces left empty in viewport while the line's head is
-    //    not show.
-    //
-    // This is not good because we didn't make full use of the viewport. Thus we should try to mov
-    // viewport to left side to use all of the spaces in the viewport. For example:
+    // For example:
     //
     // ```text
     //                                           |----------------------------------|
@@ -1070,7 +1067,6 @@ mod wrap_detail {
     // ```
     //
     // Which is a much better algorithm.
-    //
     // spellchecker:on
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
