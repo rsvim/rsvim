@@ -611,7 +611,7 @@ fn sync_wrap_linebreak(
 mod detail {
   use super::*;
 
-  pub fn _target_is_empty_eol(
+  pub fn is_empty_eol(
     buffer: &Buffer,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -800,8 +800,10 @@ mod nowrap_detail {
       );
     }
 
+    let target_at_empty_eol = detail::is_empty_eol(buffer, target_cursor_line, target_cursor_char);
     let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
     let on_right_side = target_cursor_width > viewport_end_column;
+
     if on_right_side {
       // Move viewport to right to show the cursor, just put the cursor at the last right char in the
       // new viewport.
