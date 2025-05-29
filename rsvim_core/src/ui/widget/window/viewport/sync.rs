@@ -691,12 +691,12 @@ mod nowrap_detail {
   // There are 2 edge cases:
   // 1. The target cursor is on the left side.
   // 1. The target cursor is on the right side.
-  // spellchecker:on
   //
   // Returns
   // 1. If target cursor is on the left side of viewport, and we need to move the viewport more to
   //    the left side.
   // 2. If 1st is true, this is the new "start_column" after adjustments.
+  // spellchecker:on
   fn to_left(
     buffer: &Buffer,
     _window_actual_shape: &U16Rect,
