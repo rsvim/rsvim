@@ -1059,6 +1059,13 @@ mod wrap_detail {
     // Which is a much better algorithm.
     // spellchecker:on
 
+    let mut on_left_side = false;
+
+    debug_assert!(buffer.get_rope().get_line(target_cursor_line).is_some());
+    let last_visible_char = buffer
+      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .unwrap_or(0_usize);
+
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
       buffer,
       start_column,
@@ -1067,19 +1074,17 @@ mod wrap_detail {
       maximized_viewport_height(window_actual_shape.height()),
       window_actual_shape.width(),
     );
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    debug_assert!(buffer.get_rope().get_line(target_cursor_line).is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
-    let last_visible_char = buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize);
 
-    let mut on_left_side = false;
+    let extra_space_left = match preview_target_rows.last_key_value() {
+      Some((_last_row_idx, last_row_viewport)) => {
+        last_row_viewport.end_char_idx() > last_visible_char
+      }
+      None => true,
+    };
 
-    // If (with `start_column`) the viewport contains the buffer line's last char, then the
-    // viewport maybe be not fully used, we do a reverse search to try to locate the better
-    // `start_column`.
-    if last_row_viewport.end_char_idx() > last_visible_char {
+    // If there is extra space left in viewport, i.e. viewport is not fully used, we need to do a
+    // reverse search to try to locate the better `start_column`.
+    if extra_space_left {
       let start_column_include_last_visible_char = reverse_search_start_column(
         proc,
         buffer,
