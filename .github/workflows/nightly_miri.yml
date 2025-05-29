@@ -62,4 +62,4 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
           TESTS_LIST: ${{ needs.prepare.outputs.tests_list }}
         run: |
-          ./miri.py --job 0 --package rsvim_core --tests $TESTS_LIST
+          ./miri.py --job 0 --package rsvim_core --tests "$TESTS_LIST"
