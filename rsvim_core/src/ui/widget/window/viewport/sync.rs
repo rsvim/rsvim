@@ -997,12 +997,11 @@ mod wrap_detail {
     target_cursor_char: usize,
   ) -> Option<usize> {
     let mut start_column = target_viewport_start_column;
-    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
 
     if cfg!(debug_assertions) {
       match buffer.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -1010,7 +1009,6 @@ mod wrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
           target_viewport_start_char,
           buffer
@@ -1020,7 +1018,7 @@ mod wrap_detail {
             .unwrap_or('?')
         ),
         None => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:None",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -1028,30 +1026,19 @@ mod wrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
         ),
       }
     }
 
-    // If `target_cursor_char` is out of viewport, on the leftside, we need to move viewport to left
-    // to include the `target_cursor_char`.
-    let mut on_left_side = target_cursor_width < start_column;
-    if on_left_side {
-      start_column = buffer.width_before(target_cursor_line, target_cursor_char);
-    }
-
     // spellchecker:off
+    // NOTE: The `cannot_fully_contains_target_cursor_line` in caller functions is calculated with
+    // `start_column=0`, but here the `start_column` actually belongs to the old viewport, which
+    // can be greater than 0. If the tail of target cursor line doesn't fully use the spaces of the
+    // viewport, this is not good because we didn't make full use of the viewport. Thus we should
+    // try to mov viewport to left side to use all of the spaces in the viewport.
     //
-    // If we met such edge case:
-    // 1. The target cursor line doesn't show its head, i.e. the `target_viewport_start_column` > 0,
-    //    and the line is just too lone to fully show in the viewport.
-    // 2. The tail of target cursor line doesn't fully use the spaces at the bottom-right corner of
-    //    the viewport, i.e. there are some spaces left empty in viewport while the line's head is
-    //    not show.
-    //
-    // This is not good because we didn't make full use of the viewport. Thus we should try to mov
-    // viewport to left side to use all of the spaces in the viewport. For example:
+    // For example:
     //
     // ```text
     //                                           |----------------------------------|
@@ -1070,8 +1057,14 @@ mod wrap_detail {
     // ```
     //
     // Which is a much better algorithm.
-    //
     // spellchecker:on
+
+    let mut on_left_side = false;
+
+    debug_assert!(buffer.get_rope().get_line(target_cursor_line).is_some());
+    let last_visible_char = buffer
+      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .unwrap_or(0_usize);
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
       buffer,
@@ -1081,63 +1074,36 @@ mod wrap_detail {
       maximized_viewport_height(window_actual_shape.height()),
       window_actual_shape.width(),
     );
-    let not_fully_use_viewport_rows =
-      preview_target_rows.len() < window_actual_shape.height() as usize;
-    let can_over_use_viewport_rows =
-      preview_target_rows.len() > window_actual_shape.height() as usize;
-    let not_fully_use_viewport_last_row = {
-      if not_fully_use_viewport_rows {
-        true
-      } else if can_over_use_viewport_rows {
-        // Start with `start_column`, the viewport still cannot fully contains the target cursor
-        // line, i.e. the viewport last row and its tail are been fully used, no extra spaces have
-        // been left.
-        false
-      } else {
-        match preview_target_rows.last_key_value() {
-          Some((last_row_idx, last_row_viewport)) => {
-            debug_assert_eq!(last_row_idx + 1, window_actual_shape.height());
-            debug_assert!(last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx());
 
-            // In last row, the tail (last visible char) is already the tail of target cursor line.
-            if last_row_viewport.end_char_idx()
-              > buffer
-                .last_char_on_line_no_empty_eol(target_cursor_line)
-                .unwrap()
-            {
-              let last_row_end_width =
-                buffer.width_before(target_cursor_line, last_row_viewport.end_char_idx());
-              let last_row_start_width =
-                buffer.width_before(target_cursor_line, last_row_viewport.start_char_idx());
-              let last_row_width = last_row_end_width.saturating_sub(last_row_start_width);
-              // If the last row fully uses all the window width, then there is no extra spaces.
-              last_row_width < window_actual_shape.width() as usize
-            } else {
-              // In last row, the tail (last visible char) is not the tail of target cursor line,
-              // there are more chars out of viewport on the right side. Thus there is no extra
-              // spaces.
-              false
-            }
-          }
-          None => false,
-        }
+    let extra_space_left = match preview_target_rows.last_key_value() {
+      Some((_last_row_idx, last_row_viewport)) => {
+        last_row_viewport.end_char_idx() > last_visible_char
       }
+      None => true,
     };
-    if not_fully_use_viewport_rows || not_fully_use_viewport_last_row {
-      let last_visible_char = buffer
-        .last_char_on_line_no_empty_eol(target_cursor_line)
-        .unwrap_or(0_usize);
-      let start_column_included_last_visible_char = reverse_search_start_column(
+
+    // If there is extra space left in viewport, i.e. viewport is not fully used, we need to do a
+    // reverse search to try to locate the better `start_column`.
+    if extra_space_left {
+      let start_column_include_last_visible_char = reverse_search_start_column(
         proc,
         buffer,
         window_actual_shape,
         target_cursor_line,
         last_visible_char,
       );
-      if start_column > start_column_included_last_visible_char {
-        start_column = start_column_included_last_visible_char;
+      if start_column > start_column_include_last_visible_char {
+        start_column = start_column_include_last_visible_char;
         on_left_side = true;
       }
+    }
+
+    // If `target_cursor_char` is still out of viewport, then we still need to move viewport to
+    // left.
+    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+    if target_cursor_width < start_column {
+      on_left_side = true;
+      start_column = target_cursor_width;
     }
 
     if on_left_side {
@@ -1269,11 +1235,10 @@ mod wrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> Option<usize> {
-    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
     if cfg!(debug_assertions) {
       match buffer.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -1281,7 +1246,6 @@ mod wrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
           target_viewport_start_char,
           buffer
@@ -1291,7 +1255,7 @@ mod wrap_detail {
             .unwrap_or('?')
         ),
         None => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:None",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -1299,15 +1263,16 @@ mod wrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
         ),
       }
+
+      let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+      debug_assert_eq!(target_viewport_start_column, 0_usize);
+      let on_left_side = target_cursor_width < target_viewport_start_column;
+      debug_assert!(!on_left_side);
     }
 
-    let on_left_side = target_cursor_width < target_viewport_start_column;
-    debug_assert_eq!(target_viewport_start_column, 0_usize);
-    debug_assert!(!on_left_side);
     None
   }
 
@@ -1320,25 +1285,29 @@ mod wrap_detail {
     target_cursor_char: usize,
   ) -> Option<usize> {
     debug_assert_eq!(target_viewport_start_column, 0_usize);
-    let height = window_actual_shape.height();
-    let width = window_actual_shape.width();
 
-    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
-      buffer,
-      target_viewport_start_column,
-      target_cursor_line,
-      0_u16,
-      height,
-      width,
-    );
+    if cfg!(debug_assertions) {
+      let height = window_actual_shape.height();
+      let width = window_actual_shape.width();
 
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+      let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+        buffer,
+        target_viewport_start_column,
+        target_cursor_line,
+        0_u16,
+        height,
+        width,
+      );
 
-    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-      && target_cursor_char >= last_row_viewport.end_char_idx();
+      debug_assert!(preview_target_rows.last_key_value().is_some());
+      let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
 
-    debug_assert!(!on_right_side);
+      let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+        && target_cursor_char >= last_row_viewport.end_char_idx();
+
+      debug_assert!(!on_right_side);
+    }
+
     None
   }
 
@@ -1424,12 +1393,10 @@ mod wrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> Option<usize> {
-    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
-
     if cfg!(debug_assertions) {
       match buffer.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -1437,7 +1404,6 @@ mod wrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
           target_viewport_start_char,
           buffer
@@ -1447,7 +1413,7 @@ mod wrap_detail {
             .unwrap_or('?')
         ),
         None => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:None",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -1455,15 +1421,16 @@ mod wrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
         ),
       }
+
+      let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+      debug_assert_eq!(target_viewport_start_column, 0_usize);
+      let on_left_side = target_cursor_width < target_viewport_start_column;
+      debug_assert!(!on_left_side);
     }
 
-    let on_left_side = target_cursor_width < target_viewport_start_column;
-    debug_assert_eq!(target_viewport_start_column, 0_usize);
-    debug_assert!(!on_left_side);
     None
   }
 
@@ -1476,25 +1443,29 @@ mod wrap_detail {
     target_cursor_char: usize,
   ) -> Option<usize> {
     debug_assert_eq!(target_viewport_start_column, 0_usize);
-    let height = window_actual_shape.height();
-    let width = window_actual_shape.width();
 
-    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
-      buffer,
-      target_viewport_start_column,
-      target_cursor_line,
-      0_u16,
-      height,
-      width,
-    );
+    if cfg!(debug_assertions) {
+      let height = window_actual_shape.height();
+      let width = window_actual_shape.width();
 
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+      let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+        buffer,
+        target_viewport_start_column,
+        target_cursor_line,
+        0_u16,
+        height,
+        width,
+      );
 
-    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-      && target_cursor_char >= last_row_viewport.end_char_idx();
+      debug_assert!(preview_target_rows.last_key_value().is_some());
+      let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
 
-    debug_assert!(!on_right_side);
+      let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+        && target_cursor_char >= last_row_viewport.end_char_idx();
+
+      debug_assert!(!on_right_side);
+    }
+
     None
   }
 
