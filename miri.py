@@ -7,7 +7,7 @@ import argparse
 import logging
 import subprocess
 
-LOGGING_LEVEL = logging.DEBUG
+LOGGING_LEVEL = logging.ERROR
 TOTAL_JOBS = 10
 
 
