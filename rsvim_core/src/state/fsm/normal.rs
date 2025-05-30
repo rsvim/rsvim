@@ -1,5 +1,6 @@
 //! The normal mode.
 
+use crate::buf::Buffer;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -7,7 +8,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{ViewportArc, ViewportSearchAnchorDirection};
+use crate::ui::widget::window::{CursorViewport, ViewportArc, ViewportSearchAnchorDirection};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -97,20 +98,9 @@ impl NormalStateful {
         let cursor_viewport_arc = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport_arc);
 
-        let (target_cursor_char, target_cursor_line, move_direction) =
-          cursor_ops::normalize_as_cursor_move_to(
-            op,
-            cursor_viewport.char_idx(),
-            cursor_viewport.line_idx(),
-          );
-        let target_cursor_char = match buffer.last_char_on_line_no_empty_eol(target_cursor_line) {
-          Some(last_visible_char) => std::cmp::min(target_cursor_char, last_visible_char),
-          None => target_cursor_char,
-        };
-
-        // Only move cursor when it differentiates.
-        if target_cursor_line != cursor_viewport.line_idx()
-          || target_cursor_char != cursor_viewport.char_idx()
+        // Only move cursor when it is different from current cursor.
+        if let Some((target_cursor_char, target_cursor_line, move_direction)) =
+          self._get_target_cursor(&cursor_viewport, &buffer, op)
         {
           let search_direction = match move_direction {
             CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
@@ -186,6 +176,32 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
+  // Returns `(target_cursor_char, target_cursor_line, cursor_move_direction)`.
+  fn _get_target_cursor(
+    &self,
+    cursor_viewport: &CursorViewport,
+    buffer: &Buffer,
+    op: Operation,
+  ) -> Option<(usize, usize, CursorMoveDirection)> {
+    let (target_cursor_char, target_cursor_line, move_direction) =
+      cursor_ops::normalize_as_cursor_move_to(
+        op,
+        cursor_viewport.char_idx(),
+        cursor_viewport.line_idx(),
+      );
+    let target_cursor_char = match buffer.last_char_on_line_no_empty_eol(target_cursor_line) {
+      Some(last_visible_char) => std::cmp::min(target_cursor_char, last_visible_char),
+      None => target_cursor_char,
+    };
+    if target_cursor_char != cursor_viewport.char_idx()
+      || target_cursor_line != cursor_viewport.line_idx()
+    {
+      Some((target_cursor_char, target_cursor_line, move_direction))
+    } else {
+      None
+    }
+  }
+
   #[cfg(test)]
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
@@ -199,32 +215,26 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let (target_cursor_char, target_cursor_line, _move_direction) =
-          cursor_ops::normalize_as_cursor_move_to(
-            op,
-            cursor_viewport.char_idx(),
-            cursor_viewport.line_idx(),
+        if let Some((target_cursor_char, target_cursor_line, _move_direction)) =
+          self._get_target_cursor(&cursor_viewport, &buffer, op)
+        {
+          let maybe_new_cursor_viewport = cursor_ops::cursor_move(
+            &viewport,
+            &cursor_viewport,
+            &buffer,
+            Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
           );
-        let target_cursor_char = match buffer.last_char_on_line_no_empty_eol(target_cursor_line) {
-          Some(last_visible_char) => last_visible_char,
-          None => target_cursor_char,
-        };
-        let maybe_new_cursor_viewport = cursor_ops::cursor_move(
-          &viewport,
-          &cursor_viewport,
-          &buffer,
-          Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
-        );
 
-        if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
-          current_window.set_cursor_viewport(new_cursor_viewport.clone());
-          let cursor_id = tree.cursor_id().unwrap();
-          let new_cursor_viewport = lock!(new_cursor_viewport);
-          tree.bounded_move_to(
-            cursor_id,
-            new_cursor_viewport.column_idx() as isize,
-            new_cursor_viewport.row_idx() as isize,
-          );
+          if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
+            current_window.set_cursor_viewport(new_cursor_viewport.clone());
+            let cursor_id = tree.cursor_id().unwrap();
+            let new_cursor_viewport = lock!(new_cursor_viewport);
+            tree.bounded_move_to(
+              cursor_id,
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
+            );
+          }
         }
       } else {
         unreachable!()
@@ -245,25 +255,9 @@ impl NormalStateful {
         let viewport = lock!(viewport);
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
-        let cursor_viewport = current_window.cursor_viewport();
-        let cursor_viewport = lock!(cursor_viewport);
 
-        let (target_cursor_char, target_cursor_line, _move_direction) =
-          cursor_ops::normalize_as_cursor_move_to(
-            op,
-            cursor_viewport.char_idx(),
-            cursor_viewport.line_idx(),
-          );
-        let target_cursor_char = match buffer.last_char_on_line_no_empty_eol(target_cursor_line) {
-          Some(last_visible_char) => last_visible_char,
-          None => target_cursor_char,
-        };
-        let maybe_new_viewport_arc = cursor_ops::window_scroll(
-          &viewport,
-          current_window,
-          &buffer,
-          Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
-        );
+        let maybe_new_viewport_arc =
+          cursor_ops::window_scroll(&viewport, current_window, &buffer, op);
         if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
           current_window.set_viewport(new_viewport_arc.clone());
         }
@@ -1065,7 +1059,7 @@ mod tests_cursor_move_by {
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 0);
-    assert_eq!(actual1.char_idx(), 5);
+    assert_eq!(actual1.char_idx(), 0);
 
     // Step-2
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
@@ -1472,7 +1466,7 @@ mod tests_cursor_move_to {
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
-    assert_eq!(actual2.char_idx(), 18);
+    assert_eq!(actual2.char_idx(), 9);
   }
 }
 
