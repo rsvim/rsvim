@@ -103,6 +103,17 @@ impl NormalStateful {
             cursor_viewport.char_idx(),
             cursor_viewport.line_idx(),
           );
+        debug_assert!(
+          buffer
+            .last_char_on_line_no_empty_eol(target_cursor_line)
+            .is_some()
+        );
+        let target_cursor_char = std::cmp::min(
+          target_cursor_char,
+          buffer
+            .last_char_on_line_no_empty_eol(target_cursor_line)
+            .unwrap(),
+        );
         let search_direction = match move_direction {
           CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
           CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
