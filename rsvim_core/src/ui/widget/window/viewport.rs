@@ -7120,17 +7120,13 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Initialize
     {
-      let expect = vec![
-        "1st.\n",
-        "AAAAAAAAAA",
-        "BBBBBBBBBB",
-        "3rd.\n",
-        "4th.\n",
-      ];
+      let expect = vec!["1st.\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\n", "4th.\n"];
 
       let actual = lock!(window.borrow().viewport()).clone();
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1,0),(2,0),(3,0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0),(1,0),(2,0),(3,0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
@@ -7144,13 +7140,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-1
     {
-      let expect = vec![
-        "1st.\n",
-        "AAAAAAAAAA",
-        "BBBBBBBBBB",
-        "3rd.\n",
-        "4th.\n",
-      ];
+      let expect = vec!["1st.\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\n", "4th.\n"];
 
       let actual = {
         let target_cursor_line = 1;
@@ -7187,8 +7177,10 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1,0), (2,0), (3,0)].into_iter().collect();
-      let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0),(1,0), (2,0), (3,0)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,
