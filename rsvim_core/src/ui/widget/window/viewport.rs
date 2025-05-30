@@ -5478,7 +5478,7 @@ mod tests_search_anchor_downward_nowrap {
       );
     }
 
-    // Search-7
+    // Search-1
     {
       let expect = vec![
         " lines.\n",
