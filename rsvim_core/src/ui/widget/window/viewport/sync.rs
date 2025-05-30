@@ -722,7 +722,7 @@ mod nowrap_detail {
     if on_left_side {
       // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
       // just put the cursor at the first left char in the new viewport.
-      let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
+      let start_column = target_cursor_width;
       Some(start_column)
     } else {
       None
