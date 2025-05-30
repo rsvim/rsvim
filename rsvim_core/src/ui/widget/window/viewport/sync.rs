@@ -1594,6 +1594,9 @@ pub fn search_anchor_downward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  // The cursor must move downward.
+  debug_assert!(target_cursor_line > viewport.start_line_idx());
+
   let buffer_len_lines = buffer.get_rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
@@ -1719,15 +1722,6 @@ fn search_anchor_downward_wrap(
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
@@ -1807,6 +1801,18 @@ pub fn search_anchor_upward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  // The cursor must move downward.
+  debug_assert!(target_cursor_line > viewport.start_line_idx());
+
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -1884,15 +1890,6 @@ fn search_anchor_upward_wrap(
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
@@ -1971,6 +1968,20 @@ pub fn search_anchor_leftward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  // The cursor must stay in viewport.
+  debug_assert!(
+    target_cursor_line >= viewport.start_line_idx() && target_cursor_line < viewport.end_line_idx()
+  );
+
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -2035,15 +2046,6 @@ fn search_anchor_leftward_wrap(
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
@@ -2123,6 +2125,20 @@ pub fn search_anchor_rightward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  // The cursor must stay in viewport.
+  debug_assert!(
+    target_cursor_line >= viewport.start_line_idx() && target_cursor_line < viewport.end_line_idx()
+  );
+
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -2187,15 +2203,6 @@ fn search_anchor_rightward_wrap(
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
