@@ -199,8 +199,29 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        let maybe_new_cursor_viewport =
-          cursor_ops::cursor_move(&viewport, &cursor_viewport, &buffer, op);
+        let (target_cursor_char, target_cursor_line, _move_direction) =
+          cursor_ops::normalize_as_cursor_move_to(
+            op,
+            cursor_viewport.char_idx(),
+            cursor_viewport.line_idx(),
+          );
+        debug_assert!(
+          buffer
+            .last_char_on_line_no_empty_eol(target_cursor_line)
+            .is_some()
+        );
+        let target_cursor_char = std::cmp::min(
+          target_cursor_char,
+          buffer
+            .last_char_on_line_no_empty_eol(target_cursor_line)
+            .unwrap(),
+        );
+        let maybe_new_cursor_viewport = cursor_ops::cursor_move(
+          &viewport,
+          &cursor_viewport,
+          &buffer,
+          Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+        );
 
         if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
           current_window.set_cursor_viewport(new_cursor_viewport.clone());
@@ -231,9 +252,32 @@ impl NormalStateful {
         let viewport = lock!(viewport);
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
+        let cursor_viewport = current_window.cursor_viewport();
+        let cursor_viewport = lock!(cursor_viewport);
 
-        let maybe_new_viewport_arc =
-          cursor_ops::window_scroll(&viewport, current_window, &buffer, op);
+        let (target_cursor_char, target_cursor_line, _move_direction) =
+          cursor_ops::normalize_as_cursor_move_to(
+            op,
+            cursor_viewport.char_idx(),
+            cursor_viewport.line_idx(),
+          );
+        debug_assert!(
+          buffer
+            .last_char_on_line_no_empty_eol(target_cursor_line)
+            .is_some()
+        );
+        let target_cursor_char = std::cmp::min(
+          target_cursor_char,
+          buffer
+            .last_char_on_line_no_empty_eol(target_cursor_line)
+            .unwrap(),
+        );
+        let maybe_new_viewport_arc = cursor_ops::window_scroll(
+          &viewport,
+          current_window,
+          &buffer,
+          Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+        );
         if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
           current_window.set_viewport(new_viewport_arc.clone());
         }
