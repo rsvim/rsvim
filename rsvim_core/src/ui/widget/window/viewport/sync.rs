@@ -867,36 +867,6 @@ mod nowrap_detail {
   }
 }
 
-fn _line_head_not_show(viewport: &Viewport, line_idx: usize) -> bool {
-  if viewport.start_line_idx() > line_idx || viewport.end_line_idx() <= line_idx {
-    return false;
-  }
-  debug_assert!(viewport.lines().contains_key(&line_idx));
-  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-  let rows = line_viewport.rows();
-  debug_assert!(rows.first_key_value().is_some());
-  let (_first_row_idx, first_row_viewport) = rows.first_key_value().unwrap();
-  first_row_viewport.start_char_idx() > 0
-}
-
-fn _line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> bool {
-  if viewport.start_line_idx() > line_idx || viewport.end_line_idx() <= line_idx {
-    return false;
-  }
-
-  debug_assert!(viewport.lines().contains_key(&line_idx));
-  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-  let bufline_last_visible_char = buffer
-    .last_char_on_line_no_empty_eol(line_idx)
-    .unwrap_or(0_usize);
-
-  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-  let rows = line_viewport.rows();
-  debug_assert!(rows.last_key_value().is_some());
-  let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-  last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
-}
-
 mod wrap_detail {
   use super::*;
 
@@ -1609,7 +1579,7 @@ pub fn search_anchor_downward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1816,7 +1786,7 @@ pub fn search_anchor_upward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1985,7 +1955,7 @@ pub fn search_anchor_leftward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -2142,7 +2112,7 @@ pub fn search_anchor_rightward(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 

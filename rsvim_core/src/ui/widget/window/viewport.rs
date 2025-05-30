@@ -6869,11 +6869,16 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 
     // Search-5
     {
-      let expect = vec!["e rows in the win", "dow, thus it may ", "contains less lin", "es in the buffer."];
+      let expect = vec![
+        "e rows in the win",
+        "dow, thus it may ",
+        "contains less lin",
+        "es in the buffer.",
+      ];
 
       let actual = {
         let target_cursor_line = 4;
-        let target_cursor_char = 323;
+        let target_cursor_char = 314;
 
         let mut window = window.borrow_mut();
         let old = lock!(window.viewport()).clone();
