@@ -5367,7 +5367,12 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-7
     {
-      let expect = vec!["lines.\n", "e want to test:\n", "mpletely put insi", "\n"];
+      let expect = vec![
+        " lines.\n",
+        "we want to test:\n",
+        "ompletely put ins",
+        ":\n",
+      ];
 
       let actual = {
         let target_cursor_line = 4;
@@ -5385,7 +5390,7 @@ mod tests_search_anchor_downward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
-        assert_eq!(start_column, 38);
+        assert_eq!(start_column, 37);
 
         let viewport = Viewport::view(
           &buf,
@@ -5407,7 +5412,7 @@ mod tests_search_anchor_downward_nowrap {
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(1, 0), (2, 0), (3, 0), (4, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> =
-        vec![(1, 0), (2, 0), (3, 0), (4,  0)].into_iter().collect();
+        vec![(1, 0), (2, 0), (3, 0), (4, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
         &actual,

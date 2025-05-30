@@ -716,8 +716,13 @@ mod nowrap_detail {
     }
 
     let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
-    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char)
-      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
+    let mut target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+
+    // For empty eol, sub extra 1 column.
+    if target_is_empty_eol {
+      target_cursor_width = target_cursor_width.saturating_sub(1);
+    }
+
     let on_left_side = target_cursor_width < target_viewport_start_column;
     if on_left_side {
       // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
