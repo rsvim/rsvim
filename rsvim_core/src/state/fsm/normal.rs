@@ -4576,7 +4576,7 @@ mod tests_cursor_move_and_scroll {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
-      assert_eq!(actual2.char_idx(), 93);
+      assert_eq!(actual2.char_idx(), 35);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "t, then th", "ere're mul", ".\n"];
@@ -4601,10 +4601,16 @@ mod tests_cursor_move_and_scroll {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
-      assert_eq!(actual2.char_idx(), 93);
+      assert_eq!(actual2.char_idx(), 35);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "t, then th", "ere're mul", ".\n", "are been s"];
+      let expect = vec![
+        "s we want ",
+        "to complet",
+        "e complete",
+        "ncated if ",
+        "to the nex",
+      ];
       let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
         .collect();
@@ -6276,8 +6282,7 @@ mod tests_cursor_move_and_scroll {
 
     let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
     let stateful = NormalStateful::default();
-    stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
-    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(50));
+    stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
     // Move-1
     {
@@ -6308,8 +6313,7 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(1));
-    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(24));
+    stateful.cursor_move(&data_access, Operation::CursorMoveBy((24, 1)));
 
     // Move-2
     {
@@ -6340,15 +6344,14 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    stateful.cursor_move(&data_access, Operation::CursorMoveUpBy(4));
-    stateful.cursor_move(&data_access, Operation::CursorMoveLeftBy(4));
+    stateful.cursor_move(&data_access, Operation::CursorMoveBy((-4, -4)));
 
     // Move-3
     {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 0);
-      assert_eq!(actual.char_idx(), 8);
+      assert_eq!(actual.char_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
