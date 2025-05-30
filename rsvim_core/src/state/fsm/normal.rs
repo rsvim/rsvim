@@ -104,69 +104,76 @@ impl NormalStateful {
             cursor_viewport.line_idx(),
           );
         let target_cursor_char = match buffer.last_char_on_line_no_empty_eol(target_cursor_line) {
-          Some(last_visible_char) => last_visible_char,
+          Some(last_visible_char) => std::cmp::min(target_cursor_char, last_visible_char),
           None => target_cursor_char,
         };
-        let search_direction = match move_direction {
-          CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
-          CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
-          CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
-          CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
-        };
 
-        let new_viewport_arc: Option<ViewportArc> = {
-          let viewport = lock!(viewport_arc);
-          let (start_line, start_column) = viewport.search_anchor(
-            search_direction,
-            &buffer,
-            current_window.actual_shape(),
-            current_window.options(),
-            target_cursor_line,
-            target_cursor_char,
-          );
-
-          // First try window scroll.
-          if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx()
-          {
-            let maybe_new_viewport_arc = cursor_ops::window_scroll(
-              &viewport,
-              current_window,
-              &buffer,
-              Operation::WindowScrollTo((start_column, start_line)),
-            );
-            if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
-              current_window.set_viewport(new_viewport_arc.clone());
-            }
-            maybe_new_viewport_arc
-          } else {
-            None
-          }
-        };
-
-        // Then try cursor move.
+        // Only move cursor when it differentiates.
+        if target_cursor_line != cursor_viewport.line_idx()
+          || target_cursor_char != cursor_viewport.char_idx()
         {
-          let viewport_arc = match new_viewport_arc {
-            Some(v1) => v1,
-            None => viewport_arc,
+          let search_direction = match move_direction {
+            CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
+            CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
+            CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
+            CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
           };
-          let viewport = lock!(viewport_arc);
 
-          let maybe_new_cursor_viewport = cursor_ops::cursor_move(
-            &viewport,
-            &cursor_viewport,
-            &buffer,
-            Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
-          );
-
-          if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
-            current_window.set_cursor_viewport(new_cursor_viewport.clone());
-            let cursor_id = tree.cursor_id().unwrap();
-            let new_cursor_viewport = lock!(new_cursor_viewport);
-            tree.bounded_move_to(
-              cursor_id,
-              new_cursor_viewport.column_idx() as isize,
-              new_cursor_viewport.row_idx() as isize,
+          let new_viewport_arc: Option<ViewportArc> = {
+            let viewport = lock!(viewport_arc);
+            let (start_line, start_column) = viewport.search_anchor(
+              search_direction,
+              &buffer,
+              current_window.actual_shape(),
+              current_window.options(),
+              target_cursor_line,
+              target_cursor_char,
             );
+
+            // First try window scroll.
+            if start_line != viewport.start_line_idx()
+              || start_column != viewport.start_column_idx()
+            {
+              let maybe_new_viewport_arc = cursor_ops::window_scroll(
+                &viewport,
+                current_window,
+                &buffer,
+                Operation::WindowScrollTo((start_column, start_line)),
+              );
+              if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
+                current_window.set_viewport(new_viewport_arc.clone());
+              }
+              maybe_new_viewport_arc
+            } else {
+              None
+            }
+          };
+
+          // Then try cursor move.
+          {
+            let viewport_arc = match new_viewport_arc {
+              Some(v1) => v1,
+              None => viewport_arc,
+            };
+            let viewport = lock!(viewport_arc);
+
+            let maybe_new_cursor_viewport = cursor_ops::cursor_move(
+              &viewport,
+              &cursor_viewport,
+              &buffer,
+              Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+            );
+
+            if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
+              current_window.set_cursor_viewport(new_cursor_viewport.clone());
+              let cursor_id = tree.cursor_id().unwrap();
+              let new_cursor_viewport = lock!(new_cursor_viewport);
+              tree.bounded_move_to(
+                cursor_id,
+                new_cursor_viewport.column_idx() as isize,
+                new_cursor_viewport.row_idx() as isize,
+              );
+            }
           }
         }
       } else {
