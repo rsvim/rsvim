@@ -957,10 +957,14 @@ mod wrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> usize {
-    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char)
+      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
+
     let approximate_start_column = target_cursor_width.saturating_sub(
       (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
     );
+
     find_start_char(
       proc,
       buffer,
@@ -1046,8 +1050,8 @@ mod wrap_detail {
     let mut on_left_side = false;
 
     debug_assert!(buffer.get_rope().get_line(target_cursor_line).is_some());
-    let last_visible_char = buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+    let last_char = buffer
+      .last_char_on_line(target_cursor_line) // Also consider empty eol char.
       .unwrap_or(0_usize);
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
@@ -1060,9 +1064,7 @@ mod wrap_detail {
     );
 
     let extra_space_left = match preview_target_rows.last_key_value() {
-      Some((_last_row_idx, last_row_viewport)) => {
-        last_row_viewport.end_char_idx() > last_visible_char
-      }
+      Some((_last_row_idx, last_row_viewport)) => last_row_viewport.end_char_idx() > last_char,
       None => true,
     };
 
@@ -1074,7 +1076,7 @@ mod wrap_detail {
         buffer,
         window_actual_shape,
         target_cursor_line,
-        last_visible_char,
+        last_char,
       );
       if start_column > start_column_include_last_visible_char {
         start_column = start_column_include_last_visible_char;
@@ -1269,30 +1271,39 @@ mod wrap_detail {
     target_cursor_char: usize,
   ) -> Option<usize> {
     debug_assert_eq!(target_viewport_start_column, 0_usize);
+    let height = window_actual_shape.height();
+    let width = window_actual_shape.width();
 
-    if cfg!(debug_assertions) {
-      let height = window_actual_shape.height();
-      let width = window_actual_shape.width();
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+      buffer,
+      target_viewport_start_column,
+      target_cursor_line,
+      0_u16,
+      height,
+      width,
+    );
 
-      let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+    debug_assert!(preview_target_rows.last_key_value().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
+
+    if on_right_side {
+      // The `on_right_side=true` happens only when `target_cursor_char` is the empty eol, and the
+      // `target_cursor_char` is out of viewport.
+      debug_assert!(buffer.is_empty_eol(target_cursor_line, target_cursor_char));
+      let start_column = reverse_search_start_column(
+        proc,
         buffer,
-        target_viewport_start_column,
+        window_actual_shape,
         target_cursor_line,
-        0_u16,
-        height,
-        width,
+        target_cursor_char,
       );
-
-      debug_assert!(preview_target_rows.last_key_value().is_some());
-      let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
-
-      let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-        && target_cursor_char >= last_row_viewport.end_char_idx();
-
-      debug_assert!(!on_right_side);
+      Some(start_column)
+    } else {
+      None
     }
-
-    None
   }
 
   // For case-2.1: only contains target cursor line.
@@ -1422,35 +1433,45 @@ mod wrap_detail {
     proc: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
+    target_viewport_start_line: usize,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
     target_cursor_char: usize,
-  ) -> Option<usize> {
+  ) -> Option<(usize, usize)> {
     debug_assert_eq!(target_viewport_start_column, 0_usize);
 
-    if cfg!(debug_assertions) {
-      let height = window_actual_shape.height();
-      let width = window_actual_shape.width();
+    let height = window_actual_shape.height();
+    let width = window_actual_shape.width();
 
-      let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
-        buffer,
-        target_viewport_start_column,
-        target_cursor_line,
-        0_u16,
-        height,
-        width,
-      );
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+      buffer,
+      target_viewport_start_column,
+      target_cursor_line,
+      0_u16,
+      height,
+      width,
+    );
 
-      debug_assert!(preview_target_rows.last_key_value().is_some());
-      let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+    debug_assert!(preview_target_rows.last_key_value().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
 
-      let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-        && target_cursor_char >= last_row_viewport.end_char_idx();
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
 
-      debug_assert!(!on_right_side);
+    if on_right_side {
+      // The `on_right_side=true` happens only when `target_cursor_char` is the empty eol, and the
+      // `target_cursor_char` is out of viewport.
+      debug_assert!(buffer.is_empty_eol(target_cursor_line, target_cursor_char));
+      // And the `target_cursor_line` must not to be the 1st line in the viewport (because in
+      // case-2.1, the viewport contains multiple lines and the empty eol of target cursor line is
+      // out of viewport, it has to be at the bottom-right corner).
+      debug_assert!(target_cursor_line > target_viewport_start_line);
+      // Then we simply add 1 extra line to `start_line`, instead of gives 1 extra column to
+      // `start_column` (compared other cases).
+      Some((target_viewport_start_line + 1, target_viewport_start_column))
+    } else {
+      None
     }
-
-    None
   }
 
   // For case-2.2: contains multiple lines, include target cursor line.
@@ -1502,6 +1523,7 @@ mod wrap_detail {
             proc,
             buffer,
             window_actual_shape,
+            start_line,
             start_column,
             target_cursor_line,
             target_cursor_char,
@@ -1510,17 +1532,18 @@ mod wrap_detail {
         );
       }
     } else {
-      let start_column_on_right_side = to_right_2_2(
+      let start_line_column_on_right_side = to_right_2_2(
         proc,
         buffer,
         window_actual_shape,
+        start_line,
         start_column,
         target_cursor_line,
         target_cursor_char,
       );
 
-      if let Some(start_column_right) = start_column_on_right_side {
-        return (start_line, start_column_right);
+      if let Some((start_line_right, start_column_right)) = start_line_column_on_right_side {
+        return (start_line_right, start_column_right);
       }
     }
 
