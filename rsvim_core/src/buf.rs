@@ -246,6 +246,23 @@ impl Buffer {
       None => None,
     }
   }
+
+  /// Whether the `line_idx`/`char_idx` is empty eol (end-of-line).
+  pub fn is_empty_eol(&self, line_idx: usize, char_idx: usize) -> bool {
+    match self.rope.get_line(line_idx) {
+      Some(line) => {
+        if char_idx == line.len_chars().saturating_sub(1) {
+          match line.get_char(char_idx) {
+            Some(c) => self.char_width(c) == 0,
+            None => false,
+          }
+        } else {
+          false
+        }
+      }
+      None => false,
+    }
+  }
 }
 // Rope }
 

@@ -609,28 +609,6 @@ fn sync_wrap_linebreak(
 }
 
 mod detail {
-  use super::*;
-
-  pub fn is_empty_eol(
-    buffer: &Buffer,
-    target_cursor_line: usize,
-    target_cursor_char: usize,
-  ) -> bool {
-    match buffer.get_rope().get_line(target_cursor_line) {
-      Some(bufline) => {
-        if target_cursor_char != bufline.len_chars().saturating_sub(1) {
-          false
-        } else {
-          match bufline.get_char(target_cursor_char) {
-            Some(c) => buffer.char_width(c) == 0,
-            None => false,
-          }
-        }
-      }
-      None => false,
-    }
-  }
-
   #[derive(Debug, Copy, Clone)]
   pub struct AdjustOptions {
     pub no_leftward: bool,
@@ -800,7 +778,7 @@ mod nowrap_detail {
       );
     }
 
-    let target_is_empty_eol = detail::is_empty_eol(buffer, target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
     let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char)
       + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
     let on_right_side = target_cursor_width > viewport_end_column;
