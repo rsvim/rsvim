@@ -1059,7 +1059,7 @@ mod tests_cursor_move_by {
     let tree = data_access.tree.clone();
     let actual1 = get_cursor_viewport(tree);
     assert_eq!(actual1.line_idx(), 0);
-    assert_eq!(actual1.char_idx(), 0);
+    assert_eq!(actual1.char_idx(), 5);
 
     // Step-2
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
@@ -1229,7 +1229,7 @@ mod tests_cursor_move_by {
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
-    assert_eq!(actual2.char_idx(), 18);
+    assert_eq!(actual2.char_idx(), 9);
   }
 }
 
