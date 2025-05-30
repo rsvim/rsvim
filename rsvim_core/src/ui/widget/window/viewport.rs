@@ -768,10 +768,24 @@ mod tests_util {
       actual.start_line_idx(),
       actual.end_line_idx()
     );
+    info!(
+      "expect start_line/end_line:{:?}/{:?}",
+      expect_start_line, expect_end_line
+    );
     for (k, v) in actual.lines().iter() {
-      info!("actual-{:?}: {:?}", k, v);
+      info!("actual line[{:?}]: {:?}", k, v);
     }
-    info!("expect:{:?}", expect);
+    for (i, e) in expect.iter().enumerate() {
+      info!("expect line[{}]:{:?}", i, e);
+    }
+    assert_eq!(expect_start_fills.len(), expect_end_fills.len());
+    for (k, start_v) in expect_start_fills.iter() {
+      let end_v = expect_end_fills.get(k).unwrap();
+      info!(
+        "expect start_fills/end_fills line[{}]:{:?}/{:?}",
+        k, start_v, end_v
+      );
+    }
 
     assert_eq!(actual.start_line_idx(), expect_start_line);
     assert_eq!(actual.end_line_idx(), expect_end_line);
@@ -809,7 +823,7 @@ mod tests_util {
         line_viewport
       );
       info!(
-        "l-{:?},start_filled_cols expect:{:?}, actual:{}, end_filled_cols expect:{:?}, actual:{}",
+        "l-{:?},start_filled_cols (expect/actual):{:?}/{}, end_filled_cols (expect/actual):{:?}/{}",
         actual.start_line_idx() + l,
         expect_start_fills.get(&actual_line_idx),
         line_viewport.start_filled_cols(),
