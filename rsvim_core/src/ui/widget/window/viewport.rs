@@ -6622,6 +6622,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
         "5. The extra parts are split into the next row if either options are set.\n",
         "6. The extra parts are split into the next row if either line-wrap or word-wrap options are set.\n",
+        "7. The extra parts...",
       ],
     );
 
@@ -6870,10 +6871,10 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     // Search-5
     {
       let expect = vec![
-        "e rows in the win",
-        "dow, thus it may ",
-        "contains less lin",
-        "es in the buffer.",
+        " rows in the wind",
+        "ow, thus it may c",
+        "ontains less line",
+        "s in the buffer.\n",
       ];
 
       let actual = {
@@ -6892,7 +6893,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 4);
-        assert_eq!(start_column, 304);
+        assert_eq!(start_column, 305);
 
         let viewport = Viewport::view(
           &buf,
@@ -6919,6 +6920,172 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
         &expect,
         4,
         5,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-6
+    {
+      let expect = vec![
+        " extra parts are ",
+        "split into the ne",
+        "xt row if either ",
+        "options are set.\n",
+      ];
+
+      let actual = {
+        let target_cursor_line = 5;
+        let target_cursor_char = 314;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Down,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 5);
+        assert_eq!(start_column, 6);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        5,
+        6,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-7
+    {
+      let expect = vec![
+        "into the next row",
+        " if either line-w",
+        "rap or word-wrap ",
+        "options are set.\n",
+      ];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 314;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Down,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 6);
+        assert_eq!(start_column, 29);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        6,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+    }
+
+    // Search-8
+    {
+      let expect = vec!["7. The extra part", "s...", "", ""];
+
+      let actual = {
+        let target_cursor_line = 7;
+        let target_cursor_char = 314;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Down,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 7);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(7, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(7, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        7,
+        8,
         &expect_start_fills,
         &expect_end_fills,
       );
