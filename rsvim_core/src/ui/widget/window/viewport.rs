@@ -5481,10 +5481,10 @@ mod tests_search_anchor_downward_nowrap {
     // Search-1
     {
       let expect = vec![
-        " lines.\n",
-        "we want to test:\n",
-        "ompletely put ins",
-        ":\n",
+        " and small test l",
+        "several things we",
+        "all enough to com",
+        " completely put:\n",
       ];
 
       let actual = {
@@ -5503,7 +5503,7 @@ mod tests_search_anchor_downward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
-        assert_eq!(start_column, 37);
+        assert_eq!(start_column, 22);
 
         let viewport = Viewport::view(
           &buf,
