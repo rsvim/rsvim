@@ -4349,7 +4349,7 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-2
     {
-      let expect = vec!["", "", "", "ut\tinside.", ""];
+      let expect = vec!["", "", "", "t\tinside.\n", ""];
 
       let actual = {
         let target_cursor_line = 3;
@@ -4367,7 +4367,7 @@ mod tests_search_anchor_downward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 0);
-        assert_eq!(start_column, 112);
+        assert_eq!(start_column, 113);
 
         let viewport = Viewport::view(
           &buf,
@@ -4449,7 +4449,7 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-4
     {
-      let expect = vec!["", "", "", "", "not\tset."];
+      let expect = vec!["", "", "", "", "not\tset.\n"];
 
       let actual = {
         let target_cursor_line = 5;
@@ -4467,7 +4467,7 @@ mod tests_search_anchor_downward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
-        assert_eq!(start_column, 145);
+        assert_eq!(start_column, 146);
 
         let viewport = Viewport::view(
           &buf,
@@ -4480,7 +4480,7 @@ mod tests_search_anchor_downward_nowrap {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 2)]
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 1)]
         .into_iter()
         .collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
@@ -4718,7 +4718,7 @@ mod tests_search_anchor_downward_nowrap {
 
     // Search-2
     {
-      let expect = vec!["", "", "", "ut\tinside.", ""];
+      let expect = vec!["", "", "", "t\tinside.\n", ""];
 
       let actual = {
         let target_cursor_line = 3;
@@ -4736,7 +4736,7 @@ mod tests_search_anchor_downward_nowrap {
           target_cursor_char,
         );
         assert_eq!(start_line, 0);
-        assert_eq!(start_column, 112);
+        assert_eq!(start_column, 113);
 
         let viewport = Viewport::view(
           &buf,
