@@ -1571,6 +1571,15 @@ pub fn search_anchor_downward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -1612,15 +1621,6 @@ fn search_anchor_downward_nowrap(
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   debug_assert!(viewport.lines().last_key_value().is_some());
   let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
@@ -1823,15 +1823,6 @@ fn search_anchor_upward_nowrap(
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
   let _viewport_start_column = viewport.start_column_idx();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   debug_assert!(viewport.lines().first_key_value().is_some());
   let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
@@ -1994,16 +1985,6 @@ fn search_anchor_leftward_nowrap(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
-
   // adjust horizontally
   let start_line = viewport.start_line_idx();
   let start_column = viewport.start_column_idx();
@@ -2156,16 +2137,6 @@ fn search_anchor_rightward_nowrap(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
-
   // adjust horizontally
   let start_line = viewport.start_line_idx();
   let start_column = viewport.start_column_idx();
