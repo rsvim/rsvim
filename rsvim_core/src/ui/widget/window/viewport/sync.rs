@@ -682,12 +682,10 @@ mod nowrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> Option<usize> {
-    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
-
     if cfg!(debug_assertions) {
       match buffer.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -695,7 +693,6 @@ mod nowrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
           target_viewport_start_char,
           buffer
@@ -705,7 +702,7 @@ mod nowrap_detail {
             .unwrap_or('?')
         ),
         None => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:None",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -713,12 +710,14 @@ mod nowrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
         ),
       }
     }
 
+    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char)
+      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
     let on_left_side = target_cursor_width < target_viewport_start_column;
     if on_left_side {
       // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
