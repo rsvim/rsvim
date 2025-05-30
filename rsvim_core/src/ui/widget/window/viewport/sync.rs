@@ -609,28 +609,6 @@ fn sync_wrap_linebreak(
 }
 
 mod detail {
-  use super::*;
-
-  pub fn _target_is_empty_eol(
-    buffer: &Buffer,
-    target_cursor_line: usize,
-    target_cursor_char: usize,
-  ) -> bool {
-    match buffer.get_rope().get_line(target_cursor_line) {
-      Some(bufline) => {
-        if target_cursor_char != bufline.len_chars().saturating_sub(1) {
-          false
-        } else {
-          match bufline.get_char(target_cursor_char) {
-            Some(c) => buffer.char_width(c) == 0,
-            None => false,
-          }
-        }
-      }
-      None => false,
-    }
-  }
-
   #[derive(Debug, Copy, Clone)]
   pub struct AdjustOptions {
     pub no_leftward: bool,
@@ -691,12 +669,12 @@ mod nowrap_detail {
   // There are 2 edge cases:
   // 1. The target cursor is on the left side.
   // 1. The target cursor is on the right side.
-  // spellchecker:on
   //
   // Returns
   // 1. If target cursor is on the left side of viewport, and we need to move the viewport more to
   //    the left side.
   // 2. If 1st is true, this is the new "start_column" after adjustments.
+  // spellchecker:on
   fn to_left(
     buffer: &Buffer,
     _window_actual_shape: &U16Rect,
@@ -704,12 +682,10 @@ mod nowrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> Option<usize> {
-    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
-
     if cfg!(debug_assertions) {
       match buffer.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{}({:?})",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -717,7 +693,6 @@ mod nowrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
           target_viewport_start_char,
           buffer
@@ -727,7 +702,7 @@ mod nowrap_detail {
             .unwrap_or('?')
         ),
         None => trace!(
-          "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:None",
+          "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:None",
           target_cursor_line,
           target_cursor_char,
           buffer
@@ -735,17 +710,24 @@ mod nowrap_detail {
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
-          target_cursor_width,
           target_viewport_start_column,
         ),
       }
+    }
+
+    let mut target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+
+    // For empty eol, sub extra 1 column.
+    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    if target_is_empty_eol {
+      target_cursor_width = target_cursor_width.saturating_sub(1);
     }
 
     let on_left_side = target_cursor_width < target_viewport_start_column;
     if on_left_side {
       // We need to move viewport to left to show the cursor, to minimize the viewport adjustments,
       // just put the cursor at the first left char in the new viewport.
-      let start_column = buffer.width_before(target_cursor_line, target_cursor_char);
+      let start_column = target_cursor_width;
       Some(start_column)
     } else {
       None
@@ -765,7 +747,6 @@ mod nowrap_detail {
   ) -> Option<usize> {
     let width = window_actual_shape.width();
     let viewport_end_column = target_viewport_start_column + width as usize;
-    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
 
     if cfg!(debug_assertions) {
       let target_viewport_start_char =
@@ -786,7 +767,7 @@ mod nowrap_detail {
         None => "None".to_string(),
       };
       trace!(
-        "target_cursor_line:{},target_cursor_char:{}({:?}),target_cursor_width:{},viewport_start_column:{},viewport_start_char:{},viewport_end_column:{},viewport_end_char:{}",
+        "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{},viewport_end_column:{},viewport_end_char:{}",
         target_cursor_line,
         target_cursor_char,
         buffer
@@ -794,7 +775,6 @@ mod nowrap_detail {
           .line(target_cursor_line)
           .get_char(target_cursor_char)
           .unwrap_or('?'),
-        target_cursor_width,
         target_viewport_start_column,
         target_viewport_start_char,
         viewport_end_column,
@@ -802,11 +782,15 @@ mod nowrap_detail {
       );
     }
 
+    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char)
+      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
     let on_right_side = target_cursor_width > viewport_end_column;
+
     if on_right_side {
       // Move viewport to right to show the cursor, just put the cursor at the last right char in the
       // new viewport.
-      let end_column = buffer.width_until(target_cursor_line, target_cursor_char);
+      let end_column = target_cursor_width;
       let start_column = end_column.saturating_sub(width as usize);
       Some(start_column)
     } else {
@@ -883,36 +867,6 @@ mod nowrap_detail {
   }
 }
 
-fn _line_head_not_show(viewport: &Viewport, line_idx: usize) -> bool {
-  if viewport.start_line_idx() > line_idx || viewport.end_line_idx() <= line_idx {
-    return false;
-  }
-  debug_assert!(viewport.lines().contains_key(&line_idx));
-  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-  let rows = line_viewport.rows();
-  debug_assert!(rows.first_key_value().is_some());
-  let (_first_row_idx, first_row_viewport) = rows.first_key_value().unwrap();
-  first_row_viewport.start_char_idx() > 0
-}
-
-fn _line_tail_not_show(viewport: &Viewport, buffer: &Buffer, line_idx: usize) -> bool {
-  if viewport.start_line_idx() > line_idx || viewport.end_line_idx() <= line_idx {
-    return false;
-  }
-
-  debug_assert!(viewport.lines().contains_key(&line_idx));
-  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-  let bufline_last_visible_char = buffer
-    .last_char_on_line_no_empty_eol(line_idx)
-    .unwrap_or(0_usize);
-
-  let line_viewport = viewport.lines().get(&line_idx).unwrap();
-  let rows = line_viewport.rows();
-  debug_assert!(rows.last_key_value().is_some());
-  let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
-  last_row_viewport.end_char_idx().saturating_sub(1) < bufline_last_visible_char
-}
-
 mod wrap_detail {
   use super::*;
 
@@ -973,10 +927,14 @@ mod wrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> usize {
-    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char)
+      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
+
     let approximate_start_column = target_cursor_width.saturating_sub(
       (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
     );
+
     find_start_char(
       proc,
       buffer,
@@ -1062,8 +1020,8 @@ mod wrap_detail {
     let mut on_left_side = false;
 
     debug_assert!(buffer.get_rope().get_line(target_cursor_line).is_some());
-    let last_visible_char = buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+    let last_char = buffer
+      .last_char_on_line(target_cursor_line) // Also consider empty eol char.
       .unwrap_or(0_usize);
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
@@ -1076,9 +1034,7 @@ mod wrap_detail {
     );
 
     let extra_space_left = match preview_target_rows.last_key_value() {
-      Some((_last_row_idx, last_row_viewport)) => {
-        last_row_viewport.end_char_idx() > last_visible_char
-      }
+      Some((_last_row_idx, last_row_viewport)) => last_row_viewport.end_char_idx() > last_char,
       None => true,
     };
 
@@ -1090,7 +1046,7 @@ mod wrap_detail {
         buffer,
         window_actual_shape,
         target_cursor_line,
-        last_visible_char,
+        last_char,
       );
       if start_column > start_column_include_last_visible_char {
         start_column = start_column_include_last_visible_char;
@@ -1100,7 +1056,14 @@ mod wrap_detail {
 
     // If `target_cursor_char` is still out of viewport, then we still need to move viewport to
     // left.
-    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+    let mut target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+
+    // For empty eol, sub extra 1 column.
+    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    if target_is_empty_eol {
+      target_cursor_width = target_cursor_width.saturating_sub(1);
+    }
+
     if target_cursor_width < start_column {
       on_left_side = true;
       start_column = target_cursor_width;
@@ -1285,30 +1248,39 @@ mod wrap_detail {
     target_cursor_char: usize,
   ) -> Option<usize> {
     debug_assert_eq!(target_viewport_start_column, 0_usize);
+    let height = window_actual_shape.height();
+    let width = window_actual_shape.width();
 
-    if cfg!(debug_assertions) {
-      let height = window_actual_shape.height();
-      let width = window_actual_shape.width();
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+      buffer,
+      target_viewport_start_column,
+      target_cursor_line,
+      0_u16,
+      height,
+      width,
+    );
 
-      let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+    debug_assert!(preview_target_rows.last_key_value().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
+
+    if on_right_side {
+      // The `on_right_side=true` happens only when `target_cursor_char` is the empty eol, and the
+      // `target_cursor_char` is out of viewport.
+      debug_assert!(buffer.is_empty_eol(target_cursor_line, target_cursor_char));
+      let start_column = reverse_search_start_column(
+        proc,
         buffer,
-        target_viewport_start_column,
+        window_actual_shape,
         target_cursor_line,
-        0_u16,
-        height,
-        width,
+        target_cursor_char,
       );
-
-      debug_assert!(preview_target_rows.last_key_value().is_some());
-      let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
-
-      let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-        && target_cursor_char >= last_row_viewport.end_char_idx();
-
-      debug_assert!(!on_right_side);
+      Some(start_column)
+    } else {
+      None
     }
-
-    None
   }
 
   // For case-2.1: only contains target cursor line.
@@ -1438,35 +1410,45 @@ mod wrap_detail {
     proc: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
+    target_viewport_start_line: usize,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
     target_cursor_char: usize,
-  ) -> Option<usize> {
+  ) -> Option<(usize, usize)> {
     debug_assert_eq!(target_viewport_start_column, 0_usize);
 
-    if cfg!(debug_assertions) {
-      let height = window_actual_shape.height();
-      let width = window_actual_shape.width();
+    let height = window_actual_shape.height();
+    let width = window_actual_shape.width();
 
-      let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
-        buffer,
-        target_viewport_start_column,
-        target_cursor_line,
-        0_u16,
-        height,
-        width,
-      );
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+      buffer,
+      target_viewport_start_column,
+      target_cursor_line,
+      0_u16,
+      height,
+      width,
+    );
 
-      debug_assert!(preview_target_rows.last_key_value().is_some());
-      let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+    debug_assert!(preview_target_rows.last_key_value().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
 
-      let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-        && target_cursor_char >= last_row_viewport.end_char_idx();
+    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
+      && target_cursor_char >= last_row_viewport.end_char_idx();
 
-      debug_assert!(!on_right_side);
+    if on_right_side {
+      // The `on_right_side=true` happens only when `target_cursor_char` is the empty eol, and the
+      // `target_cursor_char` is out of viewport.
+      debug_assert!(buffer.is_empty_eol(target_cursor_line, target_cursor_char));
+      // And the `target_cursor_line` must not to be the 1st line in the viewport (because in
+      // case-2.1, the viewport contains multiple lines and the empty eol of target cursor line is
+      // out of viewport, it has to be at the bottom-right corner).
+      debug_assert!(target_cursor_line > target_viewport_start_line);
+      // Then we simply add 1 extra line to `start_line`, instead of gives 1 extra column to
+      // `start_column` (compared other cases).
+      Some((target_viewport_start_line + 1, target_viewport_start_column))
+    } else {
+      None
     }
-
-    None
   }
 
   // For case-2.2: contains multiple lines, include target cursor line.
@@ -1518,6 +1500,7 @@ mod wrap_detail {
             proc,
             buffer,
             window_actual_shape,
+            start_line,
             start_column,
             target_cursor_line,
             target_cursor_char,
@@ -1526,17 +1509,18 @@ mod wrap_detail {
         );
       }
     } else {
-      let start_column_on_right_side = to_right_2_2(
+      let start_line_column_on_right_side = to_right_2_2(
         proc,
         buffer,
         window_actual_shape,
+        start_line,
         start_column,
         target_cursor_line,
         target_cursor_char,
       );
 
-      if let Some(start_column_right) = start_column_on_right_side {
-        return (start_line, start_column_right);
+      if let Some((start_line_right, start_column_right)) = start_line_column_on_right_side {
+        return (start_line_right, start_column_right);
       }
     }
 
@@ -1587,6 +1571,18 @@ pub fn search_anchor_downward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  // The cursor must move downward.
+  debug_assert!(target_cursor_line > viewport.start_line_idx());
+
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -1628,15 +1624,6 @@ fn search_anchor_downward_nowrap(
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   debug_assert!(viewport.lines().last_key_value().is_some());
   let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
@@ -1708,19 +1695,10 @@ fn search_anchor_downward_wrap(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let _viewport_start_line = viewport.start_line_idx();
+  let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
@@ -1769,11 +1747,13 @@ fn search_anchor_downward_wrap(
     )
   } else {
     // Case-2.2
-    // For `start_line`, reversely iterate from `target_cursor_line` from bottom to top, and find
-    // the 1st line in viewport.
+    // For `start_line`, first try to put `target_cursor_line` as the last line in the viewport and 
+    // locate the 1st line (by reversely searching each line from bottom to top), then compare the 
+    // 1st line with current `start_line`, choose the bigger one.
     // Force `start_column` to be 0, because viewport can contains the line.
     let start_line =
       wrap_detail::reverse_search_start_line(proc, buffer, window_actual_shape, target_cursor_line);
+    let start_line = std::cmp::max(start_line, viewport_start_line);
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
@@ -1800,6 +1780,18 @@ pub fn search_anchor_upward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  // The cursor must move upward.
+  debug_assert!(target_cursor_line < viewport.end_line_idx().saturating_sub(1));
+
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -1839,15 +1831,6 @@ fn search_anchor_upward_nowrap(
 ) -> (usize, usize) {
   let viewport_start_line = viewport.start_line_idx();
   let _viewport_start_column = viewport.start_column_idx();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   debug_assert!(viewport.lines().first_key_value().is_some());
   let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
@@ -1886,15 +1869,6 @@ fn search_anchor_upward_wrap(
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
@@ -1973,6 +1947,20 @@ pub fn search_anchor_leftward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  // The cursor must stay in viewport.
+  debug_assert!(
+    target_cursor_line >= viewport.start_line_idx() && target_cursor_line < viewport.end_line_idx()
+  );
+
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -2010,16 +1998,6 @@ fn search_anchor_leftward_nowrap(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
-
   // adjust horizontally
   let start_line = viewport.start_line_idx();
   let start_column = viewport.start_column_idx();
@@ -2047,15 +2025,6 @@ fn search_anchor_leftward_wrap(
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
@@ -2135,6 +2104,20 @@ pub fn search_anchor_rightward(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
+  // The cursor must stay in viewport.
+  debug_assert!(
+    target_cursor_line >= viewport.start_line_idx() && target_cursor_line < viewport.end_line_idx()
+  );
+
+  let buffer_len_lines = buffer.get_rope().len_lines();
+  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
+  let target_cursor_char = std::cmp::min(
+    target_cursor_char,
+    buffer
+      .last_char_on_line(target_cursor_line)
+      .unwrap_or(0_usize),
+  );
+
   match (
     window_local_options.wrap(),
     window_local_options.line_break(),
@@ -2172,16 +2155,6 @@ fn search_anchor_rightward_nowrap(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
-
   // adjust horizontally
   let start_line = viewport.start_line_idx();
   let start_column = viewport.start_column_idx();
@@ -2209,15 +2182,6 @@ fn search_anchor_rightward_wrap(
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
-
-  let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
-  let target_cursor_char = std::cmp::min(
-    target_cursor_char,
-    buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
-      .unwrap_or(0_usize),
-  );
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
     buffer,
