@@ -1695,7 +1695,7 @@ fn search_anchor_downward_wrap(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let _viewport_start_line = viewport.start_line_idx();
+  let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
@@ -1747,11 +1747,13 @@ fn search_anchor_downward_wrap(
     )
   } else {
     // Case-2.2
-    // For `start_line`, reversely iterate from `target_cursor_line` from bottom to top, and find
-    // the 1st line in viewport.
+    // For `start_line`, first try to put `target_cursor_line` as the last line in the viewport and 
+    // locate the 1st line (by reversely searching each line from bottom to top), then compare the 
+    // 1st line with current `start_line`, choose the bigger one.
     // Force `start_column` to be 0, because viewport can contains the line.
     let start_line =
       wrap_detail::reverse_search_start_line(proc, buffer, window_actual_shape, target_cursor_line);
+    let start_line = std::cmp::max(start_line, viewport_start_line);
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
