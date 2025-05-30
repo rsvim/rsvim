@@ -1086,7 +1086,13 @@ mod wrap_detail {
 
     // If `target_cursor_char` is still out of viewport, then we still need to move viewport to
     // left.
-    let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+    let mut target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+
+    // For empty eol, sub extra 1 column.
+    if target_is_empty_eol {
+      target_cursor_width = target_cursor_width.saturating_sub(1);
+    }
+
     if target_cursor_width < start_column {
       on_left_side = true;
       start_column = target_cursor_width;
