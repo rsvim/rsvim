@@ -1614,7 +1614,7 @@ fn search_anchor_downward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1825,7 +1825,7 @@ fn search_anchor_upward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -1996,7 +1996,7 @@ fn search_anchor_leftward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
@@ -2158,7 +2158,7 @@ fn search_anchor_rightward_nowrap(
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
     buffer
-      .last_char_on_line_no_empty_eol(target_cursor_line)
+      .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
 
