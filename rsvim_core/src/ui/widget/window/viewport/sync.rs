@@ -715,10 +715,10 @@ mod nowrap_detail {
       }
     }
 
-    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
     let mut target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
 
     // For empty eol, sub extra 1 column.
+    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
     if target_is_empty_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
@@ -1089,6 +1089,7 @@ mod wrap_detail {
     let mut target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
 
     // For empty eol, sub extra 1 column.
+    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
     if target_is_empty_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
