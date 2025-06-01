@@ -870,6 +870,16 @@ mod nowrap_detail {
 mod wrap_detail {
   use super::*;
 
+  pub type SyncFn = fn(
+    /* buffer */ &Buffer,
+    /* window_actual_shape */ &U16Rect,
+    /* start_line */ usize,
+    /* start_column */ usize,
+  ) -> (
+    /* line range */ ViewportLineRange,
+    /* lines_viewport */ BTreeMap<usize, LineViewport>,
+  );
+
   // Type alias for `proc_line_*` functions.
   pub type ProcessLineFn = fn(
     /* buffer */ &Buffer,
@@ -890,7 +900,7 @@ mod wrap_detail {
   }
 
   fn find_start_char(
-    proc: ProcessLineFn,
+    proc_fn: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
@@ -902,7 +912,7 @@ mod wrap_detail {
     let bufline_chars_width = buffer.width_until(target_cursor_line, bufline_len_char);
 
     while start_column < bufline_chars_width {
-      let (rows, _start_fills, _end_fills, _) = proc(
+      let (rows, _start_fills, _end_fills, _) = proc_fn(
         buffer,
         start_column,
         target_cursor_line,
@@ -921,7 +931,7 @@ mod wrap_detail {
   }
 
   fn reverse_search_start_column(
-    proc: ProcessLineFn,
+    proc_fn: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
@@ -936,7 +946,7 @@ mod wrap_detail {
     );
 
     find_start_char(
-      proc,
+      proc_fn,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -947,7 +957,7 @@ mod wrap_detail {
 
   // For case-1
   fn to_left_1(
-    proc: ProcessLineFn,
+    proc_fn: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
@@ -1024,7 +1034,7 @@ mod wrap_detail {
       .last_char_on_line(target_cursor_line) // Also consider empty eol char.
       .unwrap_or(0_usize);
 
-    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
       buffer,
       start_column,
       target_cursor_line,
@@ -1042,7 +1052,7 @@ mod wrap_detail {
     // reverse search to try to locate the better `start_column`.
     if extra_space_left {
       let start_column_include_last_visible_char = reverse_search_start_column(
-        proc,
+        proc_fn,
         buffer,
         window_actual_shape,
         target_cursor_line,
@@ -1077,7 +1087,7 @@ mod wrap_detail {
   }
 
   fn to_right_1(
-    proc: ProcessLineFn,
+    proc_fn: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
@@ -1087,7 +1097,7 @@ mod wrap_detail {
     let height = window_actual_shape.height();
     let width = window_actual_shape.width();
 
-    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
       buffer,
       target_viewport_start_column,
       target_cursor_line,
@@ -1104,7 +1114,7 @@ mod wrap_detail {
 
     if on_right_side {
       let start_column = reverse_search_start_column(
-        proc,
+        proc_fn,
         buffer,
         window_actual_shape,
         target_cursor_line,
@@ -1119,7 +1129,7 @@ mod wrap_detail {
   // For case-1: cannot fully contains target cursor line.
   pub fn adjust_wrap_1(
     opts: detail::AdjustOptions,
-    proc: ProcessLineFn,
+    proc_fn: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
@@ -1133,7 +1143,7 @@ mod wrap_detail {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_left_1(
-            proc,
+            proc_fn,
             buffer,
             window_actual_shape,
             start_column,
@@ -1145,7 +1155,7 @@ mod wrap_detail {
       }
     } else {
       let start_column_on_left_side = to_left_1(
-        proc,
+        proc_fn,
         buffer,
         window_actual_shape,
         start_column,
@@ -1162,7 +1172,7 @@ mod wrap_detail {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_right_1(
-            proc,
+            proc_fn,
             buffer,
             window_actual_shape,
             start_column,
@@ -1174,7 +1184,7 @@ mod wrap_detail {
       }
     } else {
       let start_column_on_right_side = to_right_1(
-        proc,
+        proc_fn,
         buffer,
         window_actual_shape,
         start_column,
@@ -1191,7 +1201,7 @@ mod wrap_detail {
   }
 
   fn to_left_2_1(
-    _proc: ProcessLineFn,
+    _proc_fn: ProcessLineFn,
     buffer: &Buffer,
     _window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
@@ -1240,7 +1250,7 @@ mod wrap_detail {
   }
 
   fn to_right_2_1(
-    proc: ProcessLineFn,
+    proc_fn: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
@@ -1251,7 +1261,7 @@ mod wrap_detail {
     let height = window_actual_shape.height();
     let width = window_actual_shape.width();
 
-    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
       buffer,
       target_viewport_start_column,
       target_cursor_line,
@@ -1271,7 +1281,7 @@ mod wrap_detail {
       // `target_cursor_char` is out of viewport.
       debug_assert!(buffer.is_empty_eol(target_cursor_line, target_cursor_char));
       let start_column = reverse_search_start_column(
-        proc,
+        proc_fn,
         buffer,
         window_actual_shape,
         target_cursor_line,
@@ -1286,7 +1296,7 @@ mod wrap_detail {
   // For case-2.1: only contains target cursor line.
   pub fn adjust_wrap_2_1(
     opts: detail::AdjustOptions,
-    proc: ProcessLineFn,
+    proc_fn: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
@@ -1300,7 +1310,7 @@ mod wrap_detail {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_left_2_1(
-            proc,
+            proc_fn,
             buffer,
             window_actual_shape,
             start_column,
@@ -1312,7 +1322,7 @@ mod wrap_detail {
       }
     } else {
       let start_column_on_left_side = to_left_2_1(
-        proc,
+        proc_fn,
         buffer,
         window_actual_shape,
         start_column,
@@ -1329,7 +1339,7 @@ mod wrap_detail {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_right_2_1(
-            proc,
+            proc_fn,
             buffer,
             window_actual_shape,
             start_column,
@@ -1341,7 +1351,7 @@ mod wrap_detail {
       }
     } else {
       let start_column_on_right_side = to_right_2_1(
-        proc,
+        proc_fn,
         buffer,
         window_actual_shape,
         start_column,
@@ -1358,7 +1368,7 @@ mod wrap_detail {
   }
 
   fn to_left_2_2(
-    _proc: ProcessLineFn,
+    _proc_fn: ProcessLineFn,
     buffer: &Buffer,
     _window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
@@ -1407,8 +1417,8 @@ mod wrap_detail {
   }
 
   fn to_right_2_2(
-    proc: ProcessLineFn,
-    viewport: &Viewport,
+    proc_fn: ProcessLineFn,
+    lines_viewport: &BTreeMap<usize, LineViewport>,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_viewport_start_line: usize,
@@ -1421,12 +1431,13 @@ mod wrap_detail {
     let height = window_actual_shape.height();
     let width = window_actual_shape.width();
 
-    debug_assert!(viewport.lines().contains_key(&target_cursor_line));
-    let old_target_rows = viewport.lines().get(&target_cursor_line).unwrap().rows();
-    debug_assert!(old_target_rows.last_key_value().is_some());
-    let (old_last_row_idx, old_last_row_viewport) = old_target_rows.last_key_value().unwrap();
+    debug_assert!(lines_viewport.contains_key(&target_cursor_line));
+    let current_target_rows = lines_viewport.get(&target_cursor_line).unwrap().rows();
+    debug_assert!(current_target_rows.last_key_value().is_some());
+    let (current_last_row_idx, current_last_row_viewport) =
+      current_target_rows.last_key_value().unwrap();
 
-    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+    let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
       buffer,
       target_viewport_start_column,
       target_cursor_line,
@@ -1435,11 +1446,12 @@ mod wrap_detail {
       width,
     );
 
-    let fully_show = preview_target_rows.len() == old_target_rows.len();
+    let fully_show = preview_target_rows.len() == current_target_rows.len();
     let is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
-    let is_last_row = *old_last_row_idx == height.saturating_sub(1);
-    let out_of_view = old_last_row_viewport.end_char_idx() > old_last_row_viewport.start_char_idx()
-      && target_cursor_char >= old_last_row_viewport.end_char_idx();
+    let is_last_row = *current_last_row_idx == height.saturating_sub(1);
+    let out_of_view = current_last_row_viewport.end_char_idx()
+      > current_last_row_viewport.start_char_idx()
+      && target_cursor_char >= current_last_row_viewport.end_char_idx();
     let on_right_side = fully_show && is_empty_eol && is_last_row && out_of_view;
 
     if on_right_side {
@@ -1458,8 +1470,8 @@ mod wrap_detail {
   // For case-2.2: contains multiple lines, include target cursor line.
   pub fn adjust_wrap_2_2(
     opts: detail::AdjustOptions,
-    proc: ProcessLineFn,
-    viewport: &Viewport,
+    proc_fn: ProcessLineFn,
+    lines_viewport: &BTreeMap<usize, LineViewport>,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
@@ -1473,7 +1485,7 @@ mod wrap_detail {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_left_2_2(
-            proc,
+            proc_fn,
             buffer,
             window_actual_shape,
             start_column,
@@ -1485,7 +1497,7 @@ mod wrap_detail {
       }
     } else {
       let start_column_on_left_side = to_left_2_2(
-        proc,
+        proc_fn,
         buffer,
         window_actual_shape,
         start_column,
@@ -1502,8 +1514,8 @@ mod wrap_detail {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_right_2_2(
-            proc,
-            viewport,
+            proc_fn,
+            lines_viewport,
             buffer,
             window_actual_shape,
             start_line,
@@ -1516,8 +1528,8 @@ mod wrap_detail {
       }
     } else {
       let start_line_column_on_right_side = to_right_2_2(
-        proc,
-        viewport,
+        proc_fn,
+        lines_viewport,
         buffer,
         window_actual_shape,
         start_line,
@@ -1535,7 +1547,7 @@ mod wrap_detail {
   }
 
   pub fn reverse_search_start_line(
-    proc: ProcessLineFn,
+    proc_fn: ProcessLineFn,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
@@ -1548,7 +1560,7 @@ mod wrap_detail {
 
     while (n < height as usize) && (current_line >= 0) {
       let (rows, _start_fills, _end_fills, _) =
-        proc(buffer, 0_usize, current_line as usize, 0_u16, height, width);
+        proc_fn(buffer, 0_usize, current_line as usize, 0_u16, height, width);
       n += rows.len();
 
       if current_line == 0 || n >= height as usize {
@@ -1602,6 +1614,7 @@ pub fn search_anchor_downward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_downward_wrap(
+      sync_wrap_nolinebreak,
       proc_line_wrap_nolinebreak,
       viewport,
       buffer,
@@ -1610,6 +1623,7 @@ pub fn search_anchor_downward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_downward_wrap(
+      sync_wrap_linebreak,
       proc_line_wrap_linebreak,
       viewport,
       buffer,
@@ -1695,7 +1709,8 @@ fn search_anchor_downward_nowrap(
 //        the bottom-right corner, and thus the empty eol is out of viewport.
 //        b) Otherwise the empty eol of target cursor line is not out of viewport.
 fn search_anchor_downward_wrap(
-  proc: wrap_detail::ProcessLineFn,
+  sync_fn: wrap_detail::SyncFn,
+  proc_fn: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1707,7 +1722,7 @@ fn search_anchor_downward_wrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
     buffer,
     0,
     target_cursor_line,
@@ -1727,7 +1742,7 @@ fn search_anchor_downward_wrap(
     let start_column = viewport_start_column;
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::all(),
-      proc,
+      proc_fn,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1744,7 +1759,7 @@ fn search_anchor_downward_wrap(
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_1(
       detail::AdjustOptions::all(),
-      proc,
+      proc_fn,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1758,14 +1773,20 @@ fn search_anchor_downward_wrap(
     // locate the 1st line (by reversely searching each line from bottom to top), then compare the
     // 1st line with current `start_line`, choose the bigger one.
     // Force `start_column` to be 0, because viewport can contains the line.
-    let start_line =
-      wrap_detail::reverse_search_start_line(proc, buffer, window_actual_shape, target_cursor_line);
+    let start_line = wrap_detail::reverse_search_start_line(
+      proc_fn,
+      buffer,
+      window_actual_shape,
+      target_cursor_line,
+    );
     let start_line = std::cmp::max(start_line, viewport_start_line);
     let start_column = 0_usize;
+    let (reverse_search_line_range, reverse_search_lines_viewport) =
+      sync_fn(buffer, window_actual_shape, start_line, start_column);
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
-      proc,
-      viewport,
+      proc_fn,
+      &reverse_search_lines_viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1866,7 +1887,7 @@ fn search_anchor_upward_nowrap(
 }
 
 fn search_anchor_upward_wrap(
-  proc: wrap_detail::ProcessLineFn,
+  proc_fn: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -1878,7 +1899,7 @@ fn search_anchor_upward_wrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
     buffer,
     0,
     target_cursor_line,
@@ -1898,7 +1919,7 @@ fn search_anchor_upward_wrap(
     let start_column = viewport_start_column;
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::all(),
-      proc,
+      proc_fn,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1915,7 +1936,7 @@ fn search_anchor_upward_wrap(
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_1(
       detail::AdjustOptions::all(),
-      proc,
+      proc_fn,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1932,8 +1953,8 @@ fn search_anchor_upward_wrap(
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
-      proc,
-      viewport,
+      proc_fn,
+      viewport.lines(),
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -2023,7 +2044,7 @@ fn search_anchor_leftward_nowrap(
 }
 
 fn search_anchor_leftward_wrap(
-  proc: wrap_detail::ProcessLineFn,
+  proc_fn: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -2035,7 +2056,7 @@ fn search_anchor_leftward_wrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
     buffer,
     0,
     target_cursor_line,
@@ -2055,7 +2076,7 @@ fn search_anchor_leftward_wrap(
     let start_column = viewport_start_column;
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::no_rightward(),
-      proc,
+      proc_fn,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -2072,7 +2093,7 @@ fn search_anchor_leftward_wrap(
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_1(
       detail::AdjustOptions::no_rightward(),
-      proc,
+      proc_fn,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -2090,8 +2111,8 @@ fn search_anchor_leftward_wrap(
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::no_rightward(),
-      proc,
-      viewport,
+      proc_fn,
+      viewport.lines(),
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -2181,7 +2202,7 @@ fn search_anchor_rightward_nowrap(
 }
 
 fn search_anchor_rightward_wrap(
-  proc: wrap_detail::ProcessLineFn,
+  proc_fn: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
@@ -2193,7 +2214,7 @@ fn search_anchor_rightward_wrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
+  let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
     buffer,
     0,
     target_cursor_line,
@@ -2213,7 +2234,7 @@ fn search_anchor_rightward_wrap(
     let start_column = viewport_start_column;
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::no_leftward(),
-      proc,
+      proc_fn,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -2230,7 +2251,7 @@ fn search_anchor_rightward_wrap(
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_1(
       detail::AdjustOptions::no_leftward(),
-      proc,
+      proc_fn,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -2248,8 +2269,8 @@ fn search_anchor_rightward_wrap(
     let start_column = 0_usize;
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::no_leftward(),
-      proc,
-      viewport,
+      proc_fn,
+      viewport.lines(),
       buffer,
       window_actual_shape,
       target_cursor_line,
