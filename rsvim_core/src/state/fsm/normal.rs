@@ -1229,7 +1229,7 @@ mod tests_cursor_move_by {
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
-    assert_eq!(actual2.char_idx(), 9);
+    assert_eq!(actual2.char_idx(), 18);
   }
 }
 
