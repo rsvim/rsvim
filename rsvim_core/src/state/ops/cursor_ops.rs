@@ -142,28 +142,6 @@ pub fn cursor_move(
   }
 }
 
-fn _adjust_cursor_char_idx_on_vertical_motion(
-  buffer: &Buffer,
-  cursor_line_idx: usize,
-  cursor_char_idx: usize,
-  line_idx: usize,
-) -> usize {
-  let cursor_col_idx = buffer.width_before(cursor_line_idx, cursor_char_idx);
-  let char_idx = match buffer.char_after(line_idx, cursor_col_idx) {
-    Some(char_idx) => char_idx,
-    None => {
-      debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-      debug_assert!(buffer.get_rope().line(line_idx).len_chars() > 0);
-      buffer.last_char_on_line_no_empty_eol(line_idx).unwrap()
-    }
-  };
-  trace!(
-    "cursor_line_idx:{},cursor_col_idx:{},line_idx:{},char_idx:{}",
-    cursor_line_idx, cursor_col_idx, line_idx, char_idx
-  );
-  char_idx
-}
-
 // Returns the `line_idx`/`char_idx` for new cursor position.
 fn _raw_cursor_move_by(
   viewport: &Viewport,
@@ -187,9 +165,7 @@ fn _raw_cursor_move_by(
     None => return None,
   }
 
-  let char_idx =
-    _adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
-  let char_idx = _bounded_raw_cursor_move_x_by(viewport, line_idx, char_idx, buffer, chars);
+  let char_idx = _bounded_raw_cursor_move_x_by(viewport, line_idx, cursor_char_idx, buffer, chars);
 
   Some((line_idx, char_idx))
 }

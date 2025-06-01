@@ -2,6 +2,7 @@
 
 # Formatted with ruff.
 
+import random
 import os
 import argparse
 import logging
@@ -48,6 +49,7 @@ def generate():
     tests_list = [
         t.strip() for i, t in enumerate(tests_list) if i > 0 and len(t.strip()) > 0
     ]
+    random.shuffle(tests_list)
     tests_list = ",".join(tests_list)
     print(tests_list)
 
