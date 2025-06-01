@@ -4599,13 +4599,7 @@ mod tests_cursor_move_and_scroll {
       assert_eq!(actual2.char_idx(), 93);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "",
-        "t, then th",
-        "ere're mul",
-        ".\n",
-        "are been s",
-      ];
+      let expect = vec!["", "t, then th", "ere're mul", ".\n", "are been s"];
       let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
         .collect();
