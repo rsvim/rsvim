@@ -4603,8 +4603,8 @@ mod tests_cursor_move_and_scroll {
         "",
         "t, then th",
         "ere're mul",
-        "ncated if ",
-        "to the nex",
+        ".\n",
+        "are been s",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
         .into_iter()
