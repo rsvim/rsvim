@@ -26,7 +26,7 @@ pub enum Operation {
   /// Move cursor down by `n` lines relatively, based on current cursor position.
   CursorMoveDownBy(usize),
 
-  /// Similar to [`Command::CursorMoveBy`], except it moves cursor to absolute position
+  /// Similar to [`Operation::CursorMoveBy`], except it moves cursor to absolute position
   /// `(char_idx,line_idx)`, based on current buffer.
   CursorMoveTo((/* char_idx */ usize, /* lines_idx */ usize)),
 
@@ -52,7 +52,7 @@ pub enum Operation {
   /// Scroll buffer down by `n` lines relatively, based on current window viewport.
   WindowScrollDownBy(usize),
 
-  /// Similar to [`Command::WindowScrollBy`], except it scrolls window to an absolute position
+  /// Similar to [`Operation::WindowScrollBy`], except it scrolls window to an absolute position
   /// `(column_idx,line_idx)` based on current buffer.
   WindowScrollTo((/* column_idx */ usize, /* line_idx */ usize)),
 

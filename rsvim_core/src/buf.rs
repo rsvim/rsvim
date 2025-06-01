@@ -296,7 +296,7 @@ impl Buffer {
       .width_before(&self.options, &rope_line, char_idx)
   }
 
-  /// See [`ColumnIndex::width_at`].
+  /// See [`ColumnIndex::width_until`].
   ///
   /// # Panics
   ///
