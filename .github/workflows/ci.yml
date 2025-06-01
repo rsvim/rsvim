@@ -104,6 +104,8 @@ jobs:
           SCCACHE_GHA_ENABLED: "true"
         run: cargo clippy --all-targets --all-features
       - name: Docs
+        env:
+          RUSTDOCFLAGS: "-Dwarnings"
         run: |
           echo "Info: cargo doc --workspace"
           cargo doc --workspace
