@@ -1437,6 +1437,7 @@ mod tests_cursor_move_to {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let first_line_len = lines[0].len();
+    assert_eq!(first_line_len, 29);
 
     // step-1: Move to the end of line-1.
     let data_access = StatefulDataAccess::new(
@@ -1466,7 +1467,7 @@ mod tests_cursor_move_to {
     let tree = data_access.tree.clone();
     let actual2 = get_cursor_viewport(tree);
     assert_eq!(actual2.line_idx(), 1);
-    assert_eq!(actual2.char_idx(), 9);
+    assert_eq!(actual2.char_idx(), 18);
   }
 }
 

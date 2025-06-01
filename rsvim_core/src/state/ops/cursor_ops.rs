@@ -187,9 +187,9 @@ fn _raw_cursor_move_by(
     None => return None,
   }
 
-  let char_idx =
-    _adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
-  let char_idx = _bounded_raw_cursor_move_x_by(viewport, line_idx, char_idx, buffer, chars);
+  // let char_idx =
+  //   _adjust_cursor_char_idx_on_vertical_motion(buffer, cursor_line_idx, cursor_char_idx, line_idx);
+  let char_idx = _bounded_raw_cursor_move_x_by(viewport, line_idx, cursor_char_idx, buffer, chars);
 
   Some((line_idx, char_idx))
 }
