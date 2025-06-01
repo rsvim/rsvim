@@ -4571,7 +4571,7 @@ mod tests_cursor_move_and_scroll {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
-      assert_eq!(actual2.char_idx(), 35);
+      assert_eq!(actual2.char_idx(), 93);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["", "", "t, then th", "ere're mul", ".\n"];
@@ -4596,13 +4596,13 @@ mod tests_cursor_move_and_scroll {
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
-      assert_eq!(actual2.char_idx(), 35);
+      assert_eq!(actual2.char_idx(), 93);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "s we want ",
-        "to complet",
-        "e complete",
+        "",
+        "t, then th",
+        "ere're mul",
         "ncated if ",
         "to the nex",
       ];
