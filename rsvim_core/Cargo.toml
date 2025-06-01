@@ -100,4 +100,4 @@ sourcemap = { workspace = true }
 # NOTE: Javascript dependencies }
 
 [dev-dependencies]
-assert_fs = "1.1.2"
+assert_fs = "1.1.3"
