@@ -1781,7 +1781,7 @@ fn search_anchor_downward_wrap(
     );
     let start_line = std::cmp::max(start_line, viewport_start_line);
     let start_column = 0_usize;
-    let (reverse_search_line_range, reverse_search_lines_viewport) =
+    let (_reverse_search_line_range, reverse_search_lines_viewport) =
       sync_fn(buffer, window_actual_shape, start_line, start_column);
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
