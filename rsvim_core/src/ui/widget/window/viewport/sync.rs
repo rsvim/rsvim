@@ -1918,7 +1918,7 @@ fn search_anchor_upward_wrap(
     // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
     // line.
     // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
-    let start_line = std::cmp::min(target_cursor_line, viewport_start_line);
+    let start_line = target_cursor_line;
     let start_column = viewport_start_column;
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::all(),
@@ -1952,7 +1952,7 @@ fn search_anchor_upward_wrap(
     // For `start_line`, simply force it to be `target_cursor_line` because we are moving viewport
     // to upper, thus the `target_cursor_line` must be the 1st line in viewport.
     // Force `start_column` to be 0, because viewport can contains the line.
-    let start_line = target_cursor_line;
+    let start_line = std::cmp::min(target_cursor_line, viewport_start_line);
     let start_column = 0_usize;
     let (_new_line_range, new_lines_viewport) =
       sync_fn(buffer, window_actual_shape, start_line, start_column);
