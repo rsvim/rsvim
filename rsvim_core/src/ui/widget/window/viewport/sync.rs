@@ -1781,12 +1781,12 @@ fn search_anchor_downward_wrap(
     );
     let start_line = std::cmp::max(start_line, viewport_start_line);
     let start_column = 0_usize;
-    let (_reverse_search_line_range, reverse_search_lines_viewport) =
+    let (_new_line_range, new_lines_viewport) =
       sync_fn(buffer, window_actual_shape, start_line, start_column);
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
       proc_fn,
-      &reverse_search_lines_viewport,
+      &new_lines_viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1833,6 +1833,7 @@ pub fn search_anchor_upward(
       target_cursor_char,
     ),
     (true, false) => search_anchor_upward_wrap(
+      sync_wrap_nolinebreak,
       proc_line_wrap_nolinebreak,
       viewport,
       buffer,
@@ -1841,6 +1842,7 @@ pub fn search_anchor_upward(
       target_cursor_char,
     ),
     (true, true) => search_anchor_upward_wrap(
+      sync_wrap_linebreak,
       proc_line_wrap_linebreak,
       viewport,
       buffer,
@@ -1887,6 +1889,7 @@ fn search_anchor_upward_nowrap(
 }
 
 fn search_anchor_upward_wrap(
+  sync_fn: wrap_detail::SyncFn,
   proc_fn: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
   buffer: &Buffer,
@@ -1951,10 +1954,12 @@ fn search_anchor_upward_wrap(
     // Force `start_column` to be 0, because viewport can contains the line.
     let start_line = target_cursor_line;
     let start_column = 0_usize;
+    let (_new_line_range, new_lines_viewport) =
+      sync_fn(buffer, window_actual_shape, start_line, start_column);
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
       proc_fn,
-      viewport.lines(),
+      &new_lines_viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
