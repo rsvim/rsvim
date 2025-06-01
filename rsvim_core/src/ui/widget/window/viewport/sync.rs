@@ -1897,7 +1897,7 @@ fn search_anchor_upward_wrap(
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
-  let _viewport_start_line = viewport.start_line_idx();
+  let viewport_start_line = viewport.start_line_idx();
   let viewport_start_column = viewport.start_column_idx();
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
@@ -1918,7 +1918,7 @@ fn search_anchor_upward_wrap(
     // For `start_line`, force it to be `target_cursor_line`, because viewport only contains this
     // line.
     // For `start_column`, still use old `viewport_start_column` and wait to be adjusted.
-    let start_line = target_cursor_line;
+    let start_line = std::cmp::min(target_cursor_line, viewport_start_line);
     let start_column = viewport_start_column;
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::all(),
