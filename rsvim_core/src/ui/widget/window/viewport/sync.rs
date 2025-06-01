@@ -1408,6 +1408,7 @@ mod wrap_detail {
 
   fn to_right_2_2(
     proc: ProcessLineFn,
+    viewport: &Viewport,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_viewport_start_line: usize,
@@ -1420,6 +1421,11 @@ mod wrap_detail {
     let height = window_actual_shape.height();
     let width = window_actual_shape.width();
 
+    debug_assert!(viewport.lines().contains_key(&target_cursor_line));
+    let old_target_rows = viewport.lines().get(&target_cursor_line).unwrap().rows();
+    debug_assert!(old_target_rows.last_key_value().is_some());
+    let (old_last_row_idx, old_last_row_viewport) = old_target_rows.last_key_value().unwrap();
+
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc(
       buffer,
       target_viewport_start_column,
@@ -1429,17 +1435,15 @@ mod wrap_detail {
       width,
     );
 
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
-
-    let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
-      && target_cursor_char >= last_row_viewport.end_char_idx();
+    let fully_show = preview_target_rows.len() == old_target_rows.len();
+    let is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    let is_last_row = *old_last_row_idx == height.saturating_sub(1);
+    let out_of_view = old_last_row_viewport.end_char_idx() > old_last_row_viewport.start_char_idx()
+      && target_cursor_char >= old_last_row_viewport.end_char_idx();
+    let on_right_side = fully_show && is_empty_eol && is_last_row && out_of_view;
 
     if on_right_side {
-      // The `on_right_side=true` happens only when `target_cursor_char` is the empty eol, and the
-      // `target_cursor_char` is out of viewport.
-      debug_assert!(buffer.is_empty_eol(target_cursor_line, target_cursor_char));
-      // And the `target_cursor_line` must not to be the 1st line in the viewport (because in
+      // The `target_cursor_line` must not to be the 1st line in the viewport (because in
       // case-2.1, the viewport contains multiple lines and the empty eol of target cursor line is
       // out of viewport, it has to be at the bottom-right corner).
       debug_assert!(target_cursor_line > target_viewport_start_line);
@@ -1455,6 +1459,7 @@ mod wrap_detail {
   pub fn adjust_wrap_2_2(
     opts: detail::AdjustOptions,
     proc: ProcessLineFn,
+    viewport: &Viewport,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
@@ -1498,6 +1503,7 @@ mod wrap_detail {
         debug_assert!(
           to_right_2_2(
             proc,
+            viewport,
             buffer,
             window_actual_shape,
             start_line,
@@ -1511,6 +1517,7 @@ mod wrap_detail {
     } else {
       let start_line_column_on_right_side = to_right_2_2(
         proc,
+        viewport,
         buffer,
         window_actual_shape,
         start_line,
@@ -1747,8 +1754,8 @@ fn search_anchor_downward_wrap(
     )
   } else {
     // Case-2.2
-    // For `start_line`, first try to put `target_cursor_line` as the last line in the viewport and 
-    // locate the 1st line (by reversely searching each line from bottom to top), then compare the 
+    // For `start_line`, first try to put `target_cursor_line` as the last line in the viewport and
+    // locate the 1st line (by reversely searching each line from bottom to top), then compare the
     // 1st line with current `start_line`, choose the bigger one.
     // Force `start_column` to be 0, because viewport can contains the line.
     let start_line =
@@ -1758,6 +1765,7 @@ fn search_anchor_downward_wrap(
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
       proc,
+      viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -1925,6 +1933,7 @@ fn search_anchor_upward_wrap(
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
       proc,
+      viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -2082,6 +2091,7 @@ fn search_anchor_leftward_wrap(
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::no_rightward(),
       proc,
+      viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
@@ -2239,6 +2249,7 @@ fn search_anchor_rightward_wrap(
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::no_leftward(),
       proc,
+      viewport,
       buffer,
       window_actual_shape,
       target_cursor_line,
