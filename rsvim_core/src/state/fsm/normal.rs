@@ -8,7 +8,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{CursorViewport, ViewportArc, ViewportSearchAnchorDirection};
+use crate::ui::widget::window::{CursorViewport, ViewportSearchAnchorDirection};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -95,12 +95,14 @@ impl NormalStateful {
         let buffer_arc = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer_arc);
         let viewport_arc = current_window.viewport();
+        let viewport_arc2 = viewport_arc.clone();
+        let viewport = lock!(viewport_arc2);
         let cursor_viewport_arc = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport_arc);
 
         // Only move cursor when it is different from current cursor.
-        if let Some((target_cursor_char, target_cursor_line, move_direction)) =
-          self._get_target_cursor(&cursor_viewport, &buffer, op)
+        if let Some((new_cursor_viewport_arc, move_direction)) =
+          cursor_ops::cursor_move_exclude_empty_eol(&viewport, &cursor_viewport, &buffer, op)
         {
           let search_direction = match move_direction {
             CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
@@ -108,19 +110,21 @@ impl NormalStateful {
             CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
             CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
           };
+          let new_cursor_viewport = lock!(new_cursor_viewport_arc);
+          let target_cursor_line = new_cursor_viewport.line_idx();
+          let target_cursor_char = new_cursor_viewport.line_idx();
 
-          let new_viewport_arc: Option<ViewportArc> = {
-            let viewport = lock!(viewport_arc);
-            let (start_line, start_column) = viewport.search_anchor(
-              search_direction,
-              &buffer,
-              current_window.actual_shape(),
-              current_window.options(),
-              target_cursor_line,
-              target_cursor_char,
-            );
+          let (start_line, start_column) = viewport.search_anchor(
+            search_direction,
+            &buffer,
+            current_window.actual_shape(),
+            current_window.options(),
+            target_cursor_line,
+            target_cursor_char,
+          );
 
-            // First try window scroll.
+          // First try window scroll.
+          let new_viewport_arc = {
             if start_line != viewport.start_line_idx()
               || start_column != viewport.start_column_idx()
             {
@@ -215,26 +219,17 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        if let Some((target_cursor_char, target_cursor_line, _move_direction)) =
-          self._get_target_cursor(&cursor_viewport, &buffer, op)
+        if let Some((new_cursor_viewport_arc, _move_direction)) =
+          cursor_ops::cursor_move_exclude_empty_eol(&viewport, &cursor_viewport, &buffer, op)
         {
-          let maybe_new_cursor_viewport = cursor_ops::cursor_move(
-            &viewport,
-            &cursor_viewport,
-            &buffer,
-            Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+          current_window.set_cursor_viewport(new_cursor_viewport_arc.clone());
+          let cursor_id = tree.cursor_id().unwrap();
+          let new_cursor_viewport = lock!(new_cursor_viewport_arc);
+          tree.bounded_move_to(
+            cursor_id,
+            new_cursor_viewport.column_idx() as isize,
+            new_cursor_viewport.row_idx() as isize,
           );
-
-          if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
-            current_window.set_cursor_viewport(new_cursor_viewport.clone());
-            let cursor_id = tree.cursor_id().unwrap();
-            let new_cursor_viewport = lock!(new_cursor_viewport);
-            tree.bounded_move_to(
-              cursor_id,
-              new_cursor_viewport.column_idx() as isize,
-              new_cursor_viewport.row_idx() as isize,
-            );
-          }
         }
       } else {
         unreachable!()

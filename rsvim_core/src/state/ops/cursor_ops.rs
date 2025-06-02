@@ -111,6 +111,44 @@ pub fn normalize_as_window_scroll_by(
   }
 }
 
+/// Calculate new cursor viewport by `Operation::CursorMove*` operations, without empty
+/// eol(end-of-line), which is for normal mode.
+///
+/// It returns new cursor viewport if the operation is valid, returns `None` if the cursor cannot
+/// move to the position.
+///
+/// # Panics
+///
+/// It panics if the operation is not a `Operation::CursorMove*` operation.
+pub fn cursor_move_exclude_empty_eol(
+  viewport: &Viewport,
+  cursor_viewport: &CursorViewport,
+  buffer: &Buffer,
+  op: Operation,
+) -> Option<(CursorViewportArc, CursorMoveDirection)> {
+  let (target_cursor_char, target_cursor_line, move_direction) =
+    normalize_as_cursor_move_to(op, cursor_viewport.char_idx(), cursor_viewport.line_idx());
+  let target_cursor_char = match buffer.last_char_on_line_no_empty_eol(target_cursor_line) {
+    Some(last_visible_char) => std::cmp::min(target_cursor_char, last_visible_char),
+    None => target_cursor_char,
+  };
+  if target_cursor_char != cursor_viewport.char_idx()
+    || target_cursor_line != cursor_viewport.line_idx()
+  {
+    // Only move when target cursor position is different from current.
+    cursor_move(
+      viewport,
+      cursor_viewport,
+      buffer,
+      Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+    )
+    .map(|new_cursor_viewport| (new_cursor_viewport, move_direction))
+  } else {
+    // Or just stay where you are.
+    None
+  }
+}
+
 /// Calculate new cursor viewport by `Operation::CursorMove*` operations.
 ///
 /// It returns new cursor viewport if the operation is valid, returns `None` if the cursor cannot
