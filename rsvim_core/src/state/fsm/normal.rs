@@ -1,6 +1,5 @@
 //! The normal mode.
 
-use crate::buf::Buffer;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -8,7 +7,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{CursorViewport, ViewportSearchAnchorDirection};
+use crate::ui::widget::window::ViewportSearchAnchorDirection;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -124,7 +123,7 @@ impl NormalStateful {
           );
 
           // First try window scroll.
-          let new_viewport_arc = {
+          {
             if start_line != viewport.start_line_idx()
               || start_column != viewport.start_column_idx()
             {
@@ -134,23 +133,14 @@ impl NormalStateful {
                 &buffer,
                 Operation::WindowScrollTo((start_column, start_line)),
               );
-              if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
+              if let Some(new_viewport_arc) = maybe_new_viewport_arc {
                 current_window.set_viewport(new_viewport_arc.clone());
               }
-              maybe_new_viewport_arc
-            } else {
-              None
             }
-          };
+          }
 
           // Then try cursor move.
           {
-            let viewport_arc = match new_viewport_arc {
-              Some(v1) => v1,
-              None => viewport_arc,
-            };
-            let viewport = lock!(viewport_arc);
-
             current_window.set_cursor_viewport(new_cursor_viewport_arc.clone());
             let cursor_id = tree.cursor_id().unwrap();
             tree.bounded_move_to(
