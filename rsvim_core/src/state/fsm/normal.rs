@@ -151,23 +151,13 @@ impl NormalStateful {
             };
             let viewport = lock!(viewport_arc);
 
-            let maybe_new_cursor_viewport = cursor_ops::cursor_move(
-              &viewport,
-              &cursor_viewport,
-              &buffer,
-              Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+            current_window.set_cursor_viewport(new_cursor_viewport_arc.clone());
+            let cursor_id = tree.cursor_id().unwrap();
+            tree.bounded_move_to(
+              cursor_id,
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
             );
-
-            if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
-              current_window.set_cursor_viewport(new_cursor_viewport.clone());
-              let cursor_id = tree.cursor_id().unwrap();
-              let new_cursor_viewport = lock!(new_cursor_viewport);
-              tree.bounded_move_to(
-                cursor_id,
-                new_cursor_viewport.column_idx() as isize,
-                new_cursor_viewport.row_idx() as isize,
-              );
-            }
           }
         }
       } else {
@@ -178,32 +168,6 @@ impl NormalStateful {
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
-  }
-
-  // Returns `(target_cursor_char, target_cursor_line, cursor_move_direction)`.
-  fn _get_target_cursor(
-    &self,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    op: Operation,
-  ) -> Option<(usize, usize, CursorMoveDirection)> {
-    let (target_cursor_char, target_cursor_line, move_direction) =
-      cursor_ops::normalize_as_cursor_move_to(
-        op,
-        cursor_viewport.char_idx(),
-        cursor_viewport.line_idx(),
-      );
-    let target_cursor_char = match buffer.last_char_on_line_no_empty_eol(target_cursor_line) {
-      Some(last_visible_char) => std::cmp::min(target_cursor_char, last_visible_char),
-      None => target_cursor_char,
-    };
-    if target_cursor_char != cursor_viewport.char_idx()
-      || target_cursor_line != cursor_viewport.line_idx()
-    {
-      Some((target_cursor_char, target_cursor_line, move_direction))
-    } else {
-      None
-    }
   }
 
   #[cfg(test)]
