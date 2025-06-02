@@ -176,9 +176,9 @@ impl NormalStateful {
         if let Some((new_cursor_viewport_arc, _move_direction)) =
           cursor_ops::cursor_move_exclude_empty_eol(&viewport, &cursor_viewport, &buffer, op)
         {
+          let new_cursor_viewport = lock!(new_cursor_viewport_arc);
           current_window.set_cursor_viewport(new_cursor_viewport_arc.clone());
           let cursor_id = tree.cursor_id().unwrap();
-          let new_cursor_viewport = lock!(new_cursor_viewport_arc);
           tree.bounded_move_to(
             cursor_id,
             new_cursor_viewport.column_idx() as isize,
