@@ -2,6 +2,8 @@
 
 pub mod cursor_ops;
 
+use compact_str::CompactString;
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 /// A set of low-level editor operations between terminal keyboard/mouse events and editor
 /// operations.
@@ -63,7 +65,16 @@ pub enum Operation {
   GotoNormalMode,
 
   /// Insert text.
-  InsertText(String),
+  InsertTextAtCursor(CompactString),
+
+  /// Insert single char.
+  InsertCharAtCursor(char),
+
+  /// Delete N-char text, to the left of the cursor.
+  DeleteTextToLeftAtCursor(usize),
+
+  /// Delete N-char text, to the right of the cursor.
+  DeleteTextToRightAtCursor(usize),
 
   /// Quit editor
   EditorQuit,

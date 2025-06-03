@@ -7,8 +7,11 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{CursorViewport, ViewportArc, ViewportSearchAnchorDirection};
+use crate::ui::widget::window::{
+  CursorViewport, CursorViewportArc, ViewportArc, ViewportSearchAnchorDirection,
+};
 
+use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
@@ -46,7 +49,10 @@ impl Stateful for InsertStateful {
               return self.cursor_move(&data_access, Operation::CursorMoveRightBy(usize::MAX));
             }
             KeyCode::Char(c) => {
-              return self.insert_text(&data_access, Operation::InsertText(c.to_string()));
+              return self.insert_text(
+                &data_access,
+                Operation::InsertTextAtCursor(c.to_compact_string()),
+              );
             }
             KeyCode::Esc => {
               return self.goto_normal_mode(&data_access, Operation::GotoNormalMode);
@@ -87,15 +93,61 @@ impl CursorMoveImplOptions {
 
 impl InsertStateful {
   fn insert_text(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
-    debug_assert!(matches!(op, Operation::InsertText(_)));
+    debug_assert!(
+      matches!(op, Operation::InsertTextAtCursor(_))
+        || matches!(op, Operation::InsertCharAtCursor(_))
+    );
     let text = match op {
-      Operation::InsertText(t) => t,
+      Operation::InsertTextAtCursor(t) => t,
+      Operation::InsertCharAtCursor(c) => c.to_compact_string(),
       _ => unreachable!(),
     };
 
-    {}
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    let buffer = self._current_buffer(&mut tree);
+
+    // Insert text.
+    {
+      let buffer = buffer.upgrade().unwrap();
+      let mut buffer = lock!(buffer);
+      let cursor_viewport = self._current_cursor_viewport(&mut tree);
+      let cursor_viewport = lock!(cursor_viewport);
+      let cursor_line_idx = cursor_viewport.line_idx();
+      let cursor_char_idx = cursor_viewport.char_idx();
+      debug_assert!(buffer.get_rope().get_line(cursor_line_idx).is_some());
+      let start_char_pos_of_line = buffer.get_rope().line_to_char(cursor_line_idx);
+      let insert_char_pos = start_char_pos_of_line + cursor_char_idx;
+      if cfg!(debug_assertions) {
+        use crate::test::buf::buffer_line_to_string;
+        trace!(
+          "Before buffer inserted(line:{cursor_line_idx}):{:?}",
+          buffer_line_to_string(&buffer.get_rope().line(cursor_line_idx))
+        );
+      }
+      buffer.get_rope_mut().insert(insert_char_pos, text.as_str());
+      if cfg!(debug_assertions) {
+        use crate::test::buf::buffer_line_to_string;
+        trace!(
+          "After buffer inserted(line:{cursor_line_idx}):{:?}",
+          buffer_line_to_string(&buffer.get_rope().line(cursor_line_idx))
+        );
+      }
+    }
 
     StatefulValue::InsertMode(InsertStateful::default())
+  }
+
+  fn _current_cursor_viewport(&self, tree: &mut Tree) -> CursorViewportArc {
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+        current_window.cursor_viewport()
+      } else {
+        unreachable!()
+      }
+    } else {
+      unreachable!()
+    }
   }
 }
 

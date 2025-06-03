@@ -204,3 +204,11 @@ pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
     }
   });
 }
+
+pub fn buffer_line_to_string(bufline: &RopeSlice) -> String {
+  let mut builder = String::new();
+  for c in bufline.chars() {
+    builder.push(c);
+  }
+  builder
+}
