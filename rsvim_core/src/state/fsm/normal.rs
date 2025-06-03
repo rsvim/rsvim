@@ -99,17 +99,10 @@ impl NormalStateful {
         let cursor_viewport = lock!(cursor_viewport_arc);
 
         // Only move cursor when it is different from current cursor.
-        if let Some((target_cursor_char, target_cursor_line, move_direction)) =
-          self._get_target_cursor(&cursor_viewport, &buffer, op)
+        if let Some((target_cursor_char, target_cursor_line, search_direction)) =
+          self._target_cursor_without_empty_eol(&cursor_viewport, &buffer, op)
         {
-          let search_direction = match move_direction {
-            CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
-            CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
-            CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
-            CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
-          };
-
-          let new_viewport_arc: Option<ViewportArc> = {
+          let new_viewport: Option<ViewportArc> = {
             let viewport = lock!(viewport_arc);
             let (start_line, start_column) = viewport.search_anchor(
               search_direction,
@@ -124,16 +117,16 @@ impl NormalStateful {
             if start_line != viewport.start_line_idx()
               || start_column != viewport.start_column_idx()
             {
-              let maybe_new_viewport_arc = cursor_ops::window_scroll(
+              let new_viewport = cursor_ops::window_scroll(
                 &viewport,
                 current_window,
                 &buffer,
                 Operation::WindowScrollTo((start_column, start_line)),
               );
-              if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
+              if let Some(new_viewport_arc) = new_viewport.clone() {
                 current_window.set_viewport(new_viewport_arc.clone());
               }
-              maybe_new_viewport_arc
+              new_viewport
             } else {
               None
             }
@@ -141,20 +134,17 @@ impl NormalStateful {
 
           // Then try cursor move.
           {
-            let viewport_arc = match new_viewport_arc {
-              Some(v1) => v1,
-              None => viewport_arc,
-            };
-            let viewport = lock!(viewport_arc);
+            let current_viewport = new_viewport.unwrap_or(viewport_arc);
+            let current_viewport = lock!(current_viewport);
 
-            let maybe_new_cursor_viewport = cursor_ops::cursor_move(
-              &viewport,
+            let new_cursor_viewport = cursor_ops::cursor_move(
+              &current_viewport,
               &cursor_viewport,
               &buffer,
               Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
             );
 
-            if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
+            if let Some(new_cursor_viewport) = new_cursor_viewport {
               current_window.set_cursor_viewport(new_cursor_viewport.clone());
               let cursor_id = tree.cursor_id().unwrap();
               let new_cursor_viewport = lock!(new_cursor_viewport);
@@ -177,12 +167,12 @@ impl NormalStateful {
   }
 
   // Returns `(target_cursor_char, target_cursor_line, cursor_move_direction)`.
-  fn _get_target_cursor(
+  fn _target_cursor_without_empty_eol(
     &self,
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
     op: Operation,
-  ) -> Option<(usize, usize, CursorMoveDirection)> {
+  ) -> Option<(usize, usize, ViewportSearchAnchorDirection)> {
     let (target_cursor_char, target_cursor_line, move_direction) =
       cursor_ops::normalize_as_cursor_move_to(
         op,
@@ -196,7 +186,13 @@ impl NormalStateful {
     if target_cursor_char != cursor_viewport.char_idx()
       || target_cursor_line != cursor_viewport.line_idx()
     {
-      Some((target_cursor_char, target_cursor_line, move_direction))
+      let search_direction = match move_direction {
+        CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
+        CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
+        CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
+        CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
+      };
+      Some((target_cursor_char, target_cursor_line, search_direction))
     } else {
       None
     }
@@ -215,8 +211,8 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
 
-        if let Some((target_cursor_char, target_cursor_line, _move_direction)) =
-          self._get_target_cursor(&cursor_viewport, &buffer, op)
+        if let Some((target_cursor_char, target_cursor_line, _search_direction)) =
+          self._target_cursor_without_empty_eol(&cursor_viewport, &buffer, op)
         {
           let maybe_new_cursor_viewport = cursor_ops::cursor_move(
             &viewport,
