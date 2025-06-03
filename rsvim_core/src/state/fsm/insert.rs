@@ -423,33 +423,112 @@ mod tests_cursor_move_and_scroll {
   fn nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs, _buf) = make_tree(
+    let lines = vec![
+      "Hello, RSVIM!\n",
+      "This is a quite simple and small test lines.\n",
+      "But still it contains several things we want to test:\n",
+      "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
+      "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+    ];
+    let (tree, state, bufs, buf) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
         .unwrap(),
-      vec![],
-    );
-
-    let key_event = KeyEvent::new_with_kind(
-      KeyCode::Char('a'),
-      KeyModifiers::empty(),
-      KeyEventKind::Press,
+      lines,
     );
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
-    let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
-    let stateful_machine = InsertStateful::default();
-    stateful_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let stateful = InsertStateful::default();
 
-    let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
-    assert_eq!(actual.line_idx(), 0);
-    assert_eq!(actual.char_idx(), 0);
+    // Move-1
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 3);
+      assert_eq!(actual1.char_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Move-2
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(158));
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 3);
+      assert_eq!(actual2.char_idx(), 158);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec!["", "", "", "endering.\n", "", "", "     * The", ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
   }
 
   #[test]
@@ -486,10 +565,10 @@ mod tests_cursor_move_and_scroll {
 
     let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
     let stateful = InsertStateful::default();
-    stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
     {
+      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
@@ -520,10 +599,9 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(2));
-
     // Move-2
     {
+      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(2));
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
@@ -554,10 +632,9 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
-
     // Move-3
     {
+      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 7);
@@ -577,10 +654,9 @@ mod tests_cursor_move_and_scroll {
       );
     }
 
-    stateful.cursor_move(&data_access, Operation::CursorMoveUpBy(3));
-
     // Move-4
     {
+      stateful.cursor_move(&data_access, Operation::CursorMoveUpBy(3));
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 4);
