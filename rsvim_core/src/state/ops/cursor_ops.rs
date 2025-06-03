@@ -290,9 +290,10 @@ fn _raw_window_scroll_to(
 
   let mut line_idx = _bounded_raw_window_scroll_y_to(buffer, line_idx);
 
-  // If viewport wants to scroll down (i.e. y > 0), and viewport already shows that last line in
-  // the buffer, then cannot scroll down anymore, just still keep the old `line_idx`.
-  if line_idx > 0 && end_line_idx == buffer_len_lines {
+  // If viewport wants to scroll down (i.e. lines_idx > start_line_idx), and viewport already shows
+  // that last line in the buffer, then cannot scroll down anymore, just still keep the old
+  // `line_idx`.
+  if line_idx > start_line_idx && end_line_idx == buffer_len_lines {
     line_idx = start_line_idx;
   }
 
