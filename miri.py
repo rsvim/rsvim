@@ -9,11 +9,11 @@ import logging
 import subprocess
 
 LOGGING_LEVEL = logging.INFO
-TOTAL_JOBS = 10
 
 
-def start(tests_list, job_index, package):
+def start(tests_list, job_index, package, TOTAL_JOBS):
     job_index = int(job_index)
+    TOTAL_JOBS = int(TOTAL_JOBS)
     tests_list = tests_list.split(",")
     tests_list = [t.strip() for t in tests_list if len(t.strip()) > 0]
     logging.debug(f"tests_list:{tests_list}")
@@ -70,12 +70,16 @@ if __name__ == "__main__":
         help="Run cargo miri tests job in [0-9]",
     )
     parser.add_argument(
+        "--total-jobs",
+        help="Run cargo miri tests with total [N] jobs",
+    )
+    parser.add_argument(
         "--package",
-        help="Run cargo miri tests job with [PACKAGE] name",
+        help="Run cargo miri tests with [PACKAGE] name",
     )
     parser.add_argument(
         "--tests",
-        help="Run cargo miri tests job with [TESTS] list",
+        help="Run cargo miri tests with [TESTS] list",
     )
 
     parser = parser.parse_args()
@@ -84,6 +88,6 @@ if __name__ == "__main__":
     if parser.generate:
         generate()
     elif parser.job:
-        start(parser.tests, parser.job, parser.package)
+        start(parser.tests, parser.job, parser.package, parser.total_jobs)
     else:
         logging.error("Missing arguments, use -h/--help for more details.")
