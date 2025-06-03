@@ -111,6 +111,43 @@ pub fn normalize_as_window_scroll_by(
   }
 }
 
+/// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollTo((x,y))`.
+pub fn normalize_as_window_scroll_to(
+  op: Operation,
+  viewport_start_column_idx: usize,
+  viewport_start_line_idx: usize,
+) -> (usize, usize) {
+  match op {
+    Operation::WindowScrollLeftBy(n) => {
+      let x = viewport_start_column_idx.saturating_add_signed(-(n as isize));
+      let y = viewport_start_line_idx;
+      (x, y)
+    }
+    Operation::WindowScrollRightBy(n) => {
+      let x = viewport_start_column_idx.saturating_add_signed(n as isize);
+      let y = viewport_start_line_idx;
+      (x, y)
+    }
+    Operation::WindowScrollUpBy(n) => {
+      let x = viewport_start_column_idx;
+      let y = viewport_start_line_idx.saturating_add_signed(-(n as isize));
+      (x, y)
+    }
+    Operation::WindowScrollDownBy(n) => {
+      let x = viewport_start_column_idx;
+      let y = viewport_start_line_idx.saturating_add_signed(n as isize);
+      (x, y)
+    }
+    Operation::WindowScrollTo((x, y)) => (x, y),
+    Operation::WindowScrollBy((by_x, by_y)) => {
+      let x = viewport_start_column_idx.saturating_add_signed(by_x);
+      let y = viewport_start_line_idx.saturating_add_signed(by_y);
+      (x, y)
+    }
+    _ => unreachable!(),
+  }
+}
+
 /// Calculate new cursor viewport by `Operation::CursorMove*` operations.
 ///
 /// It returns new cursor viewport if the operation is valid, returns `None` if the cursor cannot
