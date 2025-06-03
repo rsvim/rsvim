@@ -176,19 +176,13 @@ impl InsertStateful {
     op: Operation,
   ) -> Option<(usize, usize, ViewportSearchAnchorDirection)> {
     let (target_cursor_char, target_cursor_line, move_direction) =
-      cursor_ops::normalize_as_cursor_move_to(
+      cursor_ops::normalize_as_cursor_move_to_include_empty_eol(
+        buffer,
         op,
         cursor_viewport.char_idx(),
         cursor_viewport.line_idx(),
       );
-    let target_cursor_line = std::cmp::min(
-      target_cursor_line,
-      buffer.get_rope().len_lines().saturating_sub(1),
-    );
-    let target_cursor_char = match buffer.last_char_on_line(target_cursor_line) {
-      Some(last_visible_char) => std::cmp::min(target_cursor_char, last_visible_char),
-      None => target_cursor_char,
-    };
+
     if target_cursor_char != cursor_viewport.char_idx()
       || target_cursor_line != cursor_viewport.line_idx()
     {
