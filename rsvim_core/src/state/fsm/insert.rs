@@ -504,9 +504,11 @@ mod tests_cursor_move {
       let actual2 = get_cursor_viewport(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 158);
+      assert_eq!(actual2.row_idx(), 3);
+      assert_eq!(actual2.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "endering.\n", "", "", "     * The", ""];
+      let expect = vec!["", "", "", "endering.\n", "", "", "ut in the ", ""];
       let expect_fills: BTreeMap<usize, usize> = vec![
         (0, 0),
         (1, 0),
