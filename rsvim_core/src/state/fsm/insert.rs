@@ -7,7 +7,9 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{CursorViewport, ViewportArc, ViewportSearchAnchorDirection};
+use crate::ui::widget::window::{
+  CursorViewport, ViewportArc, ViewportSearchAnchorDirection, Window,
+};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -66,16 +68,38 @@ impl Stateful for InsertStateful {
   }
 }
 
+#[derive(Debug, Copy, Clone)]
+struct CursorMoveImplOptions {
+  pub include_empty_eol: bool,
+}
+
+impl CursorMoveImplOptions {
+  pub fn include_empty_eol() -> Self {
+    Self {
+      include_empty_eol: true,
+    }
+  }
+
+  pub fn exclude_empty_eol() -> Self {
+    Self {
+      include_empty_eol: false,
+    }
+  }
+}
+
 impl InsertStateful {
-  fn goto_normal_mode(
-    &self,
-    data_access: &StatefulDataAccess,
-    _command: Operation,
-  ) -> StatefulValue {
-    debug_assert!(matches!(_command, Operation::GotoNormalMode));
+  fn goto_normal_mode(&self, data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
+    debug_assert!(matches!(_op, Operation::GotoNormalMode));
 
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+
+    self._cursor_move_impl(
+      &mut tree,
+      Operation::CursorMoveBy((0, 0)),
+      CursorMoveImplOptions::exclude_empty_eol(),
+    );
+
     let cursor_id = tree.cursor_id().unwrap();
     if let Some(TreeNode::Cursor(cursor)) = tree.node_mut(cursor_id) {
       cursor.set_style(&CursorStyle::SteadyBlock);
@@ -92,6 +116,12 @@ impl InsertStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
+    self._cursor_move_impl(&mut tree, op, CursorMoveImplOptions::include_empty_eol());
+
+    StatefulValue::InsertMode(InsertStateful::default())
+  }
+
+  fn _cursor_move_impl(&self, tree: &mut Tree, op: Operation, opts: CursorMoveImplOptions) {
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
         let buffer = current_window.buffer().upgrade().unwrap();
@@ -102,7 +132,7 @@ impl InsertStateful {
 
         // Only move cursor when it is different from current cursor.
         if let Some((target_cursor_char, target_cursor_line, search_direction)) =
-          self._target_cursor_include_empty_eol(&cursor_viewport, &buffer, op)
+          self._target_cursor_considering_empty_eol(opts, &cursor_viewport, &buffer, op)
         {
           let new_viewport: Option<ViewportArc> = {
             let viewport = lock!(viewport);
@@ -164,24 +194,31 @@ impl InsertStateful {
     } else {
       unreachable!()
     }
-
-    StatefulValue::InsertMode(InsertStateful::default())
   }
 
   // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
-  fn _target_cursor_include_empty_eol(
+  fn _target_cursor_considering_empty_eol(
     &self,
+    opts: CursorMoveImplOptions,
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
     op: Operation,
   ) -> Option<(usize, usize, ViewportSearchAnchorDirection)> {
-    let (target_cursor_char, target_cursor_line, move_direction) =
+    let (target_cursor_char, target_cursor_line, move_direction) = if opts.include_empty_eol {
       cursor_ops::normalize_as_cursor_move_to_include_empty_eol(
         buffer,
         op,
         cursor_viewport.char_idx(),
         cursor_viewport.line_idx(),
-      );
+      )
+    } else {
+      cursor_ops::normalize_as_cursor_move_to_exclude_empty_eol(
+        buffer,
+        op,
+        cursor_viewport.char_idx(),
+        cursor_viewport.line_idx(),
+      )
+    };
 
     if target_cursor_char != cursor_viewport.char_idx()
       || target_cursor_line != cursor_viewport.line_idx()
