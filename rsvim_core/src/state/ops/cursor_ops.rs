@@ -240,7 +240,7 @@ fn _bounded_raw_cursor_move_x_to(
   }
 }
 
-pub fn window_scroll(
+pub fn window_scroll_to(
   viewport: &Viewport,
   current_window: &Window,
   buffer: &Buffer,

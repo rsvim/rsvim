@@ -119,7 +119,7 @@ impl InsertStateful {
             if start_line != viewport.start_line_idx()
               || start_column != viewport.start_column_idx()
             {
-              let new_viewport = cursor_ops::window_scroll(
+              let new_viewport = cursor_ops::window_scroll_to(
                 &viewport,
                 current_window,
                 &buffer,
