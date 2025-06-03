@@ -139,6 +139,9 @@ impl InsertStateful {
       (cursor_line_idx, after_inserted_char_idx)
     };
 
+    trace!(
+      "Move to inserted pos, line:{after_inserted_cursor_line_idx}, char:{after_inserted_cursor_char_idx}"
+    );
     self._cursor_move_impl(
       CursorMoveImplOptions::include_empty_eol(),
       &mut tree,
