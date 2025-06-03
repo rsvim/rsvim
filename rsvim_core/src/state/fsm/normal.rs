@@ -137,7 +137,7 @@ impl NormalStateful {
             let current_viewport = new_viewport.unwrap_or(viewport);
             let current_viewport = lock!(current_viewport);
 
-            let new_cursor_viewport = cursor_ops::cursor_move(
+            let new_cursor_viewport = cursor_ops::cursor_move_to(
               &current_viewport,
               &cursor_viewport,
               &buffer,
@@ -218,7 +218,7 @@ impl NormalStateful {
         if let Some((target_cursor_char, target_cursor_line, _search_direction)) =
           self._target_cursor_exclude_empty_eol(&cursor_viewport, &buffer, op)
         {
-          let maybe_new_cursor_viewport = cursor_ops::cursor_move(
+          let maybe_new_cursor_viewport = cursor_ops::cursor_move_to(
             &viewport,
             &cursor_viewport,
             &buffer,

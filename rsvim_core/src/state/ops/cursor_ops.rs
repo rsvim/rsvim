@@ -1,10 +1,13 @@
 //! Cursor operations.
 
+use std::intrinsics::unreachable;
+
 use crate::buf::Buffer;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Window};
 
+use tokio_util::bytes::buf;
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -119,14 +122,22 @@ pub fn normalize_as_window_scroll_by(
 /// # Panics
 ///
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
-pub fn cursor_move(
+pub fn cursor_move_to(
   viewport: &Viewport,
   cursor_viewport: &CursorViewport,
   buffer: &Buffer,
-  op: Operation,
+  cursor_move_to_op: Operation,
 ) -> Option<CursorViewportArc> {
-  let (by_chars, by_lines, _) =
-    normalize_as_cursor_move_by(op, cursor_viewport.char_idx(), cursor_viewport.line_idx());
+  debug_assert!(matches!(
+    cursor_move_to_op,
+    Operation::CursorMoveTo((_to_line, _to_char))
+  ));
+
+  let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
+    cursor_move_to_op,
+    cursor_viewport.char_idx(),
+    cursor_viewport.line_idx(),
+  );
 
   let cursor_move_result =
     _raw_cursor_move_by(viewport, cursor_viewport, buffer, by_chars, by_lines);
@@ -214,7 +225,7 @@ fn _bounded_raw_cursor_move_x_by(
         "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
         cursor_char_idx, expected, last_row_viewport, last_char_on_row
       );
-      match buffer.last_char_on_line_no_empty_eol(cursor_line_idx) {
+      match buffer.last_char_on_line(cursor_line_idx) {
         Some(last_char) => std::cmp::min(last_char_on_row, last_char),
         None => last_char_on_row,
       }

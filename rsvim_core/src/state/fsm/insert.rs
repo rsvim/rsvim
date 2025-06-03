@@ -139,7 +139,7 @@ impl InsertStateful {
             let current_viewport = new_viewport.unwrap_or(viewport);
             let current_viewport = lock!(current_viewport);
 
-            let new_cursor_viewport = cursor_ops::cursor_move(
+            let new_cursor_viewport = cursor_ops::cursor_move_to(
               &current_viewport,
               &cursor_viewport,
               &buffer,
