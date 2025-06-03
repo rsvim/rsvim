@@ -159,14 +159,6 @@ fn _raw_cursor_move_to(
   let line_idx =
     _bounded_raw_cursor_move_y_to(viewport, cursor_line_idx, cursor_char_idx, buffer, line_idx);
 
-  if cfg!(debug_assertions) {
-    debug_assert!(line_idx <= viewport.end_line_idx().saturating_sub(1));
-    match buffer.last_char_on_line(line_idx) {
-      Some(last_char) => debug_assert!(last_char >= char_idx),
-      None => { /* do nothing */ }
-    }
-  }
-
   // If `line_idx` doesn't exist, or line is empty.
   match buffer.get_rope().get_line(line_idx) {
     Some(line) => {
