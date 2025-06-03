@@ -140,13 +140,13 @@ impl InsertStateful {
     };
 
     self._cursor_move_impl(
+      CursorMoveImplOptions::include_empty_eol(),
       &mut tree,
       buffer,
       Operation::CursorMoveTo((
         after_inserted_cursor_char_idx,
         after_inserted_cursor_line_idx,
       )),
-      CursorMoveImplOptions::include_empty_eol(),
     );
 
     StatefulValue::InsertMode(InsertStateful::default())
@@ -174,10 +174,10 @@ impl InsertStateful {
     let buffer = self._current_buffer(&mut tree);
 
     self._cursor_move_impl(
+      CursorMoveImplOptions::exclude_empty_eol(),
       &mut tree,
       buffer,
       Operation::CursorMoveBy((0, 0)),
-      CursorMoveImplOptions::exclude_empty_eol(),
     );
 
     let cursor_id = tree.cursor_id().unwrap();
@@ -198,10 +198,10 @@ impl InsertStateful {
     let buffer = self._current_buffer(&mut tree);
 
     self._cursor_move_impl(
+      CursorMoveImplOptions::include_empty_eol(),
       &mut tree,
       buffer,
       op,
-      CursorMoveImplOptions::include_empty_eol(),
     );
 
     StatefulValue::InsertMode(InsertStateful::default())
@@ -221,10 +221,10 @@ impl InsertStateful {
 
   fn _cursor_move_impl(
     &self,
+    opts: CursorMoveImplOptions,
     tree: &mut Tree,
     buffer: BufferWk,
     op: Operation,
-    opts: CursorMoveImplOptions,
   ) {
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
