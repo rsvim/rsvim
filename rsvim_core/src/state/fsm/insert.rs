@@ -401,7 +401,7 @@ mod tests_util {
 }
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_and_scroll {
+mod tests_cursor_move {
   use super::tests_util::*;
   use super::*;
 
@@ -455,12 +455,12 @@ mod tests_cursor_move_and_scroll {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((5, 3)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
-      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.char_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![

@@ -468,7 +468,7 @@ mod tests_util {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_y_by {
+mod tests_raw_cursor_move_y_by {
   use super::tests_util::*;
   use super::*;
 
@@ -745,7 +745,7 @@ mod tests_cursor_move_y_by {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_x_by {
+mod tests_raw_cursor_move_x_by {
   use super::tests_util::*;
   use super::*;
 
@@ -1001,7 +1001,7 @@ mod tests_cursor_move_x_by {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_by {
+mod tests_raw_cursor_move_by {
   use super::tests_util::*;
   use super::*;
 
@@ -1235,7 +1235,7 @@ mod tests_cursor_move_by {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_to {
+mod tests_raw_cursor_move_to {
   use super::tests_util::*;
   use super::*;
 
@@ -1473,7 +1473,7 @@ mod tests_cursor_move_to {
 
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_window_scroll_y_by {
+mod tests_raw_window_scroll_y_by {
   use super::tests_util::*;
   use super::*;
 
@@ -2401,7 +2401,7 @@ mod tests_window_scroll_y_by {
 }
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_window_scroll_x_by {
+mod tests_raw_window_scroll_x_by {
   use super::tests_util::*;
   use super::*;
 
@@ -3509,7 +3509,7 @@ mod tests_window_scroll_x_by {
 }
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_window_scroll_to {
+mod tests_raw_window_scroll_to {
   use super::tests_util::*;
   use super::*;
 
@@ -4110,7 +4110,7 @@ mod tests_window_scroll_to {
 }
 #[cfg(test)]
 #[allow(unused_imports)]
-mod tests_cursor_move_and_scroll {
+mod tests_cursor_move {
   use super::tests_util::*;
   use super::*;
 
