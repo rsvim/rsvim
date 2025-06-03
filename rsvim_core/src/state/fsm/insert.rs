@@ -13,7 +13,7 @@ use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
-/// The insert editing mode.
+/// The finite-state-machine for insert mode.
 pub struct InsertStateful {}
 
 impl Stateful for InsertStateful {
@@ -119,7 +119,7 @@ impl InsertStateful {
             if start_line != viewport.start_line_idx()
               || start_column != viewport.start_column_idx()
             {
-              let new_viewport = cursor_ops::window_scroll(
+              let new_viewport = cursor_ops::window_scroll_to(
                 &viewport,
                 current_window,
                 &buffer,

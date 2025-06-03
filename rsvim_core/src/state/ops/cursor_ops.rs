@@ -111,6 +111,43 @@ pub fn normalize_as_window_scroll_by(
   }
 }
 
+/// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollTo((x,y))`.
+pub fn normalize_as_window_scroll_to(
+  op: Operation,
+  viewport_start_column_idx: usize,
+  viewport_start_line_idx: usize,
+) -> (usize, usize) {
+  match op {
+    Operation::WindowScrollLeftBy(n) => {
+      let x = viewport_start_column_idx.saturating_add_signed(-(n as isize));
+      let y = viewport_start_line_idx;
+      (x, y)
+    }
+    Operation::WindowScrollRightBy(n) => {
+      let x = viewport_start_column_idx.saturating_add_signed(n as isize);
+      let y = viewport_start_line_idx;
+      (x, y)
+    }
+    Operation::WindowScrollUpBy(n) => {
+      let x = viewport_start_column_idx;
+      let y = viewport_start_line_idx.saturating_add_signed(-(n as isize));
+      (x, y)
+    }
+    Operation::WindowScrollDownBy(n) => {
+      let x = viewport_start_column_idx;
+      let y = viewport_start_line_idx.saturating_add_signed(n as isize);
+      (x, y)
+    }
+    Operation::WindowScrollTo((x, y)) => (x, y),
+    Operation::WindowScrollBy((by_x, by_y)) => {
+      let x = viewport_start_column_idx.saturating_add_signed(by_x);
+      let y = viewport_start_line_idx.saturating_add_signed(by_y);
+      (x, y)
+    }
+    _ => unreachable!(),
+  }
+}
+
 /// Calculate new cursor viewport by `Operation::CursorMove*` operations.
 ///
 /// It returns new cursor viewport if the operation is valid, returns `None` if the cursor cannot
@@ -127,7 +164,7 @@ pub fn cursor_move_to(
 ) -> Option<CursorViewportArc> {
   debug_assert!(matches!(cursor_move_to_op, Operation::CursorMoveTo((_, _))));
   let (to_char, to_line) = match cursor_move_to_op {
-    Operation::CursorMoveTo((l, c)) => (l, c),
+    Operation::CursorMoveTo((c, l)) => (c, l),
     _ => unreachable!(),
   };
 
@@ -158,14 +195,6 @@ fn _raw_cursor_move_to(
 
   let line_idx =
     _bounded_raw_cursor_move_y_to(viewport, cursor_line_idx, cursor_char_idx, buffer, line_idx);
-
-  if cfg!(debug_assertions) {
-    debug_assert!(line_idx <= viewport.end_line_idx().saturating_sub(1));
-    match buffer.last_char_on_line(line_idx) {
-      Some(last_char) => debug_assert!(last_char >= char_idx),
-      None => { /* do nothing */ }
-    }
-  }
 
   // If `line_idx` doesn't exist, or line is empty.
   match buffer.get_rope().get_line(line_idx) {
@@ -211,21 +240,24 @@ fn _bounded_raw_cursor_move_x_to(
   }
 }
 
-pub fn window_scroll(
+pub fn window_scroll_to(
   viewport: &Viewport,
   current_window: &Window,
   buffer: &Buffer,
-  command: Operation,
+  window_scroll_to_op: Operation,
 ) -> Option<ViewportArc> {
-  let (by_columns, by_lines) = normalize_as_window_scroll_by(
-    command,
-    viewport.start_column_idx(),
-    viewport.start_line_idx(),
-  );
+  debug_assert!(matches!(
+    window_scroll_to_op,
+    Operation::WindowScrollTo((_, _))
+  ));
+  let (to_column, to_line) = match window_scroll_to_op {
+    Operation::WindowScrollTo((c, l)) => (c, l),
+    _ => unreachable!(),
+  };
 
-  let window_scroll_result = _raw_window_scroll_by(viewport, buffer, by_columns, by_lines);
+  let window_scroll_to_result = _raw_window_scroll_to(viewport, buffer, to_column, to_line);
 
-  if let Some((start_line_idx, start_column_idx)) = window_scroll_result {
+  if let Some((start_line_idx, start_column_idx)) = window_scroll_to_result {
     // Sync the viewport
     let window_actual_shape = current_window.window_content().actual_shape();
     let window_local_options = current_window.options();
@@ -244,11 +276,11 @@ pub fn window_scroll(
 }
 
 /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-fn _raw_window_scroll_by(
+fn _raw_window_scroll_to(
   viewport: &Viewport,
   buffer: &Buffer,
-  columns: isize,
-  lines: isize,
+  column_idx: usize,
+  line_idx: usize,
 ) -> Option<(usize, usize)> {
   let start_line_idx = viewport.start_line_idx();
   let end_line_idx = viewport.end_line_idx();
@@ -256,15 +288,16 @@ fn _raw_window_scroll_by(
   let buffer_len_lines = buffer.get_rope().len_lines();
   debug_assert!(end_line_idx <= buffer_len_lines);
 
-  let mut line_idx = _bounded_raw_window_scroll_y_by(start_line_idx, buffer, lines);
+  let mut line_idx = _bounded_raw_window_scroll_y_to(buffer, line_idx);
 
-  // If viewport wants to scroll down (i.e. y > 0), and viewport already shows that last line in
-  // the buffer, then cannot scroll down anymore, just still keep the old `line_idx`.
-  if lines > 0 && end_line_idx == buffer_len_lines {
+  // If viewport wants to scroll down (i.e. lines_idx > start_line_idx), and viewport already shows
+  // that last line in the buffer, then cannot scroll down anymore, just still keep the old
+  // `line_idx`.
+  if line_idx > start_line_idx && end_line_idx == buffer_len_lines {
     line_idx = start_line_idx;
   }
 
-  let column_idx = _bounded_raw_window_scroll_x_by(start_column_idx, viewport, buffer, columns);
+  let column_idx = _bounded_raw_window_scroll_x_to(start_column_idx, viewport, buffer, column_idx);
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
   // there's no need to scroll anymore.
@@ -275,28 +308,9 @@ fn _raw_window_scroll_by(
   Some((line_idx, column_idx))
 }
 
-fn _bounded_raw_window_scroll_y_by(start_line_idx: usize, buffer: &Buffer, lines: isize) -> usize {
+fn _bounded_raw_window_scroll_y_to(buffer: &Buffer, line_idx: usize) -> usize {
   let buffer_len_lines = buffer.get_rope().len_lines();
-
-  if lines < 0 {
-    let n = -lines as usize;
-    start_line_idx.saturating_sub(n)
-  } else {
-    let n = lines as usize;
-
-    // Expected start line cannot go out of buffer, i.e. it cannot be greater than the last
-    // line.
-    let expected_start_line = std::cmp::min(
-      start_line_idx.saturating_add(n),
-      buffer_len_lines.saturating_sub(1),
-    );
-
-    trace!(
-      "start_line_idx:{:?},expected_start_line:{:?}",
-      start_line_idx, expected_start_line
-    );
-    expected_start_line
-  }
+  std::cmp::min(line_idx, buffer_len_lines.saturating_sub(1))
 }
 
 // Calculate how many columns that each line (in current viewport) need to scroll until
@@ -342,24 +356,17 @@ fn _bounded_raw_window_scroll_x_max_scrolls(viewport: &Viewport, buffer: &Buffer
   max_scrolls
 }
 
-fn _bounded_raw_window_scroll_x_by(
+fn _bounded_raw_window_scroll_x_to(
   start_column_idx: usize,
   viewport: &Viewport,
   buffer: &Buffer,
-  columns: isize,
+  column_idx: usize,
 ) -> usize {
-  if columns < 0 {
-    let n = -columns as usize;
-    start_column_idx.saturating_sub(n)
-  } else {
-    let n = columns as usize;
-    let expected = start_column_idx.saturating_add(n);
-    let max_scrolls = _bounded_raw_window_scroll_x_max_scrolls(viewport, buffer);
-    let upper_bounded = start_column_idx.saturating_add(max_scrolls);
-    trace!(
-      "max_scrolls:{},upper_bounded:{},expected:{}",
-      max_scrolls, upper_bounded, expected
-    );
-    std::cmp::min(expected, upper_bounded)
-  }
+  let max_scrolls = _bounded_raw_window_scroll_x_max_scrolls(viewport, buffer);
+  let upper_bounded = start_column_idx.saturating_add(max_scrolls);
+  trace!(
+    "max_scrolls:{},upper_bounded:{},column_idx:{}",
+    max_scrolls, upper_bounded, column_idx
+  );
+  std::cmp::min(column_idx, upper_bounded)
 }

@@ -14,7 +14,7 @@ use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
-/// The normal editing mode.
+/// The finite-state-machine for normal mode.
 pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {
@@ -117,7 +117,7 @@ impl NormalStateful {
             if start_line != viewport.start_line_idx()
               || start_column != viewport.start_column_idx()
             {
-              let new_viewport = cursor_ops::window_scroll(
+              let new_viewport = cursor_ops::window_scroll_to(
                 &viewport,
                 current_window,
                 &buffer,
@@ -256,8 +256,17 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        let maybe_new_viewport_arc =
-          cursor_ops::window_scroll(&viewport, current_window, &buffer, op);
+        let (start_column, start_line) = cursor_ops::normalize_as_window_scroll_to(
+          op,
+          viewport.start_column_idx(),
+          viewport.start_line_idx(),
+        );
+        let maybe_new_viewport_arc = cursor_ops::window_scroll_to(
+          &viewport,
+          current_window,
+          &buffer,
+          Operation::WindowScrollTo((start_column, start_line)),
+        );
         if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
           current_window.set_viewport(new_viewport_arc.clone());
         }
