@@ -887,7 +887,7 @@ mod tests_raw_cursor_move_x_by {
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
-    assert_eq!(actual.char_idx(), 9);
+    assert_eq!(actual.char_idx(), 12);
   }
 
   #[test]
@@ -5826,7 +5826,7 @@ mod tests_cursor_move {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
-      assert_eq!(actual.char_idx(), 156);
+      assert_eq!(actual.char_idx(), 157);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![

@@ -125,21 +125,16 @@ pub fn cursor_move_to(
   buffer: &Buffer,
   cursor_move_to_op: Operation,
 ) -> Option<CursorViewportArc> {
-  debug_assert!(matches!(
-    cursor_move_to_op,
-    Operation::CursorMoveTo((_to_line, _to_char))
-  ));
+  debug_assert!(matches!(cursor_move_to_op, Operation::CursorMoveTo((_, _))));
+  let (to_char, to_line) = match cursor_move_to_op {
+    Operation::CursorMoveTo((l, c)) => (l, c),
+    _ => unreachable!(),
+  };
 
-  let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
-    cursor_move_to_op,
-    cursor_viewport.char_idx(),
-    cursor_viewport.line_idx(),
-  );
+  let cursor_move_to_result =
+    _raw_cursor_move_to(viewport, cursor_viewport, buffer, to_char, to_line);
 
-  let cursor_move_result =
-    _raw_cursor_move_by(viewport, cursor_viewport, buffer, by_chars, by_lines);
-
-  if let Some((line_idx, char_idx)) = cursor_move_result {
+  if let Some((line_idx, char_idx)) = cursor_move_to_result {
     let new_cursor_viewport = CursorViewport::from_position(viewport, buffer, line_idx, char_idx);
     let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
     // New cursor position
@@ -151,17 +146,20 @@ pub fn cursor_move_to(
 }
 
 // Returns the `line_idx`/`char_idx` for new cursor position.
-fn _raw_cursor_move_by(
+fn _raw_cursor_move_to(
   viewport: &Viewport,
-  cursor_viewport: &CursorViewport,
+  _cursor_viewport: &CursorViewport,
   buffer: &Buffer,
-  chars: isize,
-  lines: isize,
+  char_idx: usize,
+  line_idx: usize,
 ) -> Option<(usize, usize)> {
-  let cursor_line_idx = cursor_viewport.line_idx();
-  let cursor_char_idx = cursor_viewport.char_idx();
-  let line_idx =
-    _bounded_raw_cursor_move_y_by(viewport, cursor_line_idx, cursor_char_idx, buffer, lines);
+  if cfg!(debug_assertions) {
+    debug_assert!(line_idx <= viewport.end_line_idx().saturating_sub(1));
+    match buffer.last_char_on_line(line_idx) {
+      Some(last_char) => debug_assert!(last_char >= char_idx),
+      None => { /* do nothing */ }
+    }
+  }
 
   // If `line_idx` doesn't exist, or line is empty.
   match buffer.get_rope().get_line(line_idx) {
@@ -173,7 +171,22 @@ fn _raw_cursor_move_by(
     None => return None,
   }
 
-  let char_idx = _bounded_raw_cursor_move_x_by(viewport, line_idx, cursor_char_idx, buffer, chars);
+  if cfg!(debug_assertions) {
+    let cursor_line_idx = _cursor_viewport.line_idx();
+    let cursor_char_idx = _cursor_viewport.char_idx();
+
+    let (by_chars, by_lines, _) = normalize_as_cursor_move_by(
+      Operation::CursorMoveTo((char_idx, line_idx)),
+      _cursor_viewport.char_idx(),
+      _cursor_viewport.line_idx(),
+    );
+    let to_line_idx =
+      _bounded_raw_cursor_move_y_by(viewport, cursor_line_idx, cursor_char_idx, buffer, by_lines);
+    let to_char_idx =
+      _bounded_raw_cursor_move_x_by(viewport, line_idx, cursor_char_idx, buffer, by_chars);
+    debug_assert_eq!(to_line_idx, line_idx);
+    debug_assert_eq!(to_char_idx, char_idx);
+  }
 
   Some((line_idx, char_idx))
 }
@@ -201,7 +214,7 @@ fn _bounded_raw_cursor_move_y_by(
 }
 
 fn _bounded_raw_cursor_move_x_by(
-  viewport: &Viewport,
+  _viewport: &Viewport,
   cursor_line_idx: usize,
   cursor_char_idx: usize,
   buffer: &Buffer,
@@ -213,21 +226,10 @@ fn _bounded_raw_cursor_move_x_by(
   } else {
     let n = chars as usize;
     let expected = cursor_char_idx.saturating_add(n);
-    let upper_bounded = {
-      debug_assert!(viewport.lines().contains_key(&cursor_line_idx));
-      let line_viewport = viewport.lines().get(&cursor_line_idx).unwrap();
-      let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-      let last_char_on_row = last_row_viewport.end_char_idx().saturating_sub(1);
-      trace!(
-        "cursor_char_idx:{}, expected:{}, last_row_viewport:{:?}, last_char_on_row:{}",
-        cursor_char_idx, expected, last_row_viewport, last_char_on_row
-      );
-      match buffer.last_char_on_line(cursor_line_idx) {
-        Some(last_char) => std::cmp::min(last_char_on_row, last_char),
-        None => last_char_on_row,
-      }
-    };
-    std::cmp::min(expected, upper_bounded)
+    match buffer.last_char_on_line(cursor_line_idx) {
+      Some(last_char) => std::cmp::min(last_char, expected),
+      None => expected,
+    }
   }
 }
 
