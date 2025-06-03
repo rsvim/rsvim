@@ -108,7 +108,7 @@ impl InsertStateful {
     let buffer = self._current_buffer(&mut tree);
 
     // Insert text.
-    let inserted_width = {
+    let (after_inserted_cursor_line_idx, after_inserted_cursor_char_idx) = {
       let buffer = buffer.upgrade().unwrap();
       let mut buffer = lock!(buffer);
       let cursor_viewport = self._current_cursor_viewport(&mut tree);
@@ -117,23 +117,39 @@ impl InsertStateful {
       let cursor_char_idx = cursor_viewport.char_idx();
       debug_assert!(buffer.get_rope().get_line(cursor_line_idx).is_some());
       let start_char_pos_of_line = buffer.get_rope().line_to_char(cursor_line_idx);
-      let insert_char_pos = start_char_pos_of_line + cursor_char_idx;
+      let before_insert_char_idx = start_char_pos_of_line + cursor_char_idx;
       if cfg!(debug_assertions) {
         use crate::test::buf::buffer_line_to_string;
         trace!(
-          "Before buffer inserted(line:{cursor_line_idx}):{:?}",
+          "Before buffer inserted(line:{cursor_line_idx},char:{before_insert_char_idx}):{:?}",
           buffer_line_to_string(&buffer.get_rope().line(cursor_line_idx))
         );
       }
-      buffer.get_rope_mut().insert(insert_char_pos, text.as_str());
+      buffer
+        .get_rope_mut()
+        .insert(before_insert_char_idx, text.as_str());
+      let after_inserted_char_idx = before_insert_char_idx + buffer.string_width(text.as_str());
       if cfg!(debug_assertions) {
         use crate::test::buf::buffer_line_to_string;
         trace!(
-          "After buffer inserted(line:{cursor_line_idx}):{:?}",
+          "After buffer inserted(line:{cursor_line_idx},char:{after_inserted_char_idx}):{:?}",
           buffer_line_to_string(&buffer.get_rope().line(cursor_line_idx))
         );
       }
+      (cursor_line_idx, after_inserted_char_idx)
     };
+
+    let buffer = self._current_buffer(&mut tree);
+
+    self._cursor_move_impl(
+      &mut tree,
+      buffer,
+      Operation::CursorMoveTo((
+        after_inserted_cursor_char_idx,
+        after_inserted_cursor_line_idx,
+      )),
+      CursorMoveImplOptions::include_empty_eol(),
+    );
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
