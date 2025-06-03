@@ -164,6 +164,19 @@ impl Buffer {
   pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
     unicode::char_symbol(&self.options, c)
   }
+
+  pub fn string_width(&self, s: &str) -> usize {
+    s.chars().fold(0_usize, |acc, c| acc + self.char_width(c))
+  }
+
+  pub fn string_symbol(&self, s: &str) -> (CompactString, usize) {
+    s.chars()
+      .fold((CompactString::new(""), 0_usize), |mut acc, c| {
+        acc.0.push(c);
+        acc.1 = acc.1 + self.char_width(c);
+        acc
+      })
+  }
 }
 // Unicode }
 

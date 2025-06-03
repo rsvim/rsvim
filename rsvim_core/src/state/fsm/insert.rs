@@ -11,7 +11,7 @@ use crate::ui::widget::window::{
   CursorViewport, CursorViewportArc, ViewportArc, ViewportSearchAnchorDirection,
 };
 
-use compact_str::{CompactString, ToCompactString};
+use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
@@ -108,7 +108,7 @@ impl InsertStateful {
     let buffer = self._current_buffer(&mut tree);
 
     // Insert text.
-    {
+    let inserted_width = {
       let buffer = buffer.upgrade().unwrap();
       let mut buffer = lock!(buffer);
       let cursor_viewport = self._current_cursor_viewport(&mut tree);
@@ -133,7 +133,7 @@ impl InsertStateful {
           buffer_line_to_string(&buffer.get_rope().line(cursor_line_idx))
         );
       }
-    }
+    };
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
