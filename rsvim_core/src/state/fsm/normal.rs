@@ -92,18 +92,18 @@ impl NormalStateful {
 
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let buffer_arc = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer_arc);
-        let viewport_arc = current_window.viewport();
-        let cursor_viewport_arc = current_window.cursor_viewport();
-        let cursor_viewport = lock!(cursor_viewport_arc);
+        let buffer = current_window.buffer().upgrade().unwrap();
+        let buffer = lock!(buffer);
+        let viewport = current_window.viewport();
+        let cursor_viewport = current_window.cursor_viewport();
+        let cursor_viewport = lock!(cursor_viewport);
 
         // Only move cursor when it is different from current cursor.
         if let Some((target_cursor_char, target_cursor_line, search_direction)) =
-          self._target_cursor_without_empty_eol(&cursor_viewport, &buffer, op)
+          self._target_cursor_exclude_empty_eol(&cursor_viewport, &buffer, op)
         {
           let new_viewport: Option<ViewportArc> = {
-            let viewport = lock!(viewport_arc);
+            let viewport = lock!(viewport);
             let (start_line, start_column) = viewport.search_anchor(
               search_direction,
               &buffer,
@@ -134,7 +134,7 @@ impl NormalStateful {
 
           // Then try cursor move.
           {
-            let current_viewport = new_viewport.unwrap_or(viewport_arc);
+            let current_viewport = new_viewport.unwrap_or(viewport);
             let current_viewport = lock!(current_viewport);
 
             let new_cursor_viewport = cursor_ops::cursor_move(
@@ -166,8 +166,8 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  // Returns `(target_cursor_char, target_cursor_line, cursor_move_direction)`.
-  fn _target_cursor_without_empty_eol(
+  // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
+  fn _target_cursor_exclude_empty_eol(
     &self,
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
@@ -179,6 +179,10 @@ impl NormalStateful {
         cursor_viewport.char_idx(),
         cursor_viewport.line_idx(),
       );
+    let target_cursor_line = std::cmp::min(
+      target_cursor_line,
+      buffer.get_rope().len_lines().saturating_sub(1),
+    );
     let target_cursor_char = match buffer.last_char_on_line_no_empty_eol(target_cursor_line) {
       Some(last_visible_char) => std::cmp::min(target_cursor_char, last_visible_char),
       None => target_cursor_char,
@@ -212,7 +216,7 @@ impl NormalStateful {
         let cursor_viewport = lock!(cursor_viewport);
 
         if let Some((target_cursor_char, target_cursor_line, _search_direction)) =
-          self._target_cursor_without_empty_eol(&cursor_viewport, &buffer, op)
+          self._target_cursor_exclude_empty_eol(&cursor_viewport, &buffer, op)
         {
           let maybe_new_cursor_viewport = cursor_ops::cursor_move(
             &viewport,
