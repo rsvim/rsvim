@@ -128,7 +128,7 @@ impl InsertStateful {
       buffer
         .get_rope_mut()
         .insert(before_insert_char_idx, text.as_str());
-      let after_inserted_char_idx = before_insert_char_idx + buffer.string_width(text.as_str());
+      let after_inserted_char_idx = cursor_char_idx + buffer.string_width(text.as_str());
       if cfg!(debug_assertions) {
         use crate::test::buf::buffer_line_to_string;
         trace!(
@@ -242,6 +242,11 @@ impl InsertStateful {
         if let Some((target_cursor_char, target_cursor_line, search_direction)) =
           self._target_cursor_considering_empty_eol(opts, &cursor_viewport, &buffer, op)
         {
+          trace!(
+            "move to target cursor line:{},char:{},direction:{:?}",
+            target_cursor_line, target_cursor_char, search_direction
+          );
+
           let new_viewport: Option<ViewportArc> = {
             let viewport = lock!(viewport);
             let (start_line, start_column) = viewport.search_anchor(
