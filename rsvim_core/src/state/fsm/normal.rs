@@ -14,7 +14,7 @@ use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
-/// The normal editing mode.
+/// The finite-state-machine for normal mode.
 pub struct NormalStateful {}
 
 impl Stateful for NormalStateful {

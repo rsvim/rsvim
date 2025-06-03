@@ -13,7 +13,7 @@ use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
-/// The insert editing mode.
+/// The finite-state-machine for insert mode.
 pub struct InsertStateful {}
 
 impl Stateful for InsertStateful {
