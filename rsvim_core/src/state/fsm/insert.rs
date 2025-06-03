@@ -139,8 +139,6 @@ impl InsertStateful {
       (cursor_line_idx, after_inserted_char_idx)
     };
 
-    let buffer = self._current_buffer(&mut tree);
-
     self._cursor_move_impl(
       &mut tree,
       buffer,
