@@ -106,11 +106,11 @@ impl InsertStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let buffer = self._current_buffer(&mut tree);
+    let buffer = buffer.upgrade().unwrap();
+    let mut buffer = lock!(buffer);
 
     // Insert text.
     let (after_inserted_cursor_line_idx, after_inserted_cursor_char_idx) = {
-      let buffer = buffer.upgrade().unwrap();
-      let mut buffer = lock!(buffer);
       let cursor_viewport = self._current_cursor_viewport(&mut tree);
       let cursor_viewport = lock!(cursor_viewport);
       let cursor_line_idx = cursor_viewport.line_idx();
@@ -145,7 +145,7 @@ impl InsertStateful {
     self._cursor_move_impl(
       CursorMoveImplOptions::include_empty_eol(),
       &mut tree,
-      buffer,
+      &buffer,
       Operation::CursorMoveTo((
         after_inserted_cursor_char_idx,
         after_inserted_cursor_line_idx,
@@ -175,11 +175,13 @@ impl InsertStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let buffer = self._current_buffer(&mut tree);
+    let buffer = buffer.upgrade().unwrap();
+    let buffer = lock!(buffer);
 
     self._cursor_move_impl(
       CursorMoveImplOptions::exclude_empty_eol(),
       &mut tree,
-      buffer,
+      &buffer,
       Operation::CursorMoveBy((0, 0)),
     );
 
@@ -199,11 +201,13 @@ impl InsertStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let buffer = self._current_buffer(&mut tree);
+    let buffer = buffer.upgrade().unwrap();
+    let buffer = lock!(buffer);
 
     self._cursor_move_impl(
       CursorMoveImplOptions::include_empty_eol(),
       &mut tree,
-      buffer,
+      &buffer,
       op,
     );
 
@@ -226,14 +230,11 @@ impl InsertStateful {
     &self,
     opts: CursorMoveImplOptions,
     tree: &mut Tree,
-    buffer: BufferWk,
+    buffer: &Buffer,
     op: Operation,
   ) {
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let buffer = buffer.upgrade().unwrap();
-        let buffer = lock!(buffer);
-
         let viewport = current_window.viewport();
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
