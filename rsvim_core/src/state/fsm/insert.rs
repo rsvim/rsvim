@@ -241,7 +241,7 @@ impl InsertStateful {
 
         // Only move cursor when it is different from current cursor.
         if let Some((target_cursor_char, target_cursor_line, search_direction)) =
-          self._target_cursor_considering_empty_eol(opts, &cursor_viewport, &buffer, op)
+          self._target_cursor_considering_empty_eol(opts, &cursor_viewport, buffer, op)
         {
           trace!(
             "move to target cursor line:{},char:{},direction:{:?}",
@@ -252,7 +252,7 @@ impl InsertStateful {
             let viewport = lock!(viewport);
             let (start_line, start_column) = viewport.search_anchor(
               search_direction,
-              &buffer,
+              buffer,
               current_window.actual_shape(),
               current_window.options(),
               target_cursor_line,
@@ -266,7 +266,7 @@ impl InsertStateful {
               let new_viewport = cursor_ops::window_scroll_to(
                 &viewport,
                 current_window,
-                &buffer,
+                buffer,
                 Operation::WindowScrollTo((start_column, start_line)),
               );
               if let Some(new_viewport_arc) = new_viewport.clone() {
@@ -286,7 +286,7 @@ impl InsertStateful {
             let new_cursor_viewport = cursor_ops::cursor_move_to(
               &current_viewport,
               &cursor_viewport,
-              &buffer,
+              buffer,
               Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
             );
 
