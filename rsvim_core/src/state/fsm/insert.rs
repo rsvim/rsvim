@@ -9,6 +9,7 @@ use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{CursorViewport, ViewportArc, ViewportSearchAnchorDirection};
 
+use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
@@ -45,9 +46,9 @@ impl Stateful for InsertStateful {
             KeyCode::End => {
               return self.cursor_move(&data_access, Operation::CursorMoveRightBy(usize::MAX));
             }
-            // KeyCode::Char('i') => {
-            //   return self.goto_insert_mode(&data_access, Operation::GotoInsertMode);
-            // }
+            KeyCode::Char(c) => {
+              return self.insert_text(&data_access, Operation::InsertText(c.to_compact_string()));
+            }
             KeyCode::Esc => {
               return self.goto_normal_mode(&data_access, Operation::GotoNormalMode);
             }
@@ -82,6 +83,17 @@ impl CursorMoveImplOptions {
     Self {
       include_empty_eol: false,
     }
+  }
+}
+
+impl InsertStateful {
+  fn insert_text(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+    debug_assert!(matches!(op, Operation::InsertText(_)));
+    let text = match op {
+      Operation::InsertText(t) => t,
+      _ => unreachable!(),
+    };
+    StatefulValue::InsertMode(InsertStateful::default())
   }
 }
 
