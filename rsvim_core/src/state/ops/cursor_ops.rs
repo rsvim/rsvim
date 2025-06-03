@@ -1,13 +1,10 @@
 //! Cursor operations.
 
-use std::intrinsics::unreachable;
-
 use crate::buf::Buffer;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Window};
 
-use tokio_util::bytes::buf;
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
