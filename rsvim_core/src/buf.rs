@@ -173,7 +173,7 @@ impl Buffer {
     s.chars()
       .fold((CompactString::new(""), 0_usize), |mut acc, c| {
         acc.0.push(c);
-        acc.1 = acc.1 + self.char_width(c);
+        acc.1 += self.char_width(c);
         acc
       })
   }
