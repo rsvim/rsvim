@@ -1,17 +1,18 @@
 //! The insert mode.
 
-use crate::buf::Buffer;
+use crate::buf::{Buffer, BufferWk};
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{CursorViewport, ViewportArc, ViewportSearchAnchorDirection};
+use crate::ui::widget::window::{
+  CursorViewport, ViewportArc, ViewportSearchAnchorDirection, Window,
+};
 
-use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
-use tracing::trace;
+use tracing::{Instrument, trace};
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for insert mode.
@@ -47,7 +48,7 @@ impl Stateful for InsertStateful {
               return self.cursor_move(&data_access, Operation::CursorMoveRightBy(usize::MAX));
             }
             KeyCode::Char(c) => {
-              return self.insert_text(&data_access, Operation::InsertText(c.to_compact_string()));
+              return self.insert_text(&data_access, Operation::InsertText(c.to_string()));
             }
             KeyCode::Esc => {
               return self.goto_normal_mode(&data_access, Operation::GotoNormalMode);
@@ -93,6 +94,9 @@ impl InsertStateful {
       Operation::InsertText(t) => t,
       _ => unreachable!(),
     };
+
+    {}
+
     StatefulValue::InsertMode(InsertStateful::default())
   }
 }
@@ -103,9 +107,11 @@ impl InsertStateful {
 
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    let buffer = self._current_buffer(&mut tree);
 
     self._cursor_move_impl(
       &mut tree,
+      buffer,
       Operation::CursorMoveBy((0, 0)),
       CursorMoveImplOptions::exclude_empty_eol(),
     );
@@ -125,17 +131,42 @@ impl InsertStateful {
   fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    let buffer = self._current_buffer(&mut tree);
 
-    self._cursor_move_impl(&mut tree, op, CursorMoveImplOptions::include_empty_eol());
+    self._cursor_move_impl(
+      &mut tree,
+      buffer,
+      op,
+      CursorMoveImplOptions::include_empty_eol(),
+    );
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
 
-  fn _cursor_move_impl(&self, tree: &mut Tree, op: Operation, opts: CursorMoveImplOptions) {
+  fn _current_buffer(&self, tree: &mut Tree) -> BufferWk {
     if let Some(current_window_id) = tree.current_window_id() {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let buffer = current_window.buffer().upgrade().unwrap();
+        current_window.buffer()
+      } else {
+        unreachable!()
+      }
+    } else {
+      unreachable!()
+    }
+  }
+
+  fn _cursor_move_impl(
+    &self,
+    tree: &mut Tree,
+    buffer: BufferWk,
+    op: Operation,
+    opts: CursorMoveImplOptions,
+  ) {
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+        let buffer = buffer.upgrade().unwrap();
         let buffer = lock!(buffer);
+
         let viewport = current_window.viewport();
         let cursor_viewport = current_window.cursor_viewport();
         let cursor_viewport = lock!(cursor_viewport);
