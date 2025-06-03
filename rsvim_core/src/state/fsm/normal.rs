@@ -5861,11 +5861,11 @@ mod tests_cursor_move {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
-      assert_eq!(actual.char_idx(), 156);
+      assert_eq!(actual.char_idx(), 157);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "window ",
+        " window ",
         "content ",
         "widget, ",
         "then the ",
@@ -5895,11 +5895,11 @@ mod tests_cursor_move {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
-      assert_eq!(actual.char_idx(), 148);
+      assert_eq!(actual.char_idx(), 149);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "window ",
+        " window ",
         "content ",
         "widget, ",
         "then the ",
@@ -5929,20 +5929,20 @@ mod tests_cursor_move {
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree.clone());
       assert_eq!(actual.line_idx(), 3);
-      assert_eq!(actual.char_idx(), 48);
+      assert_eq!(actual.char_idx(), 49);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        " put ",
-        "inside a ",
-        "row of the",
-        " window ",
-        "content ",
+        "put inside",
+        " a row of ",
+        "the window",
+        " content ",
         "widget, ",
         "then the ",
         "line-wrap ",
         "and word-",
         "wrap ",
+        "doesn't "
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
