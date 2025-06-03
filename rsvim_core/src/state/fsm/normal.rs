@@ -5942,7 +5942,7 @@ mod tests_cursor_move {
         "line-wrap ",
         "and word-",
         "wrap ",
-        "doesn't "
+        "doesn't ",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
