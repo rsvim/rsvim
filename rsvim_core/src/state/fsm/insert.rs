@@ -7,12 +7,10 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{
-  CursorViewport, ViewportArc, ViewportSearchAnchorDirection, Window,
-};
+use crate::ui::widget::window::{CursorViewport, ViewportArc, ViewportSearchAnchorDirection};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
-use tracing::{Instrument, trace};
+use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for insert mode.
