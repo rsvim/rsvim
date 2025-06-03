@@ -443,7 +443,7 @@ mod tests_cursor_move_and_scroll {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
+    let stateful_machine = InsertStateful::default();
     stateful_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
@@ -485,7 +485,7 @@ mod tests_cursor_move_and_scroll {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
-    let stateful = NormalStateful::default();
+    let stateful = InsertStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
@@ -646,7 +646,7 @@ mod tests_cursor_move_and_scroll {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
-    let stateful = NormalStateful::default();
+    let stateful = InsertStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     // Move-1
