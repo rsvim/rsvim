@@ -248,9 +248,29 @@ impl CursorViewport {
 
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
     } else {
-      debug_assert!(line_viewport.rows().first_key_value().is_some());
-      let (first_row_idx, _first_row_viewport) = line_viewport.rows().first_key_value().unwrap();
-      CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+      let target_is_empty_eol = buffer.is_empty_eol(line_idx, char_idx);
+      if target_is_empty_eol {
+        // The target cursor is empty eol, and it doesn't have a space to put in the viewport, it
+        // indicates:
+        //
+        // 1. The window must be `wrap=true`
+        // 2. The viewport must contains `line_idx+1`.
+        // 3. The target cursor position is out of viewport.
+        //
+        // The cursor will be put in the position `(next line, 0-column)`.
+
+        let next_line_idx = line_idx + 1;
+        debug_assert!(viewport.lines().contains_key(&next_line_idx));
+        let next_line_viewport = viewport.lines().get(&next_line_idx).unwrap();
+        debug_assert!(next_line_viewport.rows().first_key_value().is_some());
+        let (first_row_idx, _first_row_viewport) =
+          next_line_viewport.rows().first_key_value().unwrap();
+        CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+      } else {
+        debug_assert!(line_viewport.rows().first_key_value().is_some());
+        let (first_row_idx, _first_row_viewport) = line_viewport.rows().first_key_value().unwrap();
+        CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
+      }
     }
   }
 }
