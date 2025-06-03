@@ -40,13 +40,13 @@ impl Stateful for InsertStateful {
               return self.cursor_move(&data_access, Operation::CursorMoveRightBy(1));
             }
             KeyCode::Home => {
-              return self.cursor_move(&data_access, Command::CursorMoveLeftBy(usize::MAX));
+              return self.cursor_move(&data_access, Operation::CursorMoveLeftBy(usize::MAX));
             }
             KeyCode::End => {
-              return self.cursor_move(&data_access, Command::CursorMoveRightBy(usize::MAX));
+              return self.cursor_move(&data_access, Operation::CursorMoveRightBy(usize::MAX));
             }
             // KeyCode::Char('i') => {
-            //   return self.goto_insert_mode(&data_access, Command::GotoInsertMode);
+            //   return self.goto_insert_mode(&data_access, Operation::GotoInsertMode);
             // }
             KeyCode::Esc => {
               return self.goto_normal_mode(&data_access, Operation::GotoNormalMode);
