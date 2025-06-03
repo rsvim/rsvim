@@ -1137,7 +1137,7 @@ mod tests_raw_cursor_move_by {
         Event::Key(key_event),
       );
       for c in commands.iter() {
-        stateful.__test_raw_cursor_move(&data_access, *c);
+        stateful.__test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree);
@@ -1159,7 +1159,7 @@ mod tests_raw_cursor_move_by {
         Event::Key(key_event),
       );
       for c in commands.iter() {
-        stateful.__test_raw_cursor_move(&data_access, *c);
+        stateful.__test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree);
@@ -1371,7 +1371,7 @@ mod tests_raw_cursor_move_to {
         Event::Key(key_event),
       );
       for c in commands.iter() {
-        stateful.__test_raw_cursor_move(&data_access, *c);
+        stateful.__test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree);
@@ -1393,7 +1393,7 @@ mod tests_raw_cursor_move_to {
         Event::Key(key_event),
       );
       for c in commands.iter() {
-        stateful.__test_raw_cursor_move(&data_access, *c);
+        stateful.__test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
       let actual = get_cursor_viewport(tree);
