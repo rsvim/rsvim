@@ -55,7 +55,7 @@ use std::collections::BTreeMap;
 ///   on **current** char 18 is 26.
 pub struct ColumnIndex {
   // Char index maps to its prefix display width.
-  char2width: SmallVec<[usize; 60]>,
+  char2width: SmallVec<[usize; 80]>,
 
   // Prefix display width maps to the right-most char index, i.e. the reversed mapping of
   // `char2width`.
