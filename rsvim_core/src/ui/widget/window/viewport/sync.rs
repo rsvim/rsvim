@@ -135,7 +135,7 @@ fn proc_line_nowrap(
     }
   };
 
-  let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
+  let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
   rows.insert(current_row, RowViewport::new(start_char..end_char));
   (rows, start_fills, end_fills, current_row)
 }
@@ -151,7 +151,7 @@ fn sync_nowrap(
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::new();
+  let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -201,11 +201,11 @@ fn proc_line_wrap_nolinebreak(
   let bufline_len_chars = bufline.len_chars();
 
   if bufline_len_chars == 0 {
-    let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
   } else {
-    let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(window_height as usize);
 
     // let mut start_char = buffer
     match buffer.char_after(current_line, start_column) {
@@ -262,7 +262,7 @@ fn sync_wrap_nolinebreak(
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::new();
+  let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -406,11 +406,11 @@ fn proc_line_wrap_linebreak(
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = buffer.get_rope().line(current_line);
   if bufline.len_chars() == 0 {
-    let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
   } else {
-    let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(window_height as usize);
 
     // Here clone the line with the max chars that can hold by current window/viewport,
     // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
@@ -571,7 +571,7 @@ fn sync_wrap_linebreak(
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::new();
+  let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
