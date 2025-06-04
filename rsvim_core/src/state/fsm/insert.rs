@@ -129,7 +129,7 @@ impl InsertStateful {
         .get_rope_mut()
         .insert(before_insert_char_idx, text.as_str());
       buffer.truncate_since_char(cursor_line_idx, before_insert_char_idx);
-      let after_inserted_char_idx = cursor_char_idx + buffer.string_width(text.as_str());
+      let after_inserted_char_idx = cursor_char_idx + text.len();
       if cfg!(debug_assertions) {
         use crate::test::buf::buffer_line_to_string;
         trace!(
