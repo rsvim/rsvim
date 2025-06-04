@@ -85,11 +85,11 @@ impl ColumnIndex {
     }
   }
 
-  #[cfg(not(debug_assertions))]
-  pub fn _internal_check(&self) {}
+  #[cfg(not(test))]
+  fn _internal_check(&self) {}
 
-  #[cfg(debug_assertions)]
-  pub fn _internal_check(&self) {
+  #[cfg(test)]
+  fn _internal_check(&self) {
     // Check length.
     debug_assert!(self.char2width.len() >= self.width2char.len());
 

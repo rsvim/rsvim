@@ -621,10 +621,10 @@ impl Viewport {
     }
   }
 
-  #[cfg(not(debug_assertions))]
+  #[cfg(not(test))]
   fn _internal_check(&self) {}
 
-  #[cfg(debug_assertions)]
+  #[cfg(test)]
   fn _internal_check(&self) {
     debug_assert!(self.end_line_idx >= self.start_line_idx);
     debug_assert_eq!(
@@ -645,10 +645,10 @@ impl Viewport {
       last_line_idx = Some(*line_idx);
       let mut last_row_viewport: Option<RowViewport> = None;
       for (row_idx, row_viewport) in line_viewport.rows() {
-        trace!(
-          "line_idx:{:?},row_idx:{:?},last_row_idx:{:?},last_row_viewport:{:?},row_viewport:{:?}",
-          line_idx, row_idx, last_row_idx, last_row_viewport, row_viewport
-        );
+        // trace!(
+        //   "line_idx:{:?},row_idx:{:?},last_row_idx:{:?},last_row_viewport:{:?},row_viewport:{:?}",
+        //   line_idx, row_idx, last_row_idx, last_row_viewport, row_viewport
+        // );
         match last_row_idx {
           Some(last_row_idx1) => debug_assert_eq!(last_row_idx1 + 1, *row_idx),
           None => { /* Skip */ }

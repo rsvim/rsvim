@@ -56,10 +56,10 @@ impl Relationships {
     self.children_ids.len()
   }
 
-  #[cfg(not(debug_assertions))]
-  pub fn _internal_check(&self) {}
+  #[cfg(not(test))]
+  fn _internal_check(&self) {}
 
-  #[cfg(debug_assertions)]
+  #[cfg(test)]
   fn _internal_check(&self) {
     let mut que: VecDeque<TreeNodeId> = VecDeque::new();
     que.push_back(self.root_id);
@@ -278,11 +278,11 @@ where
     }
   }
 
-  #[cfg(not(debug_assertions))]
-  pub fn _internal_check(&self) {}
+  #[cfg(not(test))]
+  fn _internal_check(&self) {}
 
-  #[cfg(debug_assertions)]
-  pub fn _internal_check(&self) {
+  #[cfg(test)]
+  fn _internal_check(&self) {
     debug_assert!(!self.nodes.is_empty());
     debug_assert!(!self.relationships.borrow().is_empty());
     debug_assert_eq!(self.relationships.borrow().len(), self.nodes.len());
