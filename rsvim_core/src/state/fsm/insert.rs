@@ -285,66 +285,64 @@ impl InsertStateful {
         let cursor_viewport = lock!(cursor_viewport);
 
         // Only move cursor when it is different from current cursor.
-        if let Some((target_cursor_char, target_cursor_line, search_direction)) =
-          self._target_cursor_considering_empty_eol(opts, &cursor_viewport, buffer, op)
-        {
-          trace!(
-            "move to target cursor line:{},char:{},direction:{:?}",
-            target_cursor_line, target_cursor_char, search_direction
+        let (target_cursor_char, target_cursor_line, search_direction) =
+          self._target_cursor_considering_empty_eol(opts, &cursor_viewport, buffer, op);
+
+        trace!(
+          "move to target cursor line:{},char:{},direction:{:?}",
+          target_cursor_line, target_cursor_char, search_direction
+        );
+
+        let new_viewport: Option<ViewportArc> = {
+          let viewport = lock!(viewport);
+          let (start_line, start_column) = viewport.search_anchor(
+            search_direction,
+            buffer,
+            current_window.actual_shape(),
+            current_window.options(),
+            target_cursor_line,
+            target_cursor_char,
           );
 
-          let new_viewport: Option<ViewportArc> = {
-            let viewport = lock!(viewport);
-            let (start_line, start_column) = viewport.search_anchor(
-              search_direction,
-              buffer,
-              current_window.actual_shape(),
-              current_window.options(),
-              target_cursor_line,
-              target_cursor_char,
-            );
-
-            // First try window scroll.
-            if start_line != viewport.start_line_idx()
-              || start_column != viewport.start_column_idx()
-            {
-              let new_viewport = cursor_ops::window_scroll_to(
-                &viewport,
-                current_window,
-                buffer,
-                Operation::WindowScrollTo((start_column, start_line)),
-              );
-              if let Some(new_viewport_arc) = new_viewport.clone() {
-                current_window.set_viewport(new_viewport_arc.clone());
-              }
-              new_viewport
-            } else {
-              None
-            }
-          };
-
-          // Then try cursor move.
+          // First try window scroll.
+          if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx()
           {
-            let current_viewport = new_viewport.unwrap_or(viewport);
-            let current_viewport = lock!(current_viewport);
-
-            let new_cursor_viewport = cursor_ops::cursor_move_to(
-              &current_viewport,
-              &cursor_viewport,
+            let new_viewport = cursor_ops::window_scroll_to(
+              &viewport,
+              current_window,
               buffer,
-              Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+              Operation::WindowScrollTo((start_column, start_line)),
             );
-
-            if let Some(new_cursor_viewport) = new_cursor_viewport {
-              current_window.set_cursor_viewport(new_cursor_viewport.clone());
-              let cursor_id = tree.cursor_id().unwrap();
-              let new_cursor_viewport = lock!(new_cursor_viewport);
-              tree.bounded_move_to(
-                cursor_id,
-                new_cursor_viewport.column_idx() as isize,
-                new_cursor_viewport.row_idx() as isize,
-              );
+            if let Some(new_viewport_arc) = new_viewport.clone() {
+              current_window.set_viewport(new_viewport_arc.clone());
             }
+            new_viewport
+          } else {
+            None
+          }
+        };
+
+        // Then try cursor move.
+        {
+          let current_viewport = new_viewport.unwrap_or(viewport);
+          let current_viewport = lock!(current_viewport);
+
+          let new_cursor_viewport = cursor_ops::cursor_move_to(
+            &current_viewport,
+            &cursor_viewport,
+            buffer,
+            Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+          );
+
+          if let Some(new_cursor_viewport) = new_cursor_viewport {
+            current_window.set_cursor_viewport(new_cursor_viewport.clone());
+            let cursor_id = tree.cursor_id().unwrap();
+            let new_cursor_viewport = lock!(new_cursor_viewport);
+            tree.bounded_move_to(
+              cursor_id,
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
+            );
           }
         }
       } else {
@@ -362,7 +360,7 @@ impl InsertStateful {
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
     op: Operation,
-  ) -> Option<(usize, usize, ViewportSearchAnchorDirection)> {
+  ) -> (usize, usize, ViewportSearchAnchorDirection) {
     let (target_cursor_char, target_cursor_line, move_direction) = if opts.include_empty_eol {
       cursor_ops::normalize_as_cursor_move_to_include_empty_eol(
         buffer,
@@ -379,19 +377,13 @@ impl InsertStateful {
       )
     };
 
-    if target_cursor_char != cursor_viewport.char_idx()
-      || target_cursor_line != cursor_viewport.line_idx()
-    {
-      let search_direction = match move_direction {
-        CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
-        CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
-        CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
-        CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
-      };
-      Some((target_cursor_char, target_cursor_line, search_direction))
-    } else {
-      None
-    }
+    let search_direction = match move_direction {
+      CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
+      CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
+      CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
+      CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
+    };
+    (target_cursor_char, target_cursor_line, search_direction)
   }
 }
 
@@ -413,13 +405,13 @@ mod tests_util {
     CursorViewport, Viewport, WindowLocalOptions, WindowLocalOptionsBuilder,
   };
 
+  use crate::ui::canvas::Canvas;
+  use crate::ui::widget::Widgetable;
+  use crate::ui::widget::window::content::WindowContent;
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
   use std::sync::Arc;
   use tracing::info;
-  use crate::ui::canvas::Canvas;
-  use crate::ui::widget::window::content::WindowContent;
-  use crate::ui::widget::Widgetable;
 
   pub fn make_tree(
     terminal_size: U16Size,
@@ -609,7 +601,7 @@ mod tests_util {
       ),
     );
     let window_content =
-        WindowContent::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
+      WindowContent::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
     let mut canvas = Canvas::new(terminal_size);
     window_content.draw(&mut canvas);
     canvas
@@ -617,11 +609,11 @@ mod tests_util {
 
   pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
     let actual = actual
-        .frame()
-        .raw_symbols()
-        .iter()
-        .map(|cs| cs.join(""))
-        .collect::<Vec<_>>();
+      .frame()
+      .raw_symbols()
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
     info!("actual:{}", actual.len());
     for a in actual.iter() {
       info!("{:?}", a);
@@ -1288,9 +1280,9 @@ mod tests_insert_text {
 
     let terminal_size = U16Size::new(10, 10);
     let window_options = WindowLocalOptionsBuilder::default()
-            .wrap(false)
-            .build()
-            .unwrap();
+      .wrap(false)
+      .build()
+      .unwrap();
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -1300,11 +1292,7 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(
-      terminal_size,
-      window_options,
-      lines,
-    );
+    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1377,7 +1365,12 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), Viewport::to_arc(viewport));
+      let actual_canvas = make_canvas(
+        terminal_size,
+        window_options,
+        buf.clone(),
+        Viewport::to_arc(viewport),
+      );
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -1437,7 +1430,12 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), Viewport::to_arc(viewport));
+      let actual_canvas = make_canvas(
+        terminal_size,
+        window_options,
+        buf.clone(),
+        Viewport::to_arc(viewport),
+      );
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -1500,7 +1498,12 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), Viewport::to_arc(viewport));
+      let actual_canvas = make_canvas(
+        terminal_size,
+        window_options,
+        buf.clone(),
+        Viewport::to_arc(viewport),
+      );
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -1511,10 +1514,10 @@ mod tests_insert_text {
 
     let terminal_size = U16Size::new(10, 6);
     let window_options = WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap();
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
     let lines = vec![
       "AAAAAAAAAA\n",
       "1st.\n",
@@ -1530,11 +1533,7 @@ mod tests_insert_text {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(
-      terminal_size,
-      window_options,
-      lines,
-    );
+    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1557,9 +1556,9 @@ mod tests_insert_text {
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 6);
+      assert_eq!(actual1.char_idx(), 7);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 6);
+      assert_eq!(actual1.column_idx(), 7);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
@@ -1570,10 +1569,9 @@ mod tests_insert_text {
         "3rd.\n",
         "4th.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> =
-          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
-              .into_iter()
-              .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1592,7 +1590,12 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), Viewport::to_arc(viewport));
+      let actual_canvas = make_canvas(
+        terminal_size,
+        window_options,
+        buf.clone(),
+        Viewport::to_arc(viewport),
+      );
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -1602,32 +1605,99 @@ mod tests_insert_text {
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
-      assert_eq!(actual1.char_idx(), 3);
-      assert_eq!(actual1.row_idx(), 2);
-      assert_eq!(actual1.column_idx(), 3);
+      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 4);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "AAAAAAAAAA",
+        "Hello, AAA",
+        "AAAAAAA\n",
         "1st.\n",
         "2nd.\n",
         "3rd.\n",
         "4th.\n",
-        "5th.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0)]
-          .into_iter()
-          .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        6,
+        5,
         &expect_fills,
         &expect_fills,
       );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.      ",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas = make_canvas(
+        terminal_size,
+        window_options,
+        buf.clone(),
+        Viewport::to_arc(viewport),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Insert-3
+    {
+      stateful.insert_text(
+        &data_access,
+        Operation::InsertTextAtCursor(CompactString::new("World!")),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 2);
+      assert_eq!(actual1.char_idx(), 10);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 9);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\n",
+        "1st.\n",
+        "2nd.World!\n",
+        "3rd.\n",
+        "4th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+        .into_iter()
+        .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.World!",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas = make_canvas(
+        terminal_size,
+        window_options,
+        buf.clone(),
+        Viewport::to_arc(viewport),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
     }
 
     // Move-2
