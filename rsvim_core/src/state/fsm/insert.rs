@@ -1268,17 +1268,19 @@ mod tests_insert_text {
     {
       stateful.insert_text(
         &data_access,
-        Operation::InsertTextAtCursor(CompactString::new("Goodbye, ")),
+        Operation::InsertTextAtCursor(CompactString::new("Bye, ")),
       );
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 3);
+      assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 5);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
+        "Bye, Hello",
         "This is a ",
         "But still ",
         "  1. When ",
@@ -1312,17 +1314,74 @@ mod tests_insert_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(158));
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
 
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual2.line_idx(), 3);
-      assert_eq!(actual2.char_idx(), 158);
-      assert_eq!(actual2.row_idx(), 3);
-      assert_eq!(actual2.column_idx(), 9);
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 15);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "endering.\n", "", "", "ut in the ", ""];
+      let expect = vec![
+        "o, RSVIM!\n",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    // Insert-3
+    {
+      stateful.insert_text(
+        &data_access,
+        Operation::InsertTextAtCursor(CompactString::new(" Go!")),
+      );
+
+      let tree = data_access.tree.clone();
+      let actual3 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual3.line_idx(), 0);
+      assert_eq!(actual3.char_idx(), 5);
+      assert_eq!(actual3.row_idx(), 0);
+      assert_eq!(actual3.column_idx(), 5);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "SVIM! Go!\n",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
       let expect_fills: BTreeMap<usize, usize> = vec![
         (0, 0),
         (1, 0),
