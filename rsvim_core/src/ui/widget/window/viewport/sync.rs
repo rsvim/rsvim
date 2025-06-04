@@ -1591,7 +1591,7 @@ pub fn search_anchor_downward(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   // The cursor must move downward.
-  debug_assert!(target_cursor_line > viewport.start_line_idx());
+  debug_assert!(target_cursor_line >= viewport.start_line_idx());
 
   let buffer_len_lines = buffer.get_rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
@@ -1810,7 +1810,7 @@ pub fn search_anchor_upward(
   target_cursor_char: usize,
 ) -> (usize, usize) {
   // The cursor must move upward.
-  debug_assert!(target_cursor_line < viewport.end_line_idx().saturating_sub(1));
+  debug_assert!(target_cursor_line <= viewport.end_line_idx().saturating_sub(1));
 
   let buffer_len_lines = buffer.get_rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
