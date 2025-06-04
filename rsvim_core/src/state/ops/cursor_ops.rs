@@ -101,7 +101,10 @@ pub fn normalize_to_cursor_move_to_exclude_empty_eol(
   let y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
   let x = match buffer.last_char_on_line_no_empty_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char),
-    None => x,
+    None => {
+      debug_assert!(buffer.get_rope().get_line(y).is_some());
+      std::cmp::min(x, buffer.get_rope().line(y).len_chars().saturating_sub(1))
+    }
   };
   (x, y, move_direction)
 }
@@ -117,7 +120,10 @@ pub fn normalize_to_cursor_move_to_include_empty_eol(
   let y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
   let x = match buffer.last_char_on_line(y) {
     Some(last_char) => std::cmp::min(x, last_char),
-    None => x,
+    None => {
+      debug_assert!(buffer.get_rope().get_line(y).is_some());
+      std::cmp::min(x, buffer.get_rope().line(y).len_chars().saturating_sub(1))
+    }
   };
   (x, y, move_direction)
 }
@@ -217,7 +223,7 @@ pub fn cursor_move_to(
 // Returns the `line_idx`/`char_idx` for new cursor position.
 fn _raw_cursor_move_to(
   viewport: &Viewport,
-  cursor_viewport: &CursorViewport,
+  _cursor_viewport: &CursorViewport,
   buffer: &Buffer,
   char_idx: usize,
   line_idx: usize,
