@@ -415,7 +415,11 @@ mod tests_util {
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
+  use std::sync::Arc;
   use tracing::info;
+  use crate::ui::canvas::Canvas;
+  use crate::ui::widget::window::content::WindowContent;
+  use crate::ui::widget::Widgetable;
 
   pub fn make_tree(
     terminal_size: U16Size,
@@ -586,6 +590,54 @@ mod tests_util {
         );
         assert_eq!(payload, expect[*r as usize]);
       }
+    }
+  }
+
+  pub fn make_canvas(
+    terminal_size: U16Size,
+    window_options: WindowLocalOptions,
+    buffer: BufferArc,
+    viewport: ViewportArc,
+  ) -> Canvas {
+    let mut tree = Tree::new(terminal_size);
+    tree.set_global_local_options(&window_options);
+    let shape = IRect::new(
+      (0, 0),
+      (
+        terminal_size.width() as isize,
+        terminal_size.height() as isize,
+      ),
+    );
+    let window_content =
+        WindowContent::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
+    let mut canvas = Canvas::new(terminal_size);
+    window_content.draw(&mut canvas);
+    canvas
+  }
+
+  pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
+    let actual = actual
+        .frame()
+        .raw_symbols()
+        .iter()
+        .map(|cs| cs.join(""))
+        .collect::<Vec<_>>();
+    info!("actual:{}", actual.len());
+    for a in actual.iter() {
+      info!("{:?}", a);
+    }
+    info!("expect:{}", expect.len());
+    for e in expect.iter() {
+      info!("{:?}", e);
+    }
+
+    assert_eq!(actual.len(), expect.len());
+    for i in 0..actual.len() {
+      let e = &expect[i];
+      let a = &actual[i];
+      info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
+      assert_eq!(e.len(), a.len());
+      assert_eq!(e, a);
     }
   }
 }
@@ -1234,6 +1286,11 @@ mod tests_insert_text {
   fn nowrap1() {
     test_log_init();
 
+    let terminal_size = U16Size::new(10, 10);
+    let window_options = WindowLocalOptionsBuilder::default()
+            .wrap(false)
+            .build()
+            .unwrap();
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -1244,11 +1301,8 @@ mod tests_insert_text {
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
     let (tree, state, bufs, buf) = make_tree(
-      U16Size::new(10, 10),
-      WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap(),
+      terminal_size,
+      window_options,
       lines,
     );
 
@@ -1310,6 +1364,21 @@ mod tests_insert_text {
         &expect_fills,
         &expect_fills,
       );
+
+      let expect_canvas = vec![
+        "Bye, Hello",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), Viewport::to_arc(viewport));
+      assert_canvas(&actual_canvas, &expect_canvas);
     }
 
     // Move-2
