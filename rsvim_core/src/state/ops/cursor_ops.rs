@@ -5,7 +5,7 @@ use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Window};
 
-use tracing::trace;
+// use tracing::trace;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// Cursor move direction.
