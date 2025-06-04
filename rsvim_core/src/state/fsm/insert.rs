@@ -1509,6 +1509,12 @@ mod tests_insert_text {
   fn wrap_nolinebreak1() {
     test_log_init();
 
+    let terminal_size = U16Size::new(10, 6);
+    let window_options = WindowLocalOptionsBuilder::default()
+        .wrap(true)
+        .line_break(false)
+        .build()
+        .unwrap();
     let lines = vec![
       "AAAAAAAAAA\n",
       "1st.\n",
@@ -1525,12 +1531,8 @@ mod tests_insert_text {
       "12th.\n",
     ];
     let (tree, state, bufs, buf) = make_tree(
-      U16Size::new(10, 6),
-      WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap(),
+      terminal_size,
+      window_options,
       lines,
     );
 
