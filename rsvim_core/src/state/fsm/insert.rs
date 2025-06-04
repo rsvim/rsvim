@@ -128,6 +128,7 @@ impl InsertStateful {
       buffer
         .get_rope_mut()
         .insert(before_insert_char_idx, text.as_str());
+      buffer.truncate_since_char(cursor_line_idx, before_insert_char_idx);
       let after_inserted_char_idx = cursor_char_idx + buffer.string_width(text.as_str());
       if cfg!(debug_assertions) {
         use crate::test::buf::buffer_line_to_string;
@@ -138,6 +139,52 @@ impl InsertStateful {
       }
       (cursor_line_idx, after_inserted_char_idx)
     };
+
+    // Update viewport since the buffer doesn't match the viewport.
+    if let Some(current_window_id) = tree.current_window_id() {
+      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+        let viewport = current_window.viewport();
+        let viewport = lock!(viewport);
+        let cursor_viewport = current_window.cursor_viewport();
+        let cursor_viewport = lock!(cursor_viewport);
+
+        let start_line = std::cmp::min(
+          viewport.start_line_idx(),
+          buffer.get_rope().len_lines().saturating_sub(1),
+        );
+        debug_assert!(buffer.get_rope().get_line(start_line).is_some());
+        let char_at_start_column = buffer
+          .get_rope()
+          .line(start_line)
+          .len_chars()
+          .saturating_sub(1);
+        let start_column = std::cmp::min(
+          viewport.start_column_idx(),
+          buffer.width_until(start_line, char_at_start_column),
+        );
+        if let Some(updated_viewport) = cursor_ops::window_scroll_to(
+          &viewport,
+          current_window,
+          &buffer,
+          Operation::WindowScrollTo((start_column, start_column)),
+        ) {
+          current_window.set_viewport(updated_viewport);
+
+          if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
+            &viewport,
+            &cursor_viewport,
+            &buffer,
+            Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
+          ) {
+            current_window.set_cursor_viewport(updated_cursor_viewport);
+          }
+        }
+      } else {
+        unreachable!();
+      }
+    } else {
+      unreachable!();
+    }
 
     trace!(
       "Move to inserted pos, line:{after_inserted_cursor_line_idx}, char:{after_inserted_cursor_char_idx}"
