@@ -1319,19 +1319,19 @@ mod tests_insert_text {
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 15);
+      assert_eq!(actual1.char_idx(), 18);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "o, RSVIM!\n",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
+        " quite sim",
+        " it contai",
+        " the line ",
+        " the line ",
+        "e extra pa",
+        "e extra pa",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
@@ -1367,19 +1367,19 @@ mod tests_insert_text {
       let tree = data_access.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
-      assert_eq!(actual3.char_idx(), 5);
+      assert_eq!(actual3.char_idx(), 22);
       assert_eq!(actual3.row_idx(), 0);
-      assert_eq!(actual3.column_idx(), 5);
+      assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
         "SVIM! Go!\n",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
+        "te simple ",
+        "contains s",
+        " line is s",
+        " line is t",
+        "tra parts ",
+        "tra parts ",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
