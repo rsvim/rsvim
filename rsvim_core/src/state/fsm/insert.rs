@@ -203,14 +203,14 @@ impl InsertStateful {
     op: Operation,
   ) -> Option<(usize, usize, ViewportSearchAnchorDirection)> {
     let (target_cursor_char, target_cursor_line, move_direction) = if opts.include_empty_eol {
-      cursor_ops::normalize_as_cursor_move_to_include_empty_eol(
+      cursor_ops::normalize_to_cursor_move_to_include_empty_eol(
         buffer,
         op,
         cursor_viewport.char_idx(),
         cursor_viewport.line_idx(),
       )
     } else {
-      cursor_ops::normalize_as_cursor_move_to_exclude_empty_eol(
+      cursor_ops::normalize_to_cursor_move_to_exclude_empty_eol(
         buffer,
         op,
         cursor_viewport.char_idx(),

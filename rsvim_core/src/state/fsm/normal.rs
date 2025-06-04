@@ -174,7 +174,7 @@ impl NormalStateful {
     op: Operation,
   ) -> Option<(usize, usize, ViewportSearchAnchorDirection)> {
     let (target_cursor_char, target_cursor_line, move_direction) =
-      cursor_ops::normalize_as_cursor_move_to_exclude_empty_eol(
+      cursor_ops::normalize_to_cursor_move_to_exclude_empty_eol(
         buffer,
         op,
         cursor_viewport.char_idx(),
@@ -250,7 +250,7 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        let (start_column, start_line) = cursor_ops::normalize_as_window_scroll_to(
+        let (start_column, start_line) = cursor_ops::normalize_to_window_scroll_to(
           op,
           viewport.start_column_idx(),
           viewport.start_line_idx(),
