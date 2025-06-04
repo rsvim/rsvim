@@ -447,7 +447,7 @@ fn proc_line_wrap_linebreak(
     );
 
     // Words.
-    let words: Vec<&str> = cloned_line.as_str().split_word_bounds().collect();
+    let words: Vec<&str> = cloned_line.split_word_bounds().collect();
     // Word index => its end char index (from the first char until current word).
     let words_end_char_idx = words
       .iter()

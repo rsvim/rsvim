@@ -63,7 +63,6 @@ lru = { workspace = true }
 paste = { workspace = true }
 smallvec = { workspace = true }
 litemap = { workspace = true }
-smol_str = { workspace = true }
 
 # NOTE: Javascript dependencies {
 

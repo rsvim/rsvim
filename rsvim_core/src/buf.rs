@@ -14,7 +14,6 @@ use lru::LruCache;
 use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
-use smol_str::{SmolStr, SmolStrBuilder};
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fs::Metadata;
@@ -189,18 +188,18 @@ impl Buffer {
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
-  ) -> Option<SmolStr> {
+  ) -> Option<String> {
     match self.rope.get_line(line_idx) {
       Some(bufline) => match bufline.get_chars_at(start_char_idx) {
         Some(chars_iter) => {
-          let mut builder = SmolStrBuilder::new();
+          let mut builder = String::with_capacity(max_chars);
           for (i, c) in chars_iter.enumerate() {
             if i >= max_chars {
-              return Some(builder.finish());
+              return Some(builder);
             }
             builder.push(c);
           }
-          Some(builder.finish())
+          Some(builder)
         }
         None => None,
       },
