@@ -715,8 +715,11 @@ mod tests_util {
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
+  use crate::ui::canvas::{Canvas, Cell};
   use crate::ui::tree::Tree;
   use crate::ui::tree::*;
+  use crate::ui::widget::Widgetable;
+  use crate::ui::widget::window::content::WindowContent;
   use crate::ui::widget::window::{Window, WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
@@ -885,6 +888,54 @@ mod tests_util {
         );
         assert_eq!(payload, expect[*r as usize]);
       }
+    }
+  }
+
+  pub fn make_canvas(
+    terminal_size: U16Size,
+    window_options: WindowLocalOptions,
+    buffer: BufferArc,
+    viewport: ViewportArc,
+  ) -> Canvas {
+    let mut tree = Tree::new(terminal_size);
+    tree.set_global_local_options(&window_options);
+    let shape = IRect::new(
+      (0, 0),
+      (
+        terminal_size.width() as isize,
+        terminal_size.height() as isize,
+      ),
+    );
+    let window_content =
+      WindowContent::new(shape, Arc::downgrade(&buffer), Arc::downgrade(&viewport));
+    let mut canvas = Canvas::new(terminal_size);
+    window_content.draw(&mut canvas);
+    canvas
+  }
+
+  pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
+    let actual = actual
+      .frame()
+      .raw_symbols()
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{}", actual.len());
+    for a in actual.iter() {
+      info!("{:?}", a);
+    }
+    info!("expect:{}", expect.len());
+    for e in expect.iter() {
+      info!("{:?}", e);
+    }
+
+    assert_eq!(actual.len(), expect.len());
+    for i in 0..actual.len() {
+      let e = &expect[i];
+      let a = &actual[i];
+      info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
+      assert_eq!(e.len(), a.len());
+      assert_eq!(e, a);
     }
   }
 }
@@ -12501,6 +12552,289 @@ mod tests_search_anchor_upward_wrap_linebreak {
         &expect_start_fills,
         &expect_end_fills,
       );
+    }
+  }
+
+  #[test]
+  fn new3() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(21, 6);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_wrap_linebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\n",
+        "This is a quite simple and small test lines.\n",
+        "But still it contains several things we want to test:\n",
+        "\t1. When\tthe\tline\tis\tsmall\tenough\tto\tcompletely\tput\tinside.\n",
+        "\t2. When\tit\t\ttoo\tlong\tto\tcompletely\tput:\n",
+        "\t\t3. The extra parts are been truncated if\tboth\tline-wrap\tand\tword-wrap\toptions\tare\tnot\tset.\n",
+        "\t\t4. The extra parts are split into the\tnext\trow,\tif\teither\tline-wrap\tor\tword-wrap\toptions\tare\tbeen\tset. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
+        "5. When the line is small enough to completely put inside.\n",
+        "6. When it too long to completely put:\n",
+        "7. The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
+      ],
+    );
+
+    let window = Rc::new(RefCell::new(make_window(
+      terminal_size,
+      buf.clone(),
+      &win_opts,
+    )));
+
+    // Initialize
+    {
+      let expect = vec![
+        "Hello, RSVIM!\n",
+        "This is a quite ",
+        "simple and small test",
+        " lines.\n",
+        "But still it contains",
+        " several things we ",
+      ];
+
+      let actual = lock!(window.borrow().viewport()).clone();
+      let expect_start_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        0,
+        3,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, RSVIM!        ",
+        "This is a quite      ",
+        "simple and small test",
+        " lines.              ",
+        "But still it contains",
+        " several things we   ",
+      ];
+
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        window.borrow().viewport(),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Prepare
+    {
+      let expect = vec![
+        "7. The extra parts ",
+        "are been truncated if",
+        " both line-wrap and ",
+        "word-wrap options are",
+        " not set.\n",
+        "",
+      ];
+
+      let actual = {
+        let target_cursor_line = 10;
+        let target_cursor_char = 0;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Down,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 9);
+        assert_eq!(start_column, 0);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+          &viewport,
+          &buf,
+          target_cursor_line,
+          target_cursor_char,
+        )));
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(9, 0), (10, 0)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(9, 0), (10, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        9,
+        11,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "7. The extra parts   ",
+        "are been truncated if",
+        " both line-wrap and  ",
+        "word-wrap options are",
+        " not set.            ",
+        "                     ",
+      ];
+
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        window.borrow().viewport(),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Search-1
+    {
+      let expect = vec!["next\t", "row,\tif", "\teither", "\tline-wrap", "\tor"];
+
+      let actual = {
+        let target_cursor_line = 6;
+        let target_cursor_char = 70;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Up,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 6);
+        assert_eq!(start_column, 23);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 5)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        6,
+        7,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "next                 ",
+        "row,        if       ",
+        "        either       ",
+        "        line-wrap    ",
+        "        or           ",
+        "                     ",
+      ];
+
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        window.borrow().viewport(),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Search-2
+    {
+      let expect = vec![
+        "both\tline",
+        "-wrap\tand",
+        "\tword-wrap",
+        "\toptions",
+        "\tare",
+      ];
+
+      let actual = {
+        let target_cursor_line = 5;
+        let target_cursor_char = 80;
+
+        let mut window = window.borrow_mut();
+        let old = lock!(window.viewport()).clone();
+        let buf = lock!(buf);
+        let (start_line, start_column) = old.search_anchor(
+          ViewportSearchAnchorDirection::Up,
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          target_cursor_line,
+          target_cursor_char,
+        );
+        assert_eq!(start_line, 5);
+        assert_eq!(start_column, 63);
+
+        let viewport = Viewport::view(
+          &buf,
+          window.actual_shape(),
+          window.options(),
+          start_line,
+          start_column,
+        );
+        window.set_viewport(Viewport::to_arc(viewport));
+        lock!(window.viewport()).clone()
+      };
+
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(5, 1)].into_iter().collect();
+      let expect_end_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
+      assert_viewport(
+        buf.clone(),
+        &actual,
+        &expect,
+        5,
+        6,
+        &expect_start_fills,
+        &expect_end_fills,
+      );
+
+      let expect_canvas = vec![
+        "both        line     ",
+        "-wrap        and     ",
+        "        word-wrap    ",
+        "        options      ",
+        "        are          ",
+      ];
+
+      let actual_canvas = make_canvas(
+        terminal_size,
+        win_opts,
+        buf.clone(),
+        window.borrow().viewport(),
+      );
+      assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
 }
