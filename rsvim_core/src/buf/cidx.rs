@@ -4,6 +4,7 @@ use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
 use ropey::RopeSlice;
 
+use smallvec::SmallVec;
 use std::collections::BTreeMap;
 // use tracing::trace;
 
@@ -54,7 +55,7 @@ use std::collections::BTreeMap;
 ///   on **current** char 18 is 26.
 pub struct ColumnIndex {
   // Char index maps to its prefix display width.
-  char2width: Vec<usize>,
+  char2width: SmallVec<[usize; 80]>,
 
   // Prefix display width maps to the right-most char index, i.e. the reversed mapping of
   // `char2width`.
@@ -71,7 +72,7 @@ impl ColumnIndex {
   /// Create new index.
   pub fn with_capacity(size: usize) -> Self {
     Self {
-      char2width: Vec::with_capacity(size),
+      char2width: SmallVec::with_capacity(size),
       width2char: BTreeMap::new(),
     }
   }
@@ -79,7 +80,7 @@ impl ColumnIndex {
   /// Create new index.
   pub fn new() -> Self {
     Self {
-      char2width: Vec::new(),
+      char2width: SmallVec::new(),
       width2char: BTreeMap::new(),
     }
   }
