@@ -14,6 +14,7 @@ use lru::LruCache;
 use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
+use smol_str::{SmolStr, SmolStrBuilder};
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fs::Metadata;
@@ -39,6 +40,8 @@ pub fn next_buffer_id() -> BufferId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
+type CachedClonedLines = LruCache<usize, Option<Rc<SmolStr>>, RandomState>;
+
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
 ///
@@ -54,6 +57,7 @@ pub struct Buffer {
   id: BufferId,
   rope: Rope,
   cached_lines_width: Rc<RefCell<LruCache<usize, ColumnIndex, RandomState>>>,
+  cached_cloned_lines: Rc<RefCell<CachedClonedLines>>,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -87,6 +91,10 @@ impl Buffer {
         get_cached_size(canvas_height),
         RandomState::new(),
       ))),
+      cached_cloned_lines: Rc::new(RefCell::new(LruCache::with_hasher(
+        get_cached_size(canvas_height),
+        RandomState::new(),
+      ))),
       options,
       filename,
       absolute_filename,
@@ -102,6 +110,10 @@ impl Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
       cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
+        get_cached_size(canvas_height),
+        RandomState::new(),
+      ))),
+      cached_cloned_lines: Rc::new(RefCell::new(LruCache::with_hasher(
         get_cached_size(canvas_height),
         RandomState::new(),
       ))),
@@ -184,28 +196,33 @@ impl Buffer {
   ///
   /// NOTE: It is for performance reason that limits maximized chars count instead of the whole
   /// line, which is useful for super long lines.
-  pub fn clone_line(
-    &self,
-    line_idx: usize,
-    start_char_idx: usize,
-    max_chars: usize,
-  ) -> Option<String> {
-    match self.rope.get_line(line_idx) {
-      Some(line) => match line.get_chars_at(start_char_idx) {
-        Some(chars_iter) => {
-          let mut builder = String::with_capacity(max_chars);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars {
-              return Some(builder);
+  pub fn clone_line(&self, line_idx: usize, max_chars: usize) -> Option<Rc<SmolStr>> {
+    let clone_impl = |the_line_idx, the_char_idx| -> Option<Rc<SmolStr>> {
+      match self.rope.get_line(the_line_idx) {
+        Some(bufline) => match bufline.get_chars_at(the_char_idx) {
+          Some(the_chars_iter) => {
+            let mut builder = SmolStrBuilder::new();
+            for (i, c) in the_chars_iter.enumerate() {
+              if i >= max_chars {
+                return Some(Rc::new(builder.finish()));
+              }
+              builder.push(c);
             }
-            builder.push(c);
+            Some(Rc::new(builder.finish()))
           }
-          Some(builder)
-        }
+          None => None,
+        },
         None => None,
-      },
-      None => None,
-    }
+      }
+    };
+
+    self
+      .cached_cloned_lines
+      .borrow_mut()
+      .get_or_insert(line_idx, || -> Option<Rc<SmolStr>> {
+        clone_impl(line_idx, start_char_idx)
+      })
+      .clone()
   }
 
   /// Get last char index on line.
@@ -385,7 +402,8 @@ impl Buffer {
         let rope_line = self.rope.line(line_idx);
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
-      .truncate_since_char(char_idx)
+      .truncate_since_char(char_idx);
+    self.cached_cloned_lines.borrow_mut()
   }
 
   /// See [`ColumnIndex::truncate_since_width`].
