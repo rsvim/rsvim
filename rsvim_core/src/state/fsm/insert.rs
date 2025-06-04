@@ -330,8 +330,8 @@ mod tests_util {
     if actual.lines().is_empty() {
       assert!(actual.end_line_idx() <= actual.start_line_idx());
     } else {
-      let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
-      let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
+      let (first_line_idx, _first_line_viewport) = actual.lines().first().unwrap();
+      let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
       assert_eq!(*first_line_idx, actual.start_line_idx());
       assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
     }
