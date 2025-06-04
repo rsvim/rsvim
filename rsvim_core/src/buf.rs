@@ -84,15 +84,16 @@ impl Buffer {
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
   ) -> Self {
+    let cache_size = get_cached_size(canvas_height);
     Self {
       id: next_buffer_id(),
       rope,
       cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
-        get_cached_size(canvas_height),
+        cache_size,
         RandomState::new(),
       ))),
       cached_cloned_lines: Rc::new(RefCell::new(LruCache::with_hasher(
-        get_cached_size(canvas_height),
+        cache_size,
         RandomState::new(),
       ))),
       options,
@@ -106,15 +107,16 @@ impl Buffer {
   #[cfg(test)]
   /// NOTE: This API should only be used for testing.
   pub fn _new_empty(canvas_height: u16, options: BufferLocalOptions) -> Self {
+    let cache_size = get_cached_size(canvas_height);
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
       cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
-        get_cached_size(canvas_height),
+        cache_size,
         RandomState::new(),
       ))),
       cached_cloned_lines: Rc::new(RefCell::new(LruCache::with_hasher(
-        get_cached_size(canvas_height),
+        cache_size,
         RandomState::new(),
       ))),
       options,
@@ -390,7 +392,7 @@ impl Buffer {
   }
 
   /// See [`ColumnIndex::truncate_since_char`].
-  pub fn truncate_since_char(&self, line_idx: usize, char_idx: usize) {
+  pub fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     self
       .cached_lines_width
       .borrow_mut()
@@ -399,11 +401,11 @@ impl Buffer {
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
       .truncate_since_char(char_idx);
-    self.cached_cloned_lines.borrow_mut()
+    self.cached_cloned_lines.borrow_mut().pop(&line_idx);
   }
 
   /// See [`ColumnIndex::truncate_since_width`].
-  pub fn truncate_since_width(&self, line_idx: usize, width: usize) {
+  pub fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     self
       .cached_lines_width
       .borrow_mut()
@@ -411,12 +413,14 @@ impl Buffer {
         let rope_line = self.rope.line(line_idx);
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
-      .truncate_since_width(width)
+      .truncate_since_width(width);
+    self.cached_cloned_lines.borrow_mut().pop(&line_idx);
   }
 
   /// Remove one cached line.
   pub fn remove_cached_line(&self, line_idx: usize) {
     self.cached_lines_width.borrow_mut().pop(&line_idx);
+    self.cached_cloned_lines.borrow_mut().pop(&line_idx);
   }
 
   /// Retain multiple cached lines by lambda function `f`.
@@ -425,6 +429,7 @@ impl Buffer {
     F: Fn(&usize, &ColumnIndex) -> bool,
   {
     let mut cached_width = self.cached_lines_width.borrow_mut();
+    let mut cached_clones = self.cached_cloned_lines.borrow_mut();
     let retained_lines: Vec<usize> = cached_width
       .iter()
       .filter(|(line_idx, column_idx)| !f(line_idx, column_idx))
@@ -432,12 +437,14 @@ impl Buffer {
       .collect();
     for line_idx in retained_lines.iter() {
       cached_width.pop(line_idx);
+      cached_clones.pop(line_idx);
     }
   }
 
   /// Clear cache.
   pub fn clear_cached_lines(&self) {
-    self.cached_lines_width.borrow_mut().clear()
+    self.cached_lines_width.borrow_mut().clear();
+    self.cached_cloned_lines.borrow_mut().clear();
   }
 
   /// Resize cache.
@@ -446,6 +453,10 @@ impl Buffer {
     let mut cached_width = self.cached_lines_width.borrow_mut();
     if new_cache_size > cached_width.cap() {
       cached_width.resize(new_cache_size);
+    }
+    let mut cached_clones = self.cached_cloned_lines.borrow_mut();
+    if new_cache_size > cached_clones.cap() {
+      cached_clones.resize(new_cache_size);
     }
   }
 }
