@@ -200,9 +200,9 @@ impl Buffer {
     let clone_impl = |the_line_idx| -> Option<Rc<SmolStr>> {
       match self.rope.get_line(the_line_idx) {
         Some(bufline) => {
-          let the_chars_iter = bufline.chars();
+          let chars_iter = bufline.chars();
           let mut builder = SmolStrBuilder::new();
-          for (i, c) in the_chars_iter.enumerate() {
+          for (i, c) in chars_iter.enumerate() {
             if i >= max_chars {
               return Some(Rc::new(builder.finish()));
             }
