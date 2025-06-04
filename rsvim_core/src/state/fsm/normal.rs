@@ -369,8 +369,8 @@ mod tests_util {
     if actual.lines().is_empty() {
       assert!(actual.end_line_idx() <= actual.start_line_idx());
     } else {
-      let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
-      let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
+      let (first_line_idx, _first_line_viewport) = actual.lines().first().unwrap();
+      let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
       assert_eq!(*first_line_idx, actual.start_line_idx());
       assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
     }
@@ -428,7 +428,7 @@ mod tests_util {
       for (r, row) in rows.iter() {
         info!("row-index-{:?}, row:{:?}", r, row);
 
-        if r > rows.first_key_value().unwrap().0 {
+        if r > rows.first().unwrap().0 {
           let prev_r = r - 1;
           let prev_row = rows.get(&prev_r).unwrap();
           info!(
@@ -436,7 +436,7 @@ mod tests_util {
             r, r, row, prev_r, prev_row
           );
         }
-        if r < rows.last_key_value().unwrap().0 {
+        if r < rows.last().unwrap().0 {
           let next_r = r + 1;
           let next_row = rows.get(&next_r).unwrap();
           info!(

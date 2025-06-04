@@ -7,8 +7,8 @@ use crate::prelude::*;
 use crate::ui::widget::window::viewport::RowViewport;
 use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 
+use litemap::LiteMap;
 use ropey::RopeSlice;
-use std::collections::BTreeMap;
 use std::ops::Range;
 #[allow(unused_imports)]
 use tracing::trace;
@@ -57,12 +57,12 @@ pub fn sync(
   window_local_options: &WindowLocalOptions,
   start_line: usize,
   start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   // If window is zero-sized.
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   if height == 0 || width == 0 {
-    return (ViewportLineRange::default(), BTreeMap::new());
+    return (ViewportLineRange::default(), LiteMap::new());
   }
 
   match (
@@ -107,7 +107,7 @@ fn proc_line_nowrap(
   current_row: u16,
   _window_height: u16,
   window_width: u16,
-) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
+) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = buffer.get_rope().line(current_line);
   let (start_char, start_fills, end_char, end_fills) = if bufline.len_chars() == 0 {
     (0_usize, 0_usize, 0_usize, 0_usize)
@@ -135,7 +135,7 @@ fn proc_line_nowrap(
     }
   };
 
-  let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+  let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
   rows.insert(current_row, RowViewport::new(start_char..end_char));
   (rows, start_fills, end_fills, current_row)
 }
@@ -146,12 +146,13 @@ fn sync_nowrap(
   window_actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut line_viewports: LiteMap<usize, LineViewport> =
+    LiteMap::with_capacity(std::cmp::min(height as usize, buffer_len_lines));
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -184,7 +185,7 @@ fn sync_nowrap(
       line_viewports,
     )
   } else {
-    (ViewportLineRange::default(), BTreeMap::new())
+    (ViewportLineRange::default(), LiteMap::new())
   }
 }
 
@@ -196,16 +197,19 @@ fn proc_line_wrap_nolinebreak(
   mut current_row: u16,
   window_height: u16,
   window_width: u16,
-) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
+) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = buffer.get_rope().line(current_line);
   let bufline_len_chars = bufline.len_chars();
 
   if bufline_len_chars == 0 {
-    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
   } else {
-    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(std::cmp::min(
+      window_height as usize,
+      bufline_len_chars / std::cmp::max(window_width as usize, 1_usize),
+    ));
 
     // let mut start_char = buffer
     match buffer.char_after(current_line, start_column) {
@@ -257,12 +261,13 @@ fn sync_wrap_nolinebreak(
   window_actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut line_viewports: LiteMap<usize, LineViewport> =
+    LiteMap::with_capacity(std::cmp::min(height as usize, buffer_len_lines));
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -295,7 +300,7 @@ fn sync_wrap_nolinebreak(
       line_viewports,
     )
   } else {
-    (ViewportLineRange::default(), BTreeMap::new())
+    (ViewportLineRange::default(), LiteMap::new())
   }
 }
 
@@ -341,7 +346,7 @@ fn _find_word_by_char(
 }
 
 #[allow(clippy::too_many_arguments)]
-/// Part-1 of the processing algorithm in `_from_top_left_wrap_linebreak`.
+/// Part-1 of the processing algorithm in [`proc_line_wrap_linebreak`].
 fn _part1(
   words: &[&str],
   words_end_char_idx: &HashMap<usize, usize>,
@@ -391,8 +396,8 @@ fn _part1(
   }
 }
 
-fn _cloned_line_max_len(window_height: u16, window_width: u16, start_column: usize) -> usize {
-  window_height as usize * window_width as usize * 2 + 16 + start_column
+fn _cloned_line_max_len(window_height: u16, window_width: u16) -> usize {
+  window_height as usize * window_width as usize * 2 + 16
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
@@ -403,25 +408,43 @@ fn proc_line_wrap_linebreak(
   mut current_row: u16,
   window_height: u16,
   window_width: u16,
-) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
+) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = buffer.get_rope().line(current_line);
   if bufline.len_chars() == 0 {
-    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
   } else {
-    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+    let bufline_len_chars = bufline.len_chars();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(std::cmp::min(
+      window_height as usize,
+      bufline_len_chars / std::cmp::max(window_width as usize, 1_usize),
+    ));
 
     // Here clone the line with the max chars that can hold by current window/viewport,
     // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
     // performance issue when iterating on super long lines.
+
+    // Clone this line from `cloned_start_char`, thus we can limit the cloned text within the
+    // window's size (i.e. height * width).
+    let cloned_start_char = buffer
+      .char_before(current_line, start_column)
+      .unwrap_or(0_usize);
+
     let cloned_line = buffer
       .clone_line(
         current_line,
-        0,
-        _cloned_line_max_len(window_height, window_width, start_column),
+        cloned_start_char,
+        _cloned_line_max_len(window_height, window_width),
       )
       .unwrap();
+
+    trace!(
+      "cloned_line({}):{:?}, start_column:{}",
+      cloned_line.len(),
+      cloned_line.as_str(),
+      start_column
+    );
 
     // Words.
     let words: Vec<&str> = cloned_line.split_word_bounds().collect();
@@ -429,7 +452,7 @@ fn proc_line_wrap_linebreak(
     let words_end_char_idx = words
       .iter()
       .enumerate()
-      .scan(0_usize, |state, (i, wd)| {
+      .scan(cloned_start_char, |state, (i, wd)| {
         *state += wd.chars().count();
         Some((i, *state))
       })
@@ -566,12 +589,13 @@ fn sync_wrap_linebreak(
   window_actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut line_viewports: LiteMap<usize, LineViewport> =
+    LiteMap::with_capacity(std::cmp::min(height as usize, buffer_len_lines));
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -604,7 +628,7 @@ fn sync_wrap_linebreak(
       line_viewports,
     )
   } else {
-    (ViewportLineRange::default(), BTreeMap::new())
+    (ViewportLineRange::default(), LiteMap::new())
   }
 }
 
@@ -877,7 +901,7 @@ mod wrap_detail {
     /* start_column */ usize,
   ) -> (
     /* line range */ ViewportLineRange,
-    /* lines_viewport */ BTreeMap<usize, LineViewport>,
+    /* lines_viewport */ LiteMap<usize, LineViewport>,
   );
 
   // Type alias for `proc_line_*` functions.
@@ -889,7 +913,7 @@ mod wrap_detail {
     /* window_height */ u16,
     /* window_width */ u16,
   ) -> (
-    /* rows */ BTreeMap<u16, RowViewport>,
+    /* rows */ LiteMap<u16, RowViewport>,
     /* start_fills */ usize,
     /* end_fills */ usize,
     /* next_current_row */ u16,
@@ -920,7 +944,7 @@ mod wrap_detail {
         window_actual_shape.height(),
         window_actual_shape.width(),
       );
-      let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+      let (_last_row_idx, last_row_viewport) = rows.last().unwrap();
       if last_row_viewport.end_char_idx() > target_cursor_char {
         return start_column;
       }
@@ -1043,7 +1067,7 @@ mod wrap_detail {
       window_actual_shape.width(),
     );
 
-    let extra_space_left = match preview_target_rows.last_key_value() {
+    let extra_space_left = match preview_target_rows.last() {
       Some((_last_row_idx, last_row_viewport)) => last_row_viewport.end_char_idx() > last_char,
       None => true,
     };
@@ -1106,8 +1130,8 @@ mod wrap_detail {
       width,
     );
 
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+    debug_assert!(preview_target_rows.last().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last().unwrap();
 
     let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
       && target_cursor_char >= last_row_viewport.end_char_idx();
@@ -1270,8 +1294,8 @@ mod wrap_detail {
       width,
     );
 
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+    debug_assert!(preview_target_rows.last().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last().unwrap();
 
     let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
       && target_cursor_char >= last_row_viewport.end_char_idx();
@@ -1418,7 +1442,7 @@ mod wrap_detail {
 
   fn to_right_2_2(
     proc_fn: ProcessLineFn,
-    lines_viewport: &BTreeMap<usize, LineViewport>,
+    lines_viewport: &LiteMap<usize, LineViewport>,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_viewport_start_line: usize,
@@ -1433,9 +1457,8 @@ mod wrap_detail {
 
     debug_assert!(lines_viewport.contains_key(&target_cursor_line));
     let current_target_rows = lines_viewport.get(&target_cursor_line).unwrap().rows();
-    debug_assert!(current_target_rows.last_key_value().is_some());
-    let (current_last_row_idx, current_last_row_viewport) =
-      current_target_rows.last_key_value().unwrap();
+    debug_assert!(current_target_rows.last().is_some());
+    let (current_last_row_idx, current_last_row_viewport) = current_target_rows.last().unwrap();
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
       buffer,
@@ -1471,7 +1494,7 @@ mod wrap_detail {
   pub fn adjust_wrap_2_2(
     opts: detail::AdjustOptions,
     proc_fn: ProcessLineFn,
-    lines_viewport: &BTreeMap<usize, LineViewport>,
+    lines_viewport: &LiteMap<usize, LineViewport>,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
@@ -1646,8 +1669,8 @@ fn search_anchor_downward_nowrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  debug_assert!(viewport.lines().last_key_value().is_some());
-  let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
+  debug_assert!(viewport.lines().last().is_some());
+  let (&last_line, _last_line_viewport) = viewport.lines().last().unwrap();
 
   let start_line = if target_cursor_line <= last_line {
     // Target cursor line is still inside current viewport.
@@ -1863,8 +1886,8 @@ fn search_anchor_upward_nowrap(
   let viewport_start_line = viewport.start_line_idx();
   let _viewport_start_column = viewport.start_column_idx();
 
-  debug_assert!(viewport.lines().first_key_value().is_some());
-  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
+  debug_assert!(viewport.lines().first().is_some());
+  let (&first_line, _first_line_viewport) = viewport.lines().first().unwrap();
 
   let start_line = if target_cursor_line >= first_line {
     // Target cursor line is still inside current viewport.

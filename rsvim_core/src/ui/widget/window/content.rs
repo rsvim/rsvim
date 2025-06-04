@@ -99,8 +99,8 @@ impl Widgetable for WindowContent {
       let rows_viewport = line_viewport.rows();
 
       if !rows_viewport.is_empty() {
-        let first_row = rows_viewport.first_key_value().unwrap();
-        let last_row = rows_viewport.last_key_value().unwrap();
+        let first_row = rows_viewport.first().unwrap();
+        let last_row = rows_viewport.last().unwrap();
         let first_row_idx = *first_row.0;
         let last_row_idx = *last_row.0;
 

@@ -80,11 +80,12 @@ impl Buffer {
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
   ) -> Self {
+    let cache_size = get_cached_size(canvas_height);
     Self {
       id: next_buffer_id(),
       rope,
       cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
-        get_cached_size(canvas_height),
+        cache_size,
         RandomState::new(),
       ))),
       options,
@@ -98,11 +99,12 @@ impl Buffer {
   #[cfg(test)]
   /// NOTE: This API should only be used for testing.
   pub fn _new_empty(canvas_height: u16, options: BufferLocalOptions) -> Self {
+    let cache_size = get_cached_size(canvas_height);
     Self {
       id: next_buffer_id(),
       rope: Rope::new(),
       cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
-        get_cached_size(canvas_height),
+        cache_size,
         RandomState::new(),
       ))),
       options,
@@ -179,11 +181,8 @@ impl Buffer {
     &mut self.rope
   }
 
-  /// Similar with [`Rope::get_line`], but collect and clone a normal string with start index
-  /// (`start_char_idx`) and max chars length (`max_chars`).
-  ///
-  /// NOTE: It is for performance reason that limits maximized chars count instead of the whole
-  /// line, which is useful for super long lines.
+  /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
+  /// for performance reason when the line is too long to clone.
   pub fn clone_line(
     &self,
     line_idx: usize,
@@ -191,7 +190,7 @@ impl Buffer {
     max_chars: usize,
   ) -> Option<String> {
     match self.rope.get_line(line_idx) {
-      Some(line) => match line.get_chars_at(start_char_idx) {
+      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
         Some(chars_iter) => {
           let mut builder = String::with_capacity(max_chars);
           for (i, c) in chars_iter.enumerate() {
@@ -377,7 +376,7 @@ impl Buffer {
   }
 
   /// See [`ColumnIndex::truncate_since_char`].
-  pub fn truncate_since_char(&self, line_idx: usize, char_idx: usize) {
+  pub fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     self
       .cached_lines_width
       .borrow_mut()
@@ -389,7 +388,7 @@ impl Buffer {
   }
 
   /// See [`ColumnIndex::truncate_since_width`].
-  pub fn truncate_since_width(&self, line_idx: usize, width: usize) {
+  pub fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     self
       .cached_lines_width
       .borrow_mut()
