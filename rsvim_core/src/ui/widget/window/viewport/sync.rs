@@ -424,7 +424,6 @@ fn proc_line_wrap_linebreak(
     // Here clone the line with the max chars that can hold by current window/viewport,
     // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
     // performance issue when iterating on super long lines.
-
     let cloned_line = buffer
       .clone_line(
         current_line,
