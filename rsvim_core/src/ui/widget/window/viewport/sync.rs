@@ -396,8 +396,8 @@ fn _part1(
   }
 }
 
-fn _cloned_line_max_len(window_height: u16, window_width: u16, start_column: usize) -> usize {
-  window_height as usize * window_width as usize * 2 + 16 + start_column
+fn _cloned_line_max_len(window_height: u16, window_width: u16) -> usize {
+  window_height as usize * window_width as usize * 2 + 16
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
@@ -424,6 +424,9 @@ fn proc_line_wrap_linebreak(
     // Here clone the line with the max chars that can hold by current window/viewport,
     // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
     // performance issue when iterating on super long lines.
+
+    // Clone this line from `cloned_start_char`, thus we can limit the cloned text withint the
+    // window's size (i.e. height * width).
     let cloned_start_char = buffer
       .char_before(current_line, start_column)
       .unwrap_or(0_usize);
@@ -431,7 +434,7 @@ fn proc_line_wrap_linebreak(
       .clone_line(
         current_line,
         cloned_start_char,
-        _cloned_line_max_len(window_height, window_width, 0_usize),
+        _cloned_line_max_len(window_height, window_width),
       )
       .unwrap();
     trace!(
