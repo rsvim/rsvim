@@ -191,27 +191,25 @@ impl Buffer {
     &mut self.rope
   }
 
-  /// Similar with [`Rope::get_line`], but collect and clone a normal string with start index
-  /// (`start_char_idx`) and max chars length (`max_chars`).
+  /// Similar with [`Rope::get_line`], but collect and clone a normal string with max chars length
+  /// (`max_chars`).
   ///
   /// NOTE: It is for performance reason that limits maximized chars count instead of the whole
   /// line, which is useful for super long lines.
   pub fn clone_line(&self, line_idx: usize, max_chars: usize) -> Option<Rc<SmolStr>> {
-    let clone_impl = |the_line_idx, the_char_idx| -> Option<Rc<SmolStr>> {
+    let clone_impl = |the_line_idx| -> Option<Rc<SmolStr>> {
       match self.rope.get_line(the_line_idx) {
-        Some(bufline) => match bufline.get_chars_at(the_char_idx) {
-          Some(the_chars_iter) => {
-            let mut builder = SmolStrBuilder::new();
-            for (i, c) in the_chars_iter.enumerate() {
-              if i >= max_chars {
-                return Some(Rc::new(builder.finish()));
-              }
-              builder.push(c);
+        Some(bufline) => {
+          let the_chars_iter = bufline.chars();
+          let mut builder = SmolStrBuilder::new();
+          for (i, c) in the_chars_iter.enumerate() {
+            if i >= max_chars {
+              return Some(Rc::new(builder.finish()));
             }
-            Some(Rc::new(builder.finish()))
+            builder.push(c);
           }
-          None => None,
-        },
+          Some(Rc::new(builder.finish()))
+        }
         None => None,
       }
     };
@@ -219,9 +217,7 @@ impl Buffer {
     self
       .cached_cloned_lines
       .borrow_mut()
-      .get_or_insert(line_idx, || -> Option<Rc<SmolStr>> {
-        clone_impl(line_idx, start_char_idx)
-      })
+      .get_or_insert(line_idx, || -> Option<Rc<SmolStr>> { clone_impl(line_idx) })
       .clone()
   }
 
