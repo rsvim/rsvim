@@ -1424,6 +1424,21 @@ mod tests_insert_text {
         &expect_fills,
         &expect_fills,
       );
+
+      let expect_canvas = vec![
+        "o, RSVIM! ",
+        " quite sim",
+        " it contai",
+        " the line ",
+        " the line ",
+        "e extra pa",
+        "e extra pa",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), Viewport::to_arc(viewport));
+      assert_canvas(&actual_canvas, &expect_canvas);
     }
 
     // Insert-3
@@ -1472,6 +1487,21 @@ mod tests_insert_text {
         &expect_fills,
         &expect_fills,
       );
+
+      let expect_canvas = vec![
+        "SVIM! Go! ",
+        "te simple ",
+        "contains s",
+        " line is s",
+        " line is t",
+        "tra parts ",
+        "tra parts ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), Viewport::to_arc(viewport));
+      assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
 
