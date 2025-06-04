@@ -153,14 +153,10 @@ impl InsertStateful {
           buffer.get_rope().len_lines().saturating_sub(1),
         );
         debug_assert!(buffer.get_rope().get_line(start_line).is_some());
-        let char_at_start_column = buffer
-          .get_rope()
-          .line(start_line)
-          .len_chars()
-          .saturating_sub(1);
+        let bufline_len_chars = buffer.get_rope().line(start_line).len_chars();
         let start_column = std::cmp::min(
           viewport.start_column_idx(),
-          buffer.width_until(start_line, char_at_start_column),
+          buffer.width_before(start_line, bufline_len_chars),
         );
 
         let updated_viewport = Viewport::to_arc(Viewport::view(
