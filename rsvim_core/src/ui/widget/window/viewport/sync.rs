@@ -208,7 +208,7 @@ fn proc_line_wrap_nolinebreak(
   } else {
     let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(std::cmp::min(
       window_height as usize,
-      bufline_len_chars / window_width as usize,
+      bufline_len_chars / std::cmp::max(window_width as usize, 1_usize),
     ));
 
     // let mut start_char = buffer
@@ -418,7 +418,7 @@ fn proc_line_wrap_linebreak(
     let bufline_len_chars = bufline.len_chars();
     let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(std::cmp::min(
       window_height as usize,
-      bufline_len_chars / window_width as usize,
+      bufline_len_chars / std::cmp::max(window_width as usize, 1_usize),
     ));
 
     // Here clone the line with the max chars that can hold by current window/viewport,
