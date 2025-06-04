@@ -240,12 +240,10 @@ fn _raw_cursor_move_to(
     std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1))
   };
 
-  if cfg!(debug_assertions) {
-    if bufline.len_chars() == 0 {
-      debug_assert_eq!(char_idx, 0_usize);
-    } else {
-      debug_assert!(bufline.len_chars() > char_idx);
-    }
+  if bufline.len_chars() == 0 {
+    debug_assert_eq!(char_idx, 0_usize);
+  } else {
+    debug_assert!(bufline.len_chars() > char_idx);
   }
 
   Some((line_idx, char_idx))
@@ -306,14 +304,12 @@ fn _raw_window_scroll_to(
     std::cmp::min(line_idx, buffer_len_lines.saturating_sub(1))
   };
 
-  if cfg!(debug_assertions) {
-    if buffer_len_lines == 0 {
-      debug_assert_eq!(line_idx, 0_usize);
-    } else {
-      debug_assert!(line_idx < buffer_len_lines);
-    }
-    debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+  if buffer_len_lines == 0 {
+    debug_assert_eq!(line_idx, 0_usize);
+  } else {
+    debug_assert!(line_idx < buffer_len_lines);
   }
+  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
 
   let window_actual_shape = current_window.actual_shape();
   let max_len_chars = _max_len_chars_since_line(buffer, line_idx, window_actual_shape.height());
