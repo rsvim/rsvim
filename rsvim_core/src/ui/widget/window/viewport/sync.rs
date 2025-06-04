@@ -920,7 +920,7 @@ mod wrap_detail {
         window_actual_shape.height(),
         window_actual_shape.width(),
       );
-      let (_last_row_idx, last_row_viewport) = rows.last_key_value().unwrap();
+      let (_last_row_idx, last_row_viewport) = rows.last().unwrap();
       if last_row_viewport.end_char_idx() > target_cursor_char {
         return start_column;
       }
@@ -1043,7 +1043,7 @@ mod wrap_detail {
       window_actual_shape.width(),
     );
 
-    let extra_space_left = match preview_target_rows.last_key_value() {
+    let extra_space_left = match preview_target_rows.last() {
       Some((_last_row_idx, last_row_viewport)) => last_row_viewport.end_char_idx() > last_char,
       None => true,
     };
@@ -1106,8 +1106,8 @@ mod wrap_detail {
       width,
     );
 
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+    debug_assert!(preview_target_rows.last().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last().unwrap();
 
     let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
       && target_cursor_char >= last_row_viewport.end_char_idx();
@@ -1270,8 +1270,8 @@ mod wrap_detail {
       width,
     );
 
-    debug_assert!(preview_target_rows.last_key_value().is_some());
-    let (_last_row_idx, last_row_viewport) = preview_target_rows.last_key_value().unwrap();
+    debug_assert!(preview_target_rows.last().is_some());
+    let (_last_row_idx, last_row_viewport) = preview_target_rows.last().unwrap();
 
     let on_right_side = last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx()
       && target_cursor_char >= last_row_viewport.end_char_idx();
@@ -1433,9 +1433,8 @@ mod wrap_detail {
 
     debug_assert!(lines_viewport.contains_key(&target_cursor_line));
     let current_target_rows = lines_viewport.get(&target_cursor_line).unwrap().rows();
-    debug_assert!(current_target_rows.last_key_value().is_some());
-    let (current_last_row_idx, current_last_row_viewport) =
-      current_target_rows.last_key_value().unwrap();
+    debug_assert!(current_target_rows.last().is_some());
+    let (current_last_row_idx, current_last_row_viewport) = current_target_rows.last().unwrap();
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
       buffer,
@@ -1646,8 +1645,8 @@ fn search_anchor_downward_nowrap(
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
 
-  debug_assert!(viewport.lines().last_key_value().is_some());
-  let (&last_line, _last_line_viewport) = viewport.lines().last_key_value().unwrap();
+  debug_assert!(viewport.lines().last().is_some());
+  let (&last_line, _last_line_viewport) = viewport.lines().last().unwrap();
 
   let start_line = if target_cursor_line <= last_line {
     // Target cursor line is still inside current viewport.
@@ -1863,8 +1862,8 @@ fn search_anchor_upward_nowrap(
   let viewport_start_line = viewport.start_line_idx();
   let _viewport_start_column = viewport.start_column_idx();
 
-  debug_assert!(viewport.lines().first_key_value().is_some());
-  let (&first_line, _first_line_viewport) = viewport.lines().first_key_value().unwrap();
+  debug_assert!(viewport.lines().first().is_some());
+  let (&first_line, _first_line_viewport) = viewport.lines().first().unwrap();
 
   let start_line = if target_cursor_line >= first_line {
     // Target cursor line is still inside current viewport.

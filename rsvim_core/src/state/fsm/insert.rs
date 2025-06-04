@@ -389,7 +389,7 @@ mod tests_util {
       for (r, row) in rows.iter() {
         info!("row-index-{:?}, row:{:?}", r, row);
 
-        if r > rows.first_key_value().unwrap().0 {
+        if r > rows.first().unwrap().0 {
           let prev_r = r - 1;
           let prev_row = rows.get(&prev_r).unwrap();
           info!(
@@ -397,7 +397,7 @@ mod tests_util {
             r, r, row, prev_r, prev_row
           );
         }
-        if r < rows.last_key_value().unwrap().0 {
+        if r < rows.last().unwrap().0 {
           let next_r = r + 1;
           let next_row = rows.get(&next_r).unwrap();
           info!(
