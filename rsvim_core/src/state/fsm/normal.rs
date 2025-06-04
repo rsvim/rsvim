@@ -5851,7 +5851,7 @@ mod tests_cursor_move {
         "doesn't ",
         "affect the",
         " rendering",
-        ".\n"
+        ".\n",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -5885,7 +5885,7 @@ mod tests_cursor_move {
         "doesn't ",
         "affect the",
         " rendering",
-        ".\n"
+        ".\n",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(3, 0)].into_iter().collect();
       assert_viewport_scroll(
