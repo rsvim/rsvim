@@ -62,6 +62,7 @@ derive_builder = { workspace = true }
 lru = { workspace = true }
 paste = { workspace = true }
 smallvec = { workspace = true }
+litemap = { workspace = true }
 
 # NOTE: Javascript dependencies {
 

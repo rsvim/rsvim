@@ -7,8 +7,8 @@ use crate::prelude::*;
 use crate::ui::widget::window::viewport::RowViewport;
 use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
 
+use litemap::LiteMap;
 use ropey::RopeSlice;
-use std::collections::BTreeMap;
 use std::ops::Range;
 #[allow(unused_imports)]
 use tracing::trace;
@@ -57,12 +57,12 @@ pub fn sync(
   window_local_options: &WindowLocalOptions,
   start_line: usize,
   start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   // If window is zero-sized.
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   if height == 0 || width == 0 {
-    return (ViewportLineRange::default(), BTreeMap::new());
+    return (ViewportLineRange::default(), LiteMap::new());
   }
 
   match (
@@ -107,7 +107,7 @@ fn proc_line_nowrap(
   current_row: u16,
   _window_height: u16,
   window_width: u16,
-) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
+) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = buffer.get_rope().line(current_line);
   let (start_char, start_fills, end_char, end_fills) = if bufline.len_chars() == 0 {
     (0_usize, 0_usize, 0_usize, 0_usize)
@@ -135,7 +135,7 @@ fn proc_line_nowrap(
     }
   };
 
-  let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+  let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
   rows.insert(current_row, RowViewport::new(start_char..end_char));
   (rows, start_fills, end_fills, current_row)
 }
@@ -146,12 +146,12 @@ fn sync_nowrap(
   window_actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::new();
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -184,7 +184,7 @@ fn sync_nowrap(
       line_viewports,
     )
   } else {
-    (ViewportLineRange::default(), BTreeMap::new())
+    (ViewportLineRange::default(), LiteMap::new())
   }
 }
 
@@ -196,16 +196,16 @@ fn proc_line_wrap_nolinebreak(
   mut current_row: u16,
   window_height: u16,
   window_width: u16,
-) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
+) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = buffer.get_rope().line(current_line);
   let bufline_len_chars = bufline.len_chars();
 
   if bufline_len_chars == 0 {
-    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
   } else {
-    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
 
     // let mut start_char = buffer
     match buffer.char_after(current_line, start_column) {
@@ -257,12 +257,12 @@ fn sync_wrap_nolinebreak(
   window_actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::new();
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -295,7 +295,7 @@ fn sync_wrap_nolinebreak(
       line_viewports,
     )
   } else {
-    (ViewportLineRange::default(), BTreeMap::new())
+    (ViewportLineRange::default(), LiteMap::new())
   }
 }
 
@@ -403,14 +403,14 @@ fn proc_line_wrap_linebreak(
   mut current_row: u16,
   window_height: u16,
   window_width: u16,
-) -> (BTreeMap<u16, RowViewport>, usize, usize, u16) {
+) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
   let bufline = buffer.get_rope().line(current_line);
   if bufline.len_chars() == 0 {
-    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
   } else {
-    let mut rows: BTreeMap<u16, RowViewport> = BTreeMap::new();
+    let mut rows: LiteMap<u16, RowViewport> = LiteMap::new();
 
     // Here clone the line with the max chars that can hold by current window/viewport,
     // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
@@ -566,12 +566,12 @@ fn sync_wrap_linebreak(
   window_actual_shape: &U16Rect,
   start_line: usize,
   start_column: usize,
-) -> (ViewportLineRange, BTreeMap<usize, LineViewport>) {
+) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = window_actual_shape.height();
   let width = window_actual_shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
-  let mut line_viewports: BTreeMap<usize, LineViewport> = BTreeMap::new();
+  let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::new();
 
   // The first `current_row` in the window maps to the `start_line` in the buffer.
   let mut current_row = 0_u16;
@@ -604,7 +604,7 @@ fn sync_wrap_linebreak(
       line_viewports,
     )
   } else {
-    (ViewportLineRange::default(), BTreeMap::new())
+    (ViewportLineRange::default(), LiteMap::new())
   }
 }
 
@@ -877,7 +877,7 @@ mod wrap_detail {
     /* start_column */ usize,
   ) -> (
     /* line range */ ViewportLineRange,
-    /* lines_viewport */ BTreeMap<usize, LineViewport>,
+    /* lines_viewport */ LiteMap<usize, LineViewport>,
   );
 
   // Type alias for `proc_line_*` functions.
@@ -889,7 +889,7 @@ mod wrap_detail {
     /* window_height */ u16,
     /* window_width */ u16,
   ) -> (
-    /* rows */ BTreeMap<u16, RowViewport>,
+    /* rows */ LiteMap<u16, RowViewport>,
     /* start_fills */ usize,
     /* end_fills */ usize,
     /* next_current_row */ u16,
@@ -1418,7 +1418,7 @@ mod wrap_detail {
 
   fn to_right_2_2(
     proc_fn: ProcessLineFn,
-    lines_viewport: &BTreeMap<usize, LineViewport>,
+    lines_viewport: &LiteMap<usize, LineViewport>,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_viewport_start_line: usize,
@@ -1471,7 +1471,7 @@ mod wrap_detail {
   pub fn adjust_wrap_2_2(
     opts: detail::AdjustOptions,
     proc_fn: ProcessLineFn,
-    lines_viewport: &BTreeMap<usize, LineViewport>,
+    lines_viewport: &LiteMap<usize, LineViewport>,
     buffer: &Buffer,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,

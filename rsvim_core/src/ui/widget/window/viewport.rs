@@ -5,8 +5,8 @@ use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::ui::widget::window::WindowLocalOptions;
 
+use litemap::LiteMap;
 use paste::paste;
-use std::collections::BTreeMap;
 use std::ops::Range;
 #[allow(unused_imports)]
 use tracing::trace;
@@ -54,7 +54,7 @@ impl RowViewport {
 #[derive(Debug, Clone)]
 /// The buffer line viewport in a buffer.
 pub struct LineViewport {
-  rows: BTreeMap<u16, RowViewport>,
+  rows: LiteMap<u16, RowViewport>,
   start_filled_cols: usize,
   end_filled_cols: usize,
 }
@@ -62,7 +62,7 @@ pub struct LineViewport {
 impl LineViewport {
   /// Make new instance.
   pub fn new(
-    rows: BTreeMap<u16, RowViewport>,
+    rows: LiteMap<u16, RowViewport>,
     start_filled_cols: usize,
     end_filled_cols: usize,
   ) -> Self {
@@ -75,7 +75,7 @@ impl LineViewport {
 
   /// Maps `row_idx` (in the window) => its row-wise viewport.
   /// The row index starts from 0.
-  pub fn rows(&self) -> &BTreeMap<u16, RowViewport> {
+  pub fn rows(&self) -> &LiteMap<u16, RowViewport> {
     &self.rows
   }
 
@@ -179,12 +179,12 @@ impl CursorViewport {
     debug_assert!(viewport.end_line_idx() > viewport.start_line_idx());
     debug_assert!(!lines.is_empty());
     debug_assert!(lines.len() == viewport.end_line_idx() - viewport.start_line_idx());
-    debug_assert!(lines.first_key_value().is_some());
-    debug_assert!(lines.last_key_value().is_some());
-    debug_assert!(*lines.first_key_value().unwrap().0 == viewport.start_line_idx());
+    debug_assert!(lines.first().is_some());
+    debug_assert!(lines.last().is_some());
+    debug_assert!(*lines.first().unwrap().0 == viewport.start_line_idx());
     debug_assert!(viewport.end_line_idx() > 0);
-    debug_assert!(*lines.last_key_value().unwrap().0 == viewport.end_line_idx() - 1);
-    let first_line = lines.first_key_value().unwrap();
+    debug_assert!(*lines.last().unwrap().0 == viewport.end_line_idx() - 1);
+    let first_line = lines.first().unwrap();
     let line_idx = *first_line.0;
     let first_line = first_line.1;
 
@@ -192,7 +192,7 @@ impl CursorViewport {
       return Self::new(0, 0, 0, 0);
     }
 
-    let first_row = first_line.rows().first_key_value().unwrap();
+    let first_row = first_line.rows().first().unwrap();
     let first_row = first_row.1;
 
     debug_assert!(first_row.end_char_idx() >= first_row.start_char_idx());
@@ -262,13 +262,12 @@ impl CursorViewport {
         let next_line_idx = line_idx + 1;
         debug_assert!(viewport.lines().contains_key(&next_line_idx));
         let next_line_viewport = viewport.lines().get(&next_line_idx).unwrap();
-        debug_assert!(next_line_viewport.rows().first_key_value().is_some());
-        let (first_row_idx, _first_row_viewport) =
-          next_line_viewport.rows().first_key_value().unwrap();
+        debug_assert!(next_line_viewport.rows().first().is_some());
+        let (first_row_idx, _first_row_viewport) = next_line_viewport.rows().first().unwrap();
         CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
       } else {
-        debug_assert!(line_viewport.rows().first_key_value().is_some());
-        let (first_row_idx, _first_row_viewport) = line_viewport.rows().first_key_value().unwrap();
+        debug_assert!(line_viewport.rows().first().is_some());
+        let (first_row_idx, _first_row_viewport) = line_viewport.rows().first().unwrap();
         CursorViewport::new(line_idx, char_idx, *first_row_idx, 0_u16)
       }
     }
@@ -519,7 +518,7 @@ pub struct Viewport {
   start_column_idx: usize,
 
   // Maps `line_idx` (in the buffer) => its line-wise viewports.
-  lines: BTreeMap<usize, LineViewport>,
+  lines: LiteMap<usize, LineViewport>,
 }
 
 arc_impl!(Viewport);
@@ -632,16 +631,10 @@ impl Viewport {
       self.end_line_idx == self.start_line_idx,
       self.lines.is_empty()
     );
-    debug_assert!(self.lines.first_key_value().is_some());
-    debug_assert_eq!(
-      *self.lines.first_key_value().unwrap().0,
-      self.start_line_idx
-    );
-    debug_assert!(self.lines.last_key_value().is_some());
-    debug_assert_eq!(
-      *self.lines.last_key_value().unwrap().0,
-      self.end_line_idx - 1
-    );
+    debug_assert!(self.lines.first().is_some());
+    debug_assert_eq!(*self.lines.first().unwrap().0, self.start_line_idx);
+    debug_assert!(self.lines.last().is_some());
+    debug_assert_eq!(*self.lines.last().unwrap().0, self.end_line_idx - 1);
     let mut last_line_idx: Option<usize> = None;
     let mut last_row_idx: Option<u16> = None;
     for (line_idx, line_viewport) in self.lines.iter() {
@@ -699,7 +692,7 @@ impl Viewport {
   }
 
   /// Get viewport information by lines.
-  pub fn lines(&self) -> &BTreeMap<usize, LineViewport> {
+  pub fn lines(&self) -> &LiteMap<usize, LineViewport> {
     self._internal_check();
     &self.lines
   }
@@ -728,6 +721,7 @@ mod tests_util {
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
+  use std::collections::BTreeMap;
   use std::fs::File;
   use std::io::{BufReader, BufWriter};
   use std::sync::Arc;
@@ -812,8 +806,8 @@ mod tests_util {
     if actual.lines().is_empty() {
       assert!(actual.end_line_idx() <= actual.start_line_idx());
     } else {
-      let (first_line_idx, _first_line_viewport) = actual.lines().first_key_value().unwrap();
-      let (last_line_idx, _last_line_viewport) = actual.lines().last_key_value().unwrap();
+      let (first_line_idx, _first_line_viewport) = actual.lines().first().unwrap();
+      let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
       assert_eq!(*first_line_idx, actual.start_line_idx());
       assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
     }
@@ -863,7 +857,7 @@ mod tests_util {
       for (r, row) in rows.iter() {
         info!("row-index-{:?}, row:{:?}", r, row);
 
-        if r > rows.first_key_value().unwrap().0 {
+        if r > rows.first().unwrap().0 {
           let prev_r = r - 1;
           let prev_row = rows.get(&prev_r).unwrap();
           info!(
@@ -871,7 +865,7 @@ mod tests_util {
             r, r, row, prev_r, prev_row
           );
         }
-        if r < rows.last_key_value().unwrap().0 {
+        if r < rows.last().unwrap().0 {
           let next_r = r + 1;
           let next_row = rows.get(&next_r).unwrap();
           info!(
@@ -906,6 +900,7 @@ mod tests_view_nowrap {
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
+  use std::collections::BTreeMap;
 
   #[test]
   fn new1() {
@@ -1365,6 +1360,7 @@ mod tests_view_nowrap_startcol {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Inodeable;
+  use std::collections::BTreeMap;
 
   #[test]
   fn update1() {
@@ -1950,6 +1946,7 @@ mod tests_view_wrap_nolinebreak {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::*;
+  use std::collections::BTreeMap;
 
   #[test]
   fn new1() {
@@ -2638,6 +2635,7 @@ mod tests_view_wrap_nolinebreak_startcol {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::*;
+  use std::collections::BTreeMap;
 
   #[test]
   fn update1() {
@@ -2891,6 +2889,7 @@ mod tests_view_wrap_linebreak {
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
+  use std::collections::BTreeMap;
 
   #[test]
   fn new1() {
@@ -3621,6 +3620,7 @@ mod tests_view_wrap_linebreak_startcol {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Inodeable;
+  use std::collections::BTreeMap;
 
   #[test]
   fn update1() {
@@ -3972,6 +3972,7 @@ mod tests_search_anchor_downward_nowrap {
   use crate::ui::tree::Inodeable;
 
   use std::cell::RefCell;
+  use std::collections::BTreeMap;
   use std::rc::Rc;
 
   #[test]
@@ -5740,6 +5741,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
   use crate::ui::tree::Inodeable;
 
   use std::cell::RefCell;
+  use std::collections::BTreeMap;
   use std::rc::Rc;
 
   #[test]
@@ -7328,6 +7330,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
   use crate::ui::tree::Inodeable;
 
   use std::cell::RefCell;
+  use std::collections::BTreeMap;
   use std::rc::Rc;
 
   #[test]
@@ -8450,6 +8453,7 @@ mod tests_search_anchor_upward_nowrap {
   use crate::ui::tree::Inodeable;
 
   use std::cell::RefCell;
+  use std::collections::BTreeMap;
   use std::rc::Rc;
 
   #[test]
@@ -10087,6 +10091,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
   use crate::ui::tree::Inodeable;
 
   use std::cell::RefCell;
+  use std::collections::BTreeMap;
   use std::rc::Rc;
 
   #[test]
@@ -11579,6 +11584,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
   use crate::ui::tree::Inodeable;
 
   use std::cell::RefCell;
+  use std::collections::BTreeMap;
   use std::rc::Rc;
 
   #[test]
@@ -12512,6 +12518,7 @@ mod tests_search_anchor_horizontally_nowrap {
   use crate::ui::tree::Inodeable;
 
   use std::cell::RefCell;
+  use std::collections::BTreeMap;
   use std::rc::Rc;
 
   #[test]
@@ -14901,6 +14908,7 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
   use crate::ui::tree::Inodeable;
 
   use std::cell::RefCell;
+  use std::collections::BTreeMap;
   use std::rc::Rc;
 
   #[test]
@@ -17919,6 +17927,7 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
   use crate::ui::tree::Inodeable;
 
   use std::cell::RefCell;
+  use std::collections::BTreeMap;
   use std::rc::Rc;
 
   #[test]
