@@ -5,7 +5,7 @@ use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Window};
 
-use tracing::trace;
+// use tracing::trace;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// Cursor move direction.
@@ -29,7 +29,7 @@ fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveBy((x,y))`.
-pub fn normalize_as_cursor_move_by(
+pub fn normalize_to_cursor_move_by(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -50,7 +50,7 @@ pub fn normalize_as_cursor_move_by(
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`.
-pub fn normalize_as_cursor_move_to(
+pub fn normalize_to_cursor_move_to(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -90,40 +90,46 @@ pub fn normalize_as_cursor_move_to(
   }
 }
 
-/// Same with [`normalize_as_cursor_move_to`], except it exclude the empty eol.
-pub fn normalize_as_cursor_move_to_exclude_empty_eol(
+/// Same with [`normalize_to_cursor_move_to`], except it exclude the empty eol.
+pub fn normalize_to_cursor_move_to_exclude_empty_eol(
   buffer: &Buffer,
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) = normalize_as_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+  let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
   let x = match buffer.last_char_on_line_no_empty_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char),
-    None => x,
+    None => {
+      debug_assert!(buffer.get_rope().get_line(y).is_some());
+      std::cmp::min(x, buffer.get_rope().line(y).len_chars().saturating_sub(1))
+    }
   };
   (x, y, move_direction)
 }
 
-/// Same with [`normalize_as_cursor_move_to`], except it include the empty eol.
-pub fn normalize_as_cursor_move_to_include_empty_eol(
+/// Same with [`normalize_to_cursor_move_to`], except it include the empty eol.
+pub fn normalize_to_cursor_move_to_include_empty_eol(
   buffer: &Buffer,
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) = normalize_as_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+  let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
   let y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
   let x = match buffer.last_char_on_line(y) {
     Some(last_char) => std::cmp::min(x, last_char),
-    None => x,
+    None => {
+      debug_assert!(buffer.get_rope().get_line(y).is_some());
+      std::cmp::min(x, buffer.get_rope().line(y).len_chars().saturating_sub(1))
+    }
   };
   (x, y, move_direction)
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollBy((x,y))`.
-pub fn normalize_as_window_scroll_by(
+pub fn normalize_to_window_scroll_by(
   op: Operation,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -144,7 +150,7 @@ pub fn normalize_as_window_scroll_by(
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollTo((x,y))`.
-pub fn normalize_as_window_scroll_to(
+pub fn normalize_to_window_scroll_to(
   op: Operation,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -200,10 +206,9 @@ pub fn cursor_move_to(
     _ => unreachable!(),
   };
 
-  let cursor_move_to_result =
-    _raw_cursor_move_to(viewport, cursor_viewport, buffer, to_char, to_line);
+  let result = _raw_cursor_move_to(viewport, cursor_viewport, buffer, to_char, to_line);
 
-  if let Some((line_idx, char_idx)) = cursor_move_to_result {
+  if let Some((line_idx, char_idx)) = result {
     let new_cursor_viewport = CursorViewport::from_position(viewport, buffer, line_idx, char_idx);
     let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
     // New cursor position
@@ -217,59 +222,31 @@ pub fn cursor_move_to(
 // Returns the `line_idx`/`char_idx` for new cursor position.
 fn _raw_cursor_move_to(
   viewport: &Viewport,
-  cursor_viewport: &CursorViewport,
+  _cursor_viewport: &CursorViewport,
   buffer: &Buffer,
   char_idx: usize,
   line_idx: usize,
 ) -> Option<(usize, usize)> {
-  let cursor_line_idx = cursor_viewport.line_idx();
-  let cursor_char_idx = cursor_viewport.char_idx();
+  let line_idx = std::cmp::min(line_idx, viewport.end_line_idx().saturating_sub(1));
+  debug_assert!(line_idx < viewport.end_line_idx());
+  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
 
-  let line_idx =
-    _bounded_raw_cursor_move_y_to(viewport, cursor_line_idx, cursor_char_idx, buffer, line_idx);
+  let bufline = buffer.get_rope().line(line_idx);
+  debug_assert!(bufline.len_chars() >= char_idx);
 
-  // If `line_idx` doesn't exist, or line is empty.
-  match buffer.get_rope().get_line(line_idx) {
-    Some(line) => {
-      if line.len_chars() == 0 {
-        return Some((line_idx, 0_usize));
-      }
-    }
-    None => return None,
+  let char_idx = if bufline.len_chars() == 0 {
+    0_usize
+  } else {
+    std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1))
+  };
+
+  if bufline.len_chars() == 0 {
+    debug_assert_eq!(char_idx, 0_usize);
+  } else {
+    debug_assert!(bufline.len_chars() > char_idx);
   }
-
-  let char_idx =
-    _bounded_raw_cursor_move_x_to(viewport, line_idx, cursor_char_idx, buffer, char_idx);
 
   Some((line_idx, char_idx))
-}
-
-fn _bounded_raw_cursor_move_y_to(
-  viewport: &Viewport,
-  cursor_line_idx: usize,
-  _cursor_char_idx: usize,
-  _buffer: &Buffer,
-  line_idx: usize,
-) -> usize {
-  let last_line_idx = viewport.end_line_idx().saturating_sub(1);
-  trace!(
-    "cursor_line_idx:{:?},last_line_idx:{:?}",
-    cursor_line_idx, last_line_idx
-  );
-  std::cmp::min(line_idx, last_line_idx)
-}
-
-fn _bounded_raw_cursor_move_x_to(
-  _viewport: &Viewport,
-  cursor_line_idx: usize,
-  _cursor_char_idx: usize,
-  buffer: &Buffer,
-  char_idx: usize,
-) -> usize {
-  match buffer.last_char_on_line(cursor_line_idx) {
-    Some(last_char) => std::cmp::min(last_char, char_idx),
-    None => char_idx,
-  }
 }
 
 pub fn window_scroll_to(
@@ -287,9 +264,9 @@ pub fn window_scroll_to(
     _ => unreachable!(),
   };
 
-  let window_scroll_to_result = _raw_window_scroll_to(viewport, buffer, to_column, to_line);
+  let result = _raw_window_scroll_to(viewport, current_window, buffer, to_column, to_line);
 
-  if let Some((start_line_idx, start_column_idx)) = window_scroll_to_result {
+  if let Some((start_line_idx, start_column_idx)) = result {
     // Sync the viewport
     let window_actual_shape = current_window.window_content().actual_shape();
     let window_local_options = current_window.options();
@@ -310,6 +287,7 @@ pub fn window_scroll_to(
 /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
 fn _raw_window_scroll_to(
   viewport: &Viewport,
+  current_window: &Window,
   buffer: &Buffer,
   column_idx: usize,
   line_idx: usize,
@@ -320,16 +298,22 @@ fn _raw_window_scroll_to(
   let buffer_len_lines = buffer.get_rope().len_lines();
   debug_assert!(end_line_idx <= buffer_len_lines);
 
-  let mut line_idx = _bounded_raw_window_scroll_y_to(buffer, line_idx);
+  let line_idx = if buffer_len_lines == 0 {
+    0_usize
+  } else {
+    std::cmp::min(line_idx, buffer_len_lines.saturating_sub(1))
+  };
 
-  // If viewport wants to scroll down (i.e. lines_idx > start_line_idx), and viewport already shows
-  // that last line in the buffer, then cannot scroll down anymore, just still keep the old
-  // `line_idx`.
-  if line_idx > start_line_idx && end_line_idx == buffer_len_lines {
-    line_idx = start_line_idx;
+  if buffer_len_lines == 0 {
+    debug_assert_eq!(line_idx, 0_usize);
+  } else {
+    debug_assert!(line_idx < buffer_len_lines);
   }
+  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
 
-  let column_idx = _bounded_raw_window_scroll_x_to(start_column_idx, viewport, buffer, column_idx);
+  let window_actual_shape = current_window.actual_shape();
+  let max_len_chars = _max_len_chars_since_line(buffer, line_idx, window_actual_shape.height());
+  let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
   // there's no need to scroll anymore.
@@ -340,65 +324,21 @@ fn _raw_window_scroll_to(
   Some((line_idx, column_idx))
 }
 
-fn _bounded_raw_window_scroll_y_to(buffer: &Buffer, line_idx: usize) -> usize {
-  let buffer_len_lines = buffer.get_rope().len_lines();
-  std::cmp::min(line_idx, buffer_len_lines.saturating_sub(1))
-}
-
-// Calculate how many columns that each line (in current viewport) need to scroll until
-// their own line's end. This is the upper bound of the actual columns that could
-// scroll.
-fn _bounded_raw_window_scroll_x_max_scrolls(viewport: &Viewport, buffer: &Buffer) -> usize {
-  let mut max_scrolls = 0_usize;
-  for (line_idx, line_viewport) in viewport.lines().iter() {
-    trace!("line_idx:{},line_viewport:{:?}", line_idx, line_viewport);
-    debug_assert!(!line_viewport.rows().is_empty());
-    let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-    trace!(
-      "_last_row_idx:{},last_row_viewport:{:?}",
-      _last_row_idx, last_row_viewport
-    );
-    debug_assert!(buffer.get_rope().get_line(*line_idx).is_some());
-    // If `last_row_viewport` is empty, i.e. the `end_char_idx == start_char_idx`, the scrolls is 0.
-    if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
-      let max_scrolls_on_line = match buffer.last_char_on_line_no_empty_eol(*line_idx) {
-        Some(last_visible_c) => {
-          let last_visible_col = buffer.width_until(*line_idx, last_visible_c);
-          let last_col_on_row = buffer.width_until(
-            *line_idx,
-            last_row_viewport.end_char_idx().saturating_sub(1),
-          );
-          let column_difference = last_visible_col.saturating_sub(last_col_on_row);
-          trace!(
-            "last_visible_c:{},last_row_viewport.end_char_idx:{},last_visible_col:{},last_col_on_row:{},column_difference:{}",
-            last_visible_c,
-            last_row_viewport.end_char_idx(),
-            last_visible_col,
-            last_col_on_row,
-            column_difference
-          );
-          column_difference
-        }
-        None => 0_usize,
-      };
-      trace!("result:{}", max_scrolls_on_line);
-      max_scrolls = std::cmp::max(max_scrolls, max_scrolls_on_line);
-    }
-  }
-  max_scrolls
-}
-
-fn _bounded_raw_window_scroll_x_to(
-  start_column_idx: usize,
-  viewport: &Viewport,
+fn _max_len_chars_since_line(
   buffer: &Buffer,
-  column_idx: usize,
+  mut start_line_idx: usize,
+  window_height: u16,
 ) -> usize {
-  let max_scrolls = _bounded_raw_window_scroll_x_max_scrolls(viewport, buffer);
-  let upper_bounded = start_column_idx.saturating_add(max_scrolls);
-  trace!(
-    "max_scrolls:{},upper_bounded:{},column_idx:{}",
-    max_scrolls, upper_bounded, column_idx
-  );
-  std::cmp::min(column_idx, upper_bounded)
+  let buffer_len_lines = buffer.get_rope().len_lines();
+
+  let mut max_len_chars = 0_usize;
+  let mut i = 0_u16;
+  while i < window_height && start_line_idx < buffer_len_lines {
+    debug_assert!(buffer.get_rope().get_line(start_line_idx).is_some());
+    let bufline = buffer.get_rope().line(start_line_idx);
+    max_len_chars = std::cmp::max(max_len_chars, bufline.len_chars());
+    i += 1;
+    start_line_idx += 1;
+  }
+  max_len_chars
 }
