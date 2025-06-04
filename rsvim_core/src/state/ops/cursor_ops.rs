@@ -206,10 +206,9 @@ pub fn cursor_move_to(
     _ => unreachable!(),
   };
 
-  let cursor_move_to_result =
-    _raw_cursor_move_to(viewport, cursor_viewport, buffer, to_char, to_line);
+  let result = _raw_cursor_move_to(viewport, cursor_viewport, buffer, to_char, to_line);
 
-  if let Some((line_idx, char_idx)) = cursor_move_to_result {
+  if let Some((line_idx, char_idx)) = result {
     let new_cursor_viewport = CursorViewport::from_position(viewport, buffer, line_idx, char_idx);
     let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
     // New cursor position
@@ -228,9 +227,6 @@ fn _raw_cursor_move_to(
   char_idx: usize,
   line_idx: usize,
 ) -> Option<(usize, usize)> {
-  // let cursor_line_idx = cursor_viewport.line_idx();
-  // let cursor_char_idx = cursor_viewport.char_idx();
-
   let line_idx = std::cmp::min(line_idx, viewport.end_line_idx().saturating_sub(1));
   debug_assert!(line_idx < viewport.end_line_idx());
   debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
@@ -243,57 +239,16 @@ fn _raw_cursor_move_to(
   } else {
     std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1))
   };
-  if bufline.len_chars() == 0 {
-    debug_assert_eq!(char_idx, 0_usize);
-  } else {
-    debug_assert!(bufline.len_chars() > char_idx);
+
+  if cfg!(debug_assertions) {
+    if bufline.len_chars() == 0 {
+      debug_assert_eq!(char_idx, 0_usize);
+    } else {
+      debug_assert!(bufline.len_chars() > char_idx);
+    }
   }
-
-  // let line_idx =
-  //   _bounded_raw_cursor_move_y_to(viewport, cursor_line_idx, cursor_char_idx, buffer, line_idx);
-
-  // // If `line_idx` doesn't exist, or line is empty.
-  // match buffer.get_rope().get_line(line_idx) {
-  //   Some(line) => {
-  //     if line.len_chars() == 0 {
-  //       return Some((line_idx, 0_usize));
-  //     }
-  //   }
-  //   None => return None,
-  // }
-
-  // let char_idx =
-  //   _bounded_raw_cursor_move_x_to(viewport, line_idx, cursor_char_idx, buffer, char_idx);
 
   Some((line_idx, char_idx))
-}
-
-fn _bounded_raw_cursor_move_y_to(
-  viewport: &Viewport,
-  cursor_line_idx: usize,
-  _cursor_char_idx: usize,
-  _buffer: &Buffer,
-  line_idx: usize,
-) -> usize {
-  let last_line_idx = viewport.end_line_idx().saturating_sub(1);
-  trace!(
-    "cursor_line_idx:{:?},last_line_idx:{:?}",
-    cursor_line_idx, last_line_idx
-  );
-  std::cmp::min(line_idx, last_line_idx)
-}
-
-fn _bounded_raw_cursor_move_x_to(
-  _viewport: &Viewport,
-  cursor_line_idx: usize,
-  _cursor_char_idx: usize,
-  buffer: &Buffer,
-  char_idx: usize,
-) -> usize {
-  match buffer.last_char_on_line(cursor_line_idx) {
-    Some(last_char) => std::cmp::min(last_char, char_idx),
-    None => char_idx,
-  }
 }
 
 pub fn window_scroll_to(
@@ -311,10 +266,9 @@ pub fn window_scroll_to(
     _ => unreachable!(),
   };
 
-  let window_scroll_to_result =
-    _raw_window_scroll_to(viewport, current_window, buffer, to_column, to_line);
+  let result = _raw_window_scroll_to(viewport, current_window, buffer, to_column, to_line);
 
-  if let Some((start_line_idx, start_column_idx)) = window_scroll_to_result {
+  if let Some((start_line_idx, start_column_idx)) = result {
     // Sync the viewport
     let window_actual_shape = current_window.window_content().actual_shape();
     let window_local_options = current_window.options();
@@ -351,39 +305,19 @@ fn _raw_window_scroll_to(
   } else {
     std::cmp::min(line_idx, buffer_len_lines.saturating_sub(1))
   };
-  if buffer_len_lines == 0 {
-    debug_assert_eq!(line_idx, 0_usize);
-  } else {
-    debug_assert!(line_idx < buffer_len_lines);
+
+  if cfg!(debug_assertions) {
+    if buffer_len_lines == 0 {
+      debug_assert_eq!(line_idx, 0_usize);
+    } else {
+      debug_assert!(line_idx < buffer_len_lines);
+    }
+    debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
   }
-  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-
-  // let bufline = buffer.get_rope().line(line_idx);
-  // let bufline_width = buffer.width_before(line_idx, bufline.len_chars());
-  // let column_idx = if bufline_width == 0 {
-  //   0_usize
-  // } else {
-  //   std::cmp::min(column_idx, bufline_width.saturating_sub(1))
-  // };
-  // if bufline_width == 0 {
-  //   debug_assert_eq!(column_idx, 0_usize);
-  // } else {
-  //   debug_assert!(column_idx < bufline_width);
-  // }
-
-  // let mut line_idx = _bounded_raw_window_scroll_y_to(buffer, line_idx);
-
-  // If viewport wants to scroll down (i.e. lines_idx > start_line_idx), and viewport already shows
-  // that last line in the buffer, then cannot scroll down anymore, just still keep the old
-  // `line_idx`.
-  // if line_idx > start_line_idx && end_line_idx == buffer_len_lines {
-  //   line_idx = start_line_idx;
-  // }
 
   let window_actual_shape = current_window.actual_shape();
   let max_len_chars = _max_len_chars_since_line(buffer, line_idx, window_actual_shape.height());
   let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
-  // let column_idx = _bounded_raw_window_scroll_x_to(start_column_idx, viewport, buffer, column_idx);
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
   // there's no need to scroll anymore.
@@ -394,14 +328,6 @@ fn _raw_window_scroll_to(
   Some((line_idx, column_idx))
 }
 
-fn _bounded_raw_window_scroll_y_to(buffer: &Buffer, line_idx: usize) -> usize {
-  let buffer_len_lines = buffer.get_rope().len_lines();
-  std::cmp::min(line_idx, buffer_len_lines.saturating_sub(1))
-}
-
-// Calculate how many columns that each line (in current viewport) need to scroll until
-// their own line's end. This is the upper bound of the actual columns that could
-// scroll.
 fn _max_len_chars_since_line(
   buffer: &Buffer,
   mut start_line_idx: usize,
@@ -420,11 +346,3 @@ fn _max_len_chars_since_line(
   }
   max_len_chars
 }
-
-// fn _bounded_raw_window_scroll_x_to(
-//   start_column_idx: usize,
-//   viewport: &Viewport,
-//   buffer: &Buffer,
-//   column_idx: usize,
-// ) -> usize {
-// }
