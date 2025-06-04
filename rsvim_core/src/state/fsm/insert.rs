@@ -8,7 +8,7 @@ use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{
-  CursorViewport, CursorViewportArc, ViewportArc, ViewportSearchAnchorDirection,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
 };
 
 use compact_str::ToCompactString;
@@ -162,22 +162,24 @@ impl InsertStateful {
           viewport.start_column_idx(),
           buffer.width_until(start_line, char_at_start_column),
         );
-        if let Some(updated_viewport) = cursor_ops::window_scroll_to(
-          &viewport,
-          current_window,
-          &buffer,
-          Operation::WindowScrollTo((start_column, start_column)),
-        ) {
-          current_window.set_viewport(updated_viewport);
 
-          if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
-            &viewport,
-            &cursor_viewport,
-            &buffer,
-            Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
-          ) {
-            current_window.set_cursor_viewport(updated_cursor_viewport);
-          }
+        let updated_viewport = Viewport::to_arc(Viewport::view(
+          &buffer,
+          current_window.actual_shape(),
+          current_window.options(),
+          start_line,
+          start_column,
+        ));
+
+        current_window.set_viewport(updated_viewport.clone());
+        let updated_viewport = lock!(updated_viewport);
+        if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
+          &updated_viewport,
+          &cursor_viewport,
+          &buffer,
+          Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
+        ) {
+          current_window.set_cursor_viewport(updated_cursor_viewport);
         }
       } else {
         unreachable!();
