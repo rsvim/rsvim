@@ -430,6 +430,7 @@ fn proc_line_wrap_linebreak(
     let cloned_start_char = buffer
       .char_before(current_line, start_column)
       .unwrap_or(0_usize);
+
     let cloned_line = buffer
       .clone_line(
         current_line,
@@ -437,6 +438,7 @@ fn proc_line_wrap_linebreak(
         _cloned_line_max_len(window_height, window_width),
       )
       .unwrap();
+
     trace!(
       "cloned_line({}):{:?}, start_column:{}",
       cloned_line.len(),
