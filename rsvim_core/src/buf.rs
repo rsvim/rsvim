@@ -18,7 +18,6 @@ use smol_str::{SmolStr, SmolStrBuilder};
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fs::Metadata;
-use std::hash::Hash;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
