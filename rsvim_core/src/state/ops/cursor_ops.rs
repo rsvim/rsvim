@@ -231,16 +231,22 @@ fn _raw_cursor_move_to(
   // let cursor_line_idx = cursor_viewport.line_idx();
   // let cursor_char_idx = cursor_viewport.char_idx();
 
-  if cfg!(debug_assertions) {
-    debug_assert!(line_idx < viewport.end_line_idx());
-    debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-    let bufline = buffer.get_rope().line(line_idx);
-    debug_assert!(bufline.len_chars() >= char_idx);
-    if bufline.len_chars() == 0 {
-      debug_assert_eq!(char_idx, 0_usize);
-    } else {
-      debug_assert!(bufline.len_chars() > char_idx);
-    }
+  let line_idx = std::cmp::min(line_idx, viewport.end_line_idx().saturating_sub(1));
+  debug_assert!(line_idx < viewport.end_line_idx());
+  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+
+  let bufline = buffer.get_rope().line(line_idx);
+  debug_assert!(bufline.len_chars() >= char_idx);
+
+  let char_idx = if bufline.len_chars() == 0 {
+    0_usize
+  } else {
+    std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1))
+  };
+  if bufline.len_chars() == 0 {
+    debug_assert_eq!(char_idx, 0_usize);
+  } else {
+    debug_assert!(bufline.len_chars() > char_idx);
   }
 
   // let line_idx =
@@ -338,16 +344,41 @@ fn _raw_window_scroll_to(
   let buffer_len_lines = buffer.get_rope().len_lines();
   debug_assert!(end_line_idx <= buffer_len_lines);
 
-  let mut line_idx = _bounded_raw_window_scroll_y_to(buffer, line_idx);
+  let line_idx = if buffer_len_lines == 0 {
+    0_usize
+  } else {
+    std::cmp::min(line_idx, buffer_len_lines.saturating_sub(1))
+  };
+  if buffer_len_lines == 0 {
+    debug_assert_eq!(line_idx, 0_usize);
+  } else {
+    debug_assert!(line_idx < buffer_len_lines);
+  }
+
+  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+  let bufline = buffer.get_rope().line(line_idx);
+  let bufline_width = buffer.width_before(line_idx, bufline.len_chars());
+  let column_idx = if bufline_width == 0 {
+    0_usize
+  } else {
+    std::cmp::min(column_idx, bufline_width.saturating_sub(1))
+  };
+  if bufline_width == 0 {
+    debug_assert_eq!(column_idx, 0_usize);
+  } else {
+    debug_assert!(column_idx < bufline_width);
+  }
+
+  // let mut line_idx = _bounded_raw_window_scroll_y_to(buffer, line_idx);
 
   // If viewport wants to scroll down (i.e. lines_idx > start_line_idx), and viewport already shows
   // that last line in the buffer, then cannot scroll down anymore, just still keep the old
   // `line_idx`.
-  if line_idx > start_line_idx && end_line_idx == buffer_len_lines {
-    line_idx = start_line_idx;
-  }
+  // if line_idx > start_line_idx && end_line_idx == buffer_len_lines {
+  //   line_idx = start_line_idx;
+  // }
 
-  let column_idx = _bounded_raw_window_scroll_x_to(start_column_idx, viewport, buffer, column_idx);
+  // let column_idx = _bounded_raw_window_scroll_x_to(start_column_idx, viewport, buffer, column_idx);
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
   // there's no need to scroll anymore.

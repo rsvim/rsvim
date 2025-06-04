@@ -1625,7 +1625,6 @@ mod tests_raw_window_scroll_y_by {
       info!("after cursor scroll");
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
         "This is a ",
         "But still ",
         "  1. When ",
@@ -1634,23 +1633,15 @@ mod tests_raw_window_scroll_y_by {
         "     * The",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        0,
+        1,
         8,
         &expect_fills,
         &expect_fills,
@@ -2325,28 +2316,16 @@ mod tests_raw_window_scroll_y_by {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "     * The char",
-        " is too long to",
-        " put at the end",
-        " of the row, th",
-        "us we will have",
-        " to put the cha",
-        "r to the beginn",
-        "ing of the next",
-        " row (because w",
-        "e don't cut a s",
-        "ingle char into",
-        " pieces)\n",
         "",
         "",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(9, 0), (10, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(10, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        9,
+        10,
         11,
         &expect_fills,
         &expect_fills,
@@ -2364,29 +2343,29 @@ mod tests_raw_window_scroll_y_by {
     {
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "  3. If a singl",
-        "e char needs mu",
-        "ltiple cells to",
-        " display on the",
-        " window, and it",
-        " happens the ch",
-        "ar is at the en",
-        "d of the row, t",
-        "here can be mul",
-        "tiple cases:\n",
         "     * The char",
         " exactly ends a",
         "t the end of th",
         "e row, i.e. the",
         " last display c",
+        "olumn of the ch",
+        "ar is exactly t",
+        "he last column ",
+        "on the row. In ",
+        "this case, we a",
+        "re happy becaus",
+        "e the char can ",
+        "be put at the e",
+        "nd of the row.\n",
+        "     * The char",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(7, 0), (8, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        7,
-        9,
+        8,
+        10,
         &expect_fills,
         &expect_fills,
       );
