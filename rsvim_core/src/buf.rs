@@ -18,6 +18,7 @@ use smol_str::{SmolStr, SmolStrBuilder};
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fs::Metadata;
+use std::hash::Hash;
 use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
@@ -40,8 +41,6 @@ pub fn next_buffer_id() -> BufferId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-type CachedClonedLines = LruCache<usize, Option<Rc<SmolStr>>, RandomState>;
-
 #[derive(Debug)]
 /// The Vim buffer, it is the in-memory texts mapping to the filesystem.
 ///
@@ -57,7 +56,6 @@ pub struct Buffer {
   id: BufferId,
   rope: Rope,
   cached_lines_width: Rc<RefCell<LruCache<usize, ColumnIndex, RandomState>>>,
-  cached_cloned_lines: Rc<RefCell<CachedClonedLines>>,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -92,10 +90,6 @@ impl Buffer {
         cache_size,
         RandomState::new(),
       ))),
-      cached_cloned_lines: Rc::new(RefCell::new(LruCache::with_hasher(
-        cache_size,
-        RandomState::new(),
-      ))),
       options,
       filename,
       absolute_filename,
@@ -112,10 +106,6 @@ impl Buffer {
       id: next_buffer_id(),
       rope: Rope::new(),
       cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
-        cache_size,
-        RandomState::new(),
-      ))),
-      cached_cloned_lines: Rc::new(RefCell::new(LruCache::with_hasher(
         cache_size,
         RandomState::new(),
       ))),
@@ -200,31 +190,23 @@ impl Buffer {
     line_idx: usize,
     start_char_idx: usize,
     max_chars: usize,
-  ) -> Option<Rc<SmolStr>> {
-    let clone_impl = |the_line_idx| -> Option<Rc<SmolStr>> {
-      match self.rope.get_line(the_line_idx) {
-        Some(bufline) => match bufline.get_chars_at(start_char_idx) {
-          Some(chars_iter) => {
-            let mut builder = SmolStrBuilder::new();
-            for (i, c) in chars_iter.enumerate() {
-              if i >= max_chars {
-                return Some(Rc::new(builder.finish()));
-              }
-              builder.push(c);
+  ) -> Option<SmolStr> {
+    match self.rope.get_line(line_idx) {
+      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
+        Some(chars_iter) => {
+          let mut builder = SmolStrBuilder::new();
+          for (i, c) in chars_iter.enumerate() {
+            if i >= max_chars {
+              return Some(builder.finish());
             }
-            Some(Rc::new(builder.finish()))
+            builder.push(c);
           }
-          None => None,
-        },
+          Some(builder.finish())
+        }
         None => None,
-      }
-    };
-
-    self
-      .cached_cloned_lines
-      .borrow_mut()
-      .get_or_insert(line_idx, || -> Option<Rc<SmolStr>> { clone_impl(line_idx) })
-      .clone()
+      },
+      None => None,
+    }
   }
 
   /// Get last char index on line.
@@ -404,8 +386,7 @@ impl Buffer {
         let rope_line = self.rope.line(line_idx);
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
-      .truncate_since_char(char_idx);
-    self.cached_cloned_lines.borrow_mut().pop(&line_idx);
+      .truncate_since_char(char_idx)
   }
 
   /// See [`ColumnIndex::truncate_since_width`].
@@ -417,14 +398,12 @@ impl Buffer {
         let rope_line = self.rope.line(line_idx);
         ColumnIndex::with_capacity(rope_line.len_chars())
       })
-      .truncate_since_width(width);
-    self.cached_cloned_lines.borrow_mut().pop(&line_idx);
+      .truncate_since_width(width)
   }
 
   /// Remove one cached line.
   pub fn remove_cached_line(&self, line_idx: usize) {
     self.cached_lines_width.borrow_mut().pop(&line_idx);
-    self.cached_cloned_lines.borrow_mut().pop(&line_idx);
   }
 
   /// Retain multiple cached lines by lambda function `f`.
@@ -433,7 +412,6 @@ impl Buffer {
     F: Fn(&usize, &ColumnIndex) -> bool,
   {
     let mut cached_width = self.cached_lines_width.borrow_mut();
-    let mut cached_clones = self.cached_cloned_lines.borrow_mut();
     let retained_lines: Vec<usize> = cached_width
       .iter()
       .filter(|(line_idx, column_idx)| !f(line_idx, column_idx))
@@ -441,14 +419,12 @@ impl Buffer {
       .collect();
     for line_idx in retained_lines.iter() {
       cached_width.pop(line_idx);
-      cached_clones.pop(line_idx);
     }
   }
 
   /// Clear cache.
   pub fn clear_cached_lines(&self) {
-    self.cached_lines_width.borrow_mut().clear();
-    self.cached_cloned_lines.borrow_mut().clear();
+    self.cached_lines_width.borrow_mut().clear()
   }
 
   /// Resize cache.
@@ -457,10 +433,6 @@ impl Buffer {
     let mut cached_width = self.cached_lines_width.borrow_mut();
     if new_cache_size > cached_width.cap() {
       cached_width.resize(new_cache_size);
-    }
-    let mut cached_clones = self.cached_cloned_lines.borrow_mut();
-    if new_cache_size > cached_clones.cap() {
-      cached_clones.resize(new_cache_size);
     }
   }
 }

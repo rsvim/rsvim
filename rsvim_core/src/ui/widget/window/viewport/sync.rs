@@ -424,13 +424,22 @@ fn proc_line_wrap_linebreak(
     // Here clone the line with the max chars that can hold by current window/viewport,
     // i.e. the `height * width` cells count as the max chars in the line. This helps avoid
     // performance issue when iterating on super long lines.
+    let cloned_start_char = buffer
+      .char_before(current_line, start_column)
+      .unwrap_or(0_usize);
     let cloned_line = buffer
       .clone_line(
         current_line,
-        0,
-        _cloned_line_max_len(window_height, window_width, start_column),
+        cloned_start_char,
+        _cloned_line_max_len(window_height, window_width, 0_usize),
       )
       .unwrap();
+    trace!(
+      "cloned_line({}):{:?}, start_column:{}",
+      cloned_line.len(),
+      cloned_line.as_str(),
+      start_column
+    );
 
     // Words.
     let words: Vec<&str> = cloned_line.as_str().split_word_bounds().collect();
