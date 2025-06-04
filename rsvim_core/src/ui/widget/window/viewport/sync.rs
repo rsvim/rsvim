@@ -396,8 +396,8 @@ fn _part1(
   }
 }
 
-fn _cloned_line_max_len(window_height: u16, window_width: u16) -> usize {
-  window_height as usize * window_width as usize * 2 + 16
+fn _cloned_line_max_len(window_height: u16, window_width: u16, start_column: usize) -> usize {
+  window_height as usize * window_width as usize * 2 + 16 + start_column
 }
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
@@ -431,8 +431,8 @@ fn proc_line_wrap_linebreak(
     let cloned_line = buffer
       .clone_line(
         current_line,
-        cloned_start_char,
-        _cloned_line_max_len(window_height, window_width),
+        0,
+        _cloned_line_max_len(window_height, window_width, start_column),
       )
       .unwrap();
 
