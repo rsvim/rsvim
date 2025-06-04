@@ -1548,7 +1548,55 @@ mod tests_insert_text {
     let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
     let stateful = InsertStateful::default();
 
-    // Move-1
+    // Insert-1
+    {
+      stateful.insert_text(
+        &data_access,
+        Operation::InsertTextAtCursor(CompactString::new("Hello, ")),
+      );
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 6);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 6);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "Hello, AAA",
+        "AAAAAAA\n",
+        "1st.\n",
+        "2nd.\n",
+        "3rd.\n",
+        "4th.\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+          vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+              .into_iter()
+              .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hello, AAA",
+        "AAAAAAA   ",
+        "1st.      ",
+        "2nd.      ",
+        "3rd.      ",
+        "4th.      ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), Viewport::to_arc(viewport));
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-2
     {
       stateful.cursor_move(&data_access, Operation::CursorMoveBy((3, 2)));
       let tree = data_access.tree.clone();
