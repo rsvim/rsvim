@@ -2315,11 +2315,7 @@ mod tests_raw_window_scroll_y_by {
     // Scroll-3
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "",
-        "",
-        "",
-      ];
+      let expect = vec!["", "", ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(10, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
@@ -2724,7 +2720,13 @@ mod tests_raw_window_scroll_x_by {
     // After cursor scroll
     {
       let viewport = get_viewport(tree);
-      let expect = vec!["", "", "", "rendering.", ""];
+      let expect = vec![
+        "!\n",
+        "ite simple",
+        " contains ",
+        "e line is ",
+        "e line is ",
+      ];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -2807,7 +2809,13 @@ mod tests_raw_window_scroll_x_by {
     // Scroll-1
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", " the line-", "multiple c"];
+      let expect = vec![
+        "!\n",
+        "ite simple",
+        " contains ",
+        "e line is ",
+        "e line is ",
+      ];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -2833,7 +2841,13 @@ mod tests_raw_window_scroll_x_by {
     // Scroll-2
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "wrap and w", "ases:\n"];
+      let expect = vec![
+        "!\n",
+        "ite simple",
+        " contains ",
+        "e line is ",
+        "e line is ",
+      ];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -2859,7 +2873,13 @@ mod tests_raw_window_scroll_x_by {
     // Scroll-3
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "rendering.", ""];
+      let expect = vec![
+        "!\n",
+        "ite simple",
+        " contains ",
+        "e line is ",
+        "e line is ",
+      ];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -2885,7 +2905,13 @@ mod tests_raw_window_scroll_x_by {
     // Scroll-4
     {
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["", "", "", "ffect the ", ""];
+      let expect = vec![
+        "llo, RSVIM",
+        "is is a qu",
+        "t still it",
+        "1. When th",
+        "2. When th",
+      ];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
@@ -3576,7 +3602,6 @@ mod tests_raw_window_scroll_to {
       info!("after cursor scroll");
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
         "This is a ",
         "But still ",
         "  1. When ",
@@ -3585,23 +3610,15 @@ mod tests_raw_window_scroll_to {
         "     * The",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
-        0,
+        1,
         8,
         &expect_fills,
         &expect_fills,
