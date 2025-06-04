@@ -311,7 +311,8 @@ pub fn window_scroll_to(
     _ => unreachable!(),
   };
 
-  let window_scroll_to_result = _raw_window_scroll_to(viewport, buffer, to_column, to_line);
+  let window_scroll_to_result =
+    _raw_window_scroll_to(viewport, current_window, buffer, to_column, to_line);
 
   if let Some((start_line_idx, start_column_idx)) = window_scroll_to_result {
     // Sync the viewport
@@ -334,6 +335,7 @@ pub fn window_scroll_to(
 /// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
 fn _raw_window_scroll_to(
   viewport: &Viewport,
+  current_window: &Window,
   buffer: &Buffer,
   column_idx: usize,
   line_idx: usize,
@@ -354,20 +356,20 @@ fn _raw_window_scroll_to(
   } else {
     debug_assert!(line_idx < buffer_len_lines);
   }
-
   debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
-  let bufline = buffer.get_rope().line(line_idx);
-  let bufline_width = buffer.width_before(line_idx, bufline.len_chars());
-  let column_idx = if bufline_width == 0 {
-    0_usize
-  } else {
-    std::cmp::min(column_idx, bufline_width.saturating_sub(1))
-  };
-  if bufline_width == 0 {
-    debug_assert_eq!(column_idx, 0_usize);
-  } else {
-    debug_assert!(column_idx < bufline_width);
-  }
+
+  // let bufline = buffer.get_rope().line(line_idx);
+  // let bufline_width = buffer.width_before(line_idx, bufline.len_chars());
+  // let column_idx = if bufline_width == 0 {
+  //   0_usize
+  // } else {
+  //   std::cmp::min(column_idx, bufline_width.saturating_sub(1))
+  // };
+  // if bufline_width == 0 {
+  //   debug_assert_eq!(column_idx, 0_usize);
+  // } else {
+  //   debug_assert!(column_idx < bufline_width);
+  // }
 
   // let mut line_idx = _bounded_raw_window_scroll_y_to(buffer, line_idx);
 
@@ -378,6 +380,9 @@ fn _raw_window_scroll_to(
   //   line_idx = start_line_idx;
   // }
 
+  let window_actual_shape = current_window.actual_shape();
+  let max_len_chars = _max_len_chars_since_line(buffer, line_idx, window_actual_shape.height());
+  let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
   // let column_idx = _bounded_raw_window_scroll_x_to(start_column_idx, viewport, buffer, column_idx);
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
@@ -397,57 +402,29 @@ fn _bounded_raw_window_scroll_y_to(buffer: &Buffer, line_idx: usize) -> usize {
 // Calculate how many columns that each line (in current viewport) need to scroll until
 // their own line's end. This is the upper bound of the actual columns that could
 // scroll.
-fn _bounded_raw_window_scroll_x_max_scrolls(viewport: &Viewport, buffer: &Buffer) -> usize {
-  let mut max_scrolls = 0_usize;
-  for (line_idx, line_viewport) in viewport.lines().iter() {
-    trace!("line_idx:{},line_viewport:{:?}", line_idx, line_viewport);
-    debug_assert!(!line_viewport.rows().is_empty());
-    let (_last_row_idx, last_row_viewport) = line_viewport.rows().last_key_value().unwrap();
-    trace!(
-      "_last_row_idx:{},last_row_viewport:{:?}",
-      _last_row_idx, last_row_viewport
-    );
-    debug_assert!(buffer.get_rope().get_line(*line_idx).is_some());
-    // If `last_row_viewport` is empty, i.e. the `end_char_idx == start_char_idx`, the scrolls is 0.
-    if last_row_viewport.end_char_idx() > last_row_viewport.start_char_idx() {
-      let max_scrolls_on_line = match buffer.last_char_on_line_no_empty_eol(*line_idx) {
-        Some(last_visible_c) => {
-          let last_visible_col = buffer.width_until(*line_idx, last_visible_c);
-          let last_col_on_row = buffer.width_until(
-            *line_idx,
-            last_row_viewport.end_char_idx().saturating_sub(1),
-          );
-          let column_difference = last_visible_col.saturating_sub(last_col_on_row);
-          trace!(
-            "last_visible_c:{},last_row_viewport.end_char_idx:{},last_visible_col:{},last_col_on_row:{},column_difference:{}",
-            last_visible_c,
-            last_row_viewport.end_char_idx(),
-            last_visible_col,
-            last_col_on_row,
-            column_difference
-          );
-          column_difference
-        }
-        None => 0_usize,
-      };
-      trace!("result:{}", max_scrolls_on_line);
-      max_scrolls = std::cmp::max(max_scrolls, max_scrolls_on_line);
-    }
+fn _max_len_chars_since_line(
+  buffer: &Buffer,
+  mut start_line_idx: usize,
+  window_height: u16,
+) -> usize {
+  let buffer_len_lines = buffer.get_rope().len_lines();
+
+  let mut max_len_chars = 0_usize;
+  let mut i = 0_u16;
+  while i < window_height && start_line_idx < buffer_len_lines {
+    debug_assert!(buffer.get_rope().get_line(start_line_idx).is_some());
+    let bufline = buffer.get_rope().line(start_line_idx);
+    max_len_chars = std::cmp::max(max_len_chars, bufline.len_chars());
+    i += 1;
+    start_line_idx += 1;
   }
-  max_scrolls
+  max_len_chars
 }
 
-fn _bounded_raw_window_scroll_x_to(
-  start_column_idx: usize,
-  viewport: &Viewport,
-  buffer: &Buffer,
-  column_idx: usize,
-) -> usize {
-  let max_scrolls = _bounded_raw_window_scroll_x_max_scrolls(viewport, buffer);
-  let upper_bounded = start_column_idx.saturating_add(max_scrolls);
-  trace!(
-    "max_scrolls:{},upper_bounded:{},column_idx:{}",
-    max_scrolls, upper_bounded, column_idx
-  );
-  std::cmp::min(column_idx, upper_bounded)
-}
+// fn _bounded_raw_window_scroll_x_to(
+//   start_column_idx: usize,
+//   viewport: &Viewport,
+//   buffer: &Buffer,
+//   column_idx: usize,
+// ) -> usize {
+// }
