@@ -447,7 +447,7 @@ fn proc_line_wrap_linebreak(
     let words_end_char_idx = words
       .iter()
       .enumerate()
-      .scan(0_usize, |state, (i, wd)| {
+      .scan(cloned_start_char, |state, (i, wd)| {
         *state += wd.chars().count();
         Some((i, *state))
       })
