@@ -1621,7 +1621,7 @@ mod tests_insert_text {
         "Hello, AAA",
         "AAAAAAA\n",
         "1st.\n",
-        "2nd.World!\n",
+        "2nd.World!",
         "3rd.\n",
         "4th.\n",
       ];
