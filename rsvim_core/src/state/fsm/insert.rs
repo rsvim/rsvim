@@ -1286,7 +1286,7 @@ mod tests_insert_text {
     {
       stateful.insert_text(
         &data_access,
-        Operation::InsertTextAtCursor(CompactString::new("Bye, ")),
+        Operation::InsertLineWiseTextAtCursor(CompactString::new("Bye, ")),
       );
 
       let tree = data_access.tree.clone();
@@ -1341,12 +1341,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(
-        terminal_size,
-        window_options,
-        buf.clone(),
-        Viewport::to_arc(viewport),
-      );
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -1406,12 +1401,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(
-        terminal_size,
-        window_options,
-        buf.clone(),
-        Viewport::to_arc(viewport),
-      );
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -1419,7 +1409,7 @@ mod tests_insert_text {
     {
       stateful.insert_text(
         &data_access,
-        Operation::InsertTextAtCursor(CompactString::new(" Go!")),
+        Operation::InsertLineWiseTextAtCursor(CompactString::new(" Go!")),
       );
 
       let tree = data_access.tree.clone();
@@ -1474,12 +1464,7 @@ mod tests_insert_text {
         "          ",
         "          ",
       ];
-      let actual_canvas = make_canvas(
-        terminal_size,
-        window_options,
-        buf.clone(),
-        Viewport::to_arc(viewport),
-      );
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
@@ -1527,7 +1512,7 @@ mod tests_insert_text {
     {
       stateful.insert_text(
         &data_access,
-        Operation::InsertTextAtCursor(CompactString::new("Hello, ")),
+        Operation::InsertLineWiseTextAtCursor(CompactString::new("Hello, ")),
       );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -1566,12 +1551,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(
-        terminal_size,
-        window_options,
-        buf.clone(),
-        Viewport::to_arc(viewport),
-      );
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -1615,12 +1595,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(
-        terminal_size,
-        window_options,
-        buf.clone(),
-        Viewport::to_arc(viewport),
-      );
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
@@ -1628,7 +1603,7 @@ mod tests_insert_text {
     {
       stateful.insert_text(
         &data_access,
-        Operation::InsertTextAtCursor(CompactString::new("World!")),
+        Operation::InsertLineWiseTextAtCursor(CompactString::new("World!")),
       );
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
@@ -1667,12 +1642,7 @@ mod tests_insert_text {
         "3rd.      ",
         "4th.      ",
       ];
-      let actual_canvas = make_canvas(
-        terminal_size,
-        window_options,
-        buf.clone(),
-        Viewport::to_arc(viewport),
-      );
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
