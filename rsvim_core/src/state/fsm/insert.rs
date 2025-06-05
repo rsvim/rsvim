@@ -124,7 +124,8 @@ impl InsertStateful {
           buffer
             .get_rope_mut()
             .insert(before_insert_char_idx, text.as_str());
-          buffer.truncate_cached_line_since_char(cursor_line_idx, before_insert_char_idx);
+          buffer
+            .truncate_cached_line_since_char(cursor_line_idx, cursor_char_idx.saturating_sub(3));
           let after_inserted_char_idx = cursor_char_idx + text.len();
           if cfg!(debug_assertions) {
             use crate::test::buf::bufline_to_string;
@@ -1612,8 +1613,8 @@ mod tests_insert_text {
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 2);
       assert_eq!(actual1.char_idx(), 10);
-      assert_eq!(actual1.row_idx(), 3);
-      assert_eq!(actual1.column_idx(), 9);
+      assert_eq!(actual1.row_idx(), 4);
+      assert_eq!(actual1.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
