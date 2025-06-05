@@ -11,6 +11,7 @@ use crate::ui::widget::window::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
 };
 
+use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
@@ -47,9 +48,12 @@ impl Stateful for InsertStateful {
             KeyCode::End => {
               return self.cursor_move(&data_access, Operation::CursorMoveRightBy(usize::MAX));
             }
-            // KeyCode::Char('i') => {
-            //   return self.goto_insert_mode(&data_access, Operation::GotoInsertMode);
-            // }
+            KeyCode::Char(c) => {
+              return self.insert_text(
+                &data_access,
+                Operation::InsertLineWiseTextAtCursor(c.to_compact_string()),
+              );
+            }
             KeyCode::Esc => {
               return self.goto_normal_mode(&data_access, Operation::GotoNormalMode);
             }
@@ -272,12 +276,12 @@ impl InsertStateful {
 
         // Only move cursor when it is different from current cursor.
         let (target_cursor_char, target_cursor_line, search_direction) =
-          self._target_cursor_considering_empty_eol(opts, &cursor_viewport, &buffer, op);
+          self._target_cursor_considering_empty_eol(opts, &cursor_viewport, buffer, op);
 
         let new_viewport: Option<ViewportArc> = {
           let (start_line, start_column) = viewport.search_anchor(
             search_direction,
-            &buffer,
+            buffer,
             current_window.actual_shape(),
             current_window.options(),
             target_cursor_line,
@@ -290,7 +294,7 @@ impl InsertStateful {
             let new_viewport = cursor_ops::window_scroll_to(
               &viewport,
               current_window,
-              &buffer,
+              buffer,
               Operation::WindowScrollTo((start_column, start_line)),
             );
             if let Some(new_viewport_arc) = new_viewport.clone() {
@@ -309,7 +313,7 @@ impl InsertStateful {
           let new_cursor_viewport = cursor_ops::cursor_move_to(
             &current_viewport,
             &cursor_viewport,
-            &buffer,
+            buffer,
             Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
           );
 
