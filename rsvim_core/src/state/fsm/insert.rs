@@ -1250,7 +1250,7 @@ mod tests_insert_text {
   use std::collections::BTreeMap;
   use tracing::info;
 
-  // #[test]
+  #[test]
   fn nowrap1() {
     test_log_init();
 
@@ -1469,7 +1469,7 @@ mod tests_insert_text {
     }
   }
 
-  // #[test]
+  #[test]
   fn wrap_nolinebreak1() {
     test_log_init();
 
@@ -1814,7 +1814,7 @@ mod tests_insert_text {
     }
   }
 
-  // #[test]
+  #[test]
   fn wrap_linebreak1() {
     test_log_init();
 
