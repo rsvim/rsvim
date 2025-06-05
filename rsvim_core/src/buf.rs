@@ -96,7 +96,7 @@ impl Buffer {
     }
   }
 
-  #[cfg(test)]
+  #[cfg(debug_assertions)]
   /// NOTE: This API should only be used for testing.
   pub fn _new_empty(canvas_height: u16, options: BufferLocalOptions) -> Self {
     let cache_size = get_cached_size(canvas_height);
@@ -564,7 +564,7 @@ impl BuffersManager {
     buf_id
   }
 
-  #[cfg(test)]
+  #[cfg(debug_assertions)]
   /// NOTE: This API should only be used for testing.
   pub fn _add_buffer(&mut self, buf: BufferArc) -> BufferId {
     let (buf_id, abs_filepath) = {
