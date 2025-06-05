@@ -67,10 +67,10 @@ pub enum Operation {
   /// Insert line-wise text at cursor.
   InsertLineWiseTextAtCursor(CompactString),
 
-  /// Delete line-wise N-char text, to the left of the cursor.
+  /// Delete line-wise N-chars text, to the left of the cursor.
   DeleteLineWiseTextToLeftAtCursor(usize),
 
-  /// Delete line-wise N-char text, to the right of the cursor.
+  /// Delete line-wise N-chars text, to the right of the cursor.
   DeleteLineWiseTextToRightAtCursor(usize),
 
   /// Quit editor
