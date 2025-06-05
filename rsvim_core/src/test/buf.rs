@@ -10,7 +10,7 @@ use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::BufReader;
-use tracing::{self, info};
+use tracing::{self, info, trace};
 use tracing_appender::non_blocking::DEFAULT_BUFFERED_LINES_LIMIT;
 
 /// Create rope from filename.
@@ -215,9 +215,9 @@ pub fn bufline_to_string(bufline: &RopeSlice) -> String {
 }
 
 pub fn print_buffer(buf: &Buffer, msg: &str) {
-  info!("{} whole buffer:", msg);
+  trace!("{} whole buffer:", msg);
   for i in 0..buf.get_rope().len_lines() {
-    info!("{i}:{:?}", bufline_to_string(&buf.get_rope().line(i)));
+    trace!("{i}:{:?}", bufline_to_string(&buf.get_rope().line(i)));
   }
 }
 
@@ -229,7 +229,7 @@ pub fn print_bufline_and_focus_char_on_line(
 ) {
   match buffer.get_rope().get_line(line_idx) {
     Some(bufline) => {
-      info!(
+      trace!(
         "{} line:{}, len_chars:{}, focus char:{}",
         msg,
         line_idx,
@@ -248,10 +248,10 @@ pub fn print_bufline_and_focus_char_on_line(
           .collect();
         builder2.push_str(s.as_str());
       }
-      info!("-{}-", builder1);
-      info!("-{}-", builder2);
+      trace!("-{}-", builder1);
+      trace!("-{}-", builder2);
     }
-    None => info!(
+    None => trace!(
       "{} line:{}, focus char:{}, not exist",
       msg, line_idx, char_idx
     ),
@@ -261,7 +261,7 @@ pub fn print_bufline_and_focus_char_on_line(
 pub fn print_bufline_and_focus_char(buffer: &Buffer, line_idx: usize, char_idx: usize, msg: &str) {
   match buffer.get_rope().get_line(line_idx) {
     Some(bufline) => {
-      info!(
+      trace!(
         "{} line:{}, len_chars:{}, focus char:{}",
         msg,
         line_idx,
@@ -286,10 +286,10 @@ pub fn print_bufline_and_focus_char(buffer: &Buffer, line_idx: usize, char_idx: 
         .collect();
         builder2.push_str(s.as_str());
       }
-      info!("-{}-", builder1);
-      info!("-{}-", builder2);
+      trace!("-{}-", builder1);
+      trace!("-{}-", builder2);
     }
-    None => info!(
+    None => trace!(
       "{} line:{}, focus char:{}, not exist",
       msg, line_idx, char_idx
     ),
