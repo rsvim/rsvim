@@ -5,20 +5,20 @@ use std::string::ToString;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum FileFormatOption {
-  /// CRLF (<CR><NL>)
+  /// CRLF (`<CR><NL>`)
   Dos,
 
-  /// LF (<NL>)
+  /// LF (`<NL>`)
   Unix,
 
-  /// LF (<NL>)
+  /// LF (`<NL>`)
   ///
-  /// NOTE: CR (<CR>) is deprecated in macos.
+  /// NOTE: CR (`<CR>`) is deprecated in macos.
   Mac,
 
-  /// CR (<CR>)
+  /// CR (`<CR>`)
   ///
-  /// NOTE: CR (<CR>) is deprecated in macos.
+  /// NOTE: CR (`<CR>`) is deprecated in macos.
   ClassicMac,
 }
 
