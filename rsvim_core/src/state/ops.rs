@@ -2,7 +2,9 @@
 
 pub mod cursor_ops;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+use compact_str::CompactString;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 /// A set of low-level editor operations between terminal keyboard/mouse events and editor
 /// operations.
 ///
@@ -61,6 +63,15 @@ pub enum Operation {
 
   /// Goto normal mode.
   GotoNormalMode,
+
+  /// Insert line-wise text at cursor.
+  InsertLineWiseTextAtCursor(/* text */ CompactString),
+
+  /// Delete line-wise N-chars text, to the left of the cursor.
+  DeleteLineWiseTextToLeftAtCursor(/* N-chars */ usize),
+
+  /// Delete line-wise N-chars text, to the right of the cursor.
+  DeleteLineWiseTextToRightAtCursor(/* N-chars */ usize),
 
   /// Quit editor
   EditorQuit,

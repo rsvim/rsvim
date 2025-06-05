@@ -437,8 +437,9 @@ impl ColumnIndex {
     if self.char2width.is_empty() || self.width2char.is_empty() {
       debug_assert_eq!(self.char2width.is_empty(), self.width2char.is_empty());
     } else if char_idx < self.char2width.len() {
-      self.char2width.truncate(char_idx);
-      self.width2char.retain(|&_w, &mut c| c < char_idx);
+      self.char2width.truncate(char_idx.saturating_sub(1));
+      let end_char = self.char2width.len();
+      self.width2char.retain(|&_w, &mut c| c < end_char);
     }
   }
 

@@ -2462,6 +2462,79 @@ mod tests_view_wrap_nolinebreak {
   }
 
   #[test]
+  fn new14() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 6);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "AAAAAAAAAA\n",
+        "1st.\n",
+        "BBBBBBBBBBCCCCCCCCCC\n",
+        "3rd.\n",
+        "4th.\n",
+        "5th.\n",
+      ],
+    );
+    let expect = vec![
+      "AAAAAAAAAA",
+      "1st.\n",
+      "BBBBBBBBBB",
+      "CCCCCCCCCC",
+      "3rd.\n",
+      "4th.\n",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = window.viewport();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    assert_viewport(buf, &actual, &expect, 0, 5, &expect_fills, &expect_fills);
+  }
+
+  #[test]
+  fn new15() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 6);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size.height(),
+      buf_opts,
+      vec![
+        "1st.\n",
+        "BBBBBBBBBBCCCCCCCCCC\n",
+        "3rd.\n",
+        "4th.\n",
+        "5th.\n",
+      ],
+    );
+    let expect = vec![
+      "1st.\n",
+      "BBBBBBBBBB",
+      "CCCCCCCCCC",
+      "3rd.\n",
+      "4th.\n",
+      "5th.\n",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = window.viewport();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    assert_viewport(buf, &actual, &expect, 0, 5, &expect_fills, &expect_fills);
+  }
+
+  #[test]
   fn update1() {
     let terminal_size = U16Size::new(15, 15);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
