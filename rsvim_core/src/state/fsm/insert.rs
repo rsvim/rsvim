@@ -8,7 +8,7 @@ use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::window::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+  CursorViewport, Viewport, ViewportArc, ViewportSearchAnchorDirection,
 };
 
 use compact_str::ToCompactString;
@@ -147,6 +147,8 @@ impl InsertStateful {
       if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
         let viewport = current_window.viewport();
         let cursor_viewport = current_window.cursor_viewport();
+        trace!("before viewport:{:?}", viewport);
+        trace!("before cursor_viewport:{:?}", cursor_viewport);
 
         let start_line = std::cmp::min(
           viewport.start_line_idx(),
@@ -166,6 +168,7 @@ impl InsertStateful {
           start_line,
           start_column,
         ));
+        trace!("after updated_viewport:{:?}", updated_viewport);
 
         current_window.set_viewport(updated_viewport.clone());
         if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
@@ -174,6 +177,10 @@ impl InsertStateful {
           &buffer,
           Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
         ) {
+          trace!(
+            "after updated_cursor_viewport:{:?}",
+            updated_cursor_viewport
+          );
           current_window.set_cursor_viewport(updated_cursor_viewport);
         }
       } else {
