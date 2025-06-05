@@ -105,6 +105,29 @@ impl TryFrom<&str> for EndOfLineOption {
   }
 }
 
+impl From<FileFormatOption> for EndOfLineOption {
+  fn from(value: FileFormatOption) -> Self {
+    match value {
+      FileFormatOption::Dos => EndOfLineOption::CRLF,
+      FileFormatOption::Unix => EndOfLineOption::LF,
+      FileFormatOption::Mac => EndOfLineOption::LF,
+      FileFormatOption::ClassicMac => EndOfLineOption::CR,
+    }
+  }
+}
+
+impl EndOfLineOption {
+  pub fn to_ascii_str(&self) -> &str {
+    use crate::defaults::ascii::end_of_line as eol;
+
+    match self {
+      EndOfLineOption::CRLF => eol::CRLF,
+      EndOfLineOption::LF => eol::LF,
+      EndOfLineOption::CR => eol::CR,
+    }
+  }
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;

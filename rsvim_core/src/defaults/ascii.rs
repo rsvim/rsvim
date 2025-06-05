@@ -3,6 +3,8 @@
 use ascii::AsciiChar;
 use std::fmt;
 
+pub mod end_of_line;
+
 /// The formatter for ASCII control code in [`AsciiChar`], helps implement the `Debug`/`Display` trait.
 pub struct AsciiControlCodeFormatter {
   value: AsciiChar,

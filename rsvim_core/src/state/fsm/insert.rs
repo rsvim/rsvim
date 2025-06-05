@@ -1,6 +1,6 @@
 //! The insert mode.
 
-use crate::buf::{Buffer, BufferWk};
+use crate::buf::{Buffer, BufferWk, EndOfLineOption};
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
@@ -126,7 +126,40 @@ impl InsertStateful {
           // to always keep an eol (end-of-line) at the end of text file. It helps the cursor
           // motion.
           if cursor_line_idx == buffer.get_rope().len_lines().saturating_sub(1) {
-            // if buffer
+            use crate::defaults::ascii::end_of_line as eol;
+
+            let buf_ff = buffer.options().file_format();
+            let bufline = buffer.get_rope().line(cursor_line_idx);
+            let bufline_len_chars = bufline.len_chars();
+
+            if bufline_len_chars == 0 {
+              buffer
+                .get_rope_mut()
+                .insert(0_usize, buf_ff.into().to_ascii_str());
+              buffer.remove_cached_line(cursor_line_idx);
+            } else {
+              let last1 = bufline.char(bufline_len_chars - 1);
+              if last1.to_string() != eol::CR || last1.to_string() != eol::LF {
+                buffer
+                  .get_rope_mut()
+                  .insert(bufline_len_chars, buf_ff.into().to_ascii_str());
+                buffer.truncate_cached_line_since_char(
+                  cursor_line_idx,
+                  bufline_len_chars.saturating_sub(1),
+                );
+              } else if bufline_len_chars >= 2 {
+                let last2 = format!("{}{}", bufline.char(bufline_len_chars - 2), last1);
+                if last2 != eol::CRLF {
+                  buffer
+                    .get_rope_mut()
+                    .insert(bufline_len_chars, buf_ff.into().to_ascii_str());
+                  buffer.truncate_cached_line_since_char(
+                    cursor_line_idx,
+                    bufline_len_chars.saturating_sub(1),
+                  );
+                }
+              }
+            }
           }
 
           buffer
