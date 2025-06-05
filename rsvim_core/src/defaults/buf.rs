@@ -16,4 +16,4 @@ pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
 pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Mac;
 
 #[cfg(not(any(target_os = "macos", target_os = "windows")))]
-pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Dos;
+pub const FILE_FORMAT: FileFormatOption = FileFormatOption::Unix;
