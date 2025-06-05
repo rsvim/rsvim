@@ -105,7 +105,7 @@ impl InsertStateful {
     let mut buffer = lock!(buffer);
 
     let dbg_print_details =
-      |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| -> () {
+      |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| {
         if cfg!(debug_assertions) {
           use crate::test::buf::{print_buffer, print_bufline_and_focus_char};
 
@@ -115,7 +115,7 @@ impl InsertStateful {
       };
 
     let dbg_print_details_on_line =
-      |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| -> () {
+      |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| {
         if cfg!(debug_assertions) {
           use crate::test::buf::{print_buffer, print_bufline_and_focus_char_on_line};
 

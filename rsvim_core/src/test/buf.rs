@@ -243,9 +243,7 @@ pub fn print_bufline_and_focus_char_on_line(
         if w > 0 {
           builder1.push(c);
         }
-        let s: String = std::iter::repeat(if i == char_idx { '^' } else { ' ' })
-          .take(w)
-          .collect();
+        let s: String = std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w).collect();
         builder2.push_str(s.as_str());
       }
       trace!("-{}-", builder1);
@@ -277,12 +275,14 @@ pub fn print_bufline_and_focus_char(buffer: &Buffer, line_idx: usize, char_idx: 
         if w > 0 {
           builder1.push(c);
         }
-        let s: String = std::iter::repeat(if i + start_char_on_line == char_idx {
-          '^'
-        } else {
-          ' '
-        })
-        .take(w)
+        let s: String = std::iter::repeat_n(
+          if i + start_char_on_line == char_idx {
+            '^'
+          } else {
+            ' '
+          },
+          w,
+        )
         .collect();
         builder2.push_str(s.as_str());
       }
