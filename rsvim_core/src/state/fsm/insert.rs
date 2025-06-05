@@ -104,6 +104,26 @@ impl InsertStateful {
     let buffer = buffer.upgrade().unwrap();
     let mut buffer = lock!(buffer);
 
+    let dbg_print_details =
+      |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| -> () {
+        if cfg!(debug_assertions) {
+          use crate::test::buf::{print_buffer, print_bufline_and_focus_char};
+
+          print_bufline_and_focus_char(dbg_buffer, dbg_line_idx, dbg_char_idx, msg);
+          print_buffer(dbg_buffer, msg);
+        }
+      };
+
+    let dbg_print_details_on_line =
+      |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| -> () {
+        if cfg!(debug_assertions) {
+          use crate::test::buf::{print_buffer, print_bufline_and_focus_char_on_line};
+
+          print_bufline_and_focus_char_on_line(dbg_buffer, dbg_line_idx, dbg_char_idx, msg);
+          print_buffer(dbg_buffer, msg);
+        }
+      };
+
     // Insert text.
     let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) = {
       if let Some(current_window_id) = tree.current_window_id() {
@@ -114,37 +134,13 @@ impl InsertStateful {
           debug_assert!(buffer.get_rope().get_line(cursor_line_idx).is_some());
           let start_char_pos_of_line = buffer.get_rope().line_to_char(cursor_line_idx);
           let before_insert_char_idx = start_char_pos_of_line + cursor_char_idx;
-          if cfg!(debug_assertions) {
-            use crate::test::buf::bufline_to_string;
 
-            let b = before_insert_char_idx;
-            let b1 = before_insert_char_idx.saturating_sub(1);
-            let b2 = before_insert_char_idx.saturating_add(1);
-            trace!(
-              "Before buffer inserted, cursor_line_idx:{cursor_line_idx},before_insert_char_idx({b}):{:?}, before({b1}):{:?}, after({b2}):{:?}",
-              buffer
-                .get_rope()
-                .get_char(b)
-                .map(|c| c.to_string())
-                .unwrap_or("null?".to_string()),
-              buffer
-                .get_rope()
-                .get_char(b1)
-                .map(|c| c.to_string())
-                .unwrap_or("null?".to_string()),
-              buffer
-                .get_rope()
-                .get_char(b2)
-                .map(|c| c.to_string())
-                .unwrap_or("null?".to_string()),
-            );
-            for i in 0..buffer.get_rope().len_lines() {
-              trace!(
-                "line:{i}:{:?}",
-                bufline_to_string(&buffer.get_rope().line(i))
-              );
-            }
-          }
+          dbg_print_details(
+            &buffer,
+            cursor_line_idx,
+            before_insert_char_idx,
+            "Before insert",
+          );
 
           buffer
             .get_rope_mut()
@@ -169,37 +165,12 @@ impl InsertStateful {
                 .insert(0_usize, buf_eol.to_compact_string().as_str());
               buffer.remove_cached_line(cursor_line_idx);
 
-              if cfg!(debug_assertions) {
-                use crate::test::buf::bufline_to_string;
-
-                let b = before_insert_char_idx;
-                let b1 = before_insert_char_idx.saturating_sub(1);
-                let b2 = before_insert_char_idx.saturating_add(1);
-                trace!(
-                  "Eol inserted (line=0), cursor_line_idx:{cursor_line_idx},before_insert_char_idx({b}):{:?}, before({b1}):{:?}, after({b2}):{:?}",
-                  buffer
-                    .get_rope()
-                    .get_char(b)
-                    .map(|c| c.to_string())
-                    .unwrap_or("null?".to_string()),
-                  buffer
-                    .get_rope()
-                    .get_char(b1)
-                    .map(|c| c.to_string())
-                    .unwrap_or("null?".to_string()),
-                  buffer
-                    .get_rope()
-                    .get_char(b2)
-                    .map(|c| c.to_string())
-                    .unwrap_or("null?".to_string()),
-                );
-                for i in 0..buffer.get_rope().len_lines() {
-                  trace!(
-                    "line:{i}:{:?}",
-                    bufline_to_string(&buffer.get_rope().line(i))
-                  );
-                }
-              }
+              dbg_print_details(
+                &buffer,
+                cursor_line_idx,
+                before_insert_char_idx,
+                "Eol inserted(line=0)",
+              );
             } else {
               let bufline_start_char_pos = buffer.get_rope().line_to_char(cursor_line_idx);
               let bufline_insert_char_pos = bufline_start_char_pos + bufline_len_chars;
@@ -214,37 +185,13 @@ impl InsertStateful {
                   cursor_line_idx,
                   bufline_len_chars.saturating_sub(1),
                 );
-                if cfg!(debug_assertions) {
-                  use crate::test::buf::bufline_to_string;
 
-                  let b = before_insert_char_idx;
-                  let b1 = before_insert_char_idx.saturating_sub(1);
-                  let b2 = before_insert_char_idx.saturating_add(1);
-                  trace!(
-                    "Eol inserted (last=1), cursor_line_idx:{cursor_line_idx},before_insert_char_idx({b}):{:?}, before({b1}):{:?}, after({b2}):{:?}",
-                    buffer
-                      .get_rope()
-                      .get_char(b)
-                      .map(|c| c.to_string())
-                      .unwrap_or("null?".to_string()),
-                    buffer
-                      .get_rope()
-                      .get_char(b1)
-                      .map(|c| c.to_string())
-                      .unwrap_or("null?".to_string()),
-                    buffer
-                      .get_rope()
-                      .get_char(b2)
-                      .map(|c| c.to_string())
-                      .unwrap_or("null?".to_string()),
-                  );
-                  for i in 0..buffer.get_rope().len_lines() {
-                    trace!(
-                      "line:{i}:{:?}",
-                      bufline_to_string(&buffer.get_rope().line(i))
-                    );
-                  }
-                }
+                dbg_print_details(
+                  &buffer,
+                  cursor_line_idx,
+                  before_insert_char_idx,
+                  "Eol inserted(last=1)",
+                );
               } else if bufline_len_chars >= 2 {
                 let last2 = format!("{}{}", bufline.char(bufline_len_chars - 2), last1);
                 if last2 != eol::CRLF {
@@ -256,75 +203,24 @@ impl InsertStateful {
                     cursor_line_idx,
                     bufline_len_chars.saturating_sub(1),
                   );
-                  if cfg!(debug_assertions) {
-                    use crate::test::buf::bufline_to_string;
-
-                    let b = before_insert_char_idx;
-                    let b1 = before_insert_char_idx.saturating_sub(1);
-                    let b2 = before_insert_char_idx.saturating_add(1);
-                    trace!(
-                      "Eol inserted (last=2), cursor_line_idx:{cursor_line_idx},before_insert_char_idx({b}):{:?}, before({b1}):{:?}, after({b2}):{:?}",
-                      buffer
-                        .get_rope()
-                        .get_char(b)
-                        .map(|c| c.to_string())
-                        .unwrap_or("null?".to_string()),
-                      buffer
-                        .get_rope()
-                        .get_char(b1)
-                        .map(|c| c.to_string())
-                        .unwrap_or("null?".to_string()),
-                      buffer
-                        .get_rope()
-                        .get_char(b2)
-                        .map(|c| c.to_string())
-                        .unwrap_or("null?".to_string()),
-                    );
-                    for i in 0..buffer.get_rope().len_lines() {
-                      trace!(
-                        "line:{i}:{:?}",
-                        bufline_to_string(&buffer.get_rope().line(i))
-                      );
-                    }
-                  }
+                  dbg_print_details(
+                    &buffer,
+                    cursor_line_idx,
+                    before_insert_char_idx,
+                    "Eol inserted(last=2)",
+                  );
                 }
               }
             }
           }
 
-          if cfg!(debug_assertions) {
-            use crate::test::buf::bufline_to_string;
+          dbg_print_details_on_line(
+            &buffer,
+            cursor_line_idx,
+            after_inserted_char_idx,
+            "After inserted",
+          );
 
-            let a = after_inserted_char_idx;
-            let a1 = a.saturating_sub(1);
-            let a2 = a.saturating_add(1);
-            match buffer.get_rope().get_line(cursor_line_idx) {
-              Some(line) => trace!(
-                "After buffer inserted, cursor_line_idx:{cursor_line_idx},after_inserted_char_idx({a}):{:?}, before({a1}):{:?}, after({a2}):{:?}",
-                line
-                  .get_char(a)
-                  .map(|c| c.to_string())
-                  .unwrap_or("null-c?".to_string()),
-                line
-                  .get_char(a1)
-                  .map(|c| c.to_string())
-                  .unwrap_or("null-c?".to_string()),
-                line
-                  .get_char(a2)
-                  .map(|c| c.to_string())
-                  .unwrap_or("null-c?".to_string()),
-              ),
-              None => trace!(
-                "After buffer inserted, cursor_line_idx:{cursor_line_idx}:null-l,after_inserted_char_idx({a}), before({a1}), after({a2})"
-              ),
-            }
-            for i in 0..buffer.get_rope().len_lines() {
-              trace!(
-                "line:{i}:{:?}",
-                bufline_to_string(&buffer.get_rope().line(i))
-              );
-            }
-          }
           (cursor_line_idx, after_inserted_char_idx)
         } else {
           unreachable!()
