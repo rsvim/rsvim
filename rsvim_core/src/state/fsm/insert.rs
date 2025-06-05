@@ -129,20 +129,21 @@ impl InsertStateful {
             use crate::defaults::ascii::end_of_line as eol;
 
             let buf_ff = buffer.options().file_format();
+            let buf_eol = EndOfLineOption::from(buf_ff);
             let bufline = buffer.get_rope().line(cursor_line_idx);
             let bufline_len_chars = bufline.len_chars();
 
             if bufline_len_chars == 0 {
               buffer
                 .get_rope_mut()
-                .insert(0_usize, buf_ff.into().to_ascii_str());
+                .insert(0_usize, buf_eol.to_compact_string().as_str());
               buffer.remove_cached_line(cursor_line_idx);
             } else {
               let last1 = bufline.char(bufline_len_chars - 1);
-              if last1.to_string() != eol::CR || last1.to_string() != eol::LF {
+              if last1.to_compact_string() != eol::CR || last1.to_compact_string() != eol::LF {
                 buffer
                   .get_rope_mut()
-                  .insert(bufline_len_chars, buf_ff.into().to_ascii_str());
+                  .insert(bufline_len_chars, buf_eol.to_compact_string().as_str());
                 buffer.truncate_cached_line_since_char(
                   cursor_line_idx,
                   bufline_len_chars.saturating_sub(1),
@@ -152,7 +153,7 @@ impl InsertStateful {
                 if last2 != eol::CRLF {
                   buffer
                     .get_rope_mut()
-                    .insert(bufline_len_chars, buf_ff.into().to_ascii_str());
+                    .insert(bufline_len_chars, buf_eol.to_compact_string().as_str());
                   buffer.truncate_cached_line_since_char(
                     cursor_line_idx,
                     bufline_len_chars.saturating_sub(1),

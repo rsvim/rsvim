@@ -58,17 +58,6 @@ impl From<EndOfLineOption> for FileFormatOption {
   }
 }
 
-impl Into<EndOfLineOption> for FileFormatOption {
-  fn into(self) -> EndOfLineOption {
-    match self {
-      FileFormatOption::Dos => EndOfLineOption::CRLF,
-      FileFormatOption::Unix => EndOfLineOption::LF,
-      FileFormatOption::Mac => EndOfLineOption::LF,
-      FileFormatOption::ClassicMac => EndOfLineOption::CR,
-    }
-  }
-}
-
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
 pub enum EndOfLineOption {
   /// Windows
@@ -83,10 +72,12 @@ pub enum EndOfLineOption {
 
 impl Display for EndOfLineOption {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    use crate::defaults::ascii::end_of_line as eol;
+
     match self {
-      EndOfLineOption::CRLF => write!(f, "CRLF"),
-      EndOfLineOption::LF => write!(f, "LF"),
-      EndOfLineOption::CR => write!(f, "CR"),
+      EndOfLineOption::CRLF => write!(f, "{}", eol::CRLF),
+      EndOfLineOption::LF => write!(f, "{}", eol::LF),
+      EndOfLineOption::CR => write!(f, "{}", eol::CR),
     }
   }
 }
@@ -112,18 +103,6 @@ impl From<FileFormatOption> for EndOfLineOption {
       FileFormatOption::Unix => EndOfLineOption::LF,
       FileFormatOption::Mac => EndOfLineOption::LF,
       FileFormatOption::ClassicMac => EndOfLineOption::CR,
-    }
-  }
-}
-
-impl EndOfLineOption {
-  pub fn to_ascii_str(&self) -> &str {
-    use crate::defaults::ascii::end_of_line as eol;
-
-    match self {
-      EndOfLineOption::CRLF => eol::CRLF,
-      EndOfLineOption::LF => eol::LF,
-      EndOfLineOption::CR => eol::CR,
     }
   }
 }
