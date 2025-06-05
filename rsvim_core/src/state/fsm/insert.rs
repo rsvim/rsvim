@@ -126,14 +126,12 @@ impl InsertStateful {
         let buffer = lock!(buffer);
         let viewport = current_window.viewport();
         let cursor_viewport = current_window.cursor_viewport();
-        let cursor_viewport = lock!(cursor_viewport);
 
         // Only move cursor when it is different from current cursor.
         let (target_cursor_char, target_cursor_line, search_direction) =
           self._target_cursor_considering_empty_eol(opts, &cursor_viewport, &buffer, op);
 
         let new_viewport: Option<ViewportArc> = {
-          let viewport = lock!(viewport);
           let (start_line, start_column) = viewport.search_anchor(
             search_direction,
             &buffer,
@@ -164,7 +162,6 @@ impl InsertStateful {
         // Then try cursor move.
         {
           let current_viewport = new_viewport.unwrap_or(viewport);
-          let current_viewport = lock!(current_viewport);
 
           let new_cursor_viewport = cursor_ops::cursor_move_to(
             &current_viewport,
@@ -176,7 +173,6 @@ impl InsertStateful {
           if let Some(new_cursor_viewport) = new_cursor_viewport {
             current_window.set_cursor_viewport(new_cursor_viewport.clone());
             let cursor_id = tree.cursor_id().unwrap();
-            let new_cursor_viewport = lock!(new_cursor_viewport);
             tree.bounded_move_to(
               cursor_id,
               new_cursor_viewport.column_idx() as isize,
@@ -241,7 +237,8 @@ mod tests_util {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::widget::window::{
-    CursorViewport, Viewport, WindowLocalOptions, WindowLocalOptionsBuilder,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, WindowLocalOptions,
+    WindowLocalOptionsBuilder,
   };
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -261,32 +258,24 @@ mod tests_util {
     (tree, state, bufs, buf)
   }
 
-  pub fn get_viewport(tree: TreeArc) -> Viewport {
+  pub fn get_viewport(tree: TreeArc) -> ViewportArc {
     let tree = lock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(current_window_id).unwrap();
     assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
-      TreeNode::Window(current_window) => {
-        let viewport = current_window.viewport();
-        let viewport = lock!(viewport);
-        viewport.clone()
-      }
+      TreeNode::Window(current_window) => current_window.viewport(),
       _ => unreachable!(),
     }
   }
 
-  pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewport {
+  pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
     let tree = lock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(current_window_id).unwrap();
     assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
-      TreeNode::Window(current_window) => {
-        let cursor_viewport = current_window.cursor_viewport();
-        let cursor_viewport = lock!(cursor_viewport);
-        *cursor_viewport
-      }
+      TreeNode::Window(current_window) => current_window.cursor_viewport(),
       _ => unreachable!(),
     }
   }
