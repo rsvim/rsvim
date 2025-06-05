@@ -1829,9 +1829,9 @@ mod tests_insert_text {
 
     let terminal_size = U16Size::new(10, 5);
     let window_option = WindowLocalOptionsBuilder::default()
-        .wrap(false)
-        .build()
-        .unwrap();
+      .wrap(false)
+      .build()
+      .unwrap();
     let lines = vec![
       "Hello, RSVIM!\n",
       "This is a quite simple and small test lines.\n",
@@ -1868,8 +1868,8 @@ mod tests_insert_text {
       let viewport = get_viewport(tree.clone());
       let expect = vec!["But still ", "  1. When ", "  2. When ", "  3. Is th", ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -1914,8 +1914,8 @@ mod tests_insert_text {
         "a\r\n",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
-          .into_iter()
-          .collect();
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2412,10 +2412,10 @@ mod tests_insert_text {
 
     let terminal_size = U16Size::new(10, 6);
     let window_options = WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap();
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
     let lines = vec![];
     let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
 
@@ -2542,10 +2542,10 @@ mod tests_insert_text {
 
     let terminal_size = U16Size::new(10, 6);
     let window_options = WindowLocalOptionsBuilder::default()
-        .wrap(true)
-        .line_break(false)
-        .build()
-        .unwrap();
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
     let lines = vec![""];
     let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
 
