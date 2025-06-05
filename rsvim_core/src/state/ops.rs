@@ -65,13 +65,13 @@ pub enum Operation {
   GotoNormalMode,
 
   /// Insert line-wise text at cursor.
-  InsertLineWiseTextAtCursor(CompactString),
+  InsertLineWiseTextAtCursor(/* text */ CompactString),
 
   /// Delete line-wise N-chars text, to the left of the cursor.
-  DeleteLineWiseTextToLeftAtCursor(usize),
+  DeleteLineWiseTextToLeftAtCursor(/* N-chars */ usize),
 
   /// Delete line-wise N-chars text, to the right of the cursor.
-  DeleteLineWiseTextToRightAtCursor(usize),
+  DeleteLineWiseTextToRightAtCursor(/* N-chars */ usize),
 
   /// Quit editor
   EditorQuit,
