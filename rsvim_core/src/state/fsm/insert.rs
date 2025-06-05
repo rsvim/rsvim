@@ -122,16 +122,19 @@ impl InsertStateful {
             );
           }
 
+          // For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
+          // to always keep an eol (end-of-line) at the end of text file. It helps the cursor
+          // motion.
+          if cursor_line_idx == buffer.get_rope().len_lines().saturating_sub(1) {
+            // if buffer
+          }
+
           buffer
             .get_rope_mut()
             .insert(before_insert_char_idx, text.as_str());
           buffer
             .truncate_cached_line_since_char(cursor_line_idx, cursor_char_idx.saturating_sub(1));
           let after_inserted_char_idx = cursor_char_idx + text.len();
-
-          // For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
-          // to always keep an eol (end-of-line) at the end of text file. It helps the cursor
-          // motion.
 
           if cfg!(debug_assertions) {
             use crate::test::buf::bufline_to_string;
