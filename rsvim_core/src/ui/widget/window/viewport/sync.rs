@@ -410,7 +410,6 @@ fn proc_line_wrap_linebreak(
     rows.insert(current_row, RowViewport::new(0..0));
     (rows, 0_usize, 0_usize, current_row)
   } else {
-    let bufline_len_chars = bufline.len_chars();
     let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(window_height as usize);
 
     // Here clone the line with the max chars that can hold by current window/viewport,
