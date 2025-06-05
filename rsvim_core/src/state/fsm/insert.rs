@@ -135,8 +135,7 @@ impl InsertStateful {
           if cursor_line_idx == buffer.get_rope().len_lines().saturating_sub(1) {
             use crate::defaults::ascii::end_of_line as eol;
 
-            let buf_ff = buffer.options().file_format();
-            let buf_eol = EndOfLineOption::from(buf_ff);
+            let buf_eol = buffer.options().end_of_line();
             let bufline = buffer.get_rope().line(cursor_line_idx);
             let bufline_len_chars = bufline.len_chars();
 
