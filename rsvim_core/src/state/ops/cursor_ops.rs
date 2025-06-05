@@ -196,37 +196,16 @@ pub fn normalize_to_window_scroll_to(
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
 pub fn cursor_move_to(
   viewport: &Viewport,
-  cursor_viewport: &CursorViewport,
+  _cursor_viewport: &CursorViewport,
   buffer: &Buffer,
   cursor_move_to_op: Operation,
 ) -> Option<CursorViewportArc> {
   debug_assert!(matches!(cursor_move_to_op, Operation::CursorMoveTo((_, _))));
-  let (to_char, to_line) = match cursor_move_to_op {
+  let (char_idx, line_idx) = match cursor_move_to_op {
     Operation::CursorMoveTo((c, l)) => (c, l),
     _ => unreachable!(),
   };
 
-  let result = _raw_cursor_move_to(viewport, cursor_viewport, buffer, to_char, to_line);
-
-  if let Some((line_idx, char_idx)) = result {
-    let new_cursor_viewport = CursorViewport::from_position(viewport, buffer, line_idx, char_idx);
-    let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
-    // New cursor position
-    Some(new_cursor_viewport)
-  } else {
-    // Or, just do nothing, stay at where you are
-    None
-  }
-}
-
-// Returns the `line_idx`/`char_idx` for new cursor position.
-fn _raw_cursor_move_to(
-  viewport: &Viewport,
-  _cursor_viewport: &CursorViewport,
-  buffer: &Buffer,
-  char_idx: usize,
-  line_idx: usize,
-) -> Option<(usize, usize)> {
   let line_idx = std::cmp::min(line_idx, viewport.end_line_idx().saturating_sub(1));
   debug_assert!(line_idx < viewport.end_line_idx());
   debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
@@ -246,7 +225,10 @@ fn _raw_cursor_move_to(
     debug_assert!(bufline.len_chars() > char_idx);
   }
 
-  Some((line_idx, char_idx))
+  let new_cursor_viewport = CursorViewport::from_position(viewport, buffer, line_idx, char_idx);
+  let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
+  // New cursor position
+  Some(new_cursor_viewport)
 }
 
 pub fn window_scroll_to(
@@ -259,45 +241,12 @@ pub fn window_scroll_to(
     window_scroll_to_op,
     Operation::WindowScrollTo((_, _))
   ));
-  let (to_column, to_line) = match window_scroll_to_op {
+  let (column_idx, line_idx) = match window_scroll_to_op {
     Operation::WindowScrollTo((c, l)) => (c, l),
     _ => unreachable!(),
   };
 
-  let result = _raw_window_scroll_to(viewport, current_window, buffer, to_column, to_line);
-
-  if let Some((start_line_idx, start_column_idx)) = result {
-    // Sync the viewport
-    let window_actual_shape = current_window.window_content().actual_shape();
-    let window_local_options = current_window.options();
-    let new_viewport = Viewport::to_arc(Viewport::view(
-      buffer,
-      window_actual_shape,
-      window_local_options,
-      start_line_idx,
-      start_column_idx,
-    ));
-    Some(new_viewport)
-  } else {
-    // Or just do nothing and keep current viewport
-    None
-  }
-}
-
-/// Returns the `start_line_idx`/`start_column_idx` for new window viewport.
-fn _raw_window_scroll_to(
-  viewport: &Viewport,
-  current_window: &Window,
-  buffer: &Buffer,
-  column_idx: usize,
-  line_idx: usize,
-) -> Option<(usize, usize)> {
-  let start_line_idx = viewport.start_line_idx();
-  let end_line_idx = viewport.end_line_idx();
-  let start_column_idx = viewport.start_column_idx();
   let buffer_len_lines = buffer.get_rope().len_lines();
-  debug_assert!(end_line_idx <= buffer_len_lines);
-
   let line_idx = if buffer_len_lines == 0 {
     0_usize
   } else {
@@ -317,11 +266,21 @@ fn _raw_window_scroll_to(
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
   // there's no need to scroll anymore.
-  if line_idx == start_line_idx && column_idx == start_column_idx {
+  if line_idx == viewport.start_line_idx() && column_idx == viewport.start_column_idx() {
     return None;
   }
 
-  Some((line_idx, column_idx))
+  // Sync the viewport
+  let window_actual_shape = current_window.window_content().actual_shape();
+  let window_local_options = current_window.options();
+  let new_viewport = Viewport::to_arc(Viewport::view(
+    buffer,
+    window_actual_shape,
+    window_local_options,
+    line_idx,
+    column_idx,
+  ));
+  Some(new_viewport)
 }
 
 fn _max_len_chars_since_line(
