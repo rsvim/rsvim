@@ -104,7 +104,7 @@ impl InsertStateful {
     let buffer = buffer.upgrade().unwrap();
     let mut buffer = lock!(buffer);
 
-    let dbg_print_details =
+    let _dbg_print_details =
       |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| {
         if cfg!(debug_assertions) {
           use crate::test::buf::{print_buffer, print_bufline_and_focus_char};
@@ -114,7 +114,7 @@ impl InsertStateful {
         }
       };
 
-    let dbg_print_details_on_line =
+    let _dbg_print_details_on_line =
       |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| {
         if cfg!(debug_assertions) {
           use crate::test::buf::{print_buffer, print_bufline_and_focus_char_on_line};
@@ -135,7 +135,7 @@ impl InsertStateful {
           let start_char_pos_of_line = buffer.get_rope().line_to_char(cursor_line_idx);
           let before_insert_char_idx = start_char_pos_of_line + cursor_char_idx;
 
-          dbg_print_details(
+          _dbg_print_details(
             &buffer,
             cursor_line_idx,
             before_insert_char_idx,
@@ -165,7 +165,7 @@ impl InsertStateful {
                 .insert(0_usize, buf_eol.to_compact_string().as_str());
               buffer.remove_cached_line(cursor_line_idx);
 
-              dbg_print_details(
+              _dbg_print_details(
                 &buffer,
                 cursor_line_idx,
                 before_insert_char_idx,
@@ -186,7 +186,7 @@ impl InsertStateful {
                   bufline_len_chars.saturating_sub(1),
                 );
 
-                dbg_print_details(
+                _dbg_print_details(
                   &buffer,
                   cursor_line_idx,
                   before_insert_char_idx,
@@ -203,7 +203,7 @@ impl InsertStateful {
                     cursor_line_idx,
                     bufline_len_chars.saturating_sub(1),
                   );
-                  dbg_print_details(
+                  _dbg_print_details(
                     &buffer,
                     cursor_line_idx,
                     before_insert_char_idx,
@@ -214,7 +214,7 @@ impl InsertStateful {
             }
           }
 
-          dbg_print_details_on_line(
+          _dbg_print_details_on_line(
             &buffer,
             cursor_line_idx,
             after_inserted_char_idx,
