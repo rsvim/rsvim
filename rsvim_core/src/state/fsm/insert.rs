@@ -1976,9 +1976,7 @@ mod tests_insert_text {
         "!\n",
         "3rd.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2023,9 +2021,7 @@ mod tests_insert_text {
         "shorter!\n",
         "3rd.\n",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)]
-        .into_iter()
-        .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2070,8 +2066,7 @@ mod tests_insert_text {
         "hat we ",
         "must make ",
       ];
-      let expect_fills: BTreeMap<usize, usize> =
-        vec![(2, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
