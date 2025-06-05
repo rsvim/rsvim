@@ -12708,7 +12708,14 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
     // Search-1
     {
-      let expect = vec!["next\t", "row,\tif", "\teither", "\tline-wrap", "\tor"];
+      let expect = vec![
+        "extra parts are split",
+        " into the\tnext",
+        "\trow,\t",
+        "if\teither",
+        "\tline-wrap",
+        "\tor\t",
+      ];
 
       let actual = {
         let target_cursor_line = 6;
@@ -12739,7 +12746,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 5)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
@@ -12752,12 +12759,12 @@ mod tests_search_anchor_upward_wrap_linebreak {
       );
 
       let expect_canvas = vec![
-        "next                 ",
-        "row,        if       ",
-        "        either       ",
+        "extra parts are split",
+        " into the        next",
+        "        row,         ",
+        "if        either     ",
         "        line-wrap    ",
         "        or           ",
-        "                     ",
       ];
 
       let actual_canvas = make_canvas(
@@ -12772,11 +12779,12 @@ mod tests_search_anchor_upward_wrap_linebreak {
     // Search-2
     {
       let expect = vec![
-        "both\tline",
-        "-wrap\tand",
-        "\tword-wrap",
-        "\toptions",
-        "\tare",
+        "extra parts are been ",
+        "truncated if\t",
+        "both\tline-wrap",
+        "\tand\t",
+        "word-wrap\t",
+        "options\tare",
       ];
 
       let actual = {
@@ -12795,7 +12803,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
           target_cursor_char,
         );
         assert_eq!(start_line, 5);
-        assert_eq!(start_column, 63);
+        assert_eq!(start_column, 23);
 
         let viewport = Viewport::view(
           &buf,
@@ -12808,7 +12816,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
         lock!(window.viewport()).clone()
       };
 
-      let expect_start_fills: BTreeMap<usize, usize> = vec![(5, 1)].into_iter().collect();
+      let expect_start_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
       let expect_end_fills: BTreeMap<usize, usize> = vec![(5, 0)].into_iter().collect();
       assert_viewport(
         buf.clone(),
@@ -12821,11 +12829,12 @@ mod tests_search_anchor_upward_wrap_linebreak {
       );
 
       let expect_canvas = vec![
-        "both        line     ",
-        "-wrap        and     ",
-        "        word-wrap    ",
-        "        options      ",
-        "        are          ",
+        "extra parts are been ",
+        "truncated if         ",
+        "both        line-wrap",
+        "        and          ",
+        "word-wrap            ",
+        "options        are   ",
       ];
 
       let actual_canvas = make_canvas(
