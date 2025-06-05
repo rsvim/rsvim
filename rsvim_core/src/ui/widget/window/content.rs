@@ -56,7 +56,6 @@ impl Widgetable for WindowContent {
     }
 
     let viewport = self.viewport.upgrade().unwrap();
-    let viewport = lock!(viewport);
 
     // If viewport has no lines.
     if viewport.end_line_idx() <= viewport.start_line_idx() {
