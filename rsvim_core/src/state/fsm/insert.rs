@@ -962,6 +962,68 @@ mod tests_util {
 }
 #[cfg(test)]
 #[allow(unused_imports)]
+mod tests_get_operation {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::{lock, state};
+
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
+
+  #[test]
+  fn get1() {
+    test_log_init();
+
+    let stateful = InsertStateful::default();
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Char('c'),
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::InsertCharWiseTextAtCursor(_))
+    ));
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Up,
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::CursorMoveUpBy(_))
+    ));
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Esc,
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::GotoNormalMode)
+    ));
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Backspace,
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::DeleteCharWiseTextToLeftAtCursor(_))
+    ));
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Delete,
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::DeleteCharWiseTextToRightAtCursor(_))
+    ));
+  }
+}
+#[cfg(test)]
+#[allow(unused_imports)]
 mod tests_cursor_move {
   use super::tests_util::*;
   use super::*;
