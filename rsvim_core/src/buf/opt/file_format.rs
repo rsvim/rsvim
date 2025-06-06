@@ -11,15 +11,10 @@ pub enum FileFormatOption {
   /// LF (`<NL>`)
   Unix,
 
-  /// LF (`<NL>`)
-  ///
-  /// NOTE: CR (`<CR>`) is deprecated in macos.
-  Mac,
-
   /// CR (`<CR>`)
   ///
-  /// NOTE: CR (`<CR>`) is deprecated in macos.
-  ClassicMac,
+  /// NOTE: This is deprecated and should never used in today's computer.
+  Mac,
 }
 
 impl Display for FileFormatOption {
@@ -28,7 +23,6 @@ impl Display for FileFormatOption {
       FileFormatOption::Dos => write!(f, "dos"),
       FileFormatOption::Unix => write!(f, "unix"),
       FileFormatOption::Mac => write!(f, "mac"),
-      FileFormatOption::ClassicMac => write!(f, "classic_mac"),
     }
   }
 }
@@ -42,7 +36,6 @@ impl TryFrom<&str> for FileFormatOption {
       "dos" => Ok(FileFormatOption::Dos),
       "unix" => Ok(FileFormatOption::Unix),
       "mac" => Ok(FileFormatOption::Mac),
-      "classic_mac" => Ok(FileFormatOption::ClassicMac),
       _ => Err("Unknown FileFormat value".to_string()),
     }
   }
@@ -53,7 +46,7 @@ impl From<EndOfLineOption> for FileFormatOption {
     match value {
       EndOfLineOption::CRLF => FileFormatOption::Dos,
       EndOfLineOption::LF => FileFormatOption::Unix,
-      EndOfLineOption::CR => FileFormatOption::ClassicMac,
+      EndOfLineOption::CR => FileFormatOption::Mac,
     }
   }
 }
@@ -101,8 +94,7 @@ impl From<FileFormatOption> for EndOfLineOption {
     match value {
       FileFormatOption::Dos => EndOfLineOption::CRLF,
       FileFormatOption::Unix => EndOfLineOption::LF,
-      FileFormatOption::Mac => EndOfLineOption::LF,
-      FileFormatOption::ClassicMac => EndOfLineOption::CR,
+      FileFormatOption::Mac => EndOfLineOption::CR,
     }
   }
 }
