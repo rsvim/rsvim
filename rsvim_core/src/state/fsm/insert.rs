@@ -184,6 +184,28 @@ fn _dbg_print_details_on_line(buffer: &Buffer, line_idx: usize, char_idx: usize,
 }
 
 impl InsertStateful {
+  fn delete_text_to_left(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+    debug_assert!(matches!(op, Operation::DeleteLineWiseTextToLeftAtCursor(_)));
+    let n = match op {
+      Operation::DeleteLineWiseTextToLeftAtCursor(n) => n,
+      _ => unreachable!(),
+    };
+
+    StatefulValue::InsertMode(InsertStateful::default())
+  }
+
+  fn delete_text_to_right(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+    debug_assert!(matches!(op, Operation::DeleteLineWiseTextToLeftAtCursor(_)));
+    let n = match op {
+      Operation::DeleteLineWiseTextToLeftAtCursor(n) => n,
+      _ => unreachable!(),
+    };
+
+    StatefulValue::InsertMode(InsertStateful::default())
+  }
+}
+
+impl InsertStateful {
   fn insert_text(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     debug_assert!(matches!(op, Operation::InsertLineWiseTextAtCursor(_)));
     let text = match op {
