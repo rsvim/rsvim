@@ -13,7 +13,8 @@ pub enum FileFormatOption {
 
   /// CR (`<CR>`)
   ///
-  /// NOTE: This is deprecated and should never used in today's computer.
+  /// NOTE: This is deprecated and only been kept for compatibility reason, which should never
+  /// used today.
   Mac,
 }
 
