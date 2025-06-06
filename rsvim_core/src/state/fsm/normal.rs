@@ -50,7 +50,7 @@ impl Stateful for NormalStateful {
               return self.goto_insert_mode(&data_access, Operation::GotoInsertMode);
             }
             KeyCode::Esc => {
-              return self.quit(&data_access, Operation::EditorQuit);
+              return self.editor_quit(&data_access, Operation::EditorQuit);
             }
             _ => { /* Skip */ }
           }
@@ -251,7 +251,7 @@ impl NormalStateful {
     }
   }
 
-  fn quit(&self, _data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
+  fn editor_quit(&self, _data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
     debug_assert!(matches!(_op, Operation::EditorQuit));
     StatefulValue::QuitState(QuitStateful::default())
   }
