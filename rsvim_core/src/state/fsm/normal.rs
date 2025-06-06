@@ -21,56 +21,62 @@ impl Stateful for NormalStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
 
-    match event {
-      Event::FocusGained => {}
-      Event::FocusLost => {}
+    let maybe_op = match event {
+      Event::FocusGained => None,
+      Event::FocusLost => None,
       Event::Key(key_event) => match key_event.kind {
         KeyEventKind::Press => {
           trace!("Event::key:{:?}", key_event);
           match key_event.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-              return self.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
-            }
-            KeyCode::Down | KeyCode::Char('j') => {
-              return self.cursor_move(&data_access, Operation::CursorMoveDownBy(1));
-            }
-            KeyCode::Left | KeyCode::Char('h') => {
-              return self.cursor_move(&data_access, Operation::CursorMoveLeftBy(1));
-            }
-            KeyCode::Right | KeyCode::Char('l') => {
-              return self.cursor_move(&data_access, Operation::CursorMoveRightBy(1));
-            }
-            KeyCode::Home => {
-              return self.cursor_move(&data_access, Operation::CursorMoveLeftBy(usize::MAX));
-            }
-            KeyCode::End => {
-              return self.cursor_move(&data_access, Operation::CursorMoveRightBy(usize::MAX));
-            }
-            KeyCode::Char('i') => {
-              return self.goto_insert_mode(&data_access, Operation::GotoInsertMode);
-            }
-            KeyCode::Esc => {
-              return self.editor_quit(&data_access, Operation::EditorQuit);
-            }
-            _ => { /* Skip */ }
+            KeyCode::Up | KeyCode::Char('k') => Some(Operation::CursorMoveUpBy(1)),
+            KeyCode::Down | KeyCode::Char('j') => Some(Operation::CursorMoveDownBy(1)),
+            KeyCode::Left | KeyCode::Char('h') => Some(Operation::CursorMoveLeftBy(1)),
+            KeyCode::Right | KeyCode::Char('l') => Some(Operation::CursorMoveRightBy(1)),
+            KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
+            KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
+            KeyCode::Char('i') => Some(Operation::GotoInsertMode),
+            KeyCode::Esc => Some(Operation::EditorQuit),
+            _ => None,
           }
         }
-        KeyEventKind::Repeat => {}
-        KeyEventKind::Release => {}
+        KeyEventKind::Repeat => None,
+        KeyEventKind::Release => None,
       },
-      Event::Mouse(_mouse_event) => {}
-      Event::Paste(ref _paste_string) => {}
-      Event::Resize(_columns, _rows) => {}
+      Event::Mouse(_mouse_event) => None,
+      Event::Paste(ref _paste_string) => None,
+      Event::Resize(_columns, _rows) => None,
+    };
+
+    if let Some(op) = maybe_op {
+      return self.handle_op(data_access, op);
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
+
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
+    match op {
+      Operation::GotoInsertMode => {
+        return self.goto_insert_mode(&data_access);
+      }
+      Operation::EditorQuit => {
+        return self.editor_quit(&data_access);
+      }
+      Operation::CursorMoveBy((_, _))
+      | Operation::CursorMoveUpBy(_)
+      | Operation::CursorMoveDownBy(_)
+      | Operation::CursorMoveLeftBy(_)
+      | Operation::CursorMoveRightBy(_)
+      | Operation::CursorMoveTo((_, _)) => {
+        return self.cursor_move(&data_access, op);
+      }
+      _ => unreachable!(),
+    }
+  }
 }
 
 impl NormalStateful {
-  fn goto_insert_mode(&self, data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
-    debug_assert!(matches!(_op, Operation::GotoInsertMode));
-
+  fn goto_insert_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let cursor_id = tree.cursor_id().unwrap();
@@ -251,8 +257,7 @@ impl NormalStateful {
     }
   }
 
-  fn editor_quit(&self, _data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
-    debug_assert!(matches!(_op, Operation::EditorQuit));
+  fn editor_quit(&self, _data_access: &StatefulDataAccess) -> StatefulValue {
     StatefulValue::QuitState(QuitStateful::default())
   }
 }

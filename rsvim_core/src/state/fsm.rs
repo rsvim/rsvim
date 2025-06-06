@@ -14,6 +14,7 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::state::StateArc;
+use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 
 use crossterm::event::Event;
@@ -64,6 +65,11 @@ pub trait Stateful {
   ///
   /// Returns next state.
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
+
+  /// Handle user's operation, this method can access the editor's data and update UI tree.
+  ///
+  /// Returns next state.
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue;
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
