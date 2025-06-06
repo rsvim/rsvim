@@ -17,60 +17,64 @@ use tracing::trace;
 /// The finite-state-machine for normal mode.
 pub struct NormalStateful {}
 
-impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    let event = data_access.event.clone();
-
+impl NormalStateful {
+  fn _get_operation(&self, event: Event) -> Option<Operation> {
     match event {
-      Event::FocusGained => {}
-      Event::FocusLost => {}
+      Event::FocusGained => None,
+      Event::FocusLost => None,
       Event::Key(key_event) => match key_event.kind {
         KeyEventKind::Press => {
           trace!("Event::key:{:?}", key_event);
           match key_event.code {
-            KeyCode::Up | KeyCode::Char('k') => {
-              return self.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
-            }
-            KeyCode::Down | KeyCode::Char('j') => {
-              return self.cursor_move(&data_access, Operation::CursorMoveDownBy(1));
-            }
-            KeyCode::Left | KeyCode::Char('h') => {
-              return self.cursor_move(&data_access, Operation::CursorMoveLeftBy(1));
-            }
-            KeyCode::Right | KeyCode::Char('l') => {
-              return self.cursor_move(&data_access, Operation::CursorMoveRightBy(1));
-            }
-            KeyCode::Home => {
-              return self.cursor_move(&data_access, Operation::CursorMoveLeftBy(usize::MAX));
-            }
-            KeyCode::End => {
-              return self.cursor_move(&data_access, Operation::CursorMoveRightBy(usize::MAX));
-            }
-            KeyCode::Char('i') => {
-              return self.goto_insert_mode(&data_access, Operation::GotoInsertMode);
-            }
-            KeyCode::Esc => {
-              return self.quit(&data_access, Operation::EditorQuit);
-            }
-            _ => { /* Skip */ }
+            KeyCode::Up | KeyCode::Char('k') => Some(Operation::CursorMoveUpBy(1)),
+            KeyCode::Down | KeyCode::Char('j') => Some(Operation::CursorMoveDownBy(1)),
+            KeyCode::Left | KeyCode::Char('h') => Some(Operation::CursorMoveLeftBy(1)),
+            KeyCode::Right | KeyCode::Char('l') => Some(Operation::CursorMoveRightBy(1)),
+            KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
+            KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
+            KeyCode::Char('i') => Some(Operation::GotoInsertMode),
+            KeyCode::Esc => Some(Operation::EditorQuit),
+            _ => None,
           }
         }
-        KeyEventKind::Repeat => {}
-        KeyEventKind::Release => {}
+        KeyEventKind::Repeat => None,
+        KeyEventKind::Release => None,
       },
-      Event::Mouse(_mouse_event) => {}
-      Event::Paste(ref _paste_string) => {}
-      Event::Resize(_columns, _rows) => {}
+      Event::Mouse(_mouse_event) => None,
+      Event::Paste(ref _paste_string) => None,
+      Event::Resize(_columns, _rows) => None,
+    }
+  }
+}
+
+impl Stateful for NormalStateful {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+    let event = data_access.event.clone();
+
+    if let Some(op) = self._get_operation(event) {
+      return self.handle_op(data_access, op);
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
+
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
+    match op {
+      Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
+      Operation::EditorQuit => self.editor_quit(&data_access),
+      Operation::CursorMoveBy((_, _))
+      | Operation::CursorMoveUpBy(_)
+      | Operation::CursorMoveDownBy(_)
+      | Operation::CursorMoveLeftBy(_)
+      | Operation::CursorMoveRightBy(_)
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
+      _ => unreachable!(),
+    }
+  }
 }
 
 impl NormalStateful {
-  fn goto_insert_mode(&self, data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
-    debug_assert!(matches!(_op, Operation::GotoInsertMode));
-
+  fn goto_insert_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let cursor_id = tree.cursor_id().unwrap();
@@ -251,8 +255,7 @@ impl NormalStateful {
     }
   }
 
-  fn quit(&self, _data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
-    debug_assert!(matches!(_op, Operation::EditorQuit));
+  fn editor_quit(&self, _data_access: &StatefulDataAccess) -> StatefulValue {
     StatefulValue::QuitState(QuitStateful::default())
   }
 }
@@ -442,6 +445,55 @@ mod tests_util {
         assert_eq!(payload, expect[*r as usize]);
       }
     }
+  }
+}
+
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_get_operation {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::{lock, state};
+
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
+
+  #[test]
+  fn get1() {
+    test_log_init();
+
+    let stateful = NormalStateful::default();
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Char('i'),
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::GotoInsertMode)
+    ));
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Char('j'),
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::CursorMoveDownBy(_))
+    ));
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Esc,
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::EditorQuit)
+    ));
   }
 }
 
