@@ -51,7 +51,7 @@ Please checkout [Documentation](https://rsvim.github.io/) for more details!
 
 ## Contribution
 
-Contributions to this project are always welcomed. Some guidelines can be found in below files:
+Contributions to RSVIM are always welcomed. Some guidelines can be found in below files:
 
 - [DEVELOPMENT.md](https://github.com/rsvim/rsvim/blob/main/DEVELOPMENT.md)
 
