@@ -2329,7 +2329,8 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["b\n", ""];
+      let b = format!("b{}", lock!(buf.clone()).options().end_of_line());
+      let expect = vec![b.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
