@@ -10,7 +10,8 @@ use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeSet;
 use std::fs::File;
 use std::io::BufReader;
-use tracing::{self, info};
+use tracing::{self, info, trace};
+use tracing_appender::non_blocking::DEFAULT_BUFFERED_LINES_LIMIT;
 
 /// Create rope from filename.
 pub fn make_rope_from_file(filename: String) -> Rope {
@@ -211,4 +212,86 @@ pub fn bufline_to_string(bufline: &RopeSlice) -> String {
     builder.push(c);
   }
   builder
+}
+
+pub fn print_buffer(buf: &Buffer, msg: &str) {
+  trace!("{} whole buffer:", msg);
+  for i in 0..buf.get_rope().len_lines() {
+    trace!("{i}:{:?}", bufline_to_string(&buf.get_rope().line(i)));
+  }
+}
+
+pub fn print_bufline_and_focus_char_on_line(
+  buffer: &Buffer,
+  line_idx: usize,
+  char_idx: usize,
+  msg: &str,
+) {
+  match buffer.get_rope().get_line(line_idx) {
+    Some(bufline) => {
+      trace!(
+        "{} line:{}, len_chars:{}, focus char:{}",
+        msg,
+        line_idx,
+        bufline.len_chars(),
+        char_idx
+      );
+      let mut builder1 = String::new();
+      let mut builder2 = String::new();
+      for (i, c) in bufline.chars().enumerate() {
+        let w = buffer.char_width(c);
+        if w > 0 {
+          builder1.push(c);
+        }
+        let s: String = std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w).collect();
+        builder2.push_str(s.as_str());
+      }
+      trace!("-{}-", builder1);
+      trace!("-{}-", builder2);
+    }
+    None => trace!(
+      "{} line:{}, focus char:{}, not exist",
+      msg, line_idx, char_idx
+    ),
+  }
+}
+
+pub fn print_bufline_and_focus_char(buffer: &Buffer, line_idx: usize, char_idx: usize, msg: &str) {
+  match buffer.get_rope().get_line(line_idx) {
+    Some(bufline) => {
+      trace!(
+        "{} line:{}, len_chars:{}, focus char:{}",
+        msg,
+        line_idx,
+        bufline.len_chars(),
+        char_idx
+      );
+      let start_char_on_line = buffer.get_rope().line_to_char(line_idx);
+
+      let mut builder1 = String::new();
+      let mut builder2 = String::new();
+      for (i, c) in bufline.chars().enumerate() {
+        let w = buffer.char_width(c);
+        if w > 0 {
+          builder1.push(c);
+        }
+        let s: String = std::iter::repeat_n(
+          if i + start_char_on_line == char_idx {
+            '^'
+          } else {
+            ' '
+          },
+          w,
+        )
+        .collect();
+        builder2.push_str(s.as_str());
+      }
+      trace!("-{}-", builder1);
+      trace!("-{}-", builder2);
+    }
+    None => trace!(
+      "{} line:{}, focus char:{}, not exist",
+      msg, line_idx, char_idx
+    ),
+  }
 }
