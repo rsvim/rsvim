@@ -90,6 +90,99 @@ impl CursorMoveImplOptions {
     }
   }
 }
+
+fn _bufline_to_string(bufline: &ropey::RopeSlice) -> String {
+  let mut builder = String::with_capacity(bufline.len_chars());
+  for c in bufline.chars() {
+    builder.push(c);
+  }
+  builder
+}
+
+fn _dbg_print_details(buffer: &Buffer, line_idx: usize, char_idx: usize, msg: &str) {
+  if cfg!(debug_assertions) {
+    match buffer.get_rope().get_line(line_idx) {
+      Some(bufline) => {
+        trace!(
+          "{} line:{}, len_chars:{}, focus char:{}",
+          msg,
+          line_idx,
+          bufline.len_chars(),
+          char_idx
+        );
+        let start_char_on_line = buffer.get_rope().line_to_char(line_idx);
+
+        let mut builder1 = String::new();
+        let mut builder2 = String::new();
+        for (i, c) in bufline.chars().enumerate() {
+          let w = buffer.char_width(c);
+          if w > 0 {
+            builder1.push(c);
+          }
+          let s: String = std::iter::repeat_n(
+            if i + start_char_on_line == char_idx {
+              '^'
+            } else {
+              ' '
+            },
+            w,
+          )
+          .collect();
+          builder2.push_str(s.as_str());
+        }
+        trace!("-{}-", builder1);
+        trace!("-{}-", builder2);
+      }
+      None => trace!(
+        "{} line:{}, focus char:{}, not exist",
+        msg, line_idx, char_idx
+      ),
+    }
+
+    trace!("{}, Whole buffer:", msg);
+    for i in 0..buffer.get_rope().len_lines() {
+      trace!("{i}:{:?}", _bufline_to_string(&buffer.get_rope().line(i)));
+    }
+  }
+}
+
+fn _dbg_print_details_on_line(buffer: &Buffer, line_idx: usize, char_idx: usize, msg: &str) {
+  if cfg!(debug_assertions) {
+    match buffer.get_rope().get_line(line_idx) {
+      Some(bufline) => {
+        trace!(
+          "{} line:{}, len_chars:{}, focus char:{}",
+          msg,
+          line_idx,
+          bufline.len_chars(),
+          char_idx
+        );
+        let mut builder1 = String::new();
+        let mut builder2 = String::new();
+        for (i, c) in bufline.chars().enumerate() {
+          let w = buffer.char_width(c);
+          if w > 0 {
+            builder1.push(c);
+          }
+          let s: String = std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w).collect();
+          builder2.push_str(s.as_str());
+        }
+        trace!("-{}-", builder1);
+        trace!("-{}-", builder2);
+      }
+      None => trace!(
+        "{} line:{}, focus char:{}, not exist",
+        msg, line_idx, char_idx
+      ),
+    }
+
+    trace!("{}, Whole buffer:", msg);
+    for i in 0..buffer.get_rope().len_lines() {
+      trace!("{i}:{:?}", _bufline_to_string(&buffer.get_rope().line(i)));
+    }
+  }
+}
+
 impl InsertStateful {
   fn insert_text(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     debug_assert!(matches!(op, Operation::InsertLineWiseTextAtCursor(_)));
@@ -103,26 +196,6 @@ impl InsertStateful {
     let buffer = self._current_buffer(&mut tree);
     let buffer = buffer.upgrade().unwrap();
     let mut buffer = lock!(buffer);
-
-    let _dbg_print_details =
-      |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| {
-        if cfg!(debug_assertions) {
-          use crate::test::buf::{print_buffer, print_bufline_and_focus_char};
-
-          print_bufline_and_focus_char(dbg_buffer, dbg_line_idx, dbg_char_idx, msg);
-          print_buffer(dbg_buffer, msg);
-        }
-      };
-
-    let _dbg_print_details_on_line =
-      |dbg_buffer: &Buffer, dbg_line_idx: usize, dbg_char_idx: usize, msg: &str| {
-        if cfg!(debug_assertions) {
-          use crate::test::buf::{print_buffer, print_bufline_and_focus_char_on_line};
-
-          print_bufline_and_focus_char_on_line(dbg_buffer, dbg_line_idx, dbg_char_idx, msg);
-          print_buffer(dbg_buffer, msg);
-        }
-      };
 
     // Insert text.
     let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) = {
