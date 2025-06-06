@@ -19,11 +19,9 @@ use tracing::trace;
 /// The finite-state-machine for insert mode.
 pub struct InsertStateful {}
 
-impl Stateful for InsertStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    let event = data_access.event.clone();
-
-    let maybe_op = match event {
+impl InsertStateful {
+  fn _get_operation(&self, event: Event) -> Option<Operation> {
+    match event {
       Event::FocusGained => None,
       Event::FocusLost => None,
       Event::Key(key_event) => match key_event.kind {
@@ -49,9 +47,15 @@ impl Stateful for InsertStateful {
       Event::Mouse(_mouse_event) => None,
       Event::Paste(ref _paste_string) => None,
       Event::Resize(_columns, _rows) => None,
-    };
+    }
+  }
+}
 
-    if let Some(op) = maybe_op {
+impl Stateful for InsertStateful {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+    let event = data_access.event.clone();
+
+    if let Some(op) = self._get_operation(event) {
       return self.handle_op(data_access, op);
     }
 
