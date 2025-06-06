@@ -15,5 +15,5 @@ pub mod state;
 pub mod ui;
 
 // Only for unit test.
-#[cfg(debug_assertions)]
+#[cfg(test)]
 pub mod test;

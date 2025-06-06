@@ -139,3 +139,18 @@ jobs:
           files: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
+  release_build:
+    name: Release Build
+    runs-on: ubuntu-22.04
+    env:
+      RUSTC_WRAPPER: "sccache"
+      SCCACHE_GHA_ENABLED: "true"
+    steps:
+      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - name: Cargo Build
+        run: |
+          cargo build --release
+          ./target/release/rsvim --version
