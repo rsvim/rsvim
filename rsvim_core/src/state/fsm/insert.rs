@@ -60,25 +60,21 @@ impl Stateful for InsertStateful {
 
   fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
-      Operation::GotoNormalMode => {
-        return self.goto_normal_mode(&data_access);
-      }
+      Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
       | Operation::CursorMoveDownBy(_)
       | Operation::CursorMoveLeftBy(_)
       | Operation::CursorMoveRightBy(_)
-      | Operation::CursorMoveTo((_, _)) => {
-        return self.cursor_move(&data_access, op);
-      }
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
       Operation::InsertCharWiseTextAtCursor(text) => {
-        return self.insert_char_wise_text_at_cursor(&data_access, text);
+        self.insert_char_wise_text_at_cursor(&data_access, text)
       }
       Operation::DeleteCharWiseTextToLeftAtCursor(n) => {
-        return self.delete_char_wise_text_to_left_at_cursor(&data_access, n);
+        self.delete_char_wise_text_to_left_at_cursor(&data_access, n)
       }
       Operation::DeleteCharWiseTextToRightAtCursor(n) => {
-        return self.delete_char_wise_text_to_right_at_cursor(&data_access, n);
+        self.delete_char_wise_text_to_right_at_cursor(&data_access, n)
       }
       _ => unreachable!(),
     }

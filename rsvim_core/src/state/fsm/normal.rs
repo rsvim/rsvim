@@ -56,20 +56,14 @@ impl Stateful for NormalStateful {
 
   fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
-      Operation::GotoInsertMode => {
-        return self.goto_insert_mode(&data_access);
-      }
-      Operation::EditorQuit => {
-        return self.editor_quit(&data_access);
-      }
+      Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
+      Operation::EditorQuit => self.editor_quit(&data_access),
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
       | Operation::CursorMoveDownBy(_)
       | Operation::CursorMoveLeftBy(_)
       | Operation::CursorMoveRightBy(_)
-      | Operation::CursorMoveTo((_, _)) => {
-        return self.cursor_move(&data_access, op);
-      }
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
       _ => unreachable!(),
     }
   }
