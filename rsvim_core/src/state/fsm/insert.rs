@@ -302,8 +302,8 @@ impl InsertStateful {
 
   fn delete_char_wise_text_to_right_at_cursor(
     &self,
-    data_access: &StatefulDataAccess,
-    n: usize,
+    _data_access: &StatefulDataAccess,
+    _n: usize,
   ) -> StatefulValue {
     StatefulValue::InsertMode(InsertStateful::default())
   }
@@ -522,7 +522,7 @@ impl InsertStateful {
           .insert(0_usize, buf_eol.to_compact_string().as_str());
         buffer.remove_cached_line(cursor_line_idx);
 
-        _dbg_print_details_on_line(&buffer, cursor_line_idx, 0_usize, "Eol appended(line=0)");
+        _dbg_print_details_on_line(buffer, cursor_line_idx, 0_usize, "Eol appended(line=0)");
       } else {
         let bufline_start_char_pos = buffer.get_rope().line_to_char(cursor_line_idx);
         let bufline_insert_char_pos = bufline_start_char_pos + bufline_len_chars;
@@ -537,7 +537,7 @@ impl InsertStateful {
             .truncate_cached_line_since_char(cursor_line_idx, bufline_len_chars.saturating_sub(1));
 
           _dbg_print_details(
-            &buffer,
+            buffer,
             cursor_line_idx,
             bufline_insert_char_pos,
             "Eol appended(last=1)",
@@ -554,7 +554,7 @@ impl InsertStateful {
               bufline_len_chars.saturating_sub(1),
             );
             _dbg_print_details(
-              &buffer,
+              buffer,
               cursor_line_idx,
               bufline_insert_char_pos,
               "Eol appended(last=2)",
