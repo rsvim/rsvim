@@ -37,6 +37,8 @@ impl Stateful for InsertStateful {
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char(c) => Some(Operation::InsertCharWiseTextAtCursor(c.to_compact_string())),
+            KeyCode::Backspace => Some(Operation::DeleteCharWiseTextToLeftAtCursor(1)),
+            KeyCode::Delete => Some(Operation::DeleteCharWiseTextToRightAtCursor(1)),
             KeyCode::Esc => Some(Operation::GotoNormalMode),
             _ => None,
           }
