@@ -2140,11 +2140,11 @@ mod tests_insert_text {
       );
 
       let expect_canvas = vec![
+        "Hello, RSV",
+        "This is a ",
         "But still ",
         "  1. When ",
         "  2. When ",
-        "  3. Is th",
-        "          ",
       ];
       let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
@@ -2152,7 +2152,10 @@ mod tests_insert_text {
 
     // Insert-2
     {
-      stateful.insert_at_cursor(&data_access, CompactString::new("a"));
+      stateful.insert_at_cursor(
+        &data_access,
+        CompactString::new("Let's\ninsert\nmultiple lines!\n"),
+      );
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
