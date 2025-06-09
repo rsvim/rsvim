@@ -36,8 +36,8 @@ impl InsertStateful {
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char(c) => Some(Operation::InsertAtCursor(c.to_compact_string())),
             KeyCode::Enter => Some(Operation::InsertAtCursor('\n'.to_compact_string())),
-            KeyCode::Backspace => Some(Operation::DeleteToLeftAtCursor(1)),
-            KeyCode::Delete => Some(Operation::DeleteToRightAtCursor(1)),
+            KeyCode::Backspace => Some(Operation::DeleteLeftAtCursor(1)),
+            KeyCode::Delete => Some(Operation::DeleteRightAtCursor(1)),
             KeyCode::Esc => Some(Operation::GotoNormalMode),
             _ => None,
           }
@@ -73,8 +73,8 @@ impl Stateful for InsertStateful {
       | Operation::CursorMoveRightBy(_)
       | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
       Operation::InsertAtCursor(text) => self.insert_at_cursor(&data_access, text),
-      Operation::DeleteToLeftAtCursor(n) => self.delete_to_left_at_cursor(&data_access, n),
-      Operation::DeleteToRightAtCursor(n) => self.delete_to_right_at_cursor(&data_access, n),
+      Operation::DeleteLeftAtCursor(n) => self.delete_to_left_at_cursor(&data_access, n),
+      Operation::DeleteRightAtCursor(n) => self.delete_to_right_at_cursor(&data_access, n),
       _ => unreachable!(),
     }
   }
@@ -936,14 +936,14 @@ mod tests_get_operation {
         KeyCode::Backspace,
         KeyModifiers::empty()
       ))),
-      Some(Operation::DeleteToLeftAtCursor(_))
+      Some(Operation::DeleteLeftAtCursor(_))
     ));
     assert!(matches!(
       stateful._get_operation(Event::Key(KeyEvent::new(
         KeyCode::Delete,
         KeyModifiers::empty()
       ))),
-      Some(Operation::DeleteToRightAtCursor(_))
+      Some(Operation::DeleteRightAtCursor(_))
     ));
   }
 }

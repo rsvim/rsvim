@@ -68,10 +68,10 @@ pub enum Operation {
   InsertAtCursor(/* text */ CompactString),
 
   /// Delete N-chars text, to the left of the cursor.
-  DeleteToLeftAtCursor(/* N-chars */ usize),
+  DeleteLeftAtCursor(/* N-chars */ usize),
 
   /// Delete N-chars text, to the right of the cursor.
-  DeleteToRightAtCursor(/* N-chars */ usize),
+  DeleteRightAtCursor(/* N-chars */ usize),
 
   /// Quit editor
   EditorQuit,
