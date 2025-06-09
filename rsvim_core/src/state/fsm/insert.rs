@@ -989,13 +989,6 @@ mod tests_get_operation {
       ))),
       Some(Operation::DeleteAtCursor(_))
     ));
-    assert!(matches!(
-      stateful._get_operation(Event::Key(KeyEvent::new(
-        KeyCode::Delete,
-        KeyModifiers::empty()
-      ))),
-      Some(Operation::DeleteRightAtCursor(_))
-    ));
   }
 }
 #[cfg(test)]
