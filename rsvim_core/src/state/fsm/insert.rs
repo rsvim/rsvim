@@ -342,7 +342,7 @@ impl InsertStateful {
           // The `text` may contains line break '\n', which can interrupts the `cursor_line_idx`
           // and we need to re-calculate it.
           let cursor_char_absolute_pos_after_inserted =
-            cursor_char_absolute_pos_before_insert + text.len();
+            cursor_char_absolute_pos_before_insert + text.chars().count();
           let cursor_line_idx_after_inserted = buffer
             .get_rope()
             .char_to_line(cursor_char_absolute_pos_after_inserted);
@@ -2808,6 +2808,68 @@ mod tests_insert_text {
 
       let expect_canvas = vec![
         "b         ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  fn wrap_nolinebreak4() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 6);
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .line_break(false)
+      .build()
+      .unwrap();
+    let lines = vec![""];
+    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let stateful = InsertStateful::default();
+
+    // Insert-1
+    {
+      stateful.insert_at_cursor(&data_access, CompactString::new("这个"));
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 2);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let viewport = get_viewport(tree.clone());
+      let b = format!("这个{}", lock!(buf.clone()).options().end_of_line());
+      let expect = vec![b.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "这个      ",
         "          ",
         "          ",
         "          ",
