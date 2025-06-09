@@ -9,8 +9,22 @@ fn version() {
     output_path.as_path()
   );
   let pkg_version = env!("CARGO_PKG_VERSION");
+  let last_commit_date = std::process::Command::new("git")
+    .args(["log", "-1", "--format=\"%as\"", "--color=never"])
+    .output()
+    .expect("Failed to run git log command!");
+  let last_commit_date = String::from_utf8_lossy(&last_commit_date.stdout);
   let mut f = std::fs::File::create(output_path).unwrap();
-  write!(&mut f, "rsvim {} (v8 {})", pkg_version, v8_version()).unwrap();
+  write!(
+    &mut f,
+    "rsvim {} (v8 {}, {})",
+    pkg_version,
+    v8_version(),
+    last_commit_date
+      .trim()
+      .trim_matches(|c: char| !c.is_ascii_digit()),
+  )
+  .unwrap();
 }
 
 fn snapshot() {
