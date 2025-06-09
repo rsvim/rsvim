@@ -122,7 +122,12 @@ pub fn normalize_to_cursor_move_to_include_empty_eol(
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
   let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
-  let y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
+  let mut y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
+  if buffer.get_rope().line(y).len_chars() == 0 {
+    // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
+    // line break '\n'), sub y by extra 1.
+    y = y.saturating_sub(1);
+  }
   let x = match buffer.last_char_on_line(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
