@@ -29,7 +29,7 @@ fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveBy((x,y))`.
-pub fn normalize_to_cursor_move_by(
+fn _normalize_to_cursor_move_by(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -50,7 +50,7 @@ pub fn normalize_to_cursor_move_by(
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`.
-pub fn normalize_to_cursor_move_to(
+fn _normalize_to_cursor_move_to(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -90,15 +90,21 @@ pub fn normalize_to_cursor_move_to(
   }
 }
 
-/// Same with [`normalize_to_cursor_move_to`], except it exclude the empty eol.
+/// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`, it excludes the empty
+/// eol.
 pub fn normalize_to_cursor_move_to_exclude_empty_eol(
   buffer: &Buffer,
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
-  let y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
+  let (x, y, move_direction) = _normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+  let mut y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
+  if buffer.get_rope().line(y).len_chars() == 0 {
+    // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
+    // line break '\n'), sub y by extra 1.
+    y = y.saturating_sub(1);
+  }
   let x = match buffer.last_char_on_line_no_empty_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
@@ -109,15 +115,21 @@ pub fn normalize_to_cursor_move_to_exclude_empty_eol(
   (x, y, move_direction)
 }
 
-/// Same with [`normalize_to_cursor_move_to`], except it include the empty eol.
+/// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`, it includes the empty
+/// eol.
 pub fn normalize_to_cursor_move_to_include_empty_eol(
   buffer: &Buffer,
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
-  let y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
+  let (x, y, move_direction) = _normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+  let mut y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
+  if buffer.get_rope().line(y).len_chars() == 0 {
+    // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
+    // line break '\n'), sub y by extra 1.
+    y = y.saturating_sub(1);
+  }
   let x = match buffer.last_char_on_line(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
@@ -129,7 +141,7 @@ pub fn normalize_to_cursor_move_to_include_empty_eol(
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollBy((x,y))`.
-pub fn normalize_to_window_scroll_by(
+fn _normalize_to_window_scroll_by(
   op: Operation,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,

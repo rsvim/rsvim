@@ -67,11 +67,8 @@ pub enum Operation {
   /// Insert text at cursor.
   InsertAtCursor(/* text */ CompactString),
 
-  /// Delete N-chars text, to the left of the cursor.
-  DeleteLeftAtCursor(/* N-chars */ usize),
-
-  /// Delete N-chars text, to the right of the cursor.
-  DeleteRightAtCursor(/* N-chars */ usize),
+  /// Delete N-chars text, to the left of cursor if negative, to the right of cursor if positive.
+  DeleteAtCursor(/* N-chars */ isize),
 
   /// Quit editor
   EditorQuit,

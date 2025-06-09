@@ -52,6 +52,10 @@ def append_lld_rustflags():
     if NO_LLD_LINKER:
         return
 
+    # Only apply to linux
+    if WINDOWS or MACOS:
+        return
+
     if LLD_FULLPATH is None:
         logging.warning(f"'lld' ({LLD_NAME}) not found!")
         return
@@ -61,9 +65,12 @@ def append_lld_rustflags():
 
 def set_rustflags(command):
     global RUSTFLAGS
-    rustflags = " ".join([f for f in RUSTFLAGS])
-    command = set_env(command, "RUSTFLAGS", rustflags, is_string=True)
-    return command.strip()
+    if len(RUSTFLAGS) > 0:
+        rustflags = " ".join([f for f in RUSTFLAGS])
+        command = set_env(command, "RUSTFLAGS", rustflags, is_string=True)
+        return command.strip()
+    else:
+        return command.strip()
 
 
 def set_sccache(command):
