@@ -1,6 +1,81 @@
-## [0.1.1-alpha.9](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.8..0.1.1-alpha.9) - 2025-05-20
+# Changelog
 
-[feafb680](https://github.com/rsvim/rsvim/commit/feafb680893ffdece400e1b17b7cb02b18a3ffc8)...[0ea752cb](https://github.com/rsvim/rsvim/commit/0ea752cbf11f840c4bcc8e30559c8c055de23752)
+All notable changes to this project will be documented in this file.
+
+## [0.1.1-alpha.10](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.9..0.1.1-alpha.10) - 2025-06-09
+
+[d8577472](https://github.com/rsvim/rsvim/commit/d8577472c1180a5a4faa2b16a58182f3369b9dd3)...[b9366d72](https://github.com/rsvim/rsvim/commit/b9366d72418ab24dde07291c86063a1a3968262b)
+
+### <!-- 0 -->Features
+
+- *(cursor)* Provide more operation primitives for normal mode (#382) ([103288db](https://github.com/rsvim/rsvim/commit/103288dbda07480c40492b17096cf81cabf5a01e)) by @linrongbin16 ([#382](https://github.com/rsvim/rsvim/pull/382))
+
+- *(insert)* Allow i/esc keycode to switch between insert/normal mode (#391) ([c0fd13fd](https://github.com/rsvim/rsvim/commit/c0fd13fd4b08a97ccf9649e0fa8b0108b282503f)) by @linrongbin16 ([#391](https://github.com/rsvim/rsvim/pull/391))
+
+- *(insert)* Initialize cursor movement in insert mode (#393) ([4dbc4b49](https://github.com/rsvim/rsvim/commit/4dbc4b49b779ae729f23a26ff5d9ef33fbc4da13)) by @linrongbin16 ([#393](https://github.com/rsvim/rsvim/pull/393))
+
+- *(viewport)* Give 1 extra column for empty eol (end-of-line) (#424) ([9fadf4f1](https://github.com/rsvim/rsvim/commit/9fadf4f11accd5a02a18b8fcc6db1adf9f1f41f0)) by @linrongbin16 ([#424](https://github.com/rsvim/rsvim/pull/424))
+
+- *(cursor)* Include empty eol when calculate cursor positions for insert mode (#435) ([b5861e84](https://github.com/rsvim/rsvim/commit/b5861e844aff233096ae2083e644bfb3c2aa0789)) by @linrongbin16 ([#435](https://github.com/rsvim/rsvim/pull/435))
+
+- *(cursor)* Impl cursor moves to empty eol when 'wrap=true' (#437) ([f94f960b](https://github.com/rsvim/rsvim/commit/f94f960b93014d2bdfa65355a4df255ed5e41aaa)) by @linrongbin16 ([#437](https://github.com/rsvim/rsvim/pull/437))
+
+- *(insert)* Insert char for insert mode (#444) ([035ca45c](https://github.com/rsvim/rsvim/commit/035ca45ce3d9df8e7d06b1b2a6c6ce3c7b8af9f9)) by @linrongbin16 ([#444](https://github.com/rsvim/rsvim/pull/444))
+
+- *(insert)* Insert eol when file has no eol at end (#445) ([f2a45bb8](https://github.com/rsvim/rsvim/commit/f2a45bb807348213dc4e01f2a6edee095b81e806)) by @linrongbin16 ([#445](https://github.com/rsvim/rsvim/pull/445))
+
+- *(insert)* Insert line break with enter (#452) ([2e2adb42](https://github.com/rsvim/rsvim/commit/2e2adb429177c09168ec409ef6d1f6020d164dda)) by @linrongbin16 ([#452](https://github.com/rsvim/rsvim/pull/452))
+
+- *(insert)* Delete text at cursor (#453) ([3545d505](https://github.com/rsvim/rsvim/commit/3545d505ba30b28ae105d1a3301a32055633a89b)) by @linrongbin16 ([#453](https://github.com/rsvim/rsvim/pull/453))
+
+
+### <!-- 1 -->Bug Fixes
+
+- *(tui)* Recover terminal and save backtrace info when panic (#395) ([2299f0ef](https://github.com/rsvim/rsvim/commit/2299f0efdce62cc0013e5ae8bbc523d3698f9a6e)) by @linrongbin16 ([#395](https://github.com/rsvim/rsvim/pull/395))
+
+- *(viewport)* Refactor wrap line anchor searching algorithms and fix edge cases (#407) ([f9c50ed6](https://github.com/rsvim/rsvim/commit/f9c50ed623d9bb97cb712b20e7f945e0e80f0387)) by @linrongbin16 ([#407](https://github.com/rsvim/rsvim/pull/407))
+
+- *(cursor)* Limit cursor position by last visible char when back to normal mode (#438) ([b1225e8e](https://github.com/rsvim/rsvim/commit/b1225e8efd50ec41e0e31d4bbff4790dee1fd81c)) by @linrongbin16 ([#438](https://github.com/rsvim/rsvim/pull/438))
+
+- *(cursor)* Fix cursor motion legacy boundary to work along anchor search (#440) ([a938add6](https://github.com/rsvim/rsvim/commit/a938add61daf2b0b58dacb64ed22e36a353db3cd)) by @linrongbin16 ([#440](https://github.com/rsvim/rsvim/pull/440))
+
+- *(build)* Fix debug assertions warnings for release build (#446) ([68829ab2](https://github.com/rsvim/rsvim/commit/68829ab2610fc1e3d69d5f724d7178f1c10ed0f8)) by @linrongbin16 ([#446](https://github.com/rsvim/rsvim/pull/446))
+
+- *(insert)* Fix non 1-width unicode chars insert (#452) ([2e2adb42](https://github.com/rsvim/rsvim/commit/2e2adb429177c09168ec409ef6d1f6020d164dda)) by @linrongbin16 ([#452](https://github.com/rsvim/rsvim/pull/452))
+
+
+### <!-- 2 -->Performance Improvements
+
+- *(cursor)* Reduce 1 lock/unlock call during cursor movement (#383) ([ce0dbfd8](https://github.com/rsvim/rsvim/commit/ce0dbfd8d20bcb405682c80828dd1be6e9f1bba9)) by @linrongbin16 ([#383](https://github.com/rsvim/rsvim/pull/383))
+
+- *(cursor)* Drop duplicated normalization between window scroll "to" and "by" (#436) ([7543c731](https://github.com/rsvim/rsvim/commit/7543c73134b9ed840b5b883963aa99b2dd76be4a)) by @linrongbin16 ([#436](https://github.com/rsvim/rsvim/pull/436))
+
+- *(viewport)* More compact memory layout (#441) ([4bf887fb](https://github.com/rsvim/rsvim/commit/4bf887fba055b49743a9230ed7ddeeb5c2f34ad1)) by @linrongbin16 ([#441](https://github.com/rsvim/rsvim/pull/441))
+
+- *(viewport)* Drop unnecessary locks on readyonly viewport (#443) ([b6b91832](https://github.com/rsvim/rsvim/commit/b6b91832d900775c538fdda905d4724e3e51de31)) by @linrongbin16 ([#443](https://github.com/rsvim/rsvim/pull/443))
+
+
+### <!-- 3 -->Code Refactoring
+
+- *(cursor)* Extract duplicated code logic into single method (#384) ([8be594e5](https://github.com/rsvim/rsvim/commit/8be594e531fc69e0dfaf1740ba464a2c3dfbd85c)) by @linrongbin16 ([#384](https://github.com/rsvim/rsvim/pull/384))
+
+- *(viewport)* Reduce duplicated logic with line-wise func arg (#397) ([18badf90](https://github.com/rsvim/rsvim/commit/18badf908d2101ace70e97ae7717c1419d922342)) by @linrongbin16 ([#397](https://github.com/rsvim/rsvim/pull/397))
+
+- *(viewport)* Refactor internal leftward/rightward searching api (#399) ([0ce7f9e3](https://github.com/rsvim/rsvim/commit/0ce7f9e3dbe2628e8792527cccc06be7d159b1e1)) by @linrongbin16 ([#399](https://github.com/rsvim/rsvim/pull/399))
+
+- *(buf)* Refactor buffer's last char apis (#403) ([57fc324a](https://github.com/rsvim/rsvim/commit/57fc324a34553a472e79b1f952a756546c7a1dbe)) by @linrongbin16 ([#403](https://github.com/rsvim/rsvim/pull/403))
+
+- *(buf)* Rename last char on line api (#405) ([77d74901](https://github.com/rsvim/rsvim/commit/77d749012babbc9545f4e69cc50b22d5e768295a)) by @linrongbin16 ([#405](https://github.com/rsvim/rsvim/pull/405))
+
+- *(viewport)* Simplify the "cannot fully contain target line" logic (#414) ([49554168](https://github.com/rsvim/rsvim/commit/495541680d724c171f00611511894842d6ce2d03)) by @linrongbin16 ([#414](https://github.com/rsvim/rsvim/pull/414))
+
+- *(cursor)* Refactor cursor motion in normal mode (#433) ([f3a6ef50](https://github.com/rsvim/rsvim/commit/f3a6ef50f272075558f965f3e4098f346e1fb673)) by @linrongbin16 ([#433](https://github.com/rsvim/rsvim/pull/433))
+
+- *(state)* Add "handle_op" api for low-level operation layer (#447) ([429f8cc4](https://github.com/rsvim/rsvim/commit/429f8cc43f676cce1a548ac085651d95d7b1133d)) by @linrongbin16 ([#447](https://github.com/rsvim/rsvim/pull/447))
+
+## [0.1.1-alpha.9](https://github.com/rsvim/rsvim/compare/v0.1.1-alpha.8..v0.1.1-alpha.9) - 2025-05-20
+
+[feafb680](https://github.com/rsvim/rsvim/commit/feafb680893ffdece400e1b17b7cb02b18a3ffc8)...[d8577472](https://github.com/rsvim/rsvim/commit/d8577472c1180a5a4faa2b16a58182f3369b9dd3)
 
 ### <!-- 0 -->Features
 
@@ -284,3 +359,4 @@
 
 - Rename 'Terminal' to 'Canvas' (#74) ([aafad5ca](https://github.com/rsvim/rsvim/commit/aafad5ca88205f41c81832a33d5101c077e4160b)) by @linrongbin16 ([#74](https://github.com/rsvim/rsvim/pull/74))
 
+<!-- generated by git-cliff -->
