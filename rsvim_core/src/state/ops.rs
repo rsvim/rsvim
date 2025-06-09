@@ -65,7 +65,7 @@ pub enum Operation {
   GotoNormalMode,
 
   /// Insert text at cursor.
-  InserAtCursor(/* text */ CompactString),
+  InsertAtCursor(/* text */ CompactString),
 
   /// Delete N-chars text, to the left of the cursor.
   DeleteToLeftAtCursor(/* N-chars */ usize),
