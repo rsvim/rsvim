@@ -3,40 +3,24 @@ use std::io::Write;
 use std::path::Path;
 
 fn version() {
-  // Emit vergen info.
-  let cargo_vergen = vergen_git2::CargoBuilder::default()
-    .target_triple(true)
-    .build()
-    .expect("Create vergen_git2::CargoBuilder failed");
-  let git2_vergen = vergen_git2::Git2Builder::default()
-    .commit_date(true)
-    .build()
-    .expect("Create vergen_git2::Git2Builder failed");
-
-  vergen_git2::Emitter::default()
-    .add_instructions(&cargo_vergen)
-    .expect("Add vergen_git2::CargoBuilder failed")
-    .add_instructions(&git2_vergen)
-    .expect("Add vergen_git2::Git2Builder failed")
-    .emit()
-    .expect("Emit vergen_git2 failed");
-
   let output_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
   eprintln!(
     "[RSVIM] Writing version into {:?}...",
     output_path.as_path()
   );
   let pkg_version = env!("CARGO_PKG_VERSION");
-  let git_commit_date = env!("VERGEN_GIT_COMMIT_DATE");
-  let host_triple = env!("VERGEN_CARGO_TARGET_TRIPLE");
+  let last_commit_date = std::process::Command::new("git")
+    .args(["log", "-1", "--format=\"%as\"", "--color=never"])
+    .output()
+    .expect("Failed to run git log command!");
+  let last_commit_date = String::from_utf8_lossy(&last_commit_date.stdout);
   let mut f = std::fs::File::create(output_path).unwrap();
   write!(
     &mut f,
-    "rsvim {} (released at {}, build for {}, with v8 {})",
+    "rsvim {} (v8 {}, {})",
     pkg_version,
-    git_commit_date,
-    host_triple,
-    v8_version()
+    v8_version(),
+    last_commit_date.trim(),
   )
   .unwrap();
 }

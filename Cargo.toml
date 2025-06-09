@@ -63,12 +63,6 @@ lru = "0.13.0"
 paste = "1.0.15"
 smallvec = "1.15.0"
 litemap = "0.8.0"
-vergen-git2 = { version = "1.0.7", features = [
-  "build",
-  "cargo",
-  "rustc",
-  "si",
-] }
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
