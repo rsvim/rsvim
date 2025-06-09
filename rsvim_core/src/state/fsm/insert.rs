@@ -3420,24 +3420,24 @@ mod tests_delete_text {
 
     // Move-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(7));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 18);
+      assert_eq!(actual1.char_idx(), 7);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 9);
+      assert_eq!(actual1.column_idx(), 7);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "o, RSVIM!\n",
-        " quite sim",
-        " it contai",
-        " the line ",
-        " the line ",
-        "e extra pa",
-        "e extra pa",
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
@@ -3463,13 +3463,13 @@ mod tests_delete_text {
       );
 
       let expect_canvas = vec![
-        "o, RSVIM! ",
-        " quite sim",
-        " it contai",
-        " the line ",
-        " the line ",
-        "e extra pa",
-        "e extra pa",
+        "Hello, RSV",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
         "          ",
         "          ",
         "          ",
@@ -3478,26 +3478,26 @@ mod tests_delete_text {
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    // Insert-3
+    // Delete-3
     {
-      stateful.insert_at_cursor(&data_access, CompactString::new(" Go!"));
+      stateful.delete_at_cursor(&data_access, -5);
 
       let tree = data_access.tree.clone();
       let actual3 = get_cursor_viewport(tree.clone());
       assert_eq!(actual3.line_idx(), 0);
-      assert_eq!(actual3.char_idx(), 22);
+      assert_eq!(actual3.char_idx(), 2);
       assert_eq!(actual3.row_idx(), 0);
-      assert_eq!(actual3.column_idx(), 9);
+      assert_eq!(actual3.column_idx(), 2);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "SVIM! Go!\n",
-        "te simple ",
-        "contains s",
-        " line is s",
-        " line is t",
-        "tra parts ",
-        "tra parts ",
+        "HeRSVIM!\n",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
@@ -3523,13 +3523,124 @@ mod tests_delete_text {
       );
 
       let expect_canvas = vec![
-        "SVIM! Go! ",
-        "te simple ",
-        "contains s",
-        " line is s",
-        " line is t",
-        "tra parts ",
-        "tra parts ",
+        "HeRSVIM!  ",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Move-4
+    {
+      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 3);
+      assert_eq!(actual1.char_idx(), 2);
+      assert_eq!(actual1.row_idx(), 3);
+      assert_eq!(actual1.column_idx(), 2);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "HeRSVIM!\n",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![
+        (0, 0),
+        (1, 0),
+        (2, 0),
+        (3, 0),
+        (4, 0),
+        (5, 0),
+        (6, 0),
+        (7, 0),
+      ]
+      .into_iter()
+      .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        8,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "HeRSVIM!  ",
+        "This is a ",
+        "But still ",
+        "  1. When ",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Delete-5
+    {
+      stateful.delete_at_cursor(&data_access, -50);
+
+      let tree = data_access.tree.clone();
+      let actual3 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual3.line_idx(), 2);
+      assert_eq!(actual3.char_idx(), 6);
+      assert_eq!(actual3.row_idx(), 2);
+      assert_eq!(actual3.column_idx(), 6);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "HeRSVIM!\n",
+        "This is a ",
+        "But st1. W",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        7,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "HeRSVIM!  ",
+        "This is a ",
+        "But st1. W",
+        "  2. When ",
+        "     * The",
+        "     * The",
+        "          ",
         "          ",
         "          ",
         "          ",
