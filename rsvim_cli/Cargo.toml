@@ -29,3 +29,4 @@ zstd = { workspace = true }
 rsvim_core = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 zstd = { workspace = true }
+vergen-git2 = { workspace = true, features = ["build", "cargo", "rustc", "si"] }
