@@ -193,110 +193,11 @@ fn _dbg_print_details_on_line(buffer: &Buffer, line_idx: usize, char_idx: usize,
 
 impl InsertStateful {
   fn delete_left_at_cursor(&self, data_access: &StatefulDataAccess, n: usize) -> StatefulValue {
-    let tree = data_access.tree.clone();
-    let mut tree = lock!(tree);
-    let buffer = self._current_buffer(&mut tree);
-    let buffer = buffer.upgrade().unwrap();
-    let mut buffer = lock!(buffer);
-
-    // Delete text.
-    let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) = {
-      if let Some(current_window_id) = tree.current_window_id() {
-        if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-          let cursor_viewport = current_window.cursor_viewport();
-          let cursor_line_idx = cursor_viewport.line_idx();
-          let cursor_char_idx = cursor_viewport.char_idx();
-          debug_assert!(buffer.get_rope().get_line(cursor_line_idx).is_some());
-          let start_char_pos_of_line = buffer.get_rope().line_to_char(cursor_line_idx);
-          let before_insert_char_idx = start_char_pos_of_line + cursor_char_idx;
-
-          _dbg_print_details(
-            &buffer,
-            cursor_line_idx,
-            before_insert_char_idx,
-            "Before delete(left)",
-          );
-
-          buffer.get_rope_mut().insert(before_insert_char_idx, "");
-          buffer
-            .truncate_cached_line_since_char(cursor_line_idx, cursor_char_idx.saturating_sub(1));
-          let after_inserted_char_idx = cursor_char_idx + n;
-
-          self._append_eol_if_not_exists_at_file_end(&mut buffer);
-
-          _dbg_print_details_on_line(
-            &buffer,
-            cursor_line_idx,
-            after_inserted_char_idx,
-            "After inserted",
-          );
-
-          (cursor_line_idx, after_inserted_char_idx)
-        } else {
-          unreachable!()
-        }
-      } else {
-        unreachable!()
-      }
-    };
-
-    // Update viewport since the buffer doesn't match the viewport.
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let viewport = current_window.viewport();
-        let cursor_viewport = current_window.cursor_viewport();
-        trace!("before viewport:{:?}", viewport);
-        trace!("before cursor_viewport:{:?}", cursor_viewport);
-
-        let start_line = std::cmp::min(
-          viewport.start_line_idx(),
-          buffer.get_rope().len_lines().saturating_sub(1),
-        );
-        debug_assert!(buffer.get_rope().get_line(start_line).is_some());
-        let bufline_len_chars = buffer.get_rope().line(start_line).len_chars();
-        let start_column = std::cmp::min(
-          viewport.start_column_idx(),
-          buffer.width_before(start_line, bufline_len_chars),
-        );
-
-        let updated_viewport = Viewport::to_arc(Viewport::view(
-          &buffer,
-          current_window.actual_shape(),
-          current_window.options(),
-          start_line,
-          start_column,
-        ));
-        trace!("after updated_viewport:{:?}", updated_viewport);
-
-        current_window.set_viewport(updated_viewport.clone());
-        if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
-          &updated_viewport,
-          &cursor_viewport,
-          &buffer,
-          Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
-        ) {
-          trace!(
-            "after updated_cursor_viewport:{:?}",
-            updated_cursor_viewport
-          );
-          current_window.set_cursor_viewport(updated_cursor_viewport);
-        }
-      } else {
-        unreachable!();
-      }
-    } else {
-      unreachable!();
-    }
-
-    trace!(
-      "Move to inserted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
-    );
-
-    StatefulValue::InsertMode(InsertStateful::default())
+    self._delete_at_cursor(data_access, -(n as isize))
   }
 
-  fn delete_right_at_cursor(&self, _data_access: &StatefulDataAccess, _n: usize) -> StatefulValue {
-    StatefulValue::InsertMode(InsertStateful::default())
+  fn delete_right_at_cursor(&self, data_access: &StatefulDataAccess, n: usize) -> StatefulValue {
+    self._delete_at_cursor(data_access, n as isize)
   }
 
   fn _delete_at_cursor(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
