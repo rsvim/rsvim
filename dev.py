@@ -65,9 +65,12 @@ def append_lld_rustflags():
 
 def set_rustflags(command):
     global RUSTFLAGS
-    rustflags = " ".join([f for f in RUSTFLAGS])
-    command = set_env(command, "RUSTFLAGS", rustflags, is_string=True)
-    return command.strip()
+    if len(RUSTFLAGS) > 0:
+        rustflags = " ".join([f for f in RUSTFLAGS])
+        command = set_env(command, "RUSTFLAGS", rustflags, is_string=True)
+        return command.strip()
+    else:
+        return command.strip()
 
 
 def set_sccache(command):
