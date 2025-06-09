@@ -1604,6 +1604,7 @@ mod tests_insert_text {
   use compact_str::CompactString;
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
+  use jiff::fmt::friendly::Designator::Compact;
   use tracing::info;
 
   #[test]
@@ -2152,9 +2153,11 @@ mod tests_insert_text {
 
     // Insert-2
     {
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text2 = CompactString::new(format!("Let's{}insert{}multiple lines!{}", buf_eol, buf_eol, buf_eol));
       stateful.insert_at_cursor(
         &data_access,
-        CompactString::new("Let's\ninsert\nmultiple lines!\n"),
+        text2
       );
 
       let tree = data_access.tree.clone();
