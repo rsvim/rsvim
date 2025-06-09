@@ -36,8 +36,8 @@ impl InsertStateful {
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char(c) => Some(Operation::InsertAtCursor(c.to_compact_string())),
             KeyCode::Enter => Some(Operation::InsertAtCursor('\n'.to_compact_string())),
-            KeyCode::Backspace => Some(Operation::DeleteLeftAtCursor(1)),
-            KeyCode::Delete => Some(Operation::DeleteRightAtCursor(1)),
+            KeyCode::Backspace => Some(Operation::DeleteAtCursor(-1)),
+            KeyCode::Delete => Some(Operation::DeleteAtCursor(1)),
             KeyCode::Esc => Some(Operation::GotoNormalMode),
             _ => None,
           }
@@ -73,8 +73,7 @@ impl Stateful for InsertStateful {
       | Operation::CursorMoveRightBy(_)
       | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
       Operation::InsertAtCursor(text) => self.insert_at_cursor(&data_access, text),
-      Operation::DeleteLeftAtCursor(n) => self.delete_left_at_cursor(&data_access, n),
-      Operation::DeleteRightAtCursor(n) => self.delete_right_at_cursor(&data_access, n),
+      Operation::DeleteAtCursor(n) => self.delete_at_cursor(&data_access, n),
       _ => unreachable!(),
     }
   }
@@ -192,15 +191,7 @@ fn _dbg_print_details_on_line(buffer: &Buffer, line_idx: usize, char_idx: usize,
 }
 
 impl InsertStateful {
-  fn delete_left_at_cursor(&self, data_access: &StatefulDataAccess, n: usize) -> StatefulValue {
-    self._delete_at_cursor(data_access, -(n as isize))
-  }
-
-  fn delete_right_at_cursor(&self, data_access: &StatefulDataAccess, n: usize) -> StatefulValue {
-    self._delete_at_cursor(data_access, n as isize)
-  }
-
-  fn _delete_at_cursor(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
+  fn delete_at_cursor(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
     if n == 0 {
       return StatefulValue::InsertMode(InsertStateful::default());
     }
@@ -996,7 +987,7 @@ mod tests_get_operation {
         KeyCode::Backspace,
         KeyModifiers::empty()
       ))),
-      Some(Operation::DeleteLeftAtCursor(_))
+      Some(Operation::DeleteAtCursor(_))
     ));
     assert!(matches!(
       stateful._get_operation(Event::Key(KeyEvent::new(
