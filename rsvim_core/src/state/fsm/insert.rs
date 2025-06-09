@@ -261,8 +261,7 @@ impl InsertStateful {
           if cursor_line_idx == cursor_line_idx_after_deleted {
             // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
             // Thus only need to truncate chars after insert position on the same line.
-            let min_cursor_char_idx =
-              std::cmp::min(cursor_char_idx_after_deleted, cursor_char_idx);
+            let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_deleted, cursor_char_idx);
             buffer.truncate_cached_line_since_char(cursor_line_idx, min_cursor_char_idx);
           } else {
             // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
@@ -1900,7 +1899,7 @@ mod tests_insert_text {
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6,0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
           .into_iter()
           .collect();
       assert_viewport_scroll(
@@ -1950,17 +1949,10 @@ mod tests_insert_text {
         "r cases?a\n",
         "",
       ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+          .into_iter()
+          .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2168,8 +2160,14 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec!["e and smal", " several t", " small eno", " too long ", "er cases?\n"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(5,0), (6, 0), (7, 0), (8, 0), (9, 0)]
+      let expect = vec![
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases?\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(5, 0), (6, 0), (7, 0), (8, 0), (9, 0)]
         .into_iter()
         .collect();
       assert_viewport_scroll(
@@ -2182,7 +2180,13 @@ mod tests_insert_text {
         &expect_fills,
       );
 
-      let expect_canvas = vec!["e and smal", " several t", " small eno", " too long ", "er cases? "];
+      let expect_canvas = vec![
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases? ",
+      ];
       let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -2205,7 +2209,7 @@ mod tests_insert_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec!["  2. When ", "  3. Is th", "The insert", "The insert", "\n"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8,0), (9, 0), (10, 0), (11, 0), (12, 0)]
+      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
         .into_iter()
         .collect();
       assert_viewport_scroll(
@@ -2241,10 +2245,16 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![" 2. When t", " 3. Is the", "he inserte", "he inserte", "nsert 4th\n"];
-      let expect_fills: BTreeMap<usize, usize> = vec![(8,0), (9, 0), (10, 0), (11, 0), (12, 0)]
-          .into_iter()
-          .collect();
+      let expect = vec![
+        " 2. When t",
+        " 3. Is the",
+        "he inserte",
+        "he inserte",
+        "nsert 4th\n",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(8, 0), (9, 0), (10, 0), (11, 0), (12, 0)]
+        .into_iter()
+        .collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -2255,7 +2265,13 @@ mod tests_insert_text {
         &expect_fills,
       );
 
-      let expect_canvas = vec![" 2. When t", " 3. Is the", "he inserte", "he inserte", "nsert 4th "];
+      let expect_canvas = vec![
+        " 2. When t",
+        " 3. Is the",
+        "he inserte",
+        "he inserte",
+        "nsert 4th ",
+      ];
       let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
@@ -3713,7 +3729,7 @@ mod tests_delete_text {
 
     // Move-9
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500,10)));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((500, 10)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
