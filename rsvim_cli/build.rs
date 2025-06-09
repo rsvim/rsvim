@@ -20,7 +20,9 @@ fn version() {
     "rsvim {} (v8 {}, {})",
     pkg_version,
     v8_version(),
-    last_commit_date.trim(),
+    last_commit_date
+      .trim()
+      .trim_matches(|c: char| !c.is_ascii_digit()),
   )
   .unwrap();
 }
