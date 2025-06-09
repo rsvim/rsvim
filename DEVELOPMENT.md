@@ -20,7 +20,7 @@ The `dev.py` script is provided to help running cargo commands, use `dev.py -h` 
 - To run unit test, please use `./dev.py test` (`cargo test`).
 - To debug code, please run binary with `RUST_BACKTRACE=full RSVIM_LOG=trace ./target/debug/rsvim`, it enables all the logs to a logging file named with format `rsvim_YYYY-MM-DD_HH-mm-ss-SSS.log`.
 - To write docs, please use `./dev.py doc` (`cargo doc`).
-- To release a new version, please use `./dev.py release [LEVEL]` (`cargo release`):
+- To release a new version, please use `./dev.py release [LEVEL]` (`cargo release`).
 
 ## TypeScript/JavaScript
 
