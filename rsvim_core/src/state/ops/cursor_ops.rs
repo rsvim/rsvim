@@ -90,7 +90,7 @@ fn _normalize_to_cursor_move_to(
   }
 }
 
-/// Same with [`normalize_to_cursor_move_to`], except it exclude the empty eol.
+/// Same with [`_normalize_to_cursor_move_to`], except it exclude the empty eol.
 pub fn normalize_to_cursor_move_to_exclude_empty_eol(
   buffer: &Buffer,
   op: Operation,
@@ -114,7 +114,7 @@ pub fn normalize_to_cursor_move_to_exclude_empty_eol(
   (x, y, move_direction)
 }
 
-/// Same with [`normalize_to_cursor_move_to`], except it include the empty eol.
+/// Same with [`_normalize_to_cursor_move_to`], except it include the empty eol.
 pub fn normalize_to_cursor_move_to_include_empty_eol(
   buffer: &Buffer,
   op: Operation,
