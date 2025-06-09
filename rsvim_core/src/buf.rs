@@ -416,7 +416,7 @@ impl Buffer {
       .map(|(line_idx, _)| *line_idx)
       .collect();
     for line_idx in to_be_removed_lines.iter() {
-    cached_width.pop(line_idx);
+      cached_width.pop(line_idx);
     }
   }
 
