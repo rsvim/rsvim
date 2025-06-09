@@ -1880,27 +1880,27 @@ mod tests_insert_text {
 
     // Move-1
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(6));
+      stateful.cursor_move(&data_access, Operation::CursorMoveBy((100, 6)));
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 6);
-      assert_eq!(actual1.char_idx(), 0);
-      assert_eq!(actual1.row_idx(), 6);
-      assert_eq!(actual1.column_idx(), 0);
+      assert_eq!(actual1.line_idx(), 5);
+      assert_eq!(actual1.char_idx(), 30);
+      assert_eq!(actual1.row_idx(), 5);
+      assert_eq!(actual1.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "  3. Is th",
+        "",
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases?\n",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6, 0)]
+        vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0), (5, 0), (6,0)]
           .into_iter()
           .collect();
       assert_viewport_scroll(
@@ -1914,12 +1914,12 @@ mod tests_insert_text {
       );
 
       let expect_canvas = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "  3. Is th",
+        "          ",
+        "e and smal",
+        " several t",
+        " small eno",
+        " too long ",
+        "er cases? ",
         "          ",
         "          ",
         "          ",
@@ -1935,21 +1935,19 @@ mod tests_insert_text {
 
       let tree = data_access.tree.clone();
       let actual2 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual2.line_idx(), 6);
-      assert_eq!(actual2.char_idx(), 1);
-      assert_eq!(actual2.row_idx(), 6);
-      assert_eq!(actual2.column_idx(), 1);
+      assert_eq!(actual2.line_idx(), 5);
+      assert_eq!(actual2.char_idx(), 31);
+      assert_eq!(actual2.row_idx(), 5);
+      assert_eq!(actual2.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let a = format!("a{}", lock!(buf.clone()).options().end_of_line());
       let expect = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "  3. Is th",
-        a.as_str(),
+        "",
+        " and small",
+        "several th",
+        "small enou",
+        "too long t",
+        "r cases?a\n",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
@@ -1960,7 +1958,6 @@ mod tests_insert_text {
         (4, 0),
         (5, 0),
         (6, 0),
-        (7, 0),
       ]
       .into_iter()
       .collect();
@@ -1969,19 +1966,19 @@ mod tests_insert_text {
         &viewport,
         &expect,
         0,
-        8,
+        7,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "  3. Is th",
-        "a         ",
+        "          ",
+        " and small",
+        "several th",
+        "small enou",
+        "too long t",
+        "r cases?a ",
+        "          ",
         "          ",
         "          ",
         "          ",
