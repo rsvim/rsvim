@@ -405,12 +405,12 @@ impl InsertStateful {
           let cursor_char_idx_after_inserted =
             cursor_char_absolute_pos_after_inserted - cursor_line_absolute_pos_after_inserted;
 
-          debug_assert!(cursor_char_idx_after_inserted >= cursor_char_idx);
           self._append_eol_if_not_exists_at_file_end(&mut buffer);
 
           if cursor_line_idx == cursor_line_idx_after_inserted {
             // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
             // Thus only need to truncate chars after insert position on the same line.
+            debug_assert!(cursor_char_idx_after_inserted >= cursor_char_idx);
             let min_cursor_char_idx =
               std::cmp::min(cursor_char_idx_after_inserted, cursor_char_idx);
             buffer.truncate_cached_line_since_char(
