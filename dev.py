@@ -52,10 +52,6 @@ def append_lld_rustflags():
     if NO_LLD_LINKER:
         return
 
-    # Only apply to linux
-    if WINDOWS or MACOS:
-        return
-
     if LLD_FULLPATH is None:
         logging.warning(f"'lld' ({LLD_NAME}) not found!")
         return
