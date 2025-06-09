@@ -407,16 +407,16 @@ impl Buffer {
   /// Retain multiple cached lines by lambda function `f`.
   pub fn retain_cached_lines<F>(&self, f: F)
   where
-    F: Fn(&usize, &ColumnIndex) -> bool,
+    F: Fn(/* line_idx */ &usize, /* column_idx */ &ColumnIndex) -> bool,
   {
     let mut cached_width = self.cached_lines_width.borrow_mut();
-    let retained_lines: Vec<usize> = cached_width
+    let to_be_removed_lines: Vec<usize> = cached_width
       .iter()
       .filter(|(line_idx, column_idx)| !f(line_idx, column_idx))
       .map(|(line_idx, _)| *line_idx)
       .collect();
-    for line_idx in retained_lines.iter() {
-      cached_width.pop(line_idx);
+    for line_idx in to_be_removed_lines.iter() {
+    cached_width.pop(line_idx);
     }
   }
 
