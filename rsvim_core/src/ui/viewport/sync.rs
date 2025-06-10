@@ -140,12 +140,12 @@ fn proc_line_nowrap(
 /// Implements [`sync`] with option `wrap=false`.
 fn sync_nowrap(
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
+  shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
+  let height = shape.height();
+  let width = shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
@@ -251,12 +251,12 @@ fn proc_line_wrap_nolinebreak(
 /// Implements [`sync`] with option `wrap=true` and `line-break=false`.
 fn sync_wrap_nolinebreak(
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
+  shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
+  let height = shape.height();
+  let width = shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
@@ -573,12 +573,12 @@ fn proc_line_wrap_linebreak(
 /// Implements [`sync`] with option `wrap=true` and `line-break=true`.
 fn sync_wrap_linebreak(
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
+  shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
+  let height = shape.height();
+  let width = shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);

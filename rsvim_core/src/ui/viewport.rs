@@ -552,17 +552,17 @@ impl Viewport {
     opts: &ViewportOptions,
     buffer: &Buffer,
     shape: &U16Rect,
-    start_line_idx: usize,
-    start_column_idx: usize,
+    start_line: usize,
+    start_column: usize,
   ) -> Self {
-    let (line_idx_range, lines) = sync::sync(opts, buffer, shape, start_line_idx, start_column_idx);
+    let (line_idx_range, lines) = sync::sync(opts, buffer, shape, start_line, start_column);
 
-    debug_assert_eq!(line_idx_range.start_line_idx(), start_line_idx);
+    debug_assert_eq!(line_idx_range.start_line_idx(), start_line);
 
     Viewport {
       start_line_idx: line_idx_range.start_line_idx(),
       end_line_idx: line_idx_range.end_line_idx(),
-      start_column_idx,
+      start_column_idx: start_column,
       lines,
     }
   }
