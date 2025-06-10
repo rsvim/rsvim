@@ -709,12 +709,12 @@ mod tests_util {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::canvas::Canvas;
   use crate::ui::tree::TreeArc;
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+  };
   use crate::ui::widget::Widgetable;
   use crate::ui::widget::window::content::WindowContent;
-  use crate::ui::widget::window::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, WindowLocalOptions,
-    WindowLocalOptionsBuilder,
-  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
@@ -946,7 +946,10 @@ mod tests_get_operation {
   use crate::test::log::init as test_log_init;
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
-  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
   use crate::{lock, state};
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -1002,7 +1005,10 @@ mod tests_cursor_move {
   use crate::test::log::init as test_log_init;
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
-  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
@@ -1623,7 +1629,10 @@ mod tests_insert_text {
   use crate::test::log::init as test_log_init;
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
-  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::CompactString;
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -3241,7 +3250,10 @@ mod tests_delete_text {
   use crate::test::log::init as test_log_init;
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
-  use crate::ui::widget::window::{Viewport, WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::CompactString;
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
