@@ -9,6 +9,10 @@ use std::ops::Range;
 #[allow(unused_imports)]
 use tracing::trace;
 
+// Re-export
+pub use opt::*;
+
+pub mod opt;
 pub mod sync;
 
 #[derive(Debug, Copy, Clone)]

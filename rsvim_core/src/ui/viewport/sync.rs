@@ -4,8 +4,8 @@
 
 use crate::buf::Buffer;
 use crate::prelude::*;
-use crate::ui::widget::window::viewport::RowViewport;
-use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
+use crate::ui::viewport::{LineViewport, RowViewport};
+use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
 use ropey::RopeSlice;
@@ -340,7 +340,6 @@ fn _find_word_by_char(
   unreachable!()
 }
 
-#[allow(clippy::too_many_arguments)]
 /// Part-1 of the processing algorithm in [`proc_line_wrap_linebreak`].
 fn _part1(
   words: &[&str],
