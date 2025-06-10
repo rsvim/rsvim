@@ -4,6 +4,7 @@ use crate::ui::canvas::Canvas;
 
 // use tracing::trace;
 
+pub mod cmdline;
 pub mod cursor;
 pub mod root;
 pub mod window;
