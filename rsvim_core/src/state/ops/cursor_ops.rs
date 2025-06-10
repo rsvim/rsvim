@@ -3,7 +3,8 @@
 use crate::buf::Buffer;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Window};
+use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc};
+use crate::ui::widget::window::Window;
 
 // use tracing::trace;
 

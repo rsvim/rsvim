@@ -5,13 +5,13 @@ use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
+use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 
 // Re-export
 pub use crate::ui::widget::window::opt::*;
-pub use crate::ui::widget::window::viewport::*;
 
 use std::sync::Arc;
 // use tracing::trace;
@@ -19,7 +19,6 @@ use std::sync::Arc;
 pub mod content;
 pub mod opt;
 pub mod root;
-pub mod viewport;
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
