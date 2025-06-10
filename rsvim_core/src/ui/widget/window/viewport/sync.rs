@@ -305,7 +305,7 @@ fn sync_wrap_nolinebreak(
 /// word.
 fn _find_word_by_char(
   words: &[&str],
-  word_end_chars_index: &HashMap<usize, usize>,
+  word_end_chars_index: &LiteMap<usize, usize>,
   char_idx: usize,
 ) -> (usize, usize, usize) {
   // trace!("words:{words:?}, words_end_chars:{word_end_chars_index:?},char_idx:{char_idx}");
@@ -344,7 +344,7 @@ fn _find_word_by_char(
 /// Part-1 of the processing algorithm in [`proc_line_wrap_linebreak`].
 fn _part1(
   words: &[&str],
-  words_end_char_idx: &HashMap<usize, usize>,
+  words_end_char_idx: &LiteMap<usize, usize>,
   buffer: &Buffer,
   bline: &RopeSlice,
   l: usize,
@@ -447,7 +447,7 @@ fn proc_line_wrap_linebreak(
         *state += wd.chars().count();
         Some((i, *state))
       })
-      .collect::<HashMap<usize, usize>>();
+      .collect::<LiteMap<usize, usize>>();
 
     // let mut start_char = buffer
     match buffer.char_after(current_line, start_column) {
