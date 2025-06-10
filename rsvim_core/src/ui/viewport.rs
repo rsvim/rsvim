@@ -17529,24 +17529,19 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Right,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
         assert_eq!(start_column, 29);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_viewport(Viewport::to_arc(viewport));
         window.viewport()
       };
@@ -17629,24 +17624,19 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Right,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 0);
         assert_eq!(start_column, 4);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,
@@ -17686,24 +17676,19 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Right,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 0);
         assert_eq!(start_column, 5);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,
@@ -17743,24 +17728,19 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Down,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
         assert_eq!(start_column, 31);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,
@@ -17795,24 +17775,19 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Right,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
         assert_eq!(start_column, 72);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,
@@ -17847,24 +17822,19 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Right,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
         assert_eq!(start_column, 72);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,
@@ -17904,24 +17874,19 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Down,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
         assert_eq!(start_column, 309);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,
@@ -17961,24 +17926,19 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Right,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
         assert_eq!(start_column, 310);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,
