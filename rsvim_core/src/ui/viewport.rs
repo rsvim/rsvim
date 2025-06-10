@@ -9,6 +9,10 @@ use std::ops::Range;
 #[allow(unused_imports)]
 use tracing::trace;
 
+// Re-export
+pub use opt::*;
+
+pub mod opt;
 pub mod sync;
 
 #[derive(Debug, Copy, Clone)]
@@ -545,19 +549,13 @@ impl Viewport {
   /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a
   /// window.
   pub fn view(
+    opts: &ViewportOptions,
     buffer: &Buffer,
-    window_actual_shape: &U16Rect,
-    window_local_options: &WindowLocalOptions,
+    shape: &U16Rect,
     start_line_idx: usize,
     start_column_idx: usize,
   ) -> Self {
-    let (line_idx_range, lines) = sync::sync(
-      buffer,
-      window_actual_shape,
-      window_local_options,
-      start_line_idx,
-      start_column_idx,
-    );
+    let (line_idx_range, lines) = sync::sync(opts, buffer, shape, start_line_idx, start_column_idx);
 
     debug_assert_eq!(line_idx_range.start_line_idx(), start_line_idx);
 

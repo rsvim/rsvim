@@ -4,7 +4,7 @@
 
 use crate::buf::Buffer;
 use crate::prelude::*;
-use crate::ui::viewport::{LineViewport, RowViewport};
+use crate::ui::viewport::{LineViewport, RowViewport, ViewportOptions};
 use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
@@ -52,26 +52,23 @@ impl ViewportLineRange {
 
 /// Calculate viewport from top to bottom.
 pub fn sync(
+  opts: &ViewportOptions,
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
+  shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   // If window is zero-sized.
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
+  let height = shape.height();
+  let width = shape.width();
   if height == 0 || width == 0 {
     return (ViewportLineRange::default(), LiteMap::new());
   }
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
-    (false, _) => sync_nowrap(buffer, window_actual_shape, start_line, start_column),
-    (true, false) => sync_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_column),
-    (true, true) => sync_wrap_linebreak(buffer, window_actual_shape, start_line, start_column),
+  match (opts.wrap(), opts.line_break()) {
+    (false, _) => sync_nowrap(buffer, shape, start_line, start_column),
+    (true, false) => sync_wrap_nolinebreak(buffer, shape, start_line, start_column),
+    (true, true) => sync_wrap_linebreak(buffer, shape, start_line, start_column),
   }
 }
 
