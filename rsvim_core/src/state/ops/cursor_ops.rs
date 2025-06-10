@@ -3,7 +3,9 @@
 use crate::buf::Buffer;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc};
+use crate::ui::viewport::{
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions,
+};
 use crate::ui::widget::window::Window;
 
 // use tracing::trace;
@@ -273,8 +275,8 @@ pub fn window_scroll_to(
   }
   debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
 
-  let window_actual_shape = current_window.actual_shape();
-  let max_len_chars = _max_len_chars_since_line(buffer, line_idx, window_actual_shape.height());
+  let shape = current_window.actual_shape();
+  let max_len_chars = _max_len_chars_since_line(buffer, line_idx, shape.height());
   let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
@@ -284,15 +286,8 @@ pub fn window_scroll_to(
   }
 
   // Sync the viewport
-  let window_actual_shape = current_window.window_content().actual_shape();
-  let window_local_options = current_window.options();
-  let new_viewport = Viewport::to_arc(Viewport::view(
-    buffer,
-    window_actual_shape,
-    window_local_options,
-    line_idx,
-    column_idx,
-  ));
+  let opts = ViewportOptions::from(current_window.options());
+  let new_viewport = Viewport::to_arc(Viewport::view(&opts, buffer, shape, line_idx, column_idx));
   Some(new_viewport)
 }
 

@@ -2,7 +2,6 @@
 
 use crate::buf::Buffer;
 use crate::prelude::*;
-use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
 use std::ops::Range;
@@ -578,15 +577,15 @@ impl Viewport {
   pub fn search_anchor(
     &self,
     direction: ViewportSearchAnchorDirection,
+    opts: &ViewportOptions,
     buffer: &Buffer,
-    window_actual_shape: &U16Rect,
-    window_local_options: &WindowLocalOptions,
-    target_cursor_line_idx: usize,
-    target_cursor_char_idx: usize,
+    shape: &U16Rect,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
   ) -> (usize, usize) {
     // If window is zero-sized.
-    let height = window_actual_shape.height();
-    let width = window_actual_shape.width();
+    let height = shape.height();
+    let width = shape.width();
     if height == 0 || width == 0 {
       return (0, 0);
     }
@@ -594,35 +593,35 @@ impl Viewport {
     match direction {
       ViewportSearchAnchorDirection::Down => sync::search_anchor_downward(
         self,
+        opts,
         buffer,
-        window_actual_shape,
-        window_local_options,
-        target_cursor_line_idx,
-        target_cursor_char_idx,
+        shape,
+        target_cursor_line,
+        target_cursor_char,
       ),
       ViewportSearchAnchorDirection::Up => sync::search_anchor_upward(
         self,
+        opts,
         buffer,
-        window_actual_shape,
-        window_local_options,
-        target_cursor_line_idx,
-        target_cursor_char_idx,
+        shape,
+        target_cursor_line,
+        target_cursor_char,
       ),
       ViewportSearchAnchorDirection::Left => sync::search_anchor_leftward(
         self,
+        opts,
         buffer,
-        window_actual_shape,
-        window_local_options,
-        target_cursor_line_idx,
-        target_cursor_char_idx,
+        shape,
+        target_cursor_line,
+        target_cursor_char,
       ),
       ViewportSearchAnchorDirection::Right => sync::search_anchor_rightward(
         self,
+        opts,
         buffer,
-        window_actual_shape,
-        window_local_options,
-        target_cursor_line_idx,
-        target_cursor_char_idx,
+        shape,
+        target_cursor_line,
+        target_cursor_char,
       ),
     }
   }
@@ -1455,9 +1454,9 @@ mod tests_view_nowrap_startcol {
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let buf = lock!(buf);
-      let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 3);
+      let shape = window.actual_shape();
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, shape, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -1520,9 +1519,9 @@ mod tests_view_nowrap_startcol {
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let buf = lock!(buf);
-      let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 6);
+      let shape = window.actual_shape();
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, shape, 0, 6);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -1585,9 +1584,9 @@ mod tests_view_nowrap_startcol {
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let buf = lock!(buf);
-      let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 15);
+      let shape = window.actual_shape();
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, shape, 0, 15);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -1650,9 +1649,9 @@ mod tests_view_nowrap_startcol {
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let buf = lock!(buf);
-      let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 60);
+      let shape = window.actual_shape();
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, shape, 0, 60);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -1706,9 +1705,9 @@ mod tests_view_nowrap_startcol {
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = {
       let buf = lock!(buf);
-      let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 500);
+      let shape = window.actual_shape();
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, shape, 0, 500);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2602,7 +2601,8 @@ mod tests_view_wrap_nolinebreak {
     ];
     let actual = {
       let buf = lock!(buf);
-      Viewport::view(&buf, window.actual_shape(), &win_opts, 2, 0)
+      let opts = ViewportOptions::from(&win_opts);
+      Viewport::view(&opts, &buf, window.actual_shape(), 2, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
@@ -2686,7 +2686,8 @@ mod tests_view_wrap_nolinebreak {
     ];
     let actual = {
       let buf = lock!(buf);
-      Viewport::view(&buf, window.actual_shape(), &win_opts, 6, 0)
+      let opts = ViewportOptions::from(&win_opts);
+      Viewport::view(&opts, &buf, window.actual_shape(), 6, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
     assert_viewport(
@@ -2738,7 +2739,8 @@ mod tests_view_wrap_nolinebreak {
     let expect = vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
     let actual = {
       let buf = lock!(buf);
-      Viewport::view(&buf, window.actual_shape(), &win_opts, 1, 0)
+      let opts = ViewportOptions::from(&win_opts);
+      Viewport::view(&opts, &buf, window.actual_shape(), 1, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
@@ -2760,6 +2762,7 @@ mod tests_view_wrap_nolinebreak_startcol {
   use super::*;
 
   use crate::buf::BufferLocalOptionsBuilder;
+  use crate::defaults::win;
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -2805,8 +2808,8 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 3);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2852,8 +2855,8 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 3);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2904,8 +2907,8 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 15);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 15);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2952,8 +2955,8 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 1, 60);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 1, 60);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2989,8 +2992,8 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 13);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 13);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3790,8 +3793,8 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 3);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3848,8 +3851,8 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 6);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 6);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3906,8 +3909,8 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 20);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 20);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3964,8 +3967,8 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 60);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 60);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -4023,8 +4026,8 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 15);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 15);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -4069,8 +4072,8 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let window_local_options = window.options();
-      let viewport = Viewport::view(&buf, window_actual_shape, window_local_options, 0, 70);
+      let opts = ViewportOptions::from(window.options());
+      let viewport = Viewport::view(&opts, &buf, window_actual_shape, 0, 70);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -4178,24 +4181,19 @@ mod tests_search_anchor_downward_nowrap {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Down,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 0);
         assert_eq!(start_column, 0);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,
@@ -4240,24 +4238,19 @@ mod tests_search_anchor_downward_nowrap {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Down,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 1);
         assert_eq!(start_column, 0);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_viewport(Viewport::to_arc(viewport));
         window.viewport()
       };
@@ -4290,24 +4283,19 @@ mod tests_search_anchor_downward_nowrap {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Down,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 2);
         assert_eq!(start_column, 1);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_viewport(Viewport::to_arc(viewport));
         window.viewport()
       };
@@ -4340,24 +4328,19 @@ mod tests_search_anchor_downward_nowrap {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Down,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 3);
         assert_eq!(start_column, 0);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_viewport(Viewport::to_arc(viewport));
         window.viewport()
       };
@@ -4453,24 +4436,19 @@ mod tests_search_anchor_downward_nowrap {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
+        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Down,
+          &opts,
           &buf,
           window.actual_shape(),
-          window.options(),
           target_cursor_line,
           target_cursor_char,
         );
         assert_eq!(start_line, 0);
         assert_eq!(start_column, 24);
 
-        let viewport = Viewport::view(
-          &buf,
-          window.actual_shape(),
-          window.options(),
-          start_line,
-          start_column,
-        );
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,

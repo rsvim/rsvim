@@ -36,8 +36,8 @@ impl ViewportOptions {
   }
 }
 
-impl From<WindowLocalOptions> for ViewportOptions {
-  fn from(value: WindowLocalOptions) -> Self {
+impl From<&WindowLocalOptions> for ViewportOptions {
+  fn from(value: &WindowLocalOptions) -> Self {
     Self {
       wrap: value.wrap(),
       line_break: value.line_break(),

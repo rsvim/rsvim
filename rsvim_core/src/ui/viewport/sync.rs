@@ -5,7 +5,6 @@
 use crate::buf::Buffer;
 use crate::prelude::*;
 use crate::ui::viewport::{LineViewport, RowViewport, ViewportOptions};
-use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
 use ropey::RopeSlice;
@@ -1593,9 +1592,9 @@ mod wrap_detail {
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_downward(
   viewport: &Viewport,
+  opts: &ViewportOptions,
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
+  shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -1611,14 +1610,11 @@ pub fn search_anchor_downward(
       .unwrap_or(0_usize),
   );
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
+  match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_downward_nowrap(
       viewport,
       buffer,
-      window_actual_shape,
+      shape,
       target_cursor_line,
       target_cursor_char,
     ),
@@ -1627,7 +1623,7 @@ pub fn search_anchor_downward(
       proc_line_wrap_nolinebreak,
       viewport,
       buffer,
-      window_actual_shape,
+      shape,
       target_cursor_line,
       target_cursor_char,
     ),
@@ -1636,7 +1632,7 @@ pub fn search_anchor_downward(
       proc_line_wrap_linebreak,
       viewport,
       buffer,
-      window_actual_shape,
+      shape,
       target_cursor_line,
       target_cursor_char,
     ),
@@ -1812,9 +1808,9 @@ fn search_anchor_downward_wrap(
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_upward(
   viewport: &Viewport,
+  opts: &ViewportOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -1830,10 +1826,7 @@ pub fn search_anchor_upward(
       .unwrap_or(0_usize),
   );
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
+  match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_upward_nowrap(
       viewport,
       buffer,
@@ -1985,9 +1978,9 @@ fn search_anchor_upward_wrap(
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_leftward(
   viewport: &Viewport,
+  opts: &ViewportOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -2005,10 +1998,7 @@ pub fn search_anchor_leftward(
       .unwrap_or(0_usize),
   );
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
+  match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_leftward_nowrap(
       viewport,
       buffer,
@@ -2143,9 +2133,9 @@ fn search_anchor_leftward_wrap(
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_rightward(
   viewport: &Viewport,
+  opts: &ViewportOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -2163,10 +2153,7 @@ pub fn search_anchor_rightward(
       .unwrap_or(0_usize),
   );
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
+  match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_rightward_nowrap(
       viewport,
       buffer,
