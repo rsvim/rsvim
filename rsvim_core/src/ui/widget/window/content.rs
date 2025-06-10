@@ -244,7 +244,7 @@ mod tests_util {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::viewport::{Viewport, ViewportArc};
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
@@ -337,7 +337,7 @@ mod tests_nowrap {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::viewport::{Viewport, ViewportArc};
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
@@ -682,7 +682,7 @@ mod tests_nowrap_startcol {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::viewport::{Viewport, ViewportArc};
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
@@ -946,7 +946,7 @@ mod tests_wrap_nolinebreak {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::viewport::{Viewport, ViewportArc};
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
@@ -1377,7 +1377,7 @@ mod tests_wrap_nolinebreak_startcol {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::viewport::{Viewport, ViewportArc};
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
@@ -1748,7 +1748,7 @@ mod tests_wrap_linebreak {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::viewport::{Viewport, ViewportArc};
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
@@ -2062,7 +2062,7 @@ mod tests_wrap_linebreak_startcol {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::viewport::{Viewport, ViewportArc};
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
