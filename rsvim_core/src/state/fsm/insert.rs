@@ -7,9 +7,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::{
-  CursorViewport, Viewport, ViewportArc, ViewportSearchAnchorDirection,
-};
+use crate::ui::viewport::{CursorViewport, Viewport, ViewportArc, ViewportSearchAnchorDirection};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
