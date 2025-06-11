@@ -471,8 +471,7 @@ impl ColumnIndex {
 mod tests {
   use super::*;
 
-  use crate::buf::{Buffer, BufferArc, BufferLocalOptionsBuilder, Text};
-  use crate::lock;
+  use crate::buf::{BufferLocalOptionsBuilder, Text};
   use crate::test::log::init as test_log_init;
 
   use ropey::{Rope, RopeBuilder};
