@@ -47,7 +47,7 @@ cargo install --locked rsvim --git https://github.com/rsvim/rsvim.git --branch m
 
 > [!IMPORTANT]
 >
-> If you failed to build due to the `v8` crate, please verify your network by whether you can download the prebuilt static library (for example `librusty_v8_release_aarch64-apple-darwin.a.gz`) from [latest rusty_v8 releases](https://github.com/denoland/rusty_v8/releases).
+> If you failed to build due to the `v8` crate, please verify your network by whether you can download the prebuilt static library (for example `librusty_v8_release_aarch64-apple-darwin.a.gz`) from `rusty_v8`'s [github releases page](https://github.com/denoland/rusty_v8/releases).
 >
 > Please refer to [rusty_v8](https://github.com/denoland/rusty_v8) for more details.
 
