@@ -81,19 +81,13 @@ def set_sccache(command):
     return command.strip()
 
 
-def clippy(watch):
+def clippy():
     append_rustflags("-Dwarnings")
     append_lld_rustflags()
 
     command = set_rustflags("")
     command = set_sccache(command)
-
-    if watch:
-        logging.info("Run 'clippy' as a service and watching file changes")
-        command = f"{command} bacon -j clippy-all --headless --all-features"
-    else:
-        logging.info("Run 'clippy' only once")
-        command = f"{command} cargo clippy --workspace --all-features --all-targets"
+    command = f"{command} cargo clippy --workspace --all-features --all-targets"
 
     command = command.strip()
     logging.info(command)
@@ -105,10 +99,10 @@ def test(name, miri, jobs):
 
     if len(name) == 0:
         name = None
-        logging.info("Run 'test' for all cases")
+        logging.info("Run 'cargo test' for all tests")
     else:
         name = " ".join(list(dict.fromkeys(name)))
-        logging.info(f"Run 'test' for '{name}'")
+        logging.info(f"Run 'cargo test' for tests: {name}")
 
     if jobs is None:
         jobs = ""
@@ -165,13 +159,21 @@ def build(release, features, all_features):
     elif len(features) > 0:
         feature_flags = " ".join([f"--features {f}" for feat in features for f in feat])
 
-    fmt = lambda ff: "default features" if len(ff) == 0 else ff
+    def show_feat(ff):
+        if len(ff) == 0:
+            return "default"
+        else:
+            return ff
 
     if release:
-        logging.info(f"Run 'build' for 'release' with {fmt(feature_flags)}")
+        logging.info(
+            f"Run 'cargo build --release' with features: {show_feat(feature_flags)}"
+        )
         command = f"{command} cargo build --release {feature_flags}"
     else:
-        logging.info(f"Run 'build' for 'debug' with {fmt(feature_flags)}")
+        logging.info(
+            f"Run 'cargo build --debug' with features: {show_feat(feature_flags)}"
+        )
         command = f"{command} cargo build {feature_flags}"
 
     command = command.strip()
@@ -200,10 +202,10 @@ def fmt():
 def doc(watch):
     command = "cargo doc && browser-sync start --ss target/doc -s target/doc --directory --startPath rsvim --no-open"
     if watch:
-        logging.info("Run 'doc' as a service and watching file changes")
+        logging.info("Run 'cargo doc' and refresh it on file changes")
         command = f"cargo watch -s '{command}'"
     else:
-        logging.info("Run 'doc' only once")
+        logging.info("Run 'cargo doc' only once")
 
     command = command.strip()
     logging.info(command)
@@ -217,10 +219,10 @@ def release(level, execute):
 
     command = f"GIT_CLIFF_CONFIG=$PWD/cliff.toml GIT_CLIFF_WORKDIR=$PWD GIT_CLIFF_REPOSITORY=$PWD GIT_CLIFF_OUTPUT=$PWD/CHANGELOG.md cargo release {level}"
     if execute:
-        logging.info(f"Run 'release' with '--execute' (no dry run), level: {level}")
+        logging.info(f"Execute 'cargo release' with level: {level}")
         command = f"{command} --execute --no-verify"
     else:
-        logging.info(f"Run 'release' in dry run, level: {level}")
+        logging.info(f"Dry run 'cargo release' with level: {level}")
 
     command = command.strip()
     logging.info(command)
@@ -253,12 +255,6 @@ if __name__ == "__main__":
         "clippy",
         aliases=["c"],
         help="Run `cargo clippy` with `RUSTFLAGS=-Dwarnings`",
-    )
-    clippy_subparser.add_argument(
-        "-w",
-        "--watch",
-        action="store_true",
-        help="Running clippy as a service and watching file changes, by default is false",
     )
 
     test_subparser = subparsers.add_parser(
@@ -359,7 +355,7 @@ if __name__ == "__main__":
         NO_LLD_LINKER = True
 
     if parser.subcommand == "clippy" or parser.subcommand == "c":
-        clippy(parser.watch)
+        clippy()
     elif parser.subcommand == "test" or parser.subcommand == "t":
         if parser.list_test:
             list_test()
