@@ -5,27 +5,21 @@ use crate::prelude::*;
 use crate::{arc_impl, lock};
 
 // Re-export
-pub use cidx::ColumnIndex;
 pub use opt::*;
 pub use text::*;
 
-use ahash::RandomState;
 use compact_str::CompactString;
-use lru::LruCache;
 use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
-use std::cell::RefCell;
 use std::collections::BTreeMap;
 use std::fs::Metadata;
 use std::io::Read;
 use std::path::{Path, PathBuf};
-use std::rc::Rc;
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
 use tracing::trace;
 
-pub mod cidx;
 pub mod opt;
 pub mod text;
 pub mod unicode;
@@ -63,11 +57,6 @@ pub struct Buffer {
 }
 
 arc_impl!(Buffer);
-
-#[inline]
-fn get_cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new(canvas_height as usize * 2 + 3).unwrap()
-}
 
 impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
