@@ -138,13 +138,13 @@ impl Buffer {
 // Rope {
 impl Buffer {
   /// Get rope.
-  pub fn get_rope(&self) -> &Rope {
-    self.text.get_rope()
+  pub fn rope(&self) -> &Rope {
+    self.text.rope()
   }
 
   /// Get mutable rope.
-  pub fn get_rope_mut(&mut self) -> &mut Rope {
-    self.text.get_rope_mut()
+  pub fn rope_mut(&mut self) -> &mut Rope {
+    self.text.rope_mut()
   }
 
   /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,

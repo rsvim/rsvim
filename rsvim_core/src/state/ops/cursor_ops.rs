@@ -102,8 +102,8 @@ pub fn normalize_to_cursor_move_to_exclude_empty_eol(
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
   let (x, y, move_direction) = _normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
-  let mut y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
-  if buffer.get_rope().line(y).len_chars() == 0 {
+  let mut y = std::cmp::min(y, buffer.rope().len_lines().saturating_sub(1));
+  if buffer.rope().line(y).len_chars() == 0 {
     // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
     // line break '\n'), sub y by extra 1.
     y = y.saturating_sub(1);
@@ -111,8 +111,8 @@ pub fn normalize_to_cursor_move_to_exclude_empty_eol(
   let x = match buffer.last_char_on_line_no_empty_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
-      debug_assert!(buffer.get_rope().get_line(y).is_some());
-      std::cmp::min(x, buffer.get_rope().line(y).len_chars().saturating_sub(1))
+      debug_assert!(buffer.rope().get_line(y).is_some());
+      std::cmp::min(x, buffer.rope().line(y).len_chars().saturating_sub(1))
     }
   };
   (x, y, move_direction)
@@ -127,8 +127,8 @@ pub fn normalize_to_cursor_move_to_include_empty_eol(
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
   let (x, y, move_direction) = _normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
-  let mut y = std::cmp::min(y, buffer.get_rope().len_lines().saturating_sub(1));
-  if buffer.get_rope().line(y).len_chars() == 0 {
+  let mut y = std::cmp::min(y, buffer.rope().len_lines().saturating_sub(1));
+  if buffer.rope().line(y).len_chars() == 0 {
     // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
     // line break '\n'), sub y by extra 1.
     y = y.saturating_sub(1);
@@ -136,8 +136,8 @@ pub fn normalize_to_cursor_move_to_include_empty_eol(
   let x = match buffer.last_char_on_line(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
-      debug_assert!(buffer.get_rope().get_line(y).is_some());
-      std::cmp::min(x, buffer.get_rope().line(y).len_chars().saturating_sub(1))
+      debug_assert!(buffer.rope().get_line(y).is_some());
+      std::cmp::min(x, buffer.rope().line(y).len_chars().saturating_sub(1))
     }
   };
   (x, y, move_direction)
@@ -223,9 +223,9 @@ pub fn cursor_move_to(
 
   let line_idx = std::cmp::min(line_idx, viewport.end_line_idx().saturating_sub(1));
   debug_assert!(line_idx < viewport.end_line_idx());
-  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+  debug_assert!(buffer.rope().get_line(line_idx).is_some());
 
-  let bufline = buffer.get_rope().line(line_idx);
+  let bufline = buffer.rope().line(line_idx);
   debug_assert!(bufline.len_chars() >= char_idx);
 
   let char_idx = if bufline.len_chars() == 0 {
@@ -261,7 +261,7 @@ pub fn window_scroll_to(
     _ => unreachable!(),
   };
 
-  let buffer_len_lines = buffer.get_rope().len_lines();
+  let buffer_len_lines = buffer.rope().len_lines();
   let line_idx = if buffer_len_lines == 0 {
     0_usize
   } else {
@@ -273,7 +273,7 @@ pub fn window_scroll_to(
   } else {
     debug_assert!(line_idx < buffer_len_lines);
   }
-  debug_assert!(buffer.get_rope().get_line(line_idx).is_some());
+  debug_assert!(buffer.rope().get_line(line_idx).is_some());
 
   let shape = current_window.actual_shape();
   let max_len_chars = _max_len_chars_since_line(buffer, line_idx, shape.height());
@@ -296,13 +296,13 @@ fn _max_len_chars_since_line(
   mut start_line_idx: usize,
   window_height: u16,
 ) -> usize {
-  let buffer_len_lines = buffer.get_rope().len_lines();
+  let buffer_len_lines = buffer.rope().len_lines();
 
   let mut max_len_chars = 0_usize;
   let mut i = 0_u16;
   while i < window_height && start_line_idx < buffer_len_lines {
-    debug_assert!(buffer.get_rope().get_line(start_line_idx).is_some());
-    let bufline = buffer.get_rope().line(start_line_idx);
+    debug_assert!(buffer.rope().get_line(start_line_idx).is_some());
+    let bufline = buffer.rope().line(start_line_idx);
     max_len_chars = std::cmp::max(max_len_chars, bufline.len_chars());
     i += 1;
     start_line_idx += 1;

@@ -73,7 +73,7 @@ pub fn make_buffers_manager(opts: BufferLocalOptions, bufs: Vec<BufferArc>) -> B
 #[allow(clippy::unused_enumerate_index)]
 pub fn print_buffer_line_details(buf: BufferArc, line_idx: usize, msg: &str) {
   let buf = lock!(buf);
-  let line = buf.get_rope().get_line(line_idx).unwrap();
+  let line = buf.rope().get_line(line_idx).unwrap();
 
   let subscriber = tracing_subscriber::FmtSubscriber::builder()
     .with_line_number(false)

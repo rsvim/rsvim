@@ -67,12 +67,12 @@ impl Text {
 // Rope {
 impl Text {
   /// Get rope.
-  pub fn get_rope(&self) -> &Rope {
+  pub fn rope(&self) -> &Rope {
     &self.rope
   }
 
   /// Get mutable rope.
-  pub fn get_rope_mut(&mut self) -> &mut Rope {
+  pub fn rope_mut(&mut self) -> &mut Rope {
     &mut self.rope
   }
 
