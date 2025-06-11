@@ -85,6 +85,22 @@ impl Buffer {
     self.id
   }
 
+  pub fn options(&self) -> &BufferLocalOptions {
+    self.text.options()
+  }
+
+  pub fn set_options(&mut self, options: &BufferLocalOptions) {
+    self.text.set_options(options);
+  }
+
+  pub fn text(&self) -> &Text {
+    &self.text
+  }
+
+  pub fn text_mut(&mut self) -> &mut Text {
+    &mut self.text
+  }
+
   pub fn filename(&self) -> &Option<PathBuf> {
     &self.filename
   }
@@ -181,18 +197,6 @@ impl Buffer {
   }
 }
 // Rope }
-
-// Options {
-impl Buffer {
-  pub fn options(&self) -> &BufferLocalOptions {
-    self.text.options()
-  }
-
-  pub fn set_options(&mut self, options: &BufferLocalOptions) {
-    self.text.set_options(options);
-  }
-}
-// Options }
 
 // Display Width {
 impl Buffer {
