@@ -10668,7 +10668,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Down,
-          &opts & buf,
+          &opts,
+          &buf,
           window.actual_shape(),
           target_cursor_line,
           target_cursor_char,
@@ -11075,7 +11076,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
         assert_eq!(start_line, 3);
         assert_eq!(start_column, 0);
 
-        let viewport = Viewport::view(&opts & buf, window.actual_shape(), start_line, start_column);
+        let viewport = Viewport::view(&opts, &buf, window.actual_shape(), start_line, start_column);
         window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
           &viewport,
           &buf,
@@ -15881,7 +15882,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
         let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchAnchorDirection::Left,
-          &opts & buf,
+          &opts,
+          &buf,
           window.actual_shape(),
           target_cursor_line,
           target_cursor_char,

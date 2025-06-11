@@ -8,7 +8,9 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, ViewportArc, ViewportSearchAnchorDirection};
+use crate::ui::viewport::{
+  CursorViewport, ViewportArc, ViewportOptions, ViewportSearchAnchorDirection,
+};
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
@@ -106,11 +108,12 @@ impl NormalStateful {
           self._target_cursor_exclude_empty_eol(&cursor_viewport, &buffer, op);
 
         let new_viewport: Option<ViewportArc> = {
+          let viewport_opts = ViewportOptions::from(current_window.options());
           let (start_line, start_column) = viewport.search_anchor(
             search_direction,
+            &viewport_opts,
             &buffer,
             current_window.actual_shape(),
-            current_window.options(),
             target_cursor_line,
             target_cursor_char,
           );
