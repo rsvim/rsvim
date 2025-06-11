@@ -4,8 +4,7 @@
 
 use crate::buf::Buffer;
 use crate::prelude::*;
-use crate::ui::widget::window::viewport::RowViewport;
-use crate::ui::widget::window::{LineViewport, WindowLocalOptions};
+use crate::ui::viewport::{LineViewport, RowViewport, ViewportOptions};
 
 use litemap::LiteMap;
 use ropey::RopeSlice;
@@ -52,26 +51,23 @@ impl ViewportLineRange {
 
 /// Calculate viewport from top to bottom.
 pub fn sync(
+  opts: &ViewportOptions,
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
+  shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   // If window is zero-sized.
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
+  let height = shape.height();
+  let width = shape.width();
   if height == 0 || width == 0 {
     return (ViewportLineRange::default(), LiteMap::new());
   }
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
-    (false, _) => sync_nowrap(buffer, window_actual_shape, start_line, start_column),
-    (true, false) => sync_wrap_nolinebreak(buffer, window_actual_shape, start_line, start_column),
-    (true, true) => sync_wrap_linebreak(buffer, window_actual_shape, start_line, start_column),
+  match (opts.wrap(), opts.line_break()) {
+    (false, _) => sync_nowrap(buffer, shape, start_line, start_column),
+    (true, false) => sync_wrap_nolinebreak(buffer, shape, start_line, start_column),
+    (true, true) => sync_wrap_linebreak(buffer, shape, start_line, start_column),
   }
 }
 
@@ -143,12 +139,12 @@ fn proc_line_nowrap(
 /// Implements [`sync`] with option `wrap=false`.
 fn sync_nowrap(
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
+  shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
+  let height = shape.height();
+  let width = shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
@@ -254,12 +250,12 @@ fn proc_line_wrap_nolinebreak(
 /// Implements [`sync`] with option `wrap=true` and `line-break=false`.
 fn sync_wrap_nolinebreak(
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
+  shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
+  let height = shape.height();
+  let width = shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
@@ -305,7 +301,7 @@ fn sync_wrap_nolinebreak(
 /// word.
 fn _find_word_by_char(
   words: &[&str],
-  word_end_chars_index: &HashMap<usize, usize>,
+  word_end_chars_index: &LiteMap<usize, usize>,
   char_idx: usize,
 ) -> (usize, usize, usize) {
   // trace!("words:{words:?}, words_end_chars:{word_end_chars_index:?},char_idx:{char_idx}");
@@ -340,11 +336,10 @@ fn _find_word_by_char(
   unreachable!()
 }
 
-#[allow(clippy::too_many_arguments)]
 /// Part-1 of the processing algorithm in [`proc_line_wrap_linebreak`].
 fn _part1(
   words: &[&str],
-  words_end_char_idx: &HashMap<usize, usize>,
+  words_end_char_idx: &LiteMap<usize, usize>,
   buffer: &Buffer,
   bline: &RopeSlice,
   l: usize,
@@ -447,7 +442,7 @@ fn proc_line_wrap_linebreak(
         *state += wd.chars().count();
         Some((i, *state))
       })
-      .collect::<HashMap<usize, usize>>();
+      .collect::<LiteMap<usize, usize>>();
 
     // let mut start_char = buffer
     match buffer.char_after(current_line, start_column) {
@@ -577,12 +572,12 @@ fn proc_line_wrap_linebreak(
 /// Implements [`sync`] with option `wrap=true` and `line-break=true`.
 fn sync_wrap_linebreak(
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
+  shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
-  let height = window_actual_shape.height();
-  let width = window_actual_shape.width();
+  let height = shape.height();
+  let width = shape.width();
   let buffer_len_lines = buffer.get_rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
@@ -1597,9 +1592,9 @@ mod wrap_detail {
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_downward(
   viewport: &Viewport,
+  opts: &ViewportOptions,
   buffer: &Buffer,
-  window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
+  shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -1615,14 +1610,11 @@ pub fn search_anchor_downward(
       .unwrap_or(0_usize),
   );
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
+  match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_downward_nowrap(
       viewport,
       buffer,
-      window_actual_shape,
+      shape,
       target_cursor_line,
       target_cursor_char,
     ),
@@ -1631,7 +1623,7 @@ pub fn search_anchor_downward(
       proc_line_wrap_nolinebreak,
       viewport,
       buffer,
-      window_actual_shape,
+      shape,
       target_cursor_line,
       target_cursor_char,
     ),
@@ -1640,7 +1632,7 @@ pub fn search_anchor_downward(
       proc_line_wrap_linebreak,
       viewport,
       buffer,
-      window_actual_shape,
+      shape,
       target_cursor_line,
       target_cursor_char,
     ),
@@ -1816,9 +1808,9 @@ fn search_anchor_downward_wrap(
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_upward(
   viewport: &Viewport,
+  opts: &ViewportOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -1834,10 +1826,7 @@ pub fn search_anchor_upward(
       .unwrap_or(0_usize),
   );
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
+  match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_upward_nowrap(
       viewport,
       buffer,
@@ -1989,9 +1978,9 @@ fn search_anchor_upward_wrap(
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_leftward(
   viewport: &Viewport,
+  opts: &ViewportOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -2009,10 +1998,7 @@ pub fn search_anchor_leftward(
       .unwrap_or(0_usize),
   );
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
+  match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_leftward_nowrap(
       viewport,
       buffer,
@@ -2147,9 +2133,9 @@ fn search_anchor_leftward_wrap(
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_rightward(
   viewport: &Viewport,
+  opts: &ViewportOptions,
   buffer: &Buffer,
   window_actual_shape: &U16Rect,
-  window_local_options: &WindowLocalOptions,
   target_cursor_line: usize,
   target_cursor_char: usize,
 ) -> (usize, usize) {
@@ -2167,10 +2153,7 @@ pub fn search_anchor_rightward(
       .unwrap_or(0_usize),
   );
 
-  match (
-    window_local_options.wrap(),
-    window_local_options.line_break(),
-  ) {
+  match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_rightward_nowrap(
       viewport,
       buffer,

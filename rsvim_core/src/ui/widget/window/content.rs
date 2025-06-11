@@ -4,8 +4,8 @@ use crate::buf::BufferWk;
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::tree::*;
+use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::ViewportWk;
 use crate::{inode_impl, lock};
 
 use geo::point;
@@ -244,9 +244,8 @@ mod tests_util {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::widget::window::{
-    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -265,12 +264,13 @@ mod tests_util {
     let mut tree = Tree::new(terminal_size);
     tree.set_global_local_options(&window_options);
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
+    let opts = ViewportOptions::from(&window_options);
     let viewport = {
       let buffer = lock!(buffer);
       Viewport::view(
+        &opts,
         &buffer,
         &actual_shape,
-        &window_options,
         start_line_idx,
         start_column_idx,
       )
@@ -338,9 +338,8 @@ mod tests_nowrap {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::widget::window::{
-    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -665,7 +664,8 @@ mod tests_nowrap {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::view(&buffer, &actual_shape, &win_opts, 4, 0);
+      let opts = ViewportOptions::from(&win_opts);
+      let viewport = Viewport::view(&opts, &buffer, &actual_shape, 4, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
@@ -684,9 +684,8 @@ mod tests_nowrap_startcol {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::widget::window::{
-    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -929,7 +928,8 @@ mod tests_nowrap_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::view(&buffer, &actual_shape, &win_opts, 4, 5);
+      let opts = ViewportOptions::from(&win_opts);
+      let viewport = Viewport::view(&opts, &buffer, &actual_shape, 4, 5);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
@@ -949,9 +949,8 @@ mod tests_wrap_nolinebreak {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::widget::window::{
-    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -1255,7 +1254,8 @@ mod tests_wrap_nolinebreak {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::view(&buffer, &actual_shape, &win_opts, 3, 0);
+      let opts = ViewportOptions::from(&win_opts);
+      let viewport = Viewport::view(&opts, &buffer, &actual_shape, 3, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1308,7 +1308,8 @@ mod tests_wrap_nolinebreak {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let viewport = Viewport::view(&buffer, &actual_shape, &win_opts, 6, 0);
+      let opts = ViewportOptions::from(&win_opts);
+      let viewport = Viewport::view(&opts, &buffer, &actual_shape, 6, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1361,7 +1362,8 @@ mod tests_wrap_nolinebreak {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let viewport = Viewport::view(&buffer, &actual_shape, &win_opts, 6, 0);
+      let opts = ViewportOptions::from(&win_opts);
+      let viewport = Viewport::view(&opts, &buffer, &actual_shape, 6, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1381,9 +1383,8 @@ mod tests_wrap_nolinebreak_startcol {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::widget::window::{
-    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -1628,7 +1629,8 @@ mod tests_wrap_nolinebreak_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::view(&buffer, &actual_shape, &win_opts, 3, 1);
+      let opts = ViewportOptions::from(&win_opts);
+      let viewport = Viewport::view(&opts, &buffer, &actual_shape, 3, 1);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1681,7 +1683,8 @@ mod tests_wrap_nolinebreak_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let viewport = Viewport::view(&buffer, &actual_shape, &win_opts, 6, 19);
+      let opts = ViewportOptions::from(&win_opts);
+      let viewport = Viewport::view(&opts, &buffer, &actual_shape, 6, 19);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1734,7 +1737,8 @@ mod tests_wrap_nolinebreak_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let viewport = Viewport::view(&buffer, &actual_shape, &win_opts, 6, 4);
+      let opts = ViewportOptions::from(&win_opts);
+      let viewport = Viewport::view(&opts, &buffer, &actual_shape, 6, 4);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1753,9 +1757,8 @@ mod tests_wrap_linebreak {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::widget::window::{
-    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
@@ -2049,7 +2052,8 @@ mod tests_wrap_linebreak {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let viewport = Viewport::view(&buffer, &actual_shape, &win_opts, 2, 0);
+      let opts = ViewportOptions::from(&win_opts);
+      let viewport = Viewport::view(&opts, &buffer, &actual_shape, 2, 0);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
@@ -2068,9 +2072,8 @@ mod tests_wrap_linebreak_startcol {
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
   use crate::ui::tree::Tree;
-  use crate::ui::widget::window::{
-    Viewport, ViewportArc, ViewportOptions, WindowLocalOptions, WindowLocalOptionsBuilder,
-  };
+  use crate::ui::viewport::{Viewport, ViewportArc, ViewportOptions};
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
