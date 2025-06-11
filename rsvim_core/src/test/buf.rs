@@ -13,36 +13,16 @@ use std::io::BufReader;
 use tracing::{self, info, trace};
 use tracing_appender::non_blocking::DEFAULT_BUFFERED_LINES_LIMIT;
 
-/// Create rope from filename.
-pub fn make_rope_from_file(filename: String) -> Rope {
-  Rope::from_reader(BufReader::new(File::open(filename).unwrap())).unwrap()
-}
-
-/// Create rope from lines.
-pub fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
-  let mut rb: RopeBuilder = RopeBuilder::new();
-  for line in lines.iter() {
-    rb.append(line);
-  }
-  rb.finish()
-}
-
-pub fn make_buffer_from_file(
-  terminal_height: u16,
-  opts: BufferLocalOptions,
-  filename: String,
-) -> BufferArc {
-  let rp = make_rope_from_file(filename);
-  let bf = Buffer::_new(terminal_height, rp, opts, None, None, None, None);
-  Buffer::to_arc(bf)
-}
-
 pub fn make_buffer_from_lines(
   terminal_height: u16,
   opts: BufferLocalOptions,
   lines: Vec<&str>,
 ) -> BufferArc {
-  let rp = make_rope_from_lines(lines);
+  let mut rpb: RopeBuilder = RopeBuilder::new();
+  for line in lines.iter() {
+    rpb.append(line);
+  }
+  let rp = rpb.finish();
   let buf = Buffer::_new(terminal_height, rp, opts, None, None, None, None);
   Buffer::to_arc(buf)
 }

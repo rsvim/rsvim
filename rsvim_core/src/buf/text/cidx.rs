@@ -472,11 +472,19 @@ mod tests {
   use super::*;
 
   use crate::buf::BufferLocalOptionsBuilder;
-  use crate::test::buf::{make_buffer_from_rope, make_rope_from_lines, print_buffer_line_details};
+  use crate::test::buf::{make_buffer_from_rope, print_buffer_line_details};
   use crate::test::log::init as test_log_init;
 
-  use ropey::Rope;
+  use ropey::{Rope, RopeBuilder};
   use tracing::info;
+
+  fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
+    let mut rb: RopeBuilder = RopeBuilder::new();
+    for line in lines.iter() {
+      rb.append(line);
+    }
+    rb.finish()
+  }
 
   fn assert_width_at(
     options: &BufferLocalOptions,
