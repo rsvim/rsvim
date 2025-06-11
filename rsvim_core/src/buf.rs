@@ -5,8 +5,9 @@ use crate::prelude::*;
 use crate::{arc_impl, lock};
 
 // Re-export
-pub use crate::buf::cidx::ColumnIndex;
-pub use crate::buf::opt::*;
+pub use cidx::ColumnIndex;
+pub use opt::*;
+pub use text::*;
 
 use ahash::RandomState;
 use compact_str::CompactString;
@@ -26,6 +27,7 @@ use tracing::trace;
 
 pub mod cidx;
 pub mod opt;
+pub mod text;
 pub mod unicode;
 
 /// Buffer ID.
@@ -52,8 +54,7 @@ pub fn next_buffer_id() -> BufferId {
 /// primitives which can be used to implement high-level Vim ex commands, etc.
 pub struct Buffer {
   id: BufferId,
-  rope: Rope,
-  cached_lines_width: Rc<RefCell<LruCache<usize, ColumnIndex, RandomState>>>,
+  text: Text,
   options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -80,38 +81,14 @@ impl Buffer {
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
   ) -> Self {
-    let cache_size = get_cached_size(canvas_height);
     Self {
       id: next_buffer_id(),
-      rope,
-      cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
-        cache_size,
-        RandomState::new(),
-      ))),
+      text: Text::new(canvas_height, rope, options),
       options,
       filename,
       absolute_filename,
       metadata,
       last_sync_time,
-    }
-  }
-
-  #[cfg(debug_assertions)]
-  /// NOTE: This API should only be used for testing.
-  pub fn _new_empty(canvas_height: u16, options: BufferLocalOptions) -> Self {
-    let cache_size = get_cached_size(canvas_height);
-    Self {
-      id: next_buffer_id(),
-      rope: Rope::new(),
-      cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
-        cache_size,
-        RandomState::new(),
-      ))),
-      options,
-      filename: None,
-      absolute_filename: None,
-      metadata: None,
-      last_sync_time: None,
     }
   }
 
@@ -173,12 +150,12 @@ impl Buffer {
 impl Buffer {
   /// Get rope.
   pub fn get_rope(&self) -> &Rope {
-    &self.rope
+    self.text.get_rope()
   }
 
   /// Get mutable rope.
   pub fn get_rope_mut(&mut self) -> &mut Rope {
-    &mut self.rope
+    self.text.get_rope_mut()
   }
 
   /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
@@ -189,39 +166,14 @@ impl Buffer {
     start_char_idx: usize,
     max_chars: usize,
   ) -> Option<String> {
-    match self.rope.get_line(line_idx) {
-      Some(bufline) => match bufline.get_chars_at(start_char_idx) {
-        Some(chars_iter) => {
-          let mut builder = String::with_capacity(max_chars);
-          for (i, c) in chars_iter.enumerate() {
-            if i >= max_chars {
-              return Some(builder);
-            }
-            builder.push(c);
-          }
-          Some(builder)
-        }
-        None => None,
-      },
-      None => None,
-    }
+    self.text.clone_line(line_idx, start_char_idx, max_chars)
   }
 
   /// Get last char index on line.
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is empty.
   pub fn last_char_on_line(&self, line_idx: usize) -> Option<usize> {
-    match self.rope.get_line(line_idx) {
-      Some(line) => {
-        let line_len_chars = line.len_chars();
-        if line_len_chars > 0 {
-          Some(line_len_chars - 1)
-        } else {
-          None
-        }
-      }
-      None => None,
-    }
+    self.text.last_char_on_line(line_idx)
   }
 
   /// Get last visible char index on line.
@@ -231,36 +183,12 @@ impl Buffer {
   /// It returns the char index if exists, returns `None` if line not exists or line is
   /// empty/blank.
   pub fn last_char_on_line_no_empty_eol(&self, line_idx: usize) -> Option<usize> {
-    match self.rope.get_line(line_idx) {
-      Some(line) => match self.last_char_on_line(line_idx) {
-        Some(last_char) => {
-          if self.char_width(line.char(last_char)) == 0 {
-            Some(last_char.saturating_sub(1))
-          } else {
-            Some(last_char)
-          }
-        }
-        None => None,
-      },
-      None => None,
-    }
+    self.text.last_char_on_line_no_empty_eol(line_idx)
   }
 
   /// Whether the `line_idx`/`char_idx` is empty eol (end-of-line).
   pub fn is_empty_eol(&self, line_idx: usize, char_idx: usize) -> bool {
-    match self.rope.get_line(line_idx) {
-      Some(line) => {
-        if char_idx == line.len_chars().saturating_sub(1) {
-          match line.get_char(char_idx) {
-            Some(c) => self.char_width(c) == 0,
-            None => false,
-          }
-        } else {
-          false
-        }
-      }
-      None => false,
-    }
+    self.text.is_empty_eol(line_idx, char_idx)
   }
 }
 // Rope }
@@ -273,165 +201,66 @@ impl Buffer {
 
   pub fn set_options(&mut self, options: &BufferLocalOptions) {
     self.options = *options;
+    self.text.set_options(options);
   }
 }
 // Options }
 
 // Display Width {
 impl Buffer {
-  /// See [`ColumnIndex::width_before`].
-  ///
-  /// # Panics
-  ///
-  /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_before(&self, line_idx: usize, char_idx: usize) -> usize {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .width_before(&self.options, &rope_line, char_idx)
+    self.text.width_before(line_idx, char_idx)
   }
 
-  /// See [`ColumnIndex::width_until`].
-  ///
-  /// # Panics
-  ///
-  /// It panics if the `line_idx` doesn't exist in rope.
   pub fn width_until(&self, line_idx: usize, char_idx: usize) -> usize {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .width_until(&self.options, &rope_line, char_idx)
+    self.text.width_until(line_idx, char_idx)
   }
 
-  /// See [`ColumnIndex::char_before`].
-  ///
-  /// # Panics
-  ///
-  /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_before(&self, line_idx: usize, width: usize) -> Option<usize> {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .char_before(&self.options, &rope_line, width)
+    self.text.char_before(line_idx, width)
   }
 
-  /// See [`ColumnIndex::char_at`].
-  ///
-  /// # Panics
-  ///
-  /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_at(&self, line_idx: usize, width: usize) -> Option<usize> {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .char_at(&self.options, &rope_line, width)
+    self.text.char_at(line_idx, width)
   }
 
-  /// See [`ColumnIndex::char_after`].
-  ///
-  /// # Panics
-  ///
-  /// It panics if the `line_idx` doesn't exist in rope.
   pub fn char_after(&self, line_idx: usize, width: usize) -> Option<usize> {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .char_after(&self.options, &rope_line, width)
+    self.text.char_after(line_idx, width)
   }
 
-  /// See [`ColumnIndex::last_char_until`].
-  ///
-  /// # Panics
-  ///
-  /// It panics if the `line_idx` doesn't exist in rope.
   pub fn last_char_until(&self, line_idx: usize, width: usize) -> Option<usize> {
-    let rope_line = self.rope.line(line_idx);
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .last_char_until(&self.options, &rope_line, width)
+    self.text.last_char_until(line_idx, width)
   }
 
-  /// See [`ColumnIndex::truncate_since_char`].
   pub fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        let rope_line = self.rope.line(line_idx);
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .truncate_since_char(char_idx)
+      .text
+      .truncate_cached_line_since_char(line_idx, char_idx)
   }
 
-  /// See [`ColumnIndex::truncate_since_width`].
   pub fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
-    self
-      .cached_lines_width
-      .borrow_mut()
-      .get_or_insert_mut(line_idx, || -> ColumnIndex {
-        let rope_line = self.rope.line(line_idx);
-        ColumnIndex::with_capacity(rope_line.len_chars())
-      })
-      .truncate_since_width(width)
+    self.text.truncate_cached_line_since_width(line_idx, width)
   }
 
-  /// Remove one cached line.
   pub fn remove_cached_line(&self, line_idx: usize) {
-    self.cached_lines_width.borrow_mut().pop(&line_idx);
+    self.text.remove_cached_line(line_idx)
   }
 
-  /// Retain multiple cached lines by lambda function `f`.
   pub fn retain_cached_lines<F>(&self, f: F)
   where
     F: Fn(/* line_idx */ &usize, /* column_idx */ &ColumnIndex) -> bool,
   {
-    let mut cached_width = self.cached_lines_width.borrow_mut();
-    let to_be_removed_lines: Vec<usize> = cached_width
-      .iter()
-      .filter(|(line_idx, column_idx)| !f(line_idx, column_idx))
-      .map(|(line_idx, _)| *line_idx)
-      .collect();
-    for line_idx in to_be_removed_lines.iter() {
-      cached_width.pop(line_idx);
-    }
+    self.text.retain_cached_lines(f)
   }
 
   /// Clear cache.
   pub fn clear_cached_lines(&self) {
-    self.cached_lines_width.borrow_mut().clear()
+    self.text.clear_cached_lines()
   }
 
   /// Resize cache.
   pub fn resize_cached_lines(&self, canvas_height: u16) {
-    let new_cache_size = get_cached_size(canvas_height);
-    let mut cached_width = self.cached_lines_width.borrow_mut();
-    if new_cache_size > cached_width.cap() {
-      cached_width.resize(new_cache_size);
-    }
+    self.text.resize_cached_lines(canvas_height)
   }
 }
 // Display Width }
