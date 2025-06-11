@@ -85,6 +85,22 @@ impl Buffer {
     self.id
   }
 
+  pub fn options(&self) -> &BufferLocalOptions {
+    self.text.options()
+  }
+
+  pub fn set_options(&mut self, options: &BufferLocalOptions) {
+    self.text.set_options(options);
+  }
+
+  pub fn text(&self) -> &Text {
+    &self.text
+  }
+
+  pub fn text_mut(&mut self) -> &mut Text {
+    &mut self.text
+  }
+
   pub fn filename(&self) -> &Option<PathBuf> {
     &self.filename
   }
@@ -138,13 +154,13 @@ impl Buffer {
 // Rope {
 impl Buffer {
   /// Get rope.
-  pub fn get_rope(&self) -> &Rope {
-    self.text.get_rope()
+  pub fn rope(&self) -> &Rope {
+    self.text.rope()
   }
 
   /// Get mutable rope.
-  pub fn get_rope_mut(&mut self) -> &mut Rope {
-    self.text.get_rope_mut()
+  pub fn rope_mut(&mut self) -> &mut Rope {
+    self.text.rope_mut()
   }
 
   /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
@@ -181,18 +197,6 @@ impl Buffer {
   }
 }
 // Rope }
-
-// Options {
-impl Buffer {
-  pub fn options(&self) -> &BufferLocalOptions {
-    self.text.options()
-  }
-
-  pub fn set_options(&mut self, options: &BufferLocalOptions) {
-    self.text.set_options(options);
-  }
-}
-// Options }
 
 // Display Width {
 impl Buffer {

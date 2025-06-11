@@ -77,7 +77,7 @@ impl Widgetable for WindowContent {
     let mut row_idx = 0_u16;
     let mut line_idx = viewport.start_line_idx();
 
-    let mut buflines = buffer.get_rope().get_lines_at(line_idx).unwrap();
+    let mut buflines = buffer.rope().get_lines_at(line_idx).unwrap();
 
     while line_idx < viewport.end_line_idx() {
       debug_assert!(row_idx < height);

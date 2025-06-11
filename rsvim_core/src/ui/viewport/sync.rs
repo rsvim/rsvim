@@ -104,7 +104,7 @@ fn proc_line_nowrap(
   _window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
-  let bufline = buffer.get_rope().line(current_line);
+  let bufline = buffer.rope().line(current_line);
   let (start_char, start_fills, end_char, end_fills) = if bufline.len_chars() == 0 {
     (0_usize, 0_usize, 0_usize, 0_usize)
   } else {
@@ -145,7 +145,7 @@ fn sync_nowrap(
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = shape.height();
   let width = shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
+  let buffer_len_lines = buffer.rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
 
@@ -193,7 +193,7 @@ fn proc_line_wrap_nolinebreak(
   window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
-  let bufline = buffer.get_rope().line(current_line);
+  let bufline = buffer.rope().line(current_line);
   let bufline_len_chars = bufline.len_chars();
 
   if bufline_len_chars == 0 {
@@ -256,7 +256,7 @@ fn sync_wrap_nolinebreak(
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = shape.height();
   let width = shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
+  let buffer_len_lines = buffer.rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
 
@@ -399,7 +399,7 @@ fn proc_line_wrap_linebreak(
   window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
-  let bufline = buffer.get_rope().line(current_line);
+  let bufline = buffer.rope().line(current_line);
   if bufline.len_chars() == 0 {
     let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
     rows.insert(current_row, RowViewport::new(0..0));
@@ -578,7 +578,7 @@ fn sync_wrap_linebreak(
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = shape.height();
   let width = shape.width();
-  let buffer_len_lines = buffer.get_rope().len_lines();
+  let buffer_len_lines = buffer.rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
 
@@ -698,14 +698,14 @@ mod nowrap_detail {
           target_cursor_line,
           target_cursor_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
           target_viewport_start_column,
           target_viewport_start_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_viewport_start_char)
             .unwrap_or('?')
@@ -715,7 +715,7 @@ mod nowrap_detail {
           target_cursor_line,
           target_cursor_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
@@ -763,7 +763,7 @@ mod nowrap_detail {
           Some(c) => format!(
             "{}({:?})",
             c,
-            buffer.get_rope().line(target_cursor_line).char(c)
+            buffer.rope().line(target_cursor_line).char(c)
           ),
           None => "None".to_string(),
         };
@@ -771,7 +771,7 @@ mod nowrap_detail {
         Some(c) => format!(
           "{}({:?})",
           c,
-          buffer.get_rope().line(target_cursor_line).char(c)
+          buffer.rope().line(target_cursor_line).char(c)
         ),
         None => "None".to_string(),
       };
@@ -780,7 +780,7 @@ mod nowrap_detail {
         target_cursor_line,
         target_cursor_char,
         buffer
-          .get_rope()
+          .rope()
           .line(target_cursor_line)
           .get_char(target_cursor_char)
           .unwrap_or('?'),
@@ -916,7 +916,7 @@ mod wrap_detail {
     target_cursor_char: usize,
     mut start_column: usize,
   ) -> usize {
-    let bufline = buffer.get_rope().line(target_cursor_line);
+    let bufline = buffer.rope().line(target_cursor_line);
     let bufline_len_char = bufline.len_chars();
     let bufline_chars_width = buffer.width_until(target_cursor_line, bufline_len_char);
 
@@ -982,14 +982,14 @@ mod wrap_detail {
           target_cursor_line,
           target_cursor_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
           target_viewport_start_column,
           target_viewport_start_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_viewport_start_char)
             .unwrap_or('?')
@@ -999,7 +999,7 @@ mod wrap_detail {
           target_cursor_line,
           target_cursor_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
@@ -1038,7 +1038,7 @@ mod wrap_detail {
 
     let mut on_left_side = false;
 
-    debug_assert!(buffer.get_rope().get_line(target_cursor_line).is_some());
+    debug_assert!(buffer.rope().get_line(target_cursor_line).is_some());
     let last_char = buffer
       .last_char_on_line(target_cursor_line) // Also consider empty eol char.
       .unwrap_or(0_usize);
@@ -1224,14 +1224,14 @@ mod wrap_detail {
           target_cursor_line,
           target_cursor_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
           target_viewport_start_column,
           target_viewport_start_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_viewport_start_char)
             .unwrap_or('?')
@@ -1241,7 +1241,7 @@ mod wrap_detail {
           target_cursor_line,
           target_cursor_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
@@ -1391,14 +1391,14 @@ mod wrap_detail {
           target_cursor_line,
           target_cursor_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
           target_viewport_start_column,
           target_viewport_start_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_viewport_start_char)
             .unwrap_or('?')
@@ -1408,7 +1408,7 @@ mod wrap_detail {
           target_cursor_line,
           target_cursor_char,
           buffer
-            .get_rope()
+            .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
@@ -1601,7 +1601,7 @@ pub fn search_anchor_downward(
   // The cursor must move downward.
   debug_assert!(target_cursor_line >= viewport.start_line_idx());
 
-  let buffer_len_lines = buffer.get_rope().len_lines();
+  let buffer_len_lines = buffer.rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
@@ -1817,7 +1817,7 @@ pub fn search_anchor_upward(
   // The cursor must move upward.
   debug_assert!(target_cursor_line < viewport.end_line_idx());
 
-  let buffer_len_lines = buffer.get_rope().len_lines();
+  let buffer_len_lines = buffer.rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
@@ -1989,7 +1989,7 @@ pub fn search_anchor_leftward(
     target_cursor_line >= viewport.start_line_idx() && target_cursor_line < viewport.end_line_idx()
   );
 
-  let buffer_len_lines = buffer.get_rope().len_lines();
+  let buffer_len_lines = buffer.rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
@@ -2144,7 +2144,7 @@ pub fn search_anchor_rightward(
     target_cursor_line >= viewport.start_line_idx() && target_cursor_line < viewport.end_line_idx()
   );
 
-  let buffer_len_lines = buffer.get_rope().len_lines();
+  let buffer_len_lines = buffer.rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
