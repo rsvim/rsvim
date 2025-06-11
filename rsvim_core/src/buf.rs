@@ -185,11 +185,10 @@ impl Buffer {
 // Options {
 impl Buffer {
   pub fn options(&self) -> &BufferLocalOptions {
-    &self.options
+    self.text.options()
   }
 
   pub fn set_options(&mut self, options: &BufferLocalOptions) {
-    self.options = *options;
     self.text.set_options(options);
   }
 }
