@@ -48,7 +48,7 @@ pub fn make_buffer_from_lines(
 }
 
 pub fn make_empty_buffer(terminal_height: u16, opts: BufferLocalOptions) -> BufferArc {
-  let buf = Buffer::_new_empty(terminal_height, opts);
+  let buf = Buffer::_new(terminal_height, Rope::new(), opts, None, None, None, None);
   Buffer::to_arc(buf)
 }
 

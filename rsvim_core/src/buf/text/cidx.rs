@@ -1,4 +1,4 @@
-//! Display width index (char-wise) for each unicode char in vim buffer.
+//! Indexes mappings between character and its display width.
 
 use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
