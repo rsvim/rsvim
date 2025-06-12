@@ -1,6 +1,6 @@
 //! The insert mode.
 
-use crate::buf::{Buffer, BufferWk};
+use crate::buf::{Buffer, BufferWk, Text};
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
@@ -106,7 +106,7 @@ fn _bufline_to_string(bufline: &ropey::RopeSlice) -> String {
   builder
 }
 
-fn _dbg_print_details(buffer: &Buffer, line_idx: usize, char_idx: usize, msg: &str) {
+fn _dbg_print_details(buffer: &Text, line_idx: usize, char_idx: usize, msg: &str) {
   if cfg!(debug_assertions) {
     match buffer.rope().get_line(line_idx) {
       Some(bufline) => {
@@ -153,7 +153,7 @@ fn _dbg_print_details(buffer: &Buffer, line_idx: usize, char_idx: usize, msg: &s
   }
 }
 
-fn _dbg_print_details_on_line(buffer: &Buffer, line_idx: usize, char_idx: usize, msg: &str) {
+fn _dbg_print_details_on_line(buffer: &Text, line_idx: usize, char_idx: usize, msg: &str) {
   if cfg!(debug_assertions) {
     match buffer.rope().get_line(line_idx) {
       Some(bufline) => {
@@ -205,13 +205,13 @@ impl InsertStateful {
           let cursor_viewport = current_window.cursor_viewport();
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
-          debug_assert!(buffer.rope().get_line(cursor_line_idx).is_some());
+          debug_assert!(buffer.text().rope().get_line(cursor_line_idx).is_some());
 
-          let cursor_line_absolute_pos = buffer.rope().line_to_char(cursor_line_idx);
+          let cursor_line_absolute_pos = buffer.text().rope().line_to_char(cursor_line_idx);
           let cursor_char_absolute_pos_before_delete = cursor_line_absolute_pos + cursor_char_idx;
 
           _dbg_print_details(
-            &buffer,
+            buffer.text(),
             cursor_line_idx,
             cursor_char_absolute_pos_before_delete,
             "Before delete",
@@ -222,7 +222,7 @@ impl InsertStateful {
             cursor_char_absolute_pos_before_delete
               ..(std::cmp::min(
                 cursor_char_absolute_pos_before_delete + n as usize,
-                buffer.rope().len_chars().saturating_sub(1),
+                buffer.text().rope().len_chars().saturating_sub(1),
               ))
           } else {
             // Delete to left side, on range `[cursor-n,cursor)`.
@@ -236,7 +236,7 @@ impl InsertStateful {
             return StatefulValue::InsertMode(InsertStateful::default());
           }
 
-          buffer.rope_mut().remove(to_be_deleted_range);
+          buffer.text_mut().rope_mut().remove(to_be_deleted_range);
 
           let cursor_char_absolute_pos_after_deleted = if n > 0 {
             cursor_char_absolute_pos_before_delete
@@ -245,13 +245,16 @@ impl InsertStateful {
           };
           let cursor_char_absolute_pos_after_deleted = std::cmp::min(
             cursor_char_absolute_pos_after_deleted,
-            buffer.rope().len_chars().saturating_sub(1),
+            buffer.text().rope().len_chars().saturating_sub(1),
           );
           let cursor_line_idx_after_deleted = buffer
+            .text()
             .rope()
             .char_to_line(cursor_char_absolute_pos_after_deleted);
-          let cursor_line_absolute_pos_after_deleted =
-            buffer.rope().line_to_char(cursor_line_idx_after_deleted);
+          let cursor_line_absolute_pos_after_deleted = buffer
+            .text()
+            .rope()
+            .line_to_char(cursor_line_idx_after_deleted);
           let cursor_char_idx_after_deleted =
             cursor_char_absolute_pos_after_deleted - cursor_line_absolute_pos_after_deleted;
 
@@ -261,15 +264,19 @@ impl InsertStateful {
             // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
             // Thus only need to truncate chars after insert position on the same line.
             let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_deleted, cursor_char_idx);
-            buffer.truncate_cached_line_since_char(cursor_line_idx, min_cursor_char_idx);
+            buffer
+              .text()
+              .truncate_cached_line_since_char(cursor_line_idx, min_cursor_char_idx);
           } else {
             // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
             let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_deleted, cursor_line_idx);
-            buffer.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
+            buffer
+              .text()
+              .retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
           }
 
           _dbg_print_details_on_line(
-            &buffer,
+            buffer.text(),
             cursor_line_idx,
             cursor_char_idx_after_deleted,
             "After deleted",
@@ -294,13 +301,13 @@ impl InsertStateful {
 
         let start_line = std::cmp::min(
           viewport.start_line_idx(),
-          buffer.rope().len_lines().saturating_sub(1),
+          buffer.text().rope().len_lines().saturating_sub(1),
         );
-        debug_assert!(buffer.rope().get_line(start_line).is_some());
-        let bufline_len_chars = buffer.rope().line(start_line).len_chars();
+        debug_assert!(buffer.text().rope().get_line(start_line).is_some());
+        let bufline_len_chars = buffer.text().rope().line(start_line).len_chars();
         let start_column = std::cmp::min(
           viewport.start_column_idx(),
-          buffer.width_before(start_line, bufline_len_chars),
+          buffer.text().width_before(start_line, bufline_len_chars),
         );
 
         let viewport_opts = ViewportOptions::from(current_window.options());
@@ -317,7 +324,7 @@ impl InsertStateful {
         if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
           &updated_viewport,
           &cursor_viewport,
-          &buffer,
+          buffer.text(),
           Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
         ) {
           trace!(
@@ -366,19 +373,20 @@ impl InsertStateful {
           let cursor_viewport = current_window.cursor_viewport();
           let cursor_line_idx = cursor_viewport.line_idx();
           let cursor_char_idx = cursor_viewport.char_idx();
-          debug_assert!(buffer.rope().get_line(cursor_line_idx).is_some());
+          debug_assert!(buffer.text().rope().get_line(cursor_line_idx).is_some());
 
-          let cursor_line_absolute_pos = buffer.rope().line_to_char(cursor_line_idx);
+          let cursor_line_absolute_pos = buffer.text().rope().line_to_char(cursor_line_idx);
           let cursor_char_absolute_pos_before_insert = cursor_line_absolute_pos + cursor_char_idx;
 
           _dbg_print_details(
-            &buffer,
+            buffer.text(),
             cursor_line_idx,
             cursor_char_absolute_pos_before_insert,
             "Before insert",
           );
 
           buffer
+            .text_mut()
             .rope_mut()
             .insert(cursor_char_absolute_pos_before_insert, text.as_str());
 
@@ -387,10 +395,13 @@ impl InsertStateful {
           let cursor_char_absolute_pos_after_inserted =
             cursor_char_absolute_pos_before_insert + text.chars().count();
           let cursor_line_idx_after_inserted = buffer
+            .text()
             .rope()
             .char_to_line(cursor_char_absolute_pos_after_inserted);
-          let cursor_line_absolute_pos_after_inserted =
-            buffer.rope().line_to_char(cursor_line_idx_after_inserted);
+          let cursor_line_absolute_pos_after_inserted = buffer
+            .text()
+            .rope()
+            .line_to_char(cursor_line_idx_after_inserted);
           let cursor_char_idx_after_inserted =
             cursor_char_absolute_pos_after_inserted - cursor_line_absolute_pos_after_inserted;
 
@@ -402,7 +413,7 @@ impl InsertStateful {
             debug_assert!(cursor_char_idx_after_inserted >= cursor_char_idx);
             let min_cursor_char_idx =
               std::cmp::min(cursor_char_idx_after_inserted, cursor_char_idx);
-            buffer.truncate_cached_line_since_char(
+            buffer.text().truncate_cached_line_since_char(
               cursor_line_idx,
               min_cursor_char_idx.saturating_sub(1),
             );
@@ -410,11 +421,13 @@ impl InsertStateful {
             // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
             let min_cursor_line_idx =
               std::cmp::min(cursor_line_idx_after_inserted, cursor_line_idx);
-            buffer.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
+            buffer
+              .text()
+              .retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
           }
 
           _dbg_print_details_on_line(
-            &buffer,
+            buffer.text(),
             cursor_line_idx,
             cursor_char_idx_after_inserted,
             "After inserted",
@@ -442,13 +455,13 @@ impl InsertStateful {
 
         let start_line = std::cmp::min(
           viewport.start_line_idx(),
-          buffer.rope().len_lines().saturating_sub(1),
+          buffer.text().rope().len_lines().saturating_sub(1),
         );
-        debug_assert!(buffer.rope().get_line(start_line).is_some());
-        let bufline_len_chars = buffer.rope().line(start_line).len_chars();
+        debug_assert!(buffer.text().rope().get_line(start_line).is_some());
+        let bufline_len_chars = buffer.text().rope().line(start_line).len_chars();
         let start_column = std::cmp::min(
           viewport.start_column_idx(),
-          buffer.width_before(start_line, bufline_len_chars),
+          buffer.text().width_before(start_line, bufline_len_chars),
         );
 
         let viewport_opts = ViewportOptions::from(current_window.options());
@@ -465,7 +478,7 @@ impl InsertStateful {
         if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
           &updated_viewport,
           &cursor_viewport,
-          &buffer,
+          buffer.text(),
           Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
         ) {
           trace!(
@@ -516,18 +529,21 @@ impl InsertStateful {
     use crate::defaults::ascii::end_of_line as eol;
     let buf_eol = buffer.options().end_of_line();
 
-    let buffer_len_chars = buffer.rope().len_chars();
+    let buffer_len_chars = buffer.text().rope().len_chars();
     let last_char_on_buf = buffer_len_chars.saturating_sub(1);
-    match buffer.rope().get_char(last_char_on_buf) {
+    match buffer.text().rope().get_char(last_char_on_buf) {
       Some(c) => {
         if c.to_compact_string() != eol::LF && c.to_compact_string() != eol::CR {
           buffer
+            .text_mut()
             .rope_mut()
             .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
-          let inserted_line_idx = buffer.rope().char_to_line(buffer_len_chars);
-          buffer.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
+          let inserted_line_idx = buffer.text().rope().char_to_line(buffer_len_chars);
+          buffer
+            .text()
+            .retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
           _dbg_print_details(
-            buffer,
+            buffer.text(),
             inserted_line_idx,
             buffer_len_chars,
             "Eol appended(non-empty)",
@@ -536,10 +552,16 @@ impl InsertStateful {
       }
       None => {
         buffer
+          .text_mut()
           .rope_mut()
           .insert(0_usize, buf_eol.to_compact_string().as_str());
-        buffer.clear_cached_lines();
-        _dbg_print_details(buffer, 0_usize, buffer_len_chars, "Eol appended(empty)");
+        buffer.text().clear_cached_lines();
+        _dbg_print_details(
+          buffer.text(),
+          0_usize,
+          buffer_len_chars,
+          "Eol appended(empty)",
+        );
       }
     }
   }
@@ -622,7 +644,7 @@ impl InsertStateful {
             let new_viewport = cursor_ops::window_scroll_to(
               &viewport,
               current_window,
-              buffer,
+              buffer.text(),
               Operation::WindowScrollTo((start_column, start_line)),
             );
             if let Some(new_viewport_arc) = new_viewport.clone() {
@@ -641,7 +663,7 @@ impl InsertStateful {
           let new_cursor_viewport = cursor_ops::cursor_move_to(
             &current_viewport,
             &cursor_viewport,
-            buffer,
+            buffer.text(),
             Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
           );
 
@@ -673,14 +695,14 @@ impl InsertStateful {
   ) -> (usize, usize, ViewportSearchDirection) {
     let (target_cursor_char, target_cursor_line, move_direction) = if opts.include_empty_eol {
       cursor_ops::normalize_to_cursor_move_to_include_empty_eol(
-        buffer,
+        buffer.text(),
         op,
         cursor_viewport.char_idx(),
         cursor_viewport.line_idx(),
       )
     } else {
       cursor_ops::normalize_to_cursor_move_to_exclude_empty_eol(
-        buffer,
+        buffer.text(),
         op,
         cursor_viewport.char_idx(),
         cursor_viewport.line_idx(),
@@ -817,7 +839,11 @@ mod tests_util {
     );
 
     let buffer = lock!(buffer);
-    let buflines = buffer.rope().get_lines_at(actual.start_line_idx()).unwrap();
+    let buflines = buffer
+      .text()
+      .rope()
+      .get_lines_at(actual.start_line_idx())
+      .unwrap();
     let total_lines = expect_end_line - expect_start_line;
 
     for (l, line) in buflines.enumerate() {
