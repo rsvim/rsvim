@@ -57,8 +57,14 @@ impl Window {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport_opts = ViewportOptions::from(local_options);
-      let viewport = Viewport::view(&viewport_opts, &buffer, &window_root_actual_shape, 0, 0);
-      let cursor_viewport = CursorViewport::from_top_left(&viewport, &buffer);
+      let viewport = Viewport::view(
+        &viewport_opts,
+        buffer.text(),
+        &window_root_actual_shape,
+        0,
+        0,
+      );
+      let cursor_viewport = CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
     };
     let viewport = Viewport::to_arc(viewport);

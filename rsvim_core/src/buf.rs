@@ -49,7 +49,6 @@ pub fn next_buffer_id() -> BufferId {
 pub struct Buffer {
   id: BufferId,
   text: Text,
-  options: BufferLocalOptions,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
   metadata: Option<Metadata>,
@@ -73,7 +72,6 @@ impl Buffer {
     Self {
       id: next_buffer_id(),
       text: Text::new(canvas_height, rope, options),
-      options,
       filename,
       absolute_filename,
       metadata,
@@ -141,12 +139,12 @@ impl Buffer {
   /// The char display width follows the
   /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/).
   pub fn char_width(&self, c: char) -> usize {
-    unicode::char_width(&self.options, c)
+    unicode::char_width(self.options(), c)
   }
 
   /// Get the printable cell symbol and its display width.
   pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
-    unicode::char_symbol(&self.options, c)
+    unicode::char_symbol(self.options(), c)
   }
 }
 // Unicode }
