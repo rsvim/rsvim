@@ -110,7 +110,7 @@ impl NormalStateful {
           let (start_line, start_column) = viewport.search_anchor(
             search_direction,
             &viewport_opts,
-            &buffer,
+            buffer.text(),
             current_window.actual_shape(),
             target_cursor_line,
             target_cursor_char,

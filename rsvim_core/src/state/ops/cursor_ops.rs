@@ -240,7 +240,8 @@ pub fn cursor_move_to(
     debug_assert!(bufline.len_chars() > char_idx);
   }
 
-  let new_cursor_viewport = CursorViewport::from_position(viewport, buffer, line_idx, char_idx);
+  let new_cursor_viewport =
+    CursorViewport::from_position(viewport, buffer.text(), line_idx, char_idx);
   let new_cursor_viewport = CursorViewport::to_arc(new_cursor_viewport);
   // New cursor position
   Some(new_cursor_viewport)
@@ -287,7 +288,13 @@ pub fn window_scroll_to(
 
   // Sync the viewport
   let opts = ViewportOptions::from(current_window.options());
-  let new_viewport = Viewport::to_arc(Viewport::view(&opts, buffer, shape, line_idx, column_idx));
+  let new_viewport = Viewport::to_arc(Viewport::view(
+    &opts,
+    buffer.text(),
+    shape,
+    line_idx,
+    column_idx,
+  ));
   Some(new_viewport)
 }
 
