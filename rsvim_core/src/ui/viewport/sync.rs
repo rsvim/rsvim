@@ -2,7 +2,7 @@
 
 #![allow(clippy::too_many_arguments)]
 
-use crate::buf::Buffer;
+use crate::buf::Text;
 use crate::prelude::*;
 use crate::ui::viewport::{LineViewport, RowViewport, ViewportOptions};
 
@@ -52,7 +52,7 @@ impl ViewportLineRange {
 /// Calculate viewport from top to bottom.
 pub fn sync(
   opts: &ViewportOptions,
-  buffer: &Buffer,
+  text: &Text,
   shape: &U16Rect,
   start_line: usize,
   start_column: usize,
@@ -65,28 +65,28 @@ pub fn sync(
   }
 
   match (opts.wrap(), opts.line_break()) {
-    (false, _) => sync_nowrap(buffer, shape, start_line, start_column),
-    (true, false) => sync_wrap_nolinebreak(buffer, shape, start_line, start_column),
-    (true, true) => sync_wrap_linebreak(buffer, shape, start_line, start_column),
+    (false, _) => sync_nowrap(text, shape, start_line, start_column),
+    (true, false) => sync_wrap_nolinebreak(text, shape, start_line, start_column),
+    (true, true) => sync_wrap_linebreak(text, shape, start_line, start_column),
   }
 }
 
 fn _end_char_and_prefills(
-  buffer: &Buffer,
+  text: &Text,
   bline: &RopeSlice,
   l: usize,
   c: usize,
   end_width: usize,
 ) -> (usize, usize) {
-  let c_width = buffer.width_until(l, c);
+  let c_width = text.width_until(l, c);
   if c_width > end_width {
     // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-    let c_width_before = buffer.width_before(l, c);
+    let c_width_before = text.width_before(l, c);
     (c, end_width.saturating_sub(c_width_before))
   } else {
     // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
     debug_assert!(bline.len_chars() > 0);
-    let next_to_last_visible_char = buffer.last_char_on_line_no_empty_eol(l).unwrap() + 1;
+    let next_to_last_visible_char = text.last_char_on_line_no_empty_eol(l).unwrap() + 1;
 
     // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
     // char.
@@ -97,27 +97,27 @@ fn _end_char_and_prefills(
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
 fn proc_line_nowrap(
-  buffer: &Buffer,
+  text: &Text,
   start_column: usize,
   current_line: usize,
   current_row: u16,
   _window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
-  let bufline = buffer.rope().line(current_line);
+  let bufline = text.rope().line(current_line);
   let (start_char, start_fills, end_char, end_fills) = if bufline.len_chars() == 0 {
     (0_usize, 0_usize, 0_usize, 0_usize)
   } else {
-    match buffer.char_after(current_line, start_column) {
+    match text.char_after(current_line, start_column) {
       Some(start_char) => {
         let start_fills = {
-          let width_before = buffer.width_before(current_line, start_char);
+          let width_before = text.width_before(current_line, start_char);
           width_before.saturating_sub(start_column)
         };
 
         let end_width = start_column + window_width as usize;
-        let (end_char, end_fills) = match buffer.char_at(current_line, end_width) {
-          Some(c) => _end_char_and_prefills(buffer, &bufline, current_line, c, end_width),
+        let (end_char, end_fills) = match text.char_at(current_line, end_width) {
+          Some(c) => _end_char_and_prefills(text, &bufline, current_line, c, end_width),
           None => {
             // If the char not found, it means the `end_width` is too long than the whole line.
             // So the char next to the line's last char is the end char.
@@ -138,14 +138,14 @@ fn proc_line_nowrap(
 
 /// Implements [`sync`] with option `wrap=false`.
 fn sync_nowrap(
-  buffer: &Buffer,
+  text: &Text,
   shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = shape.height();
   let width = shape.width();
-  let buffer_len_lines = buffer.rope().len_lines();
+  let buffer_len_lines = text.rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
 
@@ -156,14 +156,8 @@ fn sync_nowrap(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let (rows, start_fills, end_fills, _) = proc_line_nowrap(
-        buffer,
-        start_column,
-        current_line,
-        current_row,
-        height,
-        width,
-      );
+      let (rows, start_fills, end_fills, _) =
+        proc_line_nowrap(text, start_column, current_line, current_row, height, width);
 
       line_viewports.insert(
         current_line,
@@ -186,14 +180,14 @@ fn sync_nowrap(
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
 fn proc_line_wrap_nolinebreak(
-  buffer: &Buffer,
+  text: &Text,
   start_column: usize,
   current_line: usize,
   mut current_row: u16,
   window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
-  let bufline = buffer.rope().line(current_line);
+  let bufline = text.rope().line(current_line);
   let bufline_len_chars = bufline.len_chars();
 
   if bufline_len_chars == 0 {
@@ -203,11 +197,10 @@ fn proc_line_wrap_nolinebreak(
   } else {
     let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(window_height as usize);
 
-    // let mut start_char = buffer
-    match buffer.char_after(current_line, start_column) {
+    match text.char_after(current_line, start_column) {
       Some(mut start_char) => {
         let start_fills = {
-          let width_before = buffer.width_before(current_line, start_char);
+          let width_before = text.width_before(current_line, start_char);
           width_before.saturating_sub(start_column)
         };
 
@@ -216,8 +209,8 @@ fn proc_line_wrap_nolinebreak(
 
         debug_assert!(current_row < window_height);
         while current_row < window_height {
-          let (end_char, end_fills_result) = match buffer.char_at(current_line, end_width) {
-            Some(c) => _end_char_and_prefills(buffer, &bufline, current_line, c, end_width),
+          let (end_char, end_fills_result) = match text.char_at(current_line, end_width) {
+            Some(c) => _end_char_and_prefills(text, &bufline, current_line, c, end_width),
             None => {
               // If the char not found, it means the `end_width` is too long than the whole line.
               // So the char next to the line's last char is the end char.
@@ -230,14 +223,14 @@ fn proc_line_wrap_nolinebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > buffer.last_char_on_line_no_empty_eol(current_line).unwrap() {
+          if end_char > text.last_char_on_line_no_empty_eol(current_line).unwrap() {
             break;
           }
 
           // Prepare next row.
           current_row += 1;
           start_char = end_char;
-          end_width = buffer.width_before(current_line, end_char) + window_width as usize;
+          end_width = text.width_before(current_line, end_char) + window_width as usize;
         }
 
         (rows, start_fills, end_fills, current_row)
@@ -249,14 +242,14 @@ fn proc_line_wrap_nolinebreak(
 
 /// Implements [`sync`] with option `wrap=true` and `line-break=false`.
 fn sync_wrap_nolinebreak(
-  buffer: &Buffer,
+  text: &Text,
   shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = shape.height();
   let width = shape.width();
-  let buffer_len_lines = buffer.rope().len_lines();
+  let buffer_len_lines = text.rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
 
@@ -267,14 +260,8 @@ fn sync_wrap_nolinebreak(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let (rows, start_fills, end_fills, changed_current_row) = proc_line_wrap_nolinebreak(
-        buffer,
-        start_column,
-        current_line,
-        current_row,
-        height,
-        width,
-      );
+      let (rows, start_fills, end_fills, changed_current_row) =
+        proc_line_wrap_nolinebreak(text, start_column, current_line, current_row, height, width);
       current_row = changed_current_row;
 
       line_viewports.insert(
@@ -340,7 +327,7 @@ fn _find_word_by_char(
 fn _part1(
   words: &[&str],
   words_end_char_idx: &LiteMap<usize, usize>,
-  buffer: &Buffer,
+  text: &Text,
   bline: &RopeSlice,
   l: usize,
   c: usize,
@@ -350,7 +337,7 @@ fn _part1(
 ) -> (usize, usize) {
   let (wd_idx, start_c_of_wd, end_c_of_wd) = _find_word_by_char(words, words_end_char_idx, c);
 
-  let end_c_width = buffer.width_before(l, end_c_of_wd);
+  let end_c_width = text.width_before(l, end_c_of_wd);
   if end_c_width > end_width {
     // The current word is longer than current row, it needs to be put to next row.
 
@@ -368,7 +355,7 @@ fn _part1(
       // Part-1.1, simply wrapped this word to next row.
       // Here we actually use the `start_c_of_wd` as the end char for current row.
 
-      _end_char_and_prefills(buffer, bline, l, start_c_of_wd - 1, end_width)
+      _end_char_and_prefills(text, bline, l, start_c_of_wd - 1, end_width)
     } else {
       // Part-1.2, cut this word and force rendering it ignoring line-break behavior.
       debug_assert!(start_c_of_wd <= start_char);
@@ -376,7 +363,7 @@ fn _part1(
       *last_word_is_too_long = Some((wd_idx, start_c_of_wd, end_c_of_wd, c));
 
       // If the char `c` width is greater than `end_width`, the `c` itself is the end char.
-      _end_char_and_prefills(buffer, bline, l, c, end_width)
+      _end_char_and_prefills(text, bline, l, c, end_width)
     }
   } else {
     debug_assert_eq!(c + 1, end_c_of_wd);
@@ -392,14 +379,14 @@ fn _cloned_line_max_len(window_height: u16, window_width: u16) -> usize {
 
 /// Returns `rows`, `start_fills`, `end_fills`, `current_row`.
 fn proc_line_wrap_linebreak(
-  buffer: &Buffer,
+  text: &Text,
   start_column: usize,
   current_line: usize,
   mut current_row: u16,
   window_height: u16,
   window_width: u16,
 ) -> (LiteMap<u16, RowViewport>, usize, usize, u16) {
-  let bufline = buffer.rope().line(current_line);
+  let bufline = text.rope().line(current_line);
   if bufline.len_chars() == 0 {
     let mut rows: LiteMap<u16, RowViewport> = LiteMap::with_capacity(1);
     rows.insert(current_row, RowViewport::new(0..0));
@@ -413,11 +400,11 @@ fn proc_line_wrap_linebreak(
 
     // Clone this line from `cloned_start_char`, thus we can limit the cloned text within the
     // window's size (i.e. height * width).
-    let cloned_start_char = buffer
+    let cloned_start_char = text
       .char_before(current_line, start_column)
       .unwrap_or(0_usize);
 
-    let cloned_line = buffer
+    let cloned_line = text
       .clone_line(
         current_line,
         cloned_start_char,
@@ -444,11 +431,10 @@ fn proc_line_wrap_linebreak(
       })
       .collect::<LiteMap<usize, usize>>();
 
-    // let mut start_char = buffer
-    match buffer.char_after(current_line, start_column) {
+    match text.char_after(current_line, start_column) {
       Some(mut start_char) => {
         let start_fills = {
-          let width_before = buffer.width_before(current_line, start_char);
+          let width_before = text.width_before(current_line, start_char);
           width_before.saturating_sub(start_column)
         };
 
@@ -466,7 +452,7 @@ fn proc_line_wrap_linebreak(
 
         debug_assert!(current_row < window_height);
         while current_row < window_height {
-          let (end_char, end_fills_result) = match buffer.char_at(current_line, end_width) {
+          let (end_char, end_fills_result) = match text.char_at(current_line, end_width) {
             Some(c) => {
               match last_word_is_too_long {
                 Some((
@@ -487,7 +473,7 @@ fn proc_line_wrap_linebreak(
                   // 1. If the rest part of the word is still too long to put in current row.
                   // 2. If the rest part of the word is not long and can be put in current row.
 
-                  match buffer.char_at(current_line, end_width) {
+                  match text.char_at(current_line, end_width) {
                     Some(c) => {
                       if end_c_of_last_wd > c {
                         // Part-2.1, the rest part of the word is still too long.
@@ -498,7 +484,7 @@ fn proc_line_wrap_linebreak(
 
                         // If the char `c` width is greater than `end_width`, the `c` itself is
                         // the end char.
-                        _end_char_and_prefills(buffer, &bufline, current_line, c, end_width)
+                        _end_char_and_prefills(text, &bufline, current_line, c, end_width)
                       } else {
                         // Part-2.2, the rest part of the word is not long.
                         // Thus we can go back to *normal* algorithm just like part-1.
@@ -506,7 +492,7 @@ fn proc_line_wrap_linebreak(
                         _part1(
                           &words,
                           &words_end_char_idx,
-                          buffer,
+                          text,
                           &bufline,
                           current_line,
                           c,
@@ -529,7 +515,7 @@ fn proc_line_wrap_linebreak(
                   _part1(
                     &words,
                     &words_end_char_idx,
-                    buffer,
+                    text,
                     &bufline,
                     current_line,
                     c,
@@ -552,14 +538,14 @@ fn proc_line_wrap_linebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > buffer.last_char_on_line_no_empty_eol(current_line).unwrap() {
+          if end_char > text.last_char_on_line_no_empty_eol(current_line).unwrap() {
             break;
           }
 
           // Prepare next row.
           current_row += 1;
           start_char = end_char;
-          end_width = buffer.width_before(current_line, end_char) + window_width as usize;
+          end_width = text.width_before(current_line, end_char) + window_width as usize;
         }
 
         (rows, start_fills, end_fills, current_row)
@@ -571,14 +557,14 @@ fn proc_line_wrap_linebreak(
 
 /// Implements [`sync`] with option `wrap=true` and `line-break=true`.
 fn sync_wrap_linebreak(
-  buffer: &Buffer,
+  text: &Text,
   shape: &U16Rect,
   start_line: usize,
   start_column: usize,
 ) -> (ViewportLineRange, LiteMap<usize, LineViewport>) {
   let height = shape.height();
   let width = shape.width();
-  let buffer_len_lines = buffer.rope().len_lines();
+  let buffer_len_lines = text.rope().len_lines();
 
   let mut line_viewports: LiteMap<usize, LineViewport> = LiteMap::with_capacity(height as usize);
 
@@ -589,14 +575,8 @@ fn sync_wrap_linebreak(
   if current_line < buffer_len_lines {
     // If `current_row` goes out of window, `current_line` goes out of buffer.
     while current_row < height && current_line < buffer_len_lines {
-      let (rows, start_fills, end_fills, changed_current_row) = proc_line_wrap_linebreak(
-        buffer,
-        start_column,
-        current_line,
-        current_row,
-        height,
-        width,
-      );
+      let (rows, start_fills, end_fills, changed_current_row) =
+        proc_line_wrap_linebreak(text, start_column, current_line, current_row, height, width);
       current_row = changed_current_row;
 
       line_viewports.insert(
@@ -685,26 +665,26 @@ mod nowrap_detail {
   // 2. If 1st is true, this is the new "start_column" after adjustments.
   // spellchecker:on
   fn to_left(
-    buffer: &Buffer,
+    text: &Text,
     _window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> Option<usize> {
     if cfg!(debug_assertions) {
-      match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+      match text.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
           "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
           target_viewport_start_column,
           target_viewport_start_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_viewport_start_char)
@@ -714,7 +694,7 @@ mod nowrap_detail {
           "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:None",
           target_cursor_line,
           target_cursor_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
@@ -724,10 +704,10 @@ mod nowrap_detail {
       }
     }
 
-    let mut target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+    let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
     // For empty eol, sub extra 1 column.
-    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
     if target_is_empty_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
@@ -748,7 +728,7 @@ mod nowrap_detail {
   //    right.
   // 2. If 1st is true, this is the new "start_column" after adjustments.
   fn to_right(
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
@@ -759,27 +739,19 @@ mod nowrap_detail {
 
     if cfg!(debug_assertions) {
       let target_viewport_start_char =
-        match buffer.char_after(target_cursor_line, target_viewport_start_column) {
-          Some(c) => format!(
-            "{}({:?})",
-            c,
-            buffer.rope().line(target_cursor_line).char(c)
-          ),
+        match text.char_after(target_cursor_line, target_viewport_start_column) {
+          Some(c) => format!("{}({:?})", c, text.rope().line(target_cursor_line).char(c)),
           None => "None".to_string(),
         };
-      let viewport_end_char = match buffer.char_at(target_cursor_line, viewport_end_column) {
-        Some(c) => format!(
-          "{}({:?})",
-          c,
-          buffer.rope().line(target_cursor_line).char(c)
-        ),
+      let viewport_end_char = match text.char_at(target_cursor_line, viewport_end_column) {
+        Some(c) => format!("{}({:?})", c, text.rope().line(target_cursor_line).char(c)),
         None => "None".to_string(),
       };
       trace!(
         "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{},viewport_end_column:{},viewport_end_char:{}",
         target_cursor_line,
         target_cursor_char,
-        buffer
+        text
           .rope()
           .line(target_cursor_line)
           .get_char(target_cursor_char)
@@ -791,8 +763,8 @@ mod nowrap_detail {
       );
     }
 
-    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
-    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char)
+    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width = text.width_until(target_cursor_line, target_cursor_char)
       + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
     let on_right_side = target_cursor_width > viewport_end_column;
 
@@ -809,7 +781,7 @@ mod nowrap_detail {
 
   pub fn adjust_nowrap(
     opts: detail::AdjustOptions,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -822,7 +794,7 @@ mod nowrap_detail {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_left(
-            buffer,
+            text,
             window_actual_shape,
             start_column,
             target_cursor_line,
@@ -833,7 +805,7 @@ mod nowrap_detail {
       }
     } else {
       let start_column_on_left_side = to_left(
-        buffer,
+        text,
         window_actual_shape,
         start_column,
         target_cursor_line,
@@ -849,7 +821,7 @@ mod nowrap_detail {
       if cfg!(debug_assertions) {
         debug_assert!(
           to_right(
-            buffer,
+            text,
             window_actual_shape,
             start_column,
             target_cursor_line,
@@ -860,7 +832,7 @@ mod nowrap_detail {
       }
     } else {
       let start_column_on_right_side = to_right(
-        buffer,
+        text,
         window_actual_shape,
         start_column,
         target_cursor_line,
@@ -880,7 +852,7 @@ mod wrap_detail {
   use super::*;
 
   pub type SyncFn = fn(
-    /* buffer */ &Buffer,
+    /* text */ &Text,
     /* window_actual_shape */ &U16Rect,
     /* start_line */ usize,
     /* start_column */ usize,
@@ -891,7 +863,7 @@ mod wrap_detail {
 
   // Type alias for `proc_line_*` functions.
   pub type ProcessLineFn = fn(
-    /* buffer */ &Buffer,
+    /* text */ &Text,
     /* start_column */ usize,
     /* current_line */ usize,
     /* mut current_row */ u16,
@@ -910,19 +882,19 @@ mod wrap_detail {
 
   fn find_start_char(
     proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
     target_cursor_char: usize,
     mut start_column: usize,
   ) -> usize {
-    let bufline = buffer.rope().line(target_cursor_line);
+    let bufline = text.rope().line(target_cursor_line);
     let bufline_len_char = bufline.len_chars();
-    let bufline_chars_width = buffer.width_until(target_cursor_line, bufline_len_char);
+    let bufline_chars_width = text.width_until(target_cursor_line, bufline_len_char);
 
     while start_column < bufline_chars_width {
       let (rows, _start_fills, _end_fills, _) = proc_fn(
-        buffer,
+        text,
         start_column,
         target_cursor_line,
         0_u16,
@@ -941,13 +913,13 @@ mod wrap_detail {
 
   fn reverse_search_start_column(
     proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> usize {
-    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
-    let target_cursor_width = buffer.width_until(target_cursor_line, target_cursor_char)
+    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width = text.width_until(target_cursor_line, target_cursor_char)
       + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
 
     let approximate_start_column = target_cursor_width.saturating_sub(
@@ -956,7 +928,7 @@ mod wrap_detail {
 
     find_start_char(
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -967,7 +939,7 @@ mod wrap_detail {
   // For case-1
   fn to_left_1(
     proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
@@ -976,19 +948,19 @@ mod wrap_detail {
     let mut start_column = target_viewport_start_column;
 
     if cfg!(debug_assertions) {
-      match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+      match text.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
           "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
           target_viewport_start_column,
           target_viewport_start_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_viewport_start_char)
@@ -998,7 +970,7 @@ mod wrap_detail {
           "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:None",
           target_cursor_line,
           target_cursor_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
@@ -1038,13 +1010,13 @@ mod wrap_detail {
 
     let mut on_left_side = false;
 
-    debug_assert!(buffer.rope().get_line(target_cursor_line).is_some());
-    let last_char = buffer
+    debug_assert!(text.rope().get_line(target_cursor_line).is_some());
+    let last_char = text
       .last_char_on_line(target_cursor_line) // Also consider empty eol char.
       .unwrap_or(0_usize);
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
-      buffer,
+      text,
       start_column,
       target_cursor_line,
       0_u16,
@@ -1062,7 +1034,7 @@ mod wrap_detail {
     if extra_space_left {
       let start_column_include_last_visible_char = reverse_search_start_column(
         proc_fn,
-        buffer,
+        text,
         window_actual_shape,
         target_cursor_line,
         last_char,
@@ -1075,10 +1047,10 @@ mod wrap_detail {
 
     // If `target_cursor_char` is still out of viewport, then we still need to move viewport to
     // left.
-    let mut target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+    let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
     // For empty eol, sub extra 1 column.
-    let target_is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
     if target_is_empty_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
@@ -1097,7 +1069,7 @@ mod wrap_detail {
 
   fn to_right_1(
     proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
@@ -1107,7 +1079,7 @@ mod wrap_detail {
     let width = window_actual_shape.width();
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
-      buffer,
+      text,
       target_viewport_start_column,
       target_cursor_line,
       0_u16,
@@ -1124,7 +1096,7 @@ mod wrap_detail {
     if on_right_side {
       let start_column = reverse_search_start_column(
         proc_fn,
-        buffer,
+        text,
         window_actual_shape,
         target_cursor_line,
         target_cursor_char,
@@ -1139,7 +1111,7 @@ mod wrap_detail {
   pub fn adjust_wrap_1(
     opts: detail::AdjustOptions,
     proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -1153,7 +1125,7 @@ mod wrap_detail {
         debug_assert!(
           to_left_1(
             proc_fn,
-            buffer,
+            text,
             window_actual_shape,
             start_column,
             target_cursor_line,
@@ -1165,7 +1137,7 @@ mod wrap_detail {
     } else {
       let start_column_on_left_side = to_left_1(
         proc_fn,
-        buffer,
+        text,
         window_actual_shape,
         start_column,
         target_cursor_line,
@@ -1182,7 +1154,7 @@ mod wrap_detail {
         debug_assert!(
           to_right_1(
             proc_fn,
-            buffer,
+            text,
             window_actual_shape,
             start_column,
             target_cursor_line,
@@ -1194,7 +1166,7 @@ mod wrap_detail {
     } else {
       let start_column_on_right_side = to_right_1(
         proc_fn,
-        buffer,
+        text,
         window_actual_shape,
         start_column,
         target_cursor_line,
@@ -1211,26 +1183,26 @@ mod wrap_detail {
 
   fn to_left_2_1(
     _proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     _window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> Option<usize> {
     if cfg!(debug_assertions) {
-      match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+      match text.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
           "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
           target_viewport_start_column,
           target_viewport_start_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_viewport_start_char)
@@ -1240,7 +1212,7 @@ mod wrap_detail {
           "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:None",
           target_cursor_line,
           target_cursor_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
@@ -1249,7 +1221,7 @@ mod wrap_detail {
         ),
       }
 
-      let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+      let target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
       debug_assert_eq!(target_viewport_start_column, 0_usize);
       let on_left_side = target_cursor_width < target_viewport_start_column;
       debug_assert!(!on_left_side);
@@ -1260,7 +1232,7 @@ mod wrap_detail {
 
   fn to_right_2_1(
     proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
@@ -1271,7 +1243,7 @@ mod wrap_detail {
     let width = window_actual_shape.width();
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
-      buffer,
+      text,
       target_viewport_start_column,
       target_cursor_line,
       0_u16,
@@ -1288,10 +1260,10 @@ mod wrap_detail {
     if on_right_side {
       // The `on_right_side=true` happens only when `target_cursor_char` is the empty eol, and the
       // `target_cursor_char` is out of viewport.
-      debug_assert!(buffer.is_empty_eol(target_cursor_line, target_cursor_char));
+      debug_assert!(text.is_empty_eol(target_cursor_line, target_cursor_char));
       let start_column = reverse_search_start_column(
         proc_fn,
-        buffer,
+        text,
         window_actual_shape,
         target_cursor_line,
         target_cursor_char,
@@ -1306,7 +1278,7 @@ mod wrap_detail {
   pub fn adjust_wrap_2_1(
     opts: detail::AdjustOptions,
     proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -1320,7 +1292,7 @@ mod wrap_detail {
         debug_assert!(
           to_left_2_1(
             proc_fn,
-            buffer,
+            text,
             window_actual_shape,
             start_column,
             target_cursor_line,
@@ -1332,7 +1304,7 @@ mod wrap_detail {
     } else {
       let start_column_on_left_side = to_left_2_1(
         proc_fn,
-        buffer,
+        text,
         window_actual_shape,
         start_column,
         target_cursor_line,
@@ -1349,7 +1321,7 @@ mod wrap_detail {
         debug_assert!(
           to_right_2_1(
             proc_fn,
-            buffer,
+            text,
             window_actual_shape,
             start_column,
             target_cursor_line,
@@ -1361,7 +1333,7 @@ mod wrap_detail {
     } else {
       let start_column_on_right_side = to_right_2_1(
         proc_fn,
-        buffer,
+        text,
         window_actual_shape,
         start_column,
         target_cursor_line,
@@ -1378,26 +1350,26 @@ mod wrap_detail {
 
   fn to_left_2_2(
     _proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     _window_actual_shape: &U16Rect,
     target_viewport_start_column: usize,
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> Option<usize> {
     if cfg!(debug_assertions) {
-      match buffer.char_at(target_cursor_line, target_viewport_start_column) {
+      match text.char_at(target_cursor_line, target_viewport_start_column) {
         Some(target_viewport_start_char) => trace!(
           "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:{}({:?})",
           target_cursor_line,
           target_cursor_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
             .unwrap_or('?'),
           target_viewport_start_column,
           target_viewport_start_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_viewport_start_char)
@@ -1407,7 +1379,7 @@ mod wrap_detail {
           "target_cursor_line:{},target_cursor_char:{}({:?}),viewport_start_column:{},viewport_start_char:None",
           target_cursor_line,
           target_cursor_char,
-          buffer
+          text
             .rope()
             .line(target_cursor_line)
             .get_char(target_cursor_char)
@@ -1416,7 +1388,7 @@ mod wrap_detail {
         ),
       }
 
-      let target_cursor_width = buffer.width_before(target_cursor_line, target_cursor_char);
+      let target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
       debug_assert_eq!(target_viewport_start_column, 0_usize);
       let on_left_side = target_cursor_width < target_viewport_start_column;
       debug_assert!(!on_left_side);
@@ -1428,7 +1400,7 @@ mod wrap_detail {
   fn to_right_2_2(
     proc_fn: ProcessLineFn,
     lines_viewport: &LiteMap<usize, LineViewport>,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_viewport_start_line: usize,
     target_viewport_start_column: usize,
@@ -1446,7 +1418,7 @@ mod wrap_detail {
     let (current_last_row_idx, current_last_row_viewport) = current_target_rows.last().unwrap();
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
-      buffer,
+      text,
       target_viewport_start_column,
       target_cursor_line,
       0_u16,
@@ -1455,7 +1427,7 @@ mod wrap_detail {
     );
 
     let fully_show = preview_target_rows.len() == current_target_rows.len();
-    let is_empty_eol = buffer.is_empty_eol(target_cursor_line, target_cursor_char);
+    let is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
     let is_last_row = *current_last_row_idx == height.saturating_sub(1);
     let out_of_view = current_last_row_viewport.end_char_idx()
       > current_last_row_viewport.start_char_idx()
@@ -1480,7 +1452,7 @@ mod wrap_detail {
     opts: detail::AdjustOptions,
     proc_fn: ProcessLineFn,
     lines_viewport: &LiteMap<usize, LineViewport>,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
     target_cursor_char: usize,
@@ -1494,7 +1466,7 @@ mod wrap_detail {
         debug_assert!(
           to_left_2_2(
             proc_fn,
-            buffer,
+            text,
             window_actual_shape,
             start_column,
             target_cursor_line,
@@ -1506,7 +1478,7 @@ mod wrap_detail {
     } else {
       let start_column_on_left_side = to_left_2_2(
         proc_fn,
-        buffer,
+        text,
         window_actual_shape,
         start_column,
         target_cursor_line,
@@ -1524,7 +1496,7 @@ mod wrap_detail {
           to_right_2_2(
             proc_fn,
             lines_viewport,
-            buffer,
+            text,
             window_actual_shape,
             start_line,
             start_column,
@@ -1538,7 +1510,7 @@ mod wrap_detail {
       let start_line_column_on_right_side = to_right_2_2(
         proc_fn,
         lines_viewport,
-        buffer,
+        text,
         window_actual_shape,
         start_line,
         start_column,
@@ -1556,7 +1528,7 @@ mod wrap_detail {
 
   pub fn reverse_search_start_line(
     proc_fn: ProcessLineFn,
-    buffer: &Buffer,
+    text: &Text,
     window_actual_shape: &U16Rect,
     target_cursor_line: usize,
   ) -> usize {
@@ -1568,7 +1540,7 @@ mod wrap_detail {
 
     while (n < height as usize) && (current_line >= 0) {
       let (rows, _start_fills, _end_fills, _) =
-        proc_fn(buffer, 0_usize, current_line as usize, 0_u16, height, width);
+        proc_fn(text, 0_usize, current_line as usize, 0_u16, height, width);
       n += rows.len();
 
       if current_line == 0 || n >= height as usize {
@@ -1593,7 +1565,7 @@ mod wrap_detail {
 pub fn search_anchor_downward(
   viewport: &Viewport,
   opts: &ViewportOptions,
-  buffer: &Buffer,
+  text: &Text,
   shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1601,11 +1573,11 @@ pub fn search_anchor_downward(
   // The cursor must move downward.
   debug_assert!(target_cursor_line >= viewport.start_line_idx());
 
-  let buffer_len_lines = buffer.rope().len_lines();
+  let buffer_len_lines = text.rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
-    buffer
+    text
       .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
@@ -1613,7 +1585,7 @@ pub fn search_anchor_downward(
   match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_downward_nowrap(
       viewport,
-      buffer,
+      text,
       shape,
       target_cursor_line,
       target_cursor_char,
@@ -1622,7 +1594,7 @@ pub fn search_anchor_downward(
       sync_wrap_nolinebreak,
       proc_line_wrap_nolinebreak,
       viewport,
-      buffer,
+      text,
       shape,
       target_cursor_line,
       target_cursor_char,
@@ -1631,7 +1603,7 @@ pub fn search_anchor_downward(
       sync_wrap_linebreak,
       proc_line_wrap_linebreak,
       viewport,
-      buffer,
+      text,
       shape,
       target_cursor_line,
       target_cursor_char,
@@ -1641,7 +1613,7 @@ pub fn search_anchor_downward(
 
 fn search_anchor_downward_nowrap(
   viewport: &Viewport,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1668,7 +1640,7 @@ fn search_anchor_downward_nowrap(
     while (n + 1 < height as usize) && (current_line >= 0) {
       let current_row = 0_u16;
       let (rows, _start_fills, _end_fills, _) = proc_line_nowrap(
-        buffer,
+        text,
         viewport_start_column,
         current_line as usize,
         current_row,
@@ -1689,7 +1661,7 @@ fn search_anchor_downward_nowrap(
 
   nowrap_detail::adjust_nowrap(
     detail::AdjustOptions::all(),
-    buffer,
+    text,
     window_actual_shape,
     target_cursor_line,
     target_cursor_char,
@@ -1717,7 +1689,7 @@ fn search_anchor_downward_wrap(
   sync_fn: wrap_detail::SyncFn,
   proc_fn: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1728,7 +1700,7 @@ fn search_anchor_downward_wrap(
   let width = window_actual_shape.width();
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
-    buffer,
+    text,
     0,
     target_cursor_line,
     0_u16,
@@ -1748,7 +1720,7 @@ fn search_anchor_downward_wrap(
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::all(),
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -1765,7 +1737,7 @@ fn search_anchor_downward_wrap(
     wrap_detail::adjust_wrap_2_1(
       detail::AdjustOptions::all(),
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -1780,19 +1752,19 @@ fn search_anchor_downward_wrap(
     // Force `start_column` to be 0, because viewport can contains the line.
     let start_line = wrap_detail::reverse_search_start_line(
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
     );
     let start_line = std::cmp::max(start_line, viewport_start_line);
     let start_column = 0_usize;
     let (_new_line_range, new_lines_viewport) =
-      sync_fn(buffer, window_actual_shape, start_line, start_column);
+      sync_fn(text, window_actual_shape, start_line, start_column);
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
       proc_fn,
       &new_lines_viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -1809,7 +1781,7 @@ fn search_anchor_downward_wrap(
 pub fn search_anchor_upward(
   viewport: &Viewport,
   opts: &ViewportOptions,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1817,11 +1789,11 @@ pub fn search_anchor_upward(
   // The cursor must move upward.
   debug_assert!(target_cursor_line < viewport.end_line_idx());
 
-  let buffer_len_lines = buffer.rope().len_lines();
+  let buffer_len_lines = text.rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
-    buffer
+    text
       .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
@@ -1829,7 +1801,7 @@ pub fn search_anchor_upward(
   match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_upward_nowrap(
       viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -1838,7 +1810,7 @@ pub fn search_anchor_upward(
       sync_wrap_nolinebreak,
       proc_line_wrap_nolinebreak,
       viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -1847,7 +1819,7 @@ pub fn search_anchor_upward(
       sync_wrap_linebreak,
       proc_line_wrap_linebreak,
       viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -1857,7 +1829,7 @@ pub fn search_anchor_upward(
 
 fn search_anchor_upward_nowrap(
   viewport: &Viewport,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1881,7 +1853,7 @@ fn search_anchor_upward_nowrap(
 
   nowrap_detail::adjust_nowrap(
     detail::AdjustOptions::all(),
-    buffer,
+    text,
     window_actual_shape,
     target_cursor_line,
     target_cursor_char,
@@ -1894,7 +1866,7 @@ fn search_anchor_upward_wrap(
   sync_fn: wrap_detail::SyncFn,
   proc_fn: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1905,7 +1877,7 @@ fn search_anchor_upward_wrap(
   let width = window_actual_shape.width();
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
-    buffer,
+    text,
     0,
     target_cursor_line,
     0_u16,
@@ -1925,7 +1897,7 @@ fn search_anchor_upward_wrap(
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::all(),
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -1942,7 +1914,7 @@ fn search_anchor_upward_wrap(
     wrap_detail::adjust_wrap_2_1(
       detail::AdjustOptions::all(),
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -1957,12 +1929,12 @@ fn search_anchor_upward_wrap(
     let start_line = std::cmp::min(target_cursor_line, viewport_start_line);
     let start_column = 0_usize;
     let (_new_line_range, new_lines_viewport) =
-      sync_fn(buffer, window_actual_shape, start_line, start_column);
+      sync_fn(text, window_actual_shape, start_line, start_column);
     wrap_detail::adjust_wrap_2_2(
       detail::AdjustOptions::all(),
       proc_fn,
       &new_lines_viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -1979,7 +1951,7 @@ fn search_anchor_upward_wrap(
 pub fn search_anchor_leftward(
   viewport: &Viewport,
   opts: &ViewportOptions,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -1989,11 +1961,11 @@ pub fn search_anchor_leftward(
     target_cursor_line >= viewport.start_line_idx() && target_cursor_line < viewport.end_line_idx()
   );
 
-  let buffer_len_lines = buffer.rope().len_lines();
+  let buffer_len_lines = text.rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
-    buffer
+    text
       .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
@@ -2001,7 +1973,7 @@ pub fn search_anchor_leftward(
   match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_leftward_nowrap(
       viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2009,7 +1981,7 @@ pub fn search_anchor_leftward(
     (true, false) => search_anchor_leftward_wrap(
       proc_line_wrap_nolinebreak,
       viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2017,7 +1989,7 @@ pub fn search_anchor_leftward(
     (true, true) => search_anchor_leftward_wrap(
       proc_line_wrap_linebreak,
       viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2027,7 +1999,7 @@ pub fn search_anchor_leftward(
 
 fn search_anchor_leftward_nowrap(
   viewport: &Viewport,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -2038,7 +2010,7 @@ fn search_anchor_leftward_nowrap(
 
   nowrap_detail::adjust_nowrap(
     detail::AdjustOptions::no_rightward(),
-    buffer,
+    text,
     window_actual_shape,
     target_cursor_line,
     target_cursor_char,
@@ -2050,7 +2022,7 @@ fn search_anchor_leftward_nowrap(
 fn search_anchor_leftward_wrap(
   proc_fn: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -2061,7 +2033,7 @@ fn search_anchor_leftward_wrap(
   let width = window_actual_shape.width();
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
-    buffer,
+    text,
     0,
     target_cursor_line,
     0_u16,
@@ -2081,7 +2053,7 @@ fn search_anchor_leftward_wrap(
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::no_rightward(),
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2098,7 +2070,7 @@ fn search_anchor_leftward_wrap(
     wrap_detail::adjust_wrap_2_1(
       detail::AdjustOptions::no_rightward(),
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2117,7 +2089,7 @@ fn search_anchor_leftward_wrap(
       detail::AdjustOptions::no_rightward(),
       proc_fn,
       viewport.lines(),
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2134,7 +2106,7 @@ fn search_anchor_leftward_wrap(
 pub fn search_anchor_rightward(
   viewport: &Viewport,
   opts: &ViewportOptions,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -2144,11 +2116,11 @@ pub fn search_anchor_rightward(
     target_cursor_line >= viewport.start_line_idx() && target_cursor_line < viewport.end_line_idx()
   );
 
-  let buffer_len_lines = buffer.rope().len_lines();
+  let buffer_len_lines = text.rope().len_lines();
   let target_cursor_line = std::cmp::min(target_cursor_line, buffer_len_lines.saturating_sub(1));
   let target_cursor_char = std::cmp::min(
     target_cursor_char,
-    buffer
+    text
       .last_char_on_line(target_cursor_line)
       .unwrap_or(0_usize),
   );
@@ -2156,7 +2128,7 @@ pub fn search_anchor_rightward(
   match (opts.wrap(), opts.line_break()) {
     (false, _) => search_anchor_rightward_nowrap(
       viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2164,7 +2136,7 @@ pub fn search_anchor_rightward(
     (true, false) => search_anchor_rightward_wrap(
       proc_line_wrap_nolinebreak,
       viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2172,7 +2144,7 @@ pub fn search_anchor_rightward(
     (true, true) => search_anchor_rightward_wrap(
       proc_line_wrap_linebreak,
       viewport,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2182,7 +2154,7 @@ pub fn search_anchor_rightward(
 
 fn search_anchor_rightward_nowrap(
   viewport: &Viewport,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -2193,7 +2165,7 @@ fn search_anchor_rightward_nowrap(
 
   nowrap_detail::adjust_nowrap(
     detail::AdjustOptions::no_leftward(),
-    buffer,
+    text,
     window_actual_shape,
     target_cursor_line,
     target_cursor_char,
@@ -2205,7 +2177,7 @@ fn search_anchor_rightward_nowrap(
 fn search_anchor_rightward_wrap(
   proc_fn: wrap_detail::ProcessLineFn,
   viewport: &Viewport,
-  buffer: &Buffer,
+  text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
   target_cursor_char: usize,
@@ -2216,7 +2188,7 @@ fn search_anchor_rightward_wrap(
   let width = window_actual_shape.width();
 
   let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
-    buffer,
+    text,
     0,
     target_cursor_line,
     0_u16,
@@ -2236,7 +2208,7 @@ fn search_anchor_rightward_wrap(
     wrap_detail::adjust_wrap_1(
       detail::AdjustOptions::no_leftward(),
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2253,7 +2225,7 @@ fn search_anchor_rightward_wrap(
     wrap_detail::adjust_wrap_2_1(
       detail::AdjustOptions::no_leftward(),
       proc_fn,
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
@@ -2272,7 +2244,7 @@ fn search_anchor_rightward_wrap(
       detail::AdjustOptions::no_leftward(),
       proc_fn,
       viewport.lines(),
-      buffer,
+      text,
       window_actual_shape,
       target_cursor_line,
       target_cursor_char,
