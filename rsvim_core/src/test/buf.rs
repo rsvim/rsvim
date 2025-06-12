@@ -24,7 +24,7 @@ pub fn make_buffer_from_lines(
   }
   let rp = rpb.finish();
   let tx = Text::new(terminal_height, rp, opts);
-  let buf = Buffer::_new(text, None, None, None, None);
+  let buf = Buffer::_new(tx, None, None, None, None);
   Buffer::to_arc(buf)
 }
 
