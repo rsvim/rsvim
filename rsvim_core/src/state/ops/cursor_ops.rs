@@ -9,7 +9,6 @@ use crate::ui::viewport::{
 use crate::ui::widget::window::Window;
 
 use compact_str::ToCompactString;
-use std::ops::Range;
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
