@@ -142,6 +142,9 @@ jobs:
   release_build:
     name: Release Build
     runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        rust_version: [stable, nightly, 1.85.0]
     env:
       RUSTC_WRAPPER: "sccache"
       SCCACHE_GHA_ENABLED: "true"
@@ -149,6 +152,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ matrix.rust_version }}
       - uses: actions/checkout@v4
       - name: Cargo Build
         run: |
