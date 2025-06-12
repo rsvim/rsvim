@@ -8,7 +8,9 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::window::Window;
 
-// use tracing::trace;
+use compact_str::ToCompactString;
+use std::ops::Range;
+use tracing::trace;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// Cursor move direction.
@@ -304,4 +306,228 @@ fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_heig
     start_line_idx += 1;
   }
   max_len_chars
+}
+
+/// Only for testing
+pub fn _bufline_to_string(bufline: &ropey::RopeSlice) -> String {
+  let mut builder = String::with_capacity(bufline.len_chars());
+  for c in bufline.chars() {
+    builder.push(c);
+  }
+  builder
+}
+
+/// Only for testing
+pub fn _dbg_print_details(buffer: &Text, line_idx: usize, char_idx: usize, msg: &str) {
+  if cfg!(debug_assertions) {
+    match buffer.rope().get_line(line_idx) {
+      Some(bufline) => {
+        trace!(
+          "{}, line:{}, len_chars:{}, focus char:{}",
+          msg,
+          line_idx,
+          bufline.len_chars(),
+          char_idx
+        );
+        let start_char_on_line = buffer.rope().line_to_char(line_idx);
+
+        let mut builder1 = String::new();
+        let mut builder2 = String::new();
+        for (i, c) in bufline.chars().enumerate() {
+          let w = buffer.char_width(c);
+          if w > 0 {
+            builder1.push(c);
+          }
+          let s: String = std::iter::repeat_n(
+            if i + start_char_on_line == char_idx {
+              '^'
+            } else {
+              ' '
+            },
+            w,
+          )
+          .collect();
+          builder2.push_str(s.as_str());
+        }
+        trace!("-{}-", builder1);
+        trace!("-{}-", builder2);
+      }
+      None => trace!(
+        "{} line:{}, focus char:{}, not exist",
+        msg, line_idx, char_idx
+      ),
+    }
+
+    trace!("{}, Whole buffer:", msg);
+    for i in 0..buffer.rope().len_lines() {
+      trace!("{i}:{:?}", _bufline_to_string(&buffer.rope().line(i)));
+    }
+  }
+}
+
+pub fn _dbg_print_details_on_line(buffer: &Text, line_idx: usize, char_idx: usize, msg: &str) {
+  if cfg!(debug_assertions) {
+    match buffer.rope().get_line(line_idx) {
+      Some(bufline) => {
+        trace!(
+          "{} line:{}, len_chars:{}, focus char:{}",
+          msg,
+          line_idx,
+          bufline.len_chars(),
+          char_idx
+        );
+        let mut builder1 = String::new();
+        let mut builder2 = String::new();
+        for (i, c) in bufline.chars().enumerate() {
+          let w = buffer.char_width(c);
+          if w > 0 {
+            builder1.push(c);
+          }
+          let s: String = std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w).collect();
+          builder2.push_str(s.as_str());
+        }
+        trace!("-{}-", builder1);
+        trace!("-{}-", builder2);
+      }
+      None => trace!(
+        "{} line:{}, focus char:{}, not exist",
+        msg, line_idx, char_idx
+      ),
+    }
+
+    trace!("{}, Whole buffer:", msg);
+    for i in 0..buffer.rope().len_lines() {
+      trace!("{i}:{:?}", _bufline_to_string(&buffer.rope().line(i)));
+    }
+  }
+}
+
+/// Returns `(cursor_line_idx, cursor_char_idx)` if delete successful, or returns `None` if failed.
+pub fn delete_at_cursor(
+  cursor_viewport: &CursorViewport,
+  text: &mut Text,
+  n: isize,
+) -> Option<(usize, usize)> {
+  let cursor_line_idx = cursor_viewport.line_idx();
+  let cursor_char_idx = cursor_viewport.char_idx();
+  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+
+  let cursor_char_absolute_pos_before_delete =
+    text.rope().line_to_char(cursor_line_idx) + cursor_char_idx;
+
+  _dbg_print_details(
+    text,
+    cursor_line_idx,
+    cursor_char_absolute_pos_before_delete,
+    "Before delete",
+  );
+
+  let to_be_deleted_range = if n > 0 {
+    // Delete to right side, on range `[cursor..cursor+n)`.
+    cursor_char_absolute_pos_before_delete
+      ..(std::cmp::min(
+        cursor_char_absolute_pos_before_delete + n as usize,
+        text.rope().len_chars().saturating_sub(1),
+      ))
+  } else {
+    // Delete to left side, on range `[cursor-n,cursor)`.
+    (std::cmp::max(
+      0_usize,
+      cursor_char_absolute_pos_before_delete.saturating_add_signed(n),
+    ))..cursor_char_absolute_pos_before_delete
+  };
+
+  if to_be_deleted_range.is_empty() {
+    return None;
+  }
+
+  text.rope_mut().remove(to_be_deleted_range);
+
+  // For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
+  // to always keep an eol (end-of-line) at the end of text file. It helps the cursor
+  // motion.
+  append_eol_at_file_end_when_not_exist(text);
+
+  let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) =
+    _new_position_after_deletion(text, cursor_char_absolute_pos_before_delete, n);
+
+  if cursor_line_idx == cursor_line_idx_after_deleted {
+    // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
+    // Thus only need to truncate chars after insert position on the same line.
+    let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_deleted, cursor_char_idx);
+    text.truncate_cached_line_since_char(cursor_line_idx, min_cursor_char_idx);
+  } else {
+    // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
+    let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_deleted, cursor_line_idx);
+    text.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
+  }
+
+  _dbg_print_details_on_line(
+    text,
+    cursor_line_idx,
+    cursor_char_idx_after_deleted,
+    "After deleted",
+  );
+
+  Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
+}
+
+/// Return new `cursor_line_idx`, `cursor_char_idx` after deletion.
+fn _new_position_after_deletion(
+  text: &Text,
+  cursor_char_absolute_pos_before_delete: usize,
+  n: isize,
+) -> (usize, usize) {
+  let cursor_char_absolute_pos_after_deleted = if n > 0 {
+    cursor_char_absolute_pos_before_delete
+  } else {
+    cursor_char_absolute_pos_before_delete.saturating_add_signed(n)
+  };
+  let cursor_char_absolute_pos_after_deleted = std::cmp::min(
+    cursor_char_absolute_pos_after_deleted,
+    text.rope().len_chars().saturating_sub(1),
+  );
+  let cursor_line_idx_after_deleted = text
+    .rope()
+    .char_to_line(cursor_char_absolute_pos_after_deleted);
+  let cursor_line_absolute_pos_after_deleted =
+    text.rope().line_to_char(cursor_line_idx_after_deleted);
+  let cursor_char_idx_after_deleted =
+    cursor_char_absolute_pos_after_deleted - cursor_line_absolute_pos_after_deleted;
+  (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted)
+}
+
+// For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
+// to always keep an eol (end-of-line) at the end of text file. It helps the cursor
+// motion.
+pub fn append_eol_at_file_end_when_not_exist(text: &mut Text) {
+  use crate::defaults::ascii::end_of_line as eol;
+  let buf_eol = text.options().end_of_line();
+
+  let buffer_len_chars = text.rope().len_chars();
+  let last_char_on_buf = buffer_len_chars.saturating_sub(1);
+  match text.rope().get_char(last_char_on_buf) {
+    Some(c) => {
+      if c.to_compact_string() != eol::LF && c.to_compact_string() != eol::CR {
+        text
+          .rope_mut()
+          .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
+        let inserted_line_idx = text.rope().char_to_line(buffer_len_chars);
+        text.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
+        _dbg_print_details(
+          text,
+          inserted_line_idx,
+          buffer_len_chars,
+          "Eol appended(non-empty)",
+        );
+      }
+    }
+    None => {
+      text
+        .rope_mut()
+        .insert(0_usize, buf_eol.to_compact_string().as_str());
+      text.clear_cached_lines();
+      _dbg_print_details(text, 0_usize, buffer_len_chars, "Eol appended(empty)");
+    }
+  }
 }

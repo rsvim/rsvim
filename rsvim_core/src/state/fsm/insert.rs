@@ -98,98 +98,6 @@ impl CursorMoveImplOptions {
   }
 }
 
-fn _bufline_to_string(bufline: &ropey::RopeSlice) -> String {
-  let mut builder = String::with_capacity(bufline.len_chars());
-  for c in bufline.chars() {
-    builder.push(c);
-  }
-  builder
-}
-
-fn _dbg_print_details(buffer: &Text, line_idx: usize, char_idx: usize, msg: &str) {
-  if cfg!(debug_assertions) {
-    match buffer.rope().get_line(line_idx) {
-      Some(bufline) => {
-        trace!(
-          "{}, line:{}, len_chars:{}, focus char:{}",
-          msg,
-          line_idx,
-          bufline.len_chars(),
-          char_idx
-        );
-        let start_char_on_line = buffer.rope().line_to_char(line_idx);
-
-        let mut builder1 = String::new();
-        let mut builder2 = String::new();
-        for (i, c) in bufline.chars().enumerate() {
-          let w = buffer.char_width(c);
-          if w > 0 {
-            builder1.push(c);
-          }
-          let s: String = std::iter::repeat_n(
-            if i + start_char_on_line == char_idx {
-              '^'
-            } else {
-              ' '
-            },
-            w,
-          )
-          .collect();
-          builder2.push_str(s.as_str());
-        }
-        trace!("-{}-", builder1);
-        trace!("-{}-", builder2);
-      }
-      None => trace!(
-        "{} line:{}, focus char:{}, not exist",
-        msg, line_idx, char_idx
-      ),
-    }
-
-    trace!("{}, Whole buffer:", msg);
-    for i in 0..buffer.rope().len_lines() {
-      trace!("{i}:{:?}", _bufline_to_string(&buffer.rope().line(i)));
-    }
-  }
-}
-
-fn _dbg_print_details_on_line(buffer: &Text, line_idx: usize, char_idx: usize, msg: &str) {
-  if cfg!(debug_assertions) {
-    match buffer.rope().get_line(line_idx) {
-      Some(bufline) => {
-        trace!(
-          "{} line:{}, len_chars:{}, focus char:{}",
-          msg,
-          line_idx,
-          bufline.len_chars(),
-          char_idx
-        );
-        let mut builder1 = String::new();
-        let mut builder2 = String::new();
-        for (i, c) in bufline.chars().enumerate() {
-          let w = buffer.char_width(c);
-          if w > 0 {
-            builder1.push(c);
-          }
-          let s: String = std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w).collect();
-          builder2.push_str(s.as_str());
-        }
-        trace!("-{}-", builder1);
-        trace!("-{}-", builder2);
-      }
-      None => trace!(
-        "{} line:{}, focus char:{}, not exist",
-        msg, line_idx, char_idx
-      ),
-    }
-
-    trace!("{}, Whole buffer:", msg);
-    for i in 0..buffer.rope().len_lines() {
-      trace!("{i}:{:?}", _bufline_to_string(&buffer.rope().line(i)));
-    }
-  }
-}
-
 impl InsertStateful {
   fn delete_at_cursor(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
     let tree = data_access.tree.clone();
@@ -203,86 +111,15 @@ impl InsertStateful {
       if let Some(current_window_id) = tree.current_window_id() {
         if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
           let cursor_viewport = current_window.cursor_viewport();
-          let cursor_line_idx = cursor_viewport.line_idx();
-          let cursor_char_idx = cursor_viewport.char_idx();
-          debug_assert!(buffer.text().rope().get_line(cursor_line_idx).is_some());
 
-          let cursor_line_absolute_pos = buffer.text().rope().line_to_char(cursor_line_idx);
-          let cursor_char_absolute_pos_before_delete = cursor_line_absolute_pos + cursor_char_idx;
+          let maybe_new_cursor_position =
+            cursor_ops::delete_at_cursor(&cursor_viewport, buffer.text_mut(), n);
 
-          _dbg_print_details(
-            buffer.text(),
-            cursor_line_idx,
-            cursor_char_absolute_pos_before_delete,
-            "Before delete",
-          );
-
-          let to_be_deleted_range = if n > 0 {
-            // Delete to right side, on range `[cursor..cursor+n)`.
-            cursor_char_absolute_pos_before_delete
-              ..(std::cmp::min(
-                cursor_char_absolute_pos_before_delete + n as usize,
-                buffer.text().rope().len_chars().saturating_sub(1),
-              ))
-          } else {
-            // Delete to left side, on range `[cursor-n,cursor)`.
-            (std::cmp::max(
-              0_usize,
-              cursor_char_absolute_pos_before_delete.saturating_add_signed(n),
-            ))..cursor_char_absolute_pos_before_delete
-          };
-
-          if to_be_deleted_range.is_empty() {
+          if maybe_new_cursor_position.is_none() {
             return StatefulValue::InsertMode(InsertStateful::default());
           }
 
-          buffer.text_mut().rope_mut().remove(to_be_deleted_range);
-
-          let cursor_char_absolute_pos_after_deleted = if n > 0 {
-            cursor_char_absolute_pos_before_delete
-          } else {
-            cursor_char_absolute_pos_before_delete.saturating_add_signed(n)
-          };
-          let cursor_char_absolute_pos_after_deleted = std::cmp::min(
-            cursor_char_absolute_pos_after_deleted,
-            buffer.text().rope().len_chars().saturating_sub(1),
-          );
-          let cursor_line_idx_after_deleted = buffer
-            .text()
-            .rope()
-            .char_to_line(cursor_char_absolute_pos_after_deleted);
-          let cursor_line_absolute_pos_after_deleted = buffer
-            .text()
-            .rope()
-            .line_to_char(cursor_line_idx_after_deleted);
-          let cursor_char_idx_after_deleted =
-            cursor_char_absolute_pos_after_deleted - cursor_line_absolute_pos_after_deleted;
-
-          self._append_eol_if_not_exists_at_file_end(&mut buffer);
-
-          if cursor_line_idx == cursor_line_idx_after_deleted {
-            // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
-            // Thus only need to truncate chars after insert position on the same line.
-            let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_deleted, cursor_char_idx);
-            buffer
-              .text()
-              .truncate_cached_line_since_char(cursor_line_idx, min_cursor_char_idx);
-          } else {
-            // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-            let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_deleted, cursor_line_idx);
-            buffer
-              .text()
-              .retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
-          }
-
-          _dbg_print_details_on_line(
-            buffer.text(),
-            cursor_line_idx,
-            cursor_char_idx_after_deleted,
-            "After deleted",
-          );
-
-          (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted)
+          maybe_new_cursor_position.unwrap()
         } else {
           unreachable!()
         }
@@ -378,7 +215,7 @@ impl InsertStateful {
           let cursor_line_absolute_pos = buffer.text().rope().line_to_char(cursor_line_idx);
           let cursor_char_absolute_pos_before_insert = cursor_line_absolute_pos + cursor_char_idx;
 
-          _dbg_print_details(
+          cursor_ops::_dbg_print_details(
             buffer.text(),
             cursor_line_idx,
             cursor_char_absolute_pos_before_insert,
@@ -405,7 +242,10 @@ impl InsertStateful {
           let cursor_char_idx_after_inserted =
             cursor_char_absolute_pos_after_inserted - cursor_line_absolute_pos_after_inserted;
 
-          self._append_eol_if_not_exists_at_file_end(&mut buffer);
+          // For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
+          // to always keep an eol (end-of-line) at the end of text file. It helps the cursor
+          // motion.
+          cursor_ops::append_eol_at_file_end_when_not_exist(buffer.text_mut());
 
           if cursor_line_idx == cursor_line_idx_after_inserted {
             // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
@@ -426,7 +266,7 @@ impl InsertStateful {
               .retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
           }
 
-          _dbg_print_details_on_line(
+          cursor_ops::_dbg_print_details_on_line(
             buffer.text(),
             cursor_line_idx,
             cursor_char_idx_after_inserted,
@@ -519,50 +359,6 @@ impl InsertStateful {
       }
     } else {
       unreachable!()
-    }
-  }
-
-  // For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
-  // to always keep an eol (end-of-line) at the end of text file. It helps the cursor
-  // motion.
-  fn _append_eol_if_not_exists_at_file_end(&self, buffer: &mut Buffer) {
-    use crate::defaults::ascii::end_of_line as eol;
-    let buf_eol = buffer.options().end_of_line();
-
-    let buffer_len_chars = buffer.text().rope().len_chars();
-    let last_char_on_buf = buffer_len_chars.saturating_sub(1);
-    match buffer.text().rope().get_char(last_char_on_buf) {
-      Some(c) => {
-        if c.to_compact_string() != eol::LF && c.to_compact_string() != eol::CR {
-          buffer
-            .text_mut()
-            .rope_mut()
-            .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
-          let inserted_line_idx = buffer.text().rope().char_to_line(buffer_len_chars);
-          buffer
-            .text()
-            .retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
-          _dbg_print_details(
-            buffer.text(),
-            inserted_line_idx,
-            buffer_len_chars,
-            "Eol appended(non-empty)",
-          );
-        }
-      }
-      None => {
-        buffer
-          .text_mut()
-          .rope_mut()
-          .insert(0_usize, buf_eol.to_compact_string().as_str());
-        buffer.text().clear_cached_lines();
-        _dbg_print_details(
-          buffer.text(),
-          0_usize,
-          buffer_len_chars,
-          "Eol appended(empty)",
-        );
-      }
     }
   }
 }
