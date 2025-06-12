@@ -8,7 +8,6 @@ use crate::{arc_impl, lock};
 pub use opt::*;
 pub use text::*;
 
-use compact_str::CompactString;
 use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
@@ -81,20 +80,20 @@ impl Buffer {
     self.id
   }
 
-  pub fn options(&self) -> &BufferLocalOptions {
-    self.text.options()
-  }
-
-  pub fn set_options(&mut self, options: &BufferLocalOptions) {
-    self.text.set_options(options);
-  }
-
   pub fn text(&self) -> &Text {
     &self.text
   }
 
   pub fn text_mut(&mut self) -> &mut Text {
     &mut self.text
+  }
+
+  pub fn options(&self) -> &BufferLocalOptions {
+    self.text.options()
+  }
+
+  pub fn set_options(&mut self, options: &BufferLocalOptions) {
+    self.text.set_options(options);
   }
 
   pub fn filename(&self) -> &Option<PathBuf> {
@@ -129,129 +128,6 @@ impl Buffer {
     self.last_sync_time = last_sync_time;
   }
 }
-
-// Unicode {
-impl Buffer {
-  /// Get the display width for a `char`, supports both ASCI control codes and unicode.
-  ///
-  /// The char display width follows the
-  /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/).
-  pub fn char_width(&self, c: char) -> usize {
-    unicode::char_width(self.options(), c)
-  }
-
-  /// Get the printable cell symbol and its display width.
-  pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
-    unicode::char_symbol(self.options(), c)
-  }
-}
-// Unicode }
-
-// Rope {
-impl Buffer {
-  /// Get rope.
-  pub fn rope(&self) -> &Rope {
-    self.text.rope()
-  }
-
-  /// Get mutable rope.
-  pub fn rope_mut(&mut self) -> &mut Rope {
-    self.text.rope_mut()
-  }
-
-  /// Similar with [`Rope::get_line`], but collect and clone a normal string with limited length,
-  /// for performance reason when the line is too long to clone.
-  pub fn clone_line(
-    &self,
-    line_idx: usize,
-    start_char_idx: usize,
-    max_chars: usize,
-  ) -> Option<String> {
-    self.text.clone_line(line_idx, start_char_idx, max_chars)
-  }
-
-  /// Get last char index on line.
-  ///
-  /// It returns the char index if exists, returns `None` if line not exists or line is empty.
-  pub fn last_char_on_line(&self, line_idx: usize) -> Option<usize> {
-    self.text.last_char_on_line(line_idx)
-  }
-
-  /// Get last visible char index on line.
-  ///
-  /// NOTE: This function iterates each char from the end of the line to the beginning of the line.
-  ///
-  /// It returns the char index if exists, returns `None` if line not exists or line is
-  /// empty/blank.
-  pub fn last_char_on_line_no_empty_eol(&self, line_idx: usize) -> Option<usize> {
-    self.text.last_char_on_line_no_empty_eol(line_idx)
-  }
-
-  /// Whether the `line_idx`/`char_idx` is empty eol (end-of-line).
-  pub fn is_empty_eol(&self, line_idx: usize, char_idx: usize) -> bool {
-    self.text.is_empty_eol(line_idx, char_idx)
-  }
-}
-// Rope }
-
-// Display Width {
-impl Buffer {
-  pub fn width_before(&self, line_idx: usize, char_idx: usize) -> usize {
-    self.text.width_before(line_idx, char_idx)
-  }
-
-  pub fn width_until(&self, line_idx: usize, char_idx: usize) -> usize {
-    self.text.width_until(line_idx, char_idx)
-  }
-
-  pub fn char_before(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.text.char_before(line_idx, width)
-  }
-
-  pub fn char_at(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.text.char_at(line_idx, width)
-  }
-
-  pub fn char_after(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.text.char_after(line_idx, width)
-  }
-
-  pub fn last_char_until(&self, line_idx: usize, width: usize) -> Option<usize> {
-    self.text.last_char_until(line_idx, width)
-  }
-
-  pub fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
-    self
-      .text
-      .truncate_cached_line_since_char(line_idx, char_idx)
-  }
-
-  pub fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
-    self.text.truncate_cached_line_since_width(line_idx, width)
-  }
-
-  pub fn remove_cached_line(&self, line_idx: usize) {
-    self.text.remove_cached_line(line_idx)
-  }
-
-  pub fn retain_cached_lines<F>(&self, f: F)
-  where
-    F: Fn(/* line_idx */ &usize, /* column_idx */ &ColumnIndex) -> bool,
-  {
-    self.text.retain_cached_lines(f)
-  }
-
-  /// Clear cache.
-  pub fn clear_cached_lines(&self) {
-    self.text.clear_cached_lines()
-  }
-
-  /// Resize cache.
-  pub fn resize_cached_lines(&self, canvas_height: u16) {
-    self.text.resize_cached_lines(canvas_height)
-  }
-}
-// Display Width }
 
 #[derive(Debug, Clone)]
 /// The manager for all normal (file) buffers.

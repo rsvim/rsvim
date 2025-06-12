@@ -1,6 +1,6 @@
 //! The normal mode.
 
-use crate::buf::Buffer;
+use crate::buf::Text;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -103,7 +103,7 @@ impl NormalStateful {
 
         // Only move cursor when it is different from current cursor.
         let (target_cursor_char, target_cursor_line, search_direction) =
-          self._target_cursor_exclude_empty_eol(&cursor_viewport, &buffer, op);
+          self._target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
 
         let new_viewport: Option<ViewportArc> = {
           let viewport_opts = ViewportOptions::from(current_window.options());
@@ -122,7 +122,7 @@ impl NormalStateful {
             let new_viewport = cursor_ops::window_scroll_to(
               &viewport,
               current_window,
-              &buffer,
+              buffer.text(),
               Operation::WindowScrollTo((start_column, start_line)),
             );
             if let Some(new_viewport_arc) = new_viewport.clone() {
@@ -141,7 +141,7 @@ impl NormalStateful {
           let new_cursor_viewport = cursor_ops::cursor_move_to(
             &current_viewport,
             &cursor_viewport,
-            &buffer,
+            buffer.text(),
             Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
           );
 
@@ -169,12 +169,12 @@ impl NormalStateful {
   fn _target_cursor_exclude_empty_eol(
     &self,
     cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
+    text: &Text,
     op: Operation,
   ) -> (usize, usize, ViewportSearchDirection) {
     let (target_cursor_char, target_cursor_line, move_direction) =
       cursor_ops::normalize_to_cursor_move_to_exclude_empty_eol(
-        buffer,
+        text,
         op,
         cursor_viewport.char_idx(),
         cursor_viewport.line_idx(),
@@ -201,12 +201,12 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
 
         let (target_cursor_char, target_cursor_line, _search_direction) =
-          self._target_cursor_exclude_empty_eol(&cursor_viewport, &buffer, op);
+          self._target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
 
         let maybe_new_cursor_viewport = cursor_ops::cursor_move_to(
           &viewport,
           &cursor_viewport,
-          &buffer,
+          buffer.text(),
           Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
         );
 
@@ -246,7 +246,7 @@ impl NormalStateful {
         let maybe_new_viewport_arc = cursor_ops::window_scroll_to(
           &viewport,
           current_window,
-          &buffer,
+          buffer.text(),
           Operation::WindowScrollTo((start_column, start_line)),
         );
         if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
@@ -377,7 +377,7 @@ mod tests_util {
     );
 
     let buffer = lock!(buffer);
-    let buflines = buffer.rope().get_lines_at(actual.start_line_idx()).unwrap();
+    let buflines = buffer.text().rope().lines_at(actual.start_line_idx());
     let total_lines = expect_end_line - expect_start_line;
 
     for (l, line) in buflines.enumerate() {
