@@ -2,7 +2,7 @@
 
 #![allow(unused_imports)]
 
-use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BuffersManager, BuffersManagerArc};
+use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BuffersManager, BuffersManagerArc, Text};
 //use crate::envar;
 use crate::lock;
 
@@ -23,12 +23,14 @@ pub fn make_buffer_from_lines(
     rpb.append(line);
   }
   let rp = rpb.finish();
-  let buf = Buffer::_new(terminal_height, rp, opts, None, None, None, None);
+  let tx = Text::new(terminal_height, rp, opts);
+  let buf = Buffer::_new(text, None, None, None, None);
   Buffer::to_arc(buf)
 }
 
 pub fn make_empty_buffer(terminal_height: u16, opts: BufferLocalOptions) -> BufferArc {
-  let buf = Buffer::_new(terminal_height, Rope::new(), opts, None, None, None, None);
+  let tx = Text::new(terminal_height, Rope::new(), opts);
+  let buf = Buffer::_new(tx, None, None, None, None);
   Buffer::to_arc(buf)
 }
 
