@@ -139,8 +139,8 @@ jobs:
           files: lcov.info
           token: ${{ secrets.CODECOV_TOKEN }}
           verbose: true
-  release_build:
-    name: Release Build
+  build:
+    name: Build
     runs-on: ubuntu-22.04
     strategy:
       matrix:
@@ -155,7 +155,11 @@ jobs:
         with:
           toolchain: ${{ matrix.rust_version }}
       - uses: actions/checkout@v4
-      - name: Cargo Build
+      - name: Build Release
         run: |
           cargo build --release
           ./target/release/rsvim --version
+      - name: Build Debug
+        run: |
+          cargo build
+          ./target/debug/rsvim --version
