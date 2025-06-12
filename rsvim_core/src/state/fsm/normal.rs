@@ -1,6 +1,6 @@
 //! The normal mode.
 
-use crate::buf::{Buffer, Text};
+use crate::buf::Text;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};

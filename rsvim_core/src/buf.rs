@@ -8,7 +8,6 @@ use crate::{arc_impl, lock};
 pub use opt::*;
 pub use text::*;
 
-use compact_str::CompactString;
 use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
