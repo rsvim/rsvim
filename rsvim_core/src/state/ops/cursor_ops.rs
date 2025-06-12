@@ -401,6 +401,41 @@ pub fn _dbg_print_details_on_line(buffer: &Text, line_idx: usize, char_idx: usiz
   }
 }
 
+// For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
+// to always keep an eol (end-of-line) at the end of text file. It helps the cursor
+// motion.
+fn _append_eol_at_file_end(text: &mut Text) {
+  use crate::defaults::ascii::end_of_line as eol;
+  let buf_eol = text.options().end_of_line();
+
+  let buffer_len_chars = text.rope().len_chars();
+  let last_char_on_buf = buffer_len_chars.saturating_sub(1);
+  match text.rope().get_char(last_char_on_buf) {
+    Some(c) => {
+      if c.to_compact_string() != eol::LF && c.to_compact_string() != eol::CR {
+        text
+          .rope_mut()
+          .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
+        let inserted_line_idx = text.rope().char_to_line(buffer_len_chars);
+        text.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
+        _dbg_print_details(
+          text,
+          inserted_line_idx,
+          buffer_len_chars,
+          "Eol appended(non-empty)",
+        );
+      }
+    }
+    None => {
+      text
+        .rope_mut()
+        .insert(0_usize, buf_eol.to_compact_string().as_str());
+      text.clear_cached_lines();
+      _dbg_print_details(text, 0_usize, buffer_len_chars, "Eol appended(empty)");
+    }
+  }
+}
+
 /// Returns `(cursor_line_idx, cursor_char_idx)` if delete successful, or returns `None` if failed.
 pub fn delete_at_cursor(
   cursor_viewport: &CursorViewport,
@@ -481,41 +516,6 @@ pub fn delete_at_cursor(
   );
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
-}
-
-// For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
-// to always keep an eol (end-of-line) at the end of text file. It helps the cursor
-// motion.
-fn _append_eol_at_file_end(text: &mut Text) {
-  use crate::defaults::ascii::end_of_line as eol;
-  let buf_eol = text.options().end_of_line();
-
-  let buffer_len_chars = text.rope().len_chars();
-  let last_char_on_buf = buffer_len_chars.saturating_sub(1);
-  match text.rope().get_char(last_char_on_buf) {
-    Some(c) => {
-      if c.to_compact_string() != eol::LF && c.to_compact_string() != eol::CR {
-        text
-          .rope_mut()
-          .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
-        let inserted_line_idx = text.rope().char_to_line(buffer_len_chars);
-        text.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
-        _dbg_print_details(
-          text,
-          inserted_line_idx,
-          buffer_len_chars,
-          "Eol appended(non-empty)",
-        );
-      }
-    }
-    None => {
-      text
-        .rope_mut()
-        .insert(0_usize, buf_eol.to_compact_string().as_str());
-      text.clear_cached_lines();
-      _dbg_print_details(text, 0_usize, buffer_len_chars, "Eol appended(empty)");
-    }
-  }
 }
 
 /// Returns `(cursor_line_idx, cursor_char_idx)` after insertion.
