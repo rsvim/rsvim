@@ -77,7 +77,7 @@ impl Widgetable for WindowContent {
     let mut row_idx = 0_u16;
     let mut line_idx = viewport.start_line_idx();
 
-    let mut buflines = buffer.rope().get_lines_at(line_idx).unwrap();
+    let mut buflines = buffer.text().rope().get_lines_at(line_idx).unwrap();
 
     while line_idx < viewport.end_line_idx() {
       debug_assert!(row_idx < height);
@@ -149,7 +149,7 @@ impl Widgetable for WindowContent {
             let mut chars_iter = bline.get_chars_at(r_viewport.start_char_idx()).unwrap();
             while char_idx < r_viewport.end_char_idx() {
               let c = chars_iter.next().unwrap();
-              let (unicode_symbol, unicode_width) = buffer.char_symbol(c);
+              let (unicode_symbol, unicode_width) = buffer.text().char_symbol(c);
 
               let cell = Cell::with_symbol(unicode_symbol);
               let cell_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
@@ -171,8 +171,12 @@ impl Widgetable for WindowContent {
           }
 
           // Render left empty parts.
-          let end_dcol_idx = buffer.width_before(line_idx, r_viewport.end_char_idx());
-          let start_dcol_idx = buffer.width_before(line_idx, r_viewport.start_char_idx());
+          let end_dcol_idx = buffer
+            .text()
+            .width_before(line_idx, r_viewport.end_char_idx());
+          let start_dcol_idx = buffer
+            .text()
+            .width_before(line_idx, r_viewport.start_char_idx());
           let occupied_length = (end_dcol_idx - start_dcol_idx) as u16 + start_fills + end_fills;
 
           if width > occupied_length {
