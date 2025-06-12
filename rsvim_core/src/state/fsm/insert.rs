@@ -454,7 +454,7 @@ impl InsertStateful {
         let viewport_opts = ViewportOptions::from(current_window.options());
         let updated_viewport = Viewport::to_arc(Viewport::view(
           &viewport_opts,
-          &buffer,
+          buffer.text(),
           current_window.actual_shape(),
           start_line,
           start_column,
@@ -610,7 +610,7 @@ impl InsertStateful {
           let (start_line, start_column) = viewport.search_anchor(
             search_direction,
             &viewport_opts,
-            buffer,
+            buffer.text(),
             current_window.actual_shape(),
             target_cursor_line,
             target_cursor_char,
