@@ -61,9 +61,7 @@ impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
   /// manage buffer instances.
   pub fn _new(
-    canvas_height: u16,
-    rope: Rope,
-    options: BufferLocalOptions,
+    text: Text,
     filename: Option<PathBuf>,
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
@@ -71,7 +69,7 @@ impl Buffer {
   ) -> Self {
     Self {
       id: next_buffer_id(),
-      text: Text::new(canvas_height, rope, options),
+      text,
       filename,
       absolute_filename,
       metadata,
@@ -333,10 +331,9 @@ impl BuffersManager {
         }
       }
     } else {
+      let text = Text::new(canvas_height, Rope::new(), *self.global_local_options());
       Buffer::_new(
-        canvas_height,
-        Rope::new(),
-        *self.global_local_options(),
+        text,
         Some(filename.to_path_buf()),
         Some(abs_filename.clone()),
         None,
@@ -367,15 +364,8 @@ impl BuffersManager {
   pub fn new_empty_buffer(&mut self, canvas_height: u16) -> BufferId {
     debug_assert!(!self.buffers_by_path.contains_key(&None));
 
-    let buf = Buffer::_new(
-      canvas_height,
-      Rope::new(),
-      *self.global_local_options(),
-      None,
-      None,
-      None,
-      None,
-    );
+    let text = Text::new(canvas_height, Rope::new(), *self.global_local_options());
+    let buf = Buffer::_new(text, None, None, None, None);
     let buf_id = buf.id();
     let buf = Buffer::to_arc(buf);
     self.buffers.insert(buf_id, buf.clone());
@@ -449,10 +439,13 @@ impl BuffersManager {
         );
         debug_assert!(bytes == buf.len());
 
-        Ok(Buffer::_new(
+        let text = Text::new(
           canvas_height,
           self.to_rope(&buf, buf.len()),
           *self.global_local_options(),
+        );
+        Ok(Buffer::_new(
+          text,
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
