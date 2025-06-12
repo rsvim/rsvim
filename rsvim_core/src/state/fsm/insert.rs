@@ -162,75 +162,7 @@ impl InsertStateful {
       if let Some(current_window_id) = tree.current_window_id() {
         if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
           let cursor_viewport = current_window.cursor_viewport();
-          let cursor_line_idx = cursor_viewport.line_idx();
-          let cursor_char_idx = cursor_viewport.char_idx();
-          debug_assert!(buffer.text().rope().get_line(cursor_line_idx).is_some());
-
-          let cursor_line_absolute_pos = buffer.text().rope().line_to_char(cursor_line_idx);
-          let cursor_char_absolute_pos_before_insert = cursor_line_absolute_pos + cursor_char_idx;
-
-          cursor_ops::_dbg_print_details(
-            buffer.text(),
-            cursor_line_idx,
-            cursor_char_absolute_pos_before_insert,
-            "Before insert",
-          );
-
-          buffer
-            .text_mut()
-            .rope_mut()
-            .insert(cursor_char_absolute_pos_before_insert, text.as_str());
-
-          // The `text` may contains line break '\n', which can interrupts the `cursor_line_idx`
-          // and we need to re-calculate it.
-          let cursor_char_absolute_pos_after_inserted =
-            cursor_char_absolute_pos_before_insert + text.chars().count();
-          let cursor_line_idx_after_inserted = buffer
-            .text()
-            .rope()
-            .char_to_line(cursor_char_absolute_pos_after_inserted);
-          let cursor_line_absolute_pos_after_inserted = buffer
-            .text()
-            .rope()
-            .line_to_char(cursor_line_idx_after_inserted);
-          let cursor_char_idx_after_inserted =
-            cursor_char_absolute_pos_after_inserted - cursor_line_absolute_pos_after_inserted;
-
-          // For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
-          // to always keep an eol (end-of-line) at the end of text file. It helps the cursor
-          // motion.
-          cursor_ops::append_eol_at_file_end_when_not_exist(buffer.text_mut());
-
-          if cursor_line_idx == cursor_line_idx_after_inserted {
-            // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
-            // Thus only need to truncate chars after insert position on the same line.
-            debug_assert!(cursor_char_idx_after_inserted >= cursor_char_idx);
-            let min_cursor_char_idx =
-              std::cmp::min(cursor_char_idx_after_inserted, cursor_char_idx);
-            buffer.text().truncate_cached_line_since_char(
-              cursor_line_idx,
-              min_cursor_char_idx.saturating_sub(1),
-            );
-          } else {
-            // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-            let min_cursor_line_idx =
-              std::cmp::min(cursor_line_idx_after_inserted, cursor_line_idx);
-            buffer
-              .text()
-              .retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
-          }
-
-          cursor_ops::_dbg_print_details_on_line(
-            buffer.text(),
-            cursor_line_idx,
-            cursor_char_idx_after_inserted,
-            "After inserted",
-          );
-
-          (
-            cursor_line_idx_after_inserted,
-            cursor_char_idx_after_inserted,
-          )
+          cursor_ops::insert_at_cursor(&cursor_viewport, buffer.text_mut(), text)
         } else {
           unreachable!()
         }
