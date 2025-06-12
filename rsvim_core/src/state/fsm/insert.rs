@@ -8,7 +8,7 @@ use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, Viewport, ViewportArc, ViewportOptions, ViewportSearchAnchorDirection,
+  CursorViewport, Viewport, ViewportArc, ViewportOptions, ViewportSearchDirection,
 };
 
 use compact_str::{CompactString, ToCompactString};
@@ -670,7 +670,7 @@ impl InsertStateful {
     cursor_viewport: &CursorViewport,
     buffer: &Buffer,
     op: Operation,
-  ) -> (usize, usize, ViewportSearchAnchorDirection) {
+  ) -> (usize, usize, ViewportSearchDirection) {
     let (target_cursor_char, target_cursor_line, move_direction) = if opts.include_empty_eol {
       cursor_ops::normalize_to_cursor_move_to_include_empty_eol(
         buffer,
@@ -688,10 +688,10 @@ impl InsertStateful {
     };
 
     let search_direction = match move_direction {
-      CursorMoveDirection::Up => ViewportSearchAnchorDirection::Up,
-      CursorMoveDirection::Down => ViewportSearchAnchorDirection::Down,
-      CursorMoveDirection::Left => ViewportSearchAnchorDirection::Left,
-      CursorMoveDirection::Right => ViewportSearchAnchorDirection::Right,
+      CursorMoveDirection::Up => ViewportSearchDirection::Up,
+      CursorMoveDirection::Down => ViewportSearchDirection::Down,
+      CursorMoveDirection::Left => ViewportSearchDirection::Left,
+      CursorMoveDirection::Right => ViewportSearchDirection::Right,
     };
     (target_cursor_char, target_cursor_line, search_direction)
   }
@@ -713,7 +713,7 @@ mod tests_util {
   use crate::ui::canvas::Canvas;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
   use crate::ui::widget::Widgetable;
   use crate::ui::widget::window::content::WindowContent;
@@ -947,7 +947,7 @@ mod tests_get_operation {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
   use crate::{lock, state};
@@ -1006,7 +1006,7 @@ mod tests_cursor_move {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
@@ -1630,7 +1630,7 @@ mod tests_insert_text {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
@@ -3251,7 +3251,7 @@ mod tests_delete_text {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchAnchorDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
