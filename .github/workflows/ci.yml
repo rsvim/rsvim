@@ -144,7 +144,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        rust_version: [stable, nightly, 1.85.0]
+        rust_version: [stable, 1.85.0]
     env:
       RUSTC_WRAPPER: "sccache"
       SCCACHE_GHA_ENABLED: "true"
@@ -156,14 +156,10 @@ jobs:
           toolchain: ${{ matrix.rust_version }}
       - uses: actions/checkout@v4
       - name: Build Release
-        env:
-          RUSTFLAGS: ""
         run: |
           cargo build --release
           ./target/release/rsvim --version
       - name: Build Debug
-        env:
-          RUSTFLAGS: ""
         run: |
           cargo build
           ./target/debug/rsvim --version
