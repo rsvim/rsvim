@@ -377,11 +377,7 @@ mod tests_util {
     );
 
     let buffer = lock!(buffer);
-    let buflines = buffer
-      .text()
-      .rope()
-      .get_lines_at(actual.start_line_idx())
-      .unwrap();
+    let buflines = buffer.text().rope().lines_at(actual.start_line_idx());
     let total_lines = expect_end_line - expect_start_line;
 
     for (l, line) in buflines.enumerate() {
