@@ -57,18 +57,12 @@ def append_linker_rustflags():
     if NO_LINKER:
         return
 
-    if LINUX:
-        if MOLD_FULLPATH is not None:
-            append_rustflags("-Clink-arg=-fuse-ld=mold")
-        elif LLD_FULLPATH is not None:
-            append_rustflags("-Clink-arg=-fuse-ld=lld")
-        else:
-            logging.warning(f"Both 'lld' ({LLD_NAME}) and 'mold' not found!")
+    if LINUX and MOLD_FULLPATH is not None:
+        append_rustflags("-Clink-arg=-fuse-ld=mold")
+    elif LLD_FULLPATH is not None:
+        append_rustflags("-Clink-arg=-fuse-ld=lld")
     else:
-        if LLD_FULLPATH is not None:
-            append_rustflags("-Clink-arg=-fuse-ld=lld")
-        else:
-            logging.warning(f"'lld' ({LLD_NAME}) not found!")
+        logging.warning(f"Both 'lld' ({LLD_NAME}) and 'mold' not found!")
 
 
 def set_rustflags(command):
