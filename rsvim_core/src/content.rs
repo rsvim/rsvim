@@ -1,7 +1,7 @@
 //! Text contents except buffers.
 
 use crate::arc_impl;
-use crate::buf::{BufferLocalOptionsBuilder, Text, TextOptions};
+use crate::buf::{BufferLocalOptionsBuilder, Text};
 #[allow(unused_imports)]
 use crate::prelude::*;
 
@@ -18,7 +18,7 @@ arc_impl!(Contents);
 
 impl Contents {
   pub fn new(canvas_size: U16Size) -> Self {
-    let cmdline_opts = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let cmdline_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     Self {
       cmdline_content: Text::new(cmdline_opts, canvas_size, Rope::new()),
     }
