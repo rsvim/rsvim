@@ -3,6 +3,7 @@
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::widget::Widgetable;
+use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootContainer;
 use crate::ui::widget::window::{
@@ -29,6 +30,7 @@ pub enum TreeNode {
   RootContainer(RootContainer),
   Window(Window),
   Cursor(Cursor),
+  Cmdline(Cmdline),
 }
 
 macro_rules! tree_node_getter {
@@ -37,6 +39,7 @@ macro_rules! tree_node_getter {
       TreeNode::RootContainer(n) => n.$method_name(),
       TreeNode::Window(n) => n.$method_name(),
       TreeNode::Cursor(n) => n.$method_name(),
+      TreeNode::Cmdline(n) => n.$method_name(),
     }
   };
 }
@@ -47,6 +50,7 @@ macro_rules! tree_node_setter {
       TreeNode::RootContainer(n) => n.$method_name($method_arg),
       TreeNode::Window(n) => n.$method_name($method_arg),
       TreeNode::Cursor(n) => n.$method_name($method_arg),
+      TreeNode::Cmdline(n) => n.$method_name($method_arg),
     }
   };
 }
@@ -57,6 +61,7 @@ impl TreeNode {
       TreeNode::RootContainer(n) => n.id(),
       TreeNode::Window(n) => n.id(),
       TreeNode::Cursor(n) => n.id(),
+      TreeNode::Cmdline(n) => n.id(),
     }
   }
 }
@@ -122,6 +127,7 @@ impl Widgetable for TreeNode {
       TreeNode::RootContainer(w) => w.draw(canvas),
       TreeNode::Window(w) => w.draw(canvas),
       TreeNode::Cursor(w) => w.draw(canvas),
+      TreeNode::Cmdline(w) => w.draw(canvas),
     }
   }
 }
