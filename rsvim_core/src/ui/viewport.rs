@@ -2360,7 +2360,7 @@ mod tests_view_wrap_nolinebreak {
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2445,7 +2445,7 @@ mod tests_view_wrap_nolinebreak {
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2516,7 +2516,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2563,7 +2563,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2610,7 +2610,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2663,7 +2663,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2710,7 +2710,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "但它仍然contains several th\tings 我们想要测试的文字内容：\n",
@@ -2770,7 +2770,7 @@ mod tests_view_wrap_linebreak {
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2821,7 +2821,7 @@ mod tests_view_wrap_linebreak {
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2879,7 +2879,7 @@ mod tests_view_wrap_linebreak {
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2947,7 +2947,7 @@ mod tests_view_wrap_linebreak {
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2998,7 +2998,7 @@ mod tests_view_wrap_linebreak {
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -3049,7 +3049,7 @@ mod tests_view_wrap_linebreak {
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -3101,7 +3101,7 @@ mod tests_view_wrap_linebreak {
     let win_opts = make_wrap_linebreak();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
