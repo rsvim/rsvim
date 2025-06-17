@@ -96,12 +96,14 @@ impl Buffer {
   }
 
   pub fn options(&self) -> &BufferLocalOptions {
+    debug_assert_eq!(TextOptions::from(&self.options), *self.text.options());
     &self.options
   }
 
   pub fn set_options(&mut self, options: &BufferLocalOptions) {
     self.options = *options;
     self.text.set_options(&TextOptions::from(options));
+    debug_assert_eq!(TextOptions::from(&self.options), *self.text.options());
   }
 
   pub fn filename(&self) -> &Option<PathBuf> {
