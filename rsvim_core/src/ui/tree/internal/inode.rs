@@ -6,10 +6,10 @@ use crate::prelude::*;
 use std::fmt::Debug;
 use std::sync::atomic::{AtomicI32, Ordering};
 
-pub type InodeId = i32;
+pub type TreeNodeId = i32;
 
 pub trait Inodeable: Sized + Clone + Debug {
-  fn id(&self) -> InodeId;
+  fn id(&self) -> TreeNodeId;
 
   fn depth(&self) -> usize;
 
@@ -99,7 +99,7 @@ macro_rules! inode_impl {
 /// Next unique UI widget ID.
 ///
 /// NOTE: Start from 100001, so be different from buffer ID.
-pub fn next_node_id() -> InodeId {
+pub fn next_node_id() -> TreeNodeId {
   static VALUE: AtomicI32 = AtomicI32::new(100001);
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
@@ -107,7 +107,7 @@ pub fn next_node_id() -> InodeId {
 #[derive(Debug, Clone, Copy)]
 /// The internal tree node, it's both a container for the widgets and common attributes.
 pub struct InodeBase {
-  id: InodeId,
+  id: TreeNodeId,
   depth: usize,
   shape: IRect,
   actual_shape: U16Rect,
@@ -130,7 +130,7 @@ impl InodeBase {
     }
   }
 
-  pub fn id(&self) -> InodeId {
+  pub fn id(&self) -> TreeNodeId {
     self.id
   }
 

@@ -28,7 +28,7 @@ pub struct Window {
   base: Itree<WindowNode>,
 
   // The Window content widget ID.
-  content_id: InodeId,
+  content_id: TreeNodeId,
 
   // Buffer.
   buffer: BufferWk,
