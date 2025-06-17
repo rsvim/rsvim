@@ -1486,7 +1486,7 @@ mod tests_wrap_nolinebreak_startcol {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
