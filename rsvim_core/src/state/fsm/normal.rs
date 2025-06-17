@@ -290,7 +290,7 @@ mod tests_util {
     lines: Vec<&str>,
   ) -> (TreeArc, StateArc, BuffersManagerArc, BufferArc) {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
     let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
     let state = State::to_arc(State::default());
@@ -694,7 +694,7 @@ mod tests_raw_cursor_move_y_by {
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -798,7 +798,7 @@ mod tests_raw_cursor_move_x_by {
     let terminal_size = U16Size::new(10, 10);
     let lines = vec![];
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -844,7 +844,7 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -891,7 +891,7 @@ mod tests_raw_cursor_move_x_by {
 
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -937,7 +937,7 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -990,7 +990,7 @@ mod tests_raw_cursor_move_x_by {
     ];
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -1062,7 +1062,7 @@ mod tests_raw_cursor_move_by {
     ];
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -1130,7 +1130,7 @@ mod tests_raw_cursor_move_by {
     ];
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -1211,7 +1211,7 @@ mod tests_raw_cursor_move_by {
     ];
     let terminal_size = U16Size::new(50, 50);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines.clone());
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -1296,7 +1296,7 @@ mod tests_raw_cursor_move_to {
     ];
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -1364,7 +1364,7 @@ mod tests_raw_cursor_move_to {
     ];
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines);
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
@@ -1446,7 +1446,7 @@ mod tests_raw_cursor_move_to {
 
     let terminal_size = U16Size::new(50, 50);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
-    let buf = make_buffer_from_lines(terminal_size.height(), buf_opts, lines.clone());
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
     let tree = make_tree_with_buffers(
       terminal_size,
