@@ -32,9 +32,9 @@ pub fn make_tree_with_buffers(
   let window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
+      tree_mut.global_local_options(),
       window_shape,
       Arc::downgrade(buf),
-      tree_mut.global_local_options(),
     )
   };
   let window_id = window.id();

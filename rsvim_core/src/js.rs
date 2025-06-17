@@ -2,7 +2,7 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::cli::CliOpt;
-use crate::content::ContentsArc;
+use crate::content::TemporaryContentsArc;
 use crate::js::err::JsError;
 use crate::js::exception::ExceptionState;
 use crate::js::hook::module_resolve_cb;
@@ -340,7 +340,7 @@ pub struct JsRuntimeState {
   pub runtime_path: Arc<Mutex<Vec<PathBuf>>>,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
-  pub contents: ContentsArc,
+  pub contents: TemporaryContentsArc,
   // Same as the `state` in EventLoop.
   pub editing_state: StateArc,
   // Data Access for RSVIM }
@@ -381,7 +381,7 @@ impl JsRuntime {
     runtime_path: Arc<Mutex<Vec<PathBuf>>>,
     tree: TreeArc,
     buffers: BuffersManagerArc,
-    contents: ContentsArc,
+    contents: TemporaryContentsArc,
     editing_state: StateArc,
   ) -> Self {
     // Configuration flags for V8.
