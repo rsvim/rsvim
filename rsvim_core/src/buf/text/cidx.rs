@@ -1,6 +1,6 @@
 //! Indexes mappings between character and its display width.
 
-use crate::buf::opt::BufferLocalOptions;
+use crate::buf::text::opt::TextOptions;
 use crate::buf::unicode;
 use ropey::RopeSlice;
 
@@ -113,7 +113,7 @@ impl ColumnIndex {
   // Build cache beyond the bound by `char_idx` or `width`.
   fn _build_cache(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     char_idx_bound: Option<usize>,
     width_bound: Option<usize>,
@@ -165,7 +165,7 @@ impl ColumnIndex {
   // Build cache until `char_idx`.
   fn _build_cache_until_char(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     char_idx: usize,
   ) {
@@ -187,7 +187,7 @@ impl ColumnIndex {
   ///    length.
   pub fn width_before(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     char_idx: usize,
   ) -> usize {
@@ -226,7 +226,7 @@ impl ColumnIndex {
   ///    the line length.
   pub fn width_until(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     char_idx: usize,
   ) -> usize {
@@ -252,7 +252,7 @@ impl ColumnIndex {
   // Build cache until specified `width`.
   fn _build_cache_until_width(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) {
@@ -274,7 +274,7 @@ impl ColumnIndex {
   /// 2. It returns the previous char index otherwise.
   pub fn char_before(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -318,7 +318,7 @@ impl ColumnIndex {
   /// 2. It returns the **current** char index otherwise.
   pub fn char_at(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -367,7 +367,7 @@ impl ColumnIndex {
   /// 2. It returns the next char index otherwise.
   pub fn char_after(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -405,7 +405,7 @@ impl ColumnIndex {
   ///    returns the last char index.
   pub fn last_char_until(
     &mut self,
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     width: usize,
   ) -> Option<usize> {
@@ -485,7 +485,7 @@ mod tests {
     rb.finish()
   }
 
-  fn make_text_from_rope(terminal_height: u16, opts: BufferLocalOptions, rp: Rope) -> Text {
+  fn make_text_from_rope(terminal_height: u16, opts: TextOptions, rp: Rope) -> Text {
     Text::new(terminal_height, rp, opts)
   }
 
@@ -625,7 +625,7 @@ mod tests {
   }
 
   fn assert_width_at(
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[usize],
@@ -638,7 +638,7 @@ mod tests {
   }
 
   fn assert_width_at_rev(
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[(usize, usize)],
@@ -651,7 +651,7 @@ mod tests {
   }
 
   fn assert_width_before(
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[usize],
@@ -664,7 +664,7 @@ mod tests {
   }
 
   fn assert_width_before_rev(
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     actual: &mut ColumnIndex,
     expect: &[(usize, usize)],
@@ -996,7 +996,7 @@ mod tests {
   }
 
   fn assert_char_before(
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_before: &[(usize, Option<usize>)],
@@ -1014,7 +1014,7 @@ mod tests {
   }
 
   fn assert_char_at(
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_until: &[(usize, Option<usize>)],
@@ -1034,7 +1034,7 @@ mod tests {
   }
 
   fn assert_char_after(
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_after: &[(usize, Option<usize>)],
@@ -1052,7 +1052,7 @@ mod tests {
   }
 
   fn assert_last_char_until(
-    options: &BufferLocalOptions,
+    options: &TextOptions,
     buf_line: &RopeSlice,
     widx: &mut ColumnIndex,
     expect_until: &[(usize, Option<usize>)],
