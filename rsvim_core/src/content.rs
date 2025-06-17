@@ -1,4 +1,4 @@
-//! Text contents except buffers.
+//! Temporary contents except buffers.
 
 use crate::arc_impl;
 use crate::buf::{BufferLocalOptionsBuilder, Text};
@@ -10,13 +10,13 @@ use ropey::Rope;
 
 #[derive(Debug)]
 /// Text contents except buffers.
-pub struct Contents {
+pub struct TemporaryContents {
   cmdline_content: Text,
 }
 
-arc_impl!(Contents);
+arc_impl!(TemporaryContents);
 
-impl Contents {
+impl TemporaryContents {
   pub fn new(canvas_size: U16Size) -> Self {
     let cmdline_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     Self {
