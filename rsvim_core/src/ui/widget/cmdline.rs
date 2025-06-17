@@ -8,7 +8,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::opt::{self, WindowLocalOptions};
+use crate::ui::widget::window::opt::WindowLocalOptions;
 use crate::{inode_impl, lock};
 
 #[derive(Debug, Clone)]
@@ -32,10 +32,12 @@ impl Cmdline {
     contents: TemporaryContentsWk,
     viewport: ViewportWk,
   ) -> Self {
+    // Force cmdline window options.
     let mut options = *opts;
     options.set_wrap(false);
     options.set_line_break(false);
     options.set_scroll_off(0_u16);
+
     let base = InodeBase::new(shape);
     Self {
       base,
