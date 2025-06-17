@@ -2,6 +2,7 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOpt;
+use crate::content::ContentsArc;
 use crate::envar;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
@@ -81,7 +82,7 @@ pub struct EventLoop {
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
   /// Other text contents (except buffers).
-  pub contents: 
+  pub contents: ContentsArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
