@@ -2,7 +2,6 @@
 
 use crate::content::TemporaryContentsWk;
 use crate::ui::tree::*;
-use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::WindowLocalOptions;
 
@@ -27,4 +26,8 @@ impl Cmdline {
       options,
     }
   }
+}
+
+impl Widgetable for Cmdline {
+  fn draw(&self, _canvas: &mut crate::ui::canvas::Canvas) {}
 }
