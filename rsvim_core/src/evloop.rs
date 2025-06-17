@@ -80,6 +80,8 @@ pub struct EventLoop {
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
+  /// Other text contents (except buffers).
+  pub contents: 
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
