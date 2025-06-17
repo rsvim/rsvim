@@ -14,7 +14,6 @@ use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
 use std::fs::Metadata;
 use std::io::Read;
-use std::option;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
