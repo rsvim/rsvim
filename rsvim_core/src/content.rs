@@ -9,7 +9,7 @@ use paste::paste;
 use ropey::Rope;
 
 #[derive(Debug)]
-/// Text contents except buffers.
+/// Temporary contents except buffers.
 pub struct TemporaryContents {
   cmdline_content: Text,
 }
