@@ -1,6 +1,7 @@
 //! Vim cmdline.
 
 use crate::content::TemporaryContentsWk;
+use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::WindowLocalOptions;

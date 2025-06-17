@@ -334,9 +334,9 @@ impl EventLoop {
       let (buf_id, buf) = buffers.first_key_value().unwrap();
       trace!("Bind first buffer to default window {:?}", buf_id);
       Window::new(
+        tree.global_local_options(),
         window_shape,
         Arc::downgrade(buf),
-        tree.global_local_options(),
       )
     };
     let window_id = window.id();

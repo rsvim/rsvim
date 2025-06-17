@@ -354,9 +354,9 @@ mod tests {
       ),
     );
     Window::new(
+      tree.global_local_options(),
       window_shape,
       Arc::downgrade(&buffer),
-      tree.global_local_options(),
     )
   }
 
