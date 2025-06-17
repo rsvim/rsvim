@@ -132,7 +132,7 @@ impl EventLoop {
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
-    let text_contents = Contents::to_arc(Contents::new(canvas_size.height()));
+    let text_contents = Contents::to_arc(Contents::new(canvas_size));
 
     // State
     let state = State::to_arc(State::default());
