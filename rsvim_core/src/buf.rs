@@ -61,7 +61,7 @@ impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
   /// manage buffer instances.
   pub fn _new(
-    opts: &BufferLocalOptions,
+    opts: BufferLocalOptions,
     canvas_size: U16Size,
     rope: Rope,
     filename: Option<PathBuf>,
@@ -69,11 +69,11 @@ impl Buffer {
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
   ) -> Self {
-    let text_opts = TextOptions::from(opts);
+    let text_opts = TextOptions::from(&opts);
     let text = Text::new(text_opts, canvas_size, rope);
     Self {
       id: next_buffer_id(),
-      options: *opts,
+      options: opts,
       text,
       filename,
       absolute_filename,
@@ -217,7 +217,7 @@ impl BuffersManager {
       }
     } else {
       Buffer::_new(
-        self.global_local_options(),
+        *self.global_local_options(),
         canvas_size,
         Rope::new(),
         Some(filename.to_path_buf()),
@@ -251,7 +251,7 @@ impl BuffersManager {
     debug_assert!(!self.buffers_by_path.contains_key(&None));
 
     let buf = Buffer::_new(
-      self.global_local_options(),
+      *self.global_local_options(),
       canvas_size,
       Rope::new(),
       None,
@@ -333,7 +333,7 @@ impl BuffersManager {
         debug_assert!(bytes == buf.len());
 
         Ok(Buffer::_new(
-          self.global_local_options(),
+          *self.global_local_options(),
           canvas_size,
           self.to_rope(&buf, buf.len()),
           Some(filename.to_path_buf()),
