@@ -417,7 +417,7 @@ mod tests {
     let terminal_size = U16Size::new(10, 10);
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
