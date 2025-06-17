@@ -18,7 +18,7 @@ use std::rc::Rc;
 
 pub mod cidx;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 /// Text content backend.
 pub struct Text {
   rope: Rope,

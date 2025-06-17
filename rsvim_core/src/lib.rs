@@ -2,6 +2,7 @@
 
 pub mod buf;
 pub mod cli;
+pub mod content;
 pub mod coord;
 pub mod defaults;
 pub mod envar;

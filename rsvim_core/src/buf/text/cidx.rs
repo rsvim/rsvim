@@ -683,7 +683,7 @@ mod tests {
     let options = BufferLocalOptionsBuilder::default().build().unwrap();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "width1");
+    print_text_line_details(buffer, 0, "width1");
 
     let mut actual = ColumnIndex::with_capacity(10);
 
@@ -719,7 +719,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
 
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "width2");
+    print_text_line_details(buffer, 0, "width2");
 
     let mut actual = ColumnIndex::with_capacity(10);
 
@@ -759,7 +759,7 @@ mod tests {
     let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
 
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "width3");
+    print_text_line_details(buffer, 0, "width3");
 
     let mut actual = ColumnIndex::with_capacity(10);
 
@@ -817,7 +817,7 @@ mod tests {
     let options = BufferLocalOptionsBuilder::default().build().unwrap();
     let rope = make_rope_from_lines(vec!["  1. When the\r"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "width4");
+    print_text_line_details(buffer, 0, "width4");
 
     let mut actual = ColumnIndex::with_capacity(10);
 
@@ -857,7 +857,7 @@ mod tests {
     ]);
 
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "width5");
+    print_text_line_details(buffer, 0, "width5");
 
     let mut actual = ColumnIndex::with_capacity(10);
 
@@ -919,7 +919,7 @@ mod tests {
       "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
     ]);
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "width6");
+    print_text_line_details(buffer, 0, "width6");
 
     let mut actual = ColumnIndex::with_capacity(10);
 
@@ -1071,7 +1071,7 @@ mod tests {
     let options = BufferLocalOptionsBuilder::default().build().unwrap();
     let rope = make_rope_from_lines(vec!["These are\t很简单的test\tlines.\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "char1");
+    print_text_line_details(buffer, 0, "char1");
 
     let mut widx = ColumnIndex::new();
 
@@ -1243,7 +1243,7 @@ mod tests {
 
     let rope = make_rope_from_lines(vec!["\t"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "char2");
+    print_text_line_details(buffer, 0, "char2");
     let mut widx = ColumnIndex::new();
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
@@ -1313,7 +1313,7 @@ mod tests {
 
     let rope = make_rope_from_lines(vec!["\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "char3");
+    print_text_line_details(buffer, 0, "char3");
     let mut widx = ColumnIndex::with_capacity(10);
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
@@ -1411,7 +1411,7 @@ mod tests {
     {
       let rope = make_rope_from_lines(vec![""]);
       let buffer = make_text_from_rope(10, options, rope.clone());
-      print_text_line_details(buffer.clone(), 0, "char3-3");
+      print_text_line_details(buffer, 0, "char3-3");
 
       let mut widx = ColumnIndex::new();
 
@@ -1433,7 +1433,7 @@ mod tests {
     let options = BufferLocalOptionsBuilder::default().build().unwrap();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "truncate1");
+    print_text_line_details(buffer, 0, "truncate1");
 
     let mut widx = ColumnIndex::new();
 
@@ -1465,7 +1465,7 @@ mod tests {
     let options = BufferLocalOptionsBuilder::default().build().unwrap();
     let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
-    print_text_line_details(buffer.clone(), 0, "truncate2");
+    print_text_line_details(buffer, 0, "truncate2");
     let mut widx = ColumnIndex::with_capacity(10);
 
     let expect_before: Vec<(usize, Option<usize>)> = vec![
