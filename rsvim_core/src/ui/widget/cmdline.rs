@@ -1,10 +1,10 @@
 //! Vim cmdline.
 
-use crate::buf::BufferWk;
+use crate::content::TemporaryContentsWk;
 
 #[derive(Debug, Clone)]
 /// The Vim cmdline.
 pub struct Cmdline {
-  // Content buffer.
-  _buffer: BufferWk,
+  // Temporary contents for cmdline content.
+  _contents: TemporaryContentsWk,
 }
