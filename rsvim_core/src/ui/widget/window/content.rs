@@ -45,9 +45,9 @@ inode_impl!(WindowContent, base);
 impl Widgetable for WindowContent {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
-    let viewport = self.viewport.upgrade().unwrap();
     let buffer = self.buffer.upgrade().unwrap();
     let buffer = lock!(buffer);
+    let viewport = self.viewport.upgrade().unwrap();
 
     viewport.draw(buffer.text(), &actual_shape, canvas);
   }
