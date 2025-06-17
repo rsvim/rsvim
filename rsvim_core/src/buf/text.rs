@@ -5,8 +5,8 @@ use crate::buf::unicode;
 use crate::{arc_impl, lock};
 
 // Re-export
-pub use crate::buf::cidx::ColumnIndex;
-pub use crate::buf::opt::*;
+pub use cidx::ColumnIndex;
+pub use opt::TextOptions;
 
 use ahash::RandomState;
 use compact_str::CompactString;
@@ -17,13 +17,14 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 pub mod cidx;
+pub mod opt;
 
 #[derive(Debug)]
 /// Text content backend.
 pub struct Text {
   rope: Rope,
   cached_lines_width: Rc<RefCell<LruCache<usize, ColumnIndex, RandomState>>>,
-  options: BufferLocalOptions,
+  options: TextOptions,
 }
 
 arc_impl!(Text);
@@ -34,7 +35,7 @@ fn _cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
 }
 
 impl Text {
-  pub fn new(canvas_height: u16, rope: Rope, options: BufferLocalOptions) -> Self {
+  pub fn new(canvas_height: u16, rope: Rope, options: TextOptions) -> Self {
     let cache_size = _cached_size(canvas_height);
     Self {
       rope,
@@ -162,11 +163,11 @@ impl Text {
 
 // Options {
 impl Text {
-  pub fn options(&self) -> &BufferLocalOptions {
+  pub fn options(&self) -> &TextOptions {
     &self.options
   }
 
-  pub fn set_options(&mut self, options: &BufferLocalOptions) {
+  pub fn set_options(&mut self, options: &TextOptions) {
     self.options = *options;
   }
 }
