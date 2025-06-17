@@ -4,16 +4,12 @@
 
 use crate::content::TemporaryContentsWk;
 use crate::prelude::*;
-use crate::ui::canvas::{Canvas, Cell};
+use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::WindowLocalOptions;
 use crate::{inode_impl, lock};
-
-use geo::point;
-use std::convert::From;
-use tracing::trace;
 
 #[derive(Debug, Clone)]
 /// The Vim cmdline.

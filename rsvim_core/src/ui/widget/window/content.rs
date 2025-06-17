@@ -2,15 +2,11 @@
 
 use crate::buf::BufferWk;
 use crate::prelude::*;
-use crate::ui::canvas::{Canvas, Cell};
+use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
 use crate::{inode_impl, lock};
-
-use geo::point;
-use std::convert::From;
-use tracing::trace;
 
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
