@@ -2,7 +2,7 @@
 
 use crate::buf::opt::{BufferLocalOptions, EndOfLineOption, FileEncodingOption, FileFormatOption};
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 /// Text options.
 pub struct TextOptions {
   tab_stop: u16,

@@ -14,6 +14,7 @@ use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
 use std::fs::Metadata;
 use std::io::Read;
+use std::option;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
 use std::time::Instant;
@@ -47,6 +48,7 @@ pub fn next_buffer_id() -> BufferId {
 /// primitives which can be used to implement high-level Vim ex commands, etc.
 pub struct Buffer {
   id: BufferId,
+  options: BufferLocalOptions,
   text: Text,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -60,14 +62,19 @@ impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
   /// manage buffer instances.
   pub fn _new(
-    text: Text,
+    canvas_height: u16,
+    opts: BufferLocalOptions,
+    rope: Rope,
     filename: Option<PathBuf>,
     absolute_filename: Option<PathBuf>,
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
   ) -> Self {
+    let text_opts = TextOptions::from(&opts);
+    let text = Text::new(canvas_height, rope, text_opts);
     Self {
       id: next_buffer_id(),
+      options: opts,
       text,
       filename,
       absolute_filename,
@@ -89,11 +96,12 @@ impl Buffer {
   }
 
   pub fn options(&self) -> &BufferLocalOptions {
-    self.text.options()
+    &self.options
   }
 
   pub fn set_options(&mut self, options: &BufferLocalOptions) {
-    self.text.set_options(options);
+    self.options = *options;
+    self.text.set_options(&TextOptions::from(options));
   }
 
   pub fn filename(&self) -> &Option<PathBuf> {
@@ -207,9 +215,10 @@ impl BuffersManager {
         }
       }
     } else {
-      let text = Text::new(canvas_height, Rope::new(), *self.global_local_options());
       Buffer::_new(
-        text,
+        canvas_height,
+        *self.global_local_options(),
+        Rope::new(),
         Some(filename.to_path_buf()),
         Some(abs_filename.clone()),
         None,
@@ -240,8 +249,15 @@ impl BuffersManager {
   pub fn new_empty_buffer(&mut self, canvas_height: u16) -> BufferId {
     debug_assert!(!self.buffers_by_path.contains_key(&None));
 
-    let text = Text::new(canvas_height, Rope::new(), *self.global_local_options());
-    let buf = Buffer::_new(text, None, None, None, None);
+    let buf = Buffer::_new(
+      canvas_height,
+      *self.global_local_options(),
+      Rope::new(),
+      None,
+      None,
+      None,
+      None,
+    );
     let buf_id = buf.id();
     let buf = Buffer::to_arc(buf);
     self.buffers.insert(buf_id, buf.clone());
@@ -315,13 +331,10 @@ impl BuffersManager {
         );
         debug_assert!(bytes == buf.len());
 
-        let text = Text::new(
-          canvas_height,
-          self.to_rope(&buf, buf.len()),
-          *self.global_local_options(),
-        );
         Ok(Buffer::_new(
-          text,
+          canvas_height,
+          *self.global_local_options(),
+          self.to_rope(&buf, buf.len()),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),
           Some(metadata),
