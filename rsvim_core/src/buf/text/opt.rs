@@ -1,6 +1,6 @@
 //! Text options.
 
-use crate::buf::opt::{EndOfLineOption, FileEncodingOption, FileFormatOption};
+use crate::buf::opt::{BufferLocalOptions, EndOfLineOption, FileEncodingOption, FileFormatOption};
 
 #[derive(Debug, Copy, Clone)]
 /// Text options.
@@ -37,5 +37,15 @@ impl TextOptions {
 
   pub fn end_of_line(&self) -> EndOfLineOption {
     self.file_format.into()
+  }
+}
+
+impl From<&BufferLocalOptions> for TextOptions {
+  fn from(value: &BufferLocalOptions) -> Self {
+    Self {
+      tab_stop: value.tab_stop(),
+      file_encoding: value.file_encoding(),
+      file_format: value.file_format(),
+    }
   }
 }
