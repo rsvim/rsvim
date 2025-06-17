@@ -50,7 +50,7 @@ impl Cmdline {
 inode_impl!(Cmdline, base);
 
 impl Widgetable for Cmdline {
-  fn draw(&self, canvas: &mut crate::ui::canvas::Canvas) {
+  fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let upos: U16Pos = actual_shape.min().into();
     let height = actual_shape.height();
@@ -140,7 +140,7 @@ impl Widgetable for Cmdline {
             let mut chars_iter = bline.get_chars_at(r_viewport.start_char_idx()).unwrap();
             while char_idx < r_viewport.end_char_idx() {
               let c = chars_iter.next().unwrap();
-              let (unicode_symbol, unicode_width) = contents.text().char_symbol(c);
+              let (unicode_symbol, unicode_width) = contents.cmdline_content().char_symbol(c);
 
               let cell = Cell::with_symbol(unicode_symbol);
               let cell_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());
