@@ -1,9 +1,9 @@
 //! Text contents except buffers.
 
+use crate::arc_impl;
 use crate::buf::{BufferLocalOptionsBuilder, Text, TextOptions};
 #[allow(unused_imports)]
 use crate::prelude::*;
-use crate::{arc_impl, lock};
 
 use paste::paste;
 use ropey::Rope;
