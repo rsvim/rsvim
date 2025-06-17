@@ -2,6 +2,7 @@
 
 use crate::buf::Text;
 use crate::prelude::*;
+use crate::ui::canvas::Canvas;
 
 use litemap::LiteMap;
 use std::ops::Range;
@@ -11,6 +12,7 @@ use tracing::trace;
 // Re-export
 pub use opt::*;
 
+pub mod draw;
 pub mod opt;
 pub mod sync;
 
@@ -701,6 +703,10 @@ impl Viewport {
   pub fn is_empty(&self) -> bool {
     self._internal_check();
     self.lines.is_empty()
+  }
+
+  pub fn draw(&self, text: &Text, actual_shape: &U16Rect, canvas: &mut Canvas) {
+    draw::draw(self, text, actual_shape, canvas);
   }
 }
 
