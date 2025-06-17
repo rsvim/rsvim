@@ -1,6 +1,7 @@
 //! Text content backend for buffer.
 
 use crate::buf::unicode;
+use crate::prelude::*;
 #[allow(unused_imports)]
 use crate::{arc_impl, lock};
 
@@ -30,20 +31,21 @@ pub struct Text {
 arc_impl!(Text);
 
 #[inline]
-fn _cached_size(canvas_height: u16) -> std::num::NonZeroUsize {
-  std::num::NonZeroUsize::new(canvas_height as usize * 2 + 3).unwrap()
+fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {
+  std::num::NonZeroUsize::new(canvas_size.height() as usize * canvas_size.width() as usize + 3)
+    .unwrap()
 }
 
 impl Text {
-  pub fn new(canvas_height: u16, rope: Rope, options: TextOptions) -> Self {
-    let cache_size = _cached_size(canvas_height);
+  pub fn new(opts: TextOptions, canvas_size: U16Size, rope: Rope) -> Self {
+    let cache_size = _cached_size(canvas_size);
     Self {
       rope,
       cached_lines_width: Rc::new(RefCell::new(LruCache::with_hasher(
         cache_size,
         RandomState::new(),
       ))),
-      options,
+      options: opts,
     }
   }
 }
@@ -322,8 +324,8 @@ impl Text {
   }
 
   /// Resize cache.
-  pub fn resize_cached_lines(&self, canvas_height: u16) {
-    let new_cache_size = _cached_size(canvas_height);
+  pub fn resize_cached_lines(&self, canvas_size: U16Size) {
+    let new_cache_size = _cached_size(canvas_size);
     let mut cached_width = self.cached_lines_width.borrow_mut();
     if new_cache_size > cached_width.cap() {
       cached_width.resize(new_cache_size);
