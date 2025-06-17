@@ -47,7 +47,6 @@ pub fn next_buffer_id() -> BufferId {
 /// primitives which can be used to implement high-level Vim ex commands, etc.
 pub struct Buffer {
   id: BufferId,
-  options: BufferLocalOptions,
   text: Text,
   filename: Option<PathBuf>,
   absolute_filename: Option<PathBuf>,
@@ -69,11 +68,9 @@ impl Buffer {
     metadata: Option<Metadata>,
     last_sync_time: Option<Instant>,
   ) -> Self {
-    let text_opts = TextOptions::from(&opts);
-    let text = Text::new(text_opts, canvas_size, rope);
+    let text = Text::new(opts, canvas_size, rope);
     Self {
       id: next_buffer_id(),
-      options: opts,
       text,
       filename,
       absolute_filename,
@@ -95,14 +92,11 @@ impl Buffer {
   }
 
   pub fn options(&self) -> &BufferLocalOptions {
-    debug_assert_eq!(TextOptions::from(&self.options), *self.text.options());
-    &self.options
+    self.text.options()
   }
 
   pub fn set_options(&mut self, options: &BufferLocalOptions) {
-    self.options = *options;
-    self.text.set_options(&TextOptions::from(options));
-    debug_assert_eq!(TextOptions::from(&self.options), *self.text.options());
+    self.text.set_options(options);
   }
 
   pub fn filename(&self) -> &Option<PathBuf> {
