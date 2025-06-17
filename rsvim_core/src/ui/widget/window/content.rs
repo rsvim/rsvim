@@ -540,7 +540,7 @@ mod tests_nowrap {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                               ",
       "                               ",
@@ -1052,7 +1052,7 @@ mod tests_wrap_nolinebreak {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -1874,7 +1874,7 @@ mod tests_wrap_linebreak {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -2189,7 +2189,7 @@ mod tests_wrap_linebreak_startcol {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
