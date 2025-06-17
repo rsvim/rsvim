@@ -1,5 +1,7 @@
 //! Vim cmdline.
 
+#![allow(dead_code)]
+
 use crate::content::TemporaryContentsWk;
 use crate::prelude::*;
 use crate::ui::tree::*;
