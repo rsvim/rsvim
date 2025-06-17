@@ -1117,7 +1117,7 @@ mod tests_view_nowrap {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_nowrap();
 
-    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
@@ -1877,7 +1877,7 @@ mod tests_view_wrap_nolinebreak {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
-    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
@@ -2113,7 +2113,7 @@ mod tests_view_wrap_nolinebreak {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_nolinebreak();
 
-    let buf = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buf = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
@@ -2931,7 +2931,7 @@ mod tests_view_wrap_linebreak {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![""];
 
     let window = make_window(terminal_size, buffer.clone(), &win_opts);
