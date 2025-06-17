@@ -132,7 +132,7 @@ impl EventLoop {
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
-    let text_contents = Contents::to_arc(Contents::new(canvas_size.height()));
+    let text_contents = Contents::to_arc(Contents::new(canvas_size));
 
     // State
     let state = State::to_arc(State::default());
@@ -296,8 +296,7 @@ impl EventLoop {
     let input_files = self.cli_opt.file().to_vec();
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
-        let maybe_buf_id =
-          lock!(self.buffers).new_file_buffer(canvas_size.height(), Path::new(input_file));
+        let maybe_buf_id = lock!(self.buffers).new_file_buffer(canvas_size, Path::new(input_file));
         match maybe_buf_id {
           Ok(buf_id) => {
             trace!("Created file buffer {:?}:{:?}", input_file, buf_id);
@@ -308,7 +307,7 @@ impl EventLoop {
         }
       }
     } else {
-      let buf_id = lock!(self.buffers).new_empty_buffer(canvas_size.height());
+      let buf_id = lock!(self.buffers).new_empty_buffer(canvas_size);
       trace!("Created empty buffer {:?}", buf_id);
     }
 

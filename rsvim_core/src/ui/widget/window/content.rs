@@ -364,7 +364,7 @@ mod tests_nowrap {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -406,7 +406,7 @@ mod tests_nowrap {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -445,7 +445,7 @@ mod tests_nowrap {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello,  R\tS\tV\tI\tM!\n",
@@ -488,7 +488,7 @@ mod tests_nowrap {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -540,7 +540,7 @@ mod tests_nowrap {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                               ",
       "                               ",
@@ -581,7 +581,7 @@ mod tests_nowrap {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -623,7 +623,7 @@ mod tests_nowrap {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -710,7 +710,7 @@ mod tests_nowrap_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -752,7 +752,7 @@ mod tests_nowrap_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -791,7 +791,7 @@ mod tests_nowrap_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello,  R\tS\tV\tI\tM!\n",
@@ -834,7 +834,7 @@ mod tests_nowrap_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -887,7 +887,7 @@ mod tests_nowrap_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -975,7 +975,7 @@ mod tests_wrap_nolinebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1017,7 +1017,7 @@ mod tests_wrap_nolinebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "\t\t\t* The extra parts are split\tinto the next row,\tif either line-wrap\tor word-wrap options are been set. If the extra parts are still too long to\t来放在下一个横行内，一遍又一遍的重复这样的操作。This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
@@ -1052,7 +1052,7 @@ mod tests_wrap_nolinebreak {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -1082,7 +1082,7 @@ mod tests_wrap_nolinebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1144,7 +1144,7 @@ mod tests_wrap_nolinebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1204,7 +1204,7 @@ mod tests_wrap_nolinebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1279,7 +1279,7 @@ mod tests_wrap_nolinebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1333,7 +1333,7 @@ mod tests_wrap_nolinebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1409,7 +1409,7 @@ mod tests_wrap_nolinebreak_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1451,7 +1451,7 @@ mod tests_wrap_nolinebreak_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "\t\t\t* The extra parts are split\tinto the next row,\tif either line-wrap\tor word-wrap options are been set. If the extra parts are still too long to\t来放在下一个横行内，一遍又一遍的重复这样的操作。This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
@@ -1486,7 +1486,7 @@ mod tests_wrap_nolinebreak_startcol {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -1516,7 +1516,7 @@ mod tests_wrap_nolinebreak_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1579,7 +1579,7 @@ mod tests_wrap_nolinebreak_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1654,7 +1654,7 @@ mod tests_wrap_nolinebreak_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1708,7 +1708,7 @@ mod tests_wrap_nolinebreak_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1784,7 +1784,7 @@ mod tests_wrap_linebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1827,7 +1827,7 @@ mod tests_wrap_linebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1874,7 +1874,7 @@ mod tests_wrap_linebreak {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -1904,7 +1904,7 @@ mod tests_wrap_linebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -1968,7 +1968,7 @@ mod tests_wrap_linebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2011,7 +2011,7 @@ mod tests_wrap_linebreak {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2099,7 +2099,7 @@ mod tests_wrap_linebreak_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2142,7 +2142,7 @@ mod tests_wrap_linebreak_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",
@@ -2189,7 +2189,7 @@ mod tests_wrap_linebreak_startcol {
       .build()
       .unwrap();
 
-    let buffer = make_empty_buffer(terminal_size.height(), buf_opts);
+    let buffer = make_empty_buffer(terminal_size, buf_opts);
     let expect = vec![
       "                    ",
       "                    ",
@@ -2219,7 +2219,7 @@ mod tests_wrap_linebreak_startcol {
       .unwrap();
 
     let buffer = make_buffer_from_lines(
-      terminal_size.height(),
+      terminal_size,
       buf_opts,
       vec![
         "Hello, RSVIM!\n",

@@ -61,8 +61,8 @@ impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
   /// manage buffer instances.
   pub fn _new(
-    canvas_height: u16,
     opts: BufferLocalOptions,
+    canvas_size: U16Size,
     rope: Rope,
     filename: Option<PathBuf>,
     absolute_filename: Option<PathBuf>,
@@ -70,7 +70,7 @@ impl Buffer {
     last_sync_time: Option<Instant>,
   ) -> Self {
     let text_opts = TextOptions::from(&opts);
-    let text = Text::new(canvas_height, rope, text_opts);
+    let text = Text::new(text_opts, canvas_size, rope);
     Self {
       id: next_buffer_id(),
       options: opts,
@@ -185,7 +185,7 @@ impl BuffersManager {
   /// If the file name already exists.
   ///
   /// NOTE: This is a primitive API.
-  pub fn new_file_buffer(&mut self, canvas_height: u16, filename: &Path) -> IoResult<BufferId> {
+  pub fn new_file_buffer(&mut self, canvas_size: U16Size, filename: &Path) -> IoResult<BufferId> {
     let abs_filename = match filename.absolutize() {
       Ok(abs_filename) => abs_filename.to_path_buf(),
       Err(e) => {
@@ -209,7 +209,7 @@ impl BuffersManager {
     };
 
     let buf = if existed {
-      match self.edit_file(canvas_height, filename, &abs_filename) {
+      match self.edit_file(canvas_size, filename, &abs_filename) {
         Ok(buf) => buf,
         Err(e) => {
           return Err(e);
@@ -217,8 +217,8 @@ impl BuffersManager {
       }
     } else {
       Buffer::_new(
-        canvas_height,
         *self.global_local_options(),
+        canvas_size,
         Rope::new(),
         Some(filename.to_path_buf()),
         Some(abs_filename.clone()),
@@ -247,12 +247,12 @@ impl BuffersManager {
   /// If there is already other unnamed buffers.
   ///
   /// NOTE: This is a primitive API.
-  pub fn new_empty_buffer(&mut self, canvas_height: u16) -> BufferId {
+  pub fn new_empty_buffer(&mut self, canvas_size: U16Size) -> BufferId {
     debug_assert!(!self.buffers_by_path.contains_key(&None));
 
     let buf = Buffer::_new(
-      canvas_height,
       *self.global_local_options(),
+      canvas_size,
       Rope::new(),
       None,
       None,
@@ -302,7 +302,7 @@ impl BuffersManager {
   // Implementation for [new_buffer_edit_file](new_buffer_edit_file).
   fn edit_file(
     &self,
-    canvas_height: u16,
+    canvas_size: U16Size,
     filename: &Path,
     absolute_filename: &Path,
   ) -> IoResult<Buffer> {
@@ -333,8 +333,8 @@ impl BuffersManager {
         debug_assert!(bytes == buf.len());
 
         Ok(Buffer::_new(
-          canvas_height,
           *self.global_local_options(),
+          canvas_size,
           self.to_rope(&buf, buf.len()),
           Some(filename.to_path_buf()),
           Some(absolute_filename.to_path_buf()),

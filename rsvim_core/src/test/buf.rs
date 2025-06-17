@@ -3,6 +3,7 @@
 #![allow(unused_imports)]
 
 use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BuffersManager, BuffersManagerArc, Text};
+use crate::prelude::*;
 //use crate::envar;
 use crate::lock;
 
@@ -14,7 +15,7 @@ use tracing::{self, info, trace};
 use tracing_appender::non_blocking::DEFAULT_BUFFERED_LINES_LIMIT;
 
 pub fn make_buffer_from_lines(
-  terminal_height: u16,
+  terminal_size: U16Size,
   opts: BufferLocalOptions,
   lines: Vec<&str>,
 ) -> BufferArc {
@@ -23,12 +24,12 @@ pub fn make_buffer_from_lines(
     rpb.append(line);
   }
   let rp = rpb.finish();
-  let buf = Buffer::_new(terminal_height, opts, rp, None, None, None, None);
+  let buf = Buffer::_new(opts, terminal_size, rp, None, None, None, None);
   Buffer::to_arc(buf)
 }
 
-pub fn make_empty_buffer(terminal_height: u16, opts: BufferLocalOptions) -> BufferArc {
-  let buf = Buffer::_new(terminal_height, opts, Rope::new(), None, None, None, None);
+pub fn make_empty_buffer(terminal_size: U16Size, opts: BufferLocalOptions) -> BufferArc {
+  let buf = Buffer::_new(opts, terminal_size, Rope::new(), None, None, None, None);
   Buffer::to_arc(buf)
 }
 
