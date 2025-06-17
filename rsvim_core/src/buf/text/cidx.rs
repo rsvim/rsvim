@@ -477,6 +477,10 @@ mod tests {
   use ropey::{Rope, RopeBuilder};
   use tracing::info;
 
+  fn make_default_text_opts() -> TextOptions {
+    TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap())
+  }
+
   fn make_rope_from_lines(lines: Vec<&str>) -> Rope {
     let mut rb: RopeBuilder = RopeBuilder::new();
     for line in lines.iter() {
@@ -680,7 +684,7 @@ mod tests {
   fn width1() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
     print_text_line_details(buffer, 0, "width1");
@@ -715,7 +719,7 @@ mod tests {
   fn width2() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec!["This is a quite simple and small test lines.\n"]);
 
     let buffer = make_text_from_rope(10, options, rope.clone());
@@ -755,7 +759,7 @@ mod tests {
   fn width3() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec!["But still\tit\\包含了好几种东西we want to test:\n"]);
 
     let buffer = make_text_from_rope(10, options, rope.clone());
@@ -814,7 +818,7 @@ mod tests {
   fn width4() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec!["  1. When the\r"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
     print_text_line_details(buffer, 0, "width4");
@@ -851,7 +855,7 @@ mod tests {
   fn width5() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec![
       "一行文本小到可以放入一个窗口中，那么line-wrap和word-wrap选项就不会影响排版。\n",
     ]);
@@ -914,7 +918,7 @@ mod tests {
   fn width6() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec![
       "\t\t2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\n",
     ]);
@@ -956,7 +960,7 @@ mod tests {
   fn width7() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = Rope::new();
 
     let mut actual = ColumnIndex::with_capacity(10);
@@ -1068,7 +1072,7 @@ mod tests {
   fn char1() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec!["These are\t很简单的test\tlines.\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
     print_text_line_details(buffer, 0, "char1");
@@ -1239,8 +1243,7 @@ mod tests {
   fn char2() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
-
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec!["\t"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
     print_text_line_details(buffer, 0, "char2");
@@ -1309,8 +1312,7 @@ mod tests {
   fn char3() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
-
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec!["\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
     print_text_line_details(buffer, 0, "char3");
@@ -1377,7 +1379,7 @@ mod tests {
   fn char4() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
 
     {
       let rope = Rope::new();
@@ -1430,7 +1432,7 @@ mod tests {
   fn truncate1() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec!["Hello,\tRSVIM!\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
     print_text_line_details(buffer, 0, "truncate1");
@@ -1462,7 +1464,7 @@ mod tests {
   fn truncate2() {
     test_log_init();
 
-    let options = TextOptions::from(&BufferLocalOptionsBuilder::default().build().unwrap());
+    let options = make_default_text_opts();
     let rope = make_rope_from_lines(vec!["This is a quite\t简单而且很小的test\tlines.\n"]);
     let buffer = make_text_from_rope(10, options, rope.clone());
     print_text_line_details(buffer, 0, "truncate2");
