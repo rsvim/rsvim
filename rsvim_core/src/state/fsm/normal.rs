@@ -78,10 +78,12 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let cursor_id = tree.cursor_id().unwrap();
-    if let Some(TreeNode::Cursor(cursor)) = tree.node_mut(cursor_id) {
-      cursor.set_style(&CursorStyle::SteadyBar);
-    } else {
-      unreachable!()
+    debug_assert!(tree.node_mut(cursor_id).is_some());
+    let cursor_node = tree.node_mut(cursor_id).unwrap();
+    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    match cursor_node {
+      TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+      _ => unreachable!(),
     }
 
     StatefulValue::InsertMode(super::InsertStateful::default())
@@ -94,8 +96,13 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
         let viewport = current_window.viewport();
@@ -155,11 +162,8 @@ impl NormalStateful {
             );
           }
         }
-      } else {
-        unreachable!()
       }
-    } else {
-      unreachable!()
+      _ => unreachable!(),
     }
 
     StatefulValue::NormalMode(NormalStateful::default())
@@ -193,8 +197,14 @@ impl NormalStateful {
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
         let viewport = current_window.viewport();
@@ -219,11 +229,8 @@ impl NormalStateful {
             new_cursor_viewport.row_idx() as isize,
           );
         }
-      } else {
-        unreachable!()
       }
-    } else {
-      unreachable!()
+      _ => unreachable!(),
     }
   }
 
