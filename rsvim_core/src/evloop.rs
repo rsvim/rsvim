@@ -353,7 +353,7 @@ impl EventLoop {
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
     let cmdline = Cmdline::new(cmdline_shape, Arc::downgrade(&self.contents));
-    let cmdline_id = cmdline.id();
+    let _cmdline_id = cmdline.id();
     let cmdline_node = TreeNode::Cmdline(cmdline);
     tree.bounded_insert(tree_root_id, cmdline_node);
 
