@@ -35,7 +35,7 @@ pub mod msg;
 pub mod task;
 pub mod tui;
 
-// #[derive(Debug)]
+#[derive(Debug)]
 /// For slow tasks that are suitable to put in the background, this event loop will spawn them in
 /// tokio's async tasks and let them sync back data once they are done. The event loop controls all
 /// the tasks with [`CancellationToken`] and [`TaskTracker`].
