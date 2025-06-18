@@ -456,21 +456,10 @@ impl Tree {
     self.base.bounded_move_by(id, x, y)
   }
 
-  /// Move by x(columns) and y(rows). This is simply a wrapper method on [`Itree::move_by`].
-  pub fn move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
-    self.base.move_by(id, x, y)
-  }
-
   /// Bounded move to position x(columns) and y(rows). This is simply a wrapper method on
   /// [`Itree::bounded_move_to`].
   pub fn bounded_move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_to(id, x, y)
-  }
-
-  /// Move to position x(columns) and y(rows). This is simply a wrapper method on
-  /// [`Itree::move_to`].
-  pub fn move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
-    self.base.move_to(id, x, y)
   }
 }
 // Movement }
