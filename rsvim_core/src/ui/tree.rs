@@ -244,7 +244,7 @@ pub struct Tree {
   // The term *current* means the UI widget that is focused, i.e. it contains the cursor.
   //
   // But when user inputs commands in cmdline UI widget, the cursor will move to the cmdline
-  // widget, which is not a window widget. And in meanwhile, we still need to know the **current** 
+  // widget, which is not a window widget. And in meanwhile, we still need to know the **current**
   // window and the **cursor** position, as if the cursor is still inside the window.
   current_window_id: Option<TreeNodeId>,
 
@@ -364,23 +364,11 @@ impl Tree {
         }
       }
     }
-    if let Some(current_window_id) = self.current_window_id {
-
-    }
-
     self.current_window_id
+  }
 
-    if let Some(cursor_id) = self.cursor_id {
-      let mut id = cursor_id;
-      while let Some(parent_id) = self.parent_id(id) {
-        if let Some(TreeNode::Window(_w)) = self.node(parent_id) {
-          return Some(parent_id);
-        }
-        id = parent_id;
-      }
-    }
-
-    None
+  pub fn set_current_window_id(&mut self, current_window_id: Option<TreeNodeId>) {
+    self.current_window_id = current_window_id;
   }
 
   /// Get all the window widget IDs.
@@ -402,8 +390,14 @@ impl Tree {
         // When insert cursor widget, update `current_window_id`.
         let parent_node = self.node(parent_id).unwrap();
         match parent_node {
-          TreeNode::Window(window) => { self.current_window_id = Some(window.id()); }
-          TreeNode::Cmdline(cmdline) => { if let Some(cmdline_id) = self.cmdline_id { debug_assert_eq!(cmdline.id(), cmdline_id);}}
+          TreeNode::Window(window) => {
+            self.current_window_id = Some(window.id());
+          }
+          TreeNode::Cmdline(cmdline) => {
+            if let Some(cmdline_id) = self.cmdline_id {
+              debug_assert_eq!(cmdline.id(), cmdline_id);
+            }
+          }
           _ => unreachable!(),
         }
         // When insert cursor widget, update `cursor_id`.
