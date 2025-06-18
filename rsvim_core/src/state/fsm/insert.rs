@@ -108,23 +108,22 @@ impl InsertStateful {
 
     // Delete N-chars.
     let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) = {
-      if let Some(current_window_id) = tree.current_window_id() {
-        if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+      debug_assert!(tree.current_window_id().is_some());
+      let current_window_id = tree.current_window_id().unwrap();
+      debug_assert!(tree.node_mut(current_window_id).is_some());
+      let current_window_node = tree.node_mut(current_window_id).unwrap();
+      debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+      match current_window_node {
+        TreeNode::Window(current_window) => {
           let cursor_viewport = current_window.cursor_viewport();
-
           let maybe_new_cursor_position =
             cursor_ops::delete_at_cursor(&cursor_viewport, buffer.text_mut(), n);
-
           if maybe_new_cursor_position.is_none() {
             return StatefulValue::InsertMode(InsertStateful::default());
           }
-
           maybe_new_cursor_position.unwrap()
-        } else {
-          unreachable!()
         }
-      } else {
-        unreachable!()
+        _ => unreachable!(),
       }
     };
 
@@ -159,15 +158,17 @@ impl InsertStateful {
 
     // Insert text.
     let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) = {
-      if let Some(current_window_id) = tree.current_window_id() {
-        if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+      debug_assert!(tree.current_window_id().is_some());
+      let current_window_id = tree.current_window_id().unwrap();
+      debug_assert!(tree.node_mut(current_window_id).is_some());
+      let current_window_node = tree.node_mut(current_window_id).unwrap();
+      debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+      match current_window_node {
+        TreeNode::Window(current_window) => {
           let cursor_viewport = current_window.cursor_viewport();
           cursor_ops::insert_at_cursor(&cursor_viewport, buffer.text_mut(), text)
-        } else {
-          unreachable!()
         }
-      } else {
-        unreachable!()
+        _ => unreachable!(),
       }
     };
 
@@ -192,8 +193,13 @@ impl InsertStateful {
 
   // Update viewport since the buffer has changed, and the viewport doesn't match the buffer.
   fn _update_viewport_after_buffer_changed(&self, tree: &mut Tree, buffer: &Buffer) {
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => {
         let text = buffer.text();
         let viewport = current_window.viewport();
         let cursor_viewport = current_window.cursor_viewport();
@@ -234,23 +240,20 @@ impl InsertStateful {
           );
           current_window.set_cursor_viewport(updated_cursor_viewport);
         }
-      } else {
-        unreachable!();
       }
-    } else {
-      unreachable!();
+      _ => unreachable!(),
     }
   }
 
   fn _current_buffer(&self, tree: &mut Tree) -> BufferWk {
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        current_window.buffer()
-      } else {
-        unreachable!()
-      }
-    } else {
-      unreachable!()
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => current_window.buffer(),
+      _ => unreachable!(),
     }
   }
 }
@@ -270,7 +273,9 @@ impl InsertStateful {
       Operation::CursorMoveBy((0, 0)),
     );
 
+    debug_assert!(tree.cursor_id().is_some());
     let cursor_id = tree.cursor_id().unwrap();
+    debug_assert!(tree.node_mut(cursor_id).is_some());
     if let Some(TreeNode::Cursor(cursor)) = tree.node_mut(cursor_id) {
       cursor.set_style(&CursorStyle::SteadyBlock);
     } else {
@@ -306,8 +311,13 @@ impl InsertStateful {
     buffer: &Buffer,
     op: Operation,
   ) {
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => {
         let viewport = current_window.viewport();
         let cursor_viewport = current_window.cursor_viewport();
 
@@ -365,11 +375,8 @@ impl InsertStateful {
             );
           }
         }
-      } else {
-        unreachable!()
       }
-    } else {
-      unreachable!()
+      _ => unreachable!(),
     }
   }
 

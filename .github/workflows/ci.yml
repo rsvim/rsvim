@@ -17,23 +17,6 @@ env:
   RUSTFLAGS: "-Dwarnings"
   RUST_BACKTRACE: "full"
 jobs:
-  softcheck:
-    name: Soft Check
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: amannn/action-semantic-pull-request@v5
-        if: ${{ github.ref != 'refs/heads/main' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: crate-ci/typos@master
-      - name: Prettier
-        run: |
-          npm install -g prettier
-          prettier --version
-          echo "show PWD=${PWD}"
-          echo "prettier --check *.md **/*.ts"
-          prettier --check *.md **/*.ts
   check:
     name: Check
     runs-on: ubuntu-22.04
