@@ -1,4 +1,4 @@
-name: Soft Check
+name: (Experimental) CI
 on:
   pull_request:
     branches:
@@ -19,7 +19,7 @@ env:
 jobs:
   check:
     name: Check
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: amannn/action-semantic-pull-request@v5
@@ -35,8 +35,8 @@ jobs:
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
   build:
-    name: Nightly Toolchain Build
-    runs-on: ubuntu-22.04
+    name: Nightly Build
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         rust_version: [beta, nightly]
