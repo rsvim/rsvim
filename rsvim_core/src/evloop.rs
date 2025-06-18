@@ -356,7 +356,6 @@ impl EventLoop {
     let cmdline_id = cmdline.id();
     let cmdline_node = TreeNode::Cmdline(cmdline);
     tree.bounded_insert(tree_root_id, cmdline_node);
-    tree.set_cmdline_id(Some(cmdline_id));
 
     // Initialize cursor.
     let cursor_shape = IRect::new((0, 0), (1, 1));

@@ -386,6 +386,9 @@ impl Tree {
         }
         self.cursor_id = Some(cursor.id());
       }
+      TreeNode::Cmdline(cmdline) => {
+        self.cmdline_id = Some(cmdline.id());
+      }
       TreeNode::Window(window) => {
         self.window_ids.insert(window.id());
       }
