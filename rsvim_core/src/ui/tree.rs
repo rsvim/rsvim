@@ -242,11 +242,9 @@ pub struct Tree {
   // The *current* window node ID.
   //
   // The term *current* means the UI widget that is focused, i.e. it contains the cursor.
-  //
   // But when user inputs commands in cmdline UI widget, the cursor will move to the cmdline
   // widget, which is not a window widget. And in meanwhile, we still need to know the **current**
   // window and the **cursor** position, as if the cursor is still inside the window.
-  //
   // Technically speaking, this field is **saved_current_window_id**, i.e. when cursor moves to the
   // cmdline widget, this field still saves the previous *current* window id.
   current_window_id: Option<TreeNodeId>,
