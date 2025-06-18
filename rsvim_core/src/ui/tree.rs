@@ -338,19 +338,9 @@ impl Tree {
     self.cursor_id
   }
 
-  /// Set current cursor node ID.
-  pub fn set_cursor_id(&mut self, cursor_id: Option<TreeNodeId>) {
-    self.cursor_id = cursor_id;
-  }
-
   /// Get cmdline node ID.
   pub fn cmdline_id(&self) -> Option<TreeNodeId> {
     self.cmdline_id
-  }
-
-  /// Set cmdline node ID.
-  pub fn set_cmdline_id(&mut self, cmdline_id: Option<TreeNodeId>) {
-    self.cmdline_id = cmdline_id;
   }
 
   /// Get current window node ID.
@@ -365,10 +355,6 @@ impl Tree {
       }
     }
     self.current_window_id
-  }
-
-  pub fn set_current_window_id(&mut self, current_window_id: Option<TreeNodeId>) {
-    self.current_window_id = current_window_id;
   }
 
   /// Get all the window widget IDs.
