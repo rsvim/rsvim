@@ -74,7 +74,7 @@ impl Widgetable for Cmdline {
     let actual_shape = self.actual_shape();
     let contents = self.contents.upgrade().unwrap();
     let contents = lock!(contents);
-    let viewport = self.viewport.upgrade().unwrap();
+    let viewport = self.viewport.clone();
 
     viewport.draw(contents.cmdline_content(), actual_shape, canvas);
   }
