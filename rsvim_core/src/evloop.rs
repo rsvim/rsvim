@@ -13,6 +13,7 @@ use crate::state::fsm::{StatefulDataAccess, StatefulValue, StatefulValueArc};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::*;
+use crate::ui::widget::cmdline::Cmdline;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
@@ -292,7 +293,7 @@ impl EventLoop {
   pub fn init_buffers(&mut self) -> IoResult<()> {
     let canvas_size = lock!(self.canvas).size();
 
-    // Create buffers from parameters.
+    // Create default buffer from `FILES` arguments from cli, or with an empty buffer.
     let input_files = self.cli_opt.file().to_vec();
     if !input_files.is_empty() {
       for input_file in input_files.iter() {
@@ -316,7 +317,7 @@ impl EventLoop {
 
   /// Initialize windows.
   pub fn init_windows(&mut self) -> IoResult<()> {
-    // Initialize default window.
+    // Initialize default window, with default buffer.
     let (canvas_size, canvas_cursor) = {
       let canvas = lock!(self.canvas);
       let canvas_size = canvas.size();
@@ -327,7 +328,10 @@ impl EventLoop {
     let tree_root_id = tree.root_id();
     let window_shape = IRect::new(
       (0, 0),
-      (canvas_size.width() as isize, canvas_size.height() as isize),
+      (
+        canvas_size.width() as isize,
+        canvas_size.height().saturating_sub(1) as isize,
+      ),
     );
     let window = {
       let buffers = lock!(self.buffers);
@@ -342,6 +346,17 @@ impl EventLoop {
     let window_id = window.id();
     let window_node = TreeNode::Window(window);
     tree.bounded_insert(tree_root_id, window_node);
+
+    // Initialize default cmdline.
+    let cmdline_shape = IRect::new(
+      (0, canvas_size.height().saturating_sub(1) as isize),
+      (canvas_size.width() as isize, canvas_size.height() as isize),
+    );
+    let cmdline = Cmdline::new(cmdline_shape, Arc::downgrade(&self.contents));
+    let cmdline_id = cmdline.id();
+    let cmdline_node = TreeNode::Cmdline(cmdline);
+    tree.bounded_insert(tree_root_id, cmdline_node);
+    tree.set_cmdline_id(Some(cmdline_id));
 
     // Initialize cursor.
     let cursor_shape = IRect::new((0, 0), (1, 1));

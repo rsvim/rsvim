@@ -232,8 +232,11 @@ pub struct Tree {
 
   // Cursor and window state {
 
-  // [`cursor`](crate::ui::widget::cursor::Cursor) node ID.
+  // [`Cursor`](crate::ui::widget::cursor::Cursor) node ID.
   cursor_id: Option<TreeNodeId>,
+
+  // [`Cmdline`](crate::ui::widget::cmdline::Cmdline) node ID.
+  cmdline_id: Option<TreeNodeId>,
 
   // All [`Window`](crate::ui::widget::Window) node IDs.
   window_ids: BTreeSet<TreeNodeId>,
@@ -266,6 +269,7 @@ impl Tree {
     Tree {
       base: Itree::new(root_node),
       cursor_id: None,
+      cmdline_id: None,
       window_ids: BTreeSet::new(),
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowLocalOptionsBuilder::default().build().unwrap(),
@@ -330,6 +334,16 @@ impl Tree {
   /// Set current cursor node ID.
   pub fn set_cursor_id(&mut self, cursor_id: Option<TreeNodeId>) {
     self.cursor_id = cursor_id;
+  }
+
+  /// Get cmdline node ID.
+  pub fn cmdline_id(&self) -> Option<TreeNodeId> {
+    self.cmdline_id
+  }
+
+  /// Set cmdline node ID.
+  pub fn set_cmdline_id(&mut self, cmdline_id: Option<TreeNodeId>) {
+    self.cmdline_id = cmdline_id;
   }
 
   /// Get current window node ID.
