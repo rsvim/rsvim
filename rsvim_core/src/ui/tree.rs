@@ -347,11 +347,21 @@ impl Tree {
   /// Get current window node ID.
   /// NOTE: A window is called the current window because it has cursor inside it.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
-    if let Some(cursor_id) = self.cursor_id {
-      if let Some(parent_id) = self.parent_id(cursor_id) {
-        if let Some(TreeNode::Window(window)) = self.node(parent_id) {
-          debug_assert!(self.current_window_id.is_some());
-          debug_assert_eq!(self.current_window_id.unwrap(), window.id());
+    if cfg!(debug_assertions) {
+      if let Some(cursor_id) = self.cursor_id {
+        debug_assert!(self.parent_id(cursor_id).is_some());
+        let parent_id = self.parent_id(cursor_id).unwrap();
+        debug_assert!(self.node(parent_id).is_some());
+        let parent_node = self.node(parent_id).unwrap();
+        match parent_node {
+          TreeNode::Window(window) => {
+            debug_assert!(self.current_window_id.is_some());
+            debug_assert_eq!(self.current_window_id.unwrap(), window.id());
+          }
+          TreeNode::Cmdline(_cmdline) => {
+            debug_assert!(self.current_window_id.is_some());
+          }
+          _ => unreachable!(),
         }
       }
     }
