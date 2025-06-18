@@ -230,8 +230,6 @@ pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
 
-  // Cursor and window state {
-
   // [`Cursor`](crate::ui::widget::cursor::Cursor) node ID.
   cursor_id: Option<TreeNodeId>,
 
@@ -240,7 +238,16 @@ pub struct Tree {
 
   // All [`Window`](crate::ui::widget::Window) node IDs.
   window_ids: BTreeSet<TreeNodeId>,
-  // Cursor and window state }
+
+  // The *current* window node ID.
+  //
+  // The term *current* means the UI widget that is focused, i.e. it contains the cursor.
+  // But when user inputs commands in cmdline UI widget, the cursor will move to the cmdline
+  // widget, which is not a window widget. And in meanwhile, we still need to know the **current**
+  // window and the **cursor** position, as if the cursor is still inside the window.
+  // Technically speaking, this field is **saved_current_window_id**, i.e. when cursor moves to the
+  // cmdline widget, this field still saves the previous *current* window id.
+  current_window_id: Option<TreeNodeId>,
 
   // Global options for windows.
   global_options: WindowGlobalOptions,
@@ -271,6 +278,7 @@ impl Tree {
       cursor_id: None,
       cmdline_id: None,
       window_ids: BTreeSet::new(),
+      current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowLocalOptionsBuilder::default().build().unwrap(),
     }
@@ -331,35 +339,33 @@ impl Tree {
     self.cursor_id
   }
 
-  /// Set current cursor node ID.
-  pub fn set_cursor_id(&mut self, cursor_id: Option<TreeNodeId>) {
-    self.cursor_id = cursor_id;
-  }
-
   /// Get cmdline node ID.
   pub fn cmdline_id(&self) -> Option<TreeNodeId> {
     self.cmdline_id
   }
 
-  /// Set cmdline node ID.
-  pub fn set_cmdline_id(&mut self, cmdline_id: Option<TreeNodeId>) {
-    self.cmdline_id = cmdline_id;
-  }
-
   /// Get current window node ID.
   /// NOTE: A window is called the current window because it has cursor inside it.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
-    if let Some(cursor_id) = self.cursor_id {
-      let mut id = cursor_id;
-      while let Some(parent_id) = self.parent_id(id) {
-        if let Some(TreeNode::Window(_w)) = self.node(parent_id) {
-          return Some(parent_id);
+    if cfg!(debug_assertions) {
+      if let Some(cursor_id) = self.cursor_id {
+        debug_assert!(self.parent_id(cursor_id).is_some());
+        let parent_id = self.parent_id(cursor_id).unwrap();
+        debug_assert!(self.node(parent_id).is_some());
+        let parent_node = self.node(parent_id).unwrap();
+        match parent_node {
+          TreeNode::Window(window) => {
+            debug_assert!(self.current_window_id.is_some());
+            debug_assert_eq!(self.current_window_id.unwrap(), window.id());
+          }
+          TreeNode::Cmdline(_cmdline) => {
+            debug_assert!(self.current_window_id.is_some());
+          }
+          _ => unreachable!(),
         }
-        id = parent_id;
       }
     }
-
-    None
+    self.current_window_id
   }
 
   /// Get all the window widget IDs.
@@ -378,18 +384,28 @@ impl Tree {
   fn insert_guard(&mut self, node: &TreeNode, parent_id: TreeNodeId) {
     match node {
       TreeNode::Cursor(cursor) => {
-        // Ensure the parent node is a window widget.
+        // When insert cursor widget, update `current_window_id`.
         let parent_node = self.node(parent_id).unwrap();
         match parent_node {
-          TreeNode::Window(_) => { /* Skip */ }
-          _ => unreachable!("Cursor widget must insert under the window widget parent"),
+          TreeNode::Window(window) => {
+            self.current_window_id = Some(window.id());
+          }
+          TreeNode::Cmdline(cmdline) => {
+            if let Some(cmdline_id) = self.cmdline_id {
+              debug_assert_eq!(cmdline.id(), cmdline_id);
+            }
+          }
+          _ => unreachable!(),
         }
+        // When insert cursor widget, update `cursor_id`.
         self.cursor_id = Some(cursor.id());
       }
       TreeNode::Cmdline(cmdline) => {
+        // When insert cmdline widget, update `cmdline_id`.
         self.cmdline_id = Some(cmdline.id());
       }
       TreeNode::Window(window) => {
+        // When insert window widget, update `window_ids`.
         self.window_ids.insert(window.id());
       }
       _ => { /* Skip */ }
@@ -440,21 +456,10 @@ impl Tree {
     self.base.bounded_move_by(id, x, y)
   }
 
-  /// Move by x(columns) and y(rows). This is simply a wrapper method on [`Itree::move_by`].
-  pub fn move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
-    self.base.move_by(id, x, y)
-  }
-
   /// Bounded move to position x(columns) and y(rows). This is simply a wrapper method on
   /// [`Itree::bounded_move_to`].
   pub fn bounded_move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_to(id, x, y)
-  }
-
-  /// Move to position x(columns) and y(rows). This is simply a wrapper method on
-  /// [`Itree::move_to`].
-  pub fn move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
-    self.base.move_to(id, x, y)
   }
 }
 // Movement }
