@@ -238,6 +238,9 @@ pub struct Tree {
   // [`Cmdline`](crate::ui::widget::cmdline::Cmdline) node ID.
   cmdline_id: Option<TreeNodeId>,
 
+  // `Cmdline` cursor node ID.
+  cmdline_cursor_id: Option<TreeNodeId>,
+
   // All [`Window`](crate::ui::widget::Window) node IDs.
   window_ids: BTreeSet<TreeNodeId>,
   // Cursor and window state }
