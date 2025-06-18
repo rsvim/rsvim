@@ -6,9 +6,11 @@ use crate::content::TemporaryContentsWk;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::ViewportWk;
+use crate::ui::viewport::{
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions,
+};
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::window::opt::WindowLocalOptions;
+use crate::ui::widget::window::opt::{WindowLocalOptions, WindowLocalOptionsBuilder};
 use crate::{inode_impl, lock};
 
 #[derive(Debug, Clone)]
@@ -16,34 +18,51 @@ use crate::{inode_impl, lock};
 pub struct Cmdline {
   base: InodeBase,
 
-  // Cmdline content temporary content.
+  options: WindowLocalOptions,
+
   contents: TemporaryContentsWk,
 
-  // Cmdline content viewport.
-  viewport: ViewportWk,
+  viewport: ViewportArc,
 
-  options: WindowLocalOptions,
+  cursor_viewport: CursorViewportArc,
 }
 
 impl Cmdline {
-  pub fn new(
-    opts: &WindowLocalOptions,
-    shape: IRect,
-    contents: TemporaryContentsWk,
-    viewport: ViewportWk,
-  ) -> Self {
+  pub fn new(shape: IRect, contents: TemporaryContentsWk) -> Self {
     // Force cmdline window options.
-    let mut options = *opts;
-    options.set_wrap(false);
-    options.set_line_break(false);
-    options.set_scroll_off(0_u16);
+    let options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .line_break(false)
+      .scroll_off(0_u16)
+      .build()
+      .unwrap();
+    let viewport_options = ViewportOptions::from(&options);
 
     let base = InodeBase::new(shape);
+    let cmdline_actual_shape = base.actual_shape();
+
+    let (viewport, cursor_viewport) = {
+      let contents = contents.upgrade().unwrap();
+      let contents = lock!(contents);
+      let viewport = Viewport::view(
+        &viewport_options,
+        contents.cmdline_content(),
+        cmdline_actual_shape,
+        0,
+        0,
+      );
+      let cursor_viewport = CursorViewport::from_top_left(&viewport, contents.cmdline_content());
+      (viewport, cursor_viewport)
+    };
+    let viewport = Viewport::to_arc(viewport);
+    let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
+
     Self {
       base,
-      contents,
       options,
+      contents,
       viewport,
+      cursor_viewport,
     }
   }
 }
@@ -55,7 +74,7 @@ impl Widgetable for Cmdline {
     let actual_shape = self.actual_shape();
     let contents = self.contents.upgrade().unwrap();
     let contents = lock!(contents);
-    let viewport = self.viewport.upgrade().unwrap();
+    let viewport = self.viewport.clone();
 
     viewport.draw(contents.cmdline_content(), actual_shape, canvas);
   }

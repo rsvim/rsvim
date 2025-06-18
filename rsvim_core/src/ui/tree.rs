@@ -232,8 +232,11 @@ pub struct Tree {
 
   // Cursor and window state {
 
-  // [`cursor`](crate::ui::widget::cursor::Cursor) node ID.
+  // [`Cursor`](crate::ui::widget::cursor::Cursor) node ID.
   cursor_id: Option<TreeNodeId>,
+
+  // [`Cmdline`](crate::ui::widget::cmdline::Cmdline) node ID.
+  cmdline_id: Option<TreeNodeId>,
 
   // All [`Window`](crate::ui::widget::Window) node IDs.
   window_ids: BTreeSet<TreeNodeId>,
@@ -266,6 +269,7 @@ impl Tree {
     Tree {
       base: Itree::new(root_node),
       cursor_id: None,
+      cmdline_id: None,
       window_ids: BTreeSet::new(),
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowLocalOptionsBuilder::default().build().unwrap(),
@@ -332,6 +336,16 @@ impl Tree {
     self.cursor_id = cursor_id;
   }
 
+  /// Get cmdline node ID.
+  pub fn cmdline_id(&self) -> Option<TreeNodeId> {
+    self.cmdline_id
+  }
+
+  /// Set cmdline node ID.
+  pub fn set_cmdline_id(&mut self, cmdline_id: Option<TreeNodeId>) {
+    self.cmdline_id = cmdline_id;
+  }
+
   /// Get current window node ID.
   /// NOTE: A window is called the current window because it has cursor inside it.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
@@ -371,6 +385,9 @@ impl Tree {
           _ => unreachable!("Cursor widget must insert under the window widget parent"),
         }
         self.cursor_id = Some(cursor.id());
+      }
+      TreeNode::Cmdline(cmdline) => {
+        self.cmdline_id = Some(cmdline.id());
       }
       TreeNode::Window(window) => {
         self.window_ids.insert(window.id());

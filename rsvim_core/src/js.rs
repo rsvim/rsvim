@@ -367,6 +367,12 @@ pub struct JsRuntime {
   pub state: Rc<RefCell<JsRuntimeState>>,
 }
 
+impl std::fmt::Debug for JsRuntime {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "JsRuntime")
+  }
+}
+
 impl JsRuntime {
   /// Creates a new JsRuntime based on provided options.
   #[allow(clippy::too_many_arguments)]
