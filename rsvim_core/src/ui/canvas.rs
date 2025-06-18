@@ -397,7 +397,7 @@ impl Shader {
   }
 
   /// Get an iterator of the collection.
-  pub fn iter(&self) -> Iter<ShaderCommand> {
+  pub fn iter(&self) -> Iter<'_, ShaderCommand> {
     self.commands.iter()
   }
 }
