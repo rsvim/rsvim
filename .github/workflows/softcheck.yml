@@ -1,4 +1,4 @@
-name: Soft Check
+name: Nightly CI
 on:
   pull_request:
     branches:
@@ -35,7 +35,7 @@ jobs:
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
   build:
-    name: Nightly Toolchain Build
+    name: Nightly Build
     runs-on: ubuntu-22.04
     strategy:
       matrix:
