@@ -240,7 +240,12 @@ pub struct Tree {
   window_ids: BTreeSet<TreeNodeId>,
 
   // The *current* window node ID.
-  // NOTE: The term *current* means the UI widget that is focused, i.e. it contains the cursor.
+  //
+  // The term *current* means the UI widget that is focused, i.e. it contains the cursor.
+  //
+  // But when user inputs commands in cmdline UI widget, the cursor will move to the cmdline
+  // widget, which is not a window widget. And in meanwhile, we still need to know the **current** 
+  // window and the **cursor** position, as if the cursor is still inside the window.
   current_window_id: Option<TreeNodeId>,
 
   // Global options for windows.
@@ -271,8 +276,8 @@ impl Tree {
       base: Itree::new(root_node),
       cursor_id: None,
       cmdline_id: None,
-      cmdline_cursor_id: None,
       window_ids: BTreeSet::new(),
+      current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
       global_local_options: WindowLocalOptionsBuilder::default().build().unwrap(),
     }
@@ -348,19 +353,23 @@ impl Tree {
     self.cmdline_id = cmdline_id;
   }
 
-  /// Get cmdline cursor node ID.
-  pub fn cmdline_cursor_id(&self) -> Option<TreeNodeId> {
-    self.cmdline_cursor_id
-  }
-
-  /// Set cmdline cursor node ID.
-  pub fn set_cmdline_cursor_id(&mut self, cmdline_cursor_id: Option<TreeNodeId>) {
-    self.cmdline_cursor_id = cmdline_cursor_id;
-  }
-
   /// Get current window node ID.
   /// NOTE: A window is called the current window because it has cursor inside it.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
+    if let Some(cursor_id) = self.cursor_id {
+      if let Some(parent_id) = self.parent_id(cursor_id) {
+        if let Some(TreeNode::Window(window)) = self.node(parent_id) {
+          debug_assert!(self.current_window_id.is_some());
+          debug_assert_eq!(self.current_window_id.unwrap(), window.id());
+        }
+      }
+    }
+    if let Some(current_window_id) = self.current_window_id {
+
+    }
+
+    self.current_window_id
+
     if let Some(cursor_id) = self.cursor_id {
       let mut id = cursor_id;
       while let Some(parent_id) = self.parent_id(id) {
@@ -390,18 +399,22 @@ impl Tree {
   fn insert_guard(&mut self, node: &TreeNode, parent_id: TreeNodeId) {
     match node {
       TreeNode::Cursor(cursor) => {
-        // Ensure the parent node is a window widget.
+        // When insert cursor widget, update `current_window_id`.
         let parent_node = self.node(parent_id).unwrap();
         match parent_node {
-          TreeNode::Window(_) => { /* Skip */ }
-          _ => unreachable!("Cursor widget must insert under the window widget parent"),
+          TreeNode::Window(window) => { self.current_window_id = Some(window.id()); }
+          TreeNode::Cmdline(cmdline) => { if let Some(cmdline_id) = self.cmdline_id { debug_assert_eq!(cmdline.id(), cmdline_id);}}
+          _ => unreachable!(),
         }
+        // When insert cursor widget, update `cursor_id`.
         self.cursor_id = Some(cursor.id());
       }
       TreeNode::Cmdline(cmdline) => {
+        // When insert cmdline widget, update `cmdline_id`.
         self.cmdline_id = Some(cmdline.id());
       }
       TreeNode::Window(window) => {
+        // When insert window widget, update `window_ids`.
         self.window_ids.insert(window.id());
       }
       _ => { /* Skip */ }
