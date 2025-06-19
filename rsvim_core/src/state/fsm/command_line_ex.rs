@@ -58,13 +58,13 @@ impl Stateful for CommandLineExStateful {
 
   fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
-      Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
       Operation::CursorMoveByCommandLineEx((_, _))
       | Operation::CursorMoveUpByCommandLineEx(_)
       | Operation::CursorMoveDownByCommandLineEx(_)
       | Operation::CursorMoveLeftByCommandLineEx(_)
       | Operation::CursorMoveRightByCommandLineEx(_)
       | Operation::CursorMoveToCommandLineEx((_, _)) => self.cursor_move(&data_access, op),
+      Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
       Operation::InsertAtCursorCommandLineEx(text) => self.insert_at_cursor(&data_access, text),
       Operation::DeleteAtCursorCommandLineEx(n) => self.delete_at_cursor(&data_access, n),
       _ => unreachable!(),
