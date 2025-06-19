@@ -5,7 +5,7 @@ use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
-use crate::state::ops::{CommandlineModeVariant, Operation};
+use crate::state::ops::{CmdlineModeVariant, Operation};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, ViewportArc, ViewportOptions, ViewportSearchDirection};
@@ -33,9 +33,7 @@ impl NormalStateful {
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char('i') => Some(Operation::GotoInsertMode),
-            KeyCode::Char(':') => Some(Operation::GotoCommandlineMode(
-              CommandlineModeVariant::Command,
-            )),
+            KeyCode::Char(':') => Some(Operation::GotoCmdlineMode(CmdlineModeVariant::ExCommand)),
             KeyCode::Esc => Some(Operation::EditorQuit),
             _ => None,
           }
@@ -64,10 +62,8 @@ impl Stateful for NormalStateful {
   fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
       Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
-      Operation::GotoCommandlineMode(variant) => match variant {
-        CommandlineModeVariant::Command => {
-          self.goto_command_line_mode_command_variant(&data_access)
-        }
+      Operation::GotoCmdlineMode(variant) => match variant {
+        CmdlineModeVariant::Command => self.goto_command_line_mode_command_variant(&data_access),
         _ => unimplemented!(),
       },
       Operation::EditorQuit => self.editor_quit(&data_access),

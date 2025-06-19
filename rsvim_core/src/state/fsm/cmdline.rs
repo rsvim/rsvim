@@ -5,13 +5,13 @@ use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line editing mode.
-pub struct CommandLineStateful {}
+pub struct CmdlineStateful {}
 
-impl Stateful for CommandLineStateful {
+impl Stateful for CmdlineStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    StatefulValue::CommandLineMode(CommandLineStateful::default())
+    StatefulValue::CommandLineMode(CmdlineStateful::default())
   }
   fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
-    StatefulValue::CommandLineMode(CommandLineStateful::default())
+    StatefulValue::CommandLineMode(CmdlineStateful::default())
   }
 }
