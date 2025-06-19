@@ -36,6 +36,12 @@ impl NormalStateful {
             KeyCode::Char(':') => Some(Operation::GotoCommandLineMode(
               CommandLineModeVariant::ExCommand,
             )),
+            KeyCode::Char('/') => Some(Operation::GotoCommandLineMode(
+              CommandLineModeVariant::SearchPatternForward,
+            )),
+            KeyCode::Char('?') => Some(Operation::GotoCommandLineMode(
+              CommandLineModeVariant::SearchPatternBackward,
+            )),
             KeyCode::Esc => Some(Operation::EditorQuit),
             _ => None,
           }
@@ -67,6 +73,12 @@ impl Stateful for NormalStateful {
       Operation::GotoCommandLineMode(variant) => match variant {
         CommandLineModeVariant::ExCommand => {
           self.goto_command_line_mode_ex_command_variant(&data_access)
+        }
+        CommandLineModeVariant::SearchPatternForward => {
+          self.goto_command_line_mode_search_pattern_variant(&data_access, true)
+        }
+        CommandLineModeVariant::SearchPatternBackward => {
+          self.goto_command_line_mode_search_pattern_variant(&data_access, false)
         }
         _ => unimplemented!(),
       },
@@ -116,9 +128,10 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  fn goto_command_line_mode_search_variant(
+  fn goto_command_line_mode_search_pattern_variant(
     &self,
     _data_access: &StatefulDataAccess,
+    _forward: bool,
   ) -> StatefulValue {
     // let tree = data_access.tree.clone();
     // let mut tree = lock!(tree);
