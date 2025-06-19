@@ -112,7 +112,7 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  fn goto_command_line_search_forward_mode(
+  fn _goto_command_line_search_forward_mode(
     &self,
     _data_access: &StatefulDataAccess,
   ) -> StatefulValue {
@@ -145,7 +145,7 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  fn goto_command_line_search_backward_mode(
+  fn _goto_command_line_search_backward_mode(
     &self,
     _data_access: &StatefulDataAccess,
   ) -> StatefulValue {
