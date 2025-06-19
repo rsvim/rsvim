@@ -75,10 +75,10 @@ impl Stateful for NormalStateful {
           self.goto_command_line_mode_ex_command_variant(&data_access)
         }
         // CommandLineModeVariant::SearchPatternForward => {
-        //   self.goto_command_line_mode_search_pattern_variant(&data_access, true)
+        //   self.goto_command_line_mode_search_variant(&data_access, true)
         // }
         // CommandLineModeVariant::SearchPatternBackward => {
-        //   self.goto_command_line_mode_search_pattern_variant(&data_access, false)
+        //   self.goto_command_line_mode_search_variant(&data_access, false)
         // }
         _ => unimplemented!(),
       },
@@ -126,7 +126,7 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  fn goto_command_line_mode_search_pattern_variant(
+  fn goto_command_line_mode_search_variant(
     &self,
     _data_access: &StatefulDataAccess,
     _forward: bool,
@@ -154,7 +154,7 @@ impl NormalStateful {
     // }
 
     StatefulValue::CommandLineModeSearchForwardVariant(
-      super::CommandLineSearchBackwardVariantStateful::default(),
+      super::CommandLineSearchForwardVariantStateful::default(),
     )
   }
 }
