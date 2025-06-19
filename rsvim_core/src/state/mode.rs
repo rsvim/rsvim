@@ -1,8 +1,8 @@
 //! Vim editing mode.
 
-use ahash::AHashSet as HashSet;
+use crate::prelude::*;
+
 use std::fmt::Display;
-use std::str::FromStr;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// Editing mode.
