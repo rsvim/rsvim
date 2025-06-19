@@ -35,7 +35,7 @@ impl Display for Mode {
       Mode::Select => write!(f, "Select"),
       Mode::OperatorPending => write!(f, "Operator-pending"),
       Mode::Insert => write!(f, "Insert"),
-      Mode::CommandLineEx => write!(f, "Command-line"),
+      Mode::CommandLineEx => write!(f, "Command-line (ex)"),
       Mode::CommandLineSearchForward => write!(f, "Command-line (search forward)"),
       Mode::CommandLineSearchBackward => write!(f, "Command-line (search backward)"),
       Mode::Terminal => write!(f, "Terminal"),
