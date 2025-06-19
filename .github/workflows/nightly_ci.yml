@@ -34,6 +34,25 @@ jobs:
           echo "show PWD=${PWD}"
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
+  unit_test:
+    name: Nightly Test
+    strategy:
+      matrix:
+        rust_version: [beta, nightly]
+    runs-on: ubuntu-latest
+    env:
+      RUSTC_WRAPPER: "sccache"
+      SCCACHE_GHA_ENABLED: "true"
+    steps:
+      - uses: Swatinem/rust-cache@v2
+      - uses: mozilla-actions/sccache-action@v0.0.9
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust_version }}
+      - uses: taiki-e/install-action@nextest
+      - name: Cargo nextest
+        run: |
+          cargo nextest run --all-features --workspace
   build:
     name: Nightly Build
     runs-on: ubuntu-latest
@@ -46,7 +65,7 @@ jobs:
     steps:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust_version }}
       - uses: actions/checkout@v4
