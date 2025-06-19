@@ -33,7 +33,7 @@ impl Display for Mode {
       Mode::Select => write!(f, "Select"),
       Mode::OperatorPending => write!(f, "Operator-pending"),
       Mode::Insert => write!(f, "Insert"),
-      Mode::CommandLineExCommandVariant => write!(f, "Command-line (ex-command)"),
+      Mode::CommandLineExCommandVariant => write!(f, "Command-line"),
       Mode::CommandLineSearchPatternVariant => write!(f, "Command-line (search pattern)"),
       Mode::Terminal => write!(f, "Terminal"),
     }
@@ -51,8 +51,9 @@ impl FromStr for Mode {
       "Select" => Ok(Mode::Visual),
       "Operator-pending" => Ok(Mode::OperatorPending),
       "Insert" => Ok(Mode::Insert),
-      "Command-line" => Ok(Mode::CommandLineExCommandVariant),
-      "Command-line (ex-command)" => Ok(Mode::CommandLineExCommandVariant),
+      "Command-line" | "Command-line (ex-command)" | "Command-line (ex)" => {
+        Ok(Mode::CommandLineExCommandVariant)
+      }
       "Command-line (search pattern)" => Ok(Mode::CommandLineSearchPatternVariant),
       "Terminal" => Ok(Mode::Terminal),
       _ => Err("Invalid Mode name"),
