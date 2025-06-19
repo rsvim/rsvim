@@ -4,8 +4,8 @@ use crate::buf::Text;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
+use crate::state::ops::{CommandlineModeVariant, Operation};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, ViewportArc, ViewportOptions, ViewportSearchDirection};
@@ -33,7 +33,9 @@ impl NormalStateful {
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char('i') => Some(Operation::GotoInsertMode),
-            KeyCode::Char(':') => Some(Operation::GotoCommandlineMode),
+            KeyCode::Char(':') => Some(Operation::GotoCommandlineMode(
+              CommandlineModeVariant::Command,
+            )),
             KeyCode::Esc => Some(Operation::EditorQuit),
             _ => None,
           }

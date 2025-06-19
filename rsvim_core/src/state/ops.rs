@@ -4,6 +4,13 @@ pub mod cursor_ops;
 
 use compact_str::CompactString;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+pub enum CommandlineModeVariant {
+  Command,
+  SearchForward,
+  SearchBackward,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 /// A set of low-level editor operations between terminal keyboard/mouse events and editor
 /// operations.
@@ -71,7 +78,7 @@ pub enum Operation {
   DeleteAtCursor(/* N-chars */ isize),
 
   /// Goto command-line mode.
-  GotoCommandlineMode,
+  GotoCommandlineMode(CommandlineModeVariant),
 
   /// Insert command text at cursor.
   InsertCommandAtCursor(/* text */ CompactString),
