@@ -234,7 +234,7 @@ pub struct Tree {
   cursor_id: Option<TreeNodeId>,
 
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
-  cmdline_id: Option<TreeNodeId>,
+  command_line_id: Option<TreeNodeId>,
 
   // All [`Window`](crate::ui::widget::Window) node IDs.
   window_ids: BTreeSet<TreeNodeId>,
@@ -276,7 +276,7 @@ impl Tree {
     Tree {
       base: Itree::new(root_node),
       cursor_id: None,
-      cmdline_id: None,
+      command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
       global_options: WindowGlobalOptionsBuilder::default().build().unwrap(),
@@ -339,9 +339,9 @@ impl Tree {
     self.cursor_id
   }
 
-  /// Get cmdline node ID.
-  pub fn cmdline_id(&self) -> Option<TreeNodeId> {
-    self.cmdline_id
+  /// Get command-line node ID.
+  pub fn command_line_id(&self) -> Option<TreeNodeId> {
+    self.command_line_id
   }
 
   /// Get current window node ID.
@@ -358,7 +358,7 @@ impl Tree {
             debug_assert!(self.current_window_id.is_some());
             debug_assert_eq!(self.current_window_id.unwrap(), window.id());
           }
-          TreeNode::CommandLine(_cmdline) => {
+          TreeNode::CommandLine(_command_line) => {
             debug_assert!(self.current_window_id.is_some());
           }
           _ => unreachable!(),
@@ -390,9 +390,9 @@ impl Tree {
           TreeNode::Window(window) => {
             self.current_window_id = Some(window.id());
           }
-          TreeNode::CommandLine(cmdline) => {
-            if let Some(cmdline_id) = self.cmdline_id {
-              debug_assert_eq!(cmdline.id(), cmdline_id);
+          TreeNode::CommandLine(command_line) => {
+            if let Some(command_line_id) = self.command_line_id {
+              debug_assert_eq!(command_line.id(), command_line_id);
             }
           }
           _ => unreachable!(),
@@ -400,9 +400,9 @@ impl Tree {
         // When insert cursor widget, update `cursor_id`.
         self.cursor_id = Some(cursor.id());
       }
-      TreeNode::CommandLine(cmdline) => {
-        // When insert cmdline widget, update `cmdline_id`.
-        self.cmdline_id = Some(cmdline.id());
+      TreeNode::CommandLine(command_line) => {
+        // When insert command-line widget, update `command_line_id`.
+        self.command_line_id = Some(command_line.id());
       }
       TreeNode::Window(window) => {
         // When insert window widget, update `window_ids`.
