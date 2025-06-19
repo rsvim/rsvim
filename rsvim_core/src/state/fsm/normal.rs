@@ -85,7 +85,7 @@ impl Stateful for NormalStateful {
 impl NormalStateful {
   fn goto_command_line_mode_command_variant(
     &self,
-    data_access: &StatefulDataAccess,
+    _data_access: &StatefulDataAccess,
   ) -> StatefulValue {
     // let tree = data_access.tree.clone();
     // let mut tree = lock!(tree);

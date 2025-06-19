@@ -6,9 +6,9 @@ use compact_str::CompactString;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 pub enum CommandlineModeVariant {
-  Command,
-  SearchForward,
-  SearchBackward,
+  ExCommand,
+  SearchPatternForward,
+  SearchPatternBackward,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
