@@ -33,6 +33,9 @@ impl NormalStateful {
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char('i') => Some(Operation::GotoInsertMode),
+            KeyCode::Char(':') => Some(Operation::GotoCommandLineExMode),
+            // KeyCode::Char('/') => Some(Operation::GotoCommandLineSearchForwardMode),
+            // KeyCode::Char('?') => Some(Operation::GotoCommandLineSearchBackwardMode),
             KeyCode::Esc => Some(Operation::EditorQuit),
             _ => None,
           }
@@ -61,6 +64,13 @@ impl Stateful for NormalStateful {
   fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
       Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
+      Operation::GotoCommandLineExMode => self.goto_command_line_ex_mode(&data_access),
+      // Operation::GotoCommandLineSearchForwardMode => {
+      //   self.goto_command_line_search_forward_mode(&data_access)
+      // }
+      // Operation::GotoCommandLineSearchBackwardMode => {
+      //   self.goto_command_line_search_backward_mode(&data_access)
+      // }
       Operation::EditorQuit => self.editor_quit(&data_access),
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
@@ -70,6 +80,96 @@ impl Stateful for NormalStateful {
       | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
       _ => unreachable!(),
     }
+  }
+}
+
+impl NormalStateful {
+  fn goto_command_line_ex_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(_current_window) => {}
+      _ => unreachable!(),
+    }
+
+    let cursor_id = tree.cursor_id().unwrap();
+    debug_assert!(tree.node_mut(cursor_id).is_some());
+    let cursor_node = tree.node_mut(cursor_id).unwrap();
+    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    match cursor_node {
+      TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+      _ => unreachable!(),
+    }
+
+    StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
+  }
+}
+
+impl NormalStateful {
+  fn _goto_command_line_search_forward_mode(
+    &self,
+    _data_access: &StatefulDataAccess,
+  ) -> StatefulValue {
+    // let tree = data_access.tree.clone();
+    // let mut tree = lock!(tree);
+    //
+    // debug_assert!(tree.current_window_id().is_some());
+    // let current_window_id = tree.current_window_id().unwrap();
+    // debug_assert!(tree.node_mut(current_window_id).is_some());
+    // let current_window_node = tree.node_mut(current_window_id).unwrap();
+    // debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    // match current_window_node {
+    //   TreeNode::Window(_current_window) => {}
+    //   _ => unreachable!(),
+    // }
+    //
+    // let cursor_id = tree.cursor_id().unwrap();
+    // debug_assert!(tree.node_mut(cursor_id).is_some());
+    // let cursor_node = tree.node_mut(cursor_id).unwrap();
+    // debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    // match cursor_node {
+    //   TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+    //   _ => unreachable!(),
+    // }
+
+    StatefulValue::CommandLineSearchForwardMode(super::CommandLineSearchForwardStateful::default())
+  }
+}
+
+impl NormalStateful {
+  fn _goto_command_line_search_backward_mode(
+    &self,
+    _data_access: &StatefulDataAccess,
+  ) -> StatefulValue {
+    // let tree = data_access.tree.clone();
+    // let mut tree = lock!(tree);
+    //
+    // debug_assert!(tree.current_window_id().is_some());
+    // let current_window_id = tree.current_window_id().unwrap();
+    // debug_assert!(tree.node_mut(current_window_id).is_some());
+    // let current_window_node = tree.node_mut(current_window_id).unwrap();
+    // debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    // match current_window_node {
+    //   TreeNode::Window(_current_window) => {}
+    //   _ => unreachable!(),
+    // }
+    //
+    // let cursor_id = tree.cursor_id().unwrap();
+    // debug_assert!(tree.node_mut(cursor_id).is_some());
+    // let cursor_node = tree.node_mut(cursor_id).unwrap();
+    // debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    // match cursor_node {
+    //   TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+    //   _ => unreachable!(),
+    // }
+
+    StatefulValue::CommandLineSearchBackwardMode(super::CommandLineSearchBackwardStateful::default())
   }
 }
 

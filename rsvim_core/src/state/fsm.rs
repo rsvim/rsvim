@@ -21,7 +21,9 @@ use crossterm::event::Event;
 use std::sync::{Arc, Weak};
 
 // Re-export
-pub use crate::state::fsm::command_line::CommandLineStateful;
+pub use crate::state::fsm::command_line_ex::CommandLineExStateful;
+pub use crate::state::fsm::command_line_search_backward::CommandLineSearchBackwardStateful;
+pub use crate::state::fsm::command_line_search_forward::CommandLineSearchForwardStateful;
 pub use crate::state::fsm::insert::InsertStateful;
 pub use crate::state::fsm::normal::NormalStateful;
 pub use crate::state::fsm::operator_pending::OperatorPendingStateful;
@@ -30,7 +32,9 @@ pub use crate::state::fsm::select::SelectStateful;
 pub use crate::state::fsm::terminal::TerminalStateful;
 pub use crate::state::fsm::visual::VisualStateful;
 
-pub mod command_line;
+pub mod command_line_ex;
+pub mod command_line_search_backward;
+pub mod command_line_search_forward;
 pub mod insert;
 pub mod normal;
 pub mod operator_pending;
@@ -81,7 +85,9 @@ pub enum StatefulValue {
   SelectMode(SelectStateful),
   OperatorPendingMode(OperatorPendingStateful),
   InsertMode(InsertStateful),
-  CommandLineMode(CommandLineStateful),
+  CommandLineExMode(CommandLineExStateful),
+  CommandLineSearchForwardMode(CommandLineSearchForwardStateful),
+  CommandLineSearchBackwardMode(CommandLineSearchBackwardStateful),
   TerminalMode(TerminalStateful),
   // Internal states.
   QuitState(QuitStateful),
@@ -106,7 +112,9 @@ impl StatefulValue {
       StatefulValue::SelectMode(s) => s.handle(data_access),
       StatefulValue::OperatorPendingMode(s) => s.handle(data_access),
       StatefulValue::InsertMode(s) => s.handle(data_access),
-      StatefulValue::CommandLineMode(s) => s.handle(data_access),
+      StatefulValue::CommandLineExMode(s) => s.handle(data_access),
+      StatefulValue::CommandLineSearchForwardMode(s) => s.handle(data_access),
+      StatefulValue::CommandLineSearchBackwardMode(s) => s.handle(data_access),
       StatefulValue::TerminalMode(s) => s.handle(data_access),
       StatefulValue::QuitState(s) => s.handle(data_access),
     }

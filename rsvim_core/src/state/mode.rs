@@ -1,8 +1,8 @@
 //! Vim editing mode.
 
-use ahash::AHashSet as HashSet;
+use crate::prelude::*;
+
 use std::fmt::Display;
-use std::str::FromStr;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// Editing mode.
@@ -17,8 +17,12 @@ pub enum Mode {
   OperatorPending,
   /// Insert mode.
   Insert,
-  /// Command-line mode.
-  CommandLine,
+  /// Command-line mode, ex-command variant.
+  CommandLineEx,
+  /// Command-line mode, search forward variant.
+  CommandLineSearchForward,
+  /// Command-line mode, search backward variant.
+  CommandLineSearchBackward,
   /// Terminal mode.
   Terminal,
 }
@@ -31,45 +35,11 @@ impl Display for Mode {
       Mode::Select => write!(f, "Select"),
       Mode::OperatorPending => write!(f, "Operator-pending"),
       Mode::Insert => write!(f, "Insert"),
-      Mode::CommandLine => write!(f, "Command-line"),
+      Mode::CommandLineEx => write!(f, "Command-line (ex)"),
+      Mode::CommandLineSearchForward => write!(f, "Command-line (search forward)"),
+      Mode::CommandLineSearchBackward => write!(f, "Command-line (search backward)"),
       Mode::Terminal => write!(f, "Terminal"),
     }
-  }
-}
-
-impl FromStr for Mode {
-  type Err = &'static str;
-
-  /// Parse `str` to enum.
-  fn from_str(s: &str) -> Result<Self, Self::Err> {
-    match s {
-      "Normal" => Ok(Mode::Normal),
-      "Visual" => Ok(Mode::Visual),
-      "Select" => Ok(Mode::Visual),
-      "Operator-pending" => Ok(Mode::OperatorPending),
-      "Insert" => Ok(Mode::Insert),
-      "Command-line" => Ok(Mode::CommandLine),
-      "Terminal" => Ok(Mode::Terminal),
-      _ => Err("Invalid Mode name"),
-    }
-  }
-}
-
-impl TryFrom<&str> for Mode {
-  type Error = &'static str;
-
-  /// Parse `str` to enum.
-  fn try_from(s: &str) -> Result<Self, Self::Error> {
-    FromStr::from_str(s)
-  }
-}
-
-impl TryFrom<String> for Mode {
-  type Error = &'static str;
-
-  /// Parse `String` to enum.
-  fn try_from(s: String) -> Result<Self, Self::Error> {
-    TryFrom::try_from(s.as_str())
   }
 }
 
@@ -82,7 +52,7 @@ impl Mode {
       Mode::Select,
       Mode::OperatorPending,
       Mode::Insert,
-      Mode::CommandLine,
+      Mode::CommandLineEx,
       Mode::Terminal,
     ]
   }
