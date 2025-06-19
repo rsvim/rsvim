@@ -64,6 +64,12 @@ impl Stateful for NormalStateful {
   fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
       Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
+      Operation::GotoCommandlineMode(variant) => match variant {
+        CommandlineModeVariant::Command => {
+          self.goto_command_line_mode_command_variant(&data_access)
+        }
+        _ => unimplemented!(),
+      },
       Operation::EditorQuit => self.editor_quit(&data_access),
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
@@ -73,6 +79,26 @@ impl Stateful for NormalStateful {
       | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
       _ => unreachable!(),
     }
+  }
+}
+
+impl NormalStateful {
+  fn goto_command_line_mode_command_variant(
+    &self,
+    data_access: &StatefulDataAccess,
+  ) -> StatefulValue {
+    // let tree = data_access.tree.clone();
+    // let mut tree = lock!(tree);
+    // let cursor_id = tree.cursor_id().unwrap();
+    // debug_assert!(tree.node_mut(cursor_id).is_some());
+    // let cursor_node = tree.node_mut(cursor_id).unwrap();
+    // debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    // match cursor_node {
+    //   TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+    //   _ => unreachable!(),
+    // }
+
+    StatefulValue::CommandLineMode(super::CommandLineStateful::default())
   }
 }
 
