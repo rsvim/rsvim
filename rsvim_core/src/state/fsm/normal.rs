@@ -122,7 +122,7 @@ impl NormalStateful {
 }
 
 impl NormalStateful {
-  fn goto_command_line_mode_search_variant(
+  fn _goto_command_line_mode_search_variant(
     &self,
     _data_access: &StatefulDataAccess,
     _forward: bool,
