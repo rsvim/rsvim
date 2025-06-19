@@ -9,9 +9,9 @@ pub struct CommandLineExVariantStateful {}
 
 impl Stateful for CommandLineExVariantStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    StatefulValue::CommandLineModeExVariant(CommandLineExVariantStateful::default())
+    StatefulValue::CommandLineExMode(CommandLineExVariantStateful::default())
   }
   fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
-    StatefulValue::CommandLineModeExVariant(CommandLineExVariantStateful::default())
+    StatefulValue::CommandLineExMode(CommandLineExVariantStateful::default())
   }
 }

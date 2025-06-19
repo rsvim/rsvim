@@ -80,10 +80,10 @@ pub enum Operation {
   GotoCommandLineSearchBackwardMode,
 
   /// Insert command text at cursor.
-  InsertCommandAtCursor(/* text */ CompactString),
+  InsertExCommandAtCursor(/* text */ CompactString),
 
   /// Delete N-chars command text, to the left of cursor if negative, to the right of cursor if positive.
-  DeleteCommandAtCursor(/* N-chars */ isize),
+  DeleteExCommandAtCursor(/* N-chars */ isize),
 
   /// Quit editor
   EditorQuit,
