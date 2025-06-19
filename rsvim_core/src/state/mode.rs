@@ -17,8 +17,10 @@ pub enum Mode {
   OperatorPending,
   /// Insert mode.
   Insert,
-  /// Command-line mode.
-  CommandLine,
+  /// Command-line mode, ex-command variant.
+  CommandLineExCommandVariant,
+  /// Command-line mode, search pattern variant.
+  CommandLineSearchPatternVariant,
   /// Terminal mode.
   Terminal,
 }
@@ -31,7 +33,8 @@ impl Display for Mode {
       Mode::Select => write!(f, "Select"),
       Mode::OperatorPending => write!(f, "Operator-pending"),
       Mode::Insert => write!(f, "Insert"),
-      Mode::CommandLine => write!(f, "Command-line"),
+      Mode::CommandLineExCommandVariant => write!(f, "Command-line (ex-command)"),
+      Mode::CommandLineSearchPatternVariant => write!(f, "Command-line (search pattern)"),
       Mode::Terminal => write!(f, "Terminal"),
     }
   }
@@ -48,7 +51,9 @@ impl FromStr for Mode {
       "Select" => Ok(Mode::Visual),
       "Operator-pending" => Ok(Mode::OperatorPending),
       "Insert" => Ok(Mode::Insert),
-      "Command-line" => Ok(Mode::CommandLine),
+      "Command-line" => Ok(Mode::CommandLineExCommandVariant),
+      "Command-line (ex-command)" => Ok(Mode::CommandLineExCommandVariant),
+      "Command-line (search pattern)" => Ok(Mode::CommandLineSearchPatternVariant),
       "Terminal" => Ok(Mode::Terminal),
       _ => Err("Invalid Mode name"),
     }
@@ -82,7 +87,7 @@ impl Mode {
       Mode::Select,
       Mode::OperatorPending,
       Mode::Insert,
-      Mode::CommandLine,
+      Mode::CommandLineExCommandVariant,
       Mode::Terminal,
     ]
   }

@@ -56,6 +56,7 @@ impl State {
       StatefulValue::OperatorPendingMode(_) => Some(Mode::OperatorPending),
       StatefulValue::InsertMode(_) => Some(Mode::Insert),
       StatefulValue::CommandLineModeExCommandVariant(_) => Some(Mode::CommandLine),
+      StatefulValue::CommandLineModeSearchPatternVariant(_) => Some(Mode::CommandLine),
       StatefulValue::TerminalMode(_) => Some(Mode::Terminal),
       // Internal states.
       StatefulValue::QuitState(_) => None,
