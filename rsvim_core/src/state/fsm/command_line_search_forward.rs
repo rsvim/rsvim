@@ -5,13 +5,13 @@ use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line mode, search forward variant.
-pub struct CommandLineSearchForwardVariantStateful {}
+pub struct CommandLineSearchForwardStateful {}
 
-impl Stateful for CommandLineSearchForwardVariantStateful {
+impl Stateful for CommandLineSearchForwardStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    StatefulValue::CommandLineSearchForwardMode(CommandLineSearchForwardVariantStateful::default())
+    StatefulValue::CommandLineSearchForwardMode(CommandLineSearchForwardStateful::default())
   }
   fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
-    StatefulValue::CommandLineSearchForwardMode(CommandLineSearchForwardVariantStateful::default())
+    StatefulValue::CommandLineSearchForwardMode(CommandLineSearchForwardStateful::default())
   }
 }

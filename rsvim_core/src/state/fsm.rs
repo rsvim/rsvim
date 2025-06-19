@@ -21,9 +21,9 @@ use crossterm::event::Event;
 use std::sync::{Arc, Weak};
 
 // Re-export
-pub use crate::state::fsm::command_line_ex::CommandLineExVariantStateful;
-pub use crate::state::fsm::command_line_search_backward::CommandLineSearchBackwardVariantStateful;
-pub use crate::state::fsm::command_line_search_forward::CommandLineSearchForwardVariantStateful;
+pub use crate::state::fsm::command_line_ex::CommandLineExStateful;
+pub use crate::state::fsm::command_line_search_backward::CommandLineSearchBackwardStateful;
+pub use crate::state::fsm::command_line_search_forward::CommandLineSearchForwardStateful;
 pub use crate::state::fsm::insert::InsertStateful;
 pub use crate::state::fsm::normal::NormalStateful;
 pub use crate::state::fsm::operator_pending::OperatorPendingStateful;
@@ -85,9 +85,9 @@ pub enum StatefulValue {
   SelectMode(SelectStateful),
   OperatorPendingMode(OperatorPendingStateful),
   InsertMode(InsertStateful),
-  CommandLineExMode(CommandLineExVariantStateful),
-  CommandLineSearchForwardMode(CommandLineSearchForwardVariantStateful),
-  CommandLineSearchBackwardMode(CommandLineSearchBackwardVariantStateful),
+  CommandLineExMode(CommandLineExStateful),
+  CommandLineSearchForwardMode(CommandLineSearchForwardStateful),
+  CommandLineSearchBackwardMode(CommandLineSearchBackwardStateful),
   TerminalMode(TerminalStateful),
   // Internal states.
   QuitState(QuitStateful),
