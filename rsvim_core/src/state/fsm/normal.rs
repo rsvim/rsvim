@@ -80,7 +80,6 @@ impl Stateful for NormalStateful {
         CommandLineModeVariant::SearchPatternBackward => {
           self.goto_command_line_mode_search_pattern_variant(&data_access, false)
         }
-        _ => unimplemented!(),
       },
       Operation::EditorQuit => self.editor_quit(&data_access),
       Operation::CursorMoveBy((_, _))
