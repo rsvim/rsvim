@@ -65,8 +65,8 @@ impl Stateful for NormalStateful {
     match op {
       Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
       Operation::GotoCommandLineMode(variant) => match variant {
-        CommandLineModeVariant::Command => {
-          self.goto_command_line_mode_command_variant(&data_access)
+        CommandLineModeVariant::ExCommand => {
+          self.goto_command_line_mode_ex_command_variant(&data_access)
         }
         _ => unimplemented!(),
       },
@@ -83,7 +83,7 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  fn goto_command_line_mode_command_variant(
+  fn goto_command_line_mode_ex_command_variant(
     &self,
     _data_access: &StatefulDataAccess,
   ) -> StatefulValue {
