@@ -498,6 +498,10 @@ impl Tree {
     debug_assert!(self.parent_id(cursor_id).is_some());
     let current_parent_id = self.parent_id(cursor_id).unwrap();
     debug_assert!(self.node(current_parent_id).is_some());
+    debug_assert!(matches!(
+      self.node(current_parent_id).unwrap(),
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
     let removed_cursor_node = self.remove(cursor_id);
     debug_assert!(removed_cursor_node.is_some());
     let removed_cursor_node = removed_cursor_node.unwrap();
