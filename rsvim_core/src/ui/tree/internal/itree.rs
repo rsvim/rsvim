@@ -575,101 +575,6 @@ where
 
 // Movement {
 
-// /// Describe the relative position of a node and its parent node, based on the actual shape (after
-// /// truncated).
-// ///
-// /// There're several kinds of use cases:
-// ///
-// /// 1. No-edge contact (inside): The node is completely inside its parent without any edges
-// ///    contacted, which looks like:
-// ///
-// ///    ```text
-// ///    -----------------
-// ///    |               |
-// ///    |    --------   |
-// ///    |    |//////|   |
-// ///    |    |//////|   |
-// ///    |    --------   |
-// ///    |               |
-// ///    -----------------
-// ///    ```
-// ///
-// /// 2. Single-edge contact: The node is in contact with its parent on only 1 edge, which looks
-// ///    like:
-// ///
-// ///    ```text
-// ///    -----------------
-// ///    |               |
-// ///    |        -------|
-// ///    |        |//////|
-// ///    |        |//////|
-// ///    |        -------|
-// ///    |               |
-// ///    -----------------
-// ///    ```
-// ///
-// /// 3. Double-edges contact: The node is in contact on 2 edges, which looks like:
-// ///
-// ///    ```text
-// ///    -----------------
-// ///    |        |//////|
-// ///    |        |//////|
-// ///    |        -------|
-// ///    |               |
-// ///    |               |
-// ///    |               |
-// ///    -----------------
-// ///    ```
-// ///
-// /// 4. Triple-edges contact: The node is in contact on 3 edges, which looks like:
-// ///
-// ///    ```text
-// ///    -----------------
-// ///    |  |////////////|
-// ///    |  |////////////|
-// ///    |  |////////////|
-// ///    |  |////////////|
-// ///    |  |////////////|
-// ///    |  |////////////|
-// ///    -----------------
-// ///    ```
-// ///
-// /// 5. All-edges contact (overlapping): The node is in contact on 4 edges, i.e. the node is exactly
-// ///    the same with (or even bigger than, and truncated by) its parent, which looks like:
-// ///
-// ///    ```text
-// ///    -----------------
-// ///    |///////////////|
-// ///    |///////////////|
-// ///    |///////////////|
-// ///    |///////////////|
-// ///    |///////////////|
-// ///    |///////////////|
-// ///    -----------------
-// ///    ```
-// ///
-// pub enum InodeRelativePosition {
-//   /// 0-edge
-//   Inside,
-//   /// 1-edge
-//   Top,
-//   Bottom,
-//   Left,
-//   Right,
-//   // 2-edges
-//   TopLeft,
-//   TopRight,
-//   BottomLeft,
-//   BottomRight,
-//   // 3-edges
-//   TopBottomLeft,
-//   TopBottomRight,
-//   LeftRightTop,
-//   LeftRightBottom,
-//   // All-edges
-//   Overlapping,
-// }
-
 impl<T> Itree<T>
 where
   T: Inodeable,
@@ -838,6 +743,16 @@ where
   }
 }
 // Movement }
+
+// // Cursor Relationship {
+// impl<T> Itree<T>
+// where
+//   T: Inodeable,
+// {
+//   /// Set parent node for cursor node.
+//   pub fn set_cursor_parent(&mut self, id: TreeNodeId, new_parent_id: TreeNodeId) {}
+// }
+// // Cursor Relationship }
 
 #[cfg(test)]
 mod tests {

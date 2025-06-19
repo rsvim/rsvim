@@ -70,20 +70,38 @@ pub enum Operation {
   /// Delete N-chars text, to the left of cursor if negative, to the right of cursor if positive.
   DeleteAtCursor(/* N-chars */ isize),
 
-  /// Goto command-line mode, ex-command variant.
+  /// Goto command-line ex mode.
   GotoCommandLineExMode,
 
-  /// Goto command-line mode, search forward variant.
+  /// Goto command-line search forward mode.
   GotoCommandLineSearchForwardMode,
 
-  /// Goto command-line mode, search backward variant.
+  /// Goto command-line search backward mode.
   GotoCommandLineSearchBackwardMode,
 
-  /// Insert ex-command text at cursor.
-  InsertExCommandAtCursor(/* text */ CompactString),
+  /// Similar to [`CursorMoveBy`](Operation::CursorMoveBy), but for command-line ex mode.
+  CursorMoveByCommandLineEx((/* chars */ isize, /* lines */ isize)),
 
-  /// Delete N-chars ex-command text, to the left of cursor if negative, to the right of cursor if positive.
-  DeleteExCommandAtCursor(/* N-chars */ isize),
+  /// Similar to [`CursorMoveLeftBy`](Operation::CursorMoveLeftBy), but for command-line ex mode.
+  CursorMoveLeftByCommandLineEx(usize),
+
+  /// Similar to [`CursorMoveRightBy`](Operation::CursorMoveRightBy), but for command-line ex mode.
+  CursorMoveRightByCommandLineEx(usize),
+
+  /// Similar to [`CursorMoveUpBy`](Operation::CursorMoveUpBy), but for command-line ex mode.
+  CursorMoveUpByCommandLineEx(usize),
+
+  /// Similar to [`CursorMoveDownBy`](Operation::CursorMoveDownBy), but for command-line ex mode.
+  CursorMoveDownByCommandLineEx(usize),
+
+  /// Similar to [`CursorMoveTo`](Operation::CursorMoveTo), but for command-line ex mode.
+  CursorMoveToCommandLineEx((/* char_idx */ usize, /* lines_idx */ usize)),
+
+  /// Similar to [`InsertAtCursor`](Operation::InsertAtCursor), but for command-line ex mode.
+  InsertAtCursorCommandLineEx(/* text */ CompactString),
+
+  /// Similar to [`DeleteAtCursor`](Operation::DeleteAtCursor), but for command-line ex mode.
+  DeleteAtCursorCommandLineEx(/* N-chars */ isize),
 
   /// Quit editor
   EditorQuit,
