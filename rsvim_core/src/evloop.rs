@@ -347,15 +347,15 @@ impl EventLoop {
     let window_node = TreeNode::Window(window);
     tree.bounded_insert(tree_root_id, window_node);
 
-    // Initialize default cmdline.
-    let cmdline_shape = IRect::new(
+    // Initialize default command-line.
+    let command_line_shape = IRect::new(
       (0, canvas_size.height().saturating_sub(1) as isize),
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
-    let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
-    let _cmdline_id = cmdline.id();
-    let cmdline_node = TreeNode::Cmdline(cmdline);
-    tree.bounded_insert(tree_root_id, cmdline_node);
+    let command_line = CommandLine::new(command_line_shape, Arc::downgrade(&self.contents));
+    let _command_line_id = command_line.id();
+    let command_line = TreeNode::CommandLine(command_line);
+    tree.bounded_insert(tree_root_id, command_line);
 
     // Initialize cursor.
     let cursor_shape = IRect::new((0, 0), (1, 1));
