@@ -70,6 +70,15 @@ pub enum Operation {
   /// Delete N-chars text, to the left of cursor if negative, to the right of cursor if positive.
   DeleteAtCursor(/* N-chars */ isize),
 
+  /// Goto command-line mode.
+  GotoCommandlineMode,
+
+  /// Insert command text at cursor.
+  InsertCommandAtCursor(/* text */ CompactString),
+
+  /// Delete N-chars command text, to the left of cursor if negative, to the right of cursor if positive.
+  DeleteCommandAtCursor(/* N-chars */ isize),
+
   /// Quit editor
   EditorQuit,
 }

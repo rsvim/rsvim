@@ -33,6 +33,7 @@ impl NormalStateful {
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char('i') => Some(Operation::GotoInsertMode),
+            KeyCode::Char(':') => Some(Operation::GotoCommandlineMode),
             KeyCode::Esc => Some(Operation::EditorQuit),
             _ => None,
           }
