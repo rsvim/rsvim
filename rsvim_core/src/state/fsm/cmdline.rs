@@ -9,9 +9,9 @@ pub struct CmdlineStateful {}
 
 impl Stateful for CmdlineStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    StatefulValue::CommandLineMode(CmdlineStateful::default())
+    StatefulValue::CmdlineMode(CmdlineStateful::default())
   }
   fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
-    StatefulValue::CommandLineMode(CmdlineStateful::default())
+    StatefulValue::CmdlineMode(CmdlineStateful::default())
   }
 }

@@ -94,7 +94,7 @@ impl NormalStateful {
     //   _ => unreachable!(),
     // }
 
-    StatefulValue::CommandLineMode(super::CommandLineStateful::default())
+    StatefulValue::CmdlineMode(super::CmdlineStateful::default())
   }
 }
 
