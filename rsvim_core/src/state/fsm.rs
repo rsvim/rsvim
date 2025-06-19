@@ -21,8 +21,9 @@ use crossterm::event::Event;
 use std::sync::{Arc, Weak};
 
 // Re-export
-pub use crate::state::fsm::command_line_ex_command_variant::CommandLineExCommandVariantStateful;
-pub use crate::state::fsm::command_line_search_pattern_variant::CommandLineSearchPatternVariantStateful;
+pub use crate::state::fsm::command_line_ex_variant::CommandLineExCommandVariantStateful;
+pub use crate::state::fsm::command_line_search_backward_variant::CommandLineSearchPatternVariantStateful;
+pub use crate::state::fsm::command_line_search_forward_variant::CommandLineSearchPatternVariantStateful;
 pub use crate::state::fsm::insert::InsertStateful;
 pub use crate::state::fsm::normal::NormalStateful;
 pub use crate::state::fsm::operator_pending::OperatorPendingStateful;
@@ -31,8 +32,9 @@ pub use crate::state::fsm::select::SelectStateful;
 pub use crate::state::fsm::terminal::TerminalStateful;
 pub use crate::state::fsm::visual::VisualStateful;
 
-pub mod command_line_ex_command_variant;
-pub mod command_line_search_pattern_variant;
+pub mod command_line_ex_variant;
+pub mod command_line_search_backward_variant;
+pub mod command_line_search_forward_variant;
 pub mod insert;
 pub mod normal;
 pub mod operator_pending;
