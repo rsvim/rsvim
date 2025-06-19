@@ -9,12 +9,12 @@ pub struct CommandLineSearchBackwardVariantStateful {}
 
 impl Stateful for CommandLineSearchBackwardVariantStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    StatefulValue::CommandLineModeSearchForwardVariant(
+    StatefulValue::CommandLineModeSearchBackwardVariant(
       CommandLineSearchBackwardVariantStateful::default(),
     )
   }
   fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
-    StatefulValue::CommandLineModeSearchForwardVariant(
+    StatefulValue::CommandLineModeSearchBackwardVariant(
       CommandLineSearchBackwardVariantStateful::default(),
     )
   }
