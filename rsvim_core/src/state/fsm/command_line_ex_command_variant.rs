@@ -1,10 +1,10 @@
-//! The command-line mode.
+//! The command-line mode, ex-command variant.
 
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
-/// The command-line editing mode.
+/// The command-line mode, ex-command variant.
 pub struct CommandLineExCommandVariantStateful {}
 
 impl Stateful for CommandLineExCommandVariantStateful {
