@@ -85,18 +85,29 @@ impl Stateful for NormalStateful {
 impl NormalStateful {
   fn goto_command_line_mode_ex_command_variant(
     &self,
-    _data_access: &StatefulDataAccess,
+    data_access: &StatefulDataAccess,
   ) -> StatefulValue {
-    // let tree = data_access.tree.clone();
-    // let mut tree = lock!(tree);
-    // let cursor_id = tree.cursor_id().unwrap();
-    // debug_assert!(tree.node_mut(cursor_id).is_some());
-    // let cursor_node = tree.node_mut(cursor_id).unwrap();
-    // debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-    // match cursor_node {
-    //   TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
-    //   _ => unreachable!(),
-    // }
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(_current_window) => {}
+      _ => unreachable!(),
+    }
+
+    let cursor_id = tree.cursor_id().unwrap();
+    debug_assert!(tree.node_mut(cursor_id).is_some());
+    let cursor_node = tree.node_mut(cursor_id).unwrap();
+    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    match cursor_node {
+      TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+      _ => unreachable!(),
+    }
 
     StatefulValue::CommandLineMode(super::CommandLineStateful::default())
   }
