@@ -55,13 +55,9 @@ impl State {
       StatefulValue::SelectMode(_) => Some(Mode::Select),
       StatefulValue::OperatorPendingMode(_) => Some(Mode::OperatorPending),
       StatefulValue::InsertMode(_) => Some(Mode::Insert),
-      StatefulValue::CommandLineModeExVariant(_) => Some(Mode::CommandLineExVariant),
-      StatefulValue::CommandLineModeSearchForwardVariant(_) => {
-        Some(Mode::CommandLineSearchForwardVariant)
-      }
-      StatefulValue::CommandLineModeSearchBackwardVariant(_) => {
-        Some(Mode::CommandLineSearchBackwardVariant)
-      }
+      StatefulValue::CommandLineExMode(_) => Some(Mode::CommandLineEx),
+      StatefulValue::CommandLineSearchForwardMode(_) => Some(Mode::CommandLineSearchForward),
+      StatefulValue::CommandLineSearchBackwardMode(_) => Some(Mode::CommandLineSearchBackward),
       StatefulValue::TerminalMode(_) => Some(Mode::Terminal),
       // Internal states.
       StatefulValue::QuitState(_) => None,

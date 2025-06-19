@@ -18,11 +18,11 @@ pub enum Mode {
   /// Insert mode.
   Insert,
   /// Command-line mode, ex-command variant.
-  CommandLineExVariant,
+  CommandLineEx,
   /// Command-line mode, search forward variant.
-  CommandLineSearchForwardVariant,
+  CommandLineSearchForward,
   /// Command-line mode, search backward variant.
-  CommandLineSearchBackwardVariant,
+  CommandLineSearchBackward,
   /// Terminal mode.
   Terminal,
 }
@@ -35,9 +35,9 @@ impl Display for Mode {
       Mode::Select => write!(f, "Select"),
       Mode::OperatorPending => write!(f, "Operator-pending"),
       Mode::Insert => write!(f, "Insert"),
-      Mode::CommandLineExVariant => write!(f, "Command-line"),
-      Mode::CommandLineSearchForwardVariant => write!(f, "Command-line (search forward)"),
-      Mode::CommandLineSearchBackwardVariant => write!(f, "Command-line (search backward)"),
+      Mode::CommandLineEx => write!(f, "Command-line"),
+      Mode::CommandLineSearchForward => write!(f, "Command-line (search forward)"),
+      Mode::CommandLineSearchBackward => write!(f, "Command-line (search backward)"),
       Mode::Terminal => write!(f, "Terminal"),
     }
   }
@@ -54,11 +54,9 @@ impl FromStr for Mode {
       "Select" => Ok(Mode::Visual),
       "Operator-pending" => Ok(Mode::OperatorPending),
       "Insert" => Ok(Mode::Insert),
-      "Command-line" | "Command-line (ex-command)" | "Command-line (ex)" => {
-        Ok(Mode::CommandLineExVariant)
-      }
-      "Command-line (search forward)" => Ok(Mode::CommandLineSearchForwardVariant),
-      "Command-line (search backward)" => Ok(Mode::CommandLineSearchBackwardVariant),
+      "Command-line" | "Command-line (ex-command)" | "Command-line (ex)" => Ok(Mode::CommandLineEx),
+      "Command-line (search forward)" => Ok(Mode::CommandLineSearchForward),
+      "Command-line (search backward)" => Ok(Mode::CommandLineSearchBackward),
       "Terminal" => Ok(Mode::Terminal),
       _ => Err("Invalid Mode name"),
     }
@@ -92,7 +90,7 @@ impl Mode {
       Mode::Select,
       Mode::OperatorPending,
       Mode::Insert,
-      Mode::CommandLineExVariant,
+      Mode::CommandLineEx,
       Mode::Terminal,
     ]
   }
