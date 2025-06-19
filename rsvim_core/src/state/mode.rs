@@ -43,44 +43,6 @@ impl Display for Mode {
   }
 }
 
-impl FromStr for Mode {
-  type Err = &'static str;
-
-  /// Parse `str` to enum.
-  fn from_str(s: &str) -> Result<Self, Self::Err> {
-    match s {
-      "Normal" => Ok(Mode::Normal),
-      "Visual" => Ok(Mode::Visual),
-      "Select" => Ok(Mode::Visual),
-      "Operator-pending" => Ok(Mode::OperatorPending),
-      "Insert" => Ok(Mode::Insert),
-      "Command-line" | "Command-line (ex-command)" | "Command-line (ex)" => Ok(Mode::CommandLineEx),
-      "Command-line (search forward)" => Ok(Mode::CommandLineSearchForward),
-      "Command-line (search backward)" => Ok(Mode::CommandLineSearchBackward),
-      "Terminal" => Ok(Mode::Terminal),
-      _ => Err("Invalid Mode name"),
-    }
-  }
-}
-
-impl TryFrom<&str> for Mode {
-  type Error = &'static str;
-
-  /// Parse `str` to enum.
-  fn try_from(s: &str) -> Result<Self, Self::Error> {
-    FromStr::from_str(s)
-  }
-}
-
-impl TryFrom<String> for Mode {
-  type Error = &'static str;
-
-  /// Parse `String` to enum.
-  fn try_from(s: String) -> Result<Self, Self::Error> {
-    TryFrom::try_from(s.as_str())
-  }
-}
-
 impl Mode {
   /// Get all modes.
   pub fn all() -> Vec<Mode> {
