@@ -21,9 +21,9 @@ use crossterm::event::Event;
 use std::sync::{Arc, Weak};
 
 // Re-export
-pub use crate::state::fsm::command_line_ex_variant::CommandLineExCommandVariantStateful;
-pub use crate::state::fsm::command_line_search_backward_variant::CommandLineSearchPatternVariantStateful;
-pub use crate::state::fsm::command_line_search_forward_variant::CommandLineSearchPatternVariantStateful;
+pub use crate::state::fsm::command_line_ex_variant::CommandLineExVariantStateful;
+pub use crate::state::fsm::command_line_search_backward_variant::CommandLineSearchBackwardVariantStateful;
+pub use crate::state::fsm::command_line_search_forward_variant::CommandLineSearchForwardVariantStateful;
 pub use crate::state::fsm::insert::InsertStateful;
 pub use crate::state::fsm::normal::NormalStateful;
 pub use crate::state::fsm::operator_pending::OperatorPendingStateful;
@@ -85,8 +85,9 @@ pub enum StatefulValue {
   SelectMode(SelectStateful),
   OperatorPendingMode(OperatorPendingStateful),
   InsertMode(InsertStateful),
-  CommandLineModeExCommandVariant(CommandLineExCommandVariantStateful),
-  CommandLineModeSearchPatternVariant(CommandLineSearchPatternVariantStateful),
+  CommandLineModeExVariant(CommandLineExVariantStateful),
+  CommandLineModeSearchForwardVariant(CommandLineSearchForwardVariantStateful),
+  CommandLineModeSearchBackwardVariant(CommandLineSearchBackwardVariantStateful),
   TerminalMode(TerminalStateful),
   // Internal states.
   QuitState(QuitStateful),
@@ -111,8 +112,9 @@ impl StatefulValue {
       StatefulValue::SelectMode(s) => s.handle(data_access),
       StatefulValue::OperatorPendingMode(s) => s.handle(data_access),
       StatefulValue::InsertMode(s) => s.handle(data_access),
-      StatefulValue::CommandLineModeExCommandVariant(s) => s.handle(data_access),
-      StatefulValue::CommandLineModeSearchPatternVariant(s) => s.handle(data_access),
+      StatefulValue::CommandLineModeExVariant(s) => s.handle(data_access),
+      StatefulValue::CommandLineModeSearchForwardVariant(s) => s.handle(data_access),
+      StatefulValue::CommandLineModeSearchBackwardVariant(s) => s.handle(data_access),
       StatefulValue::TerminalMode(s) => s.handle(data_access),
       StatefulValue::QuitState(s) => s.handle(data_access),
     }

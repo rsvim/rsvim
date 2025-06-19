@@ -121,9 +121,7 @@ impl NormalStateful {
       _ => unreachable!(),
     }
 
-    StatefulValue::CommandLineModeExCommandVariant(
-      super::CommandLineExCommandVariantStateful::default(),
-    )
+    StatefulValue::CommandLineModeExVariant(super::CommandLineExVariantStateful::default())
   }
 }
 
@@ -155,8 +153,8 @@ impl NormalStateful {
     //   _ => unreachable!(),
     // }
 
-    StatefulValue::CommandLineModeSearchPatternVariant(
-      super::CommandLineSearchPatternVariantStateful::default(),
+    StatefulValue::CommandLineModeSearchForwardVariant(
+      super::CommandLineSearchBackwardVariantStateful::default(),
     )
   }
 }

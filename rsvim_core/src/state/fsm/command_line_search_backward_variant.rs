@@ -1,21 +1,21 @@
-//! The command-line mode, search pattern variant.
+//! The command-line mode, search backward variant.
 
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
-/// The command-line mode, search pattern variant.
-pub struct CommandLineSearchPatternVariantStateful {}
+/// The command-line mode, search backward variant.
+pub struct CommandLineSearchBackwardVariantStateful {}
 
-impl Stateful for CommandLineSearchPatternVariantStateful {
+impl Stateful for CommandLineSearchBackwardVariantStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    StatefulValue::CommandLineModeSearchPatternVariant(
-      CommandLineSearchPatternVariantStateful::default(),
+    StatefulValue::CommandLineModeSearchForwardVariant(
+      CommandLineSearchBackwardVariantStateful::default(),
     )
   }
   fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
-    StatefulValue::CommandLineModeSearchPatternVariant(
-      CommandLineSearchPatternVariantStateful::default(),
+    StatefulValue::CommandLineModeSearchForwardVariant(
+      CommandLineSearchBackwardVariantStateful::default(),
     )
   }
 }

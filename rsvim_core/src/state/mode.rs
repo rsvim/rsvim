@@ -18,9 +18,11 @@ pub enum Mode {
   /// Insert mode.
   Insert,
   /// Command-line mode, ex-command variant.
-  CommandLineExCommandVariant,
-  /// Command-line mode, search pattern variant.
-  CommandLineSearchPatternVariant,
+  CommandLineExVariant,
+  /// Command-line mode, search forward variant.
+  CommandLineSearchForwardVariant,
+  /// Command-line mode, search backward variant.
+  CommandLineSearchBackwardVariant,
   /// Terminal mode.
   Terminal,
 }
@@ -33,8 +35,9 @@ impl Display for Mode {
       Mode::Select => write!(f, "Select"),
       Mode::OperatorPending => write!(f, "Operator-pending"),
       Mode::Insert => write!(f, "Insert"),
-      Mode::CommandLineExCommandVariant => write!(f, "Command-line"),
-      Mode::CommandLineSearchPatternVariant => write!(f, "Command-line (search pattern)"),
+      Mode::CommandLineExVariant => write!(f, "Command-line"),
+      Mode::CommandLineSearchForwardVariant => write!(f, "Command-line (search forward)"),
+      Mode::CommandLineSearchBackwardVariant => write!(f, "Command-line (search backward)"),
       Mode::Terminal => write!(f, "Terminal"),
     }
   }
@@ -52,9 +55,10 @@ impl FromStr for Mode {
       "Operator-pending" => Ok(Mode::OperatorPending),
       "Insert" => Ok(Mode::Insert),
       "Command-line" | "Command-line (ex-command)" | "Command-line (ex)" => {
-        Ok(Mode::CommandLineExCommandVariant)
+        Ok(Mode::CommandLineExVariant)
       }
-      "Command-line (search pattern)" => Ok(Mode::CommandLineSearchPatternVariant),
+      "Command-line (search forward)" => Ok(Mode::CommandLineSearchForwardVariant),
+      "Command-line (search backward)" => Ok(Mode::CommandLineSearchBackwardVariant),
       "Terminal" => Ok(Mode::Terminal),
       _ => Err("Invalid Mode name"),
     }
@@ -88,7 +92,7 @@ impl Mode {
       Mode::Select,
       Mode::OperatorPending,
       Mode::Insert,
-      Mode::CommandLineExCommandVariant,
+      Mode::CommandLineExVariant,
       Mode::Terminal,
     ]
   }
