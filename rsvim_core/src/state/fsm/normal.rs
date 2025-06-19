@@ -33,15 +33,13 @@ impl NormalStateful {
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char('i') => Some(Operation::GotoInsertMode),
-            KeyCode::Char(':') => Some(Operation::GotoCommandLineMode(
-              CommandLineModeVariant::ExCommand,
+            KeyCode::Char(':') => Some(Operation::GotoCommandLineMode(CommandLineModeVariant::Ex)),
+            KeyCode::Char('/') => Some(Operation::GotoCommandLineMode(
+              CommandLineModeVariant::SearchForward,
             )),
-            // KeyCode::Char('/') => Some(Operation::GotoCommandLineMode(
-            //   CommandLineModeVariant::SearchPatternForward,
-            // )),
-            // KeyCode::Char('?') => Some(Operation::GotoCommandLineMode(
-            //   CommandLineModeVariant::SearchPatternBackward,
-            // )),
+            KeyCode::Char('?') => Some(Operation::GotoCommandLineMode(
+              CommandLineModeVariant::SearchBackward,
+            )),
             KeyCode::Esc => Some(Operation::EditorQuit),
             _ => None,
           }
@@ -71,15 +69,13 @@ impl Stateful for NormalStateful {
     match op {
       Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
       Operation::GotoCommandLineMode(variant) => match variant {
-        CommandLineModeVariant::ExCommand => {
-          self.goto_command_line_mode_ex_command_variant(&data_access)
+        CommandLineModeVariant::Ex => self.goto_command_line_mode_ex_command_variant(&data_access),
+        CommandLineModeVariant::SearchForward => {
+          self.goto_command_line_mode_search_variant(&data_access, true)
         }
-        // CommandLineModeVariant::SearchPatternForward => {
-        //   self.goto_command_line_mode_search_variant(&data_access, true)
-        // }
-        // CommandLineModeVariant::SearchPatternBackward => {
-        //   self.goto_command_line_mode_search_variant(&data_access, false)
-        // }
+        CommandLineModeVariant::SearchBackward => {
+          self.goto_command_line_mode_search_variant(&data_access, false)
+        }
         _ => unimplemented!(),
       },
       Operation::EditorQuit => self.editor_quit(&data_access),
