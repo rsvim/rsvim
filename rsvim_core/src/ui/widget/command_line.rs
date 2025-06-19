@@ -1,4 +1,4 @@
-//! Vim cmdline.
+//! Vim command-line widget.
 
 #![allow(dead_code)]
 
@@ -14,8 +14,8 @@ use crate::ui::widget::window::opt::{WindowLocalOptions, WindowLocalOptionsBuild
 use crate::{inode_impl, lock};
 
 #[derive(Debug, Clone)]
-/// The Vim cmdline.
-pub struct Cmdline {
+/// The Vim command-line.
+pub struct CommandLine {
   base: InodeBase,
 
   options: WindowLocalOptions,
@@ -27,7 +27,7 @@ pub struct Cmdline {
   cursor_viewport: CursorViewportArc,
 }
 
-impl Cmdline {
+impl CommandLine {
   pub fn new(shape: IRect, contents: TemporaryContentsWk) -> Self {
     // Force cmdline window options.
     let options = WindowLocalOptionsBuilder::default()
@@ -46,12 +46,13 @@ impl Cmdline {
       let contents = lock!(contents);
       let viewport = Viewport::view(
         &viewport_options,
-        contents.cmdline_content(),
+        contents.command_line_content(),
         cmdline_actual_shape,
         0,
         0,
       );
-      let cursor_viewport = CursorViewport::from_top_left(&viewport, contents.cmdline_content());
+      let cursor_viewport =
+        CursorViewport::from_top_left(&viewport, contents.command_line_content());
       (viewport, cursor_viewport)
     };
     let viewport = Viewport::to_arc(viewport);
@@ -67,15 +68,15 @@ impl Cmdline {
   }
 }
 
-inode_impl!(Cmdline, base);
+inode_impl!(CommandLine, base);
 
-impl Widgetable for Cmdline {
+impl Widgetable for CommandLine {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
     let contents = self.contents.upgrade().unwrap();
     let contents = lock!(contents);
     let viewport = self.viewport.clone();
 
-    viewport.draw(contents.cmdline_content(), actual_shape, canvas);
+    viewport.draw(contents.command_line_content(), actual_shape, canvas);
   }
 }

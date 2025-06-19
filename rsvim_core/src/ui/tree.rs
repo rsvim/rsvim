@@ -3,7 +3,7 @@
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::cmdline::Cmdline;
+use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootContainer;
 use crate::ui::widget::window::{
@@ -30,7 +30,7 @@ pub enum TreeNode {
   RootContainer(RootContainer),
   Window(Window),
   Cursor(Cursor),
-  Cmdline(Cmdline),
+  CommandLine(CommandLine),
 }
 
 macro_rules! tree_node_getter {
@@ -39,7 +39,7 @@ macro_rules! tree_node_getter {
       TreeNode::RootContainer(n) => n.$method_name(),
       TreeNode::Window(n) => n.$method_name(),
       TreeNode::Cursor(n) => n.$method_name(),
-      TreeNode::Cmdline(n) => n.$method_name(),
+      TreeNode::CommandLine(n) => n.$method_name(),
     }
   };
 }
@@ -50,7 +50,7 @@ macro_rules! tree_node_setter {
       TreeNode::RootContainer(n) => n.$method_name($method_arg),
       TreeNode::Window(n) => n.$method_name($method_arg),
       TreeNode::Cursor(n) => n.$method_name($method_arg),
-      TreeNode::Cmdline(n) => n.$method_name($method_arg),
+      TreeNode::CommandLine(n) => n.$method_name($method_arg),
     }
   };
 }
@@ -61,7 +61,7 @@ impl TreeNode {
       TreeNode::RootContainer(n) => n.id(),
       TreeNode::Window(n) => n.id(),
       TreeNode::Cursor(n) => n.id(),
-      TreeNode::Cmdline(n) => n.id(),
+      TreeNode::CommandLine(n) => n.id(),
     }
   }
 }
@@ -127,7 +127,7 @@ impl Widgetable for TreeNode {
       TreeNode::RootContainer(w) => w.draw(canvas),
       TreeNode::Window(w) => w.draw(canvas),
       TreeNode::Cursor(w) => w.draw(canvas),
-      TreeNode::Cmdline(w) => w.draw(canvas),
+      TreeNode::CommandLine(w) => w.draw(canvas),
     }
   }
 }
@@ -233,7 +233,7 @@ pub struct Tree {
   // [`Cursor`](crate::ui::widget::cursor::Cursor) node ID.
   cursor_id: Option<TreeNodeId>,
 
-  // [`Cmdline`](crate::ui::widget::cmdline::Cmdline) node ID.
+  // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
   cmdline_id: Option<TreeNodeId>,
 
   // All [`Window`](crate::ui::widget::Window) node IDs.
@@ -358,7 +358,7 @@ impl Tree {
             debug_assert!(self.current_window_id.is_some());
             debug_assert_eq!(self.current_window_id.unwrap(), window.id());
           }
-          TreeNode::Cmdline(_cmdline) => {
+          TreeNode::CommandLine(_cmdline) => {
             debug_assert!(self.current_window_id.is_some());
           }
           _ => unreachable!(),
@@ -390,7 +390,7 @@ impl Tree {
           TreeNode::Window(window) => {
             self.current_window_id = Some(window.id());
           }
-          TreeNode::Cmdline(cmdline) => {
+          TreeNode::CommandLine(cmdline) => {
             if let Some(cmdline_id) = self.cmdline_id {
               debug_assert_eq!(cmdline.id(), cmdline_id);
             }
@@ -400,7 +400,7 @@ impl Tree {
         // When insert cursor widget, update `cursor_id`.
         self.cursor_id = Some(cursor.id());
       }
-      TreeNode::Cmdline(cmdline) => {
+      TreeNode::CommandLine(cmdline) => {
         // When insert cmdline widget, update `cmdline_id`.
         self.cmdline_id = Some(cmdline.id());
       }
