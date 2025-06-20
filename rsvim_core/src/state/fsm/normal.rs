@@ -123,6 +123,16 @@ impl NormalStateful {
     let _inserted = tree.bounded_insert(cmdline_id, cursor_node);
     debug_assert!(_inserted.is_none());
 
+    // Clear command-line contents.
+    let contents = data_access.contents.clone();
+    let mut contents = lock!(contents);
+    contents.command_line_content_mut().rope_mut().remove(0..);
+    contents
+      .command_line_content_mut()
+      .rope_mut()
+      .insert(0, ":\n");
+    contents.command_line_content_mut().clear_cached_lines();
+
     StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
   }
 }
