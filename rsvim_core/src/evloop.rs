@@ -380,6 +380,7 @@ impl EventLoop {
           self.state.clone(),
           self.tree.clone(),
           self.buffers.clone(),
+          self.contents.clone(),
           event,
         );
 
