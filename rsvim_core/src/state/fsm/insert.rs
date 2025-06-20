@@ -421,7 +421,7 @@ mod tests_util {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
-  use crate::content::{TemporaryContentsArc, TextContents};
+  use crate::content::{TextContents, TextContentsArc};
   use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -451,7 +451,7 @@ mod tests_util {
     StateArc,
     BuffersManagerArc,
     BufferArc,
-    TemporaryContentsArc,
+    TextContentsArc,
   ) {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
