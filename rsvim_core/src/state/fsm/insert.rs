@@ -8,7 +8,7 @@ use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, Viewport, ViewportArc, ViewportOptions, ViewportSearchDirection, Viewportable,
+  CursorViewport, ViewportArc, ViewportOptions, ViewportSearchDirection, Viewportable,
 };
 
 use compact_str::{CompactString, ToCompactString};
