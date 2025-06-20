@@ -13,7 +13,7 @@ use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 
 // Re-export
-pub use crate::ui::widget::window::opt::*;
+pub use opt::*;
 
 use std::sync::Arc;
 // use tracing::trace;
