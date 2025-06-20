@@ -109,13 +109,18 @@ impl NormalStateful {
       tree.node(current_window_id).unwrap(),
       TreeNode::Window(_)
     ));
-    let removed_cursor_node = tree.remove(cursor_id);
-    debug_assert!(removed_cursor_node.is_some());
-    let removed_cursor_node = removed_cursor_node.unwrap();
+    let cursor_node = tree.remove(cursor_id);
+    debug_assert!(cursor_node.is_some());
+    let cursor_node = cursor_node.unwrap();
     debug_assert!(!tree.children_ids(current_window_id).contains(&cursor_id));
+    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    match cursor_node {
+      TreeNode::Cursor(mut cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+      _ => unreachable!(),
+    }
 
     // Insert to new parent
-    let _inserted = tree.bounded_insert(cmdline_id, removed_cursor_node);
+    let _inserted = tree.bounded_insert(cmdline_id, cursor_node);
     debug_assert!(_inserted.is_none());
 
     StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
