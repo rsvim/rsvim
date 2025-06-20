@@ -1,4 +1,4 @@
-//! The command-line mode, ex-command variant.
+//! The command-line ex mode.
 
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
