@@ -1,6 +1,6 @@
 //! Fundamental viewport for all kinds of buffer typeset/rendering in UI widgets.
 
-use crate::buf::Text;
+use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::widget::window::WindowLocalOptions;
@@ -728,7 +728,8 @@ pub trait Viewportable {
 mod tests_util {
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -961,7 +962,8 @@ mod tests_view_nowrap {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -1420,7 +1422,8 @@ mod tests_view_nowrap_startcol {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -1751,7 +1754,8 @@ mod tests_view_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -2516,7 +2520,8 @@ mod tests_view_wrap_nolinebreak_startcol {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::defaults::win;
   use crate::lock;
   use crate::prelude::*;
@@ -2772,7 +2777,8 @@ mod tests_view_wrap_linebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -3502,7 +3508,8 @@ mod tests_view_wrap_linebreak_startcol {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -3852,7 +3859,8 @@ mod tests_search_anchor_downward_nowrap {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -5648,7 +5656,8 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -7261,7 +7270,8 @@ mod tests_search_anchor_downward_wrap_linebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -8402,7 +8412,8 @@ mod tests_search_anchor_upward_nowrap {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -10067,7 +10078,8 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -11584,7 +11596,8 @@ mod tests_search_anchor_upward_wrap_linebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -12829,7 +12842,8 @@ mod tests_search_anchor_horizontally_nowrap {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -15261,7 +15275,8 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -18334,7 +18349,8 @@ mod tests_search_anchor_horizontally_wrap_linebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::lock;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};

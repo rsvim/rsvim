@@ -4,10 +4,6 @@ use crate::prelude::*;
 #[allow(unused_imports)]
 use crate::{arc_impl, lock};
 
-// Re-export
-pub use opt::*;
-pub use text::*;
-
 use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};

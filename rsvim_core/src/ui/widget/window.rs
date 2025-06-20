@@ -332,7 +332,8 @@ mod tests {
   use std::sync::Once;
   use tracing::info;
 
-  use crate::buf::{Buffer, BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::{Buffer, BufferArc};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
