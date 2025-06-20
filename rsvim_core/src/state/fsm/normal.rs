@@ -149,12 +149,12 @@ impl NormalStateful {
       }
     };
 
-    self._update_viewport_after_content_changed(&mut tree, contents.command_line_content());
+    self._update_viewport_after_goto_command_line_ex(&mut tree, contents.command_line_content());
 
     trace!(
       "Move to init pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
     );
-    self._cursor_move_impl(
+    self._move_cursor_after_goto_command_line_ex(
       &mut tree,
       contents.command_line_content(),
       Operation::CursorMoveTo((
@@ -167,7 +167,7 @@ impl NormalStateful {
   }
 
   // Update viewport since the buffer has changed, and the viewport doesn't match the buffer.
-  fn _update_viewport_after_content_changed(&self, tree: &mut Tree, text: &Text) {
+  fn _update_viewport_after_goto_command_line_ex(&self, tree: &mut Tree, text: &Text) {
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
     debug_assert!(tree.node_mut(cmdline_id).is_some());
@@ -217,28 +217,28 @@ impl NormalStateful {
     }
   }
 
-  fn _cursor_move_impl(&self, tree: &mut Tree, text: &Text, op: Operation) {
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => {
-        let viewport = current_window.viewport();
-        let cursor_viewport = current_window.cursor_viewport();
+  fn _move_cursor_after_goto_command_line_ex(&self, tree: &mut Tree, text: &Text, op: Operation) {
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.node_mut(cmdline_id).is_some());
+    let cmdline_node = tree.node_mut(cmdline_id).unwrap();
+    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+    match cmdline_node {
+      TreeNode::CommandLine(cmdline) => {
+        let viewport = cmdline.viewport();
+        let cursor_viewport = cmdline.cursor_viewport();
 
         // Only move cursor when it is different from current cursor.
         let (target_cursor_char, target_cursor_line, search_direction) =
           self._target_cursor_include_empty_eol(&cursor_viewport, text, op);
 
         let new_viewport: Option<ViewportArc> = {
-          let viewport_opts = ViewportOptions::from(current_window.options());
+          let viewport_opts = ViewportOptions::from(cmdline.options());
           let (start_line, start_column) = viewport.search_anchor(
             search_direction,
             &viewport_opts,
             text,
-            current_window.actual_shape(),
+            cmdline.actual_shape(),
             target_cursor_line,
             target_cursor_char,
           );
@@ -246,14 +246,14 @@ impl NormalStateful {
           // First try window scroll.
           if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx()
           {
-            let new_viewport = cursor_ops::window_scroll_to(
+            let new_viewport = cursor_ops::command_line_scroll_to(
               &viewport,
-              current_window,
+              cmdline,
               text,
               Operation::WindowScrollTo((start_column, start_line)),
             );
             if let Some(new_viewport_arc) = new_viewport.clone() {
-              current_window.set_viewport(new_viewport_arc.clone());
+              cmdline.set_viewport(new_viewport_arc.clone());
             }
             new_viewport
           } else {
@@ -273,7 +273,7 @@ impl NormalStateful {
           );
 
           if let Some(new_cursor_viewport) = new_cursor_viewport {
-            current_window.set_cursor_viewport(new_cursor_viewport.clone());
+            cmdline.set_cursor_viewport(new_cursor_viewport.clone());
             let cursor_id = tree.cursor_id().unwrap();
             tree.bounded_move_to(
               cursor_id,

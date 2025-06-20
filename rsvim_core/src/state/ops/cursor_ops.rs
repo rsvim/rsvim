@@ -1,12 +1,14 @@
 //! Cursor operations.
 
 use crate::buf::Text;
+use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions,
 };
-use crate::ui::widget::window::Window;
+use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::window::{Window, WindowLocalOptions};
 
 use compact_str::{CompactString, ToCompactString};
 use tracing::trace;
@@ -247,9 +249,10 @@ pub fn cursor_move_to(
   Some(new_cursor_viewport)
 }
 
-pub fn window_scroll_to(
+pub fn _widget_scroll_to(
   viewport: &Viewport,
-  current_window: &Window,
+  actual_shape: &U16Rect,
+  window_options: &WindowLocalOptions,
   text: &Text,
   window_scroll_to_op: Operation,
 ) -> Option<ViewportArc> {
@@ -276,8 +279,7 @@ pub fn window_scroll_to(
   }
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
-  let shape = current_window.actual_shape();
-  let max_len_chars = _max_len_chars_since_line(text, line_idx, shape.height());
+  let max_len_chars = _max_len_chars_since_line(text, line_idx, actual_shape.height());
   let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
@@ -287,9 +289,45 @@ pub fn window_scroll_to(
   }
 
   // Sync the viewport
-  let opts = ViewportOptions::from(current_window.options());
-  let new_viewport = Viewport::to_arc(Viewport::view(&opts, text, shape, line_idx, column_idx));
+  let opts = ViewportOptions::from(window_options);
+  let new_viewport = Viewport::to_arc(Viewport::view(
+    &opts,
+    text,
+    actual_shape,
+    line_idx,
+    column_idx,
+  ));
   Some(new_viewport)
+}
+
+pub fn window_scroll_to(
+  viewport: &Viewport,
+  current_window: &Window,
+  text: &Text,
+  window_scroll_to_op: Operation,
+) -> Option<ViewportArc> {
+  _widget_scroll_to(
+    viewport,
+    current_window.actual_shape(),
+    current_window.options(),
+    text,
+    window_scroll_to_op,
+  )
+}
+
+pub fn command_line_scroll_to(
+  viewport: &Viewport,
+  command_line: &CommandLine,
+  text: &Text,
+  window_scroll_to_op: Operation,
+) -> Option<ViewportArc> {
+  _widget_scroll_to(
+    viewport,
+    command_line.actual_shape(),
+    command_line.options(),
+    text,
+    window_scroll_to_op,
+  )
 }
 
 fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_height: u16) -> usize {
