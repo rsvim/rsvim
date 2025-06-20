@@ -170,51 +170,7 @@ impl NormalStateful {
   fn _update_viewport_after_goto_command_line_ex(&self, tree: &mut Tree, text: &Text) {
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
-    debug_assert!(tree.node_mut(cmdline_id).is_some());
-    let cmdline_node = tree.node_mut(cmdline_id).unwrap();
-    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
-    match cmdline_node {
-      TreeNode::CommandLine(cmdline) => {
-        let viewport = cmdline.viewport();
-        let cursor_viewport = cmdline.cursor_viewport();
-        trace!("before viewport:{:?}", viewport);
-        trace!("before cursor_viewport:{:?}", cursor_viewport);
-
-        let start_line = 0_usize;
-        debug_assert!(start_line <= text.rope().len_lines().saturating_sub(1));
-        debug_assert!(text.rope().get_line(start_line).is_some());
-        let bufline_len_chars = text.rope().line(start_line).len_chars();
-        let start_column = std::cmp::min(
-          viewport.start_column_idx(),
-          text.width_before(start_line, bufline_len_chars),
-        );
-
-        let viewport_opts = ViewportOptions::from(cmdline.options());
-        let updated_viewport = Viewport::to_arc(Viewport::view(
-          &viewport_opts,
-          text,
-          cmdline.actual_shape(),
-          start_line,
-          start_column,
-        ));
-        trace!("after updated_viewport:{:?}", updated_viewport);
-
-        cmdline.set_viewport(updated_viewport.clone());
-        if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
-          &updated_viewport,
-          &cursor_viewport,
-          text,
-          Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
-        ) {
-          trace!(
-            "after updated_cursor_viewport:{:?}",
-            updated_cursor_viewport
-          );
-          cmdline.set_cursor_viewport(updated_cursor_viewport);
-        }
-      }
-      _ => unreachable!(),
-    }
+    cursor_ops::update_viewport_after_text_changed(tree, cmdline_id, text);
   }
 
   fn _move_cursor_after_goto_command_line_ex(&self, tree: &mut Tree, text: &Text, op: Operation) {
