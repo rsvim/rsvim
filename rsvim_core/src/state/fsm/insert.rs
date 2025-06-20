@@ -8,7 +8,7 @@ use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, Viewport, ViewportArc, ViewportOptions, ViewportSearchDirection,
+  CursorViewport, Viewport, ViewportArc, ViewportOptions, ViewportSearchDirection, Viewportable,
 };
 
 use compact_str::{CompactString, ToCompactString};
@@ -195,54 +195,7 @@ impl InsertStateful {
   fn _update_viewport_after_buffer_changed(&self, tree: &mut Tree, buffer: &Buffer) {
     debug_assert!(tree.current_window_id().is_some());
     let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => {
-        let text = buffer.text();
-        let viewport = current_window.viewport();
-        let cursor_viewport = current_window.cursor_viewport();
-        trace!("before viewport:{:?}", viewport);
-        trace!("before cursor_viewport:{:?}", cursor_viewport);
-
-        let start_line = std::cmp::min(
-          viewport.start_line_idx(),
-          text.rope().len_lines().saturating_sub(1),
-        );
-        debug_assert!(text.rope().get_line(start_line).is_some());
-        let bufline_len_chars = text.rope().line(start_line).len_chars();
-        let start_column = std::cmp::min(
-          viewport.start_column_idx(),
-          text.width_before(start_line, bufline_len_chars),
-        );
-
-        let viewport_opts = ViewportOptions::from(current_window.options());
-        let updated_viewport = Viewport::to_arc(Viewport::view(
-          &viewport_opts,
-          text,
-          current_window.actual_shape(),
-          start_line,
-          start_column,
-        ));
-        trace!("after updated_viewport:{:?}", updated_viewport);
-
-        current_window.set_viewport(updated_viewport.clone());
-        if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
-          &updated_viewport,
-          &cursor_viewport,
-          text,
-          Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
-        ) {
-          trace!(
-            "after updated_cursor_viewport:{:?}",
-            updated_cursor_viewport
-          );
-          current_window.set_cursor_viewport(updated_cursor_viewport);
-        }
-      }
-      _ => unreachable!(),
-    }
+    cursor_ops::update_viewport_after_text_changed(tree, current_window_id, buffer.text());
   }
 
   fn _current_buffer(&self, tree: &mut Tree) -> BufferWk {

@@ -5,6 +5,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
+use crate::ui::viewport::Viewportable;
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};

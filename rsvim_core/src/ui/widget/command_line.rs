@@ -7,7 +7,7 @@ use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions, Viewportable,
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::{WindowLocalOptions, WindowLocalOptionsBuilder};
@@ -81,38 +81,40 @@ impl Widgetable for CommandLine {
   }
 }
 
-// Attributes {
-impl CommandLine {
+impl Viewportable for CommandLine {
   /// Get window local options.
-  pub fn options(&self) -> &WindowLocalOptions {
+  fn options(&self) -> &WindowLocalOptions {
     &self.options
   }
 
   /// Set window local options.
-  pub fn set_options(&mut self, options: &WindowLocalOptions) {
+  fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = *options;
   }
 
   /// Get viewport.
-  pub fn viewport(&self) -> ViewportArc {
+  fn viewport(&self) -> ViewportArc {
     self.viewport.clone()
   }
 
   /// Set viewport.
-  pub fn set_viewport(&mut self, viewport: ViewportArc) {
-    self.viewport = viewport.clone();
+  fn set_viewport(&mut self, viewport: ViewportArc) {
+    self.viewport = viewport;
   }
 
   /// Get cursor viewport.
-  pub fn cursor_viewport(&self) -> CursorViewportArc {
+  fn cursor_viewport(&self) -> CursorViewportArc {
     self.cursor_viewport.clone()
   }
 
   /// Set cursor viewport.
-  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
+  fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
     self.cursor_viewport = cursor_viewport;
   }
+}
 
+// Attributes {
+impl CommandLine {
   /// Get text contents.
   pub fn contents(&self) -> TextContentsWk {
     self.contents.clone()

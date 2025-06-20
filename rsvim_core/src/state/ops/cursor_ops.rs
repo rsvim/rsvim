@@ -5,7 +5,7 @@ use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions, Viewportable,
 };
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::{Window, WindowLocalOptions};
@@ -618,4 +618,64 @@ pub fn insert_at_cursor(
     cursor_line_idx_after_inserted,
     cursor_char_idx_after_inserted,
   )
+}
+
+pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
+  debug_assert!(tree.node_mut(id).is_some());
+  let node = tree.node_mut(id).unwrap();
+  debug_assert!(matches!(
+    node,
+    TreeNode::Window(_) | TreeNode::CommandLine(_)
+  ));
+
+  let actual_shape = match node {
+    TreeNode::Window(window) => *window.actual_shape(),
+    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
+    _ => unreachable!(),
+  };
+  let vnode: &mut dyn Viewportable = match node {
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
+    _ => unreachable!(),
+  };
+
+  let viewport = vnode.viewport();
+  let cursor_viewport = vnode.cursor_viewport();
+  trace!("before viewport:{:?}", viewport);
+  trace!("before cursor_viewport:{:?}", cursor_viewport);
+
+  let start_line = std::cmp::min(
+    viewport.start_line_idx(),
+    text.rope().len_lines().saturating_sub(1),
+  );
+  debug_assert!(text.rope().get_line(start_line).is_some());
+  let bufline_len_chars = text.rope().line(start_line).len_chars();
+  let start_column = std::cmp::min(
+    viewport.start_column_idx(),
+    text.width_before(start_line, bufline_len_chars),
+  );
+
+  let viewport_opts = ViewportOptions::from(vnode.options());
+  let updated_viewport = Viewport::to_arc(Viewport::view(
+    &viewport_opts,
+    text,
+    &actual_shape,
+    start_line,
+    start_column,
+  ));
+  trace!("after updated_viewport:{:?}", updated_viewport);
+
+  vnode.set_viewport(updated_viewport.clone());
+  if let Some(updated_cursor_viewport) = cursor_move_to(
+    &updated_viewport,
+    &cursor_viewport,
+    text,
+    Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
+  ) {
+    trace!(
+      "after updated_cursor_viewport:{:?}",
+      updated_cursor_viewport
+    );
+    vnode.set_cursor_viewport(updated_cursor_viewport);
+  }
 }
