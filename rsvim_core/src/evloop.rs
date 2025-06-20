@@ -2,7 +2,7 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOpt;
-use crate::content::{TemporaryContents, TemporaryContentsArc};
+use crate::content::{TextContents, TextContentsArc};
 use crate::envar;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
@@ -82,8 +82,8 @@ pub struct EventLoop {
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
-  /// Temporary contents (except buffers).
-  pub contents: TemporaryContentsArc,
+  /// Text contents (except buffers).
+  pub contents: TextContentsArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -133,7 +133,7 @@ impl EventLoop {
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
-    let text_contents = TemporaryContents::to_arc(TemporaryContents::new(canvas_size));
+    let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
 
     // State
     let state = State::to_arc(State::default());
@@ -348,14 +348,14 @@ impl EventLoop {
     tree.bounded_insert(tree_root_id, window_node);
 
     // Initialize default command-line.
-    let command_line_shape = IRect::new(
+    let cmdline_shape = IRect::new(
       (0, canvas_size.height().saturating_sub(1) as isize),
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
-    let command_line = CommandLine::new(command_line_shape, Arc::downgrade(&self.contents));
-    let _command_line_id = command_line.id();
-    let command_line = TreeNode::CommandLine(command_line);
-    tree.bounded_insert(tree_root_id, command_line);
+    let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
+    let _cmdline_id = cmdline.id();
+    let cmdline = TreeNode::CommandLine(cmdline);
+    tree.bounded_insert(tree_root_id, cmdline);
 
     // Initialize cursor.
     let cursor_shape = IRect::new((0, 0), (1, 1));
@@ -380,6 +380,7 @@ impl EventLoop {
           self.state.clone(),
           self.tree.clone(),
           self.buffers.clone(),
+          self.contents.clone(),
           event,
         );
 

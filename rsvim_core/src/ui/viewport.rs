@@ -3,6 +3,7 @@
 use crate::buf::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
+use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
 use std::ops::Range;
@@ -708,6 +709,17 @@ impl Viewport {
   pub fn draw(&self, text: &Text, actual_shape: &U16Rect, canvas: &mut Canvas) {
     draw::draw(self, text, actual_shape, canvas);
   }
+}
+
+pub trait Viewportable {
+  fn options(&self) -> &WindowLocalOptions;
+  fn set_options(&mut self, options: &WindowLocalOptions);
+
+  fn viewport(&self) -> ViewportArc;
+  fn set_viewport(&mut self, viewport: ViewportArc);
+
+  fn cursor_viewport(&self) -> CursorViewportArc;
+  fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc);
 }
 
 // spellchecker:off

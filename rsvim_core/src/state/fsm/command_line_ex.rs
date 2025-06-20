@@ -1,7 +1,11 @@
 //! The command-line mode, ex-command variant.
 
+use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Operation;
+use crate::state::ops::{Operation, cursor_ops};
+use crate::ui::canvas::CursorStyle;
+use crate::ui::tree::*;
+use crate::ui::viewport::Viewportable;
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -73,7 +77,73 @@ impl Stateful for CommandLineExStateful {
 }
 
 impl CommandLineExStateful {
-  fn goto_normal_mode(&self, _data_access: &StatefulDataAccess) -> StatefulValue {
+  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+
+    debug_assert!(tree.cursor_id().is_some());
+    let cursor_id = tree.cursor_id().unwrap();
+
+    // Remove from current parent
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.parent_id(cursor_id).is_some());
+    debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), cmdline_id);
+    debug_assert!(tree.node(cmdline_id).is_some());
+    debug_assert!(matches!(
+      tree.node(cmdline_id).unwrap(),
+      TreeNode::CommandLine(_)
+    ));
+    let cursor_node = tree.remove(cursor_id);
+    debug_assert!(cursor_node.is_some());
+    let cursor_node = cursor_node.unwrap();
+    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
+    match cursor_node {
+      TreeNode::Cursor(mut cursor) => cursor.set_style(&CursorStyle::SteadyBlock),
+      _ => unreachable!(),
+    }
+
+    // Insert to new parent
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node(current_window_id).is_some());
+    debug_assert!(matches!(
+      tree.node(current_window_id).unwrap(),
+      TreeNode::Window(_)
+    ));
+    let _inserted = tree.bounded_insert(current_window_id, cursor_node);
+    debug_assert!(_inserted.is_none());
+    debug_assert!(tree.current_window_id().is_some());
+    debug_assert_eq!(tree.current_window_id().unwrap(), current_window_id);
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    match current_window_node {
+      TreeNode::Window(current_window) => {
+        let cursor_viewport = current_window.cursor_viewport();
+        trace!("before viewport:{:?}", current_window.viewport());
+        trace!("before cursor_viewport:{:?}", cursor_viewport);
+        tree.bounded_move_to(
+          cursor_id,
+          cursor_viewport.column_idx() as isize,
+          cursor_viewport.row_idx() as isize,
+        );
+      }
+      _ => unreachable!(),
+    }
+
+    // Clear command-line contents.
+    let contents = data_access.contents.clone();
+    let mut contents = lock!(contents);
+    contents.command_line_content_mut().rope_mut().remove(0..);
+    contents.command_line_content_mut().clear_cached_lines();
+    // Update viewport after text changed.
+    cursor_ops::update_viewport_after_text_changed(
+      &mut tree,
+      cmdline_id,
+      contents.command_line_content(),
+    );
+
     StatefulValue::NormalMode(super::NormalStateful::default())
   }
 }

@@ -5,8 +5,9 @@ use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::ViewportOptions;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc};
+use crate::ui::viewport::{
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions, Viewportable,
+};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
@@ -176,29 +177,24 @@ impl Widgetable for Window {
   }
 }
 
-// Options {
-impl Window {
+impl Viewportable for Window {
   /// Get window local options.
-  pub fn options(&self) -> &WindowLocalOptions {
+  fn options(&self) -> &WindowLocalOptions {
     &self.options
   }
 
   /// Set window local options.
-  pub fn set_options(&mut self, options: &WindowLocalOptions) {
+  fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = *options;
   }
-}
-// Options }
 
-// Viewport {
-impl Window {
   /// Get viewport.
-  pub fn viewport(&self) -> ViewportArc {
+  fn viewport(&self) -> ViewportArc {
     self.viewport.clone()
   }
 
   /// Set viewport.
-  pub fn set_viewport(&mut self, viewport: ViewportArc) {
+  fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport.clone();
     if let Some(WindowNode::WindowContent(content)) = self.base.node_mut(self.content_id) {
       content.set_viewport(Arc::downgrade(&viewport));
@@ -206,15 +202,18 @@ impl Window {
   }
 
   /// Get cursor viewport.
-  pub fn cursor_viewport(&self) -> CursorViewportArc {
+  fn cursor_viewport(&self) -> CursorViewportArc {
     self.cursor_viewport.clone()
   }
 
   /// Set cursor viewport.
-  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
+  fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
     self.cursor_viewport = cursor_viewport;
   }
+}
 
+// Viewport {
+impl Window {
   /// Get buffer.
   pub fn buffer(&self) -> BufferWk {
     self.buffer.clone()

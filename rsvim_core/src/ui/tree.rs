@@ -412,18 +412,6 @@ impl Tree {
     }
   }
 
-  // This method handles some special requirements when remove a widget node:
-  //
-  // 1. When insert a cursor widget, it's parent widget must be a window widget.
-  // 2. Maintain the cursor widget ID and window widget IDs when remove.
-  fn remove_guard(&mut self, id: TreeNodeId) {
-    // If the removed ID is cursor ID, remove it.
-    if self.cursor_id == Some(id) {
-      self.cursor_id = None;
-    }
-    self.window_ids.remove(&id);
-  }
-
   /// See [`Itree::insert`].
   pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
     self.insert_guard(&child_node, parent_id);
@@ -438,6 +426,26 @@ impl Tree {
   ) -> Option<TreeNode> {
     self.insert_guard(&child_node, parent_id);
     self.base.bounded_insert(parent_id, child_node)
+  }
+
+  // This method handles some special requirements when remove a widget node:
+  //
+  // 1. When insert a cursor widget, it's parent widget must be a window widget.
+  // 2. Maintain the cursor widget ID and window widget IDs when remove.
+  fn remove_guard(&mut self, id: TreeNodeId) {
+    // If the removed ID is cursor ID, remove it.
+    if self.cursor_id == Some(id) {
+      self.cursor_id = None;
+    }
+    if self.command_line_id == Some(id) {
+      self.command_line_id = None;
+    }
+    self.window_ids.remove(&id);
+    if self.current_window_id == Some(id) {
+      if let Some(last_window_id) = self.window_ids.last() {
+        self.current_window_id = Some(*last_window_id);
+      }
+    }
   }
 
   /// See [`Itree::remove`].

@@ -27,5 +27,4 @@ zstd = { workspace = true }
 
 [build-dependencies]
 rsvim_core = { workspace = true }
-tokio = { workspace = true, features = ["full"] }
 zstd = { workspace = true }

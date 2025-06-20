@@ -1,12 +1,14 @@
 //! Cursor operations.
 
 use crate::buf::Text;
+use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions, Viewportable,
 };
-use crate::ui::widget::window::Window;
+use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::window::{Window, WindowLocalOptions};
 
 use compact_str::{CompactString, ToCompactString};
 use tracing::trace;
@@ -247,9 +249,10 @@ pub fn cursor_move_to(
   Some(new_cursor_viewport)
 }
 
-pub fn window_scroll_to(
+pub fn _widget_scroll_to(
   viewport: &Viewport,
-  current_window: &Window,
+  actual_shape: &U16Rect,
+  window_options: &WindowLocalOptions,
   text: &Text,
   window_scroll_to_op: Operation,
 ) -> Option<ViewportArc> {
@@ -276,8 +279,7 @@ pub fn window_scroll_to(
   }
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
-  let shape = current_window.actual_shape();
-  let max_len_chars = _max_len_chars_since_line(text, line_idx, shape.height());
+  let max_len_chars = _max_len_chars_since_line(text, line_idx, actual_shape.height());
   let column_idx = std::cmp::min(column_idx, max_len_chars.saturating_sub(1));
 
   // If the newly `start_line_idx`/`start_column_idx` is the same with current viewport, then
@@ -287,9 +289,45 @@ pub fn window_scroll_to(
   }
 
   // Sync the viewport
-  let opts = ViewportOptions::from(current_window.options());
-  let new_viewport = Viewport::to_arc(Viewport::view(&opts, text, shape, line_idx, column_idx));
+  let opts = ViewportOptions::from(window_options);
+  let new_viewport = Viewport::to_arc(Viewport::view(
+    &opts,
+    text,
+    actual_shape,
+    line_idx,
+    column_idx,
+  ));
   Some(new_viewport)
+}
+
+pub fn window_scroll_to(
+  viewport: &Viewport,
+  current_window: &Window,
+  text: &Text,
+  window_scroll_to_op: Operation,
+) -> Option<ViewportArc> {
+  _widget_scroll_to(
+    viewport,
+    current_window.actual_shape(),
+    current_window.options(),
+    text,
+    window_scroll_to_op,
+  )
+}
+
+pub fn command_line_scroll_to(
+  viewport: &Viewport,
+  command_line: &CommandLine,
+  text: &Text,
+  window_scroll_to_op: Operation,
+) -> Option<ViewportArc> {
+  _widget_scroll_to(
+    viewport,
+    command_line.actual_shape(),
+    command_line.options(),
+    text,
+    window_scroll_to_op,
+  )
 }
 
 fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_height: u16) -> usize {
@@ -580,4 +618,64 @@ pub fn insert_at_cursor(
     cursor_line_idx_after_inserted,
     cursor_char_idx_after_inserted,
   )
+}
+
+pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
+  debug_assert!(tree.node_mut(id).is_some());
+  let node = tree.node_mut(id).unwrap();
+  debug_assert!(matches!(
+    node,
+    TreeNode::Window(_) | TreeNode::CommandLine(_)
+  ));
+
+  let actual_shape = match node {
+    TreeNode::Window(window) => *window.actual_shape(),
+    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
+    _ => unreachable!(),
+  };
+  let vnode: &mut dyn Viewportable = match node {
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
+    _ => unreachable!(),
+  };
+
+  let viewport = vnode.viewport();
+  let cursor_viewport = vnode.cursor_viewport();
+  trace!("before viewport:{:?}", viewport);
+  trace!("before cursor_viewport:{:?}", cursor_viewport);
+
+  let start_line = std::cmp::min(
+    viewport.start_line_idx(),
+    text.rope().len_lines().saturating_sub(1),
+  );
+  debug_assert!(text.rope().get_line(start_line).is_some());
+  let bufline_len_chars = text.rope().line(start_line).len_chars();
+  let start_column = std::cmp::min(
+    viewport.start_column_idx(),
+    text.width_before(start_line, bufline_len_chars),
+  );
+
+  let viewport_opts = ViewportOptions::from(vnode.options());
+  let updated_viewport = Viewport::to_arc(Viewport::view(
+    &viewport_opts,
+    text,
+    &actual_shape,
+    start_line,
+    start_column,
+  ));
+  trace!("after updated_viewport:{:?}", updated_viewport);
+
+  vnode.set_viewport(updated_viewport.clone());
+  if let Some(updated_cursor_viewport) = cursor_move_to(
+    &updated_viewport,
+    &cursor_viewport,
+    text,
+    Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
+  ) {
+    trace!(
+      "after updated_cursor_viewport:{:?}",
+      updated_cursor_viewport
+    );
+    vnode.set_cursor_viewport(updated_cursor_viewport);
+  }
 }

@@ -2,12 +2,12 @@
 
 #![allow(dead_code)]
 
-use crate::content::TemporaryContentsWk;
+use crate::content::TextContentsWk;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions, Viewportable,
 };
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::{WindowLocalOptions, WindowLocalOptionsBuilder};
@@ -20,7 +20,7 @@ pub struct CommandLine {
 
   options: WindowLocalOptions,
 
-  contents: TemporaryContentsWk,
+  contents: TextContentsWk,
 
   viewport: ViewportArc,
 
@@ -28,7 +28,7 @@ pub struct CommandLine {
 }
 
 impl CommandLine {
-  pub fn new(shape: IRect, contents: TemporaryContentsWk) -> Self {
+  pub fn new(shape: IRect, contents: TextContentsWk) -> Self {
     // Force cmdline window options.
     let options = WindowLocalOptionsBuilder::default()
       .wrap(false)
@@ -80,3 +80,44 @@ impl Widgetable for CommandLine {
     viewport.draw(contents.command_line_content(), actual_shape, canvas);
   }
 }
+
+impl Viewportable for CommandLine {
+  /// Get window local options.
+  fn options(&self) -> &WindowLocalOptions {
+    &self.options
+  }
+
+  /// Set window local options.
+  fn set_options(&mut self, options: &WindowLocalOptions) {
+    self.options = *options;
+  }
+
+  /// Get viewport.
+  fn viewport(&self) -> ViewportArc {
+    self.viewport.clone()
+  }
+
+  /// Set viewport.
+  fn set_viewport(&mut self, viewport: ViewportArc) {
+    self.viewport = viewport;
+  }
+
+  /// Get cursor viewport.
+  fn cursor_viewport(&self) -> CursorViewportArc {
+    self.cursor_viewport.clone()
+  }
+
+  /// Set cursor viewport.
+  fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
+    self.cursor_viewport = cursor_viewport;
+  }
+}
+
+// Attributes {
+impl CommandLine {
+  /// Get text contents.
+  pub fn contents(&self) -> TextContentsWk {
+    self.contents.clone()
+  }
+}
+// Attributes }
