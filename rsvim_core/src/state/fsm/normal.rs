@@ -1,6 +1,6 @@
 //! The normal mode.
 
-use crate::buf::Text;
+use crate::buf::text::Text;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
@@ -529,7 +529,8 @@ impl NormalStateful {
 mod tests_util {
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::{TextContents, TextContentsArc};
   use crate::lock;
   use crate::prelude::*;
@@ -722,7 +723,8 @@ mod tests_get_operation {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -774,7 +776,8 @@ mod tests_raw_cursor_move_y_by {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
   use crate::state::State;
@@ -1053,7 +1056,8 @@ mod tests_raw_cursor_move_x_by {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
   use crate::state::State;
@@ -1315,7 +1319,8 @@ mod tests_raw_cursor_move_by {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
   use crate::state::State;
@@ -1557,7 +1562,8 @@ mod tests_raw_cursor_move_to {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::BufferLocalOptionsBuilder;
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::TextContents;
   use crate::prelude::*;
   use crate::state::State;
@@ -1803,7 +1809,8 @@ mod tests_raw_window_scroll_y_by {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -2759,7 +2766,8 @@ mod tests_raw_window_scroll_x_by {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -3958,7 +3966,8 @@ mod tests_raw_window_scroll_to {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -4613,7 +4622,8 @@ mod tests_cursor_move {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
