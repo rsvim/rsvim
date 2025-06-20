@@ -112,8 +112,8 @@ impl NormalStateful {
     let cursor_node = tree.remove(cursor_id);
     debug_assert!(cursor_node.is_some());
     let cursor_node = cursor_node.unwrap();
-    debug_assert!(!tree.children_ids(current_window_id).contains(&cursor_id));
     debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    debug_assert!(!tree.children_ids(current_window_id).contains(&cursor_id));
     match cursor_node {
       TreeNode::Cursor(mut cursor) => cursor.set_style(&CursorStyle::SteadyBar),
       _ => unreachable!(),
