@@ -471,7 +471,8 @@ impl ColumnIndex {
 mod tests {
   use super::*;
 
-  use crate::buf::{BufferLocalOptionsBuilder, Text};
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::text::Text;
   use crate::prelude::*;
   use crate::test::log::init as test_log_init;
 

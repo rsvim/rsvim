@@ -1,6 +1,6 @@
 //! Draw a text (with its viewport) on a canvas (with its actual shape).
 
-use crate::buf::Text;
+use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::{Canvas, Cell};
 use crate::ui::viewport::Viewport;
