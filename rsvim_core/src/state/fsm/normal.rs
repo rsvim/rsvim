@@ -149,14 +149,14 @@ impl NormalStateful {
       }
     };
 
-    self._update_viewport_after_content_changed(&mut tree, &contents.command_line_content());
+    self._update_viewport_after_content_changed(&mut tree, contents.command_line_content());
 
     trace!(
       "Move to init pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
     );
     self._cursor_move_impl(
       &mut tree,
-      &contents.command_line_content(),
+      contents.command_line_content(),
       Operation::CursorMoveTo((
         cursor_char_idx_after_inserted,
         cursor_line_idx_after_inserted,
