@@ -3061,7 +3061,7 @@ mod tests_raw_window_scroll_x_by {
       state.clone(),
       tree,
       bufs.clone(),
-      contents,
+      contents.clone(),
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
@@ -3094,8 +3094,13 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree,
+      bufs.clone(),
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.__test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(10));
 
@@ -3120,8 +3125,13 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree,
+      bufs.clone(),
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.__test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(160));
 
@@ -3146,8 +3156,13 @@ mod tests_raw_window_scroll_x_by {
       );
     }
 
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree,
+      bufs.clone(),
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.__test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(156));
 
@@ -3240,7 +3255,7 @@ mod tests_raw_window_scroll_x_by {
       state.clone(),
       tree,
       bufs.clone(),
-      contents,
+      contents.clone(),
       Event::Key(key_event),
     );
     let stateful = NormalStateful::default();
@@ -3272,8 +3287,13 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-2
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree,
+      bufs.clone(),
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.__test_raw_window_scroll(&data_access, Operation::WindowScrollRightBy(4));
 
@@ -3303,8 +3323,13 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-3
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree,
+      bufs.clone(),
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.__test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
@@ -3334,8 +3359,13 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-4
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree,
+      bufs.clone(),
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.__test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(4));
 
@@ -3365,8 +3395,13 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-5
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree,
+      bufs.clone(),
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.__test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(1));
 
@@ -3396,8 +3431,13 @@ mod tests_raw_window_scroll_x_by {
     }
 
     // Scroll-6
-    let data_access =
-      StatefulDataAccess::new(state.clone(), tree, bufs.clone(), Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state.clone(),
+      tree,
+      bufs.clone(),
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = NormalStateful::default();
     stateful.__test_raw_window_scroll(&data_access, Operation::WindowScrollLeftBy(3));
 
