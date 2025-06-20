@@ -421,6 +421,7 @@ mod tests_util {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
+  use crate::content::{TemporaryContents, TemporaryContentsArc};
   use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -433,7 +434,7 @@ mod tests_util {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
   use crate::ui::widget::Widgetable;
-  use crate::ui::widget::window::content::WindowContent;
+  use crate::ui::widget::window::content::{self, WindowContent};
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -445,13 +446,20 @@ mod tests_util {
     terminal_size: U16Size,
     window_local_opts: WindowLocalOptions,
     lines: Vec<&str>,
-  ) -> (TreeArc, StateArc, BuffersManagerArc, BufferArc) {
+  ) -> (
+    TreeArc,
+    StateArc,
+    BuffersManagerArc,
+    BufferArc,
+    TemporaryContentsArc,
+  ) {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
     let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
     let state = State::to_arc(State::default());
-    (tree, state, bufs, buf)
+    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    (tree, state, bufs, buf, contents)
   }
 
   pub fn get_viewport(tree: TreeArc) -> ViewportArc {
@@ -748,7 +756,7 @@ mod tests_cursor_move {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(
+    let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
@@ -766,7 +774,13 @@ mod tests_cursor_move {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Move-1
@@ -868,7 +882,7 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(
+    let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 6),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
@@ -887,7 +901,13 @@ mod tests_cursor_move {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Move-1
@@ -1111,7 +1131,7 @@ mod tests_cursor_move {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(
+    let (tree, state, bufs, buf, contents) = make_tree(
       U16Size::new(10, 6),
       WindowLocalOptionsBuilder::default()
         .wrap(true)
@@ -1130,7 +1150,13 @@ mod tests_cursor_move {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Move-1
@@ -1379,7 +1405,7 @@ mod tests_insert_text {
       "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1390,7 +1416,13 @@ mod tests_insert_text {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Insert-1
@@ -1591,7 +1623,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(terminal_size, window_option, lines);
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1602,7 +1634,13 @@ mod tests_insert_text {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Move-1
@@ -1725,7 +1763,7 @@ mod tests_insert_text {
       "  2. When the line is too long to be completely put in.\n",
       "  3. Is there any other cases?\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(terminal_size, window_option, lines);
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_option, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -1736,7 +1774,13 @@ mod tests_insert_text {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Move-1
@@ -2030,7 +2074,7 @@ mod tests_insert_text {
       "11th.\n",
       "12th.\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2041,7 +2085,13 @@ mod tests_insert_text {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Insert-1
@@ -2403,7 +2453,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2414,7 +2464,13 @@ mod tests_insert_text {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Insert-1
@@ -2465,7 +2521,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2476,7 +2532,13 @@ mod tests_insert_text {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Insert-1
@@ -2527,7 +2589,7 @@ mod tests_insert_text {
       .build()
       .unwrap();
     let lines = vec![""];
-    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2538,7 +2600,13 @@ mod tests_insert_text {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Insert-1
@@ -2601,7 +2669,7 @@ mod tests_insert_text {
       "9th.\n",
       "10th.\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -2612,7 +2680,13 @@ mod tests_insert_text {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Insert-1
@@ -3000,7 +3074,7 @@ mod tests_delete_text {
       "* The extra parts are been truncated if both line-wrap and word-wrap options are not set.\n",
       "* The extra.\n",
     ];
-    let (tree, state, bufs, buf) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -3011,7 +3085,13 @@ mod tests_delete_text {
       KeyModifiers::empty(),
       KeyEventKind::Press,
     );
-    let data_access = StatefulDataAccess::new(state, tree.clone(), bufs, Event::Key(key_event));
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
     let stateful = InsertStateful::default();
 
     // Delete-1
