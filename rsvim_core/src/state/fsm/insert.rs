@@ -421,7 +421,7 @@ mod tests_util {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
-  use crate::content::{TemporaryContents, TemporaryContentsArc};
+  use crate::content::{Contents, TemporaryContentsArc};
   use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -458,7 +458,7 @@ mod tests_util {
     let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
     let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
     let state = State::to_arc(State::default());
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     (tree, state, bufs, buf, contents)
   }
 

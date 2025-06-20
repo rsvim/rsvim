@@ -401,7 +401,7 @@ mod tests_util {
   use super::*;
 
   use crate::buf::{BufferArc, BufferLocalOptionsBuilder, BuffersManagerArc};
-  use crate::content::{TemporaryContents, TemporaryContentsArc};
+  use crate::content::{Contents, TemporaryContentsArc};
   use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
@@ -434,7 +434,7 @@ mod tests_util {
     let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
     let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
     let state = State::to_arc(State::default());
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     (tree, state, bufs, buf, contents)
   }
 
@@ -646,7 +646,7 @@ mod tests_raw_cursor_move_y_by {
   use super::*;
 
   use crate::buf::BufferLocalOptionsBuilder;
-  use crate::content::TemporaryContents;
+  use crate::content::Contents;
   use crate::prelude::*;
   use crate::state::State;
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -838,7 +838,7 @@ mod tests_raw_cursor_move_y_by {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -925,7 +925,7 @@ mod tests_raw_cursor_move_x_by {
   use super::*;
 
   use crate::buf::BufferLocalOptionsBuilder;
-  use crate::content::TemporaryContents;
+  use crate::content::Contents;
   use crate::prelude::*;
   use crate::state::State;
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -944,7 +944,7 @@ mod tests_raw_cursor_move_x_by {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -991,7 +991,7 @@ mod tests_raw_cursor_move_x_by {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -1039,7 +1039,7 @@ mod tests_raw_cursor_move_x_by {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -1086,7 +1086,7 @@ mod tests_raw_cursor_move_x_by {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -1140,7 +1140,7 @@ mod tests_raw_cursor_move_x_by {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -1187,7 +1187,7 @@ mod tests_raw_cursor_move_by {
   use super::*;
 
   use crate::buf::BufferLocalOptionsBuilder;
-  use crate::content::TemporaryContents;
+  use crate::content::Contents;
   use crate::prelude::*;
   use crate::state::State;
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -1214,7 +1214,7 @@ mod tests_raw_cursor_move_by {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -1283,7 +1283,7 @@ mod tests_raw_cursor_move_by {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -1367,7 +1367,7 @@ mod tests_raw_cursor_move_by {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -1429,7 +1429,7 @@ mod tests_raw_cursor_move_to {
   use super::*;
 
   use crate::buf::BufferLocalOptionsBuilder;
-  use crate::content::TemporaryContents;
+  use crate::content::Contents;
   use crate::prelude::*;
   use crate::state::State;
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -1456,7 +1456,7 @@ mod tests_raw_cursor_move_to {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -1525,7 +1525,7 @@ mod tests_raw_cursor_move_to {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()
@@ -1610,7 +1610,7 @@ mod tests_raw_cursor_move_to {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines.clone());
     let bufs = make_buffers_manager(buf_opts, vec![buf]);
-    let contents = TemporaryContents::to_arc(TemporaryContents::new(terminal_size));
+    let contents = Contents::to_arc(Contents::new(terminal_size));
     let tree = make_tree_with_buffers(
       terminal_size,
       WindowLocalOptionsBuilder::default()

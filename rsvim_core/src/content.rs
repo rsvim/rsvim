@@ -2,7 +2,6 @@
 
 use crate::arc_impl;
 use crate::buf::{BufferLocalOptionsBuilder, Text};
-#[allow(unused_imports)]
 use crate::prelude::*;
 
 use paste::paste;
@@ -10,13 +9,13 @@ use ropey::Rope;
 
 #[derive(Debug)]
 /// Temporary contents except buffers.
-pub struct TemporaryContents {
+pub struct Contents {
   command_line_content: Text,
 }
 
-arc_impl!(TemporaryContents);
+arc_impl!(Contents);
 
-impl TemporaryContents {
+impl Contents {
   pub fn new(canvas_size: U16Size) -> Self {
     let command_line_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     Self {
