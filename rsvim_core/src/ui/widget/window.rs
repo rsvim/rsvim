@@ -176,7 +176,7 @@ impl Widgetable for Window {
   }
 }
 
-// Options {
+// Viewport {
 impl Window {
   /// Get window local options.
   pub fn options(&self) -> &WindowLocalOptions {
@@ -187,11 +187,7 @@ impl Window {
   pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = *options;
   }
-}
-// Options }
 
-// Viewport {
-impl Window {
   /// Get viewport.
   pub fn viewport(&self) -> ViewportArc {
     self.viewport.clone()

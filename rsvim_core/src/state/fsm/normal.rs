@@ -8,8 +8,11 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, ViewportArc, ViewportOptions, ViewportSearchDirection};
+use crate::ui::viewport::{
+  CursorViewport, Viewport, ViewportArc, ViewportOptions, ViewportSearchDirection,
+};
 
+use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
@@ -88,14 +91,6 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
-    debug_assert!(tree.node(cmdline_id).is_some());
-    debug_assert!(matches!(
-      tree.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
-
     debug_assert!(tree.cursor_id().is_some());
     let cursor_id = tree.cursor_id().unwrap();
 
@@ -120,20 +115,200 @@ impl NormalStateful {
     }
 
     // Insert to new parent
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.node(cmdline_id).is_some());
+    debug_assert!(matches!(
+      tree.node(cmdline_id).unwrap(),
+      TreeNode::CommandLine(_)
+    ));
     let _inserted = tree.bounded_insert(cmdline_id, cursor_node);
     debug_assert!(_inserted.is_none());
 
-    // Clear command-line contents.
+    // Initialize command-line contents.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
     contents.command_line_content_mut().rope_mut().remove(0..);
-    contents
-      .command_line_content_mut()
-      .rope_mut()
-      .insert(0, ":\n");
     contents.command_line_content_mut().clear_cached_lines();
 
+    let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) = {
+      let cmdline_id = tree.command_line_id().unwrap();
+      debug_assert!(tree.node_mut(cmdline_id).is_some());
+      let cmdline_node = tree.node_mut(cmdline_id).unwrap();
+      debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+      match cmdline_node {
+        TreeNode::CommandLine(command_line) => {
+          let cursor_viewport = command_line.cursor_viewport();
+          cursor_ops::insert_at_cursor(
+            &cursor_viewport,
+            contents.command_line_content_mut(),
+            ":\n".to_compact_string(),
+          )
+        }
+        _ => unreachable!(),
+      }
+    };
+
+    self._update_viewport_after_content_changed(&mut tree, &contents.command_line_content());
+
+    trace!(
+      "Move to init pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
+    );
+    self._cursor_move_impl(
+      &mut tree,
+      &contents.command_line_content(),
+      Operation::CursorMoveTo((
+        cursor_char_idx_after_inserted,
+        cursor_line_idx_after_inserted,
+      )),
+    );
+
     StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
+  }
+
+  // Update viewport since the buffer has changed, and the viewport doesn't match the buffer.
+  fn _update_viewport_after_content_changed(&self, tree: &mut Tree, text: &Text) {
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.node_mut(cmdline_id).is_some());
+    let cmdline_node = tree.node_mut(cmdline_id).unwrap();
+    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+    match cmdline_node {
+      TreeNode::CommandLine(cmdline) => {
+        let viewport = cmdline.viewport();
+        let cursor_viewport = cmdline.cursor_viewport();
+        trace!("before viewport:{:?}", viewport);
+        trace!("before cursor_viewport:{:?}", cursor_viewport);
+
+        let start_line = 0_usize;
+        debug_assert!(start_line <= text.rope().len_lines().saturating_sub(1));
+        debug_assert!(text.rope().get_line(start_line).is_some());
+        let bufline_len_chars = text.rope().line(start_line).len_chars();
+        let start_column = std::cmp::min(
+          viewport.start_column_idx(),
+          text.width_before(start_line, bufline_len_chars),
+        );
+
+        let viewport_opts = ViewportOptions::from(cmdline.options());
+        let updated_viewport = Viewport::to_arc(Viewport::view(
+          &viewport_opts,
+          text,
+          cmdline.actual_shape(),
+          start_line,
+          start_column,
+        ));
+        trace!("after updated_viewport:{:?}", updated_viewport);
+
+        cmdline.set_viewport(updated_viewport.clone());
+        if let Some(updated_cursor_viewport) = cursor_ops::cursor_move_to(
+          &updated_viewport,
+          &cursor_viewport,
+          text,
+          Operation::CursorMoveTo((cursor_viewport.char_idx(), cursor_viewport.line_idx())),
+        ) {
+          trace!(
+            "after updated_cursor_viewport:{:?}",
+            updated_cursor_viewport
+          );
+          cmdline.set_cursor_viewport(updated_cursor_viewport);
+        }
+      }
+      _ => unreachable!(),
+    }
+  }
+
+  fn _cursor_move_impl(&self, tree: &mut Tree, text: &Text, op: Operation) {
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => {
+        let viewport = current_window.viewport();
+        let cursor_viewport = current_window.cursor_viewport();
+
+        // Only move cursor when it is different from current cursor.
+        let (target_cursor_char, target_cursor_line, search_direction) =
+          self._target_cursor_include_empty_eol(&cursor_viewport, text, op);
+
+        let new_viewport: Option<ViewportArc> = {
+          let viewport_opts = ViewportOptions::from(current_window.options());
+          let (start_line, start_column) = viewport.search_anchor(
+            search_direction,
+            &viewport_opts,
+            text,
+            current_window.actual_shape(),
+            target_cursor_line,
+            target_cursor_char,
+          );
+
+          // First try window scroll.
+          if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx()
+          {
+            let new_viewport = cursor_ops::window_scroll_to(
+              &viewport,
+              current_window,
+              text,
+              Operation::WindowScrollTo((start_column, start_line)),
+            );
+            if let Some(new_viewport_arc) = new_viewport.clone() {
+              current_window.set_viewport(new_viewport_arc.clone());
+            }
+            new_viewport
+          } else {
+            None
+          }
+        };
+
+        // Then try cursor move.
+        {
+          let current_viewport = new_viewport.unwrap_or(viewport);
+
+          let new_cursor_viewport = cursor_ops::cursor_move_to(
+            &current_viewport,
+            &cursor_viewport,
+            text,
+            Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+          );
+
+          if let Some(new_cursor_viewport) = new_cursor_viewport {
+            current_window.set_cursor_viewport(new_cursor_viewport.clone());
+            let cursor_id = tree.cursor_id().unwrap();
+            tree.bounded_move_to(
+              cursor_id,
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
+            );
+          }
+        }
+      }
+      _ => unreachable!(),
+    }
+  }
+
+  // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
+  fn _target_cursor_include_empty_eol(
+    &self,
+    cursor_viewport: &CursorViewport,
+    text: &Text,
+    op: Operation,
+  ) -> (usize, usize, ViewportSearchDirection) {
+    let (target_cursor_char, target_cursor_line, move_direction) =
+      cursor_ops::normalize_to_cursor_move_to_include_empty_eol(
+        text,
+        op,
+        cursor_viewport.char_idx(),
+        cursor_viewport.line_idx(),
+      );
+
+    let search_direction = match move_direction {
+      CursorMoveDirection::Up => ViewportSearchDirection::Up,
+      CursorMoveDirection::Down => ViewportSearchDirection::Down,
+      CursorMoveDirection::Left => ViewportSearchDirection::Left,
+      CursorMoveDirection::Right => ViewportSearchDirection::Right,
+    };
+    (target_cursor_char, target_cursor_line, search_direction)
   }
 }
 
