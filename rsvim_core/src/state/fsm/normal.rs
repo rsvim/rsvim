@@ -139,17 +139,22 @@ impl NormalStateful {
           let cursor_viewport = command_line.cursor_viewport();
           contents.command_line_content_mut().rope_mut().remove(0..);
           contents.command_line_content_mut().clear_cached_lines();
-          cursor_ops::insert_at_cursor(
+          let (l, c) = cursor_ops::insert_at_cursor(
             &cursor_viewport,
             contents.command_line_content_mut(),
             ":".to_compact_string(),
-          )
+          );
+          // Update viewport after content changed.
+          cursor_ops::update_viewport_after_text_changed(
+            &mut tree,
+            cmdline_id,
+            contents.command_line_content(),
+          );
+          (l, c)
         }
         _ => unreachable!(),
       }
     };
-
-    self._update_viewport_after_goto_command_line_ex(&mut tree, contents.command_line_content());
 
     trace!(
       "Move to init pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
@@ -164,13 +169,6 @@ impl NormalStateful {
     );
 
     StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
-  }
-
-  // Update viewport since the buffer has changed, and the viewport doesn't match the buffer.
-  fn _update_viewport_after_goto_command_line_ex(&self, tree: &mut Tree, text: &Text) {
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
-    cursor_ops::update_viewport_after_text_changed(tree, cmdline_id, text);
   }
 
   fn _move_cursor_after_goto_command_line_ex(&self, tree: &mut Tree, text: &Text, op: Operation) {

@@ -2,7 +2,7 @@
 
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Operation;
+use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::Viewportable;
@@ -137,6 +137,12 @@ impl CommandLineExStateful {
     let mut contents = lock!(contents);
     contents.command_line_content_mut().rope_mut().remove(0..);
     contents.command_line_content_mut().clear_cached_lines();
+    // Update viewport after text changed.
+    cursor_ops::update_viewport_after_text_changed(
+      &mut tree,
+      cmdline_id,
+      contents.command_line_content(),
+    );
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }

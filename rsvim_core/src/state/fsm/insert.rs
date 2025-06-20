@@ -121,14 +121,18 @@ impl InsertStateful {
           if maybe_new_cursor_position.is_none() {
             return StatefulValue::InsertMode(InsertStateful::default());
           }
+
+          // Update viewport since the buffer doesn't match the viewport.
+          cursor_ops::update_viewport_after_text_changed(
+            &mut tree,
+            current_window_id,
+            buffer.text(),
+          );
           maybe_new_cursor_position.unwrap()
         }
         _ => unreachable!(),
       }
     };
-
-    // Update viewport since the buffer has changed, and viewport doesn't match it any more.
-    self._update_viewport_after_buffer_changed(&mut tree, &buffer);
 
     trace!(
       "Move to inserted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
@@ -166,14 +170,18 @@ impl InsertStateful {
       match current_window_node {
         TreeNode::Window(current_window) => {
           let cursor_viewport = current_window.cursor_viewport();
-          cursor_ops::insert_at_cursor(&cursor_viewport, buffer.text_mut(), text)
+          let (l, c) = cursor_ops::insert_at_cursor(&cursor_viewport, buffer.text_mut(), text);
+          // Update viewport since the buffer doesn't match the viewport.
+          cursor_ops::update_viewport_after_text_changed(
+            &mut tree,
+            current_window_id,
+            buffer.text(),
+          );
+          (l, c)
         }
         _ => unreachable!(),
       }
     };
-
-    // Update viewport since the buffer doesn't match the viewport.
-    self._update_viewport_after_buffer_changed(&mut tree, &buffer);
 
     trace!(
       "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
@@ -189,13 +197,6 @@ impl InsertStateful {
     );
 
     StatefulValue::InsertMode(InsertStateful::default())
-  }
-
-  // Update viewport since the buffer has changed, and the viewport doesn't match the buffer.
-  fn _update_viewport_after_buffer_changed(&self, tree: &mut Tree, buffer: &Buffer) {
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    cursor_ops::update_viewport_after_text_changed(tree, current_window_id, buffer.text());
   }
 
   fn _current_buffer(&self, tree: &mut Tree) -> BufferWk {
