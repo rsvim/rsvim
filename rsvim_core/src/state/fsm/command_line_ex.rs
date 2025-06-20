@@ -12,7 +12,7 @@ use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
-/// The command-line mode, ex-command variant.
+/// The command-line ex mode.
 pub struct CommandLineExStateful {}
 
 impl CommandLineExStateful {
