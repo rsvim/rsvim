@@ -90,32 +90,32 @@ impl NormalStateful {
 
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
-
-    debug_assert!(tree.node(parent_id).is_some());
+    debug_assert!(tree.node(cmdline_id).is_some());
     debug_assert!(matches!(
-      self.node(parent_id).unwrap(),
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
+      tree.node(cmdline_id).unwrap(),
+      TreeNode::CommandLine(_)
     ));
 
-    debug_assert!(self.cursor_id.is_some());
-    let cursor_id = self.cursor_id.unwrap();
+    debug_assert!(tree.cursor_id().is_some());
+    let cursor_id = tree.cursor_id().unwrap();
 
     // Remove from current parent
-    debug_assert!(self.parent_id(cursor_id).is_some());
-    let current_parent_id = self.parent_id(cursor_id).unwrap();
-    debug_assert!(self.node(current_parent_id).is_some());
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.parent_id(cursor_id).is_some());
+    debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), current_window_id);
+    debug_assert!(tree.node(current_window_id).is_some());
     debug_assert!(matches!(
-      self.node(current_parent_id).unwrap(),
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
+      tree.node(current_window_id).unwrap(),
+      TreeNode::Window(_)
     ));
-    let removed_cursor_node = self.remove(cursor_id);
+    let removed_cursor_node = tree.remove(cursor_id);
     debug_assert!(removed_cursor_node.is_some());
     let removed_cursor_node = removed_cursor_node.unwrap();
-    debug_assert!(self.node(current_parent_id).is_some());
-    debug_assert!(!self.children_ids(current_parent_id).contains(&cursor_id));
+    debug_assert!(!tree.children_ids(current_window_id).contains(&cursor_id));
 
     // Insert to new parent
-    let _inserted = self.bounded_insert(parent_id, removed_cursor_node);
+    let _inserted = tree.bounded_insert(cmdline_id, removed_cursor_node);
     debug_assert!(_inserted.is_none());
 
     StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())

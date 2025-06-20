@@ -472,49 +472,6 @@ impl Tree {
 }
 // Movement }
 
-// Cursor {
-impl Tree {
-  /// Set cursor as a child node of another widget node.
-  /// This is useful when cursor moves between different window/cmdline or other UI widgets.
-  ///
-  /// Only these UI widgets are valid as a cursor's parent:
-  /// 1. Window.
-  /// 2. Command-line.
-  ///
-  /// # Panics
-  /// It panics if the cursor node doesn't exist, or the parent node is invalid as a cursor's
-  /// parent widget.
-  pub fn set_cursor_parent(&mut self, parent_id: TreeNodeId) {
-    debug_assert!(self.node(parent_id).is_some());
-    debug_assert!(matches!(
-      self.node(parent_id).unwrap(),
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
-    ));
-
-    debug_assert!(self.cursor_id.is_some());
-    let cursor_id = self.cursor_id.unwrap();
-
-    // Remove from current parent
-    debug_assert!(self.parent_id(cursor_id).is_some());
-    let current_parent_id = self.parent_id(cursor_id).unwrap();
-    debug_assert!(self.node(current_parent_id).is_some());
-    debug_assert!(matches!(
-      self.node(current_parent_id).unwrap(),
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
-    ));
-    let removed_cursor_node = self.remove(cursor_id);
-    debug_assert!(removed_cursor_node.is_some());
-    let removed_cursor_node = removed_cursor_node.unwrap();
-    debug_assert!(self.node(current_parent_id).is_some());
-    debug_assert!(!self.children_ids(current_parent_id).contains(&cursor_id));
-
-    // Insert to new parent
-    let _inserted = self.bounded_insert(parent_id, removed_cursor_node);
-    debug_assert!(_inserted.is_none());
-  }
-}
-// Cursor }
-
 // Global options {
 impl Tree {
   pub fn global_options(&self) -> &WindowGlobalOptions {
