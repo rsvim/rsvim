@@ -1,4 +1,4 @@
-//! The command-line mode, search backward variant.
+//! The command-line search backward mode.
 
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
