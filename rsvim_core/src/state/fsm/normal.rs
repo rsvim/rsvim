@@ -142,7 +142,7 @@ impl NormalStateful {
           cursor_ops::insert_at_cursor(
             &cursor_viewport,
             contents.command_line_content_mut(),
-            ":\n".to_compact_string(),
+            ":".to_compact_string(),
           )
         }
         _ => unreachable!(),
