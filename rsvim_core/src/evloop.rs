@@ -2,7 +2,7 @@
 
 use crate::buf::{BuffersManager, BuffersManagerArc};
 use crate::cli::CliOpt;
-use crate::content::{Contents, TemporaryContentsArc};
+use crate::content::{TextContents, TextContentsArc};
 use crate::envar;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
@@ -82,8 +82,8 @@ pub struct EventLoop {
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
-  /// Temporary contents (except buffers).
-  pub contents: TemporaryContentsArc,
+  /// Text contents (except buffers).
+  pub contents: TextContentsArc,
 
   /// Cancellation token to notify the main loop to exit.
   pub cancellation_token: CancellationToken,
@@ -133,7 +133,7 @@ impl EventLoop {
 
     // Buffers
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
-    let text_contents = Contents::to_arc(Contents::new(canvas_size));
+    let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
 
     // State
     let state = State::to_arc(State::default());

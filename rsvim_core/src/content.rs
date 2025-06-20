@@ -9,13 +9,13 @@ use ropey::Rope;
 
 #[derive(Debug)]
 /// Temporary contents except buffers.
-pub struct Contents {
+pub struct TextContents {
   command_line_content: Text,
 }
 
-arc_impl!(Contents);
+arc_impl!(TextContents);
 
-impl Contents {
+impl TextContents {
   pub fn new(canvas_size: U16Size) -> Self {
     let command_line_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     Self {

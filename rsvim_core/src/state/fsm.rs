@@ -13,7 +13,7 @@
 //! * Quit state: The editor should quit on this state.
 
 use crate::buf::BuffersManagerArc;
-use crate::content::TemporaryContentsArc;
+use crate::content::TextContentsArc;
 use crate::state::StateArc;
 use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
@@ -50,7 +50,7 @@ pub struct StatefulDataAccess {
   pub state: StateArc,
   pub tree: TreeArc,
   pub buffers: BuffersManagerArc,
-  pub contents: TemporaryContentsArc,
+  pub contents: TextContentsArc,
   pub event: Event,
 }
 
@@ -59,7 +59,7 @@ impl StatefulDataAccess {
     state: StateArc,
     tree: TreeArc,
     buffers: BuffersManagerArc,
-    contents: TemporaryContentsArc,
+    contents: TextContentsArc,
     event: Event,
   ) -> Self {
     StatefulDataAccess {
