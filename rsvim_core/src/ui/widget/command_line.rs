@@ -2,7 +2,7 @@
 
 #![allow(dead_code)]
 
-use crate::content::TemporaryContentsWk;
+use crate::content::TextContentsWk;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -20,7 +20,7 @@ pub struct CommandLine {
 
   options: WindowLocalOptions,
 
-  contents: TemporaryContentsWk,
+  contents: TextContentsWk,
 
   viewport: ViewportArc,
 
@@ -28,7 +28,7 @@ pub struct CommandLine {
 }
 
 impl CommandLine {
-  pub fn new(shape: IRect, contents: TemporaryContentsWk) -> Self {
+  pub fn new(shape: IRect, contents: TextContentsWk) -> Self {
     // Force cmdline window options.
     let options = WindowLocalOptionsBuilder::default()
       .wrap(false)
