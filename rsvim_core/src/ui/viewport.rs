@@ -2386,7 +2386,7 @@ mod tests_view_wrap_nolinebreak {
       "ndow content wi",
       "dget, then the ",
     ];
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
@@ -2417,11 +2417,7 @@ mod tests_view_wrap_nolinebreak {
       "n and again. Th",
       "is operation al",
     ];
-    let actual = {
-      let buf = lock!(buf);
-      let opts = win_opts;
-      Viewport::view(&opts, buf.text(), window.actual_shape(), 6, 0)
-    };
+    let actual = update_window_viewport(buf.clone(), &mut window, 6, 0);
     let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
     assert_viewport(
       buf.clone(),
@@ -2456,7 +2452,7 @@ mod tests_view_wrap_nolinebreak {
       "ll test lines.\n",
       "",
     ];
-    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = window.viewport();
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
@@ -2470,11 +2466,7 @@ mod tests_view_wrap_nolinebreak {
     );
 
     let expect = vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
-    let actual = {
-      let buf = lock!(buf);
-      let opts = win_opts;
-      Viewport::view(&opts, buf.text(), window.actual_shape(), 1, 0)
-    };
+    let actual = update_window_viewport(buf.clone(), &mut window, 1, 0);
     let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
       buf.clone(),
@@ -2539,14 +2531,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     ];
 
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = {
-      let buf = lock!(buf);
-      let window_actual_shape = window.actual_shape();
-      let opts = *window.options();
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 3);
-      window.set_viewport(Viewport::to_arc(viewport));
-      window.viewport()
-    };
+    let actual = update_window_viewport(buf.clone(), &mut window, 0, 3);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
@@ -2586,14 +2571,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     ];
 
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = {
-      let buf = lock!(buf);
-      let window_actual_shape = window.actual_shape();
-      let opts = *window.options();
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 3);
-      window.set_viewport(Viewport::to_arc(viewport));
-      window.viewport()
-    };
+    let actual = update_window_viewport(buf.clone(), &mut window, 0, 3);
     let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(buf, &actual, &expect, 0, 3, &expect_fills, &expect_fills);
   }
@@ -2638,14 +2616,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     ];
 
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = {
-      let buf = lock!(buf);
-      let window_actual_shape = window.actual_shape();
-      let opts = *window.options();
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 15);
-      window.set_viewport(Viewport::to_arc(viewport));
-      window.viewport()
-    };
+    let actual = update_window_viewport(buf.clone(), &mut window, 0, 15);
     let expect_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(buf, &actual, &expect, 0, 4, &expect_fills, &expect_fills);
@@ -2686,14 +2657,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     ];
 
     let mut window = make_window(terminal_size, buf.clone(), &win_opts);
-    let actual = {
-      let buf = lock!(buf);
-      let window_actual_shape = window.actual_shape();
-      let opts = *window.options();
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 1, 60);
-      window.set_viewport(Viewport::to_arc(viewport));
-      window.viewport()
-    };
+    let actual = update_window_viewport(buf.clone(), &mut window, 1, 60);
     let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(buf, &actual, &expect, 1, 4, &expect_fills, &expect_fills);
   }
