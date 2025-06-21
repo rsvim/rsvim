@@ -4264,7 +4264,7 @@ mod tests_search_anchor_downward_nowrap {
         assert_eq!(start_column, 113);
 
         let viewport = Viewport::view(
-          &opts,
+          window.options(),
           buf.text(),
           window.actual_shape(),
           start_line,
@@ -4302,10 +4302,9 @@ mod tests_search_anchor_downward_nowrap {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
-        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchDirection::Down,
-          &opts,
+          window.options(),
           buf.text(),
           window.actual_shape(),
           target_cursor_line,
