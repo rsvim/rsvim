@@ -1444,8 +1444,7 @@ mod tests_wrap_nolinebreak_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = ViewportOptions::from(&win_opts);
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 3, 1);
+      let viewport = Viewport::view(&win_opts, buffer.text(), &actual_shape, 3, 1);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
@@ -1498,8 +1497,7 @@ mod tests_wrap_nolinebreak_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let opts = ViewportOptions::from(&win_opts);
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 6, 19);
+      let viewport = Viewport::view(&win_opts, buffer.text(), &actual_shape, 6, 19);
       Viewport::to_arc(viewport)
     };
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
