@@ -10,11 +10,7 @@ use std::ops::Range;
 #[allow(unused_imports)]
 use tracing::trace;
 
-// Re-export
-pub use opt::*;
-
 pub mod draw;
-pub mod opt;
 pub mod sync;
 
 #[derive(Debug, Copy, Clone)]
@@ -546,7 +542,7 @@ impl Viewport {
   /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a
   /// window.
   pub fn view(
-    opts: &ViewportOptions,
+    opts: &WindowLocalOptions,
     text: &Text,
     shape: &U16Rect,
     start_line: usize,
@@ -575,7 +571,7 @@ impl Viewport {
   pub fn search_anchor(
     &self,
     direction: ViewportSearchDirection,
-    opts: &ViewportOptions,
+    opts: &WindowLocalOptions,
     text: &Text,
     shape: &U16Rect,
     target_cursor_line: usize,
