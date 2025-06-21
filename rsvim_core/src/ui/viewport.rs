@@ -738,11 +738,12 @@ mod tests_util {
 
   use compact_str::ToCompactString;
   use ropey::{Rope, RopeBuilder};
+  use std::cell::RefCell;
   use std::collections::BTreeMap;
   use std::fs::File;
   use std::io::{BufReader, BufWriter};
-  use std::sync::Arc;
-  use std::sync::Once;
+  use std::rc::Rc;
+  use std::sync::{Arc, Once};
   use tracing::info;
 
   pub fn make_nowrap() -> WindowLocalOptions {
@@ -964,6 +965,46 @@ mod tests_util {
       start_line,
       start_column,
     );
+    window.set_viewport(Viewport::to_arc(viewport));
+    window.viewport()
+  }
+
+  pub fn search_and_update_viewport(
+    window: Rc<RefCell<Window>>,
+    buf: BufferArc,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+    expect_start_line: usize,
+    expect_start_column: usize,
+  ) -> ViewportArc {
+    let mut window = window.borrow_mut();
+    let old = window.viewport();
+    let buf = lock!(buf);
+    let opts = *window.options();
+    let (start_line, start_column) = old.search_anchor(
+      ViewportSearchDirection::Down,
+      &opts,
+      buf.text(),
+      window.actual_shape(),
+      target_cursor_line,
+      target_cursor_char,
+    );
+    assert_eq!(start_line, expect_start_line);
+    assert_eq!(start_column, expect_start_column);
+
+    let viewport = Viewport::view(
+      &opts,
+      buf.text(),
+      window.actual_shape(),
+      start_line,
+      start_column,
+    );
+    window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
+      &viewport,
+      buf.text(),
+      target_cursor_line,
+      target_cursor_char,
+    )));
     window.set_viewport(Viewport::to_arc(viewport));
     window.viewport()
   }
@@ -3507,7 +3548,7 @@ mod tests_view_wrap_linebreak_startcol {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
-    let buffer = make_buffer_from_lines(
+    let buf = make_buffer_from_lines(
       terminal_size,
       buf_opts,
       vec![
@@ -3533,14 +3574,14 @@ mod tests_view_wrap_linebreak_startcol {
       "things we ",
     ];
 
-    let mut window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = update_window_viewport(buf.clone(), &mut window, 0, 6);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -3558,7 +3599,7 @@ mod tests_view_wrap_linebreak_startcol {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
-    let buffer = make_buffer_from_lines(
+    let buf = make_buffer_from_lines(
       terminal_size,
       buf_opts,
       vec![
@@ -3584,14 +3625,14 @@ mod tests_view_wrap_linebreak_startcol {
       "enough to ",
     ];
 
-    let mut window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = update_window_viewport(buf.clone(), &mut window, 0, 20);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -3609,7 +3650,7 @@ mod tests_view_wrap_linebreak_startcol {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
-    let buffer = make_buffer_from_lines(
+    let buf = make_buffer_from_lines(
       terminal_size,
       buf_opts,
       vec![
@@ -3635,21 +3676,14 @@ mod tests_view_wrap_linebreak_startcol {
       "and word-",
     ];
 
-    let mut window = make_window(terminal_size, buffer.clone(), &win_opts);
-    let actual = {
-      let buf = lock!(buffer);
-      let window_actual_shape = window.actual_shape();
-      let opts = *window.options();
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 60);
-      window.set_viewport(Viewport::to_arc(viewport));
-      window.viewport()
-    };
+    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = update_window_viewport(buf.clone(), &mut window, 0, 60);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -3667,7 +3701,7 @@ mod tests_view_wrap_linebreak_startcol {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
-    let buffer = make_buffer_from_lines(
+    let buf = make_buffer_from_lines(
       terminal_size,
       buf_opts,
       vec![
@@ -3694,21 +3728,14 @@ mod tests_view_wrap_linebreak_startcol {
       "短，短到可以完整的放入一个窗口",
     ];
 
-    let mut window = make_window(terminal_size, buffer.clone(), &win_opts);
-    let actual = {
-      let buf = lock!(buffer);
-      let window_actual_shape = window.actual_shape();
-      let opts = *window.options();
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 15);
-      window.set_viewport(Viewport::to_arc(viewport));
-      window.viewport()
-    };
+    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = update_window_viewport(buf.clone(), &mut window, 0, 15);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 1)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -3726,7 +3753,7 @@ mod tests_view_wrap_linebreak_startcol {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
-    let buffer = make_buffer_from_lines(
+    let buf = make_buffer_from_lines(
       terminal_size,
       buf_opts,
       vec![
@@ -3740,19 +3767,12 @@ mod tests_view_wrap_linebreak_startcol {
       "ogetmoresmoothbeh",
     ];
 
-    let mut window = make_window(terminal_size, buffer.clone(), &win_opts);
-    let actual = {
-      let buf = lock!(buffer);
-      let window_actual_shape = window.actual_shape();
-      let opts = *window.options();
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 70);
-      window.set_viewport(Viewport::to_arc(viewport));
-      window.viewport()
-    };
+    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = update_window_viewport(buf.clone(), &mut window, 0, 70);
     let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
     assert_viewport(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
@@ -3846,43 +3866,7 @@ mod tests_search_anchor_downward_nowrap {
         "\t1. When",
         "\t2. When",
       ];
-
-      let actual = {
-        let target_cursor_line = 2;
-        let target_cursor_char = 15;
-
-        let mut window = window.borrow_mut();
-        let old = window.viewport();
-        let buf = lock!(buf);
-        let opts = *window.options();
-        let (start_line, start_column) = old.search_anchor(
-          ViewportSearchDirection::Down,
-          &opts,
-          buf.text(),
-          window.actual_shape(),
-          target_cursor_line,
-          target_cursor_char,
-        );
-        assert_eq!(start_line, 0);
-        assert_eq!(start_column, 0);
-
-        let viewport = Viewport::view(
-          &opts,
-          buf.text(),
-          window.actual_shape(),
-          start_line,
-          start_column,
-        );
-        window.set_cursor_viewport(CursorViewport::to_arc(CursorViewport::from_position(
-          &viewport,
-          buf.text(),
-          target_cursor_line,
-          target_cursor_char,
-        )));
-        window.set_viewport(Viewport::to_arc(viewport));
-        window.viewport()
-      };
-
+      let actual = search_and_update_viewport(window.clone(), buf.clone(), 2, 15, 0, 0);
       let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
         .collect();
