@@ -6,9 +6,7 @@ use crate::content::TextContentsWk;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions, Viewportable,
-};
+use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::opt::{WindowLocalOptions, WindowLocalOptionsBuilder};
 use crate::{inode_impl, lock};
@@ -36,7 +34,6 @@ impl CommandLine {
       .scroll_off(0_u16)
       .build()
       .unwrap();
-    let viewport_options = ViewportOptions::from(&options);
 
     let base = InodeBase::new(shape);
     let cmdline_actual_shape = base.actual_shape();
@@ -45,7 +42,7 @@ impl CommandLine {
       let contents = contents.upgrade().unwrap();
       let contents = lock!(contents);
       let viewport = Viewport::view(
-        &viewport_options,
+        &options,
         contents.command_line_content(),
         cmdline_actual_shape,
         0,
