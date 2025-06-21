@@ -4,8 +4,8 @@ use crate::prelude::*;
 #[allow(unused_imports)]
 use crate::{arc_impl, lock};
 
-use crate::buf::opt::*;
-use crate::buf::text::Text;
+use opt::*;
+use text::Text;
 
 use paste::paste;
 use path_absolutize::Absolutize;
