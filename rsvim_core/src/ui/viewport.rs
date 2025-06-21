@@ -10,11 +10,7 @@ use std::ops::Range;
 #[allow(unused_imports)]
 use tracing::trace;
 
-// Re-export
-pub use opt::*;
-
 pub mod draw;
-pub mod opt;
 pub mod sync;
 
 #[derive(Debug, Copy, Clone)]
@@ -546,7 +542,7 @@ impl Viewport {
   /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a
   /// window.
   pub fn view(
-    opts: &ViewportOptions,
+    opts: &WindowLocalOptions,
     text: &Text,
     shape: &U16Rect,
     start_line: usize,
@@ -575,7 +571,7 @@ impl Viewport {
   pub fn search_anchor(
     &self,
     direction: ViewportSearchDirection,
-    opts: &ViewportOptions,
+    opts: &WindowLocalOptions,
     text: &Text,
     shape: &U16Rect,
     target_cursor_line: usize,
@@ -1468,8 +1464,7 @@ mod tests_view_nowrap_startcol {
     let actual = {
       let buf = lock!(buf);
       let shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), shape, 0, 3);
+      let viewport = Viewport::view(window.options(), buf.text(), shape, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -1533,8 +1528,7 @@ mod tests_view_nowrap_startcol {
     let actual = {
       let buf = lock!(buf);
       let shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), shape, 0, 6);
+      let viewport = Viewport::view(window.options(), buf.text(), shape, 0, 6);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -1598,8 +1592,7 @@ mod tests_view_nowrap_startcol {
     let actual = {
       let buf = lock!(buf);
       let shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), shape, 0, 15);
+      let viewport = Viewport::view(window.options(), buf.text(), shape, 0, 15);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -1663,8 +1656,7 @@ mod tests_view_nowrap_startcol {
     let actual = {
       let buf = lock!(buf);
       let shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), shape, 0, 60);
+      let viewport = Viewport::view(window.options(), buf.text(), shape, 0, 60);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
