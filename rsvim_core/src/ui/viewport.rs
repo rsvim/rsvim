@@ -3917,7 +3917,6 @@ mod tests_search_anchor_downward_nowrap {
       let expect = vec!["ut still it conta", "1. When", "2. When", "\t3.", "\t4."];
 
       let actual = search_and_update_viewport(window.clone(), buf.clone(), 6, 3, 2, 1);
-
       let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 7), (4, 7), (5, 7), (6, 7)]
         .into_iter()
         .collect();
