@@ -482,7 +482,7 @@ mod tests_nowrap {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = ViewportOptions::from(&win_opts);
+      let opts = win_opts;
       let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 4, 0);
       Viewport::to_arc(viewport)
     };
@@ -747,7 +747,7 @@ mod tests_nowrap_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = ViewportOptions::from(&win_opts);
+      let opts = win_opts;
       let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 4, 5);
       Viewport::to_arc(viewport)
     };
@@ -1074,7 +1074,7 @@ mod tests_wrap_nolinebreak {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = ViewportOptions::from(&win_opts);
+      let opts = win_opts;
       let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 3, 0);
       Viewport::to_arc(viewport)
     };
@@ -1128,7 +1128,7 @@ mod tests_wrap_nolinebreak {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let opts = ViewportOptions::from(&win_opts);
+      let opts = win_opts;
       let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 6, 0);
       Viewport::to_arc(viewport)
     };
@@ -1182,7 +1182,7 @@ mod tests_wrap_nolinebreak {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let opts = ViewportOptions::from(&win_opts);
+      let opts = win_opts;
       let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 6, 0);
       Viewport::to_arc(viewport)
     };
@@ -1450,7 +1450,7 @@ mod tests_wrap_nolinebreak_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = ViewportOptions::from(&win_opts);
+      let opts = win_opts;
       let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 3, 1);
       Viewport::to_arc(viewport)
     };
@@ -1504,7 +1504,7 @@ mod tests_wrap_nolinebreak_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let opts = ViewportOptions::from(&win_opts);
+      let opts = win_opts;
       let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 6, 19);
       Viewport::to_arc(viewport)
     };
@@ -1558,7 +1558,7 @@ mod tests_wrap_nolinebreak_startcol {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let opts = ViewportOptions::from(&win_opts);
+      let opts = win_opts;
       let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 6, 4);
       Viewport::to_arc(viewport)
     };
@@ -1874,7 +1874,7 @@ mod tests_wrap_linebreak {
     let viewport = {
       let buffer = lock!(buffer);
       let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = ViewportOptions::from(&win_opts);
+      let opts = win_opts;
       let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 2, 0);
       Viewport::to_arc(viewport)
     };
