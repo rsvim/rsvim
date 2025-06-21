@@ -4,7 +4,8 @@
 
 use crate::buf::text::Text;
 use crate::prelude::*;
-use crate::ui::viewport::{LineViewport, RowViewport, ViewportOptions};
+use crate::ui::viewport::{LineViewport, RowViewport};
+use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
 use ropey::RopeSlice;
@@ -51,7 +52,7 @@ impl ViewportLineRange {
 
 /// Calculate viewport from top to bottom.
 pub fn sync(
-  opts: &ViewportOptions,
+  opts: &WindowLocalOptions,
   text: &Text,
   shape: &U16Rect,
   start_line: usize,
