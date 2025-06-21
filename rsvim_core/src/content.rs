@@ -1,7 +1,8 @@
 //! Temporary contents except buffers.
 
 use crate::arc_impl;
-use crate::buf::{BufferLocalOptionsBuilder, Text};
+use crate::buf::opt::BufferLocalOptionsBuilder;
+use crate::buf::text::Text;
 use crate::prelude::*;
 
 use paste::paste;

@@ -4,9 +4,9 @@ use crate::arc_impl;
 use crate::prelude::*;
 
 // Re-export
-pub use crate::ui::canvas::frame::Frame;
-pub use crate::ui::canvas::frame::cell::Cell;
-pub use crate::ui::canvas::frame::cursor::{Cursor, CursorStyle};
+pub use frame::cell::*;
+pub use frame::cursor::*;
+pub use frame::*;
 
 use compact_str::ToCompactString;
 use crossterm;

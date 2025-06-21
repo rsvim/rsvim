@@ -55,7 +55,8 @@ impl Widgetable for WindowContent {
 mod tests_util {
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
@@ -149,7 +150,8 @@ mod tests_nowrap {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
@@ -495,7 +497,8 @@ mod tests_nowrap_startcol {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
@@ -759,7 +762,8 @@ mod tests_wrap_nolinebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::geo_size_into_rect;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -1193,7 +1197,8 @@ mod tests_wrap_nolinebreak_startcol {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::geo_size_into_rect;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
@@ -1568,7 +1573,8 @@ mod tests_wrap_linebreak {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
@@ -1883,7 +1889,8 @@ mod tests_wrap_linebreak_startcol {
   use super::tests_util::*;
   use super::*;
 
-  use crate::buf::{BufferArc, BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::buf::BufferArc;
+  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;

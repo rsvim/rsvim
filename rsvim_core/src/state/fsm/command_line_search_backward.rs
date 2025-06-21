@@ -1,10 +1,10 @@
-//! The command-line mode, search backward variant.
+//! The command-line search backward mode.
 
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
-/// The command-line mode, search backward variant.
+/// The command-line search backward mode.
 pub struct CommandLineSearchBackwardStateful {}
 
 impl Stateful for CommandLineSearchBackwardStateful {

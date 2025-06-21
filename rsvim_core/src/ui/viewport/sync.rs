@@ -2,7 +2,7 @@
 
 #![allow(clippy::too_many_arguments)]
 
-use crate::buf::Text;
+use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::viewport::{LineViewport, RowViewport, ViewportOptions};
 

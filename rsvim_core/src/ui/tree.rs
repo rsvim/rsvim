@@ -13,10 +13,7 @@ use crate::ui::widget::window::{
 use crate::{arc_impl, lock};
 
 // Re-export
-pub use crate::ui::tree::internal::{
-  InodeBase, Inodeable, Itree, ItreeIter, /*ItreeIterMut,*/
-  TreeNodeId,
-};
+pub use internal::*;
 
 use paste::paste;
 use std::collections::BTreeSet;

@@ -4,9 +4,8 @@ use crate::prelude::*;
 #[allow(unused_imports)]
 use crate::{arc_impl, lock};
 
-// Re-export
-pub use opt::*;
-pub use text::*;
+use opt::*;
+use text::Text;
 
 use paste::paste;
 use path_absolutize::Absolutize;

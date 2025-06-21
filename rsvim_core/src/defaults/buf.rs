@@ -1,9 +1,6 @@
 //! Vim buffer's default options.
-//!
-//! See: [`crate::buf::BufferLocalOptions`].
 
-use crate::buf::FileEncodingOption;
-use crate::buf::FileFormatOption;
+use crate::buf::opt::*;
 
 pub const TAB_STOP: u16 = 8;
 

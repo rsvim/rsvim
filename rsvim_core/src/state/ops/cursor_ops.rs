@@ -1,6 +1,6 @@
 //! Cursor operations.
 
-use crate::buf::Text;
+use crate::buf::text::Text;
 use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
