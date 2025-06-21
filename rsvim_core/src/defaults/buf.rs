@@ -1,6 +1,4 @@
 //! Vim buffer's default options.
-//!
-//! See: [`crate::buf::BufferLocalOptions`].
 
 use crate::buf::opt::*;
 
