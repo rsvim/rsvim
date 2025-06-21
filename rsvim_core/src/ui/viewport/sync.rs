@@ -4,7 +4,8 @@
 
 use crate::buf::text::Text;
 use crate::prelude::*;
-use crate::ui::viewport::{LineViewport, RowViewport, ViewportOptions};
+use crate::ui::viewport::{LineViewport, RowViewport};
+use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
 use ropey::RopeSlice;
@@ -51,7 +52,7 @@ impl ViewportLineRange {
 
 /// Calculate viewport from top to bottom.
 pub fn sync(
-  opts: &ViewportOptions,
+  opts: &WindowLocalOptions,
   text: &Text,
   shape: &U16Rect,
   start_line: usize,
@@ -1564,7 +1565,7 @@ mod wrap_detail {
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_downward(
   viewport: &Viewport,
-  opts: &ViewportOptions,
+  opts: &WindowLocalOptions,
   text: &Text,
   shape: &U16Rect,
   target_cursor_line: usize,
@@ -1780,7 +1781,7 @@ fn search_anchor_downward_wrap(
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_upward(
   viewport: &Viewport,
-  opts: &ViewportOptions,
+  opts: &WindowLocalOptions,
   text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
@@ -1950,7 +1951,7 @@ fn search_anchor_upward_wrap(
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_leftward(
   viewport: &Viewport,
-  opts: &ViewportOptions,
+  opts: &WindowLocalOptions,
   text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,
@@ -2105,7 +2106,7 @@ fn search_anchor_leftward_wrap(
 // Returns `start_line`, `start_column` for the new viewport.
 pub fn search_anchor_rightward(
   viewport: &Viewport,
-  opts: &ViewportOptions,
+  opts: &WindowLocalOptions,
   text: &Text,
   window_actual_shape: &U16Rect,
   target_cursor_line: usize,

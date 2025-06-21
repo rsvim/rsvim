@@ -5,9 +5,7 @@ use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions, Viewportable,
-};
+use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
@@ -47,8 +45,6 @@ pub struct Window {
 
 impl Window {
   pub fn new(opts: &WindowLocalOptions, shape: IRect, buffer: BufferWk) -> Self {
-    let options = *opts;
-
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
@@ -57,14 +53,7 @@ impl Window {
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport_opts = ViewportOptions::from(opts);
-      let viewport = Viewport::view(
-        &viewport_opts,
-        buffer.text(),
-        &window_root_actual_shape,
-        0,
-        0,
-      );
+      let viewport = Viewport::view(opts, buffer.text(), &window_root_actual_shape, 0, 0);
       let cursor_viewport = CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
     };
@@ -83,7 +72,7 @@ impl Window {
       base,
       content_id: window_content_id,
       buffer,
-      options,
+      options: *opts,
       viewport,
       cursor_viewport,
     }
