@@ -7485,7 +7485,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
         assert_eq!(start_column, 63);
 
         let viewport = Viewport::view(
-          &opts,
+          window.options(),
           buf.text(),
           window.actual_shape(),
           start_line,
@@ -7531,7 +7531,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
         assert_eq!(start_column, 78);
 
         let viewport = Viewport::view(
-          &opts,
+          window.options(),
           buf.text(),
           window.actual_shape(),
           start_line,
