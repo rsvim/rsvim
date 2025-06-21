@@ -2556,8 +2556,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 3);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2603,8 +2602,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 3);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2655,8 +2653,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 15);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 15);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2703,8 +2700,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 1, 60);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 1, 60);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2740,8 +2736,7 @@ mod tests_view_wrap_nolinebreak_startcol {
     let actual = {
       let buf = lock!(buf);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 13);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 13);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3543,8 +3538,7 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 3);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 3);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3601,8 +3595,7 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 6);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 6);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3659,8 +3652,7 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 20);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 20);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3717,8 +3709,7 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 60);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 60);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3776,8 +3767,7 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 15);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 15);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -3822,8 +3812,7 @@ mod tests_view_wrap_linebreak_startcol {
     let actual = {
       let buf = lock!(buffer);
       let window_actual_shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), window_actual_shape, 0, 70);
+      let viewport = Viewport::view(window.options(), buf.text(), window_actual_shape, 0, 70);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
