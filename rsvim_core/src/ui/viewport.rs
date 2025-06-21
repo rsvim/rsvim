@@ -1711,8 +1711,7 @@ mod tests_view_nowrap_startcol {
     let actual = {
       let buf = lock!(buf);
       let shape = window.actual_shape();
-      let opts = ViewportOptions::from(window.options());
-      let viewport = Viewport::view(&opts, buf.text(), shape, 0, 500);
+      let viewport = Viewport::view(window.options(), buf.text(), shape, 0, 500);
       window.set_viewport(Viewport::to_arc(viewport));
       window.viewport()
     };
@@ -2352,8 +2351,7 @@ mod tests_view_wrap_nolinebreak {
     ];
     let actual = {
       let buf = lock!(buf);
-      let opts = ViewportOptions::from(&win_opts);
-      Viewport::view(&opts, buf.text(), window.actual_shape(), 2, 0)
+      Viewport::view(&win_opts, buf.text(), window.actual_shape(), 2, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
@@ -2437,8 +2435,7 @@ mod tests_view_wrap_nolinebreak {
     ];
     let actual = {
       let buf = lock!(buf);
-      let opts = ViewportOptions::from(&win_opts);
-      Viewport::view(&opts, buf.text(), window.actual_shape(), 6, 0)
+      Viewport::view(&win_opts, buf.text(), window.actual_shape(), 6, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(6, 0)].into_iter().collect();
     assert_viewport(
@@ -2490,8 +2487,7 @@ mod tests_view_wrap_nolinebreak {
     let expect = vec!["This is a quite", " simple and sma", "ll test lines.\n", ""];
     let actual = {
       let buf = lock!(buf);
-      let opts = ViewportOptions::from(&win_opts);
-      Viewport::view(&opts, buf.text(), window.actual_shape(), 1, 0)
+      Viewport::view(&win_opts, buf.text(), window.actual_shape(), 1, 0)
     };
     let expect_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
