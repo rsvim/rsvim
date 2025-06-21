@@ -278,10 +278,9 @@ impl InsertStateful {
           self._target_cursor_considering_empty_eol(opts, &cursor_viewport, buffer, op);
 
         let new_viewport: Option<ViewportArc> = {
-          let viewport_opts = ViewportOptions::from(current_window.options());
           let (start_line, start_column) = viewport.search_anchor(
             search_direction,
-            &viewport_opts,
+            current_window.options(),
             buffer.text(),
             current_window.actual_shape(),
             target_cursor_line,
