@@ -3456,7 +3456,7 @@ mod tests_view_wrap_linebreak_startcol {
     let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     let win_opts = make_wrap_linebreak();
 
-    let buffer = make_buffer_from_lines(
+    let buf = make_buffer_from_lines(
       terminal_size,
       buf_opts,
       vec![
@@ -3482,14 +3482,14 @@ mod tests_view_wrap_linebreak_startcol {
       "several ",
     ];
 
-    let mut window = make_window(terminal_size, buffer.clone(), &win_opts);
+    let mut window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = update_window_viewport(buf.clone(), &mut window, 0, 3);
     let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     let expect_end_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0)].into_iter().collect();
     assert_viewport(
-      buffer,
+      buf,
       &actual,
       &expect,
       0,
