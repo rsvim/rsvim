@@ -7804,7 +7804,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
         assert_eq!(start_column, 63);
 
         let viewport = Viewport::view(
-          &opts,
+          window.options(),
           buf.text(),
           window.actual_shape(),
           start_line,
@@ -8039,10 +8039,9 @@ mod tests_search_anchor_downward_wrap_linebreak {
         let mut window = window.borrow_mut();
         let old = window.viewport();
         let buf = lock!(buf);
-        let opts = ViewportOptions::from(window.options());
         let (start_line, start_column) = old.search_anchor(
           ViewportSearchDirection::Down,
-          &opts,
+          window.options(),
           buf.text(),
           window.actual_shape(),
           target_cursor_line,
@@ -8052,7 +8051,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
         assert_eq!(start_column, 35);
 
         let viewport = Viewport::view(
-          &opts,
+          window.options(),
           buf.text(),
           window.actual_shape(),
           start_line,
