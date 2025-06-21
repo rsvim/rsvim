@@ -8,7 +8,7 @@ use std::sync::atomic::{AtomicI32, Ordering};
 
 pub type TreeNodeId = i32;
 
-pub trait Inodeable: Sized + Clone + Debug {
+pub trait Inodeable: Sized + Clone {
   fn id(&self) -> TreeNodeId;
 
   fn depth(&self) -> usize;
