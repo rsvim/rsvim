@@ -6630,35 +6630,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["inside.\n", "", "options\ta", "or\tw", ""];
 
-      let actual = {
-        let target_cursor_line = 5;
-        let target_cursor_char = 80;
-
-        let mut window = window.borrow_mut();
-        let old = window.viewport();
-        let buf = lock!(buf);
-        let opts = *window.options();
-        let (start_line, start_column) = old.search_anchor(
-          ViewportSearchDirection::Up,
-          &opts,
-          buf.text(),
-          window.actual_shape(),
-          target_cursor_line,
-          target_cursor_char,
-        );
-        assert_eq!(start_line, 3);
-        assert_eq!(start_column, 120);
-
-        let viewport = Viewport::view(
-          &opts,
-          buf.text(),
-          window.actual_shape(),
-          start_line,
-          start_column,
-        );
-        window.set_viewport(Viewport::to_arc(viewport));
-        window.viewport()
-      };
+      let actual = search_up_viewport(window.clone(), buf.clone(), 5, 80, 3, 120);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 0), (5, 1), (6, 6), (7, 0)]
         .into_iter()
@@ -6681,35 +6653,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["o\tcomplete", "\tput:\n", "p\tand", "if\teither", ""];
 
-      let actual = {
-        let target_cursor_line = 4;
-        let target_cursor_char = 35;
-
-        let mut window = window.borrow_mut();
-        let old = window.viewport();
-        let buf = lock!(buf);
-        let opts = *window.options();
-        let (start_line, start_column) = old.search_anchor(
-          ViewportSearchDirection::Up,
-          &opts,
-          buf.text(),
-          window.actual_shape(),
-          target_cursor_line,
-          target_cursor_char,
-        );
-        assert_eq!(start_line, 3);
-        assert_eq!(start_column, 84);
-
-        let viewport = Viewport::view(
-          &opts,
-          buf.text(),
-          window.actual_shape(),
-          start_line,
-          start_column,
-        );
-        window.set_viewport(Viewport::to_arc(viewport));
-        window.viewport()
-      };
+      let actual = search_up_viewport(window.clone(), buf.clone(), 4, 35, 3, 84);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 1), (7, 0)]
         .into_iter()
