@@ -6371,7 +6371,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["to\tcom", "etely\tput:", "e-wrap\tand", "if\te", ""];
 
-      let actual = search_down_viewport(window.clone(), buf.clone(), 5, 60, 3, 79);
+      let actual = search_up_viewport(window.clone(), buf.clone(), 5, 60, 3, 79);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 4), (4, 0), (5, 0), (6, 6), (7, 0)]
         .into_iter()
@@ -6394,7 +6394,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["to\tcom", "etely\tput:", "e-wrap\tand", "if\te", ""];
 
-      let actual = search_down_viewport(window.clone(), buf.clone(), 4, 38, 3, 79);
+      let actual = search_up_viewport(window.clone(), buf.clone(), 4, 38, 3, 79);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 4), (4, 0), (5, 0), (6, 6), (7, 0)]
         .into_iter()
@@ -6417,7 +6417,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["put\tinsi", "", "wrap\toptio", "line-wrap\t", ""];
 
-      let actual = search_down_viewport(window.clone(), buf.clone(), 3, 55, 3, 109);
+      let actual = search_up_viewport(window.clone(), buf.clone(), 3, 55, 3, 109);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 2), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
@@ -6446,7 +6446,7 @@ mod tests_search_anchor_upward_nowrap {
         "arts are split in",
       ];
 
-      let actual = search_down_viewport(window.clone(), buf.clone(), 2, 30, 2, 30);
+      let actual = search_up_viewport(window.clone(), buf.clone(), 2, 30, 2, 30);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 4), (4, 3), (5, 0), (6, 0)]
         .into_iter()
@@ -6475,7 +6475,7 @@ mod tests_search_anchor_upward_nowrap {
         "arts are been tru",
       ];
 
-      let actual = search_down_viewport(window.clone(), buf.clone(), 1, 32, 1, 30);
+      let actual = search_up_viewport(window.clone(), buf.clone(), 1, 32, 1, 30);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(1, 0), (2, 0), (3, 4), (4, 3), (5, 0)]
         .into_iter()
@@ -6504,7 +6504,7 @@ mod tests_search_anchor_upward_nowrap {
         "2. When\tit",
       ];
 
-      let actual = search_down_viewport(window.clone(), buf.clone(), 0, 8, 0, 8);
+      let actual = search_up_viewport(window.clone(), buf.clone(), 0, 8, 0, 8);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
