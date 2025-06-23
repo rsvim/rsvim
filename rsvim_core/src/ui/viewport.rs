@@ -6884,7 +6884,7 @@ mod tests_search_anchor_upward_nowrap {
         "is the last line.",
       ];
 
-      let actual = search_up_viewport(window.clone(), buf.clone(), 7, 24, 4, 8);
+      let actual = search_down_viewport(window.clone(), buf.clone(), 7, 24, 4, 8);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
