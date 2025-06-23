@@ -6607,35 +6607,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["put\tinsid", "", "rap\toption", "ine-wrap\to", ""];
 
-      let actual = {
-        let target_cursor_line = 6;
-        let target_cursor_char = 70;
-
-        let mut window = window.borrow_mut();
-        let old = window.viewport();
-        let buf = lock!(buf);
-        let opts = *window.options();
-        let (start_line, start_column) = old.search_anchor(
-          ViewportSearchDirection::Up,
-          &opts,
-          buf.text(),
-          window.actual_shape(),
-          target_cursor_line,
-          target_cursor_char,
-        );
-        assert_eq!(start_line, 3);
-        assert_eq!(start_column, 110);
-
-        let viewport = Viewport::view(
-          &opts,
-          buf.text(),
-          window.actual_shape(),
-          start_line,
-          start_column,
-        );
-        window.set_viewport(Viewport::to_arc(viewport));
-        window.viewport()
-      };
+      let actual = search_up_viewport(window.clone(), buf.clone(), 6, 70, 3, 110);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 1), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
