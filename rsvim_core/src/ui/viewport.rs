@@ -6952,7 +6952,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["", "", "es in the buffer.", ""];
 
-      let actual = search_up_viewport(window.clone(), buf.clone(), 6, 285, 4, 376);
+      let actual = search_left_viewport(window.clone(), buf.clone(), 6, 285, 4, 376);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
@@ -6973,7 +6973,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["", ".\n", "are", ""];
 
-      let actual = search_up_viewport(window.clone(), buf.clone(), 5, 102, 4, 161);
+      let actual = search_left_viewport(window.clone(), buf.clone(), 5, 102, 4, 161);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0), (6, 7), (7, 0)].into_iter().collect();
@@ -6994,7 +6994,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["", "t.\n", "\tare", ""];
 
-      let actual = search_up_viewport(window.clone(), buf.clone(), 5, 90, 4, 160);
+      let actual = search_left_viewport(window.clone(), buf.clone(), 5, 90, 4, 160);
 
       let expect_start_fills: BTreeMap<usize, usize> =
         vec![(4, 0), (5, 0), (6, 0), (7, 0)].into_iter().collect();
