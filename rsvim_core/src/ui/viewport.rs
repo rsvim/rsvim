@@ -6325,7 +6325,7 @@ mod tests_search_anchor_upward_nowrap {
     {
       let expect = vec!["\t1. When", "\t2. When", "\t\t3", "\t\t4", ""];
 
-      let actual = search_up_viewport(window.clone(), buf.clone(), 7, 0, 3, 0);
+      let actual = search_down_viewport(window.clone(), buf.clone(), 7, 0, 3, 0);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0), (5, 0), (6, 0), (7, 0)]
         .into_iter()
