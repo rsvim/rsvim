@@ -9576,7 +9576,7 @@ mod tests_search_anchor_horizontally_nowrap {
     {
       let expect = vec!["", "\n", " to test:\n", "is\tsmall", "\tlong"];
 
-      let actual = search_right_viewport(window.clone(), buf.clone(), 3, 25, 0, 46);
+      let actual = search_right_viewport(window.clone(), buf.clone(), 3, 25, 0, 44);
 
       let expect_start_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 2), (4, 0)]
         .into_iter()
