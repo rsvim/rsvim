@@ -4,8 +4,8 @@ use crate::buf::text::Text;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
+use crate::state::ops::{Operation, cursor_move_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, ViewportArc, ViewportSearchDirection, Viewportable};
@@ -350,72 +350,22 @@ impl NormalStateful {
 
     debug_assert!(tree.current_window_id().is_some());
     let current_window_id = tree.current_window_id().unwrap();
+    if cfg!(debug_assertions) {
+      debug_assert!(tree.cursor_id().is_some());
+      let cursor_id = tree.cursor_id().unwrap();
+      debug_assert!(tree.parent_id(cursor_id).is_some());
+      debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), current_window_id);
+    }
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => {
-        let buffer = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer);
-        let viewport = current_window.viewport();
-        let cursor_viewport = current_window.cursor_viewport();
-
-        // Only move cursor when it is different from current cursor.
-        let (target_cursor_char, target_cursor_line, search_direction) =
-          self._target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
-
-        let new_viewport: Option<ViewportArc> = {
-          let (start_line, start_column) = viewport.search_anchor(
-            search_direction,
-            current_window.options(),
-            buffer.text(),
-            current_window.actual_shape(),
-            target_cursor_line,
-            target_cursor_char,
-          );
-
-          // First try window scroll.
-          if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx()
-          {
-            let new_viewport = cursor_ops::window_scroll_to(
-              &viewport,
-              current_window,
-              buffer.text(),
-              Operation::WindowScrollTo((start_column, start_line)),
-            );
-            if let Some(new_viewport_arc) = new_viewport.clone() {
-              current_window.set_viewport(new_viewport_arc.clone());
-            }
-            new_viewport
-          } else {
-            None
-          }
-        };
-
-        // Then try cursor move.
-        {
-          let current_viewport = new_viewport.unwrap_or(viewport);
-
-          let new_cursor_viewport = cursor_ops::cursor_move_to(
-            &current_viewport,
-            &cursor_viewport,
-            buffer.text(),
-            Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
-          );
-
-          if let Some(new_cursor_viewport) = new_cursor_viewport {
-            current_window.set_cursor_viewport(new_cursor_viewport.clone());
-            let cursor_id = tree.cursor_id().unwrap();
-            tree.bounded_move_to(
-              cursor_id,
-              new_cursor_viewport.column_idx() as isize,
-              new_cursor_viewport.row_idx() as isize,
-            );
-          }
-        }
-      }
+    let buffer = match current_window_node {
+      TreeNode::Window(current_window) => current_window.buffer(),
       _ => unreachable!(),
-    }
+    };
+    let buffer = buffer.upgrade().unwrap();
+    let buffer = lock!(buffer);
+    cursor_move_ops::cursor_move(&mut tree, buffer.text(), op, false);
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
