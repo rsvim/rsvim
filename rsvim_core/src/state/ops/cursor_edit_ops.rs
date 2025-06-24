@@ -375,3 +375,41 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
   ));
   cursor_move_ops::cursor_move(tree, text, op, true);
 }
+
+pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {
+  debug_assert!(tree.cursor_id().is_some());
+  let cursor_id = tree.cursor_id().unwrap();
+  debug_assert!(tree.parent_id(cursor_id).is_some());
+  let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
+  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
+  debug_assert!(matches!(
+    cursor_parent_node,
+    TreeNode::Window(_) | TreeNode::CommandLine(_)
+  ));
+  let vnode: &mut dyn Viewportable = match cursor_parent_node {
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
+    _ => unreachable!(),
+  };
+
+  // Delete N-chars.
+  let cursor_viewport = vnode.cursor_viewport();
+  let maybe_new_cursor_position = delete_at_cursor(&cursor_viewport, text, n);
+  if maybe_new_cursor_position.is_none() {
+    return false;
+  }
+
+  // Update viewport since the buffer doesn't match the viewport.
+  update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) =
+    maybe_new_cursor_position.unwrap();
+
+  trace!(
+    "Move to deleted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
+  );
+  let op = Operation::CursorMoveTo((cursor_char_idx_after_deleted, cursor_line_idx_after_deleted));
+  cursor_move_ops::cursor_move(tree, text, op, true);
+
+  true
+}
