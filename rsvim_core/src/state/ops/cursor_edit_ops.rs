@@ -345,12 +345,27 @@ pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text:
   }
 }
 
-pub fn cursor_insert(tree: &mut Tree, buffer: &mut Text, text: CompactString) {
-  let tree = data_access.tree.clone();
-  let mut tree = lock!(tree);
-  let buffer = self._current_buffer(&mut tree);
-  let buffer = buffer.upgrade().unwrap();
-  let mut buffer = lock!(buffer);
+pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
+  debug_assert!(tree.cursor_id().is_some());
+  let cursor_id = tree.cursor_id().unwrap();
+  debug_assert!(tree.parent_id(cursor_id).is_some());
+  let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
+  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
+  debug_assert!(matches!(
+    cursor_parent_node,
+    TreeNode::Window(_) | TreeNode::CommandLine(_)
+  ));
+  let vnode_actual_shape = match cursor_parent_node {
+    TreeNode::Window(window) => *window.actual_shape(),
+    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
+    _ => unreachable!(),
+  };
+  let vnode: &mut dyn Viewportable = match cursor_parent_node {
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
+    _ => unreachable!(),
+  };
 
   // Insert text.
   let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) = {
@@ -362,7 +377,7 @@ pub fn cursor_insert(tree: &mut Tree, buffer: &mut Text, text: CompactString) {
     match current_window_node {
       TreeNode::Window(current_window) => {
         let cursor_viewport = current_window.cursor_viewport();
-        let (l, c) = cursor_ops::insert_at_cursor(&cursor_viewport, buffer.text_mut(), text);
+        let (l, c) = cursor_ops::insert_at_cursor(&cursor_viewport, buffer.text_mut(), payload);
         // Update viewport since the buffer doesn't match the viewport.
         cursor_ops::update_viewport_after_text_changed(&mut tree, current_window_id, buffer.text());
         (l, c)
