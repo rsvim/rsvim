@@ -5,7 +5,7 @@ use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_edit_ops;
-use crate::state::ops::cursor_move_ops;
+use crate::state::ops::cursor_move_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 
@@ -242,6 +242,8 @@ impl NormalStateful {
 
   #[cfg(test)]
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) {
+    use crate::ui::viewport::{ViewportSearchDirection, Viewportable};
+
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -259,18 +261,11 @@ impl NormalStateful {
 
         let (target_cursor_char, target_cursor_line, move_direction) =
           cursor_move_ops::normalize_to_cursor_move_to_exclude_empty_eol(
-            text,
+            buffer.text(),
             op,
             cursor_viewport.char_idx(),
             cursor_viewport.line_idx(),
           );
-
-        let search_direction = match move_direction {
-          CursorMoveDirection::Up => ViewportSearchDirection::Up,
-          CursorMoveDirection::Down => ViewportSearchDirection::Down,
-          CursorMoveDirection::Left => ViewportSearchDirection::Left,
-          CursorMoveDirection::Right => ViewportSearchDirection::Right,
-        };
 
         let maybe_new_cursor_viewport = cursor_move_ops::_cursor_move_to(
           &viewport,
