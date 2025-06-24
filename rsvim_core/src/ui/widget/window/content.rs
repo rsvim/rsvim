@@ -78,20 +78,15 @@ mod tests_util {
     start_line_idx: usize,
     start_column_idx: usize,
   ) -> ViewportArc {
-    let mut tree = Tree::new(terminal_size);
-    tree.set_global_local_options(&window_options);
+    let buffer = lock!(buffer);
     let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-    let opts = window_options;
-    let viewport = {
-      let buffer = lock!(buffer);
-      Viewport::view(
-        &opts,
-        buffer.text(),
-        &actual_shape,
-        start_line_idx,
-        start_column_idx,
-      )
-    };
+    let viewport = Viewport::view(
+      &window_options,
+      buffer.text(),
+      &actual_shape,
+      start_line_idx,
+      start_column_idx,
+    );
     Viewport::to_arc(viewport)
   }
 
@@ -479,13 +474,7 @@ mod tests_nowrap {
       "                     ",
       "                     ",
     ];
-    let viewport = {
-      let buffer = lock!(buffer);
-      let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = win_opts;
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 4, 0);
-      Viewport::to_arc(viewport)
-    };
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 4, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_canvas(&actual, &expect);
   }
