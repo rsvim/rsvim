@@ -331,7 +331,7 @@ pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text:
   trace!("after updated_viewport:{:?}", updated_viewport);
 
   vnode.set_viewport(updated_viewport.clone());
-  if let Some(updated_cursor_viewport) = cursor_move_to(
+  if let Some(updated_cursor_viewport) = cursor_move_ops::cursor_move_to(
     &updated_viewport,
     &cursor_viewport,
     text,
