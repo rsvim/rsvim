@@ -3,8 +3,9 @@
 use crate::buf::{Buffer, BufferWk};
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
-use crate::state::ops::{Operation, cursor_move_ops};
+use crate::state::ops::Operation;
+use crate::state::ops::cursor_move_ops::{self, CursorMoveDirection};
+use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, ViewportSearchDirection, Viewportable};
