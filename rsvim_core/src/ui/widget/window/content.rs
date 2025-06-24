@@ -57,6 +57,7 @@ mod tests_util {
 
   use crate::buf::BufferArc;
   use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+  use crate::geo_size_into_rect;
   use crate::prelude::*;
   use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
   use crate::test::log::init as test_log_init;
@@ -79,7 +80,7 @@ mod tests_util {
     start_column_idx: usize,
   ) -> ViewportArc {
     let buffer = lock!(buffer);
-    let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
+    let actual_shape = geo_size_into_rect!(terminal_size, u16);
     let viewport = Viewport::view(
       &window_options,
       buffer.text(),
@@ -1102,13 +1103,7 @@ mod tests_wrap_nolinebreak {
       "e rows in the windo",
       "w, thus it may cont",
     ];
-    let viewport = {
-      let buffer = lock!(buffer);
-      let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let opts = win_opts;
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 6, 0);
-      Viewport::to_arc(viewport)
-    };
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 6, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1156,13 +1151,7 @@ mod tests_wrap_nolinebreak {
       "                   ",
       "                   ",
     ];
-    let viewport = {
-      let buffer = lock!(buffer);
-      let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let opts = win_opts;
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 6, 0);
-      Viewport::to_arc(viewport)
-    };
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 6, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1424,13 +1413,7 @@ mod tests_wrap_nolinebreak_startcol {
       "dow content widget,",
       " there're multiple ",
     ];
-    let viewport = {
-      let buffer = lock!(buffer);
-      let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = win_opts;
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 3, 1);
-      Viewport::to_arc(viewport)
-    };
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 3, 1);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1478,13 +1461,7 @@ mod tests_wrap_nolinebreak_startcol {
       "w, thus it may cont",
       "ains less lines in ",
     ];
-    let viewport = {
-      let buffer = lock!(buffer);
-      let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let opts = win_opts;
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 6, 19);
-      Viewport::to_arc(viewport)
-    };
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 6, 19);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1532,13 +1509,7 @@ mod tests_wrap_nolinebreak_startcol {
       "                   ",
       "                   ",
     ];
-    let viewport = {
-      let buffer = lock!(buffer);
-      let actual_shape = geo_size_into_rect!(terminal_size, u16);
-      let opts = win_opts;
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 6, 4);
-      Viewport::to_arc(viewport)
-    };
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 6, 4);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
@@ -1847,14 +1818,7 @@ mod tests_wrap_linebreak {
       "the line  ",
       "is small  ",
     ];
-
-    let viewport = {
-      let buffer = lock!(buffer);
-      let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = win_opts;
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 2, 0);
-      Viewport::to_arc(viewport)
-    };
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 2, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_canvas(&actual, &expect);
   }
