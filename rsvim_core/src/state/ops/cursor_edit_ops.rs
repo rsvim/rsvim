@@ -2,7 +2,7 @@
 
 use crate::buf::text::Text;
 use crate::coord::U16Rect;
-use crate::state::ops::Operation;
+use crate::state::ops::{Operation, cursor_move_ops};
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
 use crate::ui::widget::command_line::CommandLine;
@@ -356,11 +356,6 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
     cursor_parent_node,
     TreeNode::Window(_) | TreeNode::CommandLine(_)
   ));
-  let vnode_actual_shape = match cursor_parent_node {
-    TreeNode::Window(window) => *window.actual_shape(),
-    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
-    _ => unreachable!(),
-  };
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
     TreeNode::CommandLine(cmdline) => cmdline,
@@ -372,18 +367,14 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
   let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
     insert_at_cursor(&cursor_viewport, text, payload);
   // Update viewport since the buffer doesn't match the viewport.
-  update_viewport_after_text_changed(&mut tree, cursor_parent_id, text);
+  update_viewport_after_text_changed(tree, cursor_parent_id, text);
 
   trace!(
     "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
   );
-  self._cursor_move_impl(
-    CursorMoveImplOptions::include_empty_eol(),
-    &mut tree,
-    &buffer,
-    Operation::CursorMoveTo((
-      cursor_char_idx_after_inserted,
-      cursor_line_idx_after_inserted,
-    )),
-  );
+  let op = Operation::CursorMoveTo((
+    cursor_char_idx_after_inserted,
+    cursor_line_idx_after_inserted,
+  ));
+  cursor_move_ops::cursor_move(tree, text, op, true);
 }
