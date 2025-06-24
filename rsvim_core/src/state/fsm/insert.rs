@@ -3,12 +3,9 @@
 use crate::buf::{Buffer, BufferWk};
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::cursor_move_ops::{self, CursorMoveDirection};
-use crate::state::ops::cursor_ops;
-use crate::state::ops::{Operation, cursor_edit_ops};
+use crate::state::ops::{Operation, cursor_edit_ops, cursor_move_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, ViewportSearchDirection, Viewportable};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -229,39 +226,6 @@ impl InsertStateful {
     }
     cursor_move_ops::cursor_move(tree, buffer.text(), op, opts.include_empty_eol);
   }
-
-  // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
-  fn _target_cursor_considering_empty_eol(
-    &self,
-    opts: CursorMoveImplOptions,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    op: Operation,
-  ) -> (usize, usize, ViewportSearchDirection) {
-    let (target_cursor_char, target_cursor_line, move_direction) = if opts.include_empty_eol {
-      cursor_ops::normalize_to_cursor_move_to_include_empty_eol(
-        buffer.text(),
-        op,
-        cursor_viewport.char_idx(),
-        cursor_viewport.line_idx(),
-      )
-    } else {
-      cursor_ops::normalize_to_cursor_move_to_exclude_empty_eol(
-        buffer.text(),
-        op,
-        cursor_viewport.char_idx(),
-        cursor_viewport.line_idx(),
-      )
-    };
-
-    let search_direction = match move_direction {
-      CursorMoveDirection::Up => ViewportSearchDirection::Up,
-      CursorMoveDirection::Down => ViewportSearchDirection::Down,
-      CursorMoveDirection::Left => ViewportSearchDirection::Left,
-      CursorMoveDirection::Right => ViewportSearchDirection::Right,
-    };
-    (target_cursor_char, target_cursor_line, search_direction)
-  }
 }
 
 // spellchecker:off
@@ -282,7 +246,7 @@ mod tests_util {
   use crate::ui::canvas::Canvas;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection, Viewportable,
   };
   use crate::ui::widget::Widgetable;
   use crate::ui::widget::window::content::{self, WindowContent};

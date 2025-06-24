@@ -3,9 +3,7 @@
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Operation;
-use crate::state::ops::cursor_edit_ops;
-use crate::state::ops::cursor_move_ops::{self, CursorMoveDirection};
+use crate::state::ops::{Operation, cursor_edit_ops, cursor_move_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 
@@ -242,7 +240,7 @@ impl NormalStateful {
 
   #[cfg(test)]
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) {
-    use crate::ui::viewport::{ViewportSearchDirection, Viewportable};
+    use crate::ui::viewport::Viewportable;
 
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
@@ -259,7 +257,7 @@ impl NormalStateful {
         let viewport = current_window.viewport();
         let cursor_viewport = current_window.cursor_viewport();
 
-        let (target_cursor_char, target_cursor_line, move_direction) =
+        let (target_cursor_char, target_cursor_line, _move_direction) =
           cursor_move_ops::normalize_to_cursor_move_to_exclude_empty_eol(
             buffer.text(),
             op,
@@ -290,6 +288,8 @@ impl NormalStateful {
 
   #[cfg(test)]
   fn __test_raw_window_scroll(&self, data_access: &StatefulDataAccess, op: Operation) {
+    use crate::ui::viewport::Viewportable;
+
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -299,12 +299,12 @@ impl NormalStateful {
         let buffer = current_window.buffer().upgrade().unwrap();
         let buffer = lock!(buffer);
 
-        let (start_column, start_line) = cursor_ops::normalize_to_window_scroll_to(
+        let (start_column, start_line) = cursor_move_ops::normalize_to_window_scroll_to(
           op,
           viewport.start_column_idx(),
           viewport.start_line_idx(),
         );
-        let maybe_new_viewport_arc = cursor_ops::_widget_scroll_to(
+        let maybe_new_viewport_arc = cursor_move_ops::_widget_scroll_to(
           &viewport,
           current_window.actual_shape(),
           current_window.options(),
@@ -340,7 +340,7 @@ mod tests_util {
   use crate::test::tree::make_tree_with_buffers;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection, Viewportable,
   };
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
