@@ -4,9 +4,7 @@ use crate::buf::text::Text;
 use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
-use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportOptions, Viewportable,
-};
+use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::{Window, WindowLocalOptions};
 
@@ -289,9 +287,8 @@ pub fn _widget_scroll_to(
   }
 
   // Sync the viewport
-  let opts = ViewportOptions::from(window_options);
   let new_viewport = Viewport::to_arc(Viewport::view(
-    &opts,
+    window_options,
     text,
     actual_shape,
     line_idx,
@@ -655,9 +652,8 @@ pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text:
     text.width_before(start_line, bufline_len_chars),
   );
 
-  let viewport_opts = ViewportOptions::from(vnode.options());
   let updated_viewport = Viewport::to_arc(Viewport::view(
-    &viewport_opts,
+    vnode.options(),
     text,
     &actual_shape,
     start_line,

@@ -7,9 +7,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::viewport::{
-  CursorViewport, ViewportArc, ViewportOptions, ViewportSearchDirection, Viewportable,
-};
+use crate::ui::viewport::{CursorViewport, ViewportArc, ViewportSearchDirection, Viewportable};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -280,10 +278,9 @@ impl InsertStateful {
           self._target_cursor_considering_empty_eol(opts, &cursor_viewport, buffer, op);
 
         let new_viewport: Option<ViewportArc> = {
-          let viewport_opts = ViewportOptions::from(current_window.options());
           let (start_line, start_column) = viewport.search_anchor(
             search_direction,
-            &viewport_opts,
+            current_window.options(),
             buffer.text(),
             current_window.actual_shape(),
             target_cursor_line,
