@@ -209,7 +209,7 @@ pub fn normalize_to_window_scroll_to(
 /// # Panics
 ///
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
-pub fn cursor_move_to(
+pub fn _cursor_move_to(
   viewport: &Viewport,
   _cursor_viewport: &CursorViewport,
   text: &Text,
@@ -423,7 +423,7 @@ pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eo
   {
     let current_viewport = new_viewport.unwrap_or(viewport);
 
-    let new_cursor_viewport = cursor_move_to(
+    let new_cursor_viewport = _cursor_move_to(
       &current_viewport,
       &cursor_viewport,
       text,
