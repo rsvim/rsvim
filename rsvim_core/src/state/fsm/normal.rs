@@ -1,15 +1,13 @@
 //! The normal mode.
 
-use crate::buf::text::Text;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_edit_ops;
-use crate::state::ops::cursor_move_ops::{self, CursorMoveDirection};
+use crate::state::ops::cursor_move_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, ViewportSearchDirection, Viewportable};
 
 use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
