@@ -423,7 +423,7 @@ pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eo
   {
     let current_viewport = new_viewport.unwrap_or(viewport);
 
-    let new_cursor_viewport = _cursor_move_to(
+    let new_cursor_viewport = cursor_move_to(
       &current_viewport,
       &cursor_viewport,
       text,
