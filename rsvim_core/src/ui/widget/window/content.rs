@@ -733,13 +733,7 @@ mod tests_nowrap_startcol {
       "                     ",
       "                     ",
     ];
-    let viewport = {
-      let buffer = lock!(buffer);
-      let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = win_opts;
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 4, 5);
-      Viewport::to_arc(viewport)
-    };
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 4, 5);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
     assert_canvas(&actual, &expect);
   }
@@ -1060,13 +1054,7 @@ mod tests_wrap_nolinebreak {
       "ndow content widget",
       ", there're multiple",
     ];
-    let viewport = {
-      let buffer = lock!(buffer);
-      let actual_shape = U16Rect::new((0, 0), (terminal_size.width(), terminal_size.height()));
-      let opts = win_opts;
-      let viewport = Viewport::view(&opts, buffer.text(), &actual_shape, 3, 0);
-      Viewport::to_arc(viewport)
-    };
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 3, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
