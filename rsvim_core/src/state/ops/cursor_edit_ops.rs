@@ -368,23 +368,11 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
   };
 
   // Insert text.
-  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) = {
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => {
-        let cursor_viewport = current_window.cursor_viewport();
-        let (l, c) = cursor_ops::insert_at_cursor(&cursor_viewport, buffer.text_mut(), payload);
-        // Update viewport since the buffer doesn't match the viewport.
-        cursor_ops::update_viewport_after_text_changed(&mut tree, current_window_id, buffer.text());
-        (l, c)
-      }
-      _ => unreachable!(),
-    }
-  };
+  let cursor_viewport = vnode.cursor_viewport();
+  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
+    insert_at_cursor(&cursor_viewport, text, payload);
+  // Update viewport since the buffer doesn't match the viewport.
+  update_viewport_after_text_changed(&mut tree, cursor_parent_id, text);
 
   trace!(
     "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
