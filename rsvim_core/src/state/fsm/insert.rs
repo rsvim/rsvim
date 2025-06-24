@@ -4,7 +4,7 @@ use crate::buf::{Buffer, BufferWk};
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
-use crate::state::ops::{Operation, cursor_move_ops};
+use crate::state::ops::{Operation, cursor_edit_ops, cursor_move_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, ViewportSearchDirection, Viewportable};
@@ -150,49 +150,29 @@ impl InsertStateful {
   fn insert_at_cursor(
     &self,
     data_access: &StatefulDataAccess,
-    text: CompactString,
+    payload: CompactString,
   ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let buffer = self._current_buffer(&mut tree);
+
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    if cfg!(debug_assertions) {
+      debug_assert!(tree.cursor_id().is_some());
+      let cursor_id = tree.cursor_id().unwrap();
+      debug_assert!(tree.parent_id(cursor_id).is_some());
+      debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), current_window_id);
+    }
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    let buffer = match current_window_node {
+      TreeNode::Window(current_window) => current_window.buffer(),
+      _ => unreachable!(),
+    };
     let buffer = buffer.upgrade().unwrap();
     let mut buffer = lock!(buffer);
-
-    // Insert text.
-    let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) = {
-      debug_assert!(tree.current_window_id().is_some());
-      let current_window_id = tree.current_window_id().unwrap();
-      debug_assert!(tree.node_mut(current_window_id).is_some());
-      let current_window_node = tree.node_mut(current_window_id).unwrap();
-      debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-      match current_window_node {
-        TreeNode::Window(current_window) => {
-          let cursor_viewport = current_window.cursor_viewport();
-          let (l, c) = cursor_ops::insert_at_cursor(&cursor_viewport, buffer.text_mut(), text);
-          // Update viewport since the buffer doesn't match the viewport.
-          cursor_ops::update_viewport_after_text_changed(
-            &mut tree,
-            current_window_id,
-            buffer.text(),
-          );
-          (l, c)
-        }
-        _ => unreachable!(),
-      }
-    };
-
-    trace!(
-      "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
-    );
-    self._cursor_move_impl(
-      CursorMoveImplOptions::include_empty_eol(),
-      &mut tree,
-      &buffer,
-      Operation::CursorMoveTo((
-        cursor_char_idx_after_inserted,
-        cursor_line_idx_after_inserted,
-      )),
-    );
+    cursor_edit_ops::cursor_insert(&mut tree, buffer.text_mut(), payload);
 
     StatefulValue::InsertMode(InsertStateful::default())
   }

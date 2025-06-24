@@ -1,7 +1,7 @@
 //! Cursor edit operations.
 
 use crate::buf::text::Text;
-use crate::coord::U16Rect;
+use crate::coord::*;
 use crate::state::ops::{Operation, cursor_move_ops};
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
