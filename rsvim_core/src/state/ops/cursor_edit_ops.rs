@@ -1,12 +1,9 @@
 //! Cursor edit operations.
 
 use crate::buf::text::Text;
-use crate::coord::*;
 use crate::state::ops::{Operation, cursor_move_ops};
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
-use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{Window, WindowLocalOptions};
+use crate::ui::viewport::{CursorViewport, Viewport, Viewportable};
 
 use compact_str::{CompactString, ToCompactString};
 use tracing::trace;
