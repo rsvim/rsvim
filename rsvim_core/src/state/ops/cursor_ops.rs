@@ -673,20 +673,21 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
   debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
 
-  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
-    text.insert_at(cursor_line_idx, cursor_char_idx, payload);
+  if let Some((cursor_line_idx_after_inserted, cursor_char_idx_after_inserted)) =
+    text.insert_at(cursor_line_idx, cursor_char_idx, payload)
+  {
+    // Update viewport since the buffer doesn't match the viewport.
+    update_viewport_after_text_changed(tree, cursor_parent_id, text);
 
-  // Update viewport since the buffer doesn't match the viewport.
-  update_viewport_after_text_changed(tree, cursor_parent_id, text);
-
-  trace!(
-    "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
-  );
-  let op = Operation::CursorMoveTo((
-    cursor_char_idx_after_inserted,
-    cursor_line_idx_after_inserted,
-  ));
-  cursor_move(tree, text, op, true);
+    trace!(
+      "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
+    );
+    let op = Operation::CursorMoveTo((
+      cursor_char_idx_after_inserted,
+      cursor_line_idx_after_inserted,
+    ));
+    cursor_move(tree, text, op, true);
+  }
 }
 
 pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {

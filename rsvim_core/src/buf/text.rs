@@ -377,7 +377,8 @@ impl Text {
 
   /// Insert text payload at specific `line_idx`/`char_idx` position.
   ///
-  /// It returns the new `(line_idx,char_idx)` index after text inserted.
+  /// It returns the new `(line_idx,char_idx)` index after text inserted, it returns `None` if the
+  /// text payload is empty.
   ///
   /// # Panics
   /// It panics if the line/char position doesn't exist.
@@ -386,7 +387,10 @@ impl Text {
     line_idx: usize,
     char_idx: usize,
     payload: CompactString,
-  ) -> (usize, usize) {
+  ) -> Option<(usize, usize)> {
+    if payload.is_empty() {
+      return None;
+    }
     debug_assert!(self.rope().get_line(line_idx).is_some());
     debug_assert!(char_idx <= self.rope().line(line_idx).len_chars());
 
@@ -435,7 +439,7 @@ impl Text {
       "After inserted",
     );
 
-    (line_idx_after_inserted, char_idx_after_inserted)
+    Some((line_idx_after_inserted, char_idx_after_inserted))
   }
 }
 // Edit }
