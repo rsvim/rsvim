@@ -136,7 +136,7 @@ impl CommandLineExStateful {
     contents.command_line_content_mut().rope_mut().remove(0..);
     contents.command_line_content_mut().clear_cached_lines();
     // Update viewport after text changed.
-    cursor_ops::update_viewport_after_text_changed(
+    cursor_ops::_update_viewport_after_text_changed(
       &mut tree,
       cmdline_id,
       contents.command_line_content(),
