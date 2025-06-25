@@ -2,7 +2,6 @@
 
 use crate::buf::text::Text;
 use crate::coord::U16Rect;
-use crate::dbg::buf::dbg_print_textline_with_absolute_char_idx;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
