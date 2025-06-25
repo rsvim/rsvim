@@ -1,6 +1,6 @@
 //! Buffer debug utils.
 
-#![allow(unused_imports, unused_variables)]
+#![allow(unused_imports)]
 
 use crate::buf::text::Text;
 
