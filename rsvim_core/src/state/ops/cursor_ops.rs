@@ -9,7 +9,7 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::window::WindowLocalOptions;
 
-use compact_str::{CompactString, ToCompactString};
+use compact_str::CompactString;
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -407,41 +407,6 @@ pub fn _dbg_print_details_on_line(buffer: &Text, line_idx: usize, char_idx: usiz
   }
 }
 
-// For text mode (different from the 'binary' mode, i.e. bin/hex mode), the editor have
-// to always keep an eol (end-of-line) at the end of text file. It helps the cursor
-// motion.
-fn _append_eol_at_file_end(text: &mut Text) {
-  use crate::defaults::ascii::end_of_line as eol;
-  let buf_eol = text.options().end_of_line();
-
-  let buffer_len_chars = text.rope().len_chars();
-  let last_char_on_buf = buffer_len_chars.saturating_sub(1);
-  match text.rope().get_char(last_char_on_buf) {
-    Some(c) => {
-      if c.to_compact_string() != eol::LF && c.to_compact_string() != eol::CR {
-        text
-          .rope_mut()
-          .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
-        let inserted_line_idx = text.rope().char_to_line(buffer_len_chars);
-        text.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
-        _dbg_print_details(
-          text,
-          inserted_line_idx,
-          buffer_len_chars,
-          "Eol appended(non-empty)",
-        );
-      }
-    }
-    None => {
-      text
-        .rope_mut()
-        .insert(0_usize, buf_eol.to_compact_string().as_str());
-      text.clear_cached_lines();
-      _dbg_print_details(text, 0_usize, buffer_len_chars, "Eol appended(empty)");
-    }
-  }
-}
-
 /// Returns `(cursor_line_idx, cursor_char_idx)` if delete successful, or returns `None` if failed.
 pub fn raw_delete_at_cursor(
   cursor_viewport: &CursorViewport,
@@ -484,7 +449,7 @@ pub fn raw_delete_at_cursor(
   text.rope_mut().remove(to_be_deleted_range);
 
   // Append eol at file end if it doesn't exist.
-  _append_eol_at_file_end(text);
+  text.append_empty_eol_at_end_if_not_exist();
 
   let cursor_char_absolute_pos_after_deleted = if n > 0 {
     cursor_char_absolute_pos_before_delete
@@ -522,70 +487,6 @@ pub fn raw_delete_at_cursor(
   );
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
-}
-
-/// Returns `(cursor_line_idx, cursor_char_idx)` after insertion.
-pub fn raw_insert_at_cursor(
-  cursor_viewport: &CursorViewport,
-  text: &mut Text,
-  payload: CompactString,
-) -> (usize, usize) {
-  let cursor_line_idx = cursor_viewport.line_idx();
-  let cursor_char_idx = cursor_viewport.char_idx();
-  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
-
-  let cursor_line_absolute_pos = text.rope().line_to_char(cursor_line_idx);
-  let cursor_char_absolute_pos_before_insert = cursor_line_absolute_pos + cursor_char_idx;
-
-  _dbg_print_details(
-    text,
-    cursor_line_idx,
-    cursor_char_absolute_pos_before_insert,
-    "Before insert",
-  );
-
-  text
-    .rope_mut()
-    .insert(cursor_char_absolute_pos_before_insert, payload.as_str());
-
-  // The `text` may contains line break '\n', which can interrupts the `cursor_line_idx`
-  // and we need to re-calculate it.
-  let cursor_char_absolute_pos_after_inserted =
-    cursor_char_absolute_pos_before_insert + payload.chars().count();
-  let cursor_line_idx_after_inserted = text
-    .rope()
-    .char_to_line(cursor_char_absolute_pos_after_inserted);
-  let cursor_line_absolute_pos_after_inserted =
-    text.rope().line_to_char(cursor_line_idx_after_inserted);
-  let cursor_char_idx_after_inserted =
-    cursor_char_absolute_pos_after_inserted - cursor_line_absolute_pos_after_inserted;
-
-  // Append eol at file end if it doesn't exist.
-  _append_eol_at_file_end(text);
-
-  if cursor_line_idx == cursor_line_idx_after_inserted {
-    // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
-    // Thus only need to truncate chars after insert position on the same line.
-    debug_assert!(cursor_char_idx_after_inserted >= cursor_char_idx);
-    let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_inserted, cursor_char_idx);
-    text.truncate_cached_line_since_char(cursor_line_idx, min_cursor_char_idx.saturating_sub(1));
-  } else {
-    // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-    let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_inserted, cursor_line_idx);
-    text.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
-  }
-
-  _dbg_print_details_on_line(
-    text,
-    cursor_line_idx,
-    cursor_char_idx_after_inserted,
-    "After inserted",
-  );
-
-  (
-    cursor_line_idx_after_inserted,
-    cursor_char_idx_after_inserted,
-  )
 }
 
 pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
@@ -767,19 +668,26 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
 
   // Insert text.
   let cursor_viewport = vnode.cursor_viewport();
-  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
-    raw_insert_at_cursor(&cursor_viewport, text, payload);
-  // Update viewport since the buffer doesn't match the viewport.
-  update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  let cursor_line_idx = cursor_viewport.line_idx();
+  let cursor_char_idx = cursor_viewport.char_idx();
+  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+  debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
 
-  trace!(
-    "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
-  );
-  let op = Operation::CursorMoveTo((
-    cursor_char_idx_after_inserted,
-    cursor_line_idx_after_inserted,
-  ));
-  cursor_move(tree, text, op, true);
+  if let Some((cursor_line_idx_after_inserted, cursor_char_idx_after_inserted)) =
+    text.insert_at(cursor_line_idx, cursor_char_idx, payload)
+  {
+    // Update viewport since the buffer doesn't match the viewport.
+    update_viewport_after_text_changed(tree, cursor_parent_id, text);
+
+    trace!(
+      "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
+    );
+    let op = Operation::CursorMoveTo((
+      cursor_char_idx_after_inserted,
+      cursor_line_idx_after_inserted,
+    ));
+    cursor_move(tree, text, op, true);
+  }
 }
 
 pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {
