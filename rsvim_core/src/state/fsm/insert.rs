@@ -176,12 +176,19 @@ impl InsertStateful {
     let buffer = buffer.upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    self._cursor_move_impl(
-      CursorMoveImplOptions::exclude_empty_eol(),
-      &mut tree,
-      &buffer,
-      Operation::CursorMoveBy((0, 0)),
-    );
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    if cfg!(debug_assertions) {
+      debug_assert!(tree.cursor_id().is_some());
+      let cursor_id = tree.cursor_id().unwrap();
+      debug_assert!(tree.parent_id(cursor_id).is_some());
+      debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), current_window_id);
+    }
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    let op = Operation::CursorMoveBy((0, 0));
+    cursor_ops::cursor_move(&mut tree, buffer.text(), op, false);
 
     debug_assert!(tree.cursor_id().is_some());
     let cursor_id = tree.cursor_id().unwrap();
@@ -204,23 +211,6 @@ impl InsertStateful {
     let buffer = buffer.upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    self._cursor_move_impl(
-      CursorMoveImplOptions::include_empty_eol(),
-      &mut tree,
-      &buffer,
-      op,
-    );
-
-    StatefulValue::InsertMode(InsertStateful::default())
-  }
-
-  fn _cursor_move_impl(
-    &self,
-    opts: CursorMoveImplOptions,
-    tree: &mut Tree,
-    buffer: &Buffer,
-    op: Operation,
-  ) {
     debug_assert!(tree.current_window_id().is_some());
     let current_window_id = tree.current_window_id().unwrap();
     if cfg!(debug_assertions) {
@@ -232,40 +222,9 @@ impl InsertStateful {
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    cursor_ops::cursor_move(tree, buffer.text(), op, opts.include_empty_eol);
-  }
+    cursor_ops::cursor_move(&mut tree, buffer.text(), op, true);
 
-  // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
-  fn _target_cursor_considering_empty_eol(
-    &self,
-    opts: CursorMoveImplOptions,
-    cursor_viewport: &CursorViewport,
-    buffer: &Buffer,
-    op: Operation,
-  ) -> (usize, usize, ViewportSearchDirection) {
-    let (target_cursor_char, target_cursor_line, move_direction) = if opts.include_empty_eol {
-      cursor_ops::normalize_to_cursor_move_to_include_empty_eol(
-        buffer.text(),
-        op,
-        cursor_viewport.char_idx(),
-        cursor_viewport.line_idx(),
-      )
-    } else {
-      cursor_ops::normalize_to_cursor_move_to_exclude_empty_eol(
-        buffer.text(),
-        op,
-        cursor_viewport.char_idx(),
-        cursor_viewport.line_idx(),
-      )
-    };
-
-    let search_direction = match move_direction {
-      CursorMoveDirection::Up => ViewportSearchDirection::Up,
-      CursorMoveDirection::Down => ViewportSearchDirection::Down,
-      CursorMoveDirection::Left => ViewportSearchDirection::Left,
-      CursorMoveDirection::Right => ViewportSearchDirection::Right,
-    };
-    (target_cursor_char, target_cursor_line, search_direction)
+    StatefulValue::InsertMode(InsertStateful::default())
   }
 }
 
