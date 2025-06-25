@@ -1,14 +1,12 @@
 //! The normal mode.
 
-use crate::buf::text::Text;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
-use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
+use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, ViewportArc, ViewportSearchDirection, Viewportable};
 
 use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -243,7 +241,14 @@ impl NormalStateful {
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
+}
 
+#[cfg(test)]
+use crate::buf::text::Text;
+#[cfg(test)]
+use crate::ui::viewport::{CursorViewport, ViewportSearchDirection, Viewportable};
+
+impl NormalStateful {
   #[cfg(test)]
   // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
   fn __target_cursor_exclude_empty_eol(
@@ -252,6 +257,8 @@ impl NormalStateful {
     text: &Text,
     op: Operation,
   ) -> (usize, usize, ViewportSearchDirection) {
+    use crate::state::ops::cursor_ops::CursorMoveDirection;
+
     let (target_cursor_char, target_cursor_line, move_direction) =
       cursor_ops::normalize_to_cursor_move_to_exclude_empty_eol(
         text,
