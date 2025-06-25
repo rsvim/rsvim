@@ -332,12 +332,13 @@ impl Text {
 }
 // Display Width }
 
+use crate::dbg::buf::dbg_print_textline_with_absolute_char_idx;
+
 // Edit {
 impl Text {
   /// For text, the editor have to always keep an empty eol (end-of-line) at the end of text file.
   /// It helps the cursor motion.
   pub fn append_empty_eol_at_end_if_not_exist(&mut self) {
-    use crate::dbg::buf::dbg_print_textline;
     use crate::defaults::ascii::end_of_line as eol;
     let buf_eol = self.options().end_of_line();
 
@@ -351,7 +352,7 @@ impl Text {
             .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
           let inserted_line_idx = self.rope().char_to_line(buffer_len_chars);
           self.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
-          dbg_print_textline(
+          dbg_print_textline_with_absolute_char_idx(
             self,
             inserted_line_idx,
             buffer_len_chars,
@@ -364,9 +365,67 @@ impl Text {
           .rope_mut()
           .insert(0_usize, buf_eol.to_compact_string().as_str());
         self.clear_cached_lines();
-        dbg_print_textline(self, 0_usize, buffer_len_chars, "Eol appended(empty)");
+        dbg_print_textline_with_absolute_char_idx(
+          self,
+          0_usize,
+          buffer_len_chars,
+          "Eol appended(empty)",
+        );
       }
     }
+  }
+
+  /// Insert text payload at specific `line_idx`/`char_idx` position.
+  ///
+  /// It returns the new `(line_idx,char_idx)` index after text inserted.
+  ///
+  /// # Panics
+  /// It panics if the line/char position doesn't exist.
+  pub fn insert_at(
+    &mut self,
+    line_idx: usize,
+    char_idx: usize,
+    payload: CompactString,
+  ) -> (usize, usize) {
+    debug_assert!(self.rope().get_line(line_idx).is_some());
+    debug_assert!(self.rope().line(line_idx).get_char(char_idx).is_some());
+
+    let absolute_line_idx = self.rope().line_to_char(line_idx);
+    let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
+
+    dbg_print_textline_with_absolute_char_idx(
+      self,
+      line_idx,
+      absolute_char_idx_before_insert,
+      "Before insert",
+    );
+
+    self
+      .rope_mut()
+      .insert(absolute_char_idx_before_insert, payload.as_str());
+
+    // The `text` may contains line break '\n', which can interrupts the `line_idx` and we need to
+    // re-calculate it.
+    let absolute_char_idx_after_inserted =
+      absolute_char_idx_before_insert + payload.chars().count();
+    let line_idx_after_inserted = self.rope().char_to_line(absolute_char_idx_after_inserted);
+    let absolute_line_idx_after_inserted = self.rope().line_to_char(line_idx_after_inserted);
+    let char_idx_after_inserted =
+      absolute_char_idx_after_inserted - absolute_line_idx_after_inserted;
+
+    if line_idx == line_idx_after_inserted {
+      // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
+      // Thus only need to truncate chars after insert position on the same line.
+      debug_assert!(char_idx_after_inserted >= char_idx);
+      let min_cursor_char_idx = std::cmp::min(char_idx_after_inserted, char_idx);
+      self.truncate_cached_line_since_char(line_idx, min_cursor_char_idx.saturating_sub(1));
+    } else {
+      // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
+      let min_cursor_line_idx = std::cmp::min(line_idx_after_inserted, line_idx);
+      self.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
+    }
+
+    (line_idx_after_inserted, char_idx_after_inserted)
   }
 }
 // Edit }

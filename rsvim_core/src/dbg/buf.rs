@@ -15,8 +15,16 @@ pub fn ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
 }
 
 #[cfg(debug_assertions)]
-pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &str) {
-  trace!("{} Text line:{},char:{}", msg, line_idx, char_idx);
+pub fn dbg_print_textline_with_absolute_char_idx(
+  text: &Text,
+  line_idx: usize,
+  absolute_char_idx: usize,
+  msg: &str,
+) {
+  trace!(
+    "{} text line:{},absolute_char:{}",
+    msg, line_idx, absolute_char_idx
+  );
 
   match text.rope().get_line(line_idx) {
     Some(line) => {
@@ -31,7 +39,7 @@ pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &s
           builder1.push(c);
         }
         let s: String = std::iter::repeat_n(
-          if i + start_char_on_line == char_idx {
+          if i + start_char_on_line == absolute_char_idx {
             '^'
           } else {
             ' '
@@ -47,7 +55,45 @@ pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &s
     None => trace!("line not exist"),
   }
 
-  trace!("{} Whole text:", msg);
+  trace!("{} whole text:", msg);
+  for i in 0..text.rope().len_lines() {
+    trace!("{i}:{:?}", ropeline_to_string(&text.rope().line(i)));
+  }
+}
+
+#[cfg(not(debug_assertions))]
+pub fn dbg_print_textline_with_absolute_char_idx(
+  _text: &Text,
+  _line_idx: usize,
+  _char_idx: usize,
+  _msg: &str,
+) {
+}
+
+#[cfg(debug_assertions)]
+pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &str) {
+  trace!("{} text line:{},char:{}", msg, line_idx, char_idx);
+
+  match text.rope().get_line(line_idx) {
+    Some(bufline) => {
+      trace!("len_chars:{}", bufline.len_chars());
+      let mut builder1 = String::new();
+      let mut builder2 = String::new();
+      for (i, c) in bufline.chars().enumerate() {
+        let w = text.char_width(c);
+        if w > 0 {
+          builder1.push(c);
+        }
+        let s: String = std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w).collect();
+        builder2.push_str(s.as_str());
+      }
+      trace!("-{}-", builder1);
+      trace!("-{}-", builder2);
+    }
+    None => trace!("line not exist"),
+  }
+
+  trace!("{}, whole buffer:", msg);
   for i in 0..text.rope().len_lines() {
     trace!("{i}:{:?}", ropeline_to_string(&text.rope().line(i)));
   }

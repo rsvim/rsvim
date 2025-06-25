@@ -2,6 +2,7 @@
 
 use crate::buf::text::Text;
 use crate::coord::U16Rect;
+use crate::dbg::buf::dbg_print_textline_with_absolute_char_idx;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
@@ -498,49 +499,21 @@ pub fn raw_insert_at_cursor(
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
-
-  let cursor_line_absolute_pos = text.rope().line_to_char(cursor_line_idx);
-  let cursor_char_absolute_pos_before_insert = cursor_line_absolute_pos + cursor_char_idx;
-
-  _dbg_print_details(
-    text,
-    cursor_line_idx,
-    cursor_char_absolute_pos_before_insert,
-    "Before insert",
+  debug_assert!(
+    text
+      .rope()
+      .line(cursor_line_idx)
+      .get_char(cursor_char_idx)
+      .is_some()
   );
 
-  text
-    .rope_mut()
-    .insert(cursor_char_absolute_pos_before_insert, payload.as_str());
-
-  // The `text` may contains line break '\n', which can interrupts the `cursor_line_idx`
-  // and we need to re-calculate it.
-  let cursor_char_absolute_pos_after_inserted =
-    cursor_char_absolute_pos_before_insert + payload.chars().count();
-  let cursor_line_idx_after_inserted = text
-    .rope()
-    .char_to_line(cursor_char_absolute_pos_after_inserted);
-  let cursor_line_absolute_pos_after_inserted =
-    text.rope().line_to_char(cursor_line_idx_after_inserted);
-  let cursor_char_idx_after_inserted =
-    cursor_char_absolute_pos_after_inserted - cursor_line_absolute_pos_after_inserted;
+  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
+    text.insert_at(cursor_line_idx, cursor_char_idx, payload);
 
   // Append eol at file end if it doesn't exist.
   text.append_empty_eol_at_end_if_not_exist();
 
-  if cursor_line_idx == cursor_line_idx_after_inserted {
-    // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
-    // Thus only need to truncate chars after insert position on the same line.
-    debug_assert!(cursor_char_idx_after_inserted >= cursor_char_idx);
-    let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_inserted, cursor_char_idx);
-    text.truncate_cached_line_since_char(cursor_line_idx, min_cursor_char_idx.saturating_sub(1));
-  } else {
-    // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-    let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_inserted, cursor_line_idx);
-    text.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
-  }
-
-  _dbg_print_details_on_line(
+  dbg_print_textline_with_absolute_char_idx(
     text,
     cursor_line_idx,
     cursor_char_idx_after_inserted,
