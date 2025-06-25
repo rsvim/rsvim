@@ -4,7 +4,9 @@ use crate::buf::text::Text;
 use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
+use crate::ui::viewport::{
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection, Viewportable,
+};
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::{Window, WindowLocalOptions};
 
