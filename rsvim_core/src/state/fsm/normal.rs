@@ -371,6 +371,7 @@ impl NormalStateful {
     StatefulValue::NormalMode(NormalStateful::default())
   }
 
+  #[cfg(test)]
   // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
   fn _target_cursor_exclude_empty_eol(
     &self,
