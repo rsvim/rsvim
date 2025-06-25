@@ -509,9 +509,6 @@ pub fn raw_insert_at_cursor(
   let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
     text.insert_at(cursor_line_idx, cursor_char_idx, payload);
 
-  // Append eol at file end if it doesn't exist.
-  text.append_empty_eol_at_end_if_not_exist();
-
   (
     cursor_line_idx_after_inserted,
     cursor_char_idx_after_inserted,

@@ -413,6 +413,9 @@ impl Text {
     let char_idx_after_inserted =
       absolute_char_idx_after_inserted - absolute_line_idx_after_inserted;
 
+    // Append eol at file end if it doesn't exist.
+    self.append_empty_eol_at_end_if_not_exist();
+
     if line_idx == line_idx_after_inserted {
       // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
       // Thus only need to truncate chars after insert position on the same line.
