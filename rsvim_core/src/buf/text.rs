@@ -375,16 +375,16 @@ impl Text {
     }
   }
 
-  /// Insert text payload at cursor position `line_idx`/`char_idx`, insert nothing if text
-  /// payload is empty.
+  /// Insert text payload at position `line_idx`/`char_idx`, insert nothing if text payload is
+  /// empty.
   ///
   /// # Returns
-  /// It returns the new cursor position `(line_idx,char_idx)` after text inserted, it returns
-  /// `None` if the text payload is empty.
+  /// It returns the new position `(line_idx,char_idx)` after text inserted, it returns `None` if
+  /// the text payload is empty.
   ///
   /// # Panics
   /// It panics if the cursor position doesn't exist.
-  pub fn cursor_insert_at(
+  pub fn insert_at(
     &mut self,
     line_idx: usize,
     char_idx: usize,
@@ -439,20 +439,19 @@ impl Text {
     Some((line_idx_after_inserted, char_idx_after_inserted))
   }
 
-  /// Delete `n` text chars at cursor position `line_idx`/`char_idx`, to either left or right
-  /// direction.
+  /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left or right direction.
   ///
   /// 1. If `n<0`, delete to the left direction, i.e. delete the range `[char_idx-n, char_idx)`.
   /// 2. If `n>0`, delete to the right direction, i.e. delete the range `[char_idx, char_idx+n)`.
   /// 3. If `n=0`, delete nothing.
   ///
   /// # Returns
-  /// It returns the new cursor position `(line_idx,char_idx)` after deleted, it returns `None` if
-  /// delete nothing.
+  /// It returns the new position `(line_idx,char_idx)` after deleted, it returns `None` if delete
+  /// nothing.
   ///
   /// # Panics
   /// It panics if the cursor position doesn't exist.
-  pub fn cursor_delete_at(
+  pub fn delete_at(
     &mut self,
     line_idx: usize,
     char_idx: usize,
