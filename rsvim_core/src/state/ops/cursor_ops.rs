@@ -4,9 +4,10 @@ use crate::buf::text::Text;
 use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
-use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{Window, WindowLocalOptions};
+use crate::ui::viewport::{
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection, Viewportable,
+};
+use crate::ui::widget::window::WindowLocalOptions;
 
 use compact_str::{CompactString, ToCompactString};
 use tracing::trace;
@@ -33,7 +34,7 @@ fn _cursor_direction(by_x: isize, by_y: isize) -> CursorMoveDirection {
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveBy((x,y))`.
-fn _normalize_to_cursor_move_by(
+pub fn normalize_to_cursor_move_by(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -54,7 +55,7 @@ fn _normalize_to_cursor_move_by(
 }
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`.
-fn _normalize_to_cursor_move_to(
+pub fn normalize_to_cursor_move_to(
   op: Operation,
   cursor_char_idx: usize,
   cursor_line_idx: usize,
@@ -102,7 +103,7 @@ pub fn normalize_to_cursor_move_to_exclude_empty_eol(
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) = _normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+  let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
   let mut y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
   if text.rope().line(y).len_chars() == 0 {
     // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
@@ -127,7 +128,7 @@ pub fn normalize_to_cursor_move_to_include_empty_eol(
   cursor_char_idx: usize,
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
-  let (x, y, move_direction) = _normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
+  let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
   let mut y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
   if text.rope().line(y).len_chars() == 0 {
     // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
@@ -145,7 +146,7 @@ pub fn normalize_to_cursor_move_to_include_empty_eol(
 }
 
 /// Normalize `Operation::WindowScroll*` to `Operation::WindowScrollBy((x,y))`.
-fn _normalize_to_window_scroll_by(
+pub fn normalize_to_window_scroll_by(
   op: Operation,
   viewport_start_column_idx: usize,
   viewport_start_line_idx: usize,
@@ -210,7 +211,7 @@ pub fn normalize_to_window_scroll_to(
 /// # Panics
 ///
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
-pub fn cursor_move_to(
+pub fn raw_cursor_move_to(
   viewport: &Viewport,
   _cursor_viewport: &CursorViewport,
   text: &Text,
@@ -247,7 +248,7 @@ pub fn cursor_move_to(
   Some(new_cursor_viewport)
 }
 
-pub fn _widget_scroll_to(
+pub fn raw_widget_scroll_to(
   viewport: &Viewport,
   actual_shape: &U16Rect,
   window_options: &WindowLocalOptions,
@@ -295,36 +296,6 @@ pub fn _widget_scroll_to(
     column_idx,
   ));
   Some(new_viewport)
-}
-
-pub fn window_scroll_to(
-  viewport: &Viewport,
-  current_window: &Window,
-  text: &Text,
-  window_scroll_to_op: Operation,
-) -> Option<ViewportArc> {
-  _widget_scroll_to(
-    viewport,
-    current_window.actual_shape(),
-    current_window.options(),
-    text,
-    window_scroll_to_op,
-  )
-}
-
-pub fn command_line_scroll_to(
-  viewport: &Viewport,
-  command_line: &CommandLine,
-  text: &Text,
-  window_scroll_to_op: Operation,
-) -> Option<ViewportArc> {
-  _widget_scroll_to(
-    viewport,
-    command_line.actual_shape(),
-    command_line.options(),
-    text,
-    window_scroll_to_op,
-  )
 }
 
 fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_height: u16) -> usize {
@@ -662,7 +633,7 @@ pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text:
   trace!("after updated_viewport:{:?}", updated_viewport);
 
   vnode.set_viewport(updated_viewport.clone());
-  if let Some(updated_cursor_viewport) = cursor_move_to(
+  if let Some(updated_cursor_viewport) = raw_cursor_move_to(
     &updated_viewport,
     &cursor_viewport,
     text,
@@ -674,4 +645,177 @@ pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text:
     );
     vnode.set_cursor_viewport(updated_cursor_viewport);
   }
+}
+
+/// The operation must be `Operation::CursorMove*`.
+pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eol: bool) {
+  debug_assert!(tree.cursor_id().is_some());
+  let cursor_id = tree.cursor_id().unwrap();
+  debug_assert!(tree.parent_id(cursor_id).is_some());
+  let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
+  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
+  debug_assert!(matches!(
+    cursor_parent_node,
+    TreeNode::Window(_) | TreeNode::CommandLine(_)
+  ));
+  let vnode_actual_shape = match cursor_parent_node {
+    TreeNode::Window(window) => *window.actual_shape(),
+    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
+    _ => unreachable!(),
+  };
+  let vnode: &mut dyn Viewportable = match cursor_parent_node {
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
+    _ => unreachable!(),
+  };
+
+  let viewport = vnode.viewport();
+  let cursor_viewport = vnode.cursor_viewport();
+
+  // Only move cursor when it is different from current cursor.
+  let (target_cursor_char, target_cursor_line, move_direction) = if include_empty_eol {
+    normalize_to_cursor_move_to_include_empty_eol(
+      text,
+      op,
+      cursor_viewport.char_idx(),
+      cursor_viewport.line_idx(),
+    )
+  } else {
+    normalize_to_cursor_move_to_exclude_empty_eol(
+      text,
+      op,
+      cursor_viewport.char_idx(),
+      cursor_viewport.line_idx(),
+    )
+  };
+
+  let search_direction = match move_direction {
+    CursorMoveDirection::Up => ViewportSearchDirection::Up,
+    CursorMoveDirection::Down => ViewportSearchDirection::Down,
+    CursorMoveDirection::Left => ViewportSearchDirection::Left,
+    CursorMoveDirection::Right => ViewportSearchDirection::Right,
+  };
+
+  let new_viewport: Option<ViewportArc> = {
+    let (start_line, start_column) = viewport.search_anchor(
+      search_direction,
+      vnode.options(),
+      text,
+      &vnode_actual_shape,
+      target_cursor_line,
+      target_cursor_char,
+    );
+
+    // First try window scroll.
+    if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx() {
+      let new_viewport = raw_widget_scroll_to(
+        &viewport,
+        &vnode_actual_shape,
+        vnode.options(),
+        text,
+        Operation::WindowScrollTo((start_column, start_line)),
+      );
+      if let Some(new_viewport_arc) = new_viewport.clone() {
+        vnode.set_viewport(new_viewport_arc.clone());
+      }
+      new_viewport
+    } else {
+      None
+    }
+  };
+
+  // Then try cursor move.
+  {
+    let current_viewport = new_viewport.unwrap_or(viewport);
+
+    let new_cursor_viewport = raw_cursor_move_to(
+      &current_viewport,
+      &cursor_viewport,
+      text,
+      Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+    );
+
+    if let Some(new_cursor_viewport) = new_cursor_viewport {
+      vnode.set_cursor_viewport(new_cursor_viewport.clone());
+      let cursor_id = tree.cursor_id().unwrap();
+      tree.bounded_move_to(
+        cursor_id,
+        new_cursor_viewport.column_idx() as isize,
+        new_cursor_viewport.row_idx() as isize,
+      );
+    }
+  }
+}
+
+pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
+  debug_assert!(tree.cursor_id().is_some());
+  let cursor_id = tree.cursor_id().unwrap();
+  debug_assert!(tree.parent_id(cursor_id).is_some());
+  let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
+  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
+  debug_assert!(matches!(
+    cursor_parent_node,
+    TreeNode::Window(_) | TreeNode::CommandLine(_)
+  ));
+  let vnode: &mut dyn Viewportable = match cursor_parent_node {
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
+    _ => unreachable!(),
+  };
+
+  // Insert text.
+  let cursor_viewport = vnode.cursor_viewport();
+  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
+    insert_at_cursor(&cursor_viewport, text, payload);
+  // Update viewport since the buffer doesn't match the viewport.
+  update_viewport_after_text_changed(tree, cursor_parent_id, text);
+
+  trace!(
+    "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
+  );
+  let op = Operation::CursorMoveTo((
+    cursor_char_idx_after_inserted,
+    cursor_line_idx_after_inserted,
+  ));
+  cursor_move(tree, text, op, true);
+}
+
+pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {
+  debug_assert!(tree.cursor_id().is_some());
+  let cursor_id = tree.cursor_id().unwrap();
+  debug_assert!(tree.parent_id(cursor_id).is_some());
+  let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
+  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
+  debug_assert!(matches!(
+    cursor_parent_node,
+    TreeNode::Window(_) | TreeNode::CommandLine(_)
+  ));
+  let vnode: &mut dyn Viewportable = match cursor_parent_node {
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
+    _ => unreachable!(),
+  };
+
+  // Delete N-chars.
+  let cursor_viewport = vnode.cursor_viewport();
+  let maybe_new_cursor_position = delete_at_cursor(&cursor_viewport, text, n);
+  if maybe_new_cursor_position.is_none() {
+    return false;
+  }
+
+  // Update viewport since the buffer doesn't match the viewport.
+  update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) =
+    maybe_new_cursor_position.unwrap();
+
+  trace!(
+    "Move to deleted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
+  );
+  let op = Operation::CursorMoveTo((cursor_char_idx_after_deleted, cursor_line_idx_after_deleted));
+  cursor_move(tree, text, op, true);
+
+  true
 }

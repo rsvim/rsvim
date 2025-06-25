@@ -3,8 +3,8 @@
 use crate::buf::{Buffer, BufferWk};
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
-use crate::state::ops::{Operation, cursor_edit_ops, cursor_move_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, ViewportSearchDirection};
@@ -118,7 +118,7 @@ impl InsertStateful {
     };
     let buffer = buffer.upgrade().unwrap();
     let mut buffer = lock!(buffer);
-    cursor_edit_ops::cursor_delete(&mut tree, buffer.text_mut(), n);
+    cursor_ops::cursor_delete(&mut tree, buffer.text_mut(), n);
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
@@ -150,7 +150,7 @@ impl InsertStateful {
     };
     let buffer = buffer.upgrade().unwrap();
     let mut buffer = lock!(buffer);
-    cursor_edit_ops::cursor_insert(&mut tree, buffer.text_mut(), payload);
+    cursor_ops::cursor_insert(&mut tree, buffer.text_mut(), payload);
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
@@ -232,7 +232,7 @@ impl InsertStateful {
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    cursor_move_ops::cursor_move(tree, buffer.text(), op, opts.include_empty_eol);
+    cursor_ops::cursor_move(tree, buffer.text(), op, opts.include_empty_eol);
   }
 
   // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.

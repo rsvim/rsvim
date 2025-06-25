@@ -2,8 +2,6 @@
 
 use compact_str::CompactString;
 
-pub mod cursor_edit_ops;
-pub mod cursor_move_ops;
 pub mod cursor_ops;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
