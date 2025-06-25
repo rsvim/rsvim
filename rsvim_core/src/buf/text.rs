@@ -72,8 +72,13 @@ impl Text {
     &self.rope
   }
 
-  /// Get mutable rope.
-  pub fn rope_mut(&mut self) -> &mut Rope {
+  // Get mutable rope.
+  //
+  // NOTE:
+  // Directly get mutable `&mut Rope` is disabled, while `Text` provides all kinds of mutable
+  // operations to correctly reset internal cached display width.
+  // and hide these details.
+  fn rope_mut(&mut self) -> &mut Rope {
     &mut self.rope
   }
 
@@ -272,7 +277,7 @@ impl Text {
   }
 
   /// See [`ColumnIndex::truncate_since_char`].
-  pub fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
+  fn truncate_cached_line_since_char(&self, line_idx: usize, char_idx: usize) {
     self
       .cached_lines_width
       .borrow_mut()
@@ -284,7 +289,7 @@ impl Text {
   }
 
   /// See [`ColumnIndex::truncate_since_width`].
-  pub fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
+  fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     self
       .cached_lines_width
       .borrow_mut()
@@ -296,12 +301,12 @@ impl Text {
   }
 
   /// Remove one cached line.
-  pub fn remove_cached_line(&self, line_idx: usize) {
+  fn remove_cached_line(&self, line_idx: usize) {
     self.cached_lines_width.borrow_mut().pop(&line_idx);
   }
 
   /// Retain multiple cached lines by lambda function `f`.
-  pub fn retain_cached_lines<F>(&self, f: F)
+  fn retain_cached_lines<F>(&self, f: F)
   where
     F: Fn(/* line_idx */ &usize, /* column_idx */ &ColumnIndex) -> bool,
   {
@@ -317,12 +322,12 @@ impl Text {
   }
 
   /// Clear cache.
-  pub fn clear_cached_lines(&self) {
+  fn clear_cached_lines(&self) {
     self.cached_lines_width.borrow_mut().clear()
   }
 
   /// Resize cache.
-  pub fn resize_cached_lines(&self, canvas_size: U16Size) {
+  fn resize_cached_lines(&self, canvas_size: U16Size) {
     let new_cache_size = _cached_size(canvas_size);
     let mut cached_width = self.cached_lines_width.borrow_mut();
     if new_cache_size > cached_width.cap() {
