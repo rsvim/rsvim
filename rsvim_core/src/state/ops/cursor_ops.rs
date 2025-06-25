@@ -808,7 +808,7 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
     cursor_char_idx_after_inserted,
     cursor_line_idx_after_inserted,
   ));
-  cursor_move_ops::cursor_move(tree, text, op, true);
+  cursor_move(tree, text, op, true);
 }
 
 pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {
@@ -844,7 +844,7 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {
     "Move to deleted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
   );
   let op = Operation::CursorMoveTo((cursor_char_idx_after_deleted, cursor_line_idx_after_deleted));
-  cursor_move_ops::cursor_move(tree, text, op, true);
+  cursor_move(tree, text, op, true);
 
   true
 }
