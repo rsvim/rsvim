@@ -596,9 +596,8 @@ pub fn cursor_insert(
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
   debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
   let maybe_new_cursor_position = text.insert_at(cursor_line_idx, cursor_char_idx, payload);
-  if maybe_new_cursor_position.is_none() {
-    return None;
-  }
+
+  maybe_new_cursor_position?;
 
   let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
     maybe_new_cursor_position.unwrap();
@@ -644,9 +643,8 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usiz
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
   debug_assert!(cursor_char_idx < text.rope().line(cursor_line_idx).len_chars());
   let maybe_new_cursor_position = text.delete_at(cursor_line_idx, cursor_char_idx, n);
-  if maybe_new_cursor_position.is_none() {
-    return None;
-  }
+
+  maybe_new_cursor_position?;
 
   // Update viewport since the buffer doesn't match the viewport.
   _update_viewport_after_text_changed(tree, cursor_parent_id, text);

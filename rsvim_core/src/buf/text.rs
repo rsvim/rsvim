@@ -288,6 +288,7 @@ impl Text {
       .truncate_since_char(char_idx)
   }
 
+  #[allow(dead_code)]
   /// See [`ColumnIndex::truncate_since_width`].
   fn truncate_cached_line_since_width(&self, line_idx: usize, width: usize) {
     self
@@ -300,6 +301,7 @@ impl Text {
       .truncate_since_width(width)
   }
 
+  #[allow(dead_code)]
   /// Remove one cached line.
   fn remove_cached_line(&self, line_idx: usize) {
     self.cached_lines_width.borrow_mut().pop(&line_idx);
@@ -326,6 +328,7 @@ impl Text {
     self.cached_lines_width.borrow_mut().clear()
   }
 
+  #[allow(dead_code)]
   /// Resize cache.
   fn resize_cached_lines(&self, canvas_size: U16Size) {
     let new_cache_size = _cached_size(canvas_size);

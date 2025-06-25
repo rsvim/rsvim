@@ -2,7 +2,7 @@
 
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::{Operation, cursor_ops};
+use crate::state::ops::Operation;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::Viewportable;
