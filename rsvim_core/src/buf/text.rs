@@ -375,14 +375,16 @@ impl Text {
     }
   }
 
-  /// Insert text payload at specific `line_idx`/`char_idx` position.
+  /// Insert text payload at cursor position `line_idx`/`char_idx`, insert nothing if text
+  /// payload is empty.
   ///
-  /// It returns the new `(line_idx,char_idx)` index after text inserted, it returns `None` if the
-  /// text payload is empty.
+  /// # Returns
+  /// It returns the new cursor position `(line_idx,char_idx)` after text inserted, it returns
+  /// `None` if the text payload is empty.
   ///
   /// # Panics
-  /// It panics if the line/char position doesn't exist.
-  pub fn insert_at(
+  /// It panics if the cursor position doesn't exist.
+  pub fn cursor_insert_at(
     &mut self,
     line_idx: usize,
     char_idx: usize,
@@ -397,12 +399,7 @@ impl Text {
     let absolute_line_idx = self.rope().line_to_char(line_idx);
     let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
 
-    dbg_print_textline_with_absolute_char_idx(
-      self,
-      line_idx,
-      absolute_char_idx_before_insert,
-      "Before insert",
-    );
+    dbg_print_textline(self, line_idx, char_idx, "Before insert");
 
     self
       .rope_mut()
@@ -440,6 +437,94 @@ impl Text {
     );
 
     Some((line_idx_after_inserted, char_idx_after_inserted))
+  }
+
+  /// Delete `n` text chars at cursor position `line_idx`/`char_idx`, to either left or right
+  /// direction.
+  ///
+  /// 1. If `n<0`, delete to the left direction, i.e. delete the range `[char_idx-n, char_idx)`.
+  /// 2. If `n>0`, delete to the right direction, i.e. delete the range `[char_idx, char_idx+n)`.
+  /// 3. If `n=0`, delete nothing.
+  ///
+  /// # Returns
+  /// It returns the new cursor position `(line_idx,char_idx)` after deleted, it returns `None` if
+  /// delete nothing.
+  ///
+  /// # Panics
+  /// It panics if the cursor position doesn't exist.
+  pub fn cursor_delete_at(
+    &mut self,
+    line_idx: usize,
+    char_idx: usize,
+    n: isize,
+  ) -> Option<(usize, usize)> {
+    debug_assert!(self.rope().get_line(line_idx).is_some());
+    debug_assert!(char_idx < self.rope().line(line_idx).len_chars());
+
+    let cursor_char_absolute_pos_before_delete = self.rope().line_to_char(line_idx) + char_idx;
+
+    dbg_print_textline(self, line_idx, char_idx, "Before delete");
+
+    let to_be_deleted_range = if n > 0 {
+      // Delete to right side, on range `[cursor..cursor+n)`.
+      cursor_char_absolute_pos_before_delete
+        ..(std::cmp::min(
+          cursor_char_absolute_pos_before_delete + n as usize,
+          self.rope().len_chars().saturating_sub(1),
+        ))
+    } else {
+      // Delete to left side, on range `[cursor-n,cursor)`.
+      (std::cmp::max(
+        0_usize,
+        cursor_char_absolute_pos_before_delete.saturating_add_signed(n),
+      ))..cursor_char_absolute_pos_before_delete
+    };
+
+    if to_be_deleted_range.is_empty() {
+      return None;
+    }
+
+    self.rope_mut().remove(to_be_deleted_range);
+
+    let cursor_char_absolute_pos_after_deleted = if n > 0 {
+      cursor_char_absolute_pos_before_delete
+    } else {
+      cursor_char_absolute_pos_before_delete.saturating_add_signed(n)
+    };
+    let cursor_char_absolute_pos_after_deleted = std::cmp::min(
+      cursor_char_absolute_pos_after_deleted,
+      self.rope().len_chars().saturating_sub(1),
+    );
+    let cursor_line_idx_after_deleted = self
+      .rope()
+      .char_to_line(cursor_char_absolute_pos_after_deleted);
+    let cursor_line_absolute_pos_after_deleted =
+      self.rope().line_to_char(cursor_line_idx_after_deleted);
+    let cursor_char_idx_after_deleted =
+      cursor_char_absolute_pos_after_deleted - cursor_line_absolute_pos_after_deleted;
+
+    if line_idx == cursor_line_idx_after_deleted {
+      // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
+      // Thus only need to truncate chars after insert position on the same line.
+      let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_deleted, char_idx);
+      self.truncate_cached_line_since_char(line_idx, min_cursor_char_idx);
+    } else {
+      // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
+      let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_deleted, line_idx);
+      self.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
+    }
+
+    // Append eol at file end if it doesn't exist.
+    self.append_empty_eol_at_end_if_not_exist();
+
+    dbg_print_textline(
+      self,
+      cursor_line_idx_after_deleted,
+      cursor_char_idx_after_deleted,
+      "After deleted",
+    );
+
+    Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
   }
 }
 // Edit }

@@ -416,77 +416,9 @@ pub fn raw_delete_at_cursor(
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+  debug_assert!(cursor_char_idx < text.rope().line(cursor_line_idx).len_chars());
 
-  let cursor_char_absolute_pos_before_delete =
-    text.rope().line_to_char(cursor_line_idx) + cursor_char_idx;
-
-  _dbg_print_details(
-    text,
-    cursor_line_idx,
-    cursor_char_absolute_pos_before_delete,
-    "Before delete",
-  );
-
-  let to_be_deleted_range = if n > 0 {
-    // Delete to right side, on range `[cursor..cursor+n)`.
-    cursor_char_absolute_pos_before_delete
-      ..(std::cmp::min(
-        cursor_char_absolute_pos_before_delete + n as usize,
-        text.rope().len_chars().saturating_sub(1),
-      ))
-  } else {
-    // Delete to left side, on range `[cursor-n,cursor)`.
-    (std::cmp::max(
-      0_usize,
-      cursor_char_absolute_pos_before_delete.saturating_add_signed(n),
-    ))..cursor_char_absolute_pos_before_delete
-  };
-
-  if to_be_deleted_range.is_empty() {
-    return None;
-  }
-
-  text.rope_mut().remove(to_be_deleted_range);
-
-  let cursor_char_absolute_pos_after_deleted = if n > 0 {
-    cursor_char_absolute_pos_before_delete
-  } else {
-    cursor_char_absolute_pos_before_delete.saturating_add_signed(n)
-  };
-  let cursor_char_absolute_pos_after_deleted = std::cmp::min(
-    cursor_char_absolute_pos_after_deleted,
-    text.rope().len_chars().saturating_sub(1),
-  );
-  let cursor_line_idx_after_deleted = text
-    .rope()
-    .char_to_line(cursor_char_absolute_pos_after_deleted);
-  let cursor_line_absolute_pos_after_deleted =
-    text.rope().line_to_char(cursor_line_idx_after_deleted);
-  let cursor_char_idx_after_deleted =
-    cursor_char_absolute_pos_after_deleted - cursor_line_absolute_pos_after_deleted;
-
-  if cursor_line_idx == cursor_line_idx_after_deleted {
-    // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
-    // Thus only need to truncate chars after insert position on the same line.
-    let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_deleted, cursor_char_idx);
-    text.truncate_cached_line_since_char(cursor_line_idx, min_cursor_char_idx);
-  } else {
-    // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-    let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_deleted, cursor_line_idx);
-    text.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
-  }
-
-  // Append eol at file end if it doesn't exist.
-  text.append_empty_eol_at_end_if_not_exist();
-
-  _dbg_print_details_on_line(
-    text,
-    cursor_line_idx,
-    cursor_char_idx_after_deleted,
-    "After deleted",
-  );
-
-  Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
+  text.delete_at(cursor_line_idx, cursor_char_idx, n)
 }
 
 pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
