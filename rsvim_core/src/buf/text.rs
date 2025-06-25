@@ -383,7 +383,7 @@ impl Text {
   /// the text payload is empty.
   ///
   /// # Panics
-  /// It panics if the cursor position doesn't exist.
+  /// It panics if the position doesn't exist.
   pub fn insert_at(
     &mut self,
     line_idx: usize,
@@ -450,7 +450,7 @@ impl Text {
   /// nothing.
   ///
   /// # Panics
-  /// It panics if the cursor position doesn't exist.
+  /// It panics if the position doesn't exist.
   pub fn delete_at(
     &mut self,
     line_idx: usize,
