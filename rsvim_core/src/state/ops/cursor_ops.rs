@@ -443,7 +443,7 @@ fn _append_eol_at_file_end(text: &mut Text) {
 }
 
 /// Returns `(cursor_line_idx, cursor_char_idx)` if delete successful, or returns `None` if failed.
-pub fn delete_at_cursor(
+pub fn raw_delete_at_cursor(
   cursor_viewport: &CursorViewport,
   text: &mut Text,
   n: isize,
@@ -525,7 +525,7 @@ pub fn delete_at_cursor(
 }
 
 /// Returns `(cursor_line_idx, cursor_char_idx)` after insertion.
-pub fn insert_at_cursor(
+pub fn raw_insert_at_cursor(
   cursor_viewport: &CursorViewport,
   text: &mut Text,
   payload: CompactString,
@@ -768,7 +768,7 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
   // Insert text.
   let cursor_viewport = vnode.cursor_viewport();
   let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
-    insert_at_cursor(&cursor_viewport, text, payload);
+    raw_insert_at_cursor(&cursor_viewport, text, payload);
   // Update viewport since the buffer doesn't match the viewport.
   update_viewport_after_text_changed(tree, cursor_parent_id, text);
 
@@ -801,7 +801,7 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {
 
   // Delete N-chars.
   let cursor_viewport = vnode.cursor_viewport();
-  let maybe_new_cursor_position = delete_at_cursor(&cursor_viewport, text, n);
+  let maybe_new_cursor_position = raw_delete_at_cursor(&cursor_viewport, text, n);
   if maybe_new_cursor_position.is_none() {
     return false;
   }

@@ -137,7 +137,7 @@ impl NormalStateful {
           let cursor_viewport = command_line.cursor_viewport();
           contents.command_line_content_mut().rope_mut().remove(0..);
           contents.command_line_content_mut().clear_cached_lines();
-          let (l, c) = cursor_ops::insert_at_cursor(
+          let (l, c) = cursor_ops::raw_insert_at_cursor(
             &cursor_viewport,
             contents.command_line_content_mut(),
             ":".to_compact_string(),
