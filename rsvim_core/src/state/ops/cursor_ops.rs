@@ -407,89 +407,7 @@ pub fn _dbg_print_details_on_line(buffer: &Text, line_idx: usize, char_idx: usiz
   }
 }
 
-/// Returns `(cursor_line_idx, cursor_char_idx)` if delete successful, or returns `None` if failed.
-pub fn raw_delete_at_cursor(
-  cursor_viewport: &CursorViewport,
-  text: &mut Text,
-  n: isize,
-) -> Option<(usize, usize)> {
-  let cursor_line_idx = cursor_viewport.line_idx();
-  let cursor_char_idx = cursor_viewport.char_idx();
-  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
-
-  let cursor_char_absolute_pos_before_delete =
-    text.rope().line_to_char(cursor_line_idx) + cursor_char_idx;
-
-  _dbg_print_details(
-    text,
-    cursor_line_idx,
-    cursor_char_absolute_pos_before_delete,
-    "Before delete",
-  );
-
-  let to_be_deleted_range = if n > 0 {
-    // Delete to right side, on range `[cursor..cursor+n)`.
-    cursor_char_absolute_pos_before_delete
-      ..(std::cmp::min(
-        cursor_char_absolute_pos_before_delete + n as usize,
-        text.rope().len_chars().saturating_sub(1),
-      ))
-  } else {
-    // Delete to left side, on range `[cursor-n,cursor)`.
-    (std::cmp::max(
-      0_usize,
-      cursor_char_absolute_pos_before_delete.saturating_add_signed(n),
-    ))..cursor_char_absolute_pos_before_delete
-  };
-
-  if to_be_deleted_range.is_empty() {
-    return None;
-  }
-
-  text.rope_mut().remove(to_be_deleted_range);
-
-  // Append eol at file end if it doesn't exist.
-  text.append_empty_eol_at_end_if_not_exist();
-
-  let cursor_char_absolute_pos_after_deleted = if n > 0 {
-    cursor_char_absolute_pos_before_delete
-  } else {
-    cursor_char_absolute_pos_before_delete.saturating_add_signed(n)
-  };
-  let cursor_char_absolute_pos_after_deleted = std::cmp::min(
-    cursor_char_absolute_pos_after_deleted,
-    text.rope().len_chars().saturating_sub(1),
-  );
-  let cursor_line_idx_after_deleted = text
-    .rope()
-    .char_to_line(cursor_char_absolute_pos_after_deleted);
-  let cursor_line_absolute_pos_after_deleted =
-    text.rope().line_to_char(cursor_line_idx_after_deleted);
-  let cursor_char_idx_after_deleted =
-    cursor_char_absolute_pos_after_deleted - cursor_line_absolute_pos_after_deleted;
-
-  if cursor_line_idx == cursor_line_idx_after_deleted {
-    // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.
-    // Thus only need to truncate chars after insert position on the same line.
-    let min_cursor_char_idx = std::cmp::min(cursor_char_idx_after_deleted, cursor_char_idx);
-    text.truncate_cached_line_since_char(cursor_line_idx, min_cursor_char_idx);
-  } else {
-    // Otherwise the inserted text contains line breaks, and we have to truncate all the cached lines below the cursor line, because we have new lines.
-    let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_deleted, cursor_line_idx);
-    text.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
-  }
-
-  _dbg_print_details_on_line(
-    text,
-    cursor_line_idx,
-    cursor_char_idx_after_deleted,
-    "After deleted",
-  );
-
-  Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
-}
-
-pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
+pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
   debug_assert!(tree.node_mut(id).is_some());
   let node = tree.node_mut(id).unwrap();
   debug_assert!(matches!(
@@ -649,7 +567,12 @@ pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eo
   }
 }
 
-pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
+/// Returns new cursor position if inserts successfully, returns `None` if failed.
+pub fn cursor_insert(
+  tree: &mut Tree,
+  text: &mut Text,
+  payload: CompactString,
+) -> Option<(usize, usize)> {
   debug_assert!(tree.cursor_id().is_some());
   let cursor_id = tree.cursor_id().unwrap();
   debug_assert!(tree.parent_id(cursor_id).is_some());
@@ -672,25 +595,31 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
   debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
+  let maybe_new_cursor_position = text.insert_at(cursor_line_idx, cursor_char_idx, payload);
 
-  if let Some((cursor_line_idx_after_inserted, cursor_char_idx_after_inserted)) =
-    text.insert_at(cursor_line_idx, cursor_char_idx, payload)
-  {
-    // Update viewport since the buffer doesn't match the viewport.
-    update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  maybe_new_cursor_position?;
 
-    trace!(
-      "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
-    );
-    let op = Operation::CursorMoveTo((
-      cursor_char_idx_after_inserted,
-      cursor_line_idx_after_inserted,
-    ));
-    cursor_move(tree, text, op, true);
-  }
+  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
+    maybe_new_cursor_position.unwrap();
+  // Update viewport since the buffer doesn't match the viewport.
+  _update_viewport_after_text_changed(tree, cursor_parent_id, text);
+
+  trace!(
+    "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
+  );
+  let op = Operation::CursorMoveTo((
+    cursor_char_idx_after_inserted,
+    cursor_line_idx_after_inserted,
+  ));
+  cursor_move(tree, text, op, true);
+
+  Some((
+    cursor_line_idx_after_inserted,
+    cursor_char_idx_after_inserted,
+  ))
 }
 
-pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {
+pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usize, usize)> {
   debug_assert!(tree.cursor_id().is_some());
   let cursor_id = tree.cursor_id().unwrap();
   debug_assert!(tree.parent_id(cursor_id).is_some());
@@ -709,13 +638,16 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {
 
   // Delete N-chars.
   let cursor_viewport = vnode.cursor_viewport();
-  let maybe_new_cursor_position = raw_delete_at_cursor(&cursor_viewport, text, n);
-  if maybe_new_cursor_position.is_none() {
-    return false;
-  }
+  let cursor_line_idx = cursor_viewport.line_idx();
+  let cursor_char_idx = cursor_viewport.char_idx();
+  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+  debug_assert!(cursor_char_idx < text.rope().line(cursor_line_idx).len_chars());
+  let maybe_new_cursor_position = text.delete_at(cursor_line_idx, cursor_char_idx, n);
+
+  maybe_new_cursor_position?;
 
   // Update viewport since the buffer doesn't match the viewport.
-  update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  _update_viewport_after_text_changed(tree, cursor_parent_id, text);
   let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) =
     maybe_new_cursor_position.unwrap();
 
@@ -725,5 +657,5 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> bool {
   let op = Operation::CursorMoveTo((cursor_char_idx_after_deleted, cursor_line_idx_after_deleted));
   cursor_move(tree, text, op, true);
 
-  true
+  Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }
