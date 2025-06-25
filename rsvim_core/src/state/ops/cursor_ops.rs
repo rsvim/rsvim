@@ -7,8 +7,7 @@ use crate::ui::tree::*;
 use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection, Viewportable,
 };
-use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::window::{Window, WindowLocalOptions};
+use crate::ui::widget::window::WindowLocalOptions;
 
 use compact_str::{CompactString, ToCompactString};
 use tracing::trace;
