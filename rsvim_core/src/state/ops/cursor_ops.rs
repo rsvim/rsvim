@@ -513,13 +513,6 @@ pub fn raw_insert_at_cursor(
   // Append eol at file end if it doesn't exist.
   text.append_empty_eol_at_end_if_not_exist();
 
-  dbg_print_textline_with_absolute_char_idx(
-    text,
-    cursor_line_idx,
-    cursor_char_idx_after_inserted,
-    "After inserted",
-  );
-
   (
     cursor_line_idx_after_inserted,
     cursor_char_idx_after_inserted,

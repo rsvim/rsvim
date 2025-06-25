@@ -332,7 +332,7 @@ impl Text {
 }
 // Display Width }
 
-use crate::dbg::buf::dbg_print_textline_with_absolute_char_idx;
+use crate::dbg::buf::{dbg_print_textline, dbg_print_textline_with_absolute_char_idx};
 
 // Edit {
 impl Text {
@@ -424,6 +424,13 @@ impl Text {
       let min_cursor_line_idx = std::cmp::min(line_idx_after_inserted, line_idx);
       self.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
     }
+
+    dbg_print_textline(
+      self,
+      line_idx_after_inserted,
+      char_idx_after_inserted,
+      "After inserted",
+    );
 
     (line_idx_after_inserted, char_idx_after_inserted)
   }
