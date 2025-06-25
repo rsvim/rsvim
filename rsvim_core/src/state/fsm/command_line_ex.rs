@@ -62,15 +62,15 @@ impl Stateful for CommandLineExStateful {
 
   fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
-      Operation::CursorMoveByCommandLineEx((_, _))
-      | Operation::CursorMoveUpByCommandLineEx(_)
-      | Operation::CursorMoveDownByCommandLineEx(_)
-      | Operation::CursorMoveLeftByCommandLineEx(_)
-      | Operation::CursorMoveRightByCommandLineEx(_)
-      | Operation::CursorMoveToCommandLineEx((_, _)) => self.cursor_move(&data_access, op),
+      Operation::CursorMoveBy((_, _))
+      | Operation::CursorMoveUpBy(_)
+      | Operation::CursorMoveDownBy(_)
+      | Operation::CursorMoveLeftBy(_)
+      | Operation::CursorMoveRightBy(_)
+      | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
       Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
-      Operation::InsertAtCursorCommandLineEx(text) => self.insert_at_cursor(&data_access, text),
-      Operation::DeleteAtCursorCommandLineEx(n) => self.delete_at_cursor(&data_access, n),
+      Operation::CursorInsert(text) => self.cursor_insert(&data_access, text),
+      Operation::CursorDelete(n) => self.cursor_delete(&data_access, n),
       _ => unreachable!(),
     }
   }
@@ -155,7 +155,7 @@ impl CommandLineExStateful {
 }
 
 impl CommandLineExStateful {
-  fn insert_at_cursor(
+  fn cursor_insert(
     &self,
     _data_access: &StatefulDataAccess,
     _text: CompactString,
@@ -165,7 +165,7 @@ impl CommandLineExStateful {
 }
 
 impl CommandLineExStateful {
-  fn delete_at_cursor(&self, _data_access: &StatefulDataAccess, _n: isize) -> StatefulValue {
+  fn cursor_delete(&self, _data_access: &StatefulDataAccess, _n: isize) -> StatefulValue {
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
 }
