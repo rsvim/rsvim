@@ -484,7 +484,7 @@ pub fn raw_delete_at_cursor(
   text.rope_mut().remove(to_be_deleted_range);
 
   // Append eol at file end if it doesn't exist.
-  _append_eol_at_file_end(text);
+  text.append_empty_eol_at_end_if_not_exist();
 
   let cursor_char_absolute_pos_after_deleted = if n > 0 {
     cursor_char_absolute_pos_before_delete
@@ -561,7 +561,7 @@ pub fn raw_insert_at_cursor(
     cursor_char_absolute_pos_after_inserted - cursor_line_absolute_pos_after_inserted;
 
   // Append eol at file end if it doesn't exist.
-  _append_eol_at_file_end(text);
+  text.append_empty_eol_at_end_if_not_exist();
 
   if cursor_line_idx == cursor_line_idx_after_inserted {
     // If before/after insert, the cursor line doesn't change, it means the inserted text doesn't contain line break, i.e. it is still the same line.

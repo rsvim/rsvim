@@ -10,7 +10,7 @@ use crate::{arc_impl, lock};
 pub use cidx::ColumnIndex;
 
 use ahash::RandomState;
-use compact_str::CompactString;
+use compact_str::{CompactString, ToCompactString};
 use lru::LruCache;
 use paste::paste;
 use ropey::Rope;
@@ -331,3 +331,42 @@ impl Text {
   }
 }
 // Display Width }
+
+// Edit {
+impl Text {
+  /// For text, the editor have to always keep an empty eol (end-of-line) at the end of text file.
+  /// It helps the cursor motion.
+  pub fn append_empty_eol_at_end_if_not_exist(&mut self) {
+    use crate::dbg::buf::dbg_print_textline;
+    use crate::defaults::ascii::end_of_line as eol;
+    let buf_eol = self.options().end_of_line();
+
+    let buffer_len_chars = self.rope().len_chars();
+    let last_char_on_buf = buffer_len_chars.saturating_sub(1);
+    match self.rope().get_char(last_char_on_buf) {
+      Some(c) => {
+        if c.to_compact_string() != eol::LF && c.to_compact_string() != eol::CR {
+          self
+            .rope_mut()
+            .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
+          let inserted_line_idx = self.rope().char_to_line(buffer_len_chars);
+          self.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
+          dbg_print_textline(
+            self,
+            inserted_line_idx,
+            buffer_len_chars,
+            "Eol appended(non-empty)",
+          );
+        }
+      }
+      None => {
+        self
+          .rope_mut()
+          .insert(0_usize, buf_eol.to_compact_string().as_str());
+        self.clear_cached_lines();
+        dbg_print_textline(self, 0_usize, buffer_len_chars, "Eol appended(empty)");
+      }
+    }
+  }
+}
+// Edit }
