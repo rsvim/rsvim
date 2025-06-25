@@ -373,7 +373,7 @@ impl NormalStateful {
 
   #[cfg(test)]
   // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
-  fn _target_cursor_exclude_empty_eol(
+  fn __target_cursor_exclude_empty_eol(
     &self,
     cursor_viewport: &CursorViewport,
     text: &Text,
@@ -414,7 +414,7 @@ impl NormalStateful {
         let cursor_viewport = current_window.cursor_viewport();
 
         let (target_cursor_char, target_cursor_line, _search_direction) =
-          self._target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
+          self.__target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
 
         let maybe_new_cursor_viewport = cursor_ops::raw_cursor_move_to(
           &viewport,
