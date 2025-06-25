@@ -76,25 +76,6 @@ impl Stateful for InsertStateful {
   }
 }
 
-#[derive(Debug, Copy, Clone)]
-struct CursorMoveImplOptions {
-  pub include_empty_eol: bool,
-}
-
-impl CursorMoveImplOptions {
-  pub fn include_empty_eol() -> Self {
-    Self {
-      include_empty_eol: true,
-    }
-  }
-
-  pub fn exclude_empty_eol() -> Self {
-    Self {
-      include_empty_eol: false,
-    }
-  }
-}
-
 impl InsertStateful {
   fn delete_at_cursor(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
     let tree = data_access.tree.clone();
