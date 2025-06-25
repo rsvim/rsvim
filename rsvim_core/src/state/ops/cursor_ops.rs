@@ -448,9 +448,6 @@ pub fn raw_delete_at_cursor(
 
   text.rope_mut().remove(to_be_deleted_range);
 
-  // Append eol at file end if it doesn't exist.
-  text.append_empty_eol_at_end_if_not_exist();
-
   let cursor_char_absolute_pos_after_deleted = if n > 0 {
     cursor_char_absolute_pos_before_delete
   } else {
@@ -478,6 +475,9 @@ pub fn raw_delete_at_cursor(
     let min_cursor_line_idx = std::cmp::min(cursor_line_idx_after_deleted, cursor_line_idx);
     text.retain_cached_lines(|line_idx, _column_idx| *line_idx < min_cursor_line_idx);
   }
+
+  // Append eol at file end if it doesn't exist.
+  text.append_empty_eol_at_end_if_not_exist();
 
   _dbg_print_details_on_line(
     text,
