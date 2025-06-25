@@ -65,10 +65,10 @@ pub enum Operation {
   GotoNormalMode,
 
   /// Insert text at cursor.
-  InsertAtCursor(/* text */ CompactString),
+  CursorInsert(/* text */ CompactString),
 
   /// Delete N-chars text, to the left of cursor if negative, to the right of cursor if positive.
-  DeleteAtCursor(/* N-chars */ isize),
+  CursorDelete(/* N-chars */ isize),
 
   /// Goto command-line ex mode.
   GotoCommandLineExMode,
@@ -78,30 +78,6 @@ pub enum Operation {
 
   /// Goto command-line search backward mode.
   GotoCommandLineSearchBackwardMode,
-
-  /// Similar to [`CursorMoveBy`](Operation::CursorMoveBy), but for command-line ex mode.
-  CursorMoveByCommandLineEx((/* chars */ isize, /* lines */ isize)),
-
-  /// Similar to [`CursorMoveLeftBy`](Operation::CursorMoveLeftBy), but for command-line ex mode.
-  CursorMoveLeftByCommandLineEx(usize),
-
-  /// Similar to [`CursorMoveRightBy`](Operation::CursorMoveRightBy), but for command-line ex mode.
-  CursorMoveRightByCommandLineEx(usize),
-
-  /// Similar to [`CursorMoveUpBy`](Operation::CursorMoveUpBy), but for command-line ex mode.
-  CursorMoveUpByCommandLineEx(usize),
-
-  /// Similar to [`CursorMoveDownBy`](Operation::CursorMoveDownBy), but for command-line ex mode.
-  CursorMoveDownByCommandLineEx(usize),
-
-  /// Similar to [`CursorMoveTo`](Operation::CursorMoveTo), but for command-line ex mode.
-  CursorMoveToCommandLineEx((/* char_idx */ usize, /* lines_idx */ usize)),
-
-  /// Similar to [`InsertAtCursor`](Operation::InsertAtCursor), but for command-line ex mode.
-  InsertAtCursorCommandLineEx(/* text */ CompactString),
-
-  /// Similar to [`DeleteAtCursor`](Operation::DeleteAtCursor), but for command-line ex mode.
-  DeleteAtCursorCommandLineEx(/* N-chars */ isize),
 
   /// Quit editor
   EditorQuit,
