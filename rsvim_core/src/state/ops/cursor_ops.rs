@@ -9,7 +9,7 @@ use crate::ui::viewport::{
 };
 use crate::ui::widget::window::WindowLocalOptions;
 
-use compact_str::{CompactString, ToCompactString};
+use compact_str::CompactString;
 use tracing::trace;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
