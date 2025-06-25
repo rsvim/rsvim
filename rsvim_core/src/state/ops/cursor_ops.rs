@@ -498,7 +498,7 @@ pub fn raw_insert_at_cursor(
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
-  debug_assert!(cursor_char_idx + 1 < text.rope().line(cursor_line_idx).len_chars());
+  debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
 
   let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
     text.insert_at(cursor_line_idx, cursor_char_idx, payload);
