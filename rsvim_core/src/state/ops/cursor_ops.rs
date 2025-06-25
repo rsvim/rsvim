@@ -489,26 +489,6 @@ pub fn raw_delete_at_cursor(
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }
 
-/// Returns `(cursor_line_idx, cursor_char_idx)` after insertion.
-pub fn raw_insert_at_cursor(
-  cursor_viewport: &CursorViewport,
-  text: &mut Text,
-  payload: CompactString,
-) -> (usize, usize) {
-  let cursor_line_idx = cursor_viewport.line_idx();
-  let cursor_char_idx = cursor_viewport.char_idx();
-  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
-  debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
-
-  let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
-    text.insert_at(cursor_line_idx, cursor_char_idx, payload);
-
-  (
-    cursor_line_idx_after_inserted,
-    cursor_char_idx_after_inserted,
-  )
-}
-
 pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
   debug_assert!(tree.node_mut(id).is_some());
   let node = tree.node_mut(id).unwrap();
@@ -688,8 +668,14 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
 
   // Insert text.
   let cursor_viewport = vnode.cursor_viewport();
+  let cursor_line_idx = cursor_viewport.line_idx();
+  let cursor_char_idx = cursor_viewport.char_idx();
+  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+  debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
+
   let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
-    raw_insert_at_cursor(&cursor_viewport, text, payload);
+    text.insert_at(cursor_line_idx, cursor_char_idx, payload);
+
   // Update viewport since the buffer doesn't match the viewport.
   update_viewport_after_text_changed(tree, cursor_parent_id, text);
 
