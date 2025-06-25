@@ -26,15 +26,13 @@ impl CommandLineExStateful {
           match key_event.code {
             // KeyCode::Up | KeyCode::Char('k') => Some(Operation::CursorMoveUpBy(1)),
             // KeyCode::Down | KeyCode::Char('j') => Some(Operation::CursorMoveDownBy(1)),
-            KeyCode::Left | KeyCode::Char('h') => Some(Operation::CursorMoveLeftByCommandLineEx(1)),
-            KeyCode::Right | KeyCode::Char('l') => {
-              Some(Operation::CursorMoveRightByCommandLineEx(1))
-            }
-            KeyCode::Home => Some(Operation::CursorMoveLeftByCommandLineEx(usize::MAX)),
-            KeyCode::End => Some(Operation::CursorMoveRightByCommandLineEx(usize::MAX)),
-            KeyCode::Char(c) => Some(Operation::InsertAtCursorCommandLineEx(
-              c.to_compact_string(),
-            )),
+            KeyCode::Left | KeyCode::Char('h') => Some(Operation::CursorMoveLeftBy(1)),
+            KeyCode::Right | KeyCode::Char('l') => Some(Operation::CursorMoveRightBy(1)),
+            KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
+            KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
+            KeyCode::Char(c) => Some(Operation::CursorInsert(c.to_compact_string())),
+            KeyCode::Backspace => Some(Operation::CursorDelete(-1)),
+            KeyCode::Delete => Some(Operation::CursorDelete(1)),
             KeyCode::Esc => Some(Operation::GotoNormalMode),
             _ => None,
           }
