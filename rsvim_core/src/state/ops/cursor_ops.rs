@@ -212,7 +212,7 @@ pub fn normalize_to_window_scroll_to(
 /// # Panics
 ///
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
-pub fn cursor_move_to(
+pub fn raw_cursor_move_to(
   viewport: &Viewport,
   _cursor_viewport: &CursorViewport,
   text: &Text,
@@ -249,7 +249,7 @@ pub fn cursor_move_to(
   Some(new_cursor_viewport)
 }
 
-pub fn _widget_scroll_to(
+pub fn raw_widget_scroll_to(
   viewport: &Viewport,
   actual_shape: &U16Rect,
   window_options: &WindowLocalOptions,
@@ -297,36 +297,6 @@ pub fn _widget_scroll_to(
     column_idx,
   ));
   Some(new_viewport)
-}
-
-pub fn window_scroll_to(
-  viewport: &Viewport,
-  current_window: &Window,
-  text: &Text,
-  window_scroll_to_op: Operation,
-) -> Option<ViewportArc> {
-  _widget_scroll_to(
-    viewport,
-    current_window.actual_shape(),
-    current_window.options(),
-    text,
-    window_scroll_to_op,
-  )
-}
-
-pub fn command_line_scroll_to(
-  viewport: &Viewport,
-  command_line: &CommandLine,
-  text: &Text,
-  window_scroll_to_op: Operation,
-) -> Option<ViewportArc> {
-  _widget_scroll_to(
-    viewport,
-    command_line.actual_shape(),
-    command_line.options(),
-    text,
-    window_scroll_to_op,
-  )
 }
 
 fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_height: u16) -> usize {
@@ -664,7 +634,7 @@ pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text:
   trace!("after updated_viewport:{:?}", updated_viewport);
 
   vnode.set_viewport(updated_viewport.clone());
-  if let Some(updated_cursor_viewport) = cursor_move_to(
+  if let Some(updated_cursor_viewport) = raw_cursor_move_to(
     &updated_viewport,
     &cursor_viewport,
     text,
@@ -740,7 +710,7 @@ pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eo
 
     // First try window scroll.
     if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx() {
-      let new_viewport = _widget_scroll_to(
+      let new_viewport = raw_widget_scroll_to(
         &viewport,
         &vnode_actual_shape,
         vnode.options(),
@@ -760,7 +730,7 @@ pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eo
   {
     let current_viewport = new_viewport.unwrap_or(viewport);
 
-    let new_cursor_viewport = cursor_move_to(
+    let new_cursor_viewport = raw_cursor_move_to(
       &current_viewport,
       &cursor_viewport,
       text,

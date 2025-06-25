@@ -197,9 +197,10 @@ impl NormalStateful {
           // First try window scroll.
           if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx()
           {
-            let new_viewport = cursor_ops::command_line_scroll_to(
+            let new_viewport = cursor_ops::raw_widget_scroll_to(
               &viewport,
-              cmdline,
+              cmdline.actual_shape(),
+              cmdline.options(),
               text,
               Operation::WindowScrollTo((start_column, start_line)),
             );
@@ -216,7 +217,7 @@ impl NormalStateful {
         {
           let current_viewport = new_viewport.unwrap_or(viewport);
 
-          let new_cursor_viewport = cursor_ops::cursor_move_to(
+          let new_cursor_viewport = cursor_ops::raw_cursor_move_to(
             &current_viewport,
             &cursor_viewport,
             text,
@@ -414,7 +415,7 @@ impl NormalStateful {
         let (target_cursor_char, target_cursor_line, _search_direction) =
           self._target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
 
-        let maybe_new_cursor_viewport = cursor_ops::cursor_move_to(
+        let maybe_new_cursor_viewport = cursor_ops::raw_cursor_move_to(
           &viewport,
           &cursor_viewport,
           buffer.text(),
@@ -451,9 +452,10 @@ impl NormalStateful {
           viewport.start_column_idx(),
           viewport.start_line_idx(),
         );
-        let maybe_new_viewport_arc = cursor_ops::window_scroll_to(
+        let maybe_new_viewport_arc = cursor_ops::raw_widget_scroll_to(
           &viewport,
-          current_window,
+          current_window.actual_shape(),
+          current_window.options(),
           buffer.text(),
           Operation::WindowScrollTo((start_column, start_line)),
         );
