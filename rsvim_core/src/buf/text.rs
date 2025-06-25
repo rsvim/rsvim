@@ -388,7 +388,7 @@ impl Text {
     payload: CompactString,
   ) -> (usize, usize) {
     debug_assert!(self.rope().get_line(line_idx).is_some());
-    debug_assert!(self.rope().line(line_idx).get_char(char_idx).is_some());
+    debug_assert!(char_idx + 1 < self.rope().line(line_idx).len_chars());
 
     let absolute_line_idx = self.rope().line_to_char(line_idx);
     let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
