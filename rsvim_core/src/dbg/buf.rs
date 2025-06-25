@@ -1,5 +1,7 @@
 //! Buffer debug utils.
 
+#![allow(unused_imports, unused_variables)]
+
 use crate::buf::text::Text;
 
 use tracing::trace;
@@ -52,4 +54,4 @@ pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &s
 }
 
 #[cfg(not(debug_assertions))]
-pub fn dbg_print_textline(buffer: &Text, line_idx: usize, char_idx: usize, msg: &str) {}
+pub fn dbg_print_textline(_text: &Text, _line_idx: usize, _char_idx: usize, _msg: &str) {}
