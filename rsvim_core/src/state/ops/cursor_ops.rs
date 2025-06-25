@@ -418,7 +418,7 @@ pub fn raw_delete_at_cursor(
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
   debug_assert!(cursor_char_idx < text.rope().line(cursor_line_idx).len_chars());
 
-  text.delete_at(cursor_line_idx, cursor_char_idx, n)
+  text.cursor_delete_at(cursor_line_idx, cursor_char_idx, n)
 }
 
 pub fn update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
@@ -606,7 +606,7 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) {
   debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
 
   if let Some((cursor_line_idx_after_inserted, cursor_char_idx_after_inserted)) =
-    text.insert_at(cursor_line_idx, cursor_char_idx, payload)
+    text.cursor_insert_at(cursor_line_idx, cursor_char_idx, payload)
   {
     // Update viewport since the buffer doesn't match the viewport.
     update_viewport_after_text_changed(tree, cursor_parent_id, text);
