@@ -4,8 +4,8 @@ use crate::buf::text::Text;
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops::{self, CursorMoveDirection};
-use crate::state::ops::{Operation, cursor_move_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, ViewportArc, ViewportSearchDirection, Viewportable};
@@ -365,7 +365,7 @@ impl NormalStateful {
     };
     let buffer = buffer.upgrade().unwrap();
     let buffer = lock!(buffer);
-    cursor_move_ops::cursor_move(&mut tree, buffer.text(), op, false);
+    cursor_ops::cursor_move(&mut tree, buffer.text(), op, false);
 
     StatefulValue::NormalMode(NormalStateful::default())
   }
