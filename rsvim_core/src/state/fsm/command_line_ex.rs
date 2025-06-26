@@ -170,7 +170,7 @@ impl CommandLineExStateful {
 
 // spellchecker:off
 #[cfg(test)]
-#[allow(unused_imports)]
+#[allow(unused_imports, dead_code)]
 mod tests_util {
   use super::*;
 

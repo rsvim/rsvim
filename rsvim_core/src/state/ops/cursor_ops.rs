@@ -407,7 +407,7 @@ pub fn _dbg_print_details_on_line(buffer: &Text, line_idx: usize, char_idx: usiz
   }
 }
 
-pub fn cursor_parent_widget_node(tree: &Tree) -> Option<&TreeNode> {
+pub fn cursor_parent_node(tree: &Tree) -> Option<&TreeNode> {
   if let Some(cursor_id) = tree.cursor_id() {
     if let Some(cursor_parent_id) = tree.parent_id(cursor_id) {
       debug_assert!(tree.node(cursor_parent_id).is_some());
@@ -429,7 +429,7 @@ pub fn cursor_parent_widget_node(tree: &Tree) -> Option<&TreeNode> {
   None
 }
 
-pub fn cursor_parent_widget_node_mut(tree: &mut Tree) -> Option<&mut TreeNode> {
+pub fn cursor_parent_node_mut(tree: &mut Tree) -> Option<&mut TreeNode> {
   if let Some(cursor_id) = tree.cursor_id() {
     if let Some(cursor_parent_id) = tree.parent_id(cursor_id) {
       debug_assert!(tree.node_mut(cursor_parent_id).is_some());
@@ -512,7 +512,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
 
 /// The operation must be `Operation::CursorMove*`.
 pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eol: bool) {
-  let cursor_parent_node = cursor_parent_widget_node_mut(tree).unwrap();
+  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
   let vnode_actual_shape = match cursor_parent_node {
     TreeNode::Window(window) => *window.actual_shape(),
     TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
@@ -608,7 +608,7 @@ pub fn cursor_insert(
   text: &mut Text,
   payload: CompactString,
 ) -> Option<(usize, usize)> {
-  let cursor_parent_node = cursor_parent_widget_node_mut(tree).unwrap();
+  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
   let cursor_parent_id = cursor_parent_node.id();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
@@ -647,7 +647,7 @@ pub fn cursor_insert(
 }
 
 pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usize, usize)> {
-  let cursor_parent_node = cursor_parent_widget_node_mut(tree).unwrap();
+  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
   let cursor_parent_id = cursor_parent_node.id();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
