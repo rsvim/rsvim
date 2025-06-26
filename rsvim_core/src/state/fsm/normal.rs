@@ -7,6 +7,7 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
+use crate::ui::widget::window::Window;
 
 use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -45,6 +46,15 @@ impl NormalStateful {
       Event::Mouse(_mouse_event) => None,
       Event::Paste(ref _paste_string) => None,
       Event::Resize(_columns, _rows) => None,
+    }
+  }
+
+  fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
+    let current_window_node = cursor_ops::cursor_parent_node_mut(tree).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => current_window,
+      _ => unreachable!(),
     }
   }
 }
@@ -105,10 +115,13 @@ impl NormalStateful {
     let cursor_node = cursor_node.unwrap();
     debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
     debug_assert!(!tree.children_ids(cursor_parent_id).contains(&cursor_id));
-    match cursor_node {
-      TreeNode::Cursor(mut cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+    let cursor_node = match cursor_node {
+      TreeNode::Cursor(mut cursor) => {
+        cursor.set_style(&CursorStyle::SteadyBar);
+        TreeNode::Cursor(cursor)
+      }
       _ => unreachable!(),
-    }
+    };
 
     // Insert to new parent
     debug_assert!(tree.command_line_id().is_some());
@@ -219,24 +232,10 @@ impl NormalStateful {
   fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    if cfg!(debug_assertions) {
-      debug_assert!(tree.cursor_id().is_some());
-      let cursor_id = tree.cursor_id().unwrap();
-      debug_assert!(tree.parent_id(cursor_id).is_some());
-      debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), current_window_id);
-    }
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    let buffer = match current_window_node {
-      TreeNode::Window(current_window) => current_window.buffer(),
-      _ => unreachable!(),
-    };
-    let buffer = buffer.upgrade().unwrap();
+    let current_window = self._current_window(&mut tree);
+    let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
+
     cursor_ops::cursor_move(&mut tree, buffer.text(), op, false);
 
     StatefulValue::NormalMode(NormalStateful::default())
@@ -280,40 +279,30 @@ impl NormalStateful {
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    let current_window = self._current_window(&mut tree);
+    let buffer = current_window.buffer().upgrade().unwrap();
+    let buffer = lock!(buffer);
+    let viewport = current_window.viewport();
+    let cursor_viewport = current_window.cursor_viewport();
 
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => {
-        let buffer = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer);
-        let viewport = current_window.viewport();
-        let cursor_viewport = current_window.cursor_viewport();
+    let (target_cursor_char, target_cursor_line, _search_direction) =
+      self.__target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
 
-        let (target_cursor_char, target_cursor_line, _search_direction) =
-          self.__target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
+    let maybe_new_cursor_viewport = cursor_ops::raw_cursor_move_to(
+      &viewport,
+      &cursor_viewport,
+      buffer.text(),
+      Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+    );
 
-        let maybe_new_cursor_viewport = cursor_ops::raw_cursor_move_to(
-          &viewport,
-          &cursor_viewport,
-          buffer.text(),
-          Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
-        );
-
-        if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
-          current_window.set_cursor_viewport(new_cursor_viewport.clone());
-          let cursor_id = tree.cursor_id().unwrap();
-          tree.bounded_move_to(
-            cursor_id,
-            new_cursor_viewport.column_idx() as isize,
-            new_cursor_viewport.row_idx() as isize,
-          );
-        }
-      }
-      _ => unreachable!(),
+    if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
+      current_window.set_cursor_viewport(new_cursor_viewport.clone());
+      let cursor_id = tree.cursor_id().unwrap();
+      tree.bounded_move_to(
+        cursor_id,
+        new_cursor_viewport.column_idx() as isize,
+        new_cursor_viewport.row_idx() as isize,
+      );
     }
   }
 
@@ -321,29 +310,25 @@ impl NormalStateful {
   fn __test_raw_window_scroll(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    let current_window = self._current_window(&mut tree);
+    let buffer = current_window.buffer().upgrade().unwrap();
+    let buffer = lock!(buffer);
+    let viewport = current_window.viewport();
 
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let viewport = current_window.viewport();
-        let buffer = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer);
-
-        let (start_column, start_line) = cursor_ops::normalize_to_window_scroll_to(
-          op,
-          viewport.start_column_idx(),
-          viewport.start_line_idx(),
-        );
-        let maybe_new_viewport_arc = cursor_ops::raw_widget_scroll_to(
-          &viewport,
-          current_window.actual_shape(),
-          current_window.options(),
-          buffer.text(),
-          Operation::WindowScrollTo((start_column, start_line)),
-        );
-        if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
-          current_window.set_viewport(new_viewport_arc.clone());
-        }
-      }
+    let (start_column, start_line) = cursor_ops::normalize_to_window_scroll_to(
+      op,
+      viewport.start_column_idx(),
+      viewport.start_line_idx(),
+    );
+    let maybe_new_viewport_arc = cursor_ops::raw_widget_scroll_to(
+      &viewport,
+      current_window.actual_shape(),
+      current_window.options(),
+      buffer.text(),
+      Operation::WindowScrollTo((start_column, start_line)),
+    );
+    if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
+      current_window.set_viewport(new_viewport_arc.clone());
     }
   }
 
@@ -366,11 +351,13 @@ mod tests_util {
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::test::tree::{make_tree_with_buffers, make_tree_with_buffers_cmdline};
+  use crate::ui::canvas::{Canvas, CanvasArc};
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
+  use crate::ui::widget::command_line::CommandLine;
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -397,6 +384,31 @@ mod tests_util {
     (tree, state, bufs, buf, contents)
   }
 
+  pub fn make_tree_with_cmdline(
+    terminal_size: U16Size,
+    window_local_opts: WindowLocalOptions,
+    lines: Vec<&str>,
+  ) -> (
+    TreeArc,
+    StateArc,
+    BuffersManagerArc,
+    BufferArc,
+    TextContentsArc,
+  ) {
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
+    let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
+    let contents = TextContents::to_arc(TextContents::new(terminal_size));
+    let tree = make_tree_with_buffers_cmdline(
+      terminal_size,
+      window_local_opts,
+      bufs.clone(),
+      contents.clone(),
+    );
+    let state = State::to_arc(State::default());
+    (tree, state, bufs, buf, contents)
+  }
+
   pub fn get_viewport(tree: TreeArc) -> ViewportArc {
     let tree = lock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
@@ -410,13 +422,27 @@ mod tests_util {
 
   pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
     let tree = lock!(tree);
-    let current_window_id = tree.current_window_id().unwrap();
-    let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => current_window.cursor_viewport(),
+    let cursor_id = tree.cursor_id().unwrap();
+    let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+    let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
+    assert!(matches!(
+      cursor_parent_node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    let vnode: &dyn Viewportable = match cursor_parent_node {
+      TreeNode::Window(window) => window,
+      TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
-    }
+    };
+    vnode.cursor_viewport()
+  }
+
+  pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
+    let canvas = Canvas::new(terminal_size);
+    let canvas = Canvas::to_arc(canvas);
+    let tree = lock!(tree);
+    tree.draw(canvas.clone());
+    canvas
   }
 
   #[allow(clippy::too_many_arguments)]
@@ -542,6 +568,32 @@ mod tests_util {
         );
         assert_eq!(payload, expect[*r as usize]);
       }
+    }
+  }
+
+  pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
+    let actual = actual
+      .frame()
+      .raw_symbols()
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{}", actual.len());
+    for a in actual.iter() {
+      info!("{:?}", a);
+    }
+    info!("expect:{}", expect.len());
+    for e in expect.iter() {
+      info!("{:?}", e);
+    }
+
+    assert_eq!(actual.len(), expect.len());
+    for i in 0..actual.len() {
+      let e = &expect[i];
+      let a = &actual[i];
+      info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
+      assert_eq!(e.len(), a.len());
+      assert_eq!(e, a);
     }
   }
 }
@@ -6733,6 +6785,82 @@ mod tests_cursor_move {
         &expect_fills,
       );
     }
+  }
+}
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_goto_command_line_ex_mode {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
+  use crate::lock;
+  use crate::prelude::*;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
+
+  #[test]
+  fn nowrap1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 10);
+    let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
+      terminal_size,
+      WindowLocalOptionsBuilder::default()
+        .wrap(false)
+        .build()
+        .unwrap(),
+      vec![],
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
+    let stateful = NormalStateful::default();
+    stateful.goto_command_line_ex_mode(&data_access);
+
+    let tree = data_access.tree.clone();
+    let actual_cursor = get_cursor_viewport(tree.clone());
+    assert_eq!(actual_cursor.line_idx(), 0);
+    assert_eq!(actual_cursor.char_idx(), 1);
+    assert_eq!(actual_cursor.row_idx(), 0);
+    assert_eq!(actual_cursor.column_idx(), 1);
+
+    let expect_canvas = vec![
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      ":         ",
+    ];
+    let actual_canvas = make_canvas(tree.clone(), terminal_size);
+    let actual_canvas = lock!(actual_canvas);
+    assert_canvas(&actual_canvas, &expect_canvas);
   }
 }
 // spellchecker:on
