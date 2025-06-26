@@ -159,11 +159,11 @@ impl CommandLineExStateful {
   fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = self._current_window(&mut tree);
-    let buffer = current_window.buffer().upgrade().unwrap();
-    let buffer = lock!(buffer);
+    let cmdline = self._current_command_line(&mut tree);
+    let contents = data_access.contents;
+    let contents = lock!(contents);
 
-    cursor_ops::cursor_move(&mut tree, buffer.text(), op, true);
+    cursor_ops::cursor_move(&mut tree, contents.text(), op, true);
 
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
