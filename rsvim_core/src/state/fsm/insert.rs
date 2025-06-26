@@ -3472,14 +3472,8 @@ mod tests_delete_text {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect = vec![""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
@@ -3549,14 +3543,8 @@ mod tests_delete_text {
       assert_eq!(actual1.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect = vec![""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
