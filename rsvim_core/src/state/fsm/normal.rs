@@ -579,6 +579,32 @@ mod tests_util {
       }
     }
   }
+
+  pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
+    let actual = actual
+      .frame()
+      .raw_symbols()
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{}", actual.len());
+    for a in actual.iter() {
+      info!("{:?}", a);
+    }
+    info!("expect:{}", expect.len());
+    for e in expect.iter() {
+      info!("{:?}", e);
+    }
+
+    assert_eq!(actual.len(), expect.len());
+    for i in 0..actual.len() {
+      let e = &expect[i];
+      let a = &actual[i];
+      info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
+      assert_eq!(e.len(), a.len());
+      assert_eq!(e, a);
+    }
+  }
 }
 
 #[cfg(test)]
@@ -6828,7 +6854,22 @@ mod tests_goto_command_line_ex_mode {
     assert_eq!(actual_cursor.char_idx(), 1);
     assert_eq!(actual_cursor.row_idx(), 0);
     assert_eq!(actual_cursor.column_idx(), 1);
+
+    let expect_canvas = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "  1. When ",
+      "  2. When ",
+      "     * The",
+      "     * The",
+      "          ",
+      "          ",
+      "          ",
+    ];
     let actual_canvas = make_canvas(tree.clone(), terminal_size);
+    let actual_canvas = lock!(actual_canvas);
+    assert_canvas(&actual_canvas, &expect_canvas);
   }
 }
 // spellchecker:on
