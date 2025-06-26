@@ -531,5 +531,13 @@ impl Text {
 
     Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
   }
+
+  /// Clear all text payload in current content.
+  ///
+  /// NOTE: The extra eol at text content end still keeps.
+  pub fn clear(&mut self) {
+    self.rope_mut().remove(0..);
+    self.clear_cached_lines();
+  }
 }
 // Edit }
