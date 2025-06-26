@@ -288,11 +288,16 @@ mod tests_util {
 
   pub fn get_viewport(tree: TreeArc) -> ViewportArc {
     let tree = lock!(tree);
-    let current_window_id = tree.current_window_id().unwrap();
-    let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
+    let cursor_id = tree.cursor_id().unwrap();
+    let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+    let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
+    assert!(matches!(
+      cursor_parent_node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    match cursor_parent_node {
       TreeNode::Window(current_window) => current_window.viewport(),
+      TreeNode::CommandLine(cmdline) => cmdline.viewport(),
       _ => unreachable!(),
     }
   }
@@ -306,12 +311,11 @@ mod tests_util {
       cursor_parent_node,
       TreeNode::Window(_) | TreeNode::CommandLine(_)
     ));
-    let vnode: &dyn Viewportable = match cursor_parent_node {
-      TreeNode::Window(window) => window,
-      TreeNode::CommandLine(cmdline) => cmdline,
+    match cursor_parent_node {
+      TreeNode::Window(window) => window.cursor_viewport(),
+      TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
       _ => unreachable!(),
-    };
-    vnode.cursor_viewport()
+    }
   }
 
   pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
@@ -569,7 +573,7 @@ mod tests_goto_normal_mode {
   fn nowrap1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(7, 7);
+    let terminal_size = U16Size::new(11, 5);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(false)
       .build()
@@ -608,76 +612,39 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 5);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "Bye, Hello",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
-        "",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text1 = CompactString::new(format!(":Bye, {}", buf_eol));
+      let expect = vec![text1.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        1,
         &expect_fills,
         &expect_fills,
       );
 
-      let expect_canvas = vec![
-        "Bye, Hello",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "     * The",
-        "     * The",
-        "          ",
-        "          ",
-        "          ",
-      ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let expect_canvas = vec![":Bye,      "];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
 
-    // Move-2
+    // Goto Normal-2
     {
-      stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(20));
+      stateful.goto_normal_mode(&data_access);
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 18);
+      assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 9);
+      assert_eq!(actual1.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "o, RSVIM!\n",
-        " quite sim",
-        " it contai",
-        " the line ",
-        " the line ",
-        "e extra pa",
-        "e extra pa",
-        "",
-      ];
+      let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> = vec![
         (0, 0),
         (1, 0),
@@ -708,66 +675,6 @@ mod tests_goto_normal_mode {
         " the line ",
         "e extra pa",
         "e extra pa",
-        "          ",
-        "          ",
-        "          ",
-      ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
-      assert_canvas(&actual_canvas, &expect_canvas);
-    }
-
-    // Insert-3
-    {
-      stateful.cursor_insert(&data_access, CompactString::new(" Go!"));
-
-      let tree = data_access.tree.clone();
-      let actual3 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual3.line_idx(), 0);
-      assert_eq!(actual3.char_idx(), 22);
-      assert_eq!(actual3.row_idx(), 0);
-      assert_eq!(actual3.column_idx(), 9);
-
-      let viewport = get_viewport(tree.clone());
-      let expect = vec![
-        "SVIM! Go!\n",
-        "te simple ",
-        "contains s",
-        " line is s",
-        " line is t",
-        "tra parts ",
-        "tra parts ",
-        "",
-      ];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
-      assert_viewport_scroll(
-        buf.clone(),
-        &viewport,
-        &expect,
-        0,
-        8,
-        &expect_fills,
-        &expect_fills,
-      );
-
-      let expect_canvas = vec![
-        "SVIM! Go! ",
-        "te simple ",
-        "contains s",
-        " line is s",
-        " line is t",
-        "tra parts ",
-        "tra parts ",
         "          ",
         "          ",
         "          ",
