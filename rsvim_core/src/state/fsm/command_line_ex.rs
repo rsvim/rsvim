@@ -541,4 +541,33 @@ mod tests_get_operation {
     ));
   }
 }
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_goto_normal_mode {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::{lock, state};
+
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
+
+  #[test]
+  fn test1() {
+    test_log_init();
+  }
+}
 // spellchecker:on
