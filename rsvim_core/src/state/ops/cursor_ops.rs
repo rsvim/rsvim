@@ -2,6 +2,7 @@
 
 use crate::buf::text::Text;
 use crate::coord::U16Rect;
+use crate::defaults::win;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
@@ -407,6 +408,50 @@ pub fn _dbg_print_details_on_line(buffer: &Text, line_idx: usize, char_idx: usiz
   }
 }
 
+pub fn cursor_parent_widget_node(tree: &Tree) -> Option<&TreeNode> {
+  if let Some(cursor_id) = tree.cursor_id() {
+    if let Some(cursor_parent_id) = tree.parent_id(cursor_id) {
+      debug_assert!(tree.node(cursor_parent_id).is_some());
+      let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
+      debug_assert!(matches!(
+        cursor_parent_node,
+        TreeNode::Window(_) | TreeNode::CommandLine(_)
+      ));
+      if cfg!(debug_assertions) {
+        match cursor_parent_node {
+          TreeNode::Window(window) => debug_assert_eq!(window.id(), cursor_parent_id),
+          TreeNode::CommandLine(cmdline) => debug_assert_eq!(cmdline.id(), cursor_parent_id),
+          _ => unreachable!(),
+        }
+      }
+      return Some(cursor_parent_node);
+    }
+  }
+  None
+}
+
+pub fn cursor_parent_widget_node_mut(tree: &mut Tree) -> Option<&mut TreeNode> {
+  if let Some(cursor_id) = tree.cursor_id() {
+    if let Some(cursor_parent_id) = tree.parent_id(cursor_id) {
+      debug_assert!(tree.node_mut(cursor_parent_id).is_some());
+      let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
+      debug_assert!(matches!(
+        cursor_parent_node,
+        TreeNode::Window(_) | TreeNode::CommandLine(_)
+      ));
+      if cfg!(debug_assertions) {
+        match cursor_parent_node {
+          TreeNode::Window(window) => debug_assert_eq!(window.id(), cursor_parent_id),
+          TreeNode::CommandLine(cmdline) => debug_assert_eq!(cmdline.id(), cursor_parent_id),
+          _ => unreachable!(),
+        }
+      }
+      return Some(cursor_parent_node);
+    }
+  }
+  None
+}
+
 pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
   debug_assert!(tree.node_mut(id).is_some());
   let node = tree.node_mut(id).unwrap();
@@ -468,16 +513,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
 
 /// The operation must be `Operation::CursorMove*`.
 pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eol: bool) {
-  debug_assert!(tree.cursor_id().is_some());
-  let cursor_id = tree.cursor_id().unwrap();
-  debug_assert!(tree.parent_id(cursor_id).is_some());
-  let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
-  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
-  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
-  debug_assert!(matches!(
-    cursor_parent_node,
-    TreeNode::Window(_) | TreeNode::CommandLine(_)
-  ));
+  let cursor_parent_node = cursor_parent_widget_node_mut(tree).unwrap();
   let vnode_actual_shape = match cursor_parent_node {
     TreeNode::Window(window) => *window.actual_shape(),
     TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
@@ -573,16 +609,8 @@ pub fn cursor_insert(
   text: &mut Text,
   payload: CompactString,
 ) -> Option<(usize, usize)> {
-  debug_assert!(tree.cursor_id().is_some());
-  let cursor_id = tree.cursor_id().unwrap();
-  debug_assert!(tree.parent_id(cursor_id).is_some());
-  let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
-  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
-  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
-  debug_assert!(matches!(
-    cursor_parent_node,
-    TreeNode::Window(_) | TreeNode::CommandLine(_)
-  ));
+  let cursor_parent_node = cursor_parent_widget_node_mut(tree).unwrap();
+  let cursor_parent_id = cursor_parent_node.id();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
     TreeNode::CommandLine(cmdline) => cmdline,
@@ -620,16 +648,8 @@ pub fn cursor_insert(
 }
 
 pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usize, usize)> {
-  debug_assert!(tree.cursor_id().is_some());
-  let cursor_id = tree.cursor_id().unwrap();
-  debug_assert!(tree.parent_id(cursor_id).is_some());
-  let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
-  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
-  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
-  debug_assert!(matches!(
-    cursor_parent_node,
-    TreeNode::Window(_) | TreeNode::CommandLine(_)
-  ));
+  let cursor_parent_node = cursor_parent_widget_node_mut(tree).unwrap();
+  let cursor_parent_id = cursor_parent_node.id();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
     TreeNode::CommandLine(cmdline) => cmdline,
