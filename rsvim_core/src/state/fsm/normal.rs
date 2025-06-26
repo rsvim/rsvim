@@ -6809,8 +6809,8 @@ mod tests_goto_command_line_ex_mode {
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
-    let stateful_machine = NormalStateful::default();
-    stateful_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    let stateful = NormalStateful::default();
+    stateful.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
