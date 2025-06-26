@@ -3339,13 +3339,15 @@ mod tests_delete_text {
       assert_eq!(actual3.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text5 = CompactString::new(format!("he extra.{}", buf_eol));
       let expect = vec![
         "SVIM!\n",
         "s is a qui",
         " sow of th",
         ". When the",
         "he extra p",
-        "he extra.\n",
+        text5.as_str(),
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> =
