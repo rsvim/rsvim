@@ -477,7 +477,7 @@ impl Text {
       cursor_char_absolute_pos_before_delete
         ..(std::cmp::min(
           cursor_char_absolute_pos_before_delete + n as usize,
-          self.rope().len_chars().saturating_sub(1),
+          self.rope().len_chars(),
         ))
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
