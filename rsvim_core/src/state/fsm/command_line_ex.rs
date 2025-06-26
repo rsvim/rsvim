@@ -463,21 +463,35 @@ mod tests_get_operation {
         KeyCode::Char('i'),
         KeyModifiers::empty()
       ))),
-      Some(Operation::GotoInsertMode)
+      Some(Operation::CursorInsert(_))
     ));
     assert!(matches!(
       stateful._get_operation(Event::Key(KeyEvent::new(
         KeyCode::Char('j'),
         KeyModifiers::empty()
       ))),
-      Some(Operation::CursorMoveDownBy(_))
+      Some(Operation::CursorInsert(_))
     ));
     assert!(matches!(
       stateful._get_operation(Event::Key(KeyEvent::new(
         KeyCode::Esc,
         KeyModifiers::empty()
       ))),
-      Some(Operation::EditorQuit)
+      Some(Operation::GotoNormalMode)
+    ));
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Backspace,
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::CursorDelete(_))
+    ));
+    assert!(matches!(
+      stateful._get_operation(Event::Key(KeyEvent::new(
+        KeyCode::Delete,
+        KeyModifiers::empty()
+      ))),
+      Some(Operation::CursorDelete(_))
     ));
   }
 }
