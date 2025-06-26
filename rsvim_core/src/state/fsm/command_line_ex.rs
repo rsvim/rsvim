@@ -57,7 +57,7 @@ impl CommandLineExStateful {
     }
   }
 
-  fn _current_command_line<'a>(&self, tree: &'a mut Tree) -> &'a mut CommandLine {
+  fn _command_line<'a>(&self, tree: &'a mut Tree) -> &'a mut CommandLine {
     let current_command_line = cursor_ops::cursor_parent_node_mut(tree).unwrap();
     debug_assert!(matches!(current_command_line, TreeNode::CommandLine(_)));
     match current_command_line {
@@ -191,8 +191,25 @@ impl CommandLineExStateful {
     let mut tree = lock!(tree);
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
+    let text = contents.command_line_content_mut();
 
-    cursor_ops::cursor_delete(&mut tree, contents.command_line_content_mut(), n);
+    let cmdline = self._command_line(&mut tree);
+    let cursor_viewport = cmdline.cursor_viewport();
+    let cursor_line_idx = cursor_viewport.line_idx();
+    debug_assert_eq!(cursor_line_idx, 0);
+    let cursor_char_idx = cursor_viewport.char_idx();
+    debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+
+    let to_be_deleted_n = if n > 0 {
+      // Delete to right side
+      n
+    } else {
+      // Delete to left side, do NOT delete the first ':' char.
+      let left_bound = std::cmp::max(1_usize, cursor_char_idx.saturating_add_signed(n));
+      -(cursor_char_idx.saturating_sub(left_bound) as isize)
+    };
+
+    cursor_ops::cursor_delete(&mut tree, text, to_be_deleted_n);
 
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }

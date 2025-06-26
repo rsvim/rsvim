@@ -163,6 +163,17 @@ impl Text {
       None => false,
     }
   }
+
+  /// Get chars count on specific line without empty eol, similar to `len_chars`.
+  ///
+  /// # Panics
+  /// If `line_idx` doesn't exist in text rope.
+  pub fn len_chars_no_empty_eol(&self, line_idx: usize) -> usize {
+    match self.last_char_on_line_no_empty_eol(line_idx) {
+      Some(n) => n + 1,
+      None => self.rope.line(line_idx).len_chars(),
+    }
+  }
 }
 // Rope }
 
@@ -477,7 +488,7 @@ impl Text {
       cursor_char_absolute_pos_before_delete
         ..(std::cmp::min(
           cursor_char_absolute_pos_before_delete + n as usize,
-          self.rope().len_chars().saturating_sub(1),
+          self.rope().len_chars(),
         ))
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
