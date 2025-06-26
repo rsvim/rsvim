@@ -167,3 +167,264 @@ impl CommandLineExStateful {
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
 }
+
+// spellchecker:off
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_util {
+  use super::*;
+
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
+  use crate::content::{TextContents, TextContentsArc};
+  use crate::lock;
+  use crate::prelude::*;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::{make_tree_with_buffers, make_tree_with_buffers_cmdline};
+  use crate::ui::canvas::{Canvas, CanvasArc};
+  use crate::ui::tree::TreeArc;
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  };
+  use crate::ui::widget::command_line::CommandLine;
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
+
+  pub fn make_tree(
+    terminal_size: U16Size,
+    window_local_opts: WindowLocalOptions,
+    lines: Vec<&str>,
+  ) -> (
+    TreeArc,
+    StateArc,
+    BuffersManagerArc,
+    BufferArc,
+    TextContentsArc,
+  ) {
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
+    let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
+    let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
+    let state = State::to_arc(State::default());
+    let contents = TextContents::to_arc(TextContents::new(terminal_size));
+    (tree, state, bufs, buf, contents)
+  }
+
+  pub fn make_tree_with_cmdline(
+    terminal_size: U16Size,
+    window_local_opts: WindowLocalOptions,
+    lines: Vec<&str>,
+  ) -> (
+    TreeArc,
+    StateArc,
+    BuffersManagerArc,
+    BufferArc,
+    TextContentsArc,
+  ) {
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
+    let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
+    let contents = TextContents::to_arc(TextContents::new(terminal_size));
+    let tree = make_tree_with_buffers_cmdline(
+      terminal_size,
+      window_local_opts,
+      bufs.clone(),
+      contents.clone(),
+    );
+    let state = State::to_arc(State::default());
+    (tree, state, bufs, buf, contents)
+  }
+
+  pub fn get_viewport(tree: TreeArc) -> ViewportArc {
+    let tree = lock!(tree);
+    let current_window_id = tree.current_window_id().unwrap();
+    let current_window_node = tree.node(current_window_id).unwrap();
+    assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => current_window.viewport(),
+      _ => unreachable!(),
+    }
+  }
+
+  pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
+    let tree = lock!(tree);
+    let cursor_id = tree.cursor_id().unwrap();
+    let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+    let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
+    assert!(matches!(
+      cursor_parent_node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    let vnode: &dyn Viewportable = match cursor_parent_node {
+      TreeNode::Window(window) => window,
+      TreeNode::CommandLine(cmdline) => cmdline,
+      _ => unreachable!(),
+    };
+    vnode.cursor_viewport()
+  }
+
+  pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
+    let canvas = Canvas::new(terminal_size);
+    let canvas = Canvas::to_arc(canvas);
+    let tree = lock!(tree);
+    tree.draw(canvas.clone());
+    canvas
+  }
+
+  #[allow(clippy::too_many_arguments)]
+  pub fn assert_viewport_scroll(
+    buffer: BufferArc,
+    actual: &Viewport,
+    expect: &Vec<&str>,
+    expect_start_line: usize,
+    expect_end_line: usize,
+    expect_start_fills: &BTreeMap<usize, usize>,
+    expect_end_fills: &BTreeMap<usize, usize>,
+  ) {
+    info!(
+      "actual start_line/end_line:{:?}/{:?}",
+      actual.start_line_idx(),
+      actual.end_line_idx()
+    );
+    info!(
+      "expect start_line/end_line:{:?}/{:?}",
+      expect_start_line, expect_end_line
+    );
+    for (k, v) in actual.lines().iter() {
+      info!("actual line[{:?}]: {:?}", k, v);
+    }
+    for (i, e) in expect.iter().enumerate() {
+      info!("expect line[{}]:{:?}", i, e);
+    }
+    assert_eq!(expect_start_fills.len(), expect_end_fills.len());
+    for (k, start_v) in expect_start_fills.iter() {
+      let end_v = expect_end_fills.get(k).unwrap();
+      info!(
+        "expect start_fills/end_fills line[{}]:{:?}/{:?}",
+        k, start_v, end_v
+      );
+    }
+
+    assert_eq!(actual.start_line_idx(), expect_start_line);
+    assert_eq!(actual.end_line_idx(), expect_end_line);
+    if actual.lines().is_empty() {
+      assert!(actual.end_line_idx() <= actual.start_line_idx());
+    } else {
+      let (first_line_idx, _first_line_viewport) = actual.lines().first().unwrap();
+      let (last_line_idx, _last_line_viewport) = actual.lines().last().unwrap();
+      assert_eq!(*first_line_idx, actual.start_line_idx());
+      assert_eq!(*last_line_idx, actual.end_line_idx() - 1);
+    }
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      actual.lines().len()
+    );
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      expect_start_fills.len()
+    );
+    assert_eq!(
+      actual.end_line_idx() - actual.start_line_idx(),
+      expect_end_fills.len()
+    );
+
+    let buffer = lock!(buffer);
+    let buflines = buffer.text().rope().lines_at(actual.start_line_idx());
+    let total_lines = expect_end_line - expect_start_line;
+
+    for (l, line) in buflines.enumerate() {
+      if l >= total_lines {
+        break;
+      }
+      let actual_line_idx = l + expect_start_line;
+      let line_viewport = actual.lines().get(&actual_line_idx).unwrap();
+
+      info!(
+        "l-{:?}, actual_line_idx:{}, line_viewport:{:?}",
+        l, actual_line_idx, line_viewport
+      );
+      info!(
+        "start_filled_cols expect:{:?}, actual:{}",
+        expect_start_fills.get(&actual_line_idx),
+        line_viewport.start_filled_cols()
+      );
+      assert_eq!(
+        line_viewport.start_filled_cols(),
+        *expect_start_fills.get(&actual_line_idx).unwrap()
+      );
+      info!(
+        "end_filled_cols expect:{:?}, actual:{}",
+        expect_end_fills.get(&actual_line_idx),
+        line_viewport.end_filled_cols()
+      );
+      assert_eq!(
+        line_viewport.end_filled_cols(),
+        *expect_end_fills.get(&actual_line_idx).unwrap()
+      );
+
+      let rows = &line_viewport.rows();
+      for (r, row) in rows.iter() {
+        info!("row-index-{:?}, row:{:?}", r, row);
+
+        if r > rows.first().unwrap().0 {
+          let prev_r = r - 1;
+          let prev_row = rows.get(&prev_r).unwrap();
+          info!(
+            "row-{:?}, current[{}]:{:?}, previous[{}]:{:?}",
+            r, r, row, prev_r, prev_row
+          );
+        }
+        if r < rows.last().unwrap().0 {
+          let next_r = r + 1;
+          let next_row = rows.get(&next_r).unwrap();
+          info!(
+            "row-{:?}, current[{}]:{:?}, next[{}]:{:?}",
+            r, r, row, next_r, next_row
+          );
+        }
+
+        let mut payload = String::new();
+        for c_idx in row.start_char_idx()..row.end_char_idx() {
+          let c = line.get_char(c_idx).unwrap();
+          payload.push(c);
+        }
+        info!(
+          "row-{:?}, payload actual:{:?}, expect:{:?}",
+          r, payload, expect[*r as usize]
+        );
+        assert_eq!(payload, expect[*r as usize]);
+      }
+    }
+  }
+
+  pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
+    let actual = actual
+      .frame()
+      .raw_symbols()
+      .iter()
+      .map(|cs| cs.join(""))
+      .collect::<Vec<_>>();
+    info!("actual:{}", actual.len());
+    for a in actual.iter() {
+      info!("{:?}", a);
+    }
+    info!("expect:{}", expect.len());
+    for e in expect.iter() {
+      info!("{:?}", e);
+    }
+
+    assert_eq!(actual.len(), expect.len());
+    for i in 0..actual.len() {
+      let e = &expect[i];
+      let a = &actual[i];
+      info!("i-{}, actual[{}]:{:?}, expect[{}]:{:?}", i, i, a, i, e);
+      assert_eq!(e.len(), a.len());
+      assert_eq!(e, a);
+    }
+  }
+}
