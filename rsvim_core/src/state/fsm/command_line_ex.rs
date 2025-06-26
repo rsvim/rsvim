@@ -626,7 +626,13 @@ mod tests_goto_normal_mode {
         &expect_fills,
       );
 
-      let expect_canvas = vec![":Bye,      "];
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":Bye,      ",
+      ];
       let actual_canvas = make_canvas(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
@@ -645,41 +651,26 @@ mod tests_goto_normal_mode {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![
-        (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
-      ]
-      .into_iter()
-      .collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        8,
+        1,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "o, RSVIM! ",
-        " quite sim",
-        " it contai",
-        " the line ",
-        " the line ",
-        "e extra pa",
-        "e extra pa",
-        "          ",
-        "          ",
-        "          ",
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        "           ",
       ];
-      let actual_canvas = make_canvas(terminal_size, window_options, buf.clone(), viewport);
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
     }
   }
