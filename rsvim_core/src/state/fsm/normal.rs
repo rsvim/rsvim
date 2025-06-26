@@ -279,40 +279,30 @@ impl NormalStateful {
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    let current_window = self._current_window(&mut tree);
+    let buffer = current_window.buffer().upgrade().unwrap();
+    let buffer = lock!(buffer);
+    let viewport = current_window.viewport();
+    let cursor_viewport = current_window.cursor_viewport();
 
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => {
-        let buffer = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer);
-        let viewport = current_window.viewport();
-        let cursor_viewport = current_window.cursor_viewport();
+    let (target_cursor_char, target_cursor_line, _search_direction) =
+      self.__target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
 
-        let (target_cursor_char, target_cursor_line, _search_direction) =
-          self.__target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
+    let maybe_new_cursor_viewport = cursor_ops::raw_cursor_move_to(
+      &viewport,
+      &cursor_viewport,
+      buffer.text(),
+      Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
+    );
 
-        let maybe_new_cursor_viewport = cursor_ops::raw_cursor_move_to(
-          &viewport,
-          &cursor_viewport,
-          buffer.text(),
-          Operation::CursorMoveTo((target_cursor_char, target_cursor_line)),
-        );
-
-        if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
-          current_window.set_cursor_viewport(new_cursor_viewport.clone());
-          let cursor_id = tree.cursor_id().unwrap();
-          tree.bounded_move_to(
-            cursor_id,
-            new_cursor_viewport.column_idx() as isize,
-            new_cursor_viewport.row_idx() as isize,
-          );
-        }
-      }
-      _ => unreachable!(),
+    if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
+      current_window.set_cursor_viewport(new_cursor_viewport.clone());
+      let cursor_id = tree.cursor_id().unwrap();
+      tree.bounded_move_to(
+        cursor_id,
+        new_cursor_viewport.column_idx() as isize,
+        new_cursor_viewport.row_idx() as isize,
+      );
     }
   }
 
@@ -320,29 +310,27 @@ impl NormalStateful {
   fn __test_raw_window_scroll(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    let current_window = self._current_window(&mut tree);
+    let buffer = current_window.buffer().upgrade().unwrap();
 
-    if let Some(current_window_id) = tree.current_window_id() {
-      if let Some(TreeNode::Window(current_window)) = tree.node_mut(current_window_id) {
-        let viewport = current_window.viewport();
-        let buffer = current_window.buffer().upgrade().unwrap();
-        let buffer = lock!(buffer);
+    let viewport = current_window.viewport();
+    let buffer = current_window.buffer().upgrade().unwrap();
+    let buffer = lock!(buffer);
 
-        let (start_column, start_line) = cursor_ops::normalize_to_window_scroll_to(
-          op,
-          viewport.start_column_idx(),
-          viewport.start_line_idx(),
-        );
-        let maybe_new_viewport_arc = cursor_ops::raw_widget_scroll_to(
-          &viewport,
-          current_window.actual_shape(),
-          current_window.options(),
-          buffer.text(),
-          Operation::WindowScrollTo((start_column, start_line)),
-        );
-        if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
-          current_window.set_viewport(new_viewport_arc.clone());
-        }
-      }
+    let (start_column, start_line) = cursor_ops::normalize_to_window_scroll_to(
+      op,
+      viewport.start_column_idx(),
+      viewport.start_line_idx(),
+    );
+    let maybe_new_viewport_arc = cursor_ops::raw_widget_scroll_to(
+      &viewport,
+      current_window.actual_shape(),
+      current_window.options(),
+      buffer.text(),
+      Operation::WindowScrollTo((start_column, start_line)),
+    );
+    if let Some(new_viewport_arc) = maybe_new_viewport_arc.clone() {
+      current_window.set_viewport(new_viewport_arc.clone());
     }
   }
 
