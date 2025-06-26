@@ -575,7 +575,8 @@ mod tests_goto_normal_mode {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_options, lines);
+    let (tree, state, bufs, buf, contents) =
+      make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = get_cursor_viewport(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
@@ -593,7 +594,7 @@ mod tests_goto_normal_mode {
       contents.clone(),
       Event::Key(key_event),
     );
-    let stateful = InsertStateful::default();
+    let stateful = CommandLineExStateful::default();
 
     // Insert-1
     {
