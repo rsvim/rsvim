@@ -106,7 +106,10 @@ impl NormalStateful {
     debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
     debug_assert!(!tree.children_ids(cursor_parent_id).contains(&cursor_id));
     let cursor_node = match cursor_node {
-      TreeNode::Cursor(mut cursor) => { cursor.set_style(&CursorStyle::SteadyBar); TreeNode::Cursor(cursor)}
+      TreeNode::Cursor(mut cursor) => {
+        cursor.set_style(&CursorStyle::SteadyBar);
+        TreeNode::Cursor(cursor)
+      }
       _ => unreachable!(),
     };
 
@@ -440,8 +443,11 @@ mod tests_util {
     let cursor_id = tree.cursor_id().unwrap();
     let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
     let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
-    assert!(matches!(cursor_parent_node, TreeNode::Window(_)|TreeNode::CommandLine(_)));
-    let vnode :&dyn Viewportable= match cursor_parent_node {
+    assert!(matches!(
+      cursor_parent_node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    let vnode: &dyn Viewportable = match cursor_parent_node {
       TreeNode::Window(window) => window,
       TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
