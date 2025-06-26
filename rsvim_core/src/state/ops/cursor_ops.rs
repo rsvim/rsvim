@@ -313,50 +313,6 @@ fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_heig
   max_len_chars
 }
 
-pub fn cursor_parent_node(tree: &Tree) -> Option<&TreeNode> {
-  if let Some(cursor_id) = tree.cursor_id() {
-    if let Some(cursor_parent_id) = tree.parent_id(cursor_id) {
-      debug_assert!(tree.node(cursor_parent_id).is_some());
-      let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
-      debug_assert!(matches!(
-        cursor_parent_node,
-        TreeNode::Window(_) | TreeNode::CommandLine(_)
-      ));
-      if cfg!(debug_assertions) {
-        match cursor_parent_node {
-          TreeNode::Window(window) => debug_assert_eq!(window.id(), cursor_parent_id),
-          TreeNode::CommandLine(cmdline) => debug_assert_eq!(cmdline.id(), cursor_parent_id),
-          _ => unreachable!(),
-        }
-      }
-      return Some(cursor_parent_node);
-    }
-  }
-  None
-}
-
-pub fn cursor_parent_node_mut(tree: &mut Tree) -> Option<&mut TreeNode> {
-  if let Some(cursor_id) = tree.cursor_id() {
-    if let Some(cursor_parent_id) = tree.parent_id(cursor_id) {
-      debug_assert!(tree.node_mut(cursor_parent_id).is_some());
-      let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
-      debug_assert!(matches!(
-        cursor_parent_node,
-        TreeNode::Window(_) | TreeNode::CommandLine(_)
-      ));
-      if cfg!(debug_assertions) {
-        match cursor_parent_node {
-          TreeNode::Window(window) => debug_assert_eq!(window.id(), cursor_parent_id),
-          TreeNode::CommandLine(cmdline) => debug_assert_eq!(cmdline.id(), cursor_parent_id),
-          _ => unreachable!(),
-        }
-      }
-      return Some(cursor_parent_node);
-    }
-  }
-  None
-}
-
 pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
   debug_assert!(tree.node_mut(id).is_some());
   let node = tree.node_mut(id).unwrap();
@@ -417,8 +373,15 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
 }
 
 /// The operation must be `Operation::CursorMove*`.
-pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eol: bool) {
-  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
+pub fn cursor_move(
+  tree: &mut Tree,
+  cursor_parent_id: TreeNodeId,
+  text: &Text,
+  op: Operation,
+  include_empty_eol: bool,
+) {
+  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
+  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
   let vnode_actual_shape = match cursor_parent_node {
     TreeNode::Window(window) => *window.actual_shape(),
     TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
@@ -509,9 +472,14 @@ pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eo
 }
 
 /// Returns new cursor position if inserts successfully, returns `None` if failed.
-pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) -> (usize, usize) {
-  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
-  let cursor_parent_id = cursor_parent_node.id();
+pub fn cursor_insert(
+  tree: &mut Tree,
+  cursor_parent_id: TreeNodeId,
+  text: &mut Text,
+  payload: CompactString,
+) -> (usize, usize) {
+  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
+  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
     TreeNode::CommandLine(cmdline) => cmdline,
@@ -537,7 +505,7 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) -
     cursor_char_idx_after_inserted,
     cursor_line_idx_after_inserted,
   ));
-  cursor_move(tree, text, op, true);
+  cursor_move(tree, cursor_parent_id, text, op, true);
 
   (
     cursor_line_idx_after_inserted,
@@ -545,9 +513,14 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) -
   )
 }
 
-pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usize, usize)> {
-  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
-  let cursor_parent_id = cursor_parent_node.id();
+pub fn cursor_delete(
+  tree: &mut Tree,
+  cursor_parent_id: TreeNodeId,
+  text: &mut Text,
+  n: isize,
+) -> Option<(usize, usize)> {
+  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
+  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
     TreeNode::CommandLine(cmdline) => cmdline,
@@ -579,26 +552,17 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usiz
     "Move to deleted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
   );
   let op = Operation::CursorMoveTo((cursor_char_idx_after_deleted, cursor_line_idx_after_deleted));
-  cursor_move(tree, text, op, true);
+  cursor_move(tree, cursor_parent_id, text, op, true);
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }
 
-pub fn cursor_clear(tree: &mut Tree, text: &mut Text) -> (usize, usize) {
-  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
-  let cursor_parent_id = cursor_parent_node.id();
-  let vnode: &mut dyn Viewportable = match cursor_parent_node {
-    TreeNode::Window(window) => window,
-    TreeNode::CommandLine(cmdline) => cmdline,
-    _ => unreachable!(),
-  };
-
-  // Insert text.
-  let cursor_viewport = vnode.cursor_viewport();
-  let cursor_line_idx = cursor_viewport.line_idx();
-  let cursor_char_idx = cursor_viewport.char_idx();
-  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
-  debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
+pub fn cursor_clear(
+  tree: &mut Tree,
+  cursor_parent_id: TreeNodeId,
+  text: &mut Text,
+) -> (usize, usize) {
+  // Clear text.
   text.clear();
 
   // Update viewport since the buffer doesn't match the viewport.
@@ -607,7 +571,7 @@ pub fn cursor_clear(tree: &mut Tree, text: &mut Text) -> (usize, usize) {
   let cursor_line_idx_after_clear = 0_usize;
   let cursor_char_idx_after_clear = 0_usize;
   let op = Operation::CursorMoveTo((cursor_char_idx_after_clear, cursor_line_idx_after_clear));
-  cursor_move(tree, text, op, true);
+  cursor_move(tree, cursor_parent_id, text, op, true);
 
   (cursor_line_idx_after_clear, cursor_char_idx_after_clear)
 }

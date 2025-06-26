@@ -148,7 +148,11 @@ impl CommandLineExStateful {
     // Clear command-line contents.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
-    cursor_ops::cursor_clear(&mut tree, contents.command_line_content_mut());
+    cursor_ops::cursor_clear(
+      &mut tree,
+      current_window_id,
+      contents.command_line_content_mut(),
+    );
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }
@@ -158,10 +162,18 @@ impl CommandLineExStateful {
   fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
     let contents = data_access.contents.clone();
     let contents = lock!(contents);
 
-    cursor_ops::cursor_move(&mut tree, contents.command_line_content(), op, true);
+    cursor_ops::cursor_move(
+      &mut tree,
+      cmdline_id,
+      contents.command_line_content(),
+      op,
+      true,
+    );
 
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
@@ -175,10 +187,17 @@ impl CommandLineExStateful {
   ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
 
-    cursor_ops::cursor_insert(&mut tree, contents.command_line_content_mut(), payload);
+    cursor_ops::cursor_insert(
+      &mut tree,
+      cmdline_id,
+      contents.command_line_content_mut(),
+      payload,
+    );
 
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
@@ -193,6 +212,7 @@ impl CommandLineExStateful {
     let text = contents.command_line_content_mut();
 
     let cmdline = self._command_line(&mut tree);
+    let cmdline_id = cmdline.id();
     let cursor_viewport = cmdline.cursor_viewport();
     let cursor_line_idx = cursor_viewport.line_idx();
     debug_assert_eq!(cursor_line_idx, 0);
@@ -208,7 +228,7 @@ impl CommandLineExStateful {
       -(cursor_char_idx.saturating_sub(left_bound) as isize)
     };
 
-    cursor_ops::cursor_delete(&mut tree, text, to_be_deleted_n);
+    cursor_ops::cursor_delete(&mut tree, cmdline_id, text, to_be_deleted_n);
 
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
@@ -221,8 +241,8 @@ mod tests_util {
   use super::*;
 
   use crate::buf::opt::BufferLocalOptionsBuilder;
-  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::buf::text::Text;
+  use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::{TextContents, TextContentsArc};
   use crate::lock;
   use crate::prelude::*;
@@ -565,10 +585,10 @@ mod tests_goto_normal_mode {
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
   use crate::{lock, state};
 
+  use crate::state::fsm::NormalStateful;
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
   use tracing::info;
-  use crate::state::fsm::NormalStateful;
 
   #[test]
   fn nowrap1() {
