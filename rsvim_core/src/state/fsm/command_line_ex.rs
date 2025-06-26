@@ -6,6 +6,7 @@ use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::Viewportable;
+use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::Window;
 
 use compact_str::{CompactString, ToCompactString};
@@ -52,6 +53,15 @@ impl CommandLineExStateful {
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
       TreeNode::Window(current_window) => current_window,
+      _ => unreachable!(),
+    }
+  }
+
+  fn _current_command_line<'a>(&self, tree: &'a mut Tree) -> &'a mut CommandLine {
+    let current_command_line = cursor_ops::cursor_parent_node_mut(tree).unwrap();
+    debug_assert!(matches!(current_command_line, TreeNode::CommandLine(_)));
+    match current_command_line {
+      TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
     }
   }
@@ -146,7 +156,15 @@ impl CommandLineExStateful {
 }
 
 impl CommandLineExStateful {
-  fn cursor_move(&self, _data_access: &StatefulDataAccess, _op: Operation) -> StatefulValue {
+  fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    let current_window = self._current_window(&mut tree);
+    let buffer = current_window.buffer().upgrade().unwrap();
+    let buffer = lock!(buffer);
+
+    cursor_ops::cursor_move(&mut tree, buffer.text(), op, true);
+
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
 }
