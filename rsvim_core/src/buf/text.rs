@@ -391,16 +391,14 @@ impl Text {
   /// the text payload is empty.
   ///
   /// # Panics
-  /// It panics if the position doesn't exist.
+  /// If the position doesn't exist, or the text payload is empty.
   pub fn insert_at(
     &mut self,
     line_idx: usize,
     char_idx: usize,
     payload: CompactString,
-  ) -> Option<(usize, usize)> {
-    if payload.is_empty() {
-      return None;
-    }
+  ) -> (usize, usize) {
+    debug_assert!(!payload.is_empty());
     debug_assert!(self.rope().get_line(line_idx).is_some());
     debug_assert!(char_idx <= self.rope().line(line_idx).len_chars());
 
@@ -444,7 +442,7 @@ impl Text {
       "After inserted",
     );
 
-    Some((line_idx_after_inserted, char_idx_after_inserted))
+    (line_idx_after_inserted, char_idx_after_inserted)
   }
 
   /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left or right direction.
