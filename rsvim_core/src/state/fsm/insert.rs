@@ -3473,24 +3473,10 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
         (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
       ]
       .into_iter()
       .collect();
@@ -3499,19 +3485,19 @@ mod tests_delete_text {
         &viewport,
         &expect,
         0,
-        8,
+        1,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
         "          ",
         "          ",
         "          ",
@@ -3564,24 +3550,10 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
         "",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![
         (0, 0),
-        (1, 0),
-        (2, 0),
-        (3, 0),
-        (4, 0),
-        (5, 0),
-        (6, 0),
-        (7, 0),
       ]
       .into_iter()
       .collect();
@@ -3590,19 +3562,19 @@ mod tests_delete_text {
         &viewport,
         &expect,
         0,
-        8,
+        1,
         &expect_fills,
         &expect_fills,
       );
 
       let expect_canvas = vec![
-        "Hello, RSV",
-        "This is a ",
-        "But still ",
-        "  1. When ",
-        "  2. When ",
-        "* The extr",
-        "* The extr",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
         "          ",
         "          ",
         "          ",

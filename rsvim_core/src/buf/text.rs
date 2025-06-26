@@ -500,7 +500,7 @@ impl Text {
     };
     let cursor_char_absolute_pos_after_deleted = std::cmp::min(
       cursor_char_absolute_pos_after_deleted,
-      self.rope().len_chars().saturating_sub(1),
+      self.rope().len_chars(),
     );
     let cursor_line_idx_after_deleted = self
       .rope()

@@ -660,6 +660,12 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usiz
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+  
+  // If line is empty, cursor cannot delete any text content.
+  if cursor_char_idx >= text.rope().line(cursor_line_idx).len_chars() {
+    return None;
+  }
+  
   debug_assert!(cursor_char_idx < text.rope().line(cursor_line_idx).len_chars());
   let maybe_new_cursor_position = text.delete_at(cursor_line_idx, cursor_char_idx, n);
 
