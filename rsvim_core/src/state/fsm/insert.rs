@@ -1789,6 +1789,74 @@ mod tests_insert_text {
   }
 
   #[test]
+  fn nowrap4() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 5);
+    let window_option = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let lines = vec![];
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
+    let stateful = InsertStateful::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(&data_access, "Hi".to_compact_string());
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 0);
+      assert_eq!(actual2.char_idx(), 2);
+      assert_eq!(actual2.row_idx(), 0);
+      assert_eq!(actual2.column_idx(), 2);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let l0 = format!("Hi{}", buf_eol);
+      let expect = vec![l0.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hi        ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
   fn wrap_nolinebreak1() {
     test_log_init();
 

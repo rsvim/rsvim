@@ -615,13 +615,13 @@ mod tests_goto_normal_mode {
       let buf_eol = lock!(buf).options().end_of_line();
       let text1 = CompactString::new(format!(":Bye, {}", buf_eol));
       let expect = vec![text1.as_str(), ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1,0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
         &expect,
         0,
-        1,
+        2,
         &expect_fills,
         &expect_fills,
       );
