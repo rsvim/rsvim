@@ -346,7 +346,7 @@ use crate::dbg::buf::{dbg_print_textline, dbg_print_textline_with_absolute_char_
 impl Text {
   /// For text, the editor have to always keep an empty eol (end-of-line) at the end of text file.
   /// It helps the cursor motion.
-  pub fn append_empty_eol_at_end_if_not_exist(&mut self) {
+  fn append_empty_eol_at_end_if_not_exist(&mut self) {
     use crate::defaults::ascii::end_of_line as eol;
     let buf_eol = self.options().end_of_line();
 
