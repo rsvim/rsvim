@@ -622,12 +622,9 @@ pub fn cursor_insert(
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
   debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
-  let maybe_new_cursor_position = text.insert_at(cursor_line_idx, cursor_char_idx, payload);
-
-  maybe_new_cursor_position?;
-
   let (cursor_line_idx_after_inserted, cursor_char_idx_after_inserted) =
-    maybe_new_cursor_position.unwrap();
+    text.insert_at(cursor_line_idx, cursor_char_idx, payload);
+
   // Update viewport since the buffer doesn't match the viewport.
   _update_viewport_after_text_changed(tree, cursor_parent_id, text);
 
