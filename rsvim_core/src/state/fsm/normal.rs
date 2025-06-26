@@ -6810,12 +6810,14 @@ mod tests_goto_command_line_ex_mode {
 
     let data_access = StatefulDataAccess::new(state, tree, bufs, contents, Event::Key(key_event));
     let stateful = NormalStateful::default();
-    stateful.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+    stateful.goto_command_line_ex_mode(&data_access);
 
     let tree = data_access.tree.clone();
     let actual = get_cursor_viewport(tree);
     assert_eq!(actual.line_idx(), 0);
-    assert_eq!(actual.char_idx(), 0);
+    assert_eq!(actual.char_idx(), 1);
+    assert_eq!(actual.row_idx(), 0);
+    assert_eq!(actual.column_idx(), 1);
   }
 }
 // spellchecker:on
