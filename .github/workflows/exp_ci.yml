@@ -35,7 +35,7 @@ jobs:
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
   unit_test:
-    name: Unit Test
+    name: Nightly Unit Test
     strategy:
       matrix:
         rust_version: [beta, nightly]
