@@ -35,7 +35,7 @@ jobs:
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
   unit_test:
-    name: Nightly Unit Test
+    name: (Experimental) Unit Test
     strategy:
       matrix:
         rust_version: [beta, nightly]
@@ -60,7 +60,7 @@ jobs:
           cargo llvm-cov clean --workspace
           cargo llvm-cov nextest --all-features --workspace
   build:
-    name: Nightly Build
+    name: (Experimental) Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
