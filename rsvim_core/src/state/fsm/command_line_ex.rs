@@ -179,7 +179,14 @@ impl CommandLineExStateful {
 }
 
 impl CommandLineExStateful {
-  fn cursor_delete(&self, _data_access: &StatefulDataAccess, _n: isize) -> StatefulValue {
+  fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    let contents = data_access.contents.clone();
+    let mut contents = lock!(contents);
+
+    cursor_ops::cursor_delete(&mut tree, contents.command_line_content_mut(), n);
+
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
 }
