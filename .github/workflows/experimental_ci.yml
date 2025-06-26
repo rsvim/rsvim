@@ -35,7 +35,7 @@ jobs:
           echo "prettier --check *.md **/*.ts"
           prettier --check *.md **/*.ts
   build:
-    name: (Experimental) Build
+    name: Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
