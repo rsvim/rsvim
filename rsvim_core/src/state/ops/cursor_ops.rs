@@ -583,3 +583,31 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usiz
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }
+
+pub fn cursor_clear(tree: &mut Tree, text: &mut Text) -> (usize, usize) {
+  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
+  let cursor_parent_id = cursor_parent_node.id();
+  let vnode: &mut dyn Viewportable = match cursor_parent_node {
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
+    _ => unreachable!(),
+  };
+
+  // Insert text.
+  let cursor_viewport = vnode.cursor_viewport();
+  let cursor_line_idx = cursor_viewport.line_idx();
+  let cursor_char_idx = cursor_viewport.char_idx();
+  debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+  debug_assert!(cursor_char_idx <= text.rope().line(cursor_line_idx).len_chars());
+  text.clear();
+
+  // Update viewport since the buffer doesn't match the viewport.
+  _update_viewport_after_text_changed(tree, cursor_parent_id, text);
+
+  let cursor_line_idx_after_clear = 0_usize;
+  let cursor_char_idx_after_clear = 0_usize;
+  let op = Operation::CursorMoveTo((cursor_char_idx_after_clear, cursor_line_idx_after_clear));
+  cursor_move(tree, text, op, true);
+
+  (cursor_line_idx_after_clear, cursor_char_idx_after_clear)
+}

@@ -145,17 +145,16 @@ impl CommandLineExStateful {
       cursor_viewport.row_idx() as isize,
     );
 
-    // // Clear command-line contents.
-    // let contents = data_access.contents.clone();
-    // let mut contents = lock!(contents);
-    // contents.command_line_content_mut().rope_mut().remove(0..);
-    // contents.command_line_content_mut().clear_cached_lines();
-    // // Update viewport after text changed.
-    // cursor_ops::_update_viewport_after_text_changed(
-    //   &mut tree,
-    //   cmdline_id,
-    //   contents.command_line_content(),
-    // );
+    // Clear command-line contents.
+    let contents = data_access.contents.clone();
+    let mut contents = lock!(contents);
+    contents.command_line_content_mut().clear();
+    // Update viewport after text changed.
+    cursor_ops::_update_viewport_after_text_changed(
+      &mut tree,
+      cmdline_id,
+      contents.command_line_content(),
+    );
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }
