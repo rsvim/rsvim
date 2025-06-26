@@ -2,10 +2,11 @@
 
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
-use crate::state::ops::Operation;
+use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::viewport::Viewportable;
+use crate::ui::widget::window::Window;
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -43,6 +44,15 @@ impl CommandLineExStateful {
       Event::Mouse(_mouse_event) => None,
       Event::Paste(ref _paste_string) => None,
       Event::Resize(_columns, _rows) => None,
+    }
+  }
+
+  fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
+    let current_window_node = cursor_ops::cursor_parent_node_mut(tree).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => current_window,
+      _ => unreachable!(),
     }
   }
 }
