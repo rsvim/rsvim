@@ -92,6 +92,7 @@ impl InsertStateful {
     let current_window = self._current_window(&mut tree);
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
+
     cursor_ops::cursor_delete(&mut tree, buffer.text_mut(), n);
 
     StatefulValue::InsertMode(InsertStateful::default())
@@ -109,6 +110,7 @@ impl InsertStateful {
     let current_window = self._current_window(&mut tree);
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
+
     cursor_ops::cursor_insert(&mut tree, buffer.text_mut(), payload);
 
     StatefulValue::InsertMode(InsertStateful::default())
