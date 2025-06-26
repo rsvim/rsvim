@@ -6789,7 +6789,7 @@ mod tests_goto_command_line_ex_mode {
   fn nowrap1() {
     test_log_init();
 
-    let (tree, state, bufs, _buf, contents) = make_tree(
+    let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
       U16Size::new(10, 10),
       WindowLocalOptionsBuilder::default()
         .wrap(false)
