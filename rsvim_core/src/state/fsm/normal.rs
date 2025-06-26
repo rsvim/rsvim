@@ -366,11 +366,12 @@ mod tests_util {
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::log::init as test_log_init;
-  use crate::test::tree::make_tree_with_buffers;
+  use crate::test::tree::{make_tree_with_buffers, make_tree_with_buffers_cmdline};
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
+  use crate::ui::widget::command_line::CommandLine;
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
@@ -394,6 +395,31 @@ mod tests_util {
     let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
     let state = State::to_arc(State::default());
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
+    (tree, state, bufs, buf, contents)
+  }
+
+  pub fn make_tree_with_cmdline(
+    terminal_size: U16Size,
+    window_local_opts: WindowLocalOptions,
+    lines: Vec<&str>,
+  ) -> (
+    TreeArc,
+    StateArc,
+    BuffersManagerArc,
+    BufferArc,
+    TextContentsArc,
+  ) {
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
+    let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
+    let contents = TextContents::to_arc(TextContents::new(terminal_size));
+    let tree = make_tree_with_buffers_cmdline(
+      terminal_size,
+      window_local_opts,
+      bufs.clone(),
+      contents.clone(),
+    );
+    let state = State::to_arc(State::default());
     (tree, state, bufs, buf, contents)
   }
 
