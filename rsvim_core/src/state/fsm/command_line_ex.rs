@@ -148,13 +148,7 @@ impl CommandLineExStateful {
     // Clear command-line contents.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
-    contents.command_line_content_mut().clear();
-    // Update viewport after text changed.
-    cursor_ops::_update_viewport_after_text_changed(
-      &mut tree,
-      cmdline_id,
-      contents.command_line_content(),
-    );
+    cursor_ops::cursor_clear(&mut tree, contents.command_line_content_mut());
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }
