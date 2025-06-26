@@ -367,6 +367,7 @@ mod tests_util {
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::log::init as test_log_init;
   use crate::test::tree::{make_tree_with_buffers, make_tree_with_buffers_cmdline};
+  use crate::ui::canvas::{Canvas, CanvasArc};
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
     CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
@@ -443,6 +444,14 @@ mod tests_util {
       TreeNode::Window(current_window) => current_window.cursor_viewport(),
       _ => unreachable!(),
     }
+  }
+
+  pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
+    let canvas = Canvas::new(terminal_size);
+    let canvas = Canvas::to_arc(canvas);
+    let tree = lock!(tree);
+    tree.draw(canvas.clone());
+    canvas
   }
 
   #[allow(clippy::too_many_arguments)]
@@ -6789,8 +6798,9 @@ mod tests_goto_command_line_ex_mode {
   fn nowrap1() {
     test_log_init();
 
+    let terminal_size = U16Size::new(10, 10);
     let (tree, state, bufs, _buf, contents) = make_tree_with_cmdline(
-      U16Size::new(10, 10),
+      terminal_size,
       WindowLocalOptionsBuilder::default()
         .wrap(false)
         .build()
@@ -6813,11 +6823,12 @@ mod tests_goto_command_line_ex_mode {
     stateful.goto_command_line_ex_mode(&data_access);
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
-    assert_eq!(actual.line_idx(), 0);
-    assert_eq!(actual.char_idx(), 1);
-    assert_eq!(actual.row_idx(), 0);
-    assert_eq!(actual.column_idx(), 1);
+    let actual_cursor = get_cursor_viewport(tree.clone());
+    assert_eq!(actual_cursor.line_idx(), 0);
+    assert_eq!(actual_cursor.char_idx(), 1);
+    assert_eq!(actual_cursor.row_idx(), 0);
+    assert_eq!(actual_cursor.column_idx(), 1);
+    let actual_canvas = make_canvas(tree.clone(), terminal_size);
   }
 }
 // spellchecker:on
