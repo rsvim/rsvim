@@ -6856,16 +6856,16 @@ mod tests_goto_command_line_ex_mode {
     assert_eq!(actual_cursor.column_idx(), 1);
 
     let expect_canvas = vec![
-      "Hello, RSV",
-      "This is a ",
-      "But still ",
-      "  1. When ",
-      "  2. When ",
-      "     * The",
-      "     * The",
       "          ",
       "          ",
       "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      "          ",
+      ":         ",
     ];
     let actual_canvas = make_canvas(tree.clone(), terminal_size);
     let actual_canvas = lock!(actual_canvas);
