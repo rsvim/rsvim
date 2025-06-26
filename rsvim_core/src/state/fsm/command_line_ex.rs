@@ -171,9 +171,16 @@ impl CommandLineExStateful {
 impl CommandLineExStateful {
   fn cursor_insert(
     &self,
-    _data_access: &StatefulDataAccess,
-    _text: CompactString,
+    data_access: &StatefulDataAccess,
+    payload: CompactString,
   ) -> StatefulValue {
+    let tree = data_access.tree.clone();
+    let mut tree = lock!(tree);
+    let contents = data_access.contents.clone();
+    let mut contents = lock!(contents);
+
+    cursor_ops::cursor_insert(&mut tree, contents.command_line_content_mut(), payload);
+
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
 }
