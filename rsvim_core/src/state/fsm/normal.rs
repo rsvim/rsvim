@@ -105,10 +105,10 @@ impl NormalStateful {
     let cursor_node = cursor_node.unwrap();
     debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
     debug_assert!(!tree.children_ids(cursor_parent_id).contains(&cursor_id));
-    match cursor_node {
-      TreeNode::Cursor(mut cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+    let cursor_node = match cursor_node {
+      TreeNode::Cursor(mut cursor) => { cursor.set_style(&CursorStyle::SteadyBar); TreeNode::Cursor(cursor)}
       _ => unreachable!(),
-    }
+    };
 
     // Insert to new parent
     debug_assert!(tree.command_line_id().is_some());
@@ -437,13 +437,16 @@ mod tests_util {
 
   pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
     let tree = lock!(tree);
-    let current_window_id = tree.current_window_id().unwrap();
-    let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => current_window.cursor_viewport(),
+    let cursor_id = tree.cursor_id().unwrap();
+    let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+    let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
+    assert!(matches!(cursor_parent_node, TreeNode::Window(_)|TreeNode::CommandLine(_)));
+    let vnode :&dyn Viewportable= match cursor_parent_node {
+      TreeNode::Window(window) => window,
+      TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
-    }
+    };
+    vnode.cursor_viewport()
   }
 
   pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
