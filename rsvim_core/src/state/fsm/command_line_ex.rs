@@ -569,7 +569,7 @@ mod tests_goto_normal_mode {
   fn nowrap1() {
     test_log_init();
 
-    let terminal_size = U16Size::new(10, 10);
+    let terminal_size = U16Size::new(7, 7);
     let window_options = WindowLocalOptionsBuilder::default()
       .wrap(false)
       .build()
