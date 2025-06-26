@@ -222,6 +222,7 @@ mod tests_util {
 
   use crate::buf::opt::BufferLocalOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
+  use crate::buf::text::Text;
   use crate::content::{TextContents, TextContentsArc};
   use crate::lock;
   use crate::prelude::*;
@@ -328,7 +329,7 @@ mod tests_util {
 
   #[allow(clippy::too_many_arguments)]
   pub fn assert_viewport_scroll(
-    buffer: BufferArc,
+    text: &Text,
     actual: &Viewport,
     expect: &Vec<&str>,
     expect_start_line: usize,
@@ -383,8 +384,7 @@ mod tests_util {
       expect_end_fills.len()
     );
 
-    let buffer = lock!(buffer);
-    let buflines = buffer.text().rope().lines_at(actual.start_line_idx());
+    let buflines = text.rope().lines_at(actual.start_line_idx());
     let total_lines = expect_end_line - expect_start_line;
 
     for (l, line) in buflines.enumerate() {
@@ -568,6 +568,7 @@ mod tests_goto_normal_mode {
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
   use tracing::info;
+  use crate::state::fsm::NormalStateful;
 
   #[test]
   fn nowrap1() {
@@ -598,30 +599,30 @@ mod tests_goto_normal_mode {
       contents.clone(),
       Event::Key(key_event),
     );
-    let stateful = CommandLineExStateful::default();
+    let stateful = NormalStateful::default();
 
-    // Insert-1
+    // Prepare
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye, "));
+      stateful.goto_command_line_ex_mode(&data_access);
 
       let tree = data_access.tree.clone();
       let actual1 = get_cursor_viewport(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 5);
+      assert_eq!(actual1.char_idx(), 1);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 5);
+      assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let text1 = CompactString::new(format!(":Bye, {}", buf_eol));
-      let expect = vec![text1.as_str(), ""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1,0)].into_iter().collect();
+      let text1 = CompactString::new(format!(":{}", buf_eol));
+      let expect = vec![text1.as_str()];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
-        buf.clone(),
+        lock!(contents).command_line_content(),
         &viewport,
         &expect,
         0,
-        2,
+        1,
         &expect_fills,
         &expect_fills,
       );
@@ -631,7 +632,47 @@ mod tests_goto_normal_mode {
         "           ",
         "           ",
         "           ",
-        ":Bye,      ",
+        ":          ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    let stateful = CommandLineExStateful::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text1 = CompactString::new(format!(":Bye{}", buf_eol));
+      let expect = vec![text1.as_str()];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":Bye       ",
       ];
       let actual_canvas = make_canvas(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
@@ -653,7 +694,7 @@ mod tests_goto_normal_mode {
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
-        buf.clone(),
+        lock!(contents).command_line_content(),
         &viewport,
         &expect,
         0,
