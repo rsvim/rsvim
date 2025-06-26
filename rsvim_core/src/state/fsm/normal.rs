@@ -232,10 +232,10 @@ impl NormalStateful {
   fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-
     let current_window = self._current_window(&mut tree);
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
+
     cursor_ops::cursor_move(&mut tree, buffer.text(), op, false);
 
     StatefulValue::NormalMode(NormalStateful::default())
@@ -312,10 +312,8 @@ impl NormalStateful {
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
     let buffer = current_window.buffer().upgrade().unwrap();
-
-    let viewport = current_window.viewport();
-    let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
+    let viewport = current_window.viewport();
 
     let (start_column, start_line) = cursor_ops::normalize_to_window_scroll_to(
       op,

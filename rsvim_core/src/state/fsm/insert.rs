@@ -1,6 +1,5 @@
 //! The insert mode.
 
-use crate::buf::BufferWk;
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
