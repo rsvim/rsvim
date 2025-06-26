@@ -107,10 +107,13 @@ impl CommandLineExStateful {
     let cursor_node = cursor_node.unwrap();
     debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
     debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
-    match cursor_node {
-      TreeNode::Cursor(mut cursor) => cursor.set_style(&CursorStyle::SteadyBlock),
+    let cursor_node = match cursor_node {
+      TreeNode::Cursor(mut cursor) => {
+        cursor.set_style(&CursorStyle::SteadyBlock);
+        TreeNode::Cursor(cursor)
+      }
       _ => unreachable!(),
-    }
+    };
 
     // Insert to new parent
     let current_window = self._current_window(&mut tree);
