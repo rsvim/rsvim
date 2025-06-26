@@ -603,11 +603,7 @@ pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eo
 }
 
 /// Returns new cursor position if inserts successfully, returns `None` if failed.
-pub fn cursor_insert(
-  tree: &mut Tree,
-  text: &mut Text,
-  payload: CompactString,
-) -> Option<(usize, usize)> {
+pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) -> (usize, usize) {
   let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
   let cursor_parent_id = cursor_parent_node.id();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
@@ -637,10 +633,10 @@ pub fn cursor_insert(
   ));
   cursor_move(tree, text, op, true);
 
-  Some((
+  (
     cursor_line_idx_after_inserted,
     cursor_char_idx_after_inserted,
-  ))
+  )
 }
 
 pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usize, usize)> {
