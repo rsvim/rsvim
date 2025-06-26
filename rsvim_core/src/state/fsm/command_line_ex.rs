@@ -49,7 +49,10 @@ impl CommandLineExStateful {
   }
 
   fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
-    let current_window_node = cursor_ops::cursor_parent_node_mut(tree).unwrap();
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
       TreeNode::Window(current_window) => current_window,
@@ -58,9 +61,12 @@ impl CommandLineExStateful {
   }
 
   fn _command_line<'a>(&self, tree: &'a mut Tree) -> &'a mut CommandLine {
-    let current_command_line = cursor_ops::cursor_parent_node_mut(tree).unwrap();
-    debug_assert!(matches!(current_command_line, TreeNode::CommandLine(_)));
-    match current_command_line {
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.node_mut(cmdline_id).is_some());
+    let cmdline_node = tree.node_mut(cmdline_id).unwrap();
+    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+    match cmdline_node {
       TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
     }
