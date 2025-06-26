@@ -113,32 +113,18 @@ impl CommandLineExStateful {
     }
 
     // Insert to new parent
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.node(current_window_id).is_some());
-    debug_assert!(matches!(
-      tree.node(current_window_id).unwrap(),
-      TreeNode::Window(_)
-    ));
+    let current_window = self._current_window(&mut tree);
+    let cursor_viewport = current_window.cursor_viewport();
+    trace!("before viewport:{:?}", current_window.viewport());
+    trace!("before cursor_viewport:{:?}", cursor_viewport);
+    let current_window_id = current_window.id();
     let _inserted = tree.bounded_insert(current_window_id, cursor_node);
     debug_assert!(_inserted.is_none());
-    debug_assert!(tree.current_window_id().is_some());
-    debug_assert_eq!(tree.current_window_id().unwrap(), current_window_id);
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    match current_window_node {
-      TreeNode::Window(current_window) => {
-        let cursor_viewport = current_window.cursor_viewport();
-        trace!("before viewport:{:?}", current_window.viewport());
-        trace!("before cursor_viewport:{:?}", cursor_viewport);
-        tree.bounded_move_to(
-          cursor_id,
-          cursor_viewport.column_idx() as isize,
-          cursor_viewport.row_idx() as isize,
-        );
-      }
-      _ => unreachable!(),
-    }
+    tree.bounded_move_to(
+      cursor_id,
+      cursor_viewport.column_idx() as isize,
+      cursor_viewport.row_idx() as isize,
+    );
 
     // // Clear command-line contents.
     // let contents = data_access.contents.clone();
