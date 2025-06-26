@@ -346,7 +346,7 @@ use crate::dbg::buf::{dbg_print_textline, dbg_print_textline_with_absolute_char_
 impl Text {
   /// For text, the editor have to always keep an empty eol (end-of-line) at the end of text file.
   /// It helps the cursor motion.
-  pub fn append_empty_eol_at_end_if_not_exist(&mut self) {
+  fn append_empty_eol_at_end_if_not_exist(&mut self) {
     use crate::defaults::ascii::end_of_line as eol;
     let buf_eol = self.options().end_of_line();
 
@@ -477,7 +477,7 @@ impl Text {
       cursor_char_absolute_pos_before_delete
         ..(std::cmp::min(
           cursor_char_absolute_pos_before_delete + n as usize,
-          self.rope().len_chars().saturating_sub(1),
+          self.rope().len_chars(),
         ))
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
@@ -500,7 +500,7 @@ impl Text {
     };
     let cursor_char_absolute_pos_after_deleted = std::cmp::min(
       cursor_char_absolute_pos_after_deleted,
-      self.rope().len_chars().saturating_sub(1),
+      self.rope().len_chars(),
     );
     let cursor_line_idx_after_deleted = self
       .rope()
