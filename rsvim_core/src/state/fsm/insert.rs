@@ -1631,8 +1631,7 @@ mod tests_insert_text {
     {
       let buf_eol = lock!(buf).options().end_of_line();
       let text2 = CompactString::new(format!(
-        "Insert two lines again!{}There's no line-break",
-        buf_eol
+        "Insert two lines again!{buf_eol}There's no line-break"
       ));
       stateful.cursor_insert(&data_access, text2);
 
@@ -1644,7 +1643,7 @@ mod tests_insert_text {
       assert_eq!(actual2.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let l2 = format!("es!{}", buf_eol);
+      let l2 = format!("es!{buf_eol}");
       let expect = vec!["", "", l2.as_str(), "ines again", "ine-breakl"];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
@@ -1718,8 +1717,7 @@ mod tests_insert_text {
     {
       let buf_eol = lock!(buf).options().end_of_line();
       let text5 = CompactString::new(format!(
-        "Final 3 lines.{}The inserted 2nd{}The inserted 3rd{}",
-        buf_eol, buf_eol, buf_eol
+        "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
       stateful.cursor_insert(&data_access, text5);
 
