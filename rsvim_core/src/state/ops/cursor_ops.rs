@@ -387,16 +387,24 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
   }
 }
 
-/// The operation must be `Operation::CursorMove*`.
+/// High-level cursor move operation.
+///
+/// This API will move the cursor (and possibly scroll the widget/window it belongs to), by:
+/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
+/// 2. The text content binded to the parent widget/window node.
+///
+/// # Panics
+///
+/// It panics if the operation is not `Operation::CursorMove*`.
 pub fn cursor_move(
   tree: &mut Tree,
-  cursor_parent_id: TreeNodeId,
+  id: TreeNodeId,
   text: &Text,
   op: Operation,
   include_empty_eol: bool,
 ) {
-  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
-  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
+  debug_assert!(tree.node_mut(id).is_some());
+  let cursor_parent_node = tree.node_mut(id).unwrap();
   let vnode_actual_shape = match cursor_parent_node {
     TreeNode::Window(window) => *window.actual_shape(),
     TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
@@ -489,12 +497,12 @@ pub fn cursor_move(
 /// Returns new cursor position if inserts successfully, returns `None` if failed.
 pub fn cursor_insert(
   tree: &mut Tree,
-  cursor_parent_id: TreeNodeId,
+  id: TreeNodeId,
   text: &mut Text,
   payload: CompactString,
 ) -> (usize, usize) {
-  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
-  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
+  debug_assert!(tree.node_mut(id).is_some());
+  let cursor_parent_node = tree.node_mut(id).unwrap();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
     TreeNode::CommandLine(cmdline) => cmdline,
@@ -511,7 +519,7 @@ pub fn cursor_insert(
     text.insert_at(cursor_line_idx, cursor_char_idx, payload);
 
   // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  _update_viewport_after_text_changed(tree, id, text);
 
   trace!(
     "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
@@ -520,7 +528,7 @@ pub fn cursor_insert(
     cursor_char_idx_after_inserted,
     cursor_line_idx_after_inserted,
   ));
-  cursor_move(tree, cursor_parent_id, text, op, true);
+  cursor_move(tree, id, text, op, true);
 
   (
     cursor_line_idx_after_inserted,
