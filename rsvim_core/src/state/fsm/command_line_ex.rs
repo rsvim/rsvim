@@ -637,7 +637,7 @@ mod tests_goto_normal_mode {
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let text1 = CompactString::new(format!(":{}", buf_eol));
+      let text1 = CompactString::new(format!(":{buf_eol}"));
       let expect = vec![text1.as_str()];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -677,7 +677,7 @@ mod tests_goto_normal_mode {
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let text1 = CompactString::new(format!(":Bye{}", buf_eol));
+      let text1 = CompactString::new(format!(":Bye{buf_eol}"));
       let expect = vec![text1.as_str()];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
