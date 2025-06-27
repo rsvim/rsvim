@@ -121,7 +121,7 @@ impl Debug for JsError {
 
         // Print stacktrace if available.
         if let Some(stack) = self.stack.as_ref() {
-          write!(f, "\n{}", stack)?;
+          write!(f, "\n{stack}")?;
         }
       }
       _ => {}
