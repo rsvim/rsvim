@@ -1582,8 +1582,7 @@ mod tests_insert_text {
     {
       let buf_eol = lock!(buf).options().end_of_line();
       let text2 = CompactString::new(format!(
-        "Let's{}insert{}multiple lines!{}",
-        buf_eol, buf_eol, buf_eol
+        "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
       stateful.cursor_insert(&data_access, text2);
 
@@ -1595,8 +1594,8 @@ mod tests_insert_text {
       assert_eq!(actual2.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let l0 = format!("HelLet's{}", buf_eol);
-      let l1 = format!("insert{}", buf_eol);
+      let l0 = format!("HelLet's{buf_eol}");
+      let l1 = format!("insert{buf_eol}");
       let expect = vec![
         l0.as_str(),
         l1.as_str(),
