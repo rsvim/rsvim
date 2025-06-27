@@ -12,7 +12,7 @@ use crate::ui::widget::window::WindowLocalOptions;
 use compact_str::CompactString;
 use tracing::trace;
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Copy, Clone)]
 /// Cursor move direction.
 pub enum CursorMoveDirection {
   Up,
