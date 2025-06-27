@@ -203,7 +203,13 @@ pub fn normalize_to_window_scroll_to(
   }
 }
 
-/// Calculate new cursor viewport by `Operation::CursorMove*` operations.
+/// Calculate new cursor viewport by `Operation::CursorMove*` operations, as if the cursor wants to
+/// move to a specific position, or by a specific distance.
+///
+/// This API is bounded the cursor motion by the parent widget which the cursor belongs to, the
+/// parent window/widget will not be scroll.
+///
+/// # Returns
 ///
 /// It returns new cursor viewport if the operation is valid, returns `None` if the cursor cannot
 /// move to the position.
@@ -244,6 +250,19 @@ pub fn raw_cursor_move_to(
   Some(new_cursor_viewport)
 }
 
+/// Calculate the new viewport by `Operation::WindowScroll*` operations, as if the cursor wants to
+/// move to a specific position, or by a specific distance.
+///
+/// This API only scrolls the parent window/widget where the cursor belongs to, it will not moves
+/// the cursor position.
+///
+/// # Returns
+///
+/// It returns new viewport if the operation is valid, returns `None` if the widget doesn't move.
+///
+/// # Panics
+///
+/// It panics if the operation is not a `Operation::WindowScroll*` operation.
 pub fn raw_widget_scroll_to(
   viewport: &Viewport,
   actual_shape: &U16Rect,
