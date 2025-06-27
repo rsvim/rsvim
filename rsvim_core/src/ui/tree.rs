@@ -12,6 +12,8 @@ use crate::ui::widget::window::{
 };
 use crate::{arc_impl, lock};
 
+use enum_dispatch::enum_dispatch;
+
 // Re-export
 pub use internal::*;
 
@@ -21,6 +23,7 @@ use std::collections::BTreeSet;
 
 pub mod internal;
 
+#[enum_dispatch(Inodeable)]
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
@@ -28,93 +31,6 @@ pub enum TreeNode {
   Window(Window),
   Cursor(Cursor),
   CommandLine(CommandLine),
-}
-
-macro_rules! tree_node_getter {
-  ($self_name:ident,$method_name:ident) => {
-    match $self_name {
-      TreeNode::RootContainer(n) => n.$method_name(),
-      TreeNode::Window(n) => n.$method_name(),
-      TreeNode::Cursor(n) => n.$method_name(),
-      TreeNode::CommandLine(n) => n.$method_name(),
-    }
-  };
-}
-
-macro_rules! tree_node_setter {
-  ($self_name:ident,$method_name:ident,$method_arg:ident) => {
-    match $self_name {
-      TreeNode::RootContainer(n) => n.$method_name($method_arg),
-      TreeNode::Window(n) => n.$method_name($method_arg),
-      TreeNode::Cursor(n) => n.$method_name($method_arg),
-      TreeNode::CommandLine(n) => n.$method_name($method_arg),
-    }
-  };
-}
-
-impl TreeNode {
-  pub fn id(&self) -> TreeNodeId {
-    match self {
-      TreeNode::RootContainer(n) => n.id(),
-      TreeNode::Window(n) => n.id(),
-      TreeNode::Cursor(n) => n.id(),
-      TreeNode::CommandLine(n) => n.id(),
-    }
-  }
-}
-
-impl Inodeable for TreeNode {
-  fn id(&self) -> TreeNodeId {
-    tree_node_getter!(self, id)
-  }
-
-  fn depth(&self) -> usize {
-    tree_node_getter!(self, depth)
-  }
-
-  fn set_depth(&mut self, depth: usize) {
-    tree_node_setter!(self, set_depth, depth)
-  }
-
-  fn zindex(&self) -> usize {
-    tree_node_getter!(self, zindex)
-  }
-
-  fn set_zindex(&mut self, zindex: usize) {
-    tree_node_setter!(self, set_zindex, zindex)
-  }
-
-  fn shape(&self) -> &IRect {
-    tree_node_getter!(self, shape)
-  }
-
-  fn set_shape(&mut self, shape: &IRect) {
-    tree_node_setter!(self, set_shape, shape)
-  }
-
-  fn actual_shape(&self) -> &U16Rect {
-    tree_node_getter!(self, actual_shape)
-  }
-
-  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    tree_node_setter!(self, set_actual_shape, actual_shape)
-  }
-
-  fn enabled(&self) -> bool {
-    tree_node_getter!(self, enabled)
-  }
-
-  fn set_enabled(&mut self, enabled: bool) {
-    tree_node_setter!(self, set_enabled, enabled)
-  }
-
-  fn visible(&self) -> bool {
-    tree_node_getter!(self, visible)
-  }
-
-  fn set_visible(&mut self, visible: bool) {
-    tree_node_setter!(self, set_visible, visible)
-  }
 }
 
 impl Widgetable for TreeNode {
