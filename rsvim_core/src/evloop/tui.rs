@@ -53,8 +53,8 @@ pub fn shutdown_raw_mode_on_panic() {
     let now = jiff::Zoned::now();
     let btrace = std::backtrace::Backtrace::force_capture();
     println!("FATAL! Rsvim panics at {now}!");
-    println!("{:?}", panic_hook_info);
-    println!("{}", btrace);
+    println!("{panic_hook_info:?}");
+    println!("{btrace}");
     let log_name = format!(
       "rsvim_coredump_{:0>4}-{:0>2}-{:0>2}_{:0>2}-{:0>2}-{:0>2}-{:0>3}.log",
       now.date().year(),
@@ -68,7 +68,7 @@ pub fn shutdown_raw_mode_on_panic() {
     let log_path = std::path::Path::new(log_name.as_str());
     if let Ok(mut f) = std::fs::File::create(log_path) {
       if f
-        .write_all(format!("FATAL! Rsvim panics!\n{:?}\n{}", panic_hook_info, btrace).as_bytes())
+        .write_all(format!("FATAL! Rsvim panics!\n{panic_hook_info:?}\n{btrace}").as_bytes())
         .is_err()
       {
         eprintln!("FATAL! Failed to write rsvim coredump!");
