@@ -534,13 +534,13 @@ mod tests {
           w += cw;
           n += 1;
           if cw == 0 {
-            zero_width_chars.push(format!("{}", i));
+            zero_width_chars.push(format!("{i}"));
           }
           if cw > 1 {
-            big_width_chars.push(format!("{}", i));
+            big_width_chars.push(format!("{i}"));
           }
           if i % 5 == 0 {
-            builder.push_str(&format!("{}", i));
+            builder.push_str(&format!("{i}"));
           }
           if builder.len() < w {
             let diff = w - builder.len();
