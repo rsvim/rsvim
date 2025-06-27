@@ -30,21 +30,6 @@ pub fn MUTEX_TIMEOUT() -> Duration {
   Duration::from_secs(MUTEX_TIMEOUT_SECS())
 }
 
-/// Buffer size for IO operations such as file, sockets, etc. By default is 8192.
-///
-/// NOTE: This constant can be configured through `RSVIM_IO_BUF_SIZE` environment variable.
-pub fn IO_BUF_SIZE() -> usize {
-  static VALUE: OnceLock<usize> = OnceLock::new();
-
-  *VALUE.get_or_init(|| match std::env::var("RSVIM_IO_BUF_SIZE") {
-    Ok(v1) => match v1.parse::<usize>() {
-      Ok(v2) => v2,
-      _ => 8192_usize,
-    },
-    _ => 8192_usize,
-  })
-}
-
 /// Buffer size for channels communication, by default is 1000.
 ///
 /// NOTE: This constant can be configured through `RSVIM_CHANNEL_BUF_SIZE` environment variable.
@@ -112,10 +97,5 @@ mod tests {
   #[test]
   fn mutex_timeout1() {
     assert!(MUTEX_TIMEOUT_SECS() > 0);
-  }
-
-  #[test]
-  fn io_buf_size1() {
-    assert!(IO_BUF_SIZE() > 0);
   }
 }
