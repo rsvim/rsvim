@@ -604,21 +604,28 @@ pub fn cursor_delete(
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }
 
-pub fn cursor_clear(
-  tree: &mut Tree,
-  cursor_parent_id: TreeNodeId,
-  text: &mut Text,
-) -> (usize, usize) {
+/// High-level cursor clear operation.
+///
+/// This API will clear all text contents (and possibly scroll the widget/window it belongs to), as
+/// if user deletes all the text content in current buffer, by below parameters:
+/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
+/// 2. The `text` content binded to the parent widget/window node.
+///
+/// # Returns
+///
+/// It returns new cursor position `(cursor_line_idx,cursor_char_idx)` after deletes all text
+/// content.
+pub fn cursor_clear(tree: &mut Tree, id: TreeNodeId, text: &mut Text) -> (usize, usize) {
   // Clear text.
   text.clear();
 
   // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  _update_viewport_after_text_changed(tree, id, text);
 
   let cursor_line_idx_after_clear = 0_usize;
   let cursor_char_idx_after_clear = 0_usize;
   let op = Operation::CursorMoveTo((cursor_char_idx_after_clear, cursor_line_idx_after_clear));
-  cursor_move(tree, cursor_parent_id, text, op, true);
+  cursor_move(tree, id, text, op, true);
 
   (cursor_line_idx_after_clear, cursor_char_idx_after_clear)
 }
