@@ -391,7 +391,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
 ///
 /// This API will move the cursor (and possibly scroll the widget/window it belongs to), by:
 /// 1. The parent widget/window node specified by node `id` (that contains the cursor).
-/// 2. The text content binded to the parent widget/window node.
+/// 2. The `text` content binded to the parent widget/window node.
 ///
 /// # Panics
 ///
