@@ -22,7 +22,7 @@ pub fn char_width(opt: &BufferLocalOptions, c: char) -> usize {
       AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-        format!("{}", ascii_formatter).len()
+        format!("{ascii_formatter}").len()
       }
     }
   } else {
@@ -43,7 +43,7 @@ pub fn char_symbol(opt: &BufferLocalOptions, c: char) -> (CompactString, usize) 
       AsciiChar::LineFeed | AsciiChar::CarriageReturn => (CompactString::new(""), width),
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-        (CompactString::from(format!("{}", ascii_formatter)), width)
+        (CompactString::from(format!("{ascii_formatter}")), width)
       }
     }
   } else {

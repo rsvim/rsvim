@@ -50,7 +50,16 @@ impl NormalStateful {
   }
 
   fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
-    let current_window_node = cursor_ops::cursor_parent_node_mut(tree).unwrap();
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.cursor_id().is_some());
+    debug_assert!(tree.parent_id(tree.cursor_id().unwrap()).is_some());
+    debug_assert_eq!(
+      current_window_id,
+      tree.parent_id(tree.cursor_id().unwrap()).unwrap()
+    );
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
       TreeNode::Window(current_window) => current_window,
@@ -93,7 +102,7 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  fn goto_command_line_ex_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+  pub fn goto_command_line_ex_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -140,6 +149,7 @@ impl NormalStateful {
 
     cursor_ops::cursor_insert(
       &mut tree,
+      cmdline_id,
       contents.command_line_content_mut(),
       ":".to_compact_string(),
     );
@@ -233,10 +243,11 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
+    let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    cursor_ops::cursor_move(&mut tree, buffer.text(), op, false);
+    cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, false);
 
     StatefulValue::NormalMode(NormalStateful::default())
   }

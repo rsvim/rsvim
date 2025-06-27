@@ -16,12 +16,10 @@ pub mod path_config;
 pub fn MUTEX_TIMEOUT_SECS() -> u64 {
   static VALUE: OnceLock<u64> = OnceLock::new();
 
-  *VALUE.get_or_init(|| match std::env::var("RSVIM_MUTEX_TIMEOUT_SECS") {
-    Ok(v1) => match v1.parse::<u64>() {
-      Ok(v2) => v2,
-      _ => u64::MAX,
-    },
-    _ => u64::MAX,
+  *VALUE.get_or_init(|| {
+    std::env::var("RSVIM_MUTEX_TIMEOUT_SECS")
+      .map(|v| v.parse::<u64>().unwrap_or(u64::MAX))
+      .unwrap_or(u64::MAX)
   })
 }
 
@@ -30,33 +28,16 @@ pub fn MUTEX_TIMEOUT() -> Duration {
   Duration::from_secs(MUTEX_TIMEOUT_SECS())
 }
 
-/// Buffer size for IO operations such as file, sockets, etc. By default is 8192.
-///
-/// NOTE: This constant can be configured through `RSVIM_IO_BUF_SIZE` environment variable.
-pub fn IO_BUF_SIZE() -> usize {
-  static VALUE: OnceLock<usize> = OnceLock::new();
-
-  *VALUE.get_or_init(|| match std::env::var("RSVIM_IO_BUF_SIZE") {
-    Ok(v1) => match v1.parse::<usize>() {
-      Ok(v2) => v2,
-      _ => 8192_usize,
-    },
-    _ => 8192_usize,
-  })
-}
-
 /// Buffer size for channels communication, by default is 1000.
 ///
 /// NOTE: This constant can be configured through `RSVIM_CHANNEL_BUF_SIZE` environment variable.
 pub fn CHANNEL_BUF_SIZE() -> usize {
   static VALUE: OnceLock<usize> = OnceLock::new();
 
-  *VALUE.get_or_init(|| match std::env::var("RSVIM_CHANNEL_BUF_SIZE") {
-    Ok(v1) => match v1.parse::<usize>() {
-      Ok(v2) => v2,
-      _ => 1000_usize,
-    },
-    _ => 1000_usize,
+  *VALUE.get_or_init(|| {
+    std::env::var("RSVIM_CHANNEL_BUF_SIZE")
+      .map(|v| v.parse::<usize>().unwrap_or(1000_usize))
+      .unwrap_or(1000_usize)
   })
 }
 
@@ -112,10 +93,5 @@ mod tests {
   #[test]
   fn mutex_timeout1() {
     assert!(MUTEX_TIMEOUT_SECS() > 0);
-  }
-
-  #[test]
-  fn io_buf_size1() {
-    assert!(IO_BUF_SIZE() > 0);
   }
 }

@@ -534,13 +534,13 @@ mod tests {
           w += cw;
           n += 1;
           if cw == 0 {
-            zero_width_chars.push(format!("{}", i));
+            zero_width_chars.push(format!("{i}"));
           }
           if cw > 1 {
-            big_width_chars.push(format!("{}", i));
+            big_width_chars.push(format!("{i}"));
           }
           if i % 5 == 0 {
-            builder.push_str(&format!("{}", i));
+            builder.push_str(&format!("{i}"));
           }
           if builder.len() < w {
             let diff = w - builder.len();
@@ -570,12 +570,12 @@ mod tests {
           w += cw;
           if w == 1 || w % 5 == 0 {
             if builder1.is_empty() || builder1.ends_with(" ") {
-              builder1.push_str(&format!("{}", w));
+              builder1.push_str(&format!("{w}"));
             } else if cw > 0 {
-              builder2.push_str(&format!("{}", w));
+              builder2.push_str(&format!("{w}"));
               show2 = true;
             } else {
-              builder3.push_str(&format!("{}", w));
+              builder3.push_str(&format!("{w}"));
               show3 = true;
             }
           }
@@ -614,7 +614,7 @@ mod tests {
           w += cw;
           if cw > 1 && (builder.is_empty() || builder.ends_with(" ")) {
             builder.push_str(&" ".repeat(cw - 1));
-            builder.push_str(&format!("{}", w));
+            builder.push_str(&format!("{w}"));
             show = true;
           }
 

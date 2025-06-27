@@ -49,7 +49,10 @@ impl CommandLineExStateful {
   }
 
   fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
-    let current_window_node = cursor_ops::cursor_parent_node_mut(tree).unwrap();
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
       TreeNode::Window(current_window) => current_window,
@@ -58,9 +61,12 @@ impl CommandLineExStateful {
   }
 
   fn _command_line<'a>(&self, tree: &'a mut Tree) -> &'a mut CommandLine {
-    let current_command_line = cursor_ops::cursor_parent_node_mut(tree).unwrap();
-    debug_assert!(matches!(current_command_line, TreeNode::CommandLine(_)));
-    match current_command_line {
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.node_mut(cmdline_id).is_some());
+    let cmdline_node = tree.node_mut(cmdline_id).unwrap();
+    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+    match cmdline_node {
       TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
     }
@@ -101,22 +107,29 @@ impl CommandLineExStateful {
 
     debug_assert!(tree.cursor_id().is_some());
     let cursor_id = tree.cursor_id().unwrap();
-
-    // Remove from current parent
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
-    debug_assert!(tree.parent_id(cursor_id).is_some());
-    debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), cmdline_id);
-    debug_assert!(tree.node(cmdline_id).is_some());
-    debug_assert!(matches!(
-      tree.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
+
+    if cfg!(debug_assertions) {
+      debug_assert!(tree.parent_id(cursor_id).is_some());
+      debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), cmdline_id);
+      debug_assert!(tree.node(cmdline_id).is_some());
+      debug_assert!(matches!(
+        tree.node(cmdline_id).unwrap(),
+        TreeNode::CommandLine(_)
+      ));
+    }
+
+    // Remove from current parent
     let cursor_node = tree.remove(cursor_id);
     debug_assert!(cursor_node.is_some());
     let cursor_node = cursor_node.unwrap();
-    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-    debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
+
+    if cfg!(debug_assertions) {
+      debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+      debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
+    }
+
     let cursor_node = match cursor_node {
       TreeNode::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBlock);
@@ -139,17 +152,10 @@ impl CommandLineExStateful {
       cursor_viewport.row_idx() as isize,
     );
 
-    // // Clear command-line contents.
-    // let contents = data_access.contents.clone();
-    // let mut contents = lock!(contents);
-    // contents.command_line_content_mut().rope_mut().remove(0..);
-    // contents.command_line_content_mut().clear_cached_lines();
-    // // Update viewport after text changed.
-    // cursor_ops::_update_viewport_after_text_changed(
-    //   &mut tree,
-    //   cmdline_id,
-    //   contents.command_line_content(),
-    // );
+    // Clear command-line contents.
+    let contents = data_access.contents.clone();
+    let mut contents = lock!(contents);
+    cursor_ops::cursor_clear(&mut tree, cmdline_id, contents.command_line_content_mut());
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }
@@ -159,10 +165,18 @@ impl CommandLineExStateful {
   fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
     let contents = data_access.contents.clone();
     let contents = lock!(contents);
 
-    cursor_ops::cursor_move(&mut tree, contents.command_line_content(), op, true);
+    cursor_ops::cursor_move(
+      &mut tree,
+      cmdline_id,
+      contents.command_line_content(),
+      op,
+      true,
+    );
 
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
@@ -176,10 +190,17 @@ impl CommandLineExStateful {
   ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
 
-    cursor_ops::cursor_insert(&mut tree, contents.command_line_content_mut(), payload);
+    cursor_ops::cursor_insert(
+      &mut tree,
+      cmdline_id,
+      contents.command_line_content_mut(),
+      payload,
+    );
 
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
@@ -194,6 +215,7 @@ impl CommandLineExStateful {
     let text = contents.command_line_content_mut();
 
     let cmdline = self._command_line(&mut tree);
+    let cmdline_id = cmdline.id();
     let cursor_viewport = cmdline.cursor_viewport();
     let cursor_line_idx = cursor_viewport.line_idx();
     debug_assert_eq!(cursor_line_idx, 0);
@@ -209,7 +231,7 @@ impl CommandLineExStateful {
       -(cursor_char_idx.saturating_sub(left_bound) as isize)
     };
 
-    cursor_ops::cursor_delete(&mut tree, text, to_be_deleted_n);
+    cursor_ops::cursor_delete(&mut tree, cmdline_id, text, to_be_deleted_n);
 
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
@@ -222,6 +244,7 @@ mod tests_util {
   use super::*;
 
   use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::text::Text;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::{TextContents, TextContentsArc};
   use crate::lock;
@@ -289,11 +312,16 @@ mod tests_util {
 
   pub fn get_viewport(tree: TreeArc) -> ViewportArc {
     let tree = lock!(tree);
-    let current_window_id = tree.current_window_id().unwrap();
-    let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
+    let cursor_id = tree.cursor_id().unwrap();
+    let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+    let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
+    assert!(matches!(
+      cursor_parent_node,
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
+    ));
+    match cursor_parent_node {
       TreeNode::Window(current_window) => current_window.viewport(),
+      TreeNode::CommandLine(cmdline) => cmdline.viewport(),
       _ => unreachable!(),
     }
   }
@@ -307,12 +335,11 @@ mod tests_util {
       cursor_parent_node,
       TreeNode::Window(_) | TreeNode::CommandLine(_)
     ));
-    let vnode: &dyn Viewportable = match cursor_parent_node {
-      TreeNode::Window(window) => window,
-      TreeNode::CommandLine(cmdline) => cmdline,
+    match cursor_parent_node {
+      TreeNode::Window(window) => window.cursor_viewport(),
+      TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
       _ => unreachable!(),
-    };
-    vnode.cursor_viewport()
+    }
   }
 
   pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
@@ -325,7 +352,7 @@ mod tests_util {
 
   #[allow(clippy::too_many_arguments)]
   pub fn assert_viewport_scroll(
-    buffer: BufferArc,
+    text: &Text,
     actual: &Viewport,
     expect: &Vec<&str>,
     expect_start_line: usize,
@@ -380,8 +407,7 @@ mod tests_util {
       expect_end_fills.len()
     );
 
-    let buffer = lock!(buffer);
-    let buflines = buffer.text().rope().lines_at(actual.start_line_idx());
+    let buflines = text.rope().lines_at(actual.start_line_idx());
     let total_lines = expect_end_line - expect_start_line;
 
     for (l, line) in buflines.enumerate() {
@@ -540,6 +566,177 @@ mod tests_get_operation {
       ))),
       Some(Operation::CursorDelete(_))
     ));
+  }
+}
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_goto_normal_mode {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::{lock, state};
+
+  use crate::state::fsm::NormalStateful;
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
+
+  #[test]
+  fn nowrap1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(11, 5);
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let lines = vec![];
+    let (tree, state, bufs, buf, contents) =
+      make_tree_with_cmdline(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
+    let stateful = NormalStateful::default();
+
+    // Prepare
+    {
+      stateful.goto_command_line_ex_mode(&data_access);
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 1);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text1 = CompactString::new(format!(":{buf_eol}"));
+      let expect = vec![text1.as_str()];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":          ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    let stateful = CommandLineExStateful::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text1 = CompactString::new(format!(":Bye{buf_eol}"));
+      let expect = vec![text1.as_str()];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":Bye       ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Goto Normal-2
+    {
+      stateful.goto_normal_mode(&data_access);
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
   }
 }
 // spellchecker:on

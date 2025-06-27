@@ -49,7 +49,16 @@ impl InsertStateful {
   }
 
   fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
-    let current_window_node = cursor_ops::cursor_parent_node_mut(tree).unwrap();
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.cursor_id().is_some());
+    debug_assert!(tree.parent_id(tree.cursor_id().unwrap()).is_some());
+    debug_assert_eq!(
+      current_window_id,
+      tree.parent_id(tree.cursor_id().unwrap()).unwrap()
+    );
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
       TreeNode::Window(current_window) => current_window,
@@ -90,10 +99,11 @@ impl InsertStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
+    let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
 
-    cursor_ops::cursor_delete(&mut tree, buffer.text_mut(), n);
+    cursor_ops::cursor_delete(&mut tree, current_window_id, buffer.text_mut(), n);
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
@@ -108,10 +118,11 @@ impl InsertStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
+    let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
 
-    cursor_ops::cursor_insert(&mut tree, buffer.text_mut(), payload);
+    cursor_ops::cursor_insert(&mut tree, current_window_id, buffer.text_mut(), payload);
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
@@ -122,11 +133,12 @@ impl InsertStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
+    let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
     let op = Operation::CursorMoveBy((0, 0));
-    cursor_ops::cursor_move(&mut tree, buffer.text(), op, false);
+    cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, false);
 
     debug_assert!(tree.cursor_id().is_some());
     let cursor_id = tree.cursor_id().unwrap();
@@ -146,10 +158,11 @@ impl InsertStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
+    let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
 
-    cursor_ops::cursor_move(&mut tree, buffer.text(), op, true);
+    cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, true);
 
     StatefulValue::InsertMode(InsertStateful::default())
   }
@@ -1569,8 +1582,7 @@ mod tests_insert_text {
     {
       let buf_eol = lock!(buf).options().end_of_line();
       let text2 = CompactString::new(format!(
-        "Let's{}insert{}multiple lines!{}",
-        buf_eol, buf_eol, buf_eol
+        "Let's{buf_eol}insert{buf_eol}multiple lines!{buf_eol}"
       ));
       stateful.cursor_insert(&data_access, text2);
 
@@ -1582,8 +1594,8 @@ mod tests_insert_text {
       assert_eq!(actual2.column_idx(), 0);
 
       let viewport = get_viewport(tree.clone());
-      let l0 = format!("HelLet's{}", buf_eol);
-      let l1 = format!("insert{}", buf_eol);
+      let l0 = format!("HelLet's{buf_eol}");
+      let l1 = format!("insert{buf_eol}");
       let expect = vec![
         l0.as_str(),
         l1.as_str(),
@@ -1619,8 +1631,7 @@ mod tests_insert_text {
     {
       let buf_eol = lock!(buf).options().end_of_line();
       let text2 = CompactString::new(format!(
-        "Insert two lines again!{}There's no line-break",
-        buf_eol
+        "Insert two lines again!{buf_eol}There's no line-break"
       ));
       stateful.cursor_insert(&data_access, text2);
 
@@ -1632,7 +1643,7 @@ mod tests_insert_text {
       assert_eq!(actual2.column_idx(), 9);
 
       let viewport = get_viewport(tree.clone());
-      let l2 = format!("es!{}", buf_eol);
+      let l2 = format!("es!{buf_eol}");
       let expect = vec!["", "", l2.as_str(), "ines again", "ine-breakl"];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
         .into_iter()
@@ -1706,8 +1717,7 @@ mod tests_insert_text {
     {
       let buf_eol = lock!(buf).options().end_of_line();
       let text5 = CompactString::new(format!(
-        "Final 3 lines.{}The inserted 2nd{}The inserted 3rd{}",
-        buf_eol, buf_eol, buf_eol
+        "Final 3 lines.{buf_eol}The inserted 2nd{buf_eol}The inserted 3rd{buf_eol}"
       ));
       stateful.cursor_insert(&data_access, text5);
 
@@ -1782,6 +1792,74 @@ mod tests_insert_text {
         "he inserte",
         "he inserte",
         "nsert 4th ",
+      ];
+      let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+
+  #[test]
+  fn nowrap4() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 5);
+    let window_option = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let lines = vec![];
+    let (tree, state, bufs, buf, contents) = make_tree(terminal_size, window_option, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
+    let stateful = InsertStateful::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(&data_access, "Hi".to_compact_string());
+
+      let tree = data_access.tree.clone();
+      let actual2 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual2.line_idx(), 0);
+      assert_eq!(actual2.char_idx(), 2);
+      assert_eq!(actual2.row_idx(), 0);
+      assert_eq!(actual2.column_idx(), 2);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let l0 = format!("Hi{buf_eol}");
+      let expect = vec![l0.as_str(), ""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        2,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "Hi        ",
+        "          ",
+        "          ",
+        "          ",
+        "          ",
       ];
       let actual_canvas = make_canvas(terminal_size, window_option, buf.clone(), viewport);
       assert_canvas(&actual_canvas, &expect_canvas);
@@ -2223,7 +2301,8 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let a = format!("a{}", lock!(buf.clone()).options().end_of_line());
+      let buf_eol = lock!(buf.clone()).options().end_of_line();
+      let a = format!("a{buf_eol}");
       let expect = vec![a.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -2291,7 +2370,8 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let b = format!("b{}", lock!(buf.clone()).options().end_of_line());
+      let buf_eol = lock!(buf.clone()).options().end_of_line();
+      let b = format!("b{buf_eol}");
       let expect = vec![b.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -2359,7 +2439,8 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 4);
 
       let viewport = get_viewport(tree.clone());
-      let b = format!("这个{}", lock!(buf.clone()).options().end_of_line());
+      let buf_eol = lock!(buf.clone()).options().end_of_line();
+      let b = format!("这个{buf_eol}");
       let expect = vec![b.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -3340,7 +3421,7 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let text5 = CompactString::new(format!("he extra.{}", buf_eol));
+      let text5 = CompactString::new(format!("he extra.{buf_eol}"));
       let expect = vec![
         "SVIM!\n",
         "s is a qui",
@@ -3393,7 +3474,7 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let text5 = CompactString::new(format!("he extra{}", buf_eol));
+      let text5 = CompactString::new(format!("he extra{buf_eol}"));
       let expect = vec![
         "SVIM!\n",
         "s is a qui",

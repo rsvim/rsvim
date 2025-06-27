@@ -203,7 +203,13 @@ pub fn normalize_to_window_scroll_to(
   }
 }
 
-/// Calculate new cursor viewport by `Operation::CursorMove*` operations.
+/// Calculate new cursor viewport by `Operation::CursorMove*` operations, as if the cursor wants to
+/// move to a specific position, or by a specific distance.
+///
+/// This API is bounded the cursor motion by the parent widget which the cursor belongs to, the
+/// parent window/widget will not be scroll.
+///
+/// # Returns
 ///
 /// It returns new cursor viewport if the operation is valid, returns `None` if the cursor cannot
 /// move to the position.
@@ -228,13 +234,9 @@ pub fn raw_cursor_move_to(
   debug_assert!(text.rope().get_line(line_idx).is_some());
 
   let bufline = text.rope().line(line_idx);
-  debug_assert!(bufline.len_chars() >= char_idx);
 
-  let char_idx = if bufline.len_chars() == 0 {
-    0_usize
-  } else {
-    std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1))
-  };
+  let char_idx = std::cmp::min(char_idx, bufline.len_chars().saturating_sub(1));
+  debug_assert!(bufline.len_chars() >= char_idx);
 
   if bufline.len_chars() == 0 {
     debug_assert_eq!(char_idx, 0_usize);
@@ -248,6 +250,19 @@ pub fn raw_cursor_move_to(
   Some(new_cursor_viewport)
 }
 
+/// Calculate the new viewport by `Operation::WindowScroll*` operations, as if the cursor wants to
+/// move to a specific position, or by a specific distance.
+///
+/// This API only scrolls the parent window/widget where the cursor belongs to, it will not moves
+/// the cursor position.
+///
+/// # Returns
+///
+/// It returns new viewport if the operation is valid, returns `None` if the widget doesn't move.
+///
+/// # Panics
+///
+/// It panics if the operation is not a `Operation::WindowScroll*` operation.
 pub fn raw_widget_scroll_to(
   viewport: &Viewport,
   actual_shape: &U16Rect,
@@ -313,144 +328,6 @@ fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_heig
   max_len_chars
 }
 
-/// Only for testing
-pub fn _bufline_to_string(bufline: &ropey::RopeSlice) -> String {
-  let mut builder = String::with_capacity(bufline.len_chars());
-  for c in bufline.chars() {
-    builder.push(c);
-  }
-  builder
-}
-
-/// Only for testing
-pub fn _dbg_print_details(buffer: &Text, line_idx: usize, char_idx: usize, msg: &str) {
-  if cfg!(debug_assertions) {
-    match buffer.rope().get_line(line_idx) {
-      Some(bufline) => {
-        trace!(
-          "{}, line:{}, len_chars:{}, focus char:{}",
-          msg,
-          line_idx,
-          bufline.len_chars(),
-          char_idx
-        );
-        let start_char_on_line = buffer.rope().line_to_char(line_idx);
-
-        let mut builder1 = String::new();
-        let mut builder2 = String::new();
-        for (i, c) in bufline.chars().enumerate() {
-          let w = buffer.char_width(c);
-          if w > 0 {
-            builder1.push(c);
-          }
-          let s: String = std::iter::repeat_n(
-            if i + start_char_on_line == char_idx {
-              '^'
-            } else {
-              ' '
-            },
-            w,
-          )
-          .collect();
-          builder2.push_str(s.as_str());
-        }
-        trace!("-{}-", builder1);
-        trace!("-{}-", builder2);
-      }
-      None => trace!(
-        "{} line:{}, focus char:{}, not exist",
-        msg, line_idx, char_idx
-      ),
-    }
-
-    trace!("{}, Whole buffer:", msg);
-    for i in 0..buffer.rope().len_lines() {
-      trace!("{i}:{:?}", _bufline_to_string(&buffer.rope().line(i)));
-    }
-  }
-}
-
-pub fn _dbg_print_details_on_line(buffer: &Text, line_idx: usize, char_idx: usize, msg: &str) {
-  if cfg!(debug_assertions) {
-    match buffer.rope().get_line(line_idx) {
-      Some(bufline) => {
-        trace!(
-          "{} line:{}, len_chars:{}, focus char:{}",
-          msg,
-          line_idx,
-          bufline.len_chars(),
-          char_idx
-        );
-        let mut builder1 = String::new();
-        let mut builder2 = String::new();
-        for (i, c) in bufline.chars().enumerate() {
-          let w = buffer.char_width(c);
-          if w > 0 {
-            builder1.push(c);
-          }
-          let s: String = std::iter::repeat_n(if i == char_idx { '^' } else { ' ' }, w).collect();
-          builder2.push_str(s.as_str());
-        }
-        trace!("-{}-", builder1);
-        trace!("-{}-", builder2);
-      }
-      None => trace!(
-        "{} line:{}, focus char:{}, not exist",
-        msg, line_idx, char_idx
-      ),
-    }
-
-    trace!("{}, Whole buffer:", msg);
-    for i in 0..buffer.rope().len_lines() {
-      trace!("{i}:{:?}", _bufline_to_string(&buffer.rope().line(i)));
-    }
-  }
-}
-
-pub fn cursor_parent_node(tree: &Tree) -> Option<&TreeNode> {
-  if let Some(cursor_id) = tree.cursor_id() {
-    if let Some(cursor_parent_id) = tree.parent_id(cursor_id) {
-      debug_assert!(tree.node(cursor_parent_id).is_some());
-      let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
-      debug_assert!(matches!(
-        cursor_parent_node,
-        TreeNode::Window(_) | TreeNode::CommandLine(_)
-      ));
-      if cfg!(debug_assertions) {
-        match cursor_parent_node {
-          TreeNode::Window(window) => debug_assert_eq!(window.id(), cursor_parent_id),
-          TreeNode::CommandLine(cmdline) => debug_assert_eq!(cmdline.id(), cursor_parent_id),
-          _ => unreachable!(),
-        }
-      }
-      return Some(cursor_parent_node);
-    }
-  }
-  None
-}
-
-pub fn cursor_parent_node_mut(tree: &mut Tree) -> Option<&mut TreeNode> {
-  if let Some(cursor_id) = tree.cursor_id() {
-    if let Some(cursor_parent_id) = tree.parent_id(cursor_id) {
-      debug_assert!(tree.node_mut(cursor_parent_id).is_some());
-      let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
-      debug_assert!(matches!(
-        cursor_parent_node,
-        TreeNode::Window(_) | TreeNode::CommandLine(_)
-      ));
-      if cfg!(debug_assertions) {
-        match cursor_parent_node {
-          TreeNode::Window(window) => debug_assert_eq!(window.id(), cursor_parent_id),
-          TreeNode::CommandLine(cmdline) => debug_assert_eq!(cmdline.id(), cursor_parent_id),
-          _ => unreachable!(),
-        }
-      }
-      return Some(cursor_parent_node);
-    }
-  }
-  None
-}
-
 pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
   debug_assert!(tree.node_mut(id).is_some());
   let node = tree.node_mut(id).unwrap();
@@ -510,9 +387,25 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
   }
 }
 
-/// The operation must be `Operation::CursorMove*`.
-pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eol: bool) {
-  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
+/// High-level cursor move operation.
+///
+/// This API will move the cursor (and possibly scroll the widget/window it belongs to), as if the
+/// user is operating the editor (for example, using `hjkl`), by below parameters:
+/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
+/// 2. The `text` content binded to the parent widget/window node.
+///
+/// # Panics
+///
+/// It panics if the operation is not `Operation::CursorMove*`.
+pub fn cursor_move(
+  tree: &mut Tree,
+  id: TreeNodeId,
+  text: &Text,
+  op: Operation,
+  include_empty_eol: bool,
+) {
+  debug_assert!(tree.node_mut(id).is_some());
+  let cursor_parent_node = tree.node_mut(id).unwrap();
   let vnode_actual_shape = match cursor_parent_node {
     TreeNode::Window(window) => *window.actual_shape(),
     TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
@@ -602,10 +495,25 @@ pub fn cursor_move(tree: &mut Tree, text: &Text, op: Operation, include_empty_eo
   }
 }
 
-/// Returns new cursor position if inserts successfully, returns `None` if failed.
-pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) -> (usize, usize) {
-  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
-  let cursor_parent_id = cursor_parent_node.id();
+/// High-level cursor insert operation.
+///
+/// This API will insert text at the cursor (and possibly scroll the widget/window it belongs to),
+/// as if user is typing in insert mode, by below parameters:
+/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
+/// 2. The `text` content binded to the parent widget/window node.
+///
+/// # Returns
+///
+/// - It returns new cursor position `(cursor_line_idx,cursor_char_idx)` if inserts successfully.
+/// - It returns `None` if failed.
+pub fn cursor_insert(
+  tree: &mut Tree,
+  id: TreeNodeId,
+  text: &mut Text,
+  payload: CompactString,
+) -> (usize, usize) {
+  debug_assert!(tree.node_mut(id).is_some());
+  let cursor_parent_node = tree.node_mut(id).unwrap();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
     TreeNode::CommandLine(cmdline) => cmdline,
@@ -622,7 +530,7 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) -
     text.insert_at(cursor_line_idx, cursor_char_idx, payload);
 
   // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  _update_viewport_after_text_changed(tree, id, text);
 
   trace!(
     "Move to inserted pos, line:{cursor_line_idx_after_inserted}, char:{cursor_char_idx_after_inserted}"
@@ -631,7 +539,7 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) -
     cursor_char_idx_after_inserted,
     cursor_line_idx_after_inserted,
   ));
-  cursor_move(tree, text, op, true);
+  cursor_move(tree, id, text, op, true);
 
   (
     cursor_line_idx_after_inserted,
@@ -639,9 +547,27 @@ pub fn cursor_insert(tree: &mut Tree, text: &mut Text, payload: CompactString) -
   )
 }
 
-pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usize, usize)> {
-  let cursor_parent_node = cursor_parent_node_mut(tree).unwrap();
-  let cursor_parent_id = cursor_parent_node.id();
+/// High-level cursor delete operation.
+///
+/// This API will delete text at the cursor to either left/right direction (and possibly scroll the
+/// widget/window it belongs to), as if user presses `backspace`/`delete` in insert mode, by below
+/// parameters:
+/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
+/// 2. The `text` content binded to the parent widget/window node.
+/// 3. The `n` chars to be deleted, to the left if `n<0`, to the right if `n>0`.
+///
+/// # Returns
+///
+/// - It returns new cursor position `(cursor_line_idx,cursor_char_idx)` if deletes successfully.
+/// - It returns `None` if delete nothing.
+pub fn cursor_delete(
+  tree: &mut Tree,
+  id: TreeNodeId,
+  text: &mut Text,
+  n: isize,
+) -> Option<(usize, usize)> {
+  debug_assert!(tree.node_mut(id).is_some());
+  let cursor_parent_node = tree.node_mut(id).unwrap();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
     TreeNode::CommandLine(cmdline) => cmdline,
@@ -665,7 +591,7 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usiz
   maybe_new_cursor_position?;
 
   // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  _update_viewport_after_text_changed(tree, id, text);
   let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) =
     maybe_new_cursor_position.unwrap();
 
@@ -673,7 +599,33 @@ pub fn cursor_delete(tree: &mut Tree, text: &mut Text, n: isize) -> Option<(usiz
     "Move to deleted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
   );
   let op = Operation::CursorMoveTo((cursor_char_idx_after_deleted, cursor_line_idx_after_deleted));
-  cursor_move(tree, text, op, true);
+  cursor_move(tree, id, text, op, true);
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
+}
+
+/// High-level cursor clear operation.
+///
+/// This API will clear all text contents (and possibly scroll the widget/window it belongs to), as
+/// if user deletes all the text content in current buffer, by below parameters:
+/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
+/// 2. The `text` content binded to the parent widget/window node.
+///
+/// # Returns
+///
+/// It returns new cursor position `(cursor_line_idx,cursor_char_idx)` after deletes all text
+/// content.
+pub fn cursor_clear(tree: &mut Tree, id: TreeNodeId, text: &mut Text) -> (usize, usize) {
+  // Clear text.
+  text.clear();
+
+  // Update viewport since the buffer doesn't match the viewport.
+  _update_viewport_after_text_changed(tree, id, text);
+
+  let cursor_line_idx_after_clear = 0_usize;
+  let cursor_char_idx_after_clear = 0_usize;
+  let op = Operation::CursorMoveTo((cursor_char_idx_after_clear, cursor_line_idx_after_clear));
+  cursor_move(tree, id, text, op, true);
+
+  (cursor_line_idx_after_clear, cursor_char_idx_after_clear)
 }
