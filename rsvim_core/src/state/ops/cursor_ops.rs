@@ -389,7 +389,8 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
 
 /// High-level cursor move operation.
 ///
-/// This API will move the cursor (and possibly scroll the widget/window it belongs to), by:
+/// This API will move the cursor (and possibly scroll the widget/window it belongs to), as if the
+/// user is operating the editor (for example, using `hjkl`), by below parameters:
 /// 1. The parent widget/window node specified by node `id` (that contains the cursor).
 /// 2. The `text` content binded to the parent widget/window node.
 ///
@@ -494,9 +495,11 @@ pub fn cursor_move(
   }
 }
 
-/// High-level cursor move operation.
+/// High-level cursor insert operation.
 ///
-/// This API will move the cursor (and possibly scroll the widget/window it belongs to), by:
+/// This API will insert text at the cursor (and possibly scroll the widget/window it belongs to),
+/// as if user is typing/inserting in the editor (for example typing in the insert mode), by below
+/// parameters:
 /// 1. The parent widget/window node specified by node `id` (that contains the cursor).
 /// 2. The `text` content binded to the parent widget/window node.
 ///
