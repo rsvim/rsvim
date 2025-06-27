@@ -505,7 +505,8 @@ pub fn cursor_move(
 ///
 /// # Returns
 ///
-/// It returns new cursor position if inserts successfully, returns `None` if failed.
+/// - It returns new cursor position `(cursor_line_idx,cursor_char_idx)` if inserts successfully.
+/// - It returns `None` if failed.
 ///
 /// # Panics
 ///
