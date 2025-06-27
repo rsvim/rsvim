@@ -108,11 +108,6 @@ impl CommandLineExStateful {
     debug_assert!(tree.cursor_id().is_some());
     let cursor_id = tree.cursor_id().unwrap();
 
-    // Remove from current parent
-    let cursor_node = tree.remove(cursor_id);
-    debug_assert!(cursor_node.is_some());
-    let cursor_node = cursor_node.unwrap();
-
     if cfg!(debug_assertions) {
       debug_assert!(tree.command_line_id().is_some());
       let cmdline_id = tree.command_line_id().unwrap();
@@ -123,6 +118,15 @@ impl CommandLineExStateful {
         tree.node(cmdline_id).unwrap(),
         TreeNode::CommandLine(_)
       ));
+    }
+
+    // Remove from current parent
+    let cursor_node = tree.remove(cursor_id);
+    debug_assert!(cursor_node.is_some());
+    let cursor_node = cursor_node.unwrap();
+
+    if cfg!(debug_assertions) {
+      let cmdline_id = tree.command_line_id().unwrap();
       debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
       debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
     }
