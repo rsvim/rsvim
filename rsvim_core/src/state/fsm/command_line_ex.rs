@@ -107,10 +107,10 @@ impl CommandLineExStateful {
 
     debug_assert!(tree.cursor_id().is_some());
     let cursor_id = tree.cursor_id().unwrap();
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
 
     if cfg!(debug_assertions) {
-      debug_assert!(tree.command_line_id().is_some());
-      let cmdline_id = tree.command_line_id().unwrap();
       debug_assert!(tree.parent_id(cursor_id).is_some());
       debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), cmdline_id);
       debug_assert!(tree.node(cmdline_id).is_some());
@@ -126,7 +126,6 @@ impl CommandLineExStateful {
     let cursor_node = cursor_node.unwrap();
 
     if cfg!(debug_assertions) {
-      let cmdline_id = tree.command_line_id().unwrap();
       debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
       debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
     }
@@ -156,11 +155,7 @@ impl CommandLineExStateful {
     // Clear command-line contents.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
-    cursor_ops::cursor_clear(
-      &mut tree,
-      current_window_id,
-      contents.command_line_content_mut(),
-    );
+    cursor_ops::cursor_clear(&mut tree, cmdline_id, contents.command_line_content_mut());
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }
