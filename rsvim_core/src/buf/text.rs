@@ -533,8 +533,6 @@ impl Text {
   }
 
   /// Clear all text payload in current content.
-  ///
-  /// NOTE: The extra eol at text content end still keeps.
   pub fn clear(&mut self) {
     self.rope_mut().remove(0..);
     self.clear_cached_lines();

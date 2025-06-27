@@ -5,7 +5,6 @@
 use std::path::PathBuf;
 use std::sync::OnceLock;
 use std::time::Duration;
-use std::u64;
 
 use crate::envar::path_config::PathConfig;
 
