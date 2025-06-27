@@ -5,6 +5,7 @@
 use std::path::PathBuf;
 use std::sync::OnceLock;
 use std::time::Duration;
+use std::u64;
 
 use crate::envar::path_config::PathConfig;
 
@@ -16,12 +17,10 @@ pub mod path_config;
 pub fn MUTEX_TIMEOUT_SECS() -> u64 {
   static VALUE: OnceLock<u64> = OnceLock::new();
 
-  *VALUE.get_or_init(|| match std::env::var("RSVIM_MUTEX_TIMEOUT_SECS") {
-    Ok(v1) => match v1.parse::<u64>() {
-      Ok(v2) => v2,
-      _ => u64::MAX,
-    },
-    _ => u64::MAX,
+  *VALUE.get_or_init(|| {
+    std::env::var("RSVIM_MUTEX_TIMEOUT_SECS")
+      .map(|v| v.parse::<u64>().unwrap_or(u64::MAX))
+      .unwrap_or(u64::MAX)
   })
 }
 
@@ -36,12 +35,10 @@ pub fn MUTEX_TIMEOUT() -> Duration {
 pub fn CHANNEL_BUF_SIZE() -> usize {
   static VALUE: OnceLock<usize> = OnceLock::new();
 
-  *VALUE.get_or_init(|| match std::env::var("RSVIM_CHANNEL_BUF_SIZE") {
-    Ok(v1) => match v1.parse::<usize>() {
-      Ok(v2) => v2,
-      _ => 1000_usize,
-    },
-    _ => 1000_usize,
+  *VALUE.get_or_init(|| {
+    std::env::var("RSVIM_CHANNEL_BUF_SIZE")
+      .map(|v| v.parse::<usize>().unwrap_or(1000_usize))
+      .unwrap_or(1000_usize)
   })
 }
 
