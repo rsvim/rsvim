@@ -109,20 +109,24 @@ impl CommandLineExStateful {
     let cursor_id = tree.cursor_id().unwrap();
 
     // Remove from current parent
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
-    debug_assert!(tree.parent_id(cursor_id).is_some());
-    debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), cmdline_id);
-    debug_assert!(tree.node(cmdline_id).is_some());
-    debug_assert!(matches!(
-      tree.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
     let cursor_node = tree.remove(cursor_id);
     debug_assert!(cursor_node.is_some());
     let cursor_node = cursor_node.unwrap();
-    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-    debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
+
+    if cfg!(debug_assertions) {
+      debug_assert!(tree.command_line_id().is_some());
+      let cmdline_id = tree.command_line_id().unwrap();
+      debug_assert!(tree.parent_id(cursor_id).is_some());
+      debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), cmdline_id);
+      debug_assert!(tree.node(cmdline_id).is_some());
+      debug_assert!(matches!(
+        tree.node(cmdline_id).unwrap(),
+        TreeNode::CommandLine(_)
+      ));
+      debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+      debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
+    }
+
     let cursor_node = match cursor_node {
       TreeNode::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBlock);
