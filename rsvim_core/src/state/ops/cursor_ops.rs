@@ -498,8 +498,7 @@ pub fn cursor_move(
 /// High-level cursor insert operation.
 ///
 /// This API will insert text at the cursor (and possibly scroll the widget/window it belongs to),
-/// as if user is typing/inserting in the editor (for example typing in the insert mode), by below
-/// parameters:
+/// as if user is typing in insert mode, by below parameters:
 /// 1. The parent widget/window node specified by node `id` (that contains the cursor).
 /// 2. The `text` content binded to the parent widget/window node.
 ///
@@ -507,10 +506,6 @@ pub fn cursor_move(
 ///
 /// - It returns new cursor position `(cursor_line_idx,cursor_char_idx)` if inserts successfully.
 /// - It returns `None` if failed.
-///
-/// # Panics
-///
-/// It panics if the operation is not `Operation::CursorMove*`.
 pub fn cursor_insert(
   tree: &mut Tree,
   id: TreeNodeId,
@@ -552,14 +547,27 @@ pub fn cursor_insert(
   )
 }
 
+/// High-level cursor delete operation.
+///
+/// This API will delete text at the cursor to either left/right direction (and possibly scroll the
+/// widget/window it belongs to), as if user presses `backspace`/`delete` in insert mode, by below
+/// parameters:
+/// 1. The parent widget/window node specified by node `id` (that contains the cursor).
+/// 2. The `text` content binded to the parent widget/window node.
+/// 3. The `n` chars to be deleted, to the left if `n<0`, to the right if `n>0`.
+///
+/// # Returns
+///
+/// - It returns new cursor position `(cursor_line_idx,cursor_char_idx)` if deletes successfully.
+/// - It returns `None` if delete nothing.
 pub fn cursor_delete(
   tree: &mut Tree,
-  cursor_parent_id: TreeNodeId,
+  id: TreeNodeId,
   text: &mut Text,
   n: isize,
 ) -> Option<(usize, usize)> {
-  debug_assert!(tree.node_mut(cursor_parent_id).is_some());
-  let cursor_parent_node = tree.node_mut(cursor_parent_id).unwrap();
+  debug_assert!(tree.node_mut(id).is_some());
+  let cursor_parent_node = tree.node_mut(id).unwrap();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
     TreeNode::Window(window) => window,
     TreeNode::CommandLine(cmdline) => cmdline,
@@ -583,7 +591,7 @@ pub fn cursor_delete(
   maybe_new_cursor_position?;
 
   // Update viewport since the buffer doesn't match the viewport.
-  _update_viewport_after_text_changed(tree, cursor_parent_id, text);
+  _update_viewport_after_text_changed(tree, id, text);
   let (cursor_line_idx_after_deleted, cursor_char_idx_after_deleted) =
     maybe_new_cursor_position.unwrap();
 
@@ -591,7 +599,7 @@ pub fn cursor_delete(
     "Move to deleted pos, line:{cursor_line_idx_after_deleted}, char:{cursor_char_idx_after_deleted}"
   );
   let op = Operation::CursorMoveTo((cursor_char_idx_after_deleted, cursor_line_idx_after_deleted));
-  cursor_move(tree, cursor_parent_id, text, op, true);
+  cursor_move(tree, id, text, op, true);
 
   Some((cursor_line_idx_after_deleted, cursor_char_idx_after_deleted))
 }
