@@ -1841,7 +1841,7 @@ mod tests_insert_text {
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let l0 = format!("Hi{}", buf_eol);
+      let l0 = format!("Hi{buf_eol}");
       let expect = vec![l0.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
