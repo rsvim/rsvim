@@ -2370,7 +2370,8 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 1);
 
       let viewport = get_viewport(tree.clone());
-      let b = format!("b{}", lock!(buf.clone()).options().end_of_line());
+      let buf_eol = lock!(buf.clone()).options().end_of_line();
+      let b = format!("b{buf_eol}");
       let expect = vec![b.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -2438,7 +2439,8 @@ mod tests_insert_text {
       assert_eq!(actual1.column_idx(), 4);
 
       let viewport = get_viewport(tree.clone());
-      let b = format!("这个{}", lock!(buf.clone()).options().end_of_line());
+      let buf_eol = lock!(buf.clone()).options().end_of_line();
+      let b = format!("这个{buf_eol}");
       let expect = vec![b.as_str(), ""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -3419,7 +3421,7 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let text5 = CompactString::new(format!("he extra.{}", buf_eol));
+      let text5 = CompactString::new(format!("he extra.{buf_eol}"));
       let expect = vec![
         "SVIM!\n",
         "s is a qui",
@@ -3472,7 +3474,7 @@ mod tests_delete_text {
 
       let viewport = get_viewport(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
-      let text5 = CompactString::new(format!("he extra{}", buf_eol));
+      let text5 = CompactString::new(format!("he extra{buf_eol}"));
       let expect = vec![
         "SVIM!\n",
         "s is a qui",
