@@ -3,11 +3,13 @@
 use crate::geo_rect_as;
 use crate::prelude::*;
 
+use enum_dispatch::enum_dispatch;
 use std::fmt::Debug;
 use std::sync::atomic::{AtomicI32, Ordering};
 
 pub type TreeNodeId = i32;
 
+#[enum_dispatch]
 pub trait Inodeable: Sized + Clone + Debug {
   fn id(&self) -> TreeNodeId;
 
