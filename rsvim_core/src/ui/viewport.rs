@@ -1,11 +1,13 @@
 //! Fundamental viewport for all kinds of buffer typeset/rendering in UI widgets.
 
+use crate::arc_impl;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
+use paste::paste;
 use std::ops::Range;
 #[allow(unused_imports)]
 use tracing::trace;
@@ -135,8 +137,7 @@ pub struct CursorViewport {
   column_idx: u16,
 }
 
-pub type CursorViewportArc = std::sync::Arc<CursorViewport>;
-pub type CursorViewportWk = std::sync::Weak<CursorViewport>;
+arc_impl!(CursorViewport);
 
 impl CursorViewport {
   /// Make new instance.
@@ -147,10 +148,6 @@ impl CursorViewport {
       row_idx,
       column_idx,
     }
-  }
-
-  pub fn to_arc(value: CursorViewport) -> CursorViewportArc {
-    std::sync::Arc::new(value)
   }
 
   /// Get line index, starts from 0.
@@ -521,8 +518,7 @@ pub struct Viewport {
   lines: LiteMap<usize, LineViewport>,
 }
 
-pub type ViewportArc = std::sync::Arc<Viewport>;
-pub type ViewportWk = std::sync::Weak<Viewport>;
+arc_impl!(Viewport);
 
 #[derive(Debug, Copy, Clone)]
 pub enum ViewportSearchDirection {
@@ -533,10 +529,6 @@ pub enum ViewportSearchDirection {
 }
 
 impl Viewport {
-  pub fn to_arc(value: Viewport) -> ViewportArc {
-    std::sync::Arc::new(value)
-  }
-
   /// Calculate viewport downward, from top to bottom.
   ///
   /// NOTE: By default the viewport should starts from (0, 0), i.e. when first open buffer in a

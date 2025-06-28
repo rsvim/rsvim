@@ -126,7 +126,7 @@ jobs:
     runs-on: ubuntu-22.04
     strategy:
       matrix:
-        rust_version: [stable, 1.85.0]
+        rust_version: [beta, stable, 1.85.0]
     env:
       RUSTC_WRAPPER: "sccache"
       SCCACHE_GHA_ENABLED: "true"

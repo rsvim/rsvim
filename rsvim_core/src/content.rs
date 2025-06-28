@@ -1,6 +1,6 @@
 //! Temporary contents except buffers.
 
-use crate::arc_impl;
+use crate::arc_mutex_impl;
 use crate::buf::opt::BufferLocalOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
@@ -14,7 +14,7 @@ pub struct TextContents {
   command_line_content: Text,
 }
 
-arc_impl!(TextContents);
+arc_mutex_impl!(TextContents);
 
 impl TextContents {
   pub fn new(canvas_size: U16Size) -> Self {

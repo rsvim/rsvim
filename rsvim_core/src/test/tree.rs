@@ -40,13 +40,13 @@ pub fn make_tree_with_buffers(
     )
   };
   let window_id = window.id();
-  let window_node = TreeNode::Window(window);
+  let window_node = TreeNodeDispatcher::Window(window);
   tree_mut.bounded_insert(tree_root_id, window_node);
 
   // Initialize cursor.
   let cursor_shape = IRect::new((0, 0), (1, 1));
   let cursor = Cursor::default(cursor_shape);
-  let cursor_node = TreeNode::Cursor(cursor);
+  let cursor_node = TreeNodeDispatcher::Cursor(cursor);
   tree_mut.bounded_insert(window_id, cursor_node);
 
   tree.clone()
@@ -85,7 +85,7 @@ pub fn make_tree_with_buffers_cmdline(
     )
   };
   let window_id = window.id();
-  let window_node = TreeNode::Window(window);
+  let window_node = TreeNodeDispatcher::Window(window);
   tree_mut.bounded_insert(tree_root_id, window_node);
 
   // command-line
@@ -95,13 +95,13 @@ pub fn make_tree_with_buffers_cmdline(
   );
   let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&text_contents));
   let _cmdline_id = cmdline.id();
-  let cmdline = TreeNode::CommandLine(cmdline);
+  let cmdline = TreeNodeDispatcher::CommandLine(cmdline);
   tree_mut.bounded_insert(tree_root_id, cmdline);
 
   // cursor
   let cursor_shape = IRect::new((0, 0), (1, 1));
   let cursor = Cursor::default(cursor_shape);
-  let cursor_node = TreeNode::Cursor(cursor);
+  let cursor_node = TreeNodeDispatcher::Cursor(cursor);
   tree_mut.bounded_insert(window_id, cursor_node);
 
   tree.clone()

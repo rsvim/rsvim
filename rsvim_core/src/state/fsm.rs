@@ -19,7 +19,7 @@ use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 
 use crossterm::event::Event;
-use std::sync::{Arc, Weak};
+use enum_dispatch::enum_dispatch;
 
 // Re-export
 pub use command_line_ex::CommandLineExStateful;
@@ -72,22 +72,24 @@ impl StatefulDataAccess {
   }
 }
 
+#[enum_dispatch]
 /// The FSM trait.
 pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValueDispatcher;
 
   /// Handle user's operation, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue;
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValueDispatcher;
 }
 
+#[enum_dispatch(Stateful)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The value holder for each state machine.
-pub enum StatefulValue {
+pub enum StatefulValueDispatcher {
   // Editing modes.
   NormalMode(NormalStateful),
   VisualMode(VisualStateful),
@@ -102,39 +104,10 @@ pub enum StatefulValue {
   QuitState(QuitStateful),
 }
 
-impl Default for StatefulValue {
+impl Default for StatefulValueDispatcher {
   /// Returns the default FMS state, by default it's the
   /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
   fn default() -> Self {
-    StatefulValue::NormalMode(NormalStateful::default())
+    StatefulValueDispatcher::NormalMode(NormalStateful::default())
   }
 }
-
-impl StatefulValue {
-  /// Dispatch data with current FSM state.
-  ///
-  /// Returns the next FSM state.
-  pub fn handle(self: Arc<Self>, data_access: StatefulDataAccess) -> StatefulValue {
-    match *self {
-      StatefulValue::NormalMode(s) => s.handle(data_access),
-      StatefulValue::VisualMode(s) => s.handle(data_access),
-      StatefulValue::SelectMode(s) => s.handle(data_access),
-      StatefulValue::OperatorPendingMode(s) => s.handle(data_access),
-      StatefulValue::InsertMode(s) => s.handle(data_access),
-      StatefulValue::CommandLineExMode(s) => s.handle(data_access),
-      StatefulValue::CommandLineSearchForwardMode(s) => s.handle(data_access),
-      StatefulValue::CommandLineSearchBackwardMode(s) => s.handle(data_access),
-      StatefulValue::TerminalMode(s) => s.handle(data_access),
-      StatefulValue::QuitState(s) => s.handle(data_access),
-    }
-  }
-}
-
-impl StatefulValue {
-  pub fn to_arc(s: StatefulValue) -> StatefulValueArc {
-    Arc::new(s)
-  }
-}
-
-pub type StatefulValueArc = Arc<StatefulValue>;
-pub type StatefulValueWk = Weak<StatefulValue>;
