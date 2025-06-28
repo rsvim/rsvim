@@ -12,7 +12,7 @@
 //!
 //! * Quit state: The editor should quit on this state.
 
-use crate::arc_mutex_impl;
+use crate::arc_impl;
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::state::StateArc;
@@ -114,4 +114,4 @@ impl Default for StatefulValueDispatcher {
   }
 }
 
-arc_mutex_impl!(StatefulValueDispatcher);
+arc_impl!(StatefulValueDispatcher);
