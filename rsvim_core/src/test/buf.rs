@@ -47,7 +47,7 @@ pub fn make_buffers_manager(opts: BufferLocalOptions, bufs: Vec<BufferArc>) -> B
   BuffersManager::to_arc(bm)
 }
 
-pub fn ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
+pub fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
   let mut builder = String::with_capacity(bufline.len_chars());
   for c in bufline.chars() {
     builder.push(c);
@@ -98,7 +98,7 @@ pub fn dbg_print_textline_with_absolute_char_idx(
 
   trace!("{} whole text:", msg);
   for i in 0..text.rope().len_lines() {
-    trace!("{i}:{:?}", ropeline_to_string(&text.rope().line(i)));
+    trace!("{i}:{:?}", _ropeline_to_string(&text.rope().line(i)));
   }
 }
 
@@ -136,7 +136,7 @@ pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &s
 
   trace!("{}, whole buffer:", msg);
   for i in 0..text.rope().len_lines() {
-    trace!("{i}:{:?}", ropeline_to_string(&text.rope().line(i)));
+    trace!("{i}:{:?}", _ropeline_to_string(&text.rope().line(i)));
   }
 }
 
