@@ -9,9 +9,7 @@ use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEven
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
 use crate::lock;
 use crate::prelude::*;
-use crate::state::fsm::{
-  Stateful, StatefulDataAccess, StatefulValueDispatcher, StatefulValueDispatcherArc,
-};
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::*;
@@ -80,7 +78,7 @@ pub struct EventLoop {
   pub state: StateArc,
 
   /// Finite-state machine for editing state.
-  pub stateful_machine: StatefulValueDispatcherArc,
+  pub stateful_machine: StatefulValueDispatcher,
 
   /// Vim buffers.
   pub buffers: BuffersManagerArc,
@@ -139,7 +137,7 @@ impl EventLoop {
 
     // State
     let state = State::to_arc(State::default());
-    let stateful_machine = StatefulValueDispatcher::to_arc(StatefulValueDispatcher::default());
+    let stateful_machine = StatefulValueDispatcher::default();
 
     // Worker => master
     let (worker_send_to_master, master_recv_from_worker) = channel(envar::CHANNEL_BUF_SIZE());
@@ -387,16 +385,16 @@ impl EventLoop {
         );
 
         // Handle by state machine
-        let stateful = self.stateful_machine.clone();
-        let next_stateful = StatefulValueDispatcher::to_arc(stateful.handle(data_access));
+        let stateful = self.stateful_machine;
+        let next_stateful = stateful.handle(data_access);
         {
           let mut state = lock!(self.state);
           state.update_state_machine(&next_stateful);
         }
-        self.stateful_machine = next_stateful.clone();
+        self.stateful_machine = next_stateful;
 
         // Exit loop and quit.
-        if let StatefulValueDispatcher::QuitState(_) = *next_stateful {
+        if let StatefulValueDispatcher::QuitState(_) = next_stateful {
           self.cancellation_token.cancel();
         }
       }
