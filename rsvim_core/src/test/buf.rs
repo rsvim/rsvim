@@ -47,7 +47,7 @@ pub fn make_buffers_manager(opts: BufferLocalOptions, bufs: Vec<BufferArc>) -> B
   BuffersManager::to_arc(bm)
 }
 
-pub fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
+fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
   let mut builder = String::with_capacity(bufline.len_chars());
   for c in bufline.chars() {
     builder.push(c);
@@ -55,7 +55,7 @@ pub fn _ropeline_to_string(bufline: &ropey::RopeSlice) -> String {
   builder
 }
 
-#[cfg(debug_assertions)]
+#[cfg(test)]
 pub fn dbg_print_textline_with_absolute_char_idx(
   text: &Text,
   line_idx: usize,
@@ -102,7 +102,7 @@ pub fn dbg_print_textline_with_absolute_char_idx(
   }
 }
 
-#[cfg(not(debug_assertions))]
+#[cfg(not(test))]
 pub fn dbg_print_textline_with_absolute_char_idx(
   _text: &Text,
   _line_idx: usize,
@@ -111,7 +111,7 @@ pub fn dbg_print_textline_with_absolute_char_idx(
 ) {
 }
 
-#[cfg(debug_assertions)]
+#[cfg(test)]
 pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &str) {
   trace!("{} text line:{},char:{}", msg, line_idx, char_idx);
 
@@ -140,5 +140,5 @@ pub fn dbg_print_textline(text: &Text, line_idx: usize, char_idx: usize, msg: &s
   }
 }
 
-#[cfg(not(debug_assertions))]
+#[cfg(not(test))]
 pub fn dbg_print_textline(_text: &Text, _line_idx: usize, _char_idx: usize, _msg: &str) {}
