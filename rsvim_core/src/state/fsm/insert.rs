@@ -59,9 +59,9 @@ impl InsertStateful {
     );
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    debug_assert!(matches!(current_window_node, TreeNodeDispatcher::Window(_)));
     match current_window_node {
-      TreeNode::Window(current_window) => current_window,
+      TreeNodeDispatcher::Window(current_window) => current_window,
       _ => unreachable!(),
     }
   }
@@ -143,7 +143,7 @@ impl InsertStateful {
     debug_assert!(tree.cursor_id().is_some());
     let cursor_id = tree.cursor_id().unwrap();
     debug_assert!(tree.node_mut(cursor_id).is_some());
-    if let Some(TreeNode::Cursor(cursor)) = tree.node_mut(cursor_id) {
+    if let Some(TreeNodeDispatcher::Cursor(cursor)) = tree.node_mut(cursor_id) {
       cursor.set_style(&CursorStyle::SteadyBlock);
     } else {
       unreachable!()
@@ -221,9 +221,9 @@ mod tests_util {
     let tree = lock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
+    assert!(matches!(current_window_node, TreeNodeDispatcher::Window(_)));
     match current_window_node {
-      TreeNode::Window(current_window) => current_window.viewport(),
+      TreeNodeDispatcher::Window(current_window) => current_window.viewport(),
       _ => unreachable!(),
     }
   }
@@ -232,9 +232,9 @@ mod tests_util {
     let tree = lock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
+    assert!(matches!(current_window_node, TreeNodeDispatcher::Window(_)));
     match current_window_node {
-      TreeNode::Window(current_window) => current_window.cursor_viewport(),
+      TreeNodeDispatcher::Window(current_window) => current_window.cursor_viewport(),
       _ => unreachable!(),
     }
   }

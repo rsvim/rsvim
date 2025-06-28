@@ -60,9 +60,9 @@ impl NormalStateful {
     );
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    debug_assert!(matches!(current_window_node, TreeNodeDispatcher::Window(_)));
     match current_window_node {
-      TreeNode::Window(current_window) => current_window,
+      TreeNodeDispatcher::Window(current_window) => current_window,
       _ => unreachable!(),
     }
   }
@@ -117,17 +117,17 @@ impl NormalStateful {
     debug_assert!(tree.node(cursor_parent_id).is_some());
     debug_assert!(matches!(
       tree.node(cursor_parent_id).unwrap(),
-      TreeNode::Window(_)
+      TreeNodeDispatcher::Window(_)
     ));
     let cursor_node = tree.remove(cursor_id);
     debug_assert!(cursor_node.is_some());
     let cursor_node = cursor_node.unwrap();
-    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    debug_assert!(matches!(cursor_node, TreeNodeDispatcher::Cursor(_)));
     debug_assert!(!tree.children_ids(cursor_parent_id).contains(&cursor_id));
     let cursor_node = match cursor_node {
-      TreeNode::Cursor(mut cursor) => {
+      TreeNodeDispatcher::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBar);
-        TreeNode::Cursor(cursor)
+        TreeNodeDispatcher::Cursor(cursor)
       }
       _ => unreachable!(),
     };
@@ -138,7 +138,7 @@ impl NormalStateful {
     debug_assert!(tree.node(cmdline_id).is_some());
     debug_assert!(matches!(
       tree.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
+      TreeNodeDispatcher::CommandLine(_)
     ));
     let _inserted = tree.bounded_insert(cmdline_id, cursor_node);
     debug_assert!(_inserted.is_none());
@@ -227,9 +227,9 @@ impl NormalStateful {
     let cursor_id = tree.cursor_id().unwrap();
     debug_assert!(tree.node_mut(cursor_id).is_some());
     let cursor_node = tree.node_mut(cursor_id).unwrap();
-    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+    debug_assert!(matches!(cursor_node, TreeNodeDispatcher::Cursor(_)));
     match cursor_node {
-      TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+      TreeNodeDispatcher::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
       _ => unreachable!(),
     }
 
@@ -424,9 +424,9 @@ mod tests_util {
     let tree = lock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
+    assert!(matches!(current_window_node, TreeNodeDispatcher::Window(_)));
     match current_window_node {
-      TreeNode::Window(current_window) => current_window.viewport(),
+      TreeNodeDispatcher::Window(current_window) => current_window.viewport(),
       _ => unreachable!(),
     }
   }
@@ -438,11 +438,11 @@ mod tests_util {
     let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
     assert!(matches!(
       cursor_parent_node,
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
+      TreeNodeDispatcher::Window(_) | TreeNodeDispatcher::CommandLine(_)
     ));
     let vnode: &dyn Viewportable = match cursor_parent_node {
-      TreeNode::Window(window) => window,
-      TreeNode::CommandLine(cmdline) => cmdline,
+      TreeNodeDispatcher::Window(window) => window,
+      TreeNodeDispatcher::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
     };
     vnode.cursor_viewport()

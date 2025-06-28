@@ -53,9 +53,9 @@ impl CommandLineExStateful {
     let current_window_id = tree.current_window_id().unwrap();
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    debug_assert!(matches!(current_window_node, TreeNodeDispatcher::Window(_)));
     match current_window_node {
-      TreeNode::Window(current_window) => current_window,
+      TreeNodeDispatcher::Window(current_window) => current_window,
       _ => unreachable!(),
     }
   }
@@ -65,9 +65,9 @@ impl CommandLineExStateful {
     let cmdline_id = tree.command_line_id().unwrap();
     debug_assert!(tree.node_mut(cmdline_id).is_some());
     let cmdline_node = tree.node_mut(cmdline_id).unwrap();
-    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+    debug_assert!(matches!(cmdline_node, TreeNodeDispatcher::CommandLine(_)));
     match cmdline_node {
-      TreeNode::CommandLine(cmdline) => cmdline,
+      TreeNodeDispatcher::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
     }
   }
@@ -116,7 +116,7 @@ impl CommandLineExStateful {
       debug_assert!(tree.node(cmdline_id).is_some());
       debug_assert!(matches!(
         tree.node(cmdline_id).unwrap(),
-        TreeNode::CommandLine(_)
+        TreeNodeDispatcher::CommandLine(_)
       ));
     }
 
@@ -126,14 +126,14 @@ impl CommandLineExStateful {
     let cursor_node = cursor_node.unwrap();
 
     if cfg!(debug_assertions) {
-      debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
+      debug_assert!(matches!(cursor_node, TreeNodeDispatcher::Cursor(_)));
       debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
     }
 
     let cursor_node = match cursor_node {
-      TreeNode::Cursor(mut cursor) => {
+      TreeNodeDispatcher::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBlock);
-        TreeNode::Cursor(cursor)
+        TreeNodeDispatcher::Cursor(cursor)
       }
       _ => unreachable!(),
     };
@@ -317,11 +317,11 @@ mod tests_util {
     let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
     assert!(matches!(
       cursor_parent_node,
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
+      TreeNodeDispatcher::Window(_) | TreeNodeDispatcher::CommandLine(_)
     ));
     match cursor_parent_node {
-      TreeNode::Window(current_window) => current_window.viewport(),
-      TreeNode::CommandLine(cmdline) => cmdline.viewport(),
+      TreeNodeDispatcher::Window(current_window) => current_window.viewport(),
+      TreeNodeDispatcher::CommandLine(cmdline) => cmdline.viewport(),
       _ => unreachable!(),
     }
   }
@@ -333,11 +333,11 @@ mod tests_util {
     let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
     assert!(matches!(
       cursor_parent_node,
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
+      TreeNodeDispatcher::Window(_) | TreeNodeDispatcher::CommandLine(_)
     ));
     match cursor_parent_node {
-      TreeNode::Window(window) => window.cursor_viewport(),
-      TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
+      TreeNodeDispatcher::Window(window) => window.cursor_viewport(),
+      TreeNodeDispatcher::CommandLine(cmdline) => cmdline.cursor_viewport(),
       _ => unreachable!(),
     }
   }

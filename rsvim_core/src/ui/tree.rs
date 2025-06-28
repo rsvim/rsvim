@@ -26,21 +26,21 @@ pub mod internal;
 #[enum_dispatch(Inodeable)]
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
-pub enum TreeNode {
+pub enum TreeNodeDispatcher {
   RootContainer(RootContainer),
   Window(Window),
   Cursor(Cursor),
   CommandLine(CommandLine),
 }
 
-impl Widgetable for TreeNode {
+impl Widgetable for TreeNodeDispatcher {
   /// Draw widget on the canvas.
   fn draw(&self, canvas: &mut Canvas) {
     match self {
-      TreeNode::RootContainer(w) => w.draw(canvas),
-      TreeNode::Window(w) => w.draw(canvas),
-      TreeNode::Cursor(w) => w.draw(canvas),
-      TreeNode::CommandLine(w) => w.draw(canvas),
+      TreeNodeDispatcher::RootContainer(w) => w.draw(canvas),
+      TreeNodeDispatcher::Window(w) => w.draw(canvas),
+      TreeNodeDispatcher::Cursor(w) => w.draw(canvas),
+      TreeNodeDispatcher::CommandLine(w) => w.draw(canvas),
     }
   }
 }
@@ -141,7 +141,7 @@ impl Widgetable for TreeNode {
 ///
 pub struct Tree {
   // Internal implementation.
-  base: Itree<TreeNode>,
+  base: Itree<TreeNodeDispatcher>,
 
   // [`Cursor`](crate::ui::widget::cursor::Cursor) node ID.
   cursor_id: Option<TreeNodeId>,
@@ -185,7 +185,7 @@ impl Tree {
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
     let root_container = RootContainer::new(shape);
-    let root_node = TreeNode::RootContainer(root_container);
+    let root_node = TreeNodeDispatcher::RootContainer(root_container);
     Tree {
       base: Itree::new(root_node),
       cursor_id: None,
@@ -228,12 +228,12 @@ impl Tree {
   }
 
   /// Get the node struct by its `id`.
-  pub fn node(&self, id: TreeNodeId) -> Option<&TreeNode> {
+  pub fn node(&self, id: TreeNodeId) -> Option<&TreeNodeDispatcher> {
     self.base.node(id)
   }
 
   /// Get mutable node struct by its `id`.
-  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNode> {
+  pub fn node_mut(&mut self, id: TreeNodeId) -> Option<&mut TreeNodeDispatcher> {
     self.base.node_mut(id)
   }
 
@@ -267,11 +267,11 @@ impl Tree {
         debug_assert!(self.node(parent_id).is_some());
         let parent_node = self.node(parent_id).unwrap();
         match parent_node {
-          TreeNode::Window(window) => {
+          TreeNodeDispatcher::Window(window) => {
             debug_assert!(self.current_window_id.is_some());
             debug_assert_eq!(self.current_window_id.unwrap(), window.id());
           }
-          TreeNode::CommandLine(_command_line) => {
+          TreeNodeDispatcher::CommandLine(_command_line) => {
             debug_assert!(self.current_window_id.is_some());
           }
           _ => unreachable!(),
@@ -294,16 +294,16 @@ impl Tree {
   //
   // 1. When insert a cursor widget, it's parent widget must be a window widget.
   // 2. Maintain the cursor widget ID and window widget IDs when insert.
-  fn insert_guard(&mut self, node: &TreeNode, parent_id: TreeNodeId) {
+  fn insert_guard(&mut self, node: &TreeNodeDispatcher, parent_id: TreeNodeId) {
     match node {
-      TreeNode::Cursor(cursor) => {
+      TreeNodeDispatcher::Cursor(cursor) => {
         // When insert cursor widget, update `current_window_id`.
         let parent_node = self.node(parent_id).unwrap();
         match parent_node {
-          TreeNode::Window(window) => {
+          TreeNodeDispatcher::Window(window) => {
             self.current_window_id = Some(window.id());
           }
-          TreeNode::CommandLine(command_line) => {
+          TreeNodeDispatcher::CommandLine(command_line) => {
             if let Some(command_line_id) = self.command_line_id {
               debug_assert_eq!(command_line.id(), command_line_id);
             }
@@ -313,11 +313,11 @@ impl Tree {
         // When insert cursor widget, update `cursor_id`.
         self.cursor_id = Some(cursor.id());
       }
-      TreeNode::CommandLine(command_line) => {
+      TreeNodeDispatcher::CommandLine(command_line) => {
         // When insert command-line widget, update `command_line_id`.
         self.command_line_id = Some(command_line.id());
       }
-      TreeNode::Window(window) => {
+      TreeNodeDispatcher::Window(window) => {
         // When insert window widget, update `window_ids`.
         self.window_ids.insert(window.id());
       }
@@ -326,7 +326,11 @@ impl Tree {
   }
 
   /// See [`Itree::insert`].
-  pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
+  pub fn insert(
+    &mut self,
+    parent_id: TreeNodeId,
+    child_node: TreeNodeDispatcher,
+  ) -> Option<TreeNodeDispatcher> {
     self.insert_guard(&child_node, parent_id);
     self.base.insert(parent_id, child_node)
   }
@@ -335,8 +339,8 @@ impl Tree {
   pub fn bounded_insert(
     &mut self,
     parent_id: TreeNodeId,
-    child_node: TreeNode,
-  ) -> Option<TreeNode> {
+    child_node: TreeNodeDispatcher,
+  ) -> Option<TreeNodeDispatcher> {
     self.insert_guard(&child_node, parent_id);
     self.base.bounded_insert(parent_id, child_node)
   }
@@ -362,7 +366,7 @@ impl Tree {
   }
 
   /// See [`Itree::remove`].
-  pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNode> {
+  pub fn remove(&mut self, id: TreeNodeId) -> Option<TreeNodeDispatcher> {
     self.remove_guard(id);
     self.base.remove(id)
   }
