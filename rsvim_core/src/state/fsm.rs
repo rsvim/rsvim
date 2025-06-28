@@ -12,6 +12,7 @@
 //!
 //! * Quit state: The editor should quit on this state.
 
+use crate::arc_mutex_impl;
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::state::StateArc;
@@ -20,6 +21,7 @@ use crate::ui::tree::TreeArc;
 
 use crossterm::event::Event;
 use enum_dispatch::enum_dispatch;
+use paste::paste;
 
 // Re-export
 pub use command_line_ex::CommandLineExStateful;
@@ -111,3 +113,5 @@ impl Default for StatefulValueDispatcher {
     StatefulValueDispatcher::NormalMode(NormalStateful::default())
   }
 }
+
+arc_mutex_impl!(StatefulValueDispatcher);

@@ -1,6 +1,6 @@
 //! Vim editing mode.
 
-use crate::arc_impl;
+use crate::arc_mutex_impl;
 use crate::state::fsm::StatefulValueDispatcher;
 use crate::state::mode::Mode;
 
@@ -18,7 +18,7 @@ pub struct State {
   last_mode: Mode,
 }
 
-arc_impl!(State);
+arc_mutex_impl!(State);
 
 impl State {
   pub fn new() -> Self {
