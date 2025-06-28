@@ -20,7 +20,6 @@ use crate::ui::tree::TreeArc;
 
 use crossterm::event::Event;
 use enum_dispatch::enum_dispatch;
-use paste::paste;
 
 // Re-export
 pub use command_line_ex::CommandLineExStateful;
