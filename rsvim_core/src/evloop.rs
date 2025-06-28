@@ -391,7 +391,7 @@ impl EventLoop {
           let mut state = lock!(self.state);
           state.update_state_machine(&next_stateful);
         }
-        self.stateful_machine = next_stateful.clone();
+        self.stateful_machine = next_stateful;
 
         // Exit loop and quit.
         if let StatefulValueDispatcher::QuitState(_) = next_stateful {

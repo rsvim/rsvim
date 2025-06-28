@@ -20,7 +20,6 @@ use crate::ui::tree::TreeArc;
 
 use crossterm::event::Event;
 use enum_dispatch::enum_dispatch;
-use std::sync::{Arc, Weak};
 
 // Re-export
 pub use command_line_ex::CommandLineExStateful;
@@ -112,12 +111,3 @@ impl Default for StatefulValueDispatcher {
     StatefulValueDispatcher::NormalMode(NormalStateful::default())
   }
 }
-
-impl StatefulValueDispatcher {
-  pub fn to_arc(s: StatefulValueDispatcher) -> StatefulValueDispatcherArc {
-    Arc::new(s)
-  }
-}
-
-pub type StatefulValueDispatcherArc = Arc<StatefulValueDispatcher>;
-pub type StatefulValueDispatcherWk = Weak<StatefulValueDispatcher>;
