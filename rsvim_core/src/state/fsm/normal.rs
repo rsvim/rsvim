@@ -2,7 +2,7 @@
 
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
@@ -69,17 +69,17 @@ impl NormalStateful {
 }
 
 impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValueDispatcher {
     let event = data_access.event.clone();
 
     if let Some(op) = self._get_operation(event) {
       return self.handle_op(data_access, op);
     }
 
-    StatefulValue::NormalMode(NormalStateful::default())
+    StatefulValueDispatcher::NormalMode(NormalStateful::default())
   }
 
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValueDispatcher {
     match op {
       Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
       Operation::GotoCommandLineExMode => self.goto_command_line_ex_mode(&data_access),
@@ -102,7 +102,10 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  pub fn goto_command_line_ex_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+  pub fn goto_command_line_ex_mode(
+    &self,
+    data_access: &StatefulDataAccess,
+  ) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -154,7 +157,7 @@ impl NormalStateful {
       ":".to_compact_string(),
     );
 
-    StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
+    StatefulValueDispatcher::CommandLineExMode(super::CommandLineExStateful::default())
   }
 }
 
@@ -162,7 +165,7 @@ impl NormalStateful {
   fn _goto_command_line_search_forward_mode(
     &self,
     _data_access: &StatefulDataAccess,
-  ) -> StatefulValue {
+  ) -> StatefulValueDispatcher {
     // let tree = data_access.tree.clone();
     // let mut tree = lock!(tree);
     //
@@ -185,7 +188,9 @@ impl NormalStateful {
     //   _ => unreachable!(),
     // }
 
-    StatefulValue::CommandLineSearchForwardMode(super::CommandLineSearchForwardStateful::default())
+    StatefulValueDispatcher::CommandLineSearchForwardMode(
+      super::CommandLineSearchForwardStateful::default(),
+    )
   }
 }
 
@@ -193,7 +198,7 @@ impl NormalStateful {
   fn _goto_command_line_search_backward_mode(
     &self,
     _data_access: &StatefulDataAccess,
-  ) -> StatefulValue {
+  ) -> StatefulValueDispatcher {
     // let tree = data_access.tree.clone();
     // let mut tree = lock!(tree);
     //
@@ -216,12 +221,14 @@ impl NormalStateful {
     //   _ => unreachable!(),
     // }
 
-    StatefulValue::CommandLineSearchBackwardMode(super::CommandLineSearchBackwardStateful::default())
+    StatefulValueDispatcher::CommandLineSearchBackwardMode(
+      super::CommandLineSearchBackwardStateful::default(),
+    )
   }
 }
 
 impl NormalStateful {
-  fn goto_insert_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+  fn goto_insert_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let cursor_id = tree.cursor_id().unwrap();
@@ -233,13 +240,17 @@ impl NormalStateful {
       _ => unreachable!(),
     }
 
-    StatefulValue::InsertMode(super::InsertStateful::default())
+    StatefulValueDispatcher::InsertMode(super::InsertStateful::default())
   }
 }
 
 impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
-  fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+  fn cursor_move(
+    &self,
+    data_access: &StatefulDataAccess,
+    op: Operation,
+  ) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
@@ -249,7 +260,7 @@ impl NormalStateful {
 
     cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, false);
 
-    StatefulValue::NormalMode(NormalStateful::default())
+    StatefulValueDispatcher::NormalMode(NormalStateful::default())
   }
 }
 
@@ -343,8 +354,8 @@ impl NormalStateful {
     }
   }
 
-  fn editor_quit(&self, _data_access: &StatefulDataAccess) -> StatefulValue {
-    StatefulValue::QuitState(QuitStateful::default())
+  fn editor_quit(&self, _data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
+    StatefulValueDispatcher::QuitState(QuitStateful::default())
   }
 }
 

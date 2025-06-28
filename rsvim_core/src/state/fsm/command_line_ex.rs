@@ -1,7 +1,7 @@
 //! The command-line ex mode.
 
 use crate::lock;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
 use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
@@ -74,17 +74,17 @@ impl CommandLineExStateful {
 }
 
 impl Stateful for CommandLineExStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValueDispatcher {
     let event = data_access.event.clone();
 
     if let Some(op) = self._get_operation(event) {
       return self.handle_op(data_access, op);
     }
 
-    StatefulValue::CommandLineExMode(CommandLineExStateful::default())
+    StatefulValueDispatcher::CommandLineExMode(CommandLineExStateful::default())
   }
 
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValueDispatcher {
     match op {
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
@@ -101,7 +101,7 @@ impl Stateful for CommandLineExStateful {
 }
 
 impl CommandLineExStateful {
-  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -157,12 +157,16 @@ impl CommandLineExStateful {
     let mut contents = lock!(contents);
     cursor_ops::cursor_clear(&mut tree, cmdline_id, contents.command_line_content_mut());
 
-    StatefulValue::NormalMode(super::NormalStateful::default())
+    StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
 }
 
 impl CommandLineExStateful {
-  fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+  fn cursor_move(
+    &self,
+    data_access: &StatefulDataAccess,
+    op: Operation,
+  ) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     debug_assert!(tree.command_line_id().is_some());
@@ -178,7 +182,7 @@ impl CommandLineExStateful {
       true,
     );
 
-    StatefulValue::CommandLineExMode(CommandLineExStateful::default())
+    StatefulValueDispatcher::CommandLineExMode(CommandLineExStateful::default())
   }
 }
 
@@ -187,7 +191,7 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
     payload: CompactString,
-  ) -> StatefulValue {
+  ) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     debug_assert!(tree.command_line_id().is_some());
@@ -202,12 +206,12 @@ impl CommandLineExStateful {
       payload,
     );
 
-    StatefulValue::CommandLineExMode(CommandLineExStateful::default())
+    StatefulValueDispatcher::CommandLineExMode(CommandLineExStateful::default())
   }
 }
 
 impl CommandLineExStateful {
-  fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
+  fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let contents = data_access.contents.clone();
@@ -233,7 +237,7 @@ impl CommandLineExStateful {
 
     cursor_ops::cursor_delete(&mut tree, cmdline_id, text, to_be_deleted_n);
 
-    StatefulValue::CommandLineExMode(CommandLineExStateful::default())
+    StatefulValueDispatcher::CommandLineExMode(CommandLineExStateful::default())
   }
 }
 

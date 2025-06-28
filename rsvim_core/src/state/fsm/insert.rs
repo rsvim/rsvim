@@ -1,7 +1,7 @@
 //! The insert mode.
 
 use crate::lock;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
@@ -68,17 +68,17 @@ impl InsertStateful {
 }
 
 impl Stateful for InsertStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValueDispatcher {
     let event = data_access.event.clone();
 
     if let Some(op) = self._get_operation(event) {
       return self.handle_op(data_access, op);
     }
 
-    StatefulValue::InsertMode(InsertStateful::default())
+    StatefulValueDispatcher::InsertMode(InsertStateful::default())
   }
 
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValueDispatcher {
     match op {
       Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
       Operation::CursorMoveBy((_, _))
@@ -95,7 +95,7 @@ impl Stateful for InsertStateful {
 }
 
 impl InsertStateful {
-  fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
+  fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
@@ -105,7 +105,7 @@ impl InsertStateful {
 
     cursor_ops::cursor_delete(&mut tree, current_window_id, buffer.text_mut(), n);
 
-    StatefulValue::InsertMode(InsertStateful::default())
+    StatefulValueDispatcher::InsertMode(InsertStateful::default())
   }
 }
 
@@ -114,7 +114,7 @@ impl InsertStateful {
     &self,
     data_access: &StatefulDataAccess,
     payload: CompactString,
-  ) -> StatefulValue {
+  ) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
@@ -124,12 +124,12 @@ impl InsertStateful {
 
     cursor_ops::cursor_insert(&mut tree, current_window_id, buffer.text_mut(), payload);
 
-    StatefulValue::InsertMode(InsertStateful::default())
+    StatefulValueDispatcher::InsertMode(InsertStateful::default())
   }
 }
 
 impl InsertStateful {
-  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
@@ -149,12 +149,16 @@ impl InsertStateful {
       unreachable!()
     }
 
-    StatefulValue::NormalMode(super::NormalStateful::default())
+    StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
 }
 
 impl InsertStateful {
-  fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+  fn cursor_move(
+    &self,
+    data_access: &StatefulDataAccess,
+    op: Operation,
+  ) -> StatefulValueDispatcher {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
@@ -164,7 +168,7 @@ impl InsertStateful {
 
     cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, true);
 
-    StatefulValue::InsertMode(InsertStateful::default())
+    StatefulValueDispatcher::InsertMode(InsertStateful::default())
   }
 }
 

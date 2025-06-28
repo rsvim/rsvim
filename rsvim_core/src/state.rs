@@ -1,7 +1,7 @@
 //! Vim editing mode.
 
 use crate::arc_impl;
-use crate::state::fsm::StatefulValue;
+use crate::state::fsm::StatefulValueDispatcher;
 use crate::state::mode::Mode;
 
 use paste::paste;
@@ -44,23 +44,27 @@ impl Default for State {
 }
 
 impl State {
-  pub fn update_state_machine(&mut self, next_stateful: &StatefulValue) {
+  pub fn update_state_machine(&mut self, next_stateful: &StatefulValueDispatcher) {
     // Save last stateful machine.
     self.last_mode = self.mode;
 
     // Update mode.
     let next_mode = match next_stateful {
-      StatefulValue::NormalMode(_) => Some(Mode::Normal),
-      StatefulValue::VisualMode(_) => Some(Mode::Visual),
-      StatefulValue::SelectMode(_) => Some(Mode::Select),
-      StatefulValue::OperatorPendingMode(_) => Some(Mode::OperatorPending),
-      StatefulValue::InsertMode(_) => Some(Mode::Insert),
-      StatefulValue::CommandLineExMode(_) => Some(Mode::CommandLineEx),
-      StatefulValue::CommandLineSearchForwardMode(_) => Some(Mode::CommandLineSearchForward),
-      StatefulValue::CommandLineSearchBackwardMode(_) => Some(Mode::CommandLineSearchBackward),
-      StatefulValue::TerminalMode(_) => Some(Mode::Terminal),
+      StatefulValueDispatcher::NormalMode(_) => Some(Mode::Normal),
+      StatefulValueDispatcher::VisualMode(_) => Some(Mode::Visual),
+      StatefulValueDispatcher::SelectMode(_) => Some(Mode::Select),
+      StatefulValueDispatcher::OperatorPendingMode(_) => Some(Mode::OperatorPending),
+      StatefulValueDispatcher::InsertMode(_) => Some(Mode::Insert),
+      StatefulValueDispatcher::CommandLineExMode(_) => Some(Mode::CommandLineEx),
+      StatefulValueDispatcher::CommandLineSearchForwardMode(_) => {
+        Some(Mode::CommandLineSearchForward)
+      }
+      StatefulValueDispatcher::CommandLineSearchBackwardMode(_) => {
+        Some(Mode::CommandLineSearchBackward)
+      }
+      StatefulValueDispatcher::TerminalMode(_) => Some(Mode::Terminal),
       // Internal states.
-      StatefulValue::QuitState(_) => None,
+      StatefulValueDispatcher::QuitState(_) => None,
     };
     if let Some(mode) = next_mode {
       self.mode = mode;
@@ -77,7 +81,9 @@ mod tests {
     let mut state = State::new();
     assert_eq!(state.last_mode(), Mode::Normal);
     assert_eq!(state.mode(), Mode::Normal);
-    state.update_state_machine(&StatefulValue::InsertMode(fsm::InsertStateful::default()));
+    state.update_state_machine(&StatefulValueDispatcher::InsertMode(
+      fsm::InsertStateful::default(),
+    ));
     assert_eq!(state.last_mode(), Mode::Normal);
     assert_eq!(state.mode(), Mode::Insert);
   }
