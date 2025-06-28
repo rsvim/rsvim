@@ -19,5 +19,4 @@ pub mod ui;
 pub mod dbg;
 
 // Only for unit test.
-#[cfg(test)]
 pub mod test;
