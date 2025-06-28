@@ -340,7 +340,7 @@ impl Text {
 }
 // Display Width }
 
-use crate::dbg::buf::{dbg_print_textline, dbg_print_textline_with_absolute_char_idx};
+use crate::test::buf::{dbg_print_textline, dbg_print_textline_with_absolute_char_idx};
 
 // Edit {
 impl Text {

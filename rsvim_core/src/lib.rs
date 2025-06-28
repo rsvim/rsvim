@@ -15,9 +15,5 @@ pub mod results;
 pub mod state;
 pub mod ui;
 
-// Only for debug.
-pub mod dbg;
-
 // Only for unit test.
-#[cfg(test)]
 pub mod test;
