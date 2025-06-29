@@ -109,7 +109,7 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
   ) -> StatefulValueDispatcher {
-    let cmdline_content = self._go_back_to_normal_mode(data_access);
+    let _cmdline_content = self._go_back_to_normal_mode(data_access);
 
     StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
