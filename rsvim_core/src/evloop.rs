@@ -171,9 +171,8 @@ impl EventLoop {
     // 2. Master receive requests via `mstr_from_jsrt`, and handle these tasks in async way.
     // 3. Master send the task results via `js_runtime_tick_dispatcher`.
     // 4. Master receive the task results via `js_runtime_tick_queue`, and send the results (again)
-    //    via `master_send_to_js_runtime`.
-    // 5. Js runtime receive these task results via `js_runtime_recv_from_master`, then process
-    //    pending futures.
+    //    via `mstr_to_jsrt`.
+    // 5. Js runtime receive these task results via `jsrt_from_mstr`, then process pending futures.
     //
     // You must notice that, the 3rd and 4th steps (and the pair of `js_runtime_tick_dispatcher`
     // and `js_runtime_tick_queue`) seem useless. Yes, they're simply for trigger the event loop
@@ -183,8 +182,7 @@ impl EventLoop {
     // Js runtime => master
     let (jsrt_to_mstr, mstr_from_jsrt) = channel(envar::CHANNEL_BUF_SIZE());
     // Master => js runtime
-    let (master_send_to_js_runtime, js_runtime_recv_from_master) =
-      channel(envar::CHANNEL_BUF_SIZE());
+    let (mstr_to_jsrt, jsrt_from_mstr) = channel(envar::CHANNEL_BUF_SIZE());
     // Master => master
     let (js_runtime_tick_dispatcher, js_runtime_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
 
@@ -208,7 +206,7 @@ impl EventLoop {
       startup_moment,
       startup_unix_epoch,
       jsrt_to_mstr,
-      js_runtime_recv_from_master,
+      jsrt_from_mstr,
       cli_opt.clone(),
       runtime_path.clone(),
       tree.clone(),
@@ -236,7 +234,7 @@ impl EventLoop {
       mstr_from_wkr,
       js_runtime,
       mstr_from_jsrt,
-      mstr_to_jsrt: master_send_to_js_runtime,
+      mstr_to_jsrt,
       jsrt_tick_dispatcher: js_runtime_tick_dispatcher,
       jsrt_tick_queue: js_runtime_tick_queue,
     })
