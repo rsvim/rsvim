@@ -467,11 +467,11 @@ impl EventLoop {
         event = reader.next() => {
           self.process_event(event).await;
         }
-        // Receive notification from workers
+        // Receive notification from workers => master
         worker_msg = self.master_recv_from_worker.recv() => {
           self.process_worker_notify(worker_msg).await;
         }
-        // Receive notification from js runtime
+        // Receive notification from js runtime => master
         js_req = self.master_recv_from_js_runtime.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
