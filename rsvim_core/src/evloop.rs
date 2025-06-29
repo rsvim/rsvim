@@ -111,7 +111,7 @@ pub struct EventLoop {
   /// Js runtime.
   pub js_runtime: JsRuntime,
 
-  /// Channels between "master" and "js runtime": `(mstr_from_jsrt, jsrt_to_mstr)`.
+  /// Channels between "master" and "js runtime": `(jsrt_to_mstr, mstr_from_jsrt)`.
   ///
   /// NOTE: In following variables naming, we use "mstr" for "master", "jsrt" for "js runtime".
   ///
@@ -120,10 +120,13 @@ pub struct EventLoop {
   /// Sender: master send to js runtime.
   pub mstr_to_jsrt: Sender<EventLoopToJsRuntimeMessage>,
 
-  /// An internal connected sender/receiver pair, it's simply for forward the task results
-  /// to the event loop again and bypass the limitation of V8 engine.
-  pub js_runtime_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
-  pub js_runtime_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
+  /// Channels between "master" and "master": `(jsrt_tick_dispatcher, jsrt_tick_queue)`.
+  ///
+  /// NOTE: This is an internal channel, it helps forward the task results to js runtime. This is a
+  /// system limitation of V8 engine, because the V8 rust bindings are not Arc/Mutex, thus cannot
+  /// use with tokio's async runtime.
+  pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
+  pub jsrt_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
 }
 
 impl EventLoop {
@@ -234,8 +237,8 @@ impl EventLoop {
       js_runtime,
       mstr_from_jsrt: master_recv_from_js_runtime,
       mstr_to_jsrt: master_send_to_js_runtime,
-      js_runtime_tick_dispatcher,
-      js_runtime_tick_queue,
+      jsrt_tick_dispatcher: js_runtime_tick_dispatcher,
+      jsrt_tick_queue: js_runtime_tick_queue,
     })
   }
 
@@ -425,7 +428,7 @@ impl EventLoop {
       match msg {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
           trace!("process_js_runtime_request timeout_req:{:?}", req.future_id);
-          let js_runtime_tick_dispatcher = self.js_runtime_tick_dispatcher.clone();
+          let js_runtime_tick_dispatcher = self.jsrt_tick_dispatcher.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
             let _ = js_runtime_tick_dispatcher
@@ -482,7 +485,7 @@ impl EventLoop {
         js_req = self.mstr_from_jsrt.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
-        js_resp = self.js_runtime_tick_queue.recv() => {
+        js_resp = self.jsrt_tick_queue.recv() => {
             self.process_js_runtime_response(js_resp).await;
         }
         // Receive cancellation notify
