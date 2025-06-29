@@ -149,25 +149,26 @@ impl EventLoop {
     let state = State::to_arc(State::default());
     let stateful_machine = StatefulValueDispatcher::default();
 
-    // Worker => master
-    let (worker_send_to_master, master_recv_from_worker) = channel(envar::CHANNEL_BUF_SIZE());
+    // Channels between: workers <=> master
+    let (wkr_to_mstr, mstr_from_wkr) = channel(envar::CHANNEL_BUF_SIZE());
 
-    // Since there are too many limitations that we cannot use tokio APIs along with V8 engine, we
-    // have to first send task requests to master, let the master handles these tasks for us in the
-    // async way, then send the task results back to js runtime.
+    // Since there are technical limitations that we cannot use tokio APIs along with V8 engine,
+    // because V8 rust bindings are not Arc/Mutex (i.e. not thread safe), while tokio async runtime
+    // requires Arc/Mutex (i.e. thread safe).
     //
-    // These tasks are very common and low level, serve as an infrastructure layer for js world.
+    // We have to first send js task requests to master, let the master handles these tasks for us
+    // (in async way), then send the task results back to js runtime. These tasks are very common
+    // and low level, serve as an infrastructure layer for js world.
     // For example:
     // - File IO
     // - Timer
     // - Network
     // - And more...
     //
-    // The basic workflow is:
+    // The basic message flow is:
     // 1. When js runtime needs to handles the `Promise` and `async` functions, it send requests to
-    //    master via `js_runtime_send_to_master`.
-    // 2. Master receive requests via `master_recv_from_js_runtime`, and handle these tasks in async
-    //    way.
+    //    master via `jsrt_to_mstr`.
+    // 2. Master receive requests via `mstr_from_jsrt`, and handle these tasks in async way.
     // 3. Master send the task results via `js_runtime_tick_dispatcher`.
     // 4. Master receive the task results via `js_runtime_tick_queue`, and send the results (again)
     //    via `master_send_to_js_runtime`.
@@ -180,8 +181,7 @@ impl EventLoop {
     // limitation of V8 engine work along with tokio runtime.
 
     // Js runtime => master
-    let (js_runtime_send_to_master, master_recv_from_js_runtime) =
-      channel(envar::CHANNEL_BUF_SIZE());
+    let (jsrt_to_mstr, mstr_from_jsrt) = channel(envar::CHANNEL_BUF_SIZE());
     // Master => js runtime
     let (master_send_to_js_runtime, js_runtime_recv_from_master) =
       channel(envar::CHANNEL_BUF_SIZE());
@@ -207,7 +207,7 @@ impl EventLoop {
       snapshot,
       startup_moment,
       startup_unix_epoch,
-      js_runtime_send_to_master,
+      jsrt_to_mstr,
       js_runtime_recv_from_master,
       cli_opt.clone(),
       runtime_path.clone(),
@@ -232,10 +232,10 @@ impl EventLoop {
       cancellation_token: CancellationToken::new(),
       detached_tracker,
       blocked_tracker,
-      wkr_to_mstr: worker_send_to_master,
-      mstr_from_wkr: master_recv_from_worker,
+      wkr_to_mstr,
+      mstr_from_wkr,
       js_runtime,
-      mstr_from_jsrt: master_recv_from_js_runtime,
+      mstr_from_jsrt,
       mstr_to_jsrt: master_send_to_js_runtime,
       jsrt_tick_dispatcher: js_runtime_tick_dispatcher,
       jsrt_tick_queue: js_runtime_tick_queue,

@@ -332,9 +332,9 @@ pub struct JsRuntimeState {
   // pub wake_event_queued: bool,
 
   // Data Access for RSVIM {
-  // Js runtime ==request==> master.
-  pub js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
-  // Js runtime <==response== master.
+  // Sender: js runtime send to master.
+  pub jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
+  // Receiver: js runtime receive from master.
   pub js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
   pub cli_opt: CliOpt,
   pub runtime_path: Arc<Mutex<Vec<PathBuf>>>,
@@ -381,7 +381,7 @@ impl JsRuntime {
     snapshot: SnapshotData,
     startup_moment: Instant,
     time_origin: u128,
-    js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
+    jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
     js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
     runtime_path: Arc<Mutex<Vec<PathBuf>>>,
@@ -492,7 +492,7 @@ impl JsRuntime {
       exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      js_runtime_send_to_master,
+      jsrt_to_mstr,
       js_runtime_recv_from_master,
       cli_opt,
       runtime_path,
