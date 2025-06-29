@@ -109,67 +109,14 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
   ) -> StatefulValueDispatcher {
-    let tree = data_access.tree.clone();
-    let mut tree = lock!(tree);
-
-    debug_assert!(tree.cursor_id().is_some());
-    let cursor_id = tree.cursor_id().unwrap();
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
-
-    if cfg!(debug_assertions) {
-      debug_assert!(tree.parent_id(cursor_id).is_some());
-      debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), cmdline_id);
-      debug_assert!(tree.node(cmdline_id).is_some());
-      debug_assert!(matches!(
-        tree.node(cmdline_id).unwrap(),
-        TreeNodeDispatcher::CommandLine(_)
-      ));
-    }
-
-    // Remove from current parent
-    let cursor_node = tree.remove(cursor_id);
-    debug_assert!(cursor_node.is_some());
-    let cursor_node = cursor_node.unwrap();
-
-    if cfg!(debug_assertions) {
-      debug_assert!(matches!(cursor_node, TreeNodeDispatcher::Cursor(_)));
-      debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
-    }
-
-    let cursor_node = match cursor_node {
-      TreeNodeDispatcher::Cursor(mut cursor) => {
-        cursor.set_style(&CursorStyle::SteadyBlock);
-        TreeNodeDispatcher::Cursor(cursor)
-      }
-      _ => unreachable!(),
-    };
-
-    // Insert to new parent
-    let current_window = self._current_window(&mut tree);
-    let cursor_viewport = current_window.cursor_viewport();
-    trace!("before viewport:{:?}", current_window.viewport());
-    trace!("before cursor_viewport:{:?}", cursor_viewport);
-    let current_window_id = current_window.id();
-    let _inserted = tree.bounded_insert(current_window_id, cursor_node);
-    debug_assert!(_inserted.is_none());
-    tree.bounded_move_to(
-      cursor_id,
-      cursor_viewport.column_idx() as isize,
-      cursor_viewport.row_idx() as isize,
-    );
-
-    // Clear command-line contents.
-    let contents = data_access.contents.clone();
-    let mut contents = lock!(contents);
-    cursor_ops::cursor_clear(&mut tree, cmdline_id, contents.command_line_content_mut());
+    let cmdline_content = self._go_back_to_normal_mode(data_access);
 
     StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
 }
 
 impl CommandLineExStateful {
-  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
+  fn _go_back_to_normal_mode(&self, data_access: &StatefulDataAccess) -> CompactString {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -223,7 +170,13 @@ impl CommandLineExStateful {
     // Clear command-line contents.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
+    let cmdline_content = contents.command_line_content().rope().to_compact_string();
     cursor_ops::cursor_clear(&mut tree, cmdline_id, contents.command_line_content_mut());
+    cmdline_content
+  }
+
+  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
+    self._go_back_to_normal_mode(data_access);
 
     StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
