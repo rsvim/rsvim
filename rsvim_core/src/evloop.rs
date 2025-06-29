@@ -100,8 +100,7 @@ pub struct EventLoop {
   pub blocked_tracker: TaskTracker,
 
   /// Channel: "workers" => "master"
-  ///
-  /// NOTE: In following variables naming, we use "wkr" for "workers", "mstr" for "master".
+  /// NOTE: In variables naming, we use "wkr" for "workers", "mstr" for "master".
   ///
   /// Sender: workers send to master.
   pub wkr_to_mstr: Sender<WorkerToMasterMessage>,
@@ -112,8 +111,7 @@ pub struct EventLoop {
   pub js_runtime: JsRuntime,
 
   /// Channel: "master" => "js runtime"
-  ///
-  /// NOTE: In following variables naming, we use "mstr" for "master", "jsrt" for "js runtime".
+  /// NOTE: In variables naming, we use "mstr" for "master", "jsrt" for "js runtime".
   ///
   /// Receiver: master receive from js runtime.
   pub mstr_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
