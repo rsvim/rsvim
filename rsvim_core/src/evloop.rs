@@ -99,20 +99,27 @@ pub struct EventLoop {
   pub detached_tracker: TaskTracker,
   pub blocked_tracker: TaskTracker,
 
-  /// Sender: workers => master.
+  /// Channels between "workers" and "master": `(wkr_to_mstr, mstr_from_wkr)`.
   ///
-  /// NOTE: This sender stores here is mostly just for clone to all the other tasks spawned during
-  /// running the editor. The master itself doesn't actually use it.
-  pub worker_send_to_master: Sender<WorkerToMasterMessage>,
-  /// Receiver: master <= workers.
-  pub master_recv_from_worker: Receiver<WorkerToMasterMessage>,
+  /// NOTE: In following variables naming, we use "wkr" for "workers", "mstr" for "master".
+  ///
+  /// Sender: workers send to master.
+  pub wkr_to_mstr: Sender<WorkerToMasterMessage>,
+  /// Receiver: master receive from workers.
+  pub mstr_from_wkr: Receiver<WorkerToMasterMessage>,
 
   /// Js runtime.
   pub js_runtime: JsRuntime,
-  /// Receiver: master <= js runtime.
-  pub master_recv_from_js_runtime: Receiver<JsRuntimeToEventLoopMessage>,
-  /// Sender: master => js runtime.
-  pub master_send_to_js_runtime: Sender<EventLoopToJsRuntimeMessage>,
+
+  /// Channels between "master" and "js runtime": `(mstr_from_jsrt, jsrt_to_mstr)`.
+  ///
+  /// NOTE: In following variables naming, we use "mstr" for "master", "jsrt" for "js runtime".
+  ///
+  /// Receiver: master receive from js runtime.
+  pub mstr_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
+  /// Sender: master send to js runtime.
+  pub mstr_to_jsrt: Sender<EventLoopToJsRuntimeMessage>,
+
   /// An internal connected sender/receiver pair, it's simply for forward the task results
   /// to the event loop again and bypass the limitation of V8 engine.
   pub js_runtime_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
@@ -222,11 +229,11 @@ impl EventLoop {
       cancellation_token: CancellationToken::new(),
       detached_tracker,
       blocked_tracker,
-      worker_send_to_master,
-      master_recv_from_worker,
+      wkr_to_mstr: worker_send_to_master,
+      mstr_from_wkr: master_recv_from_worker,
       js_runtime,
-      master_recv_from_js_runtime,
-      master_send_to_js_runtime,
+      mstr_from_jsrt: master_recv_from_js_runtime,
+      mstr_to_jsrt: master_send_to_js_runtime,
       js_runtime_tick_dispatcher,
       js_runtime_tick_queue,
     })
@@ -439,7 +446,7 @@ impl EventLoop {
   async fn process_js_runtime_response(&mut self, msg: Option<EventLoopToJsRuntimeMessage>) {
     if let Some(msg) = msg {
       trace!("process_js_runtime_response msg:{:?}", msg);
-      let _ = self.master_send_to_js_runtime.send(msg).await;
+      let _ = self.mstr_to_jsrt.send(msg).await;
       self.js_runtime.tick_event_loop();
     }
   }
@@ -468,11 +475,11 @@ impl EventLoop {
           self.process_event(event).await;
         }
         // Receive notification from workers => master
-        worker_msg = self.master_recv_from_worker.recv() => {
+        worker_msg = self.mstr_from_wkr.recv() => {
           self.process_worker_notify(worker_msg).await;
         }
         // Receive notification from js runtime => master
-        js_req = self.master_recv_from_js_runtime.recv() => {
+        js_req = self.mstr_from_jsrt.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
         js_resp = self.js_runtime_tick_queue.recv() => {
