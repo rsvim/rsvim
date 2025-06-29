@@ -99,7 +99,7 @@ pub struct EventLoop {
   pub detached_tracker: TaskTracker,
   pub blocked_tracker: TaskTracker,
 
-  /// Channels between "workers" and "master": `(wkr_to_mstr, mstr_from_wkr)`.
+  /// Channel: "workers" => "master"
   ///
   /// NOTE: In following variables naming, we use "wkr" for "workers", "mstr" for "master".
   ///
@@ -111,7 +111,7 @@ pub struct EventLoop {
   /// Js runtime.
   pub js_runtime: JsRuntime,
 
-  /// Channels between "master" and "js runtime": `(jsrt_to_mstr, mstr_from_jsrt)`.
+  /// Channel: "master" => "js runtime"
   ///
   /// NOTE: In following variables naming, we use "mstr" for "master", "jsrt" for "js runtime".
   ///
@@ -120,12 +120,11 @@ pub struct EventLoop {
   /// Sender: master send to js runtime.
   pub mstr_to_jsrt: Sender<EventLoopToJsRuntimeMessage>,
 
-  /// Channels between "master" and "master": `(jsrt_tick_dispatcher, jsrt_tick_queue)`.
+  /// Channel: "master" => "master" ("dispatcher" => "queue")
   ///
-  /// NOTE: This is an internal channel, it helps forward the task results to js runtime. This is a
-  /// system limitation of V8 engine, because the V8 rust bindings are not Arc/Mutex, thus cannot
-  /// use with tokio's async runtime.
+  /// Sender: dispatcher.
   pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
+  /// Receiver: queue.
   pub jsrt_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
 }
 
@@ -149,7 +148,7 @@ impl EventLoop {
     let state = State::to_arc(State::default());
     let stateful_machine = StatefulValueDispatcher::default();
 
-    // Channels: workers => master
+    // Channel: workers => master
     let (wkr_to_mstr, mstr_from_wkr) = channel(envar::CHANNEL_BUF_SIZE());
 
     // Since there are technical limitations that we cannot use tokio APIs along with V8 engine,
@@ -183,11 +182,11 @@ impl EventLoop {
     // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes, they're simply for
     // trigger the event loop in `tokio::select!`.
 
-    // js runtime => master
+    // Channel: js runtime => master
     let (jsrt_to_mstr, mstr_from_jsrt) = channel(envar::CHANNEL_BUF_SIZE());
-    // Master => js runtime
+    // Channel: master => js runtime
     let (mstr_to_jsrt, jsrt_from_mstr) = channel(envar::CHANNEL_BUF_SIZE());
-    // master => master
+    // Channel: master => master
     let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
