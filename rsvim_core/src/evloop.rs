@@ -149,7 +149,7 @@ impl EventLoop {
     let state = State::to_arc(State::default());
     let stateful_machine = StatefulValueDispatcher::default();
 
-    // Channels between: workers <=> master
+    // Channels: workers => master
     let (wkr_to_mstr, mstr_from_wkr) = channel(envar::CHANNEL_BUF_SIZE());
 
     // Since there are technical limitations that we cannot use tokio APIs along with V8 engine,
@@ -165,19 +165,23 @@ impl EventLoop {
     // - Network
     // - And more...
     //
-    // The basic message flow is:
-    // 1. When js runtime needs to handles the `Promise` and `async` functions, it send requests to
-    //    master via `jsrt_to_mstr`.
-    // 2. Master receive requests via `mstr_from_jsrt`, and handle these tasks in async way.
-    // 3. Master send the task results via `jsrt_tick_dispatcher`.
-    // 4. Master receive the task results via `jsrt_tick_queue`, and send the results (again) via
-    //    `mstr_to_jsrt`.
-    // 5. Js runtime receive these task results via `jsrt_from_mstr`, then process pending futures.
+    // When js runtime handles `Promise` and `async` APIs, the message flow uses several channels:
     //
-    // NOTE: You must notice that, the 3rd and 4th steps (and the pair of `jsrt_tick_dispatcher`
-    // and `jsrt_tick_queue`) seem useless. Yes, they're simply for trigger the event loop to run
-    // the `JsRuntime::tick_event_loop` API in `tokio::select!` main loop, due to the limitation of
-    // V8 engine work along with tokio runtime.
+    // - Channel-1 `jsrt_to_mstr` => `mstr_from_jsrt`, on message `JsRuntimeToEventLoopMessage`.
+    // - Channel-2 `jsrt_tick_dispatcher` => `jsrt_tick_queue`, on message `EventLoopToJsRuntimeMessage`.
+    // - Channel-3 `mstr_to_jsrt` => `jsrt_from_mstr`, on message `EventLoopToJsRuntimeMessage`.
+    //
+    // ```text
+    //
+    // Step-1: Js runtime --- JsRuntimeToEventLoopMessage (channel-1) --> Tokio event loop
+    // Step-2: Tokio event loop handles the request (read/write, timer, etc) in async way
+    // Step-3: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-2) --> Tokio event loop
+    // Step-4: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
+    //
+    // ```
+    //
+    // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes, they're simply for
+    // trigger the event loop in `tokio::select!`.
 
     // js runtime => master
     let (jsrt_to_mstr, mstr_from_jsrt) = channel(envar::CHANNEL_BUF_SIZE());
