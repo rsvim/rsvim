@@ -169,22 +169,22 @@ impl EventLoop {
     // 1. When js runtime needs to handles the `Promise` and `async` functions, it send requests to
     //    master via `jsrt_to_mstr`.
     // 2. Master receive requests via `mstr_from_jsrt`, and handle these tasks in async way.
-    // 3. Master send the task results via `js_runtime_tick_dispatcher`.
-    // 4. Master receive the task results via `js_runtime_tick_queue`, and send the results (again)
-    //    via `mstr_to_jsrt`.
+    // 3. Master send the task results via `jsrt_tick_dispatcher`.
+    // 4. Master receive the task results via `jsrt_tick_queue`, and send the results (again) via
+    //    `mstr_to_jsrt`.
     // 5. Js runtime receive these task results via `jsrt_from_mstr`, then process pending futures.
     //
-    // You must notice that, the 3rd and 4th steps (and the pair of `js_runtime_tick_dispatcher`
-    // and `js_runtime_tick_queue`) seem useless. Yes, they're simply for trigger the event loop
-    // to run the `JsRuntime::tick_event_loop` API in `tokio::select!` main loop, due to the
-    // limitation of V8 engine work along with tokio runtime.
+    // NOTE: You must notice that, the 3rd and 4th steps (and the pair of `jsrt_tick_dispatcher`
+    // and `jsrt_tick_queue`) seem useless. Yes, they're simply for trigger the event loop to run
+    // the `JsRuntime::tick_event_loop` API in `tokio::select!` main loop, due to the limitation of
+    // V8 engine work along with tokio runtime.
 
-    // Js runtime => master
+    // js runtime => master
     let (jsrt_to_mstr, mstr_from_jsrt) = channel(envar::CHANNEL_BUF_SIZE());
     // Master => js runtime
     let (mstr_to_jsrt, jsrt_from_mstr) = channel(envar::CHANNEL_BUF_SIZE());
-    // Master => master
-    let (js_runtime_tick_dispatcher, js_runtime_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
+    // master => master
+    let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
     let runtime_path = envar::CONFIG_DIRS_PATH();
@@ -235,8 +235,8 @@ impl EventLoop {
       js_runtime,
       mstr_from_jsrt,
       mstr_to_jsrt,
-      jsrt_tick_dispatcher: js_runtime_tick_dispatcher,
-      jsrt_tick_queue: js_runtime_tick_queue,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
     })
   }
 
@@ -425,19 +425,16 @@ impl EventLoop {
     if let Some(msg) = msg {
       match msg {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
-          trace!("process_js_runtime_request timeout_req:{:?}", req.future_id);
-          let js_runtime_tick_dispatcher = self.jsrt_tick_dispatcher.clone();
+          trace!("Receive req timeout_req:{:?}", req.future_id);
+          let jsrt_tick_dispatcher = self.jsrt_tick_dispatcher.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
-            let _ = js_runtime_tick_dispatcher
+            let _ = jsrt_tick_dispatcher
               .send(EventLoopToJsRuntimeMessage::TimeoutResp(
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
-            trace!(
-              "process_js_runtime_request timeout_req:{:?} - done",
-              req.future_id
-            );
+            trace!("Receive req timeout_req:{:?} - done", req.future_id);
           });
         }
       }
@@ -446,7 +443,7 @@ impl EventLoop {
 
   async fn process_js_runtime_response(&mut self, msg: Option<EventLoopToJsRuntimeMessage>) {
     if let Some(msg) = msg {
-      trace!("process_js_runtime_response msg:{:?}", msg);
+      trace!("Process resp msg:{:?}", msg);
       let _ = self.mstr_to_jsrt.send(msg).await;
       self.js_runtime.tick_event_loop();
     }
