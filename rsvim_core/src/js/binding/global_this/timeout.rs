@@ -70,9 +70,11 @@ pub fn set_timeout(
   let jsrt_to_mstr = state.jsrt_to_mstr.clone();
   let current_handle = tokio::runtime::Handle::current();
   current_handle.spawn_blocking(move || {
-    let _ = jsrt_to_mstr.blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
-      jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
-    ));
+    jsrt_to_mstr
+      .blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
+        jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
+      ))
+      .unwrap();
   });
   let timeout_cb = TimeoutFuture {
     future_id: timer_id,

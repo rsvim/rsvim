@@ -113,13 +113,16 @@ impl CommandLineExStateful {
   ) -> StatefulValueDispatcher {
     let cmdline_content = self._goto_normal_mode_impl(data_access);
     let state = data_access.state.clone();
+    let jsrt_tick_dispatcher = lock!(state).jsrt_tick_dispatcher().clone();
 
-    lock!(state)
-      .jsrt_tick_dispatcher()
-      .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
-        ExCommandReq::new(next_future_id(), cmdline_content),
-      ))
-      .unwrap();
+    let current_handle = tokio::runtime::Handle::current();
+    current_handle.spawn_blocking(move || {
+      jsrt_tick_dispatcher
+        .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
+          ExCommandReq::new(next_future_id(), cmdline_content),
+        ))
+        .unwrap();
+    });
 
     StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
