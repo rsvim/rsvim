@@ -10,17 +10,16 @@ use crate::ui::widget::window::{
   Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
   WindowLocalOptionsBuilder,
 };
+use crate::{inode_enum_dispatcher, widget_enum_dispatcher};
 
 // Re-export
 pub use internal::*;
 
-use enum_dispatch::enum_dispatch;
 use std::collections::BTreeSet;
 // use tracing::trace;
 
 pub mod internal;
 
-#[enum_dispatch(Inodeable)]
 #[derive(Debug, Clone)]
 /// The value holder for each widget.
 pub enum TreeNode {
@@ -30,17 +29,8 @@ pub enum TreeNode {
   CommandLine(CommandLine),
 }
 
-impl Widgetable for TreeNode {
-  /// Draw widget on the canvas.
-  fn draw(&self, canvas: &mut Canvas) {
-    match self {
-      TreeNode::RootContainer(w) => w.draw(canvas),
-      TreeNode::Window(w) => w.draw(canvas),
-      TreeNode::Cursor(w) => w.draw(canvas),
-      TreeNode::CommandLine(w) => w.draw(canvas),
-    }
-  }
-}
+inode_enum_dispatcher!(TreeNode, RootContainer, Window, Cursor, CommandLine);
+widget_enum_dispatcher!(TreeNode, RootContainer, Window, Cursor, CommandLine);
 
 #[derive(Debug, Clone)]
 /// The widget tree.

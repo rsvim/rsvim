@@ -19,7 +19,6 @@ use crate::state::ops::Operation;
 use crate::ui::tree::TreeArc;
 
 use crossterm::event::Event;
-use enum_dispatch::enum_dispatch;
 
 // Re-export
 pub use command_line_ex::CommandLineExStateful;
@@ -72,7 +71,6 @@ impl StatefulDataAccess {
   }
 }
 
-#[enum_dispatch]
 /// The FSM trait.
 pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
@@ -86,7 +84,30 @@ pub trait Stateful {
   fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue;
 }
 
-#[enum_dispatch(Stateful)]
+/// Generate enum dispatcher for `Stateful`.
+#[macro_export]
+macro_rules! stateful_enum_dispatcher {
+  ($enum:ident, $($variant:tt),*) => {
+    impl Stateful for $enum {
+      fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
+        match self {
+          $(
+            $enum::$variant(e) => e.handle(data_access),
+          )*
+        }
+      }
+
+      fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
+        match self {
+          $(
+            $enum::$variant(e) => e.handle_op(data_access, op),
+          )*
+        }
+      }
+    }
+  }
+}
+
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The value holder for each state machine.
 pub enum StatefulValue {
@@ -103,6 +124,20 @@ pub enum StatefulValue {
   // Internal states.
   QuitState(QuitStateful),
 }
+
+stateful_enum_dispatcher!(
+  StatefulValue,
+  NormalMode,
+  VisualMode,
+  SelectMode,
+  OperatorPendingMode,
+  InsertMode,
+  CommandLineExMode,
+  CommandLineSearchForwardMode,
+  CommandLineSearchBackwardMode,
+  TerminalMode,
+  QuitState
+);
 
 impl Default for StatefulValue {
   /// Returns the default FMS state, by default it's the
