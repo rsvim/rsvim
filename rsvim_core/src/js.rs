@@ -716,6 +716,7 @@ impl JsRuntime {
           }
           EventLoopToJsRuntimeMessage::ExCommandReq(req) => {
             trace!("Receive ExCommandReq:{req:?}");
+            debug_assert!(!state.pending_futures.contains_key(&req.future_id));
           }
         }
       }

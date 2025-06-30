@@ -1,6 +1,7 @@
 //! The command-line ex mode.
 
 use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
+use crate::js::next_future_id;
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
 use crate::state::ops::{Operation, cursor_ops};
@@ -116,7 +117,7 @@ impl CommandLineExStateful {
     lock!(state)
       .jsrt_tick_dispatcher()
       .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
-        ExCommandReq::new(0, cmdline_content),
+        ExCommandReq::new(next_future_id(), cmdline_content),
       ))
       .unwrap();
 
