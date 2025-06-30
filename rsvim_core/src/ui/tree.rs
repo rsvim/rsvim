@@ -10,14 +10,11 @@ use crate::ui::widget::window::{
   Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
   WindowLocalOptionsBuilder,
 };
-use crate::{arc_mutex_ptr, lock};
-
-use enum_dispatch::enum_dispatch;
 
 // Re-export
 pub use internal::*;
 
-use paste::paste;
+use enum_dispatch::enum_dispatch;
 use std::collections::BTreeSet;
 // use tracing::trace;
 

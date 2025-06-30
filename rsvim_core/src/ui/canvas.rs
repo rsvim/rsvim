@@ -1,6 +1,5 @@
 //! Canvas.
 
-use crate::arc_mutex_ptr;
 use crate::prelude::*;
 
 // Re-export
@@ -11,7 +10,6 @@ pub use frame::*;
 use compact_str::ToCompactString;
 use crossterm;
 use geo::point;
-use paste::paste;
 use std::fmt::Debug;
 use std::slice::Iter;
 use tracing::trace;

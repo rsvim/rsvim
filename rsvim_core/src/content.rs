@@ -4,7 +4,6 @@ use crate::buf::opt::BufferLocalOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
 
-use paste::paste;
 use ropey::Rope;
 
 #[derive(Debug)]
