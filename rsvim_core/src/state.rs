@@ -79,9 +79,12 @@ impl State {
 mod tests {
   use super::*;
 
+  use tokio::sync::mpsc::channel;
+
   #[test]
   fn update_state_machine1() {
-    let mut state = State::new();
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let mut state = State::to_arc(State::new(jsrt_tick_dispatcher));
     assert_eq!(state.last_mode(), Mode::Normal);
     assert_eq!(state.mode(), Mode::Normal);
     state.update_state_machine(&StatefulValueDispatcher::InsertMode(
