@@ -333,17 +333,17 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
   let node = tree.node_mut(id).unwrap();
   debug_assert!(matches!(
     node,
-    TreeNodeDispatcher::Window(_) | TreeNodeDispatcher::CommandLine(_)
+    TreeNode::Window(_) | TreeNode::CommandLine(_)
   ));
 
   let actual_shape = match node {
-    TreeNodeDispatcher::Window(window) => *window.actual_shape(),
-    TreeNodeDispatcher::CommandLine(cmdline) => *cmdline.actual_shape(),
+    TreeNode::Window(window) => *window.actual_shape(),
+    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
     _ => unreachable!(),
   };
   let vnode: &mut dyn Viewportable = match node {
-    TreeNodeDispatcher::Window(window) => window,
-    TreeNodeDispatcher::CommandLine(cmdline) => cmdline,
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
     _ => unreachable!(),
   };
 
@@ -407,13 +407,13 @@ pub fn cursor_move(
   debug_assert!(tree.node_mut(id).is_some());
   let cursor_parent_node = tree.node_mut(id).unwrap();
   let vnode_actual_shape = match cursor_parent_node {
-    TreeNodeDispatcher::Window(window) => *window.actual_shape(),
-    TreeNodeDispatcher::CommandLine(cmdline) => *cmdline.actual_shape(),
+    TreeNode::Window(window) => *window.actual_shape(),
+    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
     _ => unreachable!(),
   };
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
-    TreeNodeDispatcher::Window(window) => window,
-    TreeNodeDispatcher::CommandLine(cmdline) => cmdline,
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
     _ => unreachable!(),
   };
 
@@ -515,8 +515,8 @@ pub fn cursor_insert(
   debug_assert!(tree.node_mut(id).is_some());
   let cursor_parent_node = tree.node_mut(id).unwrap();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
-    TreeNodeDispatcher::Window(window) => window,
-    TreeNodeDispatcher::CommandLine(cmdline) => cmdline,
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
     _ => unreachable!(),
   };
 
@@ -569,8 +569,8 @@ pub fn cursor_delete(
   debug_assert!(tree.node_mut(id).is_some());
   let cursor_parent_node = tree.node_mut(id).unwrap();
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
-    TreeNodeDispatcher::Window(window) => window,
-    TreeNodeDispatcher::CommandLine(cmdline) => cmdline,
+    TreeNode::Window(window) => window,
+    TreeNode::CommandLine(cmdline) => cmdline,
     _ => unreachable!(),
   };
 

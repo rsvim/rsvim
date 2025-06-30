@@ -26,7 +26,7 @@ pub mod root;
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
-  base: Itree<WindowNodeDispatcher>,
+  base: Itree<WindowNode>,
 
   // Local window options.
   // By default these options will inherit from global options of UI.
@@ -49,7 +49,7 @@ impl Window {
   pub fn new(opts: &WindowLocalOptions, shape: IRect, buffer: BufferWk) -> Self {
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
-    let window_root_node = WindowNodeDispatcher::WindowRootContainer(window_root);
+    let window_root_node = WindowNode::WindowRootContainer(window_root);
     let window_root_actual_shape = *window_root_node.actual_shape();
 
     let (viewport, cursor_viewport) = {
@@ -66,7 +66,7 @@ impl Window {
 
     let window_content = WindowContent::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let window_content_id = window_content.id();
-    let window_content_node = WindowNodeDispatcher::WindowContent(window_content);
+    let window_content_node = WindowNode::WindowContent(window_content);
 
     base.bounded_insert(window_root_id, window_content_node);
 
@@ -187,8 +187,7 @@ impl Viewportable for Window {
   /// Set viewport.
   fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport.clone();
-    if let Some(WindowNodeDispatcher::WindowContent(content)) = self.base.node_mut(self.content_id)
-    {
+    if let Some(WindowNode::WindowContent(content)) = self.base.node_mut(self.content_id) {
       content.set_viewport(Arc::downgrade(&viewport));
     }
   }
@@ -214,7 +213,7 @@ impl Window {
   /// Get window content widget.
   pub fn window_content(&self) -> &WindowContent {
     match self.base.node(self.content_id) {
-      Some(WindowNodeDispatcher::WindowContent(w)) => w,
+      Some(WindowNode::WindowContent(w)) => w,
       _ => unreachable!(),
     }
   }
@@ -224,17 +223,17 @@ impl Window {
 #[enum_dispatch(Inodeable)]
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
-pub enum WindowNodeDispatcher {
+pub enum WindowNode {
   WindowRootContainer(WindowRootContainer),
   WindowContent(WindowContent),
 }
 
-impl Widgetable for WindowNodeDispatcher {
+impl Widgetable for WindowNode {
   /// Draw widget on the canvas.
   fn draw(&self, canvas: &mut Canvas) {
     match self {
-      WindowNodeDispatcher::WindowRootContainer(w) => w.draw(canvas),
-      WindowNodeDispatcher::WindowContent(w) => w.draw(canvas),
+      WindowNode::WindowRootContainer(w) => w.draw(canvas),
+      WindowNode::WindowContent(w) => w.draw(canvas),
     }
   }
 }
