@@ -109,7 +109,7 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
   ) -> StatefulValueDispatcher {
-    let _cmdline_content = self._goto_normal_mode_impl(data_access);
+    let cmdline_content = self._goto_normal_mode_impl(data_access);
 
     StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
@@ -171,8 +171,13 @@ impl CommandLineExStateful {
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
     let cmdline_content = contents.command_line_content().rope().to_compact_string();
+
     cursor_ops::cursor_clear(&mut tree, cmdline_id, contents.command_line_content_mut());
-    cmdline_content
+
+    let cmdline_content = cmdline_content.trim();
+    debug_assert!(cmdline_content.starts_with(":"));
+    let cmdline_content = &cmdline_content[1..];
+    CompactString::new(cmdline_content)
   }
 
   fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
