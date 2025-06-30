@@ -26,10 +26,11 @@ pub struct State {
 arc_mutex_ptr!(State);
 
 impl State {
-  pub fn new() -> Self {
+  pub fn new(jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>) -> Self {
     State {
       mode: Mode::Normal,
       last_mode: Mode::Normal,
+      jsrt_tick_dispatcher,
     }
   }
 
@@ -39,12 +40,6 @@ impl State {
 
   pub fn last_mode(&self) -> Mode {
     self.last_mode
-  }
-}
-
-impl Default for State {
-  fn default() -> Self {
-    State::new()
   }
 }
 
