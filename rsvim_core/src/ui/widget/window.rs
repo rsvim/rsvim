@@ -22,6 +22,24 @@ pub mod content;
 pub mod opt;
 pub mod root;
 
+#[enum_dispatch(Inodeable)]
+#[derive(Debug, Clone)]
+/// The value holder for each window widget.
+pub enum WindowNode {
+  WindowRootContainer(WindowRootContainer),
+  WindowContent(WindowContent),
+}
+
+impl Widgetable for WindowNode {
+  /// Draw widget on the canvas.
+  fn draw(&self, canvas: &mut Canvas) {
+    match self {
+      WindowNode::WindowRootContainer(w) => w.draw(canvas),
+      WindowNode::WindowContent(w) => w.draw(canvas),
+    }
+  }
+}
+
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
@@ -219,24 +237,6 @@ impl Window {
   }
 }
 // Viewport }
-
-#[enum_dispatch(Inodeable)]
-#[derive(Debug, Clone)]
-/// The value holder for each window widget.
-pub enum WindowNode {
-  WindowRootContainer(WindowRootContainer),
-  WindowContent(WindowContent),
-}
-
-impl Widgetable for WindowNode {
-  /// Draw widget on the canvas.
-  fn draw(&self, canvas: &mut Canvas) {
-    match self {
-      WindowNode::WindowRootContainer(w) => w.draw(canvas),
-      WindowNode::WindowContent(w) => w.draw(canvas),
-    }
-  }
-}
 
 #[allow(unused_imports)]
 #[cfg(test)]
