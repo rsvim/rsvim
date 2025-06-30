@@ -1,13 +1,10 @@
 //! Vim buffers.
 
 use crate::prelude::*;
-#[allow(unused_imports)]
-use crate::{arc_mutex_ptr, lock};
 
 use opt::*;
 use text::Text;
 
-use paste::paste;
 use path_absolutize::Absolutize;
 use ropey::{Rope, RopeBuilder};
 use std::collections::BTreeMap;
