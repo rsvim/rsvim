@@ -713,6 +713,7 @@ impl JsRuntime {
               None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
             }
           }
+          EventLoopToJsRuntimeMessage::ExCommandReq(req) => {}
         }
       }
 
