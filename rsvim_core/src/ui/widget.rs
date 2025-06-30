@@ -17,3 +17,19 @@ pub trait Widgetable {
     // trace!("draw canvas");
   }
 }
+
+/// Generate enum dispatcher for `Widget`.
+#[macro_export]
+macro_rules! widget_enum_dispatcher {
+  ($enum:ident, $($variant:tt),*) => {
+    impl Widgetable for $enum {
+      fn draw(&self, canvas: &mut Canvas) {
+        match self {
+          $(
+            $enum::$variant(w) => w.draw(canvas),
+          )*
+        }
+      }
+    }
+  }
+}

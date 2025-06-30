@@ -9,8 +9,7 @@ use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportA
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
-
-use enum_dispatch::enum_dispatch;
+use crate::{inode_enum_dispatcher, widget_enum_dispatcher};
 
 // Re-export
 pub use opt::*;
@@ -21,6 +20,16 @@ use std::sync::Arc;
 pub mod content;
 pub mod opt;
 pub mod root;
+
+#[derive(Debug, Clone)]
+/// The value holder for each window widget.
+pub enum WindowNode {
+  WindowRootContainer(WindowRootContainer),
+  WindowContent(WindowContent),
+}
+
+inode_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent);
+widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
@@ -219,24 +228,6 @@ impl Window {
   }
 }
 // Viewport }
-
-#[enum_dispatch(Inodeable)]
-#[derive(Debug, Clone)]
-/// The value holder for each window widget.
-pub enum WindowNode {
-  WindowRootContainer(WindowRootContainer),
-  WindowContent(WindowContent),
-}
-
-impl Widgetable for WindowNode {
-  /// Draw widget on the canvas.
-  fn draw(&self, canvas: &mut Canvas) {
-    match self {
-      WindowNode::WindowRootContainer(w) => w.draw(canvas),
-      WindowNode::WindowContent(w) => w.draw(canvas),
-    }
-  }
-}
 
 #[allow(unused_imports)]
 #[cfg(test)]
