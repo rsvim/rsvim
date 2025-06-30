@@ -142,10 +142,6 @@ impl EventLoop {
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
 
-    // State
-    let state = State::to_arc(State::default());
-    let stateful_machine = StatefulValueDispatcher::default();
-
     // Channel: workers => master
     let (wkr_to_mstr, mstr_from_wkr) = channel(envar::CHANNEL_BUF_SIZE());
 
@@ -199,6 +195,10 @@ impl EventLoop {
       .duration_since(UNIX_EPOCH)
       .unwrap()
       .as_millis();
+
+    // State
+    let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
+    let stateful_machine = StatefulValueDispatcher::default();
 
     // Js Runtime
     let js_runtime = JsRuntime::new(
