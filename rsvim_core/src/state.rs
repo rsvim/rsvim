@@ -41,6 +41,10 @@ impl State {
   pub fn last_mode(&self) -> Mode {
     self.last_mode
   }
+
+  pub fn jsrt_tick_dispatcher(&self) -> &Sender<EventLoopToJsRuntimeMessage> {
+    &self.jsrt_tick_dispatcher
+  }
 }
 
 impl State {

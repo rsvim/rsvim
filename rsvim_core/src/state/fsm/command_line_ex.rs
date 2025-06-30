@@ -1,5 +1,6 @@
 //! The command-line ex mode.
 
+use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
 use crate::state::ops::{Operation, cursor_ops};
@@ -110,6 +111,14 @@ impl CommandLineExStateful {
     data_access: &StatefulDataAccess,
   ) -> StatefulValueDispatcher {
     let cmdline_content = self._goto_normal_mode_impl(data_access);
+    let state = data_access.state.clone();
+
+    lock!(state)
+      .jsrt_tick_dispatcher()
+      .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
+        ExCommandReq::new(0, cmdline_content),
+      ))
+      .unwrap();
 
     StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
