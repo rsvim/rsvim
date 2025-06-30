@@ -109,14 +109,14 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
   ) -> StatefulValueDispatcher {
-    let _cmdline_content = self._go_back_to_normal_mode(data_access);
+    let _cmdline_content = self._goto_normal_mode_impl(data_access);
 
     StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
 }
 
 impl CommandLineExStateful {
-  fn _go_back_to_normal_mode(&self, data_access: &StatefulDataAccess) -> CompactString {
+  fn _goto_normal_mode_impl(&self, data_access: &StatefulDataAccess) -> CompactString {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -176,7 +176,7 @@ impl CommandLineExStateful {
   }
 
   fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
-    self._go_back_to_normal_mode(data_access);
+    self._goto_normal_mode_impl(data_access);
 
     StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
