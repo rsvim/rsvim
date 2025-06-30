@@ -28,15 +28,15 @@ pub mod root;
 pub struct Window {
   base: Itree<WindowNodeDispatcher>,
 
+  // Local window options.
+  // By default these options will inherit from global options of UI.
+  options: WindowLocalOptions,
+
   // The Window content widget ID.
   content_id: TreeNodeId,
 
   // Buffer.
   buffer: BufferWk,
-
-  // Local window options.
-  // By default these options will inherit from global options of UI.
-  options: WindowLocalOptions,
 
   // Viewport.
   viewport: ViewportArc,
@@ -72,9 +72,9 @@ impl Window {
 
     Window {
       base,
+      options: *opts,
       content_id: window_content_id,
       buffer,
-      options: *opts,
       viewport,
       cursor_viewport,
     }
