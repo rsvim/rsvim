@@ -2,7 +2,7 @@
 
 use crate::lock;
 use crate::state::fsm::quit::QuitStateful;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
@@ -60,26 +60,26 @@ impl NormalStateful {
     );
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNodeDispatcher::Window(_)));
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
-      TreeNodeDispatcher::Window(current_window) => current_window,
+      TreeNode::Window(current_window) => current_window,
       _ => unreachable!(),
     }
   }
 }
 
 impl Stateful for NormalStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValueDispatcher {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
 
     if let Some(op) = self._get_operation(event) {
       return self.handle_op(data_access, op);
     }
 
-    StatefulValueDispatcher::NormalMode(NormalStateful::default())
+    StatefulValue::NormalMode(NormalStateful::default())
   }
 
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValueDispatcher {
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
       Operation::GotoInsertMode => self.goto_insert_mode(&data_access),
       Operation::GotoCommandLineExMode => self.goto_command_line_ex_mode(&data_access),
@@ -102,10 +102,7 @@ impl Stateful for NormalStateful {
 }
 
 impl NormalStateful {
-  pub fn goto_command_line_ex_mode(
-    &self,
-    data_access: &StatefulDataAccess,
-  ) -> StatefulValueDispatcher {
+  pub fn goto_command_line_ex_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -120,17 +117,17 @@ impl NormalStateful {
     debug_assert!(tree.node(cursor_parent_id).is_some());
     debug_assert!(matches!(
       tree.node(cursor_parent_id).unwrap(),
-      TreeNodeDispatcher::Window(_)
+      TreeNode::Window(_)
     ));
     let cursor_node = tree.remove(cursor_id);
     debug_assert!(cursor_node.is_some());
     let cursor_node = cursor_node.unwrap();
-    debug_assert!(matches!(cursor_node, TreeNodeDispatcher::Cursor(_)));
+    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
     debug_assert!(!tree.children_ids(cursor_parent_id).contains(&cursor_id));
     let cursor_node = match cursor_node {
-      TreeNodeDispatcher::Cursor(mut cursor) => {
+      TreeNode::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBar);
-        TreeNodeDispatcher::Cursor(cursor)
+        TreeNode::Cursor(cursor)
       }
       _ => unreachable!(),
     };
@@ -141,7 +138,7 @@ impl NormalStateful {
     debug_assert!(tree.node(cmdline_id).is_some());
     debug_assert!(matches!(
       tree.node(cmdline_id).unwrap(),
-      TreeNodeDispatcher::CommandLine(_)
+      TreeNode::CommandLine(_)
     ));
     let _inserted = tree.bounded_insert(cmdline_id, cursor_node);
     debug_assert!(_inserted.is_none());
@@ -157,7 +154,7 @@ impl NormalStateful {
       ":".to_compact_string(),
     );
 
-    StatefulValueDispatcher::CommandLineExMode(super::CommandLineExStateful::default())
+    StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
   }
 }
 
@@ -165,7 +162,7 @@ impl NormalStateful {
   fn _goto_command_line_search_forward_mode(
     &self,
     _data_access: &StatefulDataAccess,
-  ) -> StatefulValueDispatcher {
+  ) -> StatefulValue {
     // let tree = data_access.tree.clone();
     // let mut tree = lock!(tree);
     //
@@ -188,9 +185,7 @@ impl NormalStateful {
     //   _ => unreachable!(),
     // }
 
-    StatefulValueDispatcher::CommandLineSearchForwardMode(
-      super::CommandLineSearchForwardStateful::default(),
-    )
+    StatefulValue::CommandLineSearchForwardMode(super::CommandLineSearchForwardStateful::default())
   }
 }
 
@@ -198,7 +193,7 @@ impl NormalStateful {
   fn _goto_command_line_search_backward_mode(
     &self,
     _data_access: &StatefulDataAccess,
-  ) -> StatefulValueDispatcher {
+  ) -> StatefulValue {
     // let tree = data_access.tree.clone();
     // let mut tree = lock!(tree);
     //
@@ -221,36 +216,30 @@ impl NormalStateful {
     //   _ => unreachable!(),
     // }
 
-    StatefulValueDispatcher::CommandLineSearchBackwardMode(
-      super::CommandLineSearchBackwardStateful::default(),
-    )
+    StatefulValue::CommandLineSearchBackwardMode(super::CommandLineSearchBackwardStateful::default())
   }
 }
 
 impl NormalStateful {
-  fn goto_insert_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
+  fn goto_insert_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let cursor_id = tree.cursor_id().unwrap();
     debug_assert!(tree.node_mut(cursor_id).is_some());
     let cursor_node = tree.node_mut(cursor_id).unwrap();
-    debug_assert!(matches!(cursor_node, TreeNodeDispatcher::Cursor(_)));
+    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
     match cursor_node {
-      TreeNodeDispatcher::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
+      TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
       _ => unreachable!(),
     }
 
-    StatefulValueDispatcher::InsertMode(super::InsertStateful::default())
+    StatefulValue::InsertMode(super::InsertStateful::default())
   }
 }
 
 impl NormalStateful {
   /// Cursor move in current window, with buffer scroll.
-  fn cursor_move(
-    &self,
-    data_access: &StatefulDataAccess,
-    op: Operation,
-  ) -> StatefulValueDispatcher {
+  fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = self._current_window(&mut tree);
@@ -260,7 +249,7 @@ impl NormalStateful {
 
     cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, false);
 
-    StatefulValueDispatcher::NormalMode(NormalStateful::default())
+    StatefulValue::NormalMode(NormalStateful::default())
   }
 }
 
@@ -354,8 +343,8 @@ impl NormalStateful {
     }
   }
 
-  fn editor_quit(&self, _data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
-    StatefulValueDispatcher::QuitState(QuitStateful::default())
+  fn editor_quit(&self, _data_access: &StatefulDataAccess) -> StatefulValue {
+    StatefulValue::QuitState(QuitStateful::default())
   }
 }
 
@@ -438,9 +427,9 @@ mod tests_util {
     let tree = lock!(tree);
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNodeDispatcher::Window(_)));
+    assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
-      TreeNodeDispatcher::Window(current_window) => current_window.viewport(),
+      TreeNode::Window(current_window) => current_window.viewport(),
       _ => unreachable!(),
     }
   }
@@ -452,11 +441,11 @@ mod tests_util {
     let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
     assert!(matches!(
       cursor_parent_node,
-      TreeNodeDispatcher::Window(_) | TreeNodeDispatcher::CommandLine(_)
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
     ));
     let vnode: &dyn Viewportable = match cursor_parent_node {
-      TreeNodeDispatcher::Window(window) => window,
-      TreeNodeDispatcher::CommandLine(cmdline) => cmdline,
+      TreeNode::Window(window) => window,
+      TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
     };
     vnode.cursor_viewport()

@@ -3,7 +3,7 @@
 use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
 use crate::js::next_future_id;
 use crate::lock;
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
@@ -56,9 +56,9 @@ impl CommandLineExStateful {
     let current_window_id = tree.current_window_id().unwrap();
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNodeDispatcher::Window(_)));
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
     match current_window_node {
-      TreeNodeDispatcher::Window(current_window) => current_window,
+      TreeNode::Window(current_window) => current_window,
       _ => unreachable!(),
     }
   }
@@ -68,26 +68,26 @@ impl CommandLineExStateful {
     let cmdline_id = tree.command_line_id().unwrap();
     debug_assert!(tree.node_mut(cmdline_id).is_some());
     let cmdline_node = tree.node_mut(cmdline_id).unwrap();
-    debug_assert!(matches!(cmdline_node, TreeNodeDispatcher::CommandLine(_)));
+    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
     match cmdline_node {
-      TreeNodeDispatcher::CommandLine(cmdline) => cmdline,
+      TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
     }
   }
 }
 
 impl Stateful for CommandLineExStateful {
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValueDispatcher {
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
     let event = data_access.event.clone();
 
     if let Some(op) = self._get_operation(event) {
       return self.handle_op(data_access, op);
     }
 
-    StatefulValueDispatcher::CommandLineExMode(CommandLineExStateful::default())
+    StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
 
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValueDispatcher {
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue {
     match op {
       Operation::CursorMoveBy((_, _))
       | Operation::CursorMoveUpBy(_)
@@ -110,7 +110,7 @@ impl CommandLineExStateful {
   fn confirm_ex_command_and_goto_normal_mode(
     &self,
     data_access: &StatefulDataAccess,
-  ) -> StatefulValueDispatcher {
+  ) -> StatefulValue {
     let cmdline_content = self._goto_normal_mode_impl(data_access);
     let state = data_access.state.clone();
     let jsrt_tick_dispatcher = lock!(state).jsrt_tick_dispatcher().clone();
@@ -124,7 +124,7 @@ impl CommandLineExStateful {
         .unwrap();
     });
 
-    StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
+    StatefulValue::NormalMode(super::NormalStateful::default())
   }
 }
 
@@ -144,7 +144,7 @@ impl CommandLineExStateful {
       debug_assert!(tree.node(cmdline_id).is_some());
       debug_assert!(matches!(
         tree.node(cmdline_id).unwrap(),
-        TreeNodeDispatcher::CommandLine(_)
+        TreeNode::CommandLine(_)
       ));
     }
 
@@ -154,14 +154,14 @@ impl CommandLineExStateful {
     let cursor_node = cursor_node.unwrap();
 
     if cfg!(debug_assertions) {
-      debug_assert!(matches!(cursor_node, TreeNodeDispatcher::Cursor(_)));
+      debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
       debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
     }
 
     let cursor_node = match cursor_node {
-      TreeNodeDispatcher::Cursor(mut cursor) => {
+      TreeNode::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBlock);
-        TreeNodeDispatcher::Cursor(cursor)
+        TreeNode::Cursor(cursor)
       }
       _ => unreachable!(),
     };
@@ -193,19 +193,15 @@ impl CommandLineExStateful {
     CompactString::new(cmdline_content)
   }
 
-  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
+  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
     self._goto_normal_mode_impl(data_access);
 
-    StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
+    StatefulValue::NormalMode(super::NormalStateful::default())
   }
 }
 
 impl CommandLineExStateful {
-  fn cursor_move(
-    &self,
-    data_access: &StatefulDataAccess,
-    op: Operation,
-  ) -> StatefulValueDispatcher {
+  fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     debug_assert!(tree.command_line_id().is_some());
@@ -221,7 +217,7 @@ impl CommandLineExStateful {
       true,
     );
 
-    StatefulValueDispatcher::CommandLineExMode(CommandLineExStateful::default())
+    StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
 }
 
@@ -230,7 +226,7 @@ impl CommandLineExStateful {
     &self,
     data_access: &StatefulDataAccess,
     payload: CompactString,
-  ) -> StatefulValueDispatcher {
+  ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     debug_assert!(tree.command_line_id().is_some());
@@ -245,12 +241,12 @@ impl CommandLineExStateful {
       payload,
     );
 
-    StatefulValueDispatcher::CommandLineExMode(CommandLineExStateful::default())
+    StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
 }
 
 impl CommandLineExStateful {
-  fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValueDispatcher {
+  fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let contents = data_access.contents.clone();
@@ -276,7 +272,7 @@ impl CommandLineExStateful {
 
     cursor_ops::cursor_delete(&mut tree, cmdline_id, text, to_be_deleted_n);
 
-    StatefulValueDispatcher::CommandLineExMode(CommandLineExStateful::default())
+    StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
 }
 
@@ -363,11 +359,11 @@ mod tests_util {
     let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
     assert!(matches!(
       cursor_parent_node,
-      TreeNodeDispatcher::Window(_) | TreeNodeDispatcher::CommandLine(_)
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
     ));
     match cursor_parent_node {
-      TreeNodeDispatcher::Window(current_window) => current_window.viewport(),
-      TreeNodeDispatcher::CommandLine(cmdline) => cmdline.viewport(),
+      TreeNode::Window(current_window) => current_window.viewport(),
+      TreeNode::CommandLine(cmdline) => cmdline.viewport(),
       _ => unreachable!(),
     }
   }
@@ -379,11 +375,11 @@ mod tests_util {
     let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
     assert!(matches!(
       cursor_parent_node,
-      TreeNodeDispatcher::Window(_) | TreeNodeDispatcher::CommandLine(_)
+      TreeNode::Window(_) | TreeNode::CommandLine(_)
     ));
     match cursor_parent_node {
-      TreeNodeDispatcher::Window(window) => window.cursor_viewport(),
-      TreeNodeDispatcher::CommandLine(cmdline) => cmdline.cursor_viewport(),
+      TreeNode::Window(window) => window.cursor_viewport(),
+      TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
       _ => unreachable!(),
     }
   }
