@@ -1,10 +1,12 @@
 //! Vim editing mode.
 
-use crate::arc_mutex_impl;
+use crate::arc_mutex_ptr;
+use crate::js::msg::EventLoopToJsRuntimeMessage;
 use crate::state::fsm::StatefulValueDispatcher;
 use crate::state::mode::Mode;
 
 use paste::paste;
+use tokio::sync::mpsc::Sender;
 
 pub mod fsm;
 pub mod mode;
@@ -16,9 +18,12 @@ pub struct State {
   mode: Mode,
   // Last editing mode.
   last_mode: Mode,
+
+  // Js runtime tick dispatcher
+  jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
 }
 
-arc_mutex_impl!(State);
+arc_mutex_ptr!(State);
 
 impl State {
   pub fn new() -> Self {
@@ -45,8 +50,10 @@ impl Default for State {
 
 impl State {
   pub fn update_state_machine(&mut self, next_stateful: &StatefulValueDispatcher) {
-    // Save last stateful machine.
-    self.last_mode = self.mode;
+    // Save last stateful machine (only when it is different).
+    if self.last_mode != self.mode {
+      self.last_mode = self.mode;
+    }
 
     // Update mode.
     let next_mode = match next_stateful {
@@ -66,6 +73,7 @@ impl State {
       // Internal states.
       StatefulValueDispatcher::QuitState(_) => None,
     };
+
     if let Some(mode) = next_mode {
       self.mode = mode;
     }

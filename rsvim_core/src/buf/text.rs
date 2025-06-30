@@ -4,7 +4,7 @@ use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
 use crate::prelude::*;
 #[allow(unused_imports)]
-use crate::{arc_mutex_impl, lock};
+use crate::{arc_mutex_ptr, lock};
 
 // Re-export
 pub use cidx::ColumnIndex;
@@ -27,7 +27,7 @@ pub struct Text {
   options: BufferLocalOptions,
 }
 
-arc_mutex_impl!(Text);
+arc_mutex_ptr!(Text);
 
 #[inline]
 fn _cached_size(canvas_size: U16Size) -> std::num::NonZeroUsize {

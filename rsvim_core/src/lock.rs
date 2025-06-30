@@ -2,7 +2,7 @@
 
 /// Generate Arc<Mutex<_>> pointers.
 #[macro_export]
-macro_rules! arc_mutex_impl {
+macro_rules! arc_mutex_ptr {
   ($name:ident) => {
     paste! {
       pub type [<$name Arc>] = std::sync::Arc<parking_lot::Mutex<$name>>;
@@ -20,7 +20,7 @@ macro_rules! arc_mutex_impl {
 
 /// Generate Arc<_> pointers.
 #[macro_export]
-macro_rules! arc_impl {
+macro_rules! arc_ptr {
   ($name:ident) => {
     paste! {
       pub type [<$name Arc>] = std::sync::Arc<$name>;

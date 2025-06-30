@@ -1,6 +1,6 @@
 //! Fundamental viewport for all kinds of buffer typeset/rendering in UI widgets.
 
-use crate::arc_impl;
+use crate::arc_ptr;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
@@ -137,7 +137,7 @@ pub struct CursorViewport {
   column_idx: u16,
 }
 
-arc_impl!(CursorViewport);
+arc_ptr!(CursorViewport);
 
 impl CursorViewport {
   /// Make new instance.
@@ -518,7 +518,7 @@ pub struct Viewport {
   lines: LiteMap<usize, LineViewport>,
 }
 
-arc_impl!(Viewport);
+arc_ptr!(Viewport);
 
 #[derive(Debug, Copy, Clone)]
 pub enum ViewportSearchDirection {

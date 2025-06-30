@@ -2,7 +2,7 @@
 
 use crate::prelude::*;
 #[allow(unused_imports)]
-use crate::{arc_mutex_impl, lock};
+use crate::{arc_mutex_ptr, lock};
 
 use opt::*;
 use text::Text;
@@ -53,7 +53,7 @@ pub struct Buffer {
   last_sync_time: Option<Instant>,
 }
 
-arc_mutex_impl!(Buffer);
+arc_mutex_ptr!(Buffer);
 
 impl Buffer {
   /// NOTE: This API should not be used to create new buffer, please use [`BuffersManager`] APIs to
@@ -146,7 +146,7 @@ pub struct BuffersManager {
   global_local_options: BufferLocalOptions,
 }
 
-arc_mutex_impl!(BuffersManager);
+arc_mutex_ptr!(BuffersManager);
 
 pub type BuffersManagerKeys<'a> = std::collections::btree_map::Keys<'a, BufferId, BufferArc>;
 pub type BuffersManagerValues<'a> = std::collections::btree_map::Values<'a, BufferId, BufferArc>;

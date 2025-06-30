@@ -10,7 +10,7 @@ use crate::ui::widget::window::{
   Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
   WindowLocalOptionsBuilder,
 };
-use crate::{arc_mutex_impl, lock};
+use crate::{arc_mutex_ptr, lock};
 
 use enum_dispatch::enum_dispatch;
 
@@ -169,7 +169,7 @@ pub struct Tree {
   global_local_options: WindowLocalOptions,
 }
 
-arc_mutex_impl!(Tree);
+arc_mutex_ptr!(Tree);
 
 // pub type TreeIter<'a> = ItreeIter<'a, TreeNode>;
 // pub type TreeIterMut<'a> = ItreeIterMut<'a, TreeNode>;
