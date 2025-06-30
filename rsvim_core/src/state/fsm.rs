@@ -78,18 +78,18 @@ pub trait Stateful {
   /// Handle user's keyboard/mouse event, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue;
+  fn handle(&self, data_access: StatefulDataAccess) -> StatefulValueDispatcher;
 
   /// Handle user's operation, this method can access the editor's data and update UI tree.
   ///
   /// Returns next state.
-  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValue;
+  fn handle_op(&self, data_access: StatefulDataAccess, op: Operation) -> StatefulValueDispatcher;
 }
 
 #[enum_dispatch(Stateful)]
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The value holder for each state machine.
-pub enum StatefulValue {
+pub enum StatefulValueDispatcher {
   // Editing modes.
   NormalMode(NormalStateful),
   VisualMode(VisualStateful),
@@ -104,10 +104,10 @@ pub enum StatefulValue {
   QuitState(QuitStateful),
 }
 
-impl Default for StatefulValue {
+impl Default for StatefulValueDispatcher {
   /// Returns the default FMS state, by default it's the
   /// [`Normal`](crate::state::fsm::normal::NormalStateful) editing mode.
   fn default() -> Self {
-    StatefulValue::NormalMode(NormalStateful::default())
+    StatefulValueDispatcher::NormalMode(NormalStateful::default())
   }
 }

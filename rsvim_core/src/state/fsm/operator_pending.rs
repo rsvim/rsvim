@@ -1,6 +1,6 @@
 //! The operator-pending mode.
 
-use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
+use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
 use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
@@ -8,10 +8,10 @@ use crate::state::ops::Operation;
 pub struct OperatorPendingStateful {}
 
 impl Stateful for OperatorPendingStateful {
-  fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
-    StatefulValue::OperatorPendingMode(OperatorPendingStateful::default())
+  fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValueDispatcher {
+    StatefulValueDispatcher::OperatorPendingMode(OperatorPendingStateful::default())
   }
-  fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValue {
-    StatefulValue::OperatorPendingMode(OperatorPendingStateful::default())
+  fn handle_op(&self, _data_access: StatefulDataAccess, _op: Operation) -> StatefulValueDispatcher {
+    StatefulValueDispatcher::OperatorPendingMode(OperatorPendingStateful::default())
   }
 }
