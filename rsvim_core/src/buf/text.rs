@@ -3,8 +3,6 @@
 use crate::buf::opt::BufferLocalOptions;
 use crate::buf::unicode;
 use crate::prelude::*;
-#[allow(unused_imports)]
-use crate::{arc_mutex_ptr, lock};
 
 // Re-export
 pub use cidx::ColumnIndex;
@@ -12,7 +10,6 @@ pub use cidx::ColumnIndex;
 use ahash::RandomState;
 use compact_str::{CompactString, ToCompactString};
 use lru::LruCache;
-use paste::paste;
 use ropey::Rope;
 use std::cell::RefCell;
 use std::rc::Rc;

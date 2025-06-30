@@ -1,13 +1,11 @@
 //! Fundamental viewport for all kinds of buffer typeset/rendering in UI widgets.
 
-use crate::arc_ptr;
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
-use paste::paste;
 use std::ops::Range;
 #[allow(unused_imports)]
 use tracing::trace;
