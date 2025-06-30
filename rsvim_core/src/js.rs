@@ -708,12 +708,15 @@ impl JsRuntime {
       while let Ok(msg) = state.jsrt_from_mstr.try_recv() {
         match msg {
           EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
+            trace!("Receive TimeResp:{resp:?}");
             match state.pending_futures.remove(&resp.future_id) {
               Some(timeout_cb) => futures.push(timeout_cb),
               None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
             }
           }
-          EventLoopToJsRuntimeMessage::ExCommandReq(req) => {}
+          EventLoopToJsRuntimeMessage::ExCommandReq(req) => {
+            trace!("Receive ExCommandReq:{req:?}");
+          }
         }
       }
 
