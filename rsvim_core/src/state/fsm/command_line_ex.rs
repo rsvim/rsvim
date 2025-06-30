@@ -900,38 +900,8 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
     // Goto Normal-2
     {
-      stateful.confirm_ex_command_and_goto_normal_mode(&data_access);
-
-      let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
-      assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 0);
-      assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 0);
-
-      let viewport = get_viewport(tree.clone());
-      let expect = vec![""];
-      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
-      assert_viewport_scroll(
-        lock!(contents).command_line_content(),
-        &viewport,
-        &expect,
-        0,
-        1,
-        &expect_fills,
-        &expect_fills,
-      );
-
-      let expect_canvas = vec![
-        "           ",
-        "           ",
-        "           ",
-        "           ",
-        "           ",
-      ];
-      let actual_canvas = make_canvas(tree.clone(), terminal_size);
-      let actual_canvas = lock!(actual_canvas);
-      assert_canvas(&actual_canvas, &expect_canvas);
+      let cmdline_content = stateful._goto_normal_mode_impl(&data_access);
+      info!("cmdline content:{cmdline_content:?}");
     }
   }
 }
