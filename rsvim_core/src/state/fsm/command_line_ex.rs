@@ -338,7 +338,8 @@ mod tests_util {
       bufs.clone(),
       contents.clone(),
     );
-    let state = State::to_arc(State::default());
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
     (tree, state, bufs, buf, contents)
   }
 
