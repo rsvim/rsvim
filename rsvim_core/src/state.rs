@@ -1,11 +1,10 @@
 //! Vim editing mode.
 
-use crate::arc_mutex_ptr;
 use crate::js::msg::EventLoopToJsRuntimeMessage;
+use crate::prelude::*;
 use crate::state::fsm::StatefulValue;
 use crate::state::mode::Mode;
 
-use paste::paste;
 use tokio::sync::mpsc::Sender;
 
 pub mod fsm;
