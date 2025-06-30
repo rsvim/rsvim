@@ -764,4 +764,175 @@ mod tests_goto_normal_mode {
     }
   }
 }
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_confirm_ex_command_and_goto_normal_mode {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::{lock, state};
+
+  use crate::state::fsm::NormalStateful;
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
+
+  #[test]
+  fn nowrap1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(11, 5);
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let lines = vec![];
+    let (tree, state, bufs, buf, contents) =
+      make_tree_with_cmdline(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
+    let stateful = NormalStateful::default();
+
+    // Prepare
+    {
+      stateful.goto_command_line_ex_mode(&data_access);
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 1);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text1 = CompactString::new(format!(":{buf_eol}"));
+      let expect = vec![text1.as_str()];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":          ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    let stateful = CommandLineExStateful::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text1 = CompactString::new(format!(":Bye{buf_eol}"));
+      let expect = vec![text1.as_str()];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":Bye       ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Goto Normal-2
+    {
+      stateful.confirm_ex_command_and_goto_normal_mode(&data_access);
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 0);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![""];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+}
 // spellchecker:on
