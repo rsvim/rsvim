@@ -67,12 +67,14 @@ pub fn set_timeout(
 
   // Return timeout's internal id.
   let timer_id = js::next_future_id();
-  let js_runtime_send_to_master = state.js_runtime_send_to_master.clone();
+  let jsrt_to_mstr = state.jsrt_to_mstr.clone();
   let current_handle = tokio::runtime::Handle::current();
   current_handle.spawn_blocking(move || {
-    let _ = js_runtime_send_to_master.blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
-      jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
-    ));
+    jsrt_to_mstr
+      .blocking_send(JsRuntimeToEventLoopMessage::TimeoutReq(
+        jsmsg::TimeoutReq::new(timer_id, Duration::from_millis(millis)),
+      ))
+      .unwrap();
   });
   let timeout_cb = TimeoutFuture {
     future_id: timer_id,

@@ -199,6 +199,7 @@ mod tests_util {
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
   use std::sync::Arc;
+  use tokio::sync::mpsc::{Receiver, Sender, channel};
   use tracing::info;
 
   pub fn make_tree(
@@ -216,7 +217,8 @@ mod tests_util {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
     let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-    let state = State::to_arc(State::default());
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     (tree, state, bufs, buf, contents)
   }

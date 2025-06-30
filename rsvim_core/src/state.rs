@@ -1,10 +1,12 @@
 //! Vim editing mode.
 
-use crate::arc_mutex_impl;
+use crate::arc_mutex_ptr;
+use crate::js::msg::EventLoopToJsRuntimeMessage;
 use crate::state::fsm::StatefulValueDispatcher;
 use crate::state::mode::Mode;
 
 use paste::paste;
+use tokio::sync::mpsc::Sender;
 
 pub mod fsm;
 pub mod mode;
@@ -16,15 +18,19 @@ pub struct State {
   mode: Mode,
   // Last editing mode.
   last_mode: Mode,
+
+  // Js runtime tick dispatcher
+  jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
 }
 
-arc_mutex_impl!(State);
+arc_mutex_ptr!(State);
 
 impl State {
-  pub fn new() -> Self {
+  pub fn new(jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>) -> Self {
     State {
       mode: Mode::Normal,
       last_mode: Mode::Normal,
+      jsrt_tick_dispatcher,
     }
   }
 
@@ -35,18 +41,18 @@ impl State {
   pub fn last_mode(&self) -> Mode {
     self.last_mode
   }
-}
 
-impl Default for State {
-  fn default() -> Self {
-    State::new()
+  pub fn jsrt_tick_dispatcher(&self) -> &Sender<EventLoopToJsRuntimeMessage> {
+    &self.jsrt_tick_dispatcher
   }
 }
 
 impl State {
   pub fn update_state_machine(&mut self, next_stateful: &StatefulValueDispatcher) {
-    // Save last stateful machine.
-    self.last_mode = self.mode;
+    // Save last stateful machine (only when it is different).
+    if self.last_mode != self.mode {
+      self.last_mode = self.mode;
+    }
 
     // Update mode.
     let next_mode = match next_stateful {
@@ -66,6 +72,7 @@ impl State {
       // Internal states.
       StatefulValueDispatcher::QuitState(_) => None,
     };
+
     if let Some(mode) = next_mode {
       self.mode = mode;
     }
@@ -76,9 +83,12 @@ impl State {
 mod tests {
   use super::*;
 
+  use tokio::sync::mpsc::channel;
+
   #[test]
   fn update_state_machine1() {
-    let mut state = State::new();
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let mut state = State::new(jsrt_tick_dispatcher);
     assert_eq!(state.last_mode(), Mode::Normal);
     assert_eq!(state.mode(), Mode::Normal);
     state.update_state_machine(&StatefulValueDispatcher::InsertMode(

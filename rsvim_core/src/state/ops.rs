@@ -79,6 +79,9 @@ pub enum Operation {
   /// Goto command-line search backward mode.
   GotoCommandLineSearchBackwardMode,
 
+  /// Confirm ex command and goto normal mode.
+  ConfirmExCommandAndGotoNormalMode,
+
   /// Quit editor
   EditorQuit,
 }

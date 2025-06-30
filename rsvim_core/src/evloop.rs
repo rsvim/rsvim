@@ -99,24 +99,31 @@ pub struct EventLoop {
   pub detached_tracker: TaskTracker,
   pub blocked_tracker: TaskTracker,
 
-  /// Sender: workers => master.
+  /// Channel: "workers" => "master"
+  /// NOTE: In variables naming, we use "wkr" for "workers", "mstr" for "master".
   ///
-  /// NOTE: This sender stores here is mostly just for clone to all the other tasks spawned during
-  /// running the editor. The master itself doesn't actually use it.
-  pub worker_send_to_master: Sender<WorkerToMasterMessage>,
-  /// Receiver: master <= workers.
-  pub master_recv_from_worker: Receiver<WorkerToMasterMessage>,
+  /// Sender: workers send to master.
+  pub wkr_to_mstr: Sender<WorkerToMasterMessage>,
+  /// Receiver: master receive from workers.
+  pub mstr_from_wkr: Receiver<WorkerToMasterMessage>,
 
   /// Js runtime.
   pub js_runtime: JsRuntime,
-  /// Receiver: master <= js runtime.
-  pub master_recv_from_js_runtime: Receiver<JsRuntimeToEventLoopMessage>,
-  /// Sender: master => js runtime.
-  pub master_send_to_js_runtime: Sender<EventLoopToJsRuntimeMessage>,
-  /// An internal connected sender/receiver pair, it's simply for forward the task results
-  /// to the event loop again and bypass the limitation of V8 engine.
-  pub js_runtime_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
-  pub js_runtime_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
+
+  /// Channel: "master" => "js runtime"
+  /// NOTE: In variables naming, we use "mstr" for "master", "jsrt" for "js runtime".
+  ///
+  /// Receiver: master receive from js runtime.
+  pub mstr_from_jsrt: Receiver<JsRuntimeToEventLoopMessage>,
+  /// Sender: master send to js runtime.
+  pub mstr_to_jsrt: Sender<EventLoopToJsRuntimeMessage>,
+
+  /// Channel: "master" => "master" ("dispatcher" => "queue")
+  ///
+  /// Sender: dispatcher.
+  pub jsrt_tick_dispatcher: Sender<EventLoopToJsRuntimeMessage>,
+  /// Receiver: queue.
+  pub jsrt_tick_queue: Receiver<EventLoopToJsRuntimeMessage>,
 }
 
 impl EventLoop {
@@ -135,48 +142,46 @@ impl EventLoop {
     let buffers_manager = BuffersManager::to_arc(BuffersManager::new());
     let text_contents = TextContents::to_arc(TextContents::new(canvas_size));
 
-    // State
-    let state = State::to_arc(State::default());
-    let stateful_machine = StatefulValueDispatcher::default();
+    // Channel: workers => master
+    let (wkr_to_mstr, mstr_from_wkr) = channel(envar::CHANNEL_BUF_SIZE());
 
-    // Worker => master
-    let (worker_send_to_master, master_recv_from_worker) = channel(envar::CHANNEL_BUF_SIZE());
-
-    // Since there are too many limitations that we cannot use tokio APIs along with V8 engine, we
-    // have to first send task requests to master, let the master handles these tasks for us in the
-    // async way, then send the task results back to js runtime.
+    // Since there are technical limitations that we cannot use tokio APIs along with V8 engine,
+    // because V8 rust bindings are not Arc/Mutex (i.e. not thread safe), while tokio async runtime
+    // requires Arc/Mutex (i.e. thread safe).
     //
-    // These tasks are very common and low level, serve as an infrastructure layer for js world.
+    // We have to first send js task requests to master, let the master handles these tasks for us
+    // (in async way), then send the task results back to js runtime. These tasks are very common
+    // and low level, serve as an infrastructure layer for js world.
     // For example:
     // - File IO
     // - Timer
     // - Network
     // - And more...
     //
-    // The basic workflow is:
-    // 1. When js runtime needs to handles the `Promise` and `async` functions, it send requests to
-    //    master via `js_runtime_send_to_master`.
-    // 2. Master receive requests via `master_recv_from_js_runtime`, and handle these tasks in async
-    //    way.
-    // 3. Master send the task results via `js_runtime_tick_dispatcher`.
-    // 4. Master receive the task results via `js_runtime_tick_queue`, and send the results (again)
-    //    via `master_send_to_js_runtime`.
-    // 5. Js runtime receive these task results via `js_runtime_recv_from_master`, then process
-    //    pending futures.
+    // When js runtime handles `Promise` and `async` APIs, the message flow uses several channels:
     //
-    // You must notice that, the 3rd and 4th steps (and the pair of `js_runtime_tick_dispatcher`
-    // and `js_runtime_tick_queue`) seem useless. Yes, they're simply for trigger the event loop
-    // to run the `JsRuntime::tick_event_loop` API in `tokio::select!` main loop, due to the
-    // limitation of V8 engine work along with tokio runtime.
+    // - Channel-1 `jsrt_to_mstr` => `mstr_from_jsrt`, on message `JsRuntimeToEventLoopMessage`.
+    // - Channel-2 `jsrt_tick_dispatcher` => `jsrt_tick_queue`, on message `EventLoopToJsRuntimeMessage`.
+    // - Channel-3 `mstr_to_jsrt` => `jsrt_from_mstr`, on message `EventLoopToJsRuntimeMessage`.
+    //
+    // ```text
+    //
+    // Step-1: Js runtime --- JsRuntimeToEventLoopMessage (channel-1) --> Tokio event loop
+    // Step-2: Tokio event loop handles the request (read/write, timer, etc) in async way
+    // Step-3: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-2) --> Tokio event loop
+    // Step-4: Tokio event loop --- EventLoopToJsRuntimeMessage (channel-3) --> Js runtime
+    //
+    // ```
+    //
+    // NOTE: You must notice, the step-3 and channel-2 seems unnecessary. Yes, they're simply for
+    // trigger the event loop in `tokio::select!`.
 
-    // Js runtime => master
-    let (js_runtime_send_to_master, master_recv_from_js_runtime) =
-      channel(envar::CHANNEL_BUF_SIZE());
-    // Master => js runtime
-    let (master_send_to_js_runtime, js_runtime_recv_from_master) =
-      channel(envar::CHANNEL_BUF_SIZE());
-    // Master => master
-    let (js_runtime_tick_dispatcher, js_runtime_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
+    // Channel: js runtime => master
+    let (jsrt_to_mstr, mstr_from_jsrt) = channel(envar::CHANNEL_BUF_SIZE());
+    // Channel: master => js runtime
+    let (mstr_to_jsrt, jsrt_from_mstr) = channel(envar::CHANNEL_BUF_SIZE());
+    // Channel: master => master
+    let (jsrt_tick_dispatcher, jsrt_tick_queue) = channel(envar::CHANNEL_BUF_SIZE());
 
     // Runtime Path
     let runtime_path = envar::CONFIG_DIRS_PATH();
@@ -191,14 +196,18 @@ impl EventLoop {
       .unwrap()
       .as_millis();
 
+    // State
+    let state = State::to_arc(State::new(jsrt_tick_dispatcher.clone()));
+    let stateful_machine = StatefulValueDispatcher::default();
+
     // Js Runtime
     let js_runtime = JsRuntime::new(
       JsRuntimeOptions::default(),
       snapshot,
       startup_moment,
       startup_unix_epoch,
-      js_runtime_send_to_master,
-      js_runtime_recv_from_master,
+      jsrt_to_mstr,
+      jsrt_from_mstr,
       cli_opt.clone(),
       runtime_path.clone(),
       tree.clone(),
@@ -222,13 +231,13 @@ impl EventLoop {
       cancellation_token: CancellationToken::new(),
       detached_tracker,
       blocked_tracker,
-      worker_send_to_master,
-      master_recv_from_worker,
+      wkr_to_mstr,
+      mstr_from_wkr,
       js_runtime,
-      master_recv_from_js_runtime,
-      master_send_to_js_runtime,
-      js_runtime_tick_dispatcher,
-      js_runtime_tick_queue,
+      mstr_from_jsrt,
+      mstr_to_jsrt,
+      jsrt_tick_dispatcher,
+      jsrt_tick_queue,
     })
   }
 
@@ -417,19 +426,16 @@ impl EventLoop {
     if let Some(msg) = msg {
       match msg {
         JsRuntimeToEventLoopMessage::TimeoutReq(req) => {
-          trace!("process_js_runtime_request timeout_req:{:?}", req.future_id);
-          let js_runtime_tick_dispatcher = self.js_runtime_tick_dispatcher.clone();
+          trace!("Receive req timeout_req:{:?}", req.future_id);
+          let jsrt_tick_dispatcher = self.jsrt_tick_dispatcher.clone();
           self.detached_tracker.spawn(async move {
             tokio::time::sleep(req.duration).await;
-            let _ = js_runtime_tick_dispatcher
+            let _ = jsrt_tick_dispatcher
               .send(EventLoopToJsRuntimeMessage::TimeoutResp(
                 jsmsg::TimeoutResp::new(req.future_id, req.duration),
               ))
               .await;
-            trace!(
-              "process_js_runtime_request timeout_req:{:?} - done",
-              req.future_id
-            );
+            trace!("Receive req timeout_req:{:?} - done", req.future_id);
           });
         }
       }
@@ -438,8 +444,8 @@ impl EventLoop {
 
   async fn process_js_runtime_response(&mut self, msg: Option<EventLoopToJsRuntimeMessage>) {
     if let Some(msg) = msg {
-      trace!("process_js_runtime_response msg:{:?}", msg);
-      let _ = self.master_send_to_js_runtime.send(msg).await;
+      trace!("Process resp msg:{:?}", msg);
+      let _ = self.mstr_to_jsrt.send(msg).await;
       self.js_runtime.tick_event_loop();
     }
   }
@@ -467,15 +473,15 @@ impl EventLoop {
         event = reader.next() => {
           self.process_event(event).await;
         }
-        // Receive notification from workers
-        worker_msg = self.master_recv_from_worker.recv() => {
+        // Receive notification from workers => master
+        worker_msg = self.mstr_from_wkr.recv() => {
           self.process_worker_notify(worker_msg).await;
         }
-        // Receive notification from js runtime
-        js_req = self.master_recv_from_js_runtime.recv() => {
+        // Receive notification from js runtime => master
+        js_req = self.mstr_from_jsrt.recv() => {
             self.process_js_runtime_request(js_req).await;
         }
-        js_resp = self.js_runtime_tick_queue.recv() => {
+        js_resp = self.jsrt_tick_queue.recv() => {
             self.process_js_runtime_response(js_resp).await;
         }
         // Receive cancellation notify

@@ -1,5 +1,7 @@
 //! The command-line ex mode.
 
+use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
+use crate::js::next_future_id;
 use crate::lock;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValueDispatcher};
 use crate::state::ops::{Operation, cursor_ops};
@@ -28,14 +30,15 @@ impl CommandLineExStateful {
           match key_event.code {
             // KeyCode::Up | KeyCode::Char('k') => Some(Operation::CursorMoveUpBy(1)),
             // KeyCode::Down | KeyCode::Char('j') => Some(Operation::CursorMoveDownBy(1)),
-            KeyCode::Left | KeyCode::Char('h') => Some(Operation::CursorMoveLeftBy(1)),
-            KeyCode::Right | KeyCode::Char('l') => Some(Operation::CursorMoveRightBy(1)),
+            KeyCode::Left => Some(Operation::CursorMoveLeftBy(1)),
+            KeyCode::Right => Some(Operation::CursorMoveRightBy(1)),
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char(c) => Some(Operation::CursorInsert(c.to_compact_string())),
             KeyCode::Backspace => Some(Operation::CursorDelete(-1)),
             KeyCode::Delete => Some(Operation::CursorDelete(1)),
             KeyCode::Esc => Some(Operation::GotoNormalMode),
+            KeyCode::Enter => Some(Operation::ConfirmExCommandAndGotoNormalMode),
             _ => None,
           }
         }
@@ -93,6 +96,9 @@ impl Stateful for CommandLineExStateful {
       | Operation::CursorMoveRightBy(_)
       | Operation::CursorMoveTo((_, _)) => self.cursor_move(&data_access, op),
       Operation::GotoNormalMode => self.goto_normal_mode(&data_access),
+      Operation::ConfirmExCommandAndGotoNormalMode => {
+        self.confirm_ex_command_and_goto_normal_mode(&data_access)
+      }
       Operation::CursorInsert(text) => self.cursor_insert(&data_access, text),
       Operation::CursorDelete(n) => self.cursor_delete(&data_access, n),
       _ => unreachable!(),
@@ -101,7 +107,29 @@ impl Stateful for CommandLineExStateful {
 }
 
 impl CommandLineExStateful {
-  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
+  fn confirm_ex_command_and_goto_normal_mode(
+    &self,
+    data_access: &StatefulDataAccess,
+  ) -> StatefulValueDispatcher {
+    let cmdline_content = self._goto_normal_mode_impl(data_access);
+    let state = data_access.state.clone();
+    let jsrt_tick_dispatcher = lock!(state).jsrt_tick_dispatcher().clone();
+
+    let current_handle = tokio::runtime::Handle::current();
+    current_handle.spawn_blocking(move || {
+      jsrt_tick_dispatcher
+        .blocking_send(EventLoopToJsRuntimeMessage::ExCommandReq(
+          ExCommandReq::new(next_future_id(), cmdline_content),
+        ))
+        .unwrap();
+    });
+
+    StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
+  }
+}
+
+impl CommandLineExStateful {
+  fn _goto_normal_mode_impl(&self, data_access: &StatefulDataAccess) -> CompactString {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
@@ -155,7 +183,18 @@ impl CommandLineExStateful {
     // Clear command-line contents.
     let contents = data_access.contents.clone();
     let mut contents = lock!(contents);
+    let cmdline_content = contents.command_line_content().rope().to_compact_string();
+
     cursor_ops::cursor_clear(&mut tree, cmdline_id, contents.command_line_content_mut());
+
+    let cmdline_content = cmdline_content.trim();
+    debug_assert!(cmdline_content.starts_with(":"));
+    let cmdline_content = &cmdline_content[1..];
+    CompactString::new(cmdline_content)
+  }
+
+  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValueDispatcher {
+    self._goto_normal_mode_impl(data_access);
 
     StatefulValueDispatcher::NormalMode(super::NormalStateful::default())
   }
@@ -267,6 +306,7 @@ mod tests_util {
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
+  use tokio::sync::mpsc::{Receiver, Sender, channel};
   use tracing::info;
 
   pub fn make_tree(
@@ -284,7 +324,8 @@ mod tests_util {
     let buf = make_buffer_from_lines(terminal_size, buf_opts, lines);
     let bufs = make_buffers_manager(buf_opts, vec![buf.clone()]);
     let tree = make_tree_with_buffers(terminal_size, window_local_opts, bufs.clone());
-    let state = State::to_arc(State::default());
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
     let contents = TextContents::to_arc(TextContents::new(terminal_size));
     (tree, state, bufs, buf, contents)
   }
@@ -310,7 +351,8 @@ mod tests_util {
       bufs.clone(),
       contents.clone(),
     );
-    let state = State::to_arc(State::default());
+    let (jsrt_tick_dispatcher, _jsrt_tick_queue) = channel(1);
+    let state = State::to_arc(State::new(jsrt_tick_dispatcher));
     (tree, state, bufs, buf, contents)
   }
 
@@ -740,6 +782,148 @@ mod tests_goto_normal_mode {
       let actual_canvas = make_canvas(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
       assert_canvas(&actual_canvas, &expect_canvas);
+    }
+  }
+}
+#[cfg(test)]
+#[allow(unused_imports)]
+mod tests_confirm_ex_command_and_goto_normal_mode {
+  use super::tests_util::*;
+  use super::*;
+
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::buf::{BufferArc, BuffersManagerArc};
+  use crate::prelude::*;
+  use crate::state::{State, StateArc};
+  use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
+  use crate::test::log::init as test_log_init;
+  use crate::test::tree::make_tree_with_buffers;
+  use crate::ui::tree::TreeArc;
+  use crate::ui::viewport::{
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
+  };
+  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
+  use crate::{lock, state};
+
+  use crate::state::fsm::NormalStateful;
+  use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+  use std::collections::BTreeMap;
+  use tracing::info;
+
+  #[test]
+  fn nowrap1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(11, 5);
+    let window_options = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+    let lines = vec![];
+    let (tree, state, bufs, buf, contents) =
+      make_tree_with_cmdline(terminal_size, window_options, lines);
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+    let data_access = StatefulDataAccess::new(
+      state,
+      tree.clone(),
+      bufs,
+      contents.clone(),
+      Event::Key(key_event),
+    );
+    let stateful = NormalStateful::default();
+
+    // Prepare
+    {
+      stateful.goto_command_line_ex_mode(&data_access);
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 1);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 1);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text1 = CompactString::new(format!(":{buf_eol}"));
+      let expect = vec![text1.as_str()];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":          ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    let stateful = CommandLineExStateful::default();
+
+    // Insert-1
+    {
+      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+
+      let tree = data_access.tree.clone();
+      let actual1 = get_cursor_viewport(tree.clone());
+      assert_eq!(actual1.line_idx(), 0);
+      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.row_idx(), 0);
+      assert_eq!(actual1.column_idx(), 4);
+
+      let viewport = get_viewport(tree.clone());
+      let buf_eol = lock!(buf).options().end_of_line();
+      let text1 = CompactString::new(format!(":Bye{buf_eol}"));
+      let expect = vec![text1.as_str()];
+      let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        lock!(contents).command_line_content(),
+        &viewport,
+        &expect,
+        0,
+        1,
+        &expect_fills,
+        &expect_fills,
+      );
+
+      let expect_canvas = vec![
+        "           ",
+        "           ",
+        "           ",
+        "           ",
+        ":Bye       ",
+      ];
+      let actual_canvas = make_canvas(tree.clone(), terminal_size);
+      let actual_canvas = lock!(actual_canvas);
+      assert_canvas(&actual_canvas, &expect_canvas);
+    }
+
+    // Goto Normal-2
+    {
+      let cmdline_content = stateful._goto_normal_mode_impl(&data_access);
+      info!("cmdline content:{cmdline_content:?}");
+      assert_eq!("Bye", cmdline_content.as_str());
     }
   }
 }

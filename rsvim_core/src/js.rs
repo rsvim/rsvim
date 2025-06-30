@@ -332,10 +332,10 @@ pub struct JsRuntimeState {
   // pub wake_event_queued: bool,
 
   // Data Access for RSVIM {
-  // Js runtime ==request==> master.
-  pub js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
-  // Js runtime <==response== master.
-  pub js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+  // Sender: js runtime send to master.
+  pub jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
+  // Receiver: js runtime receive from master.
+  pub jsrt_from_mstr: Receiver<EventLoopToJsRuntimeMessage>,
   pub cli_opt: CliOpt,
   pub runtime_path: Arc<Mutex<Vec<PathBuf>>>,
   pub tree: TreeArc,
@@ -381,8 +381,8 @@ impl JsRuntime {
     snapshot: SnapshotData,
     startup_moment: Instant,
     time_origin: u128,
-    js_runtime_send_to_master: Sender<JsRuntimeToEventLoopMessage>,
-    js_runtime_recv_from_master: Receiver<EventLoopToJsRuntimeMessage>,
+    jsrt_to_mstr: Sender<JsRuntimeToEventLoopMessage>,
+    jsrt_from_mstr: Receiver<EventLoopToJsRuntimeMessage>,
     cli_opt: CliOpt,
     runtime_path: Arc<Mutex<Vec<PathBuf>>>,
     tree: TreeArc,
@@ -492,8 +492,8 @@ impl JsRuntime {
       exceptions: ExceptionState::new(),
       options,
       // wake_event_queued: false,
-      js_runtime_send_to_master,
-      js_runtime_recv_from_master,
+      jsrt_to_mstr,
+      jsrt_from_mstr,
       cli_opt,
       runtime_path,
       tree,
@@ -705,13 +705,18 @@ impl JsRuntime {
     {
       let state_rc = Self::state(scope);
       let mut state = state_rc.borrow_mut();
-      while let Ok(msg) = state.js_runtime_recv_from_master.try_recv() {
+      while let Ok(msg) = state.jsrt_from_mstr.try_recv() {
         match msg {
           EventLoopToJsRuntimeMessage::TimeoutResp(resp) => {
+            trace!("Receive TimeResp:{resp:?}");
             match state.pending_futures.remove(&resp.future_id) {
               Some(timeout_cb) => futures.push(timeout_cb),
               None => unreachable!("Failed to get timeout future by ID {:?}", resp.future_id),
             }
+          }
+          EventLoopToJsRuntimeMessage::ExCommandReq(req) => {
+            trace!("Receive ExCommandReq:{req:?}");
+            debug_assert!(!state.pending_futures.contains_key(&req.future_id));
           }
         }
       }

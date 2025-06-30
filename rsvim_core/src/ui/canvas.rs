@@ -1,6 +1,6 @@
 //! Canvas.
 
-use crate::arc_mutex_impl;
+use crate::arc_mutex_ptr;
 use crate::prelude::*;
 
 // Re-export
@@ -32,7 +32,7 @@ pub struct Canvas {
   prev_frame: Frame,
 }
 
-arc_mutex_impl!(Canvas);
+arc_mutex_ptr!(Canvas);
 
 impl Canvas {
   /// Make new canvas with terminal actual size.
