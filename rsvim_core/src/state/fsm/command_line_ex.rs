@@ -907,6 +907,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     {
       let cmdline_content = stateful._goto_normal_mode_impl(&data_access);
       info!("cmdline content:{cmdline_content:?}");
+      assert_eq!("Bye", cmdline_content.as_str());
     }
   }
 }
