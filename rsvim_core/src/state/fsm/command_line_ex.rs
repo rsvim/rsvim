@@ -38,7 +38,7 @@ impl CommandLineExStateful {
             KeyCode::Backspace => Some(Operation::CursorDelete(-1)),
             KeyCode::Delete => Some(Operation::CursorDelete(1)),
             KeyCode::Esc => Some(Operation::GotoNormalMode),
-            KeyCode::Enter => Some(Operation::GotoNormalMode),
+            KeyCode::Enter => Some(Operation::ConfirmExCommandAndGotoNormalMode),
             _ => None,
           }
         }
