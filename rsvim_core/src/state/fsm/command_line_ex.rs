@@ -30,8 +30,8 @@ impl CommandLineExStateful {
           match key_event.code {
             // KeyCode::Up | KeyCode::Char('k') => Some(Operation::CursorMoveUpBy(1)),
             // KeyCode::Down | KeyCode::Char('j') => Some(Operation::CursorMoveDownBy(1)),
-            KeyCode::Left | KeyCode::Char('h') => Some(Operation::CursorMoveLeftBy(1)),
-            KeyCode::Right | KeyCode::Char('l') => Some(Operation::CursorMoveRightBy(1)),
+            KeyCode::Left => Some(Operation::CursorMoveLeftBy(1)),
+            KeyCode::Right => Some(Operation::CursorMoveRightBy(1)),
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char(c) => Some(Operation::CursorInsert(c.to_compact_string())),
