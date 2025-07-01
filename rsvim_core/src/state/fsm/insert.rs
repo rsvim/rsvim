@@ -178,7 +178,7 @@ mod tests_util {
   use crate::ui::canvas::Canvas;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection, Viewportable,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
   use crate::ui::widget::Widgetable;
   use crate::ui::widget::window::content::{self, WindowContent};
