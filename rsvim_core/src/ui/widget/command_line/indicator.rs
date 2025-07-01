@@ -11,7 +11,7 @@ use geo::point;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The symbol for command-line indicator, i.e. the ':', '/', '?' char.
-enum CommandLineIndicatorSymbol {
+pub enum CommandLineIndicatorSymbol {
   Ex,
   SearchForward,
   SearchBackard,

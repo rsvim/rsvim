@@ -9,7 +9,7 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
-use crate::{inode_enum_dispatcher, widget_enum_dispatcher};
+use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 
 // Re-export
 pub use opt::*;
@@ -52,19 +52,19 @@ impl Window {
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
-    let window_root_actual_shape = *window_root_node.actual_shape();
+
+    let mut base = Itree::new(window_root_node);
 
     let (viewport, cursor_viewport) = {
+      let window_root_actual_shape = window_root_node.actual_shape();
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport = Viewport::view(opts, buffer.text(), &window_root_actual_shape, 0, 0);
+      let viewport = Viewport::view(opts, buffer.text(), window_root_actual_shape, 0, 0);
       let cursor_viewport = CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
     };
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
-
-    let mut base = Itree::new(window_root_node);
 
     let window_content = WindowContent::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let window_content_id = window_content.id();
@@ -83,83 +83,7 @@ impl Window {
   }
 }
 
-impl Inodeable for Window {
-  fn id(&self) -> TreeNodeId {
-    self.base.root_id()
-  }
-
-  fn depth(&self) -> usize {
-    self.base.node(self.base.root_id()).unwrap().depth()
-  }
-
-  fn set_depth(&mut self, depth: usize) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_depth(depth);
-  }
-
-  fn zindex(&self) -> usize {
-    self.base.node(self.base.root_id()).unwrap().zindex()
-  }
-
-  fn set_zindex(&mut self, zindex: usize) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_zindex(zindex);
-  }
-
-  fn shape(&self) -> &IRect {
-    self.base.node(self.base.root_id()).unwrap().shape()
-  }
-
-  fn set_shape(&mut self, shape: &IRect) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_shape(shape);
-  }
-
-  fn actual_shape(&self) -> &U16Rect {
-    self.base.node(self.base.root_id()).unwrap().actual_shape()
-  }
-
-  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_actual_shape(actual_shape);
-  }
-
-  fn enabled(&self) -> bool {
-    self.base.node(self.base.root_id()).unwrap().enabled()
-  }
-
-  fn set_enabled(&mut self, enabled: bool) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_enabled(enabled);
-  }
-
-  fn visible(&self) -> bool {
-    self.base.node(self.base.root_id()).unwrap().visible()
-  }
-
-  fn set_visible(&mut self, visible: bool) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_visible(visible);
-  }
-}
+inode_itree_impl!(Window, base);
 
 impl Widgetable for Window {
   fn draw(&self, canvas: &mut Canvas) {

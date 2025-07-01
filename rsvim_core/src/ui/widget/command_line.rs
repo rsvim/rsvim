@@ -1,6 +1,7 @@
 //! Command-line widget.
 
 use crate::content::TextContentsWk;
+use crate::geo_rect_as;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -11,7 +12,12 @@ use crate::ui::widget::command_line::indicator::CommandLineIndicator;
 use crate::ui::widget::command_line::root::CommandLineRootContainer;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::opt::{WindowLocalOptions, WindowLocalOptionsBuilder};
-use crate::{inode_enum_dispatcher, inode_impl, widget_enum_dispatcher};
+use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
+
+use std::sync::Arc;
+
+// Re-export
+pub use indicator::CommandLineIndicatorSymbol;
 
 pub mod content;
 pub mod indicator;
@@ -58,7 +64,11 @@ pub struct CommandLine {
 }
 
 impl CommandLine {
-  pub fn new(shape: IRect, contents: TextContentsWk) -> Self {
+  pub fn new(
+    shape: IRect,
+    contents: TextContentsWk,
+    indicator_symbol: CommandLineIndicatorSymbol,
+  ) -> Self {
     // Force cmdline window options.
     let options = WindowLocalOptionsBuilder::default()
       .wrap(false)
@@ -71,18 +81,26 @@ impl CommandLine {
     let cmdline_root_id = cmdline_root.id();
     let cmdline_root_node = CommandLineNode::CommandLineRootContainer(cmdline_root);
 
-    let cmdline_indicator = CommandLineIndicator::new(shape, buffer, viewport);
-
     let mut base = Itree::new(cmdline_root_node);
-    let cmdline_actual_shape = base.actual_shape();
+    // let cmdline_actual_shape = base.actual_shape();
+
+    let cmdline_indicator_shape =
+      IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
+    let cmdline_indicator = CommandLineIndicator::new(cmdline_indicator_shape, indicator_symbol);
+    let cmdline_indicator_id = cmdline_indicator.id();
+    let cmdline_indicator_node = CommandLineNode::CommandLineIndicator(cmdline_indicator);
+    base.bounded_insert(cmdline_root_id, cmdline_indicator_node);
+
+    let cmdline_content_shape = IRect::new((shape.min().x + 1, shape.min().y), shape.max().into());
 
     let (viewport, cursor_viewport) = {
+      let cmdline_content_actual_shape = geo_rect_as!(cmdline_content_shape, u16);
       let contents = contents.upgrade().unwrap();
       let contents = lock!(contents);
       let viewport = Viewport::view(
         &options,
         contents.command_line_content(),
-        cmdline_actual_shape,
+        &cmdline_content_actual_shape,
         0,
         0,
       );
@@ -93,9 +111,21 @@ impl CommandLine {
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
 
+    let cmdline_content = CommandLineContent::new(
+      cmdline_content_shape,
+      contents.clone(),
+      Arc::downgrade(&viewport),
+    );
+    let cmdline_content_id = cmdline_content.id();
+    let cmdline_content_node = CommandLineNode::CommandLineContent(cmdline_content);
+    base.bounded_insert(cmdline_root_id, cmdline_content_node);
+
     Self {
       base,
       options,
+      indicator_id: cmdline_indicator_id,
+      content_id: cmdline_content_id,
+      cursor_id: None,
       contents,
       viewport,
       cursor_viewport,
@@ -103,7 +133,7 @@ impl CommandLine {
   }
 }
 
-inode_impl!(CommandLine, base);
+inode_itree_impl!(CommandLine, base);
 
 impl Widgetable for CommandLine {
   fn draw(&self, canvas: &mut Canvas) {
