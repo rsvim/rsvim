@@ -52,11 +52,11 @@ impl Window {
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
+    let window_root_actual_shape = window_root.actual_shape();
 
     let mut base = Itree::new(window_root_node);
 
     let (viewport, cursor_viewport) = {
-      let window_root_actual_shape = window_root_node.actual_shape();
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
       let viewport = Viewport::view(opts, buffer.text(), window_root_actual_shape, 0, 0);
