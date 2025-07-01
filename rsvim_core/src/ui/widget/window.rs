@@ -6,6 +6,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
 use crate::ui::widget::Widgetable;
+use crate::ui::widget::command_line::CommandLineNode;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
@@ -37,21 +38,13 @@ widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
   base: Itree<WindowNode>,
-
-  // Local window options.
-  // By default these options will inherit from global options of UI.
   options: WindowLocalOptions,
 
-  // The Window content widget ID.
   content_id: TreeNodeId,
+  cursor_id: Option<TreeNodeId>,
 
-  // Buffer.
   buffer: BufferWk,
-
-  // Viewport.
   viewport: ViewportArc,
-
-  // Cursor viewport.
   cursor_viewport: CursorViewportArc,
 }
 

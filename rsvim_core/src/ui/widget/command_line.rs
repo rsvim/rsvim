@@ -45,13 +45,14 @@ widget_enum_dispatcher!(
 /// The Vim command-line.
 pub struct CommandLine {
   base: Itree<CommandLineNode>,
-
   options: WindowLocalOptions,
+
+  content_id: TreeNodeId,
+  cursor_id: Option<TreeNodeId>,
 
   contents: TextContentsWk,
 
   viewport: ViewportArc,
-
   cursor_viewport: CursorViewportArc,
 }
 
@@ -148,3 +149,20 @@ impl CommandLine {
   }
 }
 // Attributes }
+
+// Cursor {
+impl CommandLine {
+  /// Enable cursor widget in commandline, i.e. when user start command-line mode, the cursor moves
+  /// to the command-line widget and allow receive user ex command or search patterns.
+  ///
+  /// # Returns
+  /// It returns the old cursor node if there's any, otherwise it returns `None`.
+  pub fn insert_cursor(&mut self, cursor: Cursor) -> Option<CommandLineNode> {
+    self.cursor_id = Some(cursor.id());
+    let parent_id = self.content_id;
+    self
+      .base
+      .bounded_insert(parent_id, CommandLineNode::Cursor(cursor))
+  }
+}
+// Cursor }
