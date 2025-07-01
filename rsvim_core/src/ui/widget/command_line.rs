@@ -177,17 +177,9 @@ impl Viewportable for CommandLine {
 
 // Attributes {
 impl CommandLine {
-  /// Get cursor widget ID.
-  ///
-  /// # Returns
-  /// It returns widget node ID if cursor is inside command-line, otherwise returns `None`.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
-  /// Get command-line content widget ID.
-  pub fn content_id(&self) -> TreeNodeId {
-    self.content_id
+  /// Get global text contents.
+  pub fn text_contents(&self) -> TextContentsWk {
+    self.contents.clone()
   }
 
   /// Get command-line content widget.
