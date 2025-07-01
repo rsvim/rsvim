@@ -7,6 +7,7 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
 use crate::ui::widget::Widgetable;
+use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::{inode_enum_dispatcher, widget_enum_dispatcher};
@@ -26,10 +27,11 @@ pub mod root;
 pub enum WindowNode {
   WindowRootContainer(WindowRootContainer),
   WindowContent(WindowContent),
+  Cursor(Cursor),
 }
 
-inode_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent);
-widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent);
+inode_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
+widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
