@@ -14,7 +14,7 @@ use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::{CommandLine, CommandLineIndicatorSymbol};
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::{Window, WindowNode};
+use crate::ui::widget::window::Window;
 
 use crossterm::event::{Event, EventStream};
 use crossterm::{self, queue};
