@@ -1,6 +1,6 @@
 //! Commandline's text content widget.
 
-use crate::buf::BufferWk;
+use crate::content::TextContentsWk;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
@@ -12,21 +12,17 @@ use crate::{inode_impl, lock};
 /// Commandline text content.
 pub struct CommandLineContent {
   base: InodeBase,
-
-  // Buffer.
-  buffer: BufferWk,
-
-  // Viewport.
+  contents: TextContentsWk,
   viewport: ViewportWk,
 }
 
 impl CommandLineContent {
   /// Make window content.
-  pub fn new(shape: IRect, buffer: BufferWk, viewport: ViewportWk) -> Self {
+  pub fn new(shape: IRect, contents: TextContentsWk, viewport: ViewportWk) -> Self {
     let base = InodeBase::new(shape);
     CommandLineContent {
       base,
-      buffer,
+      contents,
       viewport,
     }
   }
@@ -41,10 +37,10 @@ inode_impl!(CommandLineContent, base);
 impl Widgetable for CommandLineContent {
   fn draw(&self, canvas: &mut Canvas) {
     let actual_shape = self.actual_shape();
-    let buffer = self.buffer.upgrade().unwrap();
-    let buffer = lock!(buffer);
+    let contents = self.contents.upgrade().unwrap();
+    let contents = lock!(contents);
     let viewport = self.viewport.upgrade().unwrap();
 
-    viewport.draw(buffer.text(), actual_shape, canvas);
+    viewport.draw(contents.command_line_content(), actual_shape, canvas);
   }
 }
