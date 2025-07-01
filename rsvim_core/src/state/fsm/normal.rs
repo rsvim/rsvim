@@ -91,20 +91,14 @@ impl NormalStateful {
     // Remove cursor from current window
     let current_window = tree.current_window_mut().unwrap();
     debug_assert!(current_window.cursor_id().is_some());
-    let _cursor_id = current_window.cursor_id().unwrap();
-    let cursor_node = current_window.remove_cursor();
-    debug_assert!(cursor_node.is_some());
-    debug_assert!(current_window.cursor_id().is_none());
-    let cursor_node = cursor_node.unwrap();
-    debug_assert!(matches!(cursor_node, WindowNode::Cursor(_)));
-    let cursor = match cursor_node {
+    let cursor = match current_window.remove_cursor().unwrap() {
       WindowNode::Cursor(mut cursor) => {
-        debug_assert_eq!(cursor.id(), _cursor_id);
         cursor.set_style(&CursorStyle::SteadyBar);
         cursor
       }
       _ => unreachable!(),
     };
+    debug_assert!(current_window.cursor_id().is_none());
 
     // Insert to command-line
     debug_assert!(tree.command_line_mut().is_some());

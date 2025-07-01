@@ -50,18 +50,6 @@ impl CommandLineExStateful {
     }
   }
 
-  fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => current_window,
-      _ => unreachable!(),
-    }
-  }
-
   fn _command_line<'a>(&self, tree: &'a mut Tree) -> &'a mut CommandLine {
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
@@ -134,26 +122,18 @@ impl CommandLineExStateful {
 
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
-    let cmdline = self._command_line(&mut tree);
-
-    if cfg!(debug_assertions) {
-      debug_assert!(cmdline.cursor_id().is_some());
-    }
+    let cmdline = tree.command_line_mut().unwrap();
+    debug_assert!(cmdline.cursor_id().is_some());
 
     // Remove from current parent
-    let cursor_node = cmdline.remove_cursor();
-    debug_assert!(cursor_node.is_some());
-    let cursor_node = cursor_node.unwrap();
-    debug_assert!(matches!(cursor_node, CommandLineNode::Cursor(_)));
-    debug_assert!(cmdline.cursor_id().is_none());
-
-    let cursor = match cursor_node {
+    let cursor = match cmdline.remove_cursor().unwrap() {
       CommandLineNode::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBlock);
         cursor
       }
       _ => unreachable!(),
     };
+    debug_assert!(cmdline.cursor_id().is_none());
 
     // Insert to new parent
     let current_window = tree.current_window_mut().unwrap();
@@ -241,7 +221,7 @@ impl CommandLineExStateful {
     let mut contents = lock!(contents);
     let text = contents.command_line_content_mut();
 
-    let cmdline = self._command_line(&mut tree);
+    let cmdline = tree.command_line_mut().unwrap();
     let cmdline_id = cmdline.id();
     let cursor_viewport = cmdline.cursor_viewport();
     let cursor_line_idx = cursor_viewport.line_idx();
