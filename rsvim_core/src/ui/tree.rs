@@ -4,7 +4,6 @@ use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootContainer;
 use crate::ui::widget::window::{
   Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
@@ -25,12 +24,11 @@ pub mod internal;
 pub enum TreeNode {
   RootContainer(RootContainer),
   Window(Window),
-  Cursor(Cursor),
   CommandLine(CommandLine),
 }
 
-inode_enum_dispatcher!(TreeNode, RootContainer, Window, Cursor, CommandLine);
-widget_enum_dispatcher!(TreeNode, RootContainer, Window, Cursor, CommandLine);
+inode_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
+widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 
 #[derive(Debug, Clone)]
 /// The widget tree.
@@ -130,9 +128,6 @@ pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
 
-  // [`Cursor`](crate::ui::widget::cursor::Cursor) node ID.
-  cursor_id: Option<TreeNodeId>,
-
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
   command_line_id: Option<TreeNodeId>,
 
@@ -175,7 +170,6 @@ impl Tree {
     let root_node = TreeNode::RootContainer(root_container);
     Tree {
       base: Itree::new(root_node),
-      cursor_id: None,
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
@@ -234,37 +228,16 @@ impl Tree {
   //   self.base.iter_mut()
   // }
 
-  /// Get current cursor node ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
   /// Get command-line node ID.
   pub fn command_line_id(&self) -> Option<TreeNodeId> {
     self.command_line_id
   }
 
   /// Get current window node ID.
-  /// NOTE: A window is called the current window because it has cursor inside it.
+  /// NOTE: A window is called the current window because it has cursor inside it. But when user is
+  /// in command-line mode, the cursor widget is actually inside the command-line widget, not in
+  /// window. Mean while the **current** window is actually the **previous current** window.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
-    if cfg!(debug_assertions) {
-      if let Some(cursor_id) = self.cursor_id {
-        debug_assert!(self.parent_id(cursor_id).is_some());
-        let parent_id = self.parent_id(cursor_id).unwrap();
-        debug_assert!(self.node(parent_id).is_some());
-        let parent_node = self.node(parent_id).unwrap();
-        match parent_node {
-          TreeNode::Window(window) => {
-            debug_assert!(self.current_window_id.is_some());
-            debug_assert_eq!(self.current_window_id.unwrap(), window.id());
-          }
-          TreeNode::CommandLine(_command_line) => {
-            debug_assert!(self.current_window_id.is_some());
-          }
-          _ => unreachable!(),
-        }
-      }
-    }
     self.current_window_id
   }
 
@@ -277,29 +250,8 @@ impl Tree {
 
 // Insert/Remove {
 impl Tree {
-  // This method handles some special requirements when insert a widget node:
-  //
-  // 1. When insert a cursor widget, it's parent widget must be a window widget.
-  // 2. Maintain the cursor widget ID and window widget IDs when insert.
-  fn insert_guard(&mut self, node: &TreeNode, parent_id: TreeNodeId) {
+  fn insert_guard(&mut self, node: &TreeNode) {
     match node {
-      TreeNode::Cursor(cursor) => {
-        // When insert cursor widget, update `current_window_id`.
-        let parent_node = self.node(parent_id).unwrap();
-        match parent_node {
-          TreeNode::Window(window) => {
-            self.current_window_id = Some(window.id());
-          }
-          TreeNode::CommandLine(command_line) => {
-            if let Some(command_line_id) = self.command_line_id {
-              debug_assert_eq!(command_line.id(), command_line_id);
-            }
-          }
-          _ => unreachable!(),
-        }
-        // When insert cursor widget, update `cursor_id`.
-        self.cursor_id = Some(cursor.id());
-      }
       TreeNode::CommandLine(command_line) => {
         // When insert command-line widget, update `command_line_id`.
         self.command_line_id = Some(command_line.id());
@@ -314,7 +266,7 @@ impl Tree {
 
   /// See [`Itree::insert`].
   pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
-    self.insert_guard(&child_node, parent_id);
+    self.insert_guard(&child_node);
     self.base.insert(parent_id, child_node)
   }
 
@@ -324,7 +276,7 @@ impl Tree {
     parent_id: TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
-    self.insert_guard(&child_node, parent_id);
+    self.insert_guard(&child_node);
     self.base.bounded_insert(parent_id, child_node)
   }
 
