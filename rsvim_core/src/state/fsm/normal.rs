@@ -7,9 +7,9 @@ use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::Window;
+use crate::ui::widget::command_line::CommandLineIndicatorSymbol;
+use crate::ui::widget::window::{Window, WindowNode};
 
-use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
 
@@ -100,53 +100,55 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    debug_assert!(tree.cursor_id().is_some());
-    let cursor_id = tree.cursor_id().unwrap();
-
-    // Remove from current parent
-    debug_assert!(tree.parent_id(cursor_id).is_some());
-    let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
+    // Remove from current window
     debug_assert!(tree.current_window_id().is_some());
-    debug_assert_eq!(tree.current_window_id().unwrap(), cursor_parent_id);
-    debug_assert!(tree.node(cursor_parent_id).is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node(current_window_id).is_some());
     debug_assert!(matches!(
-      tree.node(cursor_parent_id).unwrap(),
+      tree.node(current_window_id).unwrap(),
       TreeNode::Window(_)
     ));
-    let cursor_node = tree.remove(cursor_id);
-    debug_assert!(cursor_node.is_some());
-    let cursor_node = cursor_node.unwrap();
-    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-    debug_assert!(!tree.children_ids(cursor_parent_id).contains(&cursor_id));
-    let cursor_node = match cursor_node {
-      TreeNode::Cursor(mut cursor) => {
-        cursor.set_style(&CursorStyle::SteadyBar);
-        TreeNode::Cursor(cursor)
+    debug_assert!(tree.node_mut(current_window_id).is_some());
+    let current_window_node = tree.node_mut(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+
+    // Removed cursor
+    let cursor = match current_window_node {
+      TreeNode::Window(window) => {
+        debug_assert!(window.cursor_id().is_some());
+        let _cursor_id = window.cursor_id().unwrap();
+        let cursor_node = window.remove_cursor();
+        debug_assert!(cursor_node.is_some());
+        debug_assert!(window.cursor_id().is_none());
+        let cursor_node = cursor_node.unwrap();
+        debug_assert!(matches!(cursor_node, WindowNode::Cursor(_)));
+        match cursor_node {
+          WindowNode::Cursor(mut cursor) => {
+            debug_assert_eq!(cursor.id(), _cursor_id);
+            cursor.set_style(&CursorStyle::SteadyBar);
+            cursor
+          }
+          _ => unreachable!(),
+        }
       }
       _ => unreachable!(),
     };
 
-    // Insert to new parent
+    // Insert to command-line
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
-    debug_assert!(tree.node(cmdline_id).is_some());
-    debug_assert!(matches!(
-      tree.node(cmdline_id).unwrap(),
-      TreeNode::CommandLine(_)
-    ));
-    let _inserted = tree.bounded_insert(cmdline_id, cursor_node);
-    debug_assert!(_inserted.is_none());
-
-    // Initialize command-line contents.
-    let contents = data_access.contents.clone();
-    let mut contents = lock!(contents);
-
-    cursor_ops::cursor_insert(
-      &mut tree,
-      cmdline_id,
-      contents.command_line_content_mut(),
-      ":".to_compact_string(),
-    );
+    debug_assert!(tree.node_mut(cmdline_id).is_some());
+    let cmdline_node = tree.node_mut(cmdline_id).unwrap();
+    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+    match cmdline_node {
+      TreeNode::CommandLine(cmdline) => {
+        let _previous_cursor_node = cmdline.insert_cursor(cursor);
+        debug_assert!(_previous_cursor_node.is_none());
+        cmdline.move_cursor_to(0, 0);
+        cmdline.set_indicator_symbol(CommandLineIndicatorSymbol::Ex);
+      }
+      _ => unreachable!(),
+    }
 
     StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
   }

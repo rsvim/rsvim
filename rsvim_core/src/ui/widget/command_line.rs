@@ -178,6 +178,22 @@ impl CommandLine {
   pub fn cursor_id(&self) -> Option<TreeNodeId> {
     self.cursor_id
   }
+
+  /// Get indicator symbol.
+  pub fn indicator_symbol(&self) -> CommandLineIndicatorSymbol {
+    match self.base.node(self.indicator_id).unwrap() {
+      CommandLineNode::CommandLineIndicator(indicator) => indicator.symbol(),
+      _ => unreachable!(),
+    }
+  }
+
+  /// Set indicator symbol.
+  pub fn set_indicator_symbol(&mut self, indicator_symbol: CommandLineIndicatorSymbol) {
+    match self.base.node_mut(self.indicator_id).unwrap() {
+      CommandLineNode::CommandLineIndicator(indicator) => indicator.set_symbol(indicator_symbol),
+      _ => unreachable!(),
+    }
+  }
 }
 
 // Attributes {
