@@ -162,7 +162,6 @@ impl NormalStateful {
     let mut tree = lock!(tree);
 
     let current_window = tree.current_window_mut().unwrap();
-    debug_assert!(current_window.cursor_mut().is_some());
     let cursor = current_window.cursor_mut().unwrap();
     cursor.set_style(&CursorStyle::SteadyBar);
 
