@@ -256,7 +256,10 @@ impl Tree {
       Some(window_node) => {
         debug_assert!(matches!(window_node, TreeNode::Window(_)));
         match window_node {
-          TreeNode::Window(w) => Some(w),
+          TreeNode::Window(w) => {
+            debug_assert_eq!(w.id(), window_id);
+            Some(w)
+          }
           _ => unreachable!(), // Other variants not allowed.
         }
       }
@@ -270,7 +273,10 @@ impl Tree {
       Some(window_node) => {
         debug_assert!(matches!(window_node, TreeNode::Window(_)));
         match window_node {
-          TreeNode::Window(w) => Some(w),
+          TreeNode::Window(w) => {
+            debug_assert_eq!(w.id(), window_id);
+            Some(w)
+          }
           _ => unreachable!(), // Other variants not allowed.
         }
       }
@@ -302,7 +308,10 @@ impl Tree {
         let cmdline_node = self.node(cmdline_id).unwrap();
         debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
         match cmdline_node {
-          TreeNode::CommandLine(w) => Some(w),
+          TreeNode::CommandLine(w) => {
+            debug_assert_eq!(w.id(), cmdline_id);
+            Some(w)
+          }
           _ => unreachable!(),
         }
       }
@@ -318,7 +327,10 @@ impl Tree {
         let cmdline_node = self.node_mut(cmdline_id).unwrap();
         debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
         match cmdline_node {
-          TreeNode::CommandLine(w) => Some(w),
+          TreeNode::CommandLine(w) => {
+            debug_assert_eq!(w.id(), cmdline_id);
+            Some(w)
+          }
           _ => unreachable!(),
         }
       }
