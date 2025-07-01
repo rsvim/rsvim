@@ -4,7 +4,6 @@
 
 use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
-use crate::lock;
 use crate::prelude::*;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLine;

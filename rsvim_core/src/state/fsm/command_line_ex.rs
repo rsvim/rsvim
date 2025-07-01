@@ -2,7 +2,7 @@
 
 use crate::js::msg::{EventLoopToJsRuntimeMessage, ExCommandReq};
 use crate::js::next_future_id;
-use crate::lock;
+use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
@@ -286,7 +286,6 @@ mod tests_util {
   use crate::buf::text::Text;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::{TextContents, TextContentsArc};
-  use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};

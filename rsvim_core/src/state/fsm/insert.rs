@@ -1,6 +1,6 @@
 //! The insert mode.
 
-use crate::lock;
+use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
@@ -177,7 +177,6 @@ mod tests_util {
   use crate::buf::opt::BufferLocalOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::{TextContents, TextContentsArc};
-  use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -482,7 +481,6 @@ mod tests_cursor_move {
   use super::tests_util::*;
   use super::*;
 
-  use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -1123,7 +1121,6 @@ mod tests_insert_text {
   use super::tests_util::*;
   use super::*;
 
-  use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -2859,7 +2856,6 @@ mod tests_delete_text {
   use super::tests_util::*;
   use super::*;
 
-  use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};

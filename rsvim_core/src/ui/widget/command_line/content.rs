@@ -9,7 +9,7 @@ use crate::ui::widget::Widgetable;
 use crate::{inode_impl, lock};
 
 #[derive(Debug, Clone)]
-/// The widget contains text contents for Vim window.
+/// Commandline text content.
 pub struct CommandLineContent {
   base: InodeBase,
 

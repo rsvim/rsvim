@@ -6,8 +6,6 @@ use crate::buf::opt::BufferLocalOptions;
 use crate::buf::text::Text;
 use crate::buf::{Buffer, BufferArc, BuffersManager, BuffersManagerArc};
 use crate::prelude::*;
-//use crate::envar;
-use crate::lock;
 
 use ropey::{Rope, RopeBuilder, RopeSlice};
 use std::collections::BTreeSet;

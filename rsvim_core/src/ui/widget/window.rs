@@ -1,7 +1,6 @@
-//! Vim window.
+//! Window.
 
 use crate::buf::BufferWk;
-use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;

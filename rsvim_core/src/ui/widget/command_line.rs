@@ -1,6 +1,4 @@
-//! Vim command-line widget.
-
-#![allow(dead_code)]
+//! Command-line widget.
 
 use crate::content::TextContentsWk;
 use crate::prelude::*;
@@ -8,13 +6,45 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
 use crate::ui::widget::Widgetable;
+use crate::ui::widget::command_line::content::CommandLineContent;
+use crate::ui::widget::command_line::indicator::CommandLineIndicator;
+use crate::ui::widget::command_line::root::CommandLineRootContainer;
+use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::opt::{WindowLocalOptions, WindowLocalOptionsBuilder};
-use crate::{inode_impl, lock};
+use crate::{inode_enum_dispatcher, inode_impl, widget_enum_dispatcher};
+
+pub mod content;
+pub mod indicator;
+pub mod root;
+
+#[derive(Debug, Clone)]
+/// The value holder for each window widget.
+pub enum CommandLineNode {
+  CommandLineRootContainer(CommandLineRootContainer),
+  CommandLineIndicator(CommandLineIndicator),
+  CommandLineContent(CommandLineContent),
+  Cursor(Cursor),
+}
+
+inode_enum_dispatcher!(
+  CommandLineNode,
+  CommandLineRootContainer,
+  CommandLineIndicator,
+  CommandLineContent,
+  Cursor
+);
+widget_enum_dispatcher!(
+  CommandLineNode,
+  CommandLineRootContainer,
+  CommandLineIndicator,
+  CommandLineContent,
+  Cursor
+);
 
 #[derive(Debug, Clone)]
 /// The Vim command-line.
 pub struct CommandLine {
-  base: InodeBase,
+  base: Itree<CommandLineNode>,
 
   options: WindowLocalOptions,
 
