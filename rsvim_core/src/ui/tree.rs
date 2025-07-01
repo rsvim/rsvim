@@ -285,10 +285,6 @@ impl Tree {
   // 1. When insert a cursor widget, it's parent widget must be a window widget.
   // 2. Maintain the cursor widget ID and window widget IDs when remove.
   fn remove_guard(&mut self, id: TreeNodeId) {
-    // If the removed ID is cursor ID, remove it.
-    if self.cursor_id == Some(id) {
-      self.cursor_id = None;
-    }
     if self.command_line_id == Some(id) {
       self.command_line_id = None;
     }
