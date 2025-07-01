@@ -82,7 +82,6 @@ impl CommandLine {
     let cmdline_root_node = CommandLineNode::CommandLineRootContainer(cmdline_root);
 
     let mut base = Itree::new(cmdline_root_node);
-    // let cmdline_actual_shape = base.actual_shape();
 
     let cmdline_indicator_shape =
       IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
