@@ -3,7 +3,6 @@
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
-use crate::ui::tree::TreeNodeId;
 use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
@@ -697,19 +696,6 @@ impl Viewport {
     draw::draw(self, text, actual_shape, canvas);
   }
 }
-
-// pub trait Viewportable {
-//   fn options(&self) -> &WindowLocalOptions;
-//   fn set_options(&mut self, options: &WindowLocalOptions);
-//
-//   fn viewport(&self) -> ViewportArc;
-//   fn set_viewport(&mut self, viewport: ViewportArc);
-//
-//   fn cursor_viewport(&self) -> CursorViewportArc;
-//   fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc);
-//
-//   fn cursor_id(&self) -> Option<TreeNodeId>;
-// }
 
 // spellchecker:off
 #[allow(unused_imports)]

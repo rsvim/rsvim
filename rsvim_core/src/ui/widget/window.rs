@@ -11,7 +11,6 @@ use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 
-use crossterm::cursor;
 // Re-export
 pub use opt::*;
 
