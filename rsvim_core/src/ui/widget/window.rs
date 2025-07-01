@@ -11,6 +11,7 @@ use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
 use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 
+use crossterm::cursor;
 // Re-export
 pub use opt::*;
 
@@ -147,6 +148,40 @@ impl Window {
     match self.base.node(self.content_id) {
       Some(WindowNode::WindowContent(w)) => w,
       _ => unreachable!(),
+    }
+  }
+
+  pub fn cursor(&self) -> Option<&Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.base.node(cursor_id).is_some());
+        debug_assert!(matches!(
+          self.base.node(cursor_id).unwrap(),
+          WindowNode::Cursor(_)
+        ));
+        match self.base.node(cursor_id).unwrap() {
+          WindowNode::Cursor(c) => Some(c),
+          _ => None,
+        }
+      }
+      None => None,
+    }
+  }
+
+  pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.base.node_mut(cursor_id).is_some());
+        debug_assert!(matches!(
+          self.base.node_mut(cursor_id).unwrap(),
+          WindowNode::Cursor(_)
+        ));
+        match self.base.node_mut(cursor_id).unwrap() {
+          WindowNode::Cursor(c) => Some(c),
+          _ => None,
+        }
+      }
+      None => None,
     }
   }
 }

@@ -100,36 +100,20 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    // Remove from current window
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.node(current_window_id).is_some());
-    debug_assert!(matches!(
-      tree.node(current_window_id).unwrap(),
-      TreeNode::Window(_)
-    ));
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-
-    // Removed cursor
-    let cursor = match current_window_node {
-      TreeNode::Window(window) => {
-        debug_assert!(window.cursor_id().is_some());
-        let _cursor_id = window.cursor_id().unwrap();
-        let cursor_node = window.remove_cursor();
-        debug_assert!(cursor_node.is_some());
-        debug_assert!(window.cursor_id().is_none());
-        let cursor_node = cursor_node.unwrap();
-        debug_assert!(matches!(cursor_node, WindowNode::Cursor(_)));
-        match cursor_node {
-          WindowNode::Cursor(mut cursor) => {
-            debug_assert_eq!(cursor.id(), _cursor_id);
-            cursor.set_style(&CursorStyle::SteadyBar);
-            cursor
-          }
-          _ => unreachable!(),
-        }
+    // Remove cursor from current window
+    let current_window = self._current_window(&mut tree);
+    debug_assert!(current_window.cursor_id().is_some());
+    let _cursor_id = current_window.cursor_id().unwrap();
+    let cursor_node = current_window.remove_cursor();
+    debug_assert!(cursor_node.is_some());
+    debug_assert!(current_window.cursor_id().is_none());
+    let cursor_node = cursor_node.unwrap();
+    debug_assert!(matches!(cursor_node, WindowNode::Cursor(_)));
+    let cursor = match cursor_node {
+      WindowNode::Cursor(mut cursor) => {
+        debug_assert_eq!(cursor.id(), _cursor_id);
+        cursor.set_style(&CursorStyle::SteadyBar);
+        cursor
       }
       _ => unreachable!(),
     };
@@ -176,14 +160,14 @@ impl NormalStateful {
   fn goto_insert_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let cursor_id = tree.cursor_id().unwrap();
-    debug_assert!(tree.node_mut(cursor_id).is_some());
-    let cursor_node = tree.node_mut(cursor_id).unwrap();
-    debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-    match cursor_node {
-      TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
-      _ => unreachable!(),
-    }
+
+    let current_window = self._current_window(&mut tree);
+    debug_assert!(current_window.cursor_id().is_some());
+    let _cursor_id = current_window.cursor_id().unwrap();
+    debug_assert!(current_window.cursor_mut().is_some());
+    let cursor = current_window.cursor_mut().unwrap();
+    debug_assert_eq!(_cursor_id, cursor.id());
+    cursor.set_style(&CursorStyle::SteadyBar);
 
     StatefulValue::InsertMode(super::InsertStateful::default())
   }
@@ -439,8 +423,8 @@ mod tests_util {
       }
     }
 
-    debug_assert!(cmdline_node.cursor_id().is_some());
-    cmdline_node.cursor_viewport()
+    debug_assert!(cmdline.cursor_id().is_some());
+    cmdline.cursor_viewport()
   }
 
   pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
