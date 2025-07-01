@@ -119,20 +119,14 @@ impl NormalStateful {
     };
 
     // Insert to command-line
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
-    debug_assert!(tree.node_mut(cmdline_id).is_some());
-    let cmdline_node = tree.node_mut(cmdline_id).unwrap();
-    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
-    match cmdline_node {
-      TreeNode::CommandLine(cmdline) => {
-        let _previous_cursor = cmdline.insert_cursor(cursor);
-        debug_assert!(_previous_cursor.is_none());
-        cmdline.move_cursor_to(0, 0);
-        cmdline.set_indicator_symbol(CommandLineIndicatorSymbol::Ex);
-      }
-      _ => unreachable!(),
-    }
+    debug_assert!(tree.command_line_mut().is_some());
+    let cmdline = tree.command_line_mut().unwrap();
+    let _previous_cursor = cmdline.insert_cursor(cursor);
+    debug_assert!(_previous_cursor.is_none());
+    cmdline.move_cursor_to(0, 0);
+    cmdline
+      .indicator_mut()
+      .set_symbol(CommandLineIndicatorSymbol::Ex);
 
     StatefulValue::CommandLineExMode(super::CommandLineExStateful::default())
   }
