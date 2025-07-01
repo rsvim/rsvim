@@ -6,7 +6,6 @@ use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
 use crate::ui::widget::Widgetable;
-use crate::ui::widget::command_line::CommandLineNode;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
