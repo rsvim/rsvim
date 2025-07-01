@@ -168,7 +168,7 @@ impl NormalStateful {
   fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = self._current_window(&mut tree);
+    let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
