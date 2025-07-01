@@ -222,7 +222,10 @@ impl CommandLine {
     ));
 
     match self.base.node(self.content_id).unwrap() {
-      CommandLineNode::CommandLineContent(w) => w,
+      CommandLineNode::CommandLineContent(w) => {
+        debug_assert_eq!(w.id(), self.content_id);
+        w
+      }
       _ => unreachable!(),
     }
   }
@@ -236,7 +239,10 @@ impl CommandLine {
     ));
 
     match self.base.node_mut(self.content_id).unwrap() {
-      CommandLineNode::CommandLineContent(w) => w,
+      CommandLineNode::CommandLineContent(w) => {
+        debug_assert_eq!(w.id(), self.content_id);
+        w
+      }
       _ => unreachable!(),
     }
   }
@@ -250,7 +256,10 @@ impl CommandLine {
     ));
 
     match self.base.node(self.indicator_id).unwrap() {
-      CommandLineNode::CommandLineIndicator(w) => w,
+      CommandLineNode::CommandLineIndicator(w) => {
+        debug_assert_eq!(w.id(), self.indicator_id);
+        w
+      }
       _ => unreachable!(),
     }
   }
@@ -264,7 +273,10 @@ impl CommandLine {
     ));
 
     match self.base.node_mut(self.indicator_id).unwrap() {
-      CommandLineNode::CommandLineIndicator(w) => w,
+      CommandLineNode::CommandLineIndicator(w) => {
+        debug_assert_eq!(w.id(), self.indicator_id);
+        w
+      }
       _ => unreachable!(),
     }
   }
@@ -280,7 +292,10 @@ impl CommandLine {
         ));
 
         match self.base.node(cursor_id).unwrap() {
-          CommandLineNode::Cursor(w) => Some(w),
+          CommandLineNode::Cursor(w) => {
+            debug_assert_eq!(w.id(), cursor_id);
+            Some(w)
+          }
           _ => unreachable!(),
         }
       }
@@ -299,7 +314,10 @@ impl CommandLine {
         ));
 
         match self.base.node_mut(cursor_id).unwrap() {
-          CommandLineNode::Cursor(w) => Some(w),
+          CommandLineNode::Cursor(w) => {
+            debug_assert_eq!(w.id(), cursor_id);
+            Some(w)
+          }
           _ => unreachable!(),
         }
       }

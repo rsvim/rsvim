@@ -101,7 +101,7 @@ impl NormalStateful {
     let mut tree = lock!(tree);
 
     // Remove cursor from current window
-    let current_window = tree.current_window().unwrap();
+    let current_window = tree.current_window_mut().unwrap();
     debug_assert!(current_window.cursor_id().is_some());
     let _cursor_id = current_window.cursor_id().unwrap();
     let cursor_node = current_window.remove_cursor();
@@ -161,12 +161,9 @@ impl NormalStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    let current_window = self._current_window(&mut tree);
-    debug_assert!(current_window.cursor_id().is_some());
-    let _cursor_id = current_window.cursor_id().unwrap();
+    let current_window = tree.current_window_mut().unwrap();
     debug_assert!(current_window.cursor_mut().is_some());
     let cursor = current_window.cursor_mut().unwrap();
-    debug_assert_eq!(_cursor_id, cursor.id());
     cursor.set_style(&CursorStyle::SteadyBar);
 
     StatefulValue::InsertMode(super::InsertStateful::default())

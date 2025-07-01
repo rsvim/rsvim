@@ -156,7 +156,10 @@ impl Window {
       WindowNode::WindowContent(_)
     ));
     match self.base.node(self.content_id).unwrap() {
-      WindowNode::WindowContent(w) => w,
+      WindowNode::WindowContent(w) => {
+        debug_assert_eq!(w.id(), self.content_id);
+        w
+      }
       _ => unreachable!(),
     }
   }
@@ -169,7 +172,10 @@ impl Window {
       WindowNode::WindowContent(_)
     ));
     match self.base.node_mut(self.content_id).unwrap() {
-      WindowNode::WindowContent(w) => w,
+      WindowNode::WindowContent(w) => {
+        debug_assert_eq!(w.id(), self.content_id);
+        w
+      }
       _ => unreachable!(),
     }
   }
@@ -184,7 +190,10 @@ impl Window {
           WindowNode::Cursor(_)
         ));
         match self.base.node(cursor_id).unwrap() {
-          WindowNode::Cursor(c) => Some(c),
+          WindowNode::Cursor(c) => {
+            debug_assert_eq!(c.id(), cursor_id);
+            Some(c)
+          }
           _ => None,
         }
       }
@@ -201,7 +210,10 @@ impl Window {
           WindowNode::Cursor(_)
         ));
         match self.base.node_mut(cursor_id).unwrap() {
-          WindowNode::Cursor(c) => Some(c),
+          WindowNode::Cursor(c) => {
+            debug_assert_eq!(c.id(), cursor_id);
+            Some(c)
+          }
           _ => None,
         }
       }
