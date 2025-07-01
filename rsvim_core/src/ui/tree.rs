@@ -136,12 +136,12 @@ pub struct Tree {
 
   // The *current* window node ID.
   //
-  // The term *current* means the UI widget that is focused, i.e. it contains the cursor.
-  // But when user inputs commands in cmdline UI widget, the cursor will move to the cmdline
-  // widget, which is not a window widget. And in meanwhile, we still need to know the **current**
-  // window and the **cursor** position, as if the cursor is still inside the window.
-  // Technically speaking, this field is **saved_current_window_id**, i.e. when cursor moves to the
-  // cmdline widget, this field still saves the previous *current* window id.
+  // The **current** window means user is focused on the window widget, i.e. it contains the
+  // cursor, since the cursor is like the mouse on the screen.
+  //
+  // But when user inputs commands in cmdline widget, the cursor widget will move to the cmdline
+  // widget. But we still keeps the **current window**, this field is actually the **previous**
+  // current window.
   current_window_id: Option<TreeNodeId>,
 
   // Global options for windows.
@@ -280,10 +280,6 @@ impl Tree {
     self.base.bounded_insert(parent_id, child_node)
   }
 
-  // This method handles some special requirements when remove a widget node:
-  //
-  // 1. When insert a cursor widget, it's parent widget must be a window widget.
-  // 2. Maintain the cursor widget ID and window widget IDs when remove.
   fn remove_guard(&mut self, id: TreeNodeId) {
     if self.command_line_id == Some(id) {
       self.command_line_id = None;
