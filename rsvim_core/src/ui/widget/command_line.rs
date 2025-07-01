@@ -190,9 +190,12 @@ impl CommandLine {
     self.content_id
   }
 
-  /// Get global text contents.
-  pub fn text_contents(&self) -> TextContentsWk {
-    self.contents.clone()
+  /// Get command-line content widget.
+  pub fn command_line_content(&self) -> &CommandLineContent {
+    match self.base.node(self.content_id) {
+      Some(CommandLineNode::CommandLineContent(w)) => w,
+      _ => unreachable!(),
+    }
   }
 }
 // Attributes }
