@@ -52,12 +52,6 @@ impl NormalStateful {
   fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
     debug_assert!(tree.current_window_id().is_some());
     let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.cursor_id().is_some());
-    debug_assert!(tree.parent_id(tree.cursor_id().unwrap()).is_some());
-    debug_assert_eq!(
-      current_window_id,
-      tree.parent_id(tree.cursor_id().unwrap()).unwrap()
-    );
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
@@ -163,28 +157,6 @@ impl NormalStateful {
     &self,
     _data_access: &StatefulDataAccess,
   ) -> StatefulValue {
-    // let tree = data_access.tree.clone();
-    // let mut tree = lock!(tree);
-    //
-    // debug_assert!(tree.current_window_id().is_some());
-    // let current_window_id = tree.current_window_id().unwrap();
-    // debug_assert!(tree.node_mut(current_window_id).is_some());
-    // let current_window_node = tree.node_mut(current_window_id).unwrap();
-    // debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    // match current_window_node {
-    //   TreeNode::Window(_current_window) => {}
-    //   _ => unreachable!(),
-    // }
-    //
-    // let cursor_id = tree.cursor_id().unwrap();
-    // debug_assert!(tree.node_mut(cursor_id).is_some());
-    // let cursor_node = tree.node_mut(cursor_id).unwrap();
-    // debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-    // match cursor_node {
-    //   TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
-    //   _ => unreachable!(),
-    // }
-
     StatefulValue::CommandLineSearchForwardMode(super::CommandLineSearchForwardStateful::default())
   }
 }
@@ -194,28 +166,6 @@ impl NormalStateful {
     &self,
     _data_access: &StatefulDataAccess,
   ) -> StatefulValue {
-    // let tree = data_access.tree.clone();
-    // let mut tree = lock!(tree);
-    //
-    // debug_assert!(tree.current_window_id().is_some());
-    // let current_window_id = tree.current_window_id().unwrap();
-    // debug_assert!(tree.node_mut(current_window_id).is_some());
-    // let current_window_node = tree.node_mut(current_window_id).unwrap();
-    // debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    // match current_window_node {
-    //   TreeNode::Window(_current_window) => {}
-    //   _ => unreachable!(),
-    // }
-    //
-    // let cursor_id = tree.cursor_id().unwrap();
-    // debug_assert!(tree.node_mut(cursor_id).is_some());
-    // let cursor_node = tree.node_mut(cursor_id).unwrap();
-    // debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-    // match cursor_node {
-    //   TreeNode::Cursor(cursor) => cursor.set_style(&CursorStyle::SteadyBar),
-    //   _ => unreachable!(),
-    // }
-
     StatefulValue::CommandLineSearchBackwardMode(super::CommandLineSearchBackwardStateful::default())
   }
 }

@@ -128,6 +128,11 @@ impl Viewportable for Window {
   fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
     self.cursor_viewport = cursor_viewport;
   }
+
+  /// Get cursor ID.
+  fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
 }
 
 // Viewport {
@@ -149,11 +154,6 @@ impl Window {
 
 // Cursor {
 impl Window {
-  /// Get cursor ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
   /// Enable/insert cursor widget in window, i.e. when user moves cursor to a window, the window
   /// content widget contains this cursor, and allow user moving cursor (or inserting text at
   /// cursor).

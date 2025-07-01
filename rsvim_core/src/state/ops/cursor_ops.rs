@@ -406,9 +406,10 @@ pub fn cursor_move(
 ) {
   debug_assert!(tree.node_mut(id).is_some());
   let cursor_parent_node = tree.node_mut(id).unwrap();
+
   let vnode_actual_shape = match cursor_parent_node {
-    TreeNode::Window(window) => *window.actual_shape(),
-    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
+    TreeNode::Window(window) => *window.window_content().actual_shape(),
+    TreeNode::CommandLine(cmdline) => *cmdline.command_line_content().actual_shape(),
     _ => unreachable!(),
   };
   let vnode: &mut dyn Viewportable = match cursor_parent_node {
@@ -485,7 +486,7 @@ pub fn cursor_move(
 
     if let Some(new_cursor_viewport) = new_cursor_viewport {
       vnode.set_cursor_viewport(new_cursor_viewport.clone());
-      let cursor_id = tree.cursor_id().unwrap();
+      let cursor_id = vnode.cursor_id().unwrap();
       tree.bounded_move_to(
         cursor_id,
         new_cursor_viewport.column_idx() as isize,

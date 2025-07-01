@@ -3,6 +3,7 @@
 use crate::buf::text::Text;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
+use crate::ui::tree::TreeNodeId;
 use crate::ui::widget::window::WindowLocalOptions;
 
 use litemap::LiteMap;
@@ -706,6 +707,8 @@ pub trait Viewportable {
 
   fn cursor_viewport(&self) -> CursorViewportArc;
   fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc);
+
+  fn cursor_id(&self) -> Option<TreeNodeId>;
 }
 
 // spellchecker:off

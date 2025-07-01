@@ -173,6 +173,11 @@ impl Viewportable for CommandLine {
   fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
     self.cursor_viewport = cursor_viewport;
   }
+
+  /// Get cursor ID.
+  fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
 }
 
 // Attributes {
@@ -194,11 +199,6 @@ impl CommandLine {
 
 // Cursor {
 impl CommandLine {
-  /// Get cursor ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
   /// Enable/insert cursor widget in commandline, i.e. when user start command-line mode, the
   /// cursor moves to the command-line widget and allow receive user ex command or search patterns.
   ///
