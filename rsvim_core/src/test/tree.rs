@@ -6,7 +6,7 @@ use crate::buf::BuffersManagerArc;
 use crate::content::TextContentsArc;
 use crate::prelude::*;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::command_line::{CommandLine, CommandLineIndicatorSymbol};
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::{Window, WindowLocalOptions};
 
@@ -27,11 +27,13 @@ pub fn make_tree_with_buffers(
   let mut tree_mut = lock!(tree);
   tree_mut.set_global_local_options(&window_local_opts);
   let tree_root_id = tree_mut.root_id();
+
+  // Window
   let window_shape = IRect::new(
     (0, 0),
     (canvas_size.width() as isize, canvas_size.height() as isize),
   );
-  let window = {
+  let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
       tree_mut.global_local_options(),
@@ -39,15 +41,14 @@ pub fn make_tree_with_buffers(
       Arc::downgrade(buf),
     )
   };
-  let window_id = window.id();
-  let window_node = TreeNode::Window(window);
-  tree_mut.bounded_insert(tree_root_id, window_node);
+  let _window_id = window.id();
 
-  // Initialize cursor.
+  // Cursor.
   let cursor_shape = IRect::new((0, 0), (1, 1));
   let cursor = Cursor::default(cursor_shape);
-  let cursor_node = TreeNode::Cursor(cursor);
-  tree_mut.bounded_insert(window_id, cursor_node);
+  window.insert_cursor(cursor);
+
+  tree_mut.bounded_insert(tree_root_id, TreeNode::Window(window));
 
   tree.clone()
 }
@@ -77,7 +78,7 @@ pub fn make_tree_with_buffers_cmdline(
       canvas_size.height().saturating_sub(1) as isize,
     ),
   );
-  let window = {
+  let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
       tree_mut.global_local_options(),
@@ -85,25 +86,28 @@ pub fn make_tree_with_buffers_cmdline(
       Arc::downgrade(buf),
     )
   };
-  let window_id = window.id();
-  let window_node = TreeNode::Window(window);
-  tree_mut.bounded_insert(tree_root_id, window_node);
+  let _window_id = window.id();
+
+  // cursor
+  let cursor_shape = IRect::new((0, 0), (1, 1));
+  let cursor = Cursor::default(cursor_shape);
+  window.insert_cursor(cursor);
+
+  tree_mut.bounded_insert(tree_root_id, TreeNode::Window(window));
 
   // command-line
   let cmdline_shape = IRect::new(
     (0, canvas_size.height().saturating_sub(1) as isize),
     (canvas_size.width() as isize, canvas_size.height() as isize),
   );
-  let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&text_contents));
+  let cmdline = CommandLine::new(
+    cmdline_shape,
+    Arc::downgrade(&text_contents),
+    CommandLineIndicatorSymbol::Empty,
+  );
   let _cmdline_id = cmdline.id();
-  let cmdline = TreeNode::CommandLine(cmdline);
-  tree_mut.bounded_insert(tree_root_id, cmdline);
 
-  // cursor
-  let cursor_shape = IRect::new((0, 0), (1, 1));
-  let cursor = Cursor::default(cursor_shape);
-  let cursor_node = TreeNode::Cursor(cursor);
-  tree_mut.bounded_insert(window_id, cursor_node);
+  tree_mut.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
   tree.clone()
 }
