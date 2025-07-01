@@ -7,8 +7,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::{CommandLine, CommandLineNode};
-use crate::ui::widget::window::Window;
+use crate::ui::widget::command_line::CommandLineNode;
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};

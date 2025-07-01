@@ -8,7 +8,7 @@ use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
 use crate::ui::widget::command_line::CommandLineIndicatorSymbol;
-use crate::ui::widget::window::{Window, WindowNode};
+use crate::ui::widget::window::WindowNode;
 
 use crossterm::event::{Event, KeyCode, KeyEventKind};
 use tracing::trace;
