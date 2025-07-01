@@ -51,12 +51,6 @@ impl InsertStateful {
   fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
     debug_assert!(tree.current_window_id().is_some());
     let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.cursor_id().is_some());
-    debug_assert!(tree.parent_id(tree.cursor_id().unwrap()).is_some());
-    debug_assert_eq!(
-      current_window_id,
-      tree.parent_id(tree.cursor_id().unwrap()).unwrap()
-    );
     debug_assert!(tree.node_mut(current_window_id).is_some());
     let current_window_node = tree.node_mut(current_window_id).unwrap();
     debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
@@ -140,14 +134,13 @@ impl InsertStateful {
     let op = Operation::CursorMoveBy((0, 0));
     cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, false);
 
-    debug_assert!(tree.cursor_id().is_some());
-    let cursor_id = tree.cursor_id().unwrap();
-    debug_assert!(tree.node_mut(cursor_id).is_some());
-    if let Some(TreeNode::Cursor(cursor)) = tree.node_mut(cursor_id) {
-      cursor.set_style(&CursorStyle::SteadyBlock);
-    } else {
-      unreachable!()
-    }
+    let current_window = self._current_window(&mut tree);
+    debug_assert!(current_window.cursor_id().is_some());
+    let _cursor_id = current_window.cursor_id().unwrap();
+    debug_assert!(current_window.cursor_mut().is_some());
+    let cursor = current_window.cursor_mut().unwrap();
+    debug_assert_eq!(_cursor_id, cursor.id());
+    cursor.set_style(&CursorStyle::SteadyBlock);
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }
