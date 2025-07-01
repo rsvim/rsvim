@@ -47,6 +47,7 @@ pub struct CommandLine {
   base: Itree<CommandLineNode>,
   options: WindowLocalOptions,
 
+  indicator_id: TreeNodeId,
   content_id: TreeNodeId,
   cursor_id: Option<TreeNodeId>,
 
@@ -66,7 +67,13 @@ impl CommandLine {
       .build()
       .unwrap();
 
-    let base = InodeBase::new(shape);
+    let cmdline_root = CommandLineRootContainer::new(shape);
+    let cmdline_root_id = cmdline_root.id();
+    let cmdline_root_node = CommandLineNode::CommandLineRootContainer(cmdline_root);
+
+    let cmdline_indicator = CommandLineIndicator::new(shape, buffer, viewport);
+
+    let mut base = Itree::new(cmdline_root_node);
     let cmdline_actual_shape = base.actual_shape();
 
     let (viewport, cursor_viewport) = {
