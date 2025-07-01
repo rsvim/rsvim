@@ -620,7 +620,7 @@ mod tests_get_operation {
   use crate::buf::opt::BufferLocalOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::prelude::*;
-  use crate::state::{State, StateArc};
+  use crate::state::{self, State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
   use crate::test::log::init as test_log_init;
   use crate::test::tree::make_tree_with_buffers;
@@ -629,7 +629,6 @@ mod tests_get_operation {
     CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
   use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
-  use crate::{lock, state};
 
   use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
   use std::collections::BTreeMap;
