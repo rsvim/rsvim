@@ -147,6 +147,70 @@ impl Window {
 }
 // Viewport }
 
+// Cursor {
+impl Window {
+  /// Enable/insert cursor widget in window, i.e. when user moves cursor to a window, the window
+  /// content widget contains this cursor, and allow user moving cursor (or inserting text at
+  /// cursor).
+  ///
+  /// # Returns
+  /// It returns the old cursor widget if there's any, otherwise it returns `None`.
+  pub fn insert_cursor(&mut self, cursor: Cursor) -> Option<WindowNode> {
+    self.cursor_id = Some(cursor.id());
+    self
+      .base
+      .bounded_insert(self.content_id, WindowNode::Cursor(cursor))
+  }
+
+  /// Disable/remove cursor widget from window, i.e. when user cursor leaves window, the window
+  /// content widget doesn't contain this cursor any longer.
+  ///
+  /// # Returns
+  /// It returns the removed cursor widget if exists, otherwise it returns `None`.
+  pub fn remove_cursor(&mut self) -> Option<CommandLineNode> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.base.node(cursor_id).is_some());
+        debug_assert!(self.base.parent_id(cursor_id).is_some());
+        debug_assert_eq!(self.base.parent_id(cursor_id).unwrap(), self.content_id);
+        self.cursor_id = None;
+        let cursor_node = self.base.remove(cursor_id);
+        debug_assert!(cursor_node.is_some());
+        debug_assert!(matches!(
+          cursor_node.as_ref().unwrap(),
+          CommandLineNode::Cursor(_)
+        ));
+        cursor_node
+      }
+      None => {
+        debug_assert!(self.cursor_id.is_none());
+        debug_assert!(self.base.node(self.content_id).is_some());
+        debug_assert!(self.base.children_ids(self.content_id).is_empty());
+        None
+      }
+    }
+  }
+
+  /// Bounded move cursor by x(columns) and y(rows).
+  ///
+  /// # Panics
+  /// It panics if cursor not exist.
+  pub fn move_cursor_by(&mut self, x: isize, y: isize) -> Option<IRect> {
+    let cursor_id = self.cursor_id.unwrap();
+    self.base.bounded_move_by(cursor_id, x, y)
+  }
+
+  /// Bounded move cursor to position x(columns) and y(rows).
+  ///
+  /// # Panics
+  /// It panics if cursor not exist.
+  pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
+    let cursor_id = self.cursor_id.unwrap();
+    self.base.bounded_move_to(cursor_id, x, y)
+  }
+}
+// Cursor }
+
 #[allow(unused_imports)]
 #[cfg(test)]
 mod tests {

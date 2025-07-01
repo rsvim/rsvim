@@ -201,10 +201,9 @@ impl CommandLine {
   /// It returns the old cursor widget if there's any, otherwise it returns `None`.
   pub fn insert_cursor(&mut self, cursor: Cursor) -> Option<CommandLineNode> {
     self.cursor_id = Some(cursor.id());
-    let parent_id = self.content_id;
     self
       .base
-      .bounded_insert(parent_id, CommandLineNode::Cursor(cursor))
+      .bounded_insert(self.content_id, CommandLineNode::Cursor(cursor))
   }
 
   /// Disable/remove cursor widget from commandline, i.e. when user leaves command-line mode, the
@@ -229,7 +228,7 @@ impl CommandLine {
         cursor_node
       }
       None => {
-        debug_assert!(self.cursor_id().is_none());
+        debug_assert!(self.cursor_id.is_none());
         debug_assert!(self.base.node(self.content_id).is_some());
         debug_assert!(self.base.children_ids(self.content_id).is_empty());
         None
