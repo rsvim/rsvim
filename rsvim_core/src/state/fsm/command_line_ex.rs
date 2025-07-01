@@ -7,7 +7,6 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::viewport::Viewportable;
 use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::window::Window;
 
