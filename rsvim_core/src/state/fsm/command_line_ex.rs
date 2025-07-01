@@ -339,7 +339,7 @@ mod tests_util {
     (tree, state, bufs, buf, contents)
   }
 
-  fn _current_window<'a>(tree: &'a Tree) -> &'a Window {
+  fn _current_window(tree: &Tree) -> &Window {
     let current_window_id = tree.current_window_id().unwrap();
     let current_window_node = tree.node(current_window_id).unwrap();
     assert!(matches!(current_window_node, TreeNode::Window(_)));
@@ -349,7 +349,7 @@ mod tests_util {
     }
   }
 
-  fn _cmdline<'a>(tree: &'a Tree) -> &'a CommandLine {
+  fn _cmdline(tree: &Tree) -> &CommandLine {
     let cmdline_id = tree.command_line_id().unwrap();
     let cmdline_node = tree.node(cmdline_id).unwrap();
     assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
