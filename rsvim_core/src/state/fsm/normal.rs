@@ -206,7 +206,7 @@ impl NormalStateful {
 #[cfg(test)]
 use crate::buf::text::Text;
 #[cfg(test)]
-use crate::ui::viewport::{CursorViewport, ViewportSearchDirection, Viewportable};
+use crate::ui::viewport::{CursorViewport, ViewportSearchDirection};
 
 impl NormalStateful {
   #[cfg(test)]
@@ -258,9 +258,7 @@ impl NormalStateful {
 
     if let Some(new_cursor_viewport) = maybe_new_cursor_viewport {
       current_window.set_cursor_viewport(new_cursor_viewport.clone());
-      let cursor_id = tree.cursor_id().unwrap();
-      tree.bounded_move_to(
-        cursor_id,
+      current_window.move_cursor_to(
         new_cursor_viewport.column_idx() as isize,
         new_cursor_viewport.row_idx() as isize,
       );
@@ -383,21 +381,64 @@ mod tests_util {
     }
   }
 
-  pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
+  pub fn get_cursor_viewport_from_current_window(tree: TreeArc) -> CursorViewportArc {
     let tree = lock!(tree);
-    let cursor_id = tree.cursor_id().unwrap();
-    let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
-    let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
-    assert!(matches!(
-      cursor_parent_node,
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
-    ));
-    let vnode: &dyn Viewportable = match cursor_parent_node {
-      TreeNode::Window(window) => window,
+
+    debug_assert!(tree.current_window_id().is_some());
+    let current_window_id = tree.current_window_id().unwrap();
+    debug_assert!(tree.node(current_window_id).is_some());
+    let current_window_node = tree.node(current_window_id).unwrap();
+    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+    let current_window = match current_window_node {
+      TreeNode::Window(current_window) => current_window,
+      _ => unreachable!(),
+    };
+
+    if let Some(cmdline_id) = tree.command_line_id() {
+      debug_assert!(tree.node(cmdline_id).is_some());
+      let cmdline_node = tree.node(cmdline_id).unwrap();
+      debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+      match cmdline_node {
+        TreeNode::CommandLine(cmdline) => {
+          debug_assert!(cmdline.cursor_id().is_none());
+        }
+        _ => unreachable!(),
+      }
+    }
+
+    debug_assert!(current_window.cursor_id().is_some());
+    current_window.cursor_viewport()
+  }
+
+  pub fn get_cursor_viewport_from_cmdline(tree: TreeArc) -> CursorViewportArc {
+    let tree = lock!(tree);
+
+    debug_assert!(tree.command_line_id().is_some());
+    let cmdline_id = tree.command_line_id().unwrap();
+    debug_assert!(tree.node(cmdline_id).is_some());
+    let cmdline_node = tree.node(cmdline_id).unwrap();
+    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+    let cmdline = match cmdline_node {
       TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
     };
-    vnode.cursor_viewport()
+
+    if let Some(current_window_id) = tree.current_window_id() {
+      debug_assert!(tree.node(current_window_id).is_some());
+      let current_window_node = tree.node(current_window_id).unwrap();
+      debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
+      match current_window_node {
+        TreeNode::Window(current_window) => {
+          if let Some(_cursor_id) = current_window.cursor_id() {
+            debug_assert!(current_window.cursor_id().is_none());
+          }
+        }
+        _ => unreachable!(),
+      }
+    }
+
+    debug_assert!(cmdline_node.cursor_id().is_some());
+    cmdline_node.cursor_viewport()
   }
 
   pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
@@ -651,7 +692,7 @@ mod tests_raw_cursor_move_y_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -660,7 +701,7 @@ mod tests_raw_cursor_move_y_by {
     stateful_machine.__test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -693,7 +734,7 @@ mod tests_raw_cursor_move_y_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -702,7 +743,7 @@ mod tests_raw_cursor_move_y_by {
     stateful_machine.__test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -735,7 +776,7 @@ mod tests_raw_cursor_move_y_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -744,14 +785,14 @@ mod tests_raw_cursor_move_y_by {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(3));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual1.line_idx(), 3);
     assert_eq!(actual1.char_idx(), 0);
 
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual2.line_idx(), 2);
     assert_eq!(actual2.char_idx(), 0);
   }
@@ -784,7 +825,7 @@ mod tests_raw_cursor_move_y_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -793,14 +834,14 @@ mod tests_raw_cursor_move_y_by {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual1.line_idx(), 2);
     assert_eq!(actual1.char_idx(), 0);
 
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 0);
   }
@@ -831,7 +872,7 @@ mod tests_raw_cursor_move_y_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -840,7 +881,7 @@ mod tests_raw_cursor_move_y_by {
     stateful_machine.__test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -873,7 +914,7 @@ mod tests_raw_cursor_move_y_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -882,14 +923,14 @@ mod tests_raw_cursor_move_y_by {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveDownBy(2));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual1.line_idx(), 2);
     assert_eq!(actual1.char_idx(), 0);
 
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 0);
   }
@@ -940,7 +981,7 @@ mod tests_raw_cursor_move_x_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -949,7 +990,7 @@ mod tests_raw_cursor_move_x_by {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -988,7 +1029,7 @@ mod tests_raw_cursor_move_x_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -997,7 +1038,7 @@ mod tests_raw_cursor_move_x_by {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 1);
   }
@@ -1037,7 +1078,7 @@ mod tests_raw_cursor_move_x_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -1046,7 +1087,7 @@ mod tests_raw_cursor_move_x_by {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(20));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 12);
   }
@@ -1085,7 +1126,7 @@ mod tests_raw_cursor_move_x_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -1094,14 +1135,14 @@ mod tests_raw_cursor_move_x_by {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 5);
 
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(3));
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual2.line_idx(), 0);
     assert_eq!(actual2.char_idx(), 2);
   }
@@ -1140,7 +1181,7 @@ mod tests_raw_cursor_move_x_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -1149,7 +1190,7 @@ mod tests_raw_cursor_move_x_by {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveRightBy(5));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 5);
 
@@ -1157,7 +1198,7 @@ mod tests_raw_cursor_move_x_by {
       stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveLeftBy(1));
 
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = get_cursor_viewport_from_current_window(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), i);
     }
@@ -1217,7 +1258,7 @@ mod tests_raw_cursor_move_by {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -1227,28 +1268,28 @@ mod tests_raw_cursor_move_by {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveBy((5, 0)));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 5);
 
     // Step-2
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, 1)));
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 5);
 
     // Step-3
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveBy((-3, 0)));
     let tree = data_access.tree.clone();
-    let actual3 = get_cursor_viewport(tree);
+    let actual3 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual3.line_idx(), 1);
     assert_eq!(actual3.char_idx(), 2);
 
     // Step-4
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveBy((0, -1)));
     let tree = data_access.tree.clone();
-    let actual4 = get_cursor_viewport(tree);
+    let actual4 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual4.line_idx(), 0);
     assert_eq!(actual4.char_idx(), 2);
   }
@@ -1288,7 +1329,7 @@ mod tests_raw_cursor_move_by {
     );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -1310,7 +1351,7 @@ mod tests_raw_cursor_move_by {
         stateful.__test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = get_cursor_viewport_from_current_window(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 0);
     }
@@ -1333,7 +1374,7 @@ mod tests_raw_cursor_move_by {
         stateful.__test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = get_cursor_viewport_from_current_window(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 0);
     }
@@ -1373,7 +1414,7 @@ mod tests_raw_cursor_move_by {
     );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -1389,7 +1430,7 @@ mod tests_raw_cursor_move_by {
     stateful.__test_raw_cursor_move(&data_access, command);
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree.clone());
+    let actual1 = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 27);
 
@@ -1405,7 +1446,7 @@ mod tests_raw_cursor_move_by {
     stateful.__test_raw_cursor_move(&data_access, command);
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 18);
   }
@@ -1465,7 +1506,7 @@ mod tests_raw_cursor_move_to {
     );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -1474,28 +1515,28 @@ mod tests_raw_cursor_move_to {
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveTo((5, 0)));
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree);
+    let actual1 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 5);
 
     // Step-2
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveTo((5, 1)));
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 5);
 
     // Step-3
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveTo((2, 1)));
     let tree = data_access.tree.clone();
-    let actual3 = get_cursor_viewport(tree);
+    let actual3 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual3.line_idx(), 1);
     assert_eq!(actual3.char_idx(), 2);
 
     // Step-4
     stateful.__test_raw_cursor_move(&data_access, Operation::CursorMoveTo((2, 0)));
     let tree = data_access.tree.clone();
-    let actual4 = get_cursor_viewport(tree);
+    let actual4 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual4.line_idx(), 0);
     assert_eq!(actual4.char_idx(), 2);
   }
@@ -1535,7 +1576,7 @@ mod tests_raw_cursor_move_to {
     );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -1557,7 +1598,7 @@ mod tests_raw_cursor_move_to {
         stateful.__test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = get_cursor_viewport_from_current_window(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 0);
     }
@@ -1580,7 +1621,7 @@ mod tests_raw_cursor_move_to {
         stateful.__test_raw_cursor_move(&data_access, c.clone());
       }
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree);
+      let actual = get_cursor_viewport_from_current_window(tree);
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 0);
     }
@@ -1621,7 +1662,7 @@ mod tests_raw_cursor_move_to {
     );
 
     let stateful = NormalStateful::default();
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -1640,7 +1681,7 @@ mod tests_raw_cursor_move_to {
     stateful.__test_raw_cursor_move(&data_access, command);
 
     let tree = data_access.tree.clone();
-    let actual1 = get_cursor_viewport(tree.clone());
+    let actual1 = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(actual1.line_idx(), 0);
     assert_eq!(actual1.char_idx(), 27);
 
@@ -1656,7 +1697,7 @@ mod tests_raw_cursor_move_to {
     stateful.__test_raw_cursor_move(&data_access, command);
 
     let tree = data_access.tree.clone();
-    let actual2 = get_cursor_viewport(tree);
+    let actual2 = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual2.line_idx(), 1);
     assert_eq!(actual2.char_idx(), 18);
   }
@@ -1708,7 +1749,7 @@ mod tests_raw_window_scroll_y_by {
     // Before cursor scroll
     {
       let viewport = get_viewport(tree.clone());
-      let cursor_viewport = get_cursor_viewport(tree.clone());
+      let cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(cursor_viewport.line_idx(), 0);
       assert_eq!(cursor_viewport.char_idx(), 0);
 
@@ -2665,7 +2706,7 @@ mod tests_raw_window_scroll_x_by {
     // Before cursor scroll
     {
       let viewport = get_viewport(tree.clone());
-      let cursor_viewport = get_cursor_viewport(tree.clone());
+      let cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(cursor_viewport.line_idx(), 0);
       assert_eq!(cursor_viewport.char_idx(), 0);
 
@@ -4518,7 +4559,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -4527,7 +4568,7 @@ mod tests_cursor_move {
     stateful_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -4560,7 +4601,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -4569,7 +4610,7 @@ mod tests_cursor_move {
     stateful_machine.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
 
     let tree = data_access.tree.clone();
-    let actual = get_cursor_viewport(tree);
+    let actual = get_cursor_viewport_from_current_window(tree);
     assert_eq!(actual.line_idx(), 0);
     assert_eq!(actual.char_idx(), 0);
   }
@@ -4602,7 +4643,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -4614,7 +4655,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
@@ -4657,7 +4698,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
       assert_eq!(actual2.char_idx(), 0);
 
@@ -4724,7 +4765,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -4736,7 +4777,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
@@ -4767,7 +4808,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 5);
 
@@ -4798,7 +4839,7 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 10);
 
@@ -4830,7 +4871,7 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 15);
 
@@ -4861,7 +4902,7 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 20);
 
@@ -4892,7 +4933,7 @@ mod tests_cursor_move {
     // Move-6
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 31);
 
@@ -4917,7 +4958,7 @@ mod tests_cursor_move {
     // Move-7
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 151);
 
@@ -4942,7 +4983,7 @@ mod tests_cursor_move {
     // Move-8
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 93);
 
@@ -4967,7 +5008,7 @@ mod tests_cursor_move {
     // Move-9
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
       assert_eq!(actual2.char_idx(), 93);
 
@@ -5016,7 +5057,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -5028,7 +5069,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
@@ -5062,7 +5103,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 0);
 
@@ -5096,7 +5137,7 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
       assert_eq!(actual2.char_idx(), 0);
 
@@ -5130,7 +5171,7 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 0);
 
@@ -5188,7 +5229,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -5200,7 +5241,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
@@ -5234,7 +5275,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 2);
 
@@ -5268,7 +5309,7 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 82);
 
@@ -5302,7 +5343,7 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 122);
 
@@ -5336,7 +5377,7 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 157);
 
@@ -5370,7 +5411,7 @@ mod tests_cursor_move {
     // Move-6
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 157);
 
@@ -5404,7 +5445,7 @@ mod tests_cursor_move {
     // Move-7
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 149);
 
@@ -5438,7 +5479,7 @@ mod tests_cursor_move {
     // Move-8
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 49);
 
@@ -5472,7 +5513,7 @@ mod tests_cursor_move {
     // Move-9
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
@@ -5530,7 +5571,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -5568,7 +5609,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
@@ -5599,7 +5640,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 24);
 
@@ -5630,7 +5671,7 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
@@ -5661,7 +5702,7 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 65);
 
@@ -5692,7 +5733,7 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
@@ -5747,7 +5788,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -5785,7 +5826,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 50);
 
@@ -5816,7 +5857,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 74);
 
@@ -5847,7 +5888,7 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 12);
 
@@ -5904,7 +5945,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -5916,7 +5957,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual1.line_idx(), 3);
       assert_eq!(actual1.char_idx(), 0);
 
@@ -5950,7 +5991,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 5);
       assert_eq!(actual2.char_idx(), 0);
 
@@ -5984,7 +6025,7 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 6);
       assert_eq!(actual2.char_idx(), 0);
 
@@ -6018,7 +6059,7 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual2 = get_cursor_viewport(tree.clone());
+      let actual2 = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual2.line_idx(), 3);
       assert_eq!(actual2.char_idx(), 0);
 
@@ -6077,7 +6118,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -6089,7 +6130,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
@@ -6123,7 +6164,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 2);
 
@@ -6157,7 +6198,7 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 82);
 
@@ -6191,7 +6232,7 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 122);
 
@@ -6225,7 +6266,7 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 157);
 
@@ -6259,7 +6300,7 @@ mod tests_cursor_move {
     // Move-6
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 157);
 
@@ -6293,7 +6334,7 @@ mod tests_cursor_move {
     // Move-7
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 149);
 
@@ -6327,7 +6368,7 @@ mod tests_cursor_move {
     // Move-8
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 49);
 
@@ -6361,7 +6402,7 @@ mod tests_cursor_move {
     // Move-9
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
@@ -6420,7 +6461,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -6458,7 +6499,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 0);
 
@@ -6489,7 +6530,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 24);
 
@@ -6520,7 +6561,7 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
@@ -6551,7 +6592,7 @@ mod tests_cursor_move {
     // Move-4
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 65);
 
@@ -6582,7 +6623,7 @@ mod tests_cursor_move {
     // Move-5
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 65);
 
@@ -6637,7 +6678,7 @@ mod tests_cursor_move {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -6675,7 +6716,7 @@ mod tests_cursor_move {
     // Move-1
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 3);
       assert_eq!(actual.char_idx(), 50);
 
@@ -6706,7 +6747,7 @@ mod tests_cursor_move {
     // Move-2
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 4);
       assert_eq!(actual.char_idx(), 74);
 
@@ -6737,7 +6778,7 @@ mod tests_cursor_move {
     // Move-3
     {
       let tree = data_access.tree.clone();
-      let actual = get_cursor_viewport(tree.clone());
+      let actual = get_cursor_viewport_from_current_window(tree.clone());
       assert_eq!(actual.line_idx(), 0);
       assert_eq!(actual.char_idx(), 12);
 
@@ -6809,7 +6850,7 @@ mod tests_goto_command_line_ex_mode {
       KeyEventKind::Press,
     );
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -6818,7 +6859,7 @@ mod tests_goto_command_line_ex_mode {
     stateful.goto_command_line_ex_mode(&data_access);
 
     let tree = data_access.tree.clone();
-    let actual_cursor = get_cursor_viewport(tree.clone());
+    let actual_cursor = get_cursor_viewport_from_cmdline(tree.clone());
     assert_eq!(actual_cursor.line_idx(), 0);
     assert_eq!(actual_cursor.char_idx(), 1);
     assert_eq!(actual_cursor.row_idx(), 0);
