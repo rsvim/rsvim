@@ -1,12 +1,12 @@
 //! Commandline indicator, i.e. the first char ':', '/', '?' in the commandline.
 
 use crate::buf::BufferWk;
+use crate::inode_impl;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
 use crate::ui::viewport::ViewportWk;
 use crate::ui::widget::Widgetable;
-use crate::{inode_impl, lock};
 
 #[derive(Debug, Clone)]
 /// The widget contains text contents for Vim window.
