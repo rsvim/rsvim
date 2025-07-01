@@ -136,12 +136,10 @@ inode_itree_impl!(CommandLine, base);
 
 impl Widgetable for CommandLine {
   fn draw(&self, canvas: &mut Canvas) {
-    let actual_shape = self.actual_shape();
-    let contents = self.contents.upgrade().unwrap();
-    let contents = lock!(contents);
-    let viewport = self.viewport.clone();
-
-    viewport.draw(contents.command_line_content(), actual_shape, canvas);
+    for node in self.base.iter() {
+      // trace!("Draw window:{:?}", node);
+      node.draw(canvas);
+    }
   }
 }
 

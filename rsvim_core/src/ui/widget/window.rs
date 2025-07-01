@@ -76,6 +76,7 @@ impl Window {
       base,
       options: *opts,
       content_id: window_content_id,
+      cursor_id: None,
       buffer,
       viewport,
       cursor_viewport,
