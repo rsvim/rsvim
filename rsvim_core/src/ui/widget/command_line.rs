@@ -208,12 +208,12 @@ impl CommandLine {
     }
   }
 
-  /// Bounded move by x(columns) and y(rows).
+  /// Bounded move widget by x(columns) and y(rows).
   pub fn bounded_move_by(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_by(id, x, y)
   }
 
-  /// Bounded move to position x(columns) and y(rows).
+  /// Bounded move widget to position x(columns) and y(rows).
   pub fn bounded_move_to(&mut self, id: TreeNodeId, x: isize, y: isize) -> Option<IRect> {
     self.base.bounded_move_to(id, x, y)
   }
