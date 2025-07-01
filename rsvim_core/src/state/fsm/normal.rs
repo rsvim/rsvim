@@ -101,7 +101,7 @@ impl NormalStateful {
     let mut tree = lock!(tree);
 
     // Remove cursor from current window
-    let current_window = self._current_window(&mut tree);
+    let current_window = tree.current_window().unwrap();
     debug_assert!(current_window.cursor_id().is_some());
     let _cursor_id = current_window.cursor_id().unwrap();
     let cursor_node = current_window.remove_cursor();
