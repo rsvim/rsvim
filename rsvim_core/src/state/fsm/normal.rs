@@ -48,18 +48,6 @@ impl NormalStateful {
       Event::Resize(_columns, _rows) => None,
     }
   }
-
-  fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => current_window,
-      _ => unreachable!(),
-    }
-  }
 }
 
 impl Stateful for NormalStateful {
@@ -216,7 +204,7 @@ impl NormalStateful {
   fn __test_raw_cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = self._current_window(&mut tree);
+    let current_window = tree.current_window_mut().unwrap();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
     let viewport = current_window.viewport();
@@ -245,7 +233,7 @@ impl NormalStateful {
   fn __test_raw_window_scroll(&self, data_access: &StatefulDataAccess, op: Operation) {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = self._current_window(&mut tree);
+    let current_window = tree.current_window_mut().unwrap();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
     let viewport = current_window.viewport();
