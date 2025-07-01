@@ -207,8 +207,7 @@ impl CommandLine {
   }
 
   /// Disable/remove cursor widget from commandline, i.e. when user leaves command-line mode, the
-  /// cursor leaves the command-line widget and command-line widget doesn't contain cursor any
-  /// longer.
+  /// command-line content widget doesn't contain cursor any longer.
   ///
   /// # Returns
   /// It returns the removed cursor widget if exists, otherwise it returns `None`.

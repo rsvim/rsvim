@@ -167,7 +167,7 @@ impl Window {
   ///
   /// # Returns
   /// It returns the removed cursor widget if exists, otherwise it returns `None`.
-  pub fn remove_cursor(&mut self) -> Option<CommandLineNode> {
+  pub fn remove_cursor(&mut self) -> Option<WindowNode> {
     match self.cursor_id {
       Some(cursor_id) => {
         debug_assert!(self.base.node(cursor_id).is_some());
@@ -178,7 +178,7 @@ impl Window {
         debug_assert!(cursor_node.is_some());
         debug_assert!(matches!(
           cursor_node.as_ref().unwrap(),
-          CommandLineNode::Cursor(_)
+          WindowNode::Cursor(_)
         ));
         cursor_node
       }
