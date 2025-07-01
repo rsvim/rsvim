@@ -95,6 +95,7 @@ impl Widgetable for Window {
   }
 }
 
+// Attributes
 impl Window {
   /// Get window local options.
   pub fn options(&self) -> &WindowLocalOptions {
@@ -129,27 +130,51 @@ impl Window {
     self.cursor_viewport = cursor_viewport;
   }
 
-  /// Get cursor ID.
+  /// Cursor widget ID.
   pub fn cursor_id(&self) -> Option<TreeNodeId> {
     self.cursor_id
+  }
+
+  /// Content widget ID.
+  pub fn content_id(&self) -> TreeNodeId {
+    self.content_id
   }
 }
 
 // Viewport {
 impl Window {
-  /// Get buffer.
+  /// Binded buffer.
   pub fn buffer(&self) -> BufferWk {
     self.buffer.clone()
   }
 
-  /// Get window content widget.
-  pub fn window_content(&self) -> &WindowContent {
-    match self.base.node(self.content_id) {
-      Some(WindowNode::WindowContent(w)) => w,
+  /// Window content widget.
+  pub fn content(&self) -> &WindowContent {
+    debug_assert!(self.base.node(self.content_id).is_some());
+    debug_assert!(matches!(
+      self.base.node(self.content_id).unwrap(),
+      WindowNode::WindowContent(_)
+    ));
+    match self.base.node(self.content_id).unwrap() {
+      WindowNode::WindowContent(w) => w,
       _ => unreachable!(),
     }
   }
 
+  /// Mutable window content widget.
+  pub fn content_mut(&mut self) -> &mut WindowContent {
+    debug_assert!(self.base.node_mut(self.content_id).is_some());
+    debug_assert!(matches!(
+      self.base.node_mut(self.content_id).unwrap(),
+      WindowNode::WindowContent(_)
+    ));
+    match self.base.node_mut(self.content_id).unwrap() {
+      WindowNode::WindowContent(w) => w,
+      _ => unreachable!(),
+    }
+  }
+
+  /// Cursor widget.
   pub fn cursor(&self) -> Option<&Cursor> {
     match self.cursor_id {
       Some(cursor_id) => {

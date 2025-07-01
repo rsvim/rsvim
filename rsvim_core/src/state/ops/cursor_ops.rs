@@ -340,7 +340,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
     TreeNode::Window(window) => {
       debug_assert!(window.cursor_id().is_some());
       (
-        *window.window_content().actual_shape(),
+        *window.content().actual_shape(),
         *window.options(),
         window.viewport(),
         window.cursor_viewport(),
@@ -427,7 +427,7 @@ pub fn cursor_move(
     TreeNode::Window(window) => {
       debug_assert!(window.cursor_id().is_some());
       (
-        *window.window_content().actual_shape(),
+        *window.content().actual_shape(),
         *window.options(),
         window.viewport(),
         window.cursor_viewport(),

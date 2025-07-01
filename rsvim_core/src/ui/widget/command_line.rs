@@ -57,7 +57,7 @@ pub struct CommandLine {
   content_id: TreeNodeId,
   cursor_id: Option<TreeNodeId>,
 
-  contents: TextContentsWk,
+  text_contents: TextContentsWk,
 
   viewport: ViewportArc,
   cursor_viewport: CursorViewportArc,
@@ -66,7 +66,7 @@ pub struct CommandLine {
 impl CommandLine {
   pub fn new(
     shape: IRect,
-    contents: TextContentsWk,
+    text_contents: TextContentsWk,
     indicator_symbol: CommandLineIndicatorSymbol,
   ) -> Self {
     // Force cmdline window options.
@@ -94,17 +94,17 @@ impl CommandLine {
 
     let (viewport, cursor_viewport) = {
       let cmdline_content_actual_shape = geo_rect_as!(cmdline_content_shape, u16);
-      let contents = contents.upgrade().unwrap();
-      let contents = lock!(contents);
+      let text_contents = text_contents.upgrade().unwrap();
+      let text_contents = lock!(text_contents);
       let viewport = Viewport::view(
         &options,
-        contents.command_line_content(),
+        text_contents.command_line_content(),
         &cmdline_content_actual_shape,
         0,
         0,
       );
       let cursor_viewport =
-        CursorViewport::from_top_left(&viewport, contents.command_line_content());
+        CursorViewport::from_top_left(&viewport, text_contents.command_line_content());
       (viewport, cursor_viewport)
     };
     let viewport = Viewport::to_arc(viewport);
@@ -112,7 +112,7 @@ impl CommandLine {
 
     let cmdline_content = CommandLineContent::new(
       cmdline_content_shape,
-      contents.clone(),
+      text_contents.clone(),
       Arc::downgrade(&viewport),
     );
     let cmdline_content_id = cmdline_content.id();
@@ -125,7 +125,7 @@ impl CommandLine {
       indicator_id: cmdline_indicator_id,
       content_id: cmdline_content_id,
       cursor_id: None,
-      contents,
+      text_contents,
       viewport,
       cursor_viewport,
     }
@@ -174,9 +174,19 @@ impl CommandLine {
     self.cursor_viewport = cursor_viewport;
   }
 
-  /// Get cursor ID.
+  /// Cursor widget ID.
   pub fn cursor_id(&self) -> Option<TreeNodeId> {
     self.cursor_id
+  }
+
+  /// Command-line indicator widget ID.
+  pub fn indicator_id(&self) -> TreeNodeId {
+    self.indicator_id
+  }
+
+  /// Command-line content widget ID.
+  pub fn content_id(&self) -> TreeNodeId {
+    self.content_id
   }
 
   /// Get indicator symbol.
@@ -200,7 +210,7 @@ impl CommandLine {
 impl CommandLine {
   /// Get global text contents.
   pub fn text_contents(&self) -> TextContentsWk {
-    self.contents.clone()
+    self.text_contents.clone()
   }
 
   /// Get command-line content widget.
