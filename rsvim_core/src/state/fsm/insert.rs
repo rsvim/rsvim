@@ -201,24 +201,12 @@ mod tests_util {
 
   pub fn get_viewport(tree: TreeArc) -> ViewportArc {
     let tree = lock!(tree);
-    let current_window_id = tree.current_window_id().unwrap();
-    let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => current_window.viewport(),
-      _ => unreachable!(),
-    }
+    tree.current_window().unwrap().viewport()
   }
 
   pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
     let tree = lock!(tree);
-    let current_window_id = tree.current_window_id().unwrap();
-    let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => current_window.cursor_viewport(),
-      _ => unreachable!(),
-    }
+    tree.current_window().unwrap().cursor_viewport()
   }
 
   #[allow(clippy::too_many_arguments)]
