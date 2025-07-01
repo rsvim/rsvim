@@ -213,11 +213,97 @@ impl CommandLine {
     self.text_contents.clone()
   }
 
-  /// Get command-line content widget.
-  pub fn command_line_content(&self) -> &CommandLineContent {
-    match self.base.node(self.content_id) {
-      Some(CommandLineNode::CommandLineContent(w)) => w,
+  /// Command-line content widget.
+  pub fn content(&self) -> &CommandLineContent {
+    debug_assert!(self.base.node(self.content_id).is_some());
+    debug_assert!(matches!(
+      self.base.node(self.content_id).unwrap(),
+      CommandLineNode::CommandLineContent(_)
+    ));
+
+    match self.base.node(self.content_id).unwrap() {
+      CommandLineNode::CommandLineContent(w) => w,
       _ => unreachable!(),
+    }
+  }
+
+  /// Mutable command-line content widget.
+  pub fn content_mut(&mut self) -> &mut CommandLineContent {
+    debug_assert!(self.base.node_mut(self.content_id).is_some());
+    debug_assert!(matches!(
+      self.base.node_mut(self.content_id).unwrap(),
+      CommandLineNode::CommandLineContent(_)
+    ));
+
+    match self.base.node_mut(self.content_id).unwrap() {
+      CommandLineNode::CommandLineContent(w) => w,
+      _ => unreachable!(),
+    }
+  }
+
+  /// Command-line indicator widget.
+  pub fn indicator(&self) -> &CommandLineIndicator {
+    debug_assert!(self.base.node(self.indicator_id).is_some());
+    debug_assert!(matches!(
+      self.base.node(self.indicator_id).unwrap(),
+      CommandLineNode::CommandLineIndicator(_)
+    ));
+
+    match self.base.node(self.indicator_id).unwrap() {
+      CommandLineNode::CommandLineIndicator(w) => w,
+      _ => unreachable!(),
+    }
+  }
+
+  /// Mutable command-line indicator widget.
+  pub fn indicator_mut(&mut self) -> &mut CommandLineIndicator {
+    debug_assert!(self.base.node_mut(self.indicator_id).is_some());
+    debug_assert!(matches!(
+      self.base.node_mut(self.indicator_id).unwrap(),
+      CommandLineNode::CommandLineIndicator(_)
+    ));
+
+    match self.base.node_mut(self.indicator_id).unwrap() {
+      CommandLineNode::CommandLineIndicator(w) => w,
+      _ => unreachable!(),
+    }
+  }
+
+  /// Command-line cursor widget.
+  pub fn cursor(&self) -> Option<&Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.base.node(cursor_id).is_some());
+        debug_assert!(matches!(
+          self.base.node(cursor_id).unwrap(),
+          CommandLineNode::Cursor(_)
+        ));
+
+        match self.base.node(cursor_id).unwrap() {
+          CommandLineNode::Cursor(w) => Some(w),
+          _ => unreachable!(),
+        }
+      }
+      None => None,
+    }
+  }
+
+  /// Mutable command-line cursor widget.
+  pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.base.node_mut(cursor_id).is_some());
+        debug_assert!(matches!(
+          self.base.node_mut(cursor_id).unwrap(),
+          CommandLineNode::Cursor(_)
+        ));
+
+        match self.base.node_mut(cursor_id).unwrap() {
+          CommandLineNode::Cursor(w) => Some(w),
+          _ => unreachable!(),
+        }
+      }
+      None => None,
     }
   }
 }

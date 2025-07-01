@@ -349,7 +349,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
     TreeNode::CommandLine(cmdline) => {
       debug_assert!(cmdline.cursor_id().is_some());
       (
-        *cmdline.command_line_content().actual_shape(),
+        *cmdline.content().actual_shape(),
         *cmdline.options(),
         cmdline.viewport(),
         cmdline.cursor_viewport(),
@@ -436,7 +436,7 @@ pub fn cursor_move(
     TreeNode::CommandLine(cmdline) => {
       debug_assert!(cmdline.cursor_id().is_some());
       (
-        *cmdline.command_line_content().actual_shape(),
+        *cmdline.content().actual_shape(),
         *cmdline.options(),
         cmdline.viewport(),
         cmdline.cursor_viewport(),
