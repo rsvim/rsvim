@@ -190,6 +190,7 @@ impl CommandLine {
         debug_assert!(self.base.node(cursor_id).is_some());
         debug_assert!(self.base.parent_id(cursor_id).is_some());
         debug_assert_eq!(self.base.parent_id(cursor_id).unwrap(), self.content_id);
+        self.cursor_id = None;
         let cursor_node = self.base.remove(cursor_id);
         debug_assert!(cursor_node.is_some());
         debug_assert!(matches!(
