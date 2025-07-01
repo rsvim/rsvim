@@ -5,7 +5,7 @@ use crate::geo_rect_as;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
+use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::content::CommandLineContent;
 use crate::ui::widget::command_line::indicator::CommandLineIndicator;
@@ -143,39 +143,39 @@ impl Widgetable for CommandLine {
   }
 }
 
-impl Viewportable for CommandLine {
+impl CommandLine {
   /// Get window local options.
-  fn options(&self) -> &WindowLocalOptions {
+  pub fn options(&self) -> &WindowLocalOptions {
     &self.options
   }
 
   /// Set window local options.
-  fn set_options(&mut self, options: &WindowLocalOptions) {
+  pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = *options;
   }
 
   /// Get viewport.
-  fn viewport(&self) -> ViewportArc {
+  pub fn viewport(&self) -> ViewportArc {
     self.viewport.clone()
   }
 
   /// Set viewport.
-  fn set_viewport(&mut self, viewport: ViewportArc) {
+  pub fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport;
   }
 
   /// Get cursor viewport.
-  fn cursor_viewport(&self) -> CursorViewportArc {
+  pub fn cursor_viewport(&self) -> CursorViewportArc {
     self.cursor_viewport.clone()
   }
 
   /// Set cursor viewport.
-  fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
+  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
     self.cursor_viewport = cursor_viewport;
   }
 
   /// Get cursor ID.
-  fn cursor_id(&self) -> Option<TreeNodeId> {
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
     self.cursor_id
   }
 }

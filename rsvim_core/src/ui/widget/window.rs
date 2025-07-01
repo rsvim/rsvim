@@ -4,7 +4,7 @@ use crate::buf::BufferWk;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
+use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::content::WindowContent;
@@ -95,24 +95,24 @@ impl Widgetable for Window {
   }
 }
 
-impl Viewportable for Window {
+impl Window {
   /// Get window local options.
-  fn options(&self) -> &WindowLocalOptions {
+  pub fn options(&self) -> &WindowLocalOptions {
     &self.options
   }
 
   /// Set window local options.
-  fn set_options(&mut self, options: &WindowLocalOptions) {
+  pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = *options;
   }
 
   /// Get viewport.
-  fn viewport(&self) -> ViewportArc {
+  pub fn viewport(&self) -> ViewportArc {
     self.viewport.clone()
   }
 
   /// Set viewport.
-  fn set_viewport(&mut self, viewport: ViewportArc) {
+  pub fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport.clone();
     if let Some(WindowNode::WindowContent(content)) = self.base.node_mut(self.content_id) {
       content.set_viewport(Arc::downgrade(&viewport));
@@ -120,17 +120,17 @@ impl Viewportable for Window {
   }
 
   /// Get cursor viewport.
-  fn cursor_viewport(&self) -> CursorViewportArc {
+  pub fn cursor_viewport(&self) -> CursorViewportArc {
     self.cursor_viewport.clone()
   }
 
   /// Set cursor viewport.
-  fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
+  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
     self.cursor_viewport = cursor_viewport;
   }
 
   /// Get cursor ID.
-  fn cursor_id(&self) -> Option<TreeNodeId> {
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
     self.cursor_id
   }
 }

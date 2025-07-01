@@ -698,18 +698,18 @@ impl Viewport {
   }
 }
 
-pub trait Viewportable {
-  fn options(&self) -> &WindowLocalOptions;
-  fn set_options(&mut self, options: &WindowLocalOptions);
-
-  fn viewport(&self) -> ViewportArc;
-  fn set_viewport(&mut self, viewport: ViewportArc);
-
-  fn cursor_viewport(&self) -> CursorViewportArc;
-  fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc);
-
-  fn cursor_id(&self) -> Option<TreeNodeId>;
-}
+// pub trait Viewportable {
+//   fn options(&self) -> &WindowLocalOptions;
+//   fn set_options(&mut self, options: &WindowLocalOptions);
+//
+//   fn viewport(&self) -> ViewportArc;
+//   fn set_viewport(&mut self, viewport: ViewportArc);
+//
+//   fn cursor_viewport(&self) -> CursorViewportArc;
+//   fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc);
+//
+//   fn cursor_id(&self) -> Option<TreeNodeId>;
+// }
 
 // spellchecker:off
 #[allow(unused_imports)]

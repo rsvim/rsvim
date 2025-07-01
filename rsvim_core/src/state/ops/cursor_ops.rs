@@ -5,7 +5,8 @@ use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection, Viewportable,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
+  ViewportSearchDirection, /*Viewportable,*/
 };
 use crate::ui::widget::window::WindowLocalOptions;
 
@@ -405,21 +406,29 @@ pub fn cursor_move(
   include_empty_eol: bool,
 ) {
   debug_assert!(tree.node_mut(id).is_some());
-  let cursor_parent_node = tree.node_mut(id).unwrap();
+  let vnode = tree.node_mut(id).unwrap();
 
-  let vnode_actual_shape = match cursor_parent_node {
-    TreeNode::Window(window) => *window.window_content().actual_shape(),
-    TreeNode::CommandLine(cmdline) => *cmdline.command_line_content().actual_shape(),
+  let (actual_shape, local_options, viewport, cursor_viewport) = match vnode {
+    TreeNode::Window(window) => {
+      debug_assert!(window.cursor_id().is_some());
+      (
+        *window.window_content().actual_shape(),
+        *window.options(),
+        window.viewport(),
+        window.cursor_viewport(),
+      )
+    }
+    TreeNode::CommandLine(cmdline) => {
+      debug_assert!(cmdline.cursor_id().is_some());
+      (
+        *cmdline.command_line_content().actual_shape(),
+        *cmdline.options(),
+        cmdline.viewport(),
+        cmdline.cursor_viewport(),
+      )
+    }
     _ => unreachable!(),
   };
-  let vnode: &mut dyn Viewportable = match cursor_parent_node {
-    TreeNode::Window(window) => window,
-    TreeNode::CommandLine(cmdline) => cmdline,
-    _ => unreachable!(),
-  };
-
-  let viewport = vnode.viewport();
-  let cursor_viewport = vnode.cursor_viewport();
 
   // Only move cursor when it is different from current cursor.
   let (target_cursor_char, target_cursor_line, move_direction) = if include_empty_eol {
@@ -448,9 +457,9 @@ pub fn cursor_move(
   let new_viewport: Option<ViewportArc> = {
     let (start_line, start_column) = viewport.search_anchor(
       search_direction,
-      vnode.options(),
+      &local_options,
       text,
-      &vnode_actual_shape,
+      &actual_shape,
       target_cursor_line,
       target_cursor_char,
     );
@@ -459,13 +468,17 @@ pub fn cursor_move(
     if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx() {
       let new_viewport = raw_widget_scroll_to(
         &viewport,
-        &vnode_actual_shape,
-        vnode.options(),
+        &actual_shape,
+        &local_options,
         text,
         Operation::WindowScrollTo((start_column, start_line)),
       );
-      if let Some(new_viewport_arc) = new_viewport.clone() {
-        vnode.set_viewport(new_viewport_arc.clone());
+      if let Some(new_viewport) = new_viewport.clone() {
+        match vnode {
+          TreeNode::Window(window) => window.set_viewport(new_viewport.clone()),
+          TreeNode::CommandLine(cmdline) => cmdline.set_viewport(new_viewport.clone()),
+          _ => unreachable!(),
+        }
       }
       new_viewport
     } else {
@@ -485,13 +498,23 @@ pub fn cursor_move(
     );
 
     if let Some(new_cursor_viewport) = new_cursor_viewport {
-      vnode.set_cursor_viewport(new_cursor_viewport.clone());
-      let cursor_id = vnode.cursor_id().unwrap();
-      tree.bounded_move_to(
-        cursor_id,
-        new_cursor_viewport.column_idx() as isize,
-        new_cursor_viewport.row_idx() as isize,
-      );
+      match vnode {
+        TreeNode::Window(window) => {
+          window.set_cursor_viewport(new_cursor_viewport.clone());
+          window.move_cursor_to(
+            new_cursor_viewport.column_idx() as isize,
+            new_cursor_viewport.row_idx() as isize,
+          );
+        }
+        TreeNode::CommandLine(cmdline) => {
+          cmdline.set_cursor_viewport(new_cursor_viewport.clone());
+          cmdline.move_cursor_to(
+            new_cursor_viewport.column_idx() as isize,
+            new_cursor_viewport.row_idx() as isize,
+          );
+        }
+        _ => unreachable!(),
+      }
     }
   }
 }
