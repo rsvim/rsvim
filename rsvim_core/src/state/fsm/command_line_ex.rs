@@ -49,18 +49,6 @@ impl CommandLineExStateful {
       Event::Resize(_columns, _rows) => None,
     }
   }
-
-  fn _command_line<'a>(&self, tree: &'a mut Tree) -> &'a mut CommandLine {
-    debug_assert!(tree.command_line_id().is_some());
-    let cmdline_id = tree.command_line_id().unwrap();
-    debug_assert!(tree.node_mut(cmdline_id).is_some());
-    let cmdline_node = tree.node_mut(cmdline_id).unwrap();
-    debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
-    match cmdline_node {
-      TreeNode::CommandLine(cmdline) => cmdline,
-      _ => unreachable!(),
-    }
-  }
 }
 
 impl Stateful for CommandLineExStateful {
