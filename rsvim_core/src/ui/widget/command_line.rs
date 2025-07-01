@@ -143,8 +143,21 @@ impl Viewportable for CommandLine {
 
 // Attributes {
 impl CommandLine {
-  /// Get text contents.
-  pub fn contents(&self) -> TextContentsWk {
+  /// Get cursor widget ID.
+  ///
+  /// # Returns
+  /// It returns widget node ID if cursor is inside command-line, otherwise returns `None`.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
+
+  /// Get command-line content widget ID.
+  pub fn content_id(&self) -> TreeNodeId {
+    self.content_id
+  }
+
+  /// Get global text contents.
+  pub fn text_contents(&self) -> TextContentsWk {
     self.contents.clone()
   }
 }
@@ -152,17 +165,46 @@ impl CommandLine {
 
 // Cursor {
 impl CommandLine {
-  /// Enable cursor widget in commandline, i.e. when user start command-line mode, the cursor moves
-  /// to the command-line widget and allow receive user ex command or search patterns.
+  /// Enable/insert cursor widget in commandline, i.e. when user start command-line mode, the
+  /// cursor moves to the command-line widget and allow receive user ex command or search patterns.
   ///
   /// # Returns
-  /// It returns the old cursor node if there's any, otherwise it returns `None`.
+  /// It returns the old cursor widget if there's any, otherwise it returns `None`.
   pub fn insert_cursor(&mut self, cursor: Cursor) -> Option<CommandLineNode> {
     self.cursor_id = Some(cursor.id());
     let parent_id = self.content_id;
     self
       .base
       .bounded_insert(parent_id, CommandLineNode::Cursor(cursor))
+  }
+
+  /// Disable/remove cursor widget from commandline, i.e. when user leaves command-line mode, the
+  /// cursor leaves the command-line widget and command-line widget doesn't contain cursor any
+  /// longer.
+  ///
+  /// # Returns
+  /// It returns the removed cursor widget if exists, otherwise it returns `None`.
+  pub fn remove_cursor(&mut self) -> Option<CommandLineNode> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.base.node(cursor_id).is_some());
+        debug_assert!(self.base.parent_id(cursor_id).is_some());
+        debug_assert_eq!(self.base.parent_id(cursor_id).unwrap(), self.content_id);
+        let cursor_node = self.base.remove(cursor_id);
+        debug_assert!(cursor_node.is_some());
+        debug_assert!(matches!(
+          cursor_node.as_ref().unwrap(),
+          CommandLineNode::Cursor(_)
+        ));
+        cursor_node
+      }
+      None => {
+        debug_assert!(self.cursor_id().is_none());
+        debug_assert!(self.base.node(self.content_id).is_some());
+        debug_assert!(self.base.children_ids(self.content_id).is_empty());
+        None
+      }
+    }
   }
 }
 // Cursor }
