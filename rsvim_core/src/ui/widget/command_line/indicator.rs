@@ -12,6 +12,7 @@ use geo::point;
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 /// The symbol for command-line indicator, i.e. the ':', '/', '?' char.
 pub enum CommandLineIndicatorSymbol {
+  Empty,
   Ex,
   SearchForward,
   SearchBackard,
@@ -20,6 +21,7 @@ pub enum CommandLineIndicatorSymbol {
 impl std::fmt::Display for CommandLineIndicatorSymbol {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     match self {
+      &CommandLineIndicatorSymbol::Empty => write!(f, " "),
       &CommandLineIndicatorSymbol::Ex => write!(f, ":"),
       &CommandLineIndicatorSymbol::SearchForward => write!(f, "/"),
       &CommandLineIndicatorSymbol::SearchBackard => write!(f, "?"),

@@ -12,9 +12,9 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::command_line::{CommandLine, CommandLineIndicatorSymbol};
 use crate::ui::widget::cursor::Cursor;
-use crate::ui::widget::window::Window;
+use crate::ui::widget::window::{Window, WindowNode};
 
 use crossterm::event::{Event, EventStream};
 use crossterm::{self, queue};
@@ -341,7 +341,7 @@ impl EventLoop {
         canvas_size.height().saturating_sub(1) as isize,
       ),
     );
-    let window = {
+    let mut window = {
       let buffers = lock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
       trace!("Bind first buffer to default window {:?}", buf_id);
@@ -351,21 +351,9 @@ impl EventLoop {
         Arc::downgrade(buf),
       )
     };
-    let window_id = window.id();
-    let window_node = TreeNode::Window(window);
-    tree.bounded_insert(tree_root_id, window_node);
+    let _window_id = window.id();
 
-    // Initialize default command-line.
-    let cmdline_shape = IRect::new(
-      (0, canvas_size.height().saturating_sub(1) as isize),
-      (canvas_size.width() as isize, canvas_size.height() as isize),
-    );
-    let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
-    let _cmdline_id = cmdline.id();
-    let cmdline = TreeNode::CommandLine(cmdline);
-    tree.bounded_insert(tree_root_id, cmdline);
-
-    // Initialize cursor.
+    // Initialize cursor inside the default window.
     let cursor_shape = IRect::new((0, 0), (1, 1));
     let cursor = Cursor::new(
       cursor_shape,
@@ -373,8 +361,24 @@ impl EventLoop {
       canvas_cursor.hidden(),
       canvas_cursor.style(),
     );
-    let cursor_node = TreeNode::Cursor(cursor);
-    tree.bounded_insert(window_id, cursor_node);
+    let _previous_inserted_cursor = window.insert_cursor(cursor);
+    debug_assert!(_previous_inserted_cursor.is_none());
+
+    tree.bounded_insert(tree_root_id, TreeNode::Window(window));
+
+    // Initialize default command-line.
+    let cmdline_shape = IRect::new(
+      (0, canvas_size.height().saturating_sub(1) as isize),
+      (canvas_size.width() as isize, canvas_size.height() as isize),
+    );
+    let cmdline = CommandLine::new(
+      cmdline_shape,
+      Arc::downgrade(&self.contents),
+      CommandLineIndicatorSymbol::Empty,
+    );
+    let _cmdline_id = cmdline.id();
+
+    tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
     Ok(())
   }
