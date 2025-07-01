@@ -174,6 +174,11 @@ impl CommandLine {
     self.cursor_viewport = cursor_viewport;
   }
 
+  /// Get binded global text contents.
+  pub fn text_contents(&self) -> TextContentsWk {
+    self.text_contents.clone()
+  }
+
   /// Cursor widget ID.
   pub fn cursor_id(&self) -> Option<TreeNodeId> {
     self.cursor_id
@@ -206,13 +211,8 @@ impl CommandLine {
   }
 }
 
-// Attributes {
+// Widgets {
 impl CommandLine {
-  /// Get global text contents.
-  pub fn text_contents(&self) -> TextContentsWk {
-    self.text_contents.clone()
-  }
-
   /// Command-line content widget.
   pub fn content(&self) -> &CommandLineContent {
     debug_assert!(self.base.node(self.content_id).is_some());

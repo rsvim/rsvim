@@ -130,6 +130,11 @@ impl Window {
     self.cursor_viewport = cursor_viewport;
   }
 
+  /// Get binded buffer.
+  pub fn buffer(&self) -> BufferWk {
+    self.buffer.clone()
+  }
+
   /// Cursor widget ID.
   pub fn cursor_id(&self) -> Option<TreeNodeId> {
     self.cursor_id
@@ -143,11 +148,6 @@ impl Window {
 
 // Viewport {
 impl Window {
-  /// Binded buffer.
-  pub fn buffer(&self) -> BufferWk {
-    self.buffer.clone()
-  }
-
   /// Window content widget.
   pub fn content(&self) -> &WindowContent {
     debug_assert!(self.base.node(self.content_id).is_some());

@@ -248,6 +248,86 @@ impl Tree {
 }
 // Node {
 
+// Widget {
+impl Tree {
+  /// Window widget.
+  pub fn window(&self, window_id: TreeNodeId) -> Option<&Window> {
+    match self.node(window_id) {
+      Some(window_node) => {
+        debug_assert!(matches!(window_node, TreeNode::Window(_)));
+        match window_node {
+          TreeNode::Window(w) => Some(w),
+          _ => unreachable!(), // Other variants not allowed.
+        }
+      }
+      None => None,
+    }
+  }
+
+  /// Mutable window widget.
+  pub fn window_mut(&mut self, window_id: TreeNodeId) -> Option<&mut Window> {
+    match self.node_mut(window_id) {
+      Some(window_node) => {
+        debug_assert!(matches!(window_node, TreeNode::Window(_)));
+        match window_node {
+          TreeNode::Window(w) => Some(w),
+          _ => unreachable!(), // Other variants not allowed.
+        }
+      }
+      None => None,
+    }
+  }
+
+  // Current window widget.
+  pub fn current_window(&self) -> Option<&Window> {
+    match self.current_window_id {
+      Some(current_window_id) => self.window(current_window_id),
+      None => None,
+    }
+  }
+
+  // Mutable current window widget.
+  pub fn current_window_mut(&mut self) -> Option<&mut Window> {
+    match self.current_window_id {
+      Some(current_window_id) => self.window_mut(current_window_id),
+      None => None,
+    }
+  }
+
+  // Command-line widget.
+  pub fn command_line(&self) -> Option<&CommandLine> {
+    match self.command_line_id {
+      Some(cmdline_id) => {
+        debug_assert!(self.node(cmdline_id).is_some());
+        let cmdline_node = self.node(cmdline_id).unwrap();
+        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+        match cmdline_node {
+          TreeNode::CommandLine(w) => Some(w),
+          _ => unreachable!(),
+        }
+      }
+      None => None,
+    }
+  }
+
+  // Mutable command-line widget.
+  pub fn command_line_mut(&mut self) -> Option<&mut CommandLine> {
+    match self.command_line_id {
+      Some(cmdline_id) => {
+        debug_assert!(self.node_mut(cmdline_id).is_some());
+        let cmdline_node = self.node_mut(cmdline_id).unwrap();
+        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+        match cmdline_node {
+          TreeNode::CommandLine(w) => Some(w),
+          _ => unreachable!(),
+        }
+      }
+      None => None,
+    }
+  }
+}
+// Widget }
+
 // Insert/Remove {
 impl Tree {
   fn insert_guard(&mut self, node: &TreeNode) {
