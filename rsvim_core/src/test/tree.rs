@@ -21,12 +21,12 @@ pub fn make_tree_with_buffers(
   buffers_manager: BuffersManagerArc,
 ) -> TreeArc {
   // UI Tree
-  let tree = Tree::to_arc(Tree::new(canvas_size));
+  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
   let buffers = lock!(buffers_manager);
 
-  let mut tree_mut = lock!(tree);
-  tree_mut.set_global_local_options(&window_local_opts);
-  let tree_root_id = tree_mut.root_id();
+  let mut tree = lock!(tree_arc);
+  tree.set_global_local_options(&window_local_opts);
+  let tree_root_id = tree.root_id();
 
   // Window
   let window_shape = IRect::new(
@@ -36,21 +36,22 @@ pub fn make_tree_with_buffers(
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
-      tree_mut.global_local_options(),
+      tree.global_local_options(),
       window_shape,
       Arc::downgrade(buf),
     )
   };
-  let _window_id = window.id();
+  let window_id = window.id();
 
   // Cursor.
   let cursor_shape = IRect::new((0, 0), (1, 1));
   let cursor = Cursor::default(cursor_shape);
   window.insert_cursor(cursor);
 
-  tree_mut.bounded_insert(tree_root_id, TreeNode::Window(window));
+  tree.bounded_insert(tree_root_id, TreeNode::Window(window));
+  tree.set_current_window_id(Some(window_id));
 
-  tree.clone()
+  tree_arc.clone()
 }
 
 #[cfg(test)]
@@ -63,12 +64,12 @@ pub fn make_tree_with_buffers_cmdline(
   text_contents: TextContentsArc,
 ) -> TreeArc {
   // UI Tree
-  let tree = Tree::to_arc(Tree::new(canvas_size));
+  let tree_arc = Tree::to_arc(Tree::new(canvas_size));
   let buffers = lock!(buffers_manager);
 
-  let mut tree_mut = lock!(tree);
-  tree_mut.set_global_local_options(&window_local_opts);
-  let tree_root_id = tree_mut.root_id();
+  let mut tree = lock!(tree_arc);
+  tree.set_global_local_options(&window_local_opts);
+  let tree_root_id = tree.root_id();
 
   // window
   let window_shape = IRect::new(
@@ -81,19 +82,20 @@ pub fn make_tree_with_buffers_cmdline(
   let mut window = {
     let (_, buf) = buffers.first_key_value().unwrap();
     Window::new(
-      tree_mut.global_local_options(),
+      tree.global_local_options(),
       window_shape,
       Arc::downgrade(buf),
     )
   };
-  let _window_id = window.id();
+  let window_id = window.id();
 
   // cursor
   let cursor_shape = IRect::new((0, 0), (1, 1));
   let cursor = Cursor::default(cursor_shape);
   window.insert_cursor(cursor);
 
-  tree_mut.bounded_insert(tree_root_id, TreeNode::Window(window));
+  tree.bounded_insert(tree_root_id, TreeNode::Window(window));
+  tree.set_current_window_id(Some(window_id));
 
   // command-line
   let cmdline_shape = IRect::new(
@@ -107,7 +109,7 @@ pub fn make_tree_with_buffers_cmdline(
   );
   let _cmdline_id = cmdline.id();
 
-  tree_mut.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
+  tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
-  tree.clone()
+  tree_arc.clone()
 }

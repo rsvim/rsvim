@@ -241,6 +241,28 @@ impl Tree {
     self.current_window_id
   }
 
+  /// Set current window node ID.
+  ///
+  /// NOTE: When the node ID is not `None`, it must be a valid tree node, existing in current tree,
+  /// and it must be a window widget.
+  pub fn set_current_window_id(&mut self, window_id: Option<TreeNodeId>) -> Option<TreeNodeId> {
+    if cfg!(debug_assertions) {
+      match window_id {
+        Some(window_id) => {
+          debug_assert!(self.node_mut(window_id).is_some());
+          debug_assert!(matches!(
+            self.node_mut(window_id).unwrap(),
+            TreeNode::Window(_)
+          ));
+        }
+        None => { /* */ }
+      }
+    }
+    let old = self.current_window_id;
+    self.current_window_id = window_id;
+    old
+  }
+
   /// Get all the window widget IDs.
   pub fn window_ids(&self) -> &BTreeSet<TreeNodeId> {
     &self.window_ids

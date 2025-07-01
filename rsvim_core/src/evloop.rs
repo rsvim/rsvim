@@ -351,7 +351,7 @@ impl EventLoop {
         Arc::downgrade(buf),
       )
     };
-    let _window_id = window.id();
+    let window_id = window.id();
 
     // Initialize cursor inside the default window.
     let cursor_shape = IRect::new((0, 0), (1, 1));
@@ -365,6 +365,7 @@ impl EventLoop {
     debug_assert!(_previous_inserted_cursor.is_none());
 
     tree.bounded_insert(tree_root_id, TreeNode::Window(window));
+    tree.set_current_window_id(Some(window_id));
 
     // Initialize default command-line.
     let cmdline_shape = IRect::new(
