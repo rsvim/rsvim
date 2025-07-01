@@ -126,8 +126,8 @@ impl NormalStateful {
     debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
     match cmdline_node {
       TreeNode::CommandLine(cmdline) => {
-        let _previous_cursor_node = cmdline.insert_cursor(cursor);
-        debug_assert!(_previous_cursor_node.is_none());
+        let _previous_cursor = cmdline.insert_cursor(cursor);
+        debug_assert!(_previous_cursor.is_none());
         cmdline.move_cursor_to(0, 0);
         cmdline.set_indicator_symbol(CommandLineIndicatorSymbol::Ex);
       }

@@ -7,7 +7,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLine;
+use crate::ui::widget::command_line::{CommandLine, CommandLineNode};
 use crate::ui::widget::window::Window;
 
 use compact_str::{CompactString, ToCompactString};
@@ -132,35 +132,25 @@ impl CommandLineExStateful {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
-    debug_assert!(tree.cursor_id().is_some());
-    let cursor_id = tree.cursor_id().unwrap();
     debug_assert!(tree.command_line_id().is_some());
     let cmdline_id = tree.command_line_id().unwrap();
+    let cmdline = self._command_line(&mut tree);
 
     if cfg!(debug_assertions) {
-      debug_assert!(tree.parent_id(cursor_id).is_some());
-      debug_assert_eq!(tree.parent_id(cursor_id).unwrap(), cmdline_id);
-      debug_assert!(tree.node(cmdline_id).is_some());
-      debug_assert!(matches!(
-        tree.node(cmdline_id).unwrap(),
-        TreeNode::CommandLine(_)
-      ));
+      debug_assert!(cmdline.cursor_id().is_some());
     }
 
     // Remove from current parent
-    let cursor_node = tree.remove(cursor_id);
+    let cursor_node = cmdline.remove_cursor();
     debug_assert!(cursor_node.is_some());
     let cursor_node = cursor_node.unwrap();
+    debug_assert!(matches!(cursor_node, CommandLineNode::Cursor(_)));
+    debug_assert!(cmdline.cursor_id().is_none());
 
-    if cfg!(debug_assertions) {
-      debug_assert!(matches!(cursor_node, TreeNode::Cursor(_)));
-      debug_assert!(!tree.children_ids(cmdline_id).contains(&cursor_id));
-    }
-
-    let cursor_node = match cursor_node {
-      TreeNode::Cursor(mut cursor) => {
+    let cursor = match cursor_node {
+      CommandLineNode::Cursor(mut cursor) => {
         cursor.set_style(&CursorStyle::SteadyBlock);
-        TreeNode::Cursor(cursor)
+        cursor
       }
       _ => unreachable!(),
     };
@@ -170,11 +160,10 @@ impl CommandLineExStateful {
     let cursor_viewport = current_window.cursor_viewport();
     trace!("before viewport:{:?}", current_window.viewport());
     trace!("before cursor_viewport:{:?}", cursor_viewport);
-    let current_window_id = current_window.id();
-    let _inserted = tree.bounded_insert(current_window_id, cursor_node);
-    debug_assert!(_inserted.is_none());
-    tree.bounded_move_to(
-      cursor_id,
+    let _current_window_id = current_window.id();
+    let _previous_cursor = current_window.insert_cursor(cursor);
+    debug_assert!(_previous_cursor.is_none());
+    current_window.move_cursor_to(
       cursor_viewport.column_idx() as isize,
       cursor_viewport.row_idx() as isize,
     );
@@ -350,36 +339,44 @@ mod tests_util {
     (tree, state, bufs, buf, contents)
   }
 
-  pub fn get_viewport(tree: TreeArc) -> ViewportArc {
-    let tree = lock!(tree);
-    let cursor_id = tree.cursor_id().unwrap();
-    let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
-    let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
-    assert!(matches!(
-      cursor_parent_node,
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
-    ));
-    match cursor_parent_node {
-      TreeNode::Window(current_window) => current_window.viewport(),
-      TreeNode::CommandLine(cmdline) => cmdline.viewport(),
+  fn _current_window<'a>(tree: &'a Tree) -> &'a Window {
+    let current_window_id = tree.current_window_id().unwrap();
+    let current_window_node = tree.node(current_window_id).unwrap();
+    assert!(matches!(current_window_node, TreeNode::Window(_)));
+    match current_window_node {
+      TreeNode::Window(current_window) => current_window,
       _ => unreachable!(),
     }
   }
 
-  pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
-    let tree = lock!(tree);
-    let cursor_id = tree.cursor_id().unwrap();
-    let cursor_parent_id = tree.parent_id(cursor_id).unwrap();
-    let cursor_parent_node = tree.node(cursor_parent_id).unwrap();
-    assert!(matches!(
-      cursor_parent_node,
-      TreeNode::Window(_) | TreeNode::CommandLine(_)
-    ));
-    match cursor_parent_node {
-      TreeNode::Window(window) => window.cursor_viewport(),
-      TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
+  fn _cmdline<'a>(tree: &'a Tree) -> &'a CommandLine {
+    let cmdline_id = tree.command_line_id().unwrap();
+    let cmdline_node = tree.node(cmdline_id).unwrap();
+    assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+    match cmdline_node {
+      TreeNode::CommandLine(cmdline) => cmdline,
       _ => unreachable!(),
     }
+  }
+
+  pub fn get_viewport_from_current_window(tree: TreeArc) -> ViewportArc {
+    let tree = lock!(tree);
+    _current_window(&tree).viewport()
+  }
+
+  pub fn get_viewport_from_cmdline(tree: TreeArc) -> ViewportArc {
+    let tree = lock!(tree);
+    _cmdline(&tree).viewport()
+  }
+
+  pub fn get_cursor_viewport_from_current_window(tree: TreeArc) -> CursorViewportArc {
+    let tree = lock!(tree);
+    _current_window(&tree).cursor_viewport()
+  }
+
+  pub fn get_cursor_viewport_from_cmdline(tree: TreeArc) -> CursorViewportArc {
+    let tree = lock!(tree);
+    _cmdline(&tree).cursor_viewport()
   }
 
   pub fn make_canvas(tree: TreeArc, terminal_size: U16Size) -> CanvasArc {
@@ -644,7 +641,7 @@ mod tests_goto_normal_mode {
     let (tree, state, bufs, buf, contents) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -667,13 +664,13 @@ mod tests_goto_normal_mode {
       stateful.goto_command_line_ex_mode(&data_access);
 
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = get_cursor_viewport_from_cmdline(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 1);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = get_viewport_from_cmdline(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
       let text1 = CompactString::new(format!(":{buf_eol}"));
       let expect = vec![text1.as_str()];
@@ -707,13 +704,13 @@ mod tests_goto_normal_mode {
       stateful.cursor_insert(&data_access, CompactString::new("Bye"));
 
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = get_cursor_viewport_from_cmdline(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 4);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 4);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = get_viewport_from_cmdline(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
       let text1 = CompactString::new(format!(":Bye{buf_eol}"));
       let expect = vec![text1.as_str()];
@@ -745,13 +742,13 @@ mod tests_goto_normal_mode {
       stateful.goto_normal_mode(&data_access);
 
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = get_cursor_viewport_from_cmdline(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 0);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = get_viewport_from_cmdline(tree.clone());
       let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -814,7 +811,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     let (tree, state, bufs, buf, contents) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
-    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    let prev_cursor_viewport = get_cursor_viewport_from_current_window(tree.clone());
     assert_eq!(prev_cursor_viewport.line_idx(), 0);
     assert_eq!(prev_cursor_viewport.char_idx(), 0);
 
@@ -837,13 +834,13 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       stateful.goto_command_line_ex_mode(&data_access);
 
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = get_cursor_viewport_from_cmdline(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 1);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 1);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = get_viewport_from_cmdline(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
       let text1 = CompactString::new(format!(":{buf_eol}"));
       let expect = vec![text1.as_str()];
@@ -877,13 +874,13 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       stateful.cursor_insert(&data_access, CompactString::new("Bye"));
 
       let tree = data_access.tree.clone();
-      let actual1 = get_cursor_viewport(tree.clone());
+      let actual1 = get_cursor_viewport_from_cmdline(tree.clone());
       assert_eq!(actual1.line_idx(), 0);
       assert_eq!(actual1.char_idx(), 4);
       assert_eq!(actual1.row_idx(), 0);
       assert_eq!(actual1.column_idx(), 4);
 
-      let viewport = get_viewport(tree.clone());
+      let viewport = get_viewport_from_cmdline(tree.clone());
       let buf_eol = lock!(buf).options().end_of_line();
       let text1 = CompactString::new(format!(":Bye{buf_eol}"));
       let expect = vec![text1.as_str()];
