@@ -1,4 +1,4 @@
-//! Internal implementations for Viewport.
+//! Viewport internal implementations.
 
 #![allow(clippy::too_many_arguments)]
 
@@ -10,7 +10,6 @@ use crate::ui::widget::window::WindowLocalOptions;
 use litemap::LiteMap;
 use ropey::RopeSlice;
 use std::ops::Range;
-#[allow(unused_imports)]
 use tracing::trace;
 use unicode_segmentation::UnicodeSegmentation;
 
