@@ -207,7 +207,7 @@ impl NormalStateful {
     let (target_cursor_char, target_cursor_line, _search_direction) =
       self.__target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
 
-    let maybe_new_cursor_viewport = cursor_ops::raw_cursor_move_to(
+    let maybe_new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
       &viewport,
       &cursor_viewport,
       buffer.text(),
@@ -237,7 +237,7 @@ impl NormalStateful {
       viewport.start_column_idx(),
       viewport.start_line_idx(),
     );
-    let maybe_new_viewport_arc = cursor_ops::raw_widget_scroll_to(
+    let maybe_new_viewport_arc = cursor_ops::raw_viewport_scroll_to(
       &viewport,
       current_window.actual_shape(),
       current_window.options(),

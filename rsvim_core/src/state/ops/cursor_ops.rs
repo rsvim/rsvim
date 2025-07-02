@@ -218,7 +218,7 @@ pub fn normalize_to_window_scroll_to(
 /// # Panics
 ///
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
-pub fn raw_cursor_move_to(
+pub fn raw_cursor_viewport_move_to(
   viewport: &Viewport,
   _cursor_viewport: &CursorViewport,
   text: &Text,
@@ -264,7 +264,7 @@ pub fn raw_cursor_move_to(
 /// # Panics
 ///
 /// It panics if the operation is not a `Operation::WindowScroll*` operation.
-pub fn raw_widget_scroll_to(
+pub fn raw_viewport_scroll_to(
   viewport: &Viewport,
   actual_shape: &U16Rect,
   window_options: &WindowLocalOptions,
@@ -337,24 +337,18 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
     TreeNode::Window(_) | TreeNode::CommandLine(_)
   ));
   let (actual_shape, local_options, viewport, cursor_viewport) = match vnode {
-    TreeNode::Window(window) => {
-      debug_assert!(window.cursor_id().is_some());
-      (
-        *window.content().actual_shape(),
-        *window.options(),
-        window.viewport(),
-        window.cursor_viewport(),
-      )
-    }
-    TreeNode::CommandLine(cmdline) => {
-      debug_assert!(cmdline.cursor_id().is_some());
-      (
-        *cmdline.content().actual_shape(),
-        *cmdline.options(),
-        cmdline.viewport(),
-        cmdline.cursor_viewport(),
-      )
-    }
+    TreeNode::Window(window) => (
+      *window.content().actual_shape(),
+      *window.options(),
+      window.viewport(),
+      window.cursor_viewport(),
+    ),
+    TreeNode::CommandLine(cmdline) => (
+      *cmdline.content().actual_shape(),
+      *cmdline.options(),
+      cmdline.viewport(),
+      cmdline.cursor_viewport(),
+    ),
     _ => unreachable!(),
   };
   trace!("before viewport:{:?}", viewport);
@@ -385,7 +379,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
     TreeNode::CommandLine(cmdline) => cmdline.set_viewport(updated_viewport.clone()),
     _ => unreachable!(),
   }
-  if let Some(updated_cursor_viewport) = raw_cursor_move_to(
+  if let Some(updated_cursor_viewport) = raw_cursor_viewport_move_to(
     &updated_viewport,
     &cursor_viewport,
     text,
@@ -424,24 +418,18 @@ pub fn cursor_move(
   let vnode = tree.node_mut(id).unwrap();
 
   let (actual_shape, local_options, viewport, cursor_viewport) = match vnode {
-    TreeNode::Window(window) => {
-      debug_assert!(window.cursor_id().is_some());
-      (
-        *window.content().actual_shape(),
-        *window.options(),
-        window.viewport(),
-        window.cursor_viewport(),
-      )
-    }
-    TreeNode::CommandLine(cmdline) => {
-      debug_assert!(cmdline.cursor_id().is_some());
-      (
-        *cmdline.content().actual_shape(),
-        *cmdline.options(),
-        cmdline.viewport(),
-        cmdline.cursor_viewport(),
-      )
-    }
+    TreeNode::Window(window) => (
+      *window.content().actual_shape(),
+      *window.options(),
+      window.viewport(),
+      window.cursor_viewport(),
+    ),
+    TreeNode::CommandLine(cmdline) => (
+      *cmdline.content().actual_shape(),
+      *cmdline.options(),
+      cmdline.viewport(),
+      cmdline.cursor_viewport(),
+    ),
     _ => unreachable!(),
   };
 
@@ -481,7 +469,7 @@ pub fn cursor_move(
 
     // First try window scroll.
     if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx() {
-      let new_viewport = raw_widget_scroll_to(
+      let new_viewport = raw_viewport_scroll_to(
         &viewport,
         &actual_shape,
         &local_options,
@@ -505,7 +493,7 @@ pub fn cursor_move(
   {
     let current_viewport = new_viewport.unwrap_or(viewport);
 
-    let new_cursor_viewport = raw_cursor_move_to(
+    let new_cursor_viewport = raw_cursor_viewport_move_to(
       &current_viewport,
       &cursor_viewport,
       text,
