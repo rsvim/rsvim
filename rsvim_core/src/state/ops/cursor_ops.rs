@@ -330,12 +330,12 @@ fn _max_len_chars_since_line(text: &Text, mut start_line_idx: usize, window_heig
 
 pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text: &Text) {
   debug_assert!(tree.node_mut(id).is_some());
-  let vnode = tree.node_mut(id).unwrap();
+  let node = tree.node_mut(id).unwrap();
   debug_assert!(matches!(
-    vnode,
+    node,
     TreeNode::Window(_) | TreeNode::CommandLine(_)
   ));
-  let (actual_shape, local_options, viewport, cursor_viewport) = match vnode {
+  let (actual_shape, local_options, viewport, cursor_viewport) = match node {
     TreeNode::Window(window) => (
       *window.content().actual_shape(),
       *window.options(),
@@ -373,7 +373,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
   ));
   trace!("after updated_viewport:{:?}", updated_viewport);
 
-  match vnode {
+  match node {
     TreeNode::Window(window) => window.set_viewport(updated_viewport.clone()),
     TreeNode::CommandLine(cmdline) => cmdline.set_viewport(updated_viewport.clone()),
     _ => unreachable!(),
@@ -388,7 +388,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
       "after updated_cursor_viewport:{:?}",
       updated_cursor_viewport
     );
-    match vnode {
+    match node {
       TreeNode::Window(window) => window.set_cursor_viewport(updated_cursor_viewport),
       TreeNode::CommandLine(cmdline) => cmdline.set_cursor_viewport(updated_cursor_viewport),
       _ => unreachable!(),
@@ -414,9 +414,9 @@ pub fn cursor_move(
   include_empty_eol: bool,
 ) {
   debug_assert!(tree.node_mut(id).is_some());
-  let vnode = tree.node_mut(id).unwrap();
+  let node = tree.node_mut(id).unwrap();
 
-  let (actual_shape, local_options, viewport, cursor_viewport) = match vnode {
+  let (actual_shape, local_options, viewport, cursor_viewport) = match node {
     TreeNode::Window(window) => (
       *window.content().actual_shape(),
       *window.options(),
@@ -476,7 +476,7 @@ pub fn cursor_move(
         Operation::WindowScrollTo((start_column, start_line)),
       );
       if let Some(new_viewport) = new_viewport.clone() {
-        match vnode {
+        match node {
           TreeNode::Window(window) => window.set_viewport(new_viewport.clone()),
           TreeNode::CommandLine(cmdline) => cmdline.set_viewport(new_viewport.clone()),
           _ => unreachable!(),
@@ -500,7 +500,7 @@ pub fn cursor_move(
     );
 
     if let Some(new_cursor_viewport) = new_cursor_viewport {
-      match vnode {
+      match node {
         TreeNode::Window(window) => {
           window.set_cursor_viewport(new_cursor_viewport.clone());
           if window.cursor_id().is_some() {
@@ -543,8 +543,8 @@ pub fn cursor_insert(
   payload: CompactString,
 ) -> (usize, usize) {
   debug_assert!(tree.node_mut(id).is_some());
-  let vnode = tree.node_mut(id).unwrap();
-  let cursor_viewport = match vnode {
+  let node = tree.node_mut(id).unwrap();
+  let cursor_viewport = match node {
     TreeNode::Window(window) => window.cursor_viewport(),
     TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
     _ => unreachable!(),
@@ -596,8 +596,8 @@ pub fn cursor_delete(
   n: isize,
 ) -> Option<(usize, usize)> {
   debug_assert!(tree.node_mut(id).is_some());
-  let vnode = tree.node_mut(id).unwrap();
-  let cursor_viewport = match vnode {
+  let node = tree.node_mut(id).unwrap();
+  let cursor_viewport = match node {
     TreeNode::Window(window) => window.cursor_viewport(),
     TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
     _ => unreachable!(),
