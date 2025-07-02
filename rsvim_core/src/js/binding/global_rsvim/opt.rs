@@ -1,7 +1,7 @@
 //! APIs for `Rsvim.opt` namespace.
 
 use crate::js::JsRuntime;
-use crate::lock;
+use crate::prelude::*;
 
 use tracing::trace;
 

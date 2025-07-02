@@ -4,7 +4,6 @@ use crate::prelude::*;
 use crate::ui::canvas::{Canvas, CanvasArc};
 use crate::ui::widget::Widgetable;
 use crate::ui::widget::command_line::CommandLine;
-use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::root::RootContainer;
 use crate::ui::widget::window::{
   Window, WindowGlobalOptions, WindowGlobalOptionsBuilder, WindowLocalOptions,
@@ -25,12 +24,11 @@ pub mod internal;
 pub enum TreeNode {
   RootContainer(RootContainer),
   Window(Window),
-  Cursor(Cursor),
   CommandLine(CommandLine),
 }
 
-inode_enum_dispatcher!(TreeNode, RootContainer, Window, Cursor, CommandLine);
-widget_enum_dispatcher!(TreeNode, RootContainer, Window, Cursor, CommandLine);
+inode_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
+widget_enum_dispatcher!(TreeNode, RootContainer, Window, CommandLine);
 
 #[derive(Debug, Clone)]
 /// The widget tree.
@@ -130,9 +128,6 @@ pub struct Tree {
   // Internal implementation.
   base: Itree<TreeNode>,
 
-  // [`Cursor`](crate::ui::widget::cursor::Cursor) node ID.
-  cursor_id: Option<TreeNodeId>,
-
   // [`CommandLine`](crate::ui::widget::command_line::CommandLine) node ID.
   command_line_id: Option<TreeNodeId>,
 
@@ -141,12 +136,12 @@ pub struct Tree {
 
   // The *current* window node ID.
   //
-  // The term *current* means the UI widget that is focused, i.e. it contains the cursor.
-  // But when user inputs commands in cmdline UI widget, the cursor will move to the cmdline
-  // widget, which is not a window widget. And in meanwhile, we still need to know the **current**
-  // window and the **cursor** position, as if the cursor is still inside the window.
-  // Technically speaking, this field is **saved_current_window_id**, i.e. when cursor moves to the
-  // cmdline widget, this field still saves the previous *current* window id.
+  // The **current** window means user is focused on the window widget, i.e. it contains the
+  // cursor, since the cursor is like the mouse on the screen.
+  //
+  // But when user inputs commands in cmdline widget, the cursor widget will move to the cmdline
+  // widget. But we still keeps the **current window**, this field is actually the **previous**
+  // current window.
   current_window_id: Option<TreeNodeId>,
 
   // Global options for windows.
@@ -175,7 +170,6 @@ impl Tree {
     let root_node = TreeNode::RootContainer(root_container);
     Tree {
       base: Itree::new(root_node),
-      cursor_id: None,
       command_line_id: None,
       window_ids: BTreeSet::new(),
       current_window_id: None,
@@ -234,38 +228,39 @@ impl Tree {
   //   self.base.iter_mut()
   // }
 
-  /// Get current cursor node ID.
-  pub fn cursor_id(&self) -> Option<TreeNodeId> {
-    self.cursor_id
-  }
-
   /// Get command-line node ID.
   pub fn command_line_id(&self) -> Option<TreeNodeId> {
     self.command_line_id
   }
 
   /// Get current window node ID.
-  /// NOTE: A window is called the current window because it has cursor inside it.
+  /// NOTE: A window is called the current window because it has cursor inside it. But when user is
+  /// in command-line mode, the cursor widget is actually inside the command-line widget, not in
+  /// window. Mean while the **current** window is actually the **previous current** window.
   pub fn current_window_id(&self) -> Option<TreeNodeId> {
+    self.current_window_id
+  }
+
+  /// Set current window node ID.
+  ///
+  /// NOTE: When the node ID is not `None`, it must be a valid tree node, existing in current tree,
+  /// and it must be a window widget.
+  pub fn set_current_window_id(&mut self, window_id: Option<TreeNodeId>) -> Option<TreeNodeId> {
     if cfg!(debug_assertions) {
-      if let Some(cursor_id) = self.cursor_id {
-        debug_assert!(self.parent_id(cursor_id).is_some());
-        let parent_id = self.parent_id(cursor_id).unwrap();
-        debug_assert!(self.node(parent_id).is_some());
-        let parent_node = self.node(parent_id).unwrap();
-        match parent_node {
-          TreeNode::Window(window) => {
-            debug_assert!(self.current_window_id.is_some());
-            debug_assert_eq!(self.current_window_id.unwrap(), window.id());
-          }
-          TreeNode::CommandLine(_command_line) => {
-            debug_assert!(self.current_window_id.is_some());
-          }
-          _ => unreachable!(),
+      match window_id {
+        Some(window_id) => {
+          debug_assert!(self.node_mut(window_id).is_some());
+          debug_assert!(matches!(
+            self.node_mut(window_id).unwrap(),
+            TreeNode::Window(_)
+          ));
         }
+        None => { /* */ }
       }
     }
-    self.current_window_id
+    let old = self.current_window_id;
+    self.current_window_id = window_id;
+    old
   }
 
   /// Get all the window widget IDs.
@@ -275,31 +270,102 @@ impl Tree {
 }
 // Node {
 
-// Insert/Remove {
+// Widget {
 impl Tree {
-  // This method handles some special requirements when insert a widget node:
-  //
-  // 1. When insert a cursor widget, it's parent widget must be a window widget.
-  // 2. Maintain the cursor widget ID and window widget IDs when insert.
-  fn insert_guard(&mut self, node: &TreeNode, parent_id: TreeNodeId) {
-    match node {
-      TreeNode::Cursor(cursor) => {
-        // When insert cursor widget, update `current_window_id`.
-        let parent_node = self.node(parent_id).unwrap();
-        match parent_node {
-          TreeNode::Window(window) => {
-            self.current_window_id = Some(window.id());
+  /// Window widget.
+  pub fn window(&self, window_id: TreeNodeId) -> Option<&Window> {
+    match self.node(window_id) {
+      Some(window_node) => {
+        debug_assert!(matches!(window_node, TreeNode::Window(_)));
+        match window_node {
+          TreeNode::Window(w) => {
+            debug_assert_eq!(w.id(), window_id);
+            Some(w)
           }
-          TreeNode::CommandLine(command_line) => {
-            if let Some(command_line_id) = self.command_line_id {
-              debug_assert_eq!(command_line.id(), command_line_id);
-            }
+          _ => unreachable!(), // Other variants not allowed.
+        }
+      }
+      None => None,
+    }
+  }
+
+  /// Mutable window widget.
+  pub fn window_mut(&mut self, window_id: TreeNodeId) -> Option<&mut Window> {
+    match self.node_mut(window_id) {
+      Some(window_node) => {
+        debug_assert!(matches!(window_node, TreeNode::Window(_)));
+        match window_node {
+          TreeNode::Window(w) => {
+            debug_assert_eq!(w.id(), window_id);
+            Some(w)
+          }
+          _ => unreachable!(), // Other variants not allowed.
+        }
+      }
+      None => None,
+    }
+  }
+
+  // Current window widget.
+  pub fn current_window(&self) -> Option<&Window> {
+    match self.current_window_id {
+      Some(current_window_id) => self.window(current_window_id),
+      None => None,
+    }
+  }
+
+  // Mutable current window widget.
+  pub fn current_window_mut(&mut self) -> Option<&mut Window> {
+    match self.current_window_id {
+      Some(current_window_id) => self.window_mut(current_window_id),
+      None => None,
+    }
+  }
+
+  // Command-line widget.
+  pub fn command_line(&self) -> Option<&CommandLine> {
+    match self.command_line_id {
+      Some(cmdline_id) => {
+        debug_assert!(self.node(cmdline_id).is_some());
+        let cmdline_node = self.node(cmdline_id).unwrap();
+        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+        match cmdline_node {
+          TreeNode::CommandLine(w) => {
+            debug_assert_eq!(w.id(), cmdline_id);
+            Some(w)
           }
           _ => unreachable!(),
         }
-        // When insert cursor widget, update `cursor_id`.
-        self.cursor_id = Some(cursor.id());
       }
+      None => None,
+    }
+  }
+
+  // Mutable command-line widget.
+  pub fn command_line_mut(&mut self) -> Option<&mut CommandLine> {
+    match self.command_line_id {
+      Some(cmdline_id) => {
+        debug_assert!(self.node_mut(cmdline_id).is_some());
+        let cmdline_node = self.node_mut(cmdline_id).unwrap();
+        debug_assert!(matches!(cmdline_node, TreeNode::CommandLine(_)));
+        match cmdline_node {
+          TreeNode::CommandLine(w) => {
+            debug_assert_eq!(w.id(), cmdline_id);
+            Some(w)
+          }
+          _ => unreachable!(),
+        }
+      }
+      None => None,
+    }
+  }
+}
+// Widget }
+
+// Insert/Remove {
+impl Tree {
+  fn insert_guard(&mut self, node: &TreeNode) {
+    match node {
       TreeNode::CommandLine(command_line) => {
         // When insert command-line widget, update `command_line_id`.
         self.command_line_id = Some(command_line.id());
@@ -314,7 +380,7 @@ impl Tree {
 
   /// See [`Itree::insert`].
   pub fn insert(&mut self, parent_id: TreeNodeId, child_node: TreeNode) -> Option<TreeNode> {
-    self.insert_guard(&child_node, parent_id);
+    self.insert_guard(&child_node);
     self.base.insert(parent_id, child_node)
   }
 
@@ -324,19 +390,11 @@ impl Tree {
     parent_id: TreeNodeId,
     child_node: TreeNode,
   ) -> Option<TreeNode> {
-    self.insert_guard(&child_node, parent_id);
+    self.insert_guard(&child_node);
     self.base.bounded_insert(parent_id, child_node)
   }
 
-  // This method handles some special requirements when remove a widget node:
-  //
-  // 1. When insert a cursor widget, it's parent widget must be a window widget.
-  // 2. Maintain the cursor widget ID and window widget IDs when remove.
   fn remove_guard(&mut self, id: TreeNodeId) {
-    // If the removed ID is cursor ID, remove it.
-    if self.cursor_id == Some(id) {
-      self.cursor_id = None;
-    }
     if self.command_line_id == Some(id) {
       self.command_line_id = None;
     }

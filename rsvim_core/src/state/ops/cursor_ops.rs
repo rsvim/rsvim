@@ -5,7 +5,7 @@ use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection, Viewportable,
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
 };
 use crate::ui::widget::window::WindowLocalOptions;
 
@@ -217,7 +217,7 @@ pub fn normalize_to_window_scroll_to(
 /// # Panics
 ///
 /// It panics if the operation is not a `Operation::CursorMove*` operation.
-pub fn raw_cursor_move_to(
+pub fn raw_cursor_viewport_move_to(
   viewport: &Viewport,
   _cursor_viewport: &CursorViewport,
   text: &Text,
@@ -263,7 +263,7 @@ pub fn raw_cursor_move_to(
 /// # Panics
 ///
 /// It panics if the operation is not a `Operation::WindowScroll*` operation.
-pub fn raw_widget_scroll_to(
+pub fn raw_viewport_scroll_to(
   viewport: &Viewport,
   actual_shape: &U16Rect,
   window_options: &WindowLocalOptions,
@@ -335,20 +335,21 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
     node,
     TreeNode::Window(_) | TreeNode::CommandLine(_)
   ));
-
-  let actual_shape = match node {
-    TreeNode::Window(window) => *window.actual_shape(),
-    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
+  let (actual_shape, local_options, viewport, cursor_viewport) = match node {
+    TreeNode::Window(window) => (
+      *window.content().actual_shape(),
+      *window.options(),
+      window.viewport(),
+      window.cursor_viewport(),
+    ),
+    TreeNode::CommandLine(cmdline) => (
+      *cmdline.content().actual_shape(),
+      *cmdline.options(),
+      cmdline.viewport(),
+      cmdline.cursor_viewport(),
+    ),
     _ => unreachable!(),
   };
-  let vnode: &mut dyn Viewportable = match node {
-    TreeNode::Window(window) => window,
-    TreeNode::CommandLine(cmdline) => cmdline,
-    _ => unreachable!(),
-  };
-
-  let viewport = vnode.viewport();
-  let cursor_viewport = vnode.cursor_viewport();
   trace!("before viewport:{:?}", viewport);
   trace!("before cursor_viewport:{:?}", cursor_viewport);
 
@@ -364,7 +365,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
   );
 
   let updated_viewport = Viewport::to_arc(Viewport::view(
-    vnode.options(),
+    &local_options,
     text,
     &actual_shape,
     start_line,
@@ -372,8 +373,12 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
   ));
   trace!("after updated_viewport:{:?}", updated_viewport);
 
-  vnode.set_viewport(updated_viewport.clone());
-  if let Some(updated_cursor_viewport) = raw_cursor_move_to(
+  match node {
+    TreeNode::Window(window) => window.set_viewport(updated_viewport.clone()),
+    TreeNode::CommandLine(cmdline) => cmdline.set_viewport(updated_viewport.clone()),
+    _ => unreachable!(),
+  }
+  if let Some(updated_cursor_viewport) = raw_cursor_viewport_move_to(
     &updated_viewport,
     &cursor_viewport,
     text,
@@ -383,7 +388,11 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
       "after updated_cursor_viewport:{:?}",
       updated_cursor_viewport
     );
-    vnode.set_cursor_viewport(updated_cursor_viewport);
+    match node {
+      TreeNode::Window(window) => window.set_cursor_viewport(updated_cursor_viewport),
+      TreeNode::CommandLine(cmdline) => cmdline.set_cursor_viewport(updated_cursor_viewport),
+      _ => unreachable!(),
+    }
   }
 }
 
@@ -405,20 +414,23 @@ pub fn cursor_move(
   include_empty_eol: bool,
 ) {
   debug_assert!(tree.node_mut(id).is_some());
-  let cursor_parent_node = tree.node_mut(id).unwrap();
-  let vnode_actual_shape = match cursor_parent_node {
-    TreeNode::Window(window) => *window.actual_shape(),
-    TreeNode::CommandLine(cmdline) => *cmdline.actual_shape(),
-    _ => unreachable!(),
-  };
-  let vnode: &mut dyn Viewportable = match cursor_parent_node {
-    TreeNode::Window(window) => window,
-    TreeNode::CommandLine(cmdline) => cmdline,
-    _ => unreachable!(),
-  };
+  let node = tree.node_mut(id).unwrap();
 
-  let viewport = vnode.viewport();
-  let cursor_viewport = vnode.cursor_viewport();
+  let (actual_shape, local_options, viewport, cursor_viewport) = match node {
+    TreeNode::Window(window) => (
+      *window.content().actual_shape(),
+      *window.options(),
+      window.viewport(),
+      window.cursor_viewport(),
+    ),
+    TreeNode::CommandLine(cmdline) => (
+      *cmdline.content().actual_shape(),
+      *cmdline.options(),
+      cmdline.viewport(),
+      cmdline.cursor_viewport(),
+    ),
+    _ => unreachable!(),
+  };
 
   // Only move cursor when it is different from current cursor.
   let (target_cursor_char, target_cursor_line, move_direction) = if include_empty_eol {
@@ -447,24 +459,28 @@ pub fn cursor_move(
   let new_viewport: Option<ViewportArc> = {
     let (start_line, start_column) = viewport.search_anchor(
       search_direction,
-      vnode.options(),
+      &local_options,
       text,
-      &vnode_actual_shape,
+      &actual_shape,
       target_cursor_line,
       target_cursor_char,
     );
 
     // First try window scroll.
     if start_line != viewport.start_line_idx() || start_column != viewport.start_column_idx() {
-      let new_viewport = raw_widget_scroll_to(
+      let new_viewport = raw_viewport_scroll_to(
         &viewport,
-        &vnode_actual_shape,
-        vnode.options(),
+        &actual_shape,
+        &local_options,
         text,
         Operation::WindowScrollTo((start_column, start_line)),
       );
-      if let Some(new_viewport_arc) = new_viewport.clone() {
-        vnode.set_viewport(new_viewport_arc.clone());
+      if let Some(new_viewport) = new_viewport.clone() {
+        match node {
+          TreeNode::Window(window) => window.set_viewport(new_viewport.clone()),
+          TreeNode::CommandLine(cmdline) => cmdline.set_viewport(new_viewport.clone()),
+          _ => unreachable!(),
+        }
       }
       new_viewport
     } else {
@@ -476,7 +492,7 @@ pub fn cursor_move(
   {
     let current_viewport = new_viewport.unwrap_or(viewport);
 
-    let new_cursor_viewport = raw_cursor_move_to(
+    let new_cursor_viewport = raw_cursor_viewport_move_to(
       &current_viewport,
       &cursor_viewport,
       text,
@@ -484,13 +500,27 @@ pub fn cursor_move(
     );
 
     if let Some(new_cursor_viewport) = new_cursor_viewport {
-      vnode.set_cursor_viewport(new_cursor_viewport.clone());
-      let cursor_id = tree.cursor_id().unwrap();
-      tree.bounded_move_to(
-        cursor_id,
-        new_cursor_viewport.column_idx() as isize,
-        new_cursor_viewport.row_idx() as isize,
-      );
+      match node {
+        TreeNode::Window(window) => {
+          window.set_cursor_viewport(new_cursor_viewport.clone());
+          if window.cursor_id().is_some() {
+            window.move_cursor_to(
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
+            );
+          }
+        }
+        TreeNode::CommandLine(cmdline) => {
+          cmdline.set_cursor_viewport(new_cursor_viewport.clone());
+          if cmdline.cursor_id().is_some() {
+            cmdline.move_cursor_to(
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
+            );
+          }
+        }
+        _ => unreachable!(),
+      }
     }
   }
 }
@@ -513,15 +543,14 @@ pub fn cursor_insert(
   payload: CompactString,
 ) -> (usize, usize) {
   debug_assert!(tree.node_mut(id).is_some());
-  let cursor_parent_node = tree.node_mut(id).unwrap();
-  let vnode: &mut dyn Viewportable = match cursor_parent_node {
-    TreeNode::Window(window) => window,
-    TreeNode::CommandLine(cmdline) => cmdline,
+  let node = tree.node_mut(id).unwrap();
+  let cursor_viewport = match node {
+    TreeNode::Window(window) => window.cursor_viewport(),
+    TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
     _ => unreachable!(),
   };
 
   // Insert text.
-  let cursor_viewport = vnode.cursor_viewport();
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
@@ -567,15 +596,14 @@ pub fn cursor_delete(
   n: isize,
 ) -> Option<(usize, usize)> {
   debug_assert!(tree.node_mut(id).is_some());
-  let cursor_parent_node = tree.node_mut(id).unwrap();
-  let vnode: &mut dyn Viewportable = match cursor_parent_node {
-    TreeNode::Window(window) => window,
-    TreeNode::CommandLine(cmdline) => cmdline,
+  let node = tree.node_mut(id).unwrap();
+  let cursor_viewport = match node {
+    TreeNode::Window(window) => window.cursor_viewport(),
+    TreeNode::CommandLine(cmdline) => cmdline.cursor_viewport(),
     _ => unreachable!(),
   };
 
   // Delete N-chars.
-  let cursor_viewport = vnode.cursor_viewport();
   let cursor_line_idx = cursor_viewport.line_idx();
   let cursor_char_idx = cursor_viewport.char_idx();
   debug_assert!(text.rope().get_line(cursor_line_idx).is_some());

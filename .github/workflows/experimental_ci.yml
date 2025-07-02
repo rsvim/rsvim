@@ -15,6 +15,7 @@ env:
   CARGO_NET_RETRY: 3
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-Dwarnings"
+  RSVIM_LOG: "trace"
   RUST_BACKTRACE: "full"
 jobs:
   check:

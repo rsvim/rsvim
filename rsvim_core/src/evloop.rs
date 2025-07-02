@@ -7,7 +7,6 @@ use crate::envar;
 use crate::evloop::msg::WorkerToMasterMessage;
 use crate::js::msg::{self as jsmsg, EventLoopToJsRuntimeMessage, JsRuntimeToEventLoopMessage};
 use crate::js::{JsRuntime, JsRuntimeOptions, SnapshotData};
-use crate::lock;
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::{State, StateArc};
@@ -342,7 +341,7 @@ impl EventLoop {
         canvas_size.height().saturating_sub(1) as isize,
       ),
     );
-    let window = {
+    let mut window = {
       let buffers = lock!(self.buffers);
       let (buf_id, buf) = buffers.first_key_value().unwrap();
       trace!("Bind first buffer to default window {:?}", buf_id);
@@ -353,8 +352,20 @@ impl EventLoop {
       )
     };
     let window_id = window.id();
-    let window_node = TreeNode::Window(window);
-    tree.bounded_insert(tree_root_id, window_node);
+
+    // Initialize cursor inside the default window.
+    let cursor_shape = IRect::new((0, 0), (1, 1));
+    let cursor = Cursor::new(
+      cursor_shape,
+      canvas_cursor.blinking(),
+      canvas_cursor.hidden(),
+      canvas_cursor.style(),
+    );
+    let _previous_inserted_cursor = window.insert_cursor(cursor);
+    debug_assert!(_previous_inserted_cursor.is_none());
+
+    tree.bounded_insert(tree_root_id, TreeNode::Window(window));
+    tree.set_current_window_id(Some(window_id));
 
     // Initialize default command-line.
     let cmdline_shape = IRect::new(
@@ -363,19 +374,8 @@ impl EventLoop {
     );
     let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
     let _cmdline_id = cmdline.id();
-    let cmdline = TreeNode::CommandLine(cmdline);
-    tree.bounded_insert(tree_root_id, cmdline);
 
-    // Initialize cursor.
-    let cursor_shape = IRect::new((0, 0), (1, 1));
-    let cursor = Cursor::new(
-      cursor_shape,
-      canvas_cursor.blinking(),
-      canvas_cursor.hidden(),
-      canvas_cursor.style(),
-    );
-    let cursor_node = TreeNode::Cursor(cursor);
-    tree.bounded_insert(window_id, cursor_node);
+    tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
 
     Ok(())
   }

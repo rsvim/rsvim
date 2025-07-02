@@ -1,15 +1,15 @@
-//! Vim window.
+//! Window.
 
 use crate::buf::BufferWk;
-use crate::lock;
 use crate::prelude::*;
 use crate::ui::canvas::Canvas;
 use crate::ui::tree::*;
-use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc, Viewportable};
+use crate::ui::viewport::{CursorViewport, CursorViewportArc, Viewport, ViewportArc};
 use crate::ui::widget::Widgetable;
+use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::content::WindowContent;
 use crate::ui::widget::window::root::WindowRootContainer;
-use crate::{inode_enum_dispatcher, widget_enum_dispatcher};
+use crate::{inode_enum_dispatcher, inode_itree_impl, widget_enum_dispatcher};
 
 // Re-export
 pub use opt::*;
@@ -26,31 +26,24 @@ pub mod root;
 pub enum WindowNode {
   WindowRootContainer(WindowRootContainer),
   WindowContent(WindowContent),
+  Cursor(Cursor),
 }
 
-inode_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent);
-widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent);
+inode_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
+widget_enum_dispatcher!(WindowNode, WindowRootContainer, WindowContent, Cursor);
 
 #[derive(Debug, Clone)]
 /// The Vim window, it manages all descendant widget nodes, i.e. all widgets in the
 /// [`crate::ui::widget::window`] module.
 pub struct Window {
   base: Itree<WindowNode>,
-
-  // Local window options.
-  // By default these options will inherit from global options of UI.
   options: WindowLocalOptions,
 
-  // The Window content widget ID.
   content_id: TreeNodeId,
+  cursor_id: Option<TreeNodeId>,
 
-  // Buffer.
   buffer: BufferWk,
-
-  // Viewport.
   viewport: ViewportArc,
-
-  // Cursor viewport.
   cursor_viewport: CursorViewportArc,
 }
 
@@ -59,19 +52,19 @@ impl Window {
     let window_root = WindowRootContainer::new(shape);
     let window_root_id = window_root.id();
     let window_root_node = WindowNode::WindowRootContainer(window_root);
-    let window_root_actual_shape = *window_root_node.actual_shape();
+    let window_root_actual_shape = window_root.actual_shape();
+
+    let mut base = Itree::new(window_root_node);
 
     let (viewport, cursor_viewport) = {
       let buffer = buffer.upgrade().unwrap();
       let buffer = lock!(buffer);
-      let viewport = Viewport::view(opts, buffer.text(), &window_root_actual_shape, 0, 0);
+      let viewport = Viewport::view(opts, buffer.text(), window_root_actual_shape, 0, 0);
       let cursor_viewport = CursorViewport::from_top_left(&viewport, buffer.text());
       (viewport, cursor_viewport)
     };
     let viewport = Viewport::to_arc(viewport);
     let cursor_viewport = CursorViewport::to_arc(cursor_viewport);
-
-    let mut base = Itree::new(window_root_node);
 
     let window_content = WindowContent::new(shape, buffer.clone(), Arc::downgrade(&viewport));
     let window_content_id = window_content.id();
@@ -83,6 +76,7 @@ impl Window {
       base,
       options: *opts,
       content_id: window_content_id,
+      cursor_id: None,
       buffer,
       viewport,
       cursor_viewport,
@@ -90,83 +84,7 @@ impl Window {
   }
 }
 
-impl Inodeable for Window {
-  fn id(&self) -> TreeNodeId {
-    self.base.root_id()
-  }
-
-  fn depth(&self) -> usize {
-    self.base.node(self.base.root_id()).unwrap().depth()
-  }
-
-  fn set_depth(&mut self, depth: usize) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_depth(depth);
-  }
-
-  fn zindex(&self) -> usize {
-    self.base.node(self.base.root_id()).unwrap().zindex()
-  }
-
-  fn set_zindex(&mut self, zindex: usize) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_zindex(zindex);
-  }
-
-  fn shape(&self) -> &IRect {
-    self.base.node(self.base.root_id()).unwrap().shape()
-  }
-
-  fn set_shape(&mut self, shape: &IRect) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_shape(shape);
-  }
-
-  fn actual_shape(&self) -> &U16Rect {
-    self.base.node(self.base.root_id()).unwrap().actual_shape()
-  }
-
-  fn set_actual_shape(&mut self, actual_shape: &U16Rect) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_actual_shape(actual_shape);
-  }
-
-  fn enabled(&self) -> bool {
-    self.base.node(self.base.root_id()).unwrap().enabled()
-  }
-
-  fn set_enabled(&mut self, enabled: bool) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_enabled(enabled);
-  }
-
-  fn visible(&self) -> bool {
-    self.base.node(self.base.root_id()).unwrap().visible()
-  }
-
-  fn set_visible(&mut self, visible: bool) {
-    self
-      .base
-      .node_mut(self.base.root_id())
-      .unwrap()
-      .set_visible(visible);
-  }
-}
+inode_itree_impl!(Window, base);
 
 impl Widgetable for Window {
   fn draw(&self, canvas: &mut Canvas) {
@@ -177,24 +95,25 @@ impl Widgetable for Window {
   }
 }
 
-impl Viewportable for Window {
+// Attributes
+impl Window {
   /// Get window local options.
-  fn options(&self) -> &WindowLocalOptions {
+  pub fn options(&self) -> &WindowLocalOptions {
     &self.options
   }
 
   /// Set window local options.
-  fn set_options(&mut self, options: &WindowLocalOptions) {
+  pub fn set_options(&mut self, options: &WindowLocalOptions) {
     self.options = *options;
   }
 
   /// Get viewport.
-  fn viewport(&self) -> ViewportArc {
+  pub fn viewport(&self) -> ViewportArc {
     self.viewport.clone()
   }
 
   /// Set viewport.
-  fn set_viewport(&mut self, viewport: ViewportArc) {
+  pub fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport.clone();
     if let Some(WindowNode::WindowContent(content)) = self.base.node_mut(self.content_id) {
       content.set_viewport(Arc::downgrade(&viewport));
@@ -202,32 +121,171 @@ impl Viewportable for Window {
   }
 
   /// Get cursor viewport.
-  fn cursor_viewport(&self) -> CursorViewportArc {
+  pub fn cursor_viewport(&self) -> CursorViewportArc {
     self.cursor_viewport.clone()
   }
 
   /// Set cursor viewport.
-  fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
+  pub fn set_cursor_viewport(&mut self, cursor_viewport: CursorViewportArc) {
     self.cursor_viewport = cursor_viewport;
+  }
+
+  /// Get binded buffer.
+  pub fn buffer(&self) -> BufferWk {
+    self.buffer.clone()
+  }
+
+  /// Cursor widget ID.
+  pub fn cursor_id(&self) -> Option<TreeNodeId> {
+    self.cursor_id
+  }
+
+  /// Content widget ID.
+  pub fn content_id(&self) -> TreeNodeId {
+    self.content_id
   }
 }
 
 // Viewport {
 impl Window {
-  /// Get buffer.
-  pub fn buffer(&self) -> BufferWk {
-    self.buffer.clone()
+  /// Window content widget.
+  pub fn content(&self) -> &WindowContent {
+    debug_assert!(self.base.node(self.content_id).is_some());
+    debug_assert!(matches!(
+      self.base.node(self.content_id).unwrap(),
+      WindowNode::WindowContent(_)
+    ));
+    match self.base.node(self.content_id).unwrap() {
+      WindowNode::WindowContent(w) => {
+        debug_assert_eq!(w.id(), self.content_id);
+        w
+      }
+      _ => unreachable!(),
+    }
   }
 
-  /// Get window content widget.
-  pub fn window_content(&self) -> &WindowContent {
-    match self.base.node(self.content_id) {
-      Some(WindowNode::WindowContent(w)) => w,
+  /// Mutable window content widget.
+  pub fn content_mut(&mut self) -> &mut WindowContent {
+    debug_assert!(self.base.node_mut(self.content_id).is_some());
+    debug_assert!(matches!(
+      self.base.node_mut(self.content_id).unwrap(),
+      WindowNode::WindowContent(_)
+    ));
+    match self.base.node_mut(self.content_id).unwrap() {
+      WindowNode::WindowContent(w) => {
+        debug_assert_eq!(w.id(), self.content_id);
+        w
+      }
       _ => unreachable!(),
+    }
+  }
+
+  /// Cursor widget.
+  pub fn cursor(&self) -> Option<&Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.base.node(cursor_id).is_some());
+        debug_assert!(matches!(
+          self.base.node(cursor_id).unwrap(),
+          WindowNode::Cursor(_)
+        ));
+        match self.base.node(cursor_id).unwrap() {
+          WindowNode::Cursor(c) => {
+            debug_assert_eq!(c.id(), cursor_id);
+            Some(c)
+          }
+          _ => None,
+        }
+      }
+      None => None,
+    }
+  }
+
+  pub fn cursor_mut(&mut self) -> Option<&mut Cursor> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.base.node_mut(cursor_id).is_some());
+        debug_assert!(matches!(
+          self.base.node_mut(cursor_id).unwrap(),
+          WindowNode::Cursor(_)
+        ));
+        match self.base.node_mut(cursor_id).unwrap() {
+          WindowNode::Cursor(c) => {
+            debug_assert_eq!(c.id(), cursor_id);
+            Some(c)
+          }
+          _ => None,
+        }
+      }
+      None => None,
     }
   }
 }
 // Viewport }
+
+// Cursor {
+impl Window {
+  /// Enable/insert cursor widget in window, i.e. when user moves cursor to a window, the window
+  /// content widget contains this cursor, and allow user moving cursor (or inserting text at
+  /// cursor).
+  ///
+  /// # Returns
+  /// It returns the old cursor widget if there's any, otherwise it returns `None`.
+  pub fn insert_cursor(&mut self, cursor: Cursor) -> Option<WindowNode> {
+    self.cursor_id = Some(cursor.id());
+    self
+      .base
+      .bounded_insert(self.content_id, WindowNode::Cursor(cursor))
+  }
+
+  /// Disable/remove cursor widget from window, i.e. when user cursor leaves window, the window
+  /// content widget doesn't contain this cursor any longer.
+  ///
+  /// # Returns
+  /// It returns the removed cursor widget if exists, otherwise it returns `None`.
+  pub fn remove_cursor(&mut self) -> Option<WindowNode> {
+    match self.cursor_id {
+      Some(cursor_id) => {
+        debug_assert!(self.base.node(cursor_id).is_some());
+        debug_assert!(self.base.parent_id(cursor_id).is_some());
+        debug_assert_eq!(self.base.parent_id(cursor_id).unwrap(), self.content_id);
+        self.cursor_id = None;
+        let cursor_node = self.base.remove(cursor_id);
+        debug_assert!(cursor_node.is_some());
+        debug_assert!(matches!(
+          cursor_node.as_ref().unwrap(),
+          WindowNode::Cursor(_)
+        ));
+        cursor_node
+      }
+      None => {
+        debug_assert!(self.cursor_id.is_none());
+        debug_assert!(self.base.node(self.content_id).is_some());
+        debug_assert!(self.base.children_ids(self.content_id).is_empty());
+        None
+      }
+    }
+  }
+
+  /// Bounded move cursor by x(columns) and y(rows).
+  ///
+  /// # Panics
+  /// It panics if cursor not exist.
+  pub fn move_cursor_by(&mut self, x: isize, y: isize) -> Option<IRect> {
+    let cursor_id = self.cursor_id.unwrap();
+    self.base.bounded_move_by(cursor_id, x, y)
+  }
+
+  /// Bounded move cursor to position x(columns) and y(rows).
+  ///
+  /// # Panics
+  /// It panics if cursor not exist.
+  pub fn move_cursor_to(&mut self, x: isize, y: isize) -> Option<IRect> {
+    let cursor_id = self.cursor_id.unwrap();
+    self.base.bounded_move_to(cursor_id, x, y)
+  }
+}
+// Cursor }
 
 #[allow(unused_imports)]
 #[cfg(test)]

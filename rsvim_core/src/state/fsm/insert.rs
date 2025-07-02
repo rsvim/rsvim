@@ -1,12 +1,11 @@
 //! The insert mode.
 
-use crate::lock;
+use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
 use crate::state::ops::cursor_ops;
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::window::Window;
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -47,24 +46,6 @@ impl InsertStateful {
       Event::Resize(_columns, _rows) => None,
     }
   }
-
-  fn _current_window<'a>(&self, tree: &'a mut Tree) -> &'a mut Window {
-    debug_assert!(tree.current_window_id().is_some());
-    let current_window_id = tree.current_window_id().unwrap();
-    debug_assert!(tree.cursor_id().is_some());
-    debug_assert!(tree.parent_id(tree.cursor_id().unwrap()).is_some());
-    debug_assert_eq!(
-      current_window_id,
-      tree.parent_id(tree.cursor_id().unwrap()).unwrap()
-    );
-    debug_assert!(tree.node_mut(current_window_id).is_some());
-    let current_window_node = tree.node_mut(current_window_id).unwrap();
-    debug_assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => current_window,
-      _ => unreachable!(),
-    }
-  }
 }
 
 impl Stateful for InsertStateful {
@@ -98,7 +79,7 @@ impl InsertStateful {
   fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = self._current_window(&mut tree);
+    let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
@@ -117,7 +98,7 @@ impl InsertStateful {
   ) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = self._current_window(&mut tree);
+    let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let mut buffer = lock!(buffer);
@@ -132,7 +113,7 @@ impl InsertStateful {
   fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = self._current_window(&mut tree);
+    let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
@@ -140,14 +121,13 @@ impl InsertStateful {
     let op = Operation::CursorMoveBy((0, 0));
     cursor_ops::cursor_move(&mut tree, current_window_id, buffer.text(), op, false);
 
-    debug_assert!(tree.cursor_id().is_some());
-    let cursor_id = tree.cursor_id().unwrap();
-    debug_assert!(tree.node_mut(cursor_id).is_some());
-    if let Some(TreeNode::Cursor(cursor)) = tree.node_mut(cursor_id) {
-      cursor.set_style(&CursorStyle::SteadyBlock);
-    } else {
-      unreachable!()
-    }
+    let current_window = tree.current_window_mut().unwrap();
+    debug_assert!(current_window.cursor_id().is_some());
+    let _cursor_id = current_window.cursor_id().unwrap();
+    debug_assert!(current_window.cursor_mut().is_some());
+    let cursor = current_window.cursor_mut().unwrap();
+    debug_assert_eq!(_cursor_id, cursor.id());
+    cursor.set_style(&CursorStyle::SteadyBlock);
 
     StatefulValue::NormalMode(super::NormalStateful::default())
   }
@@ -157,7 +137,7 @@ impl InsertStateful {
   fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
-    let current_window = self._current_window(&mut tree);
+    let current_window = tree.current_window_mut().unwrap();
     let current_window_id = current_window.id();
     let buffer = current_window.buffer().upgrade().unwrap();
     let buffer = lock!(buffer);
@@ -177,7 +157,6 @@ mod tests_util {
   use crate::buf::opt::BufferLocalOptionsBuilder;
   use crate::buf::{BufferArc, BuffersManagerArc};
   use crate::content::{TextContents, TextContentsArc};
-  use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -186,7 +165,7 @@ mod tests_util {
   use crate::ui::canvas::Canvas;
   use crate::ui::tree::TreeArc;
   use crate::ui::viewport::{
-    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection, Viewportable,
+    CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
   };
   use crate::ui::widget::Widgetable;
   use crate::ui::widget::window::content::{self, WindowContent};
@@ -221,24 +200,12 @@ mod tests_util {
 
   pub fn get_viewport(tree: TreeArc) -> ViewportArc {
     let tree = lock!(tree);
-    let current_window_id = tree.current_window_id().unwrap();
-    let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => current_window.viewport(),
-      _ => unreachable!(),
-    }
+    tree.current_window().unwrap().viewport()
   }
 
   pub fn get_cursor_viewport(tree: TreeArc) -> CursorViewportArc {
     let tree = lock!(tree);
-    let current_window_id = tree.current_window_id().unwrap();
-    let current_window_node = tree.node(current_window_id).unwrap();
-    assert!(matches!(current_window_node, TreeNode::Window(_)));
-    match current_window_node {
-      TreeNode::Window(current_window) => current_window.cursor_viewport(),
-      _ => unreachable!(),
-    }
+    tree.current_window().unwrap().cursor_viewport()
   }
 
   #[allow(clippy::too_many_arguments)]
@@ -482,7 +449,6 @@ mod tests_cursor_move {
   use super::tests_util::*;
   use super::*;
 
-  use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -1123,7 +1089,6 @@ mod tests_insert_text {
   use super::tests_util::*;
   use super::*;
 
-  use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
@@ -2859,7 +2824,6 @@ mod tests_delete_text {
   use super::tests_util::*;
   use super::*;
 
-  use crate::lock;
   use crate::prelude::*;
   use crate::state::{State, StateArc};
   use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
