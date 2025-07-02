@@ -504,17 +504,21 @@ pub fn cursor_move(
       match vnode {
         TreeNode::Window(window) => {
           window.set_cursor_viewport(new_cursor_viewport.clone());
-          window.move_cursor_to(
-            new_cursor_viewport.column_idx() as isize,
-            new_cursor_viewport.row_idx() as isize,
-          );
+          if window.cursor_id().is_some() {
+            window.move_cursor_to(
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
+            );
+          }
         }
         TreeNode::CommandLine(cmdline) => {
           cmdline.set_cursor_viewport(new_cursor_viewport.clone());
-          cmdline.move_cursor_to(
-            new_cursor_viewport.column_idx() as isize,
-            new_cursor_viewport.row_idx() as isize,
-          );
+          if cmdline.cursor_id().is_some() {
+            cmdline.move_cursor_to(
+              new_cursor_viewport.column_idx() as isize,
+              new_cursor_viewport.row_idx() as isize,
+            );
+          }
         }
         _ => unreachable!(),
       }
