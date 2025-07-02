@@ -1,6 +1,6 @@
 //! Temporary contents except buffers.
 
-use crate::buf::opt::BufferLocalOptionsBuilder;
+use crate::buf::opt::{BufferLocalOptionsBuilder, FileFormatOption};
 use crate::buf::text::Text;
 use crate::prelude::*;
 
@@ -16,7 +16,10 @@ arc_mutex_ptr!(TextContents);
 
 impl TextContents {
   pub fn new(canvas_size: U16Size) -> Self {
-    let command_line_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let command_line_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Unix)
+      .build()
+      .unwrap();
     Self {
       command_line_content: Text::new(command_line_opts, canvas_size, Rope::new()),
     }
