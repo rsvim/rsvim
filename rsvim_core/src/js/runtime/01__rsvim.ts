@@ -1,5 +1,5 @@
 /**
- * The `Rsvim` editor APIs.
+ * The `Rsvim` general and editor APIs.
  *
  * @packageDocumentation
  *
@@ -7,14 +7,10 @@
  * The global object.
  *
  * @categoryDescription Editor APIs
- * These APIs are specific for Rsvim editors such as buffers, windows, key mappings, etc.
+ * These APIs specific for editor, such as buffers, windows, key mappings, etc.
  *
  * @categoryDescription General APIs
- * These APIs are general purpose for common JavaScript runtime, keeps the same with [Deno APIs](https://docs.deno.com/api/deno/).
- *
- * @see [Vim: help.txt](https://vimhelp.org/)
- * @see [Neovim docs - Api](https://neovim.io/doc/user/api.html)
- * @see [Deno APIs](https://docs.deno.com/api/deno/)
+ * These APIs are general for common javascript-based runtime, keeps the same with [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
 /**
