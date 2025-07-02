@@ -61,7 +61,7 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
   // Register the `__InternalRsvimGlobalObject` global object.
   let vim = create_object_under(scope, global, "__InternalRsvimGlobalObject");
 
-  // `globalThis`
+  // For `globalThis`
   {
     set_function_to(
       scope,
@@ -77,7 +77,7 @@ pub fn create_new_context<'s>(scope: &mut v8::HandleScope<'s, ()>) -> v8::Local<
     );
   }
 
-  // `Rsvim.opt`
+  // For `Rsvim.opt`
   {
     set_function_to(scope, vim, "opt_get_wrap", global_rsvim::opt::get_wrap);
     set_function_to(scope, vim, "opt_set_wrap", global_rsvim::opt::set_wrap);
