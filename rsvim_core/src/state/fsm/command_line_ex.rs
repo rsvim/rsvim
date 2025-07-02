@@ -210,22 +210,15 @@ impl CommandLineExStateful {
 
     let cmdline = tree.command_line_mut().unwrap();
     let cmdline_id = cmdline.id();
-    let cursor_viewport = cmdline.cursor_viewport();
-    let cursor_line_idx = cursor_viewport.line_idx();
-    debug_assert_eq!(cursor_line_idx, 0);
-    let cursor_char_idx = cursor_viewport.char_idx();
-    debug_assert!(text.rope().get_line(cursor_line_idx).is_some());
+    debug_assert_eq!(cmdline.cursor_viewport().line_idx(), 0);
+    debug_assert!(
+      text
+        .rope()
+        .get_line(cmdline.cursor_viewport().line_idx())
+        .is_some()
+    );
 
-    let to_be_deleted_n = if n > 0 {
-      // Delete to right side
-      n
-    } else {
-      // Delete to left side, do NOT delete the first ':' char.
-      let left_bound = std::cmp::max(1_usize, cursor_char_idx.saturating_add_signed(n));
-      -(cursor_char_idx.saturating_sub(left_bound) as isize)
-    };
-
-    cursor_ops::cursor_delete(&mut tree, cmdline_id, text, to_be_deleted_n);
+    cursor_ops::cursor_delete(&mut tree, cmdline_id, text, n);
 
     StatefulValue::CommandLineExMode(CommandLineExStateful::default())
   }
