@@ -61,6 +61,8 @@ export class RsvimOpt {
    *
    * This option is also known as _line wrap_, @see [Wikipedia - line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
+   * @defaultValue `true`
+   *
    * @example
    * ```javascript
    * // Get the 'wrap' option.
@@ -70,7 +72,6 @@ export class RsvimOpt {
    * ```
    *
    * @returns {boolean}
-   * @defaultValue `true`
    */
   get wrap(): boolean {
     // @ts-ignore Ignore warning
