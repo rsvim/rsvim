@@ -100,16 +100,13 @@ export class RsvimOpt {
    * Local to Window.
    *
    * If `true` (on), Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
-   *
    * It only affects the way the file is displayed, not its contents.
-   * If 'breakindent' is set, line is visually indented. Then, the value
-   * of 'showbreak' is used to put in front of wrapped lines. This option
-   * is not used when the {@link wrap} option is `false`.
    *
-   * @experimental
+   * This option is not used when the {@link wrap} option is `false`.
    *
-   * @see [Wikipedia - word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
-   * @see [Vim: options.txt - 'linebreak'](https://vimhelp.org/options.txt.html#%27linebreak%27)
+   * This options is also known as _word wrap_, @see [Wikipedia - word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
+   *
+   * @defaultValue `false`
    *
    * @example
    * ```javascript
@@ -120,7 +117,6 @@ export class RsvimOpt {
    * ```
    *
    * @returns {boolean}
-   * @defaultValue `false`
    */
   get lineBreak(): boolean {
     // @ts-ignore Ignore warning
