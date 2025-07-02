@@ -102,10 +102,7 @@ pub fn make_tree_with_buffers_cmdline(
     (0, canvas_size.height().saturating_sub(1) as isize),
     (canvas_size.width() as isize, canvas_size.height() as isize),
   );
-  let cmdline = CommandLine::new(
-    cmdline_shape,
-    Arc::downgrade(&text_contents),
-  );
+  let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&text_contents));
   let _cmdline_id = cmdline.id();
 
   tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));
