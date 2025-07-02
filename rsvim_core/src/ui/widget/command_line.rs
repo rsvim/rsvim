@@ -64,10 +64,7 @@ pub struct CommandLine {
 }
 
 impl CommandLine {
-  pub fn new(
-    shape: IRect,
-    text_contents: TextContentsWk,
-  ) -> Self {
+  pub fn new(shape: IRect, text_contents: TextContentsWk) -> Self {
     // Force cmdline window options.
     let options = WindowLocalOptionsBuilder::default()
       .wrap(false)
@@ -84,7 +81,8 @@ impl CommandLine {
 
     let cmdline_indicator_shape =
       IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
-    let cmdline_indicator = CommandLineIndicator::new(cmdline_indicator_shape, CommandLineIndicatorSymbol::Empty);
+    let cmdline_indicator =
+      CommandLineIndicator::new(cmdline_indicator_shape, CommandLineIndicatorSymbol::Empty);
     let cmdline_indicator_id = cmdline_indicator.id();
     let cmdline_indicator_node = CommandLineNode::CommandLineIndicator(cmdline_indicator);
     base.bounded_insert(cmdline_root_id, cmdline_indicator_node);
@@ -161,7 +159,8 @@ impl CommandLine {
   /// Set viewport.
   pub fn set_viewport(&mut self, viewport: ViewportArc) {
     self.viewport = viewport.clone();
-    if let Some(CommandLineNode::CommandLineContent(content)) = self.base.node_mut(self.content_id) {
+    if let Some(CommandLineNode::CommandLineContent(content)) = self.base.node_mut(self.content_id)
+    {
       content.set_viewport(Arc::downgrade(&viewport));
     }
   }
