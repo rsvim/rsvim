@@ -4,8 +4,6 @@ use crate::prelude::*;
 
 use compact_str::CompactString;
 
-pub mod registry;
-
 #[derive(Debug)]
 /// Ex-command definition.
 pub struct ExCommand {
