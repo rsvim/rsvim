@@ -1,4 +1,4 @@
-//! Viewport internal implementations.
+//! Viewport internal algorithms.
 
 #![allow(clippy::too_many_arguments)]
 
