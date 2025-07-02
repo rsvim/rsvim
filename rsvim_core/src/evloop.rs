@@ -12,7 +12,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::{State, StateArc};
 use crate::ui::canvas::{Canvas, CanvasArc, Shader, ShaderCommand};
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::{CommandLine, CommandLineIndicatorSymbol};
+use crate::ui::widget::command_line::CommandLine;
 use crate::ui::widget::cursor::Cursor;
 use crate::ui::widget::window::Window;
 
@@ -372,11 +372,7 @@ impl EventLoop {
       (0, canvas_size.height().saturating_sub(1) as isize),
       (canvas_size.width() as isize, canvas_size.height() as isize),
     );
-    let cmdline = CommandLine::new(
-      cmdline_shape,
-      Arc::downgrade(&self.contents),
-      CommandLineIndicatorSymbol::Empty,
-    );
+    let cmdline = CommandLine::new(cmdline_shape, Arc::downgrade(&self.contents));
     let _cmdline_id = cmdline.id();
 
     tree.bounded_insert(tree_root_id, TreeNode::CommandLine(cmdline));

@@ -592,14 +592,12 @@ mod tests_goto_normal_mode {
         .unwrap()
         .cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 1);
+      assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 1);
+      assert_eq!(actual1.column_idx(), 0);
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
-      let buf_eol = lock!(buf).options().end_of_line();
-      let text1 = CompactString::new(format!(":{buf_eol}"));
-      let expect = vec![text1.as_str()];
+      let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
@@ -635,13 +633,13 @@ mod tests_goto_normal_mode {
         .unwrap()
         .cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.char_idx(), 3);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 4);
+      assert_eq!(actual1.column_idx(), 3);
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
       let buf_eol = lock!(buf).options().end_of_line();
-      let text1 = CompactString::new(format!(":Bye{buf_eol}"));
+      let text1 = CompactString::new(format!("Bye{buf_eol}"));
       let expect = vec![text1.as_str()];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(

@@ -67,7 +67,6 @@ impl CommandLine {
   pub fn new(
     shape: IRect,
     text_contents: TextContentsWk,
-    indicator_symbol: CommandLineIndicatorSymbol,
   ) -> Self {
     // Force cmdline window options.
     let options = WindowLocalOptionsBuilder::default()
@@ -85,7 +84,7 @@ impl CommandLine {
 
     let cmdline_indicator_shape =
       IRect::new(shape.min().into(), (shape.min().x + 1, shape.max().y));
-    let cmdline_indicator = CommandLineIndicator::new(cmdline_indicator_shape, indicator_symbol);
+    let cmdline_indicator = CommandLineIndicator::new(cmdline_indicator_shape, CommandLineIndicatorSymbol::Empty);
     let cmdline_indicator_id = cmdline_indicator.id();
     let cmdline_indicator_node = CommandLineNode::CommandLineIndicator(cmdline_indicator);
     base.bounded_insert(cmdline_root_id, cmdline_indicator_node);

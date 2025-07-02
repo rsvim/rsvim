@@ -105,7 +105,6 @@ pub fn make_tree_with_buffers_cmdline(
   let cmdline = CommandLine::new(
     cmdline_shape,
     Arc::downgrade(&text_contents),
-    CommandLineIndicatorSymbol::Empty,
   );
   let _cmdline_id = cmdline.id();
 
