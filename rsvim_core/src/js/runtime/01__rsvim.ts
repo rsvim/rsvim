@@ -1,5 +1,5 @@
 /**
- * The `Rsvim` global object APIs.
+ * The `Rsvim` editor APIs.
  *
  * @packageDocumentation
  *
