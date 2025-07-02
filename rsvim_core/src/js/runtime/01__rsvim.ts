@@ -10,7 +10,7 @@
  * These APIs specific for editor, such as buffers, windows, key mappings, etc.
  *
  * @categoryDescription General APIs
- * These APIs are general for common javascript-based runtime, keeps the same with [Deno APIs](https://docs.deno.com/api/deno/).
+ * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
 /**
@@ -18,10 +18,9 @@
  *
  * - `Rsvim.opt`: Global editor options.
  *
- *
  * @example
  * ```javascript
- * // Create a variable alias to 'Rsvim'.
+ * // Create a alias to 'Rsvim'.
  * const vim = Rsvim;
  * ```
  *
@@ -33,11 +32,11 @@ export class Rsvim {
 }
 
 /**
- * The `Rsvim.opt` object for global editor options.
+ * The `Rsvim.opt` global object for global editor options.
  *
  * @example
  * ```javascript
- * // Create a variable alias to 'Rsvim.opt'.
+ * // Create a alias to 'Rsvim.opt'.
  * const opt = Rsvim.opt;
  * ```
  *
@@ -46,7 +45,7 @@ export class Rsvim {
  */
 export class RsvimOpt {
   /**
-   * Get the _wrap_ option.
+   * Get the _wrap_ option. This option is also known as [line-wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * Local to Window.
    *
@@ -59,9 +58,6 @@ export class RsvimOpt {
    *
    * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
    * to get the break at a word boundary.
-   *
-   * @see [Wikipedia - line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
-   * @see [Vim: options.txt - 'wrap'](https://vimhelp.org/options.txt.html#%27wrap%27)
    *
    * @example
    * ```javascript
