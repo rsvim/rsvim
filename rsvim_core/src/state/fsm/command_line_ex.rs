@@ -642,9 +642,7 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 3);
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
-      let buf_eol = lock!(buf).options().end_of_line();
-      let text1 = CompactString::new(format!("Bye{buf_eol}"));
-      let expect = vec![text1.as_str()];
+      let expect = vec!["Bye\n"];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
@@ -825,9 +823,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 9);
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
-      let buf_eol = lock!(buf).options().end_of_line();
-      let text1 = CompactString::new(format!("Bye6 Bye7{buf_eol}"));
-      let expect = vec![text1.as_str()];
+      let expect = vec!["Bye6 Bye7\n"];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
