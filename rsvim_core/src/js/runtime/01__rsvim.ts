@@ -59,7 +59,7 @@ export class RsvimOpt {
    * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
    * to get the break at a word boundary.
    *
-   * This option is also known as _line wrap_, @see [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
+   * This option is also known as _line wrap_, @see [Wikipedia - line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * @example
    * ```javascript
