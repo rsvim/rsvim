@@ -94,10 +94,21 @@ pub fn init_v8_platform() {
 
 // Built-in modules {
 
-static BUILTIN_RUNTIME_MODULES: Lazy<Vec<(&str, &str)>> = Lazy::new(|| {
+struct BuiltinRuntimeModule {
+  pub filename: &'static str,
+  pub source: &'static str,
+}
+
+impl BuiltinRuntimeModule {
+  pub fn new(filename: &'static str, source: &'static str) -> Self {
+    Self { filename, source }
+  }
+}
+
+static BUILTIN_RUNTIME_MODULES: Lazy<Vec<BuiltinRuntimeModule>> = Lazy::new(|| {
   vec![
-    ("00__web.js", include_str!("./js/runtime/00__web.js")),
-    ("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
+    BuiltinRuntimeModule::new("00__web.js", include_str!("./js/runtime/00__web.js")),
+    BuiltinRuntimeModule::new("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
   ]
 });
 
@@ -151,9 +162,9 @@ impl JsRuntimeForSnapshot {
       // NOTE: Each scripts is named with an index prefix, it indicates the order of calling the
       // `add_context_data` API.
 
-      for module_src in BUILTIN_RUNTIME_MODULES.iter() {
-        let filename = module_src.0;
-        let source = module_src.1;
+      for module in BUILTIN_RUNTIME_MODULES.iter() {
+        let filename = module.filename;
+        let source = module.source;
         Self::init_builtin_module(scope, filename, source);
       }
     }
