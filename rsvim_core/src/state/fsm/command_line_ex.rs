@@ -562,7 +562,7 @@ mod tests_goto_normal_mode {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents) =
+    let (tree, state, bufs, _buf, contents) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = lock!(tree.clone())
@@ -740,7 +740,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
       .build()
       .unwrap();
     let lines = vec![];
-    let (tree, state, bufs, buf, contents) =
+    let (tree, state, bufs, _buf, contents) =
       make_tree_with_cmdline(terminal_size, window_options, lines);
 
     let prev_cursor_viewport = lock!(tree.clone())
