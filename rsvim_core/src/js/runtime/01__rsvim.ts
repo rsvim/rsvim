@@ -1,10 +1,10 @@
 /**
- * The global namespace for `Rsvim` specific, non-standard runtime APIs.
+ * The `Rsvim` global object APIs.
  *
  * @packageDocumentation
  *
  * @categoryDescription Global Object
- * The global namespace.
+ * The global object.
  *
  * @categoryDescription Editor APIs
  * These APIs are specific for Rsvim editors such as buffers, windows, key mappings, etc.
