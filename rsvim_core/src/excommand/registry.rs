@@ -1,1 +1,0 @@
-//! Ex-commands registry.

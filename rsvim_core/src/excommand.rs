@@ -25,10 +25,3 @@ pub struct ExCommandsManager {
 }
 
 arc_mutex_ptr!(ExCommandsManager);
-
-#[derive(Debug)]
-/// Ex-command instance.
-pub struct ExCommandObj {
-  name: CompactString,
-  payload: CompactString,
-}
