@@ -7,7 +7,7 @@ use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::{Operation, cursor_ops};
 use crate::ui::canvas::CursorStyle;
 use crate::ui::tree::*;
-use crate::ui::widget::command_line::CommandLineNode;
+use crate::ui::widget::command_line::{CommandLineIndicatorSymbol, CommandLineNode};
 
 use compact_str::{CompactString, ToCompactString};
 use crossterm::event::{Event, KeyCode, KeyEventKind};
@@ -143,8 +143,12 @@ impl CommandLineExStateful {
     cursor_ops::cursor_clear(&mut tree, cmdline_id, contents.command_line_content_mut());
 
     let cmdline_content = cmdline_content.trim();
-    debug_assert!(cmdline_content.starts_with(":"));
-    let cmdline_content = &cmdline_content[1..];
+    tree
+      .command_line_mut()
+      .unwrap()
+      .indicator_mut()
+      .set_symbol(CommandLineIndicatorSymbol::Empty);
+
     CompactString::new(cmdline_content)
   }
 
@@ -772,14 +776,12 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
         .unwrap()
         .cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 1);
+      assert_eq!(actual1.char_idx(), 0);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 1);
+      assert_eq!(actual1.column_idx(), 0);
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
-      let buf_eol = lock!(buf).options().end_of_line();
-      let text1 = CompactString::new(format!(":{buf_eol}"));
-      let expect = vec![text1.as_str()];
+      let expect = vec![""];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
@@ -807,7 +809,10 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
 
     // Insert-1
     {
-      stateful.cursor_insert(&data_access, CompactString::new("Bye"));
+      stateful.cursor_insert(
+        &data_access,
+        CompactString::new("Bye1 Bye2 Bye3 Bye4 Bye5 Bye6 Bye7"),
+      );
 
       let tree = data_access.tree.clone();
       let actual1 = lock!(tree.clone())
@@ -815,13 +820,13 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
         .unwrap()
         .cursor_viewport();
       assert_eq!(actual1.line_idx(), 0);
-      assert_eq!(actual1.char_idx(), 4);
+      assert_eq!(actual1.char_idx(), 34);
       assert_eq!(actual1.row_idx(), 0);
-      assert_eq!(actual1.column_idx(), 4);
+      assert_eq!(actual1.column_idx(), 9);
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
       let buf_eol = lock!(buf).options().end_of_line();
-      let text1 = CompactString::new(format!(":Bye{buf_eol}"));
+      let text1 = CompactString::new(format!("Bye6 Bye7{buf_eol}"));
       let expect = vec![text1.as_str()];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
@@ -839,7 +844,7 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
         "           ",
         "           ",
         "           ",
-        ":Bye       ",
+        ":Bye6 Bye7 ",
       ];
       let actual_canvas = make_canvas(tree.clone(), terminal_size);
       let actual_canvas = lock!(actual_canvas);
@@ -850,7 +855,10 @@ mod tests_confirm_ex_command_and_goto_normal_mode {
     {
       let cmdline_content = stateful._goto_normal_mode_impl(&data_access);
       info!("cmdline content:{cmdline_content:?}");
-      assert_eq!("Bye", cmdline_content.as_str());
+      assert_eq!(
+        "Bye1 Bye2 Bye3 Bye4 Bye5 Bye6 Bye7",
+        cmdline_content.as_str()
+      );
     }
   }
 }
