@@ -44,4 +44,3 @@ impl Widgetable for CommandLineContent {
     viewport.draw(contents.command_line_content(), actual_shape, canvas);
   }
 }
-
