@@ -86,6 +86,16 @@ pub fn v8_version() -> &'static str {
 pub fn init_v8_platform() {
   static V8_INIT: Once = Once::new();
   V8_INIT.call_once(move || {
+    // Configuration flags for V8.
+    // let mut flags = String::from(concat!(
+    //   " --no-validate-asm",
+    //   " --turbo_fast_api_calls",
+    //   " --harmony-temporal",
+    //   " --js-float16array",
+    // ));
+    // let flags = options.v8_flags.join(" ");
+    // v8::V8::set_flags_from_string(&flags);
+
     let platform = v8::new_default_platform(0, false).make_shared();
     v8::V8::initialize_platform(platform);
     v8::V8::initialize();
@@ -401,16 +411,6 @@ impl JsRuntime {
     contents: TextContentsArc,
     editing_state: StateArc,
   ) -> Self {
-    // Configuration flags for V8.
-    // let mut flags = String::from(concat!(
-    //   " --no-validate-asm",
-    //   " --turbo_fast_api_calls",
-    //   " --harmony-temporal",
-    //   " --js-float16array",
-    // ));
-    // let flags = options.v8_flags.join(" ");
-    // v8::V8::set_flags_from_string(&flags);
-
     // Fire up the v8 engine.
     init_v8_platform();
 
