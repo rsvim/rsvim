@@ -23,3 +23,23 @@ pub struct ExCommandsManager {
 }
 
 arc_mutex_ptr!(ExCommandsManager);
+
+impl ExCommandsManager {
+  pub fn new() -> Self {
+    Self {
+      ex_commands: HashMap::new(),
+    }
+  }
+
+  pub fn insert(&mut self, cmd: ExCommand) -> Option<ExCommand> {
+    None
+  }
+
+  pub fn remove(&mut self, name: CompactString) -> Option<ExCommand> {
+    None
+  }
+
+  pub fn get(&self, command_line_content: CompactString) -> Option<ExCommand> {
+    None
+  }
+}
