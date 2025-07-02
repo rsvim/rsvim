@@ -7,12 +7,11 @@ use compact_str::CompactString;
 pub mod registry;
 
 #[derive(Debug)]
+/// Ex-command definition.
 pub struct ExCommand {
   name: CompactString,
   // backend: JsCallbackFunction,
 }
-
-arc_mutex_ptr!(ExCommand);
 
 impl ExCommand {
   pub fn new(name: CompactString) -> Self {
@@ -26,3 +25,10 @@ pub struct ExCommandsManager {
 }
 
 arc_mutex_ptr!(ExCommandsManager);
+
+#[derive(Debug)]
+/// Ex-command instance.
+pub struct ExCommandObj {
+  name: CompactString,
+  payload: CompactString,
+}
