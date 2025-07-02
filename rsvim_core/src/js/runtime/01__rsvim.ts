@@ -45,7 +45,7 @@ export class Rsvim {
  */
 export class RsvimOpt {
   /**
-   * Get the _wrap_ option. This option is also known as [line-wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
+   * Get the _wrap_ option.
    *
    * Local to Window.
    *
@@ -58,6 +58,8 @@ export class RsvimOpt {
    *
    * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
    * to get the break at a word boundary.
+   *
+   * This option is also known as _line wrap_, @see [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * @example
    * ```javascript
