@@ -5,8 +5,7 @@ use crate::coord::U16Rect;
 use crate::state::ops::Operation;
 use crate::ui::tree::*;
 use crate::ui::viewport::{
-  CursorViewport, CursorViewportArc, Viewport, ViewportArc,
-  ViewportSearchDirection, /*Viewportable,*/
+  CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
 };
 use crate::ui::widget::window::WindowLocalOptions;
 
