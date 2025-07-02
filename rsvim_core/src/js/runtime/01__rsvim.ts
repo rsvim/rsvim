@@ -45,7 +45,7 @@ export class Rsvim {
  */
 export class RsvimOpt {
   /**
-   * Get the _wrap_ option.
+   * Get the _wrap_ option. This option is also known as [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * Local to Window.
    *
@@ -58,8 +58,6 @@ export class RsvimOpt {
    *
    * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
    * to get the break at a word boundary.
-   *
-   * This option is also known as _line wrap_, @see [Wikipedia - line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * @defaultValue `true`
    *
@@ -95,7 +93,7 @@ export class RsvimOpt {
   }
 
   /**
-   * Get the _line-break_ option.
+   * Get the _line-break_ option. This options is also known as [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * Local to Window.
    *
@@ -103,8 +101,6 @@ export class RsvimOpt {
    * It only affects the way the file is displayed, not its contents.
    *
    * This option is not used when the {@link wrap} option is `false`.
-   *
-   * This options is also known as _word wrap_, @see [Wikipedia - word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * @defaultValue `false`
    *

@@ -12,7 +12,7 @@
  */
 export interface GlobalThis {
   /**
-   * Sets a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
+   * Set a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
    *
    * @param {Function} callback - A function to be executed after the timer expires.
    * @param {number} delay - The milliseconds that the timer should wait before the function is executed.
@@ -27,7 +27,7 @@ export interface GlobalThis {
   ): number;
 
   /**
-   * Cancels a timeout previously established by calling {@link setTimeout}.
+   * Cancel a timeout previously established by calling {@link setTimeout}.
    *
    * @param {number} id - The ID (integer) which identifies the timer.
    * @throws {@link !Error} if ID is not an integer value.
