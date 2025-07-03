@@ -1,5 +1,8 @@
 /**
- * The `Rsvim` global object, it contains two groups of APIs: general APIs and editor APIs.
+ * The `Rsvim` global object, it contains two groups:
+ *
+ * - General APIs.
+ * - Editor APIs.
  *
  * @packageDocumentation
  *
