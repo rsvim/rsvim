@@ -1,20 +1,19 @@
 /**
- * The global namespace for `Rsvim` specific, non-standard runtime APIs.
+ * The `Rsvim` global object, it contains two groups:
+ *
+ * - General APIs.
+ * - Editor APIs.
  *
  * @packageDocumentation
  *
  * @categoryDescription Global Object
- * The global namespace.
+ * The global object.
  *
  * @categoryDescription Editor APIs
- * These APIs are specific for Rsvim editors such as buffers, windows, key mappings, etc.
+ * These APIs are specific for editor, such as buffers, windows, key mappings, etc.
  *
  * @categoryDescription General APIs
- * These APIs are general purpose for common JavaScript runtime, keeps the same with [Deno APIs](https://docs.deno.com/api/deno/).
- *
- * @see [Vim: help.txt](https://vimhelp.org/)
- * @see [Neovim docs - Api](https://neovim.io/doc/user/api.html)
- * @see [Deno APIs](https://docs.deno.com/api/deno/)
+ * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
  */
 
 /**
@@ -22,10 +21,9 @@
  *
  * - `Rsvim.opt`: Global editor options.
  *
- *
  * @example
  * ```javascript
- * // Create a variable alias to 'Rsvim'.
+ * // Create a alias to 'Rsvim'.
  * const vim = Rsvim;
  * ```
  *
@@ -37,11 +35,11 @@ export class Rsvim {
 }
 
 /**
- * The `Rsvim.opt` object for global editor options.
+ * The `Rsvim.opt` global object for global editor options.
  *
  * @example
  * ```javascript
- * // Create a variable alias to 'Rsvim.opt'.
+ * // Create a alias to 'Rsvim.opt'.
  * const opt = Rsvim.opt;
  * ```
  *
@@ -50,7 +48,7 @@ export class Rsvim {
  */
 export class RsvimOpt {
   /**
-   * Get the _wrap_ option.
+   * Get the _wrap_ option. This option is also known as [line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * Local to Window.
    *
@@ -64,19 +62,15 @@ export class RsvimOpt {
    * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
    * to get the break at a word boundary.
    *
-   * @see [Wikipedia - line wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
-   * @see [Vim: options.txt - 'wrap'](https://vimhelp.org/options.txt.html#%27wrap%27)
+   * @returns {boolean}
+   *
+   * @defaultValue `true`
    *
    * @example
    * ```javascript
    * // Get the 'wrap' option.
    * const value = Rsvim.opt.wrap;
-   * // Set the 'wrap' option.
-   * Rsvim.opt.wrap = true;
    * ```
-   *
-   * @returns {boolean}
-   * @defaultValue `true`
    */
   get wrap(): boolean {
     // @ts-ignore Ignore warning
@@ -87,7 +81,13 @@ export class RsvimOpt {
    * Set the _wrap_ option.
    *
    * @param {boolean} value - The _wrap_ option.
-   * @throws {@link !Error} if value is not a boolean value.
+   * @throws Throws {@link !Error} if value is not a boolean value.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'wrap' option.
+   * Rsvim.opt.wrap = true;
+   * ```
    */
   set wrap(value: boolean) {
     if (typeof value !== "boolean") {
@@ -100,32 +100,24 @@ export class RsvimOpt {
   }
 
   /**
-   * Get the _line-break_ option.
+   * Get the _line-break_ option. This options is also known as [word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap).
    *
    * Local to Window.
    *
    * If `true` (on), Vim will wrap long lines by a word boundary rather than at the last character that fits on the screen.
-   *
    * It only affects the way the file is displayed, not its contents.
-   * If 'breakindent' is set, line is visually indented. Then, the value
-   * of 'showbreak' is used to put in front of wrapped lines. This option
-   * is not used when the {@link wrap} option is `false`.
    *
-   * @experimental
+   * This option is not used when the {@link wrap} option is `false`.
    *
-   * @see [Wikipedia - word wrap](https://en.wikipedia.org/wiki/Line_wrap_and_word_wrap)
-   * @see [Vim: options.txt - 'linebreak'](https://vimhelp.org/options.txt.html#%27linebreak%27)
+   * @returns {boolean}
+   *
+   * @defaultValue `false`
    *
    * @example
    * ```javascript
    * // Get the 'lineBreak' option.
    * const value = Rsvim.opt.lineBreak;
-   * // Set the 'lineBreak' option.
-   * Rsvim.opt.lineBreak = true;
    * ```
-   *
-   * @returns {boolean}
-   * @defaultValue `false`
    */
   get lineBreak(): boolean {
     // @ts-ignore Ignore warning
@@ -136,7 +128,13 @@ export class RsvimOpt {
    * Set the _line-break_ option.
    *
    * @param {boolean} value - The _line-break_ option.
-   * @throws {@link !Error} if value is not a boolean value.
+   * @throws Throws {@link !Error} if value is not a boolean value.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'lineBreak' option.
+   * Rsvim.opt.lineBreak = true;
+   * ```
    */
   set lineBreak(value: boolean) {
     if (typeof value !== "boolean") {

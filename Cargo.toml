@@ -66,8 +66,8 @@ litemap = "0.8.0"
 
 # NOTE: Javascript dependencies always keep the same with `deno` {
 
-# deno: https://github.com/denoland/deno/blob/v2.3.6/Cargo.toml
-# deno_core: https://github.com/denoland/deno_core/blob/0.350.0/Cargo.toml
+# deno: https://github.com/denoland/deno/blob/v2.4.0/Cargo.toml
+# deno_core: https://github.com/denoland/deno_core/blob/0.352.0/Cargo.toml
 # deno_ast: https://github.com/denoland/deno_ast/blob/0.48.0/Cargo.toml
 
 v8 = { version = "=137.1.0", default-features = false }

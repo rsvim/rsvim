@@ -86,6 +86,16 @@ pub fn v8_version() -> &'static str {
 pub fn init_v8_platform() {
   static V8_INIT: Once = Once::new();
   V8_INIT.call_once(move || {
+    // Configuration flags for V8.
+    // let mut flags = String::from(concat!(
+    //   " --no-validate-asm",
+    //   " --turbo_fast_api_calls",
+    //   " --harmony-temporal",
+    //   " --js-float16array",
+    // ));
+    // let flags = options.v8_flags.join(" ");
+    // v8::V8::set_flags_from_string(&flags);
+
     let platform = v8::new_default_platform(0, false).make_shared();
     v8::V8::initialize_platform(platform);
     v8::V8::initialize();
@@ -94,10 +104,21 @@ pub fn init_v8_platform() {
 
 // Built-in modules {
 
-static BUILTIN_RUNTIME_MODULES: Lazy<Vec<(&str, &str)>> = Lazy::new(|| {
+struct BuiltinRuntimeModule {
+  pub filename: &'static str,
+  pub source: &'static str,
+}
+
+impl BuiltinRuntimeModule {
+  pub fn new(filename: &'static str, source: &'static str) -> Self {
+    Self { filename, source }
+  }
+}
+
+static BUILTIN_RUNTIME_MODULES: Lazy<Vec<BuiltinRuntimeModule>> = Lazy::new(|| {
   vec![
-    ("00__web.js", include_str!("./js/runtime/00__web.js")),
-    ("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
+    BuiltinRuntimeModule::new("00__web.js", include_str!("./js/runtime/00__web.js")),
+    BuiltinRuntimeModule::new("01__rsvim.js", include_str!("./js/runtime/01__rsvim.js")),
   ]
 });
 
@@ -151,9 +172,9 @@ impl JsRuntimeForSnapshot {
       // NOTE: Each scripts is named with an index prefix, it indicates the order of calling the
       // `add_context_data` API.
 
-      for module_src in BUILTIN_RUNTIME_MODULES.iter() {
-        let filename = module_src.0;
-        let source = module_src.1;
+      for module in BUILTIN_RUNTIME_MODULES.iter() {
+        let filename = module.filename;
+        let source = module.source;
         Self::init_builtin_module(scope, filename, source);
       }
     }
@@ -390,16 +411,6 @@ impl JsRuntime {
     contents: TextContentsArc,
     editing_state: StateArc,
   ) -> Self {
-    // Configuration flags for V8.
-    // let mut flags = String::from(concat!(
-    //   " --no-validate-asm",
-    //   " --turbo_fast_api_calls",
-    //   " --harmony-temporal",
-    //   " --js-float16array",
-    // ));
-    // let flags = options.v8_flags.join(" ");
-    // v8::V8::set_flags_from_string(&flags);
-
     // Fire up the v8 engine.
     init_v8_platform();
 

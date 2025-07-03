@@ -1,7 +1,7 @@
 /**
- * The [WinterCG](https://wintercg.org/) compatible web platform APIs.
+ * The [WinterTC](https://wintertc.org/) compatible web platform APIs.
  *
- * @see [Minimum Common Web Platform API](https://common-min-api.proposal.wintercg.org/)
+ * @see [Minimum Common Web Platform API](https://common-min-api.proposal.wintertc.org/)
  * @see [MDN | Web APIs](https://developer.mozilla.org/en-US/docs/Web/API)
  *
  * @packageDocumentation
@@ -12,13 +12,13 @@
  */
 export interface GlobalThis {
   /**
-   * Sets a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
+   * Set a timer which executes a function or specified piece of code once the timer expires. Also see {@link !setTimeout}.
    *
    * @param {Function} callback - A function to be executed after the timer expires.
    * @param {number} delay - The milliseconds that the timer should wait before the function is executed.
    * @param {...any} [args] - Additional arguments which are passed through to the function.
    * @returns {number} The ID (integer) which identifies the timer created.
-   * @throws {@link !Error} if callback is not a function value.
+   * @throws Throws {@link !Error} if callback is not a function value.
    */
   setTimeout(
     callback: (...args: any[]) => void,
@@ -27,10 +27,10 @@ export interface GlobalThis {
   ): number;
 
   /**
-   * Cancels a timeout previously established by calling {@link setTimeout}.
+   * Cancel a timeout previously established by calling {@link setTimeout}.
    *
    * @param {number} id - The ID (integer) which identifies the timer.
-   * @throws {@link !Error} if ID is not an integer value.
+   * @throws Throws {@link !Error} if ID is not an integer value.
    */
   clearTimeout(id: number): void;
 }

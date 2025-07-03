@@ -40,7 +40,7 @@ pub fn CORE_MODULES() -> &'static HashMap<&'static str, &'static str> {
   static VALUE: OnceLock<HashMap<&'static str, &'static str>> = OnceLock::new();
   VALUE.get_or_init(|| {
     let modules = vec![
-      ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
+      // ("rsvim:ext/infra", include_str!("./runtime/00__infra.js")),
       // ("console", include_str!("./js/console.js")),
       // ("events", include_str!("./js/events.js")),
       // ("process", include_str!("./js/process.js")),
