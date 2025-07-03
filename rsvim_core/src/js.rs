@@ -37,6 +37,10 @@ pub mod module;
 pub mod msg;
 pub mod transpiler;
 
+pub fn v8_version() -> &'static str {
+  v8::VERSION_STRING
+}
+
 // /// A vector with JS callbacks and parameters.
 // type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
 
@@ -57,22 +61,30 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-pub fn v8_version() -> &'static str {
-  v8::VERSION_STRING
-}
-
-pub fn init_v8_platform() {
+pub fn init_v8_platform(snapshot: bool, additional_v8_flags: Vec<String>) {
   static V8_INIT: Once = Once::new();
+
   V8_INIT.call_once(move || {
     // Configuration flags for V8.
-    // let mut flags = String::from(concat!(
-    //   " --no-validate-asm",
-    //   " --turbo_fast_api_calls",
-    //   " --harmony-temporal",
-    //   " --js-float16array",
-    // ));
-    // let flags = options.v8_flags.join(" ");
-    // v8::V8::set_flags_from_string(&flags);
+    //
+    // See: <https://github.com/denoland/deno_core/blob/3289dad2501818c838a76c203f73d0dd62ec6167/core/runtime/setup.rs#L72>.
+    let mut flags = String::from(concat!(
+      " --turbo_fast_api_calls",
+      " --harmony-temporal",
+      " --js-float16array",
+    ));
+
+    if snapshot {
+      flags.push_str(" --predictable --random-seed=42");
+    }
+
+    if !additional_v8_flags.is_empty() {
+      let additional_v8_flags = additional_v8_flags.join(" ");
+      let additional_v8_flags = format!(" {additional_v8_flags}");
+      flags.push_str(&additional_v8_flags.as_str());
+    }
+
+    v8::V8::set_flags_from_string(&flags);
 
     let platform = v8::new_default_platform(0, false).make_shared();
     v8::V8::initialize_platform(platform);
