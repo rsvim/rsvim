@@ -68,8 +68,6 @@ export class RsvimOpt {
    * ```javascript
    * // Get the 'wrap' option.
    * const value = Rsvim.opt.wrap;
-   * // Set the 'wrap' option.
-   * Rsvim.opt.wrap = true;
    * ```
    *
    * @returns {boolean}
@@ -84,6 +82,12 @@ export class RsvimOpt {
    *
    * @param {boolean} value - The _wrap_ option.
    * @throws {@link !Error} if value is not a boolean value.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'wrap' option.
+   * Rsvim.opt.wrap = true;
+   * ```
    */
   set wrap(value: boolean) {
     if (typeof value !== "boolean") {
@@ -111,8 +115,6 @@ export class RsvimOpt {
    * ```javascript
    * // Get the 'lineBreak' option.
    * const value = Rsvim.opt.lineBreak;
-   * // Set the 'lineBreak' option.
-   * Rsvim.opt.lineBreak = true;
    * ```
    *
    * @returns {boolean}
@@ -127,6 +129,12 @@ export class RsvimOpt {
    *
    * @param {boolean} value - The _line-break_ option.
    * @throws {@link !Error} if value is not a boolean value.
+   *
+   * @example
+   * ```javascript
+   * // Set the 'lineBreak' option.
+   * Rsvim.opt.lineBreak = true;
+   * ```
    */
   set lineBreak(value: boolean) {
     if (typeof value !== "boolean") {
