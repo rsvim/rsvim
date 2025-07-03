@@ -24,6 +24,12 @@ pub struct ExCommandsManager {
 
 arc_mutex_ptr!(ExCommandsManager);
 
+impl Default for ExCommandsManager {
+  fn default() -> Self {
+    ExCommandsManager::new()
+  }
+}
+
 impl ExCommandsManager {
   pub fn new() -> Self {
     Self {
