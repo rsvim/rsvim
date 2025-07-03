@@ -196,7 +196,7 @@ impl JsRuntimeForSnapshot {
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
-    // isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
+    isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
@@ -420,7 +420,7 @@ impl JsRuntime {
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
-    // isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
+    isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
