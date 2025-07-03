@@ -149,7 +149,7 @@ impl JsRuntimeForSnapshot {
   /// Creates a new js runtime for snapshot.
   #[allow(clippy::new_without_default)]
   pub fn new() -> Self {
-    init_v8_platform();
+    init_v8_platform(true, vec![]);
 
     let (mut isolate, global_context) = Self::create_isolate();
 
@@ -422,7 +422,7 @@ impl JsRuntime {
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
-    init_v8_platform();
+    init_v8_platform(false, vec![]);
 
     let mut isolate = {
       let create_params = v8::CreateParams::default();
