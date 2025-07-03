@@ -173,9 +173,7 @@ impl JsRuntimeForSnapshot {
       // `add_context_data` API.
 
       for module in BUILTIN_RUNTIME_MODULES.iter() {
-        let filename = module.filename;
-        let source = module.source;
-        Self::init_builtin_module(scope, filename, source);
+        Self::init_builtin_module(scope, module.filename, module.source);
       }
     }
 
