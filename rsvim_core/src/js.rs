@@ -37,28 +37,6 @@ pub mod module;
 pub mod msg;
 pub mod transpiler;
 
-#[derive(Debug, Default, Clone)]
-pub struct JsRuntimeOptions {
-  // // The seed used in Math.random() method.
-  // pub seed: Option<i64>,
-  // // Reloads every URL import.
-  // pub reload: bool,
-  // The main entry point for the program.
-  pub root: Option<String>,
-  // Holds user defined import maps for module loading.
-  pub import_map: Option<ImportMap>,
-  // // The numbers of threads used by the thread-pool.
-  // pub num_threads: Option<usize>,
-  // Indicates if we're running JavaScript tests.
-  pub test_mode: bool,
-  // // Defines the inspector listening options.
-  // pub inspect: Option<(SocketAddrV4, bool)>,
-  // // Exposes v8's garbage collector.
-  // pub expose_gc: bool,
-  /// V8 flags.
-  pub v8_flags: Vec<String>,
-}
-
 // /// A vector with JS callbacks and parameters.
 // type NextTickQueue = Vec<(v8::Global<v8::Function>, Vec<v8::Global<v8::Value>>)>;
 
@@ -323,6 +301,28 @@ impl JsRuntimeForSnapshot {
     let context = self.global_context();
     v8::HandleScope::with_context(self.isolate.as_mut().unwrap(), context)
   }
+}
+
+#[derive(Debug, Default, Clone)]
+pub struct JsRuntimeOptions {
+  // // The seed used in Math.random() method.
+  // pub seed: Option<i64>,
+  // // Reloads every URL import.
+  // pub reload: bool,
+  // The main entry point for the program.
+  pub root: Option<String>,
+  // Holds user defined import maps for module loading.
+  pub import_map: Option<ImportMap>,
+  // // The numbers of threads used by the thread-pool.
+  // pub num_threads: Option<usize>,
+  // Indicates if we're running JavaScript tests.
+  pub test_mode: bool,
+  // // Defines the inspector listening options.
+  // pub inspect: Option<(SocketAddrV4, bool)>,
+  // // Exposes v8's garbage collector.
+  // pub expose_gc: bool,
+  /// V8 flags.
+  pub v8_flags: Vec<String>,
 }
 
 /// The state of js runtime.
