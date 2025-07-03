@@ -66,7 +66,6 @@ pub fn init_v8_platform(snapshot: bool, additional_v8_flags: Vec<String>) {
 
   V8_INIT.call_once(move || {
     // Configuration flags for V8.
-    //
     // See: <https://github.com/denoland/deno_core/blob/3289dad2501818c838a76c203f73d0dd62ec6167/core/runtime/setup.rs#L72>.
     let mut flags = String::from(concat!(
       " --turbo-fast-api-calls",
