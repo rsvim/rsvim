@@ -10,7 +10,7 @@
  * The global object.
  *
  * @categoryDescription Editor APIs
- * These APIs specific for editor, such as buffers, windows, key mappings, etc.
+ * These APIs are specific for editor, such as buffers, windows, key mappings, etc.
  *
  * @categoryDescription General APIs
  * These APIs are general for common javascript-based runtime, similar to [Deno APIs](https://docs.deno.com/api/deno/).
