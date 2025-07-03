@@ -81,7 +81,7 @@ export class RsvimOpt {
    * Set the _wrap_ option.
    *
    * @param {boolean} value - The _wrap_ option.
-   * @throws {@link !Error} if value is not a boolean value.
+   * @throws Throws {@link !Error} if value is not a boolean value.
    *
    * @example
    * ```javascript
@@ -128,7 +128,7 @@ export class RsvimOpt {
    * Set the _line-break_ option.
    *
    * @param {boolean} value - The _line-break_ option.
-   * @throws {@link !Error} if value is not a boolean value.
+   * @throws Throws {@link !Error} if value is not a boolean value.
    *
    * @example
    * ```javascript
