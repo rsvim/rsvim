@@ -62,6 +62,8 @@ export class RsvimOpt {
    * The line will be broken in the middle of a word if necessary. See {@link lineBreak}
    * to get the break at a word boundary.
    *
+   * @returns {boolean}
+   *
    * @defaultValue `true`
    *
    * @example
@@ -69,8 +71,6 @@ export class RsvimOpt {
    * // Get the 'wrap' option.
    * const value = Rsvim.opt.wrap;
    * ```
-   *
-   * @returns {boolean}
    */
   get wrap(): boolean {
     // @ts-ignore Ignore warning
@@ -109,6 +109,8 @@ export class RsvimOpt {
    *
    * This option is not used when the {@link wrap} option is `false`.
    *
+   * @returns {boolean}
+   *
    * @defaultValue `false`
    *
    * @example
@@ -116,8 +118,6 @@ export class RsvimOpt {
    * // Get the 'lineBreak' option.
    * const value = Rsvim.opt.lineBreak;
    * ```
-   *
-   * @returns {boolean}
    */
   get lineBreak(): boolean {
     // @ts-ignore Ignore warning
