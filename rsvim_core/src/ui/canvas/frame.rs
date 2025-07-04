@@ -29,7 +29,7 @@ impl Clone for Frame {
   fn clone(&self) -> Self {
     Self {
       iframe: self.iframe.clone(),
-      cursor: self.cursor().clone(),
+      cursor: self.cursor.clone(),
     }
   }
 
