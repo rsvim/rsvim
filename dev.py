@@ -188,6 +188,10 @@ def build(release, features, all_features):
 
 
 def fmt():
+    command = "typos"
+    logging.info(command)
+    os.system(command)
+
     command = "cargo fmt"
     logging.info(command)
     os.system(command)
