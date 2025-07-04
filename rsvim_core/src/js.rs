@@ -61,7 +61,7 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-pub fn init_v8_platform(snapshot: bool, additional_v8_flags: &[String]) {
+pub fn init_v8_platform(snapshot: bool, user_v8_flags: &[String]) {
   static V8_INIT: Once = Once::new();
 
   V8_INIT.call_once(move || {
@@ -79,8 +79,8 @@ pub fn init_v8_platform(snapshot: bool, additional_v8_flags: &[String]) {
       flags.push_str(" --predictable --random-seed=42");
     }
 
-    if !additional_v8_flags.is_empty() {
-      let additional_v8_flags = additional_v8_flags.join(" ");
+    if !user_v8_flags.is_empty() {
+      let additional_v8_flags = user_v8_flags.join(" ");
       let additional_v8_flags = format!(" {additional_v8_flags}");
       flags.push_str(additional_v8_flags.as_str());
     }
