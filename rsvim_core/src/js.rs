@@ -79,12 +79,12 @@ pub fn init_v8_platform(snapshot: bool, user_v8_flags: Option<&[String]>) {
       flags.push_str(" --predictable --random-seed=42");
     }
 
-    if let Some(user_flags) = user_v8_flags
-      && !user_flags.is_empty()
-    {
-      let user_flags = user_flags.join(" ");
-      let user_flags = format!(" {user_flags}");
-      flags.push_str(user_flags.as_str());
+    if let Some(user_flags) = user_v8_flags {
+      if !user_flags.is_empty() {
+        let user_flags = user_flags.join(" ");
+        let user_flags = format!(" {user_flags}");
+        flags.push_str(user_flags.as_str());
+      }
     }
 
     v8::V8::set_flags_from_string(&flags);
