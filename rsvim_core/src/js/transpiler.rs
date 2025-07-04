@@ -14,7 +14,7 @@ use swc_common::SourceMap;
 use swc_common::errors::ColorConfig;
 use swc_common::errors::Handler;
 use swc_common::sync::Lrc;
-// use swc_ecma_ast::Program;
+use swc_ecma_ast::EsVersion;
 use swc_ecma_codegen::Emitter;
 use swc_ecma_codegen::text_writer::JsWriter;
 use swc_ecma_parser::Parser;
@@ -59,7 +59,7 @@ impl TypeScript {
         no_early_errors: true,
         ..Default::default()
       }),
-      Default::default(),
+      EsVersion::EsNext, // NOTE: Always use "esnext" version.
       StringInput::from(&*fm),
       None,
     );
@@ -86,8 +86,9 @@ impl TypeScript {
         .apply(&mut fixer(None));
 
       {
+        let cfg = swc_ecma_codegen::Config::default().with_target(EsVersion::EsNext);
         let mut emitter = Emitter {
-          cfg: swc_ecma_codegen::Config::default(),
+          cfg,
           cm: cm.clone(),
           comments: None,
           wr: JsWriter::new(cm, "\n", &mut buffer, None),
