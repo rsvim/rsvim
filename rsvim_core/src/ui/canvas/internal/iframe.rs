@@ -324,12 +324,13 @@ impl Iframe {
 
 #[cfg(test)]
 mod tests {
+  use super::*;
+
+  use crate::test::log::init as test_log_init;
+
   use compact_str::ToCompactString;
   use crossterm::style::{Attributes, Color};
   use tracing::info;
-
-  use super::*;
-  // use crate::test::log::init as test_log_init;
 
   #[test]
   fn new1() {
@@ -641,5 +642,48 @@ mod tests {
       assert!(actual.len() == expect.len());
       assert_eq!(actual, expect);
     }
+  }
+
+  #[test]
+  fn clone1() {
+    test_log_init();
+
+    let size1 = U16Size::new(5, 5);
+    let mut frame1 = Iframe::new(size1);
+    for i in 0..25 {
+      let pos = frame1.idx2pos(i);
+      frame1.set_cell(pos, Cell::with_char('a'));
+    }
+    assert_eq!(frame1.get_cells().len(), 25);
+    for c in frame1.get_cells() {
+      assert_eq!(c.symbol(), 'a'.to_compact_string());
+    }
+    info!("frame1:{frame1:?}");
+
+    let size2 = U16Size::new(3, 3);
+    let mut frame2 = Iframe::new(size2);
+    for i in 0..9 {
+      let pos = frame2.idx2pos(i);
+      frame2.set_cell(pos, Cell::with_char('b'));
+    }
+    frame2.clone_from(&frame1);
+    assert_eq!(frame2.get_cells().len(), 25);
+    for c in frame2.get_cells() {
+      assert_eq!(c.symbol(), 'a'.to_compact_string());
+    }
+    info!("frame2:{frame2:?}");
+
+    let size3 = U16Size::new(7, 7);
+    let mut frame3 = Iframe::new(size3);
+    for i in 0..49 {
+      let pos = frame3.idx2pos(i);
+      frame3.set_cell(pos, Cell::with_char('c'));
+    }
+    frame3.clone_from(&frame1);
+    assert_eq!(frame3.get_cells().len(), 25);
+    for c in frame3.get_cells() {
+      assert_eq!(c.symbol(), 'a'.to_compact_string());
+    }
+    info!("frame3:{frame3:?}");
   }
 }

@@ -124,7 +124,7 @@ impl Canvas {
   /// Shade done.
   pub fn _shade_done(&mut self) {
     // Save current frame.
-    self.prev_frame = self.frame.clone();
+    self.prev_frame.clone_from(&self.frame);
     // Reset the `dirty` fields.
     self.frame.reset_dirty_rows();
   }
