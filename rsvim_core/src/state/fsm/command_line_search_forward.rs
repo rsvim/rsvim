@@ -5,7 +5,7 @@ use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line search forward mode.
-pub struct CommandLineSearchForwardStateful;
+pub struct CommandLineSearchForwardStateful {}
 
 impl Stateful for CommandLineSearchForwardStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {

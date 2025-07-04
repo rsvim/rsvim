@@ -5,7 +5,7 @@ use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The operator-pending editing mode.
-pub struct OperatorPendingStateful;
+pub struct OperatorPendingStateful {}
 
 impl Stateful for OperatorPendingStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {

@@ -13,7 +13,7 @@ use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for insert mode.
-pub struct InsertStateful;
+pub struct InsertStateful {}
 
 impl InsertStateful {
   fn _get_operation(&self, event: Event) -> Option<Operation> {

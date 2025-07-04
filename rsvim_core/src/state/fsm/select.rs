@@ -5,7 +5,7 @@ use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The select editing mode.
-pub struct SelectStateful;
+pub struct SelectStateful {}
 
 impl Stateful for SelectStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {

@@ -5,7 +5,7 @@ use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The visual editing mode.
-pub struct VisualStateful;
+pub struct VisualStateful {}
 
 impl Stateful for VisualStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
