@@ -17,7 +17,7 @@ use tracing::trace;
 pub mod frame;
 pub mod internal;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Logical canvas.
 ///
 /// It manages both the current frame and the last frame as a screenshot, and internally uses a
@@ -31,20 +31,6 @@ pub struct Canvas {
 }
 
 arc_mutex_ptr!(Canvas);
-
-impl Clone for Canvas {
-  fn clone(&self) -> Self {
-    Self {
-      frame: self.frame.clone(),
-      prev_frame: self.prev_frame.clone(),
-    }
-  }
-
-  fn clone_from(&mut self, source: &Self) {
-    self.frame.clone_from(&source.frame);
-    self.prev_frame.clone_from(&source.prev_frame);
-  }
-}
 
 impl Canvas {
   /// Make new canvas with terminal actual size.

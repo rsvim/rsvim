@@ -13,7 +13,7 @@ use std::ops::Range;
 pub mod cell;
 pub mod cursor;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 /// Logical frame for the canvas.
 ///
 /// When UI widget tree drawing on the canvas, it actually draws on the current frame. Then the
@@ -23,20 +23,6 @@ pub struct Frame {
   iframe: Iframe,
   /// Cursor
   cursor: Cursor,
-}
-
-impl Clone for Frame {
-  fn clone(&self) -> Self {
-    Self {
-      iframe: self.iframe.clone(),
-      cursor: self.cursor,
-    }
-  }
-
-  fn clone_from(&mut self, source: &Self) {
-    self.iframe.clone_from(&source.iframe);
-    self.cursor.clone_from(&source.cursor);
-  }
 }
 
 impl Frame {
