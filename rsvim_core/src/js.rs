@@ -37,26 +37,8 @@ pub mod module;
 pub mod msg;
 pub mod transpiler;
 
-#[derive(Debug, Default, Clone)]
-pub struct JsRuntimeOptions {
-  // // The seed used in Math.random() method.
-  // pub seed: Option<i64>,
-  // // Reloads every URL import.
-  // pub reload: bool,
-  // The main entry point for the program.
-  pub root: Option<String>,
-  // Holds user defined import maps for module loading.
-  pub import_map: Option<ImportMap>,
-  // // The numbers of threads used by the thread-pool.
-  // pub num_threads: Option<usize>,
-  // Indicates if we're running JavaScript tests.
-  pub test_mode: bool,
-  // // Defines the inspector listening options.
-  // pub inspect: Option<(SocketAddrV4, bool)>,
-  // // Exposes v8's garbage collector.
-  // pub expose_gc: bool,
-  /// V8 flags.
-  pub v8_flags: Vec<String>,
+pub fn v8_version() -> &'static str {
+  v8::VERSION_STRING
 }
 
 // /// A vector with JS callbacks and parameters.
@@ -79,22 +61,33 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-pub fn v8_version() -> &'static str {
-  v8::VERSION_STRING
-}
-
-pub fn init_v8_platform() {
+pub fn init_v8_platform(snapshot: bool, user_v8_flags: Option<&[String]>) {
   static V8_INIT: Once = Once::new();
+
   V8_INIT.call_once(move || {
     // Configuration flags for V8.
-    // let mut flags = String::from(concat!(
-    //   " --no-validate-asm",
-    //   " --turbo_fast_api_calls",
-    //   " --harmony-temporal",
-    //   " --js-float16array",
-    // ));
-    // let flags = options.v8_flags.join(" ");
-    // v8::V8::set_flags_from_string(&flags);
+    // See: <https://github.com/denoland/deno_core/blob/3289dad2501818c838a76c203f73d0dd62ec6167/core/runtime/setup.rs#L72>.
+    let mut flags = String::from(concat!(
+      " --no-validate-asm",
+      " --turbo-fast-api-calls",
+      " --harmony-temporal",
+      " --js-float16array",
+      " --js-explicit-resource-management",
+    ));
+
+    if snapshot {
+      flags.push_str(" --predictable --random-seed=42");
+    }
+
+    if let Some(user_flags) = user_v8_flags {
+      if !user_flags.is_empty() {
+        let user_flags = user_flags.join(" ");
+        let user_flags = format!(" {user_flags}");
+        flags.push_str(user_flags.as_str());
+      }
+    }
+
+    v8::V8::set_flags_from_string(&flags);
 
     let platform = v8::new_default_platform(0, false).make_shared();
     v8::V8::initialize_platform(platform);
@@ -159,7 +152,7 @@ impl JsRuntimeForSnapshot {
   /// Creates a new js runtime for snapshot.
   #[allow(clippy::new_without_default)]
   pub fn new() -> Self {
-    init_v8_platform();
+    init_v8_platform(true, None);
 
     let (mut isolate, global_context) = Self::create_isolate();
 
@@ -173,9 +166,7 @@ impl JsRuntimeForSnapshot {
       // `add_context_data` API.
 
       for module in BUILTIN_RUNTIME_MODULES.iter() {
-        let filename = module.filename;
-        let source = module.source;
-        Self::init_builtin_module(scope, filename, source);
+        Self::init_builtin_module(scope, module.filename, module.source);
       }
     }
 
@@ -198,7 +189,7 @@ impl JsRuntimeForSnapshot {
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
-    // isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
+    isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);
@@ -327,6 +318,28 @@ impl JsRuntimeForSnapshot {
   }
 }
 
+#[derive(Debug, Default, Clone)]
+pub struct JsRuntimeOptions {
+  // // The seed used in Math.random() method.
+  // pub seed: Option<i64>,
+  // // Reloads every URL import.
+  // pub reload: bool,
+  // The main entry point for the program.
+  pub root: Option<String>,
+  // Holds user defined import maps for module loading.
+  pub import_map: Option<ImportMap>,
+  // // The numbers of threads used by the thread-pool.
+  // pub num_threads: Option<usize>,
+  // Indicates if we're running JavaScript tests.
+  pub test_mode: bool,
+  // // Defines the inspector listening options.
+  // pub inspect: Option<(SocketAddrV4, bool)>,
+  // // Exposes v8's garbage collector.
+  // pub expose_gc: bool,
+  /// V8 flags.
+  pub v8_flags: Vec<String>,
+}
+
 /// The state of js runtime.
 pub struct JsRuntimeState {
   /// A sand-boxed execution context with its own set of built-in objects and functions.
@@ -412,7 +425,7 @@ impl JsRuntime {
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
-    init_v8_platform();
+    init_v8_platform(false, Some(&options.v8_flags));
 
     let mut isolate = {
       let create_params = v8::CreateParams::default();
@@ -422,7 +435,7 @@ impl JsRuntime {
 
     // NOTE: Set microtasks policy to explicit, this requires we invoke `perform_microtask_checkpoint` API on each tick.
     // See: [`run_next_tick_callbacks`].
-    // isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
+    isolate.set_microtasks_policy(v8::MicrotasksPolicy::Explicit);
     isolate.set_capture_stack_trace_for_uncaught_exceptions(true, 10);
     isolate.set_promise_reject_callback(hook::promise_reject_cb);
     // isolate.set_host_import_module_dynamically_callback(hook::host_import_module_dynamically_cb);

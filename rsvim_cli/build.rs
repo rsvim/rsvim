@@ -1,15 +1,5 @@
-use rsvim_core::js::{JsRuntimeForSnapshot, v8_version};
-use std::io::Write;
+use rsvim_core::js::JsRuntimeForSnapshot;
 use std::path::Path;
-
-fn version() {
-  let output_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("RSVIM_VERSION.TXT");
-  let output_path1 = output_path.as_path();
-  eprintln!("[RSVIM] Writing version into {output_path1:?}...");
-  let pkg_version = env!("CARGO_PKG_VERSION");
-  let mut f = std::fs::File::create(output_path).unwrap();
-  write!(&mut f, "rsvim {} (v8 {})", pkg_version, v8_version()).unwrap();
-}
 
 fn snapshot() {
   let js_runtime = JsRuntimeForSnapshot::new();
@@ -39,6 +29,5 @@ fn snapshot() {
 }
 
 fn main() {
-  version();
   snapshot();
 }
