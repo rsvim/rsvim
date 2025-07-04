@@ -5,7 +5,7 @@ use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The terminal editing mode.
-pub struct TerminalStateful {}
+pub struct TerminalStateful;
 
 impl Stateful for TerminalStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {

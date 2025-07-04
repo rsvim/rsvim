@@ -15,7 +15,7 @@ use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line ex mode.
-pub struct CommandLineExStateful {}
+pub struct CommandLineExStateful;
 
 impl CommandLineExStateful {
   fn _get_operation(&self, event: Event) -> Option<Operation> {

@@ -15,7 +15,7 @@ use tracing::trace;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The finite-state-machine for normal mode.
-pub struct NormalStateful {}
+pub struct NormalStateful;
 
 impl NormalStateful {
   fn _get_operation(&self, event: Event) -> Option<Operation> {

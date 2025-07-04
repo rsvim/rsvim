@@ -7,7 +7,7 @@ use crate::state::ops::Operation;
 /// The quit state.
 ///
 /// NOTE: This is an internal state to tell the editor to quit.
-pub struct QuitStateful {}
+pub struct QuitStateful;
 
 impl Stateful for QuitStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {

@@ -5,7 +5,7 @@ use crate::state::ops::Operation;
 
 #[derive(Debug, Copy, Clone, Default, PartialEq, Eq, Hash)]
 /// The command-line search backward mode.
-pub struct CommandLineSearchBackwardStateful {}
+pub struct CommandLineSearchBackwardStateful;
 
 impl Stateful for CommandLineSearchBackwardStateful {
   fn handle(&self, _data_access: StatefulDataAccess) -> StatefulValue {
