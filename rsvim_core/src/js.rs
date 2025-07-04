@@ -61,7 +61,7 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-pub fn init_v8_platform(snapshot: bool, user_v8_flags: &[String]) {
+pub fn init_v8_platform(snapshot: bool, user_v8_flags: Option<&[String]>) {
   static V8_INIT: Once = Once::new();
 
   V8_INIT.call_once(move || {
@@ -79,10 +79,12 @@ pub fn init_v8_platform(snapshot: bool, user_v8_flags: &[String]) {
       flags.push_str(" --predictable --random-seed=42");
     }
 
-    if !user_v8_flags.is_empty() {
-      let additional_v8_flags = user_v8_flags.join(" ");
-      let additional_v8_flags = format!(" {additional_v8_flags}");
-      flags.push_str(additional_v8_flags.as_str());
+    if let Some(user_v8_flags) = user_v8_flags
+      && !user_v8_flags.is_empty()
+    {
+      let user_flags = user_v8_flags.join(" ");
+      let user_flags = format!(" {user_flags}");
+      flags.push_str(user_flags.as_str());
     }
 
     v8::V8::set_flags_from_string(&flags);
@@ -150,7 +152,7 @@ impl JsRuntimeForSnapshot {
   /// Creates a new js runtime for snapshot.
   #[allow(clippy::new_without_default)]
   pub fn new() -> Self {
-    init_v8_platform(true, &[]);
+    init_v8_platform(true, None);
 
     let (mut isolate, global_context) = Self::create_isolate();
 
@@ -423,7 +425,7 @@ impl JsRuntime {
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
-    init_v8_platform(false, &options.v8_flags);
+    init_v8_platform(false, Some(&options.v8_flags));
 
     let mut isolate = {
       let create_params = v8::CreateParams::default();
