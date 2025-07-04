@@ -80,7 +80,7 @@ pub fn init_v8_platform(snapshot: bool, additional_v8_flags: Vec<String>) {
     if !additional_v8_flags.is_empty() {
       let additional_v8_flags = additional_v8_flags.join(" ");
       let additional_v8_flags = format!(" {additional_v8_flags}");
-      flags.push_str(&additional_v8_flags.as_str());
+      flags.push_str(additional_v8_flags.as_str());
     }
 
     v8::V8::set_flags_from_string(&flags);
