@@ -71,6 +71,7 @@ pub fn init_v8_platform(snapshot: bool, additional_v8_flags: Vec<String>) {
       " --turbo-fast-api-calls",
       " --harmony-temporal",
       " --js-float16array",
+      " --js-explicit-resource-management",
     ));
 
     if snapshot {
