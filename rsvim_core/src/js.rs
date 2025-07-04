@@ -61,7 +61,7 @@ pub fn next_future_id() -> JsFutureId {
   VALUE.fetch_add(1, Ordering::Relaxed)
 }
 
-pub fn init_v8_platform(snapshot: bool, additional_v8_flags: Vec<String>) {
+pub fn init_v8_platform(snapshot: bool, additional_v8_flags: &[String]) {
   static V8_INIT: Once = Once::new();
 
   V8_INIT.call_once(move || {
@@ -150,7 +150,7 @@ impl JsRuntimeForSnapshot {
   /// Creates a new js runtime for snapshot.
   #[allow(clippy::new_without_default)]
   pub fn new() -> Self {
-    init_v8_platform(true, vec![]);
+    init_v8_platform(true, &[]);
 
     let (mut isolate, global_context) = Self::create_isolate();
 
@@ -423,7 +423,7 @@ impl JsRuntime {
     editing_state: StateArc,
   ) -> Self {
     // Fire up the v8 engine.
-    init_v8_platform(false, vec![]);
+    init_v8_platform(false, &options.v8_flags);
 
     let mut isolate = {
       let create_params = v8::CreateParams::default();
