@@ -8,7 +8,7 @@ use geo::point;
 use std::ops::Range;
 // use tracing::trace;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 /// Internal implementation for `Iframe`.
 pub struct Iframe {
   size: U16Size,
@@ -19,6 +19,33 @@ pub struct Iframe {
   /// NOTE: This is for fast locating the changed rows inside the terminal device, i.e. the whole
   /// TUI screen instead of the rows inside UI widget window.
   dirty_rows: Vec<bool>,
+}
+
+macro_rules! clone_vec_impl {
+  ($v:tt,$src:tt,$dest:tt) => {
+    if $dest.$v.len() < $src.$v.len() {
+      $dest.$v.reserve_exact($src.$v.len());
+    } else if $dest.$v.len() > $src.$v.len() {
+      $dest.$v.truncate($src.$v.len());
+    }
+    $dest.$v.clone_from_slice(&$src.$v);
+  };
+}
+
+impl Clone for Iframe {
+  fn clone(&self) -> Self {
+    Self {
+      size: self.size,
+      cells: self.cells.clone(),
+      dirty_rows: self.dirty_rows.clone(),
+    }
+  }
+
+  fn clone_from(&mut self, source: &Self) {
+    self.size = source.size;
+    clone_vec_impl!(cells, source, self);
+    clone_vec_impl!(dirty_rows, source, self);
+  }
 }
 
 impl Iframe {
