@@ -340,12 +340,13 @@ impl Iframe {
 
 #[cfg(test)]
 mod tests {
+  use super::*;
+
+  use crate::test::log::init as test_log_init;
+
   use compact_str::ToCompactString;
   use crossterm::style::{Attributes, Color};
   use tracing::info;
-
-  use super::*;
-  // use crate::test::log::init as test_log_init;
 
   #[test]
   fn new1() {
@@ -661,6 +662,8 @@ mod tests {
 
   #[test]
   fn clone1() {
+    test_log_init();
+
     let size1 = U16Size::new(5, 5);
     let mut frame1 = Iframe::new(size1);
     for i in 0..25 {
