@@ -199,3 +199,24 @@ impl TypeScript {
 //     )
 //   }
 // }
+
+#[cfg(test)]
+mod tests_typescript {
+  use super::*;
+
+  use crate::test::log::init as test_log_init;
+  use tracing::info;
+
+  #[test]
+  fn test1() {
+    test_log_init();
+
+    let actual1 = TypeScript::compile(
+      Some("./runtime/00__web.ts"),
+      include_str!("./runtime/00__web.ts"),
+    );
+    assert!(actual1.is_ok());
+    let actual1 = actual1.unwrap();
+    info!("actual1:\n{actual1}");
+  }
+}
