@@ -115,7 +115,6 @@ debug = true
 # Release
 [profile.release]
 lto = true
-strip = true
 codegen-units = 1
 opt-level = 'z'   # Optimize for size
 
