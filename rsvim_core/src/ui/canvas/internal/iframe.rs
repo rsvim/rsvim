@@ -21,17 +21,6 @@ pub struct Iframe {
   dirty_rows: Vec<bool>,
 }
 
-macro_rules! clone_vec_impl {
-  ($v:tt,$src:tt,$dest:tt) => {
-    if $dest.$v.len() < $src.$v.len() {
-      $dest.$v.reserve_exact($src.$v.len());
-    } else if $dest.$v.len() > $src.$v.len() {
-      $dest.$v.truncate($src.$v.len());
-    }
-    $dest.$v.clone_from_slice(&$src.$v);
-  };
-}
-
 impl Clone for Iframe {
   fn clone(&self) -> Self {
     Self {
@@ -43,8 +32,8 @@ impl Clone for Iframe {
 
   fn clone_from(&mut self, source: &Self) {
     self.size = source.size;
-    clone_vec_impl!(cells, source, self);
-    clone_vec_impl!(dirty_rows, source, self);
+    self.cells.clone_from(&source.cells);
+    self.dirty_rows.clone_from(&source.dirty_rows);
   }
 }
 
