@@ -86,7 +86,7 @@ impl TypeScript {
         .apply(&mut fixer(None));
 
       {
-        let cfg = swc_ecma_codegen::Config::default().with_target(EsVersion::EsNext);
+        let cfg = swc_ecma_codegen::Config::default().with_target(EsVersion::EsNext); // NOTE: Always use "esnext" version.
         let mut emitter = Emitter {
           cfg,
           cm: cm.clone(),
