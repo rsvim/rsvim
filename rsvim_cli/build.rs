@@ -1,5 +1,4 @@
-use rsvim_core::js::{JsRuntimeForSnapshot, v8_version};
-use std::io::Write;
+use rsvim_core::js::JsRuntimeForSnapshot;
 use std::path::Path;
 
 fn snapshot() {
