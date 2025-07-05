@@ -71,6 +71,15 @@ impl Text {
     self._internal_check_char(c);
     unicode::char_symbol(&self.options, c)
   }
+
+  /// Get both cell symbol and its display width.
+  pub fn char_symbol_and_width(&self, c: char) -> (CompactString, usize) {
+    self._internal_check_char(c);
+    (
+      unicode::char_symbol(&self.options, c),
+      unicode::char_width(&self.options, c),
+    )
+  }
 }
 // Unicode }
 
