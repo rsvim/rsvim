@@ -83,8 +83,25 @@ pub fn str_symbols(opt: &BufferLocalOptions, s: &str) -> CompactString {
 mod tests {
   use super::*;
 
+  use crate::buf::opt::BufferLocalOptionsBuilder;
+  use crate::defaults::ascii::AsciiControlCodeFormatter;
+  use crate::test::log::init as test_log_init;
+
+  use tracing::info;
+
   #[test]
-  fn next_buffer_id1() {
-    assert!(next_buffer_id() > 0);
+  fn char_width1() {
+    test_log_init();
+
+    for i in 0_u8..32_u8 {
+      let c = i as char;
+      let asciic = AsciiChar::from_ascii(c).unwrap();
+      let opt = BufferLocalOptionsBuilder::default().build().unwrap();
+      let asciifmt = AsciiControlCodeFormatter::from(asciic);
+      let formatted = format!("{asciifmt}");
+      let formatted_len = formatted.len();
+      info!("i:{i},c:{c:?},ascii char:{asciic:?},ascii formatted:{formatted:?}({formatted_len})");
+      assert_eq!(char_width(&opt, c), formatted_len);
+    }
   }
 }
