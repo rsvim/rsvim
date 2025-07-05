@@ -120,18 +120,18 @@ mod tests {
       let c = 'A';
       let opt = BufferLocalOptionsBuilder::default().build().unwrap();
       let formatted = format!("{c}");
-      let formatted_len = formatted.len();
-      info!("c:{c:?},formatted:{formatted:?}({formatted_len})");
-      assert_eq!(char_width(&opt, c), formatted_len);
+      let formatted_width = UnicodeWidthChar::width_cjk(c).unwrap();
+      info!("c:{c:?},formatted:{formatted:?}({formatted_width})");
+      assert_eq!(char_width(&opt, c), formatted_width);
     }
 
     {
       let c = '好';
       let opt = BufferLocalOptionsBuilder::default().build().unwrap();
       let formatted = format!("{c}");
-      let formatted_len = formatted.len();
-      info!("c:{c:?},formatted:{formatted:?}({formatted_len})");
-      assert_eq!(char_width(&opt, c), formatted_len);
+      let formatted_width = UnicodeWidthChar::width_cjk(c).unwrap();
+      info!("c:{c:?},formatted:{formatted:?}({formatted_width})");
+      assert_eq!(char_width(&opt, c), formatted_width);
     }
   }
 }
