@@ -19,7 +19,7 @@ pub fn char_width(opt: &BufferLocalOptions, c: char) -> usize {
     let ac = AsciiChar::from_ascii(c).unwrap();
     match ac {
       AsciiChar::Tab => opt.tab_stop() as usize,
-      AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
+      AsciiChar::LineFeed => 0,
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
         format!("{ascii_formatter}").len()
@@ -40,7 +40,7 @@ pub fn char_symbol(opt: &BufferLocalOptions, c: char) -> (CompactString, usize) 
         CompactString::from(" ".repeat(opt.tab_stop() as usize)),
         width,
       ),
-      AsciiChar::LineFeed | AsciiChar::CarriageReturn => (CompactString::new(""), width),
+      AsciiChar::LineFeed => (CompactString::new(""), width),
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
         (CompactString::from(format!("{ascii_formatter}")), width)
