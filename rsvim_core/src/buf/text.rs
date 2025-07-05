@@ -59,11 +59,6 @@ impl Text {
   pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
     unicode::char_symbol(&self.options, c)
   }
-
-  /// End of line
-  pub fn eol(&self) -> CompactString {
-    return format!("{}", self.options.end_of_line()).to_compact_string();
-  }
 }
 // Unicode }
 
@@ -137,8 +132,9 @@ impl Text {
     match self.rope.get_line(line_idx) {
       Some(line) => match self.last_char_on_line(line_idx) {
         Some(last_char) => {
-          let crlf = self.options.end_of_line() == EndOfLineOption::CRLF && last_char>0 && line.char(last_char-1) == '\r' && line.char(last_char) == '\n' {
-
+          let crlf = self.options.end_of_line() == EndOfLineOption::CRLF && last_char>0 && line.char(last_char-1) == '\r' && line.char(last_char) == '\n';
+          if crlf {
+            Some(last_char.saturating_sub(2))
           }
           if  self.options.end_of_line() == EndOfLineOption::CRLF  && {
 
@@ -170,17 +166,6 @@ impl Text {
       }
       None => false,
     }
-  }
-
-  /// Whether a line ends with its 'FileFormat' (i.e. the 'EndOfLine') option.
-  ///
-  /// For example, when a buffer configures with 'FileFormat=LF' option, it uses the '\n' as its
-  /// end of line. When a buffer configures with 'FileFormat=CRLF' option, it uses the '\r\n' as
-  /// its end of line.
-  ///
-  /// # Returns
-  /// It returns true only when the line exists and it ends with corresponding eol.
-  pub fn has_eol(&self, line_idx: usize) -> bool {
   }
 }
 // Rope }
