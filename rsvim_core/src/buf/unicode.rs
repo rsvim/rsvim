@@ -1,6 +1,6 @@
 //! Unicode utils.
 
-use crate::buf::opt::BufferLocalOptions;
+use crate::buf::opt::{BufferLocalOptions, FileFormatOption};
 use crate::defaults::ascii::AsciiControlCodeFormatter;
 
 use ascii::AsciiChar;
@@ -19,7 +19,15 @@ pub fn char_width(opt: &BufferLocalOptions, c: char) -> usize {
     let ac = AsciiChar::from_ascii(c).unwrap();
     match ac {
       AsciiChar::Tab => opt.tab_stop() as usize,
-      AsciiChar::LineFeed | AsciiChar::CarriageReturn => 0,
+      AsciiChar::LineFeed => 0,
+      AsciiChar::CarriageReturn => {
+        if opt.file_format() == FileFormatOption::Unix {
+          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+          format!("{ascii_formatter}").len()
+        } else {
+          0
+        }
+      }
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
         format!("{ascii_formatter}").len()
@@ -31,23 +39,27 @@ pub fn char_width(opt: &BufferLocalOptions, c: char) -> usize {
 }
 
 /// Get the printable cell symbol and its display width.
-pub fn char_symbol(opt: &BufferLocalOptions, c: char) -> (CompactString, usize) {
-  let width = char_width(opt, c);
+pub fn char_symbol(opt: &BufferLocalOptions, c: char) -> CompactString {
   if c.is_ascii_control() {
     let ac = AsciiChar::from_ascii(c).unwrap();
     match ac {
-      AsciiChar::Tab => (
-        CompactString::from(" ".repeat(opt.tab_stop() as usize)),
-        width,
-      ),
-      AsciiChar::LineFeed | AsciiChar::CarriageReturn => (CompactString::new(""), width),
+      AsciiChar::Tab => CompactString::from(" ".repeat(opt.tab_stop() as usize)),
+      AsciiChar::LineFeed => CompactString::new(""),
+      AsciiChar::CarriageReturn => {
+        if opt.file_format() == FileFormatOption::Unix {
+          let ascii_formatter = AsciiControlCodeFormatter::from(ac);
+          CompactString::from(format!("{ascii_formatter}"))
+        } else {
+          CompactString::new("")
+        }
+      }
       _ => {
         let ascii_formatter = AsciiControlCodeFormatter::from(ac);
-        (CompactString::from(format!("{ascii_formatter}")), width)
+        CompactString::from(format!("{ascii_formatter}"))
       }
     }
   } else {
-    (CompactString::from(c.to_string()), width)
+    CompactString::from(c.to_string())
   }
 }
 
@@ -57,12 +69,22 @@ pub fn str_width(opt: &BufferLocalOptions, s: &str) -> usize {
 }
 
 /// Get the printable cell symbols and the display width for a unicode `str`.
-pub fn str_symbols(opt: &BufferLocalOptions, s: &str) -> (CompactString, usize) {
+pub fn str_symbols(opt: &BufferLocalOptions, s: &str) -> CompactString {
   s.chars().map(|c| char_symbol(opt, c)).fold(
-    (CompactString::with_capacity(s.len()), 0_usize),
-    |(mut init_symbol, init_width), (mut symbol, width)| {
+    CompactString::with_capacity(s.len()),
+    |mut init_symbol, mut symbol| {
       init_symbol.push_str(symbol.as_mut_str());
-      (init_symbol, init_width + width)
+      init_symbol
     },
   )
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn next_buffer_id1() {
+    assert!(next_buffer_id() > 0);
+  }
 }
