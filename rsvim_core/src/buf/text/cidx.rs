@@ -816,7 +816,7 @@ mod tests {
     assert_eq!(actual.width_before(&options, &rope.line(0), 11), 11);
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 11);
 
-    let expect: Vec<usize> = [(1..=13).collect(), vec![13, 13, 13, 13]].concat();
+    let expect: Vec<usize> = [(1..=13).collect(), vec![15, 15, 15, 15]].concat();
     assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
@@ -827,7 +827,7 @@ mod tests {
       .collect();
     assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect);
 
-    let expect: Vec<usize> = [(0..=13).collect(), vec![13, 13, 13]].concat();
+    let expect: Vec<usize> = [(0..=13).collect(), vec![15, 15, 15]].concat();
     assert_width_before(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
