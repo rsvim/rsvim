@@ -87,7 +87,8 @@ pub fn draw(viewport: &Viewport, text: &Text, actual_shape: &U16Rect, canvas: &m
           let mut chars_iter = bline.get_chars_at(r_viewport.start_char_idx()).unwrap();
           while char_idx < r_viewport.end_char_idx() {
             let c = chars_iter.next().unwrap();
-            let (unicode_symbol, unicode_width) = text.char_symbol(c);
+            let unicode_width = text.char_width(c);
+            let unicode_symbol = text.char_symbol(c);
 
             let cell = Cell::with_symbol(unicode_symbol);
             let cell_upos = point!(x: col_idx + upos.x(), y: row_idx + upos.y());

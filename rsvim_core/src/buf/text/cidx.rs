@@ -518,7 +518,7 @@ mod tests {
 
       let mut payload = String::new();
       for c in line.chars() {
-        let (cs, _cw) = text.char_symbol(c);
+        let cs = text.char_symbol(c);
         payload.push_str(cs.as_ref());
       }
       info!("-{}-", payload);
@@ -530,7 +530,7 @@ mod tests {
         let mut zero_width_chars: Vec<String> = vec![];
         let mut big_width_chars: Vec<String> = vec![];
         for (i, c) in line.chars().enumerate() {
-          let (_cs, cw) = text.char_symbol(c);
+          let cw = text.char_width(c);
           w += cw;
           n += 1;
           if cw == 0 {
@@ -566,7 +566,7 @@ mod tests {
         let mut show3 = false;
         let mut w = 0_usize;
         for (_i, c) in line.chars().enumerate() {
-          let (_cs, cw) = text.char_symbol(c);
+          let cw = text.char_width(c);
           w += cw;
           if w == 1 || w % 5 == 0 {
             if builder1.is_empty() || builder1.ends_with(" ") {
@@ -610,7 +610,7 @@ mod tests {
         let mut w = 0_usize;
         let mut show = false;
         for (_i, c) in line.chars().enumerate() {
-          let (_cs, cw) = text.char_symbol(c);
+          let cw = text.char_width(c);
           w += cw;
           if cw > 1 && (builder.is_empty() || builder.ends_with(" ")) {
             builder.push_str(&" ".repeat(cw - 1));
