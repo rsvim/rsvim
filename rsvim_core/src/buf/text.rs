@@ -47,19 +47,29 @@ impl Text {
 
 // Unicode {
 impl Text {
+  #[cfg(debug_assertions)]
+  fn _internal_check_char(&self, c: char) {
+    let w = unicode::char_width(&self.options, c);
+    let s = unicode::char_symbol(&self.options, c);
+    debug_assert_eq!(s.len(), w);
+  }
+
+  #[cfg(not(debug_assertions))]
+  fn _internal_check_char(&self, _c: char) {}
+
   /// Get the display width for a `char`, supports both ASCI control codes and unicode.
   ///
   /// The char display width follows the
   /// [Unicode Standard Annex #11](https://www.unicode.org/reports/tr11/).
   pub fn char_width(&self, c: char) -> usize {
+    self._internal_check_char(c);
     unicode::char_width(&self.options, c)
   }
 
   /// Get the printable cell symbol.
   pub fn char_symbol(&self, c: char) -> CompactString {
-    let s = unicode::char_symbol(&self.options, c);
-    debug_assert_eq!(s.len(), self.char_width(c));
-    s
+    self._internal_check_char(c);
+    unicode::char_symbol(&self.options, c)
   }
 }
 // Unicode }
