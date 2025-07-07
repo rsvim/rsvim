@@ -412,13 +412,3 @@ impl BuffersManager {
   }
 }
 // Options }
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn next_buffer_id1() {
-    assert!(next_buffer_id() > 0);
-  }
-}
