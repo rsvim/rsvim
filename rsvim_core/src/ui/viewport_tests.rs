@@ -363,7 +363,6 @@ pub fn search_right_viewport(
   )
 }
 
-#[cfg(test)]
 mod tests_view_nowrap {
   use super::*;
 
@@ -820,7 +819,6 @@ mod tests_view_nowrap {
   }
 }
 
-#[cfg(test)]
 mod tests_view_nowrap_startcol {
   use super::*;
 
@@ -1114,7 +1112,6 @@ mod tests_view_nowrap_startcol {
   }
 }
 
-#[cfg(test)]
 mod tests_view_wrap_nolinebreak {
   use super::*;
 
@@ -1865,7 +1862,6 @@ mod tests_view_wrap_nolinebreak {
   }
 }
 
-#[cfg(test)]
 mod tests_view_wrap_nolinebreak_startcol {
   use super::*;
 
@@ -2084,7 +2080,6 @@ mod tests_view_wrap_nolinebreak_startcol {
   }
 }
 
-#[cfg(test)]
 mod tests_view_wrap_linebreak {
   use super::*;
 
@@ -2812,7 +2807,6 @@ mod tests_view_wrap_linebreak {
   }
 }
 
-#[cfg(test)]
 mod tests_view_wrap_linebreak_startcol {
   use super::*;
 
@@ -3118,7 +3112,6 @@ mod tests_view_wrap_linebreak_startcol {
   }
 }
 
-#[cfg(test)]
 mod tests_search_anchor_downward_nowrap {
   use super::*;
 
@@ -4068,7 +4061,7 @@ mod tests_search_anchor_downward_nowrap {
     }
   }
 }
-#[cfg(test)]
+
 mod tests_search_anchor_downward_wrap_nolinebreak {
   use super::*;
 
@@ -4923,7 +4916,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
     }
   }
 }
-#[cfg(test)]
+
 mod tests_search_anchor_downward_wrap_linebreak {
   use super::*;
 
@@ -5534,7 +5527,7 @@ mod tests_search_anchor_downward_wrap_linebreak {
     }
   }
 }
-#[cfg(test)]
+
 mod tests_search_anchor_upward_nowrap {
   use super::*;
 
@@ -6363,7 +6356,7 @@ mod tests_search_anchor_upward_nowrap {
     }
   }
 }
-#[cfg(test)]
+
 mod tests_search_anchor_upward_wrap_nolinebreak {
   use super::*;
 
@@ -7140,7 +7133,7 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
     }
   }
 }
-#[cfg(test)]
+
 mod tests_search_anchor_upward_wrap_linebreak {
   use super::*;
 
@@ -7827,7 +7820,7 @@ mod tests_search_anchor_upward_wrap_linebreak {
     }
   }
 }
-#[cfg(test)]
+
 mod tests_search_anchor_horizontally_nowrap {
   use super::*;
 
@@ -9063,7 +9056,7 @@ mod tests_search_anchor_horizontally_nowrap {
     }
   }
 }
-#[cfg(test)]
+
 mod tests_search_anchor_horizontally_wrap_nolinebreak {
   use super::*;
 
@@ -10455,7 +10448,6 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
   }
 }
 
-#[cfg(test)]
 mod tests_search_anchor_horizontally_wrap_linebreak {
   use super::*;
 
