@@ -499,135 +499,123 @@ mod tests {
   fn print_text_line_details(text: Text, line_idx: usize, msg: &str) {
     let line = text.rope().get_line(line_idx).unwrap();
 
-    let subscriber = tracing_subscriber::FmtSubscriber::builder()
-      .with_line_number(false)
-      .with_target(false)
-      .with_level(true)
-      .with_ansi(true)
-      .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-      .with_writer(std::io::stdout)
-      .without_time()
-      .finish();
+    if !msg.is_empty() {
+      info!("line: {}", msg);
+    } else {
+      info!("line");
+    }
 
-    tracing::subscriber::with_default(subscriber, || {
-      if !msg.is_empty() {
-        info!("line: {}", msg);
-      } else {
-        info!("line");
+    let mut payload = String::new();
+    for c in line.chars() {
+      let cs = text.char_symbol(c);
+      payload.push_str(cs.as_ref());
+    }
+    info!("-{}-", payload);
+
+    {
+      let mut builder = String::new();
+      let mut n = 0_usize;
+      let mut w = 0_usize;
+      let mut zero_width_chars: Vec<String> = vec![];
+      let mut big_width_chars: Vec<String> = vec![];
+      for (i, c) in line.chars().enumerate() {
+        let cw = text.char_width(c);
+        w += cw;
+        n += 1;
+        if cw == 0 {
+          zero_width_chars.push(format!("{i}"));
+        }
+        if cw > 1 {
+          big_width_chars.push(format!("{i}"));
+        }
+        if i % 5 == 0 {
+          builder.push_str(&format!("{i}"));
+        }
+        if builder.len() < w {
+          let diff = w - builder.len();
+          builder.push_str(&" ".repeat(diff));
+        }
       }
+      info!(
+        "-{}- Char Index, total:{} (width = 0 chars: count:{} indexes:{}, width > 1 chars: count:{} indexes:{})",
+        builder,
+        n,
+        zero_width_chars.len(),
+        zero_width_chars.join(","),
+        big_width_chars.len(),
+        big_width_chars.join(",")
+      );
+    }
 
-      let mut payload = String::new();
-      for c in line.chars() {
-        let (cs, _cw) = text.char_symbol(c);
-        payload.push_str(cs.as_ref());
-      }
-      info!("-{}-", payload);
-
-      {
-        let mut builder = String::new();
-        let mut n = 0_usize;
-        let mut w = 0_usize;
-        let mut zero_width_chars: Vec<String> = vec![];
-        let mut big_width_chars: Vec<String> = vec![];
-        for (i, c) in line.chars().enumerate() {
-          let (_cs, cw) = text.char_symbol(c);
-          w += cw;
-          n += 1;
-          if cw == 0 {
-            zero_width_chars.push(format!("{i}"));
-          }
-          if cw > 1 {
-            big_width_chars.push(format!("{i}"));
-          }
-          if i % 5 == 0 {
-            builder.push_str(&format!("{i}"));
-          }
-          if builder.len() < w {
-            let diff = w - builder.len();
-            builder.push_str(&" ".repeat(diff));
+    {
+      let mut builder1 = String::new();
+      let mut builder2 = String::new();
+      let mut builder3 = String::new();
+      let mut show2 = false;
+      let mut show3 = false;
+      let mut w = 0_usize;
+      for (_i, c) in line.chars().enumerate() {
+        let cw = text.char_width(c);
+        w += cw;
+        if w == 1 || w % 5 == 0 {
+          if builder1.is_empty() || builder1.ends_with(" ") {
+            builder1.push_str(&format!("{w}"));
+          } else if cw > 0 {
+            builder2.push_str(&format!("{w}"));
+            show2 = true;
+          } else {
+            builder3.push_str(&format!("{w}"));
+            show3 = true;
           }
         }
+
+        if builder1.len() < w {
+          let diff = w - builder1.len();
+          builder1.push_str(&" ".repeat(diff));
+        }
+        if builder2.len() < w {
+          let diff = w - builder2.len();
+          builder2.push_str(&" ".repeat(diff));
+        }
+        if builder3.len() < w {
+          let diff = w - builder3.len();
+          builder3.push_str(&" ".repeat(diff));
+        }
+      }
+      info!("-{}- Display Width, total width:{}", builder1, w);
+      if show2 {
         info!(
-          "-{}- Char Index, total:{} (width = 0 chars: count:{} indexes:{}, width > 1 chars: count:{} indexes:{})",
-          builder,
-          n,
-          zero_width_chars.len(),
-          zero_width_chars.join(","),
-          big_width_chars.len(),
-          big_width_chars.join(",")
+          "-{}- Display Width (extra, conflicted with the above one)",
+          builder2
         );
       }
+      if show3 {
+        info!("-{}- Display Width for width = 0 chars", builder3);
+      }
+    }
 
-      {
-        let mut builder1 = String::new();
-        let mut builder2 = String::new();
-        let mut builder3 = String::new();
-        let mut show2 = false;
-        let mut show3 = false;
-        let mut w = 0_usize;
-        for (_i, c) in line.chars().enumerate() {
-          let (_cs, cw) = text.char_symbol(c);
-          w += cw;
-          if w == 1 || w % 5 == 0 {
-            if builder1.is_empty() || builder1.ends_with(" ") {
-              builder1.push_str(&format!("{w}"));
-            } else if cw > 0 {
-              builder2.push_str(&format!("{w}"));
-              show2 = true;
-            } else {
-              builder3.push_str(&format!("{w}"));
-              show3 = true;
-            }
-          }
+    {
+      let mut builder = String::new();
+      let mut w = 0_usize;
+      let mut show = false;
+      for (_i, c) in line.chars().enumerate() {
+        let cw = text.char_width(c);
+        w += cw;
+        if cw > 1 && (builder.is_empty() || builder.ends_with(" ")) {
+          builder.push_str(&" ".repeat(cw - 1));
+          builder.push_str(&format!("{w}"));
+          show = true;
+        }
 
-          if builder1.len() < w {
-            let diff = w - builder1.len();
-            builder1.push_str(&" ".repeat(diff));
-          }
-          if builder2.len() < w {
-            let diff = w - builder2.len();
-            builder2.push_str(&" ".repeat(diff));
-          }
-          if builder3.len() < w {
-            let diff = w - builder3.len();
-            builder3.push_str(&" ".repeat(diff));
-          }
-        }
-        info!("-{}- Display Width, total width:{}", builder1, w);
-        if show2 {
-          info!(
-            "-{}- Display Width (extra, conflicted with the above one)",
-            builder2
-          );
-        }
-        if show3 {
-          info!("-{}- Display Width for width = 0 chars", builder3);
+        if builder.len() < w {
+          let diff = w - builder.len();
+          builder.push_str(&" ".repeat(diff));
         }
       }
-
-      {
-        let mut builder = String::new();
-        let mut w = 0_usize;
-        let mut show = false;
-        for (_i, c) in line.chars().enumerate() {
-          let (_cs, cw) = text.char_symbol(c);
-          w += cw;
-          if cw > 1 && (builder.is_empty() || builder.ends_with(" ")) {
-            builder.push_str(&" ".repeat(cw - 1));
-            builder.push_str(&format!("{w}"));
-            show = true;
-          }
-
-          if builder.len() < w {
-            let diff = w - builder.len();
-            builder.push_str(&" ".repeat(diff));
-          }
-        }
-        if show {
-          info!("-{}- Display Width for width > 1 chars", builder);
-        }
+      if show {
+        info!("-{}- Display Width for width > 1 chars", builder);
       }
-    });
+    }
   }
 
   fn assert_width_at(
@@ -828,7 +816,14 @@ mod tests {
     assert_eq!(actual.width_before(&options, &rope.line(0), 11), 11);
     assert_eq!(actual.width_until(&options, &rope.line(0), 10), 11);
 
-    let expect: Vec<usize> = [(1..=13).collect(), vec![13, 13, 13, 13]].concat();
+    // For CR, on Windows it is 0 width, otherwise it is 2 width (^M).
+    let cr_width = if cfg!(target_os = "windows") { 13 } else { 15 };
+
+    let expect: Vec<usize> = [
+      (1..=13).collect(),
+      vec![cr_width, cr_width, cr_width, cr_width],
+    ]
+    .concat();
     assert_width_at(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect
@@ -839,7 +834,7 @@ mod tests {
       .collect();
     assert_width_at_rev(&options, &rope.line(0), &mut actual, &expect);
 
-    let expect: Vec<usize> = [(0..=13).collect(), vec![13, 13, 13]].concat();
+    let expect: Vec<usize> = [(0..=13).collect(), vec![cr_width, cr_width, cr_width]].concat();
     assert_width_before(&options, &rope.line(0), &mut actual, &expect);
 
     let expect: Vec<(usize, usize)> = expect

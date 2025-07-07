@@ -55,9 +55,17 @@ impl Text {
     unicode::char_width(&self.options, c)
   }
 
-  /// Get the printable cell symbol and its display width.
-  pub fn char_symbol(&self, c: char) -> (CompactString, usize) {
+  /// Get the printable cell symbol.
+  pub fn char_symbol(&self, c: char) -> CompactString {
     unicode::char_symbol(&self.options, c)
+  }
+
+  /// Get both cell symbol and its display width.
+  pub fn char_symbol_and_width(&self, c: char) -> (CompactString, usize) {
+    (
+      unicode::char_symbol(&self.options, c),
+      unicode::char_width(&self.options, c),
+    )
   }
 }
 // Unicode }
