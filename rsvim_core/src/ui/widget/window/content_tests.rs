@@ -413,7 +413,7 @@ mod tests_nowrap {
 }
 
 #[cfg(test)]
-mod tests_nowrap_eol {
+mod tests_nowrap_wineol {
   use super::*;
 
   #[test]
