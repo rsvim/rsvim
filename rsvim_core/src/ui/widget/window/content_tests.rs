@@ -8,6 +8,7 @@ use crate::geo_size_into_rect;
 use crate::prelude::*;
 use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
 use crate::test::log::init as test_log_init;
+use crate::ui::canvas::Canvas;
 use crate::ui::tree::Tree;
 use crate::ui::viewport::{Viewport, ViewportArc};
 use crate::ui::widget::Widgetable;
