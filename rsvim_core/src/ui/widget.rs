@@ -9,6 +9,9 @@ pub mod cursor;
 pub mod root;
 pub mod window;
 
+#[cfg(test)]
+mod window_tests;
+
 /// Base trait for all UI widgets.
 pub trait Widgetable {
   /// Draw the widget to canvas, on the specific shape.

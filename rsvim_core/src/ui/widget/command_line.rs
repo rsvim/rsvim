@@ -23,6 +23,9 @@ pub mod content;
 pub mod indicator;
 pub mod root;
 
+#[cfg(test)]
+pub mod indicator_tests;
+
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum CommandLineNode {
