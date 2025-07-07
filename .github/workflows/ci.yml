@@ -36,7 +36,6 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - uses: mozilla-actions/sccache-action@v0.0.9
       - uses: dtolnay/rust-toolchain@stable
-      # - uses: cargo-bins/cargo-binstall@main
       - name: Rustfmt
         run: cargo fmt --check
       - name: Taplo
