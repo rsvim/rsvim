@@ -413,6 +413,44 @@ mod tests_nowrap {
 }
 
 #[cfg(test)]
+mod tests_nowrap_wineol {
+  use super::*;
+
+  #[test]
+  fn new1() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(31, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
+    let buffer = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\r\n",
+        "This is a quite simple and small test lines.\r\n",
+        "But still it contains several things we want to test:\r\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSV",
+      "This is a ",
+      "But still ",
+      "          ",
+      "          ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+  }
+}
+
+#[cfg(test)]
 mod tests_nowrap_startcol {
   use super::*;
 
