@@ -16,6 +16,9 @@ use std::rc::Rc;
 
 pub mod cidx;
 
+#[cfg(test)]
+mod cidx_tests;
+
 #[derive(Debug)]
 /// Text content backend.
 pub struct Text {

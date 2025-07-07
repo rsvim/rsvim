@@ -18,3 +18,6 @@ pub mod ui;
 
 // Only for unit test.
 pub mod test;
+
+#[cfg(test)]
+mod buf_tests;

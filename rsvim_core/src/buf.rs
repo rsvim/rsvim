@@ -19,6 +19,11 @@ pub mod opt;
 pub mod text;
 pub mod unicode;
 
+#[cfg(test)]
+mod opt_tests;
+#[cfg(test)]
+mod unicode_tests;
+
 /// Buffer ID.
 pub type BufferId = i32;
 
@@ -407,13 +412,3 @@ impl BuffersManager {
   }
 }
 // Options }
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn next_buffer_id1() {
-    assert!(next_buffer_id() > 0);
-  }
-}

@@ -11,6 +11,11 @@ pub use file_format::*;
 pub mod file_encoding;
 pub mod file_format;
 
+#[cfg(test)]
+mod file_encoding_tests;
+#[cfg(test)]
+mod file_format_tests;
+
 #[derive(Debug, Copy, Clone, Builder)]
 /// Local buffer options.
 pub struct BufferLocalOptions {
@@ -61,17 +66,5 @@ impl BufferLocalOptions {
   /// Get 'end-of-line' based on 'file-format' option.
   pub fn end_of_line(&self) -> EndOfLineOption {
     self.file_format.into()
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn default1() {
-    let opt1 = BufferLocalOptionsBuilder::default().build().unwrap();
-    assert_eq!(opt1.tab_stop(), defaults::buf::TAB_STOP);
-    assert_eq!(opt1.file_encoding(), defaults::buf::FILE_ENCODING);
   }
 }

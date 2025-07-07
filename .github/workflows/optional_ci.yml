@@ -1,4 +1,4 @@
-name: (Experimental) CI
+name: Optional
 on:
   pull_request:
     branches:
@@ -19,7 +19,7 @@ env:
   RUST_BACKTRACE: "full"
 jobs:
   check:
-    name: Check
+    name: Optional Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
