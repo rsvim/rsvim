@@ -169,7 +169,7 @@ use crate::ui::viewport::{CursorViewport, ViewportSearchDirection};
 impl NormalStateful {
   #[cfg(test)]
   // Returns `(target_cursor_char, target_cursor_line, viewport_search_direction)`.
-  fn __target_cursor_exclude_empty_eol(
+  fn __target_cursor_exclude_eol(
     &self,
     cursor_viewport: &CursorViewport,
     text: &Text,
@@ -178,7 +178,7 @@ impl NormalStateful {
     use crate::state::ops::cursor_ops::CursorMoveDirection;
 
     let (target_cursor_char, target_cursor_line, move_direction) =
-      cursor_ops::normalize_to_cursor_move_to_exclude_empty_eol(
+      cursor_ops::normalize_to_cursor_move_to_exclude_eol(
         text,
         op,
         cursor_viewport.char_idx(),
@@ -205,7 +205,7 @@ impl NormalStateful {
     let cursor_viewport = current_window.cursor_viewport();
 
     let (target_cursor_char, target_cursor_line, _search_direction) =
-      self.__target_cursor_exclude_empty_eol(&cursor_viewport, buffer.text(), op);
+      self.__target_cursor_exclude_eol(&cursor_viewport, buffer.text(), op);
 
     let maybe_new_cursor_viewport = cursor_ops::raw_cursor_viewport_move_to(
       &viewport,

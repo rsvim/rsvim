@@ -139,7 +139,7 @@ impl Text {
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is
   /// empty/blank.
-  pub fn last_char_on_line_no_empty_eol(&self, line_idx: usize) -> Option<usize> {
+  pub fn last_char_on_line_no_eol(&self, line_idx: usize) -> Option<usize> {
     match self.rope.get_line(line_idx) {
       Some(line) => match self.last_char_on_line(line_idx) {
         Some(last_char) => {
@@ -155,8 +155,8 @@ impl Text {
     }
   }
 
-  /// Whether the `line_idx`/`char_idx` is empty eol (end-of-line).
-  pub fn is_empty_eol(&self, line_idx: usize, char_idx: usize) -> bool {
+  /// Whether the `line_idx`/`char_idx` is eol (end-of-line).
+  pub fn is_eol(&self, line_idx: usize, char_idx: usize) -> bool {
     match self.rope.get_line(line_idx) {
       Some(line) => {
         if char_idx == line.len_chars().saturating_sub(1) {
@@ -352,9 +352,9 @@ use crate::test::buf::{dbg_print_textline, dbg_print_textline_with_absolute_char
 
 // Edit {
 impl Text {
-  /// For text, the editor have to always keep an empty eol (end-of-line) at the end of text file.
-  /// It helps the cursor motion.
-  fn append_empty_eol_at_end_if_not_exist(&mut self) {
+  /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
+  /// helps the cursor motion.
+  fn append_eol_at_end_if_not_exist(&mut self) {
     use crate::defaults::ascii::end_of_line as eol;
     let buf_eol = self.options().end_of_line();
 
@@ -441,7 +441,7 @@ impl Text {
     }
 
     // Append eol at file end if it doesn't exist.
-    self.append_empty_eol_at_end_if_not_exist();
+    self.append_eol_at_end_if_not_exist();
 
     dbg_print_textline(
       self,
@@ -528,7 +528,7 @@ impl Text {
     }
 
     // Append eol at file end if it doesn't exist.
-    self.append_empty_eol_at_end_if_not_exist();
+    self.append_eol_at_end_if_not_exist();
 
     dbg_print_textline(
       self,

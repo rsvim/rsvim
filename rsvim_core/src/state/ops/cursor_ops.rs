@@ -97,7 +97,7 @@ pub fn normalize_to_cursor_move_to(
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`, it excludes the empty
 /// eol.
-pub fn normalize_to_cursor_move_to_exclude_empty_eol(
+pub fn normalize_to_cursor_move_to_exclude_eol(
   text: &Text,
   op: Operation,
   cursor_char_idx: usize,
@@ -110,7 +110,7 @@ pub fn normalize_to_cursor_move_to_exclude_empty_eol(
     // line break '\n'), sub y by extra 1.
     y = y.saturating_sub(1);
   }
-  let x = match text.last_char_on_line_no_empty_eol(y) {
+  let x = match text.last_char_on_line_no_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
       debug_assert!(text.rope().get_line(y).is_some());
@@ -122,7 +122,7 @@ pub fn normalize_to_cursor_move_to_exclude_empty_eol(
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`, it includes the empty
 /// eol.
-pub fn normalize_to_cursor_move_to_include_empty_eol(
+pub fn normalize_to_cursor_move_to_include_eol(
   text: &Text,
   op: Operation,
   cursor_char_idx: usize,
@@ -406,13 +406,7 @@ pub fn _update_viewport_after_text_changed(tree: &mut Tree, id: TreeNodeId, text
 /// # Panics
 ///
 /// It panics if the operation is not `Operation::CursorMove*`.
-pub fn cursor_move(
-  tree: &mut Tree,
-  id: TreeNodeId,
-  text: &Text,
-  op: Operation,
-  include_empty_eol: bool,
-) {
+pub fn cursor_move(tree: &mut Tree, id: TreeNodeId, text: &Text, op: Operation, include_eol: bool) {
   debug_assert!(tree.node_mut(id).is_some());
   let node = tree.node_mut(id).unwrap();
 
@@ -433,15 +427,15 @@ pub fn cursor_move(
   };
 
   // Only move cursor when it is different from current cursor.
-  let (target_cursor_char, target_cursor_line, move_direction) = if include_empty_eol {
-    normalize_to_cursor_move_to_include_empty_eol(
+  let (target_cursor_char, target_cursor_line, move_direction) = if include_eol {
+    normalize_to_cursor_move_to_include_eol(
       text,
       op,
       cursor_viewport.char_idx(),
       cursor_viewport.line_idx(),
     )
   } else {
-    normalize_to_cursor_move_to_exclude_empty_eol(
+    normalize_to_cursor_move_to_exclude_eol(
       text,
       op,
       cursor_viewport.char_idx(),

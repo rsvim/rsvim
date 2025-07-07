@@ -86,7 +86,7 @@ fn _end_char_and_prefills(
   } else {
     // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
     debug_assert!(bline.len_chars() > 0);
-    let next_to_last_visible_char = text.last_char_on_line_no_empty_eol(l).unwrap() + 1;
+    let next_to_last_visible_char = text.last_char_on_line_no_eol(l).unwrap() + 1;
 
     // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
     // char.
@@ -223,7 +223,7 @@ fn proc_line_wrap_nolinebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > text.last_char_on_line_no_empty_eol(current_line).unwrap() {
+          if end_char > text.last_char_on_line_no_eol(current_line).unwrap() {
             break;
           }
 
@@ -538,7 +538,7 @@ fn proc_line_wrap_linebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > text.last_char_on_line_no_empty_eol(current_line).unwrap() {
+          if end_char > text.last_char_on_line_no_eol(current_line).unwrap() {
             break;
           }
 
@@ -706,9 +706,9 @@ mod nowrap_detail {
 
     let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
-    // For empty eol, sub extra 1 column.
-    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
-    if target_is_empty_eol {
+    // For eol, sub extra 1 column.
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    if target_is_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
 
@@ -763,9 +763,9 @@ mod nowrap_detail {
       );
     }
 
-    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
-    let target_cursor_width = text.width_until(target_cursor_line, target_cursor_char)
-      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width =
+      text.width_until(target_cursor_line, target_cursor_char) + if target_is_eol { 1 } else { 0 }; // For eol, add extra 1 column.
     let on_right_side = target_cursor_width > viewport_end_column;
 
     if on_right_side {
@@ -918,9 +918,9 @@ mod wrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> usize {
-    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
-    let target_cursor_width = text.width_until(target_cursor_line, target_cursor_char)
-      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width =
+      text.width_until(target_cursor_line, target_cursor_char) + if target_is_eol { 1 } else { 0 }; // For eol, add extra 1 column.
 
     let approximate_start_column = target_cursor_width.saturating_sub(
       (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
@@ -1012,7 +1012,7 @@ mod wrap_detail {
 
     debug_assert!(text.rope().get_line(target_cursor_line).is_some());
     let last_char = text
-      .last_char_on_line(target_cursor_line) // Also consider empty eol char.
+      .last_char_on_line(target_cursor_line) // Also consider eol.
       .unwrap_or(0_usize);
 
     let (preview_target_rows, _preview_target_start_fills, _preview_target_end_fills, _) = proc_fn(
@@ -1049,9 +1049,9 @@ mod wrap_detail {
     // left.
     let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
-    // For empty eol, sub extra 1 column.
-    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
-    if target_is_empty_eol {
+    // For eol, sub extra 1 column.
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    if target_is_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
 
@@ -1258,9 +1258,9 @@ mod wrap_detail {
       && target_cursor_char >= last_row_viewport.end_char_idx();
 
     if on_right_side {
-      // The `on_right_side=true` happens only when `target_cursor_char` is the empty eol, and the
+      // The `on_right_side=true` happens only when `target_cursor_char` is the eol, and the
       // `target_cursor_char` is out of viewport.
-      debug_assert!(text.is_empty_eol(target_cursor_line, target_cursor_char));
+      debug_assert!(text.is_eol(target_cursor_line, target_cursor_char));
       let start_column = reverse_search_start_column(
         proc_fn,
         text,
@@ -1427,17 +1427,17 @@ mod wrap_detail {
     );
 
     let fully_show = preview_target_rows.len() == current_target_rows.len();
-    let is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
+    let is_eol = text.is_eol(target_cursor_line, target_cursor_char);
     let is_last_row = *current_last_row_idx == height.saturating_sub(1);
     let out_of_view = current_last_row_viewport.end_char_idx()
       > current_last_row_viewport.start_char_idx()
       && target_cursor_char >= current_last_row_viewport.end_char_idx();
-    let on_right_side = fully_show && is_empty_eol && is_last_row && out_of_view;
+    let on_right_side = fully_show && is_eol && is_last_row && out_of_view;
 
     if on_right_side {
       // The `target_cursor_line` must not to be the 1st line in the viewport (because in
-      // case-2.1, the viewport contains multiple lines and the empty eol of target cursor line is
-      // out of viewport, it has to be at the bottom-right corner).
+      // case-2.1, the viewport contains multiple lines and the eol of target cursor line is out of
+      // viewport, it has to be at the bottom-right corner).
       debug_assert!(target_cursor_line > target_viewport_start_line);
       // Then we simply add 1 extra line to `start_line`, instead of gives 1 extra column to
       // `start_column` (compared other cases).
@@ -1676,15 +1676,15 @@ fn search_anchor_downward_nowrap(
 // 2. The viewport can contain the target cursor line, i.e. the line is not too long. And further
 //    we can split this into more sub cases:
 //    2.1 The viewport only contains the target cursor line. And we have a very specific edge
-//      case when considering the empty eol:
+//      case when considering the eol:
 //        a) The last visible char of target cursor line is at the bottom-right corner of the
-//        viewport, and thus the empty eol is actually out of viewport.
-//        b) Otherwise the empty eol of target cursor line is not out of viewport.
+//           viewport, and thus the eol is actually out of viewport.
+//        b) Otherwise the eol of target cursor line is not out of viewport.
 //    2.2 The viewport not only contains the target cursor line, i.e. it contains at least 2
-//      lines. And we have a very specific edge case for empty eol:
+//      lines. And we have a very specific edge case for eol:
 //        a) The target cursor line is the last line in viewport, and its last visible char is at
-//        the bottom-right corner, and thus the empty eol is out of viewport.
-//        b) Otherwise the empty eol of target cursor line is not out of viewport.
+//           the bottom-right corner, and thus the eol is out of viewport.
+//        b) Otherwise the eol of target cursor line is not out of viewport.
 fn search_anchor_downward_wrap(
   sync_fn: wrap_detail::SyncFn,
   proc_fn: wrap_detail::ProcessLineFn,

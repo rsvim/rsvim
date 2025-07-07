@@ -3,7 +3,7 @@
 use super::content::*;
 
 use crate::buf::BufferArc;
-use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
+use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder, FileFormatOption};
 use crate::geo_size_into_rect;
 use crate::prelude::*;
 use crate::prelude::*;
@@ -408,6 +408,83 @@ mod tests_nowrap {
     ];
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 4, 0);
     let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport.clone());
+    assert_canvas(&actual, &expect);
+  }
+}
+
+#[cfg(test)]
+mod tests_nowrap_wineol {
+  use super::*;
+
+  #[test]
+  fn new1_unix() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(31, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Unix)
+      .build()
+      .unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
+    let buffer = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\r\n",
+        "This is a quite simple and small test lines.\r\n",
+        "But still it contains several things we want to test:\r\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSVIM!^M                ",
+      "This is a quite simple and smal",
+      "But still it contains several t",
+      "                               ",
+      "                               ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+  }
+
+  #[test]
+  fn new1_win() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(31, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
+    let buffer = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\r\n",
+        "This is a quite simple and small test lines.\r\n",
+        "But still it contains several things we want to test:\r\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSVIM!                  ",
+      "This is a quite simple and smal",
+      "But still it contains several t",
+      "                               ",
+      "                               ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
     assert_canvas(&actual, &expect);
   }
 }
