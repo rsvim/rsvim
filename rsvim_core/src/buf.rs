@@ -20,9 +20,9 @@ pub mod text;
 pub mod unicode;
 
 #[cfg(test)]
-pub mod opt_tests;
+mod opt_tests;
 #[cfg(test)]
-pub mod unicode_tests;
+mod unicode_tests;
 
 /// Buffer ID.
 pub type BufferId = i32;

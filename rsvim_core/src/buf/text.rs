@@ -17,7 +17,7 @@ use std::rc::Rc;
 pub mod cidx;
 
 #[cfg(test)]
-pub mod cidx_tests;
+mod cidx_tests;
 
 #[derive(Debug)]
 /// Text content backend.
