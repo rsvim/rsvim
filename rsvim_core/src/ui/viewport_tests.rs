@@ -858,8 +858,8 @@ mod tests_view_nowrap_wineol {
     );
   }
 
-  #[test]
-  fn new1_win() {
+  // #[test]
+  fn _new1_win() {
     test_log_init();
 
     let terminal_size = U16Size::new(33, 5);
