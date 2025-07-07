@@ -1968,7 +1968,7 @@ mod tests_view_wrap_nolinebreak_wineol {
       "it contain",
       "s several.",
       "\r\n",
-      "  2. When ",
+      "  1. When ",
       "the line i",
     ];
 
@@ -2014,7 +2014,7 @@ mod tests_view_wrap_nolinebreak_wineol {
       "But still ",
       "it contain",
       "s several.",
-      "  2. When ",
+      "  1. When ",
       "the line i",
       "s too long",
     ];
