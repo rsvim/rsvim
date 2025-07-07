@@ -13,6 +13,7 @@ pub mod file_format;
 
 #[cfg(test)]
 mod file_encoding_tests;
+#[cfg(test)]
 mod file_format_tests;
 
 #[derive(Debug, Copy, Clone, Builder)]
