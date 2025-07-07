@@ -837,36 +837,22 @@ mod tests_view_nowrap_wineol {
     );
 
     let expect = vec![
-      "Hello, RSV",
-      "This is a ",
-      "But still ",
-      "  1. When ",
-      "  2. When ",
-      "     * The",
-      "     * The",
+      "Hello, RSVIM!\r\n",
+      "This is a quite simple lines.\r\n",
+      "But still it contains several thi",
       "",
     ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = window.viewport();
-    let expect_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 0),
-      (5, 0),
-      (6, 0),
-      (7, 0),
-    ]
-    .into_iter()
-    .collect();
+    let expect_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
       buf.clone(),
       &actual,
       &expect,
       0,
-      8,
+      4,
       &expect_fills,
       &expect_fills,
     );
@@ -894,36 +880,22 @@ mod tests_view_nowrap_wineol {
     );
 
     let expect = vec![
-      "Hello, RSV",
-      "This is a ",
-      "But still ",
-      "  1. When ",
-      "  2. When ",
-      "     * The",
-      "     * The",
+      "Hello, RSVIM!\r\n",
+      "This is a quite simple lines.\r\n",
+      "But still it contains several thin",
       "",
     ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = window.viewport();
-    let expect_fills: BTreeMap<usize, usize> = vec![
-      (0, 0),
-      (1, 0),
-      (2, 0),
-      (3, 0),
-      (4, 0),
-      (5, 0),
-      (6, 0),
-      (7, 0),
-    ]
-    .into_iter()
-    .collect();
+    let expect_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
       buf.clone(),
       &actual,
       &expect,
       0,
-      8,
+      4,
       &expect_fills,
       &expect_fills,
     );
