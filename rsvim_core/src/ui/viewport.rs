@@ -245,7 +245,7 @@ impl CursorViewport {
     } else {
       let target_is_eol = text.is_eol(line_idx, char_idx);
       if target_is_eol {
-        // The target cursor is empty eol, and it doesn't have a space to put in the viewport, it
+        // The target cursor is eol, and it doesn't have a space to put in the viewport, it
         // indicates:
         //
         // 1. The window must be `wrap=true`
