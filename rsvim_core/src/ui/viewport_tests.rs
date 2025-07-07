@@ -1929,6 +1929,104 @@ mod tests_view_wrap_nolinebreak {
   }
 }
 
+mod tests_view_wrap_nolinebreak_wineol {
+  use super::*;
+
+  #[test]
+  fn new1_unix() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 13);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Unix)
+      .build()
+      .unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\r\n",
+        "This is a quite simple and small test lines.\r\n",
+        "But still it contains several.\r\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSV",
+      "IM!\r\n",
+      "This is a ",
+      "quite simp",
+      "le and sma",
+      "ll test li",
+      "nes.\r\n",
+      "But still ",
+      "it contain",
+      "s several.",
+      "\r\n",
+      "  2. When ",
+      "the line i",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = window.viewport();
+    let expect_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    assert_viewport(buf, &actual, &expect, 0, 4, &expect_fills, &expect_fills);
+  }
+
+  #[test]
+  fn new1_win() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 13);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Unix)
+      .build()
+      .unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\r\n",
+        "This is a quite simple and small test lines.\r\n",
+        "But still it contains several.\r\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSV",
+      "IM!\r\n",
+      "This is a ",
+      "quite simp",
+      "le and sma",
+      "ll test li",
+      "nes.\r\n",
+      "But still ",
+      "it contain",
+      "s several.",
+      "  2. When ",
+      "the line i",
+      "s too long",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = window.viewport();
+    let expect_fills: BTreeMap<usize, usize> =
+      vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    assert_viewport(buf, &actual, &expect, 0, 4, &expect_fills, &expect_fills);
+  }
+}
+
 mod tests_view_wrap_nolinebreak_startcol {
   use super::*;
 
