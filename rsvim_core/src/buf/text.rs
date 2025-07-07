@@ -354,7 +354,7 @@ use crate::test::buf::{dbg_print_textline, dbg_print_textline_with_absolute_char
 impl Text {
   /// For text, the editor have to always keep an empty eol (end-of-line) at the end of text file.
   /// It helps the cursor motion.
-  fn append_empty_eol_at_end_if_not_exist(&mut self) {
+  fn append_eol_at_end_if_not_exist(&mut self) {
     use crate::defaults::ascii::end_of_line as eol;
     let buf_eol = self.options().end_of_line();
 
@@ -441,7 +441,7 @@ impl Text {
     }
 
     // Append eol at file end if it doesn't exist.
-    self.append_empty_eol_at_end_if_not_exist();
+    self.append_eol_at_end_if_not_exist();
 
     dbg_print_textline(
       self,
@@ -528,7 +528,7 @@ impl Text {
     }
 
     // Append eol at file end if it doesn't exist.
-    self.append_empty_eol_at_end_if_not_exist();
+    self.append_eol_at_end_if_not_exist();
 
     dbg_print_textline(
       self,

@@ -706,9 +706,9 @@ mod nowrap_detail {
 
     let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
-    // For empty eol, sub extra 1 column.
-    let target_is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
-    if target_is_empty_eol {
+    // For eol, sub extra 1 column.
+    let target_is_lol = text.is_eol(target_cursor_line, target_cursor_char);
+    if target_is_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
 
@@ -763,9 +763,9 @@ mod nowrap_detail {
       );
     }
 
-    let target_is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
-    let target_cursor_width = text.width_until(target_cursor_line, target_cursor_char)
-      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width =
+      text.width_until(target_cursor_line, target_cursor_char) + if target_is_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
     let on_right_side = target_cursor_width > viewport_end_column;
 
     if on_right_side {
@@ -918,9 +918,9 @@ mod wrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> usize {
-    let target_is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
-    let target_cursor_width = text.width_until(target_cursor_line, target_cursor_char)
-      + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    let target_cursor_width =
+      text.width_until(target_cursor_line, target_cursor_char) + if target_is_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
 
     let approximate_start_column = target_cursor_width.saturating_sub(
       (window_actual_shape.height() as usize) * (window_actual_shape.width() as usize),
@@ -1050,8 +1050,8 @@ mod wrap_detail {
     let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
     // For empty eol, sub extra 1 column.
-    let target_is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
-    if target_is_empty_eol {
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    if target_is_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
 
@@ -1427,12 +1427,12 @@ mod wrap_detail {
     );
 
     let fully_show = preview_target_rows.len() == current_target_rows.len();
-    let is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    let is_eol = text.is_eol(target_cursor_line, target_cursor_char);
     let is_last_row = *current_last_row_idx == height.saturating_sub(1);
     let out_of_view = current_last_row_viewport.end_char_idx()
       > current_last_row_viewport.start_char_idx()
       && target_cursor_char >= current_last_row_viewport.end_char_idx();
-    let on_right_side = fully_show && is_empty_eol && is_last_row && out_of_view;
+    let on_right_side = fully_show && is_eol && is_last_row && out_of_view;
 
     if on_right_side {
       // The `target_cursor_line` must not to be the 1st line in the viewport (because in
