@@ -366,13 +366,6 @@ pub fn search_right_viewport(
 mod tests_view_nowrap {
   use super::*;
 
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use std::collections::BTreeMap;
-
   #[test]
   fn new1() {
     test_log_init();
@@ -822,14 +815,6 @@ mod tests_view_nowrap {
 mod tests_view_nowrap_startcol {
   use super::*;
 
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-  use std::collections::BTreeMap;
-
   #[test]
   fn update1() {
     test_log_init();
@@ -1114,14 +1099,6 @@ mod tests_view_nowrap_startcol {
 
 mod tests_view_wrap_nolinebreak {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::*;
-  use std::collections::BTreeMap;
 
   #[test]
   fn new1() {
@@ -1865,15 +1842,6 @@ mod tests_view_wrap_nolinebreak {
 mod tests_view_wrap_nolinebreak_startcol {
   use super::*;
 
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::defaults::win;
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::*;
-  use std::collections::BTreeMap;
-
   #[test]
   fn update1() {
     test_log_init();
@@ -2082,13 +2050,6 @@ mod tests_view_wrap_nolinebreak_startcol {
 
 mod tests_view_wrap_linebreak {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use std::collections::BTreeMap;
 
   #[test]
   fn new1() {
@@ -2810,14 +2771,6 @@ mod tests_view_wrap_linebreak {
 mod tests_view_wrap_linebreak_startcol {
   use super::*;
 
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-  use std::collections::BTreeMap;
-
   #[test]
   fn update1() {
     test_log_init();
@@ -3114,17 +3067,6 @@ mod tests_view_wrap_linebreak_startcol {
 
 mod tests_search_anchor_downward_nowrap {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-
-  use std::cell::RefCell;
-  use std::collections::BTreeMap;
-  use std::rc::Rc;
 
   #[test]
   fn new1() {
@@ -4065,17 +4007,6 @@ mod tests_search_anchor_downward_nowrap {
 mod tests_search_anchor_downward_wrap_nolinebreak {
   use super::*;
 
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-
-  use std::cell::RefCell;
-  use std::collections::BTreeMap;
-  use std::rc::Rc;
-
   #[test]
   fn new1() {
     test_log_init();
@@ -4920,17 +4851,6 @@ mod tests_search_anchor_downward_wrap_nolinebreak {
 mod tests_search_anchor_downward_wrap_linebreak {
   use super::*;
 
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-
-  use std::cell::RefCell;
-  use std::collections::BTreeMap;
-  use std::rc::Rc;
-
   #[test]
   fn new1() {
     test_log_init();
@@ -5530,17 +5450,6 @@ mod tests_search_anchor_downward_wrap_linebreak {
 
 mod tests_search_anchor_upward_nowrap {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-
-  use std::cell::RefCell;
-  use std::collections::BTreeMap;
-  use std::rc::Rc;
 
   #[test]
   fn new1() {
@@ -6360,17 +6269,6 @@ mod tests_search_anchor_upward_nowrap {
 mod tests_search_anchor_upward_wrap_nolinebreak {
   use super::*;
 
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-
-  use std::cell::RefCell;
-  use std::collections::BTreeMap;
-  use std::rc::Rc;
-
   #[test]
   fn new1() {
     test_log_init();
@@ -7137,17 +7035,6 @@ mod tests_search_anchor_upward_wrap_nolinebreak {
 mod tests_search_anchor_upward_wrap_linebreak {
   use super::*;
 
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-
-  use std::cell::RefCell;
-  use std::collections::BTreeMap;
-  use std::rc::Rc;
-
   #[test]
   fn new1() {
     test_log_init();
@@ -7823,17 +7710,6 @@ mod tests_search_anchor_upward_wrap_linebreak {
 
 mod tests_search_anchor_horizontally_nowrap {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-
-  use std::cell::RefCell;
-  use std::collections::BTreeMap;
-  use std::rc::Rc;
 
   #[test]
   fn new1() {
@@ -9059,17 +8935,6 @@ mod tests_search_anchor_horizontally_nowrap {
 
 mod tests_search_anchor_horizontally_wrap_nolinebreak {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-
-  use std::cell::RefCell;
-  use std::collections::BTreeMap;
-  use std::rc::Rc;
 
   #[test]
   fn new1() {
@@ -10450,17 +10315,6 @@ mod tests_search_anchor_horizontally_wrap_nolinebreak {
 
 mod tests_search_anchor_horizontally_wrap_linebreak {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Inodeable;
-
-  use std::cell::RefCell;
-  use std::collections::BTreeMap;
-  use std::rc::Rc;
 
   #[test]
   fn new1() {
