@@ -707,7 +707,7 @@ mod nowrap_detail {
     let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
     // For eol, sub extra 1 column.
-    let target_is_lol = text.is_eol(target_cursor_line, target_cursor_char);
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
     if target_is_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
