@@ -243,7 +243,7 @@ impl CursorViewport {
 
       CursorViewport::new(line_idx, char_idx, row_idx, col_idx)
     } else {
-      let target_is_empty_eol = text.is_empty_eol(line_idx, char_idx);
+      let target_is_empty_eol = text.is_eol(line_idx, char_idx);
       if target_is_empty_eol {
         // The target cursor is empty eol, and it doesn't have a space to put in the viewport, it
         // indicates:

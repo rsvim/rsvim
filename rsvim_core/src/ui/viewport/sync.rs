@@ -86,7 +86,7 @@ fn _end_char_and_prefills(
   } else {
     // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
     debug_assert!(bline.len_chars() > 0);
-    let next_to_last_visible_char = text.last_char_on_line_no_empty_eol(l).unwrap() + 1;
+    let next_to_last_visible_char = text.last_char_on_line_no_eol(l).unwrap() + 1;
 
     // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
     // char.
@@ -223,7 +223,7 @@ fn proc_line_wrap_nolinebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > text.last_char_on_line_no_empty_eol(current_line).unwrap() {
+          if end_char > text.last_char_on_line_no_eol(current_line).unwrap() {
             break;
           }
 
@@ -538,7 +538,7 @@ fn proc_line_wrap_linebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > text.last_char_on_line_no_empty_eol(current_line).unwrap() {
+          if end_char > text.last_char_on_line_no_eol(current_line).unwrap() {
             break;
           }
 
@@ -707,7 +707,7 @@ mod nowrap_detail {
     let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
     // For empty eol, sub extra 1 column.
-    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
     if target_is_empty_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
@@ -763,7 +763,7 @@ mod nowrap_detail {
       );
     }
 
-    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
     let target_cursor_width = text.width_until(target_cursor_line, target_cursor_char)
       + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
     let on_right_side = target_cursor_width > viewport_end_column;
@@ -918,7 +918,7 @@ mod wrap_detail {
     target_cursor_line: usize,
     target_cursor_char: usize,
   ) -> usize {
-    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
     let target_cursor_width = text.width_until(target_cursor_line, target_cursor_char)
       + if target_is_empty_eol { 1 } else { 0 }; // For empty eol, add extra 1 column.
 
@@ -1050,7 +1050,7 @@ mod wrap_detail {
     let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
     // For empty eol, sub extra 1 column.
-    let target_is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
+    let target_is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
     if target_is_empty_eol {
       target_cursor_width = target_cursor_width.saturating_sub(1);
     }
@@ -1260,7 +1260,7 @@ mod wrap_detail {
     if on_right_side {
       // The `on_right_side=true` happens only when `target_cursor_char` is the empty eol, and the
       // `target_cursor_char` is out of viewport.
-      debug_assert!(text.is_empty_eol(target_cursor_line, target_cursor_char));
+      debug_assert!(text.is_eol(target_cursor_line, target_cursor_char));
       let start_column = reverse_search_start_column(
         proc_fn,
         text,
@@ -1427,7 +1427,7 @@ mod wrap_detail {
     );
 
     let fully_show = preview_target_rows.len() == current_target_rows.len();
-    let is_empty_eol = text.is_empty_eol(target_cursor_line, target_cursor_char);
+    let is_empty_eol = text.is_eol(target_cursor_line, target_cursor_char);
     let is_last_row = *current_last_row_idx == height.saturating_sub(1);
     let out_of_view = current_last_row_viewport.end_char_idx()
       > current_last_row_viewport.start_char_idx()

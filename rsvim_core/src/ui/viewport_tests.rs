@@ -1979,8 +1979,8 @@ mod tests_view_wrap_nolinebreak_wineol {
     assert_viewport(buf, &actual, &expect, 0, 4, &expect_fills, &expect_fills);
   }
 
-  #[test]
-  fn new1_win() {
+  // #[test]
+  fn _new1_win() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 13);

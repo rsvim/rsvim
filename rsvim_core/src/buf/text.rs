@@ -139,7 +139,7 @@ impl Text {
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is
   /// empty/blank.
-  pub fn last_char_on_line_no_empty_eol(&self, line_idx: usize) -> Option<usize> {
+  pub fn last_char_on_line_no_eol(&self, line_idx: usize) -> Option<usize> {
     match self.rope.get_line(line_idx) {
       Some(line) => match self.last_char_on_line(line_idx) {
         Some(last_char) => {
@@ -156,7 +156,7 @@ impl Text {
   }
 
   /// Whether the `line_idx`/`char_idx` is empty eol (end-of-line).
-  pub fn is_empty_eol(&self, line_idx: usize, char_idx: usize) -> bool {
+  pub fn is_eol(&self, line_idx: usize, char_idx: usize) -> bool {
     match self.rope.get_line(line_idx) {
       Some(line) => {
         if char_idx == line.len_chars().saturating_sub(1) {

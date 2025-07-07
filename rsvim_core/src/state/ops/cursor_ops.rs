@@ -110,7 +110,7 @@ pub fn normalize_to_cursor_move_to_exclude_empty_eol(
     // line break '\n'), sub y by extra 1.
     y = y.saturating_sub(1);
   }
-  let x = match text.last_char_on_line_no_empty_eol(y) {
+  let x = match text.last_char_on_line_no_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
       debug_assert!(text.rope().get_line(y).is_some());
