@@ -1985,7 +1985,7 @@ mod tests_view_wrap_nolinebreak_wineol {
 
     let terminal_size = U16Size::new(10, 13);
     let buf_opts = BufferLocalOptionsBuilder::default()
-      .file_format(FileFormatOption::Unix)
+      .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
     let win_opts = make_wrap_nolinebreak();
