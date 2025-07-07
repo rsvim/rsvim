@@ -23,6 +23,8 @@ pub mod root;
 
 #[cfg(test)]
 mod content_tests;
+#[cfg(test)]
+mod opt_tests;
 
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.

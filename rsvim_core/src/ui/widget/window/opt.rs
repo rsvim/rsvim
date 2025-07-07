@@ -55,26 +55,3 @@ impl WindowLocalOptions {
 #[derive(Debug, Copy, Clone, Builder)]
 /// Global window options.
 pub struct WindowGlobalOptions {}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  pub fn options1() {
-    let opt1 = WindowLocalOptionsBuilder::default()
-      .wrap(true)
-      .line_break(true)
-      .scroll_off(3)
-      .build()
-      .unwrap();
-    assert!(opt1.wrap());
-    assert!(opt1.line_break());
-    assert_eq!(opt1.scroll_off(), 3);
-
-    let opt2 = WindowLocalOptionsBuilder::default().build().unwrap();
-    assert_eq!(opt2.wrap(), defaults::win::WRAP);
-    assert_eq!(opt2.line_break(), defaults::win::LINE_BREAK);
-    assert_eq!(opt2.scroll_off(), defaults::win::SCROLL_OFF);
-  }
-}
