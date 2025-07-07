@@ -1,4 +1,3 @@
-// spellchecker:off
 use super::cidx::*;
 
 use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
@@ -1058,4 +1057,3 @@ fn truncate2() {
     widx.truncate_since_width(*w);
   }
 }
-// spellchecker:on
