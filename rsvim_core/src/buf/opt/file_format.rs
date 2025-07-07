@@ -99,14 +99,3 @@ impl From<FileFormatOption> for EndOfLineOption {
     }
   }
 }
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn display1() {
-    let actual1 = format!("{}", FileFormatOption::Dos);
-    assert_eq!(actual1, "dos");
-  }
-}

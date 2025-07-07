@@ -11,6 +11,10 @@ pub use file_format::*;
 pub mod file_encoding;
 pub mod file_format;
 
+#[cfg(test)]
+mod file_encoding_tests;
+mod file_format_tests;
+
 #[derive(Debug, Copy, Clone, Builder)]
 /// Local buffer options.
 pub struct BufferLocalOptions {
