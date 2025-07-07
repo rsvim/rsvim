@@ -21,6 +21,9 @@ pub mod content;
 pub mod opt;
 pub mod root;
 
+#[cfg(test)]
+mod content_tests;
+
 #[derive(Debug, Clone)]
 /// The value holder for each window widget.
 pub enum WindowNode {
