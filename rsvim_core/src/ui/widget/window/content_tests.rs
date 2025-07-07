@@ -6,6 +6,7 @@ use crate::buf::BufferArc;
 use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
 use crate::geo_size_into_rect;
 use crate::prelude::*;
+use crate::prelude::*;
 use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
 use crate::test::log::init as test_log_init;
 use crate::ui::canvas::Canvas;
@@ -88,26 +89,9 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
   }
 }
 
-#[allow(unused_imports)]
 #[cfg(test)]
 mod tests_nowrap {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc};
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
-
-  use compact_str::ToCompactString;
-  use ropey::{Rope, RopeBuilder};
-  use std::fs::File;
-  use std::io::{BufReader, BufWriter};
-  use std::sync::Arc;
-  use tracing::info;
 
   #[test]
   fn new1() {
@@ -428,26 +412,9 @@ mod tests_nowrap {
   }
 }
 
-#[allow(unused_imports)]
 #[cfg(test)]
 mod tests_nowrap_startcol {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc};
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
-
-  use compact_str::ToCompactString;
-  use ropey::{Rope, RopeBuilder};
-  use std::fs::File;
-  use std::io::{BufReader, BufWriter};
-  use std::sync::Arc;
-  use tracing::info;
 
   #[test]
   fn new1() {
@@ -686,27 +653,9 @@ mod tests_nowrap_startcol {
   }
 }
 
-#[allow(unused_imports)]
 #[cfg(test)]
 mod tests_wrap_nolinebreak {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::geo_size_into_rect;
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc};
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
-
-  use compact_str::ToCompactString;
-  use ropey::{Rope, RopeBuilder};
-  use std::fs::File;
-  use std::io::{BufReader, BufWriter};
-  use std::sync::Arc;
-  use tracing::info;
 
   #[test]
   fn new1() {
@@ -1102,27 +1051,9 @@ mod tests_wrap_nolinebreak {
   }
 }
 
-#[allow(unused_imports)]
 #[cfg(test)]
 mod tests_wrap_nolinebreak_startcol {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::geo_size_into_rect;
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc};
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
-
-  use compact_str::ToCompactString;
-  use ropey::{Rope, RopeBuilder};
-  use std::fs::File;
-  use std::io::{BufReader, BufWriter};
-  use std::sync::Arc;
-  use tracing::info;
 
   #[test]
   fn new1() {
@@ -1459,26 +1390,9 @@ mod tests_wrap_nolinebreak_startcol {
   }
 }
 
-#[allow(unused_imports)]
 #[cfg(test)]
 mod tests_wrap_linebreak {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc};
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
-
-  use compact_str::ToCompactString;
-  use ropey::{Rope, RopeBuilder};
-  use std::fs::File;
-  use std::io::{BufReader, BufWriter};
-  use std::sync::Arc;
-  use tracing::info;
 
   #[test]
   fn new1() {
@@ -1767,26 +1681,9 @@ mod tests_wrap_linebreak {
   }
 }
 
-#[allow(unused_imports)]
 #[cfg(test)]
 mod tests_wrap_linebreak_startcol {
   use super::*;
-
-  use crate::buf::BufferArc;
-  use crate::buf::opt::{BufferLocalOptions, BufferLocalOptionsBuilder};
-  use crate::prelude::*;
-  use crate::test::buf::{make_buffer_from_lines, make_empty_buffer};
-  use crate::test::log::init as test_log_init;
-  use crate::ui::tree::Tree;
-  use crate::ui::viewport::{Viewport, ViewportArc};
-  use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
-
-  use compact_str::ToCompactString;
-  use ropey::{Rope, RopeBuilder};
-  use std::fs::File;
-  use std::io::{BufReader, BufWriter};
-  use std::sync::Arc;
-  use tracing::info;
 
   #[test]
   fn new1() {
