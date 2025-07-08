@@ -78,8 +78,8 @@ fn last_char1_unix() {
 
     let actual2 = text.last_char_on_line_no_eol(0);
     assert!(actual2.is_some());
-    assert_eq!(actual2.unwrap(), 5);
-    assert_eq!(text.rope().line(0).char(5), '\r');
+    assert_eq!(actual2.unwrap(), 4);
+    assert_eq!(text.rope().line(0).char(4), 'o');
   }
 
   {
@@ -87,7 +87,7 @@ fn last_char1_unix() {
     let text = Text::new(opt, terminal_size, rope);
 
     assert!(!text.is_eol(0, 4));
-    assert!(!text.is_eol(0, 5));
+    assert!(text.is_eol(0, 5));
 
     let actual1 = text.last_char_on_line(0);
     assert!(actual1.is_some());
@@ -96,8 +96,8 @@ fn last_char1_unix() {
 
     let actual2 = text.last_char_on_line_no_eol(0);
     assert!(actual2.is_some());
-    assert_eq!(actual2.unwrap(), 5);
-    assert_eq!(text.rope().line(0).char(5), '\r');
+    assert_eq!(actual2.unwrap(), 4);
+    assert_eq!(text.rope().line(0).char(4), 'o');
   }
 }
 
