@@ -883,8 +883,8 @@ mod tests_view_nowrap_wineol {
 
     let expect = vec![
       "Hello, RSVIM!\r\n",
-      "This is a quite simple lines.\r\n",
-      "But still it contains several thin",
+      "This is a quite simple lines.",
+      "But still it contains several",
       "",
     ];
 
@@ -1969,9 +1969,9 @@ mod tests_view_wrap_nolinebreak_wineol {
       "But still ",
       "it contain",
       "s several.",
-      "\r\n",
       "  1. When ",
       "the line i",
+      "s small en"
     ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
@@ -1981,8 +1981,8 @@ mod tests_view_wrap_nolinebreak_wineol {
     assert_viewport(buf, &actual, &expect, 0, 4, &expect_fills, &expect_fills);
   }
 
-  // #[test]
-  fn _new1_win() {
+  #[test]
+  fn new1_win() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 13);
@@ -2018,7 +2018,7 @@ mod tests_view_wrap_nolinebreak_wineol {
       "s several.",
       "  1. When ",
       "the line i",
-      "s too long",
+      "s small en",
     ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
