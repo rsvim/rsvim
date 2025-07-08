@@ -2,13 +2,9 @@ use super::text::*;
 
 use crate::buf::opt::{BufferLocalOptionsBuilder, FileFormatOption};
 use crate::coord::U16Size;
-use crate::defaults::ascii::AsciiControlCodeFormatter;
 use crate::test::log::init as test_log_init;
 
-use ascii::AsciiChar;
-use ropey::{Rope, RopeBuilder};
-use tracing::info;
-use unicode_width::UnicodeWidthChar;
+use ropey::Rope;
 
 #[test]
 fn last_char1_unix() {
