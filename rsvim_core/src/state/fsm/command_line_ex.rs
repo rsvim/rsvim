@@ -103,7 +103,7 @@ impl CommandLineExStateful {
 }
 
 impl CommandLineExStateful {
-  fn _goto_normal_mode_impl(&self, data_access: &StatefulDataAccess) -> CompactString {
+  pub fn _goto_normal_mode_impl(&self, data_access: &StatefulDataAccess) -> CompactString {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
 
