@@ -123,8 +123,8 @@ impl Text {
     // For Windows, CRLF (`\r\n`) is eol.
     if self.options.file_format() == FileFormatOption::Dos {
       line_len_chars >= 2
-        && line.char(line_len_chars - 1) == '\n'
         && line.char(line_len_chars - 2) == '\r'
+        && line.char(line_len_chars - 1) == '\n'
         && char_idx >= line_len_chars - 2
         && char_idx <= line_len_chars - 1
     } else {
