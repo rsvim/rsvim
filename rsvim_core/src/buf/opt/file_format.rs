@@ -4,18 +4,14 @@ use std::fmt::Display;
 use std::string::ToString;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+/// NOTE: The `Mac` file format is not implemented, because ropey seems doesn't recognize it as a
+/// line break. And it is just too legacy so we really don't use it.
 pub enum FileFormatOption {
   /// CRLF (`<CR><NL>`)
   Dos,
 
   /// LF (`<NL>`)
   Unix,
-
-  /// CR (`<CR>`)
-  ///
-  /// NOTE: This is deprecated and only been kept for compatibility reason, which should never
-  /// used today.
-  Mac,
 }
 
 impl Display for FileFormatOption {
