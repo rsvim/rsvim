@@ -139,13 +139,13 @@ impl Text {
     // For Windows, CRLF (`\r\n`) is eol.
     if self.options.file_format() == FileFormatOption::Dos {
       rope_len_chars >= 2
-        && line.char(rope_len_chars - 2) == '\r'
-        && line.char(rope_len_chars - 1) == '\n'
+        && self.rope.char(rope_len_chars - 2) == '\r'
+        && self.rope.char(rope_len_chars - 1) == '\n'
         && char_idx >= rope_len_chars - 2
         && char_idx <= rope_len_chars - 1
     } else {
       // Otherwise, LF (`\n`) is eol.
-      rope_len_chars >= 1 && char_idx == rope_len_chars - 1 && line.char(char_idx) == '\n'
+      rope_len_chars >= 1 && char_idx == rope_len_chars - 1 && self.rope.char(char_idx) == '\n'
     }
   }
 
@@ -389,16 +389,16 @@ impl Text {
   fn append_eol_at_end_if_not_exist(&mut self) {
     let buf_eol = self.options().end_of_line();
 
-    let buffer_len_chars = self.rope().len_chars();
+    let buffer_len_chars = self.rope.len_chars();
     let last_char_on_buf = buffer_len_chars.saturating_sub(1);
-    match self.rope().get_char(last_char_on_buf) {
+    match self.rope.get_char(last_char_on_buf) {
       Some(_c) => {
         let c_is_eol = self._is_eol_on_whole_text(last_char_on_buf);
         if c_is_eol {
           self
             .rope_mut()
             .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
-          let inserted_line_idx = self.rope().char_to_line(buffer_len_chars);
+          let inserted_line_idx = self.rope.char_to_line(buffer_len_chars);
           self.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
           dbg_print_textline_with_absolute_char_idx(
             self,
@@ -439,10 +439,10 @@ impl Text {
     payload: CompactString,
   ) -> (usize, usize) {
     debug_assert!(!payload.is_empty());
-    debug_assert!(self.rope().get_line(line_idx).is_some());
-    debug_assert!(char_idx <= self.rope().line(line_idx).len_chars());
+    debug_assert!(self.rope.get_line(line_idx).is_some());
+    debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
 
-    let absolute_line_idx = self.rope().line_to_char(line_idx);
+    let absolute_line_idx = self.rope.line_to_char(line_idx);
     let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
 
     dbg_print_textline(self, line_idx, char_idx, "Before insert");
@@ -455,8 +455,8 @@ impl Text {
     // re-calculate it.
     let absolute_char_idx_after_inserted =
       absolute_char_idx_before_insert + payload.chars().count();
-    let line_idx_after_inserted = self.rope().char_to_line(absolute_char_idx_after_inserted);
-    let absolute_line_idx_after_inserted = self.rope().line_to_char(line_idx_after_inserted);
+    let line_idx_after_inserted = self.rope.char_to_line(absolute_char_idx_after_inserted);
+    let absolute_line_idx_after_inserted = self.rope.line_to_char(line_idx_after_inserted);
     let char_idx_after_inserted =
       absolute_char_idx_after_inserted - absolute_line_idx_after_inserted;
 
@@ -503,10 +503,10 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    debug_assert!(self.rope().get_line(line_idx).is_some());
-    debug_assert!(char_idx < self.rope().line(line_idx).len_chars());
+    debug_assert!(self.rope.get_line(line_idx).is_some());
+    debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
-    let cursor_char_absolute_pos_before_delete = self.rope().line_to_char(line_idx) + char_idx;
+    let cursor_char_absolute_pos_before_delete = self.rope.line_to_char(line_idx) + char_idx;
 
     dbg_print_textline(self, line_idx, char_idx, "Before delete");
 
@@ -515,7 +515,7 @@ impl Text {
       cursor_char_absolute_pos_before_delete
         ..(std::cmp::min(
           cursor_char_absolute_pos_before_delete + n as usize,
-          self.rope().len_chars(),
+          self.rope.len_chars(),
         ))
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
@@ -538,13 +538,13 @@ impl Text {
     };
     let cursor_char_absolute_pos_after_deleted = std::cmp::min(
       cursor_char_absolute_pos_after_deleted,
-      self.rope().len_chars(),
+      self.rope.len_chars(),
     );
     let cursor_line_idx_after_deleted = self
-      .rope()
+      .rope
       .char_to_line(cursor_char_absolute_pos_after_deleted);
     let cursor_line_absolute_pos_after_deleted =
-      self.rope().line_to_char(cursor_line_idx_after_deleted);
+      self.rope.line_to_char(cursor_line_idx_after_deleted);
     let cursor_char_idx_after_deleted =
       cursor_char_absolute_pos_after_deleted - cursor_line_absolute_pos_after_deleted;
 
