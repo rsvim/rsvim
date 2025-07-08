@@ -1,6 +1,6 @@
 //! Text content backend for buffer.
 
-use crate::buf::opt::BufferLocalOptions;
+use crate::buf::opt::{BufferLocalOptions, FileFormatOption};
 use crate::buf::unicode;
 use crate::prelude::*;
 
@@ -10,7 +10,7 @@ pub use cidx::ColumnIndex;
 use ahash::RandomState;
 use compact_str::{CompactString, ToCompactString};
 use lru::LruCache;
-use ropey::Rope;
+use ropey::{Rope, RopeSlice};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -113,6 +113,41 @@ impl Text {
         None => None,
       },
       None => None,
+    }
+  }
+
+  fn _is_eol_impl(&self, line: &RopeSlice, char_idx: usize) -> bool {
+    let line_len_chars = line.len_chars();
+
+    // For Mac:
+    //
+    // NOTE: Mac's **CR** (`\r`) is a legacy, which is actually not used today.
+    if self.options.file_format() == FileFormatOption::Mac {
+      line_len_chars >= 1
+        && char_idx == line_len_chars.saturating_sub(1)
+        && line.char(char_idx) == '\r'
+    } else {
+      // For Windows/Linux:
+      //
+      // The last **LF** ('\n') is always the eol.
+      if line_len_chars >= 1
+        && char_idx == line_len_chars.saturating_sub(1)
+        && line.char(char_idx) == '\n'
+      {
+        true
+      } else if self.options.file_format() == FileFormatOption::Dos
+        && line_len_chars >= 2
+        && char_idx == line_len_chars.saturating_sub(2)
+        && line.char(char_idx) == '\r'
+        && line.char(char_idx + 1) == '\n'
+      {
+        // For Windows:
+        // The second last **CR** ('\r') is also eol.
+        true
+      } else {
+        // Otherwise it is not.
+        false
+      }
     }
   }
 
