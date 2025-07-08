@@ -44,6 +44,8 @@ pub mod terminal;
 pub mod visual;
 
 #[cfg(test)]
+mod command_line_ex_tests;
+#[cfg(test)]
 mod insert_tests;
 #[cfg(test)]
 mod normal_tests;
