@@ -627,7 +627,11 @@ mod detail {
     }
   }
 
-  pub fn cursor_width_to_left_no_eol(text: &Text, target_cursor_line: usize, target_cursor_char: usize) -> usize {
+  pub fn cursor_width_to_left_no_eol(
+    text: &Text,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> usize {
     let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
 
     // For eol, subtract these eol width, i.e. treat them as 0-width.
@@ -722,7 +726,8 @@ mod nowrap_detail {
       }
     }
 
-    let target_cursor_width = detail::cursor_width_to_left_no_eol(text, target_cursor_line, target_cursor_char);
+    let target_cursor_width =
+      detail::cursor_width_to_left_no_eol(text, target_cursor_line, target_cursor_char);
 
     let on_left_side = target_cursor_width < target_viewport_start_column;
     if on_left_side {
@@ -1059,7 +1064,8 @@ mod wrap_detail {
 
     // If `target_cursor_char` is still out of viewport, then we still need to move viewport to
     // left.
-    let target_cursor_width = detail::cursor_width_to_left_no_eol(text, target_cursor_line, target_cursor_char);
+    let target_cursor_width =
+      detail::cursor_width_to_left_no_eol(text, target_cursor_line, target_cursor_char);
 
     if target_cursor_width < start_column {
       on_left_side = true;
