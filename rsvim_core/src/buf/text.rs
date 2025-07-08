@@ -168,9 +168,13 @@ impl Text {
     }
   }
 
-  /// Get last visible char index on line.
+  /// Get last visible char index on line, with taking `file_format` (platform specified eol) into
+  /// consideration, i.e. for different `file_format` option we have:
   ///
-  /// NOTE: This function iterates each char from the end of the line to the beginning of the line.
+  /// - When `Dos`, the `\r\n` is eol.
+  /// - When `Unix`, only `\n` is eol.
+  /// - When `Mac`, only `\r` is eol. NOTE: `Mac` is a legacy, which is actually not used in
+  ///   today's computer.
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is
   /// empty/blank.
