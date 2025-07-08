@@ -4,14 +4,17 @@ use std::fmt::Display;
 use std::string::ToString;
 
 #[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-/// NOTE: The `Mac` file format is not implemented, because ropey seems doesn't recognize it as a
-/// line break. And it is just too legacy so we really don't use it.
 pub enum FileFormatOption {
   /// CRLF (`<CR><NL>`)
   Dos,
 
   /// LF (`<NL>`)
   Unix,
+
+  /// CR (`<CR>`)
+  ///
+  /// NOTE: This is a legacy and actually not used today.
+  Mac,
 }
 
 impl Display for FileFormatOption {
@@ -19,7 +22,7 @@ impl Display for FileFormatOption {
     match self {
       FileFormatOption::Dos => write!(f, "dos"),
       FileFormatOption::Unix => write!(f, "unix"),
-      // FileFormatOption::Mac => write!(f, "mac"),
+      FileFormatOption::Mac => write!(f, "mac"),
     }
   }
 }
@@ -32,7 +35,7 @@ impl TryFrom<&str> for FileFormatOption {
     match lower_value.as_str() {
       "dos" => Ok(FileFormatOption::Dos),
       "unix" => Ok(FileFormatOption::Unix),
-      // "mac" => Ok(FileFormatOption::Mac),
+      "mac" => Ok(FileFormatOption::Mac),
       _ => Err("Unknown FileFormat value".to_string()),
     }
   }
@@ -43,7 +46,7 @@ impl From<EndOfLineOption> for FileFormatOption {
     match value {
       EndOfLineOption::CRLF => FileFormatOption::Dos,
       EndOfLineOption::LF => FileFormatOption::Unix,
-      // EndOfLineOption::CR => FileFormatOption::Mac,
+      EndOfLineOption::CR => FileFormatOption::Mac,
     }
   }
 }
@@ -55,6 +58,9 @@ pub enum EndOfLineOption {
 
   /// Unix
   LF,
+
+  /// Mac
+  CR,
 }
 
 impl Display for EndOfLineOption {
@@ -64,7 +70,7 @@ impl Display for EndOfLineOption {
     match self {
       EndOfLineOption::CRLF => write!(f, "{}", eol::CRLF),
       EndOfLineOption::LF => write!(f, "{}", eol::LF),
-      // EndOfLineOption::CR => write!(f, "{}", eol::CR),
+      EndOfLineOption::CR => write!(f, "{}", eol::CR),
     }
   }
 }
@@ -77,7 +83,7 @@ impl TryFrom<&str> for EndOfLineOption {
     match lower_value.as_str() {
       "CRLF" => Ok(EndOfLineOption::CRLF),
       "LF" => Ok(EndOfLineOption::LF),
-      // "CR" => Ok(EndOfLineOption::CR),
+      "CR" => Ok(EndOfLineOption::CR),
       _ => Err("Unknown EndOfLine value".to_string()),
     }
   }
@@ -88,7 +94,7 @@ impl From<FileFormatOption> for EndOfLineOption {
     match value {
       FileFormatOption::Dos => EndOfLineOption::CRLF,
       FileFormatOption::Unix => EndOfLineOption::LF,
-      // FileFormatOption::Mac => EndOfLineOption::CR,
+      FileFormatOption::Mac => EndOfLineOption::CR,
     }
   }
 }
