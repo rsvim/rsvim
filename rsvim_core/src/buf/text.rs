@@ -126,7 +126,7 @@ impl Text {
         && line.char(line_len_chars - 2) == '\r'
         && line.char(line_len_chars - 1) == '\n'
         && char_idx >= line_len_chars - 2
-        && char_idx <= line_len_chars - 1
+        && char_idx < line_len_chars
     } else {
       // Otherwise, LF (`\n`) is eol.
       line_len_chars >= 1 && char_idx == line_len_chars - 1 && line.char(char_idx) == '\n'
