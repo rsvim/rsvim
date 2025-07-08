@@ -1,6 +1,6 @@
 //! Temporary contents except buffers.
 
-use crate::buf::opt::{BufferLocalOptionsBuilder, FileFormatOption};
+use crate::buf::opt::BufferLocalOptionsBuilder;
 use crate::buf::text::Text;
 use crate::prelude::*;
 
