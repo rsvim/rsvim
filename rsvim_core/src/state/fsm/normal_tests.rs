@@ -244,7 +244,6 @@ pub fn assert_canvas(actual: &Canvas, expect: &[&str]) {
 }
 
 #[cfg(test)]
-#[allow(unused_imports)]
 mod tests_raw_cursor_move_y_by {
   use super::*;
 
@@ -525,7 +524,6 @@ mod tests_raw_cursor_move_y_by {
 }
 
 #[cfg(test)]
-#[allow(unused_imports)]
 mod tests_raw_cursor_move_x_by {
   use super::*;
 
@@ -793,7 +791,6 @@ mod tests_raw_cursor_move_x_by {
 }
 
 #[cfg(test)]
-#[allow(unused_imports)]
 mod tests_raw_cursor_move_by {
   use super::*;
 
@@ -1039,7 +1036,6 @@ mod tests_raw_cursor_move_by {
 }
 
 #[cfg(test)]
-#[allow(unused_imports)]
 mod tests_raw_cursor_move_to {
   use super::*;
 
@@ -1289,7 +1285,6 @@ mod tests_raw_cursor_move_to {
 }
 
 #[cfg(test)]
-#[allow(unused_imports)]
 mod tests_raw_window_scroll_y_by {
   use super::*;
 
@@ -2245,7 +2240,6 @@ mod tests_raw_window_scroll_y_by {
   }
 }
 #[cfg(test)]
-#[allow(unused_imports)]
 mod tests_raw_window_scroll_x_by {
   use super::*;
 
@@ -3444,7 +3438,6 @@ mod tests_raw_window_scroll_x_by {
   }
 }
 #[cfg(test)]
-#[allow(unused_imports)]
 mod tests_raw_window_scroll_to {
   use super::*;
 
@@ -4099,7 +4092,6 @@ mod tests_raw_window_scroll_to {
   }
 }
 #[cfg(test)]
-#[allow(unused_imports)]
 mod tests_cursor_move {
   use super::*;
 
@@ -6388,7 +6380,6 @@ mod tests_cursor_move {
   }
 }
 #[cfg(test)]
-#[allow(unused_imports)]
 mod tests_goto_command_line_ex_mode {
   use super::*;
 
