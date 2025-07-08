@@ -819,7 +819,7 @@ mod tests_view_nowrap_wineol {
   fn new1_unix() {
     test_log_init();
 
-    let terminal_size = U16Size::new(33, 5);
+    let terminal_size = U16Size::new(30, 5);
     let buf_opts = BufferLocalOptionsBuilder::default()
       .file_format(FileFormatOption::Unix)
       .build()
@@ -838,31 +838,33 @@ mod tests_view_nowrap_wineol {
 
     let expect = vec![
       "Hello, RSVIM!\r\n",
-      "This is a quite simple lines.\r\n",
-      "But still it contains several thi",
+      "This is a quite simple lines.",
+      "But still it contains several ",
       "",
     ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
     let actual = window.viewport();
-    let expect_fills: BTreeMap<usize, usize> =
+    let expect_start_fills: BTreeMap<usize, usize> =
       vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+    let expect_end_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 1), (2, 0), (3, 0)].into_iter().collect();
     assert_viewport(
       buf.clone(),
       &actual,
       &expect,
       0,
       4,
-      &expect_fills,
-      &expect_fills,
+      &expect_start_fills,
+      &expect_end_fills,
     );
   }
 
-  // #[test]
-  fn _new1_win() {
+  #[test]
+  fn new1_win() {
     test_log_init();
 
-    let terminal_size = U16Size::new(33, 5);
+    let terminal_size = U16Size::new(29, 5);
     let buf_opts = BufferLocalOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
