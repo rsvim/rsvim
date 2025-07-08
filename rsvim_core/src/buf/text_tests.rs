@@ -147,10 +147,13 @@ fn last_char1_win() {
   }
 
   {
-    let rope = Rope::from_str("hello\r\n");
+    let rope = Rope::from_str("hello\r\nworld\r\n");
     let text = Text::new(opt, terminal_size, rope);
 
     assert!(!text.is_eol(0, 4));
+    assert!(text.is_eol(0, 5));
+    assert!(text.is_eol(0, 6));
+    assert!(!text.is_eol(1, 4));
     assert!(text.is_eol(0, 5));
     assert!(text.is_eol(0, 6));
 
