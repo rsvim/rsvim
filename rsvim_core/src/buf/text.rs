@@ -116,40 +116,44 @@ impl Text {
     }
   }
 
-  // NOTE: Actually here we use a pretty loose algorithm that detects line breaks, which behaves
-  // the same with `ropey` library. It is actually a must because we heavily rely on the ropey
-  // library and cannot do anything without it.
+  // NOTE: Actually here we use a specified algorithm that keeps compatible with the `ropey`
+  // library since we heavily rely on it, and cannot do anything without it. But anyway it works
+  // great, so let's keep it.
   fn _is_eol_on_line(&self, line: &RopeSlice, char_idx: usize) -> bool {
     use crate::defaults::ascii::end_of_line as ascii_eol;
 
     let len_chars = line.len_chars();
 
-    // If file format is Windows (Dos), and the last two chars are CRLF (`\r\n`), and the
-    // `char_idx` is one of them, then it is (one of) the eol.
-    if self.options.file_format() == FileFormatOption::Dos
-      && len_chars >= 2
+    // If the last two chars are CRLF (`\r\n`), and the `char_idx` is one of them, then it is (one
+    // of) the eol.
+    //
+    // NOTE: This should usually happens on Windows (Dos), but we don't check the file format
+    // option.
+    if len_chars >= 2
       && char_idx >= len_chars - 2
       && char_idx < len_chars
       && format!("{}{}", line.char(len_chars - 2), line.char(len_chars - 1)) == ascii_eol::CRLF
     {
       true
-    } else if self.options.file_format() == FileFormatOption::Mac
-      && len_chars >= 1
+    } else if len_chars >= 1
       && char_idx == len_chars - 1
       && format!("{}", line.char(len_chars - 1)) == ascii_eol::CR
     {
-      // If file format is Mac, and the last char is CR (`\r`), and `char_idx` is it, then it is
-      // the eol.
+      // If the last char is CR (`\r`), and `char_idx` is it, then it is the eol.
+      //
+      // NOTE: This should usually happens on (legacy) Mac, but we don't check the file format
+      // option. Today's Mac also use LF as eol.
       true
     } else if len_chars >= 1
       && char_idx == len_chars - 1
       && format!("{}", line.char(len_chars - 1)) == ascii_eol::LF
     {
-      // Otherwise, no matter Windows/Mac/Linux, if the last char is LF (`\n`), and the `char_idx`
-      // is it, then it is the eol.
+      // If the last char is LF (`\n`), and the `char_idx` is it, then it is the eol.
+      //
+      // NOTE: This should usually happens on Mac/Linux, but we don't check the file format option.
       true
     } else {
-      // For other cases, they are not.
+      // Otherwise, it is not.
       false
     }
   }
