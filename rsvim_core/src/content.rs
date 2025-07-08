@@ -16,10 +16,7 @@ arc_mutex_ptr!(TextContents);
 
 impl TextContents {
   pub fn new(canvas_size: U16Size) -> Self {
-    let command_line_opts = BufferLocalOptionsBuilder::default()
-      .file_format(FileFormatOption::Unix)
-      .build()
-      .unwrap();
+    let command_line_opts = BufferLocalOptionsBuilder::default().build().unwrap();
     Self {
       command_line_content: Text::new(command_line_opts, canvas_size, Rope::new()),
     }
