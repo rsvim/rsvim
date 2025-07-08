@@ -116,20 +116,45 @@ impl Text {
     }
   }
 
-  // NOTE: The legacy mac eol CR (`\r`) is not implemented.
+  // NOTE: Actually here we use a pretty loose algorithm that detects line breaks, which behaves
+  // the same with `ropey` library. It is actually a must because we heavily rely on the ropey
+  // library and cannot do anything without it.
   fn _is_eol_on_line(&self, line: &RopeSlice, char_idx: usize) -> bool {
+    use crate::defaults::ascii::end_of_line as ascii_eol;
+
     let line_len_chars = line.len_chars();
 
-    // For Windows, CRLF (`\r\n`) is eol.
-    if self.options.file_format() == FileFormatOption::Dos {
-      line_len_chars >= 2
-        && line.char(line_len_chars - 2) == '\r'
-        && line.char(line_len_chars - 1) == '\n'
-        && char_idx >= line_len_chars - 2
-        && char_idx < line_len_chars
+    // If file format is Windows (Dos), and the last two chars are CRLF (`\r\n`), and the
+    // `char_idx` is one of them, then it is (one of) the eol.
+    if self.options.file_format() == FileFormatOption::Dos
+      && line_len_chars >= 2
+      && char_idx >= line_len_chars - 2
+      && char_idx < line_len_chars
+      && format!(
+        "{}{}",
+        line.char(line_len_chars - 2),
+        line.char(line_len_chars - 1)
+      ) == ascii_eol::CRLF
+    {
+      true
+    } else if self.options.file_format() == FileFormatOption::Mac
+      && line_len_chars >= 1
+      && char_idx == line_len_chars - 1
+      && format!("{}", line.char(line_len_chars - 1)) == ascii_eol::CR
+    {
+      // If file format is Mac, and the last char is CR (`\r`), and `char_idx` is it, then it is
+      // the eol.
+      true
+    } else if line_len_chars >= 1
+      && char_idx == line_len_chars - 1
+      && format!("{}", line.char(line_len_chars - 1)) == ascii_eol::LF
+    {
+      // Otherwise, no matter Windows/Mac/Linux, if the last char is LF (`\n`), and the `char_idx`
+      // is it, then it is the eol.
+      true
     } else {
-      // Otherwise, LF (`\n`) is eol.
-      line_len_chars >= 1 && char_idx == line_len_chars - 1 && line.char(char_idx) == '\n'
+      // For other cases, they are not.
+      false
     }
   }
 
