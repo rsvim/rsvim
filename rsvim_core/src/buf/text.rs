@@ -205,12 +205,11 @@ impl Text {
     }
   }
 
-  /// Get last visible char index on line, with taking `file_format` (platform specified eol) into
-  /// consideration, i.e. for different `file_format` option we have:
+  /// Get last visible char index on line, it takes below scenarios into considerations:
   ///
-  /// - When `Dos`, the `\r\n` is eol.
-  /// - When `Unix`, only `\n` is eol.
-  /// - When `Mac`, only `\r` is eol. NOTE: `Mac` is a legacy, which is actually not used in
+  /// - The `\r\n` is eol.
+  /// - The `\n` is eol.
+  /// - The `\r` is eol. NOTE: This is a legacy on Mac, which is actually not used in
   ///   today's computer.
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is
