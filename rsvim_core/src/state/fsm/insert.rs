@@ -37,7 +37,7 @@ impl InsertStateful {
               let eol = {
                 let tree = data_access.tree.clone();
                 let tree = lock!(tree);
-                debug_assert!(tree.current_window().is_some());
+                debug_assert!(tree.current_window_id().is_some());
                 let current_window = tree.current_window().unwrap();
                 let buffer = current_window.buffer().upgrade().unwrap();
                 let buffer = lock!(buffer);
