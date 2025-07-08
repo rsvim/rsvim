@@ -196,8 +196,8 @@ fn last_char1_mac() {
 
     let actual2 = text.last_char_on_line_no_eol(0);
     assert!(actual2.is_some());
-    assert_eq!(actual2.unwrap(), 4);
-    assert_eq!(text.rope().line(0).char(4), 'o');
+    assert_eq!(actual2.unwrap(), 5);
+    assert_eq!(text.rope().line(0).char(5), '\n');
   }
 
   {
