@@ -1,6 +1,5 @@
 //! The insert mode.
 
-use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
@@ -44,7 +43,7 @@ impl InsertStateful {
                 let buffer = lock!(buffer);
                 buffer.options().end_of_line()
               };
-              let eol = format!("{}", eol);
+              let eol = format!("{eol}");
               Some(Operation::CursorInsert(eol.to_compact_string()))
             }
             KeyCode::Backspace => Some(Operation::CursorDelete(-1)),
