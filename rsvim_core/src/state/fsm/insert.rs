@@ -1,5 +1,6 @@
 //! The insert mode.
 
+use crate::buf::opt::FileFormatOption;
 use crate::prelude::*;
 use crate::state::fsm::{Stateful, StatefulDataAccess, StatefulValue};
 use crate::state::ops::Operation;
@@ -16,7 +17,9 @@ use tracing::trace;
 pub struct InsertStateful {}
 
 impl InsertStateful {
-  fn _get_operation(&self, event: Event) -> Option<Operation> {
+  fn _get_operation(&self, data_access: &StatefulDataAccess) -> Option<Operation> {
+    let event = &data_access.event;
+
     match event {
       Event::FocusGained => None,
       Event::FocusLost => None,
@@ -31,7 +34,19 @@ impl InsertStateful {
             KeyCode::Home => Some(Operation::CursorMoveLeftBy(usize::MAX)),
             KeyCode::End => Some(Operation::CursorMoveRightBy(usize::MAX)),
             KeyCode::Char(c) => Some(Operation::CursorInsert(c.to_compact_string())),
-            KeyCode::Enter => Some(Operation::CursorInsert('\n'.to_compact_string())),
+            KeyCode::Enter => {
+              let eol = {
+                let tree = data_access.tree.clone();
+                let tree = lock!(tree);
+                debug_assert!(tree.current_window().is_some());
+                let current_window = tree.current_window().unwrap();
+                let buffer = current_window.buffer().upgrade().unwrap();
+                let buffer = lock!(buffer);
+                buffer.options().end_of_line()
+              };
+              let eol = format!("{}", eol);
+              Some(Operation::CursorInsert(eol.to_compact_string()))
+            }
             KeyCode::Backspace => Some(Operation::CursorDelete(-1)),
             KeyCode::Delete => Some(Operation::CursorDelete(1)),
             KeyCode::Esc => Some(Operation::GotoNormalMode),
@@ -42,7 +57,7 @@ impl InsertStateful {
         KeyEventKind::Release => None,
       },
       Event::Mouse(_mouse_event) => None,
-      Event::Paste(ref _paste_string) => None,
+      Event::Paste(_paste_string) => None,
       Event::Resize(_columns, _rows) => None,
     }
   }
@@ -50,9 +65,7 @@ impl InsertStateful {
 
 impl Stateful for InsertStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    let event = data_access.event.clone();
-
-    if let Some(op) = self._get_operation(event) {
+    if let Some(op) = self._get_operation(&data_access) {
       return self.handle_op(data_access, op);
     }
 
