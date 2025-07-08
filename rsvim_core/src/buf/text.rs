@@ -117,7 +117,7 @@ impl Text {
   }
 
   // NOTE: The legacy mac eol CR (`\r`) is not implemented.
-  fn _is_eol_impl(&self, line: &RopeSlice, char_idx: usize) -> bool {
+  fn _is_eol_on_line(&self, line: &RopeSlice, char_idx: usize) -> bool {
     let line_len_chars = line.len_chars();
 
     // For Windows, CRLF (`\r\n`) is eol.
@@ -130,6 +130,22 @@ impl Text {
     } else {
       // Otherwise, LF (`\n`) is eol.
       line_len_chars >= 1 && char_idx == line_len_chars - 1 && line.char(char_idx) == '\n'
+    }
+  }
+
+  fn _is_eol_on_whole_text(&self, char_idx: usize) -> bool {
+    let rope_len_chars = self.rope.len_chars();
+
+    // For Windows, CRLF (`\r\n`) is eol.
+    if self.options.file_format() == FileFormatOption::Dos {
+      rope_len_chars >= 2
+        && line.char(rope_len_chars - 2) == '\r'
+        && line.char(rope_len_chars - 1) == '\n'
+        && char_idx >= rope_len_chars - 2
+        && char_idx <= rope_len_chars - 1
+    } else {
+      // Otherwise, LF (`\n`) is eol.
+      rope_len_chars >= 1 && char_idx == rope_len_chars - 1 && line.char(char_idx) == '\n'
     }
   }
 
@@ -165,10 +181,10 @@ impl Text {
       Some(line) => match self.last_char_on_line(line_idx) {
         Some(last_char) => {
           let mut c = last_char;
-          while c > 0 && self._is_eol_impl(&line, c) {
+          while c > 0 && self._is_eol_on_line(&line, c) {
             c = c.saturating_sub(1);
           }
-          if self._is_eol_impl(&line, c) {
+          if self._is_eol_on_line(&line, c) {
             None
           } else {
             Some(c)
@@ -183,7 +199,7 @@ impl Text {
   /// Whether the `line_idx`/`char_idx` is eol (end-of-line).
   pub fn is_eol(&self, line_idx: usize, char_idx: usize) -> bool {
     match self.rope.get_line(line_idx) {
-      Some(line) => self._is_eol_impl(&line, char_idx),
+      Some(line) => self._is_eol_on_line(&line, char_idx),
       None => false,
     }
   }
@@ -371,14 +387,14 @@ impl Text {
   /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
   /// helps the cursor motion.
   fn append_eol_at_end_if_not_exist(&mut self) {
-    use crate::defaults::ascii::end_of_line as eol;
     let buf_eol = self.options().end_of_line();
 
     let buffer_len_chars = self.rope().len_chars();
     let last_char_on_buf = buffer_len_chars.saturating_sub(1);
     match self.rope().get_char(last_char_on_buf) {
-      Some(c) => {
-        if c.to_compact_string() != eol::LF && c.to_compact_string() != eol::CR {
+      Some(_c) => {
+        let c_is_eol = self._is_eol_on_whole_text(last_char_on_buf);
+        if c_is_eol {
           self
             .rope_mut()
             .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
