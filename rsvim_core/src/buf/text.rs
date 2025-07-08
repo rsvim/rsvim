@@ -119,35 +119,24 @@ impl Text {
   fn _is_eol_impl(&self, line: &RopeSlice, char_idx: usize) -> bool {
     let line_len_chars = line.len_chars();
 
-    // For Mac:
-    //
-    // NOTE: Mac's **CR** (`\r`) is a legacy, which is actually not used today.
-    if self.options.file_format() == FileFormatOption::Mac {
-      line_len_chars >= 1
-        && char_idx == line_len_chars.saturating_sub(1)
-        && line.char(char_idx) == '\r'
+    // The last **LF** ('\n') is always the eol.
+    if line_len_chars >= 1
+      && char_idx == line_len_chars.saturating_sub(1)
+      && line.char(char_idx) == '\n'
+    {
+      true
+    } else if self.options.file_format() == FileFormatOption::Dos
+      && line_len_chars >= 2
+      && char_idx == line_len_chars.saturating_sub(2)
+      && line.char(char_idx) == '\r'
+      && line.char(char_idx + 1) == '\n'
+    {
+      // For Windows:
+      // The second last **CR** ('\r') is also eol.
+      true
     } else {
-      // For Windows/Linux:
-      //
-      // The last **LF** ('\n') is always the eol.
-      if line_len_chars >= 1
-        && char_idx == line_len_chars.saturating_sub(1)
-        && line.char(char_idx) == '\n'
-      {
-        true
-      } else if self.options.file_format() == FileFormatOption::Dos
-        && line_len_chars >= 2
-        && char_idx == line_len_chars.saturating_sub(2)
-        && line.char(char_idx) == '\r'
-        && line.char(char_idx + 1) == '\n'
-      {
-        // For Windows:
-        // The second last **CR** ('\r') is also eol.
-        true
-      } else {
-        // Otherwise it is not.
-        false
-      }
+      // Otherwise it is not.
+      false
     }
   }
 
