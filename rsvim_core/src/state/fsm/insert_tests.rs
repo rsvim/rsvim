@@ -22,6 +22,7 @@ use crate::ui::widget::Widgetable;
 use crate::ui::widget::window::content::{self, WindowContent};
 use crate::ui::widget::window::{WindowLocalOptions, WindowLocalOptionsBuilder};
 
+use compact_str::ToCompactString;
 use crossterm::event::{Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use std::collections::BTreeMap;
 use std::sync::Arc;
