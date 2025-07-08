@@ -182,7 +182,7 @@ impl Text {
           while c > 0 && self._is_eol_impl(&line, c) {
             c = c.saturating_sub(1);
           }
-          if self._is_eol_impl(&line_idx, c) {
+          if self._is_eol_impl(&line, c) {
             None
           } else {
             Some(c)
