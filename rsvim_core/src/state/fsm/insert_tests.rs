@@ -14,7 +14,7 @@ use crate::test::buf::{make_buffer_from_lines, make_buffers_manager};
 use crate::test::log::init as test_log_init;
 use crate::test::tree::make_tree_with_buffers;
 use crate::ui::canvas::Canvas;
-use crate::ui::tree::TreeArc;
+use crate::ui::tree::*;
 use crate::ui::viewport::{
   CursorViewport, CursorViewportArc, Viewport, ViewportArc, ViewportSearchDirection,
 };

@@ -16,7 +16,7 @@ use tracing::trace;
 pub struct InsertStateful {}
 
 impl InsertStateful {
-  fn _get_operation(&self, data_access: &StatefulDataAccess) -> Option<Operation> {
+  fn get_operation(&self, data_access: &StatefulDataAccess) -> Option<Operation> {
     let event = &data_access.event;
 
     match event {
@@ -64,7 +64,7 @@ impl InsertStateful {
 
 impl Stateful for InsertStateful {
   fn handle(&self, data_access: StatefulDataAccess) -> StatefulValue {
-    if let Some(op) = self._get_operation(&data_access) {
+    if let Some(op) = self.get_operation(&data_access) {
       return self.handle_op(data_access, op);
     }
 
@@ -88,7 +88,7 @@ impl Stateful for InsertStateful {
 }
 
 impl InsertStateful {
-  fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
+  pub fn cursor_delete(&self, data_access: &StatefulDataAccess, n: isize) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -103,7 +103,7 @@ impl InsertStateful {
 }
 
 impl InsertStateful {
-  fn cursor_insert(
+  pub fn cursor_insert(
     &self,
     data_access: &StatefulDataAccess,
     payload: CompactString,
@@ -122,7 +122,7 @@ impl InsertStateful {
 }
 
 impl InsertStateful {
-  fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
+  pub fn goto_normal_mode(&self, data_access: &StatefulDataAccess) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
@@ -146,7 +146,7 @@ impl InsertStateful {
 }
 
 impl InsertStateful {
-  fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
+  pub fn cursor_move(&self, data_access: &StatefulDataAccess, op: Operation) -> StatefulValue {
     let tree = data_access.tree.clone();
     let mut tree = lock!(tree);
     let current_window = tree.current_window_mut().unwrap();
