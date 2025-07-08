@@ -116,27 +116,20 @@ impl Text {
     }
   }
 
+  // NOTE: The legacy mac eol CR (`\r`) is not implemented.
   fn _is_eol_impl(&self, line: &RopeSlice, char_idx: usize) -> bool {
     let line_len_chars = line.len_chars();
 
-    // The last **LF** ('\n') is always the eol.
-    if line_len_chars >= 1
-      && char_idx == line_len_chars.saturating_sub(1)
-      && line.char(char_idx) == '\n'
-    {
-      true
-    } else if self.options.file_format() == FileFormatOption::Dos
-      && line_len_chars >= 2
-      && char_idx == line_len_chars.saturating_sub(2)
-      && line.char(char_idx) == '\r'
-      && line.char(char_idx + 1) == '\n'
-    {
-      // For Windows:
-      // The second last **CR** ('\r') is also eol.
-      true
+    // For Windows, CRLF (`\r\n`) is eol.
+    if self.options.file_format() == FileFormatOption::Dos {
+      line_len_chars >= 2
+        && line.char(line_len_chars - 1) == '\n'
+        && line.char(line_len_chars - 2) == '\r'
+        && char_idx >= line_len_chars - 2
+        && char_idx <= line_len_chars - 1
     } else {
-      // Otherwise it is not.
-      false
+      // Otherwise, LF (`\n`) is eol.
+      line_len_chars >= 1 && char_idx == line_len_chars - 1 && line.char(char_idx) == '\n'
     }
   }
 
