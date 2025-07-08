@@ -142,7 +142,7 @@ impl Text {
         && self.rope.char(rope_len_chars - 2) == '\r'
         && self.rope.char(rope_len_chars - 1) == '\n'
         && char_idx >= rope_len_chars - 2
-        && char_idx <= rope_len_chars - 1
+        && char_idx < rope_len_chars
     } else {
       // Otherwise, LF (`\n`) is eol.
       rope_len_chars >= 1 && char_idx == rope_len_chars - 1 && self.rope.char(char_idx) == '\n'
