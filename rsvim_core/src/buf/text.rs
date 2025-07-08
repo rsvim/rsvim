@@ -178,10 +178,14 @@ impl Text {
     match self.rope.get_line(line_idx) {
       Some(line) => match self.last_char_on_line(line_idx) {
         Some(last_char) => {
-          if self.char_width(line.char(last_char)) == 0 {
-            Some(last_char.saturating_sub(1))
+          let mut c = last_char;
+          while c > 0 && self._is_eol_impl(&line, c) {
+            c = c.saturating_sub(1);
+          }
+          if self._is_eol_impl(&line_idx, c) {
+            None
           } else {
-            Some(last_char)
+            Some(c)
           }
         }
         None => None,
