@@ -598,6 +598,8 @@ fn sync_wrap_linebreak(
 }
 
 mod detail {
+  use crate::buf::text::Text;
+
   #[derive(Debug, Copy, Clone)]
   pub struct AdjustOptions {
     pub no_leftward: bool,
@@ -623,6 +625,22 @@ mod detail {
         no_rightward: false,
       }
     }
+  }
+
+  pub fn cursor_width_to_left_no_eol(text: &Text, target_cursor_line: usize, target_cursor_char: usize) -> usize {
+    let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
+
+    // For eol, subtract these eol width, i.e. treat them as 0-width.
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    if target_is_eol {
+      let last_visible_char = text.last_char_on_line_no_eol(target_cursor_line);
+      debug_assert!(last_visible_char.is_some());
+      let last_visible_char = last_visible_char.unwrap();
+      let last_visible_width = text.width_before(target_cursor_line, last_visible_char);
+      target_cursor_width = last_visible_width;
+    }
+
+    target_cursor_width
   }
 }
 
@@ -704,13 +722,7 @@ mod nowrap_detail {
       }
     }
 
-    let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
-
-    // For eol, sub extra 1 column.
-    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
-    if target_is_eol {
-      target_cursor_width = target_cursor_width.saturating_sub(1);
-    }
+    let target_cursor_width = detail::cursor_width_to_left_no_eol(text, target_cursor_line, target_cursor_char);
 
     let on_left_side = target_cursor_width < target_viewport_start_column;
     if on_left_side {
@@ -1047,13 +1059,7 @@ mod wrap_detail {
 
     // If `target_cursor_char` is still out of viewport, then we still need to move viewport to
     // left.
-    let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
-
-    // For eol, sub extra 1 column.
-    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
-    if target_is_eol {
-      target_cursor_width = target_cursor_width.saturating_sub(1);
-    }
+    let target_cursor_width = detail::cursor_width_to_left_no_eol(text, target_cursor_line, target_cursor_char);
 
     if target_cursor_width < start_column {
       on_left_side = true;
