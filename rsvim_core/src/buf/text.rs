@@ -122,32 +122,28 @@ impl Text {
   fn _is_eol_on_line(&self, line: &RopeSlice, char_idx: usize) -> bool {
     use crate::defaults::ascii::end_of_line as ascii_eol;
 
-    let line_len_chars = line.len_chars();
+    let len_chars = line.len_chars();
 
     // If file format is Windows (Dos), and the last two chars are CRLF (`\r\n`), and the
     // `char_idx` is one of them, then it is (one of) the eol.
     if self.options.file_format() == FileFormatOption::Dos
-      && line_len_chars >= 2
-      && char_idx >= line_len_chars - 2
-      && char_idx < line_len_chars
-      && format!(
-        "{}{}",
-        line.char(line_len_chars - 2),
-        line.char(line_len_chars - 1)
-      ) == ascii_eol::CRLF
+      && len_chars >= 2
+      && char_idx >= len_chars - 2
+      && char_idx < len_chars
+      && format!("{}{}", line.char(len_chars - 2), line.char(len_chars - 1)) == ascii_eol::CRLF
     {
       true
     } else if self.options.file_format() == FileFormatOption::Mac
-      && line_len_chars >= 1
-      && char_idx == line_len_chars - 1
-      && format!("{}", line.char(line_len_chars - 1)) == ascii_eol::CR
+      && len_chars >= 1
+      && char_idx == len_chars - 1
+      && format!("{}", line.char(len_chars - 1)) == ascii_eol::CR
     {
       // If file format is Mac, and the last char is CR (`\r`), and `char_idx` is it, then it is
       // the eol.
       true
-    } else if line_len_chars >= 1
-      && char_idx == line_len_chars - 1
-      && format!("{}", line.char(line_len_chars - 1)) == ascii_eol::LF
+    } else if len_chars >= 1
+      && char_idx == len_chars - 1
+      && format!("{}", line.char(len_chars - 1)) == ascii_eol::LF
     {
       // Otherwise, no matter Windows/Mac/Linux, if the last char is LF (`\n`), and the `char_idx`
       // is it, then it is the eol.
@@ -158,19 +154,33 @@ impl Text {
     }
   }
 
+  // Same logic with `_is_eol_on_line`, except the `char_idx` is absolute on whole rope.
   fn _is_eol_on_whole_text(&self, char_idx: usize) -> bool {
-    let rope_len_chars = self.rope.len_chars();
+    use crate::defaults::ascii::end_of_line as ascii_eol;
 
-    // For Windows, CRLF (`\r\n`) is eol.
-    if self.options.file_format() == FileFormatOption::Dos {
-      rope_len_chars >= 2
-        && self.rope.char(rope_len_chars - 2) == '\r'
-        && self.rope.char(rope_len_chars - 1) == '\n'
-        && char_idx >= rope_len_chars - 2
-        && char_idx < rope_len_chars
+    let r = &self.rope;
+    let len_chars = r.len_chars();
+
+    if self.options.file_format() == FileFormatOption::Dos
+      && len_chars >= 2
+      && char_idx >= len_chars - 2
+      && char_idx < len_chars
+      && format!("{}{}", r.char(len_chars - 2), r.char(len_chars - 1)) == ascii_eol::CRLF
+    {
+      true
+    } else if self.options.file_format() == FileFormatOption::Mac
+      && len_chars >= 1
+      && char_idx == len_chars - 1
+      && format!("{}", r.char(len_chars - 1)) == ascii_eol::CR
+    {
+      true
+    } else if len_chars >= 1
+      && char_idx == len_chars - 1
+      && format!("{}", r.char(len_chars - 1)) == ascii_eol::LF
+    {
+      true
     } else {
-      // Otherwise, LF (`\n`) is eol.
-      rope_len_chars >= 1 && char_idx == rope_len_chars - 1 && self.rope.char(char_idx) == '\n'
+      false
     }
   }
 
