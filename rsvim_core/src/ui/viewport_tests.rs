@@ -6449,7 +6449,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "But still it cont",
         "ains several thin",
         "gs we want to tes",
-        "t:\n",
+        "t:\r\n",
       ];
 
       let actual = window.borrow().viewport();
@@ -6472,7 +6472,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "But still it cont",
         "ains several thin",
         "gs we want to tes",
-        "t:\n",
+        "t:\r\n",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 0, 53, 0, 0);
@@ -6492,7 +6492,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-2
     {
-      let expect = vec!["enough\t", "to\tcomplet", "ely\tput", "\tinside.\n"];
+      let expect = vec!["enough\t", "to\tcomplet", "ely\tput", "\tinside.\r\n"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 1, 58, 1, 66);
 
@@ -6511,7 +6511,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-3
     {
-      let expect = vec!["too\t", "long\tto", "\tcompletel", "y\tput:\n"];
+      let expect = vec!["too\t", "long\tto", "\tcompletel", "y\tput:\r\n"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 2, 58, 2, 35);
 
@@ -6530,7 +6530,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-4
     {
-      let expect = vec!["wrap and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["wrap and word-wra", "p options\t", "are\tnot", "\tset.\r\n"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 3, 97, 3, 67);
 
@@ -6553,7 +6553,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         " rows in the wind",
         "ow, thus it may c",
         "ontains less line",
-        "s in the buffer.\n",
+        "s in the buffer.\r\n",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 4, 314, 4, 305);
@@ -6577,7 +6577,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         " extra parts are ",
         "split into the ne",
         "xt row if either ",
-        "options are set.\n",
+        "options are set.\r\n",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 5, 314, 5, 6);
@@ -6601,7 +6601,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "into the next row",
         " if either line-w",
         "rap or word-wrap ",
-        "options are set.\n",
+        "options are set.\r\n",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 6, 314, 6, 29);
@@ -6677,7 +6677,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "But still it cont",
         "ains several thin",
         "gs we want to tes",
-        "t:\n",
+        "t:\r",
       ];
 
       let actual = window.borrow().viewport();
@@ -6700,7 +6700,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "But still it cont",
         "ains several thin",
         "gs we want to tes",
-        "t:\n",
+        "t:\r",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 0, 53, 0, 0);
@@ -6720,7 +6720,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-2
     {
-      let expect = vec!["enough\t", "to\tcomplet", "ely\tput", "\tinside.\n"];
+      let expect = vec!["enough\t", "to\tcomplet", "ely\tput", "\tinside.\r"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 1, 58, 1, 66);
 
@@ -6739,7 +6739,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-3
     {
-      let expect = vec!["too\t", "long\tto", "\tcompletel", "y\tput:\n"];
+      let expect = vec!["too\t", "long\tto", "\tcompletel", "y\tput:\r"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 2, 58, 2, 35);
 
@@ -6758,7 +6758,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-4
     {
-      let expect = vec!["wrap and word-wra", "p options\t", "are\tnot", "\tset.\n"];
+      let expect = vec!["wrap and word-wra", "p options\t", "are\tnot", "\tset.\r"];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 3, 97, 3, 67);
 
@@ -6781,7 +6781,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         " rows in the wind",
         "ow, thus it may c",
         "ontains less line",
-        "s in the buffer.\n",
+        "s in the buffer.\r",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 4, 314, 4, 305);
@@ -6805,7 +6805,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         " extra parts are ",
         "split into the ne",
         "xt row if either ",
-        "options are set.\n",
+        "options are set.\r",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 5, 314, 5, 6);
@@ -6829,7 +6829,7 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
         "into the next row",
         " if either line-w",
         "rap or word-wrap ",
-        "options are set.\n",
+        "options are set.\r",
       ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 6, 314, 6, 29);
