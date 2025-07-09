@@ -440,7 +440,7 @@ mod tests_nowrap_eol {
       ],
     );
     let expect = vec![
-      "Hello, RSVIM!^M                ",
+      "Hello, RSVIM!                  ",
       "This is a quite simple and smal",
       "But still it contains several t",
       "                               ",
@@ -1235,7 +1235,7 @@ mod tests_wrap_nolinebreak_eol {
       buf_opts,
       vec![
         "Hello, RSVIM!\r\n",
-        "This is a quite simple and small test lines.\r\n",
+        "This is a quite simple and small test lines123456.\r\n",
         "But still it contains several things we want to test:\r\n",
         "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r\n",
         "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r\n",
@@ -1250,7 +1250,52 @@ mod tests_wrap_nolinebreak_eol {
       "quite simp",
       "le and sma",
       "ll test li",
-      "nes.      ",
+      "nes123456.",
+      "But still ",
+      "it contain",
+      "s several ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+  }
+
+  #[test]
+  fn new1_cr_mac() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 10);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Mac)
+      .build()
+      .unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(true)
+      .build()
+      .unwrap();
+
+    let buffer = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\r",
+        "This is a quite simple and small test lines123456.\r",
+        "But still it contains several things we want to test:\r",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSV",
+      "IM!       ",
+      "This is a ",
+      "quite simp",
+      "le and sma",
+      "ll test li",
+      "nes123456.",
       "But still ",
       "it contain",
       "s several ",
