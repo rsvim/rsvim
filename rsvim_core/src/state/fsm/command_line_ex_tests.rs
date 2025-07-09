@@ -520,7 +520,12 @@ mod tests_goto_normal_mode {
       assert_eq!(actual1.column_idx(), 3);
 
       let viewport = lock!(tree.clone()).command_line().unwrap().viewport();
-      let expect = vec!["Bye\n"];
+      let cmdline_eol = lock!(contents)
+        .command_line_content()
+        .options()
+        .end_of_line();
+      let line0 = format!("Bye{cmdline_eol}");
+      let expect = vec![line0.as_str()];
       let expect_fills: BTreeMap<usize, usize> = vec![(0, 0)].into_iter().collect();
       assert_viewport_scroll(
         lock!(contents).command_line_content(),
