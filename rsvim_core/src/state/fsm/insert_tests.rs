@@ -2052,10 +2052,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "3rd.\r\n",
-        "4th.\r\n",
-        "5th.\r\n",
-        "6th.\r\n",
+        "3rd.\r",
+        "4th.\r",
+        "5th.\r",
+        "6th.\r",
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
@@ -2085,10 +2085,10 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "3rd.\r\n",
-        "4th.\r\n",
-        "5th.\r\n",
-        "6th.\r\n",
+        "3rd.\r",
+        "4th.\r",
+        "5th.\r",
+        "6th.\r",
         "BBBBBBBBBB",
         "CCCCCCCCCC",
       ];
@@ -2118,12 +2118,12 @@ mod tests_cursor_move {
 
       let viewport = get_viewport(tree.clone());
       let expect = vec![
-        "4th.\r\n",
-        "5th.\r\n",
-        "6th.\r\n",
+        "4th.\r",
+        "5th.\r",
+        "6th.\r",
         "BBBBBBBBBB",
         "CCCCCCCCCC",
-        "8th.\r\n",
+        "8th.\r",
       ];
       let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0), (6, 0), (7, 0), (8, 0)]
           .into_iter()
