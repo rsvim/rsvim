@@ -637,11 +637,10 @@ mod detail {
     // For eol, subtract these eol width, i.e. treat them as 0-width.
     let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
     if target_is_eol {
-      let last_visible_char = text.last_char_on_line_no_eol(target_cursor_line);
-      debug_assert!(last_visible_char.is_some());
-      let last_visible_char = last_visible_char.unwrap();
-      let last_visible_width = text.width_before(target_cursor_line, last_visible_char);
-      target_cursor_width = last_visible_width;
+      target_cursor_width = match text.last_char_on_line_no_eol(target_cursor_line) {
+        Some(last_visible_char) => text.width_before(target_cursor_line, last_visible_char),
+        None => target_cursor_width.saturating_sub(1),
+      };
     }
 
     target_cursor_width

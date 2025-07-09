@@ -398,17 +398,18 @@ impl Text {
   /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
   /// helps the cursor motion.
   fn append_eol_at_end_if_not_exist(&mut self) {
-    let buf_eol = self.options().end_of_line();
+    let eol = self.options().end_of_line();
 
     let buffer_len_chars = self.rope.len_chars();
     let last_char_on_buf = buffer_len_chars.saturating_sub(1);
     match self.rope.get_char(last_char_on_buf) {
       Some(_c) => {
         let c_is_eol = self._is_eol_on_whole_text(last_char_on_buf);
-        if c_is_eol {
+        // Only append eol when the whole text rope doesn't have it at end.
+        if !c_is_eol {
           self
             .rope_mut()
-            .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
+            .insert(buffer_len_chars, eol.to_compact_string().as_str());
           let inserted_line_idx = self.rope.char_to_line(buffer_len_chars);
           self.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
           dbg_print_textline_with_absolute_char_idx(
@@ -422,7 +423,7 @@ impl Text {
       None => {
         self
           .rope_mut()
-          .insert(0_usize, buf_eol.to_compact_string().as_str());
+          .insert(0_usize, eol.to_compact_string().as_str());
         self.clear_cached_lines();
         dbg_print_textline_with_absolute_char_idx(
           self,
