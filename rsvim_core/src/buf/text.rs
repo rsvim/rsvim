@@ -506,7 +506,7 @@ impl Text {
 
     while acc < n && i >= 0 {
       let c1 = self.rope.get_char(i as usize);
-      let c2 = if i - 1 >= 0 {
+      let c2 = if i > 0 {
         self.rope.get_char((i - 1) as usize)
       } else {
         None
