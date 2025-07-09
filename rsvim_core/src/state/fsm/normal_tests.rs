@@ -6197,6 +6197,444 @@ mod tests_cursor_move {
   }
 
   #[test]
+  fn wrap_nolinebreak3_crlf_win() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\r\n",
+      "This is a quite simple and small test lines.\r\n",
+      "But still it contains several things we want to test:\r\n",
+      "  1. When the line is small enough to completely put inside a row.\r\n",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r\n",
+      "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
+      "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
+    ];
+    let buf_opts = BufferLocalOptionsBuilder::default().file_format(FileFormatOption::Dos).build().unwrap();
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
+      U16Size::new(25, 7),
+      buf_opts,
+      WindowLocalOptionsBuilder::default()
+          .wrap(true)
+          .build()
+          .unwrap(),
+      lines,
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    // Before
+    {
+      let viewport = get_viewport(tree.clone());
+
+      let expect = vec![
+        "Hello, RSVIM!\r\n",
+        "This is a quite simple an",
+        "d small test lines.\r\n",
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r\n",
+        "  1. When the line is sma",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+          vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    let data_access =
+        StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let stateful = NormalStateful::default();
+    stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+
+    // Move-1
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r\n",
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\r\n",
+        "  2. When the line is too",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(24));
+
+    // Move-2
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 24);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r\n",
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\r\n",
+        "  2. When the line is too",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(45));
+
+    // Move-3
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 65);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r\n",
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\r\n",
+        "  2. When the line is too",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(1));
+
+    // Move-4
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 4);
+      assert_eq!(actual.char_idx(), 65);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "  2. When the line is too",
+        " long to be completely pu",
+        "t in a row of the window ",
+        "content widget, there're ",
+        "multiple cases:\r\n",
+        "    * The extra parts are",
+        " been truncated if both l",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        4,
+        6,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+
+    // Move-5
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 65);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\r\n",
+        "  2. When the line is too",
+        " long to be completely pu",
+        "t in a row of the window ",
+        "content widget, there're ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        3,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
+
+  #[test]
+  fn wrap_nolinebreak3_cr_mac() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\r",
+      "This is a quite simple and small test lines.\r",
+      "But still it contains several things we want to test:\r",
+      "  1. When the line is small enough to completely put inside a row.\r",
+      "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r",
+      "    * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
+      "    * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
+    ];
+    let buf_opts = BufferLocalOptionsBuilder::default().file_format(FileFormatOption::Mac).build().unwrap();
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
+      U16Size::new(25, 7),
+      buf_opts,
+      WindowLocalOptionsBuilder::default()
+          .wrap(true)
+          .build()
+          .unwrap(),
+      lines,
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    // Before
+    {
+      let viewport = get_viewport(tree.clone());
+
+      let expect = vec![
+        "Hello, RSVIM!\r",
+        "This is a quite simple an",
+        "d small test lines.\r",
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r",
+        "  1. When the line is sma",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+          vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    let data_access =
+        StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let stateful = NormalStateful::default();
+    stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(3));
+
+    // Move-1
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 0);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r",
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\r",
+        "  2. When the line is too",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(24));
+
+    // Move-2
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 24);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r",
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\r",
+        "  2. When the line is too",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveRightBy(45));
+
+    // Move-3
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 65);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r",
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\r",
+        "  2. When the line is too",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveDownBy(1));
+
+    // Move-4
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 4);
+      assert_eq!(actual.char_idx(), 65);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "  2. When the line is too",
+        " long to be completely pu",
+        "t in a row of the window ",
+        "content widget, there're ",
+        "multiple cases:\r",
+        "    * The extra parts are",
+        " been truncated if both l",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        4,
+        6,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveUpBy(1));
+
+    // Move-5
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 65);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\r",
+        "  2. When the line is too",
+        " long to be completely pu",
+        "t in a row of the window ",
+        "content widget, there're ",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        3,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+  }
+
+  #[test]
   fn wrap_nolinebreak4() {
     test_log_init();
 
@@ -6353,7 +6791,7 @@ mod tests_cursor_move {
   }
 
   #[test]
-  fn wrap_nolinebreak4_crlf_unix() {
+  fn wrap_nolinebreak4_crlf_win() {
     test_log_init();
 
     let lines = vec![
@@ -6365,8 +6803,13 @@ mod tests_cursor_move {
       "  * The extra parts are been truncated.\r\n",
       "  * The extra parts are split into next row.\r\n",
     ];
-    let (tree, state, bufs, buf, contents) = make_tree(
+    let buf_opts = BufferLocalOptionsBuilder::default()
+        .file_format(FileFormatOption::Dos)
+        .build()
+        .unwrap();
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
       U16Size::new(15, 7),
+      buf_opts,
       WindowLocalOptionsBuilder::default()
         .wrap(true)
         .build()
@@ -6389,6 +6832,103 @@ mod tests_cursor_move {
       let viewport = get_viewport(tree.clone());
 
       let expect = vec![
+        "Hello, RSVIM!\r\n",
+        "This is a quite simple an",
+        "d small test lines.\r\n",
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r\n",
+        "  1. When the line is sma",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    let data_access =
+      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+    let stateful = NormalStateful::default();
+    stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
+
+    // Move-1
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 3);
+      assert_eq!(actual.char_idx(), 50);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r\n",
+        "  1. When the line is sma",
+        "ll enough to completely p",
+        "ut inside a row.\r\n",
+        "  2. When the line is too",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(2, 0), (3, 0), (4, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        2,
+        5,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveBy((24, 1)));
+
+    // Move-2
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 4);
+      assert_eq!(actual.char_idx(), 74);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
+        "  2. When the line is too",
+        " long to be completely pu",
+        "t in a row of the window ",
+        "content widget, there're ",
+        "multiple cases:\n",
+        "    * The extra parts are",
+        " been truncated if both l",
+      ];
+      let expect_fills: BTreeMap<usize, usize> = vec![(4, 0), (5, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        4,
+        6,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
+
+    stateful.cursor_move(&data_access, Operation::CursorMoveBy((-4, -4)));
+
+    // Move-3
+    {
+      let tree = data_access.tree.clone();
+      let actual = get_cursor_viewport(tree.clone());
+      assert_eq!(actual.line_idx(), 0);
+      assert_eq!(actual.char_idx(), 12);
+
+      let viewport = get_viewport(tree.clone());
+      let expect = vec![
         "Hello, RSVIM!\n",
         "This is a quite simple an",
         "d small test lines.\n",
@@ -6409,9 +6949,73 @@ mod tests_cursor_move {
         &expect_fills,
       );
     }
+  }
+
+  #[test]
+  fn wrap_nolinebreak4_cr_mac() {
+    test_log_init();
+
+    let lines = vec![
+      "Hello, RSVIM!\r",
+      "This is a quite simple lines.\r",
+      "But still it contains several:\r",
+      "1. The line is very small.\r",
+      "2. The line is very long\r",
+      "  * The extra parts are been truncated.\r",
+      "  * The extra parts are split into next row.\r",
+    ];
+    let buf_opts = BufferLocalOptionsBuilder::default()
+        .file_format(FileFormatOption::Mac)
+        .build()
+        .unwrap();
+    let (tree, state, bufs, buf, contents) = make_tree_with_buffer_opts(
+      U16Size::new(15, 7),
+      buf_opts,
+      WindowLocalOptionsBuilder::default()
+          .wrap(true)
+          .build()
+          .unwrap(),
+      lines,
+    );
+
+    let key_event = KeyEvent::new_with_kind(
+      KeyCode::Char('a'),
+      KeyModifiers::empty(),
+      KeyEventKind::Press,
+    );
+
+    let prev_cursor_viewport = get_cursor_viewport(tree.clone());
+    assert_eq!(prev_cursor_viewport.line_idx(), 0);
+    assert_eq!(prev_cursor_viewport.char_idx(), 0);
+
+    // Before
+    {
+      let viewport = get_viewport(tree.clone());
+
+      let expect = vec![
+        "Hello, RSVIM!\r\n",
+        "This is a quite simple an",
+        "d small test lines.\r\n",
+        "But still it contains sev",
+        "eral things we want to te",
+        "st:\r\n",
+        "  1. When the line is sma",
+      ];
+      let expect_fills: BTreeMap<usize, usize> =
+          vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+      assert_viewport_scroll(
+        buf.clone(),
+        &viewport,
+        &expect,
+        0,
+        4,
+        &expect_fills,
+        &expect_fills,
+      );
+    }
 
     let data_access =
-      StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
+        StatefulDataAccess::new(state, tree.clone(), bufs, contents, Event::Key(key_event));
     let stateful = NormalStateful::default();
     stateful.cursor_move(&data_access, Operation::CursorMoveBy((50, 3)));
 
@@ -6495,7 +7099,7 @@ mod tests_cursor_move {
         "  1. When the line is sma",
       ];
       let expect_fills: BTreeMap<usize, usize> =
-        vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
+          vec![(0, 0), (1, 0), (2, 0), (3, 0)].into_iter().collect();
       assert_viewport_scroll(
         buf.clone(),
         &viewport,
