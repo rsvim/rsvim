@@ -34,8 +34,8 @@ impl fmt::Display for AsciiControlCodeFormatter {
       AsciiChar::ACK => write!(f, "^F"),
       AsciiChar::Bell => write!(f, "^G"),
       AsciiChar::BackSpace => write!(f, "^H"),
-      AsciiChar::Tab => write!(f, "\t"),  // \t
-      AsciiChar::LineFeed => writeln!(f), // \n
+      AsciiChar::Tab => write!(f, "\t"),        // \t
+      AsciiChar::LineFeed => writeln!(f, "^J"), // \n
       AsciiChar::VT => write!(f, "^K"),
       AsciiChar::FF => write!(f, "^L"),
       AsciiChar::CarriageReturn => write!(f, "^M"), // \r
@@ -58,22 +58,6 @@ impl fmt::Display for AsciiControlCodeFormatter {
       AsciiChar::RS => write!(f, "^^"),
       AsciiChar::US => write!(f, "^_"),
       _ => unreachable!(),
-    }
-  }
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  use ascii::AsciiChar;
-
-  #[test]
-  fn display() {
-    for i in 0_u32..32_u32 {
-      let ac = AsciiChar::from_ascii(i).unwrap();
-      let fmt = AsciiControlCodeFormatter::from(ac);
-      println!("{i}:{fmt}");
     }
   }
 }

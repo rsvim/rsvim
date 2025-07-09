@@ -22,6 +22,8 @@ pub mod unicode;
 #[cfg(test)]
 mod opt_tests;
 #[cfg(test)]
+mod text_tests;
+#[cfg(test)]
 mod unicode_tests;
 
 /// Buffer ID.

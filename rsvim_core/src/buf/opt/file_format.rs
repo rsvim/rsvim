@@ -13,8 +13,7 @@ pub enum FileFormatOption {
 
   /// CR (`<CR>`)
   ///
-  /// NOTE: This is deprecated and only been kept for compatibility reason, which should never
-  /// used today.
+  /// NOTE: This is a legacy and actually not used today.
   Mac,
 }
 
@@ -60,7 +59,7 @@ pub enum EndOfLineOption {
   /// Unix
   LF,
 
-  /// Classic Mac, not used today
+  /// Mac
   CR,
 }
 

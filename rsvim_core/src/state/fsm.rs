@@ -43,6 +43,13 @@ pub mod select;
 pub mod terminal;
 pub mod visual;
 
+#[cfg(test)]
+mod command_line_ex_tests;
+#[cfg(test)]
+mod insert_tests;
+#[cfg(test)]
+mod normal_tests;
+
 #[derive(Debug)]
 /// The mutable data passed to each state handler, and allow them access the editor.
 pub struct StatefulDataAccess {

@@ -10,7 +10,7 @@ pub use cidx::ColumnIndex;
 use ahash::RandomState;
 use compact_str::{CompactString, ToCompactString};
 use lru::LruCache;
-use ropey::Rope;
+use ropey::{Rope, RopeSlice};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -116,6 +116,51 @@ impl Text {
     }
   }
 
+  // NOTE: Actually here we use a specified algorithm that keeps compatible with the `ropey`
+  // library since we heavily rely on it, and cannot do anything without it. But anyway it works
+  // great, so let's keep it.
+  fn _is_eol_on_line(&self, line: &RopeSlice, char_idx: usize) -> bool {
+    use crate::defaults::ascii::end_of_line as ascii_eol;
+
+    let len_chars = line.len_chars();
+
+    // The eol detection logic (NOTE: We don't check the file format option):
+    //
+    // 1. If the last two chars are CRLF (`\r\n`), and the `char_idx` is one of them, then it is
+    //    (one of) the eol. Usually for Windows/Dos.
+    // 2. If the last char is CR (`\r`) or LF (`\n`), and `char_idx` is it, then it is the eol.
+
+    let is_crlf = len_chars >= 2
+      && char_idx >= len_chars - 2
+      && char_idx < len_chars
+      && format!("{}{}", line.char(len_chars - 2), line.char(len_chars - 1)) == ascii_eol::CRLF;
+    let is_cr_or_lf = len_chars >= 1
+      && char_idx == len_chars - 1
+      && (format!("{}", line.char(len_chars - 1)) == ascii_eol::CR
+        || format!("{}", line.char(len_chars - 1)) == ascii_eol::LF);
+
+    is_crlf || is_cr_or_lf
+  }
+
+  // Same logic with `_is_eol_on_line`, except the `char_idx` is absolute on whole rope.
+  fn _is_eol_on_whole_text(&self, char_idx: usize) -> bool {
+    use crate::defaults::ascii::end_of_line as ascii_eol;
+
+    let r = &self.rope;
+    let len_chars = r.len_chars();
+
+    let is_crlf = len_chars >= 2
+      && char_idx >= len_chars - 2
+      && char_idx < len_chars
+      && format!("{}{}", r.char(len_chars - 2), r.char(len_chars - 1)) == ascii_eol::CRLF;
+    let is_cr_or_lf = len_chars >= 1
+      && char_idx == len_chars - 1
+      && (format!("{}", r.char(len_chars - 1)) == ascii_eol::CR
+        || format!("{}", r.char(len_chars - 1)) == ascii_eol::LF);
+
+    is_crlf || is_cr_or_lf
+  }
+
   /// Get last char index on line.
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is empty.
@@ -133,9 +178,12 @@ impl Text {
     }
   }
 
-  /// Get last visible char index on line.
+  /// Get last visible char index on line, it takes below scenarios into considerations:
   ///
-  /// NOTE: This function iterates each char from the end of the line to the beginning of the line.
+  /// - The `\r\n` is eol.
+  /// - The `\n` is eol.
+  /// - The `\r` is eol. NOTE: This is a legacy on Mac, which is actually not used in
+  ///   today's computer.
   ///
   /// It returns the char index if exists, returns `None` if line not exists or line is
   /// empty/blank.
@@ -143,10 +191,14 @@ impl Text {
     match self.rope.get_line(line_idx) {
       Some(line) => match self.last_char_on_line(line_idx) {
         Some(last_char) => {
-          if self.char_width(line.char(last_char)) == 0 {
-            Some(last_char.saturating_sub(1))
+          let mut c = last_char;
+          while c > 0 && self._is_eol_on_line(&line, c) {
+            c = c.saturating_sub(1);
+          }
+          if self._is_eol_on_line(&line, c) {
+            None
           } else {
-            Some(last_char)
+            Some(c)
           }
         }
         None => None,
@@ -158,16 +210,7 @@ impl Text {
   /// Whether the `line_idx`/`char_idx` is eol (end-of-line).
   pub fn is_eol(&self, line_idx: usize, char_idx: usize) -> bool {
     match self.rope.get_line(line_idx) {
-      Some(line) => {
-        if char_idx == line.len_chars().saturating_sub(1) {
-          match line.get_char(char_idx) {
-            Some(c) => self.char_width(c) == 0,
-            None => false,
-          }
-        } else {
-          false
-        }
-      }
+      Some(line) => self._is_eol_on_line(&line, char_idx),
       None => false,
     }
   }
@@ -355,18 +398,19 @@ impl Text {
   /// For text, the editor have to always keep an eol (end-of-line) at the end of text file. It
   /// helps the cursor motion.
   fn append_eol_at_end_if_not_exist(&mut self) {
-    use crate::defaults::ascii::end_of_line as eol;
-    let buf_eol = self.options().end_of_line();
+    let eol = self.options().end_of_line();
 
-    let buffer_len_chars = self.rope().len_chars();
+    let buffer_len_chars = self.rope.len_chars();
     let last_char_on_buf = buffer_len_chars.saturating_sub(1);
-    match self.rope().get_char(last_char_on_buf) {
-      Some(c) => {
-        if c.to_compact_string() != eol::LF && c.to_compact_string() != eol::CR {
+    match self.rope.get_char(last_char_on_buf) {
+      Some(_c) => {
+        let c_is_eol = self._is_eol_on_whole_text(last_char_on_buf);
+        // Only append eol when the whole text rope doesn't have it at end.
+        if !c_is_eol {
           self
             .rope_mut()
-            .insert(buffer_len_chars, buf_eol.to_compact_string().as_str());
-          let inserted_line_idx = self.rope().char_to_line(buffer_len_chars);
+            .insert(buffer_len_chars, eol.to_compact_string().as_str());
+          let inserted_line_idx = self.rope.char_to_line(buffer_len_chars);
           self.retain_cached_lines(|line_idx, _column_idx| *line_idx < inserted_line_idx);
           dbg_print_textline_with_absolute_char_idx(
             self,
@@ -379,7 +423,7 @@ impl Text {
       None => {
         self
           .rope_mut()
-          .insert(0_usize, buf_eol.to_compact_string().as_str());
+          .insert(0_usize, eol.to_compact_string().as_str());
         self.clear_cached_lines();
         dbg_print_textline_with_absolute_char_idx(
           self,
@@ -407,10 +451,10 @@ impl Text {
     payload: CompactString,
   ) -> (usize, usize) {
     debug_assert!(!payload.is_empty());
-    debug_assert!(self.rope().get_line(line_idx).is_some());
-    debug_assert!(char_idx <= self.rope().line(line_idx).len_chars());
+    debug_assert!(self.rope.get_line(line_idx).is_some());
+    debug_assert!(char_idx <= self.rope.line(line_idx).len_chars());
 
-    let absolute_line_idx = self.rope().line_to_char(line_idx);
+    let absolute_line_idx = self.rope.line_to_char(line_idx);
     let absolute_char_idx_before_insert = absolute_line_idx + char_idx;
 
     dbg_print_textline(self, line_idx, char_idx, "Before insert");
@@ -423,8 +467,8 @@ impl Text {
     // re-calculate it.
     let absolute_char_idx_after_inserted =
       absolute_char_idx_before_insert + payload.chars().count();
-    let line_idx_after_inserted = self.rope().char_to_line(absolute_char_idx_after_inserted);
-    let absolute_line_idx_after_inserted = self.rope().line_to_char(line_idx_after_inserted);
+    let line_idx_after_inserted = self.rope.char_to_line(absolute_char_idx_after_inserted);
+    let absolute_line_idx_after_inserted = self.rope.line_to_char(line_idx_after_inserted);
     let char_idx_after_inserted =
       absolute_char_idx_after_inserted - absolute_line_idx_after_inserted;
 
@@ -453,6 +497,56 @@ impl Text {
     (line_idx_after_inserted, char_idx_after_inserted)
   }
 
+  fn _n_chars_to_left(&self, absolute_char_idx: usize, n: usize) -> usize {
+    use crate::defaults::ascii::end_of_line as ascii_eol;
+
+    debug_assert!(n > 0);
+    let mut i = absolute_char_idx as isize;
+    let mut acc = 0;
+
+    while acc < n && i >= 0 {
+      let c1 = self.rope.get_char(i as usize);
+      let c2 = if i > 0 {
+        self.rope.get_char((i - 1) as usize)
+      } else {
+        None
+      };
+      if c1.is_some()
+        && c2.is_some()
+        && format!("{}{}", c2.unwrap(), c1.unwrap()) == ascii_eol::CRLF
+      {
+        i -= 2;
+      } else {
+        i -= 1;
+      }
+      acc += 1;
+    }
+    std::cmp::max(i, 0) as usize
+  }
+
+  fn _n_chars_to_right(&self, absolute_char_idx: usize, n: usize) -> usize {
+    debug_assert!(n > 0);
+
+    let len_chars = self.rope.len_chars();
+    let mut i = absolute_char_idx;
+    let mut acc = 0;
+
+    while acc < n && i <= len_chars {
+      let c1 = self.rope.get_char(i);
+      let c2 = self.rope.get_char(i + 1);
+      if c1.is_some()
+        && c2.is_some()
+        && format!("{}{}", c1.unwrap(), c2.unwrap()) == crate::defaults::ascii::end_of_line::CRLF
+      {
+        i += 2;
+      } else {
+        i += 1;
+      }
+      acc += 1;
+    }
+    i
+  }
+
   /// Delete `n` text chars at position `line_idx`/`char_idx`, to either left or right direction.
   ///
   /// 1. If `n<0`, delete to the left direction, i.e. delete the range `[char_idx-n, char_idx)`.
@@ -471,48 +565,42 @@ impl Text {
     char_idx: usize,
     n: isize,
   ) -> Option<(usize, usize)> {
-    debug_assert!(self.rope().get_line(line_idx).is_some());
-    debug_assert!(char_idx < self.rope().line(line_idx).len_chars());
+    debug_assert!(self.rope.get_line(line_idx).is_some());
+    debug_assert!(char_idx < self.rope.line(line_idx).len_chars());
 
-    let cursor_char_absolute_pos_before_delete = self.rope().line_to_char(line_idx) + char_idx;
+    let cursor_char_absolute_pos_before_delete = self.rope.line_to_char(line_idx) + char_idx;
 
     dbg_print_textline(self, line_idx, char_idx, "Before delete");
 
+    // NOTE: We also need to handle the windows-style line break `\r\n`, i.e. we treat `\r\n` as 1 single char when deleting it.
     let to_be_deleted_range = if n > 0 {
       // Delete to right side, on range `[cursor..cursor+n)`.
-      cursor_char_absolute_pos_before_delete
-        ..(std::cmp::min(
-          cursor_char_absolute_pos_before_delete + n as usize,
-          self.rope().len_chars(),
-        ))
+      let upper = self._n_chars_to_right(cursor_char_absolute_pos_before_delete, n as usize);
+      debug_assert!(upper <= self.rope.len_chars());
+      cursor_char_absolute_pos_before_delete..upper
     } else {
       // Delete to left side, on range `[cursor-n,cursor)`.
-      (std::cmp::max(
-        0_usize,
-        cursor_char_absolute_pos_before_delete.saturating_add_signed(n),
-      ))..cursor_char_absolute_pos_before_delete
+      let lower = self._n_chars_to_left(cursor_char_absolute_pos_before_delete, (-n) as usize);
+      lower..cursor_char_absolute_pos_before_delete
     };
 
     if to_be_deleted_range.is_empty() {
       return None;
     }
 
-    self.rope_mut().remove(to_be_deleted_range);
+    self.rope_mut().remove(to_be_deleted_range.clone());
 
-    let cursor_char_absolute_pos_after_deleted = if n > 0 {
-      cursor_char_absolute_pos_before_delete
-    } else {
-      cursor_char_absolute_pos_before_delete.saturating_add_signed(n)
-    };
+    let cursor_char_absolute_pos_after_deleted = to_be_deleted_range.start;
+
     let cursor_char_absolute_pos_after_deleted = std::cmp::min(
       cursor_char_absolute_pos_after_deleted,
-      self.rope().len_chars(),
+      self.rope.len_chars(),
     );
     let cursor_line_idx_after_deleted = self
-      .rope()
+      .rope
       .char_to_line(cursor_char_absolute_pos_after_deleted);
     let cursor_line_absolute_pos_after_deleted =
-      self.rope().line_to_char(cursor_line_idx_after_deleted);
+      self.rope.line_to_char(cursor_line_idx_after_deleted);
     let cursor_char_idx_after_deleted =
       cursor_char_absolute_pos_after_deleted - cursor_line_absolute_pos_after_deleted;
 

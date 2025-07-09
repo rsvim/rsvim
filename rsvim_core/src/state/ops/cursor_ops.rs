@@ -97,6 +97,30 @@ pub fn normalize_to_cursor_move_to(
 
 /// Normalize `Operation::CursorMove*` to `Operation::CursorMoveTo((x,y))`, it excludes the empty
 /// eol.
+///
+/// In `ropey` library, it gives 1 extra line after the last line break. For example we have such a
+/// text content:
+///
+/// ```text
+/// Hello\nWorld\n
+/// ```
+///
+/// The rope treats it as 3 lines:
+/// 1. `Hello\n`
+/// 2. `World\n`
+/// 3. ``
+///
+/// The last line is an empty line after the last line break `\n`.
+///
+/// Or for an empty text content:
+///
+/// ```text
+/// ```
+///
+/// The rope still treats it as 1 line:
+/// 1. ``
+///
+/// The only line is an empty line.
 pub fn normalize_to_cursor_move_to_exclude_eol(
   text: &Text,
   op: Operation,
@@ -104,12 +128,14 @@ pub fn normalize_to_cursor_move_to_exclude_eol(
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
   let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
-  let mut y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
-  if text.rope().line(y).len_chars() == 0 {
-    // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
-    // line break '\n'), sub y by extra 1.
-    y = y.saturating_sub(1);
-  }
+  let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
+
+  // if text.rope().line(y).len_chars() == 0 {
+  //   // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
+  //   // line break '\n'), sub y by extra 1.
+  //   y = y.saturating_sub(1);
+  // }
+
   let x = match text.last_char_on_line_no_eol(y) {
     Some(last_char) => std::cmp::min(x, last_char),
     None => {
@@ -129,14 +155,16 @@ pub fn normalize_to_cursor_move_to_include_eol(
   cursor_line_idx: usize,
 ) -> (usize, usize, CursorMoveDirection) {
   let (x, y, move_direction) = normalize_to_cursor_move_to(op, cursor_char_idx, cursor_line_idx);
-  let mut y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
-  if text.rope().line(y).len_chars() == 0 {
-    // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
-    // line break '\n'), sub y by extra 1.
-    y = y.saturating_sub(1);
-  }
-  let x = match text.last_char_on_line(y) {
-    Some(last_char) => std::cmp::min(x, last_char),
+  let y = std::cmp::min(y, text.rope().len_lines().saturating_sub(1));
+
+  // if text.rope().line(y).len_chars() == 0 {
+  //   // If the `y` has no chars (because the `y` is the last line in rope and separate by the last
+  //   // line break '\n'), sub y by extra 1.
+  //   y = y.saturating_sub(1);
+  // }
+
+  let x = match text.last_char_on_line_no_eol(y) {
+    Some(last_char) => std::cmp::min(x, last_char + 1), // For include eol, allow extra 1 eol char.
     None => {
       debug_assert!(text.rope().get_line(y).is_some());
       std::cmp::min(x, text.rope().line(y).len_chars().saturating_sub(1))

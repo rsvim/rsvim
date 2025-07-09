@@ -86,7 +86,7 @@ fn _end_char_and_prefills(
   } else {
     // Here we use the last visible char in the line, thus avoid those invisible chars like '\n'.
     debug_assert!(bline.len_chars() > 0);
-    let next_to_last_visible_char = text.last_char_on_line_no_eol(l).unwrap() + 1;
+    let next_to_last_visible_char = text.last_char_on_line_no_eol(l).unwrap_or(0_usize) + 1;
 
     // If the char `c` width is less than or equal to `end_width`, the char next to `c` is the end
     // char.
@@ -223,7 +223,11 @@ fn proc_line_wrap_nolinebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > text.last_char_on_line_no_eol(current_line).unwrap() {
+          if end_char
+            > text
+              .last_char_on_line_no_eol(current_line)
+              .unwrap_or(0_usize)
+          {
             break;
           }
 
@@ -538,7 +542,11 @@ fn proc_line_wrap_linebreak(
 
           // Goes out of line.
           debug_assert!(bufline.len_chars() > 0);
-          if end_char > text.last_char_on_line_no_eol(current_line).unwrap() {
+          if end_char
+            > text
+              .last_char_on_line_no_eol(current_line)
+              .unwrap_or(0_usize)
+          {
             break;
           }
 
@@ -598,6 +606,8 @@ fn sync_wrap_linebreak(
 }
 
 mod detail {
+  use crate::buf::text::Text;
+
   #[derive(Debug, Copy, Clone)]
   pub struct AdjustOptions {
     pub no_leftward: bool,
@@ -623,6 +633,25 @@ mod detail {
         no_rightward: false,
       }
     }
+  }
+
+  pub fn cursor_width_to_left_no_eol(
+    text: &Text,
+    target_cursor_line: usize,
+    target_cursor_char: usize,
+  ) -> usize {
+    let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
+
+    // For eol, subtract these eol width, i.e. treat them as 0-width.
+    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
+    if target_is_eol {
+      target_cursor_width = match text.last_char_on_line_no_eol(target_cursor_line) {
+        Some(last_visible_char) => text.width_before(target_cursor_line, last_visible_char),
+        None => target_cursor_width.saturating_sub(1),
+      };
+    }
+
+    target_cursor_width
   }
 }
 
@@ -704,13 +733,8 @@ mod nowrap_detail {
       }
     }
 
-    let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
-
-    // For eol, sub extra 1 column.
-    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
-    if target_is_eol {
-      target_cursor_width = target_cursor_width.saturating_sub(1);
-    }
+    let target_cursor_width =
+      detail::cursor_width_to_left_no_eol(text, target_cursor_line, target_cursor_char);
 
     let on_left_side = target_cursor_width < target_viewport_start_column;
     if on_left_side {
@@ -1047,13 +1071,8 @@ mod wrap_detail {
 
     // If `target_cursor_char` is still out of viewport, then we still need to move viewport to
     // left.
-    let mut target_cursor_width = text.width_before(target_cursor_line, target_cursor_char);
-
-    // For eol, sub extra 1 column.
-    let target_is_eol = text.is_eol(target_cursor_line, target_cursor_char);
-    if target_is_eol {
-      target_cursor_width = target_cursor_width.saturating_sub(1);
-    }
+    let target_cursor_width =
+      detail::cursor_width_to_left_no_eol(text, target_cursor_line, target_cursor_char);
 
     if target_cursor_width < start_column {
       on_left_side = true;
