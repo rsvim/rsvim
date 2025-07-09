@@ -5272,7 +5272,12 @@ mod tests_search_anchor_downward_nowrap_eol {
 
     // Search-5
     {
-      let expect = vec!["", " lines.\r\n", "we want to test:\r\n", "ompletely put ins"];
+      let expect = vec![
+        "",
+        " lines.\r\n",
+        "we want to test:\r\n",
+        "ompletely put ins",
+      ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 2, 53, 0, 37);
 
@@ -6898,7 +6903,13 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Initialize
     {
-      let expect = vec!["1st.\r\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\r\n", "4th.\r\n"];
+      let expect = vec![
+        "1st.\r\n",
+        "AAAAAAAAAA",
+        "BBBBBBBBBB",
+        "3rd.\r\n",
+        "4th.\r\n",
+      ];
 
       let actual = window.borrow().viewport();
       let expect_start_fills: BTreeMap<usize, usize> =
@@ -6918,7 +6929,13 @@ mod tests_search_anchor_downward_wrap_nolinebreak_eol {
 
     // Search-1
     {
-      let expect = vec!["1st.\r\n", "AAAAAAAAAA", "BBBBBBBBBB", "3rd.\r\n", "4th.\r\n"];
+      let expect = vec![
+        "1st.\r\n",
+        "AAAAAAAAAA",
+        "BBBBBBBBBB",
+        "3rd.\r\n",
+        "4th.\r\n",
+      ];
 
       let actual = search_down_viewport(window.clone(), buf.clone(), 1, 20, 0, 0);
 

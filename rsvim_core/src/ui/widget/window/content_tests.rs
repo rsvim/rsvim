@@ -413,16 +413,16 @@ mod tests_nowrap {
 }
 
 #[cfg(test)]
-mod tests_nowrap_wineol {
+mod tests_nowrap_eol {
   use super::*;
 
   #[test]
-  fn new1_unix() {
+  fn new1_crlf_win() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
     let buf_opts = BufferLocalOptionsBuilder::default()
-      .file_format(FileFormatOption::Unix)
+      .file_format(FileFormatOption::Dos)
       .build()
       .unwrap();
     let win_opts = WindowLocalOptionsBuilder::default()
@@ -453,10 +453,46 @@ mod tests_nowrap_wineol {
   }
 
   #[test]
-  fn new1_win() {
+  fn new1_cr_mac() {
     test_log_init();
 
     let terminal_size = U16Size::new(31, 5);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Mac)
+      .build()
+      .unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
+    let buffer = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\r",
+        "This is a quite simple and small test lines.\r",
+        "But still it contains several things we want to test:\r",
+      ],
+    );
+    let expect = vec![
+      "Hello, RSVIM!                  ",
+      "This is a quite simple and smal",
+      "But still it contains several t",
+      "                               ",
+      "                               ",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+  }
+
+  #[test]
+  fn new2_crlf_win() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(35, 6);
     let buf_opts = BufferLocalOptionsBuilder::default()
       .file_format(FileFormatOption::Dos)
       .build()
@@ -473,14 +509,62 @@ mod tests_nowrap_wineol {
         "Hello, RSVIM!\r\n",
         "This is a quite simple and small test lines.\r\n",
         "But still it contains several things we want to test:\r\n",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r\n",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r\n",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r\n",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r\n",
       ],
     );
+
     let expect = vec![
-      "Hello, RSVIM!                  ",
-      "This is a quite simple and smal",
-      "But still it contains several t",
-      "                               ",
-      "                               ",
+      "Hello, RSVIM!                      ",
+      "This is a quite simple and small te",
+      "But still it contains several thing",
+      "  1. When the line is small enough ",
+      "  2. When the line is too long to b",
+      "     * The extra parts are been tru",
+    ];
+
+    let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
+    let actual = make_canvas(terminal_size, win_opts, buffer.clone(), viewport);
+    assert_canvas(&actual, &expect);
+  }
+
+  #[test]
+  fn new2_cr_mac() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(35, 6);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Mac)
+      .build()
+      .unwrap();
+    let win_opts = WindowLocalOptionsBuilder::default()
+      .wrap(false)
+      .build()
+      .unwrap();
+
+    let buffer = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "Hello, RSVIM!\r",
+        "This is a quite simple and small test lines.\r",
+        "But still it contains several things we want to test:\r",
+        "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r",
+        "  2. When the line is too long to be completely put in a row of the window content widget, there're multiple cases:\r",
+        "     * The extra parts are been truncated if both line-wrap and word-wrap options are not set.\r",
+        "     * The extra parts are split into the next row, if either line-wrap or word-wrap options are been set. If the extra parts are still too long to put in the next row, repeat this operation again and again. This operation also eats more rows in the window, thus it may contains less lines in the buffer.\r",
+      ],
+    );
+
+    let expect = vec![
+      "Hello, RSVIM!                      ",
+      "This is a quite simple and small te",
+      "But still it contains several thing",
+      "  1. When the line is small enough ",
+      "  2. When the line is too long to b",
+      "     * The extra parts are been tru",
     ];
 
     let viewport = make_viewport(terminal_size, win_opts, buffer.clone(), 0, 0);
