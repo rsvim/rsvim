@@ -2142,12 +2142,12 @@ mod tests_view_wrap_nolinebreak_wineol {
     );
     let expect = vec![
       "Hello, RSV",
-      "IM!\r\n",
+      "IM!\r",
       "This is a ",
       "quite simp",
       "le and sma",
       "ll test li",
-      "nes.\r\n",
+      "nes.\r",
       "But still ",
       "it contain",
       "s several.",
@@ -2178,7 +2178,7 @@ mod tests_view_wrap_nolinebreak_wineol {
       terminal_size,
       buf_opts,
       vec![
-        "Hello, RSVIM!\r\n",
+        "Hello, RSVIM!\r",
         "This is a quite simple and small test lines.\r",
         "But still it contains several.\r",
         "  1. When the line is small enough to completely put inside a row of the window content widget, then the line-wrap and word-wrap doesn't affect the rendering.\r",
@@ -2189,12 +2189,12 @@ mod tests_view_wrap_nolinebreak_wineol {
     );
     let expect = vec![
       "Hello, RSV",
-      "IM!\r\n",
+      "IM!\r",
       "This is a ",
       "quite simp",
       "le and sma",
       "ll test li",
-      "nes.\r\n",
+      "nes.\r",
       "But still ",
       "it contain",
       "s several.",
@@ -2371,31 +2371,151 @@ mod tests_view_wrap_nolinebreak_wineol {
   }
 
   #[test]
-  fn new15() {
+  fn new15_crlf_unix() {
     test_log_init();
 
     let terminal_size = U16Size::new(10, 6);
-    let buf_opts = BufferLocalOptionsBuilder::default().build().unwrap();
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Unix)
+      .build()
+      .unwrap();
     let win_opts = make_wrap_nolinebreak();
 
     let buf = make_buffer_from_lines(
       terminal_size,
       buf_opts,
       vec![
-        "1st.\n",
-        "BBBBBBBBBBCCCCCCCCCC\n",
-        "3rd.\n",
-        "4th.\n",
-        "5th.\n",
+        "1st.\r\n",
+        "BBBBBBBBBBCCCCCCCCCC\r\n",
+        "3rd.\r\n",
+        "4th.\r\n",
+        "5th.\r\n",
       ],
     );
     let expect = vec![
-      "1st.\n",
+      "1st.\r\n",
       "BBBBBBBBBB",
       "CCCCCCCCCC",
-      "3rd.\n",
-      "4th.\n",
-      "5th.\n",
+      "3rd.\r\n",
+      "4th.\r\n",
+      "5th.\r\n",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = window.viewport();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    assert_viewport(buf, &actual, &expect, 0, 5, &expect_fills, &expect_fills);
+  }
+
+  #[test]
+  fn new15_crlf_win() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 6);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "1st.\r\n",
+        "BBBBBBBBBBCCCCCCCCCC\r\n",
+        "3rd.\r\n",
+        "4th.\r\n",
+        "5th.\r\n",
+      ],
+    );
+    let expect = vec![
+      "1st.\r\n",
+      "BBBBBBBBBB",
+      "CCCCCCCCCC",
+      "3rd.\r\n",
+      "4th.\r\n",
+      "5th.\r\n",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = window.viewport();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    assert_viewport(buf, &actual, &expect, 0, 5, &expect_fills, &expect_fills);
+  }
+
+  #[test]
+  fn new15_cr_unix() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 6);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Unix)
+      .build()
+      .unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "1st.\r",
+        "BBBBBBBBBBCCCCCCCCCC\r",
+        "3rd.\r",
+        "4th.\r",
+        "5th.\r",
+      ],
+    );
+    let expect = vec![
+      "1st.\r",
+      "BBBBBBBBBB",
+      "CCCCCCCCCC",
+      "3rd.\r",
+      "4th.\r",
+      "5th.\r",
+    ];
+
+    let window = make_window(terminal_size, buf.clone(), &win_opts);
+    let actual = window.viewport();
+    let expect_fills: BTreeMap<usize, usize> = vec![(0, 0), (1, 0), (2, 0), (3, 0), (4, 0)]
+      .into_iter()
+      .collect();
+    assert_viewport(buf, &actual, &expect, 0, 5, &expect_fills, &expect_fills);
+  }
+
+  #[test]
+  fn new15_cr_win() {
+    test_log_init();
+
+    let terminal_size = U16Size::new(10, 6);
+    let buf_opts = BufferLocalOptionsBuilder::default()
+      .file_format(FileFormatOption::Dos)
+      .build()
+      .unwrap();
+    let win_opts = make_wrap_nolinebreak();
+
+    let buf = make_buffer_from_lines(
+      terminal_size,
+      buf_opts,
+      vec![
+        "1st.\r",
+        "BBBBBBBBBBCCCCCCCCCC\r",
+        "3rd.\r",
+        "4th.\r",
+        "5th.\r",
+      ],
+    );
+    let expect = vec![
+      "1st.\r",
+      "BBBBBBBBBB",
+      "CCCCCCCCCC",
+      "3rd.\r",
+      "4th.\r",
+      "5th.\r",
     ];
 
     let window = make_window(terminal_size, buf.clone(), &win_opts);
