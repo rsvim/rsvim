@@ -503,10 +503,8 @@ impl Text {
     debug_assert!(n > 0);
     let mut i = absolute_char_idx as isize;
     let mut acc = 0;
-    // trace!("i:{i}({:?}),n:{n}", self.rope.get_char(i as usize));
 
     while acc < n && i >= 0 {
-      // trace!("i:{i}({:?}),i-1:{}({:?})", self.rope.get_char(i as usize), i-1, if i-1 >=0 { self.rope.get_char((i-1) as usize) } else { None });
       let c1 = self.rope.get_char(i as usize);
       let c2 = if i - 1 >= 0 {
         self.rope.get_char((i - 1) as usize)
